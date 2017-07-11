@@ -103,7 +103,7 @@ final class ADispatcher{
 		$path_nodes = explode('/', $rt);
 
 		//looking for controller in admin/storefront section
-		$dir_app = DIR_APP_SECTION . 'controller/';
+		$dir_app = DIR_APP . 'controller/storefront/';
 		foreach ($path_nodes as $path_node){
 			$path_build .= $path_node;
 

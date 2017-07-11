@@ -21,8 +21,8 @@ if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
-require_once(DIR_CORE . '/lib/exceptions/exception_codes.php');
-require_once(DIR_CORE . '/lib/exceptions/exception.php');
+require_once(DIR_LIB . 'exceptions/exception_codes.php');
+require_once(DIR_LIB . 'exceptions/exception.php');
 
 /**
  * called for php errors

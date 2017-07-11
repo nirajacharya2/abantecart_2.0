@@ -299,7 +299,7 @@ class AView{
 			//#PR Build the path to the template file
 			$path = DIR_TEMPLATE;
 			if (!defined('INSTALL')){
-				$file = $this->_get_template_path($path, '/template/' . $filename, 'full');
+				$file = $this->_get_template_path($path, $filename, 'full');
 			} else{
 				$file = $path . $filename;
 			}

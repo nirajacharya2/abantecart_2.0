@@ -28,36 +28,22 @@ if (!function_exists('simplexml_load_file')) {
     exit("simpleXML functions are not available. Please contact your system administrator or host service provider.");
 }
 
-// Load Configuration
-// Real path (operating system web root) to the directory where abantecart is installed
-$root_path = dirname(__FILE__);
+// Load all initial set up and Configuration
+define('DIR_ASSETS', __DIR__.'/');
+require_once('../app/core/init/app.php');
 
-// Windows IIS Compatibility  
-if (stristr(PHP_OS, 'WIN')) {
-	define('IS_WINDOWS', true);
-	$root_path = str_replace('\\', '/', $root_path);
-}
-
-define('DIR_ROOT', $root_path);
-define('DIR_CORE', DIR_ROOT . '/core/');
-
-require_once(DIR_ROOT . '/system/config.php');
-   
 // New Installation
 if (!defined('DB_DATABASE')) {
 	header('Location: install/index.php');
 	exit;
 }
 
-// Load all initial set up
-require_once(DIR_ROOT . '/core/init.php');
-
 ADebug::checkpoint('init end');
 
 if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
 
 	// Relative paths and directories
-	define('RDIR_TEMPLATE',  'storefront/view/' . $config->get('config_storefront_template') . '/');
+	define('RDIR_TEMPLATE',  'templates/' . $config->get('config_storefront_template') . '/storefront/');
 
 	// Customer
 	$registry->set('customer', new ACustomer($registry));
@@ -77,7 +63,7 @@ if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
 } else {
 	// Admin template load
 	// Relative paths and directories
-	define('RDIR_TEMPLATE',  'admin/view/default/');
+	define('RDIR_TEMPLATE',  'templates/default/admin/');
 	
 	// User
 	$registry->set('user', new AUser($registry));

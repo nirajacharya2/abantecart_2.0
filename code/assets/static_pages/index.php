@@ -21,10 +21,13 @@
 */
 // Real path (operating system web root) to the directory where abantecart is installed
 $root_path = dirname(__FILE__);
-if (defined('IS_WINDOWS')) {
+/*if (defined('IS_WINDOWS')) {
 		$root_path = str_replace('\\', '/', $root_path);
 }
-define('DIR_ROOT', $root_path); 
+define('DIR_ROOT', $root_path);*/
+// Load all initial set up
+
+require_once(__DIR__.'/../../app/core/init/app.php');
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
@@ -32,18 +35,7 @@ $dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
 define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
 define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
 
-// DIR
-define('DIR_APP_SECTION', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
-define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP_SECTION . '../')) . '/');
 
-// Startup
-require_once(DIR_ABANTECART . 'system/config.php');
-// New Installation? Redirect to install
-if (!defined('DB_DATABASE')) {
-	header('Location: ../install/index.php');
-	exit;
-}
 
 //check if this is admin and show option to report this issue 
 $from_admin = false;
@@ -64,7 +56,6 @@ foreach(array_keys($_COOKIE) as $key) {
 define('SESSION_ID', $session_id);
 
 //try to start session. 
-require_once(DIR_CORE . 'lib/session.php');
 $session = new ASession(SESSION_ID);
 
 $error = 'Please check AbanteCart and webserver error logs for more details. You can check error log in the control panel if it is functional. Otherwise, refer to error log located on your web server';
@@ -79,10 +70,10 @@ if($from_admin){
 	$t ='';
 	$count = 0;
 	$log_contents_end = "Log file tail: \n\n";
-	$log_handle = fopen(DIR_ABANTECART . "system/logs/error.txt", "r");
+	$log_handle = fopen(DIR_APP . "system/logs/error.txt", "r");
 	//read 100 lines backwards from the eof or less 
 	$max_lines = 100;
-	$max_bytes = filesize(DIR_ABANTECART . "system/logs/error.txt");
+	$max_bytes = filesize(DIR_APP . "system/logs/error.txt");
 	$lines = array();
 	while ($count < $max_lines) {
 		//read one line back

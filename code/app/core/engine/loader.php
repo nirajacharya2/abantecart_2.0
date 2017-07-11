@@ -53,7 +53,7 @@ final class ALoader{
 	 * @throws AException
 	 */
 	public function library($library){
-		$file = DIR_CORE . 'lib/' . $library . '.php';
+		$file = DIR_LIB . $library . '.php';
 
 		if (file_exists($file)){
 			/** @noinspection PhpIncludeInspection */
@@ -79,12 +79,12 @@ final class ALoader{
 		}
 
 		//mode to force load storefront model
-		$section = DIR_APP_SECTION;
+		$section = DIR_APP . 'model/admin/';
 		if ($mode == 'storefront'){
-			$section = DIR_ROOT . '/storefront/';
+			$section = DIR_APP . 'model/storefront/';
 		}
 
-		$file = $section . 'model/' . $model . '.php';
+		$file = $section . $model . '.php';
 		if ($this->registry->has('extensions') && $result = $this->extensions->isExtensionResource('M', $model, $force, $mode)){
 			if (is_file($file)){
 				$warning = new AWarning("Extension <b>{$result['extension']}</b> override model <b>$model</b>");
