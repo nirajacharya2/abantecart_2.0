@@ -29,9 +29,21 @@ if (!function_exists('simplexml_load_file')) {
 }
 
 // Load all initial set up and Configuration
-define('DIR_ASSETS', __DIR__.'/');
-
-require_once('../app/core/init/app.php');
+if(!defined('DIR_APP')) {
+	$dir_app = dirname(__DIR__) . '/app/';
+	if( !is_dir($dir_app) ){
+		$dir_app =  __DIR__ . '/app/';
+	}
+	// Windows IIS Compatibility
+	if (stristr(PHP_OS, 'WIN')) {
+		define('IS_WINDOWS', true);
+		$dir_app = str_replace('\\', '/', $dir_app);
+	}
+	define('DIR_APP', $dir_app);
+}
+define('DIR_ASSETS', __DIR__ . '/assets/');
+define('INDEX_FILE', basename(__FILE__));
+require('app/core/init/app.php');
 
 // New Installation
 if (!defined('DB_DATABASE')) {

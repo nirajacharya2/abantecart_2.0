@@ -47,7 +47,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 
 
-require (realpath(__DIR__.'/../../system/config/config.php'));
+require DIR_APP.'system/config/config.php';
 
 //Set up common paths
 define('DIR_SYSTEM', DIR_APP . 'system/');
@@ -58,8 +58,6 @@ define('DIR_CONFIG', DIR_APP . 'system/config/');
 define('DIR_CACHE', DIR_APP . 'system/cache/');
 define('DIR_LOGS', DIR_APP . 'system/logs/');
 define('DIR_VENDORS', DIR_APP . 'vendors/');
-
-
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -83,7 +81,7 @@ if($path_nodes[0] == 'a') {
 	define('IS_API', true);
 } else {
 	define('IS_API', false);
-}	
+}
 
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
@@ -91,18 +89,17 @@ if($path_nodes[0] == 'a') {
 define('DIR_TEMPLATE', DIR_ASSETS . 'templates/');
 if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ADMIN_PATH || $_POST['s'] == ADMIN_PATH)) {
 	define('IS_ADMIN', true);
-	define('DIR_APP_SECTION', DIR_APP . '/admin/');
-	define('DIR_LANGUAGE', DIR_APP . '/admin/language/');
-	define('DIR_STOREFRONT', DIR_APP . '/storefront/');
-	define('DIR_BACKUP', DIR_APP . '/admin/system/backup/');
-	define('DIR_DATA', DIR_APP . '/admin/system/data/');
+	define('DIR_APP_SECTION', DIR_APP );
+	define('DIR_LANGUAGE', DIR_APP . 'language/admin/');
+	define('DIR_BACKUP', DIR_APP . 'system/backup/');
+	define('DIR_DATA', DIR_APP . 'system/data/');
 	//generate unique session name.
 	//NOTE: This is a session name not to confuse with actual session id. Candidate to renaming 
 	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
 	define('IS_ADMIN', false);
-	define('DIR_APP_SECTION', DIR_APP . '/storefront/');
-	define('DIR_LANGUAGE', DIR_APP . '/storefront/language/');
+	define('DIR_APP_SECTION', DIR_APP );
+	define('DIR_LANGUAGE', DIR_APP . '/language/storefront/');
 	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_SF_PHPSESSID');
 	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }

@@ -30,16 +30,16 @@ define('AUTO_SERVER', '//' . REAL_HOST . HTTP_DIR_NAME . '/');
 define('HTTP_SERVER', 'http:' . AUTO_SERVER);
 define('HTTP_CATALOG', HTTP_SERVER);
 //define('HTTP_EXT', HTTP_SERVER . 'extensions/');
-define('HTTP_IMAGE', HTTP_SERVER . 'images/');
-define('HTTP_DIR_RESOURCE', HTTP_SERVER . 'resources/');
+define('HTTP_IMAGE', HTTP_SERVER . 'assets/images/');
+define('HTTP_DIR_RESOURCE', HTTP_SERVER . 'assets/resources/');
 //we use Protocol-relative URLs here
-define('HTTPS_IMAGE', AUTO_SERVER . 'images/');
-define('HTTPS_DIR_RESOURCE', AUTO_SERVER . 'resources/');
+define('HTTPS_IMAGE', AUTO_SERVER . 'assets/images/');
+define('HTTPS_DIR_RESOURCE', AUTO_SERVER . 'assets/resources/');
 //Admin HTTPS
 if ( HTTPS === true) {
 	define('HTTPS_SERVER', 'https:' . AUTO_SERVER);
 	define('HTTPS_CATALOG', HTTPS_SERVER);
-	define('HTTPS_EXT', HTTPS_SERVER . 'extensions/');
+	define('HTTPS_EXT', HTTPS_SERVER . 'assets/extensions/');
 } else {
 	define('HTTPS_SERVER', HTTP_SERVER);
 	define('HTTPS_CATALOG', HTTP_CATALOG);
@@ -58,4 +58,4 @@ if (has_value($request->get['store_id']) || has_value($session->data['current_st
 
 // Admin template load
 // Relative paths and directories
-define('RDIR_TEMPLATE',  'templates/default/admin/');
+define('RDIR_TEMPLATE',  'assets/templates/default/admin/');

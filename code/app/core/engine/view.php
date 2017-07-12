@@ -592,12 +592,12 @@ class AView{
 			if (is_file($path . $template .'/admin/'. $filename)){
 				$ret_path = $path . $template .'/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'templates/'.$template.'/admin/' . $filename;
+					$ret_path = 'assets/templates/'.$template.'/admin/' . $filename;
 				}
 			} else if (is_file($path . 'default/admin/'. $filename)){
 				$ret_path = $path . 'default/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'templates/default/admin/' . $filename;
+					$ret_path = 'assets/templates/default/admin/' . $filename;
 					$match = 'default';
 				}
 			}
@@ -605,12 +605,12 @@ class AView{
 			if (is_file($path . $template .'/storefront/'. $filename)){
 				$ret_path = $path . $template .'/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'templates/'.$template.'/storefront/' . $filename;
+					$ret_path = 'assets/templates/'.$template.'/storefront/' . $filename;
 				}
 			} else if (is_file($path . 'default/storefront/'. $filename)){
 				$ret_path = $path . 'default/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'templates/default/storefront/' . $filename;
+					$ret_path = 'assets/templates/default/storefront/' . $filename;
 					$match = 'default';
 				}
 			}

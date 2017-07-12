@@ -3,16 +3,6 @@
 mb_internal_encoding('UTF-8');
 ini_set('default_charset', 'utf-8');
 
-define('INDEX_FILE', 'index.php');
-
-$root_app = realpath(__DIR__.'/../../').'/';
-// Windows IIS Compatibility
-if (stristr(PHP_OS, 'WIN')) {
-	define('IS_WINDOWS', true);
-	$root_app = str_replace('\\', '/', $root_app);
-}
-
-define('DIR_APP', $root_app);
 define('DIR_CORE', DIR_APP . 'core/');
 define('DIR_LIB', DIR_APP . 'lib/');
 //resources
