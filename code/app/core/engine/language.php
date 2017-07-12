@@ -104,10 +104,12 @@ class ALanguage{
 
 		$this->db = $registry->get('db');
 		$this->cache = $registry->get('cache');
+
 		//current active language details
 		$this->language_details = $this->getLanguageDetails($this->code);
 
 		$this->entries = array ();
+
 	}
 
 	/* Maim Language API methods */

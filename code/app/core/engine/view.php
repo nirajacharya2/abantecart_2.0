@@ -138,7 +138,7 @@ class AView{
 	}
 
 	/**
-	 * Return array with awailable variables and types in the view
+	 * Return array with available variables and types in the view
 	 * @param string $key - optional parameter to spcify variable type of array.
 	 * @return array | mixed
 	 */
@@ -299,7 +299,7 @@ class AView{
 			//#PR Build the path to the template file
 			$path = DIR_TEMPLATE;
 			if (!defined('INSTALL')){
-				$file = $this->_get_template_path($path, $filename, 'full');
+				$file = $this->_get_template_path($path, 'template/'.$filename, 'full');
 			} else{
 				$file = $path . $filename;
 			}
@@ -385,7 +385,7 @@ class AView{
 		if ($mode == 'http'){
 			return $http_path . $output;
 		} else if ($mode == 'file'){
-			return DIR_ROOT . "/" . $output;
+			return DIR_ASSETS . "/" . $output;
 		} else{
 			return '';
 		}
@@ -518,7 +518,7 @@ class AView{
 	 * @param string $extension_name
 	 * @return string
 	 */
-	private function _extension_view_dir($extension_name){
+	protected function _extension_view_dir($extension_name){
 		return $this->_extension_section_dir($extension_name) . DIR_EXT_TEMPLATE;
 	}
 
@@ -527,7 +527,7 @@ class AView{
 	 * @param string $extension_name
 	 * @return string
 	 */
-	private function _extension_section_dir($extension_name){
+	protected function _extension_section_dir($extension_name){
 		$rel_view_path = (IS_ADMIN ? DIR_EXT_ADMIN : DIR_EXT_STORE);
 		return DIR_EXT . $extension_name . $rel_view_path;
 	}
@@ -537,7 +537,7 @@ class AView{
 	 * @param string $filename
 	 * @return array
 	 */
-	private function _extensions_resource_map($filename){
+	protected function _extensions_resource_map($filename){
 		if (empty($filename)){
 			return array ();
 		}
@@ -562,7 +562,7 @@ class AView{
 	 * @param string $mode
 	 * @return mixed
 	 */
-	private function _get_template_path($path, $filename, $mode){
+	protected function _get_template_path($path, $filename, $mode){
 		//look into extensions first
 		$res_arr = $this->_extensions_resource_map($filename);
 		//get first exact template extension resource or default template resource otherwise.
@@ -583,34 +583,34 @@ class AView{
 	 * @param string $mode
 	 * @return array|null
 	 */
-	private function _test_template_paths($path, $filename, $mode = 'relative'){
+	protected function _test_template_paths($path, $filename, $mode = 'relative'){
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
 
 		if (IS_ADMIN){
-			if (is_file($path . $template . $filename)){
-				$ret_path = $path . $template . $filename;
+			if (is_file($path . $template .'/admin/'. $filename)){
+				$ret_path = $path . $template .'/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'admin/view/' . $template . $filename;
+					$ret_path = 'templates/'.$template.'/admin/' . $filename;
 				}
-			} else if (is_file($path . 'default' . $filename)){
-				$ret_path = $path . 'default' . $filename;
+			} else if (is_file($path . 'default/admin/'. $filename)){
+				$ret_path = $path . 'default/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'admin/view/default' . $filename;
+					$ret_path = 'templates/default/admin/' . $filename;
 					$match = 'default';
 				}
 			}
 		} else{
-			if (is_file($path . $template . $filename)){
-				$ret_path = $path . $template . $filename;
+			if (is_file($path . $template .'/storefront/'. $filename)){
+				$ret_path = $path . $template .'/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'storefront/view/' . $template . $filename;
+					$ret_path = 'templates/'.$template.'/storefront/' . $filename;
 				}
-			} else if (is_file($path . 'default' . $filename)){
-				$ret_path = $path . 'default' . $filename;
+			} else if (is_file($path . 'default/storefront/'. $filename)){
+				$ret_path = $path . 'default/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'storefront/view/default' . $filename;
+					$ret_path = 'templates/default/storefront/' . $filename;
 					$match = 'default';
 				}
 			}
@@ -628,8 +628,9 @@ class AView{
 	 * @return string
 	 */
 	public function _fetch($file){
-
-		if (!file_exists($file)) return '';
+		if (!file_exists($file)) {
+			return '';
+		}
 
 		ADebug::checkpoint('_fetch ' . $file . ' start');
 		extract($this->data);

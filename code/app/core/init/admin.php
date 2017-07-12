@@ -30,10 +30,10 @@ define('AUTO_SERVER', '//' . REAL_HOST . HTTP_DIR_NAME . '/');
 define('HTTP_SERVER', 'http:' . AUTO_SERVER);
 define('HTTP_CATALOG', HTTP_SERVER);
 //define('HTTP_EXT', HTTP_SERVER . 'extensions/');
-define('HTTP_IMAGE', HTTP_SERVER . 'image/');
+define('HTTP_IMAGE', HTTP_SERVER . 'images/');
 define('HTTP_DIR_RESOURCE', HTTP_SERVER . 'resources/');
 //we use Protocol-relative URLs here
-define('HTTPS_IMAGE', AUTO_SERVER . 'image/');
+define('HTTPS_IMAGE', AUTO_SERVER . 'images/');
 define('HTTPS_DIR_RESOURCE', AUTO_SERVER . 'resources/');
 //Admin HTTPS
 if ( HTTPS === true) {
@@ -55,3 +55,7 @@ if (has_value($request->get['store_id']) || has_value($session->data['current_st
 	$config = new AConfig($registry);
 	$registry->set('config', $config);
 }
+
+// Admin template load
+// Relative paths and directories
+define('RDIR_TEMPLATE',  'templates/default/admin/');

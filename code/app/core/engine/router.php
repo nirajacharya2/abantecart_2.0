@@ -232,7 +232,7 @@ final class ARouter{
 	 */
 	private function _detect_controller($type){
 		//looking for controller in admin/storefront section
-		$dir_app = DIR_APP_SECTION . 'controller/' . $type . '/';
+		$dir_app = DIR_APP .'controller/'.(IS_ADMIN === true ? 'admin/' : 'storefront/')  . $type . '/';
 		$path_nodes = explode('/', $this->rt);
 		$path_build = '';
 
@@ -254,7 +254,7 @@ final class ARouter{
 			}
 
 			if (is_file($dir_app . $path_build . '.php')){
-				//Controller found. Save informaion and return TRUE
+				//Controller found. Save information and return TRUE
 				//Set controller and method for future use
 				$this->controller = $type . '/' . $path_build;
 				//Last part is the method of function to call

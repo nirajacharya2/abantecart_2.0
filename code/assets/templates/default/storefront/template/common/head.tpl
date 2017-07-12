@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var AView $this
+ */
+?>
 <title><?php echo $title; ?></title>
 <meta charset="UTF-8">
 <!--[if IE]>
@@ -19,11 +24,11 @@
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
-<link href="<?php echo $this->templateResource('/image/apple-touch-icon.png');?>" rel="apple-touch-icon" />
-<link href="<?php echo $this->templateResource('/image/apple-touch-icon-76x76.png');?>" rel="apple-touch-icon" sizes="76x76" />
-<link href="<?php echo $this->templateResource('/image/apple-touch-icon-120x120.png');?>" rel="apple-touch-icon" sizes="120x120" />
-<link href="<?php echo $this->templateResource('/image/apple-touch-icon-152x152.png');?>" rel="apple-touch-icon" sizes="152x152" />
-<link href="<?php echo $this->templateResource('/image/icon-192x192.png');?>" rel="apple-touch-icon" sizes="192x192" />
+<link href="<?php echo $this->templateResource('/images/apple-touch-icon.png');?>" rel="apple-touch-icon" />
+<link href="<?php echo $this->templateResource('/images/apple-touch-icon-76x76.png');?>" rel="apple-touch-icon" sizes="76x76" />
+<link href="<?php echo $this->templateResource('/images/apple-touch-icon-120x120.png');?>" rel="apple-touch-icon" sizes="120x120" />
+<link href="<?php echo $this->templateResource('/images/apple-touch-icon-152x152.png');?>" rel="apple-touch-icon" sizes="152x152" />
+<link href="<?php echo $this->templateResource('/images/icon-192x192.png');?>" rel="apple-touch-icon" sizes="192x192" />
 
 <?php foreach ($links as $link) { ?>
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>" />

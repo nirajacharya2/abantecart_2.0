@@ -163,7 +163,7 @@ function check_file_permissions($registry){
 	    );	
 	}
 
-	$image_files = get_all_files_dirs(DIR_ROOT . '/image/thumbnails/');
+	$image_files = get_all_files_dirs(DIR_ASSETS . '/images/thumbnails/');
 	$image_message = '';
 	foreach($image_files as $file) {
 		if(in_array(basename($file), array('index.php', 'index.html','.','','..'))){

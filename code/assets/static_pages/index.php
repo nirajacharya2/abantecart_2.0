@@ -19,6 +19,15 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
+
+
+exit('EXCEPTION!');
+
+
+
+
+
+
 // Real path (operating system web root) to the directory where abantecart is installed
 $root_path = dirname(__FILE__);
 /*if (defined('IS_WINDOWS')) {
@@ -26,7 +35,7 @@ $root_path = dirname(__FILE__);
 }
 define('DIR_ROOT', $root_path);*/
 // Load all initial set up
-
+define('DIR_ASSETS', __DIR__.'/');
 require_once(__DIR__.'/../../app/core/init/app.php');
 
 // HTTP

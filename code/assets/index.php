@@ -19,9 +19,9 @@
 ------------------------------------------------------------------------------*/
 
 // Required PHP Version
-define('MIN_PHP_VERSION', '5.3.0');
+define('MIN_PHP_VERSION', '7.0');
 if (version_compare(phpversion(), MIN_PHP_VERSION, '<') == TRUE) {
-    die( MIN_PHP_VERSION . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
+	exit( MIN_PHP_VERSION . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
 }
 
 if (!function_exists('simplexml_load_file')) {
@@ -30,6 +30,7 @@ if (!function_exists('simplexml_load_file')) {
 
 // Load all initial set up and Configuration
 define('DIR_ASSETS', __DIR__.'/');
+
 require_once('../app/core/init/app.php');
 
 // New Installation
@@ -41,9 +42,6 @@ if (!defined('DB_DATABASE')) {
 ADebug::checkpoint('init end');
 
 if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
-
-	// Relative paths and directories
-	define('RDIR_TEMPLATE',  'templates/' . $config->get('config_storefront_template') . '/storefront/');
 
 	// Customer
 	$registry->set('customer', new ACustomer($registry));
@@ -61,10 +59,7 @@ if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
 	$registry->set('cart', new ACart($registry));
 
 } else {
-	// Admin template load
-	// Relative paths and directories
-	define('RDIR_TEMPLATE',  'templates/default/admin/');
-	
+
 	// User
 	$registry->set('user', new AUser($registry));
 }// end admin load

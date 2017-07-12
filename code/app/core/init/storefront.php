@@ -3,7 +3,7 @@
 $config = Registry::getInstance()->get('config');
 $store_url = $config->get('config_url');
 define('HTTP_SERVER', $store_url);
-define('HTTP_IMAGE', HTTP_SERVER . 'image/');
+define('HTTP_IMAGE', HTTP_SERVER . 'images/');
 define('HTTP_EXT', HTTP_SERVER . 'extensions/');
 define('HTTP_DIR_RESOURCE', HTTP_SERVER . 'resources/');
 // Storefront HTTPS
@@ -21,9 +21,12 @@ if ($config->get('config_ssl') || HTTPS === true) {
 }
 //we use Protocol-relative URLs here
 define('HTTPS_DIR_RESOURCE', AUTO_SERVER . 'resources/');
-define('HTTPS_IMAGE', AUTO_SERVER . 'image/');
+define('HTTPS_IMAGE', AUTO_SERVER . 'images/');
 
 //set internal sign of shared ssl domains
 if(preg_replace('/\w+:\/\//','',HTTPS_SERVER) != preg_replace('/\w+:\/\//','',HTTP_SERVER) ){
 	$registry->get('config')->set('config_shared_session',true);
 }
+
+// Relative paths and directories
+define('RDIR_TEMPLATE',  'templates/' . $config->get('config_storefront_template') . '/storefront/');

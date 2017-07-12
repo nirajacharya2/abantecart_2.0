@@ -47,17 +47,17 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 
 
-require_once (realpath(__DIR__.'/../../system/config/config.php'));
+require (realpath(__DIR__.'/../../system/config/config.php'));
 
 //Set up common paths
-define('DIR_SYSTEM', DIR_APP . '/system/');
-define('DIR_IMAGE', DIR_APP . '/image/');
-define('DIR_DOWNLOAD', DIR_APP . '/download/');
-define('DIR_DATABASE', DIR_APP . '/core/database/');
-define('DIR_CONFIG', DIR_APP . '/system/config/');
-define('DIR_CACHE', DIR_APP . '/system/cache/');
-define('DIR_LOGS', DIR_APP . '/system/logs/');
-define('DIR_VENDORS', DIR_APP . '/vendors/');
+define('DIR_SYSTEM', DIR_APP . 'system/');
+define('DIR_IMAGE', DIR_ASSETS . 'images/');
+define('DIR_DOWNLOAD', DIR_APP . 'download/');
+define('DIR_DATABASE', DIR_APP . 'core/database/');
+define('DIR_CONFIG', DIR_APP . 'system/config/');
+define('DIR_CACHE', DIR_APP . 'system/cache/');
+define('DIR_LOGS', DIR_APP . 'system/logs/');
+define('DIR_VENDORS', DIR_APP . 'vendors/');
 
 
 
@@ -88,12 +88,11 @@ if($path_nodes[0] == 'a') {
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
 
-
+define('DIR_TEMPLATE', DIR_ASSETS . 'templates/');
 if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ADMIN_PATH || $_POST['s'] == ADMIN_PATH)) {
 	define('IS_ADMIN', true);
 	define('DIR_APP_SECTION', DIR_APP . '/admin/');
 	define('DIR_LANGUAGE', DIR_APP . '/admin/language/');
-	define('DIR_TEMPLATE', DIR_ASSETS . 'templates/admin/');
 	define('DIR_STOREFRONT', DIR_APP . '/storefront/');
 	define('DIR_BACKUP', DIR_APP . '/admin/system/backup/');
 	define('DIR_DATA', DIR_APP . '/admin/system/data/');
@@ -104,7 +103,6 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 	define('IS_ADMIN', false);
 	define('DIR_APP_SECTION', DIR_APP . '/storefront/');
 	define('DIR_LANGUAGE', DIR_APP . '/storefront/language/');
-	define('DIR_TEMPLATE', DIR_ASSETS . 'templates/storefront/');
 	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_SF_PHPSESSID');
 	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
@@ -182,14 +180,13 @@ try {
 	define('DIR_EXT_CORE', '/core/');
 	define('DIR_EXT_STORE', '/storefront/');
 	define('DIR_EXT_ADMIN', '/admin/');
-	define('DIR_EXT_IMAGE', '/image/');
+	define('DIR_EXT_IMAGE', '/images/');
 	define('DIR_EXT_LANGUAGE', 'language/');
 	//define('DIR_EXT_TEMPLATE', 'view/');
 
-//load base libraries
-require_once 'base.php';
+	//load base libraries
 
-
+	require_once 'base.php';
 
 // Registry
 	$registry = Registry::getInstance();
@@ -234,12 +231,13 @@ require_once 'base.php';
 
 // Set up HTTP and HTTPS based automatic and based on config
 //Admin manager classes
+
 if (IS_ADMIN === true) {
 	require_once 'admin.php';
 }else{
 	require_once 'storefront.php';
 }
-	
+
 //Messages
 	$registry->set('messages', new AMessage());
 

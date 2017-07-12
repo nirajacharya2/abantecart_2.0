@@ -79,9 +79,10 @@ final class ALoader{
 		}
 
 		//mode to force load storefront model
-		$section = DIR_APP . 'model/admin/';
-		if ($mode == 'storefront'){
+		if ($mode == 'storefront' || IS_ADMIN !== true){
 			$section = DIR_APP . 'model/storefront/';
+		}else{
+			$section = DIR_APP . 'model/admin/';
 		}
 
 		$file = $section . $model . '.php';
