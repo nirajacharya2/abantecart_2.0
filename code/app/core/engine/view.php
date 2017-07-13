@@ -297,9 +297,9 @@ class AView{
 			$file = $filename;
 		} else{
 			//#PR Build the path to the template file
-			$path = DIR_TEMPLATE;
+			$path = DIR_TEMPLATES;
 			if (!defined('INSTALL')){
-				$file = $this->_get_template_path($path, 'template/'.$filename, 'full');
+				$file = $this->_get_template_path($path, DIRNAME_TEMPLATE.$filename, 'full');
 			} else{
 				$file = $path . $filename;
 			}
@@ -374,7 +374,7 @@ class AView{
 			$output = $res_arr['default'][0];
 		} else{
 			//no extension found, use resource from core templates
-			$output = $this->_get_template_path(DIR_TEMPLATE, $filename, 'relative');
+			$output = $this->_get_template_path(DIR_TEMPLATES, $filename, 'relative');
 		}
 
 		if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array ('tpl', 'php'))){
@@ -528,7 +528,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		return DIR_EXT_ASSETS . $extension_name;
+		return DIR_ASSETS_EXT . $extension_name;
 	}
 
 	/**
@@ -545,12 +545,11 @@ class AView{
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used 
 		foreach ($extensions as $ext){
-			$res_arr = $this->_test_template_paths($this->_extension_templates_dir($ext), $filename, 'relative');
+			$res_arr = $this->_test_template_paths($this->_extension_templates_dir($ext), $filename, 'relative', true);
 			if ($res_arr){
-				$ret_arr[$res_arr['match']][] = DIR_EXTENSIONS . $ext . '/' . $res_arr['path'];
+				$ret_arr[$res_arr['match']][] = DIRNAME_ASSETS.DIRNAME_EXT . $ext . '/' . $res_arr['path'];
 			}
 		}
-
 		return $ret_arr;
 	}
 
@@ -582,21 +581,23 @@ class AView{
 	 * @param string $mode
 	 * @return array|null
 	 */
-	protected function _test_template_paths($path, $filename, $mode = 'relative'){
+	protected function _test_template_paths($path, $filename, $mode = 'relative', $is_extension=false){
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
+		$dir_assets = $is_extension ? '' : DIRNAME_ASSETS;
+
 
 		if (IS_ADMIN){
 			if (is_file($path . $template .'/admin/'. $filename)){
 				$ret_path = $path . $template .'/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'assets/templates/'.$template.'/admin/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/admin/' . $filename;
 				}
 			} else if (is_file($path . 'default/admin/'. $filename)){
 				$ret_path = $path . 'default/admin/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'assets/templates/default/admin/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/admin/' . $filename;
 					$match = 'default';
 				}
 			}
@@ -604,12 +605,12 @@ class AView{
 			if (is_file($path . $template .'/storefront/'. $filename)){
 				$ret_path = $path . $template .'/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'assets/templates/'.$template.'/storefront/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/storefront/' . $filename;
 				}
 			} else if (is_file($path . 'default/storefront/'. $filename)){
 				$ret_path = $path . 'default/storefront/'. $filename;
 				if ($mode == 'relative'){
-					$ret_path = 'assets/templates/default/storefront/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/storefront/' . $filename;
 					$match = 'default';
 				}
 			}

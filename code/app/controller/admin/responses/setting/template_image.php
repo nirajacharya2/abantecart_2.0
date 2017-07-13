@@ -33,7 +33,7 @@ class ControllerResponsesSettingTemplateImage extends AController {
 		$extensions = $this->extensions->getEnabledExtensions();
 
         $file = $template . '/image/preview.jpg';
-		if ( in_array( $template, $extensions ) && is_file( DIR_EXT_APP . $file) ) {
+		if ( in_array( $template, $extensions ) && is_file( DIR_APP_EXT . $file) ) {
             $img = HTTPS_EXT . $file;
         } else if (is_file( 'storefront/view/' . $template . '/image/preview.jpg')) {
 			$img = HTTPS_SERVER . 'storefront/view/' . $template . '/image/preview.jpg';

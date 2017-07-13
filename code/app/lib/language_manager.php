@@ -706,7 +706,7 @@ class ALanguageManager extends Alanguage{
 		}
 
 		// extensions
-		$extensions_dirs = glob(DIR_EXT_APP . '*', GLOB_ONLYDIR);
+		$extensions_dirs = glob(DIR_APP_EXT . '*', GLOB_ONLYDIR);
 
 		foreach ($extensions_dirs as $extension_dir){
 			//$extension_name = pathinfo($extension_dir,PATHINFO_BASENAME);
@@ -774,7 +774,7 @@ class ALanguageManager extends Alanguage{
 		$result_txt = '';
 		$extensions = $this->registry->get('extensions')->getEnabledExtensions();
 		if (in_array($translate_method, $extensions)){
-			$ex_class = DIR_EXT_APP . $translate_method . '/core/translator.php';
+			$ex_class = DIR_APP_EXT . $translate_method . '/core/translator.php';
 			if (file_exists($ex_class)){
 				/** @noinspection PhpIncludeInspection */
 				require_once($ex_class);

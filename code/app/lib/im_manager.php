@@ -157,7 +157,7 @@ class AIMManager extends AIM{
 				}
 
 				//use safe usage
-				$driver_file = DIR_EXT_APP . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
+				$driver_file = DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
 				if (!is_file($driver_file)){
 					$error = new AError('Cannot find file ' . $driver_file . ' to send notification.');
 					$error->toLog()->toMessages();
@@ -272,7 +272,7 @@ class AIMManager extends AIM{
 				}
 
 				//use safe usage
-				$driver_file = DIR_EXT_APP . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
+				$driver_file = DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
 				if (!is_file($driver_file)){
 					$error = new AError('Cannot find file ' . $driver_file . ' to send notification.');
 					$error->toLog()->toMessages();
@@ -433,7 +433,7 @@ class AIMManager extends AIM{
 				}
 
 				//use safe usage
-				$driver_file = DIR_EXT_APP . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
+				$driver_file = DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
 				if (!is_file($driver_file)){
 					$error = new AError('Cannot find file ' . $driver_file . ' to send notification.');
 					$error->toLog()->toMessages();
@@ -605,7 +605,7 @@ class AIMManager extends AIM{
 			//NOTE! all IM drivers MUST have class by these path
 			try{
 				/** @noinspection PhpIncludeInspection */
-				include_once(DIR_EXT_APP . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
+				include_once(DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			} catch(AException $e){
 			}
 			$classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);

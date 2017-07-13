@@ -47,9 +47,9 @@
 <?php 
 	//Generic PHP processed Javascript section
 
-if(is_file(DIR_TEMPLATE.'default/javascript/tinymce/langs/'.$language_locale.'.js')){
+if(is_file(DIR_TEMPLATES.'default/javascript/tinymce/langs/'.$language_locale.'.js')){
 	$mce_lang_code = $language_locale;
-} elseif(is_file(DIR_TEMPLATE.'default/javascript/tinymce/langs/'.substr($language_locale,0,2).'.js')){
+} elseif(is_file(DIR_TEMPLATES.'default/javascript/tinymce/langs/'.substr($language_locale,0,2).'.js')){
 	$mce_lang_code = substr($language_locale, 0, 2);
 }else{
 	$mce_lang_code = 'en';

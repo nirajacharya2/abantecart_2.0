@@ -31,13 +31,13 @@ final class ATemplate{
 		$this->config = $registry->get('config');
 
 		//#PR Build the path to the template file
-		if (file_exists(DIR_TEMPLATE . $this->config->get('config_storefront_template') . '/template/' . $filename)){
+		if (file_exists(DIR_TEMPLATES . $this->config->get('config_storefront_template') . '/template/' . $filename)){
 			$filename = $this->config->get('config_storefront_template') . '/template/' . $filename;
 		} else{
 			$filename = 'default/template/' . $filename;
 		}
 
-		$file = DIR_TEMPLATE . $filename;
+		$file = DIR_TEMPLATES . $filename;
 
 		if (file_exists($file)){
 			extract($this->data);

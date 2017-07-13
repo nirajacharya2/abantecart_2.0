@@ -421,14 +421,14 @@ class AExtensionManager{
 
 		// running sql install script if it exists
 		if (isset($config->install->sql)){
-			$file = DIR_EXT_APP . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
+			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php install script if it exists
 		if (isset($config->install->trigger)){
-			$file = DIR_EXT_APP . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
+			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -485,14 +485,14 @@ class AExtensionManager{
 		                                         'user'        => $this->user->getUsername()));
 
 		if (isset($config->uninstall->sql)){
-			$file = DIR_EXT_APP . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
+			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php uninstall script if it exists
 		if (isset($config->uninstall->trigger)){
-			$file = DIR_EXT_APP . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
+			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -529,10 +529,10 @@ class AExtensionManager{
 
 		$this->session->data['package_info']['ftp'] = false;
 		$pmanager = new APackageManager();
-		$result = $pmanager->removeDir(DIR_EXT_APP . $extension_txt_id);
+		$result = $pmanager->removeDir(DIR_APP_EXT . $extension_txt_id);
 
 		if (!$result){
-			$message = "Error: Can't to delete file or directory: '" . DIR_EXT_APP . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
+			$message = "Error: Can't to delete file or directory: '" . DIR_APP_EXT . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
 			$this->session->data['error'] = $message;
 		}
 

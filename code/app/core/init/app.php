@@ -86,7 +86,7 @@ if($path_nodes[0] == 'a') {
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
 
-define('DIR_TEMPLATE', DIR_ASSETS . 'templates/');
+define('DIR_TEMPLATES', DIR_ASSETS . 'templates/');
 if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ADMIN_PATH || $_POST['s'] == ADMIN_PATH)) {
 	define('IS_ADMIN', true);
 	define('DIR_APP_SECTION', DIR_APP );
@@ -172,18 +172,21 @@ try {
 	}
 
 // relative paths for extensions
-	define('DIR_EXTENSIONS', 'extensions/');
-	define('DIR_EXT_APP', DIR_APP . DIR_EXTENSIONS);
-	define('DIR_EXT_ASSETS', DIR_ASSETS . DIR_EXTENSIONS);
-	define('DIR_EXT_CORE', '/core/');
-	define('DIR_EXT_STORE', '/storefront/');
-	define('DIR_EXT_ADMIN', '/admin/');
-	define('DIR_EXT_IMAGE', '/images/');
-	define('DIR_EXT_LANGUAGE', 'language/');
-	//define('DIR_EXT_TEMPLATE', 'view/');
+	define('DIRNAME_APP', 'app/');
+	define('DIRNAME_ASSETS', 'assets/');
+	define('DIRNAME_EXT', 'extensions/');
+	define('DIRNAME_CORE', 'core/');
+	define('DIRNAME_STORE', 'storefront/');
+	define('DIRNAME_ADMIN', 'admin/');
+	define('DIRNAME_IMAGE', 'images/');
+	define('DIRNAME_LANGUAGE', 'language/');
+	define('DIRNAME_TEMPLATE', 'template/');
+	define('DIRNAME_TEMPLATES', 'templates/');
 
-	//load base libraries
+	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXT);
+	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXT);
 
+//load base libraries
 	require_once 'base.php';
 
 // Registry
@@ -279,8 +282,8 @@ if (IS_ADMIN === true) {
 	$template = 'default';
 	if (IS_ADMIN !== true && !empty($request->get['sf'])) {
 		$template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
-		$dir = $template . DIR_EXT_STORE . DIR_EXT_TEMPLATE . $template;
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT_APP . $dir)) {
+		$dir = $template . DIRNAME_STORE . DIRNAME_TEMPLATES . $template;
+		if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;
@@ -291,13 +294,13 @@ if (IS_ADMIN === true) {
 		//check template defined in settings
 		if (IS_ADMIN===true) {
 			$template = $config->get('admin_template');
-			$dir = 'templates/'.$template . DIR_EXT_ADMIN;
+			$dir = 'templates/'.$template .'/'. DIRNAME_ADMIN;
 		} else {
 			$template = $config->get('config_storefront_template');
-			$dir = 'templates/'.$template . DIR_EXT_STORE;
+			$dir = 'templates/'.$template .'/'. DIRNAME_STORE;
 		}
 
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT_APP . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;

@@ -470,7 +470,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			//if template process differently
 			if ( has_value((string)$data['template']) ) {
 		    	//build path to template directory.
-				$dir_template = DIR_EXT_APP.$extension.DIR_EXT_ADMIN.DIR_EXT_TEMPLATE.$this->config->get('admin_template')."/template/".$data['template'];
+				$dir_template = DIR_APP_EXT.$extension.'/'.DIRNAME_ADMIN.DIR_EXT_TEMPLATE.$this->config->get('admin_template')."/template/".$data['template'];
 				//validate template and report issue
 				if (!file_exists( $dir_template )) {
 					$warning = new AWarning(sprintf($this->language->get('error_could_not_load_override'), $dir_template, $extension));
@@ -627,9 +627,9 @@ class ControllerPagesExtensionExtensions extends AController {
 		$config = $ext->getConfig();
 		if (!empty($config->preview->item)) {
 			foreach ($config->preview->item as $item) {
-				if (!is_file(DIR_EXT_APP . $extension . DIR_EXT_IMAGE . (string)$item))
+				if (!is_file(DIR_APP_EXT . $extension . DIRNAME_IMAGE . (string)$item))
 					continue;
-				$this->data['extension_info']['preview'][] = HTTPS_EXT . $extension . DIR_EXT_IMAGE . (string)$item;
+				$this->data['extension_info']['preview'][] = HTTPS_EXT . $extension . DIRNAME_IMAGE . (string)$item;
 			}
 			//image gallery scripts and css for previews
 			$this->document->addStyle(array(
@@ -787,7 +787,7 @@ class ControllerPagesExtensionExtensions extends AController {
 		//#PR set custom templates for extension settings page.  
 		if ( has_value( (string)$config->custom_settings_template ) ) {
 			//build path to template directory.
-			$dir_template = DIR_EXT_APP . $extension . DIR_EXT_ADMIN . DIR_EXT_TEMPLATE . $this->config->get('admin_template') . "/template/";
+			$dir_template = DIR_ASSETS_EXT . $extension . '/'.DIRNAME_TEMPLATES.DIRNAME_ADMIN . $this->config->get('admin_template') . '/'.RDIR_TEMPLATE;
 			$dir_template .= (string)$config->custom_settings_template;
 			//validate template and report issue
 			if (!file_exists( $dir_template )) {
@@ -865,7 +865,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 			$config = getExtensionConfigXml($this->request->get['extension']);
 			if ($config === false) {
-				$filename = DIR_EXT_APP . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
+				$filename = DIR_APP_EXT . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
 				$err = sprintf($this->language->get('error_could_not_load_config'), $this->request->get['extension'], $filename);
 				$this->session->data['error'] = $err;
 			} else {

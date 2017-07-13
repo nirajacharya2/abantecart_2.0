@@ -41,7 +41,7 @@ class ModelSettingExtension extends Model {
 		$output = array();
 		$output[] = array('' => '');
 		foreach($query->rows as $row){
-			if(file_exists(DIR_EXT_APP.$row['key'].DIR_EXT_CORE.'lib/handler.php')){
+			if(file_exists(DIR_APP_EXT.$row['key'].DIRNAME_CORE.'lib/handler.php')){
 				$output[] = $row;
 			}
 		}

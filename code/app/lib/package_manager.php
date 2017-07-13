@@ -164,7 +164,7 @@ class APackageManager{
 	 */
 	public function backupPrevious($extension_id = ''){
 
-		$old_path = !$extension_id ? DIR_ROOT . '/' . $this->session->data['package_info']['dst_dir'] : DIR_EXT_APP;
+		$old_path = !$extension_id ? DIR_ROOT . '/' . $this->session->data['package_info']['dst_dir'] : DIR_APP_EXT;
 		$package_id = !$extension_id ? $this->session->data['package_info']['package_id'] : $extension_id;
 		if (!$package_id){
 			return false;
@@ -667,7 +667,7 @@ class APackageManager{
 					// running sql upgrade script if it exists
 					if (isset($config->upgrade->sql)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->sql;
-						$file = !file_exists($file) ? DIR_EXT_APP . $extension_id . '/' . (string)$config->upgrade->sql : $file;
+						$file = !file_exists($file) ? DIR_APP_EXT . $extension_id . '/' . (string)$config->upgrade->sql : $file;
 						if (file_exists($file)){
 							$this->db->performSql($file);
 						}
@@ -675,7 +675,7 @@ class APackageManager{
 					// running php install script if it exists
 					if (isset($config->upgrade->trigger)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->trigger;
-						$file = !file_exists($file) ? DIR_EXT_APP . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
+						$file = !file_exists($file) ? DIR_APP_EXT . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
 						if (file_exists($file)){
 							/** @noinspection PhpIncludeInspection */
 							include($file);
@@ -823,8 +823,8 @@ class APackageManager{
 	public function validate(){
 		$this->error = '';
 		//1.check is extension directory writable
-		if (!is_writable(DIR_EXT_APP)){
-			$this->error .= 'Directory ' . DIR_EXT_APP . ' is not writable. Please change permissions for it.' . "\n";
+		if (!is_writable(DIR_APP_EXT)){
+			$this->error .= 'Directory ' . DIR_APP_EXT . ' is not writable. Please change permissions for it.' . "\n";
 		}
 		//2. check temporaty directory. just call method
 		$this->getTempDir();

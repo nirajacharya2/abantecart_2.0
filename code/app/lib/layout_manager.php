@@ -91,10 +91,10 @@ class ALayoutManager{
 		if (empty($tmpl_id)){
 			//check is template an extension
 			$template = $this->config->get('config_storefront_template');
-			$dir = $template . DIR_EXT_STORE . DIR_EXT_TEMPLATE . $template;
+			$dir = $template . DIRNAME_STORE . DIR_EXT_TEMPLATE . $template;
 			$enabled_extensions = $this->extensions->getEnabledExtensions();
 
-			if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT_APP . $dir)){
+			if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)){
 				$is_valid = true;
 			} else{
 				$is_valid = false;
