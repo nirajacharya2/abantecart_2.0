@@ -35,7 +35,7 @@ class ControllerPagesExtensionExtensionSummary extends AController {
 		}
 
 		$icon_ext_img_url = HTTPS_EXT . $extension . '/image/icon.png';
-		$icon_ext_dir = DIR_EXT . $extension . '/image/icon.png';
+		$icon_ext_dir = DIR_EXT_APP . $extension . '/image/icon.png';
 		$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'image/default_extension.png');
 
 		$this->data['extension_info']['icon'] = $icon;

@@ -36,7 +36,7 @@ class ControllerResponsesExtensionExtension extends AController {
 
 		$extension = $this->request->get['extension'];
 		$ext = new ExtensionUtils($extension);
-		$help_file_path = DIR_EXT . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
+		$help_file_path = DIR_EXT_APP . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
 
 		$this->data['content'] = array();
 		$this->data['title'] = $this->language->get('text_help');

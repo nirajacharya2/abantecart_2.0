@@ -156,7 +156,7 @@ class ControllerResponsesListingGridExtension extends AController{
 				$category = $status = '';
 				// change it for show it in list first by default sorting
 				$row['date_modified'] = date('Y-m-d H:i:s', time());
-			} elseif (!file_exists(DIR_EXT . $extension . '/main.php') || !file_exists(DIR_EXT . $extension . '/config.xml')){
+			} elseif (!file_exists(DIR_EXT_APP . $extension . '/main.php') || !file_exists(DIR_EXT_APP . $extension . '/config.xml')){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
 				$icon = '<img src="' . RDIR_TEMPLATE . 'image/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_broken_extension'), $extension);
@@ -177,7 +177,7 @@ class ControllerResponsesListingGridExtension extends AController{
 				}
 
 				$icon_ext_img_url = HTTPS_EXT . $extension . '/image/icon.png';
-				$icon_ext_dir = DIR_EXT . $extension . '/image/icon.png';
+				$icon_ext_dir = DIR_EXT_APP . $extension . '/image/icon.png';
 				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'image/default_extension.png');
 				if (!$this->config->has($extension . '_status')){
 					$icon = '<img src="' . $icon . '" alt="" border="0" />';
@@ -289,8 +289,8 @@ class ControllerResponsesListingGridExtension extends AController{
 		$this->data = array ('license_text' => '', 'error_text' => '');
 		if ($result){
 			// if all fine show license agreement
-			if (file_exists(DIR_EXT . $this->request->get['extension'] . "/license.txt")){
-				$this->data['license_text'] = file_get_contents(DIR_EXT . $this->request->get['extension'] . "/license.txt");
+			if (file_exists(DIR_EXT_APP . $this->request->get['extension'] . "/license.txt")){
+				$this->data['license_text'] = file_get_contents(DIR_EXT_APP . $this->request->get['extension'] . "/license.txt");
 				$this->data['license_text'] = htmlentities($this->data['license_text'], ENT_QUOTES, 'UTF-8');
 				$this->data['license_text'] = nl2br($this->data['license_text']);
 			}

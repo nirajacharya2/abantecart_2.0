@@ -490,7 +490,7 @@ function getExtensionConfigXml($extension_txt_id) {
 	}
 
 	$extension_txt_id = str_replace('../', '', $extension_txt_id);
-	$filename = DIR_EXT . $extension_txt_id . '/config.xml';
+	$filename = DIR_EXT_APP . $extension_txt_id . '/config.xml';
 	/**
 	 * @var $ext_configs SimpleXMLElement|false
 	 */

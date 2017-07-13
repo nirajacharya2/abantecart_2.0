@@ -173,7 +173,8 @@ try {
 
 // relative paths for extensions
 	define('DIR_EXTENSIONS', 'extensions/');
-	define('DIR_EXT', DIR_APP . '/' . DIR_EXTENSIONS);
+	define('DIR_EXT_APP', DIR_APP . DIR_EXTENSIONS);
+	define('DIR_EXT_ASSETS', DIR_ASSETS . DIR_EXTENSIONS);
 	define('DIR_EXT_CORE', '/core/');
 	define('DIR_EXT_STORE', '/storefront/');
 	define('DIR_EXT_ADMIN', '/admin/');
@@ -279,7 +280,7 @@ if (IS_ADMIN === true) {
 	if (IS_ADMIN !== true && !empty($request->get['sf'])) {
 		$template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
 		$dir = $template . DIR_EXT_STORE . DIR_EXT_TEMPLATE . $template;
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT_APP . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;
@@ -296,7 +297,7 @@ if (IS_ADMIN === true) {
 			$dir = 'templates/'.$template . DIR_EXT_STORE;
 		}
 
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(DIR_EXT_APP . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;

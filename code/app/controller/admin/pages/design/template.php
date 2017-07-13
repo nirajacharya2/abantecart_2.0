@@ -124,7 +124,7 @@ class ControllerPagesDesignTemplate extends AController{
 			}
 
 			//button to extension
-			if (!is_dir('storefront/view/' . $tmpl) && is_dir(DIR_EXT . $tmpl)){
+			if (!is_dir('storefront/view/' . $tmpl) && is_dir(DIR_EXT_APP . $tmpl)){
 				$templates[$tmpl]['extn_url'] = $this->html->getSecureURL('extension/extensions/edit', '&extension=' . $tmpl);
 			}
 			//set default
@@ -133,7 +133,7 @@ class ControllerPagesDesignTemplate extends AController{
 			}
 
 			$preview_file = $tmpl . '/image/preview.jpg';
-			if (is_file(DIR_EXT . $preview_file)){
+			if (is_file(DIR_EXT_APP . $preview_file)){
 				$preview_img = HTTPS_EXT . $preview_file;
 			} else if (is_file('storefront/view/' . $tmpl . '/image/preview.jpg')){
 				$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl . '/image/preview.jpg';
@@ -335,7 +335,7 @@ class ControllerPagesDesignTemplate extends AController{
 		$this->_getForm();
 
 		$preview_file = $tmpl_id . '/image/preview.jpg';
-		if (is_file(DIR_EXT . $preview_file)){
+		if (is_file(DIR_EXT_APP . $preview_file)){
 			$preview_img = HTTPS_EXT . $preview_file;
 		} else if (is_file('storefront/view/' . $tmpl_id . '/image/preview.jpg')){
 			$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl_id . '/image/preview.jpg';

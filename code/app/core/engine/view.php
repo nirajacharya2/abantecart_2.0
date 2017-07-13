@@ -518,8 +518,8 @@ class AView{
 	 * @param string $extension_name
 	 * @return string
 	 */
-	protected function _extension_view_dir($extension_name){
-		return $this->_extension_section_dir($extension_name) . DIR_EXT_TEMPLATE;
+	protected function _extension_templates_dir($extension_name){
+		return $this->_extension_section_dir($extension_name).'/templates/';
 	}
 
 	/**
@@ -528,8 +528,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		$rel_view_path = (IS_ADMIN ? DIR_EXT_ADMIN : DIR_EXT_STORE);
-		return DIR_EXT . $extension_name . $rel_view_path;
+		return DIR_EXT_ASSETS . $extension_name;
 	}
 
 	/**
@@ -546,7 +545,7 @@ class AView{
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used 
 		foreach ($extensions as $ext){
-			$res_arr = $this->_test_template_paths($this->_extension_view_dir($ext), $filename, 'relative');
+			$res_arr = $this->_test_template_paths($this->_extension_templates_dir($ext), $filename, 'relative');
 			if ($res_arr){
 				$ret_arr[$res_arr['match']][] = DIR_EXTENSIONS . $ext . '/' . $res_arr['path'];
 			}

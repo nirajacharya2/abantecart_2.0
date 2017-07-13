@@ -107,7 +107,7 @@ final class ALoader{
 		} else if ($mode != 'silent'){
 			$backtrace = debug_backtrace();
 			$file_info = $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
-			throw new AException(AC_ERR_LOAD, 'Error: Could not load model ' . $model . ' from ' . $file_info);
+			throw new AException(AC_ERR_LOAD, 'Error: Could not load model ' . $model . ' (file '.$file.')  from ' . $file_info);
 			return false;
 		} else{
 			return false;
