@@ -17,7 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
-
+// set default encoding for multibyte php mod
+mb_internal_encoding('UTF-8');
+ini_set('default_charset', 'utf-8');
 
 // AbanteCart Version
 include('version.php');
@@ -352,6 +354,25 @@ if (IS_ADMIN === true) {
 		$registry->set('im', new AIM());
 	}
 
+	if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
+		// Customer
+		$registry->set('customer', new ACustomer($registry));
+		// Tax
+		$registry->set('tax', new ATax($registry));
+		// Weight
+		$registry->set('weight', new AWeight($registry));
+		// Length
+		$registry->set('length', new ALength($registry));
+		// Cart
+		$registry->set('cart', new ACart($registry));
+	} else {
+		// User
+		$registry->set('user', new AUser($registry));
+	}// end admin load
+
+	// Currency
+	$registry->set('currency', new ACurrency($registry));
+	return $registry;
 } //eof try
 catch (AException $e) {
 	ac_exception_handler($e);

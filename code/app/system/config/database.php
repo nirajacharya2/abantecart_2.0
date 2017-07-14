@@ -1,8 +1,10 @@
 <?php
 // Database Configuration
-define('DB_DRIVER', 'amysqli');
-define('DB_HOSTNAME', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', 'abolabo');
-define('DB_DATABASE', 'abc_2.0');
-define('DB_PREFIX', 'cba_');
+return array(
+	'DB_DRIVER' => 'amysqli',
+	'DB_HOSTNAME' => 'localhost',
+	'DB_USERNAME' => '',
+	'DB_PASSWORD' => '',
+	'DB_DATABASE' => '',
+	'DB_PREFIX' => ''
+);

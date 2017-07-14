@@ -1,4 +1,4 @@
-<?php
+<?php 
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -11,32 +11,22 @@
   License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
+
+ UPGRADE NOTE:
    Do not edit or add to this file if you wish to upgrade AbanteCart to newer
    versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
+   needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-
-
-// Load all initial set up and Configuration
-if(!defined('DIR_APP')) {
-	$dir_app = dirname(__DIR__) . '/app/';
-	if( !is_dir($dir_app) ){
-		$dir_app =  __DIR__ . '/app/';
-	}
-	// Windows IIS Compatibility
-	if (stristr(PHP_OS, 'WIN')) {
-		define('IS_WINDOWS', true);
-		$dir_app = str_replace('\\', '/', $dir_app);
-	}
-	define('DIR_APP', $dir_app);
+if (! defined ( 'DIR_CORE' )) {
+	header ( 'Location: static_pages/' );
 }
-define('DIR_ASSETS', __DIR__ . '/assets/');
-define('INDEX_FILE', basename(__FILE__));
+class ControllerResponsesFormsManagerValidate extends AController {
 
-$config = require DIR_APP.'system/config/config.php';
+	public function main(){}
 
-require DIR_APP.'abc.php';
-$app = new ABC($config);
-$app->run();
+  	public function captcha() {
+
+		$result = $this->session->data['captcha'] == $this->request->get['captcha'] ? 'true' : 'false';
+		$this->response->setOutput($result);
+	}
+}
