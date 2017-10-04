@@ -122,11 +122,11 @@ final class AMySQLi{
 			$dump .= ' (file: ' . $backtrace[1]['file'] . ' line ' . $backtrace[1]['line'] . ')';
 			$message = 'aMySQLi class error: Try to escape non-string value: ' . $dump;
 			$error = new AError($message);
-			$error->toLog()->toDebug();
+			$error->toLog()->toDebug()->toMessages();
 			return false;
 		}
-		return $this->connection->real_escape_string((string)$value);
-	}
+			return $this->connection->real_escape_string((string)$value);
+		}
 
 	/**
 	 * @return int

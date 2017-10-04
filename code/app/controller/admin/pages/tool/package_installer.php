@@ -583,8 +583,8 @@ class ControllerPagesToolPackageInstaller extends AController {
 				$dst_dirs = $pmanager->getDestinationDirectories();
 				$ftp_mode = false;
 				// if even one destination directory is not writable - use ftp mode
-				if(!is_writable(DIR_APP_EXT)){
-					$non_writables[] = DIR_APP_EXT;
+				if(!is_writable(DIR_EXT)){
+					$non_writables[] = DIR_EXT;
 				}
 
 				if ($dst_dirs) {
@@ -978,9 +978,9 @@ class ControllerPagesToolPackageInstaller extends AController {
 
 		$pmanager = new APackageManager();
 		// #2. backup previous version
-		if ($already_installed || file_exists(DIR_APP_EXT . $extension_id)) {
-			if(!is_writable(DIR_APP_EXT . $extension_id)){
-				$this->session->data['error'] = $this->language->get('error_move_backup').DIR_APP_EXT . $extension_id;
+		if ($already_installed || file_exists(DIR_EXT . $extension_id)) {
+			if(!is_writable(DIR_EXT . $extension_id)){
+				$this->session->data['error'] = $this->language->get('error_move_backup').DIR_EXT . $extension_id;
 				$this->redirect($this->_get_begin_href());
 			}else{
 				if (!$pmanager->backupPrevious($extension_id)) {
@@ -1007,9 +1007,9 @@ class ControllerPagesToolPackageInstaller extends AController {
 										  $package_info['ftp_path'] . 'extensions/' . $extension_id);
             ftp_close($fconnect);
 		} else {
-			$result = rename($temp_dirname . $package_dirname . "/code/extensions/" . $extension_id, DIR_APP_EXT.$extension_id);
+			$result = rename($temp_dirname . $package_dirname . "/code/extensions/" . $extension_id, DIR_EXT.$extension_id);
 			//this method requires permission set to be set
-			$pmanager->chmod_R(DIR_APP_EXT.$extension_id ,0777, 0777);
+			$pmanager->chmod_R(DIR_EXT.$extension_id ,0777, 0777);
 		}
 
 		/*
@@ -1037,10 +1037,10 @@ class ControllerPagesToolPackageInstaller extends AController {
 			}
 		} else {
 			if ($package_info['ftp']) {
-				$this->session->data['error'] = $this->language->get('error_move_ftp') . DIR_APP_EXT . $extension_id.'<br><br>'.$pmanager->error;
+				$this->session->data['error'] = $this->language->get('error_move_ftp') . DIR_EXT . $extension_id.'<br><br>'.$pmanager->error;
 				$this->redirect($this->html->getSecureURL('tool/package_installer/agreement'));
 			} else {
-				$this->session->data['error'] = $this->language->get('error_move') . DIR_APP_EXT . $extension_id.'<br><br>'.$pmanager->error;
+				$this->session->data['error'] = $this->language->get('error_move') . DIR_EXT . $extension_id.'<br><br>'.$pmanager->error;
 				$this->_removeTempFiles('dir');
 				$this->redirect($this->_get_begin_href());
 			}

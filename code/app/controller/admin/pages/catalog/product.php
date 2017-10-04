@@ -371,6 +371,7 @@ class ControllerPagesCatalogProduct extends AController {
 			$product_id = $this->request->get['product_id'];
 			$product_info = $this->model_catalog_product->getProduct($product_id);
 			$product_info['featured'] = $product_info['featured'] ? 1 : 0;
+			$product_info['has_track_options'] = $this->model_catalog_product->hasTrackOptions($product_id);
 		}
 
 		$this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($product_id);
@@ -419,7 +420,7 @@ class ControllerPagesCatalogProduct extends AController {
 		}
 
 		$this->loadModel('localisation/stock_status');
-		$this->data['stock_statuses'] = array();
+		$this->data['stock_statuses'] = array( '0' => $this->language->get('text_none') );
 		$results = $this->model_localisation_stock_status->getStockStatuses();
 		foreach( $results as $r ) {
 			$this->data['stock_statuses'][ $r['stock_status_id'] ] = $r['name'];
@@ -466,6 +467,7 @@ class ControllerPagesCatalogProduct extends AController {
 						'subtract',
 						'sort_order',
 						'stock_status_id',
+						'stock_checkout',
 						'price',
 						'cost',
 						'status',
@@ -530,7 +532,7 @@ class ControllerPagesCatalogProduct extends AController {
 			$this->data['preview'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
 		}
 
-		if ($this->data['stock_status_id'] == '') {
+		if ( !has_value($this->data['stock_status_id']) ) {
 			$this->data['stock_status_id'] = $this->config->get('config_stock_status_id');
 		}
 		if (isset($this->request->post['date_available'])) {
@@ -744,7 +746,8 @@ class ControllerPagesCatalogProduct extends AController {
 				0 => $this->language->get('text_no'),
 			),
 			'help_url' => $this->gen_help_url('product_inventory'),
-			'style' => 'medium-field'
+			'style' => 'medium-field',
+			'disabled'=> ($product_info['has_track_options'] ? true : false)
 		));
 
 		$this->data['form']['fields']['data']['quantity'] = $form->getFieldHtml(array(
@@ -753,6 +756,7 @@ class ControllerPagesCatalogProduct extends AController {
 			'value' => (int)$this->data['quantity'],
 			'style' => 'col-xs-1 small-field',
 			'help_url' => $this->gen_help_url('product_inventory'),
+			'attr'=> ($product_info['has_track_options'] ? 'disabled' : '')
 		));
 
 		$this->data['form']['fields']['data']['minimum'] = $form->getFieldHtml(array(
@@ -769,10 +773,22 @@ class ControllerPagesCatalogProduct extends AController {
 			'style' => 'small-field',
 		));
 
+		$this->data['form']['fields']['data']['stock_checkout'] = $form->getFieldHtml(array (
+            'type'  => 'selectbox',
+            'name'  => 'stock_checkout',
+            'value' => (has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : '' ),
+            'options' => array (
+                '' => $this->language->get('text_default'),
+                0  => $this->language->get('text_no'),
+                1  => $this->language->get('text_yes'),
+            ),
+            'style' => 'small-field',
+		));
+
 		$this->data['form']['fields']['data']['stock_status'] = $form->getFieldHtml(array(
 			'type' => 'selectbox',
 			'name' => 'stock_status_id',
-			'value' => $this->data['stock_status_id'],
+			'value' => (has_value($this->data['stock_status_id']) ? (int)$this->data['stock_status_id'] : $this->config->get('config_stock_status_id') ),
 			'options' => $this->data['stock_statuses'],
 			'help_url' => $this->gen_help_url('product_inventory'),
 			'style' => 'small-field',

@@ -26,7 +26,7 @@ if(!defined('DIR_APP')) {
 		$dir_app =  __DIR__ . '/app/';
 	}
 	// Windows IIS Compatibility
-	if (stristr(PHP_OS, 'WIN')) {
+	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 		define('IS_WINDOWS', true);
 		$dir_app = str_replace('\\', '/', $dir_app);
 	}

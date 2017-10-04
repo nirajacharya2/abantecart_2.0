@@ -58,7 +58,7 @@ class ControllerCommonHead extends AController {
 				$resource = new AResource('image');
 				$image_data = $resource->getResource( $icon_rl );
 				if ( is_file(DIR_RESOURCE . $image_data['image']) ) {
-					$icon_rl = 'assets/resources/'.$image_data['image'];
+					$icon_rl = 'resources/'.$image_data['image'];
 				} else {
 					$icon_rl = $image_data['resource_code'];
 				}

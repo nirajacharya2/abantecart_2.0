@@ -53,6 +53,7 @@ if (!defined('DIR_CORE')){
  * @method ZonesHtmlElement buildZones(array $data)
  * @method PaginationHtmlElement buildPagination(array $data)
  * @method ModalHtmlElement buildModal(array $data)
+ * @method LabelHtmlElement buildLabel(array $data)
  */
 class AHtml extends AController{
 	/**
@@ -702,6 +703,11 @@ class HtmlElementFactory{
 					'method' => 'buildZones',
 					'class'  => 'ZonesHtmlElement'
 			),
+			'B' => array (
+					'type'   => 'label',
+					'method' => 'buildLabel',
+					'class'  => 'LabelHtmlElement'
+			),
 
 	);
 
@@ -793,6 +799,10 @@ class HtmlElementFactory{
 /**
  * @abstract
  * Class HtmlElement
+ * @property mixed $value
+ * @property array $options
+ * @property array $disabled_options
+ * @property bool $required
  */
 abstract class HtmlElement{
 	/**
@@ -876,6 +886,38 @@ abstract class HtmlElement{
 	 */
 	public function getHtml(){
 		return null;
+	}
+
+	protected function _validate_options(){
+		$this->disabled_options = (array)$this->disabled_options;
+		//check case when all options are disabled
+		$all_disabled = true;
+		foreach( $this->options as $id=>$text ){
+			if(!in_array($id, $this->disabled_options)){
+				$all_disabled = false;
+				break;
+			}
+		}
+		//if all disabled and options presents (for select-chosen element or empty)
+		if($all_disabled && $this->options){
+			if(in_array($this->data['type'], array('selectbox', 'multiselectbox' ))) {
+				$this->options = array ('' => '------') + $this->options;
+			}
+			$this->value = 0;
+			if($this->required){
+				$url = HTTPS_SERVER;
+				$query_string = $this->registry->get('request')->server['QUERY_STRING'];
+				if( strpos($query_string,'_route_=') === false ){
+					$url .= '?';
+				}else{
+					$query_string = str_replace('_route_=','', $query_string);
+				}
+				$url .= $query_string;
+				$this->registry->get('messages')->saveWarning(
+						'Form Field #'.$this->element_id.' Issue',
+						'Abnormal situation. All options of required field "'.$this->data['name'].'" are disabled. URL: '.$url);
+			}
+		}
 	}
 
 }
@@ -1220,6 +1262,8 @@ class TextEditorHtmlElement extends HtmlElement{
  * @property string $style
  * @property string $placeholder
  * @property array $options
+ * @property array $disabled_options
+ * @property bool $disabled
  * @property string $ajax_url
  * @property string $search_mode
  * @property string $help_url
@@ -1230,7 +1274,9 @@ class SelectboxHtmlElement extends HtmlElement{
 	 */
 	public function getHtml(){
 
-		if (!is_array($this->value)) $this->value = array ($this->value => (string)$this->value);
+		if (!is_array($this->value)){
+			$this->value = array ($this->value => (string)$this->value);
+		}
 
 		$this->options = !$this->options ? array () : (array)$this->options;
 		foreach ($this->options as &$opt){
@@ -1247,12 +1293,16 @@ class SelectboxHtmlElement extends HtmlElement{
 		$text_continue_typing = !$text_continue_typing || $text_continue_typing == 'text_continue_typing' ? 'Continue typing ...' : $text_continue_typing;
 		$text_looking_for = !$text_looking_for || $text_looking_for == 'text_looking_for' ? 'Looking for' : $text_looking_for;
 
+		$this->_validate_options();
+
 		$this->view->batchAssign(
 				array (
 						'name'                 => $this->name,
 						'id'                   => $this->element_id,
 						'value'                => $this->value,
 						'options'              => $this->options,
+						'disabled'             => $this->disabled,
+						'disabled_options'     => $this->disabled_options,
 						'attr'                 => $this->attr,
 						'required'             => $this->required,
 						'style'                => $this->style,
@@ -1292,6 +1342,7 @@ class SelectboxHtmlElement extends HtmlElement{
  * @property string $style
  * @property string $placeholder
  * @property array $options
+ * @property array $disabled_options
  * @property string $filter_params - some additional parameters
  * @property string $ajax_url
  * @property string|array $option_attr
@@ -1304,14 +1355,17 @@ class MultiSelectboxHtmlElement extends HtmlElement{
 	 */
 	public function getHtml(){
 
-		if (!is_array($this->value)) $this->value = array ($this->value => $this->value);
-
+		if (!is_array($this->value)){
+			$this->value = array ($this->value => $this->value);
+		}
+		$this->_validate_options();
 		$this->view->batchAssign(
 				array (
 						'name'        => $this->name,
 						'id'          => $this->element_id,
 						'value'       => $this->value,
 						'options'     => $this->options,
+						'disabled_options' => $this->disabled_options,
 						'disabled'    => $this->disabled,
 						'attr'        => $this->attr . ' multiple="multiple" ',
 						'required'    => $this->required,
@@ -1410,6 +1464,7 @@ class CheckboxHtmlElement extends HtmlElement{
  * Class CheckboxGroupHtmlElement
  * @property string|int $value
  * @property array $options
+ * @property array $disabled_options
  * @property string $element_id
  * @property string $name
  * @property string $attr
@@ -1423,12 +1478,14 @@ class CheckboxGroupHtmlElement extends HtmlElement{
 
 	public function getHtml(){
 		$this->value = !is_array($this->value) ? array ($this->value => $this->value) : $this->value;
+		$this->_validate_options();
 		$this->view->batchAssign(
 				array (
 						'name'        => $this->name,
 						'id'          => $this->element_id,
 						'value'       => $this->value,
 						'options'     => $this->options,
+						'disabled_options' => $this->disabled_options,
 						'attr'        => $this->attr . ' multiple="multiple" ',
 						'required'    => $this->required,
 						'scrollbox'   => $this->scrollbox,
@@ -1496,6 +1553,8 @@ class FileHtmlElement extends HtmlElement{
  * @property string $required
  * @property string $style
  * @property array $options
+ * @property array $disabled_options
+ * @property array $disabled
  * @property string $help_url
  */
 class RadioHtmlElement extends HtmlElement{
@@ -1505,12 +1564,15 @@ class RadioHtmlElement extends HtmlElement{
 		if (empty($this->options) && has_value($this->value)){
 			$this->options = array ($this->value => $this->value);
 		}
+		$this->_validate_options();
 		$this->view->batchAssign(
 				array (
 						'name'     => $this->name,
 						'id'       => $this->element_id,
 						'value'    => $this->value,
 						'options'  => $this->options,
+						'disabled_options' => $this->disabled_options,
+						'disabled'  => $this->disabled,
 						'attr'     => $this->attr,
 						'required' => $this->required,
 						'style'    => $this->style,
@@ -2158,10 +2220,12 @@ class ZonesHtmlElement extends HtmlElement{
 	}
 
 	public function getHtml(){
-		if ($this->value && !is_array($this->value)){
-			$this->value = array ($this->value => (string)$this->value);
-		} else{
-			$this->value = array ();
+		if (!is_array($this->value)){
+			if(!$this->value){
+				$this->value = array();
+			}else {
+				$this->value = array ($this->value => (string)$this->value);
+			}
 		}
 
 		$this->zone_name = !$this->zone_name ? '' : urlencode($this->zone_name);
@@ -2446,4 +2510,40 @@ class ModalHtmlElement extends HtmlElement{
 		return $return;
 	}
 
+}
+
+/**
+ * Class LabelHtmlElement
+ * NOTE: only for storefront
+ * @property string $element_id
+ * @property string $name
+ * @property string $text
+ * @property string $value
+ * @property string $style
+ * @property string $attr
+ */
+class LabelHtmlElement extends HtmlElement{
+	/**
+	 * @return string
+	 */
+	public function getHtml(){
+		if(IS_ADMIN === true){
+			ADebug::error('labelHtmlElement', E_USER_ERROR, 'You cannot to build Label-field from Admin-side!');
+			return null;
+		}
+
+		$this->view->batchAssign(
+				array (
+						'name'           => $this->name,
+						'id'             => $this->element_id,
+						'text'          => str_replace('"', '&quot;', ($this->text ? $this->text : $this->value)),
+						'attr'           => $this->attr,
+						'style'          => $this->style
+				)
+		);
+		if (!empty($this->help_url)){
+			$this->view->assign('help_url', $this->help_url);
+		}
+		return $this->view->fetch('form/label.tpl');
+	}
 }

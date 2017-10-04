@@ -882,7 +882,6 @@ class ExtensionsApi{
 				}
 			}
 		}
-
 		return false;
 	}
 

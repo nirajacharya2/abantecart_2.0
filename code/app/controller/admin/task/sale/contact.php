@@ -272,7 +272,7 @@ class ControllerTaskSaleContact extends AController{
 		}
 		//use safe usage
 		try{
-			include_once(DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
+			include_once(DIR_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			//if class of driver
 			$classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 			if (!class_exists($classname)){

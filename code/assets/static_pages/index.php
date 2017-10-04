@@ -19,15 +19,6 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
-
-
-exit('EXCEPTION!');
-
-
-
-
-
-
 // Real path (operating system web root) to the directory where abantecart is installed
 $root_path = dirname(__FILE__);
 /*if (defined('IS_WINDOWS')) {
@@ -65,10 +56,11 @@ foreach(array_keys($_COOKIE) as $key) {
 define('SESSION_ID', $session_id);
 
 //try to start session. 
+require_once(DIR_CORE . 'lib/session.php');
 $session = new ASession(SESSION_ID);
 
 $error = 'Please check AbanteCart and webserver error logs for more details. You can check error log in the control panel if it is functional. Otherwise, refer to error log located on your web server';
-if($session && $session->data['exception_msg']){
+if($session && isset($session->data['exception_msg']) && $session->data['exception_msg']){
 	$error = $session->data['exception_msg'];
 	$session->data['exception_msg'] = '';
 }
@@ -125,7 +117,7 @@ if($from_admin){
 	<center>
 <?php 
 	if($from_admin){
-?>	
+?>
 		<div style="font-size: 16px;">
 			<b><a href="mailto:help@abantecart.com?subject=<?php echo $subject ?>&body=<?php echo $body ?>">Report this problem to AbanteCart team (do not change email subject)</a></b>
 		</div>
@@ -134,9 +126,14 @@ if($from_admin){
 	}
 ?>	
 		<div>
-			<b><a href="http://docs.abantecart.com/pages/tips/troubleshooting.html" target="_docs">AbanteCart Troubleshooting Guide</a></b>
+			<b><a href="http://docs.abantecart.com/pages/tips/troubleshooting.html" target="_docs">Check AbanteCart Troubleshooting Guide</a></b>
 		</div>
-		<br>
+		<br><br>
+		<div>
+			<b><a href="http://www.abantecart.com/contact-us" target="_abantecart">Need help? Contact for support</a></b>
+		</div>
+
+		<br><br>
 		<div>
 			<a href="<?php echo HTTP_ABANTECART; ?>">Go to main page</a>
 		</div>
