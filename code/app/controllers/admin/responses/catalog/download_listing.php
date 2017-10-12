@@ -178,7 +178,7 @@ class ControllerResponsesCatalogDownloadListing extends AController {
 					$result[ 'name' ],
 					'<a class="btn_action" href="JavaScript:void(0);"
 						onclick="showPopup(\'' . $this->html->getSecureURL('catalog/download/update', '&' . $data_type . '=' . $result[ $data_type ]) . '\')" title="' . $this->language->get('text_view') . '">' .
-					'<img height="27" src="' . RDIR_TEMPLATE . 'image/icons/icon_grid_view.png" alt="' . $this->language->get('text_edit') . '" /></a>' );
+					'<img height="27" src="' . RDIR_TEMPLATE . 'images/icons/icon_grid_view.png" alt="' . $this->language->get('text_edit') . '" /></a>' );
 				$i++;
 			}
 		}

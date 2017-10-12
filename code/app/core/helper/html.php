@@ -105,8 +105,8 @@ function buildStoreFrontMenuTree( $menu_array, $level = 0 ){
 		$rl_id = $item['icon_rl_id'];
 		if($rl_id){
 			$resource = $ar->getResource($rl_id);
-			if($resource['resource_path'] && is_file(DIR_RESOURCE . 'image/'.$resource['resource_path'])){
-				$result .= '<img class="menu_image" src="'. HTTPS_DIR_RESOURCE . 'image/'.$resource['resource_path'].'" alt="" />';
+			if($resource['resource_path'] && is_file(DIR_RESOURCE . 'images/'.$resource['resource_path'])){
+				$result .= '<img class="menu_image" src="'. HTTPS_DIR_RESOURCE . 'images/'.$resource['resource_path'].'" alt="" />';
 			}elseif($resource['resource_code']){
 				$result .= $resource['resource_code'];
 			}

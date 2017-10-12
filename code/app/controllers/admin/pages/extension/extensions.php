@@ -633,15 +633,15 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 			//image gallery scripts and css for previews
 			$this->document->addStyle(array(
-			        'href' => RDIR_TEMPLATE . 'javascript/blueimp-gallery/css/bootstrap-image-gallery.css',
+			        'href' => RDIR_TEMPLATE . 'js/blueimp-gallery/css/bootstrap-image-gallery.css',
 			        'rel' => 'stylesheet'
 			));
 			$this->document->addStyle(array(
-			        'href' => RDIR_TEMPLATE . 'javascript/blueimp-gallery/css/blueimp-gallery.min.css',
+			        'href' => RDIR_TEMPLATE . 'js/blueimp-gallery/css/blueimp-gallery.min.css',
 			        'rel' => 'stylesheet'
 			));
-			$this->document->addScript(RDIR_TEMPLATE.'javascript/blueimp-gallery/jquery.blueimp-gallery.min.js');
-			$this->document->addScript(RDIR_TEMPLATE.'javascript/blueimp-gallery/bootstrap-image-gallery.js');
+			$this->document->addScript(RDIR_TEMPLATE.'js/blueimp-gallery/jquery.blueimp-gallery.min.js');
+			$this->document->addScript(RDIR_TEMPLATE.'js/blueimp-gallery/bootstrap-image-gallery.js');
 		}
 
 		if($ext->getConfig('help_link')){

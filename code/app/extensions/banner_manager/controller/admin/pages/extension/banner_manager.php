@@ -955,7 +955,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 				}
 			}
 
-			$tpls = glob(DIR_STOREFRONT . 'view/*/template/blocks/banner_block/*.tpl');
+			$tpls = glob(DIR_STOREFRONT . 'view/*/blocks/banner_block/*.tpl');
 			foreach ($tpls as $tpl) {
 				$pos = strpos($tpl, 'blocks/banner_block/');
 				$tpl = substr($tpl, $pos);

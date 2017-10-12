@@ -21,7 +21,7 @@ if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
-require_once DIR_ROOT . '/admin/model/tool/migration/interface_migration.php';
+require_once DIR_ROOT . '/admin/models/tool/migration/interface_migration.php';
 
 class Migration_OC implements Migration {
 

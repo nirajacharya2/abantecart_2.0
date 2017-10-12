@@ -231,7 +231,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 
 		//create new instance with specific template/page/layout data
 		$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-		if (has_value($post_data['layout_change'])) {	
+		if (has_value($post_data['layout_change'])) {
 			//update layout request. Clone source layout
 			$layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
 			$this->session->data[ 'success' ] = $this->language->get('text_success_layout');

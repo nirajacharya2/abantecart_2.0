@@ -31,12 +31,12 @@ class ControllerCommonPageLayout extends AController {
 
 	if (!$this->registry->has('layouts_manager_script')) {
 	  $this->document->addStyle(array(
-	    'href' => RDIR_TEMPLATE . 'stylesheet/layouts-manager.css',
+	    'href' => RDIR_TEMPLATE . 'css/layouts-manager.css',
 	    'rel' => 'stylesheet'
 	  ));
 	
-	  $this->document->addScript(RDIR_TEMPLATE . 'javascript/jquery/sortable.js');
-	  $this->document->addScript(RDIR_TEMPLATE . 'javascript/layouts-manager.js');
+	  $this->document->addScript(RDIR_TEMPLATE . 'js/jquery/sortable.js');
+	  $this->document->addScript(RDIR_TEMPLATE . 'js/layouts-manager.js');
 	
 	  //set flag to not include scripts/css twice
 	  $this->registry->set('layouts_manager_script', true);

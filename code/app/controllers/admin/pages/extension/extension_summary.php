@@ -34,9 +34,9 @@ class ControllerPagesExtensionExtensionSummary extends AController {
 			$this->data['extension_info'] = $this->extensions->getExtensionInfo($extension);
 		}
 
-		$icon_ext_img_url = HTTPS_EXT . $extension . '/image/icon.png';
-		$icon_ext_dir = DIR_EXT . $extension . '/image/icon.png';
-		$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'image/default_extension.png');
+		$icon_ext_img_url = HTTPS_EXT . $extension . '/images/icon.png';
+		$icon_ext_dir = DIR_EXT . $extension . '/images/icon.png';
+		$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'images/default_extension.png');
 
 		$this->data['extension_info']['icon'] = $icon;
 		$this->data['extension_info']['name'] = $this->language->get($extension . '_name');

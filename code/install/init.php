@@ -49,7 +49,7 @@ define('DIR_EXT', DIR_ABANTECART . 'extensions/');
 define('DIR_EXT_CORE', '/core/');
 define('DIR_EXT_STORE', '/storefront/');
 define('DIR_EXT_ADMIN', '/admin/');
-define('DIR_EXT_LANGUAGE', 'language/');
+define('DIR_EXT_LANGUAGE', 'languages/');
 define('DIR_EXT_TEMPLATE', 'view/');
 
 //postfixes for template override

@@ -156,8 +156,8 @@ class ModelUserUserGroup extends Model {
 						'common/menu');
 
 		$controllers_list = array();
-		$files_pages = glob( DIR_APP_SECTION . 'controller/pages/*/*.php');
-		$files_response = glob( DIR_APP_SECTION . 'controller/responses/*/*.php');
+		$files_pages = glob( DIR_APP_SECTION . 'controllers/pages/*/*.php');
+		$files_response = glob( DIR_APP_SECTION . 'controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 
 		// looking for controllers inside core
@@ -169,8 +169,8 @@ class ModelUserUserGroup extends Model {
 			}
 		}
 		// looking for controllers inside extensions
-		$files_pages = glob( DIR_APP_EXT . '/*/admin/controller/pages/*/*.php');
-		$files_response = glob(  DIR_APP_EXT . '/*/admin/controller/responses/*/*.php');
+		$files_pages = glob( DIR_APP_EXT . '/*/admin/controllers/pages/*/*.php');
+		$files_response = glob(  DIR_APP_EXT . '/*/admin/controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 		foreach ($files as $file) {
 			$data = explode('/', dirname($file));

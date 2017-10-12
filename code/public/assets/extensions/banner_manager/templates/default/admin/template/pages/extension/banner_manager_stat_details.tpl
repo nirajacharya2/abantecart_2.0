@@ -27,9 +27,9 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <!--[if IE]>
-<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>javascript/jquery/flot/excanvas.js"></script>
+<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>js/jquery/flot/excanvas.js"></script>
 <![endif]-->
-<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>javascript/jquery/flot/jquery.flot.js"></script>
+<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>js/jquery/flot/jquery.flot.js"></script>
 <script type="text/javascript">
 function getSalesChart(range) {
 	$.ajax({

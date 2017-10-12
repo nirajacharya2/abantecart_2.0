@@ -63,12 +63,6 @@ class ALanguage{
 		} else{
 			$this->is_admin = (int)$section;
 		}
-		$root_path = defined(INSTALL) ? DIR_ABANTECART : DIR_APP;
-		if ($this->is_admin){
-			$this->language_path = $root_path . 'language/admin/';
-		} else{
-			$this->language_path = $root_path . 'language/storefront/';
-		}
 
 		//Load available languages;
 		$this->loader = $registry->get('load');
@@ -107,6 +101,13 @@ class ALanguage{
 
 		//current active language details
 		$this->language_details = $this->getLanguageDetails($this->code);
+
+		$root_path = defined(INSTALL) ? DIR_ABANTECART : DIR_APP;
+		if ($this->is_admin){
+			$this->language_path = $root_path . 'languages/'.$this->language_details['directory'].'/admin/';
+		} else{
+			$this->language_path = $root_path . 'languages/'.$this->language_details['directory'].'/storefront/';
+		}
 
 		$this->entries = array ();
 
@@ -752,7 +753,7 @@ class ALanguage{
 		if (empty($filename)){
 			return null;
 		}
-		$file_path = $this->language_path . $language_dir_name . '/' . $filename . '.xml';
+		$file_path = $this->language_path . $filename . '.xml';
 		if ($this->registry->has('extensions')
 				&& $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name, $this->is_admin)
 		){
@@ -886,9 +887,9 @@ class ALanguage{
 			}
 
 			if (!$this->_is_definition_in_db($update_data)){
-				$sql = "INSERT INTO " . DB_PREFIX . "language_definitions
-								(`" . implode("`, `", array_keys($update_data)) . "`)
-								VALUES ('" . implode("', '", $update_data) . "') ";
+				$sql = "INSERT INTO " . $this->db->table("language_definitions") . "
+						(`" . implode("`, `", array_keys($update_data)) . "`)
+						VALUES ('" . implode("', '", $update_data) . "') ";
 				$this->db->query($sql);
 				$this->cache->remove('localization');
 				$this->cache->remove('storefront_menu');

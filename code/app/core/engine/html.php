@@ -1681,11 +1681,11 @@ class RatingHtmlElement extends HtmlElement{
 			 * @var $doc ADocument
 			 */
 			$doc = $this->registry->get('document');
-			$doc->addScript($this->view->templateResource('/javascript/jquery/star-rating/jquery.MetaData.js'));
-			$doc->addScript($this->view->templateResource('/javascript/jquery/star-rating/jquery.rating.pack.js'));
+			$doc->addScript($this->view->templateResource('js/jquery/star-rating/jquery.MetaData.js'));
+			$doc->addScript($this->view->templateResource('js/jquery/star-rating/jquery.rating.pack.js'));
 
 			$doc->addStyle(array (
-					'href'  => $this->view->templateResource('/javascript/jquery/star-rating/jquery.rating.css'),
+					'href'  => $this->view->templateResource('js/jquery/star-rating/jquery.rating.css'),
 					'rel'   => 'stylesheet',
 					'media' => 'screen',
 			));
@@ -1891,17 +1891,17 @@ class DateHtmlElement extends HtmlElement{
 		if (!$this->registry->has('date-field')){
 
 			$doc = $this->registry->get('document');
-			$doc->addScript($this->view->templateResource('/javascript/jquery-ui/js/jquery-ui-1.10.4.custom.min.js'));
-			$doc->addScript($this->view->templateResource('/javascript/jquery-ui/js/jquery.ui.datepicker.js'));
+			$doc->addScript($this->view->templateResource('js/jquery-ui/js/jquery-ui-1.10.4.custom.min.js'));
+			$doc->addScript($this->view->templateResource('js/jquery-ui/js/jquery.ui.datepicker.js'));
 			if (IS_ADMIN === true){
 				$doc->addStyle(array (
-						'href'  => $this->view->templateResource('/javascript/jquery-ui/js/css/ui-lightness/ui.all.css'),
+						'href'  => $this->view->templateResource('js/jquery-ui/js/css/ui-lightness/ui.all.css'),
 						'rel'   => 'stylesheet',
 						'media' => 'screen',
 				));
 			} else{
 				$doc->addStyle(array (
-						'href'  => $this->view->templateResource('/javascript/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.min.css'),
+						'href'  => $this->view->templateResource('js/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.min.css'),
 						'rel'   => 'stylesheet',
 						'media' => 'screen',
 				));
@@ -2073,9 +2073,9 @@ class PhoneHtmlElement extends HtmlElement{
 		 * @var $doc ADocument
 		 */
 		$doc = $this->registry->get('document');
-		$doc->addScript($this->view->templateResource('/javascript/intl-tel-input/js/intlTelInput.min.js'));
+		$doc->addScript($this->view->templateResource('js/intl-tel-input/js/intlTelInput.min.js'));
 		$doc->addStyle(array (
-				'href' => $this->view->templateResource('/javascript/intl-tel-input/css/intlTelInput.css'),
+				'href' => $this->view->templateResource('js/intl-tel-input/css/intlTelInput.css'),
 				'rel'  => 'stylesheet'
 		));
 		

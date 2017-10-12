@@ -699,7 +699,7 @@ class ALanguageManager extends Alanguage{
 			$result['admin'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 		}
 		//storefront
-		$lang_dir = DIR_STOREFRONT . 'language/' . $language_name;
+		$lang_dir = DIR_STOREFRONT . 'languages/' . $language_name;
 		$xml_files = getFilesInDir($lang_dir, 'xml');
 		foreach ($xml_files as $file){
 			$result['storefront'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
@@ -710,7 +710,7 @@ class ALanguageManager extends Alanguage{
 
 		foreach ($extensions_dirs as $extension_dir){
 			//$extension_name = pathinfo($extension_dir,PATHINFO_BASENAME);
-			$lang_dir = $extension_dir . '/admin/language/' . $language_name;
+			$lang_dir = $extension_dir . '/admin/languages/' . $language_name;
 			if (is_dir($lang_dir)){
 				$xml_files = getFilesInDir($lang_dir, 'xml');
 				foreach ($xml_files as $file){
@@ -718,7 +718,7 @@ class ALanguageManager extends Alanguage{
 				}
 			}
 
-			$lang_dir = $extension_dir . '/storefront/language/' . $language_name;
+			$lang_dir = $extension_dir . '/storefront/languages/' . $language_name;
 			if (is_dir($lang_dir)){
 				$xml_files = getFilesInDir($lang_dir, 'xml');
 				foreach ($xml_files as $file){

@@ -42,7 +42,7 @@ class AdminCommands{
 			'page'         => 'design/content/insert',
 			'banner'       => 'extension/banner_manager/insert',
 			'store'        => 'setting/store/insert',
-			'language'     => 'localisation/language/insert',
+			'language'     => 'localisation/languages/insert',
 			'currency'     => 'localisation/currency/insert',
 			'location'     => 'localisation/location/insert',
 			'tax'          => 'localisation/tax_class/insert',

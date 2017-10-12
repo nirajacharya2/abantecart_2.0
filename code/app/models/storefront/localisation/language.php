@@ -31,7 +31,7 @@ class ModelLocalisationLanguage extends Model{
 			foreach ($query->rows as $result){
 				$rel_image_path = '';
 				if (empty($result['image'])){
-					$rel_image_path = 'storefront/language/' . $result['directory'] . '/flag.png';
+					$rel_image_path = 'storefront/languages/' . $result['directory'] . '/flag.png';
 					if (file_exists(DIR_ROOT . '/' . $rel_image_path)){
 						$sizes = get_image_size(DIR_ROOT . '/' . $rel_image_path);
 						$result['image'] = $rel_image_path;

@@ -57,7 +57,7 @@ class ControllerPagesSettings extends AController{
 		$template_data['cache'] = DIR_SYSTEM . 'cache';
 		$template_data['logs'] = DIR_SYSTEM . 'logs';
 		$template_data['image'] = DIR_ABANTECART . 'image';
-		$template_data['image_thumbnails'] = DIR_ABANTECART . 'image/thumbnails';
+		$template_data['image_thumbnails'] = DIR_ABANTECART . 'images/thumbnails';
 		$template_data['download'] = DIR_ABANTECART . 'download';
 		$template_data['extensions'] = DIR_ABANTECART . 'extensions';
 		$template_data['resources'] = DIR_ABANTECART . 'resources';

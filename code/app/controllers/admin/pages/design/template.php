@@ -34,7 +34,7 @@ class ControllerPagesDesignTemplate extends AController{
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		$this->document->addStyle(array (
-				'href' => RDIR_TEMPLATE . 'stylesheet/layouts-manager.css',
+				'href' => RDIR_TEMPLATE . 'css/layouts-manager.css',
 				'rel'  => 'stylesheet'
 		));
 
@@ -132,11 +132,11 @@ class ControllerPagesDesignTemplate extends AController{
 				$templates[$tmpl]['set_default_url'] = $this->html->getSecureURL('design/template/set_default', '&tmpl_id=' . $tmpl . '&store_id=' . $this->data['store_id']);
 			}
 
-			$preview_file = $tmpl . '/image/preview.jpg';
+			$preview_file = $tmpl . '/images/preview.jpg';
 			if (is_file(DIR_EXT . $preview_file)){
 				$preview_img = HTTPS_EXT . $preview_file;
-			} else if (is_file('storefront/view/' . $tmpl . '/image/preview.jpg')){
-				$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl . '/image/preview.jpg';
+			} else if (is_file('storefront/view/' . $tmpl . '/images/preview.jpg')){
+				$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl . '/images/preview.jpg';
 			} else{
 				$preview_img = HTTPS_IMAGE . 'no_image.jpg';
 			}
@@ -334,11 +334,11 @@ class ControllerPagesDesignTemplate extends AController{
 
 		$this->_getForm();
 
-		$preview_file = $tmpl_id . '/image/preview.jpg';
+		$preview_file = $tmpl_id . '/images/preview.jpg';
 		if (is_file(DIR_EXT . $preview_file)){
 			$preview_img = HTTPS_EXT . $preview_file;
-		} else if (is_file('storefront/view/' . $tmpl_id . '/image/preview.jpg')){
-			$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl_id . '/image/preview.jpg';
+		} else if (is_file('storefront/view/' . $tmpl_id . '/images/preview.jpg')){
+			$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl_id . '/images/preview.jpg';
 		} else{
 			$preview_img = HTTPS_IMAGE . 'no_image.jpg';
 		}

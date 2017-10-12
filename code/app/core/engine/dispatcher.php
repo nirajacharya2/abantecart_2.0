@@ -104,9 +104,9 @@ final class ADispatcher{
 
 		//looking for controller in admin/storefront section
 		if( IS_ADMIN === true ) {
-			$dir_app = DIR_APP . 'controller/admin/';
+			$dir_app = DIR_APP . 'controllers/admin/';
 		}else{
-			$dir_app = DIR_APP . 'controller/storefront/';
+			$dir_app = DIR_APP . 'controllers/storefront/';
 		}
 		foreach ($path_nodes as $path_node){
 			$path_build .= $path_node;

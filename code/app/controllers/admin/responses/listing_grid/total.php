@@ -43,7 +43,7 @@ class ControllerResponsesListingGridTotal extends AController {
 			foreach ($ext->rows as $row) {
 				$language_rt = $config_controller = '';
 				// for total-extensions inside engine
-				if (is_file(DIR_APP_SECTION . 'controller/pages/total/' . $row['key'] . '.php')) {
+				if (is_file(DIR_APP_SECTION . 'controllers/pages/total/' . $row['key'] . '.php')) {
 					$config_controller = $language_rt = 'total/' . $row['key'];
 				} else {
 					// looking for config controller into parent extension.
@@ -52,7 +52,7 @@ class ControllerResponsesListingGridTotal extends AController {
 					if ($parents) {
 						foreach ($parents as $parent) {
 							if (!$parent['status']) continue;
-							if (is_file(DIR_APP_EXT . $parent['key'] . '/admin/controller/pages/total/' . $row['key'] . '.php')) {
+							if (is_file(DIR_APP_EXT . $parent['key'] . '/admin/controllers/pages/total/' . $row['key'] . '.php')) {
 								$config_controller = 'total/' . $row['key'];
 								$language_rt = $parent['key'] . '/' . $parent['key'];
 								break;
@@ -70,7 +70,7 @@ class ControllerResponsesListingGridTotal extends AController {
 		}
 
 		//looking for uninstalled engine's total-extensions
-		$files = glob(DIR_APP_SECTION . 'controller/pages/total/*.php');
+		$files = glob(DIR_APP_SECTION . 'controllers/pages/total/*.php');
 		if ($files) {
 			foreach ($files as $file) {
 				$id = basename($file, '.php');

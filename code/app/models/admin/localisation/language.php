@@ -90,8 +90,8 @@ class ModelLocalisationLanguage extends Model{
 		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("languages") . " WHERE language_id = '" . (int)$language_id . "'");
 		$result = $query->row;
 		if (!$result['image']){
-			if (file_exists(DIR_ROOT . '/admin/language/' . $result['directory'] . '/flag.png')){
-				$result['image'] = HTTP_ABANTECART . 'admin/language/' . $result['directory'] . '/flag.png';
+			if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')){
+				$result['image'] = HTTP_ABANTECART . 'admin/languages/' . $result['directory'] . '/flag.png';
 			}
 		} else{
 			$result['image'] = HTTP_ABANTECART . $result['image'];
@@ -167,8 +167,8 @@ class ModelLocalisationLanguage extends Model{
 			$result = $query->rows;
 			foreach ($result as $i => $row){
 				if (empty($row['image'])){
-					if (file_exists(DIR_ROOT . '/admin/language/' . $row['directory'] . '/flag.png')){
-						$result[$i]['image'] = 'admin/language/' . $row['directory'] . '/flag.png';
+					if (file_exists(DIR_ROOT . '/admin/languages/' . $row['directory'] . '/flag.png')){
+						$result[$i]['image'] = 'admin/languages/' . $row['directory'] . '/flag.png';
 					}
 				} else{
 					$result[$i]['image'] = $row['image'];
@@ -185,8 +185,8 @@ class ModelLocalisationLanguage extends Model{
 
 				foreach ($query->rows as $result){
 					if (empty($result['image'])){
-						if (file_exists(DIR_ROOT . '/admin/language/' . $result['directory'] . '/flag.png')){
-							$result['image'] = 'admin/language/' . $result['directory'] . '/flag.png';
+						if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')){
+							$result['image'] = 'admin/languages/' . $result['directory'] . '/flag.png';
 						}
 					}
 

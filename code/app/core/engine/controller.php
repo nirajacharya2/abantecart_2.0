@@ -403,7 +403,7 @@ abstract class AController{
 						if (!empty($this->parent_controller)){
 							//build block template file path based on primary template used
 							//template path is based on parent block 'template_dir'
-							$tmp_dir = $this->parent_controller->view->data['template_dir'] . "template/";
+							$tmp_dir = $this->parent_controller->view->data['template_dir'] . "/";
 							$block_tpl_file = $tmp_dir . $this->view->getTemplate();
 							$prt_block_tpl_file = $tmp_dir . $this->parent_controller->view->getTemplate();
 							$args = array ('block_id'          => $this->instance_id,

@@ -32,7 +32,7 @@ class ControllerResponsesSaleInvoice extends AController {
 		$this->loadLanguage('sale/order');
 
 		$this->data['title'] = $this->language->get('heading_title');
-		$this->data['css_url'] = RDIR_TEMPLATE . 'stylesheet/invoice.css';
+		$this->data['css_url'] = RDIR_TEMPLATE . 'css/invoice.css';
 
 		if (HTTPS === true) {
 			$this->data['base'] = HTTPS_SERVER;

@@ -31,7 +31,7 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->document->addStyle(array(
-			'href' => RDIR_TEMPLATE . 'stylesheet/marketplace.css',
+			'href' => RDIR_TEMPLATE . 'css/marketplace.css',
 			'rel' => 'stylesheet'
 		));
 

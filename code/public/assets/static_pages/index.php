@@ -101,7 +101,7 @@ if($from_admin){
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>AbanteCart - Error</title>
-<link rel="stylesheet" type="text/css" href="view/stylesheet/stylesheet.css" />
+<link rel="stylesheet" type="text/css" href="view/css/stylesheet.css" />
 </head>
 <body>
 <div id="container">

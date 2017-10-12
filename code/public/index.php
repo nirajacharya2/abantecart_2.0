@@ -20,9 +20,9 @@
 
 // Load all initial set up and Configuration
 if(!defined('DIR_APP')) {
-	$dir_app = dirname(__DIR__) . '/../app/';
+	$dir_app = dirname(__DIR__) . '/app/';
 	if( !is_dir($dir_app) ){
-		$dir_app =  __DIR__ . '/../app/';
+		//$dir_app =  __DIR__ . '/../app/';
 	}
 	// Windows IIS Compatibility
 	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {

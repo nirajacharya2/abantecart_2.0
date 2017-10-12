@@ -542,10 +542,10 @@ class ExtensionsApi{
 			return false;
 		}
 		$name = '';
-		if (file_exists(DIR_APP_EXT . $extension . '/admin/language/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml')){
-			$filename = DIR_APP_EXT . $extension . '/admin/language/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml';
+		if (file_exists(DIR_APP_EXT . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml')){
+			$filename = DIR_APP_EXT . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml';
 		} else{
-			$filename = DIR_APP_EXT . $extension . '/admin/language/english/' . $extension . '/' . $extension . '.xml';
+			$filename = DIR_APP_EXT . $extension . '/admin/languages/english/' . $extension . '/' . $extension . '.xml';
 		}
 		if (file_exists($filename)){
 			/**
@@ -764,7 +764,7 @@ class ExtensionsApi{
 	public function isExtensionLanguageFile($route, $language_name, $section){
 		if (!$this->registry->has('config')) return false;
 
-		$file = '/'.($section ? DIRNAME_ADMIN : DIRNAME_STORE) . 'language/' .
+		$file = '/'.($section ? DIRNAME_ADMIN : DIRNAME_STORE) . 'languages/' .
 				$language_name . '/' . $route . '.xml';
 
 		//include language file from first matching extension
@@ -803,7 +803,7 @@ class ExtensionsApi{
 
 		switch($resource_type){
 			case 'M' :
-				$file = '/model/' .$ext_section . $route . '.php';
+				$file = '/models/' .$ext_section . $route . '.php';
 				$source = $this->extension_models;
 				break;
 			case 'L' :
@@ -811,14 +811,14 @@ class ExtensionsApi{
 						"SELECT directory 
 						FROM " . $this->db->table("languages") . " 
 						WHERE code='" . $this->registry->get('session')->data['language'] . "'");
-				$file = $ext_section . 'language/' . $query->row['directory'] . '/' . $route . '.xml';
+				$file = $ext_section . 'languages/' . $query->row['directory'] . '/' . $route . '.xml';
 				$source = $this->extension_languages;
 				break;
 			case 'T' :
 				$tmpl_id = IS_ADMIN
 						? $this->registry->get('config')->get('admin_template')
 						: $this->registry->get('config')->get('config_storefront_template');
-				$file = '/'.$tmpl_id . $ext_section . 'template/' . $route;
+				$file = '/'.$tmpl_id . $ext_section . '/' . $route;
 				$source = $this->extension_templates;
 				break;
 			default:
@@ -858,12 +858,12 @@ class ExtensionsApi{
 				}
 				if ($resource_type == 'T'){
 					//check default template
-					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/template/' . $route;
+					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route;
 					if (is_file($f)){
 						return array (
 								'file'      => $f,
 								'extension' => $ext,
-								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/template/' . $route
+								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route
 						);
 					}
 				}
@@ -898,7 +898,7 @@ class ExtensionsApi{
 
 		$tmpl_id = IS_ADMIN ? $this->registry->get('config')->get('admin_template')
 				: $this->registry->get('config')->get('config_storefront_template');
-		$file = $ext_section . DIR_EXT_TEMPLATE . $tmpl_id . '/template/' . $route;
+		$file = $ext_section . DIR_EXT_TEMPLATE . $tmpl_id . '/' . $route;
 		$source = $this->extension_templates;
 
 		$section = trim($ext_section, '/');
@@ -921,12 +921,12 @@ class ExtensionsApi{
 				//if active template tpl not found - looking for default
 				if (!isset($output[$ext])){
 					//check default template
-					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/template/' . $route;
+					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route;
 					if (is_file($f)){
 						$output[] = array (
 								'file'      => $f,
 								'extension' => $ext,
-								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/template/' . $route
+								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route
 						);
 					}
 				}
@@ -952,7 +952,7 @@ class ExtensionsApi{
 			$path_build .= $path_node;
 
 			foreach ($this->enabled_extensions as $ext){
-				$file = DIR_APP_EXT . $ext . '/controller/'. (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE)  . $path_build . '.php';
+				$file = DIR_APP_EXT . $ext . '/controllers/'. (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE)  . $path_build . '.php';
 				$ext_controllers = is_array($this->extension_controllers[$ext][$section]) ? $this->extension_controllers[$ext][$section] : array ();
 				if (in_array($path_build, $ext_controllers) && is_file($file)){
 					//remove current node

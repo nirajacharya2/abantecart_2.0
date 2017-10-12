@@ -232,7 +232,7 @@ final class ARouter{
 	 */
 	private function _detect_controller($type){
 		//looking for controller in admin/storefront section
-		$dir_app = DIR_APP .'controller/'.(IS_ADMIN === true ? 'admin/' : 'storefront/')  . $type . '/';
+		$dir_app = DIR_APP .'controllers/'.(IS_ADMIN === true ? 'admin/' : 'storefront/')  . $type . '/';
 		$path_nodes = explode('/', $this->rt);
 		$path_build = '';
 
@@ -242,7 +242,7 @@ final class ARouter{
 			$extension_id = $result['extension'];
 			// set new path if controller was found in admin/storefront section && in extensions section
 			$current_section = IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE;
-			$dir_app = DIR_APP_EXT . $extension_id .  '/controller/' . $current_section . $type . '/';
+			$dir_app = DIR_APP_EXT . $extension_id .  '/controllers/' . $current_section . $type . '/';
 		}
 		//process path and try to locate the controller
 		foreach ($path_nodes as $path_node){

@@ -53,7 +53,7 @@ $message = 'This feature or page is not available in the demo mode. We apologize
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>AbanteCart - Demo Mode</title>
-<link rel="stylesheet" type="text/css" href="view/stylesheet/stylesheet.css" />
+<link rel="stylesheet" type="text/css" href="view/css/stylesheet.css" />
 </head>
 <body>
 <div id="container">

@@ -143,7 +143,7 @@ class ControllerResponsesListingGridExtension extends AController{
 			//for new extensions
 			if ($row['remote_install']){
 				$response->userdata->installation_key[$id] = $row['installation_key'];
-				$icon = '<img src="' . RDIR_TEMPLATE . 'image/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
 				$category = '';
 				$status = $this->language->get('text_ready_to_install');
 				$response->userdata->classes[$id] = 'success disable-edit disable-delete disable-uninstall disable-install';
@@ -151,14 +151,14 @@ class ControllerResponsesListingGridExtension extends AController{
 			} elseif (in_array($extension, $missing_extensions)){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
 
-				$icon = '<img src="' . RDIR_TEMPLATE . 'image/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_missing_extension'), $extension);
 				$category = $status = '';
 				// change it for show it in list first by default sorting
 				$row['date_modified'] = date('Y-m-d H:i:s', time());
 			} elseif (!file_exists(DIR_EXT . $extension . '/main.php') || !file_exists(DIR_EXT . $extension . '/config.xml')){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
-				$icon = '<img src="' . RDIR_TEMPLATE . 'image/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_broken_extension'), $extension);
 				$category = $status = '';
 				// change it for show it in list first by default sorting
@@ -176,9 +176,9 @@ class ControllerResponsesListingGridExtension extends AController{
 					));
 				}
 
-				$icon_ext_img_url = HTTPS_EXT . $extension . '/image/icon.png';
-				$icon_ext_dir = DIR_EXT . $extension . '/image/icon.png';
-				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'image/default_extension.png');
+				$icon_ext_img_url = HTTPS_EXT . $extension . '/images/icon.png';
+				$icon_ext_dir = DIR_EXT . $extension . '/images/icon.png';
+				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'images/default_extension.png');
 				if (!$this->config->has($extension . '_status')){
 					$icon = '<img src="' . $icon . '" alt="" border="0" />';
 				} else{

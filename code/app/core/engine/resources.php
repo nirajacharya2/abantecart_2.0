@@ -272,7 +272,6 @@ class AResource{
 
 	/**
 	 * function returns URL to resource if image it will resize.
-	 * @since 1.2.7
 	 * @param array $rsrc_info - resource details
 	 * @param int $width
 	 * @param int $height
@@ -380,7 +379,7 @@ class AResource{
 			}
 			return $http_path . $this->type_dir . $resource_path;
 		} else{
-			return "/resources/" . $this->type_dir . $resource_path;
+			return "assets/resources/" . $this->type_dir . $resource_path;
 		}
 	}
 
@@ -555,7 +554,7 @@ class AResource{
 										'main_url'     => $main_url,
 										'main_width'   => $sizes['main']['width'],
 										'main_height'  => $sizes['main']['height'],
-										'main_html'    => $this->html->buildResourceImage(array ('url'    => $http_path . 'image/' . $result['resource_path'],
+										'main_html'    => $this->html->buildResourceImage(array ('url'    => $http_path . 'images/' . $result['resource_path'],
 																								 'width'  => $sizes['main']['width'],
 																								 'height' => $sizes['main']['height'],
 																								 'attr'   => 'alt="' . $rsrc_info['title'] . '"')),

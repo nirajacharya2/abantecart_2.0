@@ -88,7 +88,7 @@ class AView{
 			$this->default_template = IS_ADMIN ? $this->registry->get('config')->get('admin_template') : $this->registry->get('config')->get('config_storefront_template');
 		}
 		$this->data['template_dir'] = RDIR_TEMPLATE;
-		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . '/template/common/';
+		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . '/common/';
 		$this->instance_id = $instance_id;
 
 	}
@@ -299,7 +299,7 @@ class AView{
 			//#PR Build the path to the template file
 			$path = DIR_TEMPLATES;
 			if (!defined('INSTALL')){
-				$file = $this->_get_template_path($path, DIRNAME_TEMPLATE.$filename, 'full');
+				$file = $this->_get_template_resource_path($path, $filename, 'full');
 			} else{
 				$file = $path . $filename;
 			}
@@ -374,7 +374,8 @@ class AView{
 			$output = $res_arr['default'][0];
 		} else{
 			//no extension found, use resource from core templates
-			$output = $this->_get_template_path(DIR_TEMPLATES, $filename, 'relative');
+			$output = $this->_get_template_resource_path(DIR_TEMPLATES, $filename, $mode=='file' ? '' : 'relative');
+
 		}
 
 		if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array ('tpl', 'php'))){
@@ -382,10 +383,11 @@ class AView{
 			$http_path = $this->data['http_dir'];
 		}
 
+
 		if ($mode == 'http'){
 			return $http_path . $output;
 		} else if ($mode == 'file'){
-			return DIR_ASSETS . "/" . $output;
+			return $output;
 		} else{
 			return '';
 		}
@@ -401,7 +403,7 @@ class AView{
 		}
 
 		//check if this template file in extensions or in core
-		if ($this->templateResource('/template/' . $filename)){
+		if ($this->templateResource($filename)){
 			return true;
 		} else{
 			return false;
@@ -545,7 +547,7 @@ class AView{
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used 
 		foreach ($extensions as $ext){
-			$res_arr = $this->_test_template_paths($this->_extension_templates_dir($ext), $filename, 'relative', true);
+			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'relative', true);
 			if ($res_arr){
 				$ret_arr[$res_arr['match']][] = DIRNAME_ASSETS.DIRNAME_EXT . $ext . '/' . $res_arr['path'];
 			}
@@ -560,7 +562,7 @@ class AView{
 	 * @param string $mode
 	 * @return mixed
 	 */
-	protected function _get_template_path($path, $filename, $mode){
+	protected function _get_template_resource_path($path, $filename, $mode){
 		//look into extensions first
 		$res_arr = $this->_extensions_resource_map($filename);
 		//get first exact template extension resource or default template resource otherwise.
@@ -570,7 +572,7 @@ class AView{
 			return $res_arr['default'][0];
 		}
 
-		$template_path_arr = $this->_test_template_paths($path, $filename, $mode);
+		$template_path_arr = $this->_test_template_resource_paths($path, $filename, $mode);
 		return $template_path_arr['path'];
 	}
 
@@ -581,12 +583,11 @@ class AView{
 	 * @param string $mode
 	 * @return array|null
 	 */
-	protected function _test_template_paths($path, $filename, $mode = 'relative', $is_extension=false){
+	protected function _test_template_resource_paths($path, $filename, $mode = 'relative', $is_extension=false){
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
-		$dir_assets = $is_extension ? '' : DIRNAME_ASSETS;
-
+		$dir_assets = 'assets/';
 
 		if (IS_ADMIN){
 			if (is_file($path . $template .'/admin/'. $filename)){
@@ -601,24 +602,28 @@ class AView{
 					$match = 'default';
 				}
 			}
-		} else{
+		}else{
 			if (is_file($path . $template .'/storefront/'. $filename)){
 				$ret_path = $path . $template .'/storefront/'. $filename;
 				if ($mode == 'relative'){
 					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/storefront/' . $filename;
 				}
-			} else if (is_file($path . 'default/storefront/'. $filename)){
+			} else if (is_file(DIR_ASSETS . DIRNAME_TEMPLATES. 'default/storefront/'. $filename)){
 				$ret_path = $path . 'default/storefront/'. $filename;
+
 				if ($mode == 'relative'){
 					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/storefront/' . $filename;
 					$match = 'default';
 				}
-			}
+		}
 		}
 		//return path. Empty path indicates, nothing found
 		if ($ret_path){
-			return array ('match' => $match, 'path' => $ret_path);
-		} else{
+			return array (
+					'match' => $match,
+					'path' => $ret_path
+			);
+		}else{
 			return null;
 		}
 	}

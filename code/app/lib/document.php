@@ -202,7 +202,7 @@ final class ADocument{
 	 * method to add new javascript file to the head
 	 *
 	 * @param string - web path to the file
-	 * Examples: /javascript/bootstrap.js or http//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
+	 * Examples: /js/bootstrap.js or http//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
 	 * @return void
 	 */
 	public function addScript($script){
@@ -223,7 +223,7 @@ final class ADocument{
 	 * method to add new javascript file to the bottom before </body> tag
 	 *
 	 * @param string - web path to the file
-	 * Examples: /javascript/bootstrap.js or http//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
+	 * Examples: /js/bootstrap.js or http//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
 	 * @void
 	 */
 	public function addScriptBottom($script){

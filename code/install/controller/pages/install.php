@@ -217,7 +217,7 @@ class ControllerPagesInstall extends AController{
 		//This is ran after config is saved and we have database connection now
 		$db = new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 		$registry->set('db', $db);
-		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/language/');
+		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
 
 		// Cache
 		$cache = new ACache();

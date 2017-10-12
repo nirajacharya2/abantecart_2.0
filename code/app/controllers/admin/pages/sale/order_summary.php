@@ -30,7 +30,7 @@ class ControllerPagesSaleOrderSummary extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 	    //add phone validation js for quick preview modal
-	    $this->document->addScript($this->view->templateResource('/javascript/intl-tel-input/js/intlTelInput.min.js'));
+	    $this->document->addScript($this->view->templateResource('js/intl-tel-input/js/intlTelInput.min.js'));
 
     	$this->loadLanguage('sale/order');
     	$this->loadModel('sale/order');

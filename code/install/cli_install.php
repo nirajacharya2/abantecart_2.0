@@ -330,7 +330,7 @@ function setupDB($data){
 				htmlspecialchars_decode($data['db_name'])
 		);
 		$registry->set('db', $db);
-		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/language/');
+		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
 
 		$registry->get('model_install')->loadDemoData($registry);
 	}

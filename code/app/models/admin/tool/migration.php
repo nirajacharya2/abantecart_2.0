@@ -26,7 +26,7 @@ clearstatcache();
 
 class ModelToolMigration extends Model {
 
-	const CLASS_LOCATION = 'admin/model/tool/migration/';
+	const CLASS_LOCATION = 'admin/models/tool/migration/';
 	const CLASS_PREFIX = 'Migration_';
 	/**
 	 * @var Migration_Oscmax|Migration_OC15x|Migration_Zen|Migration_Osc|Migration_OC|Migration_Cre  $cart
@@ -727,7 +727,7 @@ class ModelToolMigration extends Model {
 
 	public function getCartList() {
 		$result = array();
-		$files = glob(DIR_ROOT . '/admin/model/tool/migration/*', GLOB_NOSORT);
+		$files = glob(DIR_ROOT . '/admin/models/tool/migration/*', GLOB_NOSORT);
 		if ($files) {
 			foreach ($files as $file) {
 				$cartname = pathinfo($file, PATHINFO_FILENAME);

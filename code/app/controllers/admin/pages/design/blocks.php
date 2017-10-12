@@ -599,7 +599,7 @@ class ControllerPagesDesignBlocks extends AController {
 			}
 		}
 
-		$tpls = glob(DIR_STOREFRONT . 'view/*/template/blocks/html_block/*.tpl');
+		$tpls = glob(DIR_TEMPLATES . '*/storefront/blocks/html_block/*.tpl');
 		foreach ($tpls as $tpl) {
 			$pos = strpos($tpl, 'blocks/html_block/');
 			$tpl = substr($tpl, $pos);
@@ -816,7 +816,7 @@ class ControllerPagesDesignBlocks extends AController {
 		}
 
 
-		$tpls = glob(DIR_STOREFRONT . 'view/*/template/blocks/listing_block/*.tpl');
+		$tpls = glob(DIR_TEMPLATES . '*/storefront/blocks/listing_block/*.tpl');
 		foreach ($tpls as $tpl) {
 			$pos = strpos($tpl, 'blocks/listing_block/');
 			$tpl = substr($tpl, $pos);

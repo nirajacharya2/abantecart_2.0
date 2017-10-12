@@ -1001,7 +1001,7 @@ function is_valid_url( $validate_url ) {
  */
 function get_url_path( $url ) {
 	$url_path1 = parse_url($url,PHP_URL_PATH);
-	//do we have path with php in the string? Treat case: /abantecart120/index.php/storefront/view/resources/image/18/6c/index.php
+	//do we have path with php in the string? Treat case: /abantecart120/index.php/storefront/view/resources/images/18/6c/index.php
 	$pos = stripos($url_path1, '.php');
 	if ($pos) {
 		//we have .php files specified.
