@@ -176,17 +176,18 @@ try {
 // relative paths for extensions
 	define('DIRNAME_APP', 'app/');
 	define('DIRNAME_ASSETS', 'assets/');
-	define('DIRNAME_EXT', 'extensions/');
+	define('DIRNAME_EXTENSIONS', 'extensions/');
 	define('DIRNAME_CORE', 'core/');
 	define('DIRNAME_STORE', 'storefront/');
 	define('DIRNAME_ADMIN', 'admin/');
-	define('DIRNAME_IMAGE', 'images/');
-	define('DIRNAME_LANGUAGE', 'languages/');
+	define('DIRNAME_IMAGES', 'images/');
+	define('DIRNAME_CONTROLLERS', 'controllers/');
+	define('DIRNAME_LANGUAGES', 'languages/');
 	define('DIRNAME_TEMPLATE', 'template/');
 	define('DIRNAME_TEMPLATES', 'templates/');
 
-	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXT);
-	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXT);
+	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXTENSIONS);
+	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
 
 //load base libraries
 	require_once 'base.php';

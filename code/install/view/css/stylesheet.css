@@ -162,7 +162,7 @@ footer a {
 
 .bad{
 	color: red;
-	background: url('../image/bad.png') no-repeat;	
+	background: url('../images/bad.png') no-repeat;
 	padding:1px 0 1px 20px;
 }
 .good {

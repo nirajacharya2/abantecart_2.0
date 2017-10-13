@@ -941,7 +941,7 @@ ul.categorymenu > li ul > li img {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/offer.png) no-repeat 0 0;
+	background: url(../images/offer.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -954,7 +954,7 @@ ul.categorymenu > li ul > li img {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/sale.png) no-repeat 0 0;
+	background: url(../images/sale.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -967,7 +967,7 @@ ul.categorymenu > li ul > li img {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/new.png) no-repeat 0 0;
+	background: url(../images/new.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -1273,7 +1273,7 @@ a.compare>img{
 }
 
 #popularbrands #prev {
-	background: url(../image/carousalarrow.png) no-repeat scroll 8px center #00A1CB;
+	background: url(../images/carousalarrow.png) no-repeat scroll 8px center #00A1CB;
 	position: absolute;
 	font-size: 24px;
 	text-indent: -9999px;
@@ -1286,7 +1286,7 @@ a.compare>img{
 }
 
 #popularbrands #next {
-	background: url(../image/carousalarrow.png) no-repeat scroll -18px center #00A1CB;
+	background: url(../images/carousalarrow.png) no-repeat scroll -18px center #00A1CB;
 	position: absolute;
 	font-size: 24px;
 	text-indent: -9999px;
@@ -1464,7 +1464,7 @@ ul.rate {
 ul.rate li {
 	height: 20px;
 	width: 20px;
-	background: url(../image/rate.png) no-repeat scroll 0 0 transparent;
+	background: url(../images/rate.png) no-repeat scroll 0 0 transparent;
 	display: inline-block;
 	margin-right: 5px
 }
@@ -2079,7 +2079,7 @@ ul.side_list li:last-child {
 ul.side_list li a {
 	display: block;
 	padding: 6px 5px 6px 30px;
-	background: url("../image/arrowcategory.png") no-repeat scroll 10px center transparent;
+	background: url("../images/arrowcategory.png") no-repeat scroll 10px center transparent;
 	color: #999;
 	font-size: 15px
 }
@@ -2090,7 +2090,7 @@ ul.side_list li a.active {
 }
 
 ul.side_list li a:hover {
-	background: url("../image/arrowcategory.png") no-repeat scroll 10px center transparent;
+	background: url("../images/arrowcategory.png") no-repeat scroll 10px center transparent;
 	color: #333;
 	font-size: 15px;
 }
@@ -2430,7 +2430,7 @@ label.error {
 }
 
 #social_icons a, .social_icons a  {
-	background: url(../image/footericon.png) no-repeat;
+	background: url(../images/footericon.png) no-repeat;
 	height: 30px;
 	width: 30px;
 	margin-right: 11px;

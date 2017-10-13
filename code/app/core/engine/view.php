@@ -102,14 +102,6 @@ class AView{
 	}
 
 	/**
-	 * @deprecated since v1.2.9
-	 * @param string $url
-	 */
-	protected function redirect($url){
-		redirect($url);
-	}
-
-	/**
 	 * @void
 	 */
 	public function enableOutput(){
@@ -139,21 +131,19 @@ class AView{
 
 	/**
 	 * Return array with available variables and types in the view
-	 * @param string $key - optional parameter to spcify variable type of array.
-	 * @return array | mixed
+	 * @param string $key - optional parameter to specify variable type of array.
+	 * @return array
 	 */
 	public function getVariables($key = ''){
 		$variables = array();
-		$scope = array();
-		if ($key){
-			$scope = $this->data[$key];
-		} else{
-			$scope = $this->data;
-		}
+		/**
+		 * @var array $scope
+		 */
+		$scope = $key ? $this->data[$key] : $this->data;
 		if(is_array($scope)){
 			foreach(array_keys($scope) as $var){
 				$variables[$var] = gettype($scope[$var]);
-			}		
+			}
 		}
 		return $variables;
 	}
@@ -178,13 +168,14 @@ class AView{
 	 */
 	public function assign($template_variable, $value = '', $default_value = ''){
 		if (empty($template_variable)){
-			return null;
+			return false;
 		}
 		if (!is_null($value)){
 			$this->data[$template_variable] = $value;
 		} else{
 			$this->data[$template_variable] = $default_value;
 		}
+		return true;
 	}
 
 	/**
@@ -367,6 +358,7 @@ class AView{
 		}
 		$http_path = '';
 		$res_arr = $this->_extensions_resource_map($filename);
+
 		//get first exact template extension resource or default template resource otherwise.
 		if (count($res_arr['original'])){
 			$output = $res_arr['original'][0];
@@ -417,6 +409,7 @@ class AView{
 	 */
 	public function setCacheKey($key){
 		$this->html_cache_key = $key;
+		return true;
 	}
 
 	/**
@@ -521,7 +514,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_templates_dir($extension_name){
-		return $this->_extension_section_dir($extension_name).'/templates/';
+		return $this->_extension_section_dir($extension_name).DIRNAME_TEMPLATES;
 	}
 
 	/**
@@ -530,7 +523,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		return DIR_ASSETS_EXT . $extension_name;
+		return DIR_APP_EXT . $extension_name.'/';
 	}
 
 	/**
@@ -545,11 +538,13 @@ class AView{
 		$ret_arr = array ();
 		$extensions = $this->extensions->getEnabledExtensions();
 		//loop through each extension and locate resource to use 
-		//Note: first extension with exact resource or default resource will be used 
+		//Note: first extension with exact resource or default resource will be used
+
 		foreach ($extensions as $ext){
-			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'relative', true);
+			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'file', $ext);
+
 			if ($res_arr){
-				$ret_arr[$res_arr['match']][] = DIRNAME_ASSETS.DIRNAME_EXT . $ext . '/' . $res_arr['path'];
+				$ret_arr[$res_arr['match']][] = $res_arr['path'];
 			}
 		}
 		return $ret_arr;
@@ -581,41 +576,55 @@ class AView{
 	 * @param string $path
 	 * @param string $filename
 	 * @param string $mode
+	 * @param string $extension_txt_id
 	 * @return array|null
 	 */
-	protected function _test_template_resource_paths($path, $filename, $mode = 'relative', $is_extension=false){
+	protected function _test_template_resource_paths($path, $filename, $mode = 'relative', $extension_txt_id = ''){
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
-		$dir_assets = 'assets/';
+		$dir_assets = $extension_txt_id ? DIRNAME_ASSETS.DIRNAME_EXTENSIONS.$extension_txt_id.'/' : DIRNAME_ASSETS;
+
 
 		if (IS_ADMIN){
-			if (is_file($path . $template .'/admin/'. $filename)){
-				$ret_path = $path . $template .'/admin/'. $filename;
+			if (is_file($path . $template .'/'.DIRNAME_ADMIN. $filename)){
+				$ret_path = $path . $template .'/'.DIRNAME_ADMIN. $filename;
 				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/admin/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/'.DIRNAME_ADMIN. $filename;
 				}
-			} else if (is_file($path . 'default/admin/'. $filename)){
-				$ret_path = $path . 'default/admin/'. $filename;
+			} else if (is_file($path . 'default/'.DIRNAME_ADMIN. $filename)){
+				$ret_path = $path . 'default/'.DIRNAME_ADMIN. $filename;
 				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/admin/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
+					$match = 'default';
+				}
+			} else if (is_file( DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename )){
+				$ret_path = DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
+				if ($mode == 'relative'){
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
 					$match = 'default';
 				}
 			}
 		}else{
-			if (is_file($path . $template .'/storefront/'. $filename)){
-				$ret_path = $path . $template .'/storefront/'. $filename;
+			if (is_file($path . $template .'/'.DIRNAME_STORE. $filename)){
+				$ret_path = $path . $template .'/'.DIRNAME_STORE. $filename;
 				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/storefront/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
 				}
-			} else if (is_file(DIR_ASSETS . DIRNAME_TEMPLATES. 'default/storefront/'. $filename)){
-				$ret_path = $path . 'default/storefront/'. $filename;
-
+			}else if (is_file($path . 'default/'.DIRNAME_STORE. $filename)){
+				$ret_path = $path . 'default/'.DIRNAME_STORE. $filename;
 				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/storefront/' . $filename;
+					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/' .DIRNAME_STORE. $filename;
 					$match = 'default';
 				}
-		}
+			}
+			//check resource in assets directory
+			else if(is_file(DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename)){
+					$ret_path = DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
+					if ($mode == 'relative'){
+						$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
+					}
+			}
 		}
 		//return path. Empty path indicates, nothing found
 		if ($ret_path){

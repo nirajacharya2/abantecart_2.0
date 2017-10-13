@@ -361,7 +361,7 @@ section.row {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/offer.png) no-repeat 0 0;
+	background: url(../images/offer.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -373,7 +373,7 @@ section.row {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/sale.png) no-repeat 0 0;
+	background: url(../images/sale.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -385,7 +385,7 @@ section.row {
 	position: absolute;
 	top: 10px;
 	left: -2px;
-	background: url(../image/new.png) no-repeat 0 0;
+	background: url(../images/new.png) no-repeat 0 0;
 	height: 45px;
 	width: 68px;
 	float: left;
@@ -773,7 +773,7 @@ ul.rate {
 ul.rate li {
 	height: 20px;
 	width: 20px;
-	background: url(../image/rate.png) no-repeat scroll 0 0 transparent;
+	background: url(../images/rate.png) no-repeat scroll 0 0 transparent;
 	display: inline-block;
 	margin-right: 5px
 }

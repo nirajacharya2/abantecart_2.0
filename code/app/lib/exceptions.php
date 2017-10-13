@@ -95,7 +95,7 @@ function ac_exception_handler($e){
 		}
 	}
 
-	//no registry, something totaly wrong
+	//no registry, something totally wrong
 	$e->logError();
 	$e->displayError();
 	$e->showErrorPage();

@@ -952,7 +952,7 @@ class ExtensionsApi{
 			$path_build .= $path_node;
 
 			foreach ($this->enabled_extensions as $ext){
-				$file = DIR_APP_EXT . $ext . '/controllers/'. (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE)  . $path_build . '.php';
+				$file = DIR_APP_EXT . $ext . '/' . DIRNAME_CONTROLLERS . (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE)  . $path_build . '.php';
 				$ext_controllers = is_array($this->extension_controllers[$ext][$section]) ? $this->extension_controllers[$ext][$section] : array ();
 				if (in_array($path_build, $ext_controllers) && is_file($file)){
 					//remove current node

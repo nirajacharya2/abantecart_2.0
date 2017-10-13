@@ -1,6 +1,6 @@
 <?php
-$img_good = '<img src="' . $template_dir . 'image/good.png" alt="Good" />';
-$img_bad = '<img src="' . $template_dir . 'image/bad.png" alt="Bad" />';
+$img_good = '<img src="' . $template_dir . 'images/good.png" alt="Good" />';
+$img_bad = '<img src="' . $template_dir . 'images/bad.png" alt="Bad" />';
 echo $header;
 ?>
 	<div class="row">

@@ -21,5 +21,5 @@ if (typeof jQuery == 'undefined') {
 </head>
 <body>
 <div class="container" id="container">
-  <header><img src="<?php echo $template_dir; ?>image/logo.png" alt="AbanteCart" title="AbanteCart" /></header>
+  <header><img src="<?php echo $template_dir; ?>images/logo.png" alt="AbanteCart" title="AbanteCart" /></header>
   <div class="container-fluid">

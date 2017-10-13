@@ -37,7 +37,7 @@ html[xmlns] .slides { display: block; }
 .carousel li { margin-right: 5px }
 .flexborder { background:#fff; margin-bottom:5px; margin-top:4px }
 /* Direction Nav */
-.flex-direction-nav a { width: 30px; height: 30px; margin: -20px 10px 0 10px; display: block; background: url(../image/bg_direction_nav.png) no-repeat 0 0; position: absolute; top: 55%; cursor: pointer; text-indent: -9999px; opacity: 0; -webkit-transition: all .3s ease;
+.flex-direction-nav a { width: 30px; height: 30px; margin: -20px 10px 0 10px; display: block; background: url(../images/bg_direction_nav.png) no-repeat 0 0; position: absolute; top: 55%; cursor: pointer; text-indent: -9999px; opacity: 0; -webkit-transition: all .3s ease;
 }
 .flex-direction-nav .flex-next { background-position: 100% 0; right: 0px; }
 .flex-direction-nav .flex-prev { left: 0px; }
@@ -77,15 +77,15 @@ div.thumbnails img.selected { background-color: #00A1CB; border-top:5px solid #0
 .clearfix { float: none; clear: both; }
 /* Product Carousal */
 .caroufredsel_wrapper { position:relative }
-#prevproductcarousal { background:url(../image/carousalarrow.png) no-repeat scroll 8px center #00A1CB; position:relative; font-size:24px; text-indent:-9999px; display:block; overflow:hidden; height:25px; width:25px; left:0; top:30px }
-#nextproductcarousal { background:url(../image/carousalarrow.png) no-repeat scroll -18px center #00A1CB; position:relative; font-size:24px; text-indent:-9999px; display:block; overflow:hidden; height:25px; width:25px; right:0; top:30px }
+#prevproductcarousal { background:url(../images/carousalarrow.png) no-repeat scroll 8px center #00A1CB; position:relative; font-size:24px; text-indent:-9999px; display:block; overflow:hidden; height:25px; width:25px; left:0; top:30px }
+#nextproductcarousal { background:url(../images/carousalarrow.png) no-repeat scroll -18px center #00A1CB; position:relative; font-size:24px; text-indent:-9999px; display:block; overflow:hidden; height:25px; width:25px; right:0; top:30px }
 /* mainslider3 Carousal */
 #mainslider3 { width:1170px }
 #mainslider3 .item { width: 1170px; float: left; }
 #mainslider3 .item > div { width: 1170px; padding: 25px 0 ; overflow: hidden; }
 #mainslider3 .item img { width: 530px; float: left; box-shadow: 0 0 20px #999; }
 #mainslider3 .item div.text { background-color: #fff; width:  530px; height:490px; padding: 20px 40px; margin-left: 20px; float: left; position: relative; box-shadow: 0 0 10px #999; border:1px solid #ccc }
-#mainslider3 .item div.text:after { content: " "; display: block; width:25px; height: 25px; margin-top: -10px; position: absolute; left: -11px; top: 50%; background:url(../image/slderleftimg.png) no-repeat 0 0; }
+#mainslider3 .item div.text:after { content: " "; display: block; width:25px; height: 25px; margin-top: -10px; position: absolute; left: -11px; top: 50%; background:url(../images/slderleftimg.png) no-repeat 0 0; }
 /* mainslider3 Carousal */
 #carouseindex4 { padding:50px 20px 5px }
 #carouseindex4 ul.slides li { border:1px solid #efefef; border-top:5px solid #efefef; padding:0px 20px 5px 20px; cursor:pointer }

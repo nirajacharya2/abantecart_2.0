@@ -1109,7 +1109,7 @@ var loadAndShowData = function (url, $elem) {
 
 function imgError(image) {
 	image.onerror = "";
-	image.src = "image/broken_image.jpg";
+	image.src = "images/broken_image.jpg";
 	image.title = "image not found or broken";
 	return true;
 }

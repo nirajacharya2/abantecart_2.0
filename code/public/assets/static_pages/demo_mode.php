@@ -57,7 +57,7 @@ $message = 'This feature or page is not available in the demo mode. We apologize
 </head>
 <body>
 <div id="container">
-  <div id="header"><img src="view/image/logo.png" alt="AbanteCart" title="AbanteCart" /></div>
+  <div id="header"><img src="view/images/logo.png" alt="AbanteCart" title="AbanteCart" /></div>
   <div id="content">
     <div id="content_top"></div>
     <div id="content_middle">

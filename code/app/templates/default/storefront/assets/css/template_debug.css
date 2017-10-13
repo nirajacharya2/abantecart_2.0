@@ -24,7 +24,7 @@ header.headerstrip .postit_notes_box_parent {
 }
 
 .postit_icon {
-	background: url(../image/icon_note.png) 50% 50% no-repeat;
+	background: url(../images/icon_note.png) 50% 50% no-repeat;
 	width: 20px;
 	height: 16px;
 	display: inline-block;

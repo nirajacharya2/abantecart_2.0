@@ -154,16 +154,16 @@ class ModelInstall extends Model{
 			$this->error['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'image/thumbnails')){
-			if (file_exists(DIR_ABANTECART . 'image/thumbnails') && is_dir(DIR_ABANTECART . 'image/thumbnails')){
-				$this->error['warning'] = 'Warning: image/thumbnails directory needs to be writable for AbanteCart to work!';
+		if (!is_writable(DIR_ABANTECART . 'images/thumbnails')){
+			if (file_exists(DIR_ABANTECART . 'images/thumbnails') && is_dir(DIR_ABANTECART . 'images/thumbnails')){
+				$this->error['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
 			} else{
-				$result = mkdir(DIR_ABANTECART . 'image/thumbnails', 0777, true);
+				$result = mkdir(DIR_ABANTECART . 'images/thumbnails', 0777, true);
 				if ($result){
-					chmod(DIR_ABANTECART . 'image/thumbnails', 0777);
+					chmod(DIR_ABANTECART . 'images/thumbnails', 0777);
 					chmod(DIR_ABANTECART . 'image', 0777);
 				} else{
-					$this->error['warning'] = 'Warning: image/thumbnails does not exists!';
+					$this->error['warning'] = 'Warning: images/thumbnails does not exists!';
 				}
 			}
 		}

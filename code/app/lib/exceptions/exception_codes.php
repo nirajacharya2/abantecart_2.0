@@ -67,3 +67,4 @@ $error_descriptions = array (
 		AC_ERR_USER_WARNING             => 'App Warning',
 
 );
+$GLOBALS['error_descriptions'] = $error_descriptions;

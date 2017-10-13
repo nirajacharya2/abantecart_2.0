@@ -82,15 +82,15 @@
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_pp_standart" target="_extension">
-	        <img src="extensions/default_pp_standart/image/icon.png"><br>Install Paypal</a>
+	        <img src="extensions/default_pp_standart/images/icon.png"><br>Install Paypal</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_payza" target="_extension">
-	        <img src="extensions/default_payza/image/icon.png"><br>Install Payza</a>
+	        <img src="extensions/default_payza/images/icon.png"><br>Install Payza</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/payment" target="_extension">
-	        <img src="admin/view/default/image/default_extension.png"><br>More Payments</a>
+	        <img src="admin/view/default/images/default_extension.png"><br>More Payments</a>
 	    </div>
     </div>
     ]]></value>
@@ -105,19 +105,19 @@
     <div class="row">
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_free_shipping" target="_extension">
-	        <img src="extensions/default_free_shipping/image/icon.png"><br>Free shipping</a>
+	        <img src="extensions/default_free_shipping/images/icon.png"><br>Free shipping</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_fedex" target="_extension">
-	        <img src="extensions/default_fedex/image/icon.png"><br>Fedex</a>
+	        <img src="extensions/default_fedex/images/icon.png"><br>Fedex</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_ups" target="_extension">
-	        <img src="extensions/default_ups/image/icon.png"><br>UPS</a>
+	        <img src="extensions/default_ups/images/icon.png"><br>UPS</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/shipping" target="_extension">
-	        <img src="admin/view/default/image/default_extension.png"><br>More Shippings</a>
+	        <img src="admin/view/default/images/default_extension.png"><br>More Shippings</a>
 	    </div>
     </div>
     ]]></value>
@@ -132,19 +132,19 @@
     <div class="row">
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_italian" target="_extension">
-	        <img src="extensions/default_italian/image/icon.png"><br>Italian</a>
+	        <img src="extensions/default_italian/images/icon.png"><br>Italian</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_spanish" target="_extension">
-	        <img src="extensions/default_spanish/image/icon.png"><br>Spanish</a>
+	        <img src="extensions/default_spanish/images/icon.png"><br>Spanish</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/install&extension=default_russian" target="_extension">
-	        <img src="extensions/default_russian/image/icon.png"><br>Russian</a>
+	        <img src="extensions/default_russian/images/icon.png"><br>Russian</a>
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions_store&category_id=67&sidx=date_modified" target="_extension">
-	        <img src="admin/view/default/image/default_extension.png"><br>More Languages</a>
+	        <img src="admin/view/default/images/default_extension.png"><br>More Languages</a>
 	    </div>
     </div>
     ]]></value>

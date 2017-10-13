@@ -8,7 +8,7 @@
 						<div class="col-xs-4 col-sm-3 col-md-2 shortcut temp text-center">
 							<a href="<?php echo $item['href'] ?>">
 								<img class="img-circle"
-								     src="<?php echo RDIR_TEMPLATE . 'image/icons/' . $item['icon'] ?>"
+								     src="<?php echo RDIR_TEMPLATE . 'images/icons/' . $item['icon'] ?>"
 								     alt="<?php echo $item['text'] ?>"/>
 								<h5><?php echo $item['text'] ?></h5>
 							</a>

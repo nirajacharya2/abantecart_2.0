@@ -2526,7 +2526,7 @@ body.stickyheader .sticky_left {
 	  display: block;
 	  -moz-box-sizing: border-box;
 	  box-sizing: border-box;
-	  background: url(../image/logo@2x.png) no-repeat;
+	  background: url(../images/logo@2x.png) no-repeat;
 	}
 }
 /***** Media queries section  *****/
@@ -3027,7 +3027,7 @@ body.stickyheader .sticky_left {
 }
 
 .postit_icon {
-    background: url(../image/icons/icon_note.png) 50% 50% no-repeat;
+    background: url(../images/icons/icon_note.png) 50% 50% no-repeat;
     width: 20px;
     height: 16px;
     display: inline-block;
@@ -3069,7 +3069,7 @@ body.stickyheader .sticky_left {
 }
 
 .postit_notes a.icon_xpandarrow {
-    background: url(../image/icons/icon_collapse.png) 100% 50% no-repeat;
+    background: url(../images/icons/icon_collapse.png) 100% 50% no-repeat;
     padding-right: 12px;
     color: #000;
     font-weight: bold;
@@ -3080,7 +3080,7 @@ body.stickyheader .sticky_left {
 }
 
 .postit_notes a.icon_xpandarrow.expand {
-    background: url(../image/icons/icon_expand.png) 100% 50% no-repeat;
+    background: url(../images/icons/icon_expand.png) 100% 50% no-repeat;
 }
 
 .postit_notes.show {
@@ -3102,7 +3102,7 @@ body.stickyheader .sticky_left {
 
 .postit_close .icon_close {
     display: inline-block;
-    background: url(../image/icons/close_icon.gif) no-repeat;
+    background: url(../images/icons/close_icon.gif) no-repeat;
     width: 11px;
     height: 11px;
 }

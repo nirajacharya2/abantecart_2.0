@@ -80,25 +80,20 @@ final class AUser{
 	 * @return bool
 	 */
 	public function login($username, $password){
-		//Supports older passwords for upgraded/migrated stores prior to 1.2.8
-		$add_pass_sql = '';
-		if (defined('SALT')){
-			$add_pass_sql = "OR password = '" . $this->db->escape(md5($password . SALT)) . "'";
-		}
 
-		$user_query = $this->db->query("SELECT *
-			FROM " . $this->db->table("users") . "
-			WHERE username = '" . $this->db->escape($username) . "'
-			AND (
-				password = 	SHA1(CONCAT(salt,
-							SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "')))
-						))
-				" . $add_pass_sql . "
-			)
-			AND status = 1
-		");
+		$sql = "SELECT *, SHA1(CONCAT(salt,
+										SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "')))
+									))
+				FROM " . $this->db->table("users") . "
+				WHERE username = '" . $this->db->escape($username) . "'
+				AND password = 	SHA1(CONCAT(salt,
+								SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "')))
+							))
+				AND status = 1";
 
-		if ($user_query->num_rows){
+		$user_query = $this->db->query( $sql );
+
+		if ( $user_query->num_rows ){
 			$this->user_id = $this->session->data['user_id'] = (int)$user_query->row['user_id'];
 			$this->user_group_id = (int)$user_query->row['user_group_id'];
 			$this->username = $user_query->row['username'];

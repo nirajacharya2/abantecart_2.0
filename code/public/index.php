@@ -31,6 +31,7 @@ if(!defined('DIR_APP')) {
 	}
 	define('DIR_APP', $dir_app);
 }
+define('DIR_PUBLIC', __DIR__ . '/');
 define('DIR_ASSETS', __DIR__ . '/assets/');
 define('INDEX_FILE', basename(__FILE__));
 
