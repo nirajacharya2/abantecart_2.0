@@ -52,7 +52,10 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 require DIR_APP.'system/config/config.php';
 
 //Set up common paths
+define('DIR_APP_EXTENSIONS', DIR_APP . 'extensions/');
 define('DIR_SYSTEM', DIR_APP . 'system/');
+define('DIR_CORE', DIR_APP . 'core/');
+define('DIR_LIB', DIR_APP . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
 define('DIR_DOWNLOAD', DIR_APP . 'download/');
 define('DIR_DATABASE', DIR_APP . 'core/database/');
@@ -91,7 +94,6 @@ if($path_nodes[0] == 'a') {
 define('DIR_TEMPLATES', DIR_APP . 'templates/');
 if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ADMIN_PATH || $_POST['s'] == ADMIN_PATH)) {
 	define('IS_ADMIN', true);
-	define('DIR_APP_SECTION', DIR_APP );
 	define('DIR_LANGUAGE', DIR_APP . 'languages/admin/');
 	define('DIR_BACKUP', DIR_APP . 'system/backup/');
 	define('DIR_DATA', DIR_APP . 'system/data/');
@@ -100,7 +102,6 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
 	define('IS_ADMIN', false);
-	define('DIR_APP_SECTION', DIR_APP );
 	define('DIR_LANGUAGE', DIR_APP . '/languages/storefront/');
 	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_SF_PHPSESSID');
 	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');

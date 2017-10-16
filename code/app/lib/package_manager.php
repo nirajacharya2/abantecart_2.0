@@ -847,7 +847,7 @@ class APackageManager{
 	 * @return string
 	 */
 	public function getTempDir(){
-		$tmp_dir = DIR_APP_SECTION . 'system/temp';
+		$tmp_dir = DIR_APP . 'system/temp';
 		$tmp_install_dir = $tmp_dir . '/install';
 		//try to create tmp dir if not yet created and install.		
 		if (make_writable_dir($tmp_dir) && make_writable_dir($tmp_install_dir)){
@@ -859,7 +859,7 @@ class APackageManager{
 			$dir = sys_get_temp_dir() . '/abantecart_install/';
 
 			if (!is_writable($dir)){
-				$error_text = 'Error: php tried to use directory ' . DIR_APP_SECTION . "system/temp/install" . ' but it is non-writable. Temporary php-directory ' . $dir . ' is non-writable too! Please change permissions one of them.' . "\n";
+				$error_text = 'Error: php tried to use directory ' . DIR_APP . "system/temp/install" . ' but it is non-writable. Temporary php-directory ' . $dir . ' is non-writable too! Please change permissions one of them.' . "\n";
 				$this->error .= $error_text;
 				$this->log->write($error_text);
 			}

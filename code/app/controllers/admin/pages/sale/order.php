@@ -485,9 +485,9 @@ class ControllerPagesSaleOrder extends AController{
 					$file_settings = unserialize($option['settings']);
 					$filename = $value;
 					if (has_value($file_settings['directory'])) {
-						$file = DIR_APP_SECTION . 'system/uploads/' . $file_settings['directory'] . '/' . $filename;
+						$file = DIR_APP . 'system/uploads/' . $file_settings['directory'] . '/' . $filename;
 					} else {
-						$file = DIR_APP_SECTION . 'system/uploads/' . $filename;
+						$file = DIR_APP . 'system/uploads/' . $filename;
 					}
 
 					if (is_file($file)) {

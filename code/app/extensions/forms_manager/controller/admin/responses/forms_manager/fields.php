@@ -395,7 +395,7 @@ class ControllerResponsesFormsManagerFields extends AController {
 		);
 
 		$this->data['entry_upload_dir'] = sprintf($this->language->get('entry_upload_dir'), 'admin/system/uploads/');
-		$uplds_dir = DIR_APP_SECTION . '/system/uploads';
+		$uplds_dir = DIR_APP . '/system/uploads';
 		$settgs_dir = $uplds_dir.'/'.trim($this->data['attribute_data']['settings']['directory'], '/');
 		//check or make writable dirs
 		if( !make_writable_dir($uplds_dir) || !make_writable_dir($settgs_dir) ){

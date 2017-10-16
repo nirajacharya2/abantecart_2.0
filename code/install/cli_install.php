@@ -44,60 +44,13 @@ error_reporting(E_ALL);
 //list of arguments
 $args = $argv;
 
-// Real path (operating system web root) to the directory where abantecart is installed
-$root_path = dirname(__FILE__);
-
-if (defined('IS_WINDOWS')){
-	$root_path = str_replace('\\', '/', $root_path);
-}
-define('DIR_ROOT', $root_path);
-
-// HTTP
-
-//define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
-//define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
-
-// DIR
-define('DIR_APP_SECTION', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
-define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');
-define('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/cache/');
-define('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP_SECTION . '../')) . '/');
-define('DIR_STOREFRONT', DIR_ABANTECART . '/storefront/');
-define('DIR_DATABASE', DIR_CORE . 'database/');
-define('DIR_TEMPLATE', DIR_APP_SECTION . 'view/template/');
-define('INSTALL', 'true');
-// Relative paths and directories
-define('RDIR_TEMPLATE', 'view/');
-
-// Startup with local init
-require_once('init.php');
-
-//Check if cart is already installed
-if (file_exists(DIR_SYSTEM . 'config.php')){
-	require_once(DIR_SYSTEM . 'config.php');
-}
-
-$installed = false;
-if (defined('DB_HOSTNAME') && DB_HOSTNAME){
-	$installed = true;
-}
-
 //process command
 
 $script = array_shift($args);
 $command = array_shift($args);
 
 switch($command){
-
 	case "install":
-
-		if ($installed){
-			echo "\n\n" . "AbanteCart is already installed!" . "\n\n";
-			exit(1);
-		}
-
 		try{
 			$options = getOptionValues();
 			$validateOptions = validateOptions($options);
@@ -107,6 +60,47 @@ switch($command){
 				echo implode(', ', $validateOptions[1]) . "\n\n";
 				exit(1);
 			}
+
+			define('INSTALL', 'true');
+			// Real path (operating system web root) to the directory where abantecart is installed
+			$root_path = dirname(__FILE__);
+
+			if (defined('IS_WINDOWS')){
+				$root_path = str_replace('\\', '/', $root_path);
+			}
+			define('DIR_INSTALL', $root_path);
+
+			// HTTP
+
+			//define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
+			//define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
+
+			// DIR
+			define('DIR_APP', $options['app_dir'] . '/');
+			define('DIR_ASSETS', $options['public_dir'] . '/assets/');
+
+
+			// Startup with local init
+			require_once(DIR_APP.'core/init/base.php');
+			require_once(DIR_APP.'core/init/app.php');
+			require_once(DIR_APP.'core/init/admin.php');
+
+			//Check if cart is already installed
+			if (file_exists(DIR_CONFIG . 'config.php')){
+				require_once(DIR_CONFIG . 'config.php');
+			}
+
+			$installed = false;
+			if (defined('DB_HOSTNAME') && DB_HOSTNAME){
+				$installed = true;
+			}
+
+			if ($installed){
+				echo "\n\n" . "AbanteCart is already installed!" . "\n\n";
+				exit(1);
+			}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			define('HTTP_ABANTECART', $options['http_server']);
 			install($options);
 			echo "\n";
@@ -156,10 +150,13 @@ set_error_handler('handleError');
  */
 function getOptionList(){
 	return array (
+			'--app_dir'          => dirname(dirname(__FILE__)).'/app/',
+			'--public_dir'       => dirname(dirname(__FILE__)).'/public/',
 			'--db_host'          => 'localhost',
 			'--db_user'          => 'root',
-			'--db_password'      => 'pass',
+			'--db_password'      => '******',
 			'--db_name'          => 'abantecart',
+			'--create-database'  => '',
 			'--db_driver'        => 'amysqli',
 			'--db_prefix'        => 'ac_',
 			'--admin_path'       => 'your_admin',
@@ -167,7 +164,8 @@ function getOptionList(){
 			'--password'         => 'admin',
 			'--email'            => 'your_email@example.com',
 			'--http_server'      => 'http://localhost/abantecart',
-			'--with-sample-data' => ''
+			'--with-sample-data' => '',
+			'--demo-mode' => ''
 	);
 }
 
@@ -182,15 +180,15 @@ function help(){
 	$output .= "\t" . "usage - get help" . "\n";
 	$output .= "\t" . "install - run installation process" . "\n\n";
 
-	$output .= "Required Parameters:" . "\n";
+	$output .= "Parameters:" . "\n\n";
 	$options = getOptionList();
 
 	foreach ($options as $opt => $ex){
 		$output .= "\t" . $opt;
 		if ($ex){
-			$output .= "=<value>" . "\t" . "[required]";
+			$output .= "=<value>" . "  \t" . "\033[0;31m[required]\033[0m";
 		} else{
-			$output .= "\t" . "[optional]";
+			$output .= "     \t" . "[optional]";
 		}
 		$output .= "\n\n";
 
@@ -200,6 +198,7 @@ function help(){
 
 	$output .= 'php cli_install.php install ';
 	foreach ($options as $opt => $ex){
+		if($opt == '--demo-mode'){ continue;}
 		$output .= $opt . ($ex ? "=" . $ex : '') . "  ";
 	}
 	$output .= "\n\n";
@@ -243,6 +242,17 @@ function getOptionValues($opt_name = ''){
 
 		$options[$name] = $value;
 	}
+	$code_dir = dirname(dirname(__FILE__));
+	if( !isset($options['app_dir']) ) {
+		if (is_dir($code_dir . '/app')) {
+			$options['app_dir'] = $code_dir . '/app';
+		}
+	}
+	if(!isset($options['public_dir'])){
+		if(is_dir($code_dir.'/public')){
+			$options['public_dir'] = $code_dir.'/public';
+		}
+	}
 
 	if ($opt_name){
 		return isset($options[$opt_name]) ? $options[$opt_name] : null;
@@ -257,6 +267,8 @@ function getOptionValues($opt_name = ''){
  */
 function validateOptions($options){
 	$required = array (
+			'app_dir',
+			'public_dir',
 			'db_host',
 			'db_user',
 			'db_password',
@@ -272,6 +284,12 @@ function validateOptions($options){
 	foreach ($required as $r){
 		if (!array_key_exists($r, $options)){
 			$missing[] = $r;
+		}else{
+			if( in_array($r, array('app_dir', 'public_dir'))){
+				if(!is_dir($options[$r])){
+					$missing[] = 'Wrong '. $r .' parameter. Directory "'.$options[$r].'" does not exists!';
+				}
+			}
 		}
 	}
 
@@ -310,6 +328,7 @@ function checkRequirements($options){
 		$registry->get('model_install')->validateSettings($options);
 		$errors = $registry->get('model_install')->error;
 	}
+exit;
 	return $errors;
 }
 

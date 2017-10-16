@@ -152,9 +152,9 @@ class ControllerPagesToolFiles extends AController {
 			}
 
 			if (has_value($attribute_data['settings']['directory'])) {
-				$file = DIR_APP_SECTION . 'system/uploads/' . $attribute_data['settings']['directory'] . '/' . $filename;
+				$file = DIR_APP . 'system/uploads/' . $attribute_data['settings']['directory'] . '/' . $filename;
 			} else {
-				$file = DIR_APP_SECTION . 'system/uploads/' . $filename;
+				$file = DIR_APP . 'system/uploads/' . $filename;
 			}
 
 			if (file_exists($file)) {

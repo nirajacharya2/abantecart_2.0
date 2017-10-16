@@ -23,12 +23,12 @@ $lib_list = array(
 		'language');
 // Include libs
 foreach($lib_list as $lib_name){
-	require_once DIR_CORE . 'engine/'. $lib_name .'.php';
+	require_once DIR_APP . 'core/engine/'. $lib_name .'.php';
 }
 
-require_once DIR_CORE . 'helper/html.php';
-require_once DIR_CORE . 'helper/utils.php';
-require_once DIR_CORE . 'helper/system_check.php';
+require_once DIR_APP . 'core/helper/html.php';
+require_once DIR_APP . 'core/helper/utils.php';
+require_once DIR_APP . 'core/helper/system_check.php';
 
 $lib_list = array(
 		'cache',
@@ -73,6 +73,6 @@ $lib_list = array(
 
 // Include libs
 foreach($lib_list as $lib_name){
-	require_once DIR_LIB . $lib_name .'.php';
+	require_once DIR_APP . 'lib/'. $lib_name .'.php';
 }
 unset($lib_list);

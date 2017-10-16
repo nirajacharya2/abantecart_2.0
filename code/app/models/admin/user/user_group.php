@@ -156,8 +156,8 @@ class ModelUserUserGroup extends Model {
 						'common/menu');
 
 		$controllers_list = array();
-		$files_pages = glob( DIR_APP_SECTION . 'controllers/pages/*/*.php');
-		$files_response = glob( DIR_APP_SECTION . 'controllers/responses/*/*.php');
+		$files_pages = glob( DIR_APP . 'controllers/pages/*/*.php');
+		$files_response = glob( DIR_APP . 'controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 
 		// looking for controllers inside core

@@ -288,7 +288,7 @@ class ControllerPagesToolBackup extends AController {
 						'style' => 'button1',
 				));
 
-		$this->data['text_fail_note'] = sprintf($this->language->get('text_fail_note'), DIR_APP_SECTION.'system/backup');
+		$this->data['text_fail_note'] = sprintf($this->language->get('text_fail_note'), DIR_APP.'system/backup');
 
 		$this->view->batchAssign($this->data);
 		$this->view->assign('help_url', $this->gen_help_url());

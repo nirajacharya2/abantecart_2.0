@@ -45,15 +45,15 @@ define('HTTP_SERVER', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_H
 define('HTTP_ABANTECART', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
 // DIR
-define('DIR_APP_SECTION', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
+define('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
 define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
 define('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');
 define('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/cache/');
 define('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP_SECTION . '../')) . '/');
+define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP . '../')) . '/');
 define('DIR_STOREFRONT', DIR_ABANTECART . '/storefront/');
 define('DIR_DATABASE', DIR_CORE . 'database/');
-define('DIR_TEMPLATE', DIR_APP_SECTION . 'view/template/');
+define('DIR_TEMPLATE', DIR_APP . 'view/template/');
 define('INSTALL', 'true');
 // Relative paths and directories
 define('RDIR_TEMPLATE',  'view/');

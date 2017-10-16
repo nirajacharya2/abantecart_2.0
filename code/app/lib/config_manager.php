@@ -1179,7 +1179,7 @@ class AConfigManager{
 			return $this->templates[$section];
 		}
 
-		$basedir = $section == 'admin' ? DIR_APP_SECTION : DIR_STOREFRONT;
+		$basedir = $section == 'admin' ? DIR_APP : DIR_STOREFRONT;
 
 		$directories = glob($basedir . 'view/*', GLOB_ONLYDIR);
 		//get core templates

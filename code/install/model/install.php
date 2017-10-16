@@ -88,7 +88,7 @@ class ModelInstall extends Model{
 			}
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'system/config.php')){
+		if (!is_writable(DIR_SYSTEM . 'config.php')){
 			$this->error['warning'] = 'Error: Could not write to config.php please check you have set the correct permissions on: ' . DIR_ABANTECART . 'system/config.php!';
 		}
 
@@ -134,7 +134,7 @@ class ModelInstall extends Model{
 			$this->error['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'system/config.php')){
+		if (!is_writable(DIR_SYSTEM.'config.php')){
 			$this->error['warning'] = 'Warning: config.php needs to be writable for AbanteCart to be installed!';
 		}
 
@@ -150,37 +150,37 @@ class ModelInstall extends Model{
 			$this->error['warning'] = 'Warning: Logs directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'image')){
+		if (!is_writable(DIR_ASSETS . 'images')){
 			$this->error['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'images/thumbnails')){
-			if (file_exists(DIR_ABANTECART . 'images/thumbnails') && is_dir(DIR_ABANTECART . 'images/thumbnails')){
+		if (!is_writable(DIR_ASSETS . 'images/thumbnails')){
+			if (file_exists(DIR_ASSETS . 'images/thumbnails') && is_dir(DIR_ASSETS . 'images/thumbnails')){
 				$this->error['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
 			} else{
-				$result = mkdir(DIR_ABANTECART . 'images/thumbnails', 0777, true);
+				$result = mkdir(DIR_ASSETS . 'images/thumbnails', 0777, true);
 				if ($result){
-					chmod(DIR_ABANTECART . 'images/thumbnails', 0777);
-					chmod(DIR_ABANTECART . 'image', 0777);
+					chmod(DIR_ASSETS . 'images/thumbnails', 0777);
+					chmod(DIR_ASSETS . 'image', 0777);
 				} else{
 					$this->error['warning'] = 'Warning: images/thumbnails does not exists!';
 				}
 			}
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'download')){
+		if (!is_writable(DIR_RESOURCES . 'downloads')){
 			$this->error['warning'] = 'Warning: Download directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'extensions')){
+		if (!is_writable(DIR_APP_EXTENSIONS)){
 			$this->error['warning'] = 'Warning: Extensions directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'resources')){
+		if (!is_writable(DIR_ASSETS . 'resources')){
 			$this->error['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ABANTECART . 'admin/system')){
+		if (!is_writable(DIR_SYSTEM)){
 			$this->error['warning'] = 'Warning: Admin/system directory needs to be writable for AbanteCart to work!';
 		}
 
@@ -231,7 +231,7 @@ class ModelInstall extends Model{
 	public function RunSQL($data){
 		$db = new ADB($data['db_driver'], $data['db_host'], $data['db_user'], $data['db_password'], $data['db_name']);
 
-		$file = DIR_APP_SECTION . 'abantecart_database.sql';
+		$file = DIR_APP . 'abantecart_database.sql';
 		if ($sql = file($file)){
 			$query = '';
 
@@ -333,7 +333,7 @@ class ModelInstall extends Model{
 		$db->query("SET NAMES 'utf8'");
 		$db->query("SET CHARACTER SET utf8");
 
-		$file = DIR_APP_SECTION . 'abantecart_sample_data.sql';
+		$file = DIR_APP . 'abantecart_sample_data.sql';
 
 		if ($sql = file($file)){
 			$query = '';
