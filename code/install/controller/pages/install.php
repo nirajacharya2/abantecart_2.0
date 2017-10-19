@@ -151,7 +151,7 @@ class ControllerPagesInstall extends AController{
 		$this->load->model('install');
 		$result = $this->model_install->validateSettings($this->request->post);
 		if (!$result){
-			$this->error = $this->model_install->error;
+			$this->error = $this->model_install->errors;
 		}
 
 		return $result;

@@ -52,7 +52,7 @@ class ControllerPagesSettings extends AController{
 		}
 
 		$template_data['action'] = HTTP_SERVER . 'index.php?rt=settings';
-		$template_data['config_catalog'] = DIR_ABANTECART . 'system/config.php';
+		$template_data['config_catalog'] = DIR_CONFIG . 'config.php';
 		$template_data['system'] = DIR_SYSTEM;
 		$template_data['cache'] = DIR_SYSTEM . 'cache';
 		$template_data['logs'] = DIR_SYSTEM . 'logs';
@@ -78,7 +78,7 @@ class ControllerPagesSettings extends AController{
 		$this->load->model('install');
 		$result = $this->model_install->validateRequirements();
 		if(!$result){
-			$this->error = $this->model_install->error;
+			$this->error = $this->model_install->errors;
 		}
 		return $result;
 	}

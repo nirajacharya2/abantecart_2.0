@@ -45,8 +45,8 @@ if ( HTTPS === true) {
 	define('HTTPS_CATALOG', HTTP_CATALOG);
 	define('HTTPS_EXT', HTTP_EXT);
 }
-
 //Admin specific loads
+
 $registry->set('extension_manager', new AExtensionManager());
 
 //Now we have session, reload config for store if provided or set in session

@@ -27,7 +27,7 @@ include_once('driver.php');
 /**
  * Memcache driver
  *
- * NOTE: to use this driver put lines belong into your system/config.php
+ * NOTE: to use this driver put lines belong into your app/config/config.php
 
 define('CACHE_DRIVER', 'memcache');
 define('CACHE_HOST', 'localhost');

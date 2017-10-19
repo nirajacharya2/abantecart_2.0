@@ -92,7 +92,7 @@ class AError{
 	public function toLog(){
 		if (!is_object($this->registry) || !$this->registry->has('log')){
 			if (class_exists('ALog')){
-				$log = new ALog(DIR_SYSTEM . 'logs/error.txt');
+				$log = new ALog(DIR_LOGS . 'error.txt');
 			} else{
 				//we have error way a head of system start
 				echo $this->error_descriptions[$this->code] . ':  ' . $this->msg;

@@ -160,7 +160,7 @@ class ControllerCommonHeader extends AController {
 
 		//backwards compatibility from 1.2.1. Can remove this check in the future.
 		if (!defined('ENCRYPTION_KEY')) {
-			$cm_body = "To be compatible with v".VERSION." add below line to configuration file: <br>\n" . DIR_ROOT . '/system/config.php';
+			$cm_body = "To be compatible with v".VERSION." add below line to configuration file: <br>\n" . DIR_APP . '/config/config.php';
 			$cm_body .= "<br>\n"."define('ENCRYPTION_KEY', '" . $this->config->get('encryption_key') . "');\n"; ;
 			$this->messages->saveWarning('Compatibility warning for v'.VERSION, $cm_body);
 		}

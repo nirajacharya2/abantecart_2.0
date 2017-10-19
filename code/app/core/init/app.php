@@ -47,11 +47,9 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 	define('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
 
-
-
-require DIR_APP.'system/config/config.php';
-
 //Set up common paths
+define('DIR_ASSETS', DIR_PUBLIC . 'assets/');
+define('DIR_RESOURCE', DIR_ASSETS . 'resources/');
 define('DIR_APP_EXTENSIONS', DIR_APP . 'extensions/');
 define('DIR_SYSTEM', DIR_APP . 'system/');
 define('DIR_CORE', DIR_APP . 'core/');
@@ -59,9 +57,9 @@ define('DIR_LIB', DIR_APP . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
 define('DIR_DOWNLOAD', DIR_APP . 'download/');
 define('DIR_DATABASE', DIR_APP . 'core/database/');
-define('DIR_CONFIG', DIR_APP . 'system/config/');
-define('DIR_CACHE', DIR_APP . 'system/cache/');
-define('DIR_LOGS', DIR_APP . 'system/logs/');
+define('DIR_CONFIG', DIR_APP . 'config/');
+define('DIR_CACHE', DIR_APP . 'var/cache/');
+define('DIR_LOGS', DIR_APP . 'var/logs/');
 define('DIR_VENDORS', DIR_APP . 'vendors/');
 
 // Error Reporting
@@ -216,7 +214,9 @@ try {
 	$hook = new AHook($registry);
 
 // Database
+
 	$registry->set('db', new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE));
+
 
 // Cache
 	$registry->set('cache', new ACache());

@@ -38,7 +38,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 define('DIR_ROOT', $root_path);
 define('DIR_CORE', DIR_ROOT . '/core/');
 
-require_once(DIR_ROOT . '/system/config.php');
+require_once(DIR_ROOT . '/config/config.php');
 
 //set server name for correct email sending
 if (defined('SERVER_NAME') && SERVER_NAME != ''){

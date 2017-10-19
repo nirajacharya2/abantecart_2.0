@@ -134,7 +134,7 @@ class ModelToolBackup extends Model{
 			$bkp->backupDirectory(DIR_RESOURCE, false);
 		}
 		if ($config){
-			$bkp->backupFile(DIR_ROOT . '/system/config.php', false);
+			$bkp->backupFile(DIR_ROOT . '/config/config.php', false);
 		}
 		$result = $bkp->archive(DIR_BACKUP . $bkp->getBackupName() . '.tar.gz', DIR_BACKUP, $bkp->getBackupName());
 		if (!$result){

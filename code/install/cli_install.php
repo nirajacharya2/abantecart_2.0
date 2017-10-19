@@ -52,8 +52,10 @@ $command = array_shift($args);
 switch($command){
 	case "install":
 		try{
+
 			$options = getOptionValues();
 			$validateOptions = validateOptions($options);
+
 			if (!$validateOptions[0]){
 				echo "\n\n";
 				echo "FAILED! Following inputs were missing or invalid: ";
@@ -62,13 +64,14 @@ switch($command){
 			}
 
 			define('INSTALL', 'true');
+			define('IS_ADMIN', 'true');
 			// Real path (operating system web root) to the directory where abantecart is installed
 			$root_path = dirname(__FILE__);
 
 			if (defined('IS_WINDOWS')){
 				$root_path = str_replace('\\', '/', $root_path);
 			}
-			define('DIR_INSTALL', $root_path);
+			define('DIR_INSTALL', $root_path.'/');
 
 			// HTTP
 
@@ -76,14 +79,13 @@ switch($command){
 			//define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
 			// DIR
-			define('DIR_APP', $options['app_dir'] . '/');
-			define('DIR_ASSETS', $options['public_dir'] . '/assets/');
+			define('DIR_APP', $options['app_dir']);
+			define('DIR_ASSETS', $options['public_dir'] . 'assets/');
 
 
 			// Startup with local init
-			require_once(DIR_APP.'core/init/base.php');
-			require_once(DIR_APP.'core/init/app.php');
-			require_once(DIR_APP.'core/init/admin.php');
+			require_once(DIR_INSTALL.'init.php');
+
 
 			//Check if cart is already installed
 			if (file_exists(DIR_CONFIG . 'config.php')){
@@ -156,9 +158,9 @@ function getOptionList(){
 			'--db_user'          => 'root',
 			'--db_password'      => '******',
 			'--db_name'          => 'abantecart',
-			'--create-database'  => '',
 			'--db_driver'        => 'amysqli',
 			'--db_prefix'        => 'ac_',
+			'--cache-driver'     => 'file',
 			'--admin_path'       => 'your_admin',
 			'--username'         => 'admin',
 			'--password'         => 'admin',
@@ -186,9 +188,9 @@ function help(){
 	foreach ($options as $opt => $ex){
 		$output .= "\t" . $opt;
 		if ($ex){
-			$output .= "=<value>" . "  \t" . "\033[0;31m[required]\033[0m";
+			$output .= "=<value>" . " \t\t" . "\033[0;31m[required]\033[0m";
 		} else{
-			$output .= "     \t" . "[optional]";
+			$output .= "     \t\t" . "[optional]";
 		}
 		$output .= "\n\n";
 
@@ -245,13 +247,20 @@ function getOptionValues($opt_name = ''){
 	$code_dir = dirname(dirname(__FILE__));
 	if( !isset($options['app_dir']) ) {
 		if (is_dir($code_dir . '/app')) {
-			$options['app_dir'] = $code_dir . '/app';
+			$options['app_dir'] = $code_dir . '/app/';
 		}
 	}
+	$options['app_dir'] = (substr( $options['app_dir'],-1 ) == '/' ? substr( $options['app_dir'], 0, -1 ) : $options['app_dir']).'/';
+
 	if(!isset($options['public_dir'])){
 		if(is_dir($code_dir.'/public')){
-			$options['public_dir'] = $code_dir.'/public';
+			$options['public_dir'] = $code_dir.'/public/';
 		}
+	}
+	$options['public_dir'] = (substr( $options['public_dir'],-1 ) == '/' ? substr( $options['public_dir'], 0, -1 ) : $options['public_dir']).'/';
+
+	if(!isset($options['cache_driver']) || $options['cache_driver'] == ''){
+		$options['cache_driver'] = 'file';
 	}
 
 	if ($opt_name){
@@ -269,6 +278,7 @@ function validateOptions($options){
 	$required = array (
 			'app_dir',
 			'public_dir',
+			'db_driver',
 			'db_host',
 			'db_user',
 			'db_password',
@@ -280,21 +290,32 @@ function validateOptions($options){
 			'email',
 			'http_server',
 	);
-	$missing = array ();
+	$errors = array ();
 	foreach ($required as $r){
 		if (!array_key_exists($r, $options)){
-			$missing[] = $r;
+			$errors[] = $r;
 		}else{
 			if( in_array($r, array('app_dir', 'public_dir'))){
 				if(!is_dir($options[$r])){
-					$missing[] = 'Wrong '. $r .' parameter. Directory "'.$options[$r].'" does not exists!';
+					$errors[] = 'Wrong '. $options[$r] .' parameter. Directory "'.$options[$r].'" does not exists!';
+				}
+				if($r == 'app_dir'){
+					if(!is_writable($options[$r].'config')) {
+						$errors[] = 'Directory "' . $options[$r] . 'config" is not writable!';
+					}
+					if( is_file($options[$r].'config/app_config.php') && !is_writable($options[$r].'config/app_config.php') ){
+						$errors[] = 'File "' . $options[$r] . 'config/app_config.php" is not writable!';
+					}
+					if( is_file($options[$r].'config/database.php') && !is_writable($options[$r].'config/database.php') ){
+						$errors[] = 'File "' . $options[$r] . 'config/database.php" is not writable!';
+					}
 				}
 			}
 		}
 	}
 
-	$valid = count($missing) === 0;
-	return array ($valid, $missing);
+	$valid = count($errors) === 0;
+	return array ($valid, $errors);
 }
 
 /**
@@ -304,10 +325,16 @@ function install($options){
 	$errors = checkRequirements($options);
 	if (!$errors){
 		writeConfigFile($options);
-		if (file_exists(DIR_SYSTEM . 'config.php')){
-			require_once(DIR_SYSTEM . 'config.php');
+		if (file_exists(DIR_CONFIG . 'config.php')){
+			require_once(DIR_CONFIG . 'config.php');
 		}
-		setupDB($options);
+
+		$result = setupDB($options);
+		if(!$result){
+			$registry = Registry::getInstance();
+			echo 'FAILED! SQL-run failed: ' . implode("\n\t", $registry->get('model_install')->errors) . "\n\n";
+			exit(1);
+		}
 		$cache = new ACache();
 		$cache->setCacheStorageDriver('file');
 		$cache->enableCache();
@@ -319,50 +346,48 @@ function install($options){
 }
 
 function checkRequirements($options){
+
 	$options['password_confirm'] = $options['password'];
+
+	require_once(DIR_INSTALL.'model/install.php');
 	$registry = Registry::getInstance();
-	$registry->get('load')->model('install');
+	$registry->set('model_install', new ModelInstall($registry));
 	$registry->get('model_install')->validateRequirements();
+
 	$errors = $registry->get('model_install')->error;
+
 	if(!$errors){
 		$registry->get('model_install')->validateSettings($options);
 		$errors = $registry->get('model_install')->error;
 	}
-exit;
 	return $errors;
 }
 
 function setupDB($data){
-
+	require_once(DIR_INSTALL.'model/install.php');
 	$registry = Registry::getInstance();
-	$registry->get('load')->model('install');
-	$registry->get('model_install')->RunSQL($data);
-
-	$load_data = getOptionValues('with-sample-data');
-
-	if ($load_data){
-		$db = new ADB(
-				$data['db_driver'],
-				htmlspecialchars_decode($data['db_host']),
-				htmlspecialchars_decode($data['db_user']),
-				htmlspecialchars_decode($data['db_password']),
-				htmlspecialchars_decode($data['db_name'])
-		);
-		$registry->set('db', $db);
-		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
-
-		$registry->get('model_install')->loadDemoData($registry);
+	$registry->set('model_install', new ModelInstall($registry));
+	$result = $registry->get('model_install')->RunSQL($data);
+	if($result) {
+		$load_data = getOptionValues('with-sample-data');
+		if ($load_data) {
+			$result = $registry->get('model_install')->loadDemoData($data);
+		}
+		if ($result) {
+			$result = $registry->get('model_install')->buildAssets($data);
+		}
+		return $result;
+	}else{
+		return false;
 	}
-
 }
 
 /**
  * @param $options
+ * @return bool
  */
 function writeConfigFile($options){
 	$registry = Registry::getInstance();
-	$registry->get('load')->model('install');
-	$registry->get('model_install')->configure($options);
-
-
+	$registry->set('model_install', new ModelInstall($registry));
+	return $registry->get('model_install')->configure($options);
 }

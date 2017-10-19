@@ -40,7 +40,7 @@ final class ALog{
 
 		if (!is_writable(pathinfo($filename, PATHINFO_DIRNAME))){
 			// if it happens see errors in httpd error log!
-			throw new AException (AC_ERR_LOAD, 'Error: Log directory ' . DIR_LOGS . ' is non-writable. Please change permissions.');
+			throw new AException (AC_ERR_LOAD, 'Error: Log directory ' . pathinfo($filename, PATHINFO_DIRNAME) . ' is non-writable. Please change permissions.');
 		}
 
 		//1.create file if it not exists

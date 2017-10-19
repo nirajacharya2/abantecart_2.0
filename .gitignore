@@ -11,7 +11,9 @@
 /code/app/system/updates.xml
 /code/app/system/backup/
 /code/app/system/uploads/
-/code/app/system/cache/*
-/code/app/system/logs/*
-/code/app/system/config/config.php
-/code/assets/images/thumbnails/*
+/code/app/var/cache/*
+/code/app/var/logs/*
+/code/app/config/*
+/code/public/assets/images/thumbnails/*
+/code/public/assets/templates/default/admin/*
+/code/public/assets/templates/default/storefront/*

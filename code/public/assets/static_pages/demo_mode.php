@@ -33,12 +33,12 @@ define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
 define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
 
 // DIR
-define('DIR_APP_SECTION', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
+define('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
 define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP_SECTION . '../')) . '/');
+define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP . '../')) . '/');
 
 // Startup
-require_once(DIR_ABANTECART . 'system/config.php');
+require_once(DIR_APP . 'config/config.php');
 // New Installation
 if (!defined('DB_DATABASE')) {
 	header('Location: ../install/index.php');

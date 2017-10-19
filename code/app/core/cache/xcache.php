@@ -27,7 +27,7 @@ include_once('driver.php');
 /**
  * XCache driver
  *
- * NOTE: to use this driver put lines belong into your system/config.php
+ * NOTE: to use this driver put lines belong into your app/config/config.php
 
 define('CACHE_DRIVER', 'xcache');
 define('CACHE_SECRET', 'your_secret_key');

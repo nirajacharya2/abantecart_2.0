@@ -158,7 +158,7 @@ class ControllerTaskToolBackup extends AController {
 		$backup_name = preg_replace('[^0-9A-z_\.]','', $settings['backup_name']);
 		$backup_name = !$backup_name ? 'manual_backup' : $backup_name;
 		$bkp = new ABackup($backup_name);
-		$result = $bkp->backupFile(DIR_ROOT . '/system/config.php', false);
+		$result = $bkp->backupFile(DIR_CONFIG . 'config.php', false);
 
 		$output = array('result' => ($result ? true : false), 'message' => '( backup config file )');
 

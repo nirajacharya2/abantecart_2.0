@@ -104,11 +104,11 @@ function check_file_permissions($registry){
 	    );
 	}
 
-	if (is_writable(DIR_SYSTEM . 'config.php')) {
+	if (is_writable(DIR_CONFIG . 'config.php')) {
 	    $ret_array[] = array(
 	    	'title' => 'Incorrect config.php file permissions',
-	    	'body' => DIR_SYSTEM . 'config.php' . ' file needs to be set to read and execute modes to keep it secured from editing!',
-	    	'type' => 'W'	    
+	    	'body' => DIR_CONFIG . 'config.php' . ' file needs to be set to read and execute modes to keep it secured from editing!',
+	    	'type' => 'W'
 	    );
 	}
 
