@@ -121,6 +121,50 @@ ALTER TABLE `ac_tasks` ENGINE=INNODB;
 ALTER TABLE `ac_task_details` ENGINE=INNODB;
 ALTER TABLE `ac_task_steps` ENGINE=INNODB;
 
-ALTER TABLE `ac_addresses` ADD
-  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`),
-  FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+ALTER TABLE `ac_language_definitions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_customers` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`);
+ALTER TABLE `ac_country_descriptions` ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_country_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_zones` ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+ALTER TABLE `ac_zone_descriptions` ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_zone_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_zones_to_locations` ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_zones_to_locations` ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_zones_to_locations` ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_addresses` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_addresses` ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+ALTER TABLE `ac_addresses` ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`);
+
+ALTER TABLE `ac_categories` CHANGE COLUMN `parent_id` `parent_id` int(11) DEFAULT NULL;
+UPDATE `ac_categories` SET `parent_id` = NULL WHERE `parent_id` = 0;
+ALTER TABLE `ac_categories` ADD FOREIGN KEY (`parent_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_category_descriptions` ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_category_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_categories_to_stores` ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_categories_to_stores` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_coupon_descriptions` ADD FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_coupon_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+
+ALTER TABLE `ac_coupons_products` ADD FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_coupons_products` ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_download_descriptions` ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_download_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_download_attribute_values` ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_banner_descriptions` ADD FOREIGN KEY (`banner_id`) REFERENCES `ac_banners`(`banner_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_banner_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_banner_stat` ADD FOREIGN KEY (`banner_id`) REFERENCES `ac_banners`(`banner_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_length_class_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+
+ALTER TABLE `ac_manufacturers_to_stores` ADD FOREIGN KEY (`manufacturer_id`) REFERENCES `ac_manufacturers`(`manufacturer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_manufacturers_to_stores` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`);
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`currency_id`) REFERENCES `ac_currencies`(`currency_id`);
+ALTER TABLE `ac_orders` CHANGE COLUMN `customer_id` `customer_id` int(11) DEFAULT NULL;
+UPDATE `ac_orders` SET `customer_id` = NULL WHERE `customer_id` = 0;
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
