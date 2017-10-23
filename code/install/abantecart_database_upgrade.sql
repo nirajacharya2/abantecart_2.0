@@ -167,5 +167,8 @@ ALTER TABLE `ac_orders` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages
 ALTER TABLE `ac_orders` ADD FOREIGN KEY (`currency_id`) REFERENCES `ac_currencies`(`currency_id`);
 ALTER TABLE `ac_orders` CHANGE COLUMN `customer_id` `customer_id` int(11) DEFAULT NULL;
 UPDATE `ac_orders` SET `customer_id` = NULL WHERE `customer_id` = 0;
-ALTER TABLE `ac_orders` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
---????? Will not create relationship if IDs are not present in customer's table. 
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE SET NULL;
+--????? Will not create relationship if IDs are not present in customer's table.
+ALTER TABLE `ac_orders` CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
+UPDATE `ac_orders` SET `coupon_id` = NULL WHERE `coupon_id` = 0;
+ALTER TABLE `ac_orders` ADD FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL;

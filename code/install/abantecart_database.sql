@@ -9060,7 +9060,7 @@ CREATE TABLE `ac_orders` (
   `currency_id` int(11) NOT NULL,
   `currency` varchar(3) COLLATE utf8_general_ci NOT NULL,
   `value` decimal(15,8) NOT NULL,
-  `coupon_id` int(11) NOT NULL,
+  `coupon_id` int(11) NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -9069,7 +9069,8 @@ CREATE TABLE `ac_orders` (
   FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`),
   FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`),
   FOREIGN KEY (`currency_id`) REFERENCES `ac_currencies`(`currency_id`),
-  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`)
+  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_orders_idx`
