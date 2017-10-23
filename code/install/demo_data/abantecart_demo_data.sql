@@ -19,140 +19,120 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES ('default_flat_rate_s
 INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES ('default_flat_rate_shipping', 'default_flat_rate_shipping_sort_order', '1');
 INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES ('default_flat_rate_shipping', 'default_flat_rate_shipping_autoselect', '1');
 
---
--- Dumping data for table `addresses`
---
-
-INSERT INTO `ac_addresses` VALUES (1,2,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616);
-INSERT INTO `ac_addresses` VALUES (2,3,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648);
-INSERT INTO `ac_addresses` VALUES (3,4,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616);
-INSERT INTO `ac_addresses` VALUES (4,5,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660);
-INSERT INTO `ac_addresses` VALUES (5,6,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616);
-INSERT INTO `ac_addresses` VALUES (6,7,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634);
-INSERT INTO `ac_addresses` VALUES (7,8,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650);
-INSERT INTO `ac_addresses` VALUES (8,9,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648);
-INSERT INTO `ac_addresses` VALUES (9,10,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648);
-INSERT INTO `ac_addresses` VALUES (10,11,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666);
-INSERT INTO `ac_addresses` VALUES (11,12,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616);
-INSERT INTO `ac_addresses` VALUES (12,13,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
-
 -- Dumping data for table `categories`
 --
-
-INSERT INTO `ac_categories` VALUES (46,43,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (47,43,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (38,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (40,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (41,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (42,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (43,0,2,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (44,43,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (45,43,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (39,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (36,0,1,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (37,36,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (48,43,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (49,0,3,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (50,49,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (51,49,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (52,0,98,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (53,52,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (54,52,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (58,0,4,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (59,58,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (60,58,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (61,58,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (62,58,0,0,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (63,58,0,1,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (64,0,99,0,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_categories` VALUES (65,0,100,1,'2015-06-12 10:03:16','2015-06-12 11:30:27');
-INSERT INTO `ac_categories` VALUES (66,65,0,1,'2015-06-12 10:04:09','2015-06-12 11:28:05');
-INSERT INTO `ac_categories` VALUES (67,65,0,1,'2015-06-12 10:06:44','2015-06-12 10:06:44');
-INSERT INTO `ac_categories` VALUES (68,0,0,1,'2015-06-16 11:12:40','2015-06-16 11:12:40');
-INSERT INTO `ac_categories` VALUES (69,68,0,1,'2015-06-16 11:13:35','2015-06-16 11:13:35');
-INSERT INTO `ac_categories` VALUES (70,68,0,1,'2015-06-22 10:14:10','2015-06-22 10:14:10');
+INSERT INTO `ac_categories`
+VALUES (43,NULL,2,1,NOW(),NOW()),
+(36,NULL,1,1,NOW(),NOW()),
+(49,NULL,3,1,NOW(),NOW()),
+(52,NULL,98,1,NOW(),NOW()),
+(58,NULL,4,1,NOW(),NOW()),
+(64,NULL,99,0,NOW(),NOW()),
+(65,NULL,100,1,NOW(),NOW()),
+(68,NULL,0,1,NOW(),NOW()),
+(46,43,0,1,NOW(),NOW()),
+(47,43,0,1,NOW(),NOW()),
+(38,36,0,1,NOW(),NOW()),
+(40,36,0,1,NOW(),NOW()),
+(41,36,0,1,NOW(),NOW()),
+(42,36,0,1,NOW(),NOW()),
+(44,43,0,1,NOW(),NOW()),
+(45,43,0,1,NOW(),NOW()),
+(39,36,0,1,NOW(),NOW()),
+(37,36,0,1,NOW(),NOW()),
+(48,43,0,1,NOW(),NOW()),
+(50,49,0,1,NOW(),NOW()),
+(51,49,0,1,NOW(),NOW()),
+(53,52,0,1,NOW(),NOW()),
+(54,52,0,1,NOW(),NOW()),
+(59,58,0,1,NOW(),NOW()),
+(60,58,0,1,NOW(),NOW()),
+(61,58,0,1,NOW(),NOW()),
+(62,58,0,0,NOW(),NOW()),
+(63,58,0,1,NOW(),NOW()),
+(66,65,0,1,NOW(),NOW()),
+(67,65,0,1,NOW(),NOW()),
+(69,68,0,1,NOW(),NOW()),
+(70,68,0,1,NOW(),NOW());
 --
 -- Dumping data for table `categories_to_stores`
 --
 
-INSERT INTO `ac_categories_to_stores` VALUES (36,0);
-INSERT INTO `ac_categories_to_stores` VALUES (37,0);
-INSERT INTO `ac_categories_to_stores` VALUES (38,0);
-INSERT INTO `ac_categories_to_stores` VALUES (39,0);
-INSERT INTO `ac_categories_to_stores` VALUES (40,0);
-INSERT INTO `ac_categories_to_stores` VALUES (41,0);
-INSERT INTO `ac_categories_to_stores` VALUES (42,0);
-INSERT INTO `ac_categories_to_stores` VALUES (43,0);
-INSERT INTO `ac_categories_to_stores` VALUES (44,0);
-INSERT INTO `ac_categories_to_stores` VALUES (45,0);
-INSERT INTO `ac_categories_to_stores` VALUES (46,0);
-INSERT INTO `ac_categories_to_stores` VALUES (47,0);
-INSERT INTO `ac_categories_to_stores` VALUES (48,0);
-INSERT INTO `ac_categories_to_stores` VALUES (49,0);
-INSERT INTO `ac_categories_to_stores` VALUES (50,0);
-INSERT INTO `ac_categories_to_stores` VALUES (51,0);
-INSERT INTO `ac_categories_to_stores` VALUES (52,0);
-INSERT INTO `ac_categories_to_stores` VALUES (53,0);
-INSERT INTO `ac_categories_to_stores` VALUES (54,0);
-INSERT INTO `ac_categories_to_stores` VALUES (58,0);
-INSERT INTO `ac_categories_to_stores` VALUES (59,0);
-INSERT INTO `ac_categories_to_stores` VALUES (60,0);
-INSERT INTO `ac_categories_to_stores` VALUES (61,0);
-INSERT INTO `ac_categories_to_stores` VALUES (62,0);
-INSERT INTO `ac_categories_to_stores` VALUES (63,0);
-INSERT INTO `ac_categories_to_stores` VALUES (64,0);
-INSERT INTO `ac_categories_to_stores` VALUES (65,0);
-INSERT INTO `ac_categories_to_stores` VALUES (66,0);
-INSERT INTO `ac_categories_to_stores` VALUES (67,0);
-INSERT INTO `ac_categories_to_stores` VALUES (68,0);
-INSERT INTO `ac_categories_to_stores` VALUES (69,0);
-INSERT INTO `ac_categories_to_stores` VALUES (70,0);
+INSERT INTO `ac_categories_to_stores`
+VALUES (36,0),
+(37,0),
+(38,0),
+(39,0),
+(40,0),
+(41,0),
+(42,0),
+(43,0),
+(44,0),
+(45,0),
+(46,0),
+(47,0),
+(48,0),
+(49,0),
+(50,0),
+(51,0),
+(52,0),
+(53,0),
+(54,0),
+(58,0),
+(59,0),
+(60,0),
+(61,0),
+(62,0),
+(63,0),
+(64,0),
+(65,0),
+(66,0),
+(67,0),
+(68,0),
+(69,0),
+(70,0);
 
 --
 -- Dumping data for table `category_descriptions`
 --
 
-INSERT INTO `ac_category_descriptions` VALUES (43,1,'Skincare','','','&lt;p&gt;\r\n	Products from award-winning skin care brands&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (41,1,'Lips','','','');
-INSERT INTO `ac_category_descriptions` VALUES (42,1,'Nails','','','');
-INSERT INTO `ac_category_descriptions` VALUES (38,1,'Face','','','');
-INSERT INTO `ac_category_descriptions` VALUES (39,1,'Eyes','','','');
-INSERT INTO `ac_category_descriptions` VALUES (36,1,'Makeup','Makeup','','&lt;p&gt;\r\n	All your makeup needs, from foundation to eye shadow in hundreds of different assortments and colors.&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (40,1,'Cheeks','','','');
-INSERT INTO `ac_category_descriptions` VALUES (37,1,'Value Sets','value sets makeup','','');
-INSERT INTO `ac_category_descriptions` VALUES (44,1,'Sun','','','');
-INSERT INTO `ac_category_descriptions` VALUES (45,1,'Gift Ideas &amp; Sets','','','');
-INSERT INTO `ac_category_descriptions` VALUES (46,1,'Face','','','&lt;p&gt;\r\n	Find face skin care solutions&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (47,1,'Eyes','','','');
-INSERT INTO `ac_category_descriptions` VALUES (48,1,'Hands &amp; Nails','','','&lt;p&gt;\r\n	Keep your hands looking fresh&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (49,1,'Fragrance','','','&lt;p&gt;\r\n	Looking for a new scent? Check out our fragrance&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (50,1,'Women','','','&lt;p&gt;\r\n	Fragrance for Women&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (51,1,'Men','','','');
-INSERT INTO `ac_category_descriptions` VALUES (52,1,'Hair Care','','','&lt;p&gt;\r\n	The widest range of premium hair products&lt;/p&gt;\r\n');
-INSERT INTO `ac_category_descriptions` VALUES (53,1,'Shampoo','','','');
-INSERT INTO `ac_category_descriptions` VALUES (54,1,'Conditioner','','','');
-INSERT INTO `ac_category_descriptions` VALUES (58,1,'Men','','','');
-INSERT INTO `ac_category_descriptions` VALUES (59,1,'Fragrance Sets','','','');
-INSERT INTO `ac_category_descriptions` VALUES (60,1,'Skincare','','','');
-INSERT INTO `ac_category_descriptions` VALUES (61,1,'Pre-Shave &amp; Shaving','','','');
-INSERT INTO `ac_category_descriptions` VALUES (62,1,'Post-Shave &amp; Moisturizers','','','');
-INSERT INTO `ac_category_descriptions` VALUES (63,1,'Body &amp; Shower','','','');
-INSERT INTO `ac_category_descriptions` VALUES (64,1,'Bath &amp; Body','','','');
-INSERT INTO `ac_category_descriptions` VALUES (65,1,'Books','','','Find the Items You&amp;#39;d Like to read');
-INSERT INTO `ac_category_descriptions` VALUES (66,1,'Audio CD','','','');
-INSERT INTO `ac_category_descriptions` VALUES (67,1,'Paperback','','','');
-INSERT INTO `ac_category_descriptions` VALUES (68,1,'Apparel &amp; accessories','','','');
-INSERT INTO `ac_category_descriptions` VALUES (69,1,'Shoes','','','');
-INSERT INTO `ac_category_descriptions` VALUES (70,1,'T-shirts','','','Shop men&amp;#39;s T-shirts');
+INSERT INTO `ac_category_descriptions`
+VALUES
+(43,1,'Skincare','','','&lt;p&gt;\r\n	Products from award-winning skin care brands&lt;/p&gt;\r\n'),
+(41,1,'Lips','','',''),
+(42,1,'Nails','','',''),
+(38,1,'Face','','',''),
+(39,1,'Eyes','','',''),
+(36,1,'Makeup','Makeup','','&lt;p&gt;\r\n	All your makeup needs, from foundation to eye shadow in hundreds of different assortments and colors.&lt;/p&gt;\r\n'),
+(40,1,'Cheeks','','',''),
+(37,1,'Value Sets','value sets makeup','',''),
+(44,1,'Sun','','',''),
+(45,1,'Gift Ideas &amp; Sets','','',''),
+(46,1,'Face','','','&lt;p&gt;\r\n	Find face skin care solutions&lt;/p&gt;\r\n'),
+(47,1,'Eyes','','',''),
+(48,1,'Hands &amp; Nails','','','&lt;p&gt;\r\n	Keep your hands looking fresh&lt;/p&gt;\r\n'),
+(49,1,'Fragrance','','','&lt;p&gt;\r\n	Looking for a new scent? Check out our fragrance&lt;/p&gt;\r\n'),
+(50,1,'Women','','','&lt;p&gt;\r\n	Fragrance for Women&lt;/p&gt;\r\n'),
+(51,1,'Men','','',''),
+(52,1,'Hair Care','','','&lt;p&gt;\r\n	The widest range of premium hair products&lt;/p&gt;\r\n'),
+(53,1,'Shampoo','','',''),
+(54,1,'Conditioner','','',''),
+(58,1,'Men','','',''),
+(59,1,'Fragrance Sets','','',''),
+(60,1,'Skincare','','',''),
+(61,1,'Pre-Shave &amp; Shaving','','',''),
+(62,1,'Post-Shave &amp; Moisturizers','','',''),
+(63,1,'Body &amp; Shower','','',''),
+(64,1,'Bath &amp; Body','','',''),
+(65,1,'Books','','','Find the Items You&amp;#39;d Like to read'),
+(66,1,'Audio CD','','',''),
+(67,1,'Paperback','','',''),
+(68,1,'Apparel &amp; accessories','','',''),
+(69,1,'Shoes','','',''),
+(70,1,'T-shirts','','','Shop men&amp;#39;s T-shirts');
 
 
---
--- Dumping data for table `coupon_descriptions`
---
 
-INSERT INTO `ac_coupon_descriptions` VALUES (4,1,'Coupon (-10%)','10% Discount');
-INSERT INTO `ac_coupon_descriptions` VALUES (5,1,'Coupon (Free Shipping)','Free Shipping');
-INSERT INTO `ac_coupon_descriptions` VALUES (6,1,'Coupon (-10.00)','Fixed Amount Discount');
 
 --
 -- Dumping data for table `coupons`
@@ -173,13 +153,32 @@ INSERT INTO `ac_coupons`
 VALUES
  ( 6, '1111', 'F', 10.0000, 0, 0, 10.0000, '2015-01-01', '2016-01-01', 10, '10', 1, NOW());
 
+--
+-- Dumping data for table `coupon_descriptions`
+--
+
+INSERT INTO `ac_coupon_descriptions` VALUES (4,1,'Coupon (-10%)','10% Discount');
+INSERT INTO `ac_coupon_descriptions` VALUES (5,1,'Coupon (Free Shipping)','Free Shipping');
+INSERT INTO `ac_coupon_descriptions` VALUES (6,1,'Coupon (-10.00)','Fixed Amount Discount');
+
+
+
 
 --
--- Dumping data for table `coupons_products`
+-- Dumping data for table `custom_blocks`
 --
 
-INSERT INTO `ac_coupons_products` VALUES (8,6,68);
-
+INSERT INTO `ac_custom_blocks` VALUES (1,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (2,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (3,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (12,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (13,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (11,23,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (9,23,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (10,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (14,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (15,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
+INSERT INTO `ac_custom_blocks` VALUES (16,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
 --
 -- Dumping data for table `block_layouts`
 --
@@ -227,21 +226,7 @@ VALUES
 (2032,	19,	17,	13,	2019,	10,	1,	NOW(),	NOW()),
 (2033,	19,	17,	16,	2019,	30,	1,	NOW(),	NOW()),
 (2034,	19,	17,	15,	2019,	60,	1,	NOW(),	NOW());
---
--- Dumping data for table `custom_blocks`
---
 
-INSERT INTO `ac_custom_blocks` VALUES (1,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (2,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (3,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (12,20,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (13,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (11,23,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (9,23,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (10,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (14,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (15,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
-INSERT INTO `ac_custom_blocks` VALUES (16,17,'2015-06-12 09:56:24','2015-06-12 09:56:24');
 
 --
 -- Dumping data for table `block_descriptions`
@@ -292,11 +277,22 @@ VALUES
 (13,0,'qqqqqq','qqqqqq','1@abantecart','1@abantecart','55 555 5555 5555','','','6b006ba67f3c172e146991a2ad46d865','a:1:{s:3:\"97.\";i:1;}',NULL,0,12,1,1,1,'109.104.166.98','2013-09-08 15:28:20','2015-06-12 09:56:24');
 
 --
--- Dumping data for table `download_descriptions`
+-- Dumping data for table `addresses`
 --
 
-INSERT INTO `ac_download_descriptions` VALUES (1,1,'Audio CD1');
-INSERT INTO `ac_download_descriptions` VALUES (2,1,'audio sample mp3');
+INSERT INTO `ac_addresses` VALUES (1,2,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616);
+INSERT INTO `ac_addresses` VALUES (2,3,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648);
+INSERT INTO `ac_addresses` VALUES (3,4,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616);
+INSERT INTO `ac_addresses` VALUES (4,5,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660);
+INSERT INTO `ac_addresses` VALUES (5,6,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616);
+INSERT INTO `ac_addresses` VALUES (6,7,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634);
+INSERT INTO `ac_addresses` VALUES (7,8,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650);
+INSERT INTO `ac_addresses` VALUES (8,9,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648);
+INSERT INTO `ac_addresses` VALUES (9,10,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648);
+INSERT INTO `ac_addresses` VALUES (10,11,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666);
+INSERT INTO `ac_addresses` VALUES (11,12,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616);
+INSERT INTO `ac_addresses` VALUES (12,13,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
+
 
 --
 -- Dumping data for table `downloads`
@@ -304,6 +300,13 @@ INSERT INTO `ac_download_descriptions` VALUES (2,1,'audio sample mp3');
 
 INSERT INTO `ac_downloads` VALUES (1,'download/18/76/4.mp3','audio-cd.mp3',50,NULL,0,'order_status',5,0,1,'2015-06-12 10:24:20','2015-06-12 10:24:20');
 INSERT INTO `ac_downloads` VALUES (2,'download/18/76/5.mp3','sample.mp3',NULL,NULL,0,'before_order',0,0,1,'2015-06-12 10:32:17','2015-06-12 10:32:17');
+
+--
+-- Dumping data for table `download_descriptions`
+--
+
+INSERT INTO `ac_download_descriptions` VALUES (1,1,'Audio CD1');
+INSERT INTO `ac_download_descriptions` VALUES (2,1,'audio sample mp3');
 
 --
 -- Dumping data for table `global_attributes`
@@ -446,6 +449,79 @@ INSERT INTO `ac_manufacturers_to_stores` VALUES (17,0);
 INSERT INTO `ac_manufacturers_to_stores` VALUES (18,0);
 INSERT INTO `ac_manufacturers_to_stores` VALUES (19,0);
 INSERT INTO `ac_manufacturers_to_stores` VALUES (20,0);
+
+--
+-- Dumping data for table `orders`
+--
+
+
+INSERT INTO `ac_orders` (
+`order_id`,
+`invoice_id`,
+`invoice_prefix`,
+`store_id`,
+`store_name`,
+`store_url`,
+`customer_id`,
+`customer_group_id`,
+`firstname`,
+`lastname`,
+`telephone`,
+`fax`,
+`email`,
+`shipping_firstname`,
+`shipping_lastname`,
+`shipping_company`,
+`shipping_address_1`,
+`shipping_address_2`,
+`shipping_city`,
+`shipping_postcode`,
+`shipping_zone`,
+`shipping_zone_id`,
+`shipping_country`,
+`shipping_country_id`,
+`shipping_address_format`,
+`shipping_method`,
+`payment_firstname`,
+`payment_lastname`,
+`payment_company`,
+`payment_address_1`,
+`payment_address_2`,
+`payment_city`,
+`payment_postcode`,
+`payment_zone`,
+`payment_zone_id`,
+`payment_country`,
+`payment_country_id`,
+`payment_address_format`,
+`payment_method`,
+`comment`,
+`total`,
+`order_status_id`,
+`language_id`,
+`currency_id`,
+`currency`,
+`value`,
+`coupon_id`,
+`date_added`,
+`date_modified`,
+`ip`,
+`payment_method_data`
+)
+VALUES
+(1,0,'',0,'Your Store','http://localhost/',1,1,'fdsfdsf','czx','(092) 222-2222','','demo@abantecart.com','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Flat Shipping Rate','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Cash On Delivery','','1585.4400',1,1,1,'GBP','1.00000000',0,'0000-00-00 00:00:00','0000-00-00 00:00:00','127.0.0.1',''),
+(2,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','','','','','','','','',0,'',0,'','','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','418.8100',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(3,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Flat Shipping Rate','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','Please ASAP','246.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(4,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','','','','','','','','',0,'',0,'','','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','','310.5270',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(5,0,'',0,'Web Store Name','demo',3,1,'Keely','Mccoy','+44 1324 483784 ','','keelymccoy@abantecart.com','Keely','Mccoy','','4842 Amet','','Grangemouth','','Gloucestershire',3552,'United Kingdom',222,'','Flat Shipping Rate','Keely','Mccoy','','4842 Amet','','Grangemouth','','Gloucestershire',3552,'United Kingdom',222,'','Cash On Delivery','','686.0925',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(6,0,'',0,'Web Store Name','demo',2,1,'Juliana','Davis','+44 1688 308321','','julidavis@abantecart.com','','','','','','','','',0,'',0,'','','Juliana','Davis','','Highlands and Islands PA75 6QE','','Isle of Mull','','Highlands',3559,'United Kingdom',222,'','Cash On Delivery','Bulgari','218.0850',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(7,0,'',0,'Web Store Name','demo',9,1,'Carlos','Compton','+1 867-874-22391','','carloscmpton@abantecart.com','','','','','','','','',0,'',0,'','','Carlos','Compton','','31 Capital Drive','','Hay River','','Nova Scotia',608,'Canada',38,'','Cash On Delivery','','175.7700',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(8,0,'',0,'Web Store Name','demo',8,1,'Bruce','Rosarini','+1 807-346-10763','','brucerosarini@abantecart.com','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','62.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(9,0,'',0,'Web Store Name','demo',8,1,'Bruce','Rosarini','+1 807-346-10763','','brucerosarini@abantecart.com','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','352.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(10,0,'',0,'Web Store Name','demo',12,1,'Allen','Waters','+1 540-985-59700','','allenwaters@abantecart.com','','','','','','','','',0,'',0,'','','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','155.1550',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(11,0,'',0,'Web Store Name','demo',12,1,'Allen','Waters','+1 540-985-59700','','allenwaters@abantecart.com','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','21.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
+(12,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','487.3750',2,1,3,'GBP','0.63820000',0,now(), now(),'171.98.12.12',''),
+(13,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','626.9600',1,1,3,'GBP','0.63820000',0,now(), now(),'171.98.12.12','');
 
 --
 -- Dumping data for table `order_history`
@@ -594,84 +670,92 @@ INSERT INTO `ac_order_totals` VALUES (41,13,'Retail 8.5%:','£31.25',48.9600,5,'
 INSERT INTO `ac_order_totals` VALUES (42,13,'Total:','£400.13',626.9600,6,'total','total');
 
 --
--- Dumping data for table `orders`
---
-
-
-INSERT INTO `ac_orders` (
-`order_id`,
-`invoice_id`,
-`invoice_prefix`,
-`store_id`,
-`store_name`,
-`store_url`,
-`customer_id`,
-`customer_group_id`,
-`firstname`,
-`lastname`,
-`telephone`,
-`fax`,
-`email`,
-`shipping_firstname`,
-`shipping_lastname`,
-`shipping_company`,
-`shipping_address_1`,
-`shipping_address_2`,
-`shipping_city`,
-`shipping_postcode`,
-`shipping_zone`,
-`shipping_zone_id`,
-`shipping_country`,
-`shipping_country_id`,
-`shipping_address_format`,
-`shipping_method`,
-`payment_firstname`,
-`payment_lastname`,
-`payment_company`,
-`payment_address_1`,
-`payment_address_2`,
-`payment_city`,
-`payment_postcode`,
-`payment_zone`,
-`payment_zone_id`,
-`payment_country`,
-`payment_country_id`,
-`payment_address_format`,
-`payment_method`,
-`comment`,
-`total`,
-`order_status_id`,
-`language_id`,
-`currency_id`,
-`currency`,
-`value`,
-`coupon_id`,
-`date_added`,
-`date_modified`,
-`ip`,
-`payment_method_data`
-)
-VALUES
-(1,0,'',0,'Your Store','http://localhost/',1,1,'fdsfdsf','czx','(092) 222-2222','','demo@abantecart.com','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Flat Shipping Rate','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Cash On Delivery','','1585.4400',1,1,1,'GBP','1.00000000',0,'0000-00-00 00:00:00','0000-00-00 00:00:00','127.0.0.1',''),
-(2,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','','','','','','','','',0,'',0,'','','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','418.8100',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(3,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Flat Shipping Rate','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','Please ASAP','246.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(4,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','','','','','','','','',0,'',0,'','','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','','310.5270',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(5,0,'',0,'Web Store Name','demo',3,1,'Keely','Mccoy','+44 1324 483784 ','','keelymccoy@abantecart.com','Keely','Mccoy','','4842 Amet','','Grangemouth','','Gloucestershire',3552,'United Kingdom',222,'','Flat Shipping Rate','Keely','Mccoy','','4842 Amet','','Grangemouth','','Gloucestershire',3552,'United Kingdom',222,'','Cash On Delivery','','686.0925',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(6,0,'',0,'Web Store Name','demo',2,1,'Juliana','Davis','+44 1688 308321','','julidavis@abantecart.com','','','','','','','','',0,'',0,'','','Juliana','Davis','','Highlands and Islands PA75 6QE','','Isle of Mull','','Highlands',3559,'United Kingdom',222,'','Cash On Delivery','Bulgari','218.0850',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(7,0,'',0,'Web Store Name','demo',9,1,'Carlos','Compton','+1 867-874-22391','','carloscmpton@abantecart.com','','','','','','','','',0,'',0,'','','Carlos','Compton','','31 Capital Drive','','Hay River','','Nova Scotia',608,'Canada',38,'','Cash On Delivery','','175.7700',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(8,0,'',0,'Web Store Name','demo',8,1,'Bruce','Rosarini','+1 807-346-10763','','brucerosarini@abantecart.com','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','62.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(9,0,'',0,'Web Store Name','demo',8,1,'Bruce','Rosarini','+1 807-346-10763','','brucerosarini@abantecart.com','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Bruce','Rosarini','','61 Cumberland ST','','Thunder Bay','','Minnesota',3646,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','352.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(10,0,'',0,'Web Store Name','demo',12,1,'Allen','Waters','+1 540-985-59700','','allenwaters@abantecart.com','','','','','','','','',0,'',0,'','','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','155.1550',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(11,0,'',0,'Web Store Name','demo',12,1,'Allen','Waters','+1 540-985-59700','','allenwaters@abantecart.com','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Allen','Waters','','110 Shenandoah Avenue','','Roanoke','','Virginia',3673,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','21.0000',1,1,1,'USD','1.00000000',0,now(), now(),'109.104.166.98',''),
-(12,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','487.3750',2,1,3,'GBP','0.63820000',0,now(), now(),'171.98.12.12',''),
-(13,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Flat Shipping Rate','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','626.9600',1,1,3,'GBP','0.63820000',0,now(), now(),'171.98.12.12','');
-
---
 -- Dumping data for table `order_downloads_history`
 --
 
 INSERT INTO `ac_order_downloads_history` VALUES (1,0,0,0,'download/18/76/5.mp3','sample.mp3',2,100,'2015-07-08 10:36:06');
+--
+-- Dumping data for table `products`
+--
 
+INSERT INTO `ac_products`
+( `product_id`,`model`,  `sku`,  `location`,  `quantity`,  `stock_status_id`,  `manufacturer_id`,  `shipping`,  `ship_individually`,  `free_shipping`,
+`shipping_price`,  `price`,  `tax_class_id`,  `date_available`,  `weight`,  `weight_class_id`,  `length`,  `width`,  `height`,  `length_class_id`,  `status`,
+`viewed`,  `sort_order`,  `subtract`,  `minimum`,  `maximum`,  `cost`,  `call_to_order`,  `date_added`,  `date_modified`)
+VALUES
+(68,'108681','','',1000,1,15,1,0,0,0.0000,42.0000,1,'2013-08-30',0.11,1,0.00,0.00,0.00,0,1,0,1,1,1,0,24.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(65,'427847','','',1000,1,15,1,0,0,0.0000,105.0000,1,'2013-08-30',70.00,2,0.00,0.00,0.00,0,1,21,1,0,1,0,99.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(66,'556240','','',145,1,12,1,0,0,0.0000,38.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,4,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(67,'463686','','',0,2,15,1,0,0,0.0000,34.5000,1,'2013-08-30',0.30,1,0.00,0.00,0.00,2,1,6,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-06-22 13:00:31'),
+(50,'558003','','',99,1,11,1,0,0,0.0000,29.5000,1,'2013-08-29',75.00,2,0.00,0.00,0.00,0,1,8,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(51,'483857','','',98,1,12,1,0,0,0.0000,30.0000,1,'2013-08-29',0.05,1,0.00,0.00,0.00,0,1,7,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(52,'523755','','',99,1,12,1,0,0,0.0000,28.0000,0,'2013-08-29',0.80,1,0.00,0.00,0.00,0,1,3,1,1,2,0,0.0000,0,'2015-06-12 09:56:25','2015-06-22 13:06:09'),
+(53,'380440','','',1000,3,15,1,0,0,0.0000,38.5000,1,'2013-08-29',100.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(54,'74144','','',999,1,15,1,0,0,0.0000,25.0000,1,'2013-08-29',0.15,1,0.00,0.00,0.00,0,1,13,1,1,1,0,0.0000,1,'2015-06-12 09:56:25','2015-06-22 12:51:08'),
+(55,'tw152236','','',1000,1,15,1,0,0,0.0000,29.0000,1,'2013-08-29',0.08,1,0.00,0.00,0.00,0,1,6,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-07-08 10:47:41'),
+(56,'35190','','',1000,1,15,1,0,0,0.0000,29.5000,1,'2013-08-29',85.00,2,0.00,0.00,0.00,0,1,9,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(57,'117148','','',1000,1,15,1,0,0,0.0000,29.5000,1,'2013-08-29',0.20,1,0.00,0.00,0.00,0,1,12,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(58,'374002','','',0,2,12,1,0,0,0.0000,34.0000,1,'2013-08-29',25.00,2,0.00,0.00,0.00,0,1,3,1,1,1,0,10.0000,0,'2015-06-12 09:56:25','2015-06-22 12:58:27'),
+(59,'14.50','','',1000,1,11,1,0,0,0.0000,5.0000,1,'2013-08-29',75.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(60,'112423','','',1000,1,11,1,0,0,0.0000,15.0000,1,'2013-08-30',0.30,2,0.00,0.00,0.00,0,1,2,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(61,'529071','','',1000,1,15,1,0,0,0.0000,48.0000,1,'2013-08-30',0.13,2,0.00,0.00,0.00,0,1,4,1,0,1,0,29.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(62,'601232','','',1000,1,13,1,0,0,0.0000,14.0000,1,'2013-08-30',0.50,1,0.00,0.00,0.00,0,1,3,1,0,1,0,8.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(63,'374622','','',1000,1,14,1,0,0,0.0000,88.0000,1,'2013-08-30',0.75,1,0.00,0.00,0.00,0,1,3,1,0,1,0,55.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(64,'497303','','',1000,1,13,1,0,0,0.0000,50.0000,1,'2013-08-30',150.00,2,0.00,0.00,0.00,0,1,8,1,1,1,0,33.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(69,'SCND001','','',1000,1,16,1,0,0,0.0000,19.0000,1,'2013-08-30',0.25,1,0.00,0.00,0.00,0,1,6,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(70,'522823','','',1000,1,14,1,0,0,0.0000,31.0000,1,'2013-08-30',0.25,2,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(71,'PCND001','','',1000,1,17,1,0,0,0.0000,11.4500,1,'2013-08-30',0.30,1,0.00,0.00,0.00,0,1,2,1,1,1,0,5.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(72,'PCND002','','',1000,1,17,1,0,0,0.0000,27.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,4,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(73,'PCND003','','',1000,1,17,1,0,0,0.0000,33.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,1,1,1,1,0,21.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(74,'PCND004','','',10000,1,17,1,0,0,0.0000,4.0000,1,'2013-08-30',0.35,1,0.00,0.00,0.00,0,1,3,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(75,'DMBW0012','','',1000,1,18,1,0,0,0.0000,6.7000,1,'2013-08-30',0.20,1,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(76,'DMBW0013','1235B','',99,1,18,1,0,0,0.0000,7.2000,1,'2013-08-30',0.20,1,0.00,0.00,0.00,0,1,5,1,1,1,0,4.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(77,'DMBW0014','1234B','',1000,1,18,1,0,0,0.0000,6.0000,1,'2013-08-30',0.30,1,0.00,0.00,0.00,0,1,9,1,1,1,0,2.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(78,'Cl0001','','',1000,1,13,1,0,0,0.0000,29.0000,1,'2013-08-30',125.00,2,0.00,0.00,0.00,0,1,10,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(79,'CKGS01','','',1000,1,13,1,0,0,0.0000,36.0000,1,'2013-08-30',250.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,28.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(80,'GRM001','','',850,1,19,1,0,0,0.0000,59.0000,1,'2013-09-01',80.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,33.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(81,'GRM002','','',1000,1,19,1,0,0,0.0000,61.0000,1,'2013-09-01',150.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-22 12:41:31'),
+(82,'GRM003','','',1000,1,19,1,0,0,0.0000,42.0000,1,'2013-09-01',100.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(83,'GRM004','','',1000,1,19,1,0,0,0.0000,37.5000,1,'2013-09-01',15.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(84,'GRM005','','',1000,1,19,1,0,0,0.0000,30.0000,1,'2013-09-01',175.00,2,0.00,0.00,0.00,0,1,7,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(85,'Ck0010','','',1000,1,13,1,0,0,0.0000,45.0000,1,'2013-09-01',0.08,5,0.00,0.00,0.00,0,1,3,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(86,'CK0009','','',1,1,13,1,0,0,0.0000,44.1000,1,'2013-09-04',0.17,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(87,'CK0010','','',10000,1,13,1,0,0,0.0000,37.5000,1,'2013-09-04',0.20,1,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(88,'CK0011','','',1,1,13,1,0,0,0.0000,31.0000,1,'2013-09-04',340.00,2,0.00,0.00,0.00,0,1,1,1,1,1,0,19.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(89,'CK0012','','',1000,3,13,1,0,0,0.0000,62.0000,1,'2013-09-04',0.12,1,0.00,0.00,0.00,0,1,5,1,1,1,0,40.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(90,'CK0013','','',1000,1,13,1,0,0,0.0000,39.0000,1,'2013-09-04',0.33,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(91,'BVLG001','','',1000,1,14,1,0,0,0.0000,29.0000,1,'2013-09-04',0.16,2,0.00,0.00,0.00,0,1,2,1,1,1,0,20.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(92,'BVLG002','','',1000,1,14,1,0,0,0.0000,57.0000,1,'2013-09-04',0.40,5,0.00,0.00,0.00,0,1,7,1,1,1,0,44.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(93,'BVLG003','','',1000,1,14,1,0,0,0.0000,280.0000,1,'2013-09-04',0.30,5,0.00,0.00,0.00,0,1,8,1,1,1,0,100.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(94,'GRMBC001','','',589,1,19,1,0,0,0.0000,263.0000,1,'2013-09-04',0.15,1,0.00,0.00,0.00,0,1,3,1,1,1,0,125.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(95,'GRMBC002','','',100,3,19,1,0,0,0.0000,104.0000,1,'2013-09-04',0.15,1,0.00,0.00,0.00,0,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(96,'GRMBC003','','',100,1,19,1,0,0,0.0000,82.0000,1,'2013-09-04',80.00,2,0.00,0.00,0.00,0,1,8,1,0,2,0,67.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(97,'GRMBC004','','',1,1,19,1,0,0,0.0000,126.0000,1,'2013-09-04',20.00,2,0.00,0.00,0.00,0,1,9,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(98,'GRMBC005','','',1000,1,19,1,0,0,0.0000,98.0000,1,'2013-09-04',40.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,87.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(99,'GRMBC006','','',1000,1,19,1,0,0,0.0000,137.0000,1,'2013-09-04',0.09,6,0.00,0.00,0.00,0,1,12,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(100,'GRMBC007','','',1000,1,19,1,0,0,0.0000,10.0000,1,'2013-09-04',15.00,2,0.00,0.00,0.00,0,0,13,1,1,4,0,8.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(101,'Pro-V','','',1000,1,17,1,0,0,0.0000,8.2300,1,'2012-03-13',8.45,6,2.00,3.00,15.00,1,1,35,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(102,'PRF00269','','',1000,1,20,1,0,0,0.0000,105.0000,1,'2012-03-14',2.50,6,0.00,0.00,0.00,3,1,6,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(103,'PRF00270','','',100,1,14,1,0,0,0.0000,78.0000,1,'2012-03-14',80.00,2,0.00,0.00,0.00,3,1,4,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(104,'PRF00271','','',1000,1,13,1,0,0,0.0000,49.0000,1,'2012-03-14',0.00,5,0.00,0.00,0.00,3,1,19,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(105,'PRF00273','','',100,2,14,1,0,0,0.0000,55.0000,0,'2012-03-14',0.00,5,0.00,0.00,0.00,3,1,18,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(106,'PRF00274','','',185,1,14,1,0,0,0.0000,70.0000,1,'2012-03-14',80.00,5,0.00,0.00,0.00,3,1,8,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(107,'PRF00274','','',0,2,15,1,0,0,0.0000,66.0000,1,'2012-03-14',7.00,6,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(108,'PRF00268','','',420,1,15,1,0,0,0.0000,125.0000,1,'2012-03-14',2.00,6,0.00,0.00,0.00,3,1,6,1,1,2,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(109,'PRF00279','','',1,1,15,1,0,0,0.0000,84.0000,1,'2012-03-14',50.00,6,3.00,2.00,10.00,1,1,6,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(110,'PRF00278','','',1000,1,20,1,0,0,0.0000,90.0000,1,'2012-03-14',0.00,6,0.00,0.00,0.00,3,1,21,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
+(111,'','','',5,1,0,1,0,0,0.0000,85.0000,1,'2015-06-11',0.20,1,23.60,17.80,5.10,1,1,13,1,1,1,0,0.0000,0,'2015-06-12 10:12:48','2015-07-08 12:41:46'),
+(112,'','','',10,1,0,1,0,1,0.0000,16.2000,1,'2015-06-11',0.12,1,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-12 11:01:46','2015-06-16 11:08:57'),
+(113,'','','',1,1,0,1,0,0,0.0000,9.9900,1,'2015-06-11',0.10,1,12.00,10.00,3.00,1,1,5,1,1,1,0,0.0000,0,'2015-06-12 11:45:22','2015-07-08 12:46:54'),
+(114,'','','',1,1,0,1,0,0,0.0000,7.9900,0,'2015-06-11',0.20,1,15.00,12.00,1.00,1,1,2,1,1,1,0,0.0000,0,'2015-06-12 12:04:56','2015-07-08 10:30:23'),
+(115,'','','',1,1,0,1,0,0,0.0000,110.0000,0,'2015-06-15',300.00,2,26.00,10.00,8.00,1,1,17,1,1,1,0,0.0000,0,'2015-06-16 11:01:53','2015-07-08 10:35:12'),
+(116,'','','',100,1,0,1,0,0,0.0000,26.0000,1,'2015-06-15',1.00,5,8.00,5.00,7.00,3,1,24,1,0,1,0,0.0000,0,'2015-06-16 12:07:12','2015-07-08 10:33:34'),
+(117,'B00OGL2XKO','','',100,1,0,1,0,1,0.0000,78.0000,1,'2015-06-17',0.50,5,7.00,4.00,3.00,3,1,24,1,1,1,0,50.0000,0,'2015-06-18 12:07:38','2015-07-08 12:41:15'),
+(118,'','','',10,1,0,1,0,0,0.0000,26.0000,1,'2015-06-21',222.00,2,5.00,5.00,4.00,3,1,8,1,0,1,0,20.0000,0,'2015-06-22 09:24:11','2015-06-22 09:53:38'),
+(119,'','','',456,1,0,1,0,0,0.0000,9.9900,1,'2015-06-21',400.00,2,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-22 10:16:06','2015-07-08 10:31:45'),
+(120,'B00UG4NFNY','','',1,1,0,1,0,0,0.0000,6.7500,0,'2015-06-21',100.00,2,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-22 10:37:31','2015-07-08 10:32:12'),
+(121,'','','',17,1,19,1,0,0,0.0000,32.0000,1,'2015-06-21',120.00,2,0.00,0.00,0.00,3,1,11,1,0,1,10,0.0000,0,'2015-06-22 12:00:53','2015-07-08 12:41:29'),
+(122,'JDSK36','','',155,1,0,1,0,0,0.0000,21.0000,1,'2015-06-21',140.00,2,23.00,20.00,2.00,1,1,5,1,0,1,0,0.0000,0,'2015-06-22 12:28:25','2015-07-08 10:33:00');
 --
 -- Dumping data for table `product_descriptions`
 --
@@ -1171,89 +1255,12 @@ INSERT INTO `ac_product_tags` VALUES (121,'fashion',1);
 INSERT INTO `ac_product_tags` VALUES (122,'fashion',1);
 INSERT INTO `ac_product_tags` VALUES (122,'grey',1);
 
---
--- Dumping data for table `products`
---
 
-INSERT INTO `ac_products`
-( `product_id`,`model`,  `sku`,  `location`,  `quantity`,  `stock_status_id`,  `manufacturer_id`,  `shipping`,  `ship_individually`,  `free_shipping`,
-`shipping_price`,  `price`,  `tax_class_id`,  `date_available`,  `weight`,  `weight_class_id`,  `length`,  `width`,  `height`,  `length_class_id`,  `status`,
-`viewed`,  `sort_order`,  `subtract`,  `minimum`,  `maximum`,  `cost`,  `call_to_order`,  `date_added`,  `date_modified`)
-VALUES
-(68,'108681','','',1000,1,15,1,0,0,0.0000,42.0000,1,'2013-08-30',0.11,1,0.00,0.00,0.00,0,1,0,1,1,1,0,24.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(65,'427847','','',1000,1,15,1,0,0,0.0000,105.0000,1,'2013-08-30',70.00,2,0.00,0.00,0.00,0,1,21,1,0,1,0,99.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(66,'556240','','',145,1,12,1,0,0,0.0000,38.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,4,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(67,'463686','','',0,2,15,1,0,0,0.0000,34.5000,1,'2013-08-30',0.30,1,0.00,0.00,0.00,2,1,6,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-06-22 13:00:31'),
-(50,'558003','','',99,1,11,1,0,0,0.0000,29.5000,1,'2013-08-29',75.00,2,0.00,0.00,0.00,0,1,8,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(51,'483857','','',98,1,12,1,0,0,0.0000,30.0000,1,'2013-08-29',0.05,1,0.00,0.00,0.00,0,1,7,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(52,'523755','','',99,1,12,1,0,0,0.0000,28.0000,0,'2013-08-29',0.80,1,0.00,0.00,0.00,0,1,3,1,1,2,0,0.0000,0,'2015-06-12 09:56:25','2015-06-22 13:06:09'),
-(53,'380440','','',1000,3,15,1,0,0,0.0000,38.5000,1,'2013-08-29',100.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(54,'74144','','',999,1,15,1,0,0,0.0000,25.0000,1,'2013-08-29',0.15,1,0.00,0.00,0.00,0,1,13,1,1,1,0,0.0000,1,'2015-06-12 09:56:25','2015-06-22 12:51:08'),
-(55,'tw152236','','',1000,1,15,1,0,0,0.0000,29.0000,1,'2013-08-29',0.08,1,0.00,0.00,0.00,0,1,6,1,1,1,0,22.0000,0,'2015-06-12 09:56:25','2015-07-08 10:47:41'),
-(56,'35190','','',1000,1,15,1,0,0,0.0000,29.5000,1,'2013-08-29',85.00,2,0.00,0.00,0.00,0,1,9,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(57,'117148','','',1000,1,15,1,0,0,0.0000,29.5000,1,'2013-08-29',0.20,1,0.00,0.00,0.00,0,1,12,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(58,'374002','','',0,2,12,1,0,0,0.0000,34.0000,1,'2013-08-29',25.00,2,0.00,0.00,0.00,0,1,3,1,1,1,0,10.0000,0,'2015-06-12 09:56:25','2015-06-22 12:58:27'),
-(59,'14.50','','',1000,1,11,1,0,0,0.0000,5.0000,1,'2013-08-29',75.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(60,'112423','','',1000,1,11,1,0,0,0.0000,15.0000,1,'2013-08-30',0.30,2,0.00,0.00,0.00,0,1,2,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(61,'529071','','',1000,1,15,1,0,0,0.0000,48.0000,1,'2013-08-30',0.13,2,0.00,0.00,0.00,0,1,4,1,0,1,0,29.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(62,'601232','','',1000,1,13,1,0,0,0.0000,14.0000,1,'2013-08-30',0.50,1,0.00,0.00,0.00,0,1,3,1,0,1,0,8.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(63,'374622','','',1000,1,14,1,0,0,0.0000,88.0000,1,'2013-08-30',0.75,1,0.00,0.00,0.00,0,1,3,1,0,1,0,55.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(64,'497303','','',1000,1,13,1,0,0,0.0000,50.0000,1,'2013-08-30',150.00,2,0.00,0.00,0.00,0,1,8,1,1,1,0,33.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(69,'SCND001','','',1000,1,16,1,0,0,0.0000,19.0000,1,'2013-08-30',0.25,1,0.00,0.00,0.00,0,1,6,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(70,'522823','','',1000,1,14,1,0,0,0.0000,31.0000,1,'2013-08-30',0.25,2,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(71,'PCND001','','',1000,1,17,1,0,0,0.0000,11.4500,1,'2013-08-30',0.30,1,0.00,0.00,0.00,0,1,2,1,1,1,0,5.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(72,'PCND002','','',1000,1,17,1,0,0,0.0000,27.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,4,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(73,'PCND003','','',1000,1,17,1,0,0,0.0000,33.0000,1,'2013-08-30',0.40,1,0.00,0.00,0.00,0,1,1,1,1,1,0,21.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(74,'PCND004','','',10000,1,17,1,0,0,0.0000,4.0000,1,'2013-08-30',0.35,1,0.00,0.00,0.00,0,1,3,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(75,'DMBW0012','','',1000,1,18,1,0,0,0.0000,6.7000,1,'2013-08-30',0.20,1,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(76,'DMBW0013','1235B','',99,1,18,1,0,0,0.0000,7.2000,1,'2013-08-30',0.20,1,0.00,0.00,0.00,0,1,5,1,1,1,0,4.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(77,'DMBW0014','1234B','',1000,1,18,1,0,0,0.0000,6.0000,1,'2013-08-30',0.30,1,0.00,0.00,0.00,0,1,9,1,1,1,0,2.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(78,'Cl0001','','',1000,1,13,1,0,0,0.0000,29.0000,1,'2013-08-30',125.00,2,0.00,0.00,0.00,0,1,10,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(79,'CKGS01','','',1000,1,13,1,0,0,0.0000,36.0000,1,'2013-08-30',250.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,28.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(80,'GRM001','','',850,1,19,1,0,0,0.0000,59.0000,1,'2013-09-01',80.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,33.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(81,'GRM002','','',1000,1,19,1,0,0,0.0000,61.0000,1,'2013-09-01',150.00,2,0.00,0.00,0.00,0,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-22 12:41:31'),
-(82,'GRM003','','',1000,1,19,1,0,0,0.0000,42.0000,1,'2013-09-01',100.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(83,'GRM004','','',1000,1,19,1,0,0,0.0000,37.5000,1,'2013-09-01',15.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(84,'GRM005','','',1000,1,19,1,0,0,0.0000,30.0000,1,'2013-09-01',175.00,2,0.00,0.00,0.00,0,1,7,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(85,'Ck0010','','',1000,1,13,1,0,0,0.0000,45.0000,1,'2013-09-01',0.08,5,0.00,0.00,0.00,0,1,3,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(86,'CK0009','','',1,1,13,1,0,0,0.0000,44.1000,1,'2013-09-04',0.17,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(87,'CK0010','','',10000,1,13,1,0,0,0.0000,37.5000,1,'2013-09-04',0.20,1,0.00,0.00,0.00,0,1,1,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(88,'CK0011','','',1,1,13,1,0,0,0.0000,31.0000,1,'2013-09-04',340.00,2,0.00,0.00,0.00,0,1,1,1,1,1,0,19.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(89,'CK0012','','',1000,3,13,1,0,0,0.0000,62.0000,1,'2013-09-04',0.12,1,0.00,0.00,0.00,0,1,5,1,1,1,0,40.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(90,'CK0013','','',1000,1,13,1,0,0,0.0000,39.0000,1,'2013-09-04',0.33,2,0.00,0.00,0.00,0,1,2,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(91,'BVLG001','','',1000,1,14,1,0,0,0.0000,29.0000,1,'2013-09-04',0.16,2,0.00,0.00,0.00,0,1,2,1,1,1,0,20.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(92,'BVLG002','','',1000,1,14,1,0,0,0.0000,57.0000,1,'2013-09-04',0.40,5,0.00,0.00,0.00,0,1,7,1,1,1,0,44.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(93,'BVLG003','','',1000,1,14,1,0,0,0.0000,280.0000,1,'2013-09-04',0.30,5,0.00,0.00,0.00,0,1,8,1,1,1,0,100.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(94,'GRMBC001','','',589,1,19,1,0,0,0.0000,263.0000,1,'2013-09-04',0.15,1,0.00,0.00,0.00,0,1,3,1,1,1,0,125.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(95,'GRMBC002','','',100,3,19,1,0,0,0.0000,104.0000,1,'2013-09-04',0.15,1,0.00,0.00,0.00,0,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(96,'GRMBC003','','',100,1,19,1,0,0,0.0000,82.0000,1,'2013-09-04',80.00,2,0.00,0.00,0.00,0,1,8,1,0,2,0,67.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(97,'GRMBC004','','',1,1,19,1,0,0,0.0000,126.0000,1,'2013-09-04',20.00,2,0.00,0.00,0.00,0,1,9,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(98,'GRMBC005','','',1000,1,19,1,0,0,0.0000,98.0000,1,'2013-09-04',40.00,2,0.00,0.00,0.00,0,1,2,1,1,1,0,87.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(99,'GRMBC006','','',1000,1,19,1,0,0,0.0000,137.0000,1,'2013-09-04',0.09,6,0.00,0.00,0.00,0,1,12,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(100,'GRMBC007','','',1000,1,19,1,0,0,0.0000,10.0000,1,'2013-09-04',15.00,2,0.00,0.00,0.00,0,0,13,1,1,4,0,8.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(101,'Pro-V','','',1000,1,17,1,0,0,0.0000,8.2300,1,'2012-03-13',8.45,6,2.00,3.00,15.00,1,1,35,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(102,'PRF00269','','',1000,1,20,1,0,0,0.0000,105.0000,1,'2012-03-14',2.50,6,0.00,0.00,0.00,3,1,6,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(103,'PRF00270','','',100,1,14,1,0,0,0.0000,78.0000,1,'2012-03-14',80.00,2,0.00,0.00,0.00,3,1,4,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(104,'PRF00271','','',1000,1,13,1,0,0,0.0000,49.0000,1,'2012-03-14',0.00,5,0.00,0.00,0.00,3,1,19,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(105,'PRF00273','','',100,2,14,1,0,0,0.0000,55.0000,0,'2012-03-14',0.00,5,0.00,0.00,0.00,3,1,18,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(106,'PRF00274','','',185,1,14,1,0,0,0.0000,70.0000,1,'2012-03-14',80.00,5,0.00,0.00,0.00,3,1,8,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(107,'PRF00274','','',0,2,15,1,0,0,0.0000,66.0000,1,'2012-03-14',7.00,6,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(108,'PRF00268','','',420,1,15,1,0,0,0.0000,125.0000,1,'2012-03-14',2.00,6,0.00,0.00,0.00,3,1,6,1,1,2,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(109,'PRF00279','','',1,1,15,1,0,0,0.0000,84.0000,1,'2012-03-14',50.00,6,3.00,2.00,10.00,1,1,6,1,1,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(110,'PRF00278','','',1000,1,20,1,0,0,0.0000,90.0000,1,'2012-03-14',0.00,6,0.00,0.00,0.00,3,1,21,1,0,1,0,0.0000,0,'2015-06-12 09:56:25','2015-06-12 09:56:25'),
-(111,'','','',5,1,0,1,0,0,0.0000,85.0000,1,'2015-06-11',0.20,1,23.60,17.80,5.10,1,1,13,1,1,1,0,0.0000,0,'2015-06-12 10:12:48','2015-07-08 12:41:46'),
-(112,'','','',10,1,0,1,0,1,0.0000,16.2000,1,'2015-06-11',0.12,1,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-12 11:01:46','2015-06-16 11:08:57'),
-(113,'','','',1,1,0,1,0,0,0.0000,9.9900,1,'2015-06-11',0.10,1,12.00,10.00,3.00,1,1,5,1,1,1,0,0.0000,0,'2015-06-12 11:45:22','2015-07-08 12:46:54'),
-(114,'','','',1,1,0,1,0,0,0.0000,7.9900,0,'2015-06-11',0.20,1,15.00,12.00,1.00,1,1,2,1,1,1,0,0.0000,0,'2015-06-12 12:04:56','2015-07-08 10:30:23'),
-(115,'','','',1,1,0,1,0,0,0.0000,110.0000,0,'2015-06-15',300.00,2,26.00,10.00,8.00,1,1,17,1,1,1,0,0.0000,0,'2015-06-16 11:01:53','2015-07-08 10:35:12'),
-(116,'','','',100,1,0,1,0,0,0.0000,26.0000,1,'2015-06-15',1.00,5,8.00,5.00,7.00,3,1,24,1,0,1,0,0.0000,0,'2015-06-16 12:07:12','2015-07-08 10:33:34'),
-(117,'B00OGL2XKO','','',100,1,0,1,0,1,0.0000,78.0000,1,'2015-06-17',0.50,5,7.00,4.00,3.00,3,1,24,1,1,1,0,50.0000,0,'2015-06-18 12:07:38','2015-07-08 12:41:15'),
-(118,'','','',10,1,0,1,0,0,0.0000,26.0000,1,'2015-06-21',222.00,2,5.00,5.00,4.00,3,1,8,1,0,1,0,20.0000,0,'2015-06-22 09:24:11','2015-06-22 09:53:38'),
-(119,'','','',456,1,0,1,0,0,0.0000,9.9900,1,'2015-06-21',400.00,2,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-22 10:16:06','2015-07-08 10:31:45'),
-(120,'B00UG4NFNY','','',1,1,0,1,0,0,0.0000,6.7500,0,'2015-06-21',100.00,2,0.00,0.00,0.00,3,1,5,1,1,1,0,0.0000,0,'2015-06-22 10:37:31','2015-07-08 10:32:12'),
-(121,'','','',17,1,19,1,0,0,0.0000,32.0000,1,'2015-06-21',120.00,2,0.00,0.00,0.00,3,1,11,1,0,1,10,0.0000,0,'2015-06-22 12:00:53','2015-07-08 12:41:29'),
-(122,'JDSK36','','',155,1,0,1,0,0,0.0000,21.0000,1,'2015-06-21',140.00,2,23.00,20.00,2.00,1,1,5,1,0,1,0,0.0000,0,'2015-06-22 12:28:25','2015-07-08 10:33:00');
 
+--
+-- Dumping data for table `coupons_products`
+--
+INSERT INTO `ac_coupons_products` VALUES (1,6,68);
 --
 -- Dumping data for table `products_featured`
 --

@@ -80,7 +80,8 @@ CREATE TABLE `ac_customers` (
   `cart` LONGTEXT COLLATE utf8_general_ci,
   `wishlist` LONGTEXT COLLATE utf8_general_ci,
   `newsletter` int(1) NOT NULL DEFAULT '0',
-  `address_id` int(11) NOT NULL DEFAULT '0', --????? need  to move as default filed to ac_address table
+  --????? need  to move as default filed to ac_address table
+  `address_id` int(11) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL,
   `approved` int(1) NOT NULL DEFAULT '0',
   `customer_group_id` int(11) NOT NULL,
@@ -388,7 +389,7 @@ CREATE TABLE `ac_country_descriptions` (
   `name` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   PRIMARY KEY (`country_id`,`language_id`),
   FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_country_descriptions` (`country_id`, `language_id`, `name`)
@@ -8659,7 +8660,8 @@ CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`,
 DROP TABLE IF EXISTS `ac_categories`;
 CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_id` int(11) DEFAULT NULL, --????? Need to update code to read NULL for root categories.
+  --????? Need to update code to read NULL for root categories.
+  `parent_id` int(11) DEFAULT NULL,
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -8934,8 +8936,8 @@ CREATE TABLE `ac_banner_stat` (
   `store_id` int(11) NOT NULL,
   `user_info` text(1500) DEFAULT '',
   PRIMARY KEY (`rowid`),
-  FOREIGN KEY (`banner_id`) REFERENCES `ac_banners`(`banner_id`) ON DELETE CASCADE ON UPDATE CASCADE
-INDEX `ac_banner_stat_idx` (`banner_id`, `type`, `time`, `store_id`)
+  FOREIGN KEY (`banner_id`) REFERENCES `ac_banners`(`banner_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX `ac_banner_stat_idx` (`banner_id`, `type`, `time`, `store_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -9018,7 +9020,8 @@ CREATE TABLE `ac_orders` (
   `store_id` int(11) NOT NULL DEFAULT '0',
   `store_name` varchar(64) COLLATE utf8_general_ci NOT NULL,
   `store_url` varchar(255) COLLATE utf8_general_ci NOT NULL,
-  `customer_id` int(11) DEFAULT NULL; --????? Need to update code to read NULL for guests.
+  --????? Need to update code to read NULL for guests.
+  `customer_id` int(11) DEFAULT NULL,
   `customer_group_id` int(11) NOT NULL DEFAULT '0',
   `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `lastname` varchar(32) COLLATE utf8_general_ci NOT NULL,
@@ -9065,16 +9068,17 @@ CREATE TABLE `ac_orders` (
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `payment_method_data` text COLLATE utf8_general_ci NOT NULL,
-  PRIMARY KEY (`order_id`, `customer_id`, `order_status_id`)
+  PRIMARY KEY (`order_id`, `order_status_id`),
   FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`),
   FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`),
   FOREIGN KEY (`currency_id`) REFERENCES `ac_currencies`(`currency_id`),
-  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE SET NULL,
   FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_orders_idx`
-ON `ac_orders` (`invoice_id`,
+ON `ac_orders` (
+							`invoice_id`,
+								`customer_id`,
 								`store_id`,
 								`customer_group_id`,
 								`shipping_zone_id`,

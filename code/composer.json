@@ -1,0 +1,39 @@
+{
+    "name": "abantecart/abantecart",
+    "type": "project",
+    "description": "AbanteCart",
+    "keywords": ["abantecart", "ecommerce", "framework", "opensource"],
+    "homepage": "http://www.abantecart.com",
+    "license": "OSL 3.0",
+    "repositories": [
+          {
+              "type": "package",
+              "package": {
+                  "name": "jquery/jquery",
+                  "version": "3.2.1",
+                  "dist": {
+                      "url": "https://code.jquery.com/jquery-3.2.1.min.js",
+                      "type": "file"
+                  }
+              }
+          }
+      ],
+    "require": {
+      "php": ">=7.0.0",
+      "mnsami/composer-custom-directory-installer": "1.1.*",
+      "google/recaptcha": "~1.1",
+      "twbs/bootstrap": "v4.0.0-beta.2",
+      "jquery/jquery": "3.2.1",
+      "illuminate/database": "*"
+    },
+    "config": {
+      "vendor-dir": "./app/vendors/"
+    },
+    "extra": {
+            "installer-paths": {
+                "./app/vendors/assets/google/recaptcha": ["google/recaptcha"],
+                "./app/vendors/assets/twbs/bootstrap": ["twbs/bootstrap"],
+                "./app/vendors/assets/jquery/jquery": ["jquery/jquery"]
+            }
+    }
+}
