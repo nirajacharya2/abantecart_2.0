@@ -76,3 +76,5 @@ foreach($lib_list as $lib_name){
 	require_once DIR_APP . 'lib/'. $lib_name .'.php';
 }
 unset($lib_list);
+
+require( DIR_VENDOR.'autoload.php');

@@ -45,6 +45,7 @@ define('HTTP_SERVER', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_H
 define('HTTP_ABANTECART', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
 // DIR
+define('DIR_ROOT', str_replace('\'', '/', realpath(dirname(dirname(__FILE__)))) . '/');
 define('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
 define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
 define('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');

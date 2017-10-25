@@ -55,7 +55,7 @@ define('DIR_DATABASE', DIR_APP . 'core/database/');
 define('DIR_CONFIG', DIR_APP . 'config/');
 define('DIR_CACHE', DIR_APP . 'var/cache/');
 define('DIR_LOGS', DIR_APP . 'var/logs/');
-define('DIR_VENDORS', DIR_APP . 'vendors/');
+define('DIR_VENDOR', DIR_ROOT . 'vendor/');
 
 // AbanteCart Version
 include(DIR_APP.'core/init/version.php');

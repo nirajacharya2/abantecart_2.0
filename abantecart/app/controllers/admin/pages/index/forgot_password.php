@@ -261,7 +261,7 @@ class ControllerPagesIndexForgotPassword extends AController {
 	private function _validate() {
 		if($this->config->get('config_recaptcha_secret_key')) {
 			/** @noinspection PhpIncludeInspection */
-			require_once DIR_VENDORS . '/google_recaptcha/autoload.php';
+			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
 			$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$this->request->post['g-recaptcha-response'],
 										$this->request->getRemoteIP());

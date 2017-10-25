@@ -60,7 +60,7 @@ define('DIR_DATABASE', DIR_APP . 'core/database/');
 define('DIR_CONFIG', DIR_APP . 'config/');
 define('DIR_CACHE', DIR_APP . 'var/cache/');
 define('DIR_LOGS', DIR_APP . 'var/logs/');
-define('DIR_VENDORS', DIR_APP . 'vendors/');
+define('DIR_VENDOR', DIR_ROOT . 'vendor/');
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -110,26 +110,6 @@ try {
 	ini_set('session.use_trans_sid', 'Off');
 	ini_set('session.use_cookies', 'On');
 	ini_set('session.cookie_httponly', 'On');
-
-	// Process Global data if Register Globals enabled
-	if (ini_get('register_globals')) {
-			$path = dirname($_SERVER['PHP_SELF']);
-			session_set_cookie_params(0,
-					$path,
-					null,
-					false,
-					true);
-			unset($path);
-			session_name(SESSION_ID);
-			session_start();
-
-			$globals = array( $_REQUEST, $_SESSION, $_SERVER, $_FILES );
-			foreach ($globals as $global) {
-					foreach (array_keys($global) as $key) {
-							unset($$key);
-					}
-			}
-	}
 
 // Magic Quotes
 	if (ini_get('magic_quotes_gpc')) {
