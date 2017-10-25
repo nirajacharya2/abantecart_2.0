@@ -18,3 +18,4 @@
 /abantecart/public/assets/templates/default/admin/*
 /abantecart/public/assets/templates/default/storefront/*
 /abantecart/vendor/*
+/abantecart/composer.lock
