@@ -172,3 +172,16 @@ ALTER TABLE `ac_orders` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers
 ALTER TABLE `ac_orders` CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
 UPDATE `ac_orders` SET `coupon_id` = NULL WHERE `coupon_id` = 0;
 ALTER TABLE `ac_orders` ADD FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL;
+
+ALTER TABLE `ac_customer_transactions` ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
+ALTER TABLE `ac_customer_transactions` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+
+ALTER TABLE `ac_order_products` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+ALTER TABLE `ac_order_products` ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`);
+
+ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
+ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+
+
+
