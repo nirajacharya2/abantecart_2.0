@@ -183,5 +183,11 @@ ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`download_id`) REFERENCES `ac_
 ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
 ALTER TABLE `ac_order_downloads` ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
 
+ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`);
+ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
+ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+
+
 
 

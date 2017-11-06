@@ -9180,7 +9180,11 @@ CREATE TABLE `ac_order_downloads_history` (
   `download_id` int(11) NOT NULL,
   `download_percent` int(11) DEFAULT '0',
   `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`)
+  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`),
+  FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`),
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_downloads_history_idx`
