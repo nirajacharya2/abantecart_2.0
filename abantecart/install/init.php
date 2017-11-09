@@ -51,7 +51,6 @@ define('DIR_CORE', DIR_APP . 'core/');
 define('DIR_LIB', DIR_APP . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
 define('DIR_DOWNLOAD', DIR_APP . 'download/');
-define('DIR_DATABASE', DIR_APP . 'core/database/');
 define('DIR_CONFIG', DIR_APP . 'config/');
 define('DIR_CACHE', DIR_APP . 'var/cache/');
 define('DIR_LOGS', DIR_APP . 'var/logs/');

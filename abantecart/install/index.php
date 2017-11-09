@@ -53,7 +53,6 @@ define('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../'))
 define('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
 define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP . '../')) . '/');
 define('DIR_STOREFRONT', DIR_ABANTECART . '/storefront/');
-define('DIR_DATABASE', DIR_CORE . 'database/');
 define('DIR_TEMPLATE', DIR_APP . 'view/template/');
 define('INSTALL', 'true');
 // Relative paths and directories
@@ -69,7 +68,16 @@ if (file_exists(DIR_SYSTEM . 'config.php')){
 
 $data_exist = false;
 if ( defined('DB_HOSTNAME') && DB_HOSTNAME ) {
-	$db = new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+	$db = new ADB(array(
+					'driver' => DB_DRIVER,
+					'host' => DB_HOSTNAME,
+					'username' => DB_USERNAME,
+					'password' => DB_PASSWORD,
+					'database' => DB_DATABASE,
+					'prefix'   => DB_PREFIX,
+					'charset'  => DB_CHARSET,
+					'collation'=> DB_COLLATION,
+				));
     $r = $db->query("SELECT * FROM ".DB_PREFIX."settings");
     $data_exist = $r->num_rows;
 } else {

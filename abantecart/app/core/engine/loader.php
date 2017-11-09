@@ -115,29 +115,6 @@ final class ALoader{
 	}
 
 	/**
-	 * @param string $driver
-	 * @param string $hostname
-	 * @param string $username
-	 * @param string $password
-	 * @param string $database
-	 * @param string | null $prefix
-	 * @param string $charset
-	 * @throws AException
-	 */
-	public function database($driver, $hostname, $username, $password, $database, $prefix = null, $charset = 'UTF8'){
-		$file = DIR_DATABASE . $driver . '.php';
-		$class = 'Database' . preg_replace('/[^a-zA-Z0-9]/', '', $driver);
-
-		if (file_exists($file)){
-			include_once($file);
-
-			$this->registry->set(str_replace('/', '_', $driver), new $class());
-		} else{
-			throw new AException(AC_ERR_LOAD, 'Error: Could not load database ' . $driver . '!');
-		}
-	}
-
-	/**
 	 * @param string $helper
 	 * @throws AException
 	 */

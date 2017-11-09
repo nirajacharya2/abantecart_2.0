@@ -1,53 +1,41 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
 
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2017 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
-------------------------------------------------------------------------------*/
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
-final class ADB{
+use Illuminate\Database\Capsule\Manager as Capsule;
+class ADB{
 	/**
-	 * @var MySql|AMySQLi
+	 * @var $orm Capsule
 	 */
-	private $driver;
+	protected $orm;
+	protected $db_config = array();
 	public $error = '';
 	public $registry;
 
 	/**
-	 * @param string $driver
-	 * @param string $hostname
-	 * @param string $username
-	 * @param string $password
-	 * @param string $database
-	 * @throws AException
-	 */
-	public function __construct($driver, $hostname, $username, $password, $database){
-		$filename = DIR_DATABASE . $driver . '.php';
-		if (file_exists($filename)){
-			/** @noinspection PhpIncludeInspection */
-			require_once($filename);
-		} else{
-			throw new AException(AC_ERR_MYSQL, 'Error: Could not load database file ' . $driver . '!');
+     * @param array $db_config array(
+     *                    'driver'    => 'mysql',
+     *                    'host'      => 'localhost',
+     *                    'database'  => '***',
+     *                    'username'  => '***',
+     *                    'password'  => '***,
+     *                    'charset'   => 'utf8',
+     *                    'collation' => 'utf8_unicode_ci',
+     *                    'prefix'    => 'ac_'
+     * @throws AException
+     */
+	public function __construct( $db_config = array() ){
+		$this->db_config = $db_config;
+		try{
+			$this->orm = new Capsule;
+			$this->orm->addConnection($db_config);
+			$this->orm->setAsGlobal();  //this is important
+			$this->orm->bootEloquent();
+		}catch(AException $e){
+			throw new AException(AC_ERR_MYSQL, 'Error: Could not load ORM-database!');
 		}
-
-		$this->driver = new $driver($hostname, $username, $password, $database);
-
 		$this->registry = Registry::getInstance();
 	}
 
@@ -63,9 +51,6 @@ final class ADB{
 		} else{
 			$result = $this->_query($sql, $noexcept);
 		}
-		if ($noexcept && $result === false){
-			$this->error = $this->driver->error;
-		}
 		return $result;
 	}
 
@@ -79,7 +64,7 @@ final class ADB{
 		if (is_object($this->registry->get('dcrypt'))){
 			$postfix = $this->registry->get('dcrypt')->posfix($table_name);
 		}
-		return DB_PREFIX . $table_name . $postfix;
+		return $this->db_config['prefix'] . $table_name . $postfix;
 	}
 
 	/**
@@ -88,25 +73,37 @@ final class ADB{
 	 * @return bool|stdClass
 	 */
 	public function _query($sql, $noexcept = false){
-		return $this->driver->query($sql, $noexcept);
+		$orm = $this->orm;
+		try{
+			$result = $orm::select($orm::raw($sql));
+			$data = json_decode(json_encode($result), true);
+			$output = new stdClass();
+			$output->row = isset($data[0]) ? $data[0] : array ();
+			$output->rows = $data;
+			$output->num_rows = sizeof($data);
+			return $output;
+		}catch(\Illuminate\Database\QueryException $ex){
+			$this->error = 'SQL Error: ' . $ex->getMessage() . '<br />Error No: ' . $ex->getCode() . '<br />SQL: ' . $sql;
+			if( !$noexcept ){
+				throw new AException(AC_ERR_MYSQL, $this->error);
+			}else{
+				return false;
+			}
+		}
 	}
 
 	public function escape($value){
-		return $this->driver->escape($value);
-	}
-
-	/**
-	 * @return int
-	 */
-	public function countAffected(){
-		return $this->driver->countAffected();
+		$orm = $this->orm;
+		//todo: need to fix sql-queries
+		return trim($orm::connection()->getPdo()->quote($value),"'");
 	}
 
 	/**
 	 * @return int
 	 */
 	public function getLastId(){
-		return $this->driver->getLastId();
+		$orm = $this->orm;
+		return $orm::connection()->getPdo()->lastInsertId();
 	}
 
 	/**
@@ -122,11 +119,9 @@ final class ADB{
 				if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')){
 					$query .= $line;
 					if (preg_match('/;\s*$/', $line)){
-						$query = str_replace("`ac_", "`" . DB_PREFIX, $query);
-						$result = $this->_query($query);
+						$query = str_replace("`ac_", "`" . $this->db_config['prefix'], $query);
+						$result = $this->_query($query, true);
 						if (!$result){
-							$err = $this->driver->getDBError();
-							$this->error = $err['error_text'];
 							return null;
 						}
 						$query = '';

@@ -56,11 +56,13 @@ define('DIR_CORE', DIR_APP . 'core/');
 define('DIR_LIB', DIR_APP . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
 define('DIR_DOWNLOAD', DIR_APP . 'download/');
-define('DIR_DATABASE', DIR_APP . 'core/database/');
 define('DIR_CONFIG', DIR_APP . 'config/');
 define('DIR_CACHE', DIR_APP . 'var/cache/');
 define('DIR_LOGS', DIR_APP . 'var/logs/');
 define('DIR_VENDOR', DIR_ROOT . 'vendor/');
+
+//load vendors classes
+require DIR_VENDOR.'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -195,7 +197,19 @@ try {
 
 // Database
 
-	$registry->set('db', new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE));
+	$registry->set('db', new ADB(
+			array(
+				'driver' => DB_DRIVER,
+				'host' => DB_HOSTNAME,
+				'username' => DB_USERNAME,
+				'password' => DB_PASSWORD,
+				'database' => DB_DATABASE,
+				'prefix'   => DB_PREFIX,
+				'charset'  => DB_CHARSET,
+				'collation'=> DB_COLLATION,
+			)
+		)
+	);
 
 
 // Cache

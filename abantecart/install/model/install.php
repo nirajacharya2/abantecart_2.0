@@ -80,11 +80,8 @@ class ModelInstall extends Model{
 				&& $data['db_name']
 		) {
 			try{
-				new ADB($data['db_driver'],
-						$data['db_host'],
-						$data['db_user'],
-						$data['db_password'],
-						$data['db_name']);
+				//todo: CHECK!!!
+				new ADB($data);
 			} catch (AException $exception){
 				$this->errors['warning'] = $exception->getMessage();
 			}
@@ -208,6 +205,7 @@ class ModelInstall extends Model{
 return array(
 		'APP_NAME' => 'AbanteCart',
 		'MIN_PHP_VERSION' => '7.0',
+		'DIR_ROOT' => '{$data['root_dir']}',
 		'DIR_APP' => '{$data['app_dir']}',
 		'DIR_PUBLIC' => '{$data['public_dir']}',
 		// SEO URL Keyword separator
@@ -217,7 +215,8 @@ return array(
 		//postfixes for template override
 		'POSTFIX_OVERRIDE' => '.override',
 		'POSTFIX_PRE' => '.pre',
-		'POSTFIX_POST' => '.post'
+		'POSTFIX_POST' => '.post',
+		'APP_CHARSET' => 'UTF-8'
 );
 EOD;
 		$file = fopen(DIR_CONFIG . 'app_config.php', 'w');
@@ -236,7 +235,9 @@ return array(
 	'DB_USERNAME' => '{$data['db_user']}',
 	'DB_PASSWORD' => '{$data['db_password']}',
 	'DB_DATABASE' => '{$data['db_name']}',
-	'DB_PREFIX' => '{$data['db_prefix']}'
+	'DB_PREFIX' => '{$data['db_prefix']}',
+	'DB_CHARSET' => 'utf8',
+	'DB_COLLATION' => 'utf8_unicode_ci'
 );
 EOD;
 		$file = fopen(DIR_CONFIG . 'database.php', 'w');
@@ -281,8 +282,8 @@ EOD;
 			$this->errors[] = 'Error: cannot open file ' . $file;
 			return false;
 		}
-
-		$db = new ADB($data['db_driver'], $data['db_host'], $data['db_user'], $data['db_password'], $data['db_name']);
+//TODO: check!!!
+		$db = new ADB($data);
 		$query = '';
 		foreach ($sql as $line) {
 			$tsl = trim($line);
@@ -399,13 +400,8 @@ EOD;
 			$this->errors[] = 'Error: cannot open file ' . $file;
 			return false;
 		}
-		$db = new ADB(
-				$data['db_driver'],
-				htmlspecialchars_decode($data['db_host']),
-				htmlspecialchars_decode($data['db_user']),
-				htmlspecialchars_decode($data['db_password']),
-				htmlspecialchars_decode($data['db_name'])
-		);
+		//TODO: CHECK!!!
+		$db = new ADB( $data );
 		$db->query("SET NAMES 'utf8'");
 		$db->query("SET CHARACTER SET utf8");
 

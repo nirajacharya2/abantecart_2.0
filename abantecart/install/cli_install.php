@@ -159,6 +159,7 @@ set_error_handler('handleError');
 function getOptionList()
 {
     return array(
+        '--root_dir'          => dirname(DIR_INSTALL).'/',
         '--app_dir'          => dirname(DIR_INSTALL).'/app/',
         '--public_dir'       => dirname(DIR_INSTALL).'/public/',
         '--db_host'          => 'localhost',
@@ -257,6 +258,12 @@ function getOptionValues($opt_name = '')
         $options[$name] = $value;
     }
     $code_dir = dirname(DIR_INSTALL);
+
+    if ( ! isset($options['root_dir'])) {
+        if (is_dir($code_dir)) {
+            $options['root_dir'] = $code_dir.'/';
+        }
+    }
     if ( ! isset($options['app_dir'])) {
         if (is_dir($code_dir.'/app')) {
             $options['app_dir'] = $code_dir.'/app/';

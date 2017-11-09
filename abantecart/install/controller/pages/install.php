@@ -215,7 +215,16 @@ class ControllerPagesInstall extends AController{
 	private function _prepare_registry(){
 		$registry = Registry::getInstance();
 		//This is ran after config is saved and we have database connection now
-		$db = new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+		$db = new ADB(array(
+						'driver' => DB_DRIVER,
+						'host' => DB_HOSTNAME,
+						'username' => DB_USERNAME,
+						'password' => DB_PASSWORD,
+						'database' => DB_DATABASE,
+						'prefix'   => DB_PREFIX,
+						'charset'  => DB_CHARSET,
+						'collation'=> DB_COLLATION,
+					));
 		$registry->set('db', $db);
 		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
 
