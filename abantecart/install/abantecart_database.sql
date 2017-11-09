@@ -8798,26 +8798,6 @@ CREATE TABLE `ac_online_customers` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
--- DDL for table `download`
---
-DROP TABLE IF EXISTS `ac_downloads`;
-CREATE TABLE `ac_downloads` (
-  `download_id` int(11) NOT NULL AUTO_INCREMENT,
-  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `max_downloads` int(11) DEFAULT NULL, -- remaining, NULL -> No limit
-  `expire_days` int(11) DEFAULT NULL,  -- default to NULL -> No expiration
-  `sort_order` int(11) NOT NULL,
-  `activate` varchar(64) NOT NULL,
-  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
-  `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
-  `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`download_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, `shared` );
---
 -- DDL for table `download_descriptions`
 --
 DROP TABLE IF EXISTS `ac_download_descriptions`;
@@ -9106,9 +9086,55 @@ CREATE TABLE `ac_customer_transactions` (
   `description` text COMMENT 'text for customer',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`customer_transaction_id`)
+  PRIMARY KEY (`customer_transaction_id`),
+  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `customer_id`, `order_id` );
+
+--
+-- DDL for table `order_products`
+--
+DROP TABLE IF EXISTS `ac_order_products`;
+CREATE TABLE `ac_order_products` (
+  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `model` varchar(24) NOT NULL DEFAULT '',
+  `sku` varchar(64) NOT NULL DEFAULT '',
+  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `quantity` int(4) NOT NULL DEFAULT '0',
+  `subtract` int(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`order_product_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
+
+--
+-- DDL for table `download`
+--
+DROP TABLE IF EXISTS `ac_downloads`;
+CREATE TABLE `ac_downloads` (
+  `download_id` int(11) NOT NULL AUTO_INCREMENT,
+  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `max_downloads` int(11) DEFAULT NULL, -- remaining, NULL -> No limit
+  `expire_days` int(11) DEFAULT NULL,  -- default to NULL -> No expiration
+  `sort_order` int(11) NOT NULL,
+  `activate` varchar(64) NOT NULL,
+  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
+  `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
+  `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`download_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, `shared` );
 
 --
 -- DDL for table `order_downloads`
@@ -9132,7 +9158,10 @@ CREATE TABLE `ac_order_downloads` (
   `attributes_data` longtext COLLATE utf8_general_ci  DEFAULT NULL,  -- serialized values
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_id`)
+  PRIMARY KEY (`order_download_id`),
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_downloads_idx`
@@ -9151,7 +9180,11 @@ CREATE TABLE `ac_order_downloads_history` (
   `download_id` int(11) NOT NULL,
   `download_percent` int(11) DEFAULT '0',
   `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`)
+  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`),
+  FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`),
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_downloads_history_idx`
@@ -9225,28 +9258,6 @@ CREATE TABLE `ac_order_options` (
 
 CREATE INDEX `ac_order_options_idx`
 ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`);
-
-
---
--- DDL for table `order_products`
---
-DROP TABLE IF EXISTS `ac_order_products`;
-CREATE TABLE `ac_order_products` (
-  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `model` varchar(24) NOT NULL DEFAULT '',
-  `sku` varchar(64) NOT NULL DEFAULT '',
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `quantity` int(4) NOT NULL DEFAULT '0',
-  `subtract` int(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`order_product_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
 
 --
 -- DDL for table `order_statuses`
