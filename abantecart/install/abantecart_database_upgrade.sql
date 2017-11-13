@@ -188,6 +188,7 @@ ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`download_id`) REFEREN
 ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
 ALTER TABLE `ac_order_downloads_history` ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
 
-
-
+ALTER TABLE `ac_order_data` ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+ALTER TABLE `ac_order_data` ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`);
+ALTER TABLE `ac_order_data_types` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
 

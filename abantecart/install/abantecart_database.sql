@@ -9201,7 +9201,9 @@ CREATE TABLE `ac_order_data` (
   `data` text COLLATE utf8_general_ci DEFAULT NULL,  -- serialized values
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_id`, `type_id`)
+  PRIMARY KEY (`order_id`, `type_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 DROP TABLE IF EXISTS `ac_order_data_types`;
@@ -9211,7 +9213,8 @@ CREATE TABLE `ac_order_data_types` (
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`type_id`)
+  PRIMARY KEY (`type_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 -- write pre-installed IM protocols for guest checkout orders
@@ -9232,7 +9235,8 @@ CREATE TABLE `ac_order_history` (
   `comment` text COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_history_id`)
+  PRIMARY KEY (`order_history_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_history_idx`
