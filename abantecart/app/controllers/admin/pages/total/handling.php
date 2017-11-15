@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -69,7 +73,7 @@ class ControllerPagesTotalHandling extends AController{
 			$this->model_setting_setting->editSetting('handling', $settings);
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->extensions->hk_ProcessData($this);
-			redirect($this->html->getSecureURL('total/handling'));
+			abc_redirect($this->html->getSecureURL('total/handling'));
 		}
 		if (isset($this->error['warning'])){
 			$this->data['error_warning'] = $this->error['warning'];

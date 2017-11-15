@@ -17,34 +17,33 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ModelReportViewed extends Model {
 	public function getProductViewedReport($start = 0, $limit = 20) {
-		$total = 0;
-
 		$product_data = array();
-		
-		$query = $this->db->query("SELECT SUM(viewed) AS total FROM " . $this->db->table("products") . " ");
-
-		$total = $query->row['total'];
+		$query = $this->db->query("SELECT SUM(viewed) AS total 
+									FROM " . $this->db->table("products") . " ");
+		$total = (int)$query->row['total'];
 
 		if ($start < 0) {
 			$start = 0;
 		}
-		
 		if ($limit < 1) {
 			$limit = 20;
 		}
 
 		$sql = "SELECT p.product_id, p.model, p.viewed, pd.name
 				FROM " . $this->db->table("products") . " p
-				LEFT JOIN " . $this->db->table("product_descriptions") . " pd ON (p.product_id = pd.product_id AND pd.language_id = '" . (int)$this->config->get('storefront_language_id') . "')
+				LEFT JOIN " . $this->db->table("product_descriptions") . " pd 
+					ON (p.product_id = pd.product_id 
+							AND pd.language_id = '" . (int)$this->config->get('storefront_language_id') . "')
 				ORDER BY viewed DESC LIMIT " . (int)$start . "," . (int)$limit;
-
 		$query = $this->db->query($sql);
-		
 		foreach ($query->rows as $result) {
 			if ($result['viewed']) {
 				$percent = round(($result['viewed'] / $total) * 100, 2) . '%';
@@ -62,10 +61,9 @@ class ModelReportViewed extends Model {
 		}
 		
 		return $product_data;
-	}	
-	
-	public function reset($start = 0, $limit = 20) {
+	}
+
+	public function reset() {
 		$this->db->query("UPDATE " . $this->db->table("products") . " SET viewed = '0'");
 	}
 }
-?>

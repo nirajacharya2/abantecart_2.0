@@ -17,9 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
+use abc\lib\AOrder;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerPagesCheckoutGuestStep3
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesCheckoutGuestStep3 extends AController {
 	private $error = array();
 	public $data = array();
@@ -35,25 +46,25 @@ class ControllerPagesCheckoutGuestStep3 extends AController {
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
-	  		redirect($this->html->getSecureURL($cart_rt));
+	  		abc_redirect($this->html->getSecureURL($cart_rt));
     	}
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()) {
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 		
 		if ($this->customer->isLogged()) {
-	  		redirect($this->html->getSecureURL('checkout/shipping'));
+	  		abc_redirect($this->html->getSecureURL('checkout/shipping'));
     	} 
 
 		if (!isset($this->session->data['guest'])) {
-	  		redirect($this->html->getSecureURL('checkout/guest_step_1'));
+	  		abc_redirect($this->html->getSecureURL('checkout/guest_step_1'));
     	} 
 
     	if ($this->cart->hasShipping()) {
 			if (!isset($this->session->data['shipping_method'])) {
-	  			redirect($this->html->getSecureURL('checkout/guest_step_2'));
+	  			abc_redirect($this->html->getSecureURL('checkout/guest_step_2'));
     		}
 		} else {
 			unset(
@@ -64,7 +75,7 @@ class ControllerPagesCheckoutGuestStep3 extends AController {
 		}
 		
 		if (!isset($this->session->data['payment_method'])) {
-	  		redirect($this->html->getSecureURL('checkout/guest_step_2'));
+	  		abc_redirect($this->html->getSecureURL('checkout/guest_step_2'));
     	}
 		
 

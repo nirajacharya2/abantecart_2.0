@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -65,7 +73,7 @@ class ControllerResponsesListingGridLanguageDefinitions extends AController{
 							'name'  => 'language_value[' . $result['language_definition_id'] . ']',
 							'value' => $result['language_value'],
 					)),
-					dateISO2Display($result['date_modified'], $this->language->get('date_format_short'))
+					AHelperUtils::dateISO2Display($result['date_modified'], $this->language->get('date_format_short'))
 			);
 			$i++;
 		}

@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\cache;
+use abc\lib\AException;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -48,12 +51,10 @@ class ACacheDriverXCache extends ACacheDriver{
 	 * @since   1.2.7
 	 */
 	public function __construct($expiration, $lock_time = 0){
-
 		if (!$lock_time){
 			$lock_time = 10;
 		}
 		parent::__construct($expiration, $lock_time);
-
 	}
 
 	/**
@@ -80,7 +81,6 @@ class ACacheDriverXCache extends ACacheDriver{
 				return true;
 			}
 		}
-
 		return false;
 	}
 

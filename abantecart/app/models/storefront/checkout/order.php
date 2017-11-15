@@ -17,6 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\ALanguage;
+use abc\core\AResource;
+use abc\core\Model;
+use abc\lib\AEncryption;
+use abc\lib\AMail;
+use abc\lib\AMessage;
+use abc\lib\AView;
+use stdClass;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -93,13 +104,15 @@ class ModelCheckoutOrder extends Model{
 
 	/**
 	 * @param array $data
-	 * @param int $set_order_id
+	 * @param null|int $set_order_id
+	 * @return null|mixed
 	 */
-	public function create($data, $set_order_id = '') {
+	public function create($data, $set_order_id = null) {
 		$result = $this->extensions->hk_create($this, $data, $set_order_id);
 		if($result !== null ){
 			return $result;
 		}
+		return null;
 	}
 	/**
 	 * @param array $data
@@ -449,7 +462,7 @@ class ModelCheckoutOrder extends Model{
 		$this->data['mail_template_data']['text_payment_method'] = $language->get('text_payment_method');
 		$this->data['mail_template_data']['text_comment'] = $language->get('text_comment');
 		$this->data['mail_template_data']['text_powered_by'] = $language->get('text_powered_by');
-		$this->data['mail_template_data']['text_project_label'] = $language->get('text_powered_by') . ' ' . project_base();
+		$this->data['mail_template_data']['text_project_label'] = $language->get('text_powered_by') . ' ' . AHelperUtils::project_base();
 
 		$this->data['mail_template_data']['text_total'] = $language->get('text_total');
 		$this->data['mail_template_data']['text_footer'] = $language->get('text_footer');
@@ -462,7 +475,7 @@ class ModelCheckoutOrder extends Model{
 
 		$this->data['mail_template_data']['order_id'] = $order_id;
 		$this->data['mail_template_data']['customer_id'] = $order_row['customer_id'];
-		$this->data['mail_template_data']['date_added'] = dateISO2Display($order_row['date_added'], $language->get('date_format_short'));
+		$this->data['mail_template_data']['date_added'] = AHelperUtils::dateISO2Display($order_row['date_added'], $language->get('date_format_short'));
 
 		$config_mail_logo = $this->config->get('config_mail_logo');
 		$config_mail_logo = !$config_mail_logo ? $this->config->get('config_logo') : $config_mail_logo;
@@ -564,7 +577,7 @@ class ModelCheckoutOrder extends Model{
 
 		$this->data['mail_template_data']['payment_address'] = $this->customer->getFormattedAddress($payment_data, $order_row['payment_address_format']);
 
-		if (!has_value($this->data['products'])){
+		if (!AHelperUtils::has_value($this->data['products'])){
 			$this->data['products'] = array ();
 		}
 
@@ -722,7 +735,6 @@ class ModelCheckoutOrder extends Model{
 	 * @param int $order_status_id
 	 * @param string $comment
 	 * @param bool|false $notify
-	 * @return mixed
 	 */
 	public function update($order_id, $order_status_id, $comment = '', $notify = FALSE) {
 		$this->extensions->hk_update($this, $order_id, $order_status_id, $comment, $notify);
@@ -783,7 +795,7 @@ class ModelCheckoutOrder extends Model{
 				$subject = sprintf($language->get('text_subject'), html_entity_decode($order_row['store_name'], ENT_QUOTES, 'UTF-8'), $order_id);
 
 				$message = $language->get('text_order') . ' ' . $order_id . "\n";
-				$message .= $language->get('text_date_added') . ' ' . dateISO2Display($order_row['date_added'], $language->get('date_format_short')) . "\n\n";
+				$message .= $language->get('text_date_added') . ' ' . AHelperUtils::dateISO2Display($order_row['date_added'], $language->get('date_format_short')) . "\n\n";
 
 				if ($order_status_query->num_rows){
 					$message .= $language->get('text_order_status') . "\n\n";
@@ -841,7 +853,7 @@ class ModelCheckoutOrder extends Model{
 	/**
 	 * @param int $order_id
 	 * @param string|array $data
-	 * @return bool|stdClass
+	 * @return stdClass
 	 */
 	public function updatePaymentMethodData($order_id, $data){
 

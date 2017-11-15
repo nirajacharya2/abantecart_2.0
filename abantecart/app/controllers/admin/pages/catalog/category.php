@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ALayoutManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -265,7 +271,7 @@ class ControllerPagesCatalogCategory extends AController {
 			$category_id = $this->model_catalog_category->addCategory($this->request->post);
 			$this->extensions->hk_ProcessData($this, 'insert');
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('catalog/category/update', '&category_id=' . $category_id));
+			abc_redirect($this->html->getSecureURL('catalog/category/update', '&category_id=' . $category_id));
 		}
 		$this->_getForm();
 
@@ -293,7 +299,7 @@ class ControllerPagesCatalogCategory extends AController {
 			$this->model_catalog_category->editCategory($this->request->get['category_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->extensions->hk_ProcessData($this, 'update');
-			redirect($this->html->getSecureURL('catalog/category/update', '&category_id=' . $this->request->get['category_id']));
+			abc_redirect($this->html->getSecureURL('catalog/category/update', '&category_id=' . $this->request->get['category_id']));
 		}
 
 		$this->_getForm($args);
@@ -362,7 +368,7 @@ class ControllerPagesCatalogCategory extends AController {
 		if ($this->data['status'] == '') {
 			$this->data['status'] = 1;
 		}
-		if ($this->request->is_GET() && has_value($this->request->get['parent_id'])) {
+		if ($this->request->is_GET() && AHelperUtils::has_value($this->request->get['parent_id'])) {
 			$this->data['parent_id'] =  $this->request->get['parent_id'];
 		}
 		if ($this->data['parent_id'] == '') {
@@ -495,7 +501,7 @@ class ControllerPagesCatalogCategory extends AController {
 				'value' => $this->data['keyword'],
 				'help_url' => $this->gen_help_url('seo_keyword'),
 				'multilingual' => true,
-				'attr' => ' gen-value="' . SEOEncode($this->data['category_description']['name']) . '" '
+				'attr' => ' gen-value="' . AHelperUtils::SEOEncode($this->data['category_description']['name']) . '" '
 		));
 
 		$this->data['form']['fields']['data']['store'] = $form->getFieldHtml(
@@ -592,8 +598,8 @@ class ControllerPagesCatalogCategory extends AController {
 		$this->data['category_id'] = $category_id;
 		$page_url = $this->html->getSecureURL('catalog/category/edit_layout', '&category_id=' . $category_id);
 		//note: category can not be ID of 0.
-		if (!has_value($category_id)) {
-			redirect($this->html->getSecureURL('catalog/category'));
+		if (!AHelperUtils::has_value($category_id)) {
+			abc_redirect($this->html->getSecureURL('catalog/category'));
 		}
 
 		//init controller data
@@ -602,7 +608,7 @@ class ControllerPagesCatalogCategory extends AController {
 		$this->loadLanguage('design/layout');
 		$this->data['help_url'] = $this->gen_help_url('layout_edit');
 
-		if (has_value($category_id) && $this->request->is_GET()) {
+		if (AHelperUtils::has_value($category_id) && $this->request->is_GET()) {
 			$this->loadModel('catalog/category');
 			$this->data['category_description'] = $this->model_catalog_category->getCategoryDescriptions($category_id);
 		}
@@ -747,7 +753,7 @@ class ControllerPagesCatalogCategory extends AController {
 
 	public function save_layout() {
 		if ($this->request->is_GET()) {
-			redirect($this->html->getSecureURL('catalog/category'));
+			abc_redirect($this->html->getSecureURL('catalog/category'));
 		}
 
 		$page_controller = 'pages/product/category';
@@ -759,7 +765,7 @@ class ControllerPagesCatalogCategory extends AController {
 		$this->loadLanguage('catalog/category');
 
 		if (!$category_id) {
-			redirect($this->html->getSecureURL('catalog/category'));
+			abc_redirect($this->html->getSecureURL('catalog/category'));
 		}
 
 		// need to know unique page existing
@@ -778,7 +784,7 @@ class ControllerPagesCatalogCategory extends AController {
 			$category_info = $this->model_catalog_category->getCategoryDescriptions($category_id);
 			if ($category_info) {
 				foreach ($category_info as $language_id => $description) {
-					if (!has_value($language_id)) {
+					if (!AHelperUtils::has_value($language_id)) {
 						continue;
 					}
 					$page_info['page_descriptions'][$language_id] = $description;
@@ -793,7 +799,7 @@ class ControllerPagesCatalogCategory extends AController {
 
 		//create new instance with specific template/page/layout data
 		$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-		if (has_value($post_data['layout_change'])) {
+		if (AHelperUtils::has_value($post_data['layout_change'])) {
 			//update layout request. Clone source layout
 			$layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
 			$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
@@ -806,7 +812,7 @@ class ControllerPagesCatalogCategory extends AController {
 			}
 		}
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		redirect($this->html->getSecureURL('catalog/category/edit_layout', '&category_id=' . $category_id));
+		abc_redirect($this->html->getSecureURL('catalog/category/edit_layout', '&category_id=' . $category_id));
 	}
 
 }

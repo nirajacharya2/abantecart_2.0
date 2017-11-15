@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ALayoutManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -40,10 +46,10 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 
 		$this->data['help_url'] = $this->gen_help_url('manufacturer_layout');
 
-		if (has_value($manufacturer_id) && $this->request->is_GET()) {
+		if (AHelperUtils::has_value($manufacturer_id) && $this->request->is_GET()) {
 			if (!$manufacturer_info) {
 				$this->session->data['warning'] = $this->language->get('error_manufacturer_not_found');
-				$this->redirect($this->html->getSecureURL('catalog/manufacturer'));
+				abc_redirect($this->html->getSecureURL('catalog/manufacturer'));
 			}
 		}
 
@@ -148,7 +154,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 	    $layoutform = $this->dispatch('common/page_layout', array($layout));
 	    $this->data['layoutform'] = $layoutform->dispatchGetOutput();
 		
-		//build pages and available layouts for clonning
+		//build pages and available layouts for cloning
 		$this->data['pages'] = $layout->getAllPages();
 		$av_layouts = array( "0" => $this->language->get('text_select_copy_layout'));
 		foreach($this->data['pages'] as $page){
@@ -184,7 +190,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 
 	public function save() {
 		if ($this->request->is_GET()) {
-			$this->redirect($this->html->getSecureURL('catalog/manufacturer_layout'));
+			abc_redirect($this->html->getSecureURL('catalog/manufacturer_layout'));
 		}
 
 		$page_controller = 'pages/product/manufacturer';
@@ -195,9 +201,9 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 		$this->loadLanguage('catalog/manufacturer');
 
-		if (!has_value($manufacturer_id)) {
+		if (!AHelperUtils::has_value($manufacturer_id)) {
 			$this->session->data['error'] = $this->language->get('error_product_not_found');
-			$this->redirect($this->html->getSecureURL('catalog/manufacturer/update'));
+			abc_redirect($this->html->getSecureURL('catalog/manufacturer/update'));
 		}
 
 		$post_data = $this->request->post;
@@ -231,7 +237,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
 
 		//create new instance with specific template/page/layout data
 		$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-		if (has_value($post_data['layout_change'])) {
+		if (AHelperUtils::has_value($post_data['layout_change'])) {
 			//update layout request. Clone source layout
 			$layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
 			$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
@@ -243,7 +249,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController {
       			$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
       		} 
 		}
-		$this->redirect($this->html->getSecureURL('catalog/manufacturer_layout', '&manufacturer_id=' . $manufacturer_id));
+		abc_redirect($this->html->getSecureURL('catalog/manufacturer_layout', '&manufacturer_id=' . $manufacturer_id));
 	}
 
 }

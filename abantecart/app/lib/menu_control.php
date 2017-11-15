@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -161,7 +165,7 @@ class AMenu{
 	}
 
 	/**
-	 * method return all children of submeni by parent id
+	 * method return all children of sub-menu by parent id
 	 *
 	 * @param string $parent_id
 	 * @return boolean | array
@@ -182,7 +186,7 @@ class AMenu{
 	/**
 	 * Method return item id list of item which have children items
 	 *
-	 * @return array
+	 * @return false|array
 	 */
 	public function getMenuParentIds(){
 		if (!$this->dataset_rows){
@@ -208,7 +212,7 @@ class AMenu{
 		$check_array = array ("item_id", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id");
 
 		//clean text id 
-		$item ["item_id"] = preformatTextID($item ["item_id"]);
+		$item ["item_id"] = AHelperUtils::preformatTextID($item ["item_id"]);
 
 		if (!$item ['item_type']){
 			$item ['item_type'] = 'extension';
@@ -223,7 +227,7 @@ class AMenu{
 		}
 
 		// then insert
-		//when autosorting
+		//when auto-sorting
 		if (!$item ["sort_order"]){
 			// we need to know last order number of children and set new for new item... yet
 			$brothers = $this->getMenuChildren($item ["parent_id"]);

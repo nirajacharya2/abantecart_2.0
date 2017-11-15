@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -43,7 +50,7 @@ class ControllerResponsesUserUserIMs extends AController {
 		$sendpoint = $this->request->get['sendpoint'];
 		$section = $this->request->get['section'];
 
-		$this->data['text_title'] = '"'.$this->language->get('im_sendpoint_name_'.preformatTextID($sendpoint)).'"';
+		$this->data['text_title'] = '"'.$this->language->get('im_sendpoint_name_'.AHelperUtils::preformatTextID($sendpoint)).'"';
 		$this->data['text_title'] .= ' '.sprintf($this->language->get('text_notification_for', 'common/im'),$user_info['username']);
 		if($section){
 			$this->data['text_title'] .= " (" . $this->language->get('text_' . $section) . ")";
@@ -154,7 +161,7 @@ class ControllerResponsesUserUserIMs extends AController {
 		if(!$this->request->is_POST()
 				|| !$this->request->get['user_id']
 				|| !$this->request->get['sendpoint']){
-			$this->redirect($this->html->getSecureURL('user/user'));
+			abc_redirect($this->html->getSecureURL('user/user'));
 		}
 
 		//init controller data

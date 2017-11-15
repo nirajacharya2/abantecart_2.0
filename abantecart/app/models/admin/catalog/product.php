@@ -17,13 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\ALanguageManager;
+use abc\core\HtmlElementFactory;
+use abc\core\Model;
+use abc\lib\AAttribute_Manager;
+use abc\lib\ADB;
+use abc\lib\ALayoutManager;
+use abc\lib\AResourceManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
 
 /**
- * @property ModelCatalogDownload $model_catalog_download
+ * @property \abc\model\admin\ModelCatalogDownload $model_catalog_download
  * @property ALanguageManager $language
+ * @property ADB $db
  */
 class ModelCatalogProduct extends Model{
 	/** @param array $data
@@ -37,9 +48,9 @@ class ModelCatalogProduct extends Model{
 							SET model = '" . $this->db->escape($data['model']) . "',
 								sku = '" . $this->db->escape($data['sku']) . "',
 								location = '" . $this->db->escape($data['location']) . "',
-								quantity = '" . preformatInteger($data['quantity']) . "',
-								minimum = '" . preformatInteger($data['minimum']) . "',
-								maximum = '" . preformatInteger($data['maximum']) . "',
+								quantity = '" . AHelperUtils::preformatInteger($data['quantity']) . "',
+								minimum = '" . AHelperUtils::preformatInteger($data['minimum']) . "',
+								maximum = '" . AHelperUtils::preformatInteger($data['maximum']) . "',
 								subtract = '" . (int)$data['subtract'] . "',
 								stock_checkout = '" . $this->db->escape($data['stock_checkout']) . "',
 								stock_status_id = '" . (int)$data['stock_status_id'] . "',
@@ -48,14 +59,14 @@ class ModelCatalogProduct extends Model{
 								shipping = '" . (int)$data['shipping'] . "',
 								ship_individually = '" . (int)$data['ship_individually'] . "',
 								free_shipping = '" . (int)$data['free_shipping'] . "',
-								shipping_price = '" . preformatFloat($data['shipping_price'], $this->language->get('decimal_point')) . "',
-								price = '" . preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
-								cost = '" . preformatFloat($data['cost'], $this->language->get('decimal_point')) . "',
-								weight = '" . preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
+								shipping_price = '" . AHelperUtils::preformatFloat($data['shipping_price'], $this->language->get('decimal_point')) . "',
+								price = '" . AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
+								cost = '" . AHelperUtils::preformatFloat($data['cost'], $this->language->get('decimal_point')) . "',
+								weight = '" . AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
 								weight_class_id = '" . (int)$data['weight_class_id'] . "',
-								length = '" . preformatFloat($data['length'], $this->language->get('decimal_point')) . "',
-								width = '" . preformatFloat($data['width'], $this->language->get('decimal_point')) . "',
-								height = '" . preformatFloat($data['height'], $this->language->get('decimal_point')) . "',
+								length = '" . AHelperUtils::preformatFloat($data['length'], $this->language->get('decimal_point')) . "',
+								width = '" . AHelperUtils::preformatFloat($data['width'], $this->language->get('decimal_point')) . "',
+								height = '" . AHelperUtils::preformatFloat($data['height'], $this->language->get('decimal_point')) . "',
 								length_class_id = '" . (int)$data['length_class_id'] . "',
 								status = '" . (int)$data['status'] . "',
 								tax_class_id = '" . (int)$data['tax_class_id'] . "',
@@ -95,7 +106,7 @@ class ModelCatalogProduct extends Model{
 			if (is_string($data['keyword'])){
 				$seo_keys = array (
 						$language_id => array (
-								'keyword' => SEOEncode($data['keyword'], 'product_id', $product_id)
+								'keyword' => AHelperUtils::SEOEncode($data['keyword'], 'product_id', $product_id)
 						));
 			} //when cloning
 			else if (is_array($data['keyword'])){
@@ -109,7 +120,7 @@ class ModelCatalogProduct extends Model{
 						continue;
 					}
 					$seo_keys[(int)$lang_id] = array (
-							'keyword' => SEOEncode($seo_key, 'product_id', $product_id)
+							'keyword' => AHelperUtils::SEOEncode($seo_key, 'product_id', $product_id)
 					);
 				}
 			}
@@ -119,7 +130,7 @@ class ModelCatalogProduct extends Model{
 			if (!is_int(key($data['product_description']))){
 				$seo_keys = array (
 						$language_id => array (
-								'keyword' => SEOEncode($data['product_description']['name'], 'product_id', $product_id)
+								'keyword' => AHelperUtils::SEOEncode($data['product_description']['name'], 'product_id', $product_id)
 						));
 			} else{ // when clones
 				$product_seo_keys = $this->getProductSEOKeywords($product_id);
@@ -134,7 +145,7 @@ class ModelCatalogProduct extends Model{
 						continue;
 					}
 					$seo_keys[(int)$lang_id] = array (
-							'keyword' => SEOEncode($seo_key, 'product_id', $product_id)
+							'keyword' => AHelperUtils::SEOEncode($seo_key, 'product_id', $product_id)
 					);
 				}
 			}
@@ -198,18 +209,18 @@ class ModelCatalogProduct extends Model{
 	public function addProductDiscount($product_id, $data){
 		$data['price'] = str_replace(" ", "", $data['price']);
 		if (!empty($data['date_start']) && !$data['iso_date']){
-			$data['date_start'] = dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+			$data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
 		}
 		if (!empty($data['date_end']) && !$data['iso_date']){
-			$data['date_end'] = dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+			$data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
 		}
 		$this->db->query(
 				"INSERT INTO " . $this->db->table("product_discounts") . "
 				SET product_id = '" . (int)$product_id . "',
 					customer_group_id = '" . (int)$data['customer_group_id'] . "',
-					quantity = '" . preformatInteger($data['quantity']) . "',
+					quantity = '" . AHelperUtils::preformatInteger($data['quantity']) . "',
 					priority = '" . (int)$data['priority'] . "',
-					price = '" . preformatFloat($data['price']) . "',
+					price = '" . AHelperUtils::preformatFloat($data['price']) . "',
 					date_start = '" . $this->db->escape($data['date_start']) . "',
 					date_end = '" . $this->db->escape($data['date_end']) . "'");
 		$id = $this->db->getLastId();
@@ -225,10 +236,10 @@ class ModelCatalogProduct extends Model{
 	public function addProductSpecial($product_id, $data){
 		$data['price'] = str_replace(" ", "", $data['price']);
 		if (!empty($data['date_start']) && !$data['iso_date']){
-			$data['date_start'] = dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+			$data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
 		}
 		if (!empty($data['date_end']) && !$data['iso_date']){
-			$data['date_end'] = dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+			$data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
 		}
 
 		$this->db->query(
@@ -236,7 +247,7 @@ class ModelCatalogProduct extends Model{
 			SET product_id = '" . (int)$product_id . "',
 				customer_group_id = '" . (int)$data['customer_group_id'] . "',
 				priority = '" . (int)$data['priority'] . "',
-				price = '" . preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
+				price = '" . AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
 				date_start = '" . $this->db->escape($data['date_start']) . "',
 				date_end = '" . $this->db->escape($data['date_end']) . "'");
 		$id = $this->db->getLastId();
@@ -294,7 +305,7 @@ class ModelCatalogProduct extends Model{
 		foreach ($fields as $f){
 			if (isset($data[$f])){
 				if (in_array($f, $preformat_fields)){
-					$data[$f] = preformatFloat($data[$f], $this->language->get('decimal_point'));
+					$data[$f] = AHelperUtils::preformatFloat($data[$f], $this->language->get('decimal_point'));
 				}
 				$update[] = $f . " = '" . $this->db->escape($data[$f]) . "'";
 			}
@@ -327,7 +338,7 @@ class ModelCatalogProduct extends Model{
 		}
 
 		if (isset($data['keyword'])){
-			$data['keyword'] = SEOEncode($data['keyword'], 'product_id', $product_id);
+			$data['keyword'] = AHelperUtils::SEOEncode($data['keyword'], 'product_id', $product_id);
 			if ($data['keyword']){
 				$this->language->replaceDescriptions('url_aliases',
 						array ('query' => "product_id=" . (int)$product_id),
@@ -362,13 +373,13 @@ class ModelCatalogProduct extends Model{
 	public function updateProductDiscount($product_discount_id, $data){
 		$fields = array ("customer_group_id", "quantity", "priority", "price", "date_start", "date_end",);
 		if (isset($data['price'])){
-			$data['price'] = preformatFloat($data['price'], $this->language->get('decimal_point'));
+			$data['price'] = AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'));
 		}
 		if (!empty($data['date_start'])){
-			$data['date_start'] = dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+			$data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
 		}
 		if (!empty($data['date_end'])){
-			$data['date_end'] = dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+			$data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
 		}
 		$update = array ();
 		foreach ($fields as $f){
@@ -390,13 +401,13 @@ class ModelCatalogProduct extends Model{
 	public function updateProductSpecial($product_special_id, $data){
 		$fields = array ("customer_group_id", "priority", "price", "date_start", "date_end",);
 		if (isset($data['price'])){
-			$data['price'] = preformatFloat($data['price'], $this->language->get('decimal_point'));
+			$data['price'] = AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'));
 		}
 		if (!empty($data['date_start'])){
-			$data['date_start'] = dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+			$data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
 		}
 		if (!empty($data['date_end'])){
-			$data['date_end'] = dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+			$data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
 		}
 
 		$update = array ();
@@ -675,7 +686,7 @@ class ModelCatalogProduct extends Model{
 	 * @param int $product_id
 	 * @param int $pd_opt_val_id
 	 * @param int $language_id
-	 * @return null|stdClass
+	 * @return null|\stdClass
 	 */
 	public function getProductOptionValueDescriptions($product_id, $pd_opt_val_id, $language_id){
 		if (empty($product_id) || empty($pd_opt_val_id) || empty($language_id)){
@@ -774,9 +785,9 @@ class ModelCatalogProduct extends Model{
 				sku = '" . $this->db->escape($data['sku']) . "',
 				quantity = '" . $this->db->escape($data['quantity']) . "',
 				subtract = '" . $this->db->escape($data['subtract']) . "',
-				price = '" . preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
+				price = '" . AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point')) . "',
 				prefix = '" . $this->db->escape($data['prefix']) . "',
-				weight = '" . preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
+				weight = '" . AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
 				weight_type = '" . $this->db->escape($data['weight_type']) . "',
 				attribute_value_id = '" . $this->db->escape($attribute_value_id) . "',
 				grouped_attribute_data = '" . $this->db->escape($data['grouped_attribute_data']) . "',
@@ -808,7 +819,7 @@ class ModelCatalogProduct extends Model{
 				subtract = '" . $this->db->escape($data['subtract']) . "',
 				price = '" . $this->db->escape($data['price']) . "',
 				prefix = '" . $this->db->escape($data['prefix']) . "',
-				weight = '" . preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
+				weight = '" . AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point')) . "',
 				weight_type = '" . $this->db->escape($data['weight_type']) . "',
 				attribute_value_id = '" . $this->db->escape($attribute_value_id) . "',
 				grouped_attribute_data = '" . $this->db->escape($data['grouped_attribute_data']) . "',
@@ -1100,7 +1111,7 @@ class ModelCatalogProduct extends Model{
 												sku = '" . $this->db->escape($pd_opt_vals['sku']) . "',
 												quantity = '" . (int)$pd_opt_vals['quantity'] . "',
 												subtract = '" . (int)$pd_opt_vals['subtract'] . "',
-												price = '" . preformatFloat($pd_opt_vals['price'], $this->language->get('decimal_point')) . "',
+												price = '" . AHelperUtils::preformatFloat($pd_opt_vals['price'], $this->language->get('decimal_point')) . "',
 												weight = '" . (float)$pd_opt_vals['weight'] . "',
 												weight_type = '" . $this->db->escape($pd_opt_vals['weight_type']) . "',
 												prefix = '" . $this->db->escape($pd_opt_vals['prefix']) . "',
@@ -1148,14 +1159,14 @@ class ModelCatalogProduct extends Model{
 	 * @return null
 	 */
 	protected function _clone_product_layout($product_id, $new_product_id){
-		if (!has_value($product_id) && !has_value($new_product_id)){
+		if (!AHelperUtils::has_value($product_id) && !AHelperUtils::has_value($new_product_id)){
 			return false;
 		}
 
 		//clone layout for the product if present
 		$lm = new ALayoutManager();
 		$pages = $lm->getPages('pages/product/product', 'product_id', (int)$product_id);
-		if (count($pages) && has_value($pages[0]['page_id'])){
+		if (count($pages) && AHelperUtils::has_value($pages[0]['page_id'])){
 			$tmpl_id = $this->config->get('config_storefront_template');
 			$src_layout_id = $pages[0]['layout_id'];
 			$src_page_id = $pages[0]['page_id'];
@@ -1169,7 +1180,7 @@ class ModelCatalogProduct extends Model{
 			$product_info = $this->getProductDescriptions($new_product_id);
 			if ($product_info){
 				foreach ($product_info as $language_id => $description){
-					if (!has_value($language_id)){
+					if (!AHelperUtils::has_value($language_id)){
 						continue;
 					}
 					$page_info['page_descriptions'][$language_id] = $description;
@@ -1566,7 +1577,7 @@ class ModelCatalogProduct extends Model{
 					'sku'                    => $data['sku'][$opt_val_id],
 					'quantity'               => $data['quantity'][$opt_val_id],
 					'subtract'               => $data['subtract'][$opt_val_id],
-					'price'                  => preformatFloat($data['price'][$opt_val_id], $this->language->get('decimal_point')),
+					'price'                  => AHelperUtils::preformatFloat($data['price'][$opt_val_id], $this->language->get('decimal_point')),
 					'prefix'                 => $data['prefix'][$opt_val_id],
 					'sort_order'             => $data['sort_order'][$opt_val_id],
 					'weight'                 => $data['weight'][$opt_val_id],
@@ -2135,7 +2146,7 @@ class ModelCatalogProduct extends Model{
 
 		$output = array ();
 		// check is product available
-		if (dateISO2Int($result->row['date_available']) > time()){
+		if (AHelperUtils::dateISO2Int($result->row['date_available']) > time()){
 			$output[] = $this->language->get('text_product_unavailable');
 		}
 

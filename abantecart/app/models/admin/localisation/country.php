@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -147,7 +150,7 @@ class ModelLocalisationCountry extends Model {
 				$sql .= " WHERE ".$data['subsql_filter'];
 			}
 			
-			//If for total, we done bulding the query
+			//If for total, we done building the query
 			if ($mode == 'total_only') {
 			    $query = $this->db->query($sql);
 		    	return $query->row['total'];

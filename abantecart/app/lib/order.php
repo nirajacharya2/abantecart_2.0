@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -28,19 +32,19 @@ if (!defined('DIR_CORE')){
  * @property ATax $tax
  * @property ACurrency $currency
  * @property ARequest $request
- * @property ALoader $load
+ * @property \abc\core\ALoader $load
  * @property ASession $session
- * @property ExtensionsAPI $extensions
- * @property ModelAccountOrder $model_account_order
- * @property ModelAccountAddress $model_account_address
- * @property ModelCheckoutExtension $model_checkout_extension
- * @property ModelCheckoutOrder $model_checkout_order
+ * @property \abc\core\ExtensionsAPI $extensions
+ * @property \abc\model\storefront\ModelAccountOrder $model_account_order
+ * @property \abc\model\storefront\ModelAccountAddress $model_account_address
+ * @property \abc\model\storefront\ModelCheckoutExtension $model_checkout_extension
+ * @property \abc\model\storefront\ModelCheckoutOrder $model_checkout_order
  * @property AIM $im
  *
  */
 class AOrder{
 	/**
-	 * @var Registry
+	 * @var \abc\core\Registry
 	 */
 	protected $registry;
 	/**
@@ -58,6 +62,11 @@ class AOrder{
 	 */
 	public    $data = array();
 
+	/**
+	 * AOrder constructor.
+	 * @param \abc\core\Registry
+	 * @param string $order_id
+	 */
 	public function __construct($registry, $order_id = ''){
 		$this->registry = $registry;
 
@@ -65,7 +74,7 @@ class AOrder{
 		$this->load->model('account/order', 'storefront');
 
 		//if nothing is passed use session array. Customer session, can function on storefront only
-		if (!has_value($order_id)){
+		if (!AHelperUtils::has_value($order_id)){
 			$this->order_id = (int)$this->session->data['order_id'];
 		} else{
 			$this->order_id = (int)$order_id;
@@ -216,7 +225,7 @@ class AOrder{
 			//IM addresses
 			$protocols = $this->im->getProtocols();
 			foreach ($protocols as $protocol){
-				if (has_value($indata['guest'][$protocol]) && !has_value($order_info[$protocol])){
+				if (AHelperUtils::has_value($indata['guest'][$protocol]) && !AHelperUtils::has_value($order_info[$protocol])){
 					$order_info[$protocol] = $indata['guest'][$protocol];
 				}
 			}
@@ -314,8 +323,7 @@ class AOrder{
 					'price'      => $product['price'],
 					'total'      => $product['total'],
 					'tax'        => $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']),
-					'stock'      => $product['stock'],
-					'sku'        => $product['sku']
+					'stock'      => $product['stock']
 			);
 		}
 

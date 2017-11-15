@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -65,11 +69,11 @@ class AOrderManager extends AOrder{
 		if (!IS_ADMIN){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access order recalculation');
 		}
-		if (!has_value($this->order_id)){
+		if (!AHelperUtils::has_value($this->order_id)){
 			return array ('error' => "Missing required details");
 		}
 		/**
-		 * @var $adm_order_mdl ModelSaleOrder
+		 * @var $adm_order_mdl \abc\model\admin\ModelSaleOrder
 		 */
 		$adm_order_mdl = $this->load->model('sale/order');
 		$customer_gr_mdl = $this->load->model('sale/customer_group');
@@ -142,9 +146,9 @@ class AOrderManager extends AOrder{
 			$customer_data['tax_exempt'] = $cust_info['tax_exempt'];
 		}
 		//get coupon code from coupon_id
-		if (has_value($order_info['coupon_id'])){
+		if (AHelperUtils::has_value($order_info['coupon_id'])){
 			/**
-			 * @var $adm_coupon_mdl ModelSaleCoupon
+			 * @var $adm_coupon_mdl \abc\model\admin\ModelSaleCoupon
 			 */
 			$adm_coupon_mdl = $this->load->model('sale/coupon');
 			$cpn_data = $adm_coupon_mdl->getCouponByID($order_info['coupon_id']);
@@ -210,7 +214,7 @@ class AOrderManager extends AOrder{
 		//locate shipping method quote
 		$quote_data = array ();
 		/**
-		 * @var $sf_ext_mdl ModelCheckoutExtension
+		 * @var $sf_ext_mdl \abc\model\storefront\ModelCheckoutExtension
 		 */
 		$sf_ext_mdl = $this->load->model('checkout/extension', 'storefront');
 
@@ -289,7 +293,7 @@ class AOrderManager extends AOrder{
 			} else{
 				//process storefront total models
 				/**
-				 * @var $sf_total_mdl ModelTotalTotal etc
+				 * @var $sf_total_mdl \abc\model\storefront\ModelTotalTotal etc
 				 */
 				$sf_total_mdl = $this->load->model('total/' . $extn['key'], 'storefront');
 				/**

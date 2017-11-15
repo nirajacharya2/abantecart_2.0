@@ -17,9 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\APromotion;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerPagesProductSpecial
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ */
 class ControllerPagesProductSpecial extends AController {
 
 	public $data = array();

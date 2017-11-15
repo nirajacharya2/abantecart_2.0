@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AConnect;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -34,12 +39,12 @@ class ControllerCommonANT extends AController {
 			return null;
 		}
 
-		if (!has_value($this->session->data['ant_messages']['date_modified'])) {
+		if (!AHelperUtils::has_value($this->session->data['ant_messages']['date_modified'])) {
 			unset($this->session->data['ant_messages']);
 		}
 
 		// prevent repeats of requests or if last update older then 24hours
-		if (has_value($this->session->data['ant_messages']) && (time() - $this->session->data['ant_messages']['date_modified'] < 86400)) {
+		if (AHelperUtils::has_value($this->session->data['ant_messages']) && (time() - $this->session->data['ant_messages']['date_modified'] < 86400)) {
 			return null;
 		}
 

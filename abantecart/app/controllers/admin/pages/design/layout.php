@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\ALayoutManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -154,7 +159,7 @@ class ControllerPagesDesignLayout extends AController{
 			}
 		}
 
-		$this->redirect($this->html->getSecureURL('design/layout', $url));
+		abc_redirect($this->html->getSecureURL('design/layout', $url));
 	}
 
 	public function preview(){
@@ -200,7 +205,7 @@ class ControllerPagesDesignLayout extends AController{
 					));
 		}
 
-		$this->redirect($this->html->getSecureURL('design/layout', $url));
+		abc_redirect($this->html->getSecureURL('design/layout', $url));
 	}
 
 
@@ -254,6 +259,6 @@ class ControllerPagesDesignLayout extends AController{
 			}
 		}
 
-		$this->redirect($this->html->getSecureURL('design/layout', $url));
+		abc_redirect($this->html->getSecureURL('design/layout', $url));
 	}
 }

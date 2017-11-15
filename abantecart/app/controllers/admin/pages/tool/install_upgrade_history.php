@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -161,7 +164,7 @@ class ControllerPagesToolInstallUpgradeHistory extends AController{
 
 		//prevent random click
 		if (!$this->request->get['delete']){
-			$this->redirect($this->html->getSecureURL('tool/install_upgrade_history'));
+			abc_redirect($this->html->getSecureURL('tool/install_upgrade_history'));
 		}
 
 		$this->loadLanguage('tool/install_upgrade_history');
@@ -173,6 +176,6 @@ class ControllerPagesToolInstallUpgradeHistory extends AController{
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
 		$this->session->data['success'] = $this->language->get('text_delete_success');
-		$this->redirect($this->html->getSecureURL('tool/install_upgrade_history'));
+		abc_redirect($this->html->getSecureURL('tool/install_upgrade_history'));
 	}
 }

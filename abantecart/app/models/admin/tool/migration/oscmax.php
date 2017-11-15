@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -26,6 +27,9 @@ class Migration_Oscmax implements Migration {
 
 	private $data;
 	private $config;
+	/**
+	 * @var \abc\lib\ADB
+	 */
 	protected $src_db;
 	private $error_msg;
 	private $language_id_src;
@@ -35,7 +39,7 @@ class Migration_Oscmax implements Migration {
 		$this->data = $migrate_data;
 		$this->error_msg = "";
 		/**
-		 * @var ADB
+		 * @var \abc\lib\ADB
 		 */
 		if($migrate_data){
 			$db_driver = DB_DRIVER;

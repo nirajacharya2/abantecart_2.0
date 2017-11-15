@@ -17,10 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AResource;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 /**
  * Class ModelCatalogCategory
  * @property ModelCatalogProduct $model_catalog_product

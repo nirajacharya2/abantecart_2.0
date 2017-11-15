@@ -17,9 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\APromotion;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerPagesProductSearch
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ */
 class ControllerPagesProductSearch extends AController {
 	protected $category;
 	protected $path;
@@ -202,7 +213,7 @@ class ControllerPagesProductSearch extends AController {
 
 				//if single result, redirect to the product
 				if (count($products_result) == 1) {
-					$this->redirect($this->html->getSEOURL('product/product','&product_id=' . key($products_result), '&encode'));		
+					abc_redirect($this->html->getSEOURL('product/product','&product_id=' . key($products_result), '&encode'));
 				}
 
 				if (is_array($products_result) && $products_result) {

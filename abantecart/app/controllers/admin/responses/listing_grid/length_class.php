@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\ALength;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -118,7 +125,6 @@ class ControllerResponsesListingGridLengthClass extends AController {
 												 ) );
 		}
 
-
 		switch ($this->request->post['oper']) {
 			case 'del':
 				$ids = explode(',', $this->request->post['id']);
@@ -148,9 +154,7 @@ class ControllerResponsesListingGridLengthClass extends AController {
 						}
 					}
 				}
-
 				break;
-
 			default:
 		}
 
@@ -210,7 +214,7 @@ class ControllerResponsesListingGridLengthClass extends AController {
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
 	}
 
-	private function _validateField( $field, $value ) {
+	protected function _validateField( $field, $value ) {
 		$err = '';
 		switch( $field ) {
 			case 'length_class_description' :
@@ -248,7 +252,7 @@ class ControllerResponsesListingGridLengthClass extends AController {
 		return $err;
 	}
 
-	private function _validateDelete( $length_class_id ) {
+	protected function _validateDelete( $length_class_id ) {
 		$length_class_info = $this->model_localisation_length_class->getLengthClass($length_class_id);
 		if ($length_class_info && ($this->config->get('config_length_class') == $length_class_info['unit'])) {
 			return $this->language->get('error_default');
@@ -259,5 +263,4 @@ class ControllerResponsesListingGridLengthClass extends AController {
 			return sprintf($this->language->get('error_product'), $product_total);
 		}
 	}
-
 }

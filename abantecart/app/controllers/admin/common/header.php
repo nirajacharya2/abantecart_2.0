@@ -17,13 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AMenu;
+use abc\lib\AResourceManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerCommonHeader
- * @property ModelToolOnlineNow $model_tool_online_now
+ * @property \abc\model\admin\ModelToolOnlineNow $model_tool_online_now
  *
  */
 class ControllerCommonHeader extends AController {
@@ -40,9 +46,9 @@ class ControllerCommonHeader extends AController {
 			$this->session->data['language'] = $this->request->post['language_code'];
 
 			if (!empty($this->request->post['redirect'])) {
-				redirect($this->request->post['redirect']);
+				abc_redirect($this->request->post['redirect']);
 			} else {
-				redirect($this->html->getURL('index/home'));
+				abc_redirect($this->html->getURL('index/home'));
 			}
 		}
 
@@ -175,8 +181,8 @@ class ControllerCommonHeader extends AController {
 		$this->loadModel('report/sale');
 		$data = array('filter' => array(
 									'order_status' => 'confirmed',
-									'date_start' => dateISO2Display(date('Y-m-d', time()) ,$this->language->get('date_format_short')),
-									'date_end' => dateISO2Display(date('Y-m-d', time()) ,$this->language->get('date_format_short'))
+									'date_start' => AHelperUtils::dateISO2Display(date('Y-m-d', time()) ,$this->language->get('date_format_short')),
+									'date_end' => AHelperUtils::dateISO2Display(date('Y-m-d', time()) ,$this->language->get('date_format_short'))
 			)
 		);
 

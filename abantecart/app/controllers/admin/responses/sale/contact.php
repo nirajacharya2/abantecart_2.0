@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -27,7 +34,7 @@ if (defined('IS_DEMO') && IS_DEMO) {
 
 /**
  * Class ControllerResponsesSaleContact
- * @property ModelSaleContact $model_sale_contact
+ * @property \abc\model\admin\ModelSaleContact $model_sale_contact
  */
 class ControllerResponsesSaleContact extends AController {
 	public $data = array();
@@ -95,7 +102,7 @@ class ControllerResponsesSaleContact extends AController {
 		if($task_result){
 			$tm->deleteTask($task_id);
 			$result_text = sprintf($this->language->get('text_success_sent'),$task_info['settings']['sent']);
-			if(has_value($this->session->data['sale_contact_presave'])){
+			if(AHelperUtils::has_value($this->session->data['sale_contact_presave'])){
 				unset($this->session->data['sale_contact_presave']);
 			}
 		}else{
@@ -261,7 +268,7 @@ class ControllerResponsesSaleContact extends AController {
 				//$max_exec_time = 7200;
 				$max_exec_time = 7200;
 			}
-			if( time() - dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
+			if( time() - AHelperUtils::dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
 
 				//get some info about task, for ex message-text and subject
 				$steps = $tm->getTaskSteps($incm_task['task_id']);
@@ -276,8 +283,8 @@ class ControllerResponsesSaleContact extends AController {
 					$incm_task['subject'] = $step_settings['subject'];
 				}
 				$incm_task['message'] = mb_substr($step_settings['message'],0, 300);
-				$incm_task['date_added'] = dateISO2Display($incm_task['date_added'], $this->language->get('date_format_short').' '.$this->language->get('time_format'));
-				$incm_task['last_time_run'] = dateISO2Display($incm_task['last_time_run'], $this->language->get('date_format_short').' '.$this->language->get('time_format'));
+				$incm_task['date_added'] = AHelperUtils::dateISO2Display($incm_task['date_added'], $this->language->get('date_format_short').' '.$this->language->get('time_format'));
+				$incm_task['last_time_run'] = AHelperUtils::dateISO2Display($incm_task['last_time_run'], $this->language->get('date_format_short').' '.$this->language->get('time_format'));
 				$incm_task['sent'] = sprintf($this->language->get('text_sent'),$incm_task['settings']['sent'], $incm_task['settings']['recipients_count']);
 
 				$this->data['tasks'][$k] = $incm_task;

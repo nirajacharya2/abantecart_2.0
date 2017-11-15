@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -24,13 +27,11 @@ class ControllerApiProductManufacturer extends AControllerAPI {
 	
 	public function get() {
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$manufacturer_id = $this->request->get['manufacturer_id'];
-
 		$this->loadModel('catalog/manufacturer');
 
 		if ($manufacturer_id) {
-			$data = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);	
+			$data = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
 		} else {
 			$data = $this->model_catalog_manufacturer->getManufacturers();
 		}

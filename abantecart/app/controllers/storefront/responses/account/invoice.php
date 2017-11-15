@@ -17,18 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AException;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 class ControllerResponsesAccountInvoice extends AController {
-
 	public function main($method) {
 		$method = (string)$method;
 		$method = !$method ? __FUNCTION__ : (string)$method;
 		//init controller data
 		$this->extensions->hk_InitData($this, $method);
-
+		$html_out = '';
 		try{
 			$page_rt = 'pages/account/invoice';
 			if($method != 'main'){
@@ -38,9 +41,7 @@ class ControllerResponsesAccountInvoice extends AController {
 			$cntr = $this->dispatch($page_rt);
 			$html_out = $cntr->dispatchGetOutput();
 		}catch(AException $e){	}
-	
         $this->extensions->hk_UpdateData($this, $method);
-
 		$this->response->setOutput($html_out);
 	}
 

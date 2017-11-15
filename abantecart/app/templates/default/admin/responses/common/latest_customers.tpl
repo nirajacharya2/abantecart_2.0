@@ -8,7 +8,7 @@
     <?php } ?> 
         <div class="media">
             <a href="<?php echo $customer['url']; ?>" class="pull-left media-thumb">
-                <img class="media-object" src="<?php echo getGravatar($customer['email']); ?>" alt="<?php echo $customer['name']; ?>"/>
+                <img class="media-object" src="<?php echo abc\core\AHelperUtils::getGravatar($customer['email']); ?>" alt="<?php echo $customer['name']; ?>"/>
             </a>
             <div class="media-body">
                 <strong><a href="<?php echo $customer['url']; ?>"><?php echo $customer['name']; ?></a></strong>

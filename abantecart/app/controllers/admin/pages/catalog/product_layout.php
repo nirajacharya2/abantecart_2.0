@@ -17,11 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ALayoutManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerPagesCatalogProductLayout extends AController {
-	private $error = array();
 	public $data = array();
 
 	public function main() {
@@ -38,12 +43,12 @@ class ControllerPagesCatalogProductLayout extends AController {
 		$this->document->setTitle($this->language->get('heading_title'));
 		$this->loadModel('catalog/product');
 
-		if (has_value($product_id) && $this->request->is_GET()) {
+		if (AHelperUtils::has_value($product_id) && $this->request->is_GET()) {
 			$product_info = $this->model_catalog_product->getProduct( $product_id );
 			if (!$product_info) {
 				unset($this->session->data['success']);
 				$this->session->data['warning'] = $this->language->get('error_product_not_found');
-				$this->redirect($this->html->getSecureURL('catalog/product'));
+				abc_redirect($this->html->getSecureURL('catalog/product'));
 			}
 
 		}
@@ -159,7 +164,7 @@ class ControllerPagesCatalogProductLayout extends AController {
 	    $layoutform = $this->dispatch('common/page_layout', array($layout));
 	    $this->data['layoutform'] = $layoutform->dispatchGetOutput();
 		
-		//build pages and available layouts for clonning
+		//build pages and available layouts for cloning
 		$this->data['pages'] = $layout->getAllPages();
 		$av_layouts = array( "0" => $this->language->get('text_select_copy_layout'));
 		foreach($this->data['pages'] as $page){
@@ -194,7 +199,7 @@ class ControllerPagesCatalogProductLayout extends AController {
 
 	public function save() {
 		if ($this->request->is_GET()) {
-			$this->redirect($this->html->getSecureURL('catalog/product_layout'));
+			abc_redirect($this->html->getSecureURL('catalog/product_layout'));
 		}
 
 		$page_controller = 'pages/product/product';
@@ -205,10 +210,10 @@ class ControllerPagesCatalogProductLayout extends AController {
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 		$this->loadLanguage('catalog/product');
 
-		if (!has_value($product_id)) {
+		if (!AHelperUtils::has_value($product_id)) {
 			unset($this->session->data['success']);
 			$this->session->data['warning'] = $this->language->get('error_product_not_found');
-			$this->redirect($this->html->getSecureURL('catalog/product/update'));
+			abc_redirect($this->html->getSecureURL('catalog/product/update'));
 		}
 
 		// need to know if unique page existing
@@ -241,7 +246,7 @@ class ControllerPagesCatalogProductLayout extends AController {
 
 		//create new instance with specific template/page/layout data
 		$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-		if (has_value($post_data['layout_change'])) {	
+		if (AHelperUtils::has_value($post_data['layout_change'])) {
 			//update layout request. Clone source layout
 			$layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
 			$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
@@ -254,7 +259,7 @@ class ControllerPagesCatalogProductLayout extends AController {
       		} 
 		}
 
-		$this->redirect($this->html->getSecureURL('catalog/product_layout', '&product_id=' . $product_id));
+		abc_redirect($this->html->getSecureURL('catalog/product_layout', '&product_id=' . $product_id));
 	}
 
 }

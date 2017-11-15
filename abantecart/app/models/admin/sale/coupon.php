@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\AFilter;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -30,14 +35,14 @@ class ModelSaleCoupon extends Model {
 	 * @return int
 	 */
 	public function addCoupon($data) {
-		if (has_value($data[ 'date_start' ])) {
+		if (AHelperUtils::has_value($data[ 'date_start' ])) {
 			$data[ 'date_start' ] = "DATE('" . $data[ 'date_start' ] . "')";
 
 		} else {
 			$data[ 'date_start' ] = "NULL";
 		}
 
-		if (has_value($data[ 'date_end' ])) {
+		if (AHelperUtils::has_value($data[ 'date_end' ])) {
 			$data[ 'date_end' ] = "DATE('" . $data[ 'date_end' ] . "')";
 		} else {
 			$data[ 'date_end' ] = "NULL";
@@ -81,7 +86,7 @@ class ModelSaleCoupon extends Model {
 	 * @param array $data
 	 */
 	public function editCoupon($coupon_id, $data) {
-		if (has_value($data[ 'date_start' ])) {
+		if (AHelperUtils::has_value($data[ 'date_start' ])) {
 			$data[ 'date_start' ] = "DATE('" . $data[ 'date_start' ] . "')";
 		}else{
 			if(isset($data[ 'date_start' ])){
@@ -90,7 +95,7 @@ class ModelSaleCoupon extends Model {
 
 		}
 
-		if (has_value($data[ 'date_end' ])) {
+		if (AHelperUtils::has_value($data[ 'date_end' ])) {
 			$data[ 'date_end' ] = "DATE('" . $data[ 'date_end' ] . "')";
 		}else{
 			if(isset($data[ 'date_end' ])){
@@ -221,7 +226,7 @@ class ModelSaleCoupon extends Model {
             $sql .= " AND ".$data['subsql_filter'];
         }
 
-		//If for total, we done bulding the query
+		//If for total, we done building the query
 		if ($mode == 'total_only') {
 		    $query = $this->db->query($sql);
 		    return $query->row['total'];

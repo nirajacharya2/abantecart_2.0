@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -46,7 +50,12 @@ class ControllerResponsesIndexChart extends AController {
 		switch ($range) {
 			case 'day':
 				for ($i = 0; $i < 24; $i++) {
-					$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . $this->db->table("orders") . "` WHERE order_status_id > '0' AND (DATE(date_added) = DATE(NOW()) AND HOUR(date_added) = '" . (int)$i . "') GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+					$query = $this->db->query(
+							"SELECT COUNT(*) AS total 
+							FROM `" . $this->db->table("orders") . "` 
+							WHERE order_status_id > '0' AND (DATE(date_added) = DATE(NOW()) AND HOUR(date_added) = '" . (int)$i . "') 
+							GROUP BY HOUR(date_added) 
+							ORDER BY HOUR(date_added) ASC");
 					
 					if ($query->num_rows) {
 						$data['order']['data'][]  = array($i, (int)$query->row['total']);
@@ -54,7 +63,12 @@ class ControllerResponsesIndexChart extends AController {
 						$data['order']['data'][]  = array($i, 0);
 					}
 					
-					$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table("customers") . " WHERE DATE(date_added) = DATE(NOW()) AND HOUR(date_added) = '" . (int)$i . "' GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+					$query = $this->db->query(
+							"SELECT COUNT(*) AS total 
+							FROM " . $this->db->table("customers") . " 
+							WHERE DATE(date_added) = DATE(NOW()) AND HOUR(date_added) = '" . (int)$i . "' 
+							GROUP BY HOUR(date_added) 
+							ORDER BY HOUR(date_added) ASC");
 					
 					if ($query->num_rows) {
 						$data['customer']['data'][] = array($i, (int)$query->row['total']);
@@ -71,7 +85,11 @@ class ControllerResponsesIndexChart extends AController {
 				for ($i = 0; $i < 7; $i++) {
 					$date = date('Y-m-d', $date_start + ($i * 86400));
 
-					$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . $this->db->table("orders") . "` WHERE order_status_id > '0' AND DATE(date_added) = '" . $this->db->escape($date) . "' GROUP BY DATE(date_added)");
+					$query = $this->db->query(
+							"SELECT COUNT(*) AS total 
+							FROM `" . $this->db->table("orders") . "` 
+							WHERE order_status_id > '0' AND DATE(date_added) = '" . $this->db->escape($date) . "' 
+							GROUP BY DATE(date_added)");
 			
 					if ($query->num_rows) {
 						$data['order']['data'][] = array($i, (int)$query->row['total']);
@@ -145,4 +163,3 @@ class ControllerResponsesIndexChart extends AController {
 		$this->response->setOutput(AJson::encode($data));
 	}
 }
-?>

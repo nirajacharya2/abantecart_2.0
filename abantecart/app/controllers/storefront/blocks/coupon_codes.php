@@ -17,32 +17,31 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerBlocksCouponCodes extends AController {
 	public $data = array();
-	
 	public function main() {
-
 		$action = func_get_arg(0);
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$this->loadLanguage('checkout/payment');
-
 		if (!$this->config->get('coupon_status')) {
 			return null;
 		}
 
 		$this->data['coupon_status'] = $this->config->get('coupon_status');
-
-		$entereted_cpn = ( isset($this->request->post[ 'coupon' ]) ? $this->request->post[ 'coupon' ] : $this->session->data[ 'coupon' ] );
+		$entered_cpn_code = ( isset($this->request->post[ 'coupon' ]) ? $this->request->post[ 'coupon' ] : $this->session->data[ 'coupon' ] );
 
 		$form = new AForm();
 		$form->setForm(array( 'form_name' => 'coupon' ));
 
-        $this->data[ 'coupon_code' ] = $entereted_cpn;
+        $this->data[ 'coupon_code' ] = $entered_cpn_code;
 		$this->data[ 'form_open' ] = $form->getFieldHtml(
                     array(
                         'type' => 'form',
@@ -54,7 +53,7 @@ class ControllerBlocksCouponCodes extends AController {
 		$this->data[ 'coupon' ] = $form->getFieldHtml( array(
                                        'type' => 'input',
 		                               'name' => 'coupon',
-		                               'value' => $entereted_cpn,
+		                               'value' => $entered_cpn_code,
 		                        ));
 		$this->data[ 'submit' ] = $form->getFieldHtml( array(
                              'type' => 'submit',
@@ -67,4 +66,3 @@ class ControllerBlocksCouponCodes extends AController {
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 	}
 }
-?>

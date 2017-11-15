@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -26,6 +29,7 @@ class ModelToolSeoUrl extends Model {
 	 * @return string
 	 */
 	public function rewrite($link) {
+		$param_key = '';
 		if ($this->config->get('enable_seo_url')) {
 			$url_data = parse_url(str_replace('&amp;', '&', $link));
 		

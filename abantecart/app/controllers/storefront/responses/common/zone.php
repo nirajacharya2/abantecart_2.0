@@ -17,24 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerResponsesCommonZone extends AController {
-	private $error = array(); 
-	    
   	public function main() {
-
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 		$stdout = '';
-		
-		if (has_value( $this->request->get['country_id'] ) && is_numeric( $this->request->get['country_id'] )) {
+		if (AHelperUtils::has_value( $this->request->get['country_id'] ) && is_numeric( $this->request->get['country_id'] )) {
 			$country_id = $this->request->get['country_id'];
 	        $stdout = '<option value="FALSE">' . $this->language->get('text_select') . '</option>';
-	
 			$this->loadModel('localisation/zone');
-	
 	    	$results = $this->model_localisation_zone->getZonesByCountryId($country_id);
 			if ( count($results) ){
 		      	foreach ($results as $result) {
@@ -56,7 +54,6 @@ class ControllerResponsesCommonZone extends AController {
 		}
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$this->response->setOutput($stdout, $this->config->get('config_compression'));
   	}
 
@@ -65,14 +62,10 @@ class ControllerResponsesCommonZone extends AController {
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 		$stdout = '';
 
-		if (has_value( $this->request->get['country_name'] )) {
-			
+		if (AHelperUtils::has_value( $this->request->get['country_name'] )) {
 			$country_name = $this->request->get['country_name'];
-			
 			$stdout = '<option value="FALSE">' . $this->language->get('text_select') . '</option>';
-	
 			$this->loadModel('localisation/zone');
-
 			$country_id = $this->model_localisation_zone->getCountryIdByName($country_name);
 			$results = $this->model_localisation_zone->getZonesByCountryId($country_id);
 			foreach ($results as $result) {
@@ -82,7 +75,6 @@ class ControllerResponsesCommonZone extends AController {
 				}
 				$stdout .= '>' . $result['name'] . '</option>';
 			}
-	
 			if (!$results) {
 				if (!$this->request->get['zone_name']) {
 					$stdout .= '<option value="0" selected="selected">' . $this->language->get('text_none') . '</option>';
@@ -93,7 +85,6 @@ class ControllerResponsesCommonZone extends AController {
 		}
 		//init controller data
 		$this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$this->response->setOutput($stdout, $this->config->get('config_compression'));
 	}
 

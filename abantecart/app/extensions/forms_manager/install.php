@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\Admin;
+use abc\lib\AMenu;
+use abc\lib\AResourceManager;
+
 if (! defined ( 'DIR_CORE' )) {
 header ( 'Location: static_pages/' );
 }

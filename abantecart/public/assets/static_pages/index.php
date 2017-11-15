@@ -20,14 +20,21 @@
 ------------------------------------------------------------------------------  
 */
 // Real path (operating system web root) to the directory where abantecart is installed
-$root_path = dirname(__FILE__);
-/*if (defined('IS_WINDOWS')) {
-		$root_path = str_replace('\\', '/', $root_path);
+use abc\core\ABC;
+use abc\lib\ASession;
+
+$dir_app = dirname(dirname(dirname(__DIR__))) . '/app/';
+// Windows IIS Compatibility
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+	define('IS_WINDOWS', true);
+	$dir_app = str_replace('\\', '/', $dir_app);
 }
-define('DIR_ROOT', $root_path);*/
 // Load all initial set up
-define('DIR_ASSETS', __DIR__.'/');
-require_once(__DIR__.'/../../app/core/init/app.php');
+define('DIR_ASSETS', basename(__DIR__).'/');
+require $dir_app.'abc.php';
+$config = require $dir_app.'config/config.php';
+$app = new ABC($config);
+require_once $dir_app.'core/init/app.php';
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
@@ -56,7 +63,7 @@ foreach(array_keys($_COOKIE) as $key) {
 define('SESSION_ID', $session_id);
 
 //try to start session. 
-require_once(DIR_CORE . 'lib/session.php');
+require_once(DIR_LIB . 'session.php');
 $session = new ASession(SESSION_ID);
 
 $error = 'Please check AbanteCart and webserver error logs for more details. You can check error log in the control panel if it is functional. Otherwise, refer to error log located on your web server';

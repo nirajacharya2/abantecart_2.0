@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+use abc\lib\AFilter;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -38,6 +44,7 @@ class ControllerApiProductLatest extends AControllerAPI {
 
 		$response = new stdClass();
 		$response->page = $filter->getParam('page');
+		//????
 		$response->total = $total_pages;
 		$response->records = $filters['limit'];
 		$response->limit = $filters['limit'];

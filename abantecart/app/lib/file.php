@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -27,7 +31,7 @@ if (!defined('DIR_CORE')){
  */
 
 /**
- * @property ALanguageManager $language
+ * @property \abc\core\ALanguageManager $language
  * @property ADB $db
  * @property ACache $cache
  * @property AConfig $config
@@ -55,7 +59,7 @@ class AFile{
 	/**
 	 * @param  string $key - key to save data in registry
 	 * @param  mixed $value - key to save data in registry
-	 * @return mixed  - data from registry
+	 * @void
 	 */
 	public function __set($key, $value){
 		$this->registry->set($key, $value);
@@ -118,10 +122,10 @@ class AFile{
 		if (empty($file_name)){
 			return array ();
 		}
-		$uplds_dir = DIR_ROOT . '/admin/system/uploads';
-		make_writable_dir($uplds_dir);
-		$file_path = $uplds_dir . '/' . $upload_sub_dir . '/';
-		make_writable_dir($file_path);
+		$uploads_dir = DIR_ROOT . '/admin/system/uploads';
+		AHelperUtils::is_writable_dir($uploads_dir);
+		$file_path = $uploads_dir . '/' . $upload_sub_dir . '/';
+		AHelperUtils::is_writable_dir($file_path);
 
 		$ext = strrchr($file_name, '.');
 		$file_name = substr($file_name, 0, strlen($file_name) - strlen($ext));
@@ -184,7 +188,7 @@ class AFile{
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		$response = new stdClass();
+		$response = new \stdClass();
 
 		$response->body = curl_exec($ch);
 		$response->http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

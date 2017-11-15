@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AEncryption;
+use abc\lib\AError;
+use abc\lib\AException;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -43,7 +49,7 @@ class ControllerPagesCheckoutSuccess extends AController{
 
 			$this->extensions->hk_ProcessData($this);
 			//Redirect back to load new page with cleared shopping cart content
-			redirect($this->html->getSecureURL('checkout/success'));
+			abc_redirect($this->html->getSecureURL('checkout/success'));
 		} //when validation failed
 		elseif ($order_id) {
 			$this->session->data['processed_order_id'] = $order_id;
@@ -53,7 +59,7 @@ class ControllerPagesCheckoutSuccess extends AController{
 
 		//check if payment was processed
 		if (!(int)$this->session->data['processed_order_id']) {
-			redirect($this->html->getURL('index/home'));
+			abc_redirect($this->html->getURL('index/home'));
 		} elseif (!$order_id && (int)$this->session->data['processed_order_id']) {
 			$order_id = (int)$this->session->data['processed_order_id'];
 		}

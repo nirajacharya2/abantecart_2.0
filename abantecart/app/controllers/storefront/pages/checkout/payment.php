@@ -17,10 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+use abc\core\HtmlElementFactory;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerPagesCheckoutPayment
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesCheckoutPayment extends AController{
 	public $error = array ();
 	public $data = array ();
@@ -42,7 +54,7 @@ class ControllerPagesCheckoutPayment extends AController{
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		//Selections are posted, validate and apply
@@ -63,14 +75,14 @@ class ControllerPagesCheckoutPayment extends AController{
 
                     //process data
                     $this->extensions->hk_ProcessData($this, 'reset_coupon');
-                    $this->redirect($this->html->getSecureURL($payment_rt, $param));
+                    abc_redirect($this->html->getSecureURL($payment_rt, $param));
                 } else if($this->_validateCoupon()) {
                     $this->session->data['coupon'] = $this->request->post['coupon'];
                     $this->session->data['success'] = $this->language->get('text_success');
 
                     //process data
                     $this->extensions->hk_ProcessData($this, 'apply_coupon');
-                    $this->redirect($this->html->getSecureURL($payment_rt, $param));
+                    abc_redirect($this->html->getSecureURL($payment_rt, $param));
                 }
             }
         }
@@ -89,23 +101,23 @@ class ControllerPagesCheckoutPayment extends AController{
         $order_total = $order_totals['total'];
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL($checkout_rt);
-			$this->redirect($this->html->getSecureURL($login_rt));
+			abc_redirect($this->html->getSecureURL($login_rt));
 		}
 
 		$this->loadModel('account/address');
 
 		if ($this->cart->hasShipping()){
 			if (!isset($this->session->data['shipping_address_id']) || !$this->session->data['shipping_address_id']){
-				$this->redirect($this->html->getSecureURL($checkout_rt));
+				abc_redirect($this->html->getSecureURL($checkout_rt));
 			}
 
 			if (!isset($this->session->data['shipping_method'])){
-				$this->redirect($this->html->getSecureURL($checkout_rt));
+				abc_redirect($this->html->getSecureURL($checkout_rt));
 			}
 		} else{
 			unset($this->session->data['shipping_address_id']);
@@ -125,13 +137,13 @@ class ControllerPagesCheckoutPayment extends AController{
 		}
 
 		if (!$this->session->data['payment_address_id']){
-			$this->redirect($this->html->getSecureURL($address_rt));
+			abc_redirect($this->html->getSecureURL($address_rt));
 		}
 
 		$this->loadModel('account/address');
 		$payment_address = $this->model_account_address->getAddress($this->session->data['payment_address_id']);
 		if (!$payment_address){
-			$this->redirect($this->html->getSecureURL($address_rt));
+			abc_redirect($this->html->getSecureURL($address_rt));
 		}
 		if (!$this->cart->hasShipping() || $this->config->get('config_tax_customer')){
 			$this->tax->setZone($payment_address['country_id'], $payment_address['zone_id']);
@@ -167,8 +179,8 @@ class ControllerPagesCheckoutPayment extends AController{
 			$psettings[$pkey] = $this->model_checkout_extension->getSettings($pkey);
 			$min = $psettings[$pkey][$pkey."_payment_minimum_total"];
 			$max = $psettings[$pkey][$pkey."_payment_maximum_total"];
-			if ((has_value($min) && $total['total'] < $min)
-					|| (has_value($max) && $total['total'] > $max)
+			if ((AHelperUtils::has_value($min) && $total['total'] < $min)
+					|| (AHelperUtils::has_value($max) && $total['total'] > $max)
 			){
 				continue;
 			}
@@ -179,7 +191,7 @@ class ControllerPagesCheckoutPayment extends AController{
 				$method_data[$pkey] = $method;
 				//# Add storefront icon if available
 				$icon = $psettings[$pkey][$pkey."_payment_storefront_icon"];
-				if (has_value($icon)){
+				if (AHelperUtils::has_value($icon)){
 					$icon_data = $this->model_checkout_extension->getSettingImage($icon);
 					$icon_data['image'] = $icon;
 					$method_data[$pkey]['icon'] = $icon_data;
@@ -199,7 +211,7 @@ class ControllerPagesCheckoutPayment extends AController{
 			$this->session->data['comment'] = strip_tags($this->request->post['comment']);
 
 			$this->extensions->hk_ProcessData($this, 'confirm');
-			$this->redirect($this->html->getSecureURL($confirm_rt));
+			abc_redirect($this->html->getSecureURL($confirm_rt));
 		}
 
 		if ($total['total'] == 0 && $this->request->get['mode'] != 'edit'){
@@ -208,7 +220,7 @@ class ControllerPagesCheckoutPayment extends AController{
 					'title' => $this->language->get('no_payment_required')
 			);
 
-			$this->redirect($this->html->getSecureURL($confirm_rt));
+			abc_redirect($this->html->getSecureURL($confirm_rt));
 
 		}
 
@@ -220,7 +232,7 @@ class ControllerPagesCheckoutPayment extends AController{
 			$pkey = key($only_method);
 			if($psettings[$pkey][$pkey."_autoselect"]){
 				$this->session->data['payment_method'] = $only_method[$pkey];
-				$this->redirect($this->html->getSecureURL($confirm_rt));			
+				abc_redirect($this->html->getSecureURL($confirm_rt));
 			}			
 		}
 
@@ -472,7 +484,7 @@ class ControllerPagesCheckoutPayment extends AController{
                     'title' => $this->language->get('no_payment_required')
                 );
                 //if enough -redirect on confirmation page
-                $this->redirect($this->html->getSecureURL('checkout/confirm'));
+                abc_redirect($this->html->getSecureURL('checkout/confirm'));
             }
         }
     }

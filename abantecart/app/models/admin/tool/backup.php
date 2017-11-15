@@ -17,10 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+use abc\lib\ABackup;
+use abc\lib\ADataset;
+use abc\lib\AFormManager;
+use abc\lib\ALayoutManager;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ModelToolBackup
+ * @package abc\model\admin
+ */
 class ModelToolBackup extends Model{
 	public $errors = array ();
 	public $backup_filename;
@@ -83,13 +95,13 @@ class ModelToolBackup extends Model{
 	 */
 	public function getTables(){
 		$table_data = array ();
-		$prefix_len = strlen(DB_PREFIX);
+		$prefix_len = strlen($this->db->prefix());
 
-		$query = $this->db->query("SHOW TABLES FROM `" . DB_DATABASE . "`", true);
+		$query = $this->db->query("SHOW TABLES FROM `" . $this->db->database() . "`", true);
 		if (!$query){
 			$sql = "SELECT TABLE_NAME
 					FROM information_schema.TABLES
-					WHERE information_schema.TABLES.table_schema = '" . DB_DATABASE . "' ";
+					WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "' ";
 			$query = $this->db->query($sql, true);
 		}
 
@@ -98,12 +110,12 @@ class ModelToolBackup extends Model{
 		}
 
 		foreach ($query->rows as $result){
-			$table_name = $result['Tables_in_' . DB_DATABASE];
+			$table_name = $result['Tables_in_' . $this->db->database()];
 			//if database prefix present - select only abantecart tables. If not - select all
-			if (DB_PREFIX && substr($table_name, 0, $prefix_len) != DB_PREFIX){
+			if ($this->db->prefix() && substr($table_name, 0, $prefix_len) != $this->db->prefix()){
 				continue;
 			}
-			$table_data[] = $result['Tables_in_' . DB_DATABASE];
+			$table_data[] = $result['Tables_in_' . $this->db->database()];
 		}
 		return $table_data;
 	}
@@ -201,7 +213,7 @@ class ModelToolBackup extends Model{
 			}
 			$sql = "SELECT SUM(data_length + index_length - data_free) AS 'db_size'
 					FROM information_schema.TABLES
-					WHERE information_schema.TABLES.table_schema = '" . DB_DATABASE . "'
+					WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'
 						AND TABLE_NAME IN ('" . implode("','", $table_list) . "')	";
 
 			$result = $this->db->query($sql);
@@ -362,7 +374,7 @@ class ModelToolBackup extends Model{
 		$sql = "SELECT TABLE_NAME AS 'table_name',
 					table_rows AS 'num_rows', (data_length + index_length - data_free) AS 'size'
 				FROM information_schema.TABLES
-				WHERE information_schema.TABLES.table_schema = '" . DB_DATABASE . "'
+				WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'
 					AND TABLE_NAME IN ('" . implode("','", $tables) . "')	";
 		$result = $this->db->query($sql);
 		$output = array ();

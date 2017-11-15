@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\ATaskManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -151,6 +155,6 @@ class ControllerPagesToolTask extends AController {
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-		redirect($this->html->getSecureURL('tool/task'));
+		abc_redirect($this->html->getSecureURL('tool/task'));
 	}
 }

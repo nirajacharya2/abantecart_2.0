@@ -17,13 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\core\HtmlElementFactory;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerPagesAccountWishlist extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function main() {
 
 		//init controller data
@@ -31,7 +35,7 @@ class ControllerPagesAccountWishlist extends AController {
 
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/wishlist');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -74,11 +78,8 @@ class ControllerPagesAccountWishlist extends AController {
 			
 		$whishlist = $this->customer->getWishList();		
     	if ( $whishlist ) {
-
-			$this->loadModel('tool/seo_url'); 
+			$this->loadModel('tool/seo_url');
 	 		$this->loadModel('catalog/product');
-						
-
 
             //get thumbnails by one pass
             $resource = new AResource('image');
@@ -104,7 +105,7 @@ class ControllerPagesAccountWishlist extends AController {
           			'name'     => $product_info['name'],
           			'model'    => $product_info['model'],
           			'thumb'    => $thumbnail,
-          			'added'	   => dateInt2Display($timestamp),
+          			'added'	   => AHelperUtils::dateInt2Display($timestamp),
 					'price'    => $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'))),
 					'href'     => $this->html->getSEOURL('product/product', '&product_id=' . $product_id,true),
 					'call_to_order' => $product_info['call_to_order'],
@@ -112,14 +113,13 @@ class ControllerPagesAccountWishlist extends AController {
         		);
       		}
             $this->data['products'] =  $products;
-			
 			if (isset($this->session->data['redirect'])) {
 				$this->data['continue'] = str_replace('&amp;','&',$this->session->data['redirect']);
 				unset($this->session->data['redirect']);
 			} else {
                 $this->data['continue'] = $this->html->getHomeURL();
 			}
-			
+
 			$this->view->assign('error', '' );
 		    if($this->session->data['error']){
 		    	$this->view->assign('error', $this->session->data['error'] );
@@ -135,10 +135,8 @@ class ControllerPagesAccountWishlist extends AController {
 			}
 	        $this->data['display_price'] = $display_price;
 
-			
 			$this->view->setTemplate('pages/account/wishlist.tpl');
-
-    	} else {            
+    	} else {
             $this->data['heading_title'] = $this->language->get('heading_title');
             $this->data['text_error'] = $this->language->get('text_empty_wishlist');
 
@@ -155,7 +153,5 @@ class ControllerPagesAccountWishlist extends AController {
 
 		$this->view->batchAssign( $this->data);
         $this->processTemplate();
-
   	}
-
 }

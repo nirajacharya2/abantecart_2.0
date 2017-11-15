@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -107,7 +111,7 @@ class ControllerPagesLocalisationStockStatus extends AController {
 
 			$stock_status_id = $this->model_localisation_stock_status->addStockStatus($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-      		$this->redirect($this->html->getSecureURL('localisation/stock_status/update', '&stock_status_id=' . $stock_status_id ));
+      		abc_redirect($this->html->getSecureURL('localisation/stock_status/update', '&stock_status_id=' . $stock_status_id ));
 		}
     	$this->_getForm();
 
@@ -130,7 +134,7 @@ class ControllerPagesLocalisationStockStatus extends AController {
     	if ( $this->request->is_POST() && $this->_validateForm()) {
 	  		$this->model_localisation_stock_status->editStockStatus($this->request->get['stock_status_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('localisation/stock_status/update', '&stock_status_id=' . $this->request->get['stock_status_id'] ));
+			abc_redirect($this->html->getSecureURL('localisation/stock_status/update', '&stock_status_id=' . $this->request->get['stock_status_id'] ));
     	}
     	$this->_getForm();
 

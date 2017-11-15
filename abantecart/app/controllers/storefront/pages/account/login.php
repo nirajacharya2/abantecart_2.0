@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AEncryption;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -28,14 +34,14 @@ class ControllerPagesAccountLogin extends AController{
 	public function main(){
 		//do redirect to secure page when ssl is enabled
 		if( $this->config->get('config_ssl') &&  $this->config->get('config_ssl_url') && HTTPS !== true){
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		if ($this->customer->isLogged()){
-			$this->redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -48,11 +54,11 @@ class ControllerPagesAccountLogin extends AController{
                     $this->session->data['account'] = $this->request->post['account'];
 
                     if ($this->request->post['account'] == 'register'){
-                        $this->redirect($this->html->getSecureURL('account/create'));
+                        abc_redirect($this->html->getSecureURL('account/create'));
                     }
 
                     if ($this->request->post['account'] == 'guest'){
-                        $this->redirect($this->html->getSecureURL('checkout/guest_step_1'));
+                        abc_redirect($this->html->getSecureURL('checkout/guest_step_1'));
                     }
                 }
                 //support old email based login
@@ -74,10 +80,10 @@ class ControllerPagesAccountLogin extends AController{
                         $redirect_url = $this->html->getSecureURL('account/account');
                     }
                     $this->extensions->hk_ProcessData($this);
-                    $this->redirect($redirect_url);
+                    abc_redirect($redirect_url);
                 }
             }
-		} elseif( has_value($this->request->get['ac']) ){
+		} elseif( AHelperUtils::has_value($this->request->get['ac']) ){
 			//activation of account via email-code. 
 			$enc = new AEncryption($this->config->get('encryption_key'));	
 			list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['ac']));
@@ -263,7 +269,7 @@ class ControllerPagesAccountLogin extends AController{
 
 			//check if existing customer has loginname = email. Redirect if not allowed
 			if ($this->config->get('prevent_email_as_login') && $this->customer->isLoginnameAsEmail()){
-				$this->redirect($this->html->getSecureURL('account/edit'));
+				abc_redirect($this->html->getSecureURL('account/edit'));
 			}
 		}
 

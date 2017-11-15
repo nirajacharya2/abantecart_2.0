@@ -17,13 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use abc\core\AResource;
+use abc\lib\AResourceManager;
+use abc\lib\AView;
+use stdClass;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerResponsesListingGridBannerManager
- * @property ModelExtensionBannerManager model_extension_banner_manager
+ * @property \abc\model\admin\ModelExtensionBannerManager model_extension_banner_manager
  */
 class ControllerResponsesListingGridBannerManager extends AController {
 	public $data;
@@ -80,10 +91,10 @@ class ControllerResponsesListingGridBannerManager extends AController {
 			$thumbnail = $thumbnails[ $result['banner_id'] ]['thumb_html'];
 			//check if banner is active based on dates and update status
 			$now = time();
-			if (dateISO2Int($result['start_date']) > $now ) {
+			if (AHelperUtils::dateISO2Int($result['start_date']) > $now ) {
 				$result['status'] = 0;
 			}
-			$stop =  dateISO2Int($result['end_date']);
+			$stop =  AHelperUtils::dateISO2Int($result['end_date']);
 			if($stop>0 && $stop<$now){
 				$result['status'] = 0;
 			}
@@ -120,10 +131,10 @@ class ControllerResponsesListingGridBannerManager extends AController {
 			$this->loadModel('extension/banner_manager');
 
 			if (isset($this->request->post['start_date']) && $this->request->post['start_date']) {
-				$this->request->post['start_date'] = dateDisplay2ISO($this->request->post['start_date']);
+				$this->request->post['start_date'] = AHelperUtils::dateDisplay2ISO($this->request->post['start_date']);
 			}
 			if (isset($this->request->post['end_date']) && $this->request->post['end_date']) {
-				$this->request->post['end_date'] = dateDisplay2ISO($this->request->post['end_date']);
+				$this->request->post['end_date'] = AHelperUtils::dateDisplay2ISO($this->request->post['end_date']);
 			}
 
 

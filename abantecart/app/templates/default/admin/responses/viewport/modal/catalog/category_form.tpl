@@ -88,7 +88,7 @@ function save_changes(){
 	    data: $('#<?php echo $form['form_open']->name; ?>').serializeArray(),
 	    dataType: 'json',
 	    success: function (data) {
-		    success_alert(<?php js_echo($text_saved); ?>, true);
+		    success_alert(<?php abc_js_echo($text_saved); ?>, true);
 	    }
 	});
 }

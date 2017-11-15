@@ -17,16 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiProductRelated
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ * @property \abc\model\storefront\ModelCatalogProduct $model_catalog_product
+ */
 class ControllerApiProductRelated extends AControllerAPI {
-	
 	public function get() {
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$product_id = $this->request->get['product_id'];
-
 		if ( !$product_id ) {
 			$this->rest->setResponseData( array('Error' => 'Missing product ID as a required parameter') );
 			$this->rest->sendResponse( 200);
@@ -34,11 +42,10 @@ class ControllerApiProductRelated extends AControllerAPI {
 		}
 
 		$products = array();
-    	$this->loadModel('catalog/review');		
-    	$this->loadModel('catalog/product');		
+    	$this->loadModel('catalog/review');
+    	$this->loadModel('catalog/product');
 		$results = $this->model_catalog_product->getProductRelated($product_id);
 
-		
 		foreach ($results as $result) {
 				$resource = new AResource('image');
 				$sizes = array('main'=> array( 'width'=>$this->config->get('config_image_related_width'),
@@ -54,6 +61,7 @@ class ControllerApiProductRelated extends AControllerAPI {
 				}
 				
 				$special = FALSE;
+				//TODO: need to check 2.0 !!!
 				$discount = $this->model_catalog_product->getProductDiscount($result['product_id']);
 				if ($discount) {
 					$price = $this->currency->format($this->tax->calculate($discount, $result['tax_class_id'], $this->config->get('config_tax')));
@@ -65,7 +73,7 @@ class ControllerApiProductRelated extends AControllerAPI {
 					}
 				}
 			
-				$options = $this->model_catalog_product->getProductOptions($result['product_id']);			
+				$options = $this->model_catalog_product->getProductOptions($result['product_id']);
 				if ($options) {
 					$add = 'a/product/product';
 				} else {

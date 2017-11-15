@@ -17,10 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\AEncryption;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerPagesAccountCreate
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesAccountCreate extends AController{
 	public $errors = array ();
 	public $data;
@@ -31,7 +41,7 @@ class ControllerPagesAccountCreate extends AController{
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		if ($this->customer->isLogged()){
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -86,7 +96,7 @@ class ControllerPagesAccountCreate extends AController{
 					$redirect_url = $this->session->data['redirect'];
 				}
 
-				redirect($redirect_url);
+				abc_redirect($redirect_url);
 			} else {
 				if(!$this->errors['warning']){
 					$this->errors['warning'] = implode('<br>',$this->errors);
@@ -172,7 +182,7 @@ class ControllerPagesAccountCreate extends AController{
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;
@@ -362,12 +372,12 @@ class ControllerPagesAccountCreate extends AController{
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 		$this->loadModel('account/customer');
-		$enc = new AEncryption($this->config->get('encryption_key'));
+		$enc = new  AEncryption($this->config->get('encryption_key'));
 		list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
 		if($customer_id && $activation_code) {
 			$this->model_account_customer->emailActivateLink($customer_id);
 		}
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		redirect($this->html->getSecureURL('account/success'));
+		abc_redirect($this->html->getSecureURL('account/success'));
 	}
 }

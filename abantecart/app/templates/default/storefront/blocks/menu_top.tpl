@@ -10,9 +10,9 @@
 	    }?>
 	    <?php 
 	    	//NOTE:
-	    	//HTML tree builded in helper/html.php
-	    	//To controll look and style of the menu use CSS in styles.css
+	    	//HTML tree built in helper/html.php
+	    	//To control look and style of the menu use CSS in styles.css
 	    ?>
-	    <?php echo buildStoreFrontMenuTree( $storemenu ); ?>
+	    <?php echo \abc\core\AHelperHtml::buildStoreFrontMenuTree( $storemenu ); ?>
 	</ul>
 </div>

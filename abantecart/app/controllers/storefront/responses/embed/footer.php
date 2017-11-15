@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -36,9 +40,9 @@ class ControllerResponsesEmbedFooter extends AController {
 			$this->data['google_analytics'] =  '';
 		}
 		
-		$this->data['text_project_label'] = $this->language->get('text_powered_by') . ' ' . project_base();
+		$this->data['text_project_label'] = $this->language->get('text_powered_by') . ' ' . AHelperUtils::project_base();
 
-		$this->view->assign('scripts_bottom', $this->document->getScriptsBottom());		
+		$this->view->assign('scripts_bottom', $this->document->getScriptsBottom());
 
 		$this->view->batchAssign($this->data);
 		$this->processTemplate('embed/footer.tpl');

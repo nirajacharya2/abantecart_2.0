@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -31,7 +35,7 @@ if (!defined('DIR_CORE')){
 class CSRFToken{
 
 	/**
-	 * @var registry - access to application registry
+	 * @var Registry - access to application registry
 	 */
 	protected $registry;
 	/**
@@ -92,7 +96,7 @@ class CSRFToken{
 			//create new token instance
 			$this->instance = $this->setInstance();
 		}
-		$this->token = genToken();
+		$this->token = AHelperUtils::genToken();
 
 		$this->session->data['csrftoken'][$this->instance] = $this->token;
 		return $this->token;
@@ -111,7 +115,7 @@ class CSRFToken{
 			$token = $this->request->get_or_post('csrftoken');
 		}
 		//note: $instance can be zero!
-		if(!empty($token) && has_value($instance) && $this->session->data['csrftoken'][$instance] === $token){
+		if(!empty($token) && AHelperUtils::has_value($instance) && $this->session->data['csrftoken'][$instance] === $token){
 			$this->instance = $instance;
 			$this->token = $this->session->data['csrftoken'][$instance];
 			unset($this->session->data['csrftoken'][$instance]);

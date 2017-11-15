@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -841,7 +844,7 @@ final class ADataset{
 	}
 
 	/**
-	 * @param string $data
+	 * @param array $data
 	 */
 	public function loadXML($data){
 		// Input possible with XML string, File or both.
@@ -877,7 +880,7 @@ final class ADataset{
 	}
 
 	/**
-	 * @param simpleXMLElement $xml_obj
+	 * @param \SimpleXMLElement $xml_obj
 	 */
 	private function _processXML($xml_obj){
 
@@ -886,18 +889,18 @@ final class ADataset{
 		//process each layout 
 		foreach ($datasets as $dataset){
 			/**
-			 * @var DOMNode $dataset
+			 * @var \SimpleXMLElement $dataset
 			 */
 			$dataset = $dataset->dataset;
 			/* Determine an action tag in all parent elements. 
-			* Action can be insert, update and delete		       
+			* Action can be insert, update and delete
 			*   ->>> action = insert
 			*		Mean that we will try create new dataset with column definitions and insert rows in it  
 			*  ->>> action = update (default)
 			*		Before loading the dataset, determine if same dataset exists with same name and key combination.
 			*		If does exists, write new over existing
 			*  ->>> action = delete
-			*		Delete all that contains in dataset (values, definitions, properties and dataset)					
+			*		Delete all that contains in dataset (values, definitions, properties and dataset)
 			*		NOTE: Parent level delete action is cascaded to all children elements
 			*/
 			if (!$dataset->action){

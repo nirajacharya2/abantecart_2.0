@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -49,8 +56,8 @@ class ControllerResponsesListingGridReportSale extends AController {
 
             $response->rows[$i]['id'] = $i;
 			$response->rows[$i]['cell'] = array(
-				dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
-				dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
 				$result['orders'],
                 $this->currency->format($result['total'], $this->config->get('config_currency')),
 			);
@@ -91,8 +98,8 @@ class ControllerResponsesListingGridReportSale extends AController {
 
             $response->rows[$i]['id'] = $i;
 			$response->rows[$i]['cell'] = array(
-				dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
-				dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
 				$result['orders'],
                 $this->currency->format($result['total'], $this->config->get('config_currency')),
 			);
@@ -130,8 +137,8 @@ class ControllerResponsesListingGridReportSale extends AController {
 
             $response->rows[$i]['id'] = $i;
 			$response->rows[$i]['cell'] = array(
-				dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
-				dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
 				$result['orders'],
                 $this->currency->format($result['total'], $this->config->get('config_currency')),
 			);

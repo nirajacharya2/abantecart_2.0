@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 		header ( 'Location: static_pages/' );
 }
@@ -72,7 +76,7 @@ class ModelToolFormsManager extends Model {
 		if ( $query->num_rows ) {
 			foreach ( $query->rows as $row ) {
 
-				if ( has_value($row['settings']) ) {
+				if ( AHelperUtils::has_value($row['settings']) ) {
 					$row['settings'] = unserialize($row['settings']);
 				}
 

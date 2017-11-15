@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\lib\AJson;
+use abc\lib\AOrder;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -64,7 +69,7 @@ class ControllerApiCheckoutProcess extends AControllerAPI {
 			$this->rest->sendResponse(500, array(  'status' => 5, 'error' => 'Something went wrong. Incomplete request!' ) );
 			return null;
 		}
-		//we process only responce type payment extensions
+		//we process only response type payment extensions
 		$payment_controller = $this->dispatch( 'responses/extension/' . $this->session->data['process_rt'], array($request));
 		$this->load->library('json');
 		$this->data = AJson::decode( $payment_controller->dispatchGetOutput(), TRUE );

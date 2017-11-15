@@ -17,9 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\APromotion;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+
+/**
+ * Class ControllerApiCheckoutPayment
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerApiCheckoutPayment extends AControllerAPI {
 	public $error = array();
 	public $data = array();
@@ -109,7 +120,7 @@ class ControllerApiCheckoutPayment extends AControllerAPI {
 		$method_data = array();
 		$results = $this->model_checkout_extension->getExtensions('payment');
 
-		//TODO Load peyment methods that support API
+		//TODO Load payment methods that support API
 		foreach ($results as $result) {
 			$this->loadModel('extension/' . $result[ 'key' ]);
 			$method = $this->{'model_extension_' . $result[ 'key' ]}->getMethod($payment_address);

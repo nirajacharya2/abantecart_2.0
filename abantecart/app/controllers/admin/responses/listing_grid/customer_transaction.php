@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -48,23 +56,23 @@ class ControllerResponsesListingGridCustomerTransaction extends AController {
 			'customer_id' => (int)$this->request->get['customer_id']
 		);
 
-		if ( has_value($this->request->get[ 'user' ]) ){
+		if ( AHelperUtils::has_value($this->request->get[ 'user' ]) ){
 			$data['filter']['user'] = $this->request->get['user'];
 		}
-		if ( has_value($this->request->get['credit']) ){
+		if ( AHelperUtils::has_value($this->request->get['credit']) ){
 			$data['filter']['credit'] = $this->request->get['credit'];
 		}
-		if ( has_value($this->request->get['debit']) ){
+		if ( AHelperUtils::has_value($this->request->get['debit']) ){
 			$data['filter']['debit'] = $this->request->get['debit'];
 		}
-		if ( has_value($this->request->get['transaction_type']) ){
+		if ( AHelperUtils::has_value($this->request->get['transaction_type']) ){
 			$data['filter']['transaction_type'] = $this->request->get['transaction_type'];
 		}
-		if ( has_value($this->request->get['date_start']) ){
-			$data['filter']['date_start'] = dateDisplay2ISO($this->request->get['date_start']);
+		if ( AHelperUtils::has_value($this->request->get['date_start']) ){
+			$data['filter']['date_start'] = AHelperUtils::dateDisplay2ISO($this->request->get['date_start']);
 		}
-		if ( has_value($this->request->get['date_end']) ){
-			$data['filter']['date_end'] = dateDisplay2ISO($this->request->get['date_end']);
+		if ( AHelperUtils::has_value($this->request->get['date_end']) ){
+			$data['filter']['date_end'] = AHelperUtils::dateDisplay2ISO($this->request->get['date_end']);
 		}
 
 		$allowedFields = array_merge(array ('user', 'credit', 'debit', 'transaction_type', 'date_start', 'date_end'), (array)$this->data['allowed_fields']);
@@ -312,13 +320,13 @@ class ControllerResponsesListingGridCustomerTransaction extends AController {
 				$this->data['form']['fields']['date_added'] = $form->getFieldHtml(array(
 																					'type' => 'input',
 																					'name' => 'date_added',
-																					'value' => dateISO2Display($info['date_added'],$this->language->get('date_format_short').' '.$this->language->get('time_format')),
+																					'value' => AHelperUtils::dateISO2Display($info['date_added'],$this->language->get('date_format_short').' '.$this->language->get('time_format')),
 																					'attr' => 'disabled="disabled"'
 				));
 				$this->data['form']['fields']['date_modified'] =  $form->getFieldHtml(array(
 																					'type' => 'input',
 																					'name' => 'date_modified',
-																					'value' => dateISO2Display($info['date_modified'],$this->language->get('date_format_short').' '.$this->language->get('time_format')),
+																					'value' => AHelperUtils::dateISO2Display($info['date_modified'],$this->language->get('date_format_short').' '.$this->language->get('time_format')),
 																					'attr' => 'disabled="disabled"'
 				));
 			}

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\core\extension;
+use abc\core\Extension;
+use abc\core\Registry;
+use abc\lib\ALayoutManager;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -110,7 +115,7 @@ class ExtensionBannerManager extends Extension{
 			}
 
 			if ($block_txt_id == 'banner_block') {
-				redirect($this->html->getSecureURL('extension/banner_manager/edit_block',
+				abc_redirect($this->html->getSecureURL('extension/banner_manager/edit_block',
 						'&custom_block_id=' . (int)$this->request->get['custom_block_id']));
 			}
 		}

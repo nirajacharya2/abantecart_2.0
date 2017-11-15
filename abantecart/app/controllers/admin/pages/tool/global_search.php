@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -30,22 +34,18 @@ class ControllerPagesToolGlobalSearch extends AController {
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$this->loadLanguage('tool/global_search');
-
 		$this->document->setTitle ( $this->language->get( 'heading_title' ) );
-
 		$this->request->post['search'] = $this->request->post['search'] ? $this->request->post['search'] : $this->request->get['search'];
-
 		$this->data['heading_title'] = $this->language->get( 'heading_title').':&nbsp;&nbsp;&nbsp;&nbsp;'. htmlentities($this->request->post ['search'],ENT_QUOTES,'UTF-8');
-	
+
 		if (isset ( $this->error ['warning'] )) {
 			$this->data['error_warning'] = $this->error ['warning'];
 		} else {
 			$this->data['error_warning'] = '';
 		}
-		
+
 		if (isset ( $this->session->data ['success'] )) {
 			$this->data['success'] = $this->session->data ['success'];
-			
 			unset ( $this->session->data ['success'] );
 		} else {
 			$this->data['success'] = '';
@@ -191,4 +191,4 @@ class ControllerPagesToolGlobalSearch extends AController {
 		return ! $this->error ? true : false;
 	}
 }
-?>
+

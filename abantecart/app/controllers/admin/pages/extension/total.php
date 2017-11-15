@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -100,7 +102,7 @@ class ControllerPagesExtensionTotal extends AController {
 		if (!$this->user->canModify('extension/total')) {
 			$this->session->data['error'] = $this->language->get('error_permission'); 
 			
-			$this->redirect($this->html->getSecureURL('extension/total'));
+			abc_redirect($this->html->getSecureURL('extension/total'));
 		} else {				
 			$this->loadModel('setting/extension');
 		
@@ -111,7 +113,7 @@ class ControllerPagesExtensionTotal extends AController {
 			$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'total/' . $this->request->get['extension']);
 			$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'total/' . $this->request->get['extension']);
 
-			$this->redirect($this->html->getSecureURL('extension/total'));
+			abc_redirect($this->html->getSecureURL('extension/total'));
 		}
 
         //update controller data

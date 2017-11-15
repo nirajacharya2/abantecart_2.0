@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -34,7 +38,7 @@ class AMessage{
 	 */
 	protected $session;
 	/**
-	 * @var AHtml
+	 * @var \abc\core\AHtml
 	 */
 	protected $html;
 	/**
@@ -338,7 +342,7 @@ class AMessage{
 	 * @return string
 	 */
 	public function markViewedANT($message_id, $language_code){
-		if (!has_value($message_id) || !has_value($language_code)){
+		if (!AHelperUtils::has_value($message_id) || !AHelperUtils::has_value($language_code)){
 			return null;
 		}
 		$sql = "UPDATE  " . $this->db->table("ant_messages") . " 

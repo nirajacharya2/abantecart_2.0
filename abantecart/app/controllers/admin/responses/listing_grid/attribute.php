@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AAttribute_Manager;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -41,7 +49,7 @@ class ControllerResponsesListingGridAttribute extends AController {
 		//get all leave attributes 
 		$new_level = 0;
 		$attr_parent_id = null;
-		$leafnodes = $this->attribute_manager->getLeafAttributes();
+		$leaf_nodes = $this->attribute_manager->getLeafAttributes();
 		$to_show_tree = ($this->config->get('config_show_tree_data') ) ? true: false;
 		if ($to_show_tree) {
 			if ($this->request->post[ 'nodeid' ]) {
@@ -67,9 +75,9 @@ class ControllerResponsesListingGridAttribute extends AController {
 		$results = $this->attribute_manager->getAttributes(array(), '', $attr_parent_id);
 		$i = 0;
 		foreach ($results as $result) {
-			//treegrid structure
+			//tree grid structure
 			if ($to_show_tree) {
-				$last_leaf = ($result[ 'attribute_id' ] == $leafnodes[ $result[ 'attribute_id' ] ] ? true : false);
+				$last_leaf = ($result[ 'attribute_id' ] == $leaf_nodes[ $result[ 'attribute_id' ] ] ? true : false);
 			} else {
 				$last_leaf = true;
 			}
@@ -139,10 +147,11 @@ class ControllerResponsesListingGridAttribute extends AController {
 					//resort required. 
 					if(  $this->request->post['resort'] == 'yes' ) {
 						//get only ids we need
+						$array = array();
 						foreach($ids as $id){
 							$array[$id] = $this->request->post['sort_order'][$id];
 						}
-						$new_sort = build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
+						$new_sort = AHelperUtils::build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
 	 					$this->request->post['sort_order'] = $new_sort;
 					}
 					foreach ($ids as $id) {
@@ -237,6 +246,7 @@ class ControllerResponsesListingGridAttribute extends AController {
 	}
 
 	public function validateDelete($id) {
+		$this->data['attribute_id'] = $id;
 		$this->data['error'] = '';
 		$this->extensions->hk_ValidateData($this);
 		return $this->data['error'];

@@ -1,5 +1,4 @@
 <?php
-
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -18,7 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -54,14 +56,14 @@ final class ATypeTask{
 		$dispatch = '';
 		$this->recursion_limit = 0;
 
-		foreach ($this->pre_dispatch as $pre_dispatch){
+		foreach ($this->pre_dispatch as $pre_dispatch) {
 			/**
 			 * @var $pre_dispatch ADispatcher
 			 */
 
 			$result = $pre_dispatch->dispatch();
 
-			if ($result){
+			if ($result) {
 				//Something happened. Need to run different page
 				$dispatch_rt = $result;
 				break;
@@ -69,7 +71,7 @@ final class ATypeTask{
 		}
 
 		//Process dispatcher in while if we have new dispatch back
-		while ($dispatch_rt && $dispatch_rt != 'completed'){
+		while ($dispatch_rt && $dispatch_rt != 'completed') {
 			//Process main level controller
 			//filter in case we have responses set already
 			$dispatch_rt = preg_replace('/^(task)\//', '', $dispatch_rt);

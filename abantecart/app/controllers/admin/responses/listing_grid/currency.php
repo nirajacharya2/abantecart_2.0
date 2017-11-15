@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -78,7 +85,7 @@ class ControllerResponsesListingGridCurrency extends AController {
 					'name' => 'value[' . $result[ 'currency_id' ] . ']',
 					'value' => $result[ 'value' ],
 				)),
-				dateISO2Display($result[ 'date_modified' ], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result[ 'date_modified' ], $this->language->get('date_format_short')),
 				$this->html->buildCheckbox(array(
 					'name' => 'status[' . $result[ 'currency_id' ] . ']',
 					'value' => $result[ 'status' ],

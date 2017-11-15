@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -36,27 +40,23 @@ class ControllerPagesAccountTransactions extends AController{
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/transactions');
 
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
-
 		$this->document->resetBreadcrumbs();
-
 		$this->document->addBreadcrumb(
 				array (
 						'href'      => $this->html->getHomeURL(),
 						'text'      => $this->language->get('text_home'),
 						'separator' => false
 				));
-
 		$this->document->addBreadcrumb(
 				array (
 						'href'      => $this->html->getSecureURL('account/account'),
 						'text'      => $this->language->get('text_account'),
 						'separator' => $this->language->get('text_separator')
 				));
-
 		$this->document->addBreadcrumb(
 				array (
 						'href'      => $this->html->getSecureURL('account/transactions'),
@@ -65,7 +65,6 @@ class ControllerPagesAccountTransactions extends AController{
 				));
 
 		$this->loadModel('account/customer');
-
 		$trans_total = $this->model_account_customer->getTotalTransactions();
 
 		$balance = $this->customer->getBalance();
@@ -100,7 +99,7 @@ class ControllerPagesAccountTransactions extends AController{
 						'debit'                   => $this->currency->format($result['debit']),
 						'transaction_type'        => $result['transaction_type'],
 						'description'             => $result['description'],
-						'date_added'              => dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
+						'date_added'              => AHelperUtils::dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
 				);
 			}
 

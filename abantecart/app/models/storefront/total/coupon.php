@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\APromotion;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -81,9 +85,9 @@ class ModelTotalCoupon extends Model {
 						$taxes[$ship_data['tax_class_id']]['tax'] -= $this->tax->calcTotalTaxAmount($ship_data['cost'], $ship_data['tax_class_id']);
 					}
 					
-					$discount_total += $ship_data['cost'];				
-				}				
-      			
+					$discount_total += $ship_data['cost'];
+				}
+
 				$total_data[] = array(
         			'id'         => 'coupon',
         			'title'      => $coupon['name'] . ':',
@@ -98,4 +102,3 @@ class ModelTotalCoupon extends Model {
 		}
 	}
 }
-?>

@@ -17,11 +17,23 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+use abc\core\AResource;
+use abc\core\HtmlElementFactory;
+use abc\lib\AAttribute_Manager;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\ATax;
+use abc\lib\AWeight;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
 
-/** @noinspection PhpUndefinedClassInspection */
 class ControllerResponsesProductProduct extends AController{
 	public $error = array ();
 	public $data = array ();
@@ -306,10 +318,10 @@ class ControllerResponsesProductProduct extends AController{
 			$this->request->get['required'] = 0;
 		}
 
-		if (has_value($this->request->get['regexp_pattern'])){
+		if (AHelperUtils::has_value($this->request->get['regexp_pattern'])){
 			$this->request->get['regexp_pattern'] = trim($this->request->get['regexp_pattern']);
 		}
-		if (has_value($this->request->get['option_placeholder'])){
+		if (AHelperUtils::has_value($this->request->get['option_placeholder'])){
 			$this->request->get['option_placeholder'] = trim($this->request->get['option_placeholder']);
 		}
 
@@ -578,7 +590,7 @@ class ControllerResponsesProductProduct extends AController{
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		redirect($this->html->getSecureURL('product/product/load_option', '&product_id=' . $this->request->get['product_id'] . '&option_id=' . $this->request->get['option_id']));
+		abc_redirect($this->html->getSecureURL('product/product/load_option', '&product_id=' . $this->request->get['product_id'] . '&option_id=' . $this->request->get['option_id']));
 	}
 
 	/**
@@ -745,7 +757,7 @@ class ControllerResponsesProductProduct extends AController{
 		$this->data['form']['fields']['price'] = $form->getFieldHtml(array (
 				'type'  => 'input',
 				'name'  => 'price[' . $product_option_value_id . ']',
-				'value' => moneyDisplayFormat($this->data['price']),
+				'value' => AHelperUtils::moneyDisplayFormat($this->data['price']),
 				'style' => 'medium-field'
 		));
 
@@ -1033,8 +1045,8 @@ class ControllerResponsesProductProduct extends AController{
 
 		$order_statuses = $this->model_localisation_order_status->getOrderStatuses();
 
-		$this->data['date_added'] = dateISO2Display($file_data['date_added'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
-		$this->data['date_modified'] = dateISO2Display($file_data['date_modified'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
+		$this->data['date_added'] = AHelperUtils::dateISO2Display($file_data['date_added'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
+		$this->data['date_modified'] = AHelperUtils::dateISO2Display($file_data['date_modified'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
 
 		$this->data['action'] = $this->html->getSecureURL('r/product/product/processDownloadForm', '&product_id=' . $product_id);
 
@@ -1494,8 +1506,8 @@ class ControllerResponsesProductProduct extends AController{
 				}
 
 				//set default selection is nothing selected
-				if (!has_value($preset_value) && $option['element_type'] != 'C'){
-					if (has_value($default_value)){
+				if (!AHelperUtils::has_value($preset_value) && $option['element_type'] != 'C'){
+					if (AHelperUtils::has_value($default_value)){
 						$preset_value = $default_value;
 					}
 				}

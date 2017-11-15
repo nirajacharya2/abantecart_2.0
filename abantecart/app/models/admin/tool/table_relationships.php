@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -75,7 +78,7 @@ class ModelToolTableRelationships extends Model {
 					'relation_ids' => array( 'resource_id', 'object_id' ),
 					'special_relation' => array( 'object_name' => 'categories', 'object_id' => 'category_id'),
 					'children' => array(
-						/* Note: Issue to connect to resource_library automaticaly */
+						/* Note: Issue to connect to resource_library automatically */
 						'resource_library' => $this->sections['resource_library']
 					)
 				),
@@ -316,7 +319,7 @@ class ModelToolTableRelationships extends Model {
 	}
 
 	private function _build_table_relationship() {
-		//NOTE: Not used see below in _build_relathionship
+		//NOTE: Not used see below in _build_relationship
 		$cache_key = 'tables.key.relationship';
 
 		if($this->cache){
@@ -325,7 +328,7 @@ class ModelToolTableRelationships extends Model {
 		if (!$this->tables_data) {
 			$sql = "SELECT table_name, column_name, extra 
 			    	FROM information_schema.columns 
-			    	WHERE table_schema='" . DB_DATABASE . "' group by table_name";
+			    	WHERE table_schema='" . $this->db->database() . "' group by table_name";
 			$load_sql = $this->db->query($sql);
 			$tables = $load_sql->rows;
 
@@ -384,8 +387,8 @@ class ModelToolTableRelationships extends Model {
 			$this->_build_table_relationship();
 		}
 
-		if( $this->tables_data[DB_PREFIX.$table_name] ) {
-			return $this->tables_data[DB_PREFIX.$table_name];
+		if( $this->tables_data[$this->db->prefix().$table_name] ) {
+			return $this->tables_data[$this->db->prefix().$table_name];
 		} else {
 			return null;
 		}
@@ -397,7 +400,8 @@ class ModelToolTableRelationships extends Model {
 	 * @return array
 	 */
 	public function get_table_columns ( $table_name ) {
-		$sql = 'SHOW COLUMNS FROM `' . $this->db->escape(DB_PREFIX.$table_name) . '` FROM `' . DB_DATABASE . '`';
+		$sql = 'SHOW COLUMNS 
+				FROM `' . $this->db->escape($this->db->prefix().$table_name) . '` FROM `' . $this->db->database() . '`';
 
 		$results = $this->db->query($sql);
 		return $results->rows;

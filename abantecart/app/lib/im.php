@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+use Exception;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -24,15 +29,15 @@ if (!defined('DIR_CORE')){
 /**
  * Class AIM for Instant Messages
  * @property ACustomer $customer
- * @property ALanguage $language
+ * @property \abc\core\ALanguage $language
  * @property ADB $db
  * @property ALog $log
- * @property ALoader $load
- * @property AHtml $html
- * @property ExtensionsAPI $extensions
+ * @property \abc\core\ALoader $load
+ * @property \abc\core\AHtml $html
+ * @property \abc\core\ExtensionsAPI $extensions
  * @property ASession $session
  * @property AConfig $config
- * @property ModelAccountCustomer $model_account_customer
+ * @property \abc\model\storefront\ModelAccountCustomer $model_account_customer
  * @property AResponse $response
  * @property  array() $admin_sendpoints
  */
@@ -121,7 +126,7 @@ class AIM{
 
 	/**
 	 * @param string $protocol
-	 * @return array
+	 * @void
 	 */
 	public function removeProtocol($protocol = ''){
 		unset($this->protocols[$protocol]);
@@ -163,7 +168,7 @@ class AIM{
 				'category' => 'Communication'
 		);
 		//returns all drivers for admin side settings page
-		if (has_value($filter_arr['status'])){
+		if (AHelperUtils::has_value($filter_arr['status'])){
 			$filter['status'] = (int)$filter_arr['status'];
 		}
 
@@ -187,7 +192,7 @@ class AIM{
 			$driver_txt_id = $ext['key'];
 
 			//skip non-installed
-			if (!has_value($this->config->get($driver_txt_id . '_status'))){
+			if (!AHelperUtils::has_value($this->config->get($driver_txt_id . '_status'))){
 				continue;
 			}
 
@@ -202,7 +207,7 @@ class AIM{
 				include_once(DIR_APP_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			} catch(AException $e){
 			}
-			$classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
+			$classname = "\abc\lib\\".preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 
 			if (!class_exists($classname)){
 				continue;
@@ -342,7 +347,7 @@ class AIM{
 				//send notification to customer, check if selected or forced
 				$force_arr = $sendpoint_data[0]['force_send'];
 				$forced = false;
-				if (has_value($force_arr) && in_array($protocol, $force_arr)){
+				if (AHelperUtils::has_value($force_arr) && in_array($protocol, $force_arr)){
 					$forced = true;
 				}
 				if ($customer_im_settings[$sendpoint][$protocol] || $forced){
@@ -602,16 +607,15 @@ final class AMailIM{
 			return true;
 		}
 	}
-
+//TODO: what is thi for??
 	/**
 	 * Function builds form element for storefront side (customer account page)
 	 *
-	 * @param AForm $form
+	 * @param \abc\core\AForm $form
 	 * @param string $value
 	 * @return object
 	 */
-	public function getURIField(
-			$form, $value = ''){
+	public function getURIField($form, $value = ''){
 		return '';
 	}
 }

@@ -1,4 +1,8 @@
 <?php
+use abc\core\AHelperUtils;
+use abc\lib\AConfig;
+use abc\lib\AExtensionManager;
+
 $lib_list = array(
 					'order_manager',
 					'layout_manager',
@@ -51,7 +55,7 @@ $registry->set('extension_manager', new AExtensionManager());
 
 //Now we have session, reload config for store if provided or set in session
 $session = $registry->get('session');
-if (has_value($request->get['store_id']) || has_value($session->data['current_store_id']) ) {
+if (AHelperUtils::has_value($request->get['store_id']) || AHelperUtils::has_value($session->data['current_store_id']) ) {
 	$config = new AConfig($registry);
 	$registry->set('config', $config);
 }

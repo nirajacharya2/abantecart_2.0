@@ -17,12 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\ALayoutManager;
+use abc\lib\AListingManager;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
- * @property ModelExtensionBannerManager $model_extension_banner_manager
+ * @property \abc\model\admin\ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerPagesExtensionBannerManager extends AController {
 	public $data = array();
@@ -176,7 +184,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 			$banner_id = $this->model_extension_banner_manager->addBanner($this->request->post);
 
 			$this->session->data ['success'] = $this->language->get('text_banner_success');
-			redirect($this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $banner_id));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $banner_id));
 		}
 
 		foreach ($this->request->post as $k => $v) {
@@ -208,7 +216,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 			$this->model_extension_banner_manager->editBanner($banner_id, $this->request->post);
 
 			$this->session->data ['success'] = $this->language->get('text_banner_success');
-			redirect($this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $banner_id));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $banner_id));
 		}
 
 		$this->data['error'] = $this->error;
@@ -234,7 +242,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 		$this->model_extension_banner_manager->deleteBanner($banner_id);
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		redirect($this->html->getSecureURL('extension/banner_manager'));
+		abc_redirect($this->html->getSecureURL('extension/banner_manager'));
 	}
 
 	private function _getForm() {
@@ -331,10 +339,10 @@ class ControllerPagesExtensionBannerManager extends AController {
 
 		//check if banner is active based on dates and update status
 		$now = time();
-		if (dateISO2Int($this->data['start_date']) > $now ) {
+		if (AHelperUtils::dateISO2Int($this->data['start_date']) > $now ) {
 			$this->data['status'] = 0;
 		}
-		$stop = dateISO2Int($this->data['end_date']);
+		$stop = AHelperUtils::dateISO2Int($this->data['end_date']);
 
 		if($stop > 0 && $stop < $now){
 			$this->data['status'] = 0;
@@ -416,9 +424,9 @@ class ControllerPagesExtensionBannerManager extends AController {
 		$this->data['form']['fields']['date_start'] = $form->getFieldHtml(array(
 				'type' => 'date',
 				'name' => 'start_date',
-				'value' => dateISO2Display($this->data['start_date']),
-				'default' => dateNowDisplay(),
-				'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+				'value' => AHelperUtils::dateISO2Display($this->data['start_date']),
+				'default' => AHelperUtils::dateNowDisplay(),
+				'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 				'highlight' => 'future',
 				'style' => 'small-field'));
 		$this->data['form']['text']['date_start'] = $this->language->get('entry_banner_date_start');
@@ -426,9 +434,9 @@ class ControllerPagesExtensionBannerManager extends AController {
 		$this->data['form']['fields']['date_end'] = $form->getFieldHtml(array(
 				'type' => 'date',
 				'name' => 'end_date',
-				'value' => dateISO2Display($this->data['end_date']),
+				'value' => AHelperUtils::dateISO2Display($this->data['end_date']),
 				'default' => '',
-				'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+				'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 				'highlight' => 'past',
 				'style' => 'small-field'));
 
@@ -524,10 +532,10 @@ class ControllerPagesExtensionBannerManager extends AController {
 	// Prepare data before passing to model
 	protected function _prepareData() {
 		if (isset($this->request->post['start_date']) && $this->request->post['start_date']) {
-			$this->request->post['start_date'] = dateDisplay2ISO($this->request->post['start_date']);
+			$this->request->post['start_date'] = AHelperUtils::dateDisplay2ISO($this->request->post['start_date']);
 		}
 		if (isset($this->request->post['end_date']) && $this->request->post['end_date']) {
-			$this->request->post['end_date'] = dateDisplay2ISO($this->request->post['end_date']);
+			$this->request->post['end_date'] = AHelperUtils::dateDisplay2ISO($this->request->post['end_date']);
 		}
 
 		if (is_array($this->request->post['banner_group_name']) && isset($this->request->post['banner_group_name'][1])) {
@@ -625,7 +633,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 			}
 
 			$this->session->data ['success'] = $this->language->get('text_banner_success');
-			redirect($this->html->getSecureURL('extension/banner_manager/edit_block', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager/edit_block', '&custom_block_id=' . $custom_block_id));
 		}
 
 		foreach ($this->request->post as $k => $v) {
@@ -694,7 +702,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 		$this->data['block_id'] = $block['block_id'];
 		$custom_block_id = (int)$this->request->get['custom_block_id'];
 		if (!$custom_block_id) {
-			redirect($this->html->getSecureURL('extension/banner_manager/insert_block'));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager/insert_block'));
 		}
 
 		$tabs = array(
@@ -753,7 +761,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 
 			$this->session->data ['success'] = $this->language->get('text_banner_success');
 			$this->cache->remove('banner');
-			redirect($this->html->getSecureURL('extension/banner_manager/edit_block', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager/edit_block', '&custom_block_id=' . $custom_block_id));
 		}
 
 		$this->_getBlockForm();

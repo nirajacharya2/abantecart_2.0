@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -34,9 +37,8 @@ class ControllerBlocksCustomer extends AController {
 			$this->data['active'] = true;
 			if($this->customer->isLogged()) {
 				$this->data['name'] = $this->customer->getFirstName();
-				
 			} else {
-				$this->data['name'] = $this->customer->getUnauthName();			
+				$this->data['name'] = $this->customer->getUnauthName();
 				$this->data['login'] = $this->html->getSecureURL('account/login');
 			}
 			

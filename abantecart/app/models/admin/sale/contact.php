@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -310,7 +315,7 @@ class ModelSaleContact extends Model{
 		}
 		$output = array ();
 		foreach ($list as $c){
-			if (has_value($c[$field_name])){
+			if (AHelperUtils::has_value($c[$field_name])){
 				$output[$c[$field_name]] = $c;
 			}
 		}

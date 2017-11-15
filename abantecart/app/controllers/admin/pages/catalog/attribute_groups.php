@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\AAttribute_Manager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -122,7 +127,7 @@ class ControllerPagesCatalogAttributeGroups extends AController {
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$attribute_groups_id = $this->attribute_manager->addAttributeGroup($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-      		$this->redirect($this->html->getSecureURL('catalog/attribute_groups/update', '&attribute_groups_id=' . $attribute_groups_id ));
+      		abc_redirect($this->html->getSecureURL('catalog/attribute_groups/update', '&attribute_groups_id=' . $attribute_groups_id ));
 		}
     	$this->_getForm();
 
@@ -145,7 +150,7 @@ class ControllerPagesCatalogAttributeGroups extends AController {
     	if ($this->request->is_POST() && $this->_validateForm()) {
 	  		$this->attribute_manager->updateAttributeGroup($this->request->get['attribute_groups_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('catalog/attribute_groups/update', '&attribute_groups_id=' . $this->request->get['attribute_groups_id'] ));
+			abc_redirect($this->html->getSecureURL('catalog/attribute_groups/update', '&attribute_groups_id=' . $this->request->get['attribute_groups_id'] ));
     	}
     	$this->_getForm();
 

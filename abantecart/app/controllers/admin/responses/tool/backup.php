@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\ADataset;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -140,11 +147,11 @@ class ControllerResponsesToolBackup extends AController {
 			}
 			if($this->model_tool_backup->errors){
 				$this->session->data['error'] = $this->model_tool_backup->errors;
-				redirect($this->html->getSecureURL('tool/backup'));
+				abc_redirect($this->html->getSecureURL('tool/backup'));
 			}else{
 				$this->loadLanguage('tool/backup');
 				$this->session->data['success'] = $this->language->get('text_success_backup');
-				redirect($this->html->getSecureURL('tool/install_upgrade_history'));
+				abc_redirect($this->html->getSecureURL('tool/install_upgrade_history'));
 			}
               //update controller data
             $this->extensions->hk_UpdateData($this,__FUNCTION__);

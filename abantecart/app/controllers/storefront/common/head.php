@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperSystemCheck;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -28,7 +33,7 @@ class ControllerCommonHead extends AController {
 
 		//run system check to make sure system is stable to run the request
 		//for storefront log messages. nothing is shown to users
-		run_system_check($this->registry, 'log');
+		AHelperSystemCheck::run_system_check($this->registry, 'log');
 
 		$this->loadLanguage('common/header');
 

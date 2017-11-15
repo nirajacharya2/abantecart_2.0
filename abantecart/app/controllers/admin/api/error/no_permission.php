@@ -17,14 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AControllerAPI;
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiErrorNoPermission extends AControllerAPI {
-	
 	public function main() {
-		$this->rest->setResponseData( array( 'error' => 'No permission to access this resource!' ) );	
+		$this->rest->setResponseData( array( 'error' => 'No permission to access this resource!' ) );
 		$this->rest->sendResponse(401);
 		return null;
-	}	
+	}
 }

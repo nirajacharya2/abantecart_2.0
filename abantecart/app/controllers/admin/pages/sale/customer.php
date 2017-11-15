@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -294,7 +299,7 @@ class ControllerPagesSaleCustomer extends AController{
 			$customer_id = $this->model_sale_customer->addCustomer($this->request->post);
 			$redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id=' . $customer_id);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 		$this->_getForm();
 
@@ -332,7 +337,7 @@ class ControllerPagesSaleCustomer extends AController{
 			$redirect_url = $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id);
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 
 		$this->_getForm($args);
@@ -361,7 +366,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		$this->data['addresses'] = array ();
 		$customer_info = array ();
-		if (has_value($customer_id)){
+		if (AHelperUtils::has_value($customer_id)){
 			$customer_info = $this->model_sale_customer->getCustomer($customer_id);
 			$this->data['button_orders_count'] = $this->html->buildElement(
 					array (
@@ -375,7 +380,7 @@ class ControllerPagesSaleCustomer extends AController{
 			);
 			$this->data['addresses'] = $this->model_sale_customer->getAddressesByCustomerId($customer_id);
 			if($customer_info['last_login'] && !in_array($customer_info['last_login'], array('0000-00-00 00:00:00', '1970-01-01 00:00:00'))){
-				$date =  dateISO2Display($customer_info['last_login'],$this->language->get('date_format_short').' '.$this->language->get('time_format'));
+				$date =  AHelperUtils::dateISO2Display($customer_info['last_login'],$this->language->get('date_format_short').' '.$this->language->get('time_format'));
 			}else{
 				$date = $this->language->get('text_never');
 			}
@@ -457,7 +462,7 @@ class ControllerPagesSaleCustomer extends AController{
 				'text'   => $this->language->get('tab_customer_details'),
 				'active' => true
 		);
-		if (has_value($customer_id)){
+		if (AHelperUtils::has_value($customer_id)){
 			$this->data['tabs'][] = array (
 					'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=' . $customer_id),
 					'text' => $this->language->get('tab_transactions')
@@ -543,7 +548,7 @@ class ControllerPagesSaleCustomer extends AController{
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol == 'email'){
 					continue;
@@ -623,7 +628,7 @@ class ControllerPagesSaleCustomer extends AController{
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 
 		$this->_getAddressForm();
@@ -659,7 +664,7 @@ class ControllerPagesSaleCustomer extends AController{
 			$redirect_url = $this->html->getSecureURL('sale/customer/update_address', '&customer_id=' . $customer_id . '&address_id=' . $address_id);
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 
 		$this->_getAddressForm();
@@ -691,7 +696,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		$customer_info = array ();
 
-		if (has_value($customer_id)){
+		if (AHelperUtils::has_value($customer_id)){
 			$customer_info = $this->model_sale_customer->getCustomer($customer_id);
 			$this->data['button_orders_count'] = $this->html->buildElement(
 					array (
@@ -734,7 +739,7 @@ class ControllerPagesSaleCustomer extends AController{
 		$this->data['category_products'] = $this->html->getSecureURL('product/product/category');
 		$this->data['common_zone'] = $this->html->getSecureURL('common/zone');
 
-		if (!has_value($address_id)){
+		if (!AHelperUtils::has_value($address_id)){
 			//new address
 			$this->data['action'] = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id=' . $customer_id);
 			$this->data['tab_customer_address'] = $this->language->get('text_add_address');
@@ -762,7 +767,7 @@ class ControllerPagesSaleCustomer extends AController{
 				'active' => true
 		);
 
-		if (has_value($customer_id)){
+		if (AHelperUtils::has_value($customer_id)){
 			$this->data['tabs'][] = array (
 					'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=' . $customer_id),
 					'text' => $this->language->get('tab_transactions')
@@ -814,7 +819,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		//note: Only allow to delete or change if not default
 		if (!$current_address['default']){
-			if (has_value($address_id)){
+			if (AHelperUtils::has_value($address_id)){
 				$this->data['form']['delete'] = $form->getFieldHtml(array (
 						'type' => 'button',
 						'name' => 'delete',
@@ -857,11 +862,11 @@ class ControllerPagesSaleCustomer extends AController{
 
 		if (!$this->user->canModify('sale/customer')){
 			$this->session->data['error'] = $this->language->get('error_permission');
-			redirect($this->html->getSecureURL('sale/customer'));
+			abc_redirect($this->html->getSecureURL('sale/customer'));
 		}
 
 		if (!isset($this->request->get['customer_id'])){
-			redirect($this->html->getSecureURL('sale/customer'));
+			abc_redirect($this->html->getSecureURL('sale/customer'));
 		}
 
 		$customer_id = $this->request->get['customer_id'];
@@ -874,7 +879,7 @@ class ControllerPagesSaleCustomer extends AController{
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		redirect($this->html->getSecureURL('sale/customer'));
+		abc_redirect($this->html->getSecureURL('sale/customer'));
 	}
 
 	public function actonbehalf(){
@@ -892,21 +897,21 @@ class ControllerPagesSaleCustomer extends AController{
 					} else{
 						$add_store_url = $store_settings['config_url'] . '?s=' . ADMIN_PATH . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
 					}
-					redirect($add_store_url);
+					abc_redirect($add_store_url);
 				}
 			} else{
-				startStorefrontSession($this->user->getId(), array ('customer_id' => $this->request->get['customer_id']));
+				AHelperUtils::startStorefrontSession($this->user->getId(), array ('customer_id' => $this->request->get['customer_id']));
 				if ($store_settings['config_ssl']){
-					redirect($this->html->getCatalogURL('account/account', '', '', true));
+					abc_redirect($this->html->getCatalogURL('account/account', '', '', true));
 				} else{
-					redirect($this->html->getCatalogURL('account/account'));
+					abc_redirect($this->html->getCatalogURL('account/account'));
 				}
 			}
 		}
 
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		redirect($this->html->getSecureURL('sale/customer'));
+		abc_redirect($this->html->getSecureURL('sale/customer'));
 	}
 
 	public function delete_address(){
@@ -923,7 +928,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		$customer_id = $this->request->get['customer_id'];
 		$address_id = $this->request->get['address_id'];
-		if (has_value($customer_id) && has_value($address_id)){
+		if (AHelperUtils::has_value($customer_id) && AHelperUtils::has_value($address_id)){
 			//check if this is a default address. Do not allow to delete
 			$customer_info = $this->model_sale_customer->getCustomer($customer_id);
 			if ($customer_info['address_id'] == $address_id){
@@ -933,7 +938,7 @@ class ControllerPagesSaleCustomer extends AController{
 				$this->loadModel('sale/customer_group');
 				$this->model_sale_customer->deleteAddress($customer_id, $address_id);
 				$this->session->data['success'] = $this->language->get('text_success');
-				redirect($this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id));
+				abc_redirect($this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id));
 			}
 		}
 
@@ -994,7 +999,7 @@ class ControllerPagesSaleCustomer extends AController{
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol == 'email'){
 					continue;

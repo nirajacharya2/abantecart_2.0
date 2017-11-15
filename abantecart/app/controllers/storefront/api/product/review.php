@@ -17,16 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiProductReview
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ */
 class ControllerApiProductReview extends AControllerAPI {
-	
 	public function get() {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$product_id = $this->request->get['product_id'];
-		
 		if ( !$product_id ) {
 			$this->rest->setResponseData( array('Error' => 'Missing product ID as a required parameter') );
 			$this->rest->sendResponse(200);
@@ -38,7 +46,7 @@ class ControllerApiProductReview extends AControllerAPI {
 			$this->rest->sendResponse(200);
 			return null;
 		}
-				
+
 		$this->loadModel('catalog/review');
 	    $total_reviews = $this->model_catalog_review->getTotalReviewsByProductId( $product_id );
 	    $average = $this->model_catalog_review->getAverageRating( $product_id );	
@@ -68,7 +76,7 @@ class ControllerApiProductReview extends AControllerAPI {
         		'author'     => $result['author'],
 				'rating'     => $result['rating'],
 				'text'       => strip_tags($result['text']),
-        		'date_added' => dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
+        		'date_added' => AHelperUtils::dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
         	);
       	}
 
@@ -82,13 +90,13 @@ class ControllerApiProductReview extends AControllerAPI {
 											 'rows' => $reviews) );
 		$this->rest->sendResponse(200);
 	}
-	
+
 	public function put() {
 		//Allow to review only for logged in customers. 
 		if (!$this->customer->isLoggedWithToken( $this->request->get['token'] )) {
-			$this->rest->setResponseData( array( 'error' => 'Login attempt failed!' ) );	
+			$this->rest->setResponseData( array( 'error' => 'Login attempt failed!' ) );
 			$this->rest->sendResponse(401);
 			return null;
     	}
-	}	
+	}
 }

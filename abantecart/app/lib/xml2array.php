@@ -17,11 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
-// ???? Posibly discontinued
+// ???? Possibly deprecated
 
 class MyDOMDocument extends DOMDocument{
 	public function toArray(DOMNode $oDomNode = null){
@@ -39,7 +44,7 @@ class MyDOMDocument extends DOMDocument{
 				// this will give us a clue as to what the result structure should be
 				$oChildNodeList = $oDomNode->getElementsByTagName($oChildNode->nodeName);
 				$iChildCount = 0;
-				// there are x number of childs in this node that have the same tag name
+				// there are x number of children in this node that have the same tag name
 				// however, we are only interested in the # of siblings with the same tag name
 				foreach ($oChildNodeList as $oNode){
 					if ($oNode->parentNode->isSameNode($oChildNode->parentNode)){
@@ -49,7 +54,7 @@ class MyDOMDocument extends DOMDocument{
 				$mValue = $this->toArray($oChildNode);
 				$sKey = ($oChildNode->nodeName{0} == '#') ? 0 : $oChildNode->nodeName;
 				$mValue = is_array($mValue) ? $mValue[$oChildNode->nodeName] : $mValue;
-				// how many of thse child nodes do we have?
+				// how many of child nodes do we have?
 				if ($iChildCount > 1){  // more than 1 child - make numeric array
 					$mResult[$sKey][] = $mValue;
 				} else{

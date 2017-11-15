@@ -1,5 +1,4 @@
 <?php
-
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -18,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -102,7 +108,7 @@ class ControllerResponsesListingGridExtension extends AController{
 		$ready_to_install = $this->session->data['ready_to_install'];
 		$to_install = $to_inst_keys = array ();
 
-		if (!has_value($this->session->data['extension_filter'])
+		if (!AHelperUtils::has_value($this->session->data['extension_filter'])
 				|| $this->session->data['extension_filter'] == 'extensions'
 		){
 
@@ -205,7 +211,7 @@ class ControllerResponsesListingGridExtension extends AController{
 					$extension,
 					$name,
 					$category,
-					dateISO2Display($row['date_modified'], $this->language->get('date_format_short'))
+					AHelperUtils::dateISO2Display($row['date_modified'], $this->language->get('date_format_short'))
 			);
 			if (!$this->config->get('config_store_id')){
 				$response->rows[$i]['cell'][] = $row['store_name'] ? $row['store_name'] : $this->language->get('text_default');
@@ -284,7 +290,7 @@ class ControllerResponsesListingGridExtension extends AController{
 		$this->loadLanguage('extension/extensions');
 
 		// first of all we need check dependencies
-		$config = getExtensionConfigXml($this->request->get['extension']);
+		$config = AHelperUtils::getExtensionConfigXml($this->request->get['extension']);
 		$result = $this->extension_manager->validateDependencies($this->request->get['extension'], $config);
 		$this->data = array ('license_text' => '', 'error_text' => '');
 		if ($result){

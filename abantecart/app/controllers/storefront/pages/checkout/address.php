@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -37,16 +41,16 @@ class ControllerPagesCheckoutAddress extends AController{
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->cart->hasShipping()){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('checkout/shipping');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -98,7 +102,7 @@ class ControllerPagesCheckoutAddress extends AController{
                 }
                 unset($this->session->data['shipping_methods'], $this->session->data['shipping_method']);
                 $this->extensions->hk_ProcessData($this);
-                $this->redirect($this->html->getSecureURL('checkout/shipping'));
+                abc_redirect($this->html->getSecureURL('checkout/shipping'));
             }
 
             $this->error = $this->model_account_address->validateAddressData($this->request->post);
@@ -111,7 +115,7 @@ class ControllerPagesCheckoutAddress extends AController{
                     $this->tax->setZone($this->request->post['country_id'], $this->request->post['zone_id']);
                 }
                 $this->extensions->hk_ProcessData($this);
-                $this->redirect($this->html->getSecureURL('checkout/shipping'));
+                abc_redirect($this->html->getSecureURL('checkout/shipping'));
             }
         }
 
@@ -133,12 +137,12 @@ class ControllerPagesCheckoutAddress extends AController{
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('checkout/shipping');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -191,7 +195,7 @@ class ControllerPagesCheckoutAddress extends AController{
                 unset($this->session->data['payment_methods']);
                 unset($this->session->data['payment_method']);
                 $this->extensions->hk_ProcessData($this);
-                $this->redirect($this->html->getSecureURL('checkout/payment'));
+                abc_redirect($this->html->getSecureURL('checkout/payment'));
             }
 
             $this->error = $this->model_account_address->validateAddressData($this->request->post);
@@ -201,7 +205,7 @@ class ControllerPagesCheckoutAddress extends AController{
                 unset($this->session->data['payment_methods']);
                 unset($this->session->data['payment_method']);
                 $this->extensions->hk_ProcessData($this);
-                $this->redirect($this->html->getSecureURL('checkout/payment'));
+                abc_redirect($this->html->getSecureURL('checkout/payment'));
             }
         }
 

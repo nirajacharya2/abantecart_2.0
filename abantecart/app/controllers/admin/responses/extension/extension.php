@@ -17,11 +17,17 @@ Do not edit or add to this file if you wish to upgrade AbanteCart to newer
 versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\ExtensionUtils;
+use abc\lib\AAttribute_Manager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerResponsesExtensionExtension extends AController {
 	public $data = array();
+	protected $attribute_manager;
 
 	public function __construct($registry, $instance_id, $controller, $parent_controller = '') {
 		parent::__construct($registry, $instance_id, $controller, $parent_controller);

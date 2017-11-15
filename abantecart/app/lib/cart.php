@@ -17,20 +17,29 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AAttribute;
+use abc\core\AHelperUtils;
+use abc\core\ALanguage;
+use abc\core\APromotion;
+use abc\core\HtmlElementFactory;
+use abc\core\Registry;
+
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 
 /**
  * Class ACart
- * @property ModelCatalogProduct $model_catalog_product
+ * @property \abc\model\storefront\ModelCatalogProduct $model_catalog_product
  * @property ATax $tax
  * @property ADB $db
  * @property AWeight $weight
  * @property AConfig $config
- * @property ALoader $load
- * @property ModelCheckoutExtension $model_checkout_extension
+ * @property \abc\core\ALoader $load
+ * @property \abc\model\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property ADownload $download
  */
 class ACart{
@@ -189,7 +198,7 @@ class ACart{
 		if ($recalculate){
 			$this->getProducts(true);
 		}
-		return has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : array ();
+		return AHelperUtils::has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : array ();
 	}
 
 	/**
@@ -203,7 +212,7 @@ class ACart{
 	 */
 	public function buildProductDetails($product_id, $quantity = 0, $options = array ()){
 
-		if (!has_value($product_id) || !is_numeric($product_id) || $quantity == 0){
+		if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id) || $quantity == 0){
 			return array ();
 		}
 
@@ -211,7 +220,7 @@ class ACart{
 
 		$stock = true;
 		/**
-		 * @var $sf_product_mdl ModelCatalogProduct
+		 * @var  \abc\model\storefront\ModelCatalogProduct $sf_product_mdl
 		 */
 		$sf_product_mdl = $this->load->model('catalog/product', 'storefront');
 		$elements_with_options = HtmlElementFactory::getElementsWithOptions();
@@ -222,7 +231,7 @@ class ACart{
 		}
 
         $stock_checkout = $product_query['stock_checkout'];
-		if (!has_value($stock_checkout)) {
+		if (!AHelperUtils::has_value($stock_checkout)) {
 			$stock_checkout = $this->config->get('config_stock_checkout');
 		}
 
@@ -423,14 +432,14 @@ class ACart{
 	}
 
 	/**
-	 * @param $key
-	 * @param $data
-	 * @return null
+	 * @param string $key
+	 * @param array $data
+	 * @return bool
 	 */
 	public function addVirtual($key, $data){
 
-		if (!has_value($data)){
-			return null;
+		if (!AHelperUtils::has_value($data)){
+			return false;
 		}
 
 		if (!isset($this->cust_data['cart']['virtual']) || !is_array($this->cust_data['cart']['virtual'])){
@@ -438,6 +447,7 @@ class ACart{
 		}
 
 		$this->cust_data['cart']['virtual'][$key] = $data;
+		return true;
 	}
 
 	/**
@@ -453,7 +463,7 @@ class ACart{
 	public function removeVirtual($key){
 		if (isset($this->cust_data['cart']['virtual'][$key])){
 			unset($this->cust_data['cart']['virtual'][$key]);
-			if (!has_value($this->cust_data['cart']['virtual'])){
+			if (!AHelperUtils::has_value($this->cust_data['cart']['virtual'])){
 				unset($this->cust_data['cart']['virtual']);
 			}
 		}
@@ -626,7 +636,7 @@ class ACart{
 	 */
 	public function getSubTotal($recalculate = false){
 		//check if value already set
-		if (has_value($this->sub_total) && !$recalculate){
+		if (AHelperUtils::has_value($this->sub_total) && !$recalculate){
 			return $this->sub_total;
 		}
 
@@ -654,7 +664,7 @@ class ACart{
 	 */
 	public function getAppliedTaxes($recalculate = false){
 		//check if value already set
-		if (has_value($this->taxes) && !$recalculate){
+		if (AHelperUtils::has_value($this->taxes) && !$recalculate){
 			return $this->taxes;
 		}
 
@@ -701,7 +711,7 @@ class ACart{
 	 */
 	public function getTotal($recalculate = false){
 		//check if value already set
-		if (has_value($this->total_value) && !$recalculate){
+		if (AHelperUtils::has_value($this->total_value) && !$recalculate){
 			return $this->total_value;
 		}
 		$this->total_value = 0.0;
@@ -720,7 +730,7 @@ class ACart{
 	 */
 	public function getFinalTotal($recalculate = false){
 		//check if value already set
-		if (has_value($this->total_data) && has_value($this->final_total) && !$recalculate){
+		if (AHelperUtils::has_value($this->total_data) && AHelperUtils::has_value($this->final_total) && !$recalculate){
 			return $this->final_total;
 		}
 		$this->final_total = 0.0;
@@ -738,7 +748,7 @@ class ACart{
 		$taxes = $this->getAppliedTaxes($recalculate);
 		//force storefront load (if called from admin)
 		/**
-		 * @var $sf_checkout_mdl ModelCheckoutExtension
+		 * @var $sf_checkout_mdl \abc\model\storefront\ModelCheckoutExtension
 		 */
 		$sf_checkout_mdl = $this->load->model('checkout/extension', 'storefront');
 		$total_extns = $sf_checkout_mdl->getExtensions('total');
@@ -751,7 +761,7 @@ class ACart{
 			$sf_total_mdl = $this->load->model('total/' . $extn['key'], 'storefront');
 			/**
 			 * parameters are references!!!
-			 * @var ModelTotalTotal|ModelTotalBalance|ModelTotalCoupon|ModelTotalHandling|ModelTotalLowOrderFee|ModelTotalShipping|ModelTotalSubTotal|ModelTotalTax $sf_total_mdl
+			 * @var \abc\model\storefront\ModelTotalTotal $sf_total_mdl
 			 */
 			$sf_total_mdl->getTotal($total_data, $total, $taxes, $this->cust_data);
 			$sf_total_mdl = null;
@@ -774,7 +784,7 @@ class ACart{
 	 */
 	public function getFinalTotalData($recalculate = false){
 		//check if value already set
-		if (has_value($this->total_data) && has_value($this->final_total) && !$recalculate){
+		if (AHelperUtils::has_value($this->total_data) && AHelperUtils::has_value($this->final_total) && !$recalculate){
 			return $this->total_data;
 		}
 		$this->final_total = $this->getFinalTotal($recalculate);

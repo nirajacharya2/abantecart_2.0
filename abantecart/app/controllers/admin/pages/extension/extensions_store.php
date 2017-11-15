@@ -17,13 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 
 /**
  * Class ControllerPagesExtensionExtensionsStore
- * @property ModelToolMPAPI $model_tool_mp_api
+ * @property \abc\model\admin\ModelToolMPAPI $model_tool_mp_api
  */
 class ControllerPagesExtensionExtensionsStore extends AController {
 	public $data;
@@ -76,22 +82,22 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 			$this->data['my_extensions_shown'] = true;
 		}
 
-		if (!has_value($request_data['sidx']) ){
+		if (!AHelperUtils::has_value($request_data['sidx']) ){
 			$request_data['sidx'] = 'date_modified';
 		}
-		if (!has_value($request_data['sord'])) {
+		if (!AHelperUtils::has_value($request_data['sord'])) {
 			$request_data['sord'] = 'desc';
 		}
-		if (has_value($request_data['limit'])) {
+		if (AHelperUtils::has_value($request_data['limit'])) {
 			$request_data['rows'] = $request_data['limit'];
 		}
 		$token_param = "";
-		if (has_value($mp_token)) {
+		if (AHelperUtils::has_value($mp_token)) {
 			$request_data['mp_token'] = $mp_token;
 			$token_param = "&mp_token=".$mp_token;
 		}
 
-		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));		
+		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));
 		$mp_params = '?rt=account/authenticate&return_url='.$return_url;
 		$mp_params .= '&store_id='.UNIQUE_ID;
 		$mp_params .= '&store_url='.HTTP_SERVER;
@@ -99,14 +105,14 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 		$this->view->assign('amp_connect_url', $this->model_tool_mp_api->getMPURL().$mp_params);
 		$this->view->assign('amp_disconnect_url', $this->html->getSecureURL('tool/extensions_store/disconnect'));
 
-		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));		
+		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));
 		$mp_params = '?rt=r/product/product&return_url='.$return_url;
 		$mp_params .= '&store_id='.UNIQUE_ID;
 		$mp_params .= '&store_url='.HTTP_SERVER;
 		$mp_params .= '&store_version='.VERSION;
 		$this->view->assign('amp_product_url', $this->model_tool_mp_api->getMPURL().$mp_params.$token_param);
 
-		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));		
+		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));
 		$mp_params = '?rt=r/checkout/purchase&return_url='.$return_url;
 		$mp_params .= '&store_id='.UNIQUE_ID;
 		$mp_params .= '&store_url='.HTTP_SERVER;
@@ -159,16 +165,16 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 
 		if( $result['products']['rows']	){
 			$uri = '&limit='.$result['products']['limit'];
-			if(has_value($request_data['keyword'])){
+			if(AHelperUtils::has_value($request_data['keyword'])){
 				$uri .= '&keyword='.$request_data['keyword'];
 			}
-			if(has_value($request_data['category_id'])){
+			if(AHelperUtils::has_value($request_data['category_id'])){
 				$uri .= '&category_id='.$request_data['category_id'];
 			}
-			if(has_value($request_data['manufacturer_id'])){
+			if(AHelperUtils::has_value($request_data['manufacturer_id'])){
 				$uri .= '&manufacturer_id='.$request_data['manufacturer_id'];
 			}
-			if(has_value($request_data['purchased_only'])){
+			if(AHelperUtils::has_value($request_data['purchased_only'])){
 				$uri .= '&purchased_only='.$request_data['purchased_only'];
 			}
 			$sort_order = '&sidx='.$result['products']['sidx'].'&sord='.strtoupper($result['products']['sord']);

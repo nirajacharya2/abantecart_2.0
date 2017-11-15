@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -28,8 +32,8 @@ if (!defined('DIR_CORE')){
  * @property AConfig $config
  * @property ALog $log
  * @property AMessage $message
- * @property ALanguageManager $language
- * @property ExtensionsApi $extensions
+ * @property \abc\core\ALanguageManager $language
+ * @property \abc\core\ExtensionsApi $extensions
  */
 class ALayoutManager{
 	protected $registry;
@@ -37,7 +41,7 @@ class ALayoutManager{
 	private $page = array ();
 	private $layouts = array ();
 	private $blocks = array ();
-	//Layout palaceholder parent blocks present in any template
+	//Layout placeholder parent blocks present in any template
 	private $main_placeholders = array (
 			'header',
 			'header_bottom',
@@ -87,7 +91,7 @@ class ALayoutManager{
 
 		$this->tmpl_id = !empty ($tmpl_id) ? $tmpl_id : $this->config->get('config_storefront_template');
 
-		//do check for existance of storefront template in case when $tmpl_id not set
+		//do check for existence of storefront template in case when $tmpl_id not set
 		if (empty($tmpl_id)){
 			//check is template an extension
 			$template = $this->config->get('config_storefront_template');
@@ -144,7 +148,7 @@ class ALayoutManager{
 			if (count($this->active_layout) == 0){
 				$message_text = 'No template layout found for page_id/controller ' . $this->page_id . '::' . $this->page ['controller'] . '!';
 				$message_text .= ' Requested data: template: ' . $tmpl_id . ', page_id: ' . $page_id . ', layout_id: ' . $layout_id;
-				$message_text .= '  ' . genExecTrace('full');
+				$message_text .= '  ' . AHelperUtils::genExecTrace('full');
 				throw new AException (AC_ERR_LOAD_LAYOUT, $message_text);
 			}
 		}
@@ -225,9 +229,9 @@ class ALayoutManager{
 		$query = $this->db->query($sql);
 		$pages = $query->rows;
 		//process pages and tag restricted layout/pages
-		//rescticted layouts are the once without key_param and key_value
+		//restricted layouts are the once without key_param and key_value
 		foreach ($pages as $count => $page){
-			if (!has_value($page['key_param']) && !has_value($page['key_value'])){
+			if (!AHelperUtils::has_value($page['key_param']) && !AHelperUtils::has_value($page['key_value'])){
 				$pages[$count]['restricted'] = true;
 			}
 		}
@@ -289,7 +293,7 @@ class ALayoutManager{
 
 	/**
 	 * Run logic to detect page ID and layout ID for given parameters
-	 * This will detect if requested page already has layout or return default overwise.
+	 * This will detect if requested page already has layout or return default otherwise.
 	 * @param string $controller
 	 * @param string $key_param
 	 * @param string $key_value
@@ -297,12 +301,12 @@ class ALayoutManager{
 	 */
 	public function getPageLayoutIDs($controller = '', $key_param = '', $key_value = ''){
 		$ret_arr = array ();
-		if (!has_value($controller)){
+		if (!AHelperUtils::has_value($controller)){
 			return $ret_arr;
 		}
 		$pages = $this->getPages($controller, $key_param, $key_value);
 		//check if we got most specific page/layout
-		if (count($pages) && has_value($pages[0]['page_id'])){
+		if (count($pages) && AHelperUtils::has_value($pages[0]['page_id'])){
 			$ret_arr['page_id'] = $pages[0]['page_id'];
 			$ret_arr['layout_id'] = $pages[0]['layout_id'];
 		} else{
@@ -397,11 +401,11 @@ class ALayoutManager{
 	}
 
 	/**
-	 * @param string $data
+	 * @param array $data
 	 * @param string $mode
 	 * @return array|int
 	 */
-	public function getBlocksList($data = '', $mode = ''){
+	public function getBlocksList($data = array(), $mode = ''){
 		$language_id = !(int)$data['language_id'] ? $this->language->getContentLanguageID() : (int)$data['language_id'];
 
 		if ($mode != 'total_only'){
@@ -540,7 +544,7 @@ class ALayoutManager{
 		$blocks = array ();
 		foreach ($this->blocks as $block){
 			if ((string)$block['parent_instance_id'] == (string)$parent_instance_id){
-				//locate block template assigned based on parant block ID
+				//locate block template assigned based on parent block ID
 				$block['template'] = $this->getBlockTemplate($block['block_id'], $parent_block_id);
 				array_push($blocks, $block);
 			}
@@ -580,7 +584,7 @@ class ALayoutManager{
 				){
 					//fill in blank locations if any
 					if (count($children) < self::FIXED_POSITIONS){
-						$children = $this->_buildChildtenBlocks($children, self::FIXED_POSITIONS);
+						$children = $this->_build_children_blocks($children, self::FIXED_POSITIONS);
 					}
 				}
 				$blocks[$block['block_id']]['children'] = $children;
@@ -595,13 +599,13 @@ class ALayoutManager{
 	 * @param int $total_blocks
 	 * @return array
 	 */
-	private function _buildChildtenBlocks($blocks, $total_blocks){
+	private function _build_children_blocks($blocks, $total_blocks){
 		$select_boxes = array ();
 		$empty_block = array (
 				'block_txt_id' => $this->language->get('text_none')
 		);
 		for ($x = 0; $x < $total_blocks; $x++){
-			$idx = $this->_find_block_by_postion($blocks, ($x + 1) * 10);
+			$idx = $this->_find_block_by_position($blocks, ($x + 1) * 10);
 			if ($idx >= 0){
 				$select_boxes[] = $blocks[$idx];
 			} else{
@@ -617,7 +621,7 @@ class ALayoutManager{
 	 * @param int $position
 	 * @return int
 	 */
-	private function _find_block_by_postion($blocks_arr, $position){
+	private function _find_block_by_position($blocks_arr, $position){
 		foreach ($blocks_arr as $index => $block_s){
 			if ($block_s['position'] == $position){
 				return $index;
@@ -739,7 +743,7 @@ class ALayoutManager{
 								$child ['layout_id'] = $this->layout_id;
 								list($child ['block_id'], $child ['custom_block_id']) = explode("_", $block_data['block_id']);
 								$child ['parent_instance_id'] = $instance_id;
-								//NOTE: Blocks possitions are saved in 10th increment starting from 10
+								//NOTE: Blocks positions are saved in 10th increment starting from 10
 								$child ['position'] = ($key + 1) * 10;
 								$child ['status'] = $block_data['status'];
 								$this->saveLayoutBlocks($child);
@@ -810,7 +814,7 @@ class ALayoutManager{
 	 * @return bool
 	 */
 	public function clonePageLayout($src_layout_id, $dest_layout_id = '', $layout_name = ''){
-		if (!has_value($src_layout_id)){
+		if (!AHelperUtils::has_value($src_layout_id)){
 			return false;
 		}
 
@@ -846,7 +850,7 @@ class ALayoutManager{
 	 * @return bool
 	 */
 	public function deletePageLayoutByID($page_id, $layout_id){
-		if (!has_value($page_id) || !has_value($layout_id)){
+		if (!AHelperUtils::has_value($page_id) || !AHelperUtils::has_value($layout_id)){
 			return false;
 		}
 
@@ -921,7 +925,7 @@ class ALayoutManager{
 	 */
 	public function deleteLayoutBlocks($layout_id = 0, $parent_instance_id = 0){
 		if (!$parent_instance_id && !$layout_id){
-			throw new AException (AC_ERR_LOAD, 'Error: Cannot to delete layout block, parent_instance_id "' . $parent_instance_id . '" and layout_id "' . $layout_id . '" doesn\'t exists.');
+			throw new AException (AC_ERR_LOAD, 'Error: Cannot to delete layout block, parent_instance_id "' . $parent_instance_id . '" and layout_id "' . $layout_id . '" does not exists.');
 		} else{
 			$this->db->query("DELETE FROM " . $this->db->table("block_layouts") . " 
 								WHERE layout_id = '" . ( int )$layout_id . "' AND parent_instance_id = '" . ( int )$parent_instance_id . "'");
@@ -1025,12 +1029,14 @@ class ALayoutManager{
 	/**
 	 * @param int $block_id
 	 * @param int $parent_block_id
-	 * @return array
+	 * @return string
 	 */
 	public function getBlockTemplate($block_id, $parent_block_id = 0){
 		$block_id = (int)$block_id;
 		$parent_block_id = (int)$parent_block_id;
-		if (!$block_id) return '';
+		if (!$block_id){
+			return '';
+		}
 
 		$sql = "SELECT template
 				FROM " . $this->db->table("block_templates") . " 
@@ -1079,7 +1085,7 @@ class ALayoutManager{
 		// page description
 		if ($data ['page_descriptions']){
 			foreach ($data ['page_descriptions'] as $language_id => $description){
-				if (!has_value($language_id)){
+				if (!AHelperUtils::has_value($language_id)){
 					continue;
 				}
 
@@ -1400,7 +1406,7 @@ class ALayoutManager{
 	 */
 	public function deleteBlockTemplates($block_id = 0, $parent_block_id = 0){
 		if (!$block_id){
-			throw new AException (AC_ERR_LOAD, 'Error: Cannot to delete block template, block_id "' . $block_id . '" doesn\'t exists.');
+			throw new AException (AC_ERR_LOAD, 'Error: Cannot to delete block template, block_id "' . $block_id . '" does not exists.');
 		} else{
 			$sql = "DELETE FROM " . $this->db->table("block_templates") . " WHERE block_id = '" . ( int )$block_id . "'";
 			if ($parent_block_id){
@@ -1488,7 +1494,7 @@ class ALayoutManager{
 	 * @return bool
 	 */
 	public function cloneLayoutBlocks($source_layout_id, $new_layout_id){
-		if (!has_value($source_layout_id) || !has_value($new_layout_id)){
+		if (!AHelperUtils::has_value($source_layout_id) || !AHelperUtils::has_value($new_layout_id)){
 			return false;
 		}
 
@@ -1579,14 +1585,14 @@ class ALayoutManager{
 	 */
 	private function _set_current_page($page_id = '', $layout_id = ''){
 		//find page used for this instance. If page_id is not specified for the instance, generic page/layout is used.
-		if (has_value($page_id) && has_value($layout_id)){
+		if (AHelperUtils::has_value($page_id) && AHelperUtils::has_value($layout_id)){
 			foreach ($this->pages as $page){
 				if ($page['page_id'] == $page_id && $page['layout_id'] == $layout_id){
 					$this->page = $page;
 					break;
 				}
 			}
-		} else if (has_value($page_id)){
+		} else if (AHelperUtils::has_value($page_id)){
 			//we have page not related to any layout yet. need to pull differently
 			$language_id = $this->language->getContentLanguageID();
 			$sql = " SELECT p.page_id,
@@ -1630,20 +1636,20 @@ class ALayoutManager{
 		//process each layout 
 		foreach ($template_layouts as $layout){
 
-			/* Determin an action tag in all patent elements. Action can be insert, update and delete
+			/* Determine an action tag in all patent elements. Action can be insert, update and delete
 			   Default action (if not provided) is update
 			   ->>> action = insert
-					Before loading the layout, determin if same layout exists with same name, template and type comdination.
+					Before loading the layout, determine if same layout exists with same name, template and type combination.
 					If does exists, return and log error
 			   ->>> action = update (default)
-					Before loading the layout, determin if same layout exists with same name, template and type comdination.
+					Before loading the layout, determine if same layout exists with same name, template and type combination.
 					If does exists, write new settings over existing
 			   ->>> action = delete
-					Delete the element provided from databse and delete relationships to other elements linked to currnet one
+					Delete the element provided from database and delete relationships to other elements linked to current one
 
-				NOTE: Parent level delete action is cascaded to all childer elements
+				NOTE: Parent level delete action is cascaded to all children elements
 
-				TODO: Need to use transaction sql here to prevent partual load or partual delete in case of error
+				TODO: Need to use transaction sql here to prevent partial load or partial delete in case of error
 			*/
 
 			//check if layout with same name exists
@@ -1870,7 +1876,7 @@ class ALayoutManager{
 			$action = 'insert';
 		}
 
-		if (has_value($block_id) && $action == 'delete'){
+		if (AHelperUtils::has_value($block_id) && $action == 'delete'){
 			//try to delete the block if exists
 			$this->_deleteBlock($block, $layout_id);
 		} else if ($action == 'insert'){
@@ -1937,8 +1943,8 @@ class ALayoutManager{
 						}
 					}
 				}
-				//insert new block tempalte
-				//Idealy, block needs to have a template set, but template can be set in the controller for the block.
+				//insert new block template
+				//Ideally, block needs to have a template set, but template can be set in the controller for the block.
 				if ($block->templates->template){
 					foreach ($block->templates->template as $block_template){
 						// parent block_id by parent_name
@@ -2043,7 +2049,7 @@ class ALayoutManager{
 						$this->db->query($query);
 					}
 				} else if (!$restricted){
-					//log warning if try to update exsting block with new controller or template
+					//log warning if try to update existing block with new controller or template
 					if ($block->templates || $block->controller){
 						$error_text = 'Layout (' . $layout_name . ') XML warning: Block (block_txt_id: "' . $block->block_txt_id . '") cannot be updated. This block is used by another template(s)! Will be linked to existing block';
 						$error = new AWarning ($error_text);
@@ -2094,8 +2100,8 @@ class ALayoutManager{
 
 		// start recursion for all included blocks
 		if ($block->block){
-			foreach ($block->block as $childblock){
-				$this->_processBlock($layout, $childblock, $instance_id);
+			foreach ($block->block as $child_block){
+				$this->_processBlock($layout, $child_block, $instance_id);
 			}
 		}
 		return true;
@@ -2209,11 +2215,11 @@ class ALayoutManager{
 					if ((string)$block_description->title){
 						$desc_array['title'] = (string)$block_description->title;
 					}
-					if (has_value((string)$block_description->block_wrapper)){
+					if (AHelperUtils::has_value((string)$block_description->block_wrapper)){
 						$desc_array['block_wrapper'] = (string)$block_description->block_wrapper;
 					}
 
-					if (has_value((string)$block_description->block_framed)){
+					if (AHelperUtils::has_value((string)$block_description->block_framed)){
 						$desc_array['block_framed'] = (int)$block_description->block_framed;
 					}
 
@@ -2249,7 +2255,7 @@ class ALayoutManager{
 		$result = $this->db->query($sql);
 		$block_id = (int)$result->row['block_id'];
 		if (!$block_id){
-			// if we donot know about this block - break;
+			// if we do not know about this block - break;
 			return false;
 		}
 
@@ -2261,12 +2267,12 @@ class ALayoutManager{
 		$result = $this->db->query($query);
 		//do not allow to delete block if used by other layout or template
 		if ($result->row['total'] == 0){
-			$sql[] = "DELETE FROM " . DB_PREFIX . "block_descriptions
-		    			   WHERE block_id='" . $block_id . "'";
+			$sql[] = "DELETE FROM " . $this->db->table("block_descriptions"). "
+					WHERE block_id='" . $block_id . "'";
 			$sql[] = "DELETE FROM " . $this->db->table("block_templates") . "
-		    		   WHERE block_id='" . $block_id . "'";
+					WHERE block_id='" . $block_id . "'";
 			$sql[] = "DELETE FROM " . $this->db->table("blocks") . "
-		    		   WHERE block_id='" . $block_id . "'";
+					WHERE block_id='" . $block_id . "'";
 		}
 		//Unlink block from current layout				
 		$sql[] = "DELETE FROM " . $this->db->table("block_layouts") . " 
@@ -2290,14 +2296,14 @@ class ALayoutManager{
 		$result = $this->db->query($sql);
 		$block_id = ( int )$result->row ['block_id'];
 		if (!$block_id){
-			// if we donot know about this block - break;
+			// if we do not know about this block - break;
 			return false;
 		}
 		//get block custom
 		$custom_block_info = $this->getBlocksList(array ('subsql_filter' => "bd.name = '" . (string)$block->custom_block_txt_id . "' AND cb.block_id='" . $block_id . "'"));
 		$custom_block_id = $custom_block_info[0]['custom_block_id'];
 		if (!$custom_block_id){
-			// if we donot know about this custom block - break;
+			// if we do not know about this custom block - break;
 			return false;
 		}
 

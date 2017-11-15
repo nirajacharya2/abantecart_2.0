@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -113,7 +117,7 @@ class ControllerPagesSaleCustomerGroup extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$customer_group_id = $this->model_sale_customer_group->addCustomerGroup($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('sale/customer_group', '&customer_group_id=' . $customer_group_id ) );
+			abc_redirect( $this->html->getSecureURL('sale/customer_group', '&customer_group_id=' . $customer_group_id ) );
 		}
 		$this->_getForm();
 
@@ -138,7 +142,7 @@ class ControllerPagesSaleCustomerGroup extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$this->model_sale_customer_group->editCustomerGroup($this->request->get['customer_group_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('sale/customer_group', '&customer_group_id=' . $this->request->get['customer_group_id'] ) );
+			abc_redirect( $this->html->getSecureURL('sale/customer_group', '&customer_group_id=' . $this->request->get['customer_group_id'] ) );
 		}
 		$this->_getForm();
 

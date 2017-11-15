@@ -17,93 +17,101 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+namespace abc\core;
+use abc\lib\AConfig;
+use abc\lib\AView;
+use abc\lib\AWarning;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 
 /**
- * @property ModelToolUpdater $model_tool_updater
- * @property ModelSettingStore $model_setting_store
- * @property ModelCatalogCategory $model_catalog_category
- * @property ModelCatalogDownload $model_catalog_download
- * @property ModelCatalogProduct $model_catalog_product
- * @property ModelCatalogManufacturer $model_catalog_manufacturer
- * @property ModelLocalisationStockStatus $model_localisation_stock_status
- * @property ModelLocalisationTaxClass $model_localisation_tax_class
- * @property ModelLocalisationWeightClass $model_localisation_weight_class
- * @property ModelLocalisationLengthClass $model_localisation_length_class
- * @property ModelToolImage $model_tool_image
- * @property ModelSaleCustomerGroup $model_sale_customer_group
- * @property ModelCatalogReview $model_catalog_review
- * @property ModelSettingExtension $model_setting_extension
- * @property ModelUserUserGroup $model_user_user_group
- * @property ModelSettingSetting $model_setting_setting
- * @property ModelUserUser $model_user_user
- * @property ModelSaleOrder $model_sale_order
- * @property ModelSaleCustomer $model_sale_customer
- * @property ModelSaleCustomerTransaction $model_sale_customer_transaction
- * @property ModelLocalisationCurrency $model_localisation_currency
- * @property ModelLocalisationCountry $model_localisation_country
- * @property ModelLocalisationZone $model_localisation_zone
- * @property ModelLocalisationLocation $model_localisation_location
- * @property ModelLocalisationLanguage $model_localisation_language
- * @property ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
- * @property ModelLocalisationOrderStatus $model_localisation_order_status
- * @property ModelReportViewed $model_report_viewed
- * @property ModelSaleCoupon $model_sale_coupon
- * @property ModelSaleContact $model_sale_contact
- * @property ModelToolBackup $model_tool_backup
- * @property ModelToolGlobalSearch $model_tool_global_search
- * @property ModelToolMigration $model_tool_migration
- * @property ModelToolDatasetManager $model_tool_dataset_manager
- * @property ModelToolInstallUpgradeHistory $model_tool_install_upgrade_history
- * @property ModelToolMessageManager $model_tool_message_manager
- * @property ModelReportPurchased $model_report_purchased
- * @property ModelReportSale $model_report_sale
- * @property ModelToolPackageInstaller $model_tool_package_installer
- * @property ModelToolSeoUrl $model_tool_seo_url
- * @property ModelCheckoutExtension $model_checkout_extension
- * @property ModelToolTableRelationships $model_tool_table_relationships
- * @property ModelAccountOrder $model_account_order
- * @property ModelAccountAddress $model_account_address
- * @property ModelCheckoutOrder $model_checkout_order
- * @property ModelToolBackup $model_tools_backup
- * @property ModelAccountCustomer $model_account_customer
- * @property ModelCatalogContent $model_catalog_content
- * @property ModelToolDatasetsManager $model_tool_datasets_manager
- * @property AConfig $config
- * @property ADB $db
- * @property ACache $cache
+ * @property \abc\model\admin\ModelToolUpdater $model_tool_updater
+ * @property \abc\model\admin\ModelSettingStore $model_setting_store
+ * @property \abc\model\admin\ModelCatalogCategory | \abc\model\storefront\ModelCatalogCategory $model_catalog_category
+ * @property \abc\model\admin\ModelCatalogDownload $model_catalog_download
+ * @property \abc\model\admin\ModelCatalogProduct | \abc\model\storefront\ModelCatalogProduct $model_catalog_product
+ * @property \abc\model\admin\ModelCatalogManufacturer | \abc\model\storefront\ModelCatalogManufacturer $model_catalog_manufacturer
+ * @property \abc\model\admin\ModelLocalisationStockStatus $model_localisation_stock_status
+ * @property \abc\model\admin\ModelLocalisationTaxClass $model_localisation_tax_class
+ * @property \abc\model\admin\ModelLocalisationWeightClass $model_localisation_weight_class
+ * @property \abc\model\admin\ModelLocalisationLengthClass $model_localisation_length_class
+ * @property \abc\model\admin\ModelToolImage | \abc\model\storefront\ModelToolImage $model_tool_image
+ * @property \abc\model\admin\ModelSaleCustomerGroup $model_sale_customer_group
+ * @property \abc\model\admin\ModelCatalogReview $model_catalog_review
+ * @property \abc\model\admin\ModelSettingExtension $model_setting_extension
+ * @property \abc\model\admin\ModelUserUserGroup $model_user_user_group
+ * @property \abc\model\admin\ModelSettingSetting $model_setting_setting
+ * @property \abc\model\admin\ModelUserUser $model_user_user
+ * @property \abc\model\admin\ModelSaleOrder $model_sale_order
+ * @property \abc\model\admin\ModelSaleCustomer $model_sale_customer
+ * @property \abc\model\admin\ModelSaleCustomerTransaction $model_sale_customer_transaction
+ * @property \abc\model\admin\ModelLocalisationCurrency $model_localisation_currency
+ * @property \abc\model\admin\ModelLocalisationCountry $model_localisation_country
+ * @property \abc\model\admin\ModelLocalisationZone $model_localisation_zone
+ * @property \abc\model\admin\ModelLocalisationLocation $model_localisation_location
+ * @property \abc\model\admin\ModelLocalisationLanguage $model_localisation_language
+ * @property \abc\model\admin\ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
+ * @property \abc\model\admin\ModelLocalisationOrderStatus $model_localisation_order_status
+ * @property \abc\model\admin\ModelReportViewed $model_report_viewed
+ * @property \abc\model\admin\ModelSaleCoupon $model_sale_coupon
+ * @property \abc\model\admin\ModelSaleContact $model_sale_contact
+ * @property \abc\model\admin\ModelToolBackup $model_tool_backup
+ * @property \abc\model\admin\ModelToolGlobalSearch $model_tool_global_search
+ * @property \abc\model\admin\ModelToolMigration $model_tool_migration
+ * @property \abc\model\admin\ModelToolDatasetsManager $model_tool_dataset_manager
+ * @property \abc\model\admin\ModelToolInstallUpgradeHistory $model_tool_install_upgrade_history
+ * @property \abc\model\admin\ModelToolMessageManager $model_tool_message_manager
+ * @property \abc\model\admin\ModelReportPurchased $model_report_purchased
+ * @property \abc\model\admin\ModelReportSale $model_report_sale
+ * @property \abc\model\admin\ModelToolPackageInstaller $model_tool_package_installer
+ * @property \abc\model\storefront\ModelToolSeoUrl $model_tool_seo_url
+ * @property \abc\model\storefront\ModelCheckoutExtension $model_checkout_extension
+ * @property \abc\model\admin\ModelToolTableRelationships $model_tool_table_relationships
+ * @property \abc\model\storefront\ModelAccountOrder $model_account_order
+ * @property \abc\model\storefront\ModelAccountAddress $model_account_address
+ * @property \abc\model\storefront\ModelCheckoutOrder $model_checkout_order
+ * @property \abc\model\admin\ModelToolBackup $model_tools_backup
+ * @property \abc\model\storefront\ModelAccountCustomer $model_account_customer
+ * @property \abc\model\admin\ModelCatalogContent $model_catalog_content
+ * @property \abc\model\admin\ModelToolDatasetsManager $model_tool_datasets_manager
+ * @property \abc\lib\AConfig $config
+ * @property \abc\lib\ADB $db
+ * @property \abc\lib\ACache $cache
  * @property ALanguageManager $language
  * @property AResource $resource
- * @property AView $view
- * @property ALoader $load
- * @property ARouter $router
+ * @property \abc\lib\AView $view
+ * @property \abc\core\ALoader $load
+ * @property \abc\core\ARouter $router
  * @property AHtml $html
- * @property ARequest $request
- * @property AResponse $response
- * @property ASession $session
+ * @property \abc\lib\ARequest $request
+ * @property \abc\lib\AResponse $response
+ * @property \abc\lib\ASession $session
  * @property ExtensionsApi $extensions
- * @property AExtensionManager $extension_manager
+ * @property \abc\lib\AExtensionManager $extension_manager
  * @property ALayout $layout
- * @property ACurrency $currency
- * @property ACart $cart
- * @property ATax $tax
- * @property AUser $user
- * @property ALog $log
- * @property AMessage $messages
- * @property ACustomer $customer
- * @property ADocument $document
+ * @property \abc\lib\ACurrency $currency
+ * @property \abc\lib\ACart $cart
+ * @property \abc\lib\ATax $tax
+ * @property \abc\lib\AUser $user
+ * @property \abc\lib\ALog $log
+ * @property \abc\lib\AMessage $messages
+ * @property \abc\lib\ACustomer $customer
+ * @property \abc\lib\ADocument $document
  * @property ADispatcher $dispatcher
- * @property ADataEncryption $dcrypt
- * @property ModelToolFileUploads $model_tool_file_uploads
- * @property ADownload $download
- * @property AOrderStatus $order_status
- * @property AIMManager $im
- * @property CSRFToken $csrftoken
+ * @property \abc\lib\ADataEncryption $dcrypt
+ * @property \abc\model\admin\ModelToolFileUploads $model_tool_file_uploads
+ * @property \abc\lib\ADownload $download
+ * @property \abc\lib\AOrderStatus $order_status
+ * @property \abc\lib\AIMManager $im
+ * @property \abc\lib\CSRFToken $csrftoken
  */
 abstract class AController{
+	/**
+	 * @var Registry
+	 */
 	protected $registry;
 	protected $instance_id;
 	protected $controller;
@@ -117,7 +125,7 @@ abstract class AController{
 	protected $html_cache_key;
 
 	/**
-	 * @param $registry Registry
+	 * @param $registry \abc\core\Registry
 	 * @param int $instance_id
 	 * @param string $controller
 	 * @param string|AController $parent_controller
@@ -134,7 +142,7 @@ abstract class AController{
 
 		$this->config = $this->registry->get('config');
 
-		if ($this->language){
+		if ($this->language) {
 			//add main language to languages references and map to view 
 			$this->loadLanguage($this->language->language_details['filename']);
 			//try to map controller language to view 
@@ -143,7 +151,7 @@ abstract class AController{
 		//Load default model for current controller instance. Ignore if no model found  mode = silent
 		$this->loadModel($this->controller, "silent");
 
-		if ($this->layout){
+		if ($this->layout) {
 			//Load Controller template and pass to view. This can be reset in controller as well
 			$this->view->setTemplate($this->layout->getBlockTemplate($this->instance_id));
 			//Load Children from layout if any. 'instance_id', 'controller', 'block_text_id', 'template'
@@ -152,14 +160,17 @@ abstract class AController{
 		}
 
 		//set embed mode if passed
-		if ($this->request->get['embed_mode']){
+		if ($this->request->get['embed_mode']) {
+			/**
+			 * @var AConfig $config
+			 */
 			$config = $this->registry->get('config');
 			$config->set('embed_mode', true);
 		}
 	}
 
 	public function __destruct(){
-		if (isset($this->language)){
+		if (isset($this->language)) {
 			//clean up the scope
 			$this->language->set_language_scope(array ());
 		}
@@ -173,11 +184,11 @@ abstract class AController{
 	 */
 	public function html_cache(){
 		//check is HTML cache is enabled and it is storefront
-		if (!$this->config->get('config_html_cache') || IS_ADMIN){
+		if (!$this->config->get('config_html_cache') || IS_ADMIN) {
 			return false;
 		}
 		//build HTML cache key if not yet built for this controller. 
-		if (!$this->html_cache_key){
+		if (!$this->html_cache_key) {
 			$this->html_cache_key = $this->buildHTMLCacheKey();
 		}
 		//check if can load HTML files and stop
@@ -189,10 +200,10 @@ abstract class AController{
 		//build HTML cache key
 		//build cache string based on allowed params 
 		$cache_params = array ();
-		if (is_array($allowed_params) && $allowed_params){
+		if (is_array($allowed_params) && $allowed_params) {
 			sort($allowed_params);
-			foreach ($allowed_params as $key){
-				if (has_value($values[$key])){
+			foreach ($allowed_params as $key) {
+				if (AHelperUtils::has_value($values[$key])) {
 					$cache_params[$key] = $values[$key];
 				}
 			}
@@ -205,16 +216,17 @@ abstract class AController{
 				'store_id'      => $this->config->get('config_store_id'),
 				'language_id'   => $this->language->getLanguageID(),
 				'currency_code' => $this->currency->getCode(),
-				//in case with shared ssl-domain
+			//in case with shared ssl-domain
 				'https'         => (HTTPS === true ? 1 : 0)
 		);
-		if (!$controller){
+		if (!$controller) {
 			$controller = $this->controller;
 		}
 		//NOTE: Blocks are cached based on unique instanced ID
-		$this->html_cache_key = 'html_cache.' . str_replace('/', '.', $controller) . "." . implode('.', $cache_state_vars) . "_" . $this->instance_id;
+		$this->html_cache_key = 'html_cache.' . str_replace('/', '.', $controller) . "." . implode('.',
+						$cache_state_vars) . "_" . $this->instance_id;
 		//add specific params to the key
-		if ($param_string){
+		if ($param_string) {
 			$this->html_cache_key .= "_" . $param_string;
 		}
 		//pass html_cache_key to view for future use
@@ -235,12 +247,12 @@ abstract class AController{
 		$rt_class = $ds->getClass();
 		$rt_file = $ds->getFile();
 		$rt_method = $ds->getMethod();
-		if (!empty($rt_file) && !empty($rt_class) && !empty($rt_method)){
+		if (!empty($rt_file) && !empty($rt_class) && !empty($rt_method)) {
 			/** @noinspection PhpIncludeInspection */
 			require_once($rt_file);
-			if (class_exists($rt_class)){
+			if (class_exists($rt_class)) {
 				$static_method = $rt_method . '_cache_keys';
-				if (method_exists($rt_class, $static_method)){
+				if (method_exists($rt_class, $static_method)) {
 					//finally get keys and build a cache key
 					$cache_keys = call_user_func($rt_class . '::' . $static_method);
 					return $cache_keys;
@@ -260,7 +272,7 @@ abstract class AController{
 	// Clear function is public in case controller needs to be cleaned explicitly
 	public function clear(){
 		$vars = get_object_vars($this);
-		foreach ($vars as $key => $val){
+		foreach ($vars as $key => $val) {
 			$this->$key = null;
 		}
 	}
@@ -275,7 +287,9 @@ abstract class AController{
 
 	//Load language and store to view
 	public function loadLanguage($rt, $mode = ''){
-		if (empty ($rt) || !method_exists($this->language, 'load')) return null;
+		if (empty ($rt) || !method_exists($this->language, 'load')) {
+			return null;
+		}
 		// strip off pages or response
 		$rt = preg_replace('/^(api|pages|responses)\//', '', $rt);
 		$this->languages[] = $rt;
@@ -284,7 +298,9 @@ abstract class AController{
 	}
 
 	public function loadModel($rt, $mode = ''){
-		if (empty ($rt) || !method_exists($this->load, 'model')) return null;
+		if (empty ($rt) || !method_exists($this->load, 'model')) {
+			return null;
+		}
 		// strip off pages or response
 		$rt = preg_replace('/^(pages|responses)\//', '', $rt);
 		return $this->load->model($rt, $mode);
@@ -296,12 +312,13 @@ abstract class AController{
 	}
 
 	// Redirect to new page
+
 	/**
 	 * @deprecated since v1.2.9
 	 * @param $url
 	 */
 	protected function redirect($url){
-		redirect($url);
+		abc_redirect($url);
 	}
 
 	public function getInstance(){
@@ -326,12 +343,12 @@ abstract class AController{
 		$blocks = array ();
 		// Look into all blocks that are loaded from layout database or have position set for them
 		// Hardcoded children with blocks require manual inclusion to the templates.
-		foreach ($this->children as $block){
-			if (!empty($block['position'])){
+		foreach ($this->children as $block) {
+			if (!empty($block['position'])) {
 				//assign count based on position (currently div. by 10)
-				if ((int)$block['position'] % 10 == 0){
+				if ((int)$block['position'] % 10 == 0) {
 					$blocks[(int)($block['position'] / 10 - 1)] = $block['block_txt_id'] . '_' . (int)$block['instance_id'];
-				} else{
+				} else {
 					array_push($blocks, $block['block_txt_id'] . '_' . $block['instance_id']);
 				}
 			}
@@ -358,13 +375,13 @@ abstract class AController{
 
 	public function processTemplate($template = ''){
 		//is this an embed mode? Special templates needs to be loaded
-		if (is_object($this->registry->get('config')) && $this->registry->get('config')->get('embed_mode') == true){
+		if (is_object($this->registry->get('config')) && $this->registry->get('config')->get('embed_mode') == true) {
 			//get template if it was set earlier
-			if (empty($template)){
+			if (empty($template)) {
 				$template = $this->view->getTemplate();
 			}
 			//only substitute the template for page templates
-			if (substr($template, 0, 6) == 'pages/' && substr($template, 0, 6) != 'embed/'){
+			if (substr($template, 0, 6) == 'pages/' && substr($template, 0, 6) != 'embed/') {
 				//load special headers for embed as no page/layout needed
 				$this->addChild('responses/embed/head', 'head');
 				$this->addChild('responses/embed/footer', 'footer');
@@ -372,7 +389,7 @@ abstract class AController{
 			}
 		}
 
-		if (!empty($template)){
+		if (!empty($template)) {
 			$this->view->setTemplate($template);
 		}
 		$this->view->assign('block_details', $this->block_details);
@@ -384,45 +401,51 @@ abstract class AController{
 		//Render the controller output in view
 
 		// template debug
-		if ($this->config){
-			if ($this->config->get('storefront_template_debug')){
+		if ($this->config) {
+			if ($this->config->get('storefront_template_debug')) {
 				// storefront enabling
-				if (!IS_ADMIN && !isset($this->session->data['tmpl_debug']) && isset($this->request->get['tmpl_debug'])){
+				if (!IS_ADMIN && !isset($this->session->data['tmpl_debug']) && isset($this->request->get['tmpl_debug'])) {
 					$this->session->data['tmpl_debug'] = isset($this->request->get['tmpl_debug']);
 				}
 
 				if ((isset($this->session->data['tmpl_debug'])
 								&& isset($this->request->get['tmpl_debug']))
 						&& ($this->session->data['tmpl_debug'] == $this->request->get['tmpl_debug'])
-				){
+				) {
 
 					$block_details = $this->layout->getBlockDetails($this->instance_id);
 					$excluded_blocks = array ('common/head');
 
-					if (!empty($this->instance_id) && (string)$this->instance_id != '0' && !in_array($block_details['controller'], $excluded_blocks)){
-						if (!empty($this->parent_controller)){
+					if (!empty($this->instance_id) && (string)$this->instance_id != '0' && !in_array($block_details['controller'],
+									$excluded_blocks)
+					) {
+						if (!empty($this->parent_controller)) {
 							//build block template file path based on primary template used
 							//template path is based on parent block 'template_dir'
 							$tmp_dir = $this->parent_controller->view->data['template_dir'] . "/";
 							$block_tpl_file = $tmp_dir . $this->view->getTemplate();
 							$prt_block_tpl_file = $tmp_dir . $this->parent_controller->view->getTemplate();
-							$args = array ('block_id'          => $this->instance_id,
-										   'block_controller'  => $this->dispatcher->getFile(),
-										   'block_tpl'         => $block_tpl_file,
-										   'parent_id'         => $this->parent_controller->instance_id,
-										   'parent_controller' => $this->parent_controller->dispatcher->getFile(),
-										   'parent_tpl'        => $prt_block_tpl_file
+							$args = array (
+									'block_id'          => $this->instance_id,
+									'block_controller'  => $this->dispatcher->getFile(),
+									'block_tpl'         => $block_tpl_file,
+									'parent_id'         => $this->parent_controller->instance_id,
+									'parent_controller' => $this->parent_controller->dispatcher->getFile(),
+									'parent_tpl'        => $prt_block_tpl_file
 							);
-							$debug_wrapper = $this->dispatch('common/template_debug', array ('instance_id' => $this->instance_id, 'details' => $args));
+							$debug_wrapper = $this->dispatch('common/template_debug',
+									array ('instance_id' => $this->instance_id, 'details' => $args));
 							$debug_output = $debug_wrapper->dispatchGetOutput();
 							$output = trim($this->view->getOutput());
-							if (!empty($output)) $output = '<span class="block_tmpl_wrapper">' . $output . $debug_output . '</span>';
+							if (!empty($output)) {
+								$output = '<span class="block_tmpl_wrapper">' . $output . $debug_output . '</span>';
+							}
 							$this->view->setOutput($output);
 						}
 					}
 
 				}
-			} else{
+			} else {
 				unset($this->session->data['tmpl_debug']);
 			}
 		}
@@ -431,29 +454,31 @@ abstract class AController{
 
 	//Set of functions to access parent controller and exchange information
 	public function addToParentByName($parent_controller_name, $variable, $value){
-		if ($parent_controller_name == $this->instance_id){
+		if ($parent_controller_name == $this->instance_id) {
 			$this->view->append($variable, $value);
-		} else if (!empty ($this->parent_controller)){
-			$this->parent_controller->AddToParentByName($parent_controller_name, $variable, $value);
-		} else{
-			$wrn = new AWarning('Call to unknown parent controller ' . $parent_controller_name . ' in ' . get_class($this));
-			$wrn->toDebug();
+		} else {
+			if (!empty ($this->parent_controller)) {
+				$this->parent_controller->AddToParentByName($parent_controller_name, $variable, $value);
+			} else {
+				$wrn = new AWarning('Call to unknown parent controller ' . $parent_controller_name . ' in ' . get_class($this));
+				$wrn->toDebug();
+			}
 		}
 
 	}
 
 	//Add value to direct parent
 	public function addToParent($variable, $value){
-		if (!empty ($this->parent_controller)){
+		if (!empty ($this->parent_controller)) {
 			$this->parent_controller->view->append($variable, $value);
-		} else{
+		} else {
 			$wrn = new AWarning('Parent controller called does not exist in ' . get_class($this));
 			$wrn->toDebug();
 		}
 	}
 
 	public function can_access(){
-		if (!defined('IS_ADMIN') || !IS_ADMIN){
+		if (!defined('IS_ADMIN') || !IS_ADMIN) {
 			return null;
 		}
 
@@ -469,13 +494,13 @@ abstract class AController{
 
 	//Generate the URL to external help
 	public function gen_help_url($sub_key = ''){
-		if ($this->config->get('config_help_links') != 1){
+		if ($this->config->get('config_help_links') != 1) {
 			return null;
 		}
 
-		if (!empty($sub_key)){
+		if (!empty($sub_key)) {
 			$main_key = $sub_key;
-		} else{
+		} else {
 			$main_key = str_replace('/', '_', $this->controller);
 		}
 

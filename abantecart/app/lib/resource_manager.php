@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -24,10 +29,10 @@ if (!defined('DIR_CORE')) {
 /**
  * Class AResourceManager
  * @property ADB $db
- * @property AHtml $html
+ * @property \abc\core\AHtml $html
  * @property ACache $cache
  * @property AConfig $config
- * @property ALanguageManager $language
+ * @property \abc\core\ALanguageManager $language
  */
 class AResourceManager extends AResource{
 	protected $registry;
@@ -80,7 +85,7 @@ class AResourceManager extends AResource{
 	}
 
 	public function updateResourceType($data){
-		if (empty($data) || !has_value($data['type_id'])) {
+		if (empty($data) || !AHelperUtils::has_value($data['type_id'])) {
 			return null;
 		}
 		$sql = "UPDATE " . $this->db->table('resource_types') . "
@@ -736,7 +741,7 @@ class AResourceManager extends AResource{
 	 * @return bool|int
 	 */
 	public function isMapped($resource_id, $object_name = '', $object_id = 0){
-		if (!has_value($resource_id)) {
+		if (!AHelperUtils::has_value($resource_id)) {
 			return null;
 		}
 		if (($object_name && !(int)$object_id) || (!$object_name && (int)$object_id)) {

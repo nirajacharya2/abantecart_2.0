@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\model\storefront\ModelToolOnlineNow;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -98,7 +102,7 @@ class ACustomer{
 	 */
 	protected $dcrypt;
 	/**
-	 * @var ExtensionsApi
+	 * @var \abc\core\ExtensionsApi
 	 */
 	protected $extensions;
 
@@ -108,7 +112,7 @@ class ACustomer{
 	protected $unauth_customer = array ();
 
 	/**
-	 * @param  Registry $registry
+	 * @param  \abc\core\Registry $registry
 	 */
 	public function __construct($registry){
 		$this->cache = $registry->get('cache');
@@ -173,7 +177,11 @@ class ACustomer{
 			$customer_id = $this->isUnauthCustomer();
 		}
 		$this->load->model('tool/online_now');
-		$registry->get('model_tool_online_now')->setOnline($ip, $customer_id, $url, $referer);
+		$model = $registry->get('model_tool_online_now');
+		/**
+		 * @var ModelToolOnlineNow $model;
+		 */
+		$model->setOnline($ip, $customer_id, $url, $referer);
 		//call hooks
 		$this->extensions->hk_ProcessData($this, 'constructor', $customer_id);
 		}
@@ -445,18 +453,6 @@ class ACustomer{
 	}
 
 	/**
-	 * @deprecated
-	 * @since 1.2.7
-	 * @param array $data_array
-	 * @param string $format
-	 * @param array $locate
-	 * @return string
-	 */
-	public function getFormatedAdress($data_array, $format = '', $locate = array ()){
-		return $this->getFormattedAddress($data_array, $format, $locate);
-	}
-
-	/**
 	 * @since 1.2.7
 	 * @param array $data_array
 	 * @param string $format
@@ -707,7 +703,7 @@ class ACustomer{
 	 * @return null
 	 */
 	public function addToWishList($product_id){
-		if (!has_value($product_id) || !is_numeric($product_id)){
+		if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)){
 			return null;
 		}
 		$whishlist = $this->getWishList();
@@ -722,7 +718,7 @@ class ACustomer{
 	 * @return null
 	 */
 	public function removeFromWishList($product_id){
-		if (!has_value($product_id) || !is_numeric($product_id)){
+		if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)){
 			return null;
 		}
 		$whishlist = $this->getWishList();
@@ -787,7 +783,7 @@ class ACustomer{
 		if (!$this->isLogged()){
 			return false;
 		}
-		if (!has_value($tr_details['transaction_type']) || !has_value($tr_details['created_by'])){
+		if (!AHelperUtils::has_value($tr_details['transaction_type']) || !AHelperUtils::has_value($tr_details['created_by'])){
 			return false;
 		}
 

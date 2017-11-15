@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -46,10 +51,10 @@ class ControllerCommonHeader extends AController {
 		}
 
 		//get logo image dimensions
-		$info = get_image_size($logo_path);
+		$info = AHelperUtils::get_image_size($logo_path);
 		$this->data['logo_width'] = $info['width'];
 		$this->data['logo_height'] = $info['height'];
-        						
+
 		$this->view->batchAssign($this->data);
 		$this->processTemplate('common/header.tpl');
         //init controller data

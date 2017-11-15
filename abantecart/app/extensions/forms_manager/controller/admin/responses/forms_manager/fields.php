@@ -17,14 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 
 /**
  * Class ControllerResponsesFormsManagerFields
- * @property ModelToolFormsManager $model_tool_forms_manager
+ * @property \abc\model\admin\ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerResponsesFormsManagerFields extends AController {
 
@@ -323,7 +331,9 @@ class ControllerResponsesFormsManagerFields extends AController {
 	 */
 	private function _field_value_form($item, $form) {
 
-		if(in_array($this->data['field_data']['element_type'], array('U','K'))){ return array();}
+		if(in_array($this->data['field_data']['element_type'], array('U','K'))){
+			return array();
+		}
 
 		$field_value_id = '';
 		if (isset($item['id'])) {
@@ -398,7 +408,7 @@ class ControllerResponsesFormsManagerFields extends AController {
 		$uplds_dir = DIR_APP . '/system/uploads';
 		$settgs_dir = $uplds_dir.'/'.trim($this->data['attribute_data']['settings']['directory'], '/');
 		//check or make writable dirs
-		if( !make_writable_dir($uplds_dir) || !make_writable_dir($settgs_dir) ){
+		if( !AHelperUtils::is_writable_dir($uplds_dir) || !AHelperUtils::is_writable_dir($settgs_dir) ){
 			$this->data['form']['settings_fields']['directory'] .= '<i class="error">' . $this->language->get('error_directory_not_writable') . '</i>';
 		}
 

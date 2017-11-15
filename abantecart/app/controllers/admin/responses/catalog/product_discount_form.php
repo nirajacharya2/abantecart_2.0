@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AView;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -24,8 +30,7 @@ if (!defined('DIR_CORE') || !IS_ADMIN) {
 
 class ControllerResponsesCatalogProductDiscountForm extends AController {
 	public $data = array();
-
-
+	public $error;
 	public function insert() {
 
 		//init controller data
@@ -96,7 +101,7 @@ class ControllerResponsesCatalogProductDiscountForm extends AController {
 			if (isset ($this->request->post [$f])) {
 				$this->data [$f] = $this->request->post [$f];
 				if (in_array($f, array('date_start', 'date_end'))) {
-					$this->data [$f] = dateDisplay2ISO($this->data [$f], $this->language->get('date_format_short'));
+					$this->data [$f] = AHelperUtils::dateDisplay2ISO($this->data [$f], $this->language->get('date_format_short'));
 				}
 			} elseif (isset($discount_info)) {
 				$this->data[$f] = $discount_info[$f];
@@ -178,26 +183,26 @@ class ControllerResponsesCatalogProductDiscountForm extends AController {
 		$this->data['form']['fields']['price'] = $form->getFieldHtml(array(
 				'type' => 'input',
 				'name' => 'price',
-				'value' => moneyDisplayFormat($this->data['price']),
+				'value' => AHelperUtils::moneyDisplayFormat($this->data['price']),
 				'style' => 'tiny-field'
 		));
 
-		$this->data['js_date_format'] = format4Datepicker($this->language->get('date_format_short'));
+		$this->data['js_date_format'] = AHelperUtils::format4Datepicker($this->language->get('date_format_short'));
 		$this->data['form']['fields']['date_start'] = $form->getFieldHtml(array(
 				'type' => 'date',
 				'name' => 'date_start',
-				'value' => dateISO2Display($this->data['date_start'], $this->language->get('date_format_short')),
+				'value' => AHelperUtils::dateISO2Display($this->data['date_start'], $this->language->get('date_format_short')),
 				'default' => '',
-				'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+				'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 				'highlight' => 'future',
 				'style' => 'small-field',
 		));
 		$this->data['form']['fields']['date_end'] = $form->getFieldHtml(array(
 				'type' => 'date',
 				'name' => 'date_end',
-				'value' => dateISO2Display($this->data['date_end'], $this->language->get('date_format_short')),
+				'value' => AHelperUtils::dateISO2Display($this->data['date_end'], $this->language->get('date_format_short')),
 				'default' => '',
-				'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+				'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 				'highlight' => 'future',
 				'style' => 'small-field',
 		));

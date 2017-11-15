@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\core\HtmlElementFactory;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -29,7 +35,7 @@ class ControllerPagesAccountDownload extends AController{
 
 		//if disabled downloads redirect to
 		if (!$this->config->get('config_download')){
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 		// when guest checkout downloads
 		$this->loadModel('account/customer');
@@ -44,7 +50,7 @@ class ControllerPagesAccountDownload extends AController{
 
 		if (!$this->customer->isLogged() && !$guest){
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/download');
-			redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -144,13 +150,13 @@ class ControllerPagesAccountDownload extends AController{
 						'thumbnail'   => $thumbnail,
 						'attributes'  => $attributes,
 						'order_id'    => $download_info['order_id'],
-						'date_added'  => dateISO2Display($download_info['date_added'], $this->language->get('date_format_short')),
+						'date_added'  => AHelperUtils::dateISO2Display($download_info['date_added'], $this->language->get('date_format_short')),
 						'name'        => $download_info['name'],
 						'remaining'   => $download_info['remaining_count'],
 						'size'        => round(substr($size, 0, strpos($size, '.') + 4), 2) . $suffix[$i],
 						'button'      => $download_button,
 						'text'        => $download_text,
-						'expire_date' => dateISO2Display($download_info['expire_date'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format_short'))
+						'expire_date' => AHelperUtils::dateISO2Display($download_info['expire_date'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format_short'))
 				);
 
 			}
@@ -207,7 +213,7 @@ class ControllerPagesAccountDownload extends AController{
 		$order_download_id = (int)$this->request->get['order_download_id'];
 
 		if (!$this->config->get('config_download')){
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$can_access = false;
@@ -257,7 +263,7 @@ class ControllerPagesAccountDownload extends AController{
 		}
 
 		$this->session->data['warning'] = $this->language->get('error_download_not_exists');
-		redirect($this->html->getSecureURL('account/download'));
+		abc_redirect($this->html->getSecureURL('account/download'));
 	}
 
 }

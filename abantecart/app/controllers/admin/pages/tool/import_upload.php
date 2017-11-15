@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AData;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -31,7 +35,7 @@ class ControllerPagesToolImportUpload extends AController {
 	 */
 	public $file_types = array('text/csv', 'application/vnd.ms-excel', 'text/plain', 'application/octet-stream');
 	/**
-	 * @var AData
+	 * @var \abc\lib\AData
 	 */
 	private $handler;
 
@@ -41,17 +45,17 @@ class ControllerPagesToolImportUpload extends AController {
 		$redirect = $this->html->getSecureURL('tool/import_export', '&active=import');
 
 		if ( !$this->request->is_POST() || !$this->user->canModify('tool/import_export') ) {
-			redirect($redirect);
+			abc_redirect($redirect);
 			return $this->dispatch('error/permission');
 		}
 
 		if ( empty($this->request->files) ) {
 			$this->session->data['error'] = 'File data for export is empty!';
-			redirect($redirect);
+			abc_redirect($redirect);
 		}
 
 		if (!$this->validateRequest()) {
-			redirect($redirect);
+			abc_redirect($redirect);
 		}
 
 		//All good so far, prepare import
@@ -59,7 +63,7 @@ class ControllerPagesToolImportUpload extends AController {
 		$file_data = $this->_prepare_import();
 		if($file_data['error']) {
 			$this->session->data['error'] = $file_data['error'];
-			redirect($redirect);
+			abc_redirect($redirect);
 		}
 
 		$this->session->data['import'] = $file_data;
@@ -68,9 +72,9 @@ class ControllerPagesToolImportUpload extends AController {
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
 		//internal import format
 		if( $file_data['format'] == 'internal') {
-			redirect($this->html->getSecureURL('tool/import_export/internal_import'));
+			abc_redirect($this->html->getSecureURL('tool/import_export/internal_import'));
 		} else {
-			redirect($this->html->getSecureURL('tool/import_export/import_wizard'));
+			abc_redirect($this->html->getSecureURL('tool/import_export/import_wizard'));
 		}
 	}
 

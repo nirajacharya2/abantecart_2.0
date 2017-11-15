@@ -17,21 +17,23 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+namespace abc\lib;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class AView
  * @property AConfig $config
- * @property ExtensionsAPI $extensions
+ * @property \abc\core\ExtensionsAPI $extensions
  * @property AResponse $response
  * @property ACache $cache
  *
  */
 class AView{
 	/**
-	 * @var $registry Registry
+	 * @var $registry \abc\core\Registry
 	 */
 	protected $registry;
 	/**
@@ -78,17 +80,17 @@ class AView{
 	protected $html_cache_key;
 
 	/**
-	 * @param Registry $registry
+	 * @param \abc\core\Registry $registry
 	 * @param int $instance_id
 	 */
 	public function __construct($registry, $instance_id){
 		$this->registry = $registry;
 		$this->has_extensions = $this->registry->has('extensions');
-		if ($this->registry->get('config')){
+		if ($this->registry->get('config')) {
 			$this->default_template = IS_ADMIN ? $this->registry->get('config')->get('admin_template') : $this->registry->get('config')->get('config_storefront_template');
 		}
 		$this->data['template_dir'] = RDIR_TEMPLATE;
-		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . '/common/';
+		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . 'common/';
 		$this->instance_id = $instance_id;
 
 	}
@@ -135,13 +137,13 @@ class AView{
 	 * @return array
 	 */
 	public function getVariables($key = ''){
-		$variables = array();
+		$variables = array ();
 		/**
 		 * @var array $scope
 		 */
 		$scope = $key ? $this->data[$key] : $this->data;
-		if(is_array($scope)){
-			foreach(array_keys($scope) as $var){
+		if (is_array($scope)) {
+			foreach (array_keys($scope) as $var) {
 				$variables[$var] = gettype($scope[$var]);
 			}
 		}
@@ -153,9 +155,9 @@ class AView{
 	 * @return array | mixed - reference to $this->data
 	 */
 	public function &getData($key = ''){
-		if ($key){
+		if ($key) {
 			return $this->data[$key];
-		} else{
+		} else {
 			return $this->data;
 		}
 	}
@@ -167,12 +169,12 @@ class AView{
 	 * @return null
 	 */
 	public function assign($template_variable, $value = '', $default_value = ''){
-		if (empty($template_variable)){
+		if (empty($template_variable)) {
 			return false;
 		}
-		if (!is_null($value)){
+		if (!is_null($value)) {
 			$this->data[$template_variable] = $value;
-		} else{
+		} else {
 			$this->data[$template_variable] = $default_value;
 		}
 		return true;
@@ -183,17 +185,18 @@ class AView{
 	 * @param string $template_variable
 	 * @param string $value
 	 * @param string $default_value
-	 * @return null
+	 * @return bool
 	 */
 	public function append($template_variable, $value = '', $default_value = ''){
-		if (empty($template_variable)){
-			return null;
+		if (empty($template_variable)) {
+			return false;
 		}
-		if (!is_null($value)){
+		if (!is_null($value)) {
 			$this->data[$template_variable] = $this->data[$template_variable] . $value;
-		} else{
+		} else {
 			$this->data[$template_variable] = $this->data[$template_variable] . $default_value;
 		}
+		return true;
 	}
 
 	/**
@@ -201,19 +204,19 @@ class AView{
 	 * @return null
 	 */
 	public function batchAssign($assign_arr){
-		if (empty($assign_arr) || !is_array($assign_arr)){
-			return null;
+		if (empty($assign_arr) || !is_array($assign_arr)) {
+			return false;
 		}
 
-		foreach ($assign_arr as $key => $value){
+		foreach ($assign_arr as $key => $value) {
 			//when key already defined and type of old and new values are different send warning in debug-mode
-			if (isset($this->data[$key]) && is_object($this->data[$key])){
+			if (isset($this->data[$key]) && is_object($this->data[$key])) {
 				$warning_text = 'Warning! Variable "' . $key . '" in template "' . $this->template . '" overriding value and data type "object." ';
 				$warning_text .= 'Possibly need to review your code! (also check that extensions do not load language definitions in UpdateData hook).';
 				$warning = new AWarning($warning_text);
 				$warning->toDebug();
 				continue; // prevent overriding.
-			} elseif (isset($this->data[$key]) && gettype($this->data[$key]) != gettype($value)){
+			} elseif (isset($this->data[$key]) && gettype($this->data[$key]) != gettype($value)) {
 				$warning_text = 'Warning! Variable "' . $key . '" in template "' . $this->template . '" overriding value and data type "' . gettype($this->data[$key]) . '" ';
 				$warning_text .= 'Forcing new data type ' . gettype($value) . '. Possibly need to review your code!';
 				$warning = new AWarning($warning_text);
@@ -221,6 +224,7 @@ class AView{
 			}
 			$this->data[$key] = $value;
 		}
+		return true;
 	}
 
 	/**
@@ -228,7 +232,7 @@ class AView{
 	 * @param string $value
 	 */
 	public function addHookVar($name, $value){
-		if (!empty($name)){
+		if (!empty($name)) {
 			$this->hook_vars[$name] .= $value;
 		}
 	}
@@ -238,7 +242,7 @@ class AView{
 	 * @return string
 	 */
 	public function getHookVar($name){
-		if (isset($this->hook_vars[$name])){
+		if (isset($this->hook_vars[$name])) {
 			return $this->hook_vars[$name];
 		}
 		return '';
@@ -247,14 +251,14 @@ class AView{
 	// Render html output
 	public function render(){
 		// If no template return empty. We might have controller that has no templates
-		if (!empty($this->template) && $this->enableOutput){
+		if (!empty($this->template) && $this->enableOutput) {
 			$compression = '';
-			if ($this->config){
+			if ($this->config) {
 				$compression = $this->config->get('config_compression');
 			}
-			if (!empty($this->output)){
+			if (!empty($this->output)) {
 				$this->response->setOutput($this->output, $compression);
-			} else{
+			} else {
 				$this->response->setOutput($this->fetch($this->template), $compression);
 			}
 		}
@@ -283,20 +287,20 @@ class AView{
 	public function fetch($filename){
 		ADebug::checkpoint('fetch ' . $filename . ' start');
 		//#PR First see if we have full path to template file. Nothing to do. Higher precedence!
-		if (is_file($filename)){
+		if (is_file($filename)) {
 			//#PR set full path
 			$file = $filename;
-		} else{
+		} else {
 			//#PR Build the path to the template file
 			$path = DIR_TEMPLATES;
-			if (!defined('INSTALL')){
+			if (!defined('INSTALL')) {
 				$file = $this->_get_template_resource_path($path, $filename, 'full');
-			} else{
+			} else {
 				$file = $path . $filename;
 			}
 
-			if ($this->has_extensions && $result = $this->extensions->isExtensionResource('T', $filename)){
-				if (is_file($file)){
+			if ($this->has_extensions && $result = $this->extensions->isExtensionResource('T', $filename)) {
+				if (is_file($file)) {
 					$warning = new AWarning("Extension <b>" . $result['extension'] . "</b> overrides core template with <b>" . $filename . "</b>");
 					$warning->toDebug();
 				}
@@ -304,17 +308,17 @@ class AView{
 			}
 		}
 
-		if (empty($file)){
+		if (empty($file)) {
 			$error = new AError('Error: Unable to identify file path to template ' . $filename . '! Check blocks in the layout or enable debug mode to get more details. ' . AC_ERR_LOAD);
 			$error->toDebug()->toLog();
 			return '';
 		}
 
-		if (is_file($file)){
+		if (is_file($file)) {
 			$content = '';
 			$file_pre = str_replace('.tpl', POSTFIX_PRE . '.tpl', $filename);
-			if ($result = $this->extensions->getAllPrePostTemplates($file_pre)){
-				foreach ($result as $item){
+			if ($result = $this->extensions->getAllPrePostTemplates($file_pre)) {
+				foreach ($result as $item) {
 					$content .= $this->_fetch($item['file']);
 				}
 			}
@@ -322,24 +326,26 @@ class AView{
 			$content .= $this->_fetch($file);
 
 			$file_post = str_replace('.tpl', POSTFIX_POST . '.tpl', $filename);
-			if ($result = $this->extensions->getAllPrePostTemplates($file_post)){
-				foreach ($result as $item){
+			if ($result = $this->extensions->getAllPrePostTemplates($file_post)) {
+				foreach ($result as $item) {
 					$content .= $this->_fetch($item['file']);
 				}
 			}
 			ADebug::checkpoint('fetch ' . $filename . ' end');
 
 			//Write HTML Cache if we need and can write
-			if ($this->config && $this->config->get('config_html_cache') && $this->html_cache_key){
-				if ($this->cache->save_html_cache($this->html_cache_key, $content) === false){
-					$error = new AError('Error: Cannot create HTML cache for file ' . $this->html_cache_key . '! Directory to write cache is not writable', AC_ERR_LOAD);
+			if ($this->config && $this->config->get('config_html_cache') && $this->html_cache_key) {
+				if ($this->cache->save_html_cache($this->html_cache_key, $content) === false) {
+					$error = new AError('Error: Cannot create HTML cache for file ' . $this->html_cache_key . '! Directory to write cache is not writable',
+							AC_ERR_LOAD);
 					$error->toDebug()->toLog();
 				}
 			}
 
 			return $content;
-		} else{
-			$error = new AError('Error: Cannot load template ' . $filename . '! File ' . $file . ' is missing or incorrect. Check blocks in the layout or enable debug mode to get more details. ', AC_ERR_LOAD);
+		} else {
+			$error = new AError('Error: Cannot load template ' . $filename . '! File ' . $file . ' is missing or incorrect. Check blocks in the layout or enable debug mode to get more details. ',
+					AC_ERR_LOAD);
 			$error->toDebug()->toLog();
 		}
 
@@ -353,35 +359,39 @@ class AView{
 	 * @return string with relative path
 	 */
 	public function templateResource($filename, $mode = 'http'){
-		if (!$filename){
+		if (!$filename) {
 			return null;
 		}
 		$http_path = '';
 		$res_arr = $this->_extensions_resource_map($filename);
 
 		//get first exact template extension resource or default template resource otherwise.
-		if (count($res_arr['original'])){
+		if (count($res_arr['original'])) {
 			$output = $res_arr['original'][0];
-		} else if (count($res_arr['default'])){
-			$output = $res_arr['default'][0];
-		} else{
-			//no extension found, use resource from core templates
-			$output = $this->_get_template_resource_path(DIR_TEMPLATES, $filename, $mode=='file' ? '' : 'relative');
+		} else {
+			if (count($res_arr['default'])) {
+				$output = $res_arr['default'][0];
+			} else {
+				//no extension found, use resource from core templates
+				$output = $this->_get_template_resource_path(DIR_TEMPLATES, $filename,
+						$mode == 'file' ? '' : 'relative');
 
+			}
 		}
 
-		if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array ('tpl', 'php'))){
+		if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array ('tpl', 'php'))) {
 			$this->extensions->hk_ProcessData($this, __FUNCTION__);
 			$http_path = $this->data['http_dir'];
 		}
 
-
-		if ($mode == 'http'){
+		if ($mode == 'http') {
 			return $http_path . $output;
-		} else if ($mode == 'file'){
-			return $output;
-		} else{
-			return '';
+		} else {
+			if ($mode == 'file') {
+				return $output;
+			} else {
+				return '';
+			}
 		}
 	}
 
@@ -390,14 +400,14 @@ class AView{
 	 * @return bool
 	 */
 	public function isTemplateExists($filename){
-		if (!$filename){
+		if (!$filename) {
 			return false;
 		}
 
 		//check if this template file in extensions or in core
-		if ($this->templateResource($filename)){
+		if ($this->templateResource($filename)) {
 			return true;
-		} else{
+		} else {
 			return false;
 		}
 	}
@@ -418,14 +428,14 @@ class AView{
 	 * @return bool
 	 */
 	public function checkHTMLCache($key){
-		if (!$key){
+		if (!$key) {
 			return false;
 		}
 		$this->html_cache_key = $key;
 		$html_cache = $this->cache->get_html_cache($key);
-		if ($html_cache){
+		if ($html_cache) {
 			$compression = '';
-			if ($this->config){
+			if ($this->config) {
 				$compression = $this->config->get('config_compression');
 			}
 			$this->response->setOutput($html_cache, $compression);
@@ -442,7 +452,7 @@ class AView{
 	 * @return string
 	 */
 	public function LoadMinifyCSS($css_file, $group = 'css'){
-		if (empty($css_file)){
+		if (empty($css_file)) {
 			return '';
 		}
 		//build hash key
@@ -452,14 +462,14 @@ class AView{
 		$key = $group . "." . md5($group . '-' . $key);
 		//check if hash is created and load 
 		$css_data = $this->cache->pull($key);
-		if ($css_data === false){
+		if ($css_data === false) {
 			require_once(DIR_CORE . 'helper/html-css-js-minifier.php');
 			//build minified css and save
 			$path = dirname($this->templateResource($css_file, 'http'));
 			$new_content = file_get_contents($this->templateResource($css_file, 'file'));
 			//replace relative directories with full path
 			$css_data = preg_replace('/\.\.\//', $path . '/../', $new_content);
-			$css_data = minify_css($css_data);
+			$css_data = abc_minify_css($css_data);
 			$this->cache->push($key, $css_data);
 		}
 		return $css_data;
@@ -468,38 +478,38 @@ class AView{
 	/**
 	 * Beta!
 	 * Preload JavaScript and return an output.
-	 * @param string /array $js_file file(s) with relative name
+	 * @param string|array $js_file file(s) with relative name
 	 * @param string $group JS group name for caching
 	 * @return string
 	 */
 	public function PreloadJS($js_file, $group = 'js'){
-		if (empty($js_file)){
+		if (empty($js_file)) {
 			return '';
 		}
 		//build hash key
 		$key = '';
 		//get file time stamp
-		if (is_array($js_file)){
-			foreach ($js_file as $js){
+		if (is_array($js_file)) {
+			foreach ($js_file as $js) {
 				//get file time stamp
 				$key .= $js . "-" . filemtime($this->templateResource($js, 'file'));
 			}
-		} else{
+		} else {
 			$key .= $js_file . "-" . filemtime($this->templateResource($js_file, 'file'));
 		}
 
 		$key = $group . "." . md5($group . '-' . $key);
 		//check if hash is created and load 
 		$js_data = $this->cache->pull($key);
-		if ($js_data === false){
+		if ($js_data === false) {
 			//load js and save to cache
 			//TODO: Add stable minify method. minify_js in html-css-js-minifier.php is not stable  
 			$js_data = '';
-			if (is_array($js_file)){
-				foreach ($js_file as $file){
+			if (is_array($js_file)) {
+				foreach ($js_file as $file) {
 					$js_data .= file_get_contents($this->templateResource($file, 'file')) . "\n";
 				}
-			} else{
+			} else {
 				$js_data .= file_get_contents($this->templateResource($js_file, 'file'));
 			}
 			//$js_data = minify_js($js_data);
@@ -514,7 +524,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_templates_dir($extension_name){
-		return $this->_extension_section_dir($extension_name).DIRNAME_TEMPLATES;
+		return $this->_extension_section_dir($extension_name) . DIRNAME_TEMPLATES;
 	}
 
 	/**
@@ -523,7 +533,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		return DIR_APP_EXT . $extension_name.'/';
+		return DIR_APP_EXT . $extension_name . '/';
 	}
 
 	/**
@@ -532,7 +542,7 @@ class AView{
 	 * @return array
 	 */
 	protected function _extensions_resource_map($filename){
-		if (empty($filename)){
+		if (empty($filename)) {
 			return array ();
 		}
 		$ret_arr = array ();
@@ -540,10 +550,11 @@ class AView{
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used
 
-		foreach ($extensions as $ext){
-			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'file', $ext);
+		foreach ($extensions as $ext) {
+			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'file',
+					$ext);
 
-			if ($res_arr){
+			if ($res_arr) {
 				$ret_arr[$res_arr['match']][] = $res_arr['path'];
 			}
 		}
@@ -561,10 +572,12 @@ class AView{
 		//look into extensions first
 		$res_arr = $this->_extensions_resource_map($filename);
 		//get first exact template extension resource or default template resource otherwise.
-		if (count($res_arr['original'])){
+		if (count($res_arr['original'])) {
 			return $res_arr['original'][0];
-		} else if (count($res_arr['default'])){
-			return $res_arr['default'][0];
+		} else {
+			if (count($res_arr['default'])) {
+				return $res_arr['default'][0];
+			}
 		}
 
 		$template_path_arr = $this->_test_template_resource_paths($path, $filename, $mode);
@@ -583,56 +596,62 @@ class AView{
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
-		$dir_assets = $extension_txt_id ? DIRNAME_ASSETS.DIRNAME_EXTENSIONS.$extension_txt_id.'/' : DIRNAME_ASSETS;
+		$dir_assets = $extension_txt_id ? DIRNAME_ASSETS . DIRNAME_EXTENSIONS . $extension_txt_id . '/' : DIRNAME_ASSETS;
 
-
-		if (IS_ADMIN){
-			if (is_file($path . $template .'/'.DIRNAME_ADMIN. $filename)){
-				$ret_path = $path . $template .'/'.DIRNAME_ADMIN. $filename;
-				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/'.DIRNAME_ADMIN. $filename;
+		if (IS_ADMIN) {
+			if (is_file($path . $template . '/' . DIRNAME_ADMIN . $filename)) {
+				$ret_path = $path . $template . '/' . DIRNAME_ADMIN . $filename;
+				if ($mode == 'relative') {
+					$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_ADMIN . $filename;
 				}
-			} else if (is_file($path . 'default/'.DIRNAME_ADMIN. $filename)){
-				$ret_path = $path . 'default/'.DIRNAME_ADMIN. $filename;
-				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
-					$match = 'default';
-				}
-			} else if (is_file( DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename )){
-				$ret_path = DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
-				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/'.DIRNAME_ADMIN. $filename;
-					$match = 'default';
-				}
-			}
-		}else{
-			if (is_file($path . $template .'/'.DIRNAME_STORE. $filename)){
-				$ret_path = $path . $template .'/'.DIRNAME_STORE. $filename;
-				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
-				}
-			}else if (is_file($path . 'default/'.DIRNAME_STORE. $filename)){
-				$ret_path = $path . 'default/'.DIRNAME_STORE. $filename;
-				if ($mode == 'relative'){
-					$ret_path = $dir_assets.DIRNAME_TEMPLATES.'default/' .DIRNAME_STORE. $filename;
-					$match = 'default';
-				}
-			}
-			//check resource in assets directory
-			else if(is_file(DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename)){
-					$ret_path = DIR_PUBLIC.$dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
-					if ($mode == 'relative'){
-						$ret_path = $dir_assets.DIRNAME_TEMPLATES.$template.'/' .DIRNAME_STORE. $filename;
+			} else {
+				if (is_file($path . 'default/' . DIRNAME_ADMIN . $filename)) {
+					$ret_path = $path . 'default/' . DIRNAME_ADMIN . $filename;
+					if ($mode == 'relative') {
+						$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+						$match = 'default';
 					}
+				} else {
+					if (is_file(DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename)) {
+						$ret_path = DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+						if ($mode == 'relative') {
+							$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+							$match = 'default';
+						}
+					}
+				}
+			}
+		} else {
+			if (is_file($path . $template . '/' . DIRNAME_STORE . $filename)) {
+				$ret_path = $path . $template . '/' . DIRNAME_STORE . $filename;
+				if ($mode == 'relative') {
+					$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+				}
+			} else {
+				if (is_file($path . 'default/' . DIRNAME_STORE . $filename)) {
+					$ret_path = $path . 'default/' . DIRNAME_STORE . $filename;
+					if ($mode == 'relative') {
+						$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_STORE . $filename;
+						$match = 'default';
+					}
+				} //check resource in assets directory
+				else {
+					if (is_file(DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename)) {
+						$ret_path = DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+						if ($mode == 'relative') {
+							$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+						}
+					}
+				}
 			}
 		}
 		//return path. Empty path indicates, nothing found
-		if ($ret_path){
+		if ($ret_path) {
 			return array (
 					'match' => $match,
-					'path' => $ret_path
+					'path'  => $ret_path
 			);
-		}else{
+		} else {
 			return null;
 		}
 	}

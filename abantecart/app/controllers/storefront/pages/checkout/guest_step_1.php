@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -37,21 +42,21 @@ class ControllerPagesCheckoutGuestStep1 extends AController{
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if ($this->customer->isLogged()){
-			redirect($this->html->getSecureURL('checkout/shipping'));
+			abc_redirect($this->html->getSecureURL('checkout/shipping'));
 		}
 
 		if (!$this->config->get('config_guest_checkout') || $this->cart->hasDownload()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('checkout/shipping');
-			redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 		$_post =& $this->request->post;
 		$_session =& $this->session->data;
@@ -72,7 +77,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController{
 			//IM addresses
 			$protocols = $this->im->getProtocols();
 			foreach($protocols as $protocol){
-				if(has_value($_post[$protocol]) && !has_value($_session['guest'][$protocol])){
+				if(AHelperUtils::has_value($_post[$protocol]) && !AHelperUtils::has_value($_session['guest'][$protocol])){
 					$_session['guest'][$protocol] = $_post[$protocol];
 				}
 			}
@@ -151,7 +156,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController{
 			unset($_session['payment_method']);
 
 			$this->extensions->hk_ProcessData($this);
-			redirect($this->html->getSecureURL('checkout/guest_step_2'));
+			abc_redirect($this->html->getSecureURL('checkout/guest_step_2'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -258,6 +263,9 @@ class ControllerPagesCheckoutGuestStep1 extends AController{
 		//get only active IM drivers
 		$im_drivers = $this->im->getIMDriverObjects();
 		if ($im_drivers){
+			/**
+			 * @var \abc\lib\AMailIM $driver_obj
+			 */
 			foreach ($im_drivers as $protocol => $driver_obj){
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;

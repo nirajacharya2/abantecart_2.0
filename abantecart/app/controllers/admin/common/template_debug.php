@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -25,10 +27,10 @@ class ControllerCommonTemplateDebug extends AController {
 		
 		$args = func_get_arg(1);
 		$block_details = $this->layout->getBlockDetails($args['block_id']);
-		$block_tmpl = $this->layout->getBlockTemplate($args['block_id']);
+		//$block_tmpl = $this->layout->getBlockTemplate($args['block_id']);
 		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
-		$parent_tmpl = $this->layout->getBlockTemplate($block_details['parent_instance_id']);
-		
+		//$parent_tmpl = $this->layout->getBlockTemplate($block_details['parent_instance_id']);
+
 		$tmpl_data = array();
 		$tmpl_data['id'] = $args['block_id'];
 		$tmpl_data['name'] = $block_details['block_txt_id'];
@@ -42,11 +44,8 @@ class ControllerCommonTemplateDebug extends AController {
 		$tmpl_data['parent']['tpl_path'] = $args['parent_tpl'];
 		$tmpl_data['parent']['controller'] = $parent_block['controller'];
 		$tmpl_data['parent']['controller_path'] = str_replace(DIR_ROOT . '/', '', $args['parent_controller']);
-		
+
 		$this->view->batchAssign($tmpl_data);
-		
 		$this->processTemplate('common/template_debug.tpl');
-		
 	}
 }
-?>

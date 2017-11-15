@@ -17,12 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\ALanguage;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ModelUserUser extends Model {
 	public function addUser($data) {
-		$salt_key = genToken(8);
+		$salt_key = AHelperUtils::genToken(8);
 		$this->db->query("INSERT INTO " . $this->db->table("users") . " 
 						  SET username = '" . $this->db->escape($data['username']) . "',
 						      firstname = '" . $this->db->escape($data['firstname']) . "',
@@ -56,7 +61,7 @@ class ModelUserUser extends Model {
 		}
 
 		if ( $data['password'] ) {
-			$salt_key = genToken(8);
+			$salt_key = AHelperUtils::genToken(8);
 			$update[] = "salt = '" . $this->db->escape($salt_key) . "'"; 
 			$update[] = "password = '". $this->db->escape(sha1($salt_key.sha1($salt_key.sha1($data['password'])))) ."'";		
 		}
@@ -86,7 +91,7 @@ class ModelUserUser extends Model {
 		if ( !empty($data['subsql_filter']) )
 			$sql .= " WHERE ".$data['subsql_filter'];
 
-	    //If for total, we done bulding the query
+	    //If for total, we done building the query
 		if ($mode == 'total_only') {
 	    	$query = $this->db->query($sql);
 	    	return $query->row['total'];

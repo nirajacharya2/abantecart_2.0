@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -134,7 +138,7 @@ class AMenu_Storefront extends AMenu{
 		}
 
 		//clean text id 
-		$item ["item_id"] = preformatTextID($item ["item_id"]);
+		$item ["item_id"] = AHelperUtils::preformatTextID($item ["item_id"]);
 
 		$check_array = array ("item_id", "item_icon", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id");
 

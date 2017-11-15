@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AContentManager;
+use abc\lib\AMenu_Storefront;
+
 if(!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -34,7 +41,7 @@ class ControllerPagesDesignMenu extends AController{
 			'sort_order'
 	);
 	/**
-	 * @var AMenu_Storefront
+	 * @var \abc\lib\AMenu_Storefront
 	 */
 	private $menu;
 	private $menu_items;
@@ -181,7 +188,7 @@ class ControllerPagesDesignMenu extends AController{
 			}
 
 			$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, 'UTF-8');
-			$text_id = preformatTextID($post['item_id']);
+			$text_id = AHelperUtils::preformatTextID($post['item_id']);
 			$result = $this->menu->insertMenuItem(array(
 					'item_id'         => $text_id,
 					'item_icon'       => $post['item_icon'],
@@ -197,7 +204,7 @@ class ControllerPagesDesignMenu extends AController{
 				$this->error['warning'] = $result;
 			} else{
 				$this->session->data['success'] = $this->language->get('text_success');
-				redirect($this->html->getSecureURL('design/menu/update', '&item_id=' . $text_id));
+				abc_redirect($this->html->getSecureURL('design/menu/update', '&item_id=' . $text_id));
 			}
 		}
 
@@ -247,7 +254,7 @@ class ControllerPagesDesignMenu extends AController{
 				}
 
 
-				if(has_value($update_item['item_icon_resource_id'])){
+				if(AHelperUtils::has_value($update_item['item_icon_resource_id'])){
 					$update_item['item_icon_rl_id'] = $update_item['item_icon_resource_id'];
 				} else{
 					$update_item['item_icon_rl_id'] = '';
@@ -259,7 +266,7 @@ class ControllerPagesDesignMenu extends AController{
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('design/menu/update', '&item_id=' . $item_id));
+			abc_redirect($this->html->getSecureURL('design/menu/update', '&item_id=' . $item_id));
 		}
 
 		$this->_getForm();

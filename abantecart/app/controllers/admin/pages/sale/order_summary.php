@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -60,7 +64,7 @@ class ControllerPagesSaleOrderSummary extends AController {
 				'customer_name' => $order_info['firstname'] .' '.$order_info['lastname'],
 				'email' => $order_info['email'],
 				'telephone' => $order_info['telephone'],
-				'date_added' => dateISO2Display($order_info['date_added'], $this->language->get('date_format_short').' '.$this->language->get('time_format')),
+				'date_added' => AHelperUtils::dateISO2Display($order_info['date_added'], $this->language->get('date_format_short').' '.$this->language->get('time_format')),
 				'total' => $this->currency->format($order_info['total'], $order_info['currency'], $order_info['value']),
 				'order_status' => $order_info['order_status_id'],
 				'shipping_method' => $order_info['shipping_method'],

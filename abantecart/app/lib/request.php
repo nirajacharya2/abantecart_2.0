@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -49,10 +52,10 @@ final class ARequest{
 		$this->server = $_SERVER;
 
 		//check if there is any encrypted data
-		if (has_value($this->get['__e'])){
+		if (AHelperUtils::has_value($this->get['__e'])){
 			$this->get = array_replace_recursive($this->get, $this->decodeURI($this->get['__e']));
 		}
-		if (has_value($this->post['__e'])){
+		if (AHelperUtils::has_value($this->post['__e'])){
 			$this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
 		}
 		$this->_detectBrowser();
@@ -148,7 +151,7 @@ final class ARequest{
 			}
 		}
 
-		//http://en.wikipedia.org/wiki/List_of_user_agents_for_mobile_phones - list of useragents
+		//http://en.wikipedia.org/wiki/List_of_user_agents_for_mobile_phones - list of user-agents
 		$devices = array ("iphone", "android", "blackberry", "ipod", "ipad", "htc", "symbian", "webos", "opera mini", "windows phone os", "iemobile");
 
 		for ($i = 0; $i < count($devices); $i++){

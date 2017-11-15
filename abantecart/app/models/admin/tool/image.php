@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use \abc\core\Model;
+use abc\lib\AWarning;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -38,7 +43,7 @@ class ModelToolImage extends Model{
 			$new_image = $filename;
 		} else{
 			$new_image = 'thumbnails/' . substr($filename, 0, strrpos($filename, '.')) . '-' . $width . 'x' . $height . '.' . $extension;
-			if (!check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))){
+			if (!AHelperUtils::check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))){
 				$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
 				$err->toLog()->toDebug();
 				return false;

@@ -17,10 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+use DOMDocument;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class AConnect
+ * @package abc\lib
+ * @property AConfig $config
+ * @property ASession $session
+ */
 final class AConnect{
 	/**
 	 * @var string
@@ -63,7 +73,7 @@ final class AConnect{
 	 */
 	private $timeout = 5;
 	/**
-	 * http-authentification parameters
+	 * http-authorization parameters
 	 *
 	 * @var array
 	 */
@@ -104,6 +114,22 @@ final class AConnect{
 		$this->request_headers['User-Agent'] = $this->snapshot;
 		$this->request_referer = $this->uri;
 	}
+	/**
+	 * getter
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function __get($key){
+		return $this->registry->get($key);
+	}
+
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function __set($key, $value){
+		$this->registry->set($key, $value);
+	}
 
 	/**
 	 * @param string $name
@@ -121,7 +147,7 @@ final class AConnect{
 
 	/**
 	 * @param string $url
-	 * @return array( "mime" <string>, "length" int, "content" string)
+	 * @return false|array( "mime" <string>, "length" int, "content" string)
 	 */
 	public function getResponse($url){
 		if (!$url = $this->_checkURL($url)){
@@ -133,7 +159,7 @@ final class AConnect{
 
 	/**
 	 * @param string $url
-	 * @return array( "mime" <string>, "length" int, "content" string)
+	 * @return false | array( "mime" <string>, "length" int, "content" string)
 	 */
 	public function getResponseSecure($url){
 		if (!$url = $this->_checkURL($url, true)){
@@ -147,7 +173,7 @@ final class AConnect{
 	 * @param string $url
 	 * @param string $new_filename
 	 * @param boolean $secure
-	 * @return boolean
+	 * @return array | boolean
 	 */
 	public function getFile($url, $new_filename = '', $secure = false){
 		if (!$url = $this->_checkURL($url, $secure)){
@@ -232,7 +258,7 @@ final class AConnect{
 	/**
 	 * @param string $url
 	 * @param int $port
-	 * @return int (bytes)
+	 * @return false | int (bytes)
 	 */
 	public function getDataLength($url, $port = 80){
 		$url .= !is_int(strpos($url, '?')) ? '?file_size=1' : '&file_size=1';
@@ -261,7 +287,7 @@ final class AConnect{
 	 * @param boolean $save_filename
 	 * @param bool $headers_only
 	 * @throws AException
-	 * @return array ( "mime" <string>, "length" int, "content" string) or false
+	 * @return false | int | array ( "mime" <string>, "length" int, "content" string) or false
 	 */
 	public function getData($url, $port = null, $length_only = false, $save_filename = null, $headers_only = false){
 		//check url
@@ -276,10 +302,10 @@ final class AConnect{
 			$this->error = "ERROR: wrong port number!";
 			return false;
 		}
-		$retbuffer = '';
+
 		switch($this->connect_method){
 			case 'curl' :
-				$retbuffer = $this->_processCurl($url, $port, $save_filename, $length_only, $headers_only);
+				$ret_buffer = $this->_processCurl($url, $port, $save_filename, $length_only, $headers_only);
 				break;
 			case 'socket' :
 				if ($this->connect_method == 'socket' && $protocol == 'https'){
@@ -287,7 +313,7 @@ final class AConnect{
 					$port = $port == 80 ? 443 : $port;
 				}
 
-				$retbuffer = $this->_processSocket($url, $port, $save_filename, $length_only, $headers_only);
+				$ret_buffer = $this->_processSocket($url, $port, $save_filename, $length_only, $headers_only);
 
 				break;
 			default :
@@ -299,18 +325,18 @@ final class AConnect{
 				break;
 		}
 
-		if (!$retbuffer){
+		if (!$ret_buffer){
 			return false;
 		}
 
 		if ($length_only || $headers_only){
-			return $retbuffer;
+			return $ret_buffer;
 		}
 
 		if (!$save_filename){
-			return $this->_convertToArray($retbuffer);
+			return $this->_convertToArray($ret_buffer);
 		} else{
-			if (!file_put_contents($save_filename, $retbuffer["data"])){
+			if (!file_put_contents($save_filename, $ret_buffer["data"])){
 				$this->error = "ERROR: Can't save file as " . $save_filename . "!";
 				return false;
 			}
@@ -334,7 +360,7 @@ final class AConnect{
 		if ($this->_check_curl()){
 			$this->connect_method = 'curl';
 		} else{
-			// we have no choice to use fsocket.
+			// we have no choice to use socket.
 			$this->connect_method = 'socket';
 		}
 	}
@@ -345,14 +371,14 @@ final class AConnect{
 	 * @param null $filename
 	 * @param boolean $length_only
 	 * @param bool $headers_only
-	 * @return array( "mime" <string>, "length" int, "content" string) or false
+	 * @return false | int | array( "mime" <string>, "length" int, "content" string) or false
 	 */
 	private function _processCurl($url, $port = 80, $filename = null, $length_only = false, $headers_only = false){
 		//Curl Connection for HTTP and HTTPS
 		$authentication = $this->auth['name'] ? 1 : 0;
 		$curl_sock = curl_init();
 		// write handler into session for response-preloader.
-		$this->registry->get('session')->data['curl_handler'] = $curl_sock;
+		$this->session->data['curl_handler'] = $curl_sock;
 		// set default options for curl
 		if (!$this->curl_options){
 			$this->curl_options = Array (
@@ -365,7 +391,7 @@ final class AConnect{
 			);
 		}
 
-		// for safemode part. Problem is redirects while connect.
+		// for safe-mode part. Problem is redirects while connect.
 		$this->curl_options[CURLOPT_SSL_VERIFYPEER] = false;
 		if ($port != 80){
 			$this->curl_options[CURLOPT_PORT] = $port;
@@ -374,7 +400,7 @@ final class AConnect{
 
 		$this->curl_options[CURLOPT_FOLLOWLOCATION] = false;
 		if ($redirect_count > 0){
-			$newurl = $url;
+			$new_url = $url;
 			$rch = curl_copy_handle($curl_sock);
 			curl_setopt($rch, CURLOPT_HEADER, true);
 			curl_setopt($rch, CURLOPT_NOBODY, true);
@@ -391,7 +417,7 @@ final class AConnect{
 					}
 					curl_setopt_array($rch, $this->curl_options);
 				}
-				curl_setopt($rch, CURLOPT_URL, $newurl);
+				curl_setopt($rch, CURLOPT_URL, $new_url);
 				$header = curl_exec($rch);
 				if (curl_errno($rch)){
 					$code = 0;
@@ -399,7 +425,7 @@ final class AConnect{
 					$code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
 					if ($code == 301 || $code == 302){
 						preg_match('/Location:(.*?)\n/', $header, $matches);
-						$newurl = trim(array_pop($matches));
+						$new_url = trim(array_pop($matches));
 					} else{
 						$code = 0;
 					}
@@ -410,7 +436,7 @@ final class AConnect{
 			if (!$redirect_count){
 				return false;
 			}
-			$url = $newurl;
+			$url = $new_url;
 		}
 
 		$this->curl_options[CURLOPT_URL] = $url;
@@ -455,7 +481,7 @@ final class AConnect{
 			}
 		}
 		curl_close($curl_sock);
-		unset($this->registry->get('session')->data['curl_handler']);
+		unset($this->session->data['curl_handler']);
 
 		$content_length = $content_length ? (int)$content_length : -1;
 		$content_type = $content_type ? $content_type : -1;
@@ -469,7 +495,7 @@ final class AConnect{
 	 * @param null $filename
 	 * @param boolean $length_only
 	 * @param bool $headers_only
-	 * @return array( "mime" <string>, "length" int, "content" string) or false
+	 * @return false | int | array( "mime" <string>, "length" int, "content" string)
 	 */
 	public function _processSocket($url, $port, $filename = null, $length_only = false, $headers_only = false){
 		//Socket Connection for HTTP and HTTPS
@@ -634,7 +660,7 @@ final class AConnect{
 
 	/**
 	 * @param bool|string $headers
-	 * @return array
+	 * @return array|false
 	 */
 	private function _http_parse_headers($headers = false){
 		if ($headers === false){
@@ -642,19 +668,20 @@ final class AConnect{
 		}
 		$headers = str_replace("\r", "", $headers);
 		$headers = explode("\n", $headers);
+		$headers_data = array();
 		foreach ($headers as $value){
 			$header = explode(": ", $value);
 			if (strpos($value, ':') === false && strpos($value, 'HTTP') !== false){
-				$headerdata['status'] = $header[0];
+				$headers_data['status'] = $header[0];
 			} elseif ($header[0] && $header[1]){
-				$headerdata[$header[0]] = $header[1];
+				$headers_data[$header[0]] = $header[1];
 			}
 		}
-		if (!isset($headerdata['Content-Disposition']) && isset($headerdata['Content-disposition'])){
-			$headerdata['Content-Disposition'] = $headerdata['Content-disposition'];
+		if (!isset($headers_data['Content-Disposition']) && isset($headers_data['Content-disposition'])){
+			$headers_data['Content-Disposition'] = $headers_data['Content-disposition'];
 		}
-		$this->response_headers = $headerdata;
-		return $headerdata;
+		$this->response_headers = $headers_data;
+		return $headers_data;
 	}
 
 	/**
@@ -662,22 +689,5 @@ final class AConnect{
 	 */
 	public function get_connect_method(){
 		return $this->connect_method;
-	}
-
-	/**
-	 * getter
-	 * @param string $key
-	 * @return mixed
-	 */
-	public function __get($key){
-		return $this->registry->get($key);
-	}
-
-	/**
-	 * @param string $key
-	 * @param mixed $value
-	 */
-	public function __set($key, $value){
-		$this->registry->set($key, $value);
 	}
 }

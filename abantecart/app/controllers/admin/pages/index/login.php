@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperSystemCheck;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -48,15 +54,15 @@ class ControllerPagesIndexLogin extends AController {
 		));
 
 		if ($this->request->is_POST() && $this->_validate()) {
-			$this->session->data['token'] = genToken(32);
+			$this->session->data['token'] = AHelperUtils::genToken(32);
 			$this->session->data['checkupdates'] = true; // sign to run ajax-request to check for updates. see common/head for details
 			//login is successful redirect to originally requested page
 			if (isset($this->request->post['redirect']) && !preg_match("/rt=index\/login/i", $this->request->post['redirect'])) {
 				$redirect = $this->html->filterQueryParams( $this->request->post['redirect'], array('token')  );
 				$redirect .=  "&token=".$this->session->data['token'];
-				redirect($redirect);
+				abc_redirect($redirect);
 			} else {
-				redirect($this->html->getSecureURL('index/home'));
+				abc_redirect($this->html->getSecureURL('index/home'));
 			}
 		}
 
@@ -107,7 +113,7 @@ class ControllerPagesIndexLogin extends AController {
 		}
 
 		//run critical system check
-		$check_result = run_critical_system_check($this->registry);
+		$check_result = AHelperSystemCheck::run_critical_system_check($this->registry);
 
 		if($check_result){
 			$this->error['warning'] = '';

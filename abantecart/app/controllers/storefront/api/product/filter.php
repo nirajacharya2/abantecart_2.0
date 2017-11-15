@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+use abc\lib\AFilter;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -25,9 +31,7 @@ class ControllerApiProductFilter extends AControllerAPI {
 	public function get() {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-        
 	    $this->loadModel('catalog/product');
-
 	    $filter_params = array('category_id', 'manufacturer_id', 'keyword', 'match', 'pfrom', 'pto' );
  		$grid_filter_params = array( 'name', 'description', 'model', 'sku' );
 		$filter_data = array(
@@ -37,8 +41,6 @@ class ControllerApiProductFilter extends AControllerAPI {
 		);
 
 		$filter = new AFilter( $filter_data );
-
-
 		$filters = $filter->getFilterData();
 		$category_id = $filter->getFilterParam('category_id');
 		$manufacturer_id = $filter->getFilterParam('manufacturer_id');
@@ -50,8 +52,8 @@ class ControllerApiProductFilter extends AControllerAPI {
 			return null;
 		}
 
-
 	    //get total
+		$total = 0;
 		if($keyword){
 			$total = $this->model_catalog_product->getTotalProducts( $filters );
 		}elseif($category_id){
@@ -76,8 +78,7 @@ class ControllerApiProductFilter extends AControllerAPI {
 	    $response->sord = $filters['order'];
 	    $response->params = $filters;
 
-	    $resource = new AResource('image');
-
+		$results = array();
 		if($keyword){
 	    	$results = $this->model_catalog_product->getProducts( $filters );
 		}elseif($category_id){
@@ -124,12 +125,10 @@ class ControllerApiProductFilter extends AControllerAPI {
 	    	}
 	    }
 
-		
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
 		$this->rest->setResponseData( $response );
 		$this->rest->sendResponse( 200 );
 	}
-		
-}        
+}

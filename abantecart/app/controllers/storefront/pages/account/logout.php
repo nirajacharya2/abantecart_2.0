@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -52,7 +55,7 @@ class ControllerPagesAccountLogout extends AController {
 			}
 			$this->tax->setZone( $country_id, $zone_id );
 			
-      		$this->redirect($this->html->getSecureURL('account/logout'));
+      		abc_redirect($this->html->getSecureURL('account/logout'));
     	}
  
 		$this->document->setTitle( $this->language->get('heading_title') );

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -161,7 +165,7 @@ class ControllerPagesIndexHome extends AController {
 				'order_id'   => $result['order_id'],
 				'name'       => $result['name'],
 				'status'     => $result['status'],
-				'date_added' => dateISO2Display($result['date_added'],$this->language->get('date_format_short')),
+				'date_added' => AHelperUtils::dateISO2Display($result['date_added'],$this->language->get('date_format_short')),
 				'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
 				'action'     => $action
 			);

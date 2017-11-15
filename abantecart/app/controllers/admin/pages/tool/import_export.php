@@ -17,13 +17,18 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\AData;
+
 if(!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerPagesToolImportExport
- * @property ModelToolImportProcess $model_tool_import_process
+ * @property \abc\model\admin\ModelToolImportProcess $model_tool_import_process
  */
 class ControllerPagesToolImportExport extends AController{
 
@@ -54,7 +59,7 @@ class ControllerPagesToolImportExport extends AController{
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 		if ($this->request->get['active'] == 'import_wizard' && $this->session->data['import']) {
-			redirect($this->html->getSecureURL('tool/import_export/import_wizard'));
+			abc_redirect($this->html->getSecureURL('tool/import_export/import_wizard'));
 		}
 
 		$this->loadLanguage('tool/import_export');
@@ -306,7 +311,7 @@ class ControllerPagesToolImportExport extends AController{
 	public function reset() {
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 		unset($this->session->data['import']);
-		redirect($this->html->getSecureURL('tool/import_export', '&active=import'));
+		abc_redirect($this->html->getSecureURL('tool/import_export', '&active=import'));
 	}
 
 	public function import_wizard(){
@@ -315,7 +320,7 @@ class ControllerPagesToolImportExport extends AController{
 
 		$import_data = $this->session->data['import'];
 		if( $import_data['format'] == 'internal' ){
-			redirect($this->html->getSecureURL('tool/import_export/internal_import'));
+			abc_redirect($this->html->getSecureURL('tool/import_export/internal_import'));
 		}
 
 		if(empty($import_data)) {
@@ -569,7 +574,7 @@ class ControllerPagesToolImportExport extends AController{
 		}
 
 		if(!$imp_data){
-			redirect($this->html->getSecureURL('tool/import_export'));
+			abc_redirect($this->html->getSecureURL('tool/import_export'));
 		}
 
 		$this->loadLanguage('tool/import_export');
@@ -586,7 +591,7 @@ class ControllerPagesToolImportExport extends AController{
 				$this->session->data['success'] = sprintf($this->language->get('text_success_scheduled'),
 														 $this->html->getSecureURL('tool/task'));
 			}
-			redirect($this->html->getSecureURL('tool/import_export/'.($file_format=='internal' ? 'internal_import' : 'import_wizard')));
+			abc_redirect($this->html->getSecureURL('tool/import_export/'.($file_format=='internal' ? 'internal_import' : 'import_wizard')));
 		}
 	}
 

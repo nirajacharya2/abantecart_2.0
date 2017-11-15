@@ -18,8 +18,8 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-if (!defined('E_DEPRECATED')) define('E_DEPRECATED', 8192); // since PHP 5.3.0
-if (!defined('E_RECOVERABLE_ERROR')) define('E_RECOVERABLE_ERROR', 4096); // since PHP 5.2.0
+if (!defined('E_DEPRECATED')) define('E_DEPRECATED', 8192);
+if (!defined('E_RECOVERABLE_ERROR')) define('E_RECOVERABLE_ERROR', 4096);
 
 // Error codes
 

@@ -17,12 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE') || !IS_ADMIN){
+
+namespace abc\model\admin;
+
+use abc\core\Model;
+use abc\lib\AException;
+use abc\lib\AMenu_Storefront;
+use abc\lib\ATaskManager;
+
+if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
 class ModelLocalisationLanguage extends Model{
-	public $errors = array();
+	public $errors = array ();
 
 	/**
 	 * @param $data
@@ -57,10 +65,11 @@ class ModelLocalisationLanguage extends Model{
 	 */
 	public function editLanguage($language_id, $data){
 		$update_data = array ();
-		foreach ($data as $key => $val){
+		foreach ($data as $key => $val) {
 			$update_data[] = "`$key` = '" . $this->db->escape($val) . "' ";
 		}
-		$this->db->query("UPDATE " . $this->db->table("languages") . " SET " . implode(',', $update_data) . " WHERE language_id = '" . (int)$language_id . "'");
+		$this->db->query("UPDATE " . $this->db->table("languages") . " SET " . implode(',',
+						$update_data) . " WHERE language_id = '" . (int)$language_id . "'");
 
 		$this->cache->remove('localization');
 	}
@@ -89,11 +98,11 @@ class ModelLocalisationLanguage extends Model{
 	public function getLanguage($language_id){
 		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("languages") . " WHERE language_id = '" . (int)$language_id . "'");
 		$result = $query->row;
-		if (!$result['image']){
-			if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')){
+		if (!$result['image']) {
+			if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')) {
 				$result['image'] = HTTP_ABANTECART . 'admin/languages/' . $result['directory'] . '/flag.png';
 			}
-		} else{
+		} else {
 			$result['image'] = HTTP_ABANTECART . $result['image'];
 		}
 		return $query->row;
@@ -105,30 +114,30 @@ class ModelLocalisationLanguage extends Model{
 	 * @return int|array
 	 */
 	public function getLanguages($data = array (), $mode = 'default'){
-		if ($data || $mode == 'total_only'){
+		if ($data || $mode == 'total_only') {
 			$filter = (isset($data['filter']) ? $data['filter'] : array ());
-			if ($mode == 'total_only'){
+			if ($mode == 'total_only') {
 				$sql = "SELECT count(*) as total FROM " . $this->db->table("languages") . " ";
-			} else{
+			} else {
 				$sql = "SELECT * FROM " . $this->db->table("languages") . " ";
 			}
 
-			if (isset($filter['status']) && !is_null($filter['status'])){
+			if (isset($filter['status']) && !is_null($filter['status'])) {
 				$sql .= " WHERE `status` = '" . $this->db->escape($filter['status']) . "' ";
-			} else{
+			} else {
 				$sql .= " WHERE `status` like '%' ";
 			}
 
-			if (isset($filter['name']) && !is_null($filter['name'])){
+			if (isset($filter['name']) && !is_null($filter['name'])) {
 				$sql .= " AND `name` LIKE '%" . $this->db->escape($filter['name']) . "%' ";
 			}
 
-			if (!empty($data['subsql_filter'])){
+			if (!empty($data['subsql_filter'])) {
 				$sql .= " AND " . $data['subsql_filter'];
 			}
 
 			//If for total, we done building the query
-			if ($mode == 'total_only'){
+			if ($mode == 'total_only') {
 				$query = $this->db->query($sql);
 				return (int)$query->row['total'];
 			}
@@ -139,24 +148,24 @@ class ModelLocalisationLanguage extends Model{
 					'sort_order'
 			);
 
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)){
+			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 				$sql .= " ORDER BY " . $data['sort'];
-			} else{
+			} else {
 				$sql .= " ORDER BY sort_order, name";
 			}
 
-			if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')){
+			if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
 				$sql .= " DESC";
-			} else{
+			} else {
 				$sql .= " ASC";
 			}
 
-			if (isset($data['start']) || isset($data['limit'])){
-				if ($data['start'] < 0){
+			if (isset($data['start']) || isset($data['limit'])) {
+				if ($data['start'] < 0) {
 					$data['start'] = 0;
 				}
 
-				if ($data['limit'] < 1){
+				if ($data['limit'] < 1) {
 					$data['limit'] = 20;
 				}
 
@@ -165,27 +174,27 @@ class ModelLocalisationLanguage extends Model{
 
 			$query = $this->db->query($sql);
 			$result = $query->rows;
-			foreach ($result as $i => $row){
-				if (empty($row['image'])){
-					if (file_exists(DIR_ROOT . '/admin/languages/' . $row['directory'] . '/flag.png')){
+			foreach ($result as $i => $row) {
+				if (empty($row['image'])) {
+					if (file_exists(DIR_ROOT . '/admin/languages/' . $row['directory'] . '/flag.png')) {
 						$result[$i]['image'] = 'admin/languages/' . $row['directory'] . '/flag.png';
 					}
-				} else{
+				} else {
 					$result[$i]['image'] = $row['image'];
 				}
 			}
 			return $result;
-		} else{
+		} else {
 			$language_data = $this->cache->pull('localization.language.admin');
 
-			if ($language_data === false){
+			if ($language_data === false) {
 				$query = $this->db->query("SELECT *
 											FROM " . $this->db->table("languages") . " 
 											ORDER BY sort_order, name");
 
-				foreach ($query->rows as $result){
-					if (empty($result['image'])){
-						if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')){
+				foreach ($query->rows as $result) {
+					if (empty($result['image'])) {
+						if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')) {
 							$result['image'] = 'admin/languages/' . $result['directory'] . '/flag.png';
 						}
 					}
@@ -217,15 +226,14 @@ class ModelLocalisationLanguage extends Model{
 		return $this->getLanguages($data, 'total_only');
 	}
 
-
 	/**
 	 * @param string $task_name
 	 * @param array $data
 	 * @return array|bool
 	 */
-	public function createTask($task_name, $data = array()){
+	public function createTask($task_name, $data = array ()){
 
-		if (!$task_name){
+		if (!$task_name) {
 			$this->errors[] = 'Can not to create task. Empty task name has been given.';
 		}
 
@@ -233,13 +241,13 @@ class ModelLocalisationLanguage extends Model{
 		$tables = $this->_get_tables_info($data['source_language']);
 		$task_controller = 'task/localisation/language/translate';
 
-		if (!$tables){
+		if (!$tables) {
 			$this->errors[] = 'No tables info!';
 			return false;
 		}
 
 		$total_desc_count = 0;
-		foreach($tables as $table_name => $table){
+		foreach ($tables as $table_name => $table) {
 			$total_desc_count += $table['description_count'];
 		}
 
@@ -251,91 +259,95 @@ class ModelLocalisationLanguage extends Model{
 
 		//create new task
 		$task_id = $tm->addTask(
-				array ('name'               => $task_name,
-				       'starter'            => 1, //admin-side is starter
-				       'created_by'         => $this->user->getId(), //get starter id
-				       'status'             => $tm::STATUS_READY,
-				       'start_time'         => date('Y-m-d H:i:s', mktime(0, 0, 0, date('m'), date('d') + 1, date('Y'))),
-				       'last_time_run'      => '0000-00-00 00:00:00',
-				       'progress'           => '0',
-				       'last_result'        => '1', // think all fine until some failed step will set 0 here
-				       'run_interval'       => '0',
-						//think that task will execute with some connection errors
-				       'max_execution_time' => ($total_desc_count * $time_per_item * 2)
+				array (
+						'name'               => $task_name,
+						'starter'            => 1, //admin-side is starter
+						'created_by'         => $this->user->getId(), //get starter id
+						'status'             => $tm::STATUS_READY,
+						'start_time'         => date('Y-m-d H:i:s',
+								mktime(0, 0, 0, date('m'), date('d') + 1, date('Y'))),
+						'last_time_run'      => '0000-00-00 00:00:00',
+						'progress'           => '0',
+						'last_result'        => '1', // think all fine until some failed step will set 0 here
+						'run_interval'       => '0',
+					//think that task will execute with some connection errors
+						'max_execution_time' => ($total_desc_count * $time_per_item * 2)
 				)
 		);
-		if (!$task_id){
+		if (!$task_id) {
 			$this->errors = array_merge($this->errors, $tm->errors);
 			return false;
 		}
 
 		$tm->updateTaskDetails($task_id,
-				array(
-					'created_by' => $this->user->getId(),
-					'settings'   => array(
-										'descriptions_count' => $total_desc_count
-										)
+				array (
+						'created_by' => $this->user->getId(),
+						'settings'   => array (
+								'descriptions_count' => $total_desc_count
+						)
 				)
 		);
 
 		//create steps
 		$sort_order = 1;
-		foreach($tables as $table_name => $info){
+		$eta = array ();
+		foreach ($tables as $table_name => $info) {
 
-			if(!$info['primary_keys']){
+			if (!$info['primary_keys']) {
 				continue;
 			}
 
-			$settings = array();
+			$settings = array ();
 			//get all indexes of descriptions of the table
-			$sql = "SELECT ".implode(', ', $info['primary_keys'])."
-					FROM ".$table_name."
-					WHERE language_id = ".$data['source_language'];
+			$sql = "SELECT " . implode(', ', $info['primary_keys']) . "
+					FROM " . $table_name . "
+					WHERE language_id = " . $data['source_language'];
 			$result = $this->db->query($sql);
 
-			if($divider >= $info['description_count']){
-				$items = array();
-				foreach($result->rows as $row){
-					foreach($row as $k=>$v){
+			if ($divider >= $info['description_count']) {
+				$items = array ();
+				foreach ($result->rows as $row) {
+					foreach ($row as $k => $v) {
 						$items[$k][] = $v;
 					}
 				}
 
-				$settings[0] = array(
-									'src_language_id' => $data['source_language'],
-									'language_id' => $data['language_id'],
-									'translate_method' => $data['translate_method'],
-									'table' =>
-						                  array('table_name' => $table_name,
-												'items_count' => $info['description_count'],
-												'indexes' => $items
-						                  )
+				$settings[0] = array (
+						'src_language_id'  => $data['source_language'],
+						'language_id'      => $data['language_id'],
+						'translate_method' => $data['translate_method'],
+						'table'            =>
+								array (
+										'table_name'  => $table_name,
+										'items_count' => $info['description_count'],
+										'indexes'     => $items
+								)
 				);
-			}else{
+			} else {
 				$slices = array_chunk($result->rows, $divider);
 
-
-				foreach($slices as $slice){
-					$items = array();
-					foreach($slice as $row){
-						foreach($row as $k=>$v){
+				foreach ($slices as $slice) {
+					$items = array ();
+					foreach ($slice as $row) {
+						foreach ($row as $k => $v) {
 							$items[$k][] = $v;
 						}
 					}
-					$settings[] = array(
-										'src_language_id' => $data['source_language'],
-										'language_id' => $data['language_id'],
-										'translate_method' => $data['translate_method'],
-										'table' =>
-							                  array('table_name' => $table_name,
-													'items_count' => sizeof($slice),
-									                'indexes' => $items
-							                  )
+					$settings[] = array (
+							'src_language_id'  => $data['source_language'],
+							'language_id'      => $data['language_id'],
+							'translate_method' => $data['translate_method'],
+							'table'            =>
+									array (
+											'table_name'  => $table_name,
+											'items_count' => sizeof($slice),
+											'indexes'     => $items
+									)
 					);
 				}
 			}
 
-			foreach($settings as $s){
+			foreach ($settings as $s) {
 				$step_id = $tm->addStep(array (
 						'task_id'            => $task_id,
 						'sort_order'         => $sort_order,
@@ -349,60 +361,57 @@ class ModelLocalisationLanguage extends Model{
 				));
 				$eta[$step_id] = $time_per_item * $divider * 2;
 				$sort_order++;
-
 			}
 		}
 
 		$task_details = $tm->getTaskById($task_id);
 
-
-		if($task_details){
-			foreach($eta as $step_id => $estimate){
+		if ($task_details) {
+			foreach ($eta as $step_id => $estimate) {
 				$task_details['steps'][$step_id]['eta'] = $estimate;
 				//remove settings from output json array. We will take it from database on execution.
 				unset($task_details['steps'][$step_id]['settings']);
 			}
 			return $task_details;
-		}else{
+		} else {
 			$this->errors[] = 'Can not to get task details for execution';
-			$this->errors = array_merge($this->errors,$tm->errors);
+			$this->errors = array_merge($this->errors, $tm->errors);
 			return false;
 		}
 
 	}
 
-
 	protected function _get_tables_info($src_language_id = 0){
-		$output = array();
+		$output = array ();
 		$lang_tables = $this->language->getLanguageBasedTables();
-		if(!$lang_tables){
+		if (!$lang_tables) {
 			return false;
 		}
 
 		$src_language_id = (int)$src_language_id;
-		if(!$src_language_id){
+		if (!$src_language_id) {
 			return false;
 		}
-		$excludes = array(
-			$this->db->table('languages'),
-			$this->db->table('language_definitions'),
-			$this->db->table('orders')
+		$excludes = array (
+				$this->db->table('languages'),
+				$this->db->table('language_definitions'),
+				$this->db->table('orders')
 		);
-		foreach($lang_tables as $table){
+		foreach ($lang_tables as $table) {
 			$table_name = $table['table_name'];
-			if(in_array($table_name, $excludes)){
+			if (in_array($table_name, $excludes)) {
 				continue;
 			}
 
 			$sql = "SELECT COUNT(*) as cnt
-					FROM ".$table_name."
-					WHERE language_id = ".$src_language_id;
+					FROM " . $table_name . "
+					WHERE language_id = " . $src_language_id;
 			$result = $this->db->query($sql);
 			$row_cnt = (int)$result->row['cnt'];
-			if($row_cnt){
+			if ($row_cnt) {
 				$pkeys = $this->language->getPrimaryKeys($table_name);
 				$lpk = array_search('language_id', $pkeys);
-				if(is_int($lpk)){
+				if (is_int($lpk)) {
 					unset($pkeys[$lpk]);
 				}
 

@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\HtmlElementFactory;
+use abc\lib\AAttribute_Manager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -38,7 +44,7 @@ class ControllerPagesCatalogProductOptions extends AController {
 			$product_id = $this->request->get['product_id'];
 			$product_option_id = $this->model_catalog_product->addProductOption($product_id, $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect(
+			abc_redirect(
 				$this->html->getSecureURL('catalog/product_options','&product_id='.$product_id.'&product_option_id='.$product_option_id )
 			);
 		}
@@ -46,7 +52,7 @@ class ControllerPagesCatalogProductOptions extends AController {
 		$product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
 		if ( !$product_info ) {
 			$this->session->data['warning'] = $this->language->get('error_product_not_found');
-			redirect($this->html->getSecureURL('catalog/product'));
+			abc_redirect($this->html->getSecureURL('catalog/product'));
 		}
 
 		$this->data['attributes'] = array(

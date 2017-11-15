@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -26,14 +30,16 @@ class ModelLocalisationLanguage extends Model{
 
 		$language_data = $this->cache->pull('localization.language.sf');
 		if ($language_data === false){
-			$query = $this->db->query("SELECT * FROM " . $this->db->table("languages") . " WHERE status = 1 ORDER BY sort_order, name");
+			$query = $this->db->query("SELECT * 
+									FROM " . $this->db->table("languages") . " 
+									WHERE status = 1 
+									ORDER BY sort_order, name");
 
 			foreach ($query->rows as $result){
-				$rel_image_path = '';
 				if (empty($result['image'])){
 					$rel_image_path = 'storefront/languages/' . $result['directory'] . '/flag.png';
 					if (file_exists(DIR_ROOT . '/' . $rel_image_path)){
-						$sizes = get_image_size(DIR_ROOT . '/' . $rel_image_path);
+						$sizes = AHelperUtils::get_image_size(DIR_ROOT . '/' . $rel_image_path);
 						$result['image'] = $rel_image_path;
 						$result['image_width'] = $sizes['width'];
 						$result['image_height'] = $sizes['height'];
@@ -41,7 +47,7 @@ class ModelLocalisationLanguage extends Model{
 				} else{
 					$rel_image_path = $result['image'];
 					if (file_exists(DIR_ROOT . '/' . $rel_image_path)){
-						$sizes = get_image_size(DIR_ROOT . '/' . $rel_image_path);
+						$sizes = AHelperUtils::get_image_size(DIR_ROOT . '/' . $rel_image_path);
 						$result['image'] = $rel_image_path;
 						$result['image_width'] = $sizes['width'];
 						$result['image_height'] = $sizes['height'];

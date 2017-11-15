@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
@@ -114,7 +119,7 @@ class ControllerPagesLocalisationLocation extends AController {
         if ( $this->request->is_POST() && $this->_validateForm() ) {
             $location_id = $this->model_localisation_location->addLocation($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $location_id));
+            abc_redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $location_id));
         }
         $this->_getForm();
 
@@ -138,7 +143,7 @@ class ControllerPagesLocalisationLocation extends AController {
         if ( $this->request->is_POST() && $this->_validateForm() ) {
             $this->model_localisation_location->editLocation($this->request->get['location_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id']));
+            abc_redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id']));
         }
         $this->_getForm();
 
@@ -268,7 +273,7 @@ class ControllerPagesLocalisationLocation extends AController {
             $this->request->post['zone_id'] = array_diff((array)$this->request->post['zone_id'], $exists);
             $zone_to_location_id = $this->model_localisation_location->addLocationZone($this->request->get['location_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id'] . '&zone_to_location_id=' . $zone_to_location_id));
+            abc_redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id'] . '&zone_to_location_id=' . $zone_to_location_id));
         }
         $this->_getLocationsForm();
 
@@ -291,7 +296,7 @@ class ControllerPagesLocalisationLocation extends AController {
         if ( $this->request->is_POST() ) {
             $this->model_localisation_location->editLocationZone($this->request->get['zone_to_location_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id'] . '&zone_to_location_id=' . $this->request->get['zone_to_location_id']));
+            abc_redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id'] . '&zone_to_location_id=' . $this->request->get['zone_to_location_id']));
         }
         $this->_getLocationsForm();
 
@@ -306,7 +311,7 @@ class ControllerPagesLocalisationLocation extends AController {
 
         $this->model_localisation_location->deleteLocationZone($this->request->get['zone_to_location_id']);
         $this->session->data['success'] = $this->language->get('text_success');
-        $this->redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id']));
+        abc_redirect($this->html->getSecureURL('localisation/location/locations', '&location_id=' . $this->request->get['location_id']));
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -569,8 +574,9 @@ class ControllerPagesLocalisationLocation extends AController {
 
 	private function _initTabs($active = null) {
 
-		if( !has_value($this->request->get['location_id']) ) {
+		if( !AHelperUtils::has_value($this->request->get['location_id']) ) {
 			$this->data['tabs'] = array();
+			$location_id = null;
 		}else{
 			$location_id = (int)$this->request->get['location_id'];
 		}

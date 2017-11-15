@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AEncryption;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -111,7 +118,7 @@ class ControllerPagesAccountInvoice extends AController{
 		}
 
 		if (!$order_id && $this->customer->isLogged()){
-			redirect($this->html->getSecureURL('account/history'));
+			abc_redirect($this->html->getSecureURL('account/history'));
 		}
 
 		//get info for registered customers
@@ -244,7 +251,7 @@ class ControllerPagesAccountInvoice extends AController{
 			$results = $this->model_account_order->getOrderHistories($order_id);
 			foreach ($results as $result){
 				$histories[] = array (
-						'date_added' => dateISO2Display($result['date_added'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')),
+						'date_added' => AHelperUtils::dateISO2Display($result['date_added'], $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')),
 						'status'     => $result['status'],
 						'comment'    => nl2br($result['comment'])
 				);
@@ -265,19 +272,19 @@ class ControllerPagesAccountInvoice extends AController{
 					       'style' => 'button'));
 
 			//button for order cancellation
-			if ($this->config->get('config_customer_cancelation_order_status_id')){
-				$order_cancel_ids = unserialize($this->config->get('config_customer_cancelation_order_status_id'));
+			if ($this->config->get('config_customer_cancellation_order_status_id')){
+				$order_cancel_ids = unserialize($this->config->get('config_customer_cancellation_order_status_id'));
 				if (in_array($order_info['order_status_id'], $order_cancel_ids)){
 					$this->data['button_order_cancel'] = $this->html->buildElement(
 							array ('type'  => 'button',
-							       'name'  => 'button_order_cancelation',
-							       'text'  => $this->language->get('text_order_cancelation'),
+							       'name'  => 'button_order_cancellation',
+							       'text'  => $this->language->get('text_order_cancellation'),
 							       'icon'  => 'fa fa-ban',
 							       'style' => 'button'));
 					if (!$guest){
-						$this->data['order_cancelation_url'] = $this->html->getSecureURL('account/invoice/CancelOrder', '&order_id=' . $order_id);
+						$this->data['order_cancellation_url'] = $this->html->getSecureURL('account/invoice/CancelOrder', '&order_id=' . $order_id);
 					} else{
-						$this->data['order_cancelation_url'] = $this->html->getSecureURL('account/invoice/CancelOrder', '&ot=' . $order_token);
+						$this->data['order_cancellation_url'] = $this->html->getSecureURL('account/invoice/CancelOrder', '&ot=' . $order_token);
 					}
 				}
 			}
@@ -415,12 +422,12 @@ class ControllerPagesAccountInvoice extends AController{
 				if ($order_id){
 					$this->session->data['redirect'] = $this->html->getSecureURL('account/invoice', '&order_id=' . $order_id);
 				}
-				redirect($this->html->getSecureURL('account/login'));
+				abc_redirect($this->html->getSecureURL('account/login'));
 			}
 			$order_info = $this->model_account_order->getOrder($order_id, '', 'view');
 			//compare emails
 			if ($order_info['email'] != $email){
-				redirect($this->html->getSecureURL('account/login'));
+				abc_redirect($this->html->getSecureURL('account/login'));
 			}
 			$guest = true;
 		} else{
@@ -428,23 +435,23 @@ class ControllerPagesAccountInvoice extends AController{
 		}
 
 		if (!$order_id && !$guest){
-			redirect($this->html->getSecureURL('account/invoice'));
+			abc_redirect($this->html->getSecureURL('account/invoice'));
 		}
 
 		if (!$customer_id && !$guest){
-			redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		if (!$order_info){
-			redirect($this->html->getSecureURL('account/invoice'));
+			abc_redirect($this->html->getSecureURL('account/invoice'));
 		}
 		//is cancellation enabled at all
-		if ($this->config->get('config_customer_cancelation_order_status_id')){
-			$order_cancel_ids = unserialize($this->config->get('config_customer_cancelation_order_status_id'));
+		if ($this->config->get('config_customer_cancellation_order_status_id')){
+			$order_cancel_ids = unserialize($this->config->get('config_customer_cancellation_order_status_id'));
 		}
 		//is cancellation allowed for current order status
 		if (!$order_cancel_ids || !in_array($order_info['order_status_id'], $order_cancel_ids)){
-			redirect($this->html->getSecureURL('account/invoice'));
+			abc_redirect($this->html->getSecureURL('account/invoice'));
 		}
 
 		//now do change
@@ -453,13 +460,13 @@ class ControllerPagesAccountInvoice extends AController{
 		if ($new_order_status_id){
 			$this->loadModel('checkout/order');
 			$this->model_checkout_order->update($order_id, $new_order_status_id, $this->language->get('text_request_cancellation_from_customer'), true);
-			$this->session->data['success'] = $this->language->get('text_order_cancelation_success');
+			$this->session->data['success'] = $this->language->get('text_order_cancellation_success');
 
 			$this->messages->saveNotice(
-					sprintf($this->language->get('text_order_cancelation_message_title'),
+					sprintf($this->language->get('text_order_cancellation_message_title'),
 							$order_id
 					),
-					sprintf($this->language->get('text_order_cancelation_message_body'),
+					sprintf($this->language->get('text_order_cancellation_message_body'),
 							$order_info['firstname'] . ' ' . $order_info['lastname'],
 							$order_id,
 							'#admin#rt=sale/order/details&order_id=' . $order_id
@@ -479,7 +486,7 @@ class ControllerPagesAccountInvoice extends AController{
 			$url = $this->html->getSecureURL('account/invoice', '&ot=' . $this->request->get['ot']);
 		}
 
-		redirect($url);
+		abc_redirect($url);
 	}
 
 	protected function _validate(){

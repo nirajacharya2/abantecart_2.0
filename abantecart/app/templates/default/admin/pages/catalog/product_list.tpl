@@ -74,7 +74,7 @@
 					success: function (msg) {
 						if (msg == '') {
 							jQuery('#product_grid').trigger("reloadGrid");
-							success_alert('<?php js_echo($text_success_relation_set);?>',true);
+							success_alert('<?php abc_js_echo($text_success_relation_set);?>',true);
 						} else {
 							alert(msg);
 						}

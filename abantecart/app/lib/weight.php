@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -187,7 +191,7 @@ class AWeight{
 				$output[$wth['language_id']] = $wth['unit'];
 			}
 		}
-		return has_value($output[$language_id]) ? $output[$language_id] : (string)current($output);
+		return AHelperUtils::has_value($output[$language_id]) ? $output[$language_id] : (string)current($output);
 	}
 
 	/**

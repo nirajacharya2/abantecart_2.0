@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -34,9 +39,9 @@ class ControllerResponsesUserCustomers extends AController {
         $this->loadModel('sale/customer');
 		$results = $customer_data = array();
 		
-		if (has_value($this->request->get['keyword'])) {
+		if (AHelperUtils::has_value($this->request->get['keyword'])) {
 			$results = $this->model_sale_customer->getCustomersByKeyword($this->request->get['keyword']);
-		}elseif(has_value($this->request->get['email'])){
+		}elseif(AHelperUtils::has_value($this->request->get['email'])){
 			$results = $this->model_sale_customer->getCustomersByEmails($this->request->get['email']);
 		}
 

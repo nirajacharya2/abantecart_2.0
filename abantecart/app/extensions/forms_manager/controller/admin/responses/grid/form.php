@@ -17,18 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 /**
  * Class ControllerResponsesGridForm
- * @property ModelToolFormsManager $model_tool_forms_manager
+ * @property \abc\model\admin\ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerResponsesGridForm extends AController {
-	private $error = array();
-
 	public function main() {
-
 		$this->loadLanguage('forms_manager/forms_manager');
 		$this->loadModel('tool/forms_manager');
 

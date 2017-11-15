@@ -194,7 +194,7 @@
 						   data-type="<?php echo $type; ?>"><i class="fa fa-unlink fa-lg"></i>
 						</a>
 					</div>
-				<?php } else if (has_value($object_id) && $mode != 'list_all') { ?>
+				<?php } else if (\abc\core\AHelperUtils::has_value($object_id) && $mode != 'list_all') { ?>
 					<div class="col-sm-3">
 						<a class="btn btn-primary btn-xs rl_link tooltips"
 						   data-original-title="<?php echo $txt_link_resource; ?>"

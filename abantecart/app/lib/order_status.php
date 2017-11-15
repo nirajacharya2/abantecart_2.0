@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -87,7 +91,7 @@ class AOrderStatus{
 	public function addStatus($order_status_id, $status_text_id){
 		$order_status_id = (int)$order_status_id;
 		//preformat text_id at first
-		$status_text_id = preformatTextID($status_text_id);
+		$status_text_id = AHelperUtils::preformatTextID($status_text_id);
 
 		if (in_array($order_status_id, array_keys($this->statuses)) || in_array($status_text_id, $this->statuses)){
 			$error_text = 'Error: Cannot add new order status with id ' . $order_status_id . ' and text id ' . $status_text_id . ' into AOrderStatus class.';

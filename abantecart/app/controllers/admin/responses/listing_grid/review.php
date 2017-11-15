@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -84,7 +93,7 @@ class ControllerResponsesListingGridReview extends AController {
 					'value' => $result[ 'status' ],
 					'style' => 'btn_switch',
 				)),
-				dateISO2Display($result[ 'date_added' ], $this->language->get('date_format_short'))
+				AHelperUtils::dateISO2Display($result[ 'date_added' ], $this->language->get('date_format_short'))
 			);
 			$i++;
 		}

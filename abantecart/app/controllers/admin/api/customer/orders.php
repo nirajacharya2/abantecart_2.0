@@ -17,9 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiCustomerOrders
+ * @package abc\controller\API
+ * @property \abc\model\admin\ModelSaleOrder $model_sale_order
+ */
 class ControllerApiCustomerOrders extends AControllerAPI {
   
 	public function get() {
@@ -32,7 +42,7 @@ class ControllerApiCustomerOrders extends AControllerAPI {
 
 		$request = $this->rest->getRequestParams();
 		
-		if ( !has_value($request['customer_id']) ) {
+		if ( !AHelperUtils::has_value($request['customer_id']) ) {
 			$this->rest->setResponseData( array('Error' => 'Customer ID is missing') );
 			$this->rest->sendResponse(200);
 			return null;

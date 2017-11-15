@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\AResourceManager;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -29,7 +35,7 @@ class ModelToolMigration extends Model {
 	const CLASS_LOCATION = 'admin/models/tool/migration/';
 	const CLASS_PREFIX = 'Migration_';
 	/**
-	 * @var Migration_Oscmax|Migration_OC15x|Migration_Zen|Migration_Osc|Migration_OC|Migration_Cre  $cart
+	 * @var Migration_Oscmax | Migration_OC15x | Migration_Zen | Migration_Osc | Migration_OC | Migration_Cre
 	 */
 	protected $cartObj = null;
 	protected $log = '';
@@ -45,7 +51,7 @@ class ModelToolMigration extends Model {
 		}
 		/** @noinspection PhpIncludeInspection */
 		require_once($file);
-		$name = self::CLASS_PREFIX . ucfirst($cart);
+		$name = "abc\model\admin\\".self::CLASS_PREFIX . ucfirst($cart);
 		return class_exists($name);
 	}
 
@@ -103,10 +109,8 @@ class ModelToolMigration extends Model {
 
 		$cart = $this->session->data['migration']['cart_type'];
 		$filename = self::CLASS_LOCATION . $cart . '.php';
-		/** @noinspection PhpIncludeInspection */
 		require_once $filename;
 		$class_name = self::CLASS_PREFIX . ucfirst($cart);
-
 		$this->cartObj = new $class_name($this->session->data['migration'], $this->config);
 
 		if ($this->session->data['migration']['migrate_customers']) {
@@ -155,48 +159,54 @@ class ModelToolMigration extends Model {
 
 		if ($this->session->data['migration']['migrate_products']) {
 			//categories
-			$sql .= "DELETE FROM `" . DB_PREFIX . "categories`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "category_descriptions` WHERE language_id='" . $languageId . "';\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "categories_to_stores`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "url_aliases` WHERE query LIKE 'category_id=%';\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "resource_map` WHERE object_name = 'categories';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("categories")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("category_descriptions")."` 
+					WHERE language_id='" . $languageId . "';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("categories_to_stores")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("url_aliases")."` 
+					WHERE query LIKE 'category_id=%';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("resource_map")."` 
+					WHERE object_name = 'categories';\n";
 			//products
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_descriptions` WHERE language_id='" . $languageId . "';\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_to_categories`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_to_downloads`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_to_stores`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_options`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_option_descriptions`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_option_values`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_option_value_descriptions`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_specials`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_featured`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_related`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "product_tags`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_descriptions")."` 
+					WHERE language_id='" . $languageId . "';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_to_categories")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_to_downloads")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_to_stores")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_options")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_option_descriptions")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_option_values")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_option_value_descriptions")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_specials")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_featured")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_related")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("product_tags")."`;\n";
 
-			$sql .= "DELETE FROM `" . DB_PREFIX . "reviews`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "manufacturers`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "manufacturers_to_stores`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "url_aliases` WHERE `query` LIKE 'product_id=%';\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "products_related`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "resource_map` WHERE object_name = 'products';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("reviews")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("manufacturers")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("manufacturers_to_stores")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("url_aliases")."` 
+					WHERE `query` LIKE 'product_id=%';\n";
+			$sql .= "DELETE FROM `" . $this->db->table("products_related")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("resource_map")."` 
+					WHERE object_name = 'products';\n";
 		}
 
 		if ($this->session->data['migration']['migrate_customers']) {
-			$sql .= "DELETE FROM `" . DB_PREFIX . "customers`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "addresses`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("customers")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("addresses")."`;\n";
 		}
 
 		/* for future
 		 * if ($this->session->data['migration']['migrate_orders']) {
-			$sql .= "DELETE FROM `" . DB_PREFIX . "orders`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_downloads`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_history`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_options`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_products`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_statuses`;\n";
-			$sql .= "DELETE FROM `" . DB_PREFIX . "order_totals`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("orders")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_downloads")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_history")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_options")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_products")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_statuses")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table("order_totals")."`;\n";
 		}*/
 
 		$this->import($sql);
@@ -246,7 +256,7 @@ class ModelToolMigration extends Model {
 			return true;
 		}
 
-		// get all loginnames to prevent conflicts.
+		// get all login names to prevent conflicts.
 		$query = $this->db->query("SELECT LOWER(`loginname`) AS loginname
 								   FROM " . $this->db->table("customers"));
 		$logins = array();
@@ -259,10 +269,10 @@ class ModelToolMigration extends Model {
 				continue;
 			}
 
-			$store_id = has_value($data['store_id']) ? (int)$data['store_id'] : (int)$this->config->get('config_store_id');
-			$date_added = has_value($data['date_added']) ? "'" . $this->db->escape($data['date_added']) . "'" : 'NOW()';
-			$status = has_value($data['status']) ? $data['status'] : 1;
-			$approved = has_value($data['approved']) ? $data['approved'] : 1;
+			$store_id = AHelperUtils::has_value($data['store_id']) ? (int)$data['store_id'] : (int)$this->config->get('config_store_id');
+			$date_added = AHelperUtils::has_value($data['date_added']) ? "'" . $this->db->escape($data['date_added']) . "'" : 'NOW()';
+			$status = AHelperUtils::has_value($data['status']) ? $data['status'] : 1;
+			$approved = AHelperUtils::has_value($data['approved']) ? $data['approved'] : 1;
 			$data['email'] = mb_strtolower($data['email']);
 
 			//process unique loginname
@@ -279,8 +289,8 @@ class ModelToolMigration extends Model {
 				$loginname = 'gen_'.md5(microtime());
 			}
 
-			$salt_key = genToken(8);
-			$sql = "INSERT INTO " . DB_PREFIX . "customers
+			$salt_key = AHelperUtils::genToken(8);
+			$sql = "INSERT INTO " . $this->db->table("customers")."
 					SET store_id = '" . $store_id . "',
 						firstname = '" . $this->db->escape($data['firstname']) . "',
 						lastname = '" . $this->db->escape($data['lastname']) . "',
@@ -307,7 +317,7 @@ class ModelToolMigration extends Model {
 			$customer_id_map[$data['customer_id']] = $customer_id;
 			$data['address'] = (array)$data['address'];
 			foreach ($data['address'] as $address) {
-				$sql = "INSERT INTO " . DB_PREFIX . "addresses
+				$sql = "INSERT INTO " . $this->db->table("addresses")."
 					  SET customer_id = '" . (int)$customer_id . "',
 						  firstname = '" . $this->db->escape($address['firstname']) . "',
 							lastname = '" . $this->db->escape($address['lastname']) . "',
@@ -316,12 +326,12 @@ class ModelToolMigration extends Model {
 							city = '" . $this->db->escape($address['city']) . "',
 							postcode = '" . $this->db->escape($address['postcode']) . "',
 							country_id = " . ($address['country_iso_code2'] ? " COALESCE((SELECT country_id
-																				FROM ".DB_PREFIX."countries
+																				FROM ".$this->db->table("countries")."
 																				WHERE iso_code_2='".$this->db->escape($address['country_iso_code2'])."'
 																				LIMIT 0,1),0)"
-																			: "'0'") . ",
+																		: "'0'") . ",
 							zone_id = " . ($address['zone_iso_code2'] ? "COALESCE((SELECT zone_id
-																			FROM ".DB_PREFIX."zones
+																			FROM " . $this->db->table("zones") . "
 																			WHERE code='".$this->db->escape($address['zone_iso_code2'])."'
 																			LIMIT 0,1),0)"
 																		: "'0'");
@@ -333,7 +343,7 @@ class ModelToolMigration extends Model {
 				$address_id = $this->db->getLastId();
 			}
 
-			$result = $this->db->query("UPDATE " . DB_PREFIX . "customers
+			$result = $this->db->query("UPDATE " . $this->db->table("customers")."
 									    SET address_id = '" . (int)$address_id . "'
 								        WHERE customer_id = '" . (int)$customer_id . "'",
 				true);
@@ -393,7 +403,7 @@ class ModelToolMigration extends Model {
 		$this->pic_count = 0;
 		foreach ($categories as $data) {
 			$data['name'] = strip_tags($data['name']);
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "categories
+			$result = $this->db->query("INSERT INTO " . $this->db->table("categories")."
                                         SET parent_id = '" . (int)$data['parent_id'] . "',
                                             sort_order = '" . (int)$data['sort_order'] . "',
                                             status = '1',
@@ -409,7 +419,7 @@ class ModelToolMigration extends Model {
 			//IMAGE PROCESSING
 			$this->_migrateImages( $data, 'categories', $category_id );
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "category_descriptions
+			$result = $this->db->query("INSERT INTO " . $this->db->table("category_descriptions")."
 					 				     SET category_id = '" . (int)$category_id . "',
 										     language_id = '" . (int)$language_id . "',
 										     name = '" . $this->db->escape($data['name']) . "',
@@ -419,7 +429,7 @@ class ModelToolMigration extends Model {
 				$this->addLog($this->db->error);
 			}
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "categories_to_stores
+			$result = $this->db->query("INSERT INTO " . $this->db->table("categories_to_stores")."
 										   (category_id,store_id)
 										 VALUES ('" . (int)$category_id . "','" . (int)$store_id . "')", true);
 			if ($result === false) {
@@ -428,11 +438,11 @@ class ModelToolMigration extends Model {
 		}
 
 		//update parent id according to new map
-		$query = $this->db->query("SELECT category_id, parent_id FROM " . DB_PREFIX . "categories ");
+		$query = $this->db->query("SELECT category_id, parent_id FROM " . $this->db->table("categories"));
 		foreach ($query->rows as $result) {
 			if (empty($category_id_map[$result['parent_id']])) continue;
 
-			$result = $this->db->query("UPDATE " . DB_PREFIX . "categories
+			$result = $this->db->query("UPDATE " . $this->db->table("categories")."
 										    SET parent_id = '" . $category_id_map[$result['parent_id']] . "'
 										    WHERE category_id = '" . (int)$result['category_id'] . "'", true);
 			if ($result === false) {
@@ -446,7 +456,7 @@ class ModelToolMigration extends Model {
 		$this->pic_count = 0;
 		foreach ($manufacturers as $data) {
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "manufacturers
+			$result = $this->db->query("INSERT INTO " . $this->db->table("manufacturers")."
                                         SET name = '" . $this->db->escape($data['name']) . "'", true);
 			if ($result === false) {
 				$this->addLog($this->db->error);
@@ -457,7 +467,7 @@ class ModelToolMigration extends Model {
 			//IMAGE PROCESSING
 			$this->_migrateImages( $data, 'manufacturers', $manufacturer_id );
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "manufacturers_to_stores
+			$result = $this->db->query("INSERT INTO " . $this->db->table("manufacturers_to_stores")."
                                         SET manufacturer_id = '" . (int)$manufacturer_id . "', store_id = '" . (int)$store_id . "'", true);
 			if ($result === false) {
 				$this->addLog($this->db->error);
@@ -472,10 +482,10 @@ class ModelToolMigration extends Model {
 		foreach ($products as $data) {
 
 			$data['manufacturer_id'] = empty($manufacturer_id_map[$data['manufacturer_id']]) ? '' : $manufacturer_id_map[$data['manufacturer_id']];
-			$date_added = has_value($data['date_added']) ? "'" . $this->db->escape($data['date_added']) . "'" : 'NOW()';
-			$date_modified = has_value($data['date_modified']) ? "'" . $this->db->escape($data['date_modified']) . "'" : 'NOW()';
+			$date_added = AHelperUtils::has_value($data['date_added']) ? "'" . $this->db->escape($data['date_added']) . "'" : 'NOW()';
+			$date_modified = AHelperUtils::has_value($data['date_modified']) ? "'" . $this->db->escape($data['date_modified']) . "'" : 'NOW()';
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "products
+			$result = $this->db->query("INSERT INTO " . $this->db->table("products")."
 										SET model = '" . $this->db->escape($data['model']) . "',
 											sku	= '" . $this->db->escape($data['sku']) . "',
 											location = '" . $this->db->escape($data['location']) . "',
@@ -511,7 +521,7 @@ class ModelToolMigration extends Model {
 			//IMAGE PROCESSING
 			$this->_migrateImages( $data, 'products', $product_id );
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "product_descriptions
+			$result = $this->db->query("INSERT INTO " . $this->db->table("product_descriptions")."
 										  SET product_id = '" . (int)$product_id . "',
 										  	  language_id = '" . (int)$language_id . "',
 											  name = '" . $this->db->escape($data['name']) . "',
@@ -525,16 +535,16 @@ class ModelToolMigration extends Model {
 			// add seo keyword
 			if($this->config->get('enable_seo_url')){
 				if(!$data['seo_keyword']){
-					$seo_key = SEOEncode($data['name'],	'product_id',	$product_id);
+					$seo_key = AHelperUtils::SEOEncode($data['name'],	'product_id',	$product_id);
 				}else{
-					$seo_key = SEOEncode($data['seo_keyword'],	'product_id',	$product_id);
+					$seo_key = AHelperUtils::SEOEncode($data['seo_keyword'],	'product_id',	$product_id);
 				}
 				$this->language->replaceDescriptions('url_aliases',
 														array('query' => "product_id=" . (int)$product_id),
 														array((int)$language_id => array('keyword'=>$seo_key)));
 			}
 
-			$result = $this->db->query("INSERT INTO " . DB_PREFIX . "products_to_stores
+			$result = $this->db->query("INSERT INTO " . $this->db->table("products_to_stores")."
 			                              SET product_id = '" . (int)$product_id . "', store_id = '" . (int)$store_id . "'", true);
 			if ($result === false) {
 				$this->addLog($this->db->error);
@@ -544,7 +554,7 @@ class ModelToolMigration extends Model {
 				foreach ($data['product_category'] as $category_id) {
 					if (!(int)$category_id_map[$category_id]) continue;
 
-					$result = $this->db->query("INSERT INTO " . DB_PREFIX . "products_to_categories
+					$result = $this->db->query("INSERT INTO " . $this->db->table("products_to_categories")."
                                                     (product_id,category_id)
                                                 VALUES ('" . (int)$product_id . "', '" . (int)$category_id_map[$category_id] . "')", true);
 					if ($result === false) {
@@ -562,7 +572,7 @@ class ModelToolMigration extends Model {
 						continue;
 					}
 
-					$sql = "INSERT INTO " . DB_PREFIX . "reviews
+					$sql = "INSERT INTO " . $this->db->table("reviews")."
 	                                             (`product_id`, `customer_id`, `author`,
 	                                             `text`,`rating`,`status`,`date_added`,`date_modified`)
 	                                            VALUES ('" . (int)$product_id_map[$review['product_id']] . "',
@@ -591,8 +601,8 @@ class ModelToolMigration extends Model {
 		$options['product_options'] = (array)$options['product_options'];
 		foreach ($options['product_options'] as $product_option) {
 			//options
-			$required = has_value($product_option['required']) ? $product_option['required'] : 0;
-			$sql = "INSERT INTO " . DB_PREFIX . "product_options (product_id, sort_order,status,element_type,required)
+			$required = AHelperUtils::has_value($product_option['required']) ? $product_option['required'] : 0;
+			$sql = "INSERT INTO " . $this->db->table("product_options")." (product_id, sort_order,status,element_type,required)
 					VALUES('" . $product_id_map[$product_option['product_id']] . "','" . $product_option['sort_order'] . "','1','" . $this->db->escape($product_option['element_type']) . "', '" . (int)$required . "');";
 			$result = $this->db->query($sql);
 			if ($result === false) {
@@ -605,7 +615,7 @@ class ModelToolMigration extends Model {
 			$product_option_id_map[$key] = $product_option_id;
 
 			//option description
-			$sql = "INSERT INTO " . DB_PREFIX . "product_option_descriptions (product_option_id, language_id, product_id, name)
+			$sql = "INSERT INTO " . $this->db->table("product_option_descriptions")." (product_option_id, language_id, product_id, name)
 					VALUES('" . $product_option_id . "', 1, '" . $product_id_map[$product_option['product_id']] . "','" . $this->db->escape($product_option['product_option_name']) . "');";
 			$result = $this->db->query($sql);
 			if ($result === false) {
@@ -627,7 +637,7 @@ class ModelToolMigration extends Model {
 				$key = $product_option_value['product_id'] . '_new_' . $product_option_value['products_text_attributes_id'];
 			}
 
-			$sql = "INSERT INTO " . DB_PREFIX . "product_option_values (product_id,
+			$sql = "INSERT INTO " . $this->db->table("product_option_values")." (product_id,
 																product_option_id,
 																price,
 																quantity,
@@ -646,7 +656,7 @@ class ModelToolMigration extends Model {
 			$product_option_value_id = $this->db->getLastId();
 			$product_option_value_id_map[$product_option_value['product_option_value_id']] = $product_option_value_id;
 
-			$sql = "INSERT INTO " . DB_PREFIX . "product_option_value_descriptions (
+			$sql = "INSERT INTO " . $this->db->table("product_option_value_descriptions")." (
 																product_option_value_id,
 																language_id,
 																product_id,
@@ -730,17 +740,17 @@ class ModelToolMigration extends Model {
 		$files = glob(DIR_ROOT . '/admin/models/tool/migration/*', GLOB_NOSORT);
 		if ($files) {
 			foreach ($files as $file) {
-				$cartname = pathinfo($file, PATHINFO_FILENAME);
-				if (strtolower($cartname) == 'interface_migration') continue;
+				$cart_name = pathinfo($file, PATHINFO_FILENAME);
+				if (strtolower($cart_name) == 'interface_migration') continue;
 
 				/** @noinspection PhpIncludeInspection */
 				require_once($file);
-				$name = self::CLASS_PREFIX . ucfirst($cartname);
+				$name = self::CLASS_PREFIX . ucfirst($cart_name);
 				/**
 				 * @var Migration_Oscmax|Migration_OC15x|Migration_Zen|Migration_Osc|Migration_OC|Migration_Cre  $cart
 				 */
 				$cart = new $name('', '');
-				$result[$cartname] = $cart->getName() . $cart->getVersion();
+				$result[$cart_name] = $cart->getName() . $cart->getVersion();
 			}
 		}
 

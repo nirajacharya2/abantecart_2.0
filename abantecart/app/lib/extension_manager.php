@@ -1,27 +1,32 @@
 <?php
 /*incompatibility*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\ExtensionUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
- * @property ExtensionsApi $extensions
+ * @property \abc\core\ExtensionsApi $extensions
  * @property ADB $db
  * @property ACache $cache
  * @property AConfig $config
- * @property ALanguage $language
- * @property ALoader $load
- * @property ModelToolUpdater $model_tool_updater
- * @property AHtml $html
+ * @property \abc\core\ALanguage $language
+ * @property \abc\core\ALoader $load
+ * @property \abc\model\admin\ModelToolUpdater $model_tool_updater
+ * @property \abc\core\AHtml $html
  * @property AUser $user
  * @property ASession $session
  * @property ALog $log
  * @property AMessage $messages
- * @property ModelSettingStore $model_setting_store
+ * @property \abc\model\admin\ModelSettingStore $model_setting_store
  * */
 class AExtensionManager{
 	/**
-	 * @var Registry
+	 * @var \abc\core\Registry
 	 */
 	protected $registry;
 	/**
@@ -322,7 +327,7 @@ class AExtensionManager{
 
 			//Special case. 
 			//Check that we have single mode RL with ID 
-			if (has_value($data[$key . "_resource_id"]) && !has_value($value)){
+			if (AHelperUtils::has_value($data[$key . "_resource_id"]) && !AHelperUtils::has_value($value)){
 				//save ID if resource path is missing
 				$value = $data[$key . "_resource_id"];
 			}
@@ -369,7 +374,7 @@ class AExtensionManager{
 	 * extension install actions, db queries, copying files etc
 	 *
 	 * @param string $name
-	 * @param DomNode| DOMElement $config
+	 * @param \DomNode| \DOMElement $config
 	 * @return bool|null
 	 */
 	public function install($name, $config){
@@ -450,7 +455,7 @@ class AExtensionManager{
 
 	/**
 	 * @param string $name
-	 * @param DOMNode $config
+	 * @param \DOMNode $config
 	 * @return bool|null
 	 */
 	public function uninstall($name, $config){
@@ -559,7 +564,7 @@ class AExtensionManager{
 			return false;
 		}
 		// get config.xml
-		$config = getExtensionConfigXml($extension_txt_id);
+		$config = AHelperUtils::getExtensionConfigXml($extension_txt_id);
 
 		$result = $this->validateCoreVersion($extension_txt_id, $config);
 		if (!$result){
@@ -579,7 +584,7 @@ class AExtensionManager{
 	/**
 	 *  is dependencies present
 	 * @param string $extension_txt_id
-	 * @param DOMNode $config
+	 * @param \DOMNode $config
 	 * @return bool
 	 */
 	public function validateDependencies($extension_txt_id, $config){
@@ -603,7 +608,7 @@ class AExtensionManager{
 			}
 			// if extension installed - check version that need
 			if ($version){
-				if ($required && (!versionCompare($version, $versions[$item], '>=') || !versionCompare($prior_version, $versions[$item], '<='))){
+				if ($required && (!AHelperUtils::versionCompare($version, $versions[$item], '>=') || !AHelperUtils::versionCompare($prior_version, $versions[$item], '<='))){
 					$this->errors[] = sprintf('<b>%s</b> extension cannot be installed: <b>%s</b> extension versions <b>' . $prior_version . ' - ' . $version . '</b> are required', $extension_txt_id, $item);
 				}
 			}
@@ -627,9 +632,9 @@ class AExtensionManager{
 				continue;
 			}
 			/**
-			 * @var DOMNode $config
+			 * @var \DOMNode $config
 			 */
-			$config = getExtensionConfigXml($extension);
+			$config = AHelperUtils::getExtensionConfigXml($extension);
 			if (!isset($config->dependencies->item)) continue;
 			foreach ($config->dependencies->item as $item){
 				$required = (boolean)$item['required'];
@@ -664,7 +669,7 @@ class AExtensionManager{
 	/**
 	 *  is extension support current core version
 	 * @param string $extension_txt_id
-	 * @param DOMNode $config
+	 * @param \DOMNode $config
 	 * @return bool
 	 */
 	public function validateCoreVersion($extension_txt_id, $config){
@@ -680,14 +685,14 @@ class AExtensionManager{
 		}
 		// check is cart version presents on extension cart version list
 		foreach ($cart_versions as $version){
-			$result = versionCompare(VERSION, $version, '>=');
+			$result = AHelperUtils::versionCompare(VERSION, $version, '>=');
 			if ($result){
 				return true;
 			}
 		}
 		// if not - seek cart earlier version then current cart version in the list
 		foreach ($cart_versions as $version){
-			$result = versionCompare($version, VERSION, '<');
+			$result = AHelperUtils::versionCompare($version, VERSION, '<');
 			if ($result){
 				$error_text = 'Extension <b>%s</b> written for earlier version of Abantecart (v.%s) lower that you have. ';
 				$error_text .= 'Probably all will be OK.';
@@ -710,7 +715,7 @@ class AExtensionManager{
 	 */
 	/**
 	 * @param string $extension_txt_id
-	 * @param DOMNode $config
+	 * @param \DOMNode $config
 	 * @return bool
 	 */
 	public function validatePhpModules($extension_txt_id, $config){

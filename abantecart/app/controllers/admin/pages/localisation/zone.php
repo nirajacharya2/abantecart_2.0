@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -170,7 +174,7 @@ class ControllerPagesLocalisationZone extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$zone_id = $this->model_localisation_zone->addZone($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('localisation/zone/update', '&zone_id=' . $zone_id ));
+			abc_redirect($this->html->getSecureURL('localisation/zone/update', '&zone_id=' . $zone_id ));
 		}
 		$this->_getForm();
 
@@ -193,7 +197,7 @@ class ControllerPagesLocalisationZone extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$this->model_localisation_zone->editZone($this->request->get['zone_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('localisation/zone/update', '&zone_id=' . $this->request->get['zone_id'] ));
+			abc_redirect($this->html->getSecureURL('localisation/zone/update', '&zone_id=' . $this->request->get['zone_id'] ));
 		}
 		$this->_getForm();
 
@@ -205,7 +209,7 @@ class ControllerPagesLocalisationZone extends AController {
 		$this->data = array();
 		$this->data['error'] = $this->error;
 		$this->data['cancel'] = $this->html->getSecureURL('localisation/zone');
-
+		$zone_info = array();
    		$this->document->initBreadcrumb( array (
        		'href'      => $this->html->getSecureURL('index/home'),
        		'text'      => $this->language->get('text_home'),

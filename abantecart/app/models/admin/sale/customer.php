@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\core\Model;
+use abc\lib\AMail;
+use abc\lib\AView;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -39,7 +46,7 @@ class ModelSaleCustomer extends Model {
 			$data = $this->dcrypt->encrypt_data($data, 'customers');
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
-		$salt_key = genToken(8);
+		$salt_key = AHelperUtils::genToken(8);
 		$this->db->query("INSERT INTO " . $this->db->table("customers") . "
 						SET loginname = '" . $this->db->escape($data['loginname']) . "',
 							firstname = '" . $this->db->escape($data['firstname']) . "',
@@ -123,7 +130,7 @@ class ModelSaleCustomer extends Model {
 						WHERE customer_id = '" . (int)$customer_id . "'");
 	
 		if ($data['password']) {
-			$salt_key = genToken(8);
+			$salt_key = AHelperUtils::genToken(8);
 			$this->db->query("UPDATE " . $this->db->table("customers") . "
 							SET
 								salt = '" . $this->db->escape($salt_key) . "', 
@@ -219,7 +226,7 @@ class ModelSaleCustomer extends Model {
 		}
 
 		if ( in_array($field, $data) )
-			if ( $this->dcrypt->active && in_array($field, $this->dcrypt->getEcryptedFields("customers")) ) {
+			if ( $this->dcrypt->active && in_array($field, $this->dcrypt->getEncryptedFields("customers")) ) {
 				//check key_id to use 
 				$query_key = $this->db->query(
 									"SELECT key_id
@@ -233,7 +240,7 @@ class ModelSaleCustomer extends Model {
 							  WHERE customer_id = '" . (int)$customer_id . "'");
 
 		if ($field == 'password') {
-			$salt_key = genToken(8);
+			$salt_key = AHelperUtils::genToken(8);
 			$this->db->query("UPDATE " . $this->db->table("customers") . "
 							SET 
 								salt = '" . $this->db->escape($salt_key) . "', 
@@ -263,7 +270,7 @@ class ModelSaleCustomer extends Model {
 		//get all columns
 		$sql = "SELECT COLUMN_NAME
 				FROM INFORMATION_SCHEMA.COLUMNS
-				WHERE TABLE_SCHEMA = '".DB_DATABASE."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
+				WHERE TABLE_SCHEMA = '".$this->db->database()."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
 		$result = $this->db->query($sql);
 		$columns = array();
 		foreach($result->rows as $row){
@@ -356,7 +363,7 @@ class ModelSaleCustomer extends Model {
 
 		$data = array('firstname', 'lastname', 'company', 'address_1', 'address_2', 'city', 'postcode', 'country_id', 'zone_id' );
 		if ( in_array($field_name, $data) )
-			if ( $this->dcrypt->active && in_array($field_name, $this->dcrypt->getEcryptedFields("addresses")) ) {
+			if ( $this->dcrypt->active && in_array($field_name, $this->dcrypt->getEncryptedFields("addresses")) ) {
 				//check key_id to use
 				$query_key = $this->db->query( "SELECT key_id
 												FROM " . $this->db->table("addresses") . "
@@ -502,68 +509,68 @@ class ModelSaleCustomer extends Model {
 		$implode = array();
 		$filter = (isset($data['filter']) ? $data['filter'] : array());
 
-		if (has_value($filter['name'])) {
+		if (AHelperUtils::has_value($filter['name'])) {
 			$implode[] = "CONCAT(c.firstname, ' ', c.lastname) LIKE '%" . $this->db->escape($filter['name']) . "%' collate utf8_general_ci";
 		}
 
-		if (has_value($filter['name_email'])) {
+		if (AHelperUtils::has_value($filter['name_email'])) {
 			$implode[] = "CONCAT(c.firstname, ' ', c.lastname, ' ', c.email) LIKE '%" . $this->db->escape($filter['name_email']) . "%' collate utf8_general_ci";
 		}
 		//more specific login, last and first name search
-		if (has_value($filter['loginname'])) {
+		if (AHelperUtils::has_value($filter['loginname'])) {
 			$implode[] = "LOWER(c.loginname) = LOWER('" .$this->db->escape($filter['loginname']) . "') collate utf8_general_ci";
 		}
-		if (has_value($filter['firstname'])) {
+		if (AHelperUtils::has_value($filter['firstname'])) {
 			$implode[] = "LOWER(c.firstname) LIKE LOWER('" .$this->db->escape($filter['firstname']) . "%') collate utf8_general_ci";
 		}
-		if (has_value($filter['lastname'])) {
+		if (AHelperUtils::has_value($filter['lastname'])) {
 			$implode[] = "LOWER(c.lastname) LIKE LOWER('" .$this->db->escape($filter['lastname']) . "%') collate utf8_general_ci";
 		}
 		//select differently if encrypted
 		if ( !$this->dcrypt->active ) {
-			if (has_value($filter['email'])) {
+			if (AHelperUtils::has_value($filter['email'])) {
 				$implode[] = "c.email LIKE '%" . $this->db->escape($filter['email']) . "%' collate utf8_general_ci";
 			}
-			if (has_value($filter['telephone'])) {
+			if (AHelperUtils::has_value($filter['telephone'])) {
 				$implode[] = "c.telephone LIKE '%" . $this->db->escape($filter['telephone']) . "%' collate utf8_general_ci";
 			}
-			if (has_value($filter['sms'])) {
+			if (AHelperUtils::has_value($filter['sms'])) {
 				$implode[] = "c.sms LIKE '%" . $this->db->escape($filter['sms']) . "%' collate utf8_general_ci";
 			}
 		}
 		
-		if (has_value($filter['customer_group_id'])) {
+		if (AHelperUtils::has_value($filter['customer_group_id'])) {
 			$implode[] = "cg.customer_group_id = '" . $this->db->escape($filter['customer_group_id']) . "'";
 		}
 		// select only subscribers (group + customers with subscription)
-		if (has_value($filter['all_subscribers'])) {
+		if (AHelperUtils::has_value($filter['all_subscribers'])) {
 			$implode[] = "( (c.newsletter=1 AND c.status = 1 AND c.approved = 1) OR
 						(c.newsletter=1 AND cg.customer_group_id = '".(int)$this->getSubscribersCustomerGroupId()."'))";
 		}
 
 		// select only customers without newsletter subscribers
-		if (has_value($filter['only_customers'])) {
+		if (AHelperUtils::has_value($filter['only_customers'])) {
 			$implode[] = "cg.customer_group_id NOT IN (".(int)$this->getSubscribersCustomerGroupId().") ";
 		}
 
-		if (has_value($filter['only_with_mobile_phones'])) {
+		if (AHelperUtils::has_value($filter['only_with_mobile_phones'])) {
 			$implode[] = " TRIM(COALESCE(c.sms,''))  <> '' ";
 		}
 
-		if (has_value($filter['status'])) {
+		if (AHelperUtils::has_value($filter['status'])) {
 			$implode[] = "c.status = '" . (int)$filter['status'] . "'";
 		}	
 		
-		if (has_value($filter['approved'])) {
+		if (AHelperUtils::has_value($filter['approved'])) {
 			$implode[] = "c.approved = '" . (int)$filter['approved'] . "'";
 		}		
 		
-		if (has_value($filter['date_added'])) {
+		if (AHelperUtils::has_value($filter['date_added'])) {
 			$implode[] = "DATE(c.date_added) = DATE('" . $this->db->escape($filter['date_added']) . "')";
 		}
 
 		$store_id = null;
-		if( has_value($this->session->data['current_store_id']) ) {
+		if( AHelperUtils::has_value($this->session->data['current_store_id']) ) {
 			$store_id = (int)$this->session->data['current_store_id'];
 		}
 
@@ -631,13 +638,13 @@ class ModelSaleCustomer extends Model {
 		$query = $this->db->query($sql);
 		$result_rows = $query->rows;
 		if ( $this->dcrypt->active ) {
-			if (has_value($filter['email'])) {
+			if (AHelperUtils::has_value($filter['email'])) {
 				$result_rows = $this->_filter_by_encrypted_field($result_rows, 'email', $filter['email']);
 			}
-			if (has_value($filter['telephone'])) {
+			if (AHelperUtils::has_value($filter['telephone'])) {
 				$result_rows = $this->_filter_by_encrypted_field($result_rows, 'telephone', $filter['telephone']);
 			}
-			if (has_value($filter['sms'])) {
+			if (AHelperUtils::has_value($filter['sms'])) {
 				$result_rows = $this->_filter_by_encrypted_field($result_rows, 'sms', $filter['sms']);
 			}
 		}
@@ -664,7 +671,7 @@ class ModelSaleCustomer extends Model {
 		if ( !count($data) ) {
 			return array();
 		}
-		if ( !has_value($field) || !has_value($value) ) {
+		if ( !AHelperUtils::has_value($field) || !AHelperUtils::has_value($value) ) {
 			return $data;
 		}
 		$result_rows = array(); 
@@ -695,7 +702,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getCustomersByNewsletter() {
 		$store_based = '';
-		if( has_value($this->session->data['current_store_id']) ) {
+		if( AHelperUtils::has_value($this->session->data['current_store_id']) ) {
 			$store_based = " AND store_id = " . (int)$this->session->data['current_store_id'];
 		}
 		$query = $this->db->query("SELECT *
@@ -715,7 +722,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getCustomersByKeyword($keyword) {
 		$store_based = '';
-		if( has_value($this->session->data['current_store_id']) ) {
+		if( AHelperUtils::has_value($this->session->data['current_store_id']) ) {
 			$store_based = " AND store_id = " . (int)$this->session->data['current_store_id'];
 		}
 
@@ -740,7 +747,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getCustomersByEmails($emails) {
 		$store_based = '';
-		if( has_value($this->session->data['current_store_id']) ) {
+		if( AHelperUtils::has_value($this->session->data['current_store_id']) ) {
 			$store_based = " and store_id = " . (int)$this->session->data['current_store_id'];
 		}
 
@@ -818,7 +825,7 @@ class ModelSaleCustomer extends Model {
 		}
 		//exclude given customer from checking
 		$not_current_customer = '';
-		if ( has_value($customer_id) ) {
+		if ( AHelperUtils::has_value($customer_id) ) {
 			$not_current_customer = "AND customer_id <> '$customer_id'";
 		}
 		$query = $this->db->query("SELECT COUNT(*) AS total
@@ -1025,7 +1032,7 @@ class ModelSaleCustomer extends Model {
 			$this->data['mail_template_data']['store_name'] = $store_info[ 'store_name' ];
 			$this->data['mail_template_data']['store_url'] = $store_info[ 'store_url' ];
 			$this->data['mail_template_data']['text_thanks'] = $this->language->get('text_thanks');
-			$this->data['mail_template_data']['text_project_label'] = project_base();
+			$this->data['mail_template_data']['text_project_label'] = AHelperUtils::project_base();
 
 			$this->data['mail_template'] = 'mail/account_create.tpl';
 

@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AJson;
+
+if (! defined ( 'DIR_CORE' )) {
+	header ( 'Location: static_pages/' );
+}
 
 class ControllerResponsesCheckoutNoPayment extends AController {
 	public $data = array();
@@ -61,7 +68,6 @@ class ControllerResponsesCheckoutNoPayment extends AController {
 		$this->response->setOutput(AJson::encode($this->data));
 	}
 
-
 	public function api_confirm() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
@@ -74,7 +80,7 @@ class ControllerResponsesCheckoutNoPayment extends AController {
 		$this->load->library('json');
 		$this->response->setOutput(AJson::encode($this->data));
 	}
-	
+
 	public function confirm() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);

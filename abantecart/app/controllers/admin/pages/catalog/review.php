@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -200,7 +204,7 @@ class ControllerPagesCatalogReview extends AController {
 			$review_id = $this->model_catalog_review->addReview($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->redirect( $this->html->getSecureURL('catalog/review/update','&review_id='.$review_id) );
+			abc_redirect( $this->html->getSecureURL('catalog/review/update','&review_id='.$review_id) );
 		}
 		$this->_getForm();
 
@@ -219,7 +223,7 @@ class ControllerPagesCatalogReview extends AController {
 			$this->model_catalog_review->editReview($this->request->get['review_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->redirect( $this->html->getSecureURL('catalog/review/update','&review_id='.$this->request->get['review_id']) );
+			abc_redirect( $this->html->getSecureURL('catalog/review/update','&review_id='.$this->request->get['review_id']) );
 		}
 		$this->_getForm();
 

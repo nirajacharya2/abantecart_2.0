@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+use Exception;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -35,7 +39,7 @@ class ADebug{
 			if (defined('INSTALL')){
 				self::$debug = 1;
 				self::$debug_level = 1;
-			} else if (class_exists('Registry')){
+			} else if (class_exists('\abc\core\Registry')){
 				$registry = Registry::getInstance();
 				if ($registry->has('config')){
 
@@ -99,10 +103,10 @@ class ADebug{
 				'msg'  => $msg,
 				'type' => 'variable',
 		);
+		return true;
 	}
 
 	static function error($name, $code, $msg){
-
 		self::$checkpoints[] = array (
 				'name'           => $name,
 				'time'           => self::microtime(),
@@ -183,7 +187,7 @@ class ADebug{
 			return false;
 		}
 		$previous = array ();
-		$cummulative = array ();
+		$cumulative = array ();
 
 		$first = true;
 
@@ -208,9 +212,9 @@ class ADebug{
 					if ($c['type'] != 'checkpoint') continue;
 					if ($first == true){
 						$first = false;
-						$cummulative = $c;
+						$cumulative = $c;
 					}
-					$time = sprintf("%01.4f", $c['time'] - $cummulative['time']);
+					$time = sprintf("%01.4f", $c['time'] - $cumulative['time']);
 				}
 				echo '<div class="debug_info">';
 				echo 'Queries - ' . count(self::$queries) . '<br />';
@@ -242,7 +246,7 @@ class ADebug{
 								'queries'        => 0,
 						);
 						$first = false;
-						$cummulative = $c;
+						$cumulative = $c;
 					}
 
 					switch($c['type']){
@@ -256,7 +260,7 @@ class ADebug{
 							echo '- Memory: ' . (number_format($c['memory'] - $previous['memory'])) . ' (' . number_format($c['memory']) . ')' . '<br />';
 							echo '- Files: ' . ($c['included_files'] - $previous['included_files']) . ' (' . $c['included_files'] . ')' . '<br />';
 							echo '- Queries: ' . ($c['queries'] - $previous['queries']) . ' (' . $c['queries'] . ')' . '<br />';
-							echo '- Time: ' . sprintf("%01.4f", $c['time'] - $previous['time']) . ' (' . sprintf("%01.4f", $c['time'] - $cummulative['time']) . ')' . '<br />';
+							echo '- Time: ' . sprintf("%01.4f", $c['time'] - $previous['time']) . ' (' . sprintf("%01.4f", $c['time'] - $cumulative['time']) . ')' . '<br />';
 							if (self::$debug_level > 3){
 								self::display_queries($previous['queries'], $c['queries']);
 							}

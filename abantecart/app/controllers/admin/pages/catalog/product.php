@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -299,7 +304,7 @@ class ControllerPagesCatalogProduct extends AController {
 			$this->model_catalog_product->updateProductLinks($product_id, $product_data);
 			$this->extensions->hk_ProcessData($this,'product_insert');
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
+			abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
 		}
 		$this->_getForm();
 
@@ -331,7 +336,7 @@ class ControllerPagesCatalogProduct extends AController {
 			$this->model_catalog_product->updateProductLinks($product_id, $product_data);
 			$this->extensions->hk_ProcessData($this,'product_update');
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
+			abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
 		}
 		$this->_getForm($args);
 		//update controller data
@@ -351,12 +356,12 @@ class ControllerPagesCatalogProduct extends AController {
 				if($this->data['new_product']['layout_clone']){
 					$this->session->data['success'] .= ' '.$this->language->get('text_success_copy_layout');
 				}
-				redirect($this->html->getSecureURL(
+				abc_redirect($this->html->getSecureURL(
 						'catalog/product/update',
 						'&product_id='.$this->data['new_product']['id']));
 			} else {
 				$this->session->data['success'] = $this->language->get('text_error_copy');
-				redirect($this->html->getSecureURL('catalog/product'));
+				abc_redirect($this->html->getSecureURL('catalog/product'));
 			}
 		}
 
@@ -365,6 +370,8 @@ class ControllerPagesCatalogProduct extends AController {
 	}
 
 	private function _getForm($args = array()) {
+		$product_id = null;
+		$product_info = array();
 		$viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
 		$content_language_id = $this->language->getContentLanguageID();
 		if (isset($this->request->get['product_id'])) {
@@ -532,7 +539,7 @@ class ControllerPagesCatalogProduct extends AController {
 			$this->data['preview'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
 		}
 
-		if ( !has_value($this->data['stock_status_id']) ) {
+		if ( !AHelperUtils::has_value($this->data['stock_status_id']) ) {
 			$this->data['stock_status_id'] = $this->config->get('config_stock_status_id');
 		}
 		if (isset($this->request->post['date_available'])) {
@@ -540,7 +547,7 @@ class ControllerPagesCatalogProduct extends AController {
 		} elseif (isset($product_info)) {
 			$this->data['date_available'] = $product_info['date_available'];
 		} else {
-			$this->data['date_available'] = dateInt2ISO(time()-86400);
+			$this->data['date_available'] = AHelperUtils::dateInt2ISO(time()-86400);
 		}
 
 		$weight_info = $this->model_localisation_weight_class->getWeightClassDescriptionByUnit($this->config->get('config_weight_class'));
@@ -720,13 +727,13 @@ class ControllerPagesCatalogProduct extends AController {
 		$this->data['form']['fields']['data']['price'] = $form->getFieldHtml(array(
 			'type' => 'input',
 			'name' => 'price',
-			'value' => moneyDisplayFormat($this->data['price']),
+			'value' => AHelperUtils::moneyDisplayFormat($this->data['price']),
 			'style' => 'small-field'
 		));
 		$this->data['form']['fields']['data']['cost'] = $form->getFieldHtml(array(
 			'type' => 'input',
 			'name' => 'cost',
-			'value' => moneyDisplayFormat($this->data['cost']),
+			'value' => AHelperUtils::moneyDisplayFormat($this->data['cost']),
 			'style' => 'small-field'
 		));
 		$this->data['form']['fields']['data']['tax_class'] = $form->getFieldHtml(array(
@@ -776,7 +783,7 @@ class ControllerPagesCatalogProduct extends AController {
 		$this->data['form']['fields']['data']['stock_checkout'] = $form->getFieldHtml(array (
             'type'  => 'selectbox',
             'name'  => 'stock_checkout',
-            'value' => (has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : '' ),
+            'value' => (AHelperUtils::has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : '' ),
             'options' => array (
                 '' => $this->language->get('text_default'),
                 0  => $this->language->get('text_no'),
@@ -788,7 +795,7 @@ class ControllerPagesCatalogProduct extends AController {
 		$this->data['form']['fields']['data']['stock_status'] = $form->getFieldHtml(array(
 			'type' => 'selectbox',
 			'name' => 'stock_status_id',
-			'value' => (has_value($this->data['stock_status_id']) ? (int)$this->data['stock_status_id'] : $this->config->get('config_stock_status_id') ),
+			'value' => (AHelperUtils::has_value($this->data['stock_status_id']) ? (int)$this->data['stock_status_id'] : $this->config->get('config_stock_status_id') ),
 			'options' => $this->data['stock_statuses'],
 			'help_url' => $this->gen_help_url('product_inventory'),
 			'style' => 'small-field',
@@ -821,15 +828,15 @@ class ControllerPagesCatalogProduct extends AController {
 					'name' => 'keyword',
 					'value' => $this->data['keyword'],
 					'help_url' => $this->gen_help_url('seo_keyword'),
-					'attr' => ' gen-value="'.SEOEncode($this->data['product_description']['name']).'" ',
+					'attr' => ' gen-value="'.AHelperUtils::SEOEncode($this->data['product_description']['name']).'" ',
 					'multilingual' => true,
 				));
 		$this->data['form']['fields']['data']['date_available'] = $form->getFieldHtml(array(
 			'type' => 'date',
 			'name' => 'date_available',
-			'value' => dateISO2Display($this->data[ 'date_available' ]),
-			'default' => dateNowDisplay(),
-			'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+			'value' => AHelperUtils::dateISO2Display($this->data[ 'date_available' ]),
+			'default' => AHelperUtils::dateNowDisplay(),
+			'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 			'highlight' => 'future',
 			'style' => 'small-field',
 			));
@@ -865,7 +872,7 @@ class ControllerPagesCatalogProduct extends AController {
 		$this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml(array(
 			'type' => 'input',
 			'name' => 'shipping_price',
-			'value' => moneyDisplayFormat($this->data['shipping_price']),
+			'value' => AHelperUtils::moneyDisplayFormat($this->data['shipping_price']),
 			'style' => 'tiny-field',
 		));
 
@@ -990,7 +997,7 @@ class ControllerPagesCatalogProduct extends AController {
 		}
 
 		foreach(array('length', 'width', 'height','weight') as $name){
-			$v =  abs(preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
+			$v =  abs(AHelperUtils::preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
 			if($v>=1000){
 				$this->error[$name] = $this->language->get('error_measure_value');
 			}
@@ -1024,7 +1031,7 @@ class ControllerPagesCatalogProduct extends AController {
 
 	protected function _prepareData($data = array()){
 		if(isset($data['date_available'])){
-			$data['date_available'] = dateDisplay2ISO($data['date_available']);
+			$data['date_available'] = AHelperUtils::dateDisplay2ISO($data['date_available']);
 		}
 		return $data;
 	}

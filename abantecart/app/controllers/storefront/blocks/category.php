@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -56,7 +60,7 @@ class ControllerBlocksCategory extends AController {
 		$this->view->assign('selected_category_id', $this->category_id);
 		$this->view->assign('path', $request['path']);
 		
-		//load main lavel categories
+		//load main level categories
 		$all_categories = $this->model_catalog_category->getAllCategories();
 		//build thumbnails list
 		$category_ids = array();
@@ -88,7 +92,7 @@ class ControllerBlocksCategory extends AController {
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
   	}
 
-	/** Function builds one dimentional category tree based on given array
+	/** Function builds one dimensional category tree based on given array
 	 *
 	 * @param array $all_categories
 	 * @param int $parent_id

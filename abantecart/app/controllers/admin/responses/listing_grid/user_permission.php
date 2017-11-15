@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -33,7 +40,6 @@ class ControllerResponsesListingGridUserPermission extends AController {
 
 		$page = $this->request->post['page']; // get the requested page
 		$limit = $this->request->post['rows']; // get how many rows we want to have into the grid
-		$sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
 		$sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
@@ -125,7 +131,7 @@ class ControllerResponsesListingGridUserPermission extends AController {
 
 	    // update user group permissions
 
-		if (has_value($this->request->post['permission']) && has_value($this->request->get['user_group_id'])){
+		if (AHelperUtils::has_value($this->request->post['permission']) && AHelperUtils::has_value($this->request->get['user_group_id'])){
 			$this->model_user_user_group->editUserGroup($this->request->get['user_group_id'], $this->request->post);
 		}
 
@@ -175,8 +181,8 @@ class ControllerResponsesListingGridUserPermission extends AController {
 		$search_str = $searchData['rules'][0]['data'];
 		$access = $modify = array();
 		foreach($controllers as $key=>$controller){
-			$access[$key] = has_value($permissions['access'][$controller]) ? (int)$permissions['access'][$controller] : null;
-			$modify[$key] = has_value($permissions['modify'][$controller]) ? (int)$permissions['modify'][$controller] : null;
+			$access[$key] = AHelperUtils::has_value($permissions['access'][$controller]) ? (int)$permissions['access'][$controller] : null;
+			$modify[$key] = AHelperUtils::has_value($permissions['modify'][$controller]) ? (int)$permissions['modify'][$controller] : null;
 		}
 
 		//filter result by controller name (temporary solution). needs to improve.

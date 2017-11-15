@@ -17,11 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerResponsesIndexMaintenance extends AController {
-
 	public $data;
 	public function main() {
         //init controller data
@@ -33,4 +35,3 @@ class ControllerResponsesIndexMaintenance extends AController {
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
     }
 }
-?>

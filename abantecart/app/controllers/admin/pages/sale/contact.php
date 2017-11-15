@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -39,7 +46,7 @@ class ControllerPagesSaleContact extends AController {
 		$driver = $this->config->get('config_sms_driver');
 		//if sms driver not set or disabled - redirect
 		if(!$driver || !$this->config->get($driver.'_status')){
-			redirect($this->html->getSecureURL('sale/contact/email'));
+			abc_redirect($this->html->getSecureURL('sale/contact/email'));
 		}
 
 		$this->data['protocol'] = 'sms';
@@ -51,7 +58,7 @@ class ControllerPagesSaleContact extends AController {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if(!has_value($this->data['protocol'])){
+		if(!AHelperUtils::has_value($this->data['protocol'])){
 			$this->data['protocol'] = 'email';
 		}
 
@@ -116,11 +123,11 @@ class ControllerPagesSaleContact extends AController {
 		$this->data['products'] = array();
 		$this->loadModel('catalog/product');
 		$customer_ids = $this->request->get_or_post('to');
-		if(!$customer_ids && has_value($this->session->data['sale_contact_presave']['to'])){
+		if(!$customer_ids && AHelperUtils::has_value($this->session->data['sale_contact_presave']['to'])){
 			$customer_ids = $this->session->data['sale_contact_presave']['to'];
 		}
 		$product_ids = $this->request->get_or_post('products');
-		if(!$product_ids && has_value($this->session->data['sale_contact_presave']['products'])){
+		if(!$product_ids && AHelperUtils::has_value($this->session->data['sale_contact_presave']['products'])){
 			$product_ids = $this->session->data['sale_contact_presave']['products'];
 		}
 		
@@ -159,7 +166,7 @@ class ControllerPagesSaleContact extends AController {
 
 		foreach(array('recipient','subject','message') as $n){
 			$this->data[$n] = $this->request->post_or_get($n);
-			if (!$this->data[$n] && has_value($this->session->data['sale_contact_presave'][$n])){
+			if (!$this->data[$n] && AHelperUtils::has_value($this->session->data['sale_contact_presave'][$n])){
 				$this->data[$n] = $this->session->data['sale_contact_presave'][$n];
 			}
 		}
@@ -284,7 +291,7 @@ class ControllerPagesSaleContact extends AController {
 		));
 
 		//if email address given
-		if (has_value($this->request->get['email'])) {
+		if (AHelperUtils::has_value($this->request->get['email'])) {
 			$this->data['emails'] = (array)$this->request->get['email'];
 		}
 
@@ -308,7 +315,7 @@ class ControllerPagesSaleContact extends AController {
 		}
 
 		//load tabs controller
-		if($this->data['protocol']=='email' || !has_value($this->data['protocol'])){
+		if($this->data['protocol']=='email' || !AHelperUtils::has_value($this->data['protocol'])){
 			$this->data['active'] = 'email';
 		}elseif($this->data['protocol']=='sms'){
 			$this->data['active'] = 'sms';
@@ -354,7 +361,7 @@ class ControllerPagesSaleContact extends AController {
 				//if no limitations for execution time for task - think it's 2 hours
 				$max_exec_time = 7200;
 			}
-			if( time() - dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
+			if( time() - AHelperUtils::dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
 				$this->data['incomplete_tasks_url'] = $this->html->getSecureURL('r/sale/contact/incomplete');
 				break;
 			}

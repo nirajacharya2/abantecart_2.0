@@ -17,6 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\AResourceManager;
+use abc\lib\ResourceUploadHandler;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -147,7 +157,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 							$this->data['object_id']);
 
 			// also check is mapped at all
-			//NOTE: we allow to delete resource that mappend ONLY to current object
+			//NOTE: we allow to delete resource that mapped ONLY to current object
 			$is_mapped = $rm->isMapped($resource['resource_id']);
 			if( ($is_mapped==1 && $resource['mapped_to_current']) || !$is_mapped){
 				$resource['can_delete'] = true;
@@ -162,20 +172,20 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 		$this->_buildForm($resource);
 
 		//get resource information 
-		$res_dets = $rm->getResource($resource['resource_id']);
-		if($res_dets['resource_path']) {
-			$res_dets['res_url'] = $rm->buildResourceURL($res_dets['resource_path']);
-			$res_dets['file_path'] = DIR_RESOURCE . $rm->getTypeDir() . $res_dets['resource_path'];
-			$res_dets['file_size'] = human_filesize(filesize($res_dets['file_path']));
-			$image_dets = getimagesize($res_dets['file_path']);
-			if($image_dets[0]) {
-				$res_dets['width'] = $image_dets[0].'px.';
-				$res_dets['height'] = $image_dets[1].'px.';
-				$res_dets['mime'] = $image_dets['mime'];
+		$res_details = $rm->getResource($resource['resource_id']);
+		if($res_details['resource_path']) {
+			$res_details['res_url'] = $rm->buildResourceURL($res_details['resource_path']);
+			$res_details['file_path'] = DIR_RESOURCE . $rm->getTypeDir() . $res_details['resource_path'];
+			$res_details['file_size'] = AHelperUtils::human_filesize(filesize($res_details['file_path']));
+			$image_details = getimagesize($res_details['file_path']);
+			if($image_details[0]) {
+				$res_details['width'] = $image_details[0].'px.';
+				$res_details['height'] = $image_details[1].'px.';
+				$res_details['mime'] = $image_details['mime'];
 			} else {
-				$res_dets['mime'] = getMimeType($res_dets['file_path']);
+				$res_details['mime'] = AHelperUtils::getMimeType($res_details['file_path']);
 			}
-			$this->data['details'] = $res_dets;
+			$this->data['details'] = $res_details;
 		}
 		$this->data['resource'] = $resource;
 			
@@ -205,7 +215,8 @@ class ControllerResponsesCommonResourceLibrary extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		if($this->request->is_POST()){
-			return $this->add_code();
+			$this->add_code();
+			return null;
 		}
 
 		$this->data['languages'] = array();
@@ -313,9 +324,6 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 		);
 	}
 
-	/**
-	 * @throws AException
-	 */
 	public function list_library() {
 
 		//init controller data
@@ -376,7 +384,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 
 		foreach ($result as $key => $item) {
 			if ($item['date_added']) {
-				$result[$key]['date_added'] = dateISO2Display($item['date_added']);
+				$result[$key]['date_added'] = AHelperUtils::dateISO2Display($item['date_added']);
 			}
 			$result[$key]['thumbnail_url'] = $rm->getResourceThumb(
 				$item['resource_id'],
@@ -422,6 +430,9 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 		$this->processTemplate('responses/common/resource_library.tpl');
 	}
 
+	/**
+	 * @param AResourceManager $rm
+	 */
 	private function _common($rm) {
 
 		if($this->request->get['mode']=='single'){
@@ -868,7 +879,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 
 		$rm = new AResourceManager();
 		$resource_id = (int)$this->request->get['resource_id'];
-		if(has_value($this->request->get['object_name']) && has_value($this->request->get['object_id'])){
+		if(AHelperUtils::has_value($this->request->get['object_name']) && AHelperUtils::has_value($this->request->get['object_id'])){
 			$rm->unmapResource( $this->request->get['object_name'],$this->request->get['object_id'], $resource_id);
 		}
 		$result = $rm->deleteResource($resource_id);
@@ -934,7 +945,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-		if(!has_value($this->request->get['object_name']) || !has_value($this->request->get['object_id']) ){
+		if(!AHelperUtils::has_value($this->request->get['object_name']) || !AHelperUtils::has_value($this->request->get['object_id']) ){
 			$error = new AError('');
 						return $error->toJSONResponse('VALIDATION_ERROR_406',
 							array('error_text' => $this->language->get('error_unmap')));
@@ -999,7 +1010,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 			$rm->setType($result['type_name']);
 			if (!empty($result['resource_code'])) {
 				if (strpos($result['resource_code'], "http") === 0) {
-					$this->redirect($result['resource_code']);
+					abc_redirect($result['resource_code']);
 				} else {
 					$this->response->setOutput($result['resource_code']);
 				}

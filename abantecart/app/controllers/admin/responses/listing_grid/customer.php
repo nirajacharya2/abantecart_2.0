@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -48,13 +55,13 @@ class ControllerResponsesListingGridCustomer extends AController {
 			'start' => ($page - 1) * $limit,
 			'limit' => $limit,
 		);
-		if ( has_value($this->request->get[ 'customer_group' ]) ){
+		if ( AHelperUtils::has_value($this->request->get[ 'customer_group' ]) ){
 			$data['filter']['customer_group_id'] = $this->request->get['customer_group'];
 		}
-		if ( has_value($this->request->get['status']) ){
+		if ( AHelperUtils::has_value($this->request->get['status']) ){
 			$data['filter']['status'] = $this->request->get['status'];
 		}
-		if ( has_value($this->request->get['approved']) ){
+		if ( AHelperUtils::has_value($this->request->get['approved']) ){
 			$data['filter']['approved'] = $this->request->get['approved'];
 		}
 
@@ -267,7 +274,7 @@ class ControllerResponsesListingGridCustomer extends AController {
 						if($field == 'default' && $address_id) {
 							$this->model_sale_customer->setDefaultAddress($customer_id, $address_id);
 						}
-						else if( has_value($address_id) ){
+						else if( AHelperUtils::has_value($address_id) ){
 							$this->model_sale_customer->editAddressField($address_id, $field, $value);
 						}else{
 							$this->model_sale_customer->editCustomerField($customer_id, $field, $value);

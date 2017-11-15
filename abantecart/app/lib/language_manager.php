@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+namespace abc\core;
+
+use abc\lib\AConfig;
+use abc\lib\ADebug;
+use abc\lib\AException;
+use abc\Translator;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -213,7 +221,7 @@ class ALanguageManager extends Alanguage{
 		}
 
 		/**
-		 * @var AConfig $config
+		 * @var \abc\lib\AConfig $config
 		 */
 		$config = $this->registry->get('config');
 
@@ -229,7 +237,7 @@ class ALanguageManager extends Alanguage{
 			foreach ($lang_data as $key => $values){
 				if (count($values)){
 					foreach ($values as $value){
-						if (has_value($value)){
+						if (AHelperUtils::has_value($value)){
 							$this->_do_insert_descriptions($table_name, $index, array ($lang_id => array ($key => $value)));
 						}
 					}
@@ -293,11 +301,11 @@ class ALanguageManager extends Alanguage{
 
 		$del_index = array ();
 		foreach ($index as $i => $v){
-			if (has_value($v)){
+			if (AHelperUtils::has_value($v)){
 				$del_index[] = $i . " = '" . $this->db->escape($v) . "'";
 			}
 		}
-		$sql = "DELETE FROM " . DB_PREFIX . $table_name . " ";
+		$sql = "DELETE FROM " . $this->db->table($table_name) . " ";
 		$sql .= "WHERE " . implode(" AND ", $del_index);
 		$this->db->query($sql);
 		return null;
@@ -315,11 +323,11 @@ class ALanguageManager extends Alanguage{
 
 		$sel_index = array ();
 		foreach ($index as $i => $v){
-			if (has_value($v)){
+			if (AHelperUtils::has_value($v)){
 				$sel_index[] = $i . " = '" . $this->db->escape($v) . "'";
 			}
 		}
-		$sql = "SELECT * FROM " . DB_PREFIX . $table_name . " ";
+		$sql = "SELECT * FROM " . $this->db->table($table_name) . " ";
 		$sql .= "WHERE " . implode(" AND ", $sel_index);
 		if (!is_null($language_id)){
 			$sql .= " AND language_id=" . (int)$language_id;
@@ -347,7 +355,7 @@ class ALanguageManager extends Alanguage{
 			if (!$lang_data) continue;
 			$update_index = array ();
 			foreach ($index as $i => $v){
-				if (has_value($v)){
+				if (AHelperUtils::has_value($v)){
 					$update_index[] = $i . " = '" . $this->db->escape($v) . "'";
 				}
 			}
@@ -358,7 +366,7 @@ class ALanguageManager extends Alanguage{
 				$update_data[] = $i . " = '" . $this->db->escape($v) . "'";
 			}
 
-			$sql = "UPDATE " . DB_PREFIX . $table_name . " ";
+			$sql = "UPDATE " . $this->db->table($table_name) . " ";
 			$sql .= "SET " . implode(", ", $update_data) . " WHERE " . implode(" AND ", $update_index);
 			$this->db->query($sql);
 		}
@@ -380,7 +388,7 @@ class ALanguageManager extends Alanguage{
 				$lang_data[$key] = $this->db->escape($value);
 			}
 			$load_data = array_merge($lang_data, $index, array ('language_id' => $lang_id));
-			$sql = "INSERT INTO " . DB_PREFIX . $table_name . " ";
+			$sql = "INSERT INTO " . $this->db->table($table_name) . " ";
 			$sql .= "(`" . implode("`, `", array_keys($load_data)) . "`) VALUES ('" . implode("', '", $load_data) . "') ";
 			$this->db->query($sql);
 		}
@@ -453,7 +461,7 @@ class ALanguageManager extends Alanguage{
 				//insert only
 				//translate source text
 				foreach ($txt_data[$src_lang_id] as $key => $value){
-					if (has_value($value)){
+					if (AHelperUtils::has_value($value)){
 						if (in_array($key, array_keys($serialized_roadmap))){
 							$unserialized_data = unserialize($value);
 							if ($unserialized_data !== false){
@@ -694,13 +702,13 @@ class ALanguageManager extends Alanguage{
 		// admin
 		$lang_dir = DIR_LANGUAGE . $language_name;
 
-		$xml_files = getFilesInDir($lang_dir, 'xml');
+		$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 		foreach ($xml_files as $file){
 			$result['admin'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 		}
 		//storefront
 		$lang_dir = DIR_STOREFRONT . 'languages/' . $language_name;
-		$xml_files = getFilesInDir($lang_dir, 'xml');
+		$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 		foreach ($xml_files as $file){
 			$result['storefront'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 		}
@@ -712,7 +720,7 @@ class ALanguageManager extends Alanguage{
 			//$extension_name = pathinfo($extension_dir,PATHINFO_BASENAME);
 			$lang_dir = $extension_dir . '/admin/languages/' . $language_name;
 			if (is_dir($lang_dir)){
-				$xml_files = getFilesInDir($lang_dir, 'xml');
+				$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 				foreach ($xml_files as $file){
 					$result['extensions']['admin'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 				}
@@ -720,7 +728,7 @@ class ALanguageManager extends Alanguage{
 
 			$lang_dir = $extension_dir . '/storefront/languages/' . $language_name;
 			if (is_dir($lang_dir)){
-				$xml_files = getFilesInDir($lang_dir, 'xml');
+				$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 				foreach ($xml_files as $file){
 					$result['extensions']['storefront'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 				}
@@ -746,7 +754,7 @@ class ALanguageManager extends Alanguage{
 		array_push($pkeys, 'language_definition_id', 'language_id', 'section', 'block', 'language_key');
 		$section = $this->is_admin ? 1 : 0;
 		$specific_sql = " AND block = '" . $block . "' AND section = '" . $section . "'";
-		return $this->cloneLanguageRows(DB_PREFIX . 'language_definitions', $pkeys, $language_id, $source_language, $specific_sql);
+		return $this->cloneLanguageRows($this->db->table('language_definitions'), $pkeys, $language_id, $source_language, $specific_sql);
 	}
 
 	/**
@@ -1020,7 +1028,7 @@ class ALanguageManager extends Alanguage{
 		if (!$load_data){
 			$sql = "SELECT DISTINCT table_name 
 			    	FROM information_schema.columns 
-			    	WHERE column_name = 'language_id' AND table_schema='" . DB_DATABASE . "'";
+			    	WHERE column_name = 'language_id' AND table_schema='" . $this->db->database() . "'";
 			$load_sql = $this->db->query($sql);
 			$load_data = $load_sql->rows;
 			if ($this->cache){

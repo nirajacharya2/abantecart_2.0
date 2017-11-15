@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -35,10 +42,10 @@ class ControllerResponsesListingGridReportPurchased extends AController {
 		$grid_filter_params = array( 'name', 'model' );
 
 		if(!$this->request->get['date_start']){
-			$this->request->get['date_start'] = dateInt2Display(strtotime('-30 day'));
+			$this->request->get['date_start'] = AHelperUtils::dateInt2Display(strtotime('-30 day'));
 		}
 		if(!$this->request->get['date_end']){
-			$this->request->get['date_end'] = dateInt2Display(time());
+			$this->request->get['date_end'] = AHelperUtils::dateInt2Display(time());
 		}
 
 		$filter_form = new AFilter(array( 'method' => 'get', 'filter_params' => $filter_params ));

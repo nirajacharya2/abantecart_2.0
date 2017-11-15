@@ -17,11 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiCommonAccess extends AControllerAPI {
-	
 	public function main() {
 		//validate if API enabled and KEY matches. 
 		if ( $this->config->get('config_storefront_api_status')	) {
@@ -33,10 +35,7 @@ class ControllerApiCommonAccess extends AControllerAPI {
 			} else if ( !$this->config->get('config_storefront_api_key') ) {
 				return null;
 			}
-		}	
+		}
 		return $this->dispatch('api/error/no_access');
-	}	
+	}
 }
-
-
-

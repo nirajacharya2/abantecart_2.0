@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ATaskManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -185,7 +191,7 @@ class ControllerPagesLocalisationLanguage extends AController {
 
 			$language_id = $this->model_localisation_language->addLanguage($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('localisation/language/update', '&language_id=' . $language_id ));
+			abc_redirect($this->html->getSecureURL('localisation/language/update', '&language_id=' . $language_id ));
 		}
 
 		$this->_getForm();
@@ -200,7 +206,7 @@ class ControllerPagesLocalisationLanguage extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 		$language_id = (int)$this->request->get['language_id'];
 		if(!$language_id){
-			redirect($this->html->getSecureURL('localisation/language'));
+			abc_redirect($this->html->getSecureURL('localisation/language'));
 		}
 		
 		$this->view->assign('success', $this->session->data['success']);
@@ -212,7 +218,7 @@ class ControllerPagesLocalisationLanguage extends AController {
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_localisation_language->editLanguage($language_id, $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');			
-			redirect($this->html->getSecureURL('localisation/language/update', '&language_id=' . $language_id ));
+			abc_redirect($this->html->getSecureURL('localisation/language/update', '&language_id=' . $language_id ));
 		}
 		$this->_getForm();
 
@@ -431,7 +437,7 @@ class ControllerPagesLocalisationLanguage extends AController {
 					//if no limitations for execution time for task - think it's 2 hours
 					$max_exec_time = 7200;
 				}
-				if( time() - dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
+				if( time() - AHelperUtils::dateISO2Int($incm_task['last_time_run']) > $max_exec_time ){
 					$this->data['incomplete_tasks_url'] = $this->html->getSecureURL('r/localisation/language_description/incomplete');
 					break;
 				}

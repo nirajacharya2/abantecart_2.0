@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+use abc\lib\AConfigManager;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -53,7 +60,7 @@ class ControllerPagesSettingSetting extends AController {
 
 		if ($this->request->is_POST() && $this->_validate($get['active'], $get['store_id'])) {
 			foreach( array('config_logo', 'config_mail_logo', 'config_icon') as $n){
-				if (has_value($post[$n])) {
+				if (AHelperUtils::has_value($post[$n])) {
 					$post[$n] = html_entity_decode($post[$n], ENT_COMPAT, 'UTF-8');
 				} else if(!$post[$n] && isset($post[$n.'_resource_id'])) {
 					//we save resource ID vs resource path
@@ -62,13 +69,13 @@ class ControllerPagesSettingSetting extends AController {
 			}
 
 			//html decode store name
-			if (has_value($post['store_name'])) {
+			if (AHelperUtils::has_value($post['store_name'])) {
 				$post['store_name'] = html_entity_decode($post['store_name'], ENT_COMPAT, 'UTF-8');
 			}
 
 			//when change base currency for default store also change values for all currencies in database before saving
 			if (!(int)$get['store_id']
-					&& has_value($post['config_currency'])
+					&& AHelperUtils::has_value($post['config_currency'])
 					&& $post['config_currency'] != $this->config->get('config_currency')
 			){
 				$this->loadModel('localisation/currency');
@@ -82,13 +89,13 @@ class ControllerPagesSettingSetting extends AController {
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			if(has_value($post['config_maintenance']) && $post['config_maintenance']){
+			if(AHelperUtils::has_value($post['config_maintenance']) && $post['config_maintenance']){
 				//mark storefront session as merchant session
-				startStorefrontSession($this->user->getId());
+				AHelperUtils::startStorefrontSession($this->user->getId());
 			}
 			$redirect_url = $this->html->getSecureURL('setting/setting',
 					'&active=' . $get['active'] . '&store_id=' . (int)$get['store_id']);
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 
 		$this->data['store_id'] = 0;
@@ -476,7 +483,7 @@ class ControllerPagesSettingSetting extends AController {
 						if(!$tmpl_id){
 							$tmpl_id = $this->config->get('config_storefront_template');
 						}
-						redirect($this->html->getSecureURL('design/template/edit','&tmpl_id='.$tmpl_id));
+						abc_redirect($this->html->getSecureURL('design/template/edit','&tmpl_id='.$tmpl_id));
 					}
 				}
 
@@ -581,7 +588,7 @@ class ControllerPagesSettingSetting extends AController {
 		$ret_data = array();
 
 		if ($data['storefront_template_debug']) {
-			$this->session->data['tmpl_debug'] = genToken(16);
+			$this->session->data['tmpl_debug'] = AHelperUtils::genToken(16);
 			$ret_data['storefront_debug_url'] = $this->html->getCatalogURL('index/home', '&tmpl_debug=' . $this->session->data['tmpl_debug']);
 			$ret_data['admin_debug_url'] = $this->html->getSecureURL('index/home', '&tmpl_debug=' . $this->session->data['tmpl_debug']);
 		} else {

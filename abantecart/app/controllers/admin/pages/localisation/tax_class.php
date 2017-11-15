@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
@@ -115,7 +120,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         if ( $this->request->is_POST() && $this->_validateForm()) {
             $tax_class_id = $this->model_localisation_tax_class->addTaxClass($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/tax_class/insert_rates', '&tax_class_id=' . $tax_class_id));
+            abc_redirect($this->html->getSecureURL('localisation/tax_class/insert_rates', '&tax_class_id=' . $tax_class_id));
         }
         $this->_getForm();
 
@@ -138,7 +143,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         if ( $this->request->is_POST() && $this->_validateForm()) {
             $this->model_localisation_tax_class->editTaxClass($this->request->get['tax_class_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/tax_class/update', '&tax_class_id=' . $this->request->get['tax_class_id']));
+            abc_redirect($this->html->getSecureURL('localisation/tax_class/update', '&tax_class_id=' . $this->request->get['tax_class_id']));
         }
         $this->_getForm();
 
@@ -170,7 +175,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
             'text' => $this->language->get('heading_title'),
             'separator' => ' :: '
         ));
-        
+
         $tax_title = $tax_class_info['tax_class'][$this->session->data['content_language_id']]['title'];
 		$this->document->setTitle( $this->language->get('text_edit') . $this->language->get('text_class') . ' - ' . $tax_title );
 
@@ -275,7 +280,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         if ( $this->request->is_POST() && $this->_validateRateForm() ) {
             $tax_rate_id = $this->model_localisation_tax_class->addTaxRate($this->request->get['tax_class_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id'] . '&tax_rate_id=' . $tax_rate_id));
+            abc_redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id'] . '&tax_rate_id=' . $tax_rate_id));
         }
         $this->_getRatesForm();
 
@@ -298,7 +303,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         if ( $this->request->is_POST() && $this->_validateRateForm() ) {
             $this->model_localisation_tax_class->editTaxRate($this->request->get['tax_rate_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id'] . '&tax_rate_id=' . $this->request->get['tax_rate_id']));
+            abc_redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id'] . '&tax_rate_id=' . $this->request->get['tax_rate_id']));
         }
         $this->_getRatesForm();
 
@@ -313,7 +318,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
 
         $this->model_localisation_tax_class->deleteTaxRate($this->request->get['tax_rate_id']);
         $this->session->data['success'] = $this->language->get('text_success');
-        $this->redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id']));
+        abc_redirect($this->html->getSecureURL('localisation/tax_class/rates', '&tax_class_id=' . $this->request->get['tax_class_id']));
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -324,7 +329,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
 		$tax_class_id = (int)$this->request->get['tax_class_id'];
 
 		if(!$tax_class_id){
-			$this->redirect($this->html->getSecureURL('localisation/tax_class'));
+			abc_redirect($this->html->getSecureURL('localisation/tax_class'));
 		}
 
 		$tax_rate_id = (int)$this->request->get['tax_rate_id'];
@@ -362,7 +367,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
             'separator' => ' :: '
         ));
 
-
+	    $rate_info = array();
         if ($tax_rate_id && $this->request->is_GET() ) {
             $rate_info = $this->model_localisation_tax_class->getTaxRate($tax_rate_id);
         }
@@ -377,11 +382,11 @@ class ControllerPagesLocalisationTaxClass extends AController {
                 $this->data[$f] = '';
             }
         }
-        
+
 		//set multilingual fields
 		$this->data['tax_rate'] = array();
 		if (is_array($this->request->post['tax_rate']) && sizeof($this->request->post['tax_rate']) ) {
-			$this->data['tax_rate'] = $this->request->post['tax_rate'];			
+			$this->data['tax_rate'] = $this->request->post['tax_rate'];
 		} elseif ( $rate_info['tax_rate'] ) {
 			$this->data['tax_rate'] = $rate_info['tax_rate'];
 		}
@@ -394,7 +399,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         }
 
         $zone_to_locations = $this->model_localisation_location->getZoneToLocations(array('location_id' => $this->data['location_id']));
-
+	    $zones = array();
         foreach ($zone_to_locations as $value) {
             $zones[] = $value['zone_id'];
         }
@@ -490,7 +495,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
             'style' => 'large-field',
             'multilingual' => true,
         ));
-        
+
 		$this->data[ 'rate_prefix' ] = trim($this->data[ 'rate_prefix' ]);
 		$currency_symbol = $this->currency->getCurrency($this->config->get('config_currency'));
 		$currency_symbol = $currency_symbol[ 'symbol_left' ] . $currency_symbol[ 'symbol_right' ];
@@ -585,7 +590,7 @@ class ControllerPagesLocalisationTaxClass extends AController {
         ));
 
 		$tax_class_id = (int)$this->request->get['tax_class_id'];
-
+	    $tax_class_info = array();
         if ( $tax_class_id ) {
             $tax_class_info = $this->model_localisation_tax_class->getTaxClass( $tax_class_id );
         }
@@ -722,12 +727,12 @@ class ControllerPagesLocalisationTaxClass extends AController {
 	private function _initTabs($active = null) {
 
 
-		if( !has_value($this->request->get['tax_class_id']) ) {
+		if( !AHelperUtils::has_value($this->request->get['tax_class_id']) ) {
 			$this->data['tabs'] = array();
+			$tax_class_id = null;
 		}else{
 			$tax_class_id = (int)$this->request->get['tax_class_id'];
 			$this->data['tax_class_id'] = $tax_class_id;
-
 		}
 
 

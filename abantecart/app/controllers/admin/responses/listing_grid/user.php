@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -48,7 +56,7 @@ class ControllerResponsesListingGridUser extends AController {
 	    $filter_grid = new AFilter( array( 'method' => 'post', 
 	    								   'grid_filter_params' => $grid_filter_params,
 	    								   'additional_filter_string' => $filter_form->getFilterString()
-	    								  ) );   	    
+	    								  ) );
 		$total = $this->model_user_user->getTotalUsers( $filter_grid->getFilterData() );
 	    $response = new stdClass();
 		$response->page = $filter_grid->getParam('page');
@@ -58,7 +66,6 @@ class ControllerResponsesListingGridUser extends AController {
 
 	    $i = 0;
 		foreach ($results as $result) {
-
             $response->rows[$i]['id'] = $result['user_id'];
 			$response->rows[$i]['cell'] = array(
 				$result['username'],
@@ -68,7 +75,7 @@ class ControllerResponsesListingGridUser extends AController {
                     'value' => $result['status'],
                     'style'  => 'btn_switch',
                 )),
-				dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
+				AHelperUtils::dateISO2Display($result['date_added'], $this->language->get('date_format_short'))
 			);
 			$i++;
 		}
@@ -113,12 +120,8 @@ class ControllerResponsesListingGridUser extends AController {
 				foreach( $ids as $id ) {
 					$this->model_user_user->editUser($id, array('status' => isset($this->request->post['status'][$id]) ? $this->request->post['status'][$id] : 0 ) );
 				}
-
 				break;
-
 			default:
-
-
 		}
 
 		//update controller data

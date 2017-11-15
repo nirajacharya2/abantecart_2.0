@@ -21,6 +21,8 @@
 ------------------------------------------------------------------------------  
 */
 
+use abc\core\AHelperUtils;
+
 class ModelInstall extends Model{
 	public $errors = array ();
 
@@ -301,7 +303,7 @@ EOD;
 
 		$db->query("SET CHARACTER SET utf8;");
 		$db->query("SET @@session.sql_mode = 'MYSQL40';");
-		$salt_key = genToken(8);
+		$salt_key = AHelperUtils::genToken(8);
 		$db->query(
 				"INSERT INTO `" . $data['db_prefix'] . "users`
 			SET user_id = '1',
@@ -333,7 +335,7 @@ EOD;
 		}
 		$db->query(
 				"UPDATE `" . $data['db_prefix'] . "settings` 
-				SET value = '" . $db->escape(genToken(16)) . "' 
+				SET value = '" . $db->escape(AHelperUtils::genToken(16)) . "' 
 				WHERE `key` = 'task_api_key'; ");
 		$db->query("INSERT INTO `" . $data['db_prefix'] . "settings` 
 					SET `group` = 'config', `key` = 'install_date', value = NOW(); ");

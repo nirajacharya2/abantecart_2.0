@@ -1,4 +1,5 @@
-<?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
+<?php
+include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <?php echo $summary_form; ?>
 <?php echo $product_tabs ?>
@@ -35,7 +36,7 @@
 						<td class="left"><?php echo $customer_groups[$product_discount['customer_group_id']]; ?></td>
 						<td class="left"><?php echo $product_discount['quantity']; ?></td>
 						<td class="left"><?php echo $product_discount['priority']; ?></td>
-						<td class="left"><?php echo moneyDisplayFormat($product_discount['price']); ?></td>
+						<td class="left"><?php echo \abc\core\AHelperUtils::moneyDisplayFormat($product_discount['price']); ?></td>
 						<td class="left"><?php echo $product_discount['date_start']; ?></td>
 						<td class="left"><?php echo $product_discount['date_end']; ?></td>
 						<td class="left">
@@ -91,7 +92,7 @@
 					<tr>
 						<td class="left col-sm-6"><?php echo $customer_groups[$item['customer_group_id']]; ?></td>
 						<td class="left"><?php echo $item['priority']; ?></td>
-						<td class="left"><?php echo moneyDisplayFormat($item['price']); ?></td>
+						<td class="left"><?php echo \abc\core\AHelperUtils::moneyDisplayFormat($item['price']); ?></td>
 						<td class="left"><?php echo $item['date_start']; ?></td>
 						<td class="left"><?php echo $item['date_end']; ?></td>
 						<td class="left">

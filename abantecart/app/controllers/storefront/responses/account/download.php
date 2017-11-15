@@ -17,18 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AException;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 class ControllerResponsesAccountDownload extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function main() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-
+		$html_out = '';
 		try{
 			$this->config->set('embed_mode', true);
 			$dd = $this->dispatch('pages/account/download');
@@ -41,6 +43,7 @@ class ControllerResponsesAccountDownload extends AController {
 	public function startDownload() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
+		$html_out = '';
 		try{
 			$this->config->set('embed_mode', true);
 			$dd = $this->dispatch('pages/account/download/startDownload');

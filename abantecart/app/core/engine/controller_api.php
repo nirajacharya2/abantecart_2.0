@@ -17,7 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+use abc\lib\ARest;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -33,7 +37,7 @@ class AControllerAPI extends AController{
 
 	public function main(){
 		//call methods based on REST re	quest type
-		switch($this->rest->getRequestMethod()){
+		switch ($this->rest->getRequestMethod()) {
 			case 'get':
 				return $this->get();
 				break;

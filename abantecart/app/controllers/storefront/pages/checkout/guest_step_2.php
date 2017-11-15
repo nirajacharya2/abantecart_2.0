@@ -17,10 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerPagesCheckoutGuestStep2
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesCheckoutGuestStep2 extends AController{
 	public $error = array ();
 	public $data = array ();
@@ -37,25 +48,25 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if ($this->customer->isLogged()){
-			redirect($this->html->getSecureURL('checkout/shipping'));
+			abc_redirect($this->html->getSecureURL('checkout/shipping'));
 		}
 
 		if (!$this->config->get('config_guest_checkout') || $this->cart->hasDownload()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('checkout/shipping');
-			redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		if (!isset($this->session->data['guest'])){
-			redirect($this->html->getSecureURL('checkout/guest_step_1'));
+			abc_redirect($this->html->getSecureURL('checkout/guest_step_1'));
 		}
 
 		if (!$this->cart->hasShipping()){
@@ -81,7 +92,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 
                         //process data
                         $this->extensions->hk_ProcessData($this, 'reset_coupon');
-                        redirect($this->html->getSecureURL('checkout/guest_step_3'));
+                        abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
                     } else if($this->_validateCoupon()) {
                         $this->session->data['coupon'] = $this->request->post['coupon'];
                         $this->session->data['success'] = $this->language->get('text_success');
@@ -94,7 +105,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
                         }
                         //process data
                         $this->extensions->hk_ProcessData($this, 'apply_coupon');
-                        redirect($this->html->getSecureURL('checkout/guest_step_3'));
+                        abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
                     }
                 }
 
@@ -113,7 +124,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
                     }
                     $this->session->data['comment'] = $this->request->post['comment'];
                     $this->extensions->hk_ProcessData($this);
-                    redirect($this->html->getSecureURL('checkout/guest_step_3'));
+                    abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
                 }
             }
         }
@@ -144,7 +155,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 					//# Add storefront icon if available
 					$ext_setgs = $this->model_checkout_extension->getSettings($result['key']);
 					$icon = $ext_setgs[$result['key'] . "_shipping_storefront_icon"];
-					if (has_value($icon)){
+					if (AHelperUtils::has_value($icon)){
 						$icon_data = $this->model_checkout_extension->getSettingImage($icon);
 						$icon_data['image'] = $icon;
 						$quote_data[$result['key']]['icon'] = $icon_data;
@@ -172,8 +183,8 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 			$psettings[$pkey] = $this->model_checkout_extension->getSettings($pkey);
 			$min = $psettings[$pkey][$pkey."_payment_minimum_total"];
 			$max = $ext_setgs[$pkey][$pkey."_payment_maximum_total"];
-			if ((has_value($min) && $total['total'] < $min)
-					|| (has_value($max) && $total['total'] > $max)
+			if ((AHelperUtils::has_value($min) && $total['total'] < $min)
+					|| (AHelperUtils::has_value($max) && $total['total'] > $max)
 			){
 				continue;
 			}
@@ -186,7 +197,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 
 				//# Add storefront icon if available
 				$icon = $psettings[$pkey][$pkey . "_payment_storefront_icon"];
-				if (has_value($icon)){
+				if (AHelperUtils::has_value($icon)){
 					$icon_data = $this->model_checkout_extension->getSettingImage($icon);
 					$icon_data['image'] = $icon;
 					$method_data[$result['key']]['icon'] = $icon_data;
@@ -251,7 +262,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController{
 				$pkey = key($only_method);
 				if($psettings[$pkey][$pkey."_autoselect"]  && $skip_step){
 					$this->session->data['payment_method'] = $only_method[$pkey];
-					redirect($this->html->getSecureURL('checkout/guest_step_3'));
+					abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
 				}				
 			}
 		}

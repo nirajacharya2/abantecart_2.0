@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AException;
+use abc\lib\AJson;
+use abc\lib\AMail;
+use abc\lib\ATaskManager;
+use abc\lib\AView;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -274,13 +283,15 @@ class ControllerTaskSaleContact extends AController{
 		try{
 			include_once(DIR_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			//if class of driver
-			$classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
+			$classname = '\abc\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 			if (!class_exists($classname)){
 				$error = new AError('IM-driver ' . $driver_txt_id . ' load error.');
 				$error->toLog()->toMessages();
 				return false;
 			}
-
+			/**
+			 * @var \abc\lib\AMailIM $driver
+			 */
 			$driver = new $classname();
 		} catch(AException $e){	}
 

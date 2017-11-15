@@ -17,9 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiProductCategory
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogCategory $model_catalog_category
+ */
 class ControllerApiProductCategory extends AControllerAPI {
 	
 	public function get() {
@@ -64,10 +74,7 @@ class ControllerApiProductCategory extends AControllerAPI {
 												 $category_id,
 												 $this->config->get('config_image_category_width'),
 												 $this->config->get('config_image_category_height'));
-
-		//typo fix with backwards compatibility
-		//TODO: remove this in the future
-		$category_info['thumbnail'] = $category_info['tumbnail'] = $thumbnail['thumb_url'];
+		$category_info['thumbnail'] = $thumbnail['thumb_url'];
 
 		//Process data for category 
 		$category_info['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8'); 
@@ -80,12 +87,12 @@ class ControllerApiProductCategory extends AControllerAPI {
 		return $category_info;
 	}
 
-	public function getCategories( $parent_categ_id = 0 ) {
+	public function getCategories( $parent_category_id = 0 ) {
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 		$this->loadModel('catalog/category');
-		$results = $this->model_catalog_category->getCategories($parent_categ_id);
+		$results = $this->model_catalog_category->getCategories($parent_category_id);
 
-		$category_ids = array();
+		$category_ids = $categories = array();
 		foreach($results as $result){
 			$category_ids[] = (int)$result['category_id'];
 		}
@@ -100,7 +107,6 @@ class ControllerApiProductCategory extends AControllerAPI {
 
 		foreach ($results as $result) {
 				$thumbnail = $thumbnails[ $result['category_id'] ];
-				
 				$categories[] = array(
 						'name'  => $result['name'],
 						'category_id'	=> $result['category_id'],

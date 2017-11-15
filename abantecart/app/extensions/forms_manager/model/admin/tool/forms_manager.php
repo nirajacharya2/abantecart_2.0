@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -250,7 +254,7 @@ class ModelToolFormsManager extends Model {
 				$cols[] = 'success_page = "' . $this->db->escape($data['controller_path']) . '"';
 			}
 
-			if (has_value($data['success_page'])) {
+			if (AHelperUtils::has_value($data['success_page'])) {
 				$cols[] = 'success_page = "' . $this->db->escape($data['success_page']) . '"';
 			} else {
 				if (isset($data['controller_path'])) {
@@ -310,36 +314,36 @@ class ModelToolFormsManager extends Model {
 				'regexp_pattern'
 		);
 
-		if (has_value($data['field_name'])) {
+		if (AHelperUtils::has_value($data['field_name'])) {
 			$data['field_name'] = str_replace(' ', '_', $this->db->escape($data['field_name']));
 			if (!$data['field_name']) {
 				return false;
 			}
 		}
 
-		if (has_value($data['sort_order'])) {
+		if (AHelperUtils::has_value($data['sort_order'])) {
 			$data['sort_order'] = (int)$data['sort_order'];
 		}
 
-		if (has_value($data['required'])) {
+		if (AHelperUtils::has_value($data['required'])) {
 			$data['required'] = ((int)$data['required']) ? 'Y' : 'N';
 		}
 
-		if (has_value($data['status'])) {
+		if (AHelperUtils::has_value($data['status'])) {
 			$data['status'] = ((int)$data['status']) ? 1 : 0;
 		}
 
-		if (has_value($data['regexp_pattern'])) {
+		if (AHelperUtils::has_value($data['regexp_pattern'])) {
 			$data['regexp_pattern'] = $this->db->escape($data['regexp_pattern']);
 		}
 
 
-		if (has_value($data['settings'])) {
+		if (AHelperUtils::has_value($data['settings'])) {
 			$data['settings'] = $this->db->escape(serialize($data['settings']));
 		}
 		$update = array();
 		foreach ($columns as $colname) {
-			if(has_value($data[$colname])){
+			if(AHelperUtils::has_value($data[$colname])){
 				$update[] = $colname . " = '" . $data[$colname] . "'";
 			}
 		}

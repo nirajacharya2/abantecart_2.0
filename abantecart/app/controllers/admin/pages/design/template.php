@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AConfigManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -167,7 +173,7 @@ class ControllerPagesDesignTemplate extends AController{
 
 		if (!$this->user->canModify('design/template')){
 			$this->session->data['warning'] = $this->language->get('error_permission');
-			redirect($this->html->getSecureURL('design/template'));
+			abc_redirect($this->html->getSecureURL('design/template'));
 		}
 
 		$this->loadModel('setting/setting');
@@ -188,7 +194,7 @@ class ControllerPagesDesignTemplate extends AController{
 			$this->session->data['warning'] = $this->language->get('text_error');
 		}
 
-		redirect($this->html->getSecureURL('design/template'));
+		abc_redirect($this->html->getSecureURL('design/template'));
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -205,25 +211,25 @@ class ControllerPagesDesignTemplate extends AController{
 
 		if (!$tmpl_id){
 			$this->session->data['warning'] = $this->language->get('text_error');
-			redirect($this->html->getSecureURL('design/template'));
+			abc_redirect($this->html->getSecureURL('design/template'));
 		}
 		$this->data['group'] = $this->data['tmpl_id'] == 'default' ? 'appearance' : $this->data['tmpl_id'];
 
 		if ($this->request->is_POST() && $this->_validate('appearance')){
 			$post = $this->request->post;
-			if (has_value($post['config_logo'])){
+			if (AHelperUtils::has_value($post['config_logo'])){
 				$post['config_logo'] = html_entity_decode($post['config_logo'], ENT_COMPAT, 'UTF-8');
 			} else if (!$post['config_logo'] && isset($post['config_logo_resource_id'])){
 				//we save resource ID vs resource path
 				$post['config_logo'] = $post['config_logo_resource_id'];
 			}
-			if (has_value($post['config_mail_logo'])){
+			if (AHelperUtils::has_value($post['config_mail_logo'])){
 				$post['config_mail_logo'] = html_entity_decode($post['config_mail_logo'], ENT_COMPAT, 'UTF-8');
 			} else if (!$post['config_mail_logo'] && isset($post['config_mail_logo_resource_id'])){
 				//we save resource ID vs resource path
 				$post['config_mail_logo'] = $post['config_mail_logo_resource_id'];
 			}
-			if (has_value($post['config_icon'])){
+			if (AHelperUtils::has_value($post['config_icon'])){
 				$post['config_icon'] = html_entity_decode($post['config_icon'], ENT_COMPAT, 'UTF-8');
 			} else if (!$post['config_icon'] && isset($post['config_icon_resource_id'])){
 				//we save resource ID vs resource path
@@ -235,7 +241,7 @@ class ControllerPagesDesignTemplate extends AController{
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$redirect_url = $this->html->getSecureURL('design/template/edit', '&tmpl_id=' . $tmpl_id);
-			redirect($redirect_url);
+			abc_redirect($redirect_url);
 		}
 
 		$this->data['store_id'] = 0;

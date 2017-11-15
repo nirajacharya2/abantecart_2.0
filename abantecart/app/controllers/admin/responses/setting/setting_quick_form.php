@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AConfigManager;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -196,7 +204,7 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 			$this->session->data['quick_start_step'] = $group;
 		}
 		$store_id = !isset($this->session->data['current_store_id']) ? 0 : $this->session->data['current_store_id'];
-		if(has_value($this->request->get['store_id'])) {
+		if(AHelperUtils::has_value($this->request->get['store_id'])) {
 			$store_id = $this->request->get['store_id'];
 			$this->session->data['current_store_id'] = $store_id;
 		}
@@ -211,13 +219,13 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 
 				if ($group == 'appearance'){
 					$section = $this->request->get['tmpl_id'] == 'default' ? 'appearance' : $this->request->get['tmpl_id'];
-					if (has_value($this->request->post['config_logo'])){
+					if (AHelperUtils::has_value($this->request->post['config_logo'])){
 						$this->request->post['config_logo'] = html_entity_decode($this->request->post['config_logo'], ENT_COMPAT, 'UTF-8');
 					} else if (!$this->request->post['config_logo'] && isset($this->request->post['config_logo_resource_id'])){
 						//we save resource ID vs resource path
 						$this->request->post['config_logo'] = $this->request->post['config_logo_resource_id'];
 					}
-					if (has_value($this->request->post['config_icon'])){
+					if (AHelperUtils::has_value($this->request->post['config_icon'])){
 						$this->request->post['config_icon'] = html_entity_decode($this->request->post['config_icon'], ENT_COMPAT, 'UTF-8');
 					} else if (!$this->request->post['config_icon'] && isset($this->request->post['config_icon_resource_id'])){
 						//we save resource ID vs resource path

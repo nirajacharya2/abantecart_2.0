@@ -17,11 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\APromotion;
+use abc\core\HtmlElementFactory;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
-
-/** @noinspection PhpUndefinedClassInspection */
 class ModelCatalogProduct extends Model{
 	/**
 	 * @param int $product_id
@@ -1665,7 +1668,7 @@ class ModelCatalogProduct extends Model{
 	public function getProductSpecials($sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 0){
 		$limit = (int)$limit;
 		$promotion = new APromotion();
-		$results = $promotion->getProductSpecials($sort, $order, $start, $limit);
+		$results = $promotion->getSpecialProducts(array('sort' => $sort, 'order' => $order, 'start' => $start, 'limit' => $limit));
 
 		return $results;
 	}

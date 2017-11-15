@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
 
 class ControllerPagesAccountAccount extends AController {
 	public $data = array();
@@ -27,7 +29,7 @@ class ControllerPagesAccountAccount extends AController {
 
 		if (!$this->customer->isLogged()) {
 	  		$this->session->data['redirect'] = $this->html->getSecureURL('account/account');
-	  		$this->redirect($this->html->getSecureURL('account/login'));
+	  		abc_redirect($this->html->getSecureURL('account/login'));
     	} 
 
 		$this->loadLanguage('account/account');

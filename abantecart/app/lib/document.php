@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -176,7 +177,7 @@ final class ADocument{
 	 *
 	 * @param array $style_item - array("href"=>"","rel"=>"","media"=>)
 	 * Examples: href => 'www.google.com', $rel = 'stylesheet', $media = 'screen'
-	 * @return null
+	 * @void
 	 */
 	public function addStyle($style_item = array ()){
 		if ($style_item["href"]){
@@ -251,7 +252,7 @@ final class ADocument{
 	}
 
 	/**
-	 * method to initialize Breadcrumbs aray and add root attribute
+	 * method to initialize "breadcrumbs" array and add root attribute
 	 *
 	 * @param array $breadcrumb_item ("href"=>"", "text"=>"", "separator"=>)
 	 * @void
@@ -282,7 +283,7 @@ final class ADocument{
 	}
 
 	/**
-	 * trims text with set length and ellipes
+	 * trims text with set length and ellipsis
 	 * @param string $input text to trim
 	 * @param int $length in characters to trim to
 	 * @param bool $ellipses if ellipses (...) are to be added

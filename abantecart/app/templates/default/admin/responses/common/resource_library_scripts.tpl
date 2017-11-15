@@ -184,7 +184,7 @@ var saveRL = function (URL, postdata) {
 		global: false,
 		success: function (new_rl_id) {
 			rid = new_rl_id;
-			rl_success_alert(<?php js_echo($text_success); ?>, true);
+			rl_success_alert(<?php abc_js_echo($text_success); ?>, true);
 		},
 
 		error: rl_error_handler
@@ -239,19 +239,19 @@ var loadMedia = function (type, wrapper) {
 					html += '<a class="btn resource_edit tooltips" ' +
 							'data-type="' + type + '" ' +
 							'data-rl-id="' + item['resource_id'] + '" ' +
-							'data-original-title="<?php echo_html2view($button_edit) ?>"><i class="fa fa-edit"></i></a>' +
+							'data-original-title="<?php abc_echo_html2view($button_edit) ?>"><i class="fa fa-edit"></i></a>' +
 							'<a class="btn resource_unmap tooltips" ' +
 							'data-rl-id="' + item['resource_id'] + '" ' +
-							'data-original-title="<?php echo_html2view($button_unmap); ?>" ' +
+							'data-original-title="<?php abc_echo_html2view($button_unmap); ?>" ' +
 							'data-confirmation="delete" ' +
-							'data-confirmation-text="<?php echo_html2view($text_confirm_unmap) ?>" ' +
+							'data-confirmation-text="<?php abc_echo_html2view($text_confirm_unmap) ?>" ' +
 							'onclick="unmap_resource(' + item['resource_id'] + ',\'' + json.object_name + '\',\'' + json.object_id + '\');"><i class="fa fa-unlink"></i></a>';
 	
 					if (item['can_delete'] == true) {
 						html += '<a class="btn resource_delete tooltips" data-rl-id="' + item['resource_id'] + '" ' +
-								'data-original-title="<?php echo_html2view($button_delete); ?>" ' +
+								'data-original-title="<?php abc_echo_html2view($button_delete); ?>" ' +
 								'data-confirmation="delete" ' +
-								'data-confirmation-text="<?php echo_html2view($text_confirm_delete); ?>" ' +
+								'data-confirmation-text="<?php abc_echo_html2view($text_confirm_delete); ?>" ' +
 								'onclick="delete_resource(' + item['resource_id'] + ',\'' + json.object_name + '\',\'' + json.object_id + '\');"><i class="fa fa-trash-o"></i></a>';
 					}
 					html += '</div>';
@@ -265,17 +265,17 @@ var loadMedia = function (type, wrapper) {
 			if(json.total > json.limit) {
 				html += '<div class="col-md-1 col-sm-2 col-xs-6 reslibrary_block">' +
 						'<div class="center thumbnail">';
-				html += '<a class="btn list_maped_resources tooltips transparent rl_large_icon" '+data_mode+' data-type="' + type + '" data-original-title="<?php echo_html2view($text_view_more) ?>"><i class="fa fa-folder-open"></i></a></div>';
-				html += '<div class="caption center ellipsis"><a href="#" class="list_maped_resources resource_edit" '+data_mode+' data-type="' + type + '"><?php echo_html2view($text_view_more) ?></a></div><br />';
+				html += '<a class="btn list_maped_resources tooltips transparent rl_large_icon" '+data_mode+' data-type="' + type + '" data-original-title="<?php abc_echo_html2view($text_view_more) ?>"><i class="fa fa-folder-open"></i></a></div>';
+				html += '<div class="caption center ellipsis"><a href="#" class="list_maped_resources resource_edit" '+data_mode+' data-type="' + type + '"><?php abc_echo_html2view($text_view_more) ?></a></div><br />';
 				html += '</div>';
 			}
 		
 			html += '<div class="col-md-1 col-sm-2 col-xs-6 reslibrary_block">' +
 					'<div class="center thumbnail fileupload_drag_area">' +
 					'<form action="<?php echo $rl_upload; ?>&type=' + type + '" method="POST" enctype="multipart/form-data"><input type="file" name="files[]" multiple="" class="hide">';
-			html += '<a class="btn resource_add tooltips transparent rl_large_icon" '+data_mode+' data-type="' + type + '" data-original-title="<?php echo_html2view($text_add_media) ?>"><i class="fa fa-plus-circle"></i></a>';
+			html += '<a class="btn resource_add tooltips transparent rl_large_icon" '+data_mode+' data-type="' + type + '" data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><i class="fa fa-plus-circle"></i></a>';
 			html += '</form></div>';
-			html += '<div class="caption center ellipsis"><a href="#" class="resource_add" '+data_mode+' data-type="' + type + '"><?php echo_html2view($text_add_media) ?></a></div><br />';
+			html += '<div class="caption center ellipsis"><a href="#" class="resource_add" '+data_mode+' data-type="' + type + '"><?php abc_echo_html2view($text_add_media) ?></a></div><br />';
 			html += '</div>';
 
 			$(wrapper).html(html);
@@ -331,7 +331,7 @@ var loadSingle = function (type, wrapper_id, resource_id, field) {
 								'data-rl-id="' + item['resource_id'] + '">' + src + '</a></div>';
 
 				html += '<a class="btn resource_delete tooltips" data-rl-id="' + item['resource_id'] + '" ' +
-						'data-original-title="<?php echo_html2view($button_delete) ?>" ' +
+						'data-original-title="<?php abc_echo_html2view($button_delete) ?>" ' +
 						'><i class="fa fa-times"></i>&nbsp;<?php echo $button_remove?></a>';
 				html += '</div>';
 				var resource_uri = '';
@@ -364,7 +364,7 @@ var loadSingle = function (type, wrapper_id, resource_id, field) {
 						'data-type="' + type + '" ' +
 						'data-wrapper_id="' + wrapper_id + '" ' +
 						'data-field="' + field + '" ' +
-						'data-original-title="<?php echo_html2view($text_add_media) ?>"><img src="<?php echo $template_dir . 'image/icons/icon_add_media.png'; ?>" alt="<?php echo_html2view($text_add_media); ?>" width="100" /></a>';
+						'data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><img src="<?php echo $template_dir . 'image/icons/icon_add_media.png'; ?>" alt="<?php abc_echo_html2view($text_add_media); ?>" width="100" /></a>';
 				html += '</div></div>';
 
 				$('#'+field).val('');
@@ -513,7 +513,7 @@ function map_resource(rl_id, object_name, object_id) {
 			if (json) {
 				$('#image_row' + rl_id).parent().remove();
 			}
-			rl_success_alert(<?php js_echo($text_map_success); ?>, true);
+			rl_success_alert(<?php abc_js_echo($text_map_success); ?>, true);
 		},
 		error: rl_error_handler
 	});
@@ -538,7 +538,7 @@ function unmap_resource(rl_id, object_name, object_id) {
 			if (json) {
 				$('#image_row' + rl_id).parent().remove();
 			}
-			rl_success_alert(<?php js_echo($text_success_unmap); ?>, true);
+			rl_success_alert(<?php abc_js_echo($text_success_unmap); ?>, true);
 		},
 		error: rl_error_handler
 	});
@@ -571,7 +571,7 @@ function delete_resource(rl_id, object_name, object_id) {
 				mediaDialog(type, 'list_library');
 				sideDialog(type, 'add');
 			}
-			rl_success_alert(<?php js_echo($text_file_delete); ?>, true);
+			rl_success_alert(<?php abc_js_echo($text_file_delete); ?>, true);
 		},
 		error: rl_error_handler
 	});
@@ -812,7 +812,7 @@ var bind_rl = function (elm) {
 			async: false,
 			global: false,
 			success: function () {
-				rl_success_alert(<?php js_echo($text_success); ?>, true);
+				rl_success_alert(<?php abc_js_echo($text_success); ?>, true);
 			},
 			error: rl_error_handler
 		});
@@ -963,7 +963,7 @@ var multi_action = function (action) {
 		async: false,
 		global: false,
 		success: function (html) {
-			rl_success_alert(<?php js_echo($text_success); ?>, true);
+			rl_success_alert(<?php abc_js_echo($text_success); ?>, true);
 		},
 		error: rl_error_handler
 	});
@@ -980,7 +980,7 @@ var multi_action = function (action) {
 
 var rl_error_alert = function (text, autohide) {
 	if(text.length<1){
-		text = <?php js_echo($error_ajax); ?>;
+		text = <?php abc_js_echo($error_ajax); ?>;
 	}
 	error_alert(text, autohide);
 }

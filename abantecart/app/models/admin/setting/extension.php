@@ -17,10 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
-class ModelSettingExtension extends Model {	
+class ModelSettingExtension extends Model {
 	/*
 	* Get enabled payment extensions. Used in configuration for shipping extensions
 	*/

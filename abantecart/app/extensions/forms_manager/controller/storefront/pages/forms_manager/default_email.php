@@ -17,13 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\HtmlElementFactory;
+use abc\lib\AMail;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 /**
  * Class ControllerPagesFormsManagerDefaultEmail
- * @property ModelToolFormsManager $model_tool_forms_manager
+ * @property \abc\model\storefront\ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerPagesFormsManagerDefaultEmail extends AController {
 
@@ -40,7 +47,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController {
 			$path = $_SERVER['HTTP_REFERER'];
 
 			if ( !isset($this->request->get['form_id']) ) {
-				$this->redirect($path);
+				abc_redirect($path);
 				exit;
 			}
 
@@ -54,7 +61,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController {
 				//save error and data to session
 				$this->session->data['custom_form_'.$form_id] = $this->request->post;
 				$this->session->data['custom_form_'.$form_id]['errors'] = $errors;
-				$this->redirect($path);
+				abc_redirect($path);
 				exit;
 			}else {
 
@@ -135,11 +142,11 @@ class ControllerPagesFormsManagerDefaultEmail extends AController {
 					
 					//clear form session 
 					unset($this->session->data['custom_form_'.$form_id]);
-					$this->redirect($success_url);
+					abc_redirect($success_url);
 					exit;
 				} else {
 					$this->session->data['warning'] = $mail->error;
-					$this->redirect($this->html->getSecureURL('forms_manager/default_email','&form_id='.$form_id));
+					abc_redirect($this->html->getSecureURL('forms_manager/default_email','&form_id='.$form_id));
 					exit;
 				}
 			}

@@ -78,7 +78,7 @@ if ( defined('DB_HOSTNAME') && DB_HOSTNAME ) {
 					'charset'  => DB_CHARSET,
 					'collation'=> DB_COLLATION,
 				));
-    $r = $db->query("SELECT * FROM ".DB_PREFIX."settings");
+    $r = $db->query("SELECT * FROM ".$this->db->prefix()."settings");
     $data_exist = $r->num_rows;
 } else {
     unset($session->data['finish']);

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -36,17 +41,17 @@ class ControllerPagesCatalogProductFiles extends AController {
 		$product_id = $this->request->get['product_id'];
 
 		if(!$product_id){
-			$this->redirect($this->html->getSecureURL('catalog/product'));
+			abc_redirect($this->html->getSecureURL('catalog/product'));
 		}
 
-		if (has_value($product_id) && $this->request->is_GET()) {
+		if (AHelperUtils::has_value($product_id) && $this->request->is_GET()) {
 			$product_info = $this->model_catalog_product->getProduct($product_id);
 			if (!$product_info) {
 				$this->session->data['warning'] = $this->language->get('error_product_not_found');
-				$this->redirect($this->html->getSecureURL('catalog/product'));
+				abc_redirect($this->html->getSecureURL('catalog/product'));
 			}
 			// remove
-			if(has_value($this->request->get['act']) && $this->request->get['act']=='delete'){
+			if(AHelperUtils::has_value($this->request->get['act']) && $this->request->get['act']=='delete'){
 				$download_info = $this->model_catalog_download->getDownload( $this->request->get['download_id'] );
 				$map_list = $this->model_catalog_download->getDownloadMapList($this->request->get['download_id']);
 
@@ -56,7 +61,7 @@ class ControllerPagesCatalogProductFiles extends AController {
 					$this->model_catalog_download->unmapDownload($this->request->get['download_id'], $product_id);
 				}
 				$this->session->data['success'] = $this->language->get('text_success_remove');
-				$this->redirect($this->html->getSecureURL('catalog/product_files', '&product_id='.$product_id));
+				abc_redirect($this->html->getSecureURL('catalog/product_files', '&product_id='.$product_id));
 			}
 
 		}
@@ -73,7 +78,7 @@ class ControllerPagesCatalogProductFiles extends AController {
 			}
 
 			$this->session->data['success'] = $this->language->get('text_map_success');
-			$this->redirect($this->html->getSecureURL('catalog/product_files', '&product_id=' . $product_id));
+			abc_redirect($this->html->getSecureURL('catalog/product_files', '&product_id=' . $product_id));
 		}
 
 
@@ -228,7 +233,7 @@ class ControllerPagesCatalogProductFiles extends AController {
 		$download_info = $this->download->getDownloadInfo($download_id);
 
 		if(!$download_info || !$product_id){
-			$this->redirect($this->html->getSecureURL('catalog/product_files', '&product_id=' . $product_id));
+			abc_redirect($this->html->getSecureURL('catalog/product_files', '&product_id=' . $product_id));
 		}
 
 		$download_info['attributes_data'] = serialize($this->download->getDownloadAttributesValues($download_id));
@@ -249,7 +254,7 @@ class ControllerPagesCatalogProductFiles extends AController {
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$this->redirect( $this->html->getSecureURL('catalog/product_files','&product_id='.$product_id) );
+		abc_redirect( $this->html->getSecureURL('catalog/product_files','&product_id='.$product_id) );
 
 	}
 

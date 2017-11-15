@@ -17,9 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerPagesAccountSubscriber
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesAccountSubscriber extends AController {
 	private $error = array();
 	public $data;
@@ -29,7 +39,7 @@ class ControllerPagesAccountSubscriber extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		if ($this->customer->isLogged()) {
-	  		redirect($this->html->getSecureURL('account/notification'));
+	  		abc_redirect($this->html->getSecureURL('account/notification'));
     	}
 		$this->loadModel('account/customer');
     	$this->loadLanguage('account/create');
@@ -59,7 +69,7 @@ class ControllerPagesAccountSubscriber extends AController {
 			    $request_data['subscriber'] = true;
 				$this->model_account_customer->addCustomer($request_data);
 				$this->extensions->hk_UpdateData($this,__FUNCTION__);
-		  		redirect($this->html->getSecureURL('account/subscriber','&success=1'));
+		  		abc_redirect($this->html->getSecureURL('account/subscriber','&success=1'));
 	  		}
     	}
 

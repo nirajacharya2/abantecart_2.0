@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -31,7 +35,7 @@ class ModelLocalisationOrderStatus extends Model{
 	 */
 	public function addOrderStatus($data){
 
-		$status_text_id = preformatTextID($data['status_text_id']);
+		$status_text_id = AHelperUtils::preformatTextID($data['status_text_id']);
 		if (!$status_text_id){
 			return false;
 		}
@@ -76,7 +80,7 @@ class ModelLocalisationOrderStatus extends Model{
 		}
 
 
-		$status_text_id = preformatTextID($data['status_text_id']);
+		$status_text_id = AHelperUtils::preformatTextID($data['status_text_id']);
 		if ($status_text_id){
 			$sql = "UPDATE " . $this->db->table('order_status_ids') . "
 					SET status_text_id = '" . $this->db->escape($status_text_id) . "'

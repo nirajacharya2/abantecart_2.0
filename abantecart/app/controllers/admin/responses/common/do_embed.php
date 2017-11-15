@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -25,7 +30,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 	public function main() {}
 
 	public function product() {
-		if(!has_value($this->request->get['product_id'])){
+		if(!AHelperUtils::has_value($this->request->get['product_id'])){
 			return null;
 		}
 		//init controller data

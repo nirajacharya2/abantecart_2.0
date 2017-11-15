@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -106,7 +110,7 @@ class ControllerPagesUserUserPermission extends AController {
 		$this->loadLanguage('user/user_group');
 		if (!$this->user->canModify('user/user_permission')) {
 			$this->session->data['error'] = sprintf($this->language->get('error_permission_modify'), 'user/user_permission');
-			$this->redirect($this->html->getSecureURL('user/user_permission'));
+			abc_redirect($this->html->getSecureURL('user/user_permission'));
 		}
 
 
@@ -127,7 +131,7 @@ class ControllerPagesUserUserPermission extends AController {
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->redirect($this->html->getSecureURL('user/user_permission'));
+		abc_redirect($this->html->getSecureURL('user/user_permission'));
 	}
 
 	public function insert() {
@@ -141,7 +145,7 @@ class ControllerPagesUserUserPermission extends AController {
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$id = $this->model_user_user_group->addUserGroup($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success_group_added');
-			$this->redirect($this->html->getSecureURL('user/user_permission/update', '&user_group_id=' . $id));
+			abc_redirect($this->html->getSecureURL('user/user_permission/update', '&user_group_id=' . $id));
 		}
 
 		$this->_getForm();
@@ -167,7 +171,7 @@ class ControllerPagesUserUserPermission extends AController {
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_user_user_group->editUserGroup($this->request->get['user_group_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('user/user_permission/update', '&user_group_id=' . $this->request->get['user_group_id']));
+			abc_redirect($this->html->getSecureURL('user/user_permission/update', '&user_group_id=' . $this->request->get['user_group_id']));
 		}
 		$this->_getForm();
 

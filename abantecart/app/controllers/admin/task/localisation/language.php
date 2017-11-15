@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -111,7 +116,7 @@ class ControllerTaskLocalisationLanguage extends AController{
 		$this->response->setOutput(AJson::encode(array ('result' => true, 'message' => $translate_result)));
 	}
 
-	private function _return_error($error_text){
+	protected function _return_error($error_text){
 		$this->response->setOutput(AJson::encode(array ('result' => false, 'error_text' => $error_text)));
 	}
 

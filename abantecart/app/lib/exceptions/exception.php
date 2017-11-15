@@ -17,13 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\ARouter;
+use abc\core\Registry;
+use Exception;
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 class AException extends Exception{
 
-	public $registry = null;
+	public $registry;
 	protected $error;
 
 	public function __construct($errno = 0, $errstr = '', $file = '', $line = ''){
@@ -32,7 +36,7 @@ class AException extends Exception{
 		$this->message = $errstr ? $errstr : $this->message;
 		$this->file = $file ? $file : $this->file;
 		$this->line = $line ? $line : $this->line;
-		if (class_exists('Registry')){
+		if (class_exists('\abc\core\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 
@@ -81,7 +85,7 @@ class AException extends Exception{
 			$this->registry->get('response')->output();
 			exit();
 		}
-		$url = "static_pages/index.php";
+		$url = "assets/static_pages/index.php";
 		$url .= (IS_ADMIN === true) ? '?mode=admin' : '';
 		header("Location: $url");
 		exit();

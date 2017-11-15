@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -72,7 +79,7 @@ class ControllerResponsesListingGridOrderStatus extends AController{
 		foreach ($results as $result){
 			$id = $result['order_status_id'];
 			$response->rows[$i]['id'] = $id;
-			if (has_value($base_order_statuses[$id])){
+			if (AHelperUtils::has_value($base_order_statuses[$id])){
 				$response->userdata->classes[$id] = 'disable-delete';
 			}
 			$response->rows[$i]['cell'] = array (

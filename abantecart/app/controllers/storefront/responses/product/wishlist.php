@@ -17,13 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerResponsesProductWishlist extends AController {
 	public $error = array();
 	public $data = array();
-	
 	public function add() {
 
         //init controller data
@@ -38,11 +41,10 @@ class ControllerResponsesProductWishlist extends AController {
 				$json['error'] = 'Missing required data';
 			}
 		} else {
-			$json['error'] = 'No permission';		
+			$json['error'] = 'No permission';
 		}
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-		
 		$this->load->library('json');
 		$this->response->setOutput(AJson::encode($json));
 	}
@@ -61,13 +63,11 @@ class ControllerResponsesProductWishlist extends AController {
 				$json['error'] = 'Missing required data';
 			}
 		} else {
-			$json['error'] = 'No permission';		
+			$json['error'] = 'No permission';
 		}
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-		
 		$this->load->library('json');
 		$this->response->setOutput(AJson::encode($json));
 	}
-	
 }

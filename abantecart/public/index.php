@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 
+use abc\core\ABC;
 
 $dir_app = dirname(__DIR__) . '/app/';
 // Windows IIS Compatibility

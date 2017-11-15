@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -190,7 +199,7 @@ class ControllerResponsesListingGridCategory extends AController{
 						foreach ($ids as $id){
 							$array[$id] = $this->request->post['sort_order'][$id];
 						}
-						$new_sort = build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
+						$new_sort = AHelperUtils::build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
 						$this->request->post['sort_order'] = $new_sort;
 					}
 					foreach ($ids as $id){

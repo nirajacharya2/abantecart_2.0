@@ -17,13 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 /**
  * Class ControllerResponsesExtensionBannerManager
- * @property ModelExtensionBannerManager $model_extension_banner_manager
+ * @property \abc\model\storefront\ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerResponsesExtensionBannerManager extends AController {
 	public $data = array();

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -114,7 +118,7 @@ class ControllerPagesLocalisationOrderStatus extends AController {
 
 			$order_status_id = $this->model_localisation_order_status->addOrderStatus($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-      		$this->redirect($this->html->getSecureURL('localisation/order_status/update', '&order_status_id=' . $order_status_id ));
+      		abc_redirect($this->html->getSecureURL('localisation/order_status/update', '&order_status_id=' . $order_status_id ));
 		}
     	$this->_getForm();
 
@@ -137,7 +141,7 @@ class ControllerPagesLocalisationOrderStatus extends AController {
     	if ( $this->request->is_POST() && $this->_validateForm() ) {
 	  		$this->model_localisation_order_status->editOrderStatus($this->request->get['order_status_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('localisation/order_status/update', '&order_status_id=' . $this->request->get['order_status_id'] ));
+			abc_redirect($this->html->getSecureURL('localisation/order_status/update', '&order_status_id=' . $this->request->get['order_status_id'] ));
     	}
     	$this->_getForm();
 

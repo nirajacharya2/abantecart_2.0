@@ -17,6 +17,7 @@ Do not edit or add to this file if you wish to upgrade AbanteCart to newer
 versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }

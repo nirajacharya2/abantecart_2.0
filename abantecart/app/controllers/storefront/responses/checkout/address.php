@@ -17,42 +17,39 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\lib\AException;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 class ControllerResponsesCheckoutAddress extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function shipping() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-
+		$html_out = '';
 		try{
 			$this->config->set('embed_mode', true);
 			$cntr = $this->dispatch('pages/checkout/address/shipping');
 			$html_out = $cntr->dispatchGetOutput();
-		}catch(AException $e){	}
-	
+		}catch(AException $e){}
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-
 		$this->response->setOutput($html_out);
-	}	
+	}
 
 	public function payment() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-
+		$html_out = '';
 		try{
 			$this->config->set('embed_mode', true);
 			$cntr = $this->dispatch('pages/checkout/address/payment');
 			$html_out = $cntr->dispatchGetOutput();
-		}catch(AException $e){	}
-	
+		}catch(AException $e){}
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-
 		$this->response->setOutput($html_out);
-	}	
-
+	}
 }

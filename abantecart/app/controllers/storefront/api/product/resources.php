@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -48,7 +52,7 @@ class ControllerApiProductResources extends AControllerAPI {
 						                                $this->config->get('config_image_additional_height'));
 				if($thumbnail){
 					$images[] = array(
-						'origial' => HTTPS_DIR_RESOURCE.'image/'.$result['resource_path'],
+						'original' => HTTPS_DIR_RESOURCE.'image/'.$result['resource_path'],
 						'thumb' => $thumbnail );
 				}
 			}
@@ -61,13 +65,11 @@ class ControllerApiProductResources extends AControllerAPI {
 			//This is possible only in admin for now
 			$resources = $resource->getAllResourceTypes();
 		}
-		
 
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
 		$this->rest->setResponseData( array( 'total' => count($resources), 'resources' => $resources) );
 		$this->rest->sendResponse(200);
-
 	}
 }

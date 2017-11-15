@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -95,7 +100,7 @@ class ModelCheckoutExtension extends Model {
 					AND store_id = '".(int)$store_id."'" );
 		foreach ($query->rows as $result) {
 			$value = $result['value'];
-			if (is_serialized($value)) {
+			if (AHelperUtils::is_serialized($value)) {
 				$value = unserialize($value);
 			}
 			$data[$result['key']] = $value;
@@ -107,8 +112,7 @@ class ModelCheckoutExtension extends Model {
 		Function to get image details based on RL path or RL ID
 	*/
 	public function getSettingImage( $rl_image ) {
-		$image_data = array();
-		if ( !has_value( $rl_image ) ) {
+		if ( !AHelperUtils::has_value( $rl_image ) ) {
 			return array();
 		} 
 		$resource = new AResource('image');

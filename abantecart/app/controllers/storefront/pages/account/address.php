@@ -1,5 +1,4 @@
 <?php
-
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -18,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
 
 class ControllerPagesAccountAddress extends AController{
 	public $error = array ();
@@ -54,7 +56,7 @@ class ControllerPagesAccountAddress extends AController{
 
 			$this->extensions->hk_ProcessData($this);
 
-			$this->redirect($this->html->getSecureURL('account/address'));
+			abc_redirect($this->html->getSecureURL('account/address'));
 		}
 
 		$this->getForm();
@@ -91,7 +93,7 @@ class ControllerPagesAccountAddress extends AController{
 
 			$this->extensions->hk_ProcessData($this);
 
-			$this->redirect($this->html->getSecureURL('account/address'));
+			abc_redirect($this->html->getSecureURL('account/address'));
 		}
 
 		$this->getForm();
@@ -126,7 +128,7 @@ class ControllerPagesAccountAddress extends AController{
 
 			$this->session->data['success'] = $this->language->get('text_delete');
 			$this->extensions->hk_ProcessData($this);
-			$this->redirect($this->html->getSecureURL('account/address'));
+			abc_redirect($this->html->getSecureURL('account/address'));
 		}
 
 		$this->getList();
@@ -493,7 +495,7 @@ class ControllerPagesAccountAddress extends AController{
 	private function _check_access(){
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/address');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 	}
 }

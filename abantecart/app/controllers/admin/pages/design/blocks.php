@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\ALayoutManager;
+use abc\lib\AListingManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -214,7 +220,7 @@ class ControllerPagesDesignBlocks extends AController {
 					$content = $this->request->post['block_content'];
 					break;
 				default:
-					$this->redirect($this->html->getSecureURL('design/blocks'));
+					abc_redirect($this->html->getSecureURL('design/blocks'));
 					break;
 			}
 
@@ -258,7 +264,7 @@ class ControllerPagesDesignBlocks extends AController {
 
 			$this->session->data ['success'] = $this->language->get('text_success');
 			unset($this->session->data['custom_list_changes'][$custom_block_id], $this->session->data['layout_params']);
-			$this->redirect($this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id));
 		}
 
 		// if we need to save new block in layout - keep parameters in session
@@ -353,7 +359,7 @@ class ControllerPagesDesignBlocks extends AController {
 					$content = $this->request->post['block_content'];
 					break;
 				default:
-					$this->redirect($this->html->getSecureURL('design/blocks'));
+					abc_redirect($this->html->getSecureURL('design/blocks'));
 					break;
 			}
 
@@ -368,7 +374,7 @@ class ControllerPagesDesignBlocks extends AController {
 							'language_id' => $this->session->data['content_language_id']));
 			$layout->editBlockStatus((int)$this->request->post['block_status'], 0,	$custom_block_id);
 			$this->session->data ['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id));
 		}
 		// end of saving
 
@@ -462,7 +468,7 @@ class ControllerPagesDesignBlocks extends AController {
 		}
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->redirect($this->html->getSecureURL('design/blocks'));
+		abc_redirect($this->html->getSecureURL('design/blocks'));
 	}
 
 	private function _getHTMLForm() {

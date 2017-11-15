@@ -17,7 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+use abc\lib\ACache;
+use abc\lib\ACart;
+use abc\lib\AConfig;
+use abc\lib\ACustomer;
+use abc\lib\ADB;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -53,15 +62,17 @@ class APromotion{
 	public function __construct($customer_group_id = null){
 		$this->registry = Registry::getInstance();
 
-		if ($customer_group_id){
+		if ($customer_group_id) {
 			$this->customer_group_id = $customer_group_id;
-		} else if (!is_null($this->customer)){
-			//set customer group
-			if ($this->customer->isLogged()){
-				$this->customer_group_id = $this->customer->getCustomerGroupId();
-			} else{
-				$this->customer_group_id = $this->config->get('config_customer_group_id');
+		} else {
+			if (!is_null($this->customer)) {
+				//set customer group
+				if ($this->customer->isLogged()) {
+					$this->customer_group_id = $this->customer->getCustomerGroupId();
+				} else {
+					$this->customer_group_id = $this->config->get('config_customer_group_id');
 
+				}
 			}
 		}
 
@@ -126,13 +137,13 @@ class APromotion{
 		$discount_quantity = (int)$discount_quantity;
 		$customer_group_id = (int)$this->customer_group_id;
 
-		if (!$product_id && !$discount_quantity){
+		if (!$product_id && !$discount_quantity) {
 			return 0.00;
 		}
 
 		$cache_key = 'product.discount.qty.' . $discount_quantity . '.' . (int)$product_id . '.' . $customer_group_id;
 		$output = $this->cache->pull($cache_key);
-		if ($output !== false){
+		if ($output !== false) {
 			return $output;
 		}
 
@@ -161,7 +172,7 @@ class APromotion{
 		$cache_key = 'product.discount.' . (int)$product_id . '.' . $customer_group_id;
 		$output = $this->cache->pull($cache_key);
 
-		if ($output !== false){
+		if ($output !== false) {
 			return $output;
 		}
 
@@ -174,9 +185,9 @@ class APromotion{
 										AND (date_end = '0000-00-00' OR date_end > NOW()))
 									ORDER BY priority ASC, price ASC
 									LIMIT 1");
-		if ($query->num_rows){
+		if ($query->num_rows) {
 			$output = $query->row['price'];
-		} else{
+		} else {
 			$output = '';
 		}
 
@@ -194,7 +205,7 @@ class APromotion{
 		$customer_group_id = (int)$this->customer_group_id;
 		$cache_key = 'product.discounts.' . (int)$product_id . '.' . $customer_group_id;
 		$output = $this->cache->pull($cache_key);
-		if ($output !== false){
+		if ($output !== false) {
 			return $output;
 		}
 		$query = $this->db->query("	SELECT *
@@ -220,7 +231,7 @@ class APromotion{
 		$customer_group_id = (int)$this->customer_group_id;
 		$cache_key = 'product.special.' . (int)$product_id . '.' . $customer_group_id;
 		$output = $this->cache->pull($cache_key);
-		if ($output !== false){
+		if ($output !== false) {
 			return $output;
 		}
 
@@ -232,7 +243,7 @@ class APromotion{
 										AND ((date_start = '0000-00-00' OR date_start < NOW())
 										AND (date_end = '0000-00-00' OR date_end > NOW()))
 									ORDER BY priority ASC, price ASC LIMIT 1");
-		if ($query->num_rows){
+		if ($query->num_rows) {
 			$output = (float)$query->row['price'];
 		}
 		$this->cache->push($cache_key, $output);
@@ -265,7 +276,7 @@ class APromotion{
 		$cache_key .= '.store_' . $store_id . '.lang_' . $language_id;
 
 		$cache = $this->cache->pull($cache_key);
-		if ($cache !== false){
+		if ($cache !== false) {
 			return $cache;
 		}
 
@@ -298,26 +309,26 @@ class APromotion{
 				'date_modified'
 		);
 
-		if (in_array($sort, $sort_data)){
-			if ($sort == 'pd.name'){
+		if (in_array($sort, $sort_data)) {
+			if ($sort == 'pd.name') {
 				$sql .= " ORDER BY LCASE(" . $sort . ")";
-			} else{
+			} else {
 				$sql .= " ORDER BY " . $this->db->escape($sort);
 			}
-		} else{
+		} else {
 			$sql .= " ORDER BY p.sort_order";
 		}
 
-		if ($order == 'DESC'){
+		if ($order == 'DESC') {
 			$sql .= " DESC";
-		} else{
+		} else {
 			$sql .= " ASC";
 		}
 
-		if ($start < 0){
+		if ($start < 0) {
 			$start = 0;
 		}
-		if ((int)$limit){
+		if ((int)$limit) {
 			$sql .= " LIMIT " . (int)$start . "," . (int)$limit;
 		}
 
@@ -350,12 +361,12 @@ class APromotion{
 		$cache_key .= '.store_' . $store_id . '.lang_' . $language_id;
 
 		$cache = $this->cache->pull($cache_key);
-		if ($cache !== false){
+		if ($cache !== false) {
 			return $cache;
 		}
 
 		$sql = "SELECT DISTINCT ps.product_id, p.*, pd.name, pd.description, pd.blurb, ss.name AS stock";
-		if ($data['avg_rating']){
+		if ($data['avg_rating']) {
 			$sql .= ", (SELECT AVG(rating)
 					FROM " . $this->db->table("reviews") . " r1
 					WHERE r1.product_id = ps.product_id AND r1.status = '1'
@@ -394,26 +405,26 @@ class APromotion{
 				'date_modified'
 		);
 
-		if (in_array($data['sort'], $sort_data)){
-			if ($data['sort'] == 'pd.name'){
+		if (in_array($data['sort'], $sort_data)) {
+			if ($data['sort'] == 'pd.name') {
 				$sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
-			} else{
+			} else {
 				$sql .= " ORDER BY " . $this->db->escape($data['sort']);
 			}
-		} else{
+		} else {
 			$sql .= " ORDER BY p.sort_order";
 		}
 
-		if ($data['order'] == 'DESC'){
+		if ($data['order'] == 'DESC') {
 			$sql .= " DESC";
-		} else{
+		} else {
 			$sql .= " ASC";
 		}
 
-		if ($data['start'] < 0){
+		if ($data['start'] < 0) {
 			$data['start'] = 0;
 		}
-		if ((int)$data['limit']){
+		if ((int)$data['limit']) {
 			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 		}
 
@@ -435,7 +446,7 @@ class APromotion{
 
 		$cache_key = 'product.special.total.' . $customer_group_id . '.store_' . $store_id;
 		$output = $this->cache->pull($cache_key);
-		if ($output !== false){
+		if ($output !== false) {
 			return $output;
 		}
 
@@ -462,7 +473,7 @@ class APromotion{
 	 * @return array
 	 */
 	public function getCouponData($coupon_code){
-		if (empty ($coupon_code)){
+		if (empty ($coupon_code)) {
 			return array ();
 		}
 
@@ -476,29 +487,29 @@ class APromotion{
 												AND (date_end = '0000-00-00' OR date_end > NOW()))
 												AND c.status = '1'");
 		$coupon_product_data = array ();
-		if ($coupon_query->num_rows){
-			if ($coupon_query->row['total'] >= $this->cart->getSubTotal()){
+		if ($coupon_query->num_rows) {
+			if ($coupon_query->row['total'] >= $this->cart->getSubTotal()) {
 				$status = false;
 			}
 			$coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
 													 FROM `" . $this->db->table("orders") . "`
 													 WHERE order_status_id > '0' AND coupon_id = '" . (int)$coupon_query->row['coupon_id'] . "'");
 
-			if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total'] && $coupon_query->row['uses_total'] > 0){
+			if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total'] && $coupon_query->row['uses_total'] > 0) {
 				$status = false;
 			}
-			if ($coupon_query->row['logged'] && !is_null($this->customer) && !$this->customer->getId()){
+			if ($coupon_query->row['logged'] && !is_null($this->customer) && !$this->customer->getId()) {
 				$status = false;
 			}
 
-			if (!is_null($this->customer) && $this->customer->getId()){
+			if (!is_null($this->customer) && $this->customer->getId()) {
 				$coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
 														 FROM `" . $this->db->table("orders") . "`
 														 WHERE order_status_id > '0'
 																AND coupon_id = '" . (int)$coupon_query->row['coupon_id'] . "'
 																AND customer_id = '" . (int)$this->customer->getId() . "'");
 
-				if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer'] && $coupon_query->row['uses_customer'] > 0){
+				if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer'] && $coupon_query->row['uses_customer'] > 0) {
 					$status = false;
 				}
 			}
@@ -507,30 +518,30 @@ class APromotion{
 													   FROM " . $this->db->table("coupons_products") . "
 													   WHERE coupon_id = '" . (int)$coupon_query->row['coupon_id'] . "'");
 
-			foreach ($coupon_product_query->rows as $result){
+			foreach ($coupon_product_query->rows as $result) {
 				$coupon_product_data[] = $result['product_id'];
 			}
 
-			if ($coupon_product_data){
+			if ($coupon_product_data) {
 				$coupon_product = false;
 
-				foreach ($this->cart->getProducts() as $product){
-					if (in_array($product['product_id'], $coupon_product_data)){
+				foreach ($this->cart->getProducts() as $product) {
+					if (in_array($product['product_id'], $coupon_product_data)) {
 						$coupon_product = true;
 
 						break;
 					}
 				}
 
-				if (!$coupon_product){
+				if (!$coupon_product) {
 					$status = false;
 				}
 			}
-		} else{
+		} else {
 			$status = false;
 		}
 
-		if ($status){
+		if ($status) {
 			$coupon_data = array (
 					'coupon_id'     => $coupon_query->row['coupon_id'],
 					'code'          => $coupon_query->row['code'],
@@ -560,15 +571,16 @@ class APromotion{
 	 */
 	public function apply_promotions($total_data, $total){
 		$registry = Registry::getInstance();
-		if ($registry->has('extensions')){
+		if ($registry->has('extensions')) {
 			$result = $registry->get('extensions')->hk_apply_promotions($this, $total_data, $total);
-		} else{
+		} else {
 			$result = $this->_apply_promotions($total_data, $total);
 		}
 		return $result;
 	}
 
 	//adding native promotions
+
 	/**
 	 * @param array $total_data
 	 * @param array $total

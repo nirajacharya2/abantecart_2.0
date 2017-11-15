@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -34,11 +38,11 @@ final class ASession{
 	 */
 	public function __construct($ses_name = ''){
 
-		if (class_exists('Registry')){
+		if (class_exists('\abc\core\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 
-		if (!session_id() || has_value($ses_name)){
+		if (!session_id() || AHelperUtils::has_value($ses_name)){
 			$this->ses_name = $ses_name;
 			$this->init($this->ses_name);
 		}
@@ -50,7 +54,7 @@ final class ASession{
 			){
 				// last request was more than 30 minutes ago
 				$this->clear();
-				redirect($this->registry->get('html')->currentURL(array ('token')));
+				abc_redirect($this->registry->get('html')->currentURL(array ('token')));
 			}
 		}
 		// update last activity time stamp

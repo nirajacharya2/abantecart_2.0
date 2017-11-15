@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AEncryption;
+use abc\lib\AOrderManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -252,7 +260,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if ($this->request->is_POST() && $this->_validateForm()) {
 
-			if (has_value($this->request->post['order_product_id'])) { //if present - saving form modal
+			if (AHelperUtils::has_value($this->request->post['order_product_id'])) { //if present - saving form modal
 				$this->model_sale_order->editOrderProduct($this->request->get['order_id'], $this->request->post);
 			} else {
 				$this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
@@ -261,11 +269,11 @@ class ControllerPagesSaleOrder extends AController{
 			//recalc totals and update
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->session->data['attention'] = $this->language->get('attention_check_total');
-			redirect($this->html->getSecureURL('sale/order/recalc',
+			abc_redirect($this->html->getSecureURL('sale/order/recalc',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
-		redirect($this->html->getSecureURL('sale/order'));
+		abc_redirect($this->html->getSecureURL('sale/order'));
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -284,7 +292,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (has_value($this->session->data['error'])) {
+		if (AHelperUtils::has_value($this->session->data['error'])) {
 			$this->data['error']['warning'] = $this->session->data['error'];
 			unset($this->session->data['error']);
 		}
@@ -292,12 +300,12 @@ class ControllerPagesSaleOrder extends AController{
 		$order_id = (int)$this->request->get['order_id'];
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_sale_order->editOrder($order_id, $this->request->post);
-			if (has_value($this->request->post['downloads'])) {
+			if (AHelperUtils::has_value($this->request->post['downloads'])) {
 				$data = $this->request->post['downloads'];
 				$this->loadModel('catalog/download');
 				foreach ($data as $order_download_id => $item) {
 					if ($item['expire_date']) {
-						$item['expire_date'] = dateDisplay2ISO($item['expire_date'],
+						$item['expire_date'] = AHelperUtils::dateDisplay2ISO($item['expire_date'],
 								$this->language->get('date_format_short'));
 					} else {
 						$item['expire_date'] = '';
@@ -308,19 +316,19 @@ class ControllerPagesSaleOrder extends AController{
 				//NOTE: Totals will be recalculated if forced so skip array is not needed.
 				if ($this->request->post['force_recalc']) {
 					$this->session->data['attention'] = $this->language->get('attention_check_total');
-					redirect($this->html->getSecureURL('sale/order/recalc', '&order_id=' . $order_id));
+					abc_redirect($this->html->getSecureURL('sale/order/recalc', '&order_id=' . $order_id));
 				} else {
 					if ($this->request->post['force_recalc_single']) {
 						//recalc single only
 						$skip_recalc = array ();
 						foreach ($this->request->post['totals'] as $key => $value) {
-							if (has_value($value)) {
+							if (AHelperUtils::has_value($value)) {
 								$skip_recalc[] = $key;
 							}
 						}
 
 						$enc = new AEncryption($this->config->get('encryption_key'));
-						redirect($this->html->getSecureURL('sale/order/recalc',
+						abc_redirect($this->html->getSecureURL('sale/order/recalc',
 								'&order_id=' . $order_id . '&skip_recalc=' . $enc->encrypt(serialize($skip_recalc))
 						)
 						);
@@ -341,7 +349,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		$this->document->initBreadcrumb(array (
@@ -405,7 +413,7 @@ class ControllerPagesSaleOrder extends AController{
 		$this->data['lastname'] = $order_info['lastname'];
 		$this->data['total'] = $this->currency->format($order_info['total'], $order_info['currency'],
 				$order_info['value']);
-		$this->data['date_added'] = dateISO2Display($order_info['date_added'],
+		$this->data['date_added'] = AHelperUtils::dateISO2Display($order_info['date_added'],
 				$this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
 		if ($order_info['customer_id']) {
 			$this->data['customer_href'] = $this->html->getSecureURL('sale/customer/update',
@@ -484,7 +492,7 @@ class ControllerPagesSaleOrder extends AController{
 				if ($option['element_type'] == 'U') {
 					$file_settings = unserialize($option['settings']);
 					$filename = $value;
-					if (has_value($file_settings['directory'])) {
+					if (AHelperUtils::has_value($file_settings['directory'])) {
 						$file = DIR_APP . 'system/uploads/' . $file_settings['directory'] . '/' . $filename;
 					} else {
 						$file = DIR_APP . 'system/uploads/' . $filename;
@@ -525,7 +533,7 @@ class ControllerPagesSaleOrder extends AController{
 				$this->data['no_recalc_allowed'] = true;
 				$product['status'] = 0;
 			} else {
-				if (dateISO2Int($product['date_available']) > time()) {
+				if (AHelperUtils::dateISO2Int($product['date_available']) > time()) {
 					$this->data['no_recalc_allowed'] = true;
 					$product['status'] = 0;
 				}
@@ -732,7 +740,7 @@ class ControllerPagesSaleOrder extends AController{
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('sale/order/shipping',
+			abc_redirect($this->html->getSecureURL('sale/order/shipping',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
@@ -746,7 +754,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		//set content language to order language ID.
@@ -919,7 +927,7 @@ class ControllerPagesSaleOrder extends AController{
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('sale/order/payment',
+			abc_redirect($this->html->getSecureURL('sale/order/payment',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
@@ -933,7 +941,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		//set content language to order language ID.
@@ -1084,7 +1092,7 @@ class ControllerPagesSaleOrder extends AController{
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$this->model_sale_order->addOrderHistory($this->request->get['order_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('sale/order/history',
+			abc_redirect($this->html->getSecureURL('sale/order/history',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
@@ -1098,7 +1106,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		//set content language to order language ID.
@@ -1214,7 +1222,7 @@ class ControllerPagesSaleOrder extends AController{
 		$results = $this->model_sale_order->getOrderHistory($this->request->get['order_id']);
 		foreach ($results as $result) {
 			$this->data['histories'][] = array (
-					'date_added' => dateISO2Display(
+					'date_added' => AHelperUtils::dateISO2Display(
 							$result['date_added'],
 							$this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
 					),
@@ -1252,7 +1260,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		//set content language to order language ID.
@@ -1324,7 +1332,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (has_value($this->session->data['error'])) {
+		if (AHelperUtils::has_value($this->session->data['error'])) {
 			$this->data['error']['warning'] = $this->session->data['error'];
 			unset($this->session->data['error']);
 		}
@@ -1336,19 +1344,19 @@ class ControllerPagesSaleOrder extends AController{
 		}
 
 		if ($this->request->is_POST() && $this->_validateForm()) {
-			if (has_value($this->request->post['downloads'])) {
+			if (AHelperUtils::has_value($this->request->post['downloads'])) {
 				$data = $this->request->post['downloads'];
 				$this->loadModel('catalog/download');
 				foreach ($data as $order_download_id => $item) {
 					if (isset($item['expire_date'])) {
-						$item['expire_date'] = $item['expire_date'] ? dateDisplay2ISO($item['expire_date'],
+						$item['expire_date'] = $item['expire_date'] ? AHelperUtils::dateDisplay2ISO($item['expire_date'],
 								$this->language->get('date_format_short')) : '';
 					}
 					$this->model_catalog_download->editOrderDownload($order_download_id, $item);
 				}
 			}
 			//add download to order
-			if (has_value($this->request->post['push'])) {
+			if (AHelperUtils::has_value($this->request->post['push'])) {
 				$this->load->library('json');
 				foreach ($this->request->post['push'] as $order_product_id => $download_id) {
 
@@ -1361,7 +1369,7 @@ class ControllerPagesSaleOrder extends AController{
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('sale/order/files',
+			abc_redirect($this->html->getSecureURL('sale/order/files',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
@@ -1376,7 +1384,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		if (empty($order_info)) {
 			$this->session->data['error'] = $this->language->get('error_order_load');
-			redirect($this->html->getSecureURL('sale/order'));
+			abc_redirect($this->html->getSecureURL('sale/order'));
 		}
 
 		$this->document->initBreadcrumb(array (
@@ -1505,7 +1513,7 @@ class ControllerPagesSaleOrder extends AController{
 					$attributes = $this->download->getDownloadAttributesValuesForDisplay($download_info['download_id']);
 					$is_file = $this->download->isFileAvailable($download_info['filename']);
 					foreach ($download_info['download_history'] as &$h) {
-						$h['time'] = dateISO2Display($h['time'],
+						$h['time'] = AHelperUtils::dateISO2Display($h['time'],
 								$this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
 					}
 					unset($h);
@@ -1543,9 +1551,9 @@ class ControllerPagesSaleOrder extends AController{
 									array (
 											'type'       => 'date',
 											'name'       => 'downloads[' . (int)$download_info['order_download_id'] . '][expire_date]',
-											'value'      => ($download_info['expire_date'] ? dateISO2Display($download_info['expire_date']) : ''),
+											'value'      => ($download_info['expire_date'] ? AHelperUtils::dateISO2Display($download_info['expire_date']) : ''),
 											'default'    => '',
-											'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+											'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
 											'highlight'  => 'future',
 											'style'      => 'medium-field'
 									)),
@@ -1562,7 +1570,7 @@ class ControllerPagesSaleOrder extends AController{
 				}
 			}
 		} else {
-			redirect($this->html->getSecureURL('sale/order/details',
+			abc_redirect($this->html->getSecureURL('sale/order/details',
 					'&order_id=' . $this->request->get['order_id']));
 		}
 
@@ -1593,7 +1601,7 @@ class ControllerPagesSaleOrder extends AController{
 			$this->session->data['error'] = $this->language->get('error_permission');
 			return 0;
 		} else {
-			if (!has_value($order_id)) {
+			if (!AHelperUtils::has_value($order_id)) {
 				$this->session->data['error'] = "Missing required details";
 				return 0;
 			}
@@ -1611,7 +1619,7 @@ class ControllerPagesSaleOrder extends AController{
 
 		//do we need to add new total record?
 		/**
-		 * @var $adm_order_mdl ModelSaleOrder
+		 * @var $adm_order_mdl \abc\model\admin\ModelSaleOrder
 		 */
 		$adm_order_mdl = $this->load->model('sale/order');
 		if ($this->request->post['key'] && $order_id) {
@@ -1629,7 +1637,7 @@ class ControllerPagesSaleOrder extends AController{
 			$this->session->data['success'] = $this->language->get('text_success');
 		}
 
-		redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
+		abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -1643,9 +1651,9 @@ class ControllerPagesSaleOrder extends AController{
 		$order_id = $this->request->get['order_id'];
 		$order_total_id = $this->request->get['order_total_id'];
 
-		if (has_value($order_id) && has_value($order_total_id)) {
+		if (AHelperUtils::has_value($order_id) && AHelperUtils::has_value($order_total_id)) {
 			/**
-			 * @var $adm_order_mdl ModelSaleOrder
+			 * @var $adm_order_mdl \abc\model\admin\ModelSaleOrder
 			 */
 			$adm_order_mdl = $this->load->model('sale/order');
 			$original_totals = $adm_order_mdl->getOrderTotals($order_id);
@@ -1672,7 +1680,7 @@ class ControllerPagesSaleOrder extends AController{
 			}
 		}
 
-		redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
+		abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);

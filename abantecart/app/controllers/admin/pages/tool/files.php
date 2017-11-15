@@ -17,6 +17,12 @@ Do not edit or add to this file if you wish to upgrade AbanteCart to newer
 versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AAttribute;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -151,7 +157,7 @@ class ControllerPagesToolFiles extends AController {
 				$attribute_data = $am->getAttribute($this->request->get['attribute_id']);
 			}
 
-			if (has_value($attribute_data['settings']['directory'])) {
+			if (AHelperUtils::has_value($attribute_data['settings']['directory'])) {
 				$file = DIR_APP . 'system/uploads/' . $attribute_data['settings']['directory'] . '/' . $filename;
 			} else {
 				$file = DIR_APP . 'system/uploads/' . $filename;

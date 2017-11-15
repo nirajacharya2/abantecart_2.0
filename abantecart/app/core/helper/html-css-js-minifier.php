@@ -1,11 +1,12 @@
 <?php
+//TODO: need to remove this file in 2.0
 /**
 	PHP Function to Minify HTML, CSS and JavaScript
  * @param string $input
  * @return string
  */
 // HTML Minifier
-function minify_html($input) {
+function abc_minify_html($input) {
     if(trim($input) === "") return $input;
     // Remove extra white-space(s) between HTML attribute(s)
     $input = preg_replace_callback('#<([^\/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(\/?)>#s', function($matches) {
@@ -14,7 +15,7 @@ function minify_html($input) {
     // Minify inline CSS declaration(s)
     if(strpos($input, ' style=') !== false) {
         $input = preg_replace_callback('#<([^<]+?)\s+style=([\'"])(.*?)\2(?=[\/\s>])#s', function($matches) {
-            return '<' . $matches[1] . ' style=' . $matches[2] . minify_css($matches[3]) . $matches[2];
+            return '<' . $matches[1] . ' style=' . $matches[2] . abc_minify_css($matches[3]) . $matches[2];
         }, $input);
     }
     return preg_replace(
@@ -56,7 +57,7 @@ function minify_html($input) {
  * @param string $input
  * @return string
  */
-function minify_css($input) {
+function abc_minify_css($input) {
     if(trim($input) === "") return $input;
     return preg_replace(
         array(
@@ -103,7 +104,7 @@ function minify_css($input) {
  * @param string $input
  * @return string
  */
-function minify_js($input) {
+function abc_minify_js($input) {
     if(trim($input) === "") return $input;
     return preg_replace(
         array(

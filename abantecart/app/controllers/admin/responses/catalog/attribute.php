@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\lib\AAttribute_Manager;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -167,25 +175,25 @@ class ControllerResponsesCatalogAttribute extends AController{
 				'extensions' => $form->getFieldHtml(array (
 						'type'  => 'input',
 						'name'  => 'settings[extensions]',
-						'value' => (has_value($this->data['settings']['extensions']) ? $this->data['settings']['extensions'] : ''),
+						'value' => (AHelperUtils::has_value($this->data['settings']['extensions']) ? $this->data['settings']['extensions'] : ''),
 						'style' => 'no-save'
 				)),
 				'min_size'   => $form->getFieldHtml(array (
 						'type'  => 'input',
 						'name'  => 'settings[min_size]',
-						'value' => (has_value($this->data['settings']['min_size']) ? $this->data['settings']['min_size'] : ''),
+						'value' => (AHelperUtils::has_value($this->data['settings']['min_size']) ? $this->data['settings']['min_size'] : ''),
 						'style' => 'small-field no-save'
 				)),
 				'max_size'   => $form->getFieldHtml(array (
 						'type'  => 'input',
 						'name'  => 'settings[max_size]',
-						'value' => (has_value($this->data['settings']['max_size']) ? $this->data['settings']['max_size'] : ''),
+						'value' => (AHelperUtils::has_value($this->data['settings']['max_size']) ? $this->data['settings']['max_size'] : ''),
 						'style' => 'small-field no-save'
 				)),
 				'directory'  => $form->getFieldHtml(array (
 						'type'  => 'input',
 						'name'  => 'settings[directory]',
-						'value' => (has_value($this->data['settings']['directory']) ? $this->data['settings']['directory'] : ''),
+						'value' => (AHelperUtils::has_value($this->data['settings']['directory']) ? $this->data['settings']['directory'] : ''),
 						'style' => 'no-save'
 				)),
 		);

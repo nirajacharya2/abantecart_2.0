@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -28,9 +31,7 @@ class ControllerPagesAccountSuccess extends AController{
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		$this->document->setTitle($this->language->get('heading_title'));
-
 		$this->document->resetBreadcrumbs();
-
 		$this->document->addBreadcrumb(
 				array (
 						'href'      => $this->html->getHomeURL(),

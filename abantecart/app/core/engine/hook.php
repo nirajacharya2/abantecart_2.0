@@ -17,7 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -45,8 +48,9 @@ final class AHook{
 	}
 
 	public function __call($method, $args){
-		if (!$this->registry->has('extensions'))
+		if (!$this->registry->has('extensions')) {
 			return null;
+		}
 
 		array_unshift($args, $this);
 		$return = call_user_func_array(array ($this->extensions, $method), $args);

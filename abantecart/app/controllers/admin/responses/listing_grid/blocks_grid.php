@@ -17,6 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use abc\lib\ALayoutManager;
+use abc\lib\AListingManager;
+use abc\lib\AResourceManager;
+use abc\lib\AView;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -300,7 +314,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController{
 
 		$this->load->library('json');
 		$lm = new ALayoutManager();
-		$form_name = has_value($this->request->get['form_name']) ? $this->request->get['form_name'] : 'BlockFrm';
+		$form_name = AHelperUtils::has_value($this->request->get['form_name']) ? $this->request->get['form_name'] : 'BlockFrm';
 		$custom_block_id = (int)$this->request->get ['custom_block_id'];
 		$listing_datasource = $this->request->post_or_get('listing_datasource');
 		$rl_object_name = $id_name = $ajax_url = '';

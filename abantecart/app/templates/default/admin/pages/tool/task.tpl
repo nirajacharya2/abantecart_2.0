@@ -26,7 +26,7 @@
 					type:'POST',
 					success: function(data){
 					    if(data.result == true) {
-                            success_alert(<?php js_echo($text_task_started); ?>, true);
+                            success_alert(<?php abc_js_echo($text_task_started); ?>, true);
                         }
 					},
 					complete: function(){
@@ -46,7 +46,7 @@
 					url: URL,
 					type:'POST'
 				});
-				success_alert(<?php js_echo($text_task_started); ?>, true);
+				success_alert(<?php abc_js_echo($text_task_started); ?>, true);
 				$('#tasks_grid').trigger("reloadGrid");
 				return false;
 			})

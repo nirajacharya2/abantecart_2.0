@@ -21,7 +21,7 @@ if ( !defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
-if(!class_exists('ExtensionFormsManager')){
+if(!class_exists('\abc\core\extension\ExtensionFormsManager')){
 	include('core/forms_manager.php');
 }
 

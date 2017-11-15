@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperHtml;
+use abc\lib\ADataset;
+use abc\lib\AResourceManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -34,7 +40,7 @@ class ControllerCommonMenu extends AController {
 		//use to update data before render
 		$this->extensions->hk_ProcessData($this);
 
-		// need to resort by sort_order property and exlude disabled extension items
+		// need to resort by sort_order property and exclude disabled extension items
 		$enabled_extension = $this->extensions->getEnabledExtensions();
 
 
@@ -69,7 +75,7 @@ class ControllerCommonMenu extends AController {
 		unset ($tmp);
 
 
-		$this->view->assign('menu_html',  renderAdminMenu(
+		$this->view->assign('menu_html',  AHelperHtml::renderAdminMenu(
 										$this->_buildMenuArray($this->data['menu_items']),
 										0, 
 										$this->request->get_or_post('rt') )
@@ -113,7 +119,7 @@ class ControllerCommonMenu extends AController {
 				if (isset($item ['language'])) {
 					$this->loadLanguage($item ['language'], 'silent');
 				}
-				$childen = $this->_getChildItems($item['item_id'], $menu_items);
+				$children = $this->_getChildItems($item['item_id'], $menu_items);
 				$rt = '';
 				$menu_link = '';
 				if ( preg_match("/(http|https):/", $item['item_url']) ) {
@@ -140,8 +146,8 @@ class ControllerCommonMenu extends AController {
 					$temp['rt'] = $rt;
 				}
 
-				if ($childen) {
-					$temp['children'] = $childen;
+				if ($children) {
+					$temp['children'] = $children;
 				}
 
 				$result[ $item['item_id'] ] = $temp;

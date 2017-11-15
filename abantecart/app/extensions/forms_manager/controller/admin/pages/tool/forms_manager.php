@@ -17,13 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\HtmlElementFactory;
+use abc\lib\ALayoutManager;
+use abc\lib\AListingManager;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerPagesToolFormsManager
- * @property ModelToolFormsManager $model_tool_forms_manager
+ * @property \abc\model\admin\ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerPagesToolFormsManager extends AController {
 
@@ -45,13 +53,13 @@ class ControllerPagesToolFormsManager extends AController {
 				if ($this->model_tool_forms_manager->getFormIdByName($this->request->post['form_name'])) {
 
 					$this->session->data['warning'] = $this->language->get('error_duplicate_form_name');
-					$this->redirect($this->html->getSecureURL('tool/forms_manager'));
+					abc_redirect($this->html->getSecureURL('tool/forms_manager'));
 				}
 				$this->request->get['form_id'] = $this->model_tool_forms_manager->addForm($this->request->post);
 			} elseif (!$this->model_tool_forms_manager->addField($this->request->get['form_id'], $this->request->post)) {
 				$this->session->data['warning'] = $this->language->get('error_duplicate_field_name');
 			}
-			$this->redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $this->request->get['form_id']));
+			abc_redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $this->request->get['form_id']));
 			exit;
 		}
 
@@ -170,7 +178,7 @@ class ControllerPagesToolFormsManager extends AController {
 				$form_id = $this->model_tool_forms_manager->addForm($this->request->post);
 				$this->session->data['success'] = $this->language->get('text_success_added_form');
 			}
-			$this->redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $form_id));
+			abc_redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $form_id));
 		}
 
 		$this->view->assign('error', $this->error);
@@ -195,7 +203,7 @@ class ControllerPagesToolFormsManager extends AController {
 		$this->loadModel('tool/forms_manager');
 		$this->model_tool_forms_manager->removeField($this->request->get['form_id'], $this->request->get['field_id']);
 		$this->session->data['success'] = $this->language->get('text_field_removed');
-		$this->redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $this->request->get['form_id']));
+		abc_redirect($this->html->getSecureURL('tool/forms_manager/update', '&form_id=' . $this->request->get['form_id']));
 	}
 
 
@@ -572,7 +580,7 @@ class ControllerPagesToolFormsManager extends AController {
 			}
 
 			$this->session->data ['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . $custom_block_id));
 		}
 
 		foreach ($this->request->post as $k => $v) {
@@ -602,7 +610,7 @@ class ControllerPagesToolFormsManager extends AController {
 		$this->data['block_id'] = $block['block_id'];
 		$custom_block_id = (int)$this->request->get['custom_block_id'];
 		if (!$custom_block_id) {
-			$this->redirect($this->html->getSecureURL('tool/forms_manager/insert_block'));
+			abc_redirect($this->html->getSecureURL('tool/forms_manager/insert_block'));
 		}
 
 
@@ -676,7 +684,7 @@ class ControllerPagesToolFormsManager extends AController {
 			}
 
 			$this->session->data ['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . $custom_block_id));
+			abc_redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . $custom_block_id));
 		}
 
 		$this->_getBlockForm();

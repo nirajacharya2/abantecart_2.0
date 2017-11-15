@@ -105,7 +105,7 @@
 		<value><![CDATA[Customer's order comment]]></value>
 	</definition>
 	<definition>
-		<key>text_order_cancelation</key>
+		<key>text_order_cancellation</key>
 		<value><![CDATA[Request Cancellation of Order]]></value>
 	</definition>
 	<definition>
@@ -113,20 +113,20 @@
 		<value><![CDATA[Request an Order cancellation from Customer ]]></value>
 	</definition>
 	<definition>
-		<key>text_order_cancelation_confirm</key>
+		<key>text_order_cancellation_confirm</key>
 		<value>
 			<![CDATA[Your cancellation request may not be made in some cases, for example, when the goods have been shipped. Continue?]]></value>
 	</definition>
 	<definition>
-		<key>text_order_cancelation_success</key>
+		<key>text_order_cancellation_success</key>
 		<value><![CDATA[Order cancellation request has been submitted]]></value>
 	</definition>
 	<definition>
-		<key>text_order_cancelation_message_title</key>
+		<key>text_order_cancellation_message_title</key>
 		<value><![CDATA[Order #%s cancellation request]]></value>
 	</definition>
 	<definition>
-		<key>text_order_cancelation_message_body</key>
+		<key>text_order_cancellation_message_body</key>
 		<value><![CDATA[Customer %s has requested order cancellation for order #%s . To review go to %s]]></value>
 	</definition>
 	<definition>

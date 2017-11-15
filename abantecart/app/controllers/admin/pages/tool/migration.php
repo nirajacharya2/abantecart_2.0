@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\AException;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -59,7 +64,7 @@ class ControllerPagesToolMigration extends AController {
 
 		$this->_setCommonVars('heading_title_step_one');
 		if (!$this->_validateAccess()) {
-			$this->redirect($this->html->getSecureURL('tool/migration'));
+			abc_redirect($this->html->getSecureURL('tool/migration'));
 		}
 
 		$errors = array(
@@ -83,7 +88,7 @@ class ControllerPagesToolMigration extends AController {
 
 		if ($this->request->is_POST() && ($this->_validateStepOne())) {
 			$this->model_tool_migration->saveStepData($formData);
-			$this->redirect($this->html->getSecureURL('tool/migration/step_two'));
+			abc_redirect($this->html->getSecureURL('tool/migration/step_two'));
 		}
 
 		$this->data['cancel'] = $this->html->getSecureURL('tool/migration');
@@ -179,7 +184,7 @@ class ControllerPagesToolMigration extends AController {
 
 		$this->_setCommonVars('heading_title_step_two');
 		if (!$this->_validateAccess() || !$this->model_tool_migration->isStepData()) {
-			$this->redirect($this->html->getSecureURL('tool/migration'));
+			abc_redirect($this->html->getSecureURL('tool/migration'));
 		}
 
 		$errors = array(
@@ -196,7 +201,7 @@ class ControllerPagesToolMigration extends AController {
 
 		if ($this->request->is_POST() && ($this->_validateStepTwo())) {
 			$this->model_tool_migration->saveStepData($formData);
-			$this->redirect($this->html->getSecureURL('tool/migration/step_three'));
+			abc_redirect($this->html->getSecureURL('tool/migration/step_three'));
 		}
 		$this->data['counts'] = $this->model_tool_migration->getCounts();
 		
@@ -269,7 +274,7 @@ class ControllerPagesToolMigration extends AController {
 
 		$this->_setCommonVars('heading_title_step_three');
 		if (!$this->_validateAccess() || !$this->model_tool_migration->isStepData()) {
-			$this->redirect($this->html->getSecureURL('tool/migration'));
+			abc_redirect($this->html->getSecureURL('tool/migration'));
 		}
 
 		$this->data['success'] = $this->language->get('text_finished');

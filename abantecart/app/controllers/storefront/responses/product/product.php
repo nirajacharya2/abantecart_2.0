@@ -17,18 +17,23 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AException;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 class ControllerResponsesProductProduct extends AController {
-
 	public $data = array();
-
 	public function main() {
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
+		$html_out = '';
 		try{
 			$this->config->set('embed_mode', true);
 			$cntr = $this->dispatch('pages/product/product');
@@ -266,7 +271,7 @@ class ControllerResponsesProductProduct extends AController {
 			return $output;
 		}
 
-		if (has_value($this->request->post['product_id']) && is_numeric($this->request->post['product_id'])) {
+		if (AHelperUtils::has_value($this->request->post['product_id']) && is_numeric($this->request->post['product_id'])) {
 			$product_id = $this->request->post['product_id'];
 			if (isset($this->request->post['option'])) {
 				$option = $this->request->post['option'];

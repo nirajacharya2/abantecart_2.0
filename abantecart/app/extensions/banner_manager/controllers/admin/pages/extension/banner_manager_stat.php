@@ -17,13 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerPagesExtensionBannerManagerStat
- * @property ModelExtensionBannerManager $model_extension_banner_manager
+ * @property \abc\model\admin\ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerPagesExtensionBannerManagerStat extends AController{
 	public $data = array ();
@@ -211,7 +214,7 @@ class ControllerPagesExtensionBannerManagerStat extends AController{
 
 		//prevent random click
 		if ($this->request->get['delete'] != '1' && $this->request->get['delete'] != 'all'){
-			$this->redirect($this->html->getSecureURL('extension/banner_manager_stat'));
+			abc_redirect($this->html->getSecureURL('extension/banner_manager_stat'));
 		}
 
 		$banner_id = (int)$this->request->get['banner_id'];
@@ -221,6 +224,6 @@ class ControllerPagesExtensionBannerManagerStat extends AController{
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
 		$this->session->data['success'] = $this->language->get('text_delete_success');
-		$this->redirect($this->html->getSecureURL('extension/banner_manager_stat'));
+		abc_redirect($this->html->getSecureURL('extension/banner_manager_stat'));
 	}
 }

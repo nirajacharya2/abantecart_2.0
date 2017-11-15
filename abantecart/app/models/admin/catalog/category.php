@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\ALayoutManager;
+use abc\lib\AResourceManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -57,13 +63,10 @@ class ModelCatalogCategory extends Model{
 		}
 
 		if ($data['keyword']){
-			$seo_key = SEOEncode($data['keyword'], 'category_id', $category_id);
+			$seo_key = AHelperUtils::SEOEncode($data['keyword'], 'category_id', $category_id);
 		} else{
 			//Default behavior to save SEO URL keyword from category name in default language
-			/**
-			 * @var ALanguageManager
-			 */
-			$seo_key = SEOEncode($data['category_description'][$this->language->getDefaultLanguageID()]['name'],
+			$seo_key = AHelperUtils::SEOEncode($data['category_description'][$this->language->getDefaultLanguageID()]['name'],
 					'category_id',
 					$category_id);
 		}
@@ -129,7 +132,7 @@ class ModelCatalogCategory extends Model{
 		}
 
 		if (isset($data['keyword'])){
-			$data['keyword'] = SEOEncode($data['keyword']);
+			$data['keyword'] = AHelperUtils::SEOEncode($data['keyword']);
 			if ($data['keyword']){
 				$this->language->replaceDescriptions('url_aliases',
 						array ('query' => "category_id=" . (int)$category_id),

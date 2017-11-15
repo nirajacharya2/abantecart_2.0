@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\ABackup;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -31,11 +38,11 @@ class ControllerTaskToolBackup extends AController {
 
 		$bkp = new ABackup($backup_name);
 
-		if(has_value($this->request->get['sql_dump_mode'])){
+		if(AHelperUtils::has_value($this->request->get['sql_dump_mode'])){
 			$bkp->sql_dump_mode = $this->request->get['sql_dump_mode'];
 		}
 
-		if(has_value($this->request->get['table_list'])){
+		if(AHelperUtils::has_value($this->request->get['table_list'])){
 			$table_list = $this->request->get['table_list'];
 		}
 
@@ -199,9 +206,8 @@ class ControllerTaskToolBackup extends AController {
 			return $error->toJSONResponse('APP_ERROR_402',
 									array( 'error_text' => implode("\n",$bkp->error),
 										'reset_value' => true
-									));
+									)
+			);
 		}
-
 	}
-	
 }

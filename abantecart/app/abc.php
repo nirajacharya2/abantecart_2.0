@@ -1,4 +1,6 @@
 <?php
+namespace abc\core;
+use abc\lib\ADebug;
 
 include 'abc_base.php';
 class ABC extends ABCBase{
@@ -35,7 +37,7 @@ class ABC extends ABCBase{
 
 		if( IS_ADMIN === true && $registry->get('config')->get('config_maintenance') && $registry->get('user')->isLogged() ) {
 			$user_id = $registry->get('user')->getId();
-			startStorefrontSession($user_id);
+			AHelperUtils::startStorefrontSession($user_id);
 		}
 
 		//Show cache stats if debugging

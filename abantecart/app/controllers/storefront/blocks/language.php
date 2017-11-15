@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -33,9 +36,9 @@ class ControllerBlocksLanguage extends AController {
 			$this->session->data['language'] = $this->request->post['language_code'];
 		
 			if (isset($this->request->post['redirect'])) {
-				$this->redirect($this->request->post['redirect']);
+				abc_redirect($this->request->post['redirect']);
 			} else {
-				$this->redirect($this->html->getHomeURL());
+				abc_redirect($this->html->getHomeURL());
 			}
     	}
 

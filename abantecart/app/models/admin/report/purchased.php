@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -40,11 +43,11 @@ class ModelReportPurchased extends Model {
 		}
 		$implode = array("o.order_status_id > '0'");
 		if (!empty($data['filter']['date_start'])) {
-			$date_start = dateDisplay2ISO($data['filter']['date_start'],$this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($data['filter']['date_start'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') >= DATE_FORMAT('" . $this->db->escape($date_start) . "','%Y-%m-%d') ";
 		}
 		if (!empty($data['filter']['date_end'])) {
-			$date_end = dateDisplay2ISO($data['filter']['date_end'],$this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($data['filter']['date_end'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') <= DATE_FORMAT('" . $this->db->escape($date_end) . "','%Y-%m-%d') ";
 		}
 
@@ -86,11 +89,11 @@ class ModelReportPurchased extends Model {
 
 		$implode = array("o.order_status_id > '0'");
 		if (!empty($data['filter']['date_start'])) {
-			$date_start = dateDisplay2ISO($data['filter']['date_start'],$this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($data['filter']['date_start'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') >= DATE_FORMAT('" . $this->db->escape($date_start) . "','%Y-%m-%d') ";
 		}
 		if (!empty($data['filter']['date_end'])) {
-			$date_end = dateDisplay2ISO($data['filter']['date_end'],$this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($data['filter']['date_end'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') <= DATE_FORMAT('" . $this->db->escape($date_end) . "','%Y-%m-%d') ";
 		}
 

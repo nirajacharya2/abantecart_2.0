@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\ALanguageManager;
+use abc\core\Model;
+use abc\lib\AWarning;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -222,7 +228,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 						LEFT JOIN " . $this->db->table("languages") . " l ON l.language_id = ld.language_id";
 			}
 
-			if (has_value($filter['section'])) {
+			if (AHelperUtils::has_value($filter['section'])) {
                 $filter['section'] = $filter['section']=='admin' ? 1 :0;
 				$sql .= " WHERE `section` = '" . (int)$filter['section'] . "' ";
 			} else {
@@ -344,9 +350,9 @@ class ModelLocalisationLanguageDefinitions extends Model {
 
 	/**
 	 * Load needed data and build form for definitions add or edit
-	 * @param ARequest $request - Data from request object
+	 * @param \abc\lib\ARequest $request - Data from request object
 	 * @param array $data  - from requester
-	 * @param AForm $form  - form object
+	 * @param \abc\core\AForm $form  - form object
 	 * @return array ($data imputed processed and returned back)
 	 */
 	public function buildFormData( &$request, &$data, &$form ) {
@@ -359,7 +365,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 
 		//if existing definition disable edit for some fields
 		$disable_attr = '';
-		if (has_value($language_definition_id)) {
+		if (AHelperUtils::has_value($language_definition_id)) {
 			$disable_attr = ' readonly ';
 		}
 		
@@ -377,21 +383,21 @@ class ModelLocalisationLanguageDefinitions extends Model {
 		$def_det = array();
 		$all_defs = array();
 		//!!!! ATTENTION: Important to understand this process flow. See comments
-		if (has_value($language_definition_id)) {
+		if (AHelperUtils::has_value($language_definition_id)) {
 			// 1. language_definition_id is provided, load definition based on ID
 			$def_det = $this->getLanguageDefinition($language_definition_id);
 			if ( empty($def_det) ) {
 				//this is incorrect ID redirect to create new
-				$parms = '&view_mode='.$view_mode;
-				return ( array( 'redirect_params' => $parms ));				
+				$params = '&view_mode='.$view_mode;
+				return ( array( 'redirect_params' => $params ));
 			}
 			
 			//special case then main file is edited (english, russian, etc ).
 			//Candidate for improvement. Rename these files to main.xml
 			$main_block = $this->language->isMainBlock($def_det['block'], $def_det['language_id']);	
 
-			// 2. make sure we load all the langaues from XML in case they were not used yet.
-			foreach ($languages as $lang) {				
+			// 2. make sure we load all the languages from XML in case they were not used yet.
+			foreach ($languages as $lang) {
 				$new_lang_obj = new ALanguageManager($this->registry, $lang['code'], $def_det['section']);
 				if ($main_block) {
 					$block_path = $lang['filename'];
@@ -419,16 +425,16 @@ class ModelLocalisationLanguageDefinitions extends Model {
 				}
 				$new_def = $this->LoadDefinitionSetEmpty( $def_det['section'], $block, $def_det['language_key'], $content_lang_id);
 				//if exists redirect with correct language_definition_id for content language 
-				if (has_value($new_def['language_definition_id'])) {
-					$parms = '&view_mode='.$view_mode;	
-					$parms .= '&language_definition_id='.$new_def['language_definition_id'];
-					return ( array( 'redirect_params' => $parms ));		
+				if (AHelperUtils::has_value($new_def['language_definition_id'])) {
+					$params = '&view_mode='.$view_mode;
+					$params .= '&language_definition_id='.$new_def['language_definition_id'];
+					return ( array( 'redirect_params' => $params ));
 				} else {
-					//alow to create new one with blank defintion value
+					//allow to create new one with blank definition value
 					$def_det = $new_def;
 				}
 			}
-		}			
+		}
  
 		foreach ($fields as $field) {
 			if (isset($request->post[ $field ])) {
@@ -507,12 +513,10 @@ class ModelLocalisationLanguageDefinitions extends Model {
 					'type' => 'hidden',
 					'name' => 'main_block',
 					'value' =>  1,
-				));			
+				));
 		}
 
-
-
-		//load all language fields for this definition to be awailable in the template
+		//load all language fields for this definition to be available in the template
 		foreach ($data['languages'] as $i) {
 			$value = '';
 			$id = '';

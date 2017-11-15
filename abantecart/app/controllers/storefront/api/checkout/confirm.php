@@ -17,9 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+use abc\lib\AJson;
+use abc\lib\AOrder;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiCheckoutConfirm
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerApiCheckoutConfirm extends AControllerAPI {
 	public $error = array();
 	public $data = array();
@@ -159,15 +171,14 @@ class ControllerApiCheckoutConfirm extends AControllerAPI {
 
 		$this->load->library('json');
 		$this->data['payment'] = AJson::decode( $payment_controller->dispatchGetOutput(), TRUE );
-		//set process_rt for process step to run the payment 	
+		//set process_rt for process step to run the payment
 		$this->session->data['process_rt'] = $this->data['payment']['process_rt'];
 		//mark confirmation viewed
 		$this->session->data['confirmed'] = TRUE;
-				
+
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-		
+
 		$this->rest->setResponseData( $this->data );
-		$this->rest->sendResponse( 200 );		
+		$this->rest->sendResponse( 200 );
 	}
-	
 }

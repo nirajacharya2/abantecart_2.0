@@ -1,5 +1,7 @@
 <?php
 // Storefront HTTP
+use abc\core\Registry;
+
 $config = Registry::getInstance()->get('config');
 $store_url = $config->get('config_url');
 define('HTTP_SERVER', $store_url);

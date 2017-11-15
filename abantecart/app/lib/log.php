@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -39,7 +42,7 @@ final class ALog{
 		$this->filename = $filename;
 
 		if (!is_writable(pathinfo($filename, PATHINFO_DIRNAME))){
-			// if it happens see errors in httpd error log!
+			// if it happens see errors in httpd-error log!
 			throw new AException (AC_ERR_LOAD, 'Error: Log directory ' . pathinfo($filename, PATHINFO_DIRNAME) . ' is non-writable. Please change permissions.');
 		}
 
@@ -54,7 +57,7 @@ final class ALog{
 			@fclose($handle);
 		}
 
-		if (class_exists('Registry')){
+		if (class_exists('\abc\core\Registry')){
 			// for disabling via settings
 			$registry = Registry::getInstance();
 			if (is_object($registry->get('config'))){

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -29,9 +33,9 @@ class ControllerPagesAccountUnsubscribe extends AController{
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if (has_value($this->request->get['customer_id'])
+		if (AHelperUtils::has_value($this->request->get['customer_id'])
 				&& (int)$this->request->get['customer_id'] > 0
-				&& has_value($this->request->get['email'])
+				&& AHelperUtils::has_value($this->request->get['email'])
 		){
 			$this->loadModel('account/customer');
 			$customer = $this->model_account_customer->getCustomer((int)$this->request->get['customer_id']);
@@ -39,13 +43,12 @@ class ControllerPagesAccountUnsubscribe extends AController{
 			if ($customer && $customer['email'] == $this->request->get['email']){
 				$this->model_account_customer->editNewsletter(0, (int)$this->request->get['customer_id']);
 			} else{
-				//othewise - redirect to index page
-				$this->html->redirect($this->html->getHomeURL());
+				//otherwise - redirect to index page
+				abc_redirect($this->html->getHomeURL());
 			}
 		} else{
-			$this->html->redirect($this->html->getHomeURL());
+			abc_redirect($this->html->getHomeURL());
 		}
-
 
 		$this->document->setTitle($this->language->get('heading_title'));
 		$this->document->resetBreadcrumbs();
@@ -56,12 +59,8 @@ class ControllerPagesAccountUnsubscribe extends AController{
 						'separator' => false
 				));
 
-
 		$this->data['heading_title'] = $this->language->get('heading_title');
-
 		$this->data['text_message'] = $this->language->get('text_message');
-
-
 		$this->data['button_continue'] = $this->language->get('button_continue');
 		$this->data['continue'] = $this->html->getHomeURL();
 

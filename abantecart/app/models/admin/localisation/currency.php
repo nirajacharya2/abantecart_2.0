@@ -17,13 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+use abc\lib\AConnect;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ModelLocalisationCurrency
- * @property ModelSettingSetting $model_setting_setting
+ * @property \abc\model\admin\ModelSettingSetting $model_setting_setting
  */
 class ModelLocalisationCurrency extends Model {
 	/**
@@ -189,8 +193,6 @@ class ModelLocalisationCurrency extends Model {
 
 	/**
 	 * NOTE: Update of currency values works only for default store!
-	 *
-	 * @throws AException
 	 */
 	public function updateCurrencies() {
 		if (extension_loaded('curl')) {

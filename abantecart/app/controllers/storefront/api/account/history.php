@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -60,7 +64,7 @@ class ControllerApiAccountHistory extends AControllerAPI {
 								'order_id'   => $result['order_id'],
 								'name'       => $result['firstname'] . ' ' . $result['lastname'],
 								'status'     => $result['status'],
-								'date_added' => dateISO2Display($result['date_added'], $this->language->get('date_format_short')),
+								'date_added' => AHelperUtils::dateISO2Display($result['date_added'], $this->language->get('date_format_short')),
 								'products'   => $product_total,
 								'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
         		);

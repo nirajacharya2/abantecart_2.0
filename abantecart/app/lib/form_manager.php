@@ -17,12 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
- * @property ALanguageManager $language
+ * @property \abc\core\ALanguageManager $language
  * @property ADB $db
  */
 class AFormManager{
@@ -41,20 +44,26 @@ class AFormManager{
 		$this->registry = Registry::getInstance();
 
 		//check if form with same name exists
-		$sql = "SELECT form_id FROM " . $this->db->table("forms") . " WHERE form_name='" . $this->db->escape($form_name) . "'";
+		$sql = "SELECT form_id 
+				FROM " . $this->db->table("forms") . " 
+				WHERE form_name='" . $this->db->escape($form_name) . "'";
 		$result = $this->db->query($sql);
 		$this->form_id = ( int )$result->row ['form_id'];
 
 		if ($this->form_id){
 			// field groups of form
-			$sql = "SELECT group_id FROM " . $this->db->table("form_groups") . " WHERE form_id='" . $this->form_id . "'";
+			$sql = "SELECT group_id 
+					FROM " . $this->db->table("form_groups") . " 
+					WHERE form_id='" . $this->form_id . "'";
 			$result = $this->db->query($sql);
 			if ($result->num_rows){
 				$this->form_field_groups [] = ( int )$result->row ['group_id'];
 			}
 
 			// fields of form
-			$sql = "SELECT field_id FROM " . $this->db->table("fields") . " WHERE form_id='" . $this->form_id . "'";
+			$sql = "SELECT field_id 
+					FROM " . $this->db->table("fields") . " 
+					WHERE form_id='" . $this->form_id . "'";
 			$result = $this->db->query($sql);
 			if ($result->num_rows){
 				$this->form_fields [] = ( int )$result->row ['field_id'];
@@ -76,7 +85,9 @@ class AFormManager{
 		if (!$group_name || !$this->form_id){
 			return null;
 		}
-		$sql = "SELECT group_id FROM " . $this->db->table("form_groups") . " WHERE group_name = '" . $this->db->escape($group_name) . "' AND form_id = '" . $this->form_id . "'";
+		$sql = "SELECT group_id 
+				FROM " . $this->db->table("form_groups") . " 
+				WHERE group_name = '" . $this->db->escape($group_name) . "' AND form_id = '" . $this->form_id . "'";
 		$result = $this->db->query($sql);
 		return ( int )$result->row ['group_id'];
 	}
@@ -92,7 +103,9 @@ class AFormManager{
 		if (!$field_group_id || !$language_id){
 			return null;
 		}
-		$sql = "SELECT * FROM " . $this->db->table("fields_group_descriptions") . " WHERE group_id = '" . $field_group_id . "' AND language_id = '" . $language_id . "'";
+		$sql = "SELECT * 
+				FROM " . $this->db->table("fields_group_descriptions") . " 
+				WHERE group_id = '" . $field_group_id . "' AND language_id = '" . $language_id . "'";
 		$result = $this->db->query($sql);
 		return $result->row;
 	}
@@ -101,7 +114,9 @@ class AFormManager{
 		if (!$field_name || !$this->form_id){
 			return null;
 		}
-		$sql = "SELECT field_id FROM " . $this->db->table("fields") . " WHERE field_name = '" . $this->db->escape($field_name) . "' AND form_id= '" . $this->form_id . "'";
+		$sql = "SELECT field_id 
+				FROM " . $this->db->table("fields") . " 
+				WHERE field_name = '" . $this->db->escape($field_name) . "' AND form_id= '" . $this->form_id . "'";
 		$result = $this->db->query($sql);
 		return ( int )$result->row ['field_id'];
 	}
@@ -112,7 +127,9 @@ class AFormManager{
 		if (!$field_id || !$this->form_id || !$language_id){
 			return null;
 		}
-		$sql = "SELECT * FROM " . $this->db->table("field_descriptions") . " WHERE field_id = '" . $field_id . "' AND language_id = '" . $language_id . "'";
+		$sql = "SELECT * 
+				FROM " . $this->db->table("field_descriptions") . " 
+				WHERE field_id = '" . $field_id . "' AND language_id = '" . $language_id . "'";
 		$result = $this->db->query($sql);
 		return $result->row;
 	}
@@ -122,7 +139,9 @@ class AFormManager{
 		if (!$this->form_id || !$language_id){
 			return null;
 		}
-		$sql = "SELECT * FROM " . $this->db->table("form_descriptions") . " WHERE form_id = '" . $this->form_id . "' AND language_id = '" . $language_id . "'";
+		$sql = "SELECT * 
+				FROM " . $this->db->table("form_descriptions") . " 
+				WHERE form_id = '" . $this->form_id . "' AND language_id = '" . $language_id . "'";
 		$result = $this->db->query($sql);
 		return $result->row;
 	}
@@ -157,10 +176,10 @@ class AFormManager{
 
 	public function loadXML($data){
 		// Input possible with XML string, File or both.
-		// We process both one at a time. XML string processed first		
+		// We process both one at a time. XML string processed first
 		if ($data ['xml']){
 			/**
-			 * @var $xml_obj SimpleXmlElement
+			 * @var  \SimpleXmlElement $xml_obj
 			 */
 			$xml_obj = simplexml_load_string($data ['xml']);
 			if (!$xml_obj){
@@ -191,7 +210,7 @@ class AFormManager{
 	}
 
 	/**
-	 * @param SimpleXmlElement $xml_obj
+	 * @param \SimpleXmlElement $xml_obj
 	 * @return null
 	 */
 	private function _processXML($xml_obj){
@@ -199,22 +218,20 @@ class AFormManager{
 		//process each layout 
 		foreach ($forms as $form){
 			/**
-			 * @var DOMNode $form
+			 * @var \SimpleXMLElement $form
 			 */
 			$form = $form->form;
 			/* Determine an action tag in all patent elements. Action can be insert, update and delete
-		       Default action (if not provided) is update
-		       ->>> action = insert 
-					Before loading the layout, determine if same layout exists with same name, template and type comdination.
+				Default action (if not provided) is update
+				->>> action = insert
+					Before loading the layout, determine if same layout exists with same name, template and type combination.
 					If does exists, return and log error 
-		       ->>> action = update (default) 
-					Before loading the layout, determine if same layout exists with same name, template and type comdination.
+				->>> action = update (default)
+					Before loading the layout, determine if same layout exists with same name, template and type combination.
 					If does exists, write new settings over existing
-		       ->>> action = delete 
-					Delete the element provided from database and delete relationships to other elements linked to currnet one
-					
+				->>> action = delete
+					Delete the element provided from database and delete relationships to other elements linked to current one
 				NOTE: Parent level delete action is cascaded to all children elements
-				
 				TODO: Need to use transaction sql here to prevent partial load or partial delete in case of error
 			*/
 

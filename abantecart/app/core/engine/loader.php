@@ -17,7 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+use abc\lib\AConfig;
+use abc\lib\AException;
+use abc\lib\AWarning;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -55,10 +61,10 @@ final class ALoader{
 	public function library($library){
 		$file = DIR_LIB . $library . '.php';
 
-		if (file_exists($file)){
+		if (file_exists($file)) {
 			/** @noinspection PhpIncludeInspection */
 			include_once($file);
-		} else{
+		} else {
 			throw new AException(AC_ERR_LOAD, 'Error: Could not load library ' . $library . '!');
 		}
 	}
@@ -74,43 +80,50 @@ final class ALoader{
 		//force mode allows to load models for ALL extensions to bypass extension enabled only status
 		//This might be helpful in storefront. In admin all installed extensions are available
 		$force = '';
-		if ($mode == 'force'){
+		if ($mode == 'force') {
 			$force = 'all';
 		}
 
 		//mode to force load storefront model
-		if ($mode == 'storefront' || IS_ADMIN !== true){
+		if ($mode == 'storefront' || IS_ADMIN !== true) {
 			$section = DIR_APP . 'models/storefront/';
-		}else{
+			$namespace = "\abc\model\storefront";
+		} else {
 			$section = DIR_APP . 'models/admin/';
+			$namespace = "\abc\model\admin";
 		}
 
 		$file = $section . $model . '.php';
-		if ($this->registry->has('extensions') && $result = $this->extensions->isExtensionResource('M', $model, $force, $mode)){
-			if (is_file($file)){
+		if ($this->registry->has('extensions') && $result = $this->extensions->isExtensionResource('M', $model, $force,
+						$mode)
+		) {
+			if (is_file($file)) {
 				$warning = new AWarning("Extension <b>{$result['extension']}</b> override model <b>$model</b>");
 				$warning->toDebug();
 			}
 			$file = $result['file'];
 		}
 
-		$class = 'Model' . preg_replace('/[^a-zA-Z0-9]/', '', $model);
+		$class = $namespace.'\Model' . preg_replace('/[^a-zA-Z0-9]/', '', $model);
 		$obj_name = 'model_' . str_replace('/', '_', $model);
 
 		//if model is loaded return it back
-		if (is_object($this->registry->get($obj_name))){
+		if (is_object($this->registry->get($obj_name))) {
 			return $this->registry->get($obj_name);
-		} else if (file_exists($file)){
-			include_once($file);
-			$this->registry->set($obj_name, new $class($this->registry));
-			return $this->registry->get($obj_name);
-		} else if ($mode != 'silent'){
-			$backtrace = debug_backtrace();
-			$file_info = $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
-			throw new AException(AC_ERR_LOAD, 'Error: Could not load model ' . $model . ' (file '.$file.')  from ' . $file_info);
-			return false;
-		} else{
-			return false;
+		} else {
+			if (file_exists($file)) {
+				include_once($file);
+				$this->registry->set($obj_name, new $class($this->registry));
+				return $this->registry->get($obj_name);
+			} else {
+				if ($mode != 'silent') {
+					$backtrace = debug_backtrace();
+					$file_info = $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
+					throw new AException(AC_ERR_LOAD, 'Error: Could not load model ' . $model . ' (file ' . $file . ')  from ' . $file_info);
+				} else {
+					return false;
+				}
+			}
 		}
 	}
 
@@ -121,9 +134,9 @@ final class ALoader{
 	public function helper($helper){
 		$file = DIR_CORE . 'helper/' . $helper . '.php';
 
-		if (file_exists($file)){
+		if (file_exists($file)) {
 			include_once($file);
-		} else{
+		} else {
 			throw new AException(AC_ERR_LOAD, 'Error: Could not load helper ' . $helper . '!');
 		}
 	}

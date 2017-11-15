@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -75,7 +78,7 @@ class ControllerApiAccountEdit extends AControllerAPI {
 	}
 
 	private function _build_response() {
-		//Get all required data fileds for registration. 
+		//Get all required data fields for registration.
 		$this->loadLanguage('account/create');
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -158,8 +161,5 @@ class ControllerApiAccountEdit extends AControllerAPI {
 
 		$this->rest->setResponseData($this->data);
 		$this->rest->sendResponse(200);
-
 	}
-
-
 }

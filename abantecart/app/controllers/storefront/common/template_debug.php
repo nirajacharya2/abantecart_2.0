@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -28,10 +30,11 @@ class ControllerCommonTemplateDebug extends AController {
 		
 		$args = func_get_arg(1);
 		$block_details = $this->layout->getBlockDetails($args['block_id']);
+		//TODO: ???
 		$block_tmpl = $this->layout->getBlockTemplate($args['block_id']);
-		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
 		$parent_tmpl = $this->layout->getBlockTemplate($block_details['parent_instance_id']);
-		
+
+		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
 
 		$this->data['id'] = $args['block_id'];
 		$this->data['name'] = $block_details['block_txt_id'];

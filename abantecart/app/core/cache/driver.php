@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\cache;
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -35,7 +36,7 @@ class ACacheDriver {
 	protected $key;
 
 	/**
-	 * @var datetime Now time
+	 * @var int Now time
 	 * @since  1.2.7
 	 */
 	public $now;

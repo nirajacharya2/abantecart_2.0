@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -31,8 +34,8 @@ class ControllerCommonHTMLCache extends AController {
 				//Check if requested controller allows HTML caching
 				$cache_keys = $this->getCacheKeyValues($rt_controller);
 				if(is_array($cache_keys)){
-					//all good, see if we can load cache with the key 			
-            		$this->buildHTMLCacheKey($cache_keys, $this->request->get, $rt_controller);			
+					//all good, see if we can load cache with the key
+            		$this->buildHTMLCacheKey($cache_keys, $this->request->get, $rt_controller);
 					if($this->html_cache()){
 						//return complete status to dispatcher
 						return 'completed';
@@ -42,5 +45,6 @@ class ControllerCommonHTMLCache extends AController {
 		}
 
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
+
     }
 }

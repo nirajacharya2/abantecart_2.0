@@ -17,19 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerResponsesCommonZone extends AController {
-	private $error = array(); 
-	    
   	public function main() {
 
           //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
        	$this->loadModel('localisation/zone');
-
+	    $results = array();
 		if(isset( $this->request->get['country_id'] )){
 			$results = $this->model_localisation_zone->getZonesByCountryId($this->request->get['country_id']);
 		}elseif( $this->request->get['location_id'] ){

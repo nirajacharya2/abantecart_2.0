@@ -17,17 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
+use abc\lib\AListing;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
-/** @noinspection PhpUndefinedClassInspection */
+
 class ControllerBlocksListingBlock extends AController {
 	public $data;
 	public function main() {
 
 		//disable cache when login display price setting is off or enabled showing of prices with taxes
-		if( ($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
-			&&	$this->html_cache()	){
+		if( ($this->config->get('config_customer_price') && !$this->config->get('config_tax')) && $this->html_cache() ){
 			return null;
 		}
 
@@ -41,7 +45,6 @@ class ControllerBlocksListingBlock extends AController {
 		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
 		$parent_block_txt_id = $parent_block['block_txt_id'];
 
-
 		$extension_controllers = $this->extensions->getExtensionControllers();
 		$exists = false;
 		foreach($extension_controllers as $ext){
@@ -51,7 +54,7 @@ class ControllerBlocksListingBlock extends AController {
 			}
 		}
 
-		$template_overrided = false;
+		$template_overridden = false;
 
 		if($block_data){
 			if(!$exists || !$this->data['controller']){
@@ -67,7 +70,7 @@ class ControllerBlocksListingBlock extends AController {
 						)){
 
 					$this->_prepareProducts( $block_data['content'], $block_data['block_wrapper'] );
-					$template_overrided = true;
+					$template_overridden = true;
 				}else{
 					$block_data['content'] = $this->_prepareItems($block_data['content']);
 				}
@@ -80,7 +83,7 @@ class ControllerBlocksListingBlock extends AController {
 				$this->view->setOutput($override->dispatchGetOutput());
 			}
 			// need to set wrapper for non products listing blocks
-			if($this->view->isTemplateExists($block_data['block_wrapper']) && !$template_overrided){
+			if($this->view->isTemplateExists($block_data['block_wrapper']) && !$template_overridden){
 				$this->view->setTemplate( $block_data['block_wrapper'] );
 			}
 
@@ -98,7 +101,7 @@ class ControllerBlocksListingBlock extends AController {
 		$this->loadModel('catalog/product');
 		$this->loadModel('catalog/review');
 		$this->loadLanguage('product/product');
-
+		$products = $product_ids = array();
 		foreach($data as $result){
 			$product_ids[] = (int)$result['product_id'];
 		}
@@ -187,6 +190,8 @@ class ControllerBlocksListingBlock extends AController {
 				$item_name = 'product';
 		}else if(isset($content[0]['resource_id'])){
 				$item_name = 'resource';
+		}else{
+			$item_name = '';
 		}
 
 		foreach($content as &$cn){
@@ -208,6 +213,7 @@ class ControllerBlocksListingBlock extends AController {
 	 * @return array
 	 */
 	protected function _getBlockContent($instance_id) {
+		$output = array();
 		$this->data['block_info'] = $this->layout->getBlockDetails($instance_id);
 		$this->data['custom_block_id'] = $this->data['block_info']['custom_block_id'];
 
@@ -239,6 +245,7 @@ class ControllerBlocksListingBlock extends AController {
 		if(!$this->data['custom_block_id'] || !$this->data['descriptions']){
 			return false;
 		}
+		$result = array();
 
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
@@ -300,6 +307,8 @@ class ControllerBlocksListingBlock extends AController {
 									'height'=>$this->config->get('config_image_manufacturer_height')
 					);
 				}else{
+					$object_name = '';
+					$object_id = null;
 					$image_sizes['thumb'] = array(
 							'width'=>$this->config->get('config_image_product_width'),
 							'height'=>$this->config->get('config_image_product_height')
@@ -404,6 +413,7 @@ class ControllerBlocksListingBlock extends AController {
 	private function _prepareCustomItems($data_source, $result){
 		if(!$data_source['rl_object_name'] ){ return $result; }
 		$resource = new AResource('image');
+		$image_sizes = array();
 		if($result){
 
 			if ($data_source['rl_object_name']){

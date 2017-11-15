@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -75,7 +84,7 @@ class ControllerResponsesListingGridProduct extends AController {
 			$thumbnail = $thumbnails[ $result['product_id'] ];
 
 			$response->rows[ $i ]['id'] = $result['product_id'];
-			if( dateISO2Int($result['date_available'])> time()){
+			if( AHelperUtils::dateISO2Int($result['date_available'])> time()){
 				$response->userdata->classes[ $result['product_id'] ] = 'warning';
 			}
 
@@ -85,7 +94,7 @@ class ControllerResponsesListingGridProduct extends AController {
 				$price = $this->html->buildInput(
 								array(
 									'name' => 'price[' . $result['product_id'] . ']',
-									'value' => moneyDisplayFormat( $result['price'] )
+									'value' => AHelperUtils::moneyDisplayFormat( $result['price'] )
 								));
 			}
 
@@ -211,7 +220,7 @@ class ControllerResponsesListingGridProduct extends AController {
 					return $error->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $err ));
 				}
 				if($key=='date_available'){
-					$value = dateDisplay2ISO($value);
+					$value = AHelperUtils::dateDisplay2ISO($value);
 				}
 				$data = array( $key => $value );
 				$this->model_catalog_product->updateProduct($product_id, $data);
@@ -342,7 +351,7 @@ class ControllerResponsesListingGridProduct extends AController {
 			case 'width'  :
 			case 'height' :
 			case 'weight' :
-				$v =  abs(preformatFloat($value, $this->language->get('decimal_point')));
+				$v =  abs(AHelperUtils::preformatFloat($value, $this->language->get('decimal_point')));
 				if($v>=1000){
 					$this->data['error'] = $this->language->get('error_measure_value');
 				}

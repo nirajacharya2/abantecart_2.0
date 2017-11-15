@@ -19,6 +19,13 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
+use abc\core\ALanguageManager;
+use abc\core\ExtensionsApi;
+use abc\core\Registry;
+use abc\lib\ACache;
+use abc\lib\AConfig;
+use abc\lib\ADB;
+use abc\lib\AJson;
 
 /**\
  * Class ControllerPagesInstall
@@ -310,7 +317,7 @@ class progressbar implements AProgressBar{
 	function get_progress(){
 		$cnt = 0;
 		$res = $this->registry->get('db')->query('SELECT section, COUNT(DISTINCT `block`) as cnt
-													FROM ' . DB_PREFIX . 'language_definitions
+													FROM ' . $this->db->prefix() . 'language_definitions
 													GROUP by section');
 		foreach ($res->rows as $row){
 			$cnt += $row['cnt'];

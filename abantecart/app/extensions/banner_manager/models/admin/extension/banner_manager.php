@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -25,7 +28,7 @@ if (!defined('DIR_CORE')) {
  * Class ModelExtensionBannerManager
  */
 
-/** @noinspection PhpUndefinedClassInspection */
+
 class ModelExtensionBannerManager extends Model {
 	/**
 	 * @param array $data

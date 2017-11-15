@@ -17,12 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\ALanguage;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ModelTotalBalance extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {
-
 		if ($this->config->get('balance_status')) {
 			if((float)$cust_data['used_balance']){
 				//create new instance of language for case when model called from admin-side
@@ -31,7 +34,7 @@ class ModelTotalBalance extends Model {
 				$total_data[] = array(
 					'id'         => 'balance',
 					'title'      => $language->get('text_balance_checkout'),
-					'text'       => '-'.$this->currency->format($cust_data['used_balance']),
+					'text'       => '-'.$this->currency->format( $cust_data['used_balance'] ),
 					'value'      => - $this->session->data['used_balance'],
 					'sort_order' => 999,
 					'total_type' => 'balance'

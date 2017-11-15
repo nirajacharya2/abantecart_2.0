@@ -17,10 +17,18 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerApiCheckoutAddress
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelAccountAddress $model_account_address
+ */
 class ControllerApiCheckoutAddress extends AControllerAPI{
 	public $error = array ();
 	public $data = array ();
@@ -67,10 +75,6 @@ class ControllerApiCheckoutAddress extends AControllerAPI{
 					$this->rest->sendResponse(200, array ('status' => 0, 'error' => 'deletion of default address not allowed'));
 					return null;
 				}
-
-				$this->model_account_address->deleteAddress($request['address_id']);
-				$this->rest->sendResponse(200, array ('status' => 1, 'success' => 'address removed '));
-				return null;
 			} else {
 				if (!isset($request['address_id'])) {
 					$this->rest->sendResponse(200, array ('status' => 0, 'error' => 'address id missing '));

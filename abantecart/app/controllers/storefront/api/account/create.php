@@ -17,9 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\lib\AMail;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+
+/**
+ * Class ControllerApiAccountCreate
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerApiAccountCreate extends AControllerAPI {
 	private $v_error = array();
 	public $data;
@@ -30,8 +41,8 @@ class ControllerApiAccountCreate extends AControllerAPI {
         //only support post params for create account
 		$request_data = $this->rest->getRequestParams();
 		
-		if ($this->customer->isLoggedWithToken( $request['token'] )) {
-			$this->rest->setResponseData( array( 'error' => 'Already Logged in. Can not create new account.' ) );	
+		if ($this->customer->isLoggedWithToken( $request_data['token'] )) {
+			$this->rest->setResponseData( array( 'error' => 'Already Logged in. Can not create new account.' ) );
 			$this->rest->sendResponse(401);
 			return null;
     	} 
@@ -78,9 +89,7 @@ class ControllerApiAccountCreate extends AControllerAPI {
 			} else {
 				$this->data['text_message'] = sprintf($this->language->get('text_approval'), $this->config->get('store_name'), ''	);
 			}
-
-    	} else { 
-
+    	} else {
       		$this->data['status'] = 0;
       		$this->data['errors'] = $this->v_error;
 	        $this->data['error_warning'] = $this->v_error['warning'];
@@ -100,13 +109,12 @@ class ControllerApiAccountCreate extends AControllerAPI {
 		
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-		
 		$this->rest->setResponseData( $this->data );
 		$this->rest->sendResponse( 200 );
 	}
 	
 	public function get() {
-		//Get all required data fileds for registration. 
+		//Get all required data fields for registration.
 		$this->loadLanguage('account/create');
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
@@ -219,7 +227,7 @@ class ControllerApiAccountCreate extends AControllerAPI {
                                                    	'type' => 'checkbox',
 		                                           	'name' => 'agree',
 		                                            'value' => 1,
-		                                            'checked' => $agree );
+		                                            'checked' => false );
 
 		if ($this->config->get('config_account_id')) {
 			$this->loadModel('catalog/content');

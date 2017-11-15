@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -214,9 +220,9 @@ class ControllerResponsesListingGridZone extends AController {
 				if ( $key == 'zone_name' ) {
 					foreach ($value as $lang => $val) {
 		    			$err .= $this->_validateField('name', $val['name']);
-		    		}				
+		    		}
 				} else {
-					$err = $this->_validateField($key, $value);			
+					$err = $this->_validateField($key, $value);
 				}
 				if (!empty($err)) {
 					$error = new AError('');

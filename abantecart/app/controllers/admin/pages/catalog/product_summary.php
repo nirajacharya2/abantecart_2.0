@@ -17,45 +17,55 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
-	header ( 'Location: static_pages/' );
+
+namespace abc\controller\admin;
+
+use abc\core\AController;
+use abc\core\AResource;
+
+if (!defined('DIR_CORE') || !IS_ADMIN) {
+	header('Location: static_pages/');
 }
-class ControllerPagesCatalogProductSummary extends AController {
-	public $data = array();
-  	public function main() {
 
-          //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+class ControllerPagesCatalogProductSummary extends AController{
+	public $data = array ();
 
-    	$this->loadLanguage('catalog/product');
+	public function main(){
+
+		//init controller data
+		$this->extensions->hk_InitData($this, __FUNCTION__);
+
+		$this->loadLanguage('catalog/product');
 		$this->loadModel('catalog/product');
 
 		$this->data['product'] = $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        $this->data['product']['product_id'] = '#'.$this->data['product']['product_id'];
-        $this->data['product']['price'] = $this->currency->format($this->data['product']['price']);
+		$this->data['product']['product_id'] = '#' . $this->data['product']['product_id'];
+		$this->data['product']['price'] = $this->currency->format($this->data['product']['price']);
 		$this->data['product']['condition'] = $this->model_catalog_product->getProductCondition($this->request->get['product_id']);
 
 		$this->data['text_product_condition'] = $this->language->get('text_product_condition');
 		$this->data['text_product_available'] = $this->language->get('text_product_available');
 
-        $resource = new AResource('image');
+		$resource = new AResource('image');
 		$thumbnail = $resource->getMainThumb('products',
-			                                     $this->request->get['product_id'],
-			                                     $this->config->get('config_image_grid_width'),
-			                                     $this->config->get('config_image_grid_height'),true);
-        $this->data['product']['image'] = $thumbnail;
-        $this->data['product']['preview'] = $this->html->getCatalogURL('product/product', '&product_id='.$product_info['product_id']);
-	
+				$this->request->get['product_id'],
+				$this->config->get('config_image_grid_width'),
+				$this->config->get('config_image_grid_height'), true);
+		$this->data['product']['image'] = $thumbnail;
+		$this->data['product']['preview'] = $this->html->getCatalogURL('product/product',
+				'&product_id=' . $product_info['product_id']);
+
 		$this->loadModel('sale/order');
 		$this->data['product']['orders'] = $this->model_sale_order->getOrderTotalWithProduct($product_info['product_id']);
-		$this->data['product']['orders_url'] = $this->html->getSecureURL('sale/order', '&product_id='.$product_info['product_id']);
+		$this->data['product']['orders_url'] = $this->html->getSecureURL('sale/order',
+				'&product_id=' . $product_info['product_id']);
 
-		$this->view->assign('help_url', $this->gen_help_url('product_summary') );
-        $this->view->batchAssign( $this->data );
-		$this->processTemplate('pages/catalog/product_summary.tpl' );
+		$this->view->assign('help_url', $this->gen_help_url('product_summary'));
+		$this->view->batchAssign($this->data);
+		$this->processTemplate('pages/catalog/product_summary.tpl');
 
-          //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+		//update controller data
+		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 	}
 
 }

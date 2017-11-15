@@ -17,13 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 /**
  * Class ModelLocalisationZone
  */
-/** @noinspection PhpUndefinedClassInspection */
+
 class ModelLocalisationZone extends Model {
 	/**
 	 * @param int $zone_id
@@ -37,9 +40,9 @@ class ModelLocalisationZone extends Model {
 		$query = $this->db->query("SELECT z.*, COALESCE(zd1.name,zd2.name) as name 
 									FROM " . $this->db->table("zones") . " z
 									LEFT JOIN " . $this->db->table("zone_descriptions") . " zd1
-									ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "')		
+									ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "')
 									LEFT JOIN " . $this->db->table("zone_descriptions") . " zd2
-									ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_lang_id . "')		
+									ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_lang_id . "')
 								  	WHERE z.zone_id = '" . (int)$zone_id . "' AND status = '1'");
 		return $query->row;
 	}

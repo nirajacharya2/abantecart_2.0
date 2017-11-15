@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\ADataset;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -75,7 +80,7 @@ class ModelToolFileUploads extends Model {
 
 		if ( $result->num_rows ) {
 
-			if ( has_value($result->row['settings']) ) {
+			if ( AHelperUtils::has_value($result->row['settings']) ) {
 				$result->row['settings'] = unserialize($result->row['settings']);
 			}
 

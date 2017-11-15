@@ -17,10 +17,25 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+use abc\core\AResource;
+use abc\core\HtmlElementFactory;
+use abc\core\Registry;
+use abc\lib\AMessage;
+
 if(!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerPagesProductProduct
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ */
 class ControllerPagesProductProduct extends AController{
 
 	public $data = array();
@@ -113,10 +128,10 @@ class ControllerPagesProductProduct extends AController{
 
 		//key of product from cart
 		$key = array();
-		if(has_value($request['key'])){
+		if(AHelperUtils::has_value($request['key'])){
 			$key = explode(':', $request['key']);
 			$product_id = (int)$key[0];
-		} elseif(has_value($request['product_id'])){
+		} elseif(AHelperUtils::has_value($request['product_id'])){
 			$product_id = (int)$request['product_id'];
 		} else{
 			$product_id = 0;
@@ -336,7 +351,7 @@ class ControllerPagesProductProduct extends AController{
 		$this->data['product_id'] = $product_id;
 		$this->data['average'] = $average;
 
-		if(!has_value($product_info['stock_checkout'])){
+		if(!AHelperUtils::has_value($product_info['stock_checkout'])){
 			$product_info['stock_checkout'] = $this->config->get('config_stock_checkout');
 		}
 
@@ -374,7 +389,7 @@ class ControllerPagesProductProduct extends AController{
 
 				$default_value = $option_value['default'] && !$default_value ? $option_value['product_option_value_id'] : $default_value;
 				// for case when trying to add to cart without required options. we get option-array back inside _GET
-				if(has_value($request['option'][$option['product_option_id']])){
+				if(AHelperUtils::has_value($request['option'][$option['product_option_id']])){
 					$default_value = $request['option'][$option['product_option_id']];
 				}
 
@@ -462,8 +477,8 @@ class ControllerPagesProductProduct extends AController{
 				}
 
 				//set default selection is nothing selected
-				if (!has_value($value)) {
-					if(has_value($default_value)){
+				if (!AHelperUtils::has_value($value)) {
+					if(AHelperUtils::has_value($default_value)){
 						$value = $default_value;
 					}
 				}
@@ -539,7 +554,7 @@ class ControllerPagesProductProduct extends AController{
 				$msg = new AMessage();
 				$msg->saveNotice($message_ttl, $message_txt);
 				$this->model_catalog_product->updateStatus($product_id, 0);
-				redirect($this->html->getSEOURL('product/product', '&product_id=' . $product_info['product_id'], '&encode'));
+				abc_redirect($this->html->getSEOURL('product/product', '&product_id=' . $product_info['product_id'], '&encode'));
 			}
 		}else{
 			$this->data['can_buy'] = true;

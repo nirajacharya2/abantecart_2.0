@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -126,7 +128,7 @@ strtoupper($this->language->get('text_file_tail')).DIR_LOGS."
 		$handle = fopen($file, 'w+');
 		fclose($handle);
 		$this->session->data['success'] = $this->language->get('text_success');
-		$this->redirect($this->html->getSecureURL('tool/error_log'));
+		abc_redirect($this->html->getSecureURL('tool/error_log'));
 
 		//update controller data
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);

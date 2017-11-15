@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
 
 class ControllerBlocksCart extends AController {
 	
@@ -66,6 +69,7 @@ class ControllerBlocksCart extends AController {
 			$thumbnail = $thumbnails[ $result['product_id'] ];
 
         	foreach ($result['option'] as $option) {
+        		$title = '';
 		        if($option['element_type']=='H'){ continue;} //hide hidden options
 		        $value = $option['value'];
 		        // hide binary value for checkbox
@@ -116,7 +120,7 @@ class ControllerBlocksCart extends AController {
 		$this->view->batchAssign($this->data);
 
 		$this->processTemplate();
-		
+
 		//init controller data
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
 

@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -24,12 +27,12 @@ class ModelToolMessageManager extends Model {
 
 	public function deleteMessage($message_id) {
 		
-		$this->messages->deleteMessage($message_id);		
+		$this->messages->deleteMessage($message_id);
 		return true;
 	}
 	
 	public function getMessage($message_id) {
-			return $this->messages->getMessage($message_id);	
+			return $this->messages->getMessage($message_id);
 	}
 
 	public function getMessages($data = array()) {

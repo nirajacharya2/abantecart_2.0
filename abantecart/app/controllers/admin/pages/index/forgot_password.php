@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ADataset;
+use abc\lib\AEncryption;
+use abc\lib\AMail;
+use ReCaptcha\ReCaptcha;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -41,7 +50,7 @@ class ControllerPagesIndexForgotPassword extends AController {
 		if ($this->request->is_POST() && $this->_validate()) {
 
 			//generate hash
-			$hash = genToken(32);
+			$hash = AHelperUtils::genToken(32);
 			$enc = new AEncryption($this->config->get('encryption_key'));
 			$rtoken = $enc->encrypt($this->request->post['username'].'::'.$hash);
 			$link = $this->html->getSecureURL('index/forgot_password/validate','&rtoken='.$rtoken);
@@ -62,7 +71,7 @@ class ControllerPagesIndexForgotPassword extends AController {
 			$mail->setText(sprintf($this->language->get('reset_email_body_text'), $link, $link));
 			$mail->	send();
 
-			redirect($this->html->getSecureURL('index/forgot_password','&mail=sent'));
+			abc_redirect($this->html->getSecureURL('index/forgot_password','&mail=sent'));
 		}
 
 		$this->data['login'] =  $this->html->getSecureURL('index/login');
@@ -262,11 +271,11 @@ class ControllerPagesIndexForgotPassword extends AController {
 		if($this->config->get('config_recaptcha_secret_key')) {
 			/** @noinspection PhpIncludeInspection */
 			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
-			$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$this->request->post['g-recaptcha-response'],
 										$this->request->getRemoteIP());
 			if (!$resp->isSuccess() && $resp->getErrorCodes()) {
-				$this->error['captcha'] = $this->language->get('error_captcha');			
+				$this->error['captcha'] = $this->language->get('error_captcha');
 				return FALSE;
 			}
 		} else {

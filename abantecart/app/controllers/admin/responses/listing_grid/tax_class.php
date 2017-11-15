@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -88,7 +95,6 @@ class ControllerResponsesListingGridTaxClass extends AController {
 							$error = new AError('');
 							return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
 						}
-
 						$this->model_localisation_tax_class->deleteTaxClass($id);
 					}
 				break;
@@ -109,7 +115,6 @@ class ControllerResponsesListingGridTaxClass extends AController {
 							$this->model_localisation_tax_class->editTaxClass($id, array('tax_class' => $this->request->post['tax_class'][$id]));
 						}
 					}
-
 				break;
 			default:
 		}
@@ -295,7 +300,6 @@ class ControllerResponsesListingGridTaxClass extends AController {
 		$response->userdata = (object)array('');
 
 		foreach ($tax_rates as $i=> $tax_rate) {
-
 			$response->rows[$i]['id'] = $tax_rate['tax_rate_id'];
 			$response->rows[$i]['cell'] = array(
 					$locations[ $tax_rate['location_id'] ],
@@ -304,7 +308,6 @@ class ControllerResponsesListingGridTaxClass extends AController {
 					$tax_rate['rate_prefix'] . $tax_rate['rate'],
 					$tax_rate['priority']
 			);
-
 		}
 		$this->data['response'] = $response;
 
@@ -313,5 +316,4 @@ class ControllerResponsesListingGridTaxClass extends AController {
 		$this->load->library('json');
 		$this->response->setOutput(AJson::encode($this->data['response']));
 	}
-
 }

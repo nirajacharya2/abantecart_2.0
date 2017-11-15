@@ -1,3 +1,3 @@
 <ul id="main_menu" class="nav">
-    <?php echo renderStoreMenu( $storemenu ); ?>
+    <?php echo \abc\core\AHelperHtml::renderStoreMenu( $storemenu ); ?>
 </ul>

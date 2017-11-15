@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -144,7 +147,7 @@ final class ACurrency{
 	 * @param float $number
 	 * @param string $currency
 	 * @param string $crr_value
-	 * @return string
+	 * @return float
 	 */
 	public function format_number($number, $currency = '', $crr_value = ''){
 		return $this->format($number, $currency, $crr_value, false);

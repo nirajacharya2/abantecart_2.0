@@ -17,7 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+namespace abc\core;
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -29,7 +30,7 @@ final class Registry{
 	 * @return Registry
 	 */
 	static function getInstance(){
-		if (self::$instance == null){
+		if (self::$instance == null) {
 			self::$instance = new Registry();
 		}
 		return self::$instance;
@@ -43,7 +44,7 @@ final class Registry{
 
 	/**
 	 * @param $key string
-	 * @return CSRFToken|ARequest|ALoader|ADocument|ADB|AConfig|AHtml|ExtensionsApi|AExtensionManager|ALanguageManager|ASession|ACache|AMessage|ALog|AResponse|AUser|ARouter|ACurrency|ModelLocalisationLanguageDefinitions|ModelLocalisationCountry|ModelSettingSetting|ADataEncryption|ModelInstall|ADownload|AOrderStatus|AIMManager|ACustomer
+	 * @return \abc\lib\CSRFToken|\abc\lib\ARequest|ALoader|\abc\lib\ADocument|\abc\lib\ADB|\abc\lib\AConfig|AHtml|ExtensionsApi|\abc\lib\AExtensionManager|ALanguageManager|\abc\lib\ASession|\abc\lib\ACache|\abc\lib\AMessage|\abc\lib\ALog|\abc\lib\AResponse|\abc\lib\AUser|ARouter|\abc\lib\ACurrency|\abc\model\admin\ModelLocalisationLanguageDefinitions|\abc\model\admin\ModelLocalisationCountry|\abc\model\admin\ModelSettingSetting|\abc\model\admin\ModelToolOnlineNow|\abc\lib\ADataEncryption|\abc\lib\ADownload|\abc\lib\AOrderStatus|\abc\lib\AIMManager|\abc\lib\ACustomer
 	 */
 	public function get($key){
 		return (isset($this->data[$key]) ? $this->data[$key] : null);

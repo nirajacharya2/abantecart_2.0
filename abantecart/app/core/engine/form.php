@@ -17,7 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+use abc\lib\ADataset;
+use abc\lib\AError;
+use abc\lib\AFile;
+use abc\lib\AView;
+use ReCaptcha\ReCaptcha;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -26,15 +35,15 @@ if (!defined('DIR_CORE')){
  *
  * Class AForm
  * @property ALayout $layout
- * @property ACache $cache
- * @property ADB $db
- * @property AConfig $config
  * @property AHtml $html
- * @property ASession $session
- * @property ARequest $request
- * @property ALoader $load
  * @property ALanguageManager $language
- * @property ModelLocalisationCountry $model_localisation_country
+ * @property \abc\lib\ACache $cache
+ * @property \abc\lib\ADB $db
+ * @property \abc\lib\AConfig $config
+ * @property \abc\lib\ASession $session
+ * @property \abc\lib\ARequest $request
+ * @property \abc\core\ALoader $load
+ * @property \abc\model\admin\ModelLocalisationCountry $model_localisation_country
  *
  */
 class AForm{
@@ -52,7 +61,7 @@ class AForm{
 	 *      [status]
 	 *      [description] )
 	 */
-	private $form;
+	protected $form;
 	/**
 	 * @var array $fields - array of form fields
 	 * Array
@@ -69,11 +78,11 @@ class AForm{
 	 *       [value]
 	 *   )
 	 */
-	private $fields;
+	protected $fields;
 	/**
 	 * @var $groups - fields groups
 	 */
-	private $groups;
+	protected $groups;
 	/**
 	 * @var $page_id - current page id
 	 */
@@ -85,7 +94,7 @@ class AForm{
 	/**
 	 * @var $form_edit_action - ( ST = standard,  HS = highlight save,  HT = highlight )
 	 */
-	private $form_edit_action;
+	protected $form_edit_action;
 
 	/**
 	 * @param  string $form_edit_action
@@ -117,36 +126,38 @@ class AForm{
 	 * Sets the form and loads the data for the form from the database
 	 *
 	 * @param string $name
-	 * @return null
+	 * @return bool
 	 */
 	public function loadFromDb($name){
-
 		$this->_loadForm($name);
 		// if no form return
-		if (empty($this->form)) return null;
-
+		if (empty($this->form)) {
+			return false;
+		}
 		$this->_loadFields();
 		// if no fields no need to get groups
-		if (empty($this->fields)) return null;
-
+		if (empty($this->fields)) {
+			return false;
+		}
 		$this->_loadGroups();
+		return true;
 	}
 
 	/**
 	 * load form data into this->form variable
 	 *
 	 * @param string $name - unique form name
-	 * @return null
+	 * @return bool
 	 */
-	private function _loadForm($name){
+	protected function _loadForm($name){
 		$language_id = (int)$this->config->get('storefront_language_id');
 		$store_id = (int)$this->config->get('config_store_id');
 		$cache_key = 'forms.' . $name;
 		$cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
 		$form = $this->cache->pull($cache_key);
-		if ($form !== false){
+		if ($form !== false) {
 			$this->form = $form;
-			return null;
+			return false;
 		}
 
 		$query = $this->db->query("SELECT f.*, fd.description
@@ -157,13 +168,14 @@ class AForm{
 											AND f.status = 1 "
 		);
 
-		if (!$query->num_rows){
+		if (!$query->num_rows) {
 			$err = new AError('NOT EXIST Form with name ' . $name);
 			$err->toDebug()->toLog();
-			return null;
+			return false;
 		}
 		$this->cache->push($cache_key, $query->row);
 		$this->form = $query->row;
+		return true;
 	}
 
 	/**
@@ -171,14 +183,14 @@ class AForm{
 	 *
 	 * @return void
 	 */
-	private function _loadFields(){
+	protected function _loadFields(){
 
 		$language_id = (int)$this->config->get('storefront_language_id');
 		$store_id = (int)$this->config->get('config_store_id');
 		$cache_key = 'forms.' . $this->form['form_name'] . '.fields';
 		$cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
 		$fields = $this->cache->pull($cache_key);
-		if ($fields !== false){
+		if ($fields !== false) {
 			$this->fields = $fields;
 			return null;
 		}
@@ -192,9 +204,9 @@ class AForm{
 				AND f.status = 1
 			ORDER BY f.sort_order");
 		$this->fields = array ();
-		if ($query->num_rows){
-			foreach ($query->rows as $row){
-				if (has_value($row['settings'])){
+		if ($query->num_rows) {
+			foreach ($query->rows as $row) {
+				if (AHelperUtils::has_value($row['settings'])) {
 					$row['settings'] = unserialize($row['settings']);
 				}
 				$this->fields[$row['field_id']] = $row;
@@ -203,10 +215,10 @@ class AForm{
 					FROM " . $this->db->table("field_values") . " 
 					WHERE field_id = '" . $row['field_id'] . "'
 					AND language_id = '" . $language_id . "'");
-				if ($query->num_rows){
+				if ($query->num_rows) {
 					$values = unserialize($query->row['value']);
 					usort($values, array ('self', '_sort_by_sort_order'));
-					foreach ($values as $value){
+					foreach ($values as $value) {
 						$this->fields[$row['field_id']]['options'][$value['name']] = $value['name'];
 					}
 					$this->fields[$row['field_id']]['value'] = $values[0]['name'];
@@ -222,8 +234,8 @@ class AForm{
 	 * @param array $b
 	 * @return int
 	 */
-	private function _sort_by_sort_order($a, $b){
-		if ($a['sort_order'] == $b['sort_order']){
+	protected function _sort_by_sort_order($a, $b){
+		if ($a['sort_order'] == $b['sort_order']) {
 			return 0;
 		}
 		return ($a['sort_order'] < $b['sort_order']) ? -1 : 1;
@@ -234,13 +246,13 @@ class AForm{
 	 *
 	 * @return void
 	 */
-	private function _loadGroups(){
+	protected function _loadGroups(){
 		$language_id = (int)$this->config->get('storefront_language_id');
 		$store_id = (int)$this->config->get('config_store_id');
 		$cache_key = 'forms.' . $this->form['form_name'] . '.groups';
 		$cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
 		$groups = $this->cache->pull($cache_key);
-		if ($groups !== false){
+		if ($groups !== false) {
 			$this->groups = $groups;
 			return null;
 		}
@@ -256,13 +268,14 @@ class AForm{
 			ORDER BY g.sort_order, fg.sort_order"
 		);
 		$this->groups = array ();
-		if ($query->num_rows)
-			foreach ($query->rows as $row){
-				if (empty($this->groups[$row['group_id']])){
+		if ($query->num_rows) {
+			foreach ($query->rows as $row) {
+				if (empty($this->groups[$row['group_id']])) {
 					$this->groups[$row['group_id']] = $row;
 				}
 				$this->groups[$row['group_id']]['fields'][] = $row['field_id'];
 			}
+		}
 
 		$this->cache->push($cache_key, $this->groups);
 	}
@@ -295,7 +308,7 @@ class AForm{
 
 		$fields = array ();
 
-		foreach ($this->fields as $field){
+		foreach ($this->fields as $field) {
 			$fields[$field['field_name']] = array (
 					'value'    => $field['value'],
 					'required' => $field['required'],
@@ -312,8 +325,8 @@ class AForm{
 	 * @return array with field data
 	 */
 	public function getField($fname){
-		foreach ($this->fields as $field){
-			if ($field['field_name'] == $fname){
+		foreach ($this->fields as $field) {
+			if ($field['field_name'] == $fname) {
 				return array (
 						'field_name'   => $field['field_name'],
 						'element_type' => $field['element_type'],
@@ -339,8 +352,8 @@ class AForm{
 	 * @return void
 	 */
 	public function assign($fname, $value = ''){
-		foreach ($this->fields as $key => $field){
-			if ($field['field_name'] == $fname){
+		foreach ($this->fields as $key => $field) {
+			if ($field['field_name'] == $fname) {
 				$this->fields[$key]['value'] = $value;
 				break;
 			}
@@ -354,7 +367,7 @@ class AForm{
 	 * @return void
 	 */
 	public function batchAssign($values){
-		foreach ($values as $name => $value){
+		foreach ($values as $name => $value) {
 			$this->assign($name, $value);
 		}
 	}
@@ -366,8 +379,8 @@ class AForm{
 	 * @return void
 	 */
 	public function loadFieldOptions($fname, $values){
-		foreach ($this->fields as $key => $field){
-			if ($field['field_name'] == $fname){
+		foreach ($this->fields as $key => $field) {
+			if ($field['field_name'] == $fname) {
 				$this->fields[$key]['options'] = $values;
 				break;
 			}
@@ -383,7 +396,7 @@ class AForm{
 	public function getFieldHtml($data){
 		$data['form'] = $this->form['form_name'];
 
-		if ($data['type'] == 'form'){
+		if ($data['type'] == 'form') {
 			$data['javascript'] = $this->addFormJs();
 		}
 
@@ -411,7 +424,7 @@ class AForm{
 		$language = $this->registry->get('language');
 		$view = new AView($this->registry, 0);
 
-		switch($this->form_edit_action){
+		switch ($this->form_edit_action) {
 			case 'ST': //standards
 				$view->batchAssign(
 						array (
@@ -457,14 +470,16 @@ class AForm{
 	public function getFormHtml($fieldsOnly = false){
 
 		// if no form was loaded return empty string
-		if (empty($this->form)) return '';
+		if (empty($this->form)) {
+			return '';
+		}
 
 		$fields_html = array ();
 		$view = new AView($this->registry, 0);
 
-		foreach ($this->fields as $field){
+		foreach ($this->fields as $field) {
 			//check for enabled recaptcha instead of default captcha
-			if ($this->config->get('config_recaptcha_site_key') && $field['element_type'] == 'K'){
+			if ($this->config->get('config_recaptcha_site_key') && $field['element_type'] == 'K') {
 				$field['element_type'] = 'J';
 			}
 			//build data array for each field HTML template
@@ -479,12 +494,12 @@ class AForm{
 			);
 
 			//populate customer entered values from session (if present)
-			if (is_array($this->session->data['custom_form_' . $this->form['form_id']])){
+			if (is_array($this->session->data['custom_form_' . $this->form['form_id']])) {
 				$data['value'] = $this->session->data['custom_form_' . $this->form['form_id']][$field['field_name']];
 			}
 
 			//custom data based on the HTML element type
-			switch($data['type']){
+			switch ($data['type']) {
 				case 'multiselectbox' :
 					$data['name'] .= '[]';
 					break;
@@ -501,7 +516,7 @@ class AForm{
 			}
 			$item = HtmlElementFactory::create($data);
 
-			switch($data['type']){
+			switch ($data['type']) {
 				case 'IPaddress' :
 				case 'hidden' :
 					$fields_html[$field['field_id']] = $item->getHtml();
@@ -522,8 +537,8 @@ class AForm{
 		}
 
 		$output = '';
-		if (!empty($this->groups)){
-			foreach ($this->groups as $group){
+		if (!empty($this->groups)) {
+			foreach ($this->groups as $group) {
 				$view->batchAssign(
 						array (
 								'group'       => $group,
@@ -532,13 +547,13 @@ class AForm{
 				);
 				$output .= $view->fetch('form/form_group.tpl');
 			}
-		} else{
+		} else {
 			$view->batchAssign(array ('fields_html' => $fields_html));
 			$output .= $view->fetch('form/form_no_group.tpl');
 		}
 
 		// add submit button and form open/close tag
-		if (!$fieldsOnly){
+		if (!$fieldsOnly) {
 			$data = array (
 					'type' => 'submit',
 					'form' => $this->form['form_name'],
@@ -550,7 +565,8 @@ class AForm{
 					'type'   => 'form',
 					'name'   => $this->form['form_name'],
 					'attr'   => ' class="form" ',
-					'action' => $this->html->getSecureURL($this->form['controller'], '&form_id=' . $this->form['form_id'], true),
+					'action' => $this->html->getSecureURL($this->form['controller'],
+							'&form_id=' . $this->form['form_id'], true),
 			);
 			$form_open = HtmlElementFactory::create($data);
 			$form_close = $view->fetch('form/form_close.tpl');
@@ -559,12 +575,12 @@ class AForm{
 
 			$view->batchAssign(
 					array (
-							'description' => $this->form['description'],
-							'form'        => $output,
-							'form_open'   => $js . $form_open->getHtml(),
-							'form_close'  => $form_close,
-							'submit'      => $submit,
-                            'button_reset' => $this->language->get('button_reset'),
+							'description'  => $this->form['description'],
+							'form'         => $output,
+							'form_open'    => $js . $form_open->getHtml(),
+							'form_close'   => $form_close,
+							'submit'       => $submit,
+							'button_reset' => $this->language->get('button_reset'),
 					)
 			);
 			$output = $view->fetch('form/form.tpl');
@@ -583,43 +599,43 @@ class AForm{
 		$this->_loadFields();
 		$this->load->language('checkout/cart'); // load language for file upload text errors
 
-		foreach ($this->fields as $field){
+		foreach ($this->fields as $field) {
 			// for multivalue required fields
 			if (in_array($field['element_type'], HtmlElementFactory::getMultivalueElements())
 					&& !sizeof($data[$field['field_name']])
 					&& $field['required'] == 'Y'
-			){
+			) {
 				$errors[$field['field_name']] = $field['name'] . ' ' . $this->language->get('text_field_required');
 			}
 			// for required string values
-			if ($field['required'] == 'Y' && !in_array($field['element_type'], array ('K', 'J', 'U'))){
-				if (!is_array($data[$field['field_name']])){
+			if ($field['required'] == 'Y' && !in_array($field['element_type'], array ('K', 'J', 'U'))) {
+				if (!is_array($data[$field['field_name']])) {
 					$data[$field['field_name']] = trim($data[$field['field_name']]);
 					//if empty string!
-					if ($data[$field['field_name']] == ''){
+					if ($data[$field['field_name']] == '') {
 						$errors[$field['field_name']] = $field['name'] . ' ' . $this->language->get('text_field_required');
 					}
-				} else{
+				} else {
 					// if empty array
-					if (!$data[$field['field_name']]){
+					if (!$data[$field['field_name']]) {
 						$errors[$field['field_name']] = $field['name'] . ' ' . $this->language->get('text_field_required');
 					}
 				}
 			}
 			// check by regexp
-			if (has_value($field['regexp_pattern'])){
-				if (!is_array($data[$field['field_name']])){ //for string value
-					if (!preg_match($field['regexp_pattern'], $data[$field['field_name']])){
+			if (AHelperUtils::has_value($field['regexp_pattern'])) {
+				if (!is_array($data[$field['field_name']])) { //for string value
+					if (!preg_match($field['regexp_pattern'], $data[$field['field_name']])) {
 						// show error only for field with value or required
-						if (($data[$field['field_name']] && $field['required'] != 'Y') || $field['required'] == 'Y'){
+						if (($data[$field['field_name']] && $field['required'] != 'Y') || $field['required'] == 'Y') {
 							$errors[$field['field_name']] .= ' ' . $field['error_text'];
 						}
 					}
-				} else{
+				} else {
 					// for array's values
-					foreach ($data[$field['field_name']] as $dd){
-						if (!preg_match($field['regexp_pattern'], $dd)){
-							if (($dd && $field['required'] != 'Y') || $field['required'] == 'Y'){
+					foreach ($data[$field['field_name']] as $dd) {
+						if (!preg_match($field['regexp_pattern'], $dd)) {
+							if (($dd && $field['required'] != 'Y') || $field['required'] == 'Y') {
 								$errors[$field['field_name']] .= ' ' . $field['error_text'];
 							}
 							break;
@@ -629,18 +645,18 @@ class AForm{
 			}
 
 			//for captcha or recaptcha	
-			if ($field['element_type'] == 'K' || $field['element_type'] == 'J'){
+			if ($field['element_type'] == 'K' || $field['element_type'] == 'J') {
 
-				if ($this->config->get('config_recaptcha_secret_key')){
-					require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
-					$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+				if ($this->config->get('config_recaptcha_secret_key')) {
+					require_once DIR_VENDOR . DIRNAME_ASSETS.'google/recaptcha/src/autoload.php';
+					$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 					$resp = $recaptcha->verify($data['g-recaptcha-response'], $this->request->getRemoteIP());
-					if (!$resp->isSuccess() && $resp->getErrorCodes()){
+					if (!$resp->isSuccess() && $resp->getErrorCodes()) {
 						$errors[$field['field_name']] = $this->language->get('error_captcha');
 					}
-				} else{
+				} else {
 					if (!isset($this->session->data['captcha']) || ($this->session->data['captcha'] != $data[$field['field_name']])
-					){
+					) {
 						$errors[$field['field_name']] = $this->language->get('error_captcha');
 					}
 				}
@@ -648,9 +664,9 @@ class AForm{
 
 			// for file
 			if ($field['element_type'] == 'U'
-				&&
-				($this->request->files[$field['field_name']]['tmp_name'] || $field['required'] == 'Y')
-			){
+					&&
+					($this->request->files[$field['field_name']]['tmp_name'] || $field['required'] == 'Y')
+			) {
 				$fm = new AFile();
 				$file_path_info = $fm->getUploadFilePath($data['settings']['directory'],
 						$this->request->files[$field['field_name']]['name']);
@@ -665,7 +681,7 @@ class AForm{
 
 				$file_errors = $fm->validateFileOption($field['settings'], $file_data);
 
-				if ($file_errors){
+				if ($file_errors) {
 					$errors[$field['field_name']] .= implode(' ', $file_errors);
 				}
 			}
@@ -680,13 +696,13 @@ class AForm{
 	 * @return array - list of absolute paths of moved files
 	 */
 	public function processFileUploads($files = array ()){
-		if ($this->fields){
+		if ($this->fields) {
 			$this->_loadFields();
 		}
 
 		$output = array ();
-		foreach ($this->fields as $field){
-			if ($field['element_type'] != 'U'){
+		foreach ($this->fields as $field) {
+			if ($field['element_type'] != 'U') {
 				continue;
 			}
 
@@ -698,11 +714,12 @@ class AForm{
 
 			$result = move_uploaded_file($files[$field['field_name']]['tmp_name'], $file_path_info['path']);
 
-			if ($result){
+			if ($result) {
 				$output[$field['field_name']] = array (
 						'display_name' => $field['name'],
-						'path'         => $file_path_info['path']);
-			} else{
+						'path'         => $file_path_info['path']
+				);
+			} else {
 				$err = new AError("AForm error: can't to move uploaded file " . $files[$field['field_name']]['tmp_name'] . " to " . $file_path_info['path']);
 				$err->toLog()->toDebug();
 			}

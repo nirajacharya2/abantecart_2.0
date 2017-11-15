@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AAttribute;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -25,12 +31,12 @@ if (!defined('DIR_CORE')){
  * Class ADownload - class to manage downloads
  *
  * @property ADB $db
- * @property ALanguageManager $language
+ * @property \abc\core\ALanguageManager $language
  * @property ACustomer $customer
  * @property AConfig $config
  * @property ALog $log
- * @property ALoader $load
- * @property ExtensionsAPI $extensions
+ * @property \abc\core\ALoader $load
+ * @property \abc\core\ExtensionsAPI $extensions
  * @property ARequest $request
  */
 final class ADownload{
@@ -38,7 +44,7 @@ final class ADownload{
 	public $errors = array ();
 
 	/**
-	 * @var registry - access to application registry
+	 * @var Registry - access to application registry
 	 */
 	protected $registry;
 
@@ -58,7 +64,7 @@ final class ADownload{
 	/**
 	 * @param  string $key - key to save data in registry
 	 * @param  mixed $value - key to save data in registry
-	 * @return mixed  - data from registry
+	 * @void
 	 */
 	public function __set($key, $value){
 		$this->registry->set($key, $value);
@@ -322,7 +328,7 @@ final class ADownload{
 					}
 				} else{
 					// do not include empty value for display for customer or admin display
-					if (!has_value($row['value']) && in_array($mode, array ('to_customer', 'to_display'))){
+					if (!AHelperUtils::has_value($row['value']) && in_array($mode, array ('to_customer', 'to_display'))){
 						continue;
 					}
 					$output[$attributes[$row['attribute_id']]['name']] = $row['value'];
@@ -356,7 +362,7 @@ final class ADownload{
 		if ($download_info['remaining_count'] != '' && $download_info['remaining_count'] < 1){
 			return false;
 		}
-		if ($download_info['expire_date'] != '' && dateISO2Int($download_info['expire_date']) < time()){
+		if ($download_info['expire_date'] != '' && AHelperUtils::dateISO2Int($download_info['expire_date']) < time()){
 			return false;
 		}
 
@@ -369,7 +375,7 @@ final class ADownload{
 			$mask = basename($file);
 		}
 
-		$mime = getMimeType($file);
+		$mime = AHelperUtils::getMimeType($file);
 		$encoding = 'binary';
 		if (!headers_sent()){
 			if (file_exists($file)){
@@ -585,7 +591,7 @@ final class ADownload{
 
 		if ($download_info['status'] == 0){
 			$text_status = $this->language->get('text_pending');
-		} elseif (dateISO2Int($download_info['expire_date']) < time()){
+		} elseif (AHelperUtils::dateISO2Int($download_info['expire_date']) < time()){
 			$text_status = $this->language->get('text_expired');
 		} elseif ($download_info['remaining_count'] == '0'){
 			$text_status = $this->language->get('text_reached_limit');

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\AConnect;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
@@ -39,7 +44,7 @@ class ModelToolMPAPI extends Model {
 	 * Disconnect store from AbanteCart marketplace
 	 */	
 	public function disconnect($mp_token){
-		if (!has_value($mp_token)) {
+		if (!AHelperUtils::has_value($mp_token)) {
 			return false;
 		}
 
@@ -108,20 +113,20 @@ class ModelToolMPAPI extends Model {
 		$connect->connect_method = 'curl'; // set curl as default connection type
 
 		// prepare parameters
-		if(has_value($params['limit'])){
+		if(AHelperUtils::has_value($params['limit'])){
 			$get_params['limit'] = $get_params['rows'] = $params['limit'];
 		}else{
 			$get_params['limit'] = $get_params['rows'] = 24;
 		}
-		if(has_value($params['page'])){
+		if(AHelperUtils::has_value($params['page'])){
 			$get_params['page'] = $params['page'];
 		}
-		if(has_value($params['sidx'])){
+		if(AHelperUtils::has_value($params['sidx'])){
 			$get_params['sidx'] = $params['sidx'];
 		}else{
 			$get_params['sidx'] = 'rating';
 		}
-		if(has_value($params['sord'])){
+		if(AHelperUtils::has_value($params['sord'])){
 			$get_params['sord'] = $params['sord'];
 		}else{
 			$get_params['sord'] = 'DESC';
@@ -157,12 +162,12 @@ class ModelToolMPAPI extends Model {
 			$get_params['purchased_only'] = $params['purchased_only'];	
 			$get_params['rt'] = 'a/product/filter';
 			$output['products'] = $this->send( $connect, $get_params);			
-		} elseif (has_value($params['category_id'])){
+		} elseif (AHelperUtils::has_value($params['category_id'])){
 			// get products of category
 			$get_params['rt'] = 'a/product/filter';
 			$get_params['category_id'] = (int)$params['category_id'];
 			$output['products'] = $this->send( $connect, $get_params);
-		} elseif (has_value($params['keyword'])){//get products by keyword
+		} elseif (AHelperUtils::has_value($params['keyword'])){//get products by keyword
 			$get_params['rt'] = 'a/product/filter';
 			$get_params['keyword'] = $params['keyword'];
 			$output['products'] = $this->send( $connect, $get_params );

@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+use abc\lib\AFile;
+use abc\lib\ALog;
+use abc\lib\AResourceManager;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -32,7 +39,7 @@ class ModelToolImportProcess extends Model{
 	public $errors = array ();
 	protected $eta = array ();
 	/**
-	 * @var ALog
+	 * @var \abc\lib\ALog
 	 */
 	protected $imp_log = null;
 
@@ -1130,7 +1137,7 @@ if (!function_exists('array_column')) {
 	 * @param mixed $indexKey (Optional.) The column to use as the index/keys for
 	 *                        the returned array. This value may be the integer key
 	 *                        of the column, or it may be the string key name.
-	 * @return array
+	 * @return array|false
 	 */
 	function array_column($input = null, $columnKey = null, $indexKey = null){
 		// Using func_get_args() in order to check for proper number of

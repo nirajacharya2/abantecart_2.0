@@ -17,10 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
+use abc\lib\AOrder;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerPagesCheckoutConfirm
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesCheckoutConfirm extends AController{
 	private $error = array ();
 	public $data = array ();
@@ -44,27 +54,27 @@ class ControllerPagesCheckoutConfirm extends AController{
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()){
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL($checkout_rt);
 
-			redirect($this->html->getSecureURL($login_rt));
+			abc_redirect($this->html->getSecureURL($login_rt));
 		}
 
 		if ($this->cart->hasShipping()){
 			if (!isset($this->session->data['shipping_address_id']) || !$this->session->data['shipping_address_id']){
-				redirect($this->html->getSecureURL($checkout_rt));
+				abc_redirect($this->html->getSecureURL($checkout_rt));
 			}
 
 			if (!isset($this->session->data['shipping_method'])){
-				redirect($this->html->getSecureURL($checkout_rt));
+				abc_redirect($this->html->getSecureURL($checkout_rt));
 			}
 		} else{
 			unset($this->session->data['shipping_address_id']);
@@ -76,11 +86,11 @@ class ControllerPagesCheckoutConfirm extends AController{
 		}
 
 		if (!isset($this->session->data['payment_address_id']) || !$this->session->data['payment_address_id']){
-			redirect($this->html->getSecureURL($payment_rt));
+			abc_redirect($this->html->getSecureURL($payment_rt));
 		}
 
 		if (!isset($this->session->data['payment_method'])){
-			redirect($this->html->getSecureURL($payment_rt));
+			abc_redirect($this->html->getSecureURL($payment_rt));
 		}
 
 		if ($this->request->get['balance'] == 'disapply'){
@@ -94,7 +104,7 @@ class ControllerPagesCheckoutConfirm extends AController{
 		if ($order_id === false){
 			// preventing rebuilding order of already processed orders
 			//(by "back" button via browser history from external payment page(paypal, google_checkout etc))
-			redirect($this->html->getSecureURL($success_rt));
+			abc_redirect($this->html->getSecureURL($success_rt));
 		}
 		$this->session->data['order_id'] = $order_id;
 

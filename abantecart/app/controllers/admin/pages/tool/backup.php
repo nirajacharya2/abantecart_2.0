@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\ABackup;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -65,7 +71,7 @@ class ControllerPagesToolBackup extends AController {
 				}else{
 					$this->session->data['success'] = sprintf($this->language->get('text_success_scheduled'),
 															  $this->html->getSecureURL('tool/task'));
-					redirect($this->html->getSecureURL('tool/backup'));
+					abc_redirect($this->html->getSecureURL('tool/backup'));
 				}
 
 			}
@@ -75,16 +81,16 @@ class ControllerPagesToolBackup extends AController {
 				if ($file_type == 'sql') {
 					$this->model_tool_backup->restore($content);
 					$this->session->data['success'] = $this->language->get('text_success');
-					redirect($this->html->getSecureURL('tool/backup'));
+					abc_redirect($this->html->getSecureURL('tool/backup'));
 				} else {
 					if ($this->model_tool_backup->load($content)) {
 						$this->session->data['success'] = $this->language->get('text_success_xml');
-						redirect($this->html->getSecureURL('tool/backup'));
+						abc_redirect($this->html->getSecureURL('tool/backup'));
 					} else {
 						$this->error['warning'] = $this->language->get('error_xml');
 					}
 				}
-			} elseif(!has_value($this->request->post['do_backup'])) {
+			} elseif(!AHelperUtils::has_value($this->request->post['do_backup'])) {
 				if ($this->request->files) {
 					$this->error['warning'] = $this->language->get('error_empty') . ' (' . pathinfo($this->request->files['restore']['name'], PATHINFO_EXTENSION) . ')';
 				} else {
@@ -96,7 +102,7 @@ class ControllerPagesToolBackup extends AController {
 						$uploaded_file = $this->request->files['import'];
 					}
 					if ($uploaded_file) {
-						$this->error['warning'] .= '<br>Error: ' . getTextUploadError($uploaded_file['error']);
+						$this->error['warning'] .= '<br>Error: ' . AHelperUtils::getTextUploadError($uploaded_file['error']);
 					}
 				}
 			}
@@ -315,7 +321,7 @@ class ControllerPagesToolBackup extends AController {
 			$this->error['warning'] = $this->language->get('error_nothing_to_do');
 		}
 
-		if(has_value($this->request->post['do_backup'])){ // sign of backup form
+		if(AHelperUtils::has_value($this->request->post['do_backup'])){ // sign of backup form
 			$this->request->post['backup_code'] = $this->request->post['backup_code'] ? true : false;
 			$this->request->post['backup_content'] = $this->request->post['backup_content'] ? true : false;
 
@@ -354,7 +360,7 @@ class ControllerPagesToolBackup extends AController {
 				exit;
 			} else {
 				$this->session->data['error'] = 'Error: You Cannot to Download File '.$file.' Because of Absent on Hard Drive.';
-				redirect($this->html->getSecureURL('tool/install_upgrade_history'));
+				abc_redirect($this->html->getSecureURL('tool/install_upgrade_history'));
 			}
 		} else {
 			return $this->dispatch('error/permission');

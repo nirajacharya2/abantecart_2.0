@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\lib\AAttribute_Manager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -154,7 +161,7 @@ class ControllerPagesCatalogAttribute extends AController{
 		if ($this->request->is_POST() && $this->validateAttributeForm()){
 			$attribute_id = $this->attribute_manager->addAttribute($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('catalog/attribute/update', '&attribute_id=' . $attribute_id));
+			abc_redirect($this->html->getSecureURL('catalog/attribute/update', '&attribute_id=' . $attribute_id));
 		}
 		$this->_getForm();
 
@@ -177,7 +184,7 @@ class ControllerPagesCatalogAttribute extends AController{
 		if ($this->request->is_POST() && $this->validateAttributeForm()){
 			$this->attribute_manager->updateAttribute($this->request->get['attribute_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('catalog/attribute/update', '&attribute_id=' . $this->request->get['attribute_id']));
+			abc_redirect($this->html->getSecureURL('catalog/attribute/update', '&attribute_id=' . $this->request->get['attribute_id']));
 		}
 
 		$this->_getForm();
@@ -189,6 +196,7 @@ class ControllerPagesCatalogAttribute extends AController{
 	private function _getForm(){
 
 		$this->data = array ();
+		$attribute_type_info = array();
 		$this->data['error'] = $this->error;
 		$this->data['cancel'] = $this->html->getSecureURL('catalog/attribute');
 		$this->data['get_attribute_type'] = $this->html->getSecureURL('r/catalog/attribute/get_attribute_type');
@@ -229,12 +237,12 @@ class ControllerPagesCatalogAttribute extends AController{
 				}
 			}
 
-			if (has_value($attribute_info['settings'])){
+			if (AHelperUtils::has_value($attribute_info['settings'])){
 				$attribute_info['settings'] = unserialize($attribute_info['settings']);
 			}
 		}
 
-		if (has_value($this->request->get['attribute_type_id'])){
+		if (AHelperUtils::has_value($this->request->get['attribute_type_id'])){
 			$attribute_type_info = $this->attribute_manager->getAttributeTypeInfoById((int)$this->request->get['attribute_type_id']);
 		}
 
@@ -412,7 +420,7 @@ class ControllerPagesCatalogAttribute extends AController{
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if (!has_value($this->request->get_or_post('attribute_type_id'))){
+		if (!AHelperUtils::has_value($this->request->get_or_post('attribute_type_id'))){
 			$this->error['attribute_type'] = $this->language->get('error_required');
 		} else{
 			$this->request->post['attribute_type_id'] = $this->request->get_or_post('attribute_type_id');
@@ -422,10 +430,10 @@ class ControllerPagesCatalogAttribute extends AController{
 			$this->request->post['required'] = 0;
 		}
 
-		if (has_value($this->request->post['regexp_pattern'])){
+		if (AHelperUtils::has_value($this->request->post['regexp_pattern'])){
 			$this->request->post['regexp_pattern'] = trim($this->request->post['regexp_pattern']);
 		}
-		if (has_value($this->request->post['placeholder'])){
+		if (AHelperUtils::has_value($this->request->post['placeholder'])){
 			$this->request->post['placeholder'] = trim($this->request->post['placeholder']);
 		}
 
@@ -442,7 +450,7 @@ class ControllerPagesCatalogAttribute extends AController{
 	}
 
 	private function _initTabs($active = null){
-		$method = (has_value($this->request->get['attribute_id']) ? 'update' : 'insert');
+		$method = (AHelperUtils::has_value($this->request->get['attribute_id']) ? 'update' : 'insert');
 
 		foreach ($this->data['attribute_types'] as $type_id => $type){
 			if (!$type_id) continue;

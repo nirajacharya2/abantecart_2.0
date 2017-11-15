@@ -17,13 +17,18 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\ACustomer;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 class ControllerResponsesSaleInvoice extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function main() {
 
 		//init controller data
@@ -151,7 +156,7 @@ class ControllerResponsesSaleInvoice extends AController {
 				$this->data['orders'][] = array(
 						'order_id' => $order_id,
 						'invoice_id' => $invoice_id,
-						'date_added' => dateISO2Display($order_info['date_added'], $this->language->get('date_format_short')),
+						'date_added' => AHelperUtils::dateISO2Display($order_info['date_added'], $this->language->get('date_format_short')),
 						'store_name' => $order_info['store_name'],
 						'store_url' => rtrim($order_info['store_url'], '/'),
 						'address' => nl2br($this->config->get('config_address')),

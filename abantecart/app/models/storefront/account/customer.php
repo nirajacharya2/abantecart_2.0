@@ -17,13 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\ALanguage;
+use abc\core\AResource;
+use abc\core\Model;
+use abc\lib\AEncryption;
+use abc\lib\AMail;
+use abc\lib\AMessage;
+use abc\lib\AView;
+use ReCaptcha\ReCaptcha;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 /**
  * Class ModelAccountCustomer
  * @property ModelCatalogContent $model_catalog_content
- * @property AIM $im
+ * @property \abc\lib\AIM $im
  * @property ModelAccountOrder $model_account_order
  */
 class ModelAccountCustomer extends Model {
@@ -72,7 +83,7 @@ class ModelAccountCustomer extends Model {
 								WHERE customer_id = '" . (int)$row['customer_id'] . "'");
 		}
 
-    	$salt_key = genToken(8);
+    	$salt_key = AHelperUtils::genToken(8);
       	$sql = "INSERT INTO " . $this->db->table("customers") . "
 			  SET	store_id = '" . (int)$this->config->get('config_store_id') . "',
 					loginname = '" . $this->db->escape($data['loginname']) . "',
@@ -246,7 +257,7 @@ class ModelAccountCustomer extends Model {
 		//get all columns
 		$sql = "SELECT COLUMN_NAME
 				FROM INFORMATION_SCHEMA.COLUMNS
-				WHERE TABLE_SCHEMA = '".DB_DATABASE."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
+				WHERE TABLE_SCHEMA = '".$this->db->database()."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
 		$result = $this->db->query($sql);
 		$columns = array();
 		foreach($result->rows as $row){
@@ -336,7 +347,7 @@ class ModelAccountCustomer extends Model {
 			}
 			//for newsletter subscription do changes inside customers table
 			//if at least one protocol enabled - set 1, otherwise - 0
-			if(has_value($update['newsletter'])){
+			if(AHelperUtils::has_value($update['newsletter'])){
 				$newsletter_status = 0;
 				foreach($update['newsletter'] as $protocol=>$status){
 					if($status){
@@ -355,7 +366,7 @@ class ModelAccountCustomer extends Model {
 	 * @param string $password
 	 */
 	public function editPassword($loginname, $password) {
-    	$salt_key = genToken(8);
+    	$salt_key = AHelperUtils::genToken(8);
       	$this->db->query("UPDATE " . $this->db->table("customers") . "
       	                SET
 							salt = '" . $this->db->escape($salt_key) . "', 
@@ -545,7 +556,7 @@ class ModelAccountCustomer extends Model {
 		if($this->config->get('config_account_create_captcha')) {
 			if($this->config->get('config_recaptcha_secret_key')) {
 				require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
-				$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+				$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 				$resp = $recaptcha->verify(	$data['g-recaptcha-response'],
 											$this->request->getRemoteIP());
 				if (!$resp->isSuccess() && $resp->getErrorCodes()) {
@@ -639,7 +650,7 @@ class ModelAccountCustomer extends Model {
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;
@@ -665,7 +676,7 @@ class ModelAccountCustomer extends Model {
 
 		if($this->config->get('config_recaptcha_secret_key')) {
 			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
-			$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$data['g-recaptcha-response'],
 										$this->request->getRemoteIP());
 			if (!$resp->isSuccess() && $resp->getErrorCodes()) {
@@ -699,7 +710,7 @@ class ModelAccountCustomer extends Model {
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;
@@ -767,7 +778,7 @@ class ModelAccountCustomer extends Model {
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var AMailIM $driver_obj
+				 * @var \abc\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;
@@ -880,7 +891,7 @@ class ModelAccountCustomer extends Model {
 
 		$this->data['mail_template_data']['store_name'] = $this->config->get('store_name');
 		$this->data['mail_template_data']['store_url'] = $this->config->get('config_url');
-		$this->data['mail_template_data']['text_project_label'] = project_base();
+		$this->data['mail_template_data']['text_project_label'] = AHelperUtils::project_base();
 
 		$this->data['mail_template'] = 'mail/account_create.tpl';
 
@@ -908,7 +919,7 @@ class ModelAccountCustomer extends Model {
 
 		//encrypt token and data
 		$enc = new AEncryption($this->config->get('encryption_key'));
-		$code = genToken();
+		$code = AHelperUtils::genToken();
 		//store activation code
 		$customer_data['data']['email_activation'] = $code;
 		$this->updateOtherData($customer_id, $customer_data['data']);
@@ -956,7 +967,7 @@ class ModelAccountCustomer extends Model {
 
 		$this->data['mail_template_data']['store_name'] = $this->config->get('store_name');
 		$this->data['mail_template_data']['store_url'] = $this->config->get('config_url');
-		$this->data['mail_template_data']['text_project_label'] = project_base();
+		$this->data['mail_template_data']['text_project_label'] = AHelperUtils::project_base();
 		$this->data['mail_template'] = 'mail/account_create.tpl';
 
 		//allow to change email data from extensions

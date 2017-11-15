@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -34,17 +37,15 @@ class ControllerCommonPage extends AController {
 				$rt_controller = $this->router->getController();
 				$cache_keys = $this->getCacheKeyValues($rt_controller);
 				if(is_array($cache_keys)){
-					//all good, now cache will be saved in a view class 			
-            		$this->buildHTMLCacheKey($cache_keys, $this->request->get, $rt_controller);					
+					//all good, now cache will be saved in a view class
+            		$this->buildHTMLCacheKey($cache_keys, $this->request->get, $rt_controller);
 				}
 			}
 		}
 
 		$this->view->assign('lang', $this->language->get('code'));
 		$this->view->assign('direction', $this->language->get('direction'));
-
         $this->addChild('common/head', 'head', 'common/head.tpl');
-
 		foreach ($this->children as $block) {
 			if ( !empty($block['position']) ) {
 				$this->view->assign($block['block_txt_id'], $block['block_txt_id'].'_'.$block['instance_id']);

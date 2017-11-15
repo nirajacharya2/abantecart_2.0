@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AError;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -26,8 +32,9 @@ if (defined('IS_DEMO') && IS_DEMO) {
 }
 
 /**
- * Class ControllerResponsesSaleContact
- * @property ModelToolImportProcess $model_tool_import_process
+ * Class ControllerResponsesToolImportProcess
+ * @package abc\controller\admin
+ * @property \abc\model\admin\ModelToolImportProcess $model_tool_import_process
  */
 class ControllerResponsesToolImportProcess extends AController {
 	public $data = array();
@@ -161,9 +168,13 @@ class ControllerResponsesToolImportProcess extends AController {
 
 		$this->load->library('json');
 		$this->response->addJSONHeader();
-		$this->response->setOutput( AJson::encode(array(
-													'result' => true,
-													'result_text' => $result_text ))
+		$this->response->setOutput(
+				AJson::encode(
+							array(
+								'result' => true,
+								'result_text' => $result_text
+							)
+				)
 		);
 	}
 
@@ -172,15 +183,12 @@ class ControllerResponsesToolImportProcess extends AController {
 			$this->errors['warning'] = $this->language->get('error_permission');
 			return false;
 		}
-
 		if (
 			($this->session->data['import']['format'] != 'internal' && !$this->session->data['import_map'])
 				|| !$this->session->data['import']) {
 			$this->errors['warning'] = $this->language->get('error_data_corrupted');
 			return false;
 		}
-
 		return true;
 	}
-
 }

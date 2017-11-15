@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -32,7 +36,7 @@ class ControllerPagesAccountEdit extends AController{
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/edit');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -61,7 +65,7 @@ class ControllerPagesAccountEdit extends AController{
 				$this->model_account_customer->editCustomerNotifications($request_data);
 				$this->session->data['success'] = $this->language->get('text_success');
 				$this->extensions->hk_ProcessData($this);
-				$this->redirect($this->html->getSecureURL('account/account'));
+				abc_redirect($this->html->getSecureURL('account/account'));
 			}
 		}
 
@@ -198,6 +202,9 @@ class ControllerPagesAccountEdit extends AController{
 		//get only active IM drivers
 		$im_drivers = $this->im->getIMDriverObjects();
 		if ($im_drivers){
+			/**
+			 * @var \abc\lib\AMailIM $driver_obj
+			 */
 			foreach ($im_drivers as $protocol => $driver_obj){
 				if (!is_object($driver_obj) || $protocol=='email'){
 					continue;
@@ -215,15 +222,6 @@ class ControllerPagesAccountEdit extends AController{
 				$this->data['error_'.$protocol] = $this->error[$protocol];
 			}
 		}
-
-		//TODO: REMOVE THIS IN 1.3!!!
-		// backward compatibility code
-		$deprecated = array_keys($this->data['form']['fields']);
-		foreach($deprecated as $name){
-			$this->data['form'][$name] = $this->data['form']['fields'][$name];
-		}
-		//end of trick
-
 
 		$this->data['form']['continue'] = $form->getFieldHtml(
 				array (

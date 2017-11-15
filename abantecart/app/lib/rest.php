@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+use XMLWriter;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -42,7 +46,7 @@ class ARest{
 			'qs'   => 'text/plain'
 	);
 
-	private static $staus_codes = array (
+	private static $status_codes = array (
 			100 => 'Continue',
 			101 => 'Switching Protocols',
 			200 => 'OK',
@@ -124,7 +128,7 @@ class ARest{
 	}
 
 	/*
-	* Adding to the responce array 
+	* Adding to the response array
 	*/
 	public function setResponseData($response_arr){
 		$this->response = $response_arr;
@@ -231,7 +235,7 @@ class ARest{
 	}
 
 	private function _getStatusMessage($status){
-		return (isset(self::$staus_codes[$status])) ? self::$staus_codes[$status] : self::$staus_codes[500];
+		return (isset(self::$status_codes[$status])) ? self::$status_codes[$status] : self::$status_codes[500];
 	}
 
 	private function _getResponseFormat($format){

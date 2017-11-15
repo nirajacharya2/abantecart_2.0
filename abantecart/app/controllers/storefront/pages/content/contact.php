@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+use abc\lib\AMail;
+use abc\lib\AView;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -27,7 +35,7 @@ class ControllerPagesContentContact extends AController{
 	/**
 	 * @var AForm
 	 */
-	private $form;
+	protected $form;
 
 	public function main(){
 
@@ -69,7 +77,7 @@ class ControllerPagesContentContact extends AController{
 
 			$this->data['mail_template_data']['store_name'] = $this->config->get('store_name');
 			$this->data['mail_template_data']['store_url'] = $this->config->get('config_url');
-			$this->data['mail_template_data']['text_project_label'] = project_base();
+			$this->data['mail_template_data']['text_project_label'] = AHelperUtils::project_base();
 			$this->data['mail_template_data']['entry_enquiry'] = $this->data['mail_plain_text'] = $this->language->get('entry_enquiry');
 			$this->data['mail_plain_text'] .= "\r\n" . $post_data['enquiry'] . "\r\n";
 			$this->data['mail_template_data']['enquiry'] = nl2br($post_data['enquiry'] . "\r\n");
@@ -77,7 +85,7 @@ class ControllerPagesContentContact extends AController{
 			$form_fields = $this->form->getFields();
 			$this->data['mail_template_data']['form_fields'] = array ();
 			foreach ($form_fields as $field_name => $field_info){
-				if (has_value($post_data[$field_name]) && !in_array($field_name, array ('first_name', 'email', 'enquiry', 'captcha'))){
+				if (AHelperUtils::has_value($post_data[$field_name]) && !in_array($field_name, array ('first_name', 'email', 'enquiry', 'captcha'))){
 					$field_details = $this->form->getField($field_name);
 					$this->data['mail_plain_text'] .= "\r\n" . rtrim($field_details['name'], ':') . ":\t" . $post_data[$field_name];
 					$this->data['mail_template_data']['form_fields'][rtrim($field_details['name'], ':')] = $post_data[$field_name];
@@ -147,7 +155,7 @@ class ControllerPagesContentContact extends AController{
 			$this->im->send('customer_contact', $message_arr);
 
 			$this->extensions->hk_ProcessData($this);
-			redirect($success_url);
+			abc_redirect($success_url);
 		}
 
 		if ($this->request->is_POST()){

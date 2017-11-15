@@ -17,13 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\ExtensionUtils;
+use abc\lib\ADebug;
+use abc\lib\AWarning;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerPagesExtensionExtensions
- * @property ModelToolMPApi $model_tool_mp_api
+ * @property \abc\model\admin\ModelToolMPApi $model_tool_mp_api
  */
 class ControllerPagesExtensionExtensions extends AController {
 
@@ -92,7 +100,7 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		//set store id based on param or session.
 		$store_id = (int)$this->config->get('config_store_id');
-		if ( has_value($this->request->get_or_post('store_id')) ) {
+		if ( AHelperUtils::has_value($this->request->get_or_post('store_id')) ) {
 			$store_id = (int)$this->request->get_or_post('store_id');
 			$this->session->data['current_store_id'] = (int)$this->request->get_or_post('store_id');
 		} else if ($this->session->data['current_store_id']) {
@@ -268,7 +276,7 @@ class ControllerPagesExtensionExtensions extends AController {
 		$extension = $this->request->get['extension'];
 
 		if(!$extension){
-			redirect($this->html->getSecureURL('extension/extensions'));
+			abc_redirect($this->html->getSecureURL('extension/extensions'));
 		}
 
 		$this->document->resetBreadcrumbs();
@@ -301,7 +309,7 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		$this->data['extension_info'] = $this->extensions->getExtensionInfo($extension);
 		if (!$this->data['extension_info']) { // if extension is not installed yet - redirect to list
-			redirect($this->html->getSecureURL('extension/extensions'));
+			abc_redirect($this->html->getSecureURL('extension/extensions'));
 		}
 		$this->data['extension_info']['id'] = $extension;
 		$this->data['form_store_switch'] = $this->html->getStoreSwitcher();
@@ -468,7 +476,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 			$html = '';
 			//if template process differently
-			if ( has_value((string)$data['template']) ) {
+			if ( AHelperUtils::has_value((string)$data['template']) ) {
 		    	//build path to template directory.
 				$dir_template = DIR_EXT.$extension.DIR_EXT_ADMIN.DIR_EXT_TEMPLATE.$this->config->get('admin_template')."/template/".$data['template'];
 				//validate template and report issue
@@ -495,11 +503,11 @@ class ControllerPagesExtensionExtensions extends AController {
 		$this->data['target_url'] = $this->html->getSecureURL('extension/extensions/edit', '&extension=' . $extension . '&store_id=' . $store_id);
 
 		//check if we restore settings to default values
-		if (has_value($this->request->get['reload'])) {
+		if (AHelperUtils::has_value($this->request->get['reload'])) {
 			$this->extension_manager->editSetting($extension, $ext->getDefaultSettings());
 			$this->cache->remove('settings');
 			$this->session->data['success'] = $this->language->get('text_restore_success');
-			redirect($this->data['target_url']);
+			abc_redirect($this->data['target_url']);
 		}
 
 		//check if we save settings with the post
@@ -515,7 +523,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			$this->extension_manager->editSetting($extension, $save_data);
 			$this->cache->remove('settings');
 			$this->session->data['success'] = $this->language->get('text_save_success');
-			redirect($this->data['target_url']);
+			abc_redirect($this->data['target_url']);
 		}
 
 		$conflict_resources = $ext->validateResources();
@@ -580,7 +588,7 @@ class ControllerPagesExtensionExtensions extends AController {
 		$this->data['update'] = $this->html->getSecureURL('listing_grid/extension/update', '&id=' . $extension . '&store_id=' . $store_id);
 		$this->data['dependants_url'] = $this->html->getSecureURL('listing_grid/extension/dependants', '&extension='.$extension);
 
-		if(!$this->extension_manager->validateDependencies($extension,getExtensionConfigXml($extension))){
+		if(!$this->extension_manager->validateDependencies($extension,AHelperUtils::getExtensionConfigXml($extension))){
 			$this->error['warning'] = $this->language->get('error_dependencies');
 		}
 
@@ -617,12 +625,12 @@ class ControllerPagesExtensionExtensions extends AController {
 		//if extension is missing - do redirect on extensions list with alert!
 		if (in_array($extension, $missing_extensions)) {
 			$this->session->data['error'] = sprintf($this->language->get('text_missing_extension'),$extension);
-			redirect($this->html->getSecureURL('extension/extensions'));
+			abc_redirect($this->html->getSecureURL('extension/extensions'));
 		}
 
 		$this->data['extension_info']['note'] = $ext->getConfig('note') ? $this->html->convertLinks($this->language->get($extension . '_note')) : '';
 		/**
-		 * @var DOMElement $ext
+		 * @var \SimpleXMLElement $ext
 		 */
 		$config = $ext->getConfig();
 		if (!empty($config->preview->item)) {
@@ -785,7 +793,7 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		$template = 'pages/extension/extensions_edit.tpl';
 		//#PR set custom templates for extension settings page.  
-		if ( has_value( (string)$config->custom_settings_template ) ) {
+		if ( AHelperUtils::has_value( (string)$config->custom_settings_template ) ) {
 			//build path to template directory.
 			$dir_template = DIR_EXT . $extension . DIR_EXT_ADMIN . DIR_EXT_TEMPLATE . $this->config->get('admin_template') . "/template/";
 			$dir_template .= (string)$config->custom_settings_template;
@@ -856,14 +864,14 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		if (!$this->user->canModify('extension/extensions')) {
 			$this->session->data['error'] = $this->language->get('error_permission');
-			redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		} else {
 			$validate = $this->extension_manager->validate($this->request->get['extension']);
 			if (!$validate) {
 				$this->session->data['error'] = implode('<br>', $this->extension_manager->errors);
-				redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+				abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 			}
-			$config = getExtensionConfigXml($this->request->get['extension']);
+			$config = AHelperUtils::getExtensionConfigXml($this->request->get['extension']);
 			if ($config === false) {
 				$filename = DIR_EXT . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
 				$err = sprintf($this->language->get('error_could_not_load_config'), $this->request->get['extension'], $filename);
@@ -871,7 +879,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			} else {
 				$this->extension_manager->install($this->request->get['extension'], $config);
 			}
-			redirect($this->html->getSecureURL('extension/extensions/edit', '&extension=' . $this->request->get['extension']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/edit', '&extension=' . $this->request->get['extension']));
 		}
 	}
 
@@ -882,11 +890,11 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		if (!$this->user->canModify('extension/extensions')) {
 			$this->session->data['error'] = $this->language->get('error_permission');
-			redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		} else {
 			$ext = new ExtensionUtils($this->request->get['extension']);
 			$this->extension_manager->uninstall($this->request->get['extension'], $ext->getConfig());
-			redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		}
 
 		//update controller data
@@ -899,14 +907,14 @@ class ControllerPagesExtensionExtensions extends AController {
 
 		if (!$this->user->canModify('extension/extensions')) {
 			$this->session->data['error'] = $this->language->get('error_permission');
-			redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		} else {
 			//extensions that has record in DB but missing files
 			$missing_extensions = $this->extensions->getMissingExtensions();
 
 			if ((!in_array($this->request->get['extension'], $missing_extensions)) && $this->config->has($this->request->get['extension'] . '_status')) {
 				$this->session->data['error'] = $this->language->get('error_uninstall');
-				redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+				abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 			}
 			$ext = new ExtensionUtils($this->request->get['extension']);
 			if (in_array($this->request->get['extension'], $missing_extensions)) {
@@ -914,7 +922,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 
 			$this->extension_manager->delete($this->request->get['extension']);
-			redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
+			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		}
 
 		//update controller data

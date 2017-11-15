@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -50,7 +57,7 @@ class ControllerResponsesListingGridCoupon extends AController {
 		$now = time();
 		foreach ($results as $result) {
 			// check date range
-			if ( dateISO2Int($result[ 'date_start' ]) > $now || dateISO2Int($result[ 'date_end' ]) < $now ) {
+			if ( AHelperUtils::dateISO2Int($result[ 'date_start' ]) > $now || AHelperUtils::dateISO2Int($result[ 'date_end' ]) < $now ) {
 				$result['status'] = 0;
 			}
 
@@ -58,9 +65,9 @@ class ControllerResponsesListingGridCoupon extends AController {
 			$response->rows[$i]['cell'] = array(
 				$result['name'],
 				$result['code'],
-				moneyDisplayFormat($result['discount']),
-				dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
-				dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
+				AHelperUtils::moneyDisplayFormat($result['discount']),
+				AHelperUtils::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
 				$this->html->buildCheckbox(array(
                     'name'  => 'status['.$result['coupon_id'].']',
                     'value' => $result['status'],
@@ -148,11 +155,11 @@ class ControllerResponsesListingGridCoupon extends AController {
 
 		        $err = $this->_validateForm($field, $value );
 				if(in_array($field,array('date_start', 'date_end'))){
-					$value = dateDisplay2ISO($value);
+					$value = AHelperUtils::dateDisplay2ISO($value);
 				}
 
 			    if( in_array($field, array('discount','total')) ){
-					$value = preformatFloat($value, $this->language->get('decimal_point') );
+					$value = AHelperUtils::preformatFloat($value, $this->language->get('decimal_point') );
 				}
 
 			    if ( !$err ) {
@@ -210,7 +217,7 @@ class ControllerResponsesListingGridCoupon extends AController {
 				break;
 			case 'date_start':
 			case 'date_end':
-				if(!dateDisplay2ISO($value)){
+				if(!AHelperUtils::dateDisplay2ISO($value)){
 					$err = $this->language->get('error_date');
 				}
 				break;

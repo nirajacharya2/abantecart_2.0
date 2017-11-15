@@ -17,11 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiAccountLogout extends AControllerAPI {
-	
+
 	public function post() {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 		$request_data = $this->rest->getRequestParams();
@@ -69,13 +72,12 @@ class ControllerApiAccountLogout extends AControllerAPI {
 			unset($this->session->data['order_id']);
 			unset($this->session->data['coupon']);
 
-		    if($this->config->get('config_tax_store')){
+			if($this->config->get('config_tax_store')){
 				$country_id = $this->config->get('config_country_id');
 				$zone_id = $this->config->get('config_zone_id');
 			}else{
 				$country_id = $zone_id = 0;
 			}
-			$this->tax->setZone( $country_id, $zone_id );	
-	
+			$this->tax->setZone( $country_id, $zone_id );
 	}
 }

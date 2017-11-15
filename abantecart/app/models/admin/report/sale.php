@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -34,7 +38,7 @@ class ModelReportSale extends Model{
 		} else{
 			$group = $data['group'];
 		}
-		if (!has_value($group)){
+		if (!AHelperUtils::has_value($group)){
 			$group = 'week';
 		}
 
@@ -77,12 +81,12 @@ class ModelReportSale extends Model{
 			$sql .= " WHERE order_status_id >= 0";
 		}
 		if (isset($filter['date_start'])){
-			$date_start = dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
 		} else{
 			$date_start = date('Y-m-d', strtotime('-7 day'));
 		}
 		if (isset($filter['date_end'])){
-			$date_end = dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
 		} else{
 			$date_end = date('Y-m-d', time());
 		}
@@ -163,7 +167,7 @@ class ModelReportSale extends Model{
 		} else{
 			$group = $data['group'];
 		}
-		if (!has_value($group)){
+		if (!AHelperUtils::has_value($group)){
 			$group = 'week';
 		}
 
@@ -199,16 +203,16 @@ class ModelReportSale extends Model{
 					ON (o.order_id = ot.order_id) 
 				WHERE ot.type = 'tax' ";
 
-		if (has_value($filter['order_status'])){
+		if (AHelperUtils::has_value($filter['order_status'])){
 			$sql .= " AND  o.order_status_id = " . (int)$filter['order_status'] . " ";
 		}
 		if (isset($filter['date_start'])){
-			$date_start = dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
 		} else{
 			$date_start = date('Y-m-d', strtotime('-7 day'));
 		}
 		if (isset($filter['date_end'])){
-			$date_end = dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
 		} else{
 			$date_end = date('Y-m-d', time());
 		}
@@ -281,7 +285,7 @@ class ModelReportSale extends Model{
 		} else{
 			$group = $data['group'];
 		}
-		if (!has_value($group)){
+		if (!AHelperUtils::has_value($group)){
 			$group = 'week';
 		}
 
@@ -316,16 +320,16 @@ class ModelReportSale extends Model{
 					ON (o.order_id = ot.order_id) 
 				WHERE ot.type = 'shipping' ";
 
-		if (has_value($filter['order_status'])){
+		if (AHelperUtils::has_value($filter['order_status'])){
 			$sql .= " AND  o.order_status_id = " . (int)$filter['order_status'] . " ";
 		}
 		if (isset($filter['date_start'])){
-			$date_start = dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
 		} else{
 			$date_start = date('Y-m-d', strtotime('-7 day'));
 		}
 		if (isset($filter['date_end'])){
-			$date_end = dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
 		} else{
 			$date_end = date('Y-m-d', time());
 		}
@@ -420,12 +424,12 @@ class ModelReportSale extends Model{
 				WHERE ot.type = 'discount' ";
 
 		if (isset($filter['date_start'])){
-			$date_start = dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
 		} else{
 			$date_start = date('Y-m-d', strtotime('-7 day'));
 		}
 		if (isset($filter['date_end'])){
-			$date_end = dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
 		} else{
 			$date_end = date('Y-m-d', time());
 		}

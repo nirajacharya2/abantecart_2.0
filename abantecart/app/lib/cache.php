@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\cache\ACacheDriverFile;
+use DirectoryIterator;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -191,7 +195,8 @@ class ACache{
 			}
 
 			//instantiate storage driver class
-			$this->cache_driver = new $drv['class']($this->expire, $this->locktime);
+			$drv_class = $drv['class'];
+			$this->cache_driver = new $drv_class($this->expire, $this->locktime);
 			return true;
 		}
 		return false;
@@ -281,7 +286,7 @@ class ACache{
 		}
 
 		if ($this->enabled && $this->cache_driver && $this->cache_driver->isSupported()){
-			//load cache from storage		
+			//load cache from storage
 			$data = $this->cache_driver->get($key, $group);
 			if ($data === false){
 				//check if cache is locked
@@ -301,6 +306,9 @@ class ACache{
 			}
 		}
 
+		if(!isset($this->cache_misses[$group][$key])){
+			$this->cache_misses[$group][$key] = 0;
+		}
 		$this->cache_misses[$group][$key] += 1;
 		return false;
 	}
@@ -429,13 +437,10 @@ class ACache{
 
 	/**
 	 * Set lock on cached item to prevent data clash
-	 *
 	 * @param   string $key The cache data key
 	 * @param   string $group The cache data group
 	 * @param   string $locktime The default locktime for locking the cache.
-	 *
-	 * @return  object  Properties are lock and locklooped
-	 *
+	 * @return  array  Properties are lock and locklooped
 	 * @since   1.2.7
 	 */
 	public function lock($key, $group, $locktime = null){
@@ -590,7 +595,7 @@ class ACache{
 		$driver = array ();
 		$file_path = DIR_CORE . 'cache/' . $driver_name . '.php';
 		if (file_exists($file_path)){
-			$class = 'ACacheDriver' . ucfirst($driver_name);
+			$class = '\abc\cache\ACacheDriver' . ucfirst($driver_name);
 			$driver = array ('class' => $class, 'file' => $file_path, 'driver_name' => $driver_name);
 		}
 		return $driver;
@@ -694,7 +699,7 @@ class ACache{
 			}
 			//Minify HTML before saving to cache
 			require_once(DIR_CORE . 'helper/html-css-js-minifier.php');
-			$data = minify_html($data);
+			$data = abc_minify_html($data);
 			$ret = $this->cache_driver->put($key, $group, $data);
 
 			if ($lock['locked'] == true){

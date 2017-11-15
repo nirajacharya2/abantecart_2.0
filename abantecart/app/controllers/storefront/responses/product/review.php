@@ -17,9 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+use abc\lib\AJson;
+use ReCaptcha\ReCaptcha;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerResponsesProductReview
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ */
 class ControllerResponsesProductReview extends AController {
 	public $error = array();
 	public $data = array();
@@ -50,7 +63,7 @@ class ControllerResponsesProductReview extends AController {
 				'rating'     => $result['rating'],
 				'text'       => str_replace("\n", '<br />', strip_tags($result['text'])),
         		'stars'      => sprintf($this->language->get('text_stars'), $result['rating']),
-        		'date_added' => dateISO2Display($result['date_added'],$this->language->get('date_format_short'))
+        		'date_added' => AHelperUtils::dateISO2Display($result['date_added'],$this->language->get('date_format_short'))
         	);
       	}
 		$this->data['reviews'] =  $reviews;
@@ -124,11 +137,11 @@ class ControllerResponsesProductReview extends AController {
 
 		if($this->config->get('config_recaptcha_secret_key')) {
 			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
-			$recaptcha = new \ReCaptcha\ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$this->request->post['g-recaptcha-response'],
 										$this->request->getRemoteIP());
 			if (!$resp->isSuccess() && $resp->getErrorCodes()) {
-				$this->error['message'] = $this->language->get('error_captcha');			
+				$this->error['message'] = $this->language->get('error_captcha');
 			}
 		} else {
 			if (!isset($this->session->data['captcha']) 
@@ -143,6 +156,6 @@ class ControllerResponsesProductReview extends AController {
 			return TRUE;
 		} else {
 			return FALSE;
-		}	
+		}
 	}
 }

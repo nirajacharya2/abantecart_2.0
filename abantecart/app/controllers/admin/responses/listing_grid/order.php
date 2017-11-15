@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -59,10 +66,10 @@ class ControllerResponsesListingGridOrder extends AController {
 		if (isset($this->request->get[ 'status' ]) && $this->request->get[ 'status' ] != ''){
 			$data[ 'filter_order_status_id' ] = $this->request->get[ 'status' ];
 		}
-		if (has_value($this->request->get[ 'customer_id' ])){
+		if (AHelperUtils::has_value($this->request->get[ 'customer_id' ])){
 			$data[ 'filter_customer_id' ] = $this->request->get[ 'customer_id' ];
 		}
-		if (has_value($this->request->get[ 'product_id' ])){
+		if (AHelperUtils::has_value($this->request->get[ 'product_id' ])){
 			$data[ 'filter_product_id' ] = $this->request->get[ 'product_id' ];
 		}
 
@@ -73,7 +80,7 @@ class ControllerResponsesListingGridOrder extends AController {
 				if (!in_array($rule[ 'field' ], $allowedFields)) continue;
 				$data[ 'filter_' . $rule[ 'field' ] ] = $rule[ 'data' ];
 				if ($rule[ 'field' ] == 'date_added') {
-					$data[ 'filter_' . $rule[ 'field' ] ] = dateDisplay2ISO($rule[ 'data' ]);
+					$data[ 'filter_' . $rule[ 'field' ] ] = AHelperUtils::dateDisplay2ISO($rule[ 'data' ]);
 				}
 			}
 		}
@@ -118,7 +125,7 @@ class ControllerResponsesListingGridOrder extends AController {
 					'value' => array_search($result[ 'status' ], $statuses),
 					'options' => $statuses,
 				)),
-				dateISO2Display($result[ 'date_added' ], $this->language->get('date_format_short')),
+				AHelperUtils::dateISO2Display($result[ 'date_added' ], $this->language->get('date_format_short')),
 				$this->currency->format($result[ 'total' ], $result[ 'currency' ], $result[ 'value' ]),
 			);
 			$i++;
@@ -189,12 +196,12 @@ class ControllerResponsesListingGridOrder extends AController {
 				));
 		}
 
-		if(has_value($this->request->post['downloads'])){
+		if(AHelperUtils::has_value($this->request->post['downloads'])){
 			$data = $this->request->post['downloads'];
 			$this->loadModel('catalog/download');
 			foreach($data as $order_download_id=>$item){
 				if (isset($item['expire_date'])) {
-					$item['expire_date'] = $item['expire_date'] ? dateDisplay2ISO($item['expire_date'], $this->language->get('date_format_short')) : '';
+					$item['expire_date'] = $item['expire_date'] ? AHelperUtils::dateDisplay2ISO($item['expire_date'], $this->language->get('date_format_short')) : '';
 				}
 				$this->model_catalog_download->editOrderDownload($order_download_id, $item);
 			}
@@ -243,7 +250,7 @@ class ControllerResponsesListingGridOrder extends AController {
 				'name' => $order_info[ 'firstname' ] . '' . $order_info[ 'lastname' ],
 				'email' => $order_info[ 'email' ],
 				'telephone' => $order_info[ 'telephone' ],
-				'date_added' => dateISO2Display($order_info[ 'date_added' ], $this->language->get('date_format_short')),
+				'date_added' => AHelperUtils::dateISO2Display($order_info[ 'date_added' ], $this->language->get('date_format_short')),
 				'total' => $this->currency->format($order_info[ 'total' ], $order_info[ 'currency' ], $order_info[ 'value' ]),
 				'order_status' => $order_info[ 'order_status_id' ],
 				'shipping_method' => $order_info[ 'shipping_method' ],

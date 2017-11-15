@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AContentManager;
+use abc\lib\ALayoutManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -150,7 +157,7 @@ class ControllerPagesDesignContent extends AController {
 
 			$content_id = $this->acm->addContent($savedata);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
+			abc_redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
 		}
 
 		// content language switcher
@@ -177,7 +184,7 @@ class ControllerPagesDesignContent extends AController {
 
 	public function update() {
 		if(!$this->request->get['content_id']){
-			redirect($this->html->getSecureURL('design/content/insert'));
+			abc_redirect($this->html->getSecureURL('design/content/insert'));
 		}
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
@@ -202,7 +209,7 @@ class ControllerPagesDesignContent extends AController {
 			}
 			$this->acm->editContent($content_id, $savedata);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
+			abc_redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
 		}
 		$this->_initTabs('form');
 		$this->view->assign('content_id', $content_id);
@@ -535,8 +542,8 @@ class ControllerPagesDesignContent extends AController {
 		$this->acm = new AContentManager();
 
 		$content_id = $this->_get_content_id($this->request->get['content_id']);
-		if (!has_value($content_id)) {
-			redirect($this->html->getSecureURL('design/content'));
+		if (!AHelperUtils::has_value($content_id)) {
+			abc_redirect($this->html->getSecureURL('design/content'));
 		}
 
 		$page_url = $this->html->getSecureURL('design/content/edit_layout', '&content_id=' . $content_id);
@@ -694,8 +701,8 @@ class ControllerPagesDesignContent extends AController {
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		$this->acm = new AContentManager();
-		if (!has_value($content_id)) {
-			redirect($this->html->getSecureURL('design/content'));
+		if (!AHelperUtils::has_value($content_id)) {
+			abc_redirect($this->html->getSecureURL('design/content'));
 		}
 
 		if ($this->request->is_POST()) {
@@ -732,7 +739,7 @@ class ControllerPagesDesignContent extends AController {
 
 			//create new instance with specific template/page/layout data
 			$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-			if (has_value($post_data['layout_change'])) {
+			if (AHelperUtils::has_value($post_data['layout_change'])) {
 				//update layout request. Clone source layout
 				$layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
 				$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
@@ -744,9 +751,9 @@ class ControllerPagesDesignContent extends AController {
 					$this->session->data[ 'success' ] = $this->language->get('text_success_layout');
 				}
 			}
-			redirect($this->html->getSecureURL('design/content/edit_layout', '&content_id=' . $content_id));
+			abc_redirect($this->html->getSecureURL('design/content/edit_layout', '&content_id=' . $content_id));
 		}
-		redirect($this->html->getSecureURL('design/content/'));
+		abc_redirect($this->html->getSecureURL('design/content/'));
 	}
 
 	protected function _get_content_id( $input ) {

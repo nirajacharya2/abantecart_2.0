@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\AAttribute_Manager;
+use abc\lib\AResourceManager;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -242,6 +248,7 @@ class ModelCatalogDownload extends Model {
 		$this->db->query("DELETE FROM " . $this->db->table("download_attribute_values") . " WHERE download_id = '" . (int)$download_id . "'");
 		$this->db->query("DELETE FROM " . $this->db->table("products_to_downloads") . " WHERE download_id = '" . (int)$download_id . "'");
 		$this->cache->remove('html_cache');
+		return true;
 	}
 
 	/**
@@ -326,7 +333,7 @@ class ModelCatalogDownload extends Model {
 			$sql .= " WHERE " . $data[ 'subsql_filter' ];
 		}
 
-		//If for total, we done bulding the query
+		//If for total, we done building the query
 		if ($mode == 'total_only') {
 			$query = $this->db->query($sql);
 			return $query->row[ 'total' ];
@@ -506,7 +513,7 @@ class ModelCatalogDownload extends Model {
 				$update[] = "`remaining_count` = NULL";
 			}
 		}
-		if(has_value($data[ 'status' ])){
+		if(AHelperUtils::has_value($data[ 'status' ])){
 			$update[] = "`status` = '" . (int)$data[ 'status' ]."'";
 		}
 		if($update){
@@ -554,14 +561,14 @@ class ModelCatalogDownload extends Model {
 	}
 
 	/**
-	 * @param $download_info
-	 * @return string
+	 * @param array $download_info
+	 * @return array
 	 */
 	public function getTextStatusForOrderDownload($download_info){
 
 		$text_status = array();
 
-		if( dateISO2Int($download_info['expire_date']) < time()){
+		if( AHelperUtils::dateISO2Int($download_info['expire_date']) < time()){
 			$text_status[] = $this->language->get('text_download_expired');
 		}
 

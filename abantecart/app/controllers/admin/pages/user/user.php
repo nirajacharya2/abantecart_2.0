@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -30,9 +35,7 @@ class ControllerPagesUserUser extends AController{
 
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-
 		$this->document->setTitle($this->language->get('heading_title'));
-
 		$this->view->assign('error_warning', $this->error['warning']);
 		$this->view->assign('success', $this->session->data['success']);
 		if (isset($this->session->data['success'])){
@@ -183,7 +186,7 @@ class ControllerPagesUserUser extends AController{
 		if ($this->request->is_POST() && $this->_validateForm()){
 			$user_id = $this->model_user_user->addUser($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('user/user/update', '&user_id=' . $user_id));
+			abc_redirect($this->html->getSecureURL('user/user/update', '&user_id=' . $user_id));
 		}
 		$this->_getForm();
 
@@ -208,7 +211,7 @@ class ControllerPagesUserUser extends AController{
 		if ($this->request->is_POST() && $this->_validateForm()){
 			$this->model_user_user->editUser($this->request->get['user_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('user/user/update', '&user_id=' . $this->request->get['user_id']));
+			abc_redirect($this->html->getSecureURL('user/user/update', '&user_id=' . $this->request->get['user_id']));
 		}
 		$this->_getForm();
 
@@ -378,7 +381,7 @@ class ControllerPagesUserUser extends AController{
 			$user_id = 0;
 		}
 		if (!$user_id){
-			$this->redirect($this->html->getSecureURL('user/user'));
+			abc_redirect($this->html->getSecureURL('user/user'));
 		}
 
 		$this->loadLanguage('common/im');
@@ -436,7 +439,7 @@ class ControllerPagesUserUser extends AController{
 			if(!empty($this->im->sendpoints[$sendpoint][1]) || !empty($this->im->admin_sendpoints[$sendpoint][1])){
 				$this->data['sendpoints'][$sendpoint] = array (
 						'id'     => $sendpoint,
-						'text'   => $this->language->get('im_sendpoint_name_' . preformatTextID($sendpoint)),
+						'text'   => $this->language->get('im_sendpoint_name_' . AHelperUtils::preformatTextID($sendpoint)),
 						'values' => $values);
 			}
 		}

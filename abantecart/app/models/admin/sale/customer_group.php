@@ -17,10 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ModelSaleCustomerGroup extends Model {
+	/**
+	 * @param array $data
+	 * @return int
+	 */
 	public function addCustomerGroup($data) {
 		$this->db->query("INSERT INTO " . $this->db->table("customer_groups") . " 
 							SET name = '" . $this->db->escape($data['name']) . "',
@@ -28,54 +35,75 @@ class ModelSaleCustomerGroup extends Model {
 						");
 		return $this->db->getLastId();
 	}
-	
+
+	/**
+	 * @param int $customer_group_id
+	 * @param array $data
+	 */
 	public function editCustomerGroup($customer_group_id, $data) {
 		if ( !empty($data['name']) ) {
-			$this->db->query("UPDATE " . $this->db->table("customer_groups") . " 
-				SET 
-					name = '" . $this->db->escape($data['name']) . "'
-				WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-		
+			$this->db->query(
+					"UPDATE " . $this->db->table("customer_groups") . " 
+					SET 
+						name = '" . $this->db->escape($data['name']) . "'
+					WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		}
 		if ( isset($data['tax_exempt']) ) {
-			$this->db->query("UPDATE " . $this->db->table("customer_groups") . " 
-				SET 
-					tax_exempt = '" . $this->db->escape($data['tax_exempt']) . "' 				
-				WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+			$this->db->query(
+					"UPDATE " . $this->db->table("customer_groups") . " 
+					SET 
+						tax_exempt = '" . $this->db->escape($data['tax_exempt']) . "'
+					WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		}
 	}
-	
+
+	/**
+	 * @param int $customer_group_id
+	 */
 	public function deleteCustomerGroup($customer_group_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("customer_groups") . " WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("product_discounts") . " WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table("customer_groups") . " 
+						WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table("product_discounts") . " 
+						WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 	}
-	
+
+	/**
+	 * @param int $customer_group_id
+	 * @return mixed
+	 */
 	public function getCustomerGroup($customer_group_id) {
-		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("customer_groups") . " WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-		
+		$query = $this->db->query(
+				"SELECT DISTINCT * 
+				FROM " . $this->db->table("customer_groups") . " 
+				WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		return $query->row;
 	}
-	
+
+	/**
+	 * @param array $data
+	 * @param string $mode
+	 * @return mixed
+	 */
 	public function getCustomerGroups($data = array(), $mode = 'default') {
 		if ($mode == 'total_only') {
-			$sql = "SELECT count(*) as total FROM " . $this->db->table("customer_groups") . " ";
+			$sql = "SELECT count(*) as total 
+					FROM " . $this->db->table("customer_groups") . " ";
+		} else {
+			$sql = "SELECT * 
+					FROM " . $this->db->table("customer_groups") . " ";
 		}
-		else {
-			$sql = "SELECT * FROM " . $this->db->table("customer_groups") . " ";
-		}
-		
+
 		if ( !empty($data['subsql_filter']) ) {
 			$sql .= " WHERE ".$data['subsql_filter'];
 		}
-		
-		//If for total, we done bulding the query
+
+		//If for total, we done building the query
 		if ($mode == 'total_only') {
 		    $query = $this->db->query($sql);
 		    return $query->row['total'];
 		}
 		
-		$sql .= " ORDER BY name";	
-			
+		$sql .= " ORDER BY name";
 		if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
 			$sql .= " DESC";
 		} else {
@@ -103,4 +131,3 @@ class ModelSaleCustomerGroup extends Model {
 		return $this->getCustomerGroups($data, 'total_only');
 	}
 }
-?>

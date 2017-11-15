@@ -1,4 +1,8 @@
-<?php if ($logged){ ?>
+<?php
+/**
+ * @var \abc\lib\AView $this
+ */
+if ($logged){ ?>
 	<div class="leftpanel">
 
 		<div class="logopanel">

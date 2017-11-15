@@ -17,12 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\Model;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
  * Class ModelAccountAddress
+ * @property ModelLocalisationZone $model_localisation_zone
+ * @property ModelLocalisationCountry $model_localisation_country
  */
 class ModelAccountAddress extends Model{
 	public $error = array ();
@@ -217,7 +222,6 @@ class ModelAccountAddress extends Model{
 	/**
 	 * @param array $address_row
 	 * @return array
-	 * @throws AException
 	 */
 	private function _build_address_data($address_row){
 		$addr_row = $this->dcrypt->decrypt_data($address_row, 'addresses');

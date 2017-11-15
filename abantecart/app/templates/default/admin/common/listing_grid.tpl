@@ -43,13 +43,13 @@
 
 var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 
-	var text_choose_action = <?php js_echo($text_choose_action); ?>;
-	var text_select_items = <?php js_echo($text_select_items); ?>;
+	var text_choose_action = <?php abc_js_echo($text_choose_action); ?>;
+	var text_select_items = <?php abc_js_echo($text_select_items); ?>;
 	var _table_id = '<?php echo $data['table_id'] ?>';
 	var table_id = '#<?php echo $data['table_id'] ?>';
 	var jq_names = [<?php
 		foreach($data['colNames'] as $col_name){
-			js_echo($col_name);
+			abc_js_echo($col_name);
 			echo ',';
 		}
 		//echo "'" . implode("','", $data['colNames']) . "'"
@@ -253,7 +253,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		if (!empty($data['actions'])) {
 			foreach ($data['actions'] as $type => $action) {
 				$html_string = '';
-				$href = 'href="'.(has_value($action['href']) ? $action['href'] : '#').'"';
+				$href = 'href="'.(\abc\core\AHelperUtils::has_value($action['href']) ? $action['href'] : '#').'"';
 
 				$html_string .= "actions_urls['".$type."'] = '".$href."';\n";
 				$html_string .= ' actions += \'';
@@ -320,7 +320,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,'UTF-8').'</h5><ul class="dropdown-list grid-dropdown">';
 					foreach($action['children'] as $child){
 						$li_class = '';
-						$href = has_value($child['href']) ? $child['href'] : '#';				
+						$href = \abc\core\AHelperUtils::has_value($child['href']) ? $child['href'] : '#';
 						//for viewport mode
 						if($child['vhref']){
 							$href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$child['vhref'].'" data-fullmode-href="'.$href.'"';
@@ -627,7 +627,7 @@ if ($custom_buttons) {
 					ids,
 					{	reloadAfterSubmit: true,
 						beforeShowForm:function ($form) {
-							$("td.delmsg", $form[0]).html(<?php js_echo($text_delete_confirm); ?>);
+							$("td.delmsg", $form[0]).html(<?php abc_js_echo($text_delete_confirm); ?>);
 							var dlgDiv = $("#delmod" + _table_id);
 							var parentDiv = $(table_id + '_wrapper');
 							$('#dData', dlgDiv).show();

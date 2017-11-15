@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\AWarning;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -45,8 +50,9 @@ class ModelToolImage extends Model{
 
 		$alias = !$alias ? $filename : dirname($filename) . '/' . basename($alias);
 		$new_image = 'thumbnails/' . substr($alias, 0, strrpos($alias, '.')) . '-' . $width . 'x' . $height . '.' . $extension;
+		$new_image2x = '';
 
-		if(!check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))) {
+		if(!AHelperUtils::check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))) {
 			$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
 			$err->toLog()->toDebug();
 		}
@@ -54,7 +60,7 @@ class ModelToolImage extends Model{
 		if ($this->config->get('config_retina_enable')){
 			//retina variant
 			$new_image2x = 'thumbnails/' . substr($alias, 0, strrpos($alias, '.')) . '-' . $width . 'x' . $height . '@2x.' . $extension;
-			if(!check_resize_image($orig_image_filepath, $new_image2x, $width*2, $height*2, $this->config->get('config_image_quality'))) {
+			if(!AHelperUtils::check_resize_image($orig_image_filepath, $new_image2x, $width*2, $height*2, $this->config->get('config_image_quality'))) {
 				$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
 				$err->toLog()->toDebug();
 			}

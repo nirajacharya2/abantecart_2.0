@@ -17,7 +17,41 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc;
 // set default encoding for multibyte php mod
+use abc\core\AHook;
+use abc\core\AHtml;
+use abc\core\ALanguage;
+use abc\core\ALanguageManager;
+use abc\core\ALayout;
+use abc\core\ALoader;
+use abc\core\ExtensionsApi;
+use abc\core\Registry;
+use abc\lib\ACache;
+use abc\lib\ACart;
+use abc\lib\AConfig;
+use abc\lib\ACurrency;
+use abc\lib\ACustomer;
+use abc\lib\ADataEncryption;
+use abc\lib\ADB;
+use abc\lib\ADocument;
+use abc\lib\ADownload;
+use abc\lib\AError;
+use abc\lib\AException;
+use abc\lib\AIM;
+use abc\lib\AIMManager;
+use abc\lib\ALength;
+use abc\lib\ALog;
+use abc\lib\AMessage;
+use abc\lib\AOrderStatus;
+use abc\lib\ARequest;
+use abc\lib\AResponse;
+use abc\lib\ASession;
+use abc\lib\ATax;
+use abc\lib\AUser;
+use abc\lib\AWeight;
+use abc\lib\CSRFToken;
+
 mb_internal_encoding('UTF-8');
 ini_set('default_charset', 'utf-8');
 
@@ -48,7 +82,9 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 }
 
 //Set up common paths
-define('DIR_ASSETS', DIR_PUBLIC . 'assets/');
+if(!defined('DIR_ASSETS')) {
+	define('DIR_ASSETS', DIR_PUBLIC . 'assets/');
+}
 define('DIR_RESOURCE', DIR_ASSETS . 'resources/');
 define('DIR_APP_EXTENSIONS', DIR_APP . 'extensions/');
 define('DIR_SYSTEM', DIR_APP . 'system/');
@@ -72,9 +108,9 @@ require_once(DIR_LIB . 'error.php');
 require_once(DIR_LIB . 'warning.php');
 
 //define rt - route for application controller
-if($_GET['rt']) {
+if( isset($_GET['rt']) && $_GET['rt'] ) {
 	define('ROUTE', $_GET['rt']);
-} else if($_POST['rt']){
+} else if( isset($_POST['rt']) && $_POST['rt'] ){
 	define('ROUTE', $_POST['rt']);
 } else {
 	define('ROUTE', 'index/home');
@@ -371,5 +407,5 @@ if (IS_ADMIN === true) {
 	return $registry;
 } //eof try
 catch (AException $e) {
-	ac_exception_handler($e);
+	\abc\lib\ac_exception_handler($e);
 }

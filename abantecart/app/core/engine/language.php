@@ -17,7 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+use abc\lib\ADebug;
+use abc\lib\AError;
+use abc\lib\AWarning;
+use abc\lib\AException;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
@@ -30,11 +38,11 @@ class ALanguage{
 
 	protected $code = '';
 	/**
-	 * @var ADB
+	 * @var \abc\lib\ADB
 	 */
 	protected $db;
 	/**
-	 * @var ACache
+	 * @var \abc\lib\ACache
 	 */
 	protected $cache;
 	/**
@@ -42,7 +50,7 @@ class ALanguage{
 	 */
 	protected $registry;
 	/**
-	 * @var ALoader
+	 * @var \abc\core\ALoader
 	 */
 	protected $loader;
 	protected $language_path;
@@ -58,9 +66,9 @@ class ALanguage{
 	 */
 	public function __construct($registry, $code = '', $section = 0){
 		$this->registry = $registry;
-		if ($section === ''){
+		if ($section === '') {
 			$this->is_admin = ((!defined('IS_ADMIN') || !IS_ADMIN) ? 0 : 1);
-		} else{
+		} else {
 			$this->is_admin = (int)$section;
 		}
 
@@ -68,18 +76,18 @@ class ALanguage{
 		$this->loader = $registry->get('load');
 
 		$result = $this->loader->model('localisation/language', 'silent');
-		if ($result !== false){
+		if ($result !== false) {
 			/**
-			 * @var ModelLocalisationLanguage $model
+			 * @var \abc\model\admin\ModelLocalisationLanguage $model
 			 */
 			$model = $registry->get('model_localisation_language');
 			$this->available_languages = $model->getLanguages();
-		} else{
-			if (defined('INSTALL')){
+		} else {
+			if (defined('INSTALL')) {
 				$this->loader->model('install', 'silent');
 				$model = $registry->get('model_install');
 				$this->available_languages = $model->getLanguages();
-			} else{
+			} else {
 				//problem no languages available
 				$err = new AError('Error: no languages available in AbanteCart !', AC_ERR_LOAD);
 				$err->toLog()->toDebug();
@@ -88,11 +96,11 @@ class ALanguage{
 		}
 
 		//If No language code, we need to detect language, set site language to use and set content language separately
-		if (!$code){
+		if (!$code) {
 			$this->setCurrentLanguage();
 			//session language contains main language code
 			$this->code = $registry->get('session')->data['language'];
-		} else{
+		} else {
 			$this->code = $code;
 		}
 
@@ -103,10 +111,10 @@ class ALanguage{
 		$this->language_details = $this->getLanguageDetails($this->code);
 
 		$root_path = defined(INSTALL) ? DIR_ABANTECART : DIR_APP;
-		if ($this->is_admin){
-			$this->language_path = $root_path . 'languages/'.$this->language_details['directory'].'/admin/';
-		} else{
-			$this->language_path = $root_path . 'languages/'.$this->language_details['directory'].'/storefront/';
+		if ($this->is_admin) {
+			$this->language_path = $root_path . 'languages/' . $this->language_details['directory'] . '/admin/';
+		} else {
+			$this->language_path = $root_path . 'languages/' . $this->language_details['directory'] . '/storefront/';
 		}
 
 		$this->entries = array ();
@@ -126,27 +134,27 @@ class ALanguage{
 	 * @return null|string - Definition value
 	 */
 	public function get($key, $block = '', $silent = false){
-		if (empty($key)){
+		if (empty($key)) {
 			return null;
 		}
 
 		//if no specific area specified return main language
-		if (!empty($block)){
-			if (!$this->_is_loaded($block)){
+		if (!empty($block)) {
+			if (!$this->_is_loaded($block)) {
 				$this->_load($block);
 			}
 			$return_text = $this->_get_language_value($key, $block);
-		} else{
-			if (!$silent){
+		} else {
+			if (!$silent) {
 				$backtrace = debug_backtrace();
 				$caller_file = $backtrace[0]['file'];
 				$caller_file_line = $backtrace[0]['line'];
 				$return_text = $this->_get_last_language_value($key, $caller_file, $caller_file_line, $silent);
-			} else{
+			} else {
 				$return_text = $this->_get_last_language_value($key, '', '', $silent);
 			}
 		}
-		if (empty($return_text)){
+		if (empty($return_text)) {
 			$return_text = $key;
 		}
 		return $return_text;
@@ -162,7 +170,7 @@ class ALanguage{
 
 		$result = $this->get($key);
 
-		if ($key == $result || trim($result) == ''){
+		if ($key == $result || trim($result) == '') {
 			$backtrace = debug_backtrace();
 			$ts = time();
 			$log_message = $ts . "- Not described error.\n"
@@ -172,7 +180,7 @@ class ALanguage{
 			$e = new AError($log_message);
 			$e->toDebug()->toLog();
 			$result = "Not described error happened.";
-			if (IS_ADMIN === true){
+			if (IS_ADMIN === true) {
 				$result .= "Check log for details. Code [" . $ts . "]";
 			}
 		}
@@ -190,10 +198,12 @@ class ALanguage{
 	 */
 	public function getASet($block = ''){
 		//if no specific area specified return main language set
-		if (empty($block) && empty($this->current_languages_scope)){
+		if (empty($block) && empty($this->current_languages_scope)) {
 			$block = $this->language_details['filename'];
-		} else if (!empty($block) && !$this->_is_loaded($block)){
-			$this->_load($block);
+		} else {
+			if (!empty($block) && !$this->_is_loaded($block)) {
+				$this->_load($block);
+			}
 		}
 		return $this->_get_language_set($block);
 	}
@@ -210,13 +220,13 @@ class ALanguage{
 	 */
 	public function load($block = '', $mode = ''){
 		//If $filename is not provided load current language main file
-		if (!$block){
+		if (!$block) {
 			$block = $this->current_language['filename'];
 		}
 		$this->registry = Registry::getInstance();
-		if ($this->registry->has('extensions')){
+		if ($this->registry->has('extensions')) {
 			$result = $this->registry->get('extensions')->hk_load($this, $block, $mode);
-		} else{
+		} else {
 			$result = $this->_load($block, $mode);
 		}
 		return $result;
@@ -238,8 +248,8 @@ class ALanguage{
 	 */
 	public function getActiveLanguages(){
 		$active_languages = array ();
-		foreach ($this->available_languages as $result){
-			if ($result['status'] == 1){
+		foreach ($this->available_languages as $result) {
+			if ($result['status'] == 1) {
 				$active_languages[] = $result;
 			}
 		}
@@ -252,10 +262,12 @@ class ALanguage{
 	 * @return array - Array with language details
 	 */
 	public function getLanguageDetails($code){
-		if (empty($code)) return array ();
+		if (empty($code)) {
+			return array ();
+		}
 
-		foreach ($this->available_languages as $lang){
-			if ($lang['code'] == $code){
+		foreach ($this->available_languages as $lang) {
+			if ($lang['code'] == $code) {
 				return $lang;
 			}
 		}
@@ -268,10 +280,12 @@ class ALanguage{
 	 * @return array - Array with language details
 	 */
 	public function getLanguageDetailsByID($id){
-		if (!is_numeric($id)) return array ();
+		if (!is_numeric($id)) {
+			return array ();
+		}
 
-		foreach ($this->available_languages as $lang){
-			if ($lang['language_id'] == $id){
+		foreach ($this->available_languages as $lang) {
+			if ($lang['language_id'] == $id) {
 				return $lang;
 			}
 		}
@@ -286,24 +300,24 @@ class ALanguage{
 		$request = $this->registry->get('request');
 		$browser_langs = (string)$request->server['HTTP_ACCEPT_LANGUAGE'];
 
-		if ($browser_langs){
+		if ($browser_langs) {
 			$parse = explode(';', $browser_langs);
 			$browser_languages = array_map('trim', explode(',', $parse[0]));
-			if ($browser_languages){
-				foreach ($browser_languages as $browser_language){
+			if ($browser_languages) {
+				foreach ($browser_languages as $browser_language) {
 					$browser_language = trim($browser_language);
 					$browser_language = preg_replace('/[^a-zA-Z\-\_]/', '', $browser_language);
 					//validate and ignore browser data if causing warnings
-					if (!$browser_language){
+					if (!$browser_language) {
 						continue;
 					}
-					foreach ($this->getActiveLanguages() as $key => $value){
+					foreach ($this->getActiveLanguages() as $key => $value) {
 						$locale = array_map('trim', explode(',', $value['locale']));
-						if (!$locale){
+						if (!$locale) {
 							continue;
 						}
 						//match browser language code with AbanteCart language locales
-						if (preg_grep("/" . $browser_language . "/i", $locale)){
+						if (preg_grep("/" . $browser_language . "/i", $locale)) {
 							//matching language was found
 							return $value['code'];
 						}
@@ -326,7 +340,7 @@ class ALanguage{
 
 		//build code based array
 		$languages = array ();
-		foreach ($this->getActiveLanguages() as $lng){
+		foreach ($this->getActiveLanguages() as $lng) {
 			$languages[$lng['code']] = $lng;
 		}
 
@@ -335,33 +349,33 @@ class ALanguage{
 		$request_lang = isset($request->post['language']) ? $request->post['language'] : $request_lang;
 		unset($request->get['language'], $request->post['language']);
 
-		if ($request_lang && array_key_exists($request_lang, $languages)){
+		if ($request_lang && array_key_exists($request_lang, $languages)) {
 			$lang_code = $request_lang;
 			//Session based language
-		} elseif (isset($session->data['language']) && array_key_exists($session->data['language'], $languages)){
+		} elseif (isset($session->data['language']) && array_key_exists($session->data['language'], $languages)) {
 			$lang_code = $session->data['language'];
 			//Cookie based language
-		} elseif (isset($request->cookie['language']) && array_key_exists($request->cookie['language'], $languages)){
+		} elseif (isset($request->cookie['language']) && array_key_exists($request->cookie['language'], $languages)) {
 			$lang_code = $request->cookie['language'];
 			//Try autodetect the language based on the browser languages
-		} elseif ($detect = $this->getClientBrowserLanguage()){
+		} elseif ($detect = $this->getClientBrowserLanguage()) {
 			$lang_code = $detect;
-		} else{
+		} else {
 			$lang_code = $config->get('config_storefront_language');
 		}
 
 		// check if is code of enabled language
-		if (!isset($languages[$lang_code])){
+		if (!isset($languages[$lang_code])) {
 			$lang_code = key($languages);
 			$error = new AError('Error! Default language with code "' . $lang_code . '" is not available or disabled. Loading ' . $languages[$lang_code]['name'] . ' language to keep system operating. Check your settings for default language.');
 			$error->toLog()->toDebug();
 		}
 
-		if (!isset($session->data['language']) || $session->data['language'] != $lang_code){
+		if (!isset($session->data['language']) || $session->data['language'] != $lang_code) {
 			$session->data['language'] = $lang_code;
 		}
 
-		if (!isset($request->cookie['language']) || $request->cookie['language'] != $lang_code){
+		if (!isset($request->cookie['language']) || $request->cookie['language'] != $lang_code) {
 			//Set cookie for the language code
 			setcookie('language',
 					$lang_code,
@@ -375,12 +389,12 @@ class ALanguage{
 		$this->current_language = $languages[$lang_code];
 		$config->set('storefront_language_id', $this->current_language['language_id']);
 
-		if ($this->is_admin){
+		if ($this->is_admin) {
 			// set up language for content separately (admin only)
 			$cont_lang_code = $config->get('admin_language');
-			if (isset($request->get['content_language_code'])){
+			if (isset($request->get['content_language_code'])) {
 				$cont_lang_code = $request->get['content_language_code'];
-			} else{
+			} else {
 				$cont_lang_code = !isset($session->data['content_language']) ? $cont_lang_code : $session->data['content_language'];
 			}
 			$this->setCurrentContentLanguage('', $cont_lang_code);
@@ -395,16 +409,18 @@ class ALanguage{
 	 */
 	public function setCurrentContentLanguage($language_id = '', $language_code = ''){
 		$session = $this->registry->get('session');
-		if ($language_id){
+		if ($language_id) {
 			$session->data['content_language'] = $this->_get_language_code($language_id);
 			$session->data['content_language_id'] = $language_id;
 			return true;
-		} else if ($language_code){
-			$session->data['content_language_id'] = $this->_get_language_id($language_code);
-			$session->data['content_language'] = $language_code;
-			return true;
-		}else{
-			return false;
+		} else {
+			if ($language_code) {
+				$session->data['content_language_id'] = $this->_get_language_id($language_code);
+				$session->data['content_language'] = $language_code;
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
@@ -432,7 +448,7 @@ class ALanguage{
 	public function getDefaultLanguage(){
 		//build code based array
 		$languages = array ();
-		foreach ($this->available_languages as $lng){
+		foreach ($this->available_languages as $lng) {
 			$languages[$lng['code']] = $lng;
 		}
 		return $languages[$this->getDefaultLanguageCode()];
@@ -488,14 +504,14 @@ class ALanguage{
 	 * @return bool
 	 */
 	public function isMainBlock($block, $lang_id = ''){
-		if (has_value($lang_id)){
+		if (AHelperUtils::has_value($lang_id)) {
 			$lang_det = $this->getLanguageDetailsByID($lang_id);
-			if ($lang_det['filename'] == $block){
+			if ($lang_det['filename'] == $block) {
 				return true;
 			}
-		} else{
-			foreach ($this->available_languages as $lang){
-				if ($lang['filename'] == $block){
+		} else {
+			foreach ($this->available_languages as $lang) {
+				if ($lang['filename'] == $block) {
 					return true;
 				}
 			}
@@ -510,12 +526,13 @@ class ALanguage{
 	 */
 	public function ReadXmlFile($file){
 		$definitions = array ();
-		if (file_exists($file) && filesize($file) > 0){
+		if (file_exists($file) && filesize($file) > 0) {
 			$xml = simplexml_load_file($file);
-			if (isset($xml->definition))
-				foreach ($xml->definition as $item){
+			if (isset($xml->definition)) {
+				foreach ($xml->definition as $item) {
 					$definitions[(string)$item->key] = trim((string)$item->value, "\t\n\r\0\x0B");
 				}
+			}
 		}
 		return $definitions;
 	}
@@ -536,11 +553,13 @@ class ALanguage{
 	 * @return array|null
 	 */
 	public function _load($filename, $mode = ''){
-		if (empty($filename)) return null;
+		if (empty($filename)) {
+			return null;
+		}
 		$load_data = null;
 
 		//Check if we already have language loaded. Skip and return the language set
-		if ($this->_is_loaded($filename)){
+		if ($this->_is_loaded($filename)) {
 			$load_data = $this->_get_language_set($filename);
 			return $load_data;
 		}
@@ -548,17 +567,17 @@ class ALanguage{
 		$cache_key = 'localization.lang.' . $this->code . '.' . (($this->is_admin) ? 'a' : 's') . '.' . $filename;
 		$cache_key = str_replace('/', '_', $cache_key);
 
-		if ($this->cache){
+		if ($this->cache) {
 			$load_data = $this->cache->pull($cache_key);
 		}
 
-		if ($load_data === false){
+		if ($load_data === false) {
 
 			//Check that filename has proper name with no other special characters. 
 			$block_name = str_replace('/', '_', $filename);
 			//prevent error for pre and post controllers
 			$block_name = str_replace('.', '_', $block_name);
-			if (preg_match("/[\W]+/", $block_name)){
+			if (preg_match("/[\W]+/", $block_name)) {
 				$error = new AError('Error! Trying to load language with invalid path: "' . $filename . '"!');
 				$error->toLog()->toDebug();
 				return array ();
@@ -570,8 +589,8 @@ class ALanguage{
 
 			//try to get text data from db
 			$_ = $this->_load_from_db($this->language_details['language_id'], $filename, $this->is_admin);
-			
-			if (empty($_)){
+
+			if (empty($_)) {
 				// nothing in the database. This block (rt) was never accessed before for this language. Need to load definitions from XML
 				$_ = $this->_load_from_xml($filename, $directory, $mode);
 				$this->_save_to_db($filename, $_);
@@ -579,18 +598,20 @@ class ALanguage{
 				//We have something in database, look for missing or new values.
 				//Do this silently in case language file is missing, Not a big problem
 				$xml_vals = $this->_load_from_xml($filename, $directory, 'silent');
-				if (count($xml_vals) > count($_)){
+				if (count($xml_vals) > count($_)) {
 					//we have missing value in language XML. Probably newly added
-					foreach ($xml_vals as $key => $value){
+					foreach ($xml_vals as $key => $value) {
 						//missing value for $key
-						if (empty($_[$key])){
+						if (empty($_[$key])) {
 							$_[$key] = $value;
 							$this->_write_missing_definition(
-									array ('language_id'    => $this->language_details['language_id'],
-										   'section'        => $this->is_admin,
-										   'block'          => $block_name,
-										   'language_key'   => $key,
-										   'language_value' => $value)
+									array (
+											'language_id'    => $this->language_details['language_id'],
+											'section'        => $this->is_admin,
+											'block'          => $block_name,
+											'language_key'   => $key,
+											'language_value' => $value
+									)
 							);
 						}
 					}
@@ -598,7 +619,7 @@ class ALanguage{
 			}
 
 			$load_data = $_;
-			if ($this->cache){
+			if ($this->cache) {
 				$this->cache->push($cache_key, $load_data);
 			}
 		}
@@ -618,19 +639,20 @@ class ALanguage{
 	protected function _get_language_set($block){
 		$entries = array ();
 		//if no rt look in all languages for last available translation
-		if (empty ($block)){
+		if (empty ($block)) {
 
 			$look_in_list = $this->current_languages_scope;
 			//look in all languages and merge
-			if (empty($look_in_list)){
+			if (empty($look_in_list)) {
 				$look_in_list = array_keys($this->entries);
 			}
 
-			foreach ($look_in_list as $block){
-				if (!empty($this->entries[$block]))
+			foreach ($look_in_list as $block) {
+				if (!empty($this->entries[$block])) {
 					$entries = array_merge($entries, $this->entries[$block]);
+				}
 			}
-		} else{
+		} else {
 			$entries = $this->entries[$block];
 		}
 		return $entries;
@@ -642,8 +664,8 @@ class ALanguage{
 	 * @return null
 	 */
 	protected function _get_language_id($code){
-		foreach ($this->available_languages as $lang){
-			if ($lang['code'] == $code){
+		foreach ($this->available_languages as $lang) {
+			if ($lang['code'] == $code) {
 				return $lang['language_id'];
 			}
 		}
@@ -656,8 +678,8 @@ class ALanguage{
 	 * @return null
 	 */
 	protected function _get_language_code($ID){
-		foreach ($this->available_languages as $lang){
-			if ($lang['language_id'] == $ID){
+		foreach ($this->available_languages as $lang) {
+			if ($lang['language_id'] == $ID) {
 				return $lang['code'];
 			}
 		}
@@ -670,7 +692,7 @@ class ALanguage{
 	 * @return bool
 	 */
 	protected function _is_loaded($block){
-		if (isset ($this->entries[$block]) && count($this->entries[$block]) > 0){
+		if (isset ($this->entries[$block]) && count($this->entries[$block]) > 0) {
 			return true;
 		}
 		return false;
@@ -683,7 +705,7 @@ class ALanguage{
 	 * @return array
 	 */
 	protected function _load_from_db($language_id, $filename, $section){
-		if (empty ($language_id) || empty($filename)){
+		if (empty ($language_id) || empty($filename)) {
 			return array ();
 		}
 		$block_name = str_replace('/', '_', $filename);
@@ -692,12 +714,12 @@ class ALanguage{
 				WHERE language_id = '" . (int)$language_id . "'
 							  AND section =" . (int)$section . " AND block='" . $this->db->escape($block_name) . "'";
 		$language_query = $this->db->query($sql);
-		if ($language_query->num_rows){
-			foreach ($language_query->rows as $language){
+		if ($language_query->num_rows) {
+			foreach ($language_query->rows as $language) {
 				$lang_array[$language['language_key']] = trim($language['language_value'], "\t\n\r\0\x0B");
 			}
 		}
-		return $lang_array ? $lang_array : array();
+		return $lang_array ? $lang_array : array ();
 	}
 
 	/**
@@ -706,7 +728,7 @@ class ALanguage{
 	 * @return bool
 	 */
 	protected function _save_to_db($filename, $definitions){
-		if (!$definitions){
+		if (!$definitions) {
 			return false;
 		}
 
@@ -716,7 +738,7 @@ class ALanguage{
 		$sql = "INSERT INTO " . $this->db->table("language_definitions") . " ";
 		$sql .= "(language_id,block,section,language_key,language_value,date_added) VALUES ";
 		$values = array ();
-		foreach ($definitions as $k => $v){
+		foreach ($definitions as $k => $v) {
 			//preventing duplication sql-error by unique index
 			$check_array = array (
 					'language_id'    => (int)$this->language_details['language_id'],
@@ -725,7 +747,7 @@ class ALanguage{
 					'language_key'   => $this->db->escape($k),
 					'language_value' => $this->db->escape($v)
 			);
-			if ($this->_is_definition_in_db($check_array)){
+			if ($this->_is_definition_in_db($check_array)) {
 				continue;
 			}
 
@@ -736,7 +758,7 @@ class ALanguage{
 						  '" . $this->db->escape($v) . "',
 						  NOW() )";
 		}
-		if ($values){
+		if ($values) {
 			$sql = $sql . implode(', ', $values);
 			$this->db->query($sql);
 		}
@@ -750,14 +772,15 @@ class ALanguage{
 	 * @return null|string
 	 */
 	protected function _detect_language_xml_file($filename, $language_dir_name = 'english'){
-		if (empty($filename)){
+		if (empty($filename)) {
 			return null;
 		}
 		$file_path = $this->language_path . $filename . '.xml';
 		if ($this->registry->has('extensions')
-				&& $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name, $this->is_admin)
-		){
-			if (is_file($file_path)){
+				&& $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name,
+						$this->is_admin)
+		) {
+			if (is_file($file_path)) {
 				$warning = new AWarning("Extension <b>" . $result['extension'] . "</b> overrides language file <b>" . $filename . "</b>");
 				$warning->toDebug();
 			}
@@ -774,7 +797,7 @@ class ALanguage{
 	 * @return array|null
 	 */
 	protected function _load_from_xml($filename, $directory, $mode){
-		if (!$filename){
+		if (!$filename) {
 			return null;
 		}
 		$definitions = array ();
@@ -783,38 +806,38 @@ class ALanguage{
 		//get default extension language file
 		$default_language_info = $this->getDefaultLanguage();
 
-		if ($filename == $directory){ // for common language file (english.xml. russian.xml, etc)
+		if ($filename == $directory) { // for common language file (english.xml. russian.xml, etc)
 			$file_name = $default_language_info['filename'];
 			$mode = 'silent';
-		} else{
+		} else {
 			$file_name = $filename;
 		}
 		// get path to actual language
 		$file_path = $this->_detect_language_xml_file($filename, $this->language_details['directory']);
-		if (file_exists($file_path)){
+		if (file_exists($file_path)) {
 			ADebug::checkpoint('ALanguage ' . $this->language_details['name'] . ' loading XML file ' . $file_path);
 			$definitions = $this->ReadXmlFile($file_path);
 		} else {
 			//Missing xml, now handle default language XML load 
 			$default_file_path = $this->_detect_language_xml_file($file_name, $default_language_info['directory']);
 			// if default language file path wrong - takes english as a fallback
-			if (!file_exists($default_file_path) && $default_language_info['directory'] != 'english'){
+			if (!file_exists($default_file_path) && $default_language_info['directory'] != 'english') {
 				$file_name = $filename == $directory ? 'english' : $file_name;
 				$default_file_path = $this->_detect_language_xml_file($file_name, 'english');
 			}
-			if (file_exists($default_file_path)){
+			if (file_exists($default_file_path)) {
 				ADebug::checkpoint('ALanguage ' . $this->language_details['name'] . ' loading default language XML file ' . $default_file_path);
 				$definitions = $this->ReadXmlFile($default_file_path);
-			} else{
-				if ($mode != 'silent'){
+			} else {
+				if ($mode != 'silent') {
 					$error = new AError('Missing default English definition XML file for ' . $filename . ' !');
 					$error->toLog()->toDebug();
 				}
 			}
 		}
-		
+
 		//skip if not required and language file does not exist for silent mode.
-		if (empty($definitions) && $mode != 'silent'){
+		if (empty($definitions) && $mode != 'silent') {
 			$error = new AError('Could not load language ' . $filename . ' from file "' . $file_path . '"!');
 			$error->toLog()->toDebug();
 		}
@@ -828,7 +851,7 @@ class ALanguage{
 	 * @return null
 	 */
 	protected function _get_language_value($key, $filename){
-		if (empty ($filename) || empty ($key)){
+		if (empty ($filename) || empty ($key)) {
 			return null;
 		}
 		return $this->entries[$filename][$key];
@@ -843,30 +866,31 @@ class ALanguage{
 	 * @return null|string
 	 */
 	protected function _get_last_language_value($key, $caller_file = '', $caller_file_line = '', $silent = false){
-		if (empty ($key)){
+		if (empty ($key)) {
 			return null;
 		}
 
 		//look in all blocks for last available translation based on list or all
-		if (isset ($this->current_languages_scope) && sizeof($this->current_languages_scope) > 0){
+		if (isset ($this->current_languages_scope) && sizeof($this->current_languages_scope) > 0) {
 			$rev_language_blocks = array_reverse($this->current_languages_scope);
-		} else{
+		} else {
 			$rev_language_blocks = array_reverse(array_keys($this->entries));
 		}
 
 		$lang_value = '';
-		foreach ($rev_language_blocks as $block){
+		foreach ($rev_language_blocks as $block) {
 			$lang_value = $this->_get_language_value($key, $block);
-			if (isset($lang_value)){
+			if (isset($lang_value)) {
 				break;
 			}
 		}
 
 		// if value empty - write message based on the setting
-		if (empty($lang_value) && $this->registry->get('config')->get('warn_lang_text_missing')){
+		if (empty($lang_value) && $this->registry->get('config')->get('warn_lang_text_missing')) {
 			$rt = $this->registry->get('request')->get['rt'];
-			if (!$silent){
-				$this->registry->get('messages')->saveWarning('Language definition "' . $key . '" is missing for "' . $this->available_languages[$this->code]['name'] . '"', 'AbanteCart engine cannot find value of language definition with key "' . $key . '" in ' . $caller_file . ' line ' . $caller_file_line . ($rt ? ' (rt=' . $rt . ')' : '') . '.  Please add it in #admin#rt=localisation/language_definitions or run language translate process in #admin#rt=localisation/language');
+			if (!$silent) {
+				$this->registry->get('messages')->saveWarning('Language definition "' . $key . '" is missing for "' . $this->available_languages[$this->code]['name'] . '"',
+						'AbanteCart engine cannot find value of language definition with key "' . $key . '" in ' . $caller_file . ' line ' . $caller_file_line . ($rt ? ' (rt=' . $rt . ')' : '') . '.  Please add it in #admin#rt=localisation/language_definitions or run language translate process in #admin#rt=localisation/language');
 			}
 		}
 		return $lang_value;
@@ -877,16 +901,16 @@ class ALanguage{
 	 */
 	protected function _write_missing_definition($data){
 		$update_data = array ();
-		if ($this->is_admin){
+		if ($this->is_admin) {
 			$this->loader->model('localisation/language_definitions');
 			$model = $this->registry->get('model_localisation_language_definitions');
 			$model->addLanguageDefinition($data);
-		} else{
-			foreach ($data as $key => $val){
+		} else {
+			foreach ($data as $key => $val) {
 				$update_data[$this->db->escape($key)] = $this->db->escape($val);
 			}
 
-			if (!$this->_is_definition_in_db($update_data)){
+			if (!$this->_is_definition_in_db($update_data)) {
 				$sql = "INSERT INTO " . $this->db->table("language_definitions") . "
 						(`" . implode("`, `", array_keys($update_data)) . "`)
 						VALUES ('" . implode("', '", $update_data) . "') ";
@@ -895,8 +919,9 @@ class ALanguage{
 				$this->cache->remove('storefront_menu');
 			}
 		}
-		if ($this->registry->get('config')->get('warn_lang_text_missing')){
-			$this->registry->get('messages')->saveNotice('Missing language definition "' . $data['language_key'] . '" was loaded for "' . $this->available_languages[$this->code]['name'] . '" language', 'Missing language definition with key "' . $data['language_key'] . '" for block "' . $data['block'] . '" was automatically added. Please check this at #admin#rt=localisation/language_definitions to see or change value.');
+		if ($this->registry->get('config')->get('warn_lang_text_missing')) {
+			$this->registry->get('messages')->saveNotice('Missing language definition "' . $data['language_key'] . '" was loaded for "' . $this->available_languages[$this->code]['name'] . '" language',
+					'Missing language definition with key "' . $data['language_key'] . '" for block "' . $data['block'] . '" was automatically added. Please check this at #admin#rt=localisation/language_definitions to see or change value.');
 		}
 	}
 
@@ -906,7 +931,7 @@ class ALanguage{
 	 */
 	protected function _is_definition_in_db($data){
 		$sql = "SELECT *
-					 FROM " . DB_PREFIX . "language_definitions
+					 FROM " . $this->db->table("language_definitions") . "
 					 WHERE language_id = '" . $data['language_id'] . "'
 						   AND  block = '" . $data['block'] . "'
 						   AND section =  '" . $data['section'] . "'

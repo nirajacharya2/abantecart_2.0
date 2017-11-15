@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -147,7 +152,7 @@ class ControllerPagesCatalogManufacturer extends AController {
 		if (($this->request->is_POST()) && $this->_validateForm()) {
 			$manufacturer_id = $this->model_catalog_manufacturer->addManufacturer($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=' . $manufacturer_id ));
+			abc_redirect($this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=' . $manufacturer_id ));
 		}
     	$this->_getForm();
 
@@ -176,7 +181,7 @@ class ControllerPagesCatalogManufacturer extends AController {
     	if (($this->request->is_POST()) && $this->_validateForm()) {
 			$this->model_catalog_manufacturer->editManufacturer($manufacturer_id, $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=' . $manufacturer_id ));
+			abc_redirect($this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=' . $manufacturer_id ));
 		}
 
 		if( $this->config->get('config_embed_status')){
@@ -315,13 +320,13 @@ class ControllerPagesCatalogManufacturer extends AController {
 		));
 		$this->data['generate_seo_url'] = $this->html->getSecureURL('common/common/getseokeyword', '&object_key_name=manufacturer_id&id=' . $manufacturer_id);
 
-		$this->data['form']['fields']['general']['keyword'] = $form->getFieldHtml(array(
+		$this->data['form']['fields']['general']['keyword'] = $form->getFieldHtml([
 				'type' => 'input',
 				'name' => 'keyword',
 				'value' => $this->data['keyword'],
-				'attr' => ' gen-value="' . SEOEncode($this->data['category_description']['name']) . '" ',
+				'attr' => ' gen-value="' . AHelperUtils::SEOEncode($this->data['category_description']['name']) . '" ',
 				'help_url' => $this->gen_help_url('seo_keyword')
-		));
+		]);
 
 		$this->data['form']['fields']['general']['sort_order'] = $form->getFieldHtml(array(
 			'type' => 'input',

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -32,7 +36,7 @@ class ControllerApiOrderDetails extends AControllerAPI {
 
 		$request = $this->rest->getRequestParams();
 		
-		if ( !has_value($request['order_id']) ) {
+		if ( !AHelperUtils::has_value($request['order_id']) ) {
 			$this->rest->setResponseData( array('Error' => 'Order ID is missing') );
 			$this->rest->sendResponse(200);
 			return null;

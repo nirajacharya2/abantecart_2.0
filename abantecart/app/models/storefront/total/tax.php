@@ -17,22 +17,25 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\storefront;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ModelTotalTax extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {
 		//check if we have customer object 
-		$istax_exempt = false;
+		$is_tax_exempt = false;
 		if(is_object($this->customer)) {
-			$istax_exempt = $this->customer->isTaxExempt();
+			$is_tax_exempt = $this->customer->isTaxExempt();
 			$customer_group_id = $this->customer->getCustomerGroupId();
 		} else {
-			$istax_exempt = $cust_data['tax_exempt'];		
-			$customer_group_id = $cust_data['customer_group_id'];	
+			$is_tax_exempt = $cust_data['tax_exempt'];
+			$customer_group_id = $cust_data['customer_group_id'];
 		}
 
-		if($istax_exempt) {
+		if($is_tax_exempt) {
 			//customer is tax exempt, do nothing
 			return;
 		}
@@ -48,7 +51,7 @@ class ModelTotalTax extends Model {
 								//we found taxt exempt. 
 								continue;
 							}
-						}				
+						}
 						//This is the same as $subtax['tax'], but we will recalculate
 						$tax_amount = $this->tax->calcTaxAmount($subtax['total'], $tax_class);
 						//round base currency tax amount to 2 decimal place

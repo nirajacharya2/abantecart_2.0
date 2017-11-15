@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\ALanguageManager;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -70,9 +75,9 @@ class AContentManager{
 		unset($data['parent_content_id'][0], $data ['sort_order'][0]);
 
 		if (empty ($data['keyword'])){
-			$seo_key = SEOEncode($data['title'], 'content_id', $content_id);
+			$seo_key = AHelperUtils::SEOEncode($data['title'], 'content_id', $content_id);
 		} else{
-			$seo_key = SEOEncode($data['keyword'], 'content_id', $content_id);
+			$seo_key = AHelperUtils::SEOEncode($data['keyword'], 'content_id', $content_id);
 		}
 		if ($seo_key){
 			$this->language->replaceDescriptions('url_aliases',
@@ -152,7 +157,7 @@ class AContentManager{
 				array ((int)$language_id => $update));
 
 		if (isset($data['keyword'])){
-			$data['keyword'] = SEOEncode($data['keyword'], 'content_id', $content_id);
+			$data['keyword'] = AHelperUtils::SEOEncode($data['keyword'], 'content_id', $content_id);
 			if ($data['keyword']){
 				$this->language->replaceDescriptions('url_aliases',
 						array ('query' => "content_id=" . ( int )$content_id),
@@ -214,7 +219,7 @@ class AContentManager{
 
 				break;
 			case 'keyword' :
-				$value = SEOEncode($value, 'content_id', $content_id);
+				$value = AHelperUtils::SEOEncode($value, 'content_id', $content_id);
 				if ($value){
 					$this->language->replaceDescriptions('url_aliases',
 							array ('query' => "content_id=" . ( int )$content_id),
@@ -277,7 +282,7 @@ class AContentManager{
 				$query = "DELETE FROM " . $this->db->table("contents_to_stores") . " WHERE content_id='" . $content_id . "'";
 				$this->db->query($query);
 				foreach ($value as $store_id){
-					if (has_value($store_id)){
+					if (AHelperUtils::has_value($store_id)){
 						$query = "INSERT INTO " . $this->db->table("contents_to_stores") . " (content_id,store_id)
 										VALUES ('" . $content_id . "','" . (int)$store_id . "')";
 						$this->db->query($query);
@@ -313,7 +318,7 @@ class AContentManager{
 	public function getContent($content_id, $language_id = null){
 		$output = array ();
 		$content_id = (int)$content_id;
-		if (!has_value($language_id)){
+		if (!AHelperUtils::has_value($language_id)){
 			$language_id = ( int )$this->language->getContentLanguageID();
 		}
 

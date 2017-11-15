@@ -17,9 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\APromotion;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiProductProduct
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogProduct $model_catalog_product
+ * @property \abc\model\storefront\ModelCatalogReview $model_catalog_review
+ *
+ */
 class ControllerApiProductProduct extends AControllerAPI {
 	
 	public function get() {
@@ -66,7 +79,7 @@ class ControllerApiProductProduct extends AControllerAPI {
 				$product_info['price'] = $this->currency->format($this->tax->calculate($product_info['price'],
 				                                                                           $product_info['tax_class_id'],
 				                                                                           $this->config->get('config_tax')));
-				
+				//TODO: need to check in 2.0
 				$special = $this->model_catalog_product->getProductSpecial($product_id);
 				
 				if ($special) {
@@ -107,21 +120,22 @@ class ControllerApiProductProduct extends AControllerAPI {
 		}
 		//hide quantity
 		unset($product_info['quantity']);
-			
-			
+
+
 		if (!$product_info['minimum']) {
 			$product_info['minimum'] = 1;
 		}
 
 		$product_info['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
-		$product_info['options'] = $this->model_catalog_product->getProductOptions($product_id);			
+		$product_info['options'] = $this->model_catalog_product->getProductOptions($product_id);
 
 		$this->loadModel('catalog/review');
 		if ($this->config->get('enable_reviews')) {
-			$average = $this->model_catalog_review->getAverageRating( $product_id );	
+			$average = $this->model_catalog_review->getAverageRating( $product_id );
 			$product_info['text_stars'] = sprintf($this->language->get('text_stars'), $average);
-			$product_info['stars'] = sprintf($this->language->get('text_stars'), $rating);
+
+			$product_info['stars'] = sprintf($this->language->get('text_stars'), $rating); //???? TODO: check!
 			$product_info['average'] = $average;
 		}
 

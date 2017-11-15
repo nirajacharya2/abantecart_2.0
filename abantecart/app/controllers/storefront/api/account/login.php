@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -35,7 +38,7 @@ class ControllerApiAccountLogin extends AControllerAPI {
 				$this->rest->setResponseData( array( 'status' => 0, 'request' => 'unauthorized' ) );	
 				$this->rest->sendResponse(401);
 				return null;
-    		} 		 	
+    		}
 		
 		} else {
 			//support old email based login
@@ -57,15 +60,14 @@ class ControllerApiAccountLogin extends AControllerAPI {
 				$this->rest->sendResponse(401);
 				return null;
 			}
-		}				
+		}
 	}
 
-	
   	private function _validate($loginname, $password) {
     	if (!$this->customer->login($loginname, $password)) {
       		return FALSE;
     	}else{
-			unset($this->session->data['guest']);    	
+			unset($this->session->data['guest']);
 		    $this->loadModel('account/address');
 			$address = $this->model_account_address->getAddress($this->customer->getAddressId());
 		    $this->session->data['country_id'] = $address['country_id'];
@@ -73,5 +75,4 @@ class ControllerApiAccountLogin extends AControllerAPI {
 			return TRUE;
 	    }
   	}
-	
 }

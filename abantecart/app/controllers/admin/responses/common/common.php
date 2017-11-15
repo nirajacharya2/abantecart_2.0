@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperSystemCheck;
+use abc\core\AHelperUtils;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -41,7 +47,7 @@ class ControllerResponsesCommonCommon extends AController {
 	public function getSeoKeyword(){
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-		$seo_key = SEOEncode($this->request->get['seo_name'],
+		$seo_key = AHelperUtils::SEOEncode($this->request->get['seo_name'],
 							$this->request->get['object_key_name'],
 							(int)$this->request->get['id']);
 
@@ -61,7 +67,7 @@ class ControllerResponsesCommonCommon extends AController {
 		$message_id = $this->request->get['message_id'];
 
 		$result = array();
-		if( has_value($message_id) && $this->messages->markViewedANT($message_id, '*')) {
+		if( AHelperUtils::has_value($message_id) && $this->messages->markViewedANT($message_id, '*')) {
 			$result['success'] = true;
 		}
 
@@ -70,7 +76,7 @@ class ControllerResponsesCommonCommon extends AController {
 
 		$this->load->library('json');
 		$this->response->addJSONHeader();
-		$this->response->setOutput(AJson::encode($result));		
+		$this->response->setOutput(AJson::encode($result));
 	}
 	/**
 	 * void function run server-server update check procedure
@@ -101,17 +107,16 @@ class ControllerResponsesCommonCommon extends AController {
 			return null;
 		}
 
-
 		if( time()-$last_time_check < $this->system_check_period ){
 			return null;
 		}
-
+		$result = array();
 		$message_link = $this->html->getSecureURL('tool/message_manager');
 		$logs_link = $this->html->getSecureURL('tool/error_log');
 
 		//if enabled system check for all 0 or for admin only 1
 		//run system check to make sure system is stable to run the request
-		list($system_messages, $counts) = run_system_check($this->registry, 'log');
+		list($system_messages, $counts) = AHelperSystemCheck::run_system_check($this->registry, 'log');
 		if(count($system_messages) > 0){
 			if($counts['error_count']) {
 				$result ['error'] = sprintf($this->language->get('text_system_error'), $message_link, $logs_link);

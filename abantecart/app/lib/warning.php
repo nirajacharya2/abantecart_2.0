@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -38,7 +39,7 @@ class AWarning extends AError{
 	/**
 	 * add warning message to debug log
 	 *
-	 * @return ADebug
+	 * @return AWarning
 	 */
 	public function toDebug(){
 		ADebug::warning($this->error_descriptions[$this->code], $this->code, $this->msg);
@@ -48,7 +49,7 @@ class AWarning extends AError{
 	/**
 	 * add warning message to messages
 	 * @param string $subject
-	 * @return ADebug
+	 * @return AWarning
 	 */
 	public function toMessages($subject=''){
 		if (is_object($this->registry) && $this->registry->has('messages')){

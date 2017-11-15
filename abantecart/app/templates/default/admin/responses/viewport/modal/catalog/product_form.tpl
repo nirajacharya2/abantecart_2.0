@@ -1,3 +1,4 @@
+<?php use abc\core\AHelperUtils; ?>
 <div class="modal-header">
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i
@@ -99,7 +100,7 @@
 			data: $('#<?php echo $form['form_open']->name; ?>').serializeArray(),
 			dataType: 'json',
 			success: function (data) {
-				success_alert(<?php js_echo($text_saved); ?>, true);
+				success_alert(<?php abc_js_echo($text_saved); ?>, true);
 			}
 		});
 	}

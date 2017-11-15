@@ -17,15 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiCommonAccess extends AControllerAPI {
-	
+
 	public function main() {
 		//check if any restriction on caller IP
 		if ( !$this->_validate_ip() ) {
-		    return $this->dispatch('api/error/no_access');				
+			return $this->dispatch('api/error/no_access');
 		}
 		//validate if API enabled and KEY matches. 
 		if ( $this->config->get('config_admin_api_status')	) {
@@ -37,12 +41,12 @@ class ControllerApiCommonAccess extends AControllerAPI {
 			} else if ( !$this->config->get('config_admin_api_key') ) {
 				return null;
 			}
-		}	
+		}
 		return $this->dispatch('api/error/no_access');
-	}	
-	
+	}
+
 	private function _validate_ip () {
-		if (!has_value($this->config->get('config_admin_access_ip_list'))) {
+		if (!AHelperUtils::has_value($this->config->get('config_admin_access_ip_list'))) {
 			return true;
 		}
 		
@@ -52,7 +56,7 @@ class ControllerApiCommonAccess extends AControllerAPI {
 		}
 		return false;
 	}
-	
+
 	public function login() {
 		$request = $this->rest->getRequestParams();
 		//allow access to listed controllers with no login
@@ -82,6 +86,7 @@ class ControllerApiCommonAccess extends AControllerAPI {
 				return $this->dispatch('api/index/login');
 			}
 		}
+		return false;
 	}
 
 	public function permission() {
@@ -113,8 +118,8 @@ class ControllerApiCommonAccess extends AControllerAPI {
 				}
 			}
 		}
-	}	
-	
+		return false;
+	}
 }
 
 

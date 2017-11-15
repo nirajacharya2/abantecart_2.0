@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -30,8 +32,7 @@ class ControllerBlocksOrderSummary extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$this->loadModel('tool/seo_url');
-    	$this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/order_summary'));
-    			
+		$this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/order_summary'));
 		$this->view->assign('view', $this->html->getSecureURL('checkout/cart'));
 
         $rt = $this->request->get['rt'];
@@ -40,16 +41,13 @@ class ControllerBlocksOrderSummary extends AController {
         } else {
 			if ( $this->cart->hasMinRequirement() && $this->cart->hasMaxRequirement() ) {
             	$this->view->assign('checkout', $this->html->getSecureURL('checkout/shipping'));
-			}	
+			}
         }
 
 		$products = array();
-		
 		$qty = 0;
-		
     	foreach ($this->cart->getProducts() as $result) {
         	$option_data = array();
-
         	foreach ($result['option'] as $option) {
 		        $value = $option['value'];
                 // hide binary value for checkbox
@@ -61,7 +59,6 @@ class ControllerBlocksOrderSummary extends AController {
                 if($option['element_type']=='T'){
                     $title = strip_tags($value);
                     $title = str_replace('\r\n',"\n",$title);
-
                     $value = str_replace('\r\n',"\n",$value);
 	                if(mb_strlen($value) > 64){
 		                $value = mb_substr($value, 0, 64) . '...';
@@ -74,9 +71,8 @@ class ControllerBlocksOrderSummary extends AController {
 			        'title' => $title
           		);
         	}
-			
+
 			$qty += $result['quantity'];
-			
       		$products[] = array(
         		'key' 		 => $result['key'],
         		'name'       => $result['name'],
@@ -89,18 +85,12 @@ class ControllerBlocksOrderSummary extends AController {
     	}
 
         $this->view->assign('products', $products );
-		
 		$this->view->assign('total_qty', $qty);
-
-
       	$display_totals = $this->cart->buildTotalDisplay();
-
 		$this->data['totals'] = $display_totals['total_data'];
-		
 		$this->view->batchAssign($this->data);
         $this->processTemplate();
 		//init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 	}
-
 }

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -31,7 +35,7 @@ class ControllerPagesAccountPassword extends AController{
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL('account/password');
-			$this->redirect($this->html->getSecureURL('account/login'));
+			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -40,7 +44,7 @@ class ControllerPagesAccountPassword extends AController{
 			$this->loadModel('account/customer');
 			$this->model_account_customer->editPassword($this->customer->getLoginName(), $this->request->post['password']);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->resetBreadcrumbs();
@@ -141,7 +145,7 @@ class ControllerPagesAccountPassword extends AController{
 			$this->error['current_password'] = $this->language->get('error_current_password');
 		}
 		
-		//check passwrod length considering html entities (sepcial case for characters " > < & )
+		//check password length considering html entities (special case for characters " > < & )
 		$pass_len = mb_strlen(htmlspecialchars_decode($post['password']));
 		if ($pass_len < 4 || $pass_len > 20){
 			$this->error['password'] = $this->language->get('error_password');

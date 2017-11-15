@@ -17,9 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\HtmlElementFactory;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerPagesContentContent
+ * @package abc\controller\storefront
+ * @property \abc\model\storefront\ModelCatalogContent $model_catalog_content
+ */
 class ControllerPagesContentContent extends AController {
 	/**
 	 * Check if HTML Cache is enabled for the method
@@ -59,8 +69,8 @@ class ControllerPagesContentContent extends AController {
         		'href'      => $this->html->getSEOURL('content/content', '&content_id=' . $request['content_id'], true),
         		'text'      => $content_info['title'],
         		'separator' => $this->language->get('text_separator')
-      		 ));		
-						
+      		 ));
+
       		$this->view->assign('heading_title', $content_info['title'] );
             $this->view->assign('button_continue', $this->language->get('button_continue') );
 

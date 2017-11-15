@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -46,7 +49,7 @@ final class AUser{
 	private $permission = array ();
 
 	/**
-	 * @param $registry Registry
+	 * @param $registry \abc\core\Registry
 	 */
 	public function __construct($registry){
 		$this->db = $registry->get('db');
@@ -266,7 +269,7 @@ final class AUser{
 	 * @return string
 	 */
 	public function getAvatar(){
-		return getGravatar($this->email);
+		return AHelperUtils::getGravatar($this->email);
 	}
 
 	/**

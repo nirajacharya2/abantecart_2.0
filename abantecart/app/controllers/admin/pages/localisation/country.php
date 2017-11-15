@@ -17,7 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
 
+if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
+	header ( 'Location: static_pages/' );
+}
 class ControllerPagesLocalisationCountry extends AController {
 	public $data = array();
 	public $error = array();
@@ -124,7 +130,7 @@ class ControllerPagesLocalisationCountry extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$country_id = $this->model_localisation_country->addCountry($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('localisation/country/update', '&country_id=' . $country_id ) );
+			abc_redirect( $this->html->getSecureURL('localisation/country/update', '&country_id=' . $country_id ) );
 		}
 		$this->_getForm();
 
@@ -146,7 +152,7 @@ class ControllerPagesLocalisationCountry extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 			$this->model_localisation_country->editCountry($this->request->get['country_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('localisation/country/update', '&country_id=' . $this->request->get['country_id'] ) );
+			abc_redirect( $this->html->getSecureURL('localisation/country/update', '&country_id=' . $this->request->get['country_id'] ) );
 		}
 		$this->_getForm();
 
@@ -294,7 +300,7 @@ class ControllerPagesLocalisationCountry extends AController {
 			return FALSE;
 		}
 	}
-
+//TODO: 2.0 what is this?
 	private function validateDelete() {
 		if (!$this->user->canModify('localisation/country')) {
 			$this->error['warning'] = $this->language->get('error_permission');

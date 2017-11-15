@@ -17,6 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AConnect;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+use stdClass;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -26,7 +36,6 @@ class ControllerResponsesListingGridTask extends AController {
 	public function main() {
 		//init controller data
 		$this->extensions->hk_InitData($this,__FUNCTION__);
-		
 		$this->loadLanguage( 'tool/task' );
 		if (! $this->user->canAccess('tool/task' )) {
 
@@ -67,7 +76,7 @@ class ControllerResponsesListingGridTask extends AController {
 			$response->rows [$i] ['id'] = $id;
 			$status = $result['status'];
 			//if task works more than 30min - we think it's stuck
-			if($status == 2 && time() - dateISO2Int($result['start_time']) > 1800){
+			if($status == 2 && time() - AHelperUtils::dateISO2Int($result['start_time']) > 1800){
 				$status = -1;
 			}
 
@@ -110,8 +119,8 @@ class ControllerResponsesListingGridTask extends AController {
 													$result ['task_id'],
 													$result ['name'],
 													$text_status,
-													dateISO2Display($result ['start_time'],$this->language->get('date_format_short'). ' '. $this->language->get('time_format')),
-													dateISO2Display($result ['date_modified'],$this->language->get('date_format_short'). ' '. $this->language->get('time_format')),
+													AHelperUtils::dateISO2Display($result ['start_time'],$this->language->get('date_format_short'). ' '. $this->language->get('time_format')),
+													AHelperUtils::dateISO2Display($result ['date_modified'],$this->language->get('date_format_short'). ' '. $this->language->get('time_format')),
 													);
 			$i ++;
 		}
@@ -210,9 +219,10 @@ class ControllerResponsesListingGridTask extends AController {
 		$this->load->library('json');
 		$this->response->addJSONHeader();
 
-		if(has_value($this->request->post_or_get('task_id'))){
+		if(AHelperUtils::has_value($this->request->post_or_get('task_id'))){
 			$tm = new ATaskManager();
 			$task = $tm->getTaskById($this->request->post_or_get('task_id'));
+			$task_id = null;
 			//check
 			if($task && $task['status'] == $tm::STATUS_READY){
 				$tm->updateTask($task['task_id'], array(

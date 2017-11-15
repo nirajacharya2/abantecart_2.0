@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AJson;
+use abc\lib\ATaskManager;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -40,7 +46,7 @@ class ControllerResponsesCommonRunTask extends AController {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-		if(!has_value($this->request->get['task_name'])){
+		if(!AHelperUtils::has_value($this->request->get['task_name'])){
 			$this->data['output'] = array(
 										'error'=>true,
 										'error_text' => 'Error: Do not know what to run.');

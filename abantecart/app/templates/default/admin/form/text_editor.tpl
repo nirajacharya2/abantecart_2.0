@@ -1,7 +1,6 @@
 <?php
-
 //unique id
-$wrapper_id = randomWord(6);
+$wrapper_id = \abc\core\AHelperUtils::randomWord(6);
 ?>
 <div id="<?php echo $wrapper_id ?>" class="text-editor panel panel-default">
 	<ul class="nav nav-tabs" role="tablist">
@@ -33,8 +32,8 @@ $wrapper_id = randomWord(6);
 	        </span>
 			<?php } ?>
 		
-			<a title="<?php js_echo($button_add_media); ?>"
-				data-original-title="<?php js_echo($button_add_media); ?>"
+			<a title="<?php abc_js_echo($button_add_media); ?>"
+				data-original-title="<?php abc_js_echo($button_add_media); ?>"
                 href="#"
                 class="btn btn-primary tooltips add_media">
 				<i class="fa fa-file-picture-o fa-fw"></i> <?php echo $button_add_media; ?>

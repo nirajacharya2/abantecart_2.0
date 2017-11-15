@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -134,7 +138,7 @@ class ControllerPagesLocalisationCurrency extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 			$currency_id = $this->model_localisation_currency->addCurrency($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $currency_id ) );
+			abc_redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $currency_id ) );
 		}
 		$this->_getForm();
 
@@ -157,7 +161,7 @@ class ControllerPagesLocalisationCurrency extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 			$this->model_localisation_currency->editCurrency($this->request->get['currency_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $this->request->get['currency_id'] ) );
+			abc_redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $this->request->get['currency_id'] ) );
 		}
 		$this->_getForm();
 

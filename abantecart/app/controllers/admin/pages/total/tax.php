@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE') || !IS_ADMIN){
 	header('Location: static_pages/');
 }
@@ -38,7 +42,7 @@ class ControllerPagesTotalTax extends AController{
 			$this->model_setting_setting->editSetting('tax', $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->extensions->hk_ProcessData($this);
-			redirect($this->html->getSecureURL('total/tax'));
+			abc_redirect($this->html->getSecureURL('total/tax'));
 		}
 
 		if (isset($this->error['warning'])){

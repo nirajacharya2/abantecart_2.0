@@ -17,6 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -29,7 +35,7 @@ class ControllerPagesAccountNotification extends AController {
 
 		if (!$this->customer->isLogged()) {
 	  		$this->session->data['redirect'] = $this->html->getSecureURL('account/notification');
-	  		redirect($this->html->getSecureURL('account/login'));
+	  		abc_redirect($this->html->getSecureURL('account/login'));
     	} 
 		
 		$this->document->setTitle( $this->language->get('heading_title') );
@@ -39,7 +45,7 @@ class ControllerPagesAccountNotification extends AController {
 		if ($this->request->is_POST() && $this->csrftoken->isTokenValid()) {
 			$this->model_account_customer->saveCustomerNotificationSettings($this->request->post['settings']);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
       	$this->document->resetBreadcrumbs();
@@ -76,9 +82,11 @@ class ControllerPagesAccountNotification extends AController {
 		$protocols = $this->im->getActiveProtocols('storefront');
 		$im_drivers = $this->im->getIMDriverObjects();
 		//build protocol list
+		/**
+		 * @var \abc\lib\AMailIM $driver
+		 */
 		foreach($im_drivers as $name=>$driver){
 			$this->data['protocols'][$name] = array( 'name' => $name );
-
 			if(is_object($driver)){
 				$this->data['protocols'][$name]['title'] = $driver->getProtocolTitle();
 			}
@@ -98,8 +106,8 @@ class ControllerPagesAccountNotification extends AController {
 			$force_arr = $sendpoint_data[0]['force_send'];
 				
 		    $point = array();
-		    $point['title'] = $this->language->get('im_sendpoint_name_'.preformatTextID($sendpoint));
-		    $point['note'] = $this->language->get('im_sendpoint_name_'.preformatTextID($sendpoint).'_note');
+		    $point['title'] = $this->language->get('im_sendpoint_name_'.AHelperUtils::preformatTextID($sendpoint));
+		    $point['note'] = $this->language->get('im_sendpoint_name_'.AHelperUtils::preformatTextID($sendpoint).'_note');
 		    $point['warn'] = '';
 
 		    foreach($protocols as $protocol){
@@ -111,7 +119,7 @@ class ControllerPagesAccountNotification extends AController {
 		    	if(!$customer_info[$protocol]) {
 		    		$read_only = ' disabled readonly ';
 				    $checked = false;
-		    	} else if(has_value($force_arr) && in_array($protocol, $force_arr)) {
+		    	} else if(AHelperUtils::has_value($force_arr) && in_array($protocol, $force_arr)) {
 		    		$read_only = ' disabled readonly ';
 		    		$checked = true;
 		    	}

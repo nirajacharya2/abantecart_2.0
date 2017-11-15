@@ -17,22 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerPagesIndexLogout extends AController {
 	public function main() {
-
 		//init controller data
 		$this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$this->user->logout();
- 
 		unset($this->session->data['token'], $this->session->data['system_check_last_time']);
-
 		//update controller data
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-
-		$this->redirect($this->html->getSecureURL('index/login'));
+		abc_redirect($this->html->getSecureURL('index/login'));
 	}
 }  

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
@@ -98,7 +103,7 @@ class ControllerPagesReportCustomerOrders extends AController{
 
 		//prepare the filter form
 		//Note: External search form needs to be named [grid_name]_search
-		//		In this case it will be auto submited to filter grid
+		//		In this case it will be auto submitted to filter grid
         $form = new AForm();
         $form->setForm(array(
             'form_name' => 'customer_order_grid_search',
@@ -116,16 +121,16 @@ class ControllerPagesReportCustomerOrders extends AController{
             'text' => $this->language->get('button_go'),
             'style' => 'button1',
         ));
-		$this->view->assign('js_date_format', format4Datepicker($this->language->get('date_format_short')));
+		$this->view->assign('js_date_format', AHelperUtils::format4Datepicker($this->language->get('date_format_short')));
         $this->data['grid_search_form']['fields']['date_start'] = $form->getFieldHtml(array(
             'type' => 'input',
             'name' => 'date_start',
-            'default' => dateInt2Display(strtotime('-7 day')),
+            'default' => AHelperUtils::dateInt2Display(strtotime('-7 day')),
         ));
         $this->data['grid_search_form']['fields']['date_end'] = $form->getFieldHtml(array(
             'type' => 'input',
             'name' => 'date_end',
-            'default' => dateInt2Display(time()),
+            'default' => AHelperUtils::dateInt2Display(time()),
         ));
 
 		$this->loadModel('localisation/order_status');

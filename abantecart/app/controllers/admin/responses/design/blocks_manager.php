@@ -17,6 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\core\ALanguage;
+use abc\lib\AJson;
+use abc\lib\ALayoutManager;
+use abc\lib\AView;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
   header ( 'Location: static_pages/' );
 }
@@ -57,7 +65,7 @@ class ControllerResponsesDesignBlocksManager extends AController {
 		//update controller data
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
 		
-		$this->response->setOutput($blocks);	
+		$this->response->setOutput($blocks);
 	}
 	
 	public function addBlock() {
@@ -85,9 +93,9 @@ class ControllerResponsesDesignBlocksManager extends AController {
 		  $customName = $selectedBlock['block_name'];
 		  $edit_url = $this->html->getSecureURL('design/blocks/edit', '&custom_block_id='.$selectedBlock['custom_block_id']);
 		}
-		
+
 		$this->loadLanguage('design/blocks');
-		
+
 		$view->batchAssign(array(
 		  'id' => 0,
 		  'blockId' => $selectedBlock['block_id'],
@@ -122,10 +130,10 @@ class ControllerResponsesDesignBlocksManager extends AController {
 		$layout_id = $this->request->get['layout_id'];
 		$lm = new ALayoutManager($template, $page_id, $layout_id);
 
-		//acccept 2 type of ids. Number based and custom [block]_[custom_block] 
+		//accept 2 type of ids. Number based and custom [block]_[custom_block]
 		$custom_block_id = $this->request->get['block_id'];
 		if (preg_match("/(\d+)_(\d+)/", $custom_block_id, $match)) {
-			//take last postion of id for custom block
+			//take last position of id for custom block
 			$block_id = $match[1];
 			$custom_block_id = $match[2];
 		} else if( is_numeric($custom_block_id) ) {
@@ -141,7 +149,7 @@ class ControllerResponsesDesignBlocksManager extends AController {
 
 		$info = $lm->getBlockInfo((int)$block_id);
 		foreach($info as &$i){
-			$i['block_date_added'] = dateISO2Display($i['block_date_added'], $this->language->get('date_format_short'). ' '.$this->language->get('time_format'));
+			$i['block_date_added'] = AHelperUtils::dateISO2Display($i['block_date_added'], $this->language->get('date_format_short'). ' '.$this->language->get('time_format'));
 		}
 		//expect only 1 block details per layout
 		$this->data = array_merge($info[0],$this->data);
@@ -189,30 +197,30 @@ class ControllerResponsesDesignBlocksManager extends AController {
 	
 	
 	public function validate_block() {
-		$responce = array();
+		$response = array();
 		$this->loadLanguage('design/blocks');
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 		$block_id = $this->request->get['block_id'];
 		$parent_block_id = $this->request->get['parent_block_id'];
-		
-		if (has_value($block_id) && has_value($parent_block_id)) {
+
+		if (AHelperUtils::has_value($block_id) && AHelperUtils::has_value($parent_block_id)) {
 			$lm = new ALayoutManager();
 			$template = $lm->getBlockTemplate($block_id, $parent_block_id);
 			if ($template) {
-				$responce['allowed'] = 'true';
-				$responce['template'] = $template;
+				$response['allowed'] = 'true';
+				$response['template'] = $template;
 			} else {
-				$responce['allowed'] = 'false';		
-				$responce['message'] = $this->language->get('error_block_not_available');	
-			}			
+				$response['allowed'] = 'false';
+				$response['message'] = $this->language->get('error_block_not_available');
+			}
 		}
-	
+
         //update controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
-		$this->load->library('json');		
-		$this->response->setOutput(AJson::encode($responce));
+		$this->load->library('json');
+		$this->response->setOutput(AJson::encode($response));
 	}
 
 }

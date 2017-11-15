@@ -1,12 +1,17 @@
 <?php
-    if ( !defined ( 'DIR_CORE' ) ) {
-        header ( 'Location: static_pages/' );
-    }
+namespace abc\core\extension;
+use abc\core\Extension;
+use abc\core\Registry;
+use abc\lib\ALayoutManager;
+
+if ( !defined ( 'DIR_CORE' ) ) {
+    header ( 'Location: static_pages/' );
+}
 /**
  * Class ExtensionFormsManager
- * @property ALanguageManager $language
- * @property AHtml $html
- * @property ARequest $request
+ * @property \abc\core\ALanguageManager $language
+ * @property \abc\core\AHtml $html
+ * @property \abc\lib\ARequest $request
  */
 class ExtensionFormsManager extends Extension {
 
@@ -53,7 +58,7 @@ class ExtensionFormsManager extends Extension {
 			}
 
 			if($block_txt_id=='custom_form_block'){
-				redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . (int)$this->request->get['custom_block_id']));
+				abc_redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . (int)$this->request->get['custom_block_id']));
 			}
 		}
 	}
@@ -89,7 +94,7 @@ class ExtensionFormsManager extends Extension {
 			}
 
 			if($block_txt_id=='custom_form_block'){
-				redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . (int)$this->request->get['custom_block_id']));
+				abc_redirect($this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . (int)$this->request->get['custom_block_id']));
 			}
 		}
 	}

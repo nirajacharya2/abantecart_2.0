@@ -17,43 +17,45 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+namespace abc\core;
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
- * @property AConfig $config
- * @property ADB $db
- * @property ACache $cache
+ * @property \abc\lib\AConfig $config
+ * @property \abc\lib\ADB $db
+ * @property \abc\lib\ACache $cache
  * @property AResource $resource
- * @property AView $view
+ * @property \abc\lib\AView $view
  * @property ALoader $load
  * @property AHtml $html
- * @property ARequest $request
- * @property AResponse $response
- * @property ASession $session
+ * @property \abc\lib\ARequest $request
+ * @property \abc\lib\AResponse $response
+ * @property \abc\lib\ASession $session
  * @property ExtensionsApi $extensions
- * @property AExtensionManager $extension_manager
+ * @property \abc\lib\AExtensionManager $extension_manager
  * @property ALayout $layout
- * @property ACurrency $currency
- * @property ACart $cart
- * @property ATax $tax
- * @property AUser $user
- * @property ALog $log
- * @property AMessage $messages
- * @property ACustomer $customer
- * @property ADocument $document
+ * @property \abc\lib\ACurrency $currency
+ * @property \abc\lib\ACart $cart
+ * @property \abc\lib\ATax $tax
+ * @property \abc\lib\AUser $user
+ * @property \abc\lib\ALog $log
+ * @property \abc\lib\AMessage $messages
+ * @property \abc\lib\ACustomer $customer
+ * @property \abc\lib\ADocument $document
  * @property ALanguageManager $language
- * @property ADataEncryption $dcrypt
- * @property ModelCatalogCategory $model_catalog_category
- * @property ADownload $download
- * @property AOrderStatus $order_status
- * @property AIMManager $im
+ * @property \abc\lib\ADataEncryption $dcrypt
+ * @property \abc\model\admin\ModelCatalogCategory | \abc\model\storefront\ModelCatalogCategory $model_catalog_category
+ * @property \abc\lib\ADownload $download
+ * @property \abc\lib\AOrderStatus $order_status
+ * @property \abc\lib\AIMManager $im
  */
 abstract class Model{
-
+	/**
+	 * @var Registry
+	 */
 	public $registry;
-
 	/**
 	 * @param $registry Registry
 	 */
@@ -61,6 +63,10 @@ abstract class Model{
 		$this->registry = $registry;
 	}
 
+	/**
+	 * @param $key
+	 * @return mixed
+	 */
 	public function __get($key){
 		return $this->registry->get($key);
 	}
@@ -70,11 +76,11 @@ abstract class Model{
 	}
 
 	public function __call($method, $args){
-		if (!$this->registry->has('extensions')){
+		if (!$this->registry->has('extensions')) {
 			return null;
 		}
 		array_unshift($args, $this);
-		$return = call_user_func_array(array ($this->extensions, $method), $args);
+		$return = call_user_func_array(array ($this->registry->get('extensions'), $method), $args);
 		return $return;
 	}
 }

@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -44,10 +48,10 @@ class ControllerPagesExtensionExtensionSummary extends AController {
 		$datetime_format = $this->language->get('date_format_short').' '.$this->language->get('time_format');
 
 		if($this->data['extension_info']['date_installed']){
-			$this->data['extension_info']['installed'] = dateISO2Display($this->data['extension_info']['date_installed'], $datetime_format );
+			$this->data['extension_info']['installed'] = AHelperUtils::dateISO2Display($this->data['extension_info']['date_installed'], $datetime_format );
 		}
 		if($this->data['extension_info']['date_added']){
-			$this->data['extension_info']['date_added'] =  dateISO2Display($this->data['extension_info']['date_added'], $datetime_format );
+			$this->data['extension_info']['date_added'] =  AHelperUtils::dateISO2Display($this->data['extension_info']['date_added'], $datetime_format );
 		}
 		$updates = $this->cache->pull('extensions.updates');
 

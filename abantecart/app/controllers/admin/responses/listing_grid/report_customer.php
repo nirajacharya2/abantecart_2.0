@@ -17,13 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerResponsesListingGridReportCustomer
- * @property ModelReportCustomer $model_report_customer
+ * @property \abc\model\admin\ModelReportCustomer $model_report_customer
  */
 class ControllerResponsesListingGridReportCustomer extends AController{
 	public $data = array ();
@@ -70,7 +77,7 @@ class ControllerResponsesListingGridReportCustomer extends AController{
 			$response->rows[$i]['cell'] = array (
 					$result['customer'],
 					$result['ip'],
-					dateISO2Display($result['date_added'],
+					AHelperUtils::dateISO2Display($result['date_added'],
 							$this->language->get('date_format_short') . ' ' . $this->language->get('time_format')),
 					$result['url'],
 			);

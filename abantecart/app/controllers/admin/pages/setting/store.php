@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
@@ -35,7 +39,7 @@ class ControllerPagesSettingStore extends AController {
 		if ($this->request->is_POST() && $this->_validateForm()) {
 			$store_id = $this->model_setting_store->addStore($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $store_id));
+			abc_redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $store_id));
 		}
 		$this->getForm();
 
@@ -52,7 +56,7 @@ class ControllerPagesSettingStore extends AController {
 
 		//nothing to do here for default store
 		if ($this->request->get['store_id'] == 0) {
-			redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $this->request->get['store_id']));
+			abc_redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $this->request->get['store_id']));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -60,7 +64,7 @@ class ControllerPagesSettingStore extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 			$this->model_setting_store->editStore($this->request->get['store_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('setting/store/update', '&store_id=' . $this->request->get['store_id']));
+			abc_redirect($this->html->getSecureURL('setting/store/update', '&store_id=' . $this->request->get['store_id']));
 		}
 		$this->getForm();
 
@@ -77,7 +81,7 @@ class ControllerPagesSettingStore extends AController {
 
 		//nothing to do here for default store
 		if ($this->request->get['store_id'] == 0) {
-			redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $this->request->get['store_id']));
+			abc_redirect($this->html->getSecureURL('setting/setting', '&active=details&store_id=' . $this->request->get['store_id']));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -85,7 +89,7 @@ class ControllerPagesSettingStore extends AController {
 		if (isset($this->request->get['store_id']) && $this->_validateDelete()) {
 			$this->model_setting_store->deleteStore($this->request->get['store_id']);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('setting/setting','&active=details&store_id=0'));
+			abc_redirect($this->html->getSecureURL('setting/setting','&active=details&store_id=0'));
 		}
 		$this->getForm();
 

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\ALength;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -122,7 +127,7 @@ class ControllerPagesLocalisationLengthClass extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 			$length_class_id = $this->model_localisation_length_class->addLengthClass($this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('localisation/length_class/update', '&length_class_id=' . $length_class_id ));
+			abc_redirect($this->html->getSecureURL('localisation/length_class/update', '&length_class_id=' . $length_class_id ));
 		}
 		$this->_getForm();
 
@@ -145,7 +150,7 @@ class ControllerPagesLocalisationLengthClass extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm()) {
 			$this->model_localisation_length_class->editLengthClass($this->request->get['length_class_id'], $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			redirect($this->html->getSecureURL('localisation/length_class/update', '&length_class_id=' . $this->request->get['length_class_id'] ));
+			abc_redirect($this->html->getSecureURL('localisation/length_class/update', '&length_class_id=' . $this->request->get['length_class_id'] ));
 		}
 		$this->_getForm();
 
@@ -196,7 +201,7 @@ class ControllerPagesLocalisationLengthClass extends AController {
 		} else {
 			$this->data['iso_code'] = '';
 		}
-
+		$is_predefined = false;
 		if (!isset($this->request->get['length_class_id'])) {
 			$this->data['action'] = $this->html->getSecureURL('localisation/length_class/insert');
 			$this->data['heading_title'] = $this->language->get('text_insert') . $this->language->get('text_class');

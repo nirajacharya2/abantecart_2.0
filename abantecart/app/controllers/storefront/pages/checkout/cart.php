@@ -17,20 +17,28 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\APromotion;
+use abc\core\AResource;
+use abc\lib\ADataset;
+use abc\lib\AFile;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
  * Class ControllerPagesCheckoutCart
- * @property AWeight $weight
+ * @property \abc\lib\AWeight $weight
  */
 class ControllerPagesCheckoutCart extends AController{
 	public $error = array ();
 	public $data = array ();
 
 	/**
-	 * @throws AException
 	 * NOTE: this method have a few hk_processData calls.
 	 */
 	public function main(){
@@ -66,14 +74,14 @@ class ControllerPagesCheckoutCart extends AController{
 
 			$this->cart->add($this->request->get['product_id'], $quantity, $option);
 			$this->extensions->hk_ProcessData($this, 'add_product');
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 
 		} else if ($this->request->is_GET() && isset($this->request->get['remove'])){
 
 			//remove product with button click.
 			$this->cart->remove($this->request->get['remove']);
 			$this->extensions->hk_ProcessData($this, 'remove_product');
-			redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 
 		} else if ($this->request->is_POST()){
             $post = $this->request->post;
@@ -118,7 +126,7 @@ class ControllerPagesCheckoutCart extends AController{
 					}
 
 					//for FILE-attributes
-					if (has_value($this->request->files['option']['name'])){
+					if (AHelperUtils::has_value($this->request->files['option']['name'])){
 
 						$fm = new AFile();
 						foreach ($this->request->files['option']['name'] as $id => $name){
@@ -129,13 +137,13 @@ class ControllerPagesCheckoutCart extends AController{
 
 							$options[$id] = $file_path_info['name'];
 
-							if (!has_value($name)){
+							if (!AHelperUtils::has_value($name)){
 								continue;
 							}
 
 							if ($attribute_data['required'] && !$this->request->files['option']['size'][$id]){
 								$this->session->data['error'] = $this->language->get('error_required_options');
-								redirect($_SERVER['HTTP_REFERER']);
+								abc_redirect($_SERVER['HTTP_REFERER']);
 							}
 
 							$file_data = array (
@@ -150,15 +158,15 @@ class ControllerPagesCheckoutCart extends AController{
 
 							$file_errors = $fm->validateFileOption($attribute_data['settings'], $file_data);
 
-							if (has_value($file_errors)){
+							if (AHelperUtils::has_value($file_errors)){
 								$this->session->data['error'] = implode('<br/>', $file_errors);
-								redirect($_SERVER['HTTP_REFERER']);
+								abc_redirect($_SERVER['HTTP_REFERER']);
 							} else{
 								$result = move_uploaded_file($file_data['tmp_name'], $file_path_info['path']);
 
 								if (!$result || $this->request->files['package_file']['error']){
-									$this->session->data['error'] .= '<br>Error: ' . getTextUploadError($this->request->files['option']['error'][$id]);
-									redirect($_SERVER['HTTP_REFERER']);
+									$this->session->data['error'] .= '<br>Error: ' . AHelperUtils::getTextUploadError($this->request->files['option']['error'][$id]);
+									abc_redirect($_SERVER['HTTP_REFERER']);
 								}
 							}
 
@@ -181,7 +189,7 @@ class ControllerPagesCheckoutCart extends AController{
 						$this->session->data['error'] = $text_errors;
 						//send options values back via _GET
 						$url = '&' . http_build_query(array ('option' => $post['option']));
-						redirect($this->html->getSecureURL($product_rt, '&product_id=' . $post['product_id'] . $url));
+						abc_redirect($this->html->getSecureURL($product_rt, '&product_id=' . $post['product_id'] . $url));
 					}
 
 					$this->cart->add($post['product_id'], $post['quantity'], $options);
@@ -203,7 +211,7 @@ class ControllerPagesCheckoutCart extends AController{
 
 			//next page is requested after cart update
 			if (isset($post['next_step'])){
-				redirect($this->html->getSecureURL($post['next_step']));
+				abc_redirect($this->html->getSecureURL($post['next_step']));
 			}
 
 			if (isset($post['redirect'])){
@@ -212,7 +220,7 @@ class ControllerPagesCheckoutCart extends AController{
 
 			if (isset($post['quantity']) || isset($post['remove'])){
 				$this->_unset_methods_data_in_session();
-				redirect($this->html->getSecureURL($cart_rt));
+				abc_redirect($this->html->getSecureURL($cart_rt));
 			}
 		}
 

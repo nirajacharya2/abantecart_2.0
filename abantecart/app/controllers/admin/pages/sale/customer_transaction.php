@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -35,8 +40,8 @@ class ControllerPagesSaleCustomerTransaction extends AController{
 
 		$customer_id = $this->request->get['customer_id'];
 		$customer_info = $this->model_sale_customer->getCustomer($customer_id);
-		if (!has_value($customer_info)) {
-			redirect($this->html->getSecureURL('sale/customer'));
+		if (!AHelperUtils::has_value($customer_info)) {
+			abc_redirect($this->html->getSecureURL('sale/customer'));
 		}
 
 		$this->document->setTitle($this->language->get('heading_title_transactions'));
@@ -177,17 +182,17 @@ class ControllerPagesSaleCustomerTransaction extends AController{
 				'text'  => $this->language->get('button_reset'),
 				'style' => 'button2',
 		));
-		$this->data['js_date_format'] = format4Datepicker($this->language->get('date_format_short'));
+		$this->data['js_date_format'] = AHelperUtils::format4Datepicker($this->language->get('date_format_short'));
 		$this->data['grid_search_form']['fields']['date_start'] = $form->getFieldHtml(array (
 				'type'    => 'input',
 				'name'    => 'date_start',
-				'default' => dateInt2Display(time()),
+				'default' => AHelperUtils::dateInt2Display(time()),
 		));
 
 		$this->data['grid_search_form']['fields']['date_end'] = $form->getFieldHtml(array (
 				'type'    => 'input',
 				'name'    => 'date_end',
-				'default' => dateInt2Display(time()),
+				'default' => AHelperUtils::dateInt2Display(time()),
 		));
 
 		$this->data['grid_settings']['search_form'] = true;
@@ -239,7 +244,7 @@ class ControllerPagesSaleCustomerTransaction extends AController{
 				'target' => 'new'
 		));
 
-		if (has_value($customer_info['orders_count']) && $customer_id) {
+		if (AHelperUtils::has_value($customer_info['orders_count']) && $customer_id) {
 			$this->data['button_orders_count'] = $form->getFieldHtml(
 					array (
 							'type'  => 'button',

@@ -9711,7 +9711,7 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('checkout','config_shipping_tax_estimate',1),
 ('checkout','config_coupon_on_cart_page',1),
 ('checkout','config_expire_order_days',30),
-('checkout','config_customer_cancelation_order_status_id',''),
+('checkout','config_customer_cancellation_order_status_id',''),
 ('checkout','config_zero_customer_balance','0'),
 
 -- Appearance

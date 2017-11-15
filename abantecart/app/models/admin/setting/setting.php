@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -139,7 +143,7 @@ class ModelSettingSetting extends Model {
 					AND store_id = '".(int)$store_id."'" );
 		foreach ($query->rows as $result) {
 			$value = $result['value'];
-			if (is_serialized($value)) {
+			if (AHelperUtils::is_serialized($value)) {
 				$value = unserialize($value);
 			}
 			$data[$result['key']] = $value;
@@ -155,8 +159,9 @@ class ModelSettingSetting extends Model {
 	public function editSetting($group, $data, $store_id=null) {
 		$store_id = is_null($store_id) ? ($this->config->get('config_store_id')) : (int)$store_id;
 		$languages = $this->language->getAvailableLanguages();
-		// check what is it - update or insert of setting
+		$url_protocol = $ssl_url_protocol = '';
 
+		// check what is it - update or insert of setting
 		$edit_type = 'insert';
 		foreach($languages as $language){
 			if( $this->config->get('config_description_'.$language['language_id'])) {
@@ -202,27 +207,27 @@ class ModelSettingSetting extends Model {
 			}
 		}
 
-		if(has_value($data['config_url'])){
+		if(AHelperUtils::has_value($data['config_url'])){
 			$url_protocol = preg_match("/^(https):\/\//", $data['config_url']) ? 'https' : 'http';
 		}
-		if(has_value($data['config_ssl_url'])){
+		if(AHelperUtils::has_value($data['config_ssl_url'])){
 			$ssl_url_protocol = preg_match("/^(https):\/\//", $data['config_ssl_url']) ? 'https' : 'http';
 		}
 
 		//need to add slash at the end because browsers do it too automatically
-		if(has_value($data['config_url']) && substr($data['config_url'],-1)!='/'){
+		if(AHelperUtils::has_value($data['config_url']) && substr($data['config_url'],-1)!='/'){
 			$data['config_url'] .= '/';
 		}
-		if(has_value($data['config_ssl_url']) && substr($data['config_ssl_url'],-1)!='/'){
+		if(AHelperUtils::has_value($data['config_ssl_url']) && substr($data['config_ssl_url'],-1)!='/'){
 			$data['config_ssl_url'] .= '/';
 		}
 		//need to set ssl_mode setting to use it in AHtml class for building correct URLs
-		if(!has_value($data['config_url']) XOR !has_value($data['config_ssl_url'])) {
+		if(!AHelperUtils::has_value($data['config_url']) XOR !AHelperUtils::has_value($data['config_ssl_url'])) {
 			$saved_settings = $this->getSetting($group, $store_id);
-			if (!has_value($data['config_url']) && has_value($data['config_ssl_url'])) {
+			if (!AHelperUtils::has_value($data['config_url']) && AHelperUtils::has_value($data['config_ssl_url'])) {
 				$url_protocol = preg_match("/^(https):\/\//", $saved_settings['config_url']) ? 'https' : 'http';
 			}
-			if (has_value($data['config_url']) && !has_value($data['config_ssl_url'])) {
+			if (AHelperUtils::has_value($data['config_url']) && !AHelperUtils::has_value($data['config_ssl_url'])) {
 				$ssl_url_protocol = preg_match("/^(https):\/\//",  $saved_settings['config_ssl_url']) ? 'https' : 'http';
 			}
 		}

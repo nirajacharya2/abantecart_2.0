@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -99,7 +103,7 @@ final class AConfig{
 		$db = $this->registry->get('db');
 
 		//detect URL for the store
-		$url = str_replace('www.', '', $_SERVER['HTTP_HOST']) . get_url_path($_SERVER['PHP_SELF']);
+		$url = str_replace('www.', '', $_SERVER['HTTP_HOST']) . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 		if (defined('INSTALL')){
 			$url = str_replace('install/', '', $url);
 		}
@@ -210,11 +214,11 @@ final class AConfig{
 					$warning->toLog();
 				}
 				//set config url to current domain
-				$this->cnfg['config_url'] = 'http://' . REAL_HOST . get_url_path($_SERVER['PHP_SELF']);
+				$this->cnfg['config_url'] = 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 			}
 
 			if (!$this->cnfg['config_url']){
-				$this->cnfg['config_url'] = 'http://' . REAL_HOST . get_url_path($_SERVER['PHP_SELF']);
+				$this->cnfg['config_url'] = 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 			}
 		}
 
@@ -223,9 +227,9 @@ final class AConfig{
 			//Check if admin has specific store in session or selected
 			$session = $this->registry->get('session');
 			$store_id = $this->registry->get('request')->get['store_id'];
-			if (has_value($store_id)){
+			if (AHelperUtils::has_value($store_id)){
 				$this->cnfg['current_store_id'] = (int)$store_id;
-			} else if (has_value($session->data['current_store_id'])){
+			} else if (AHelperUtils::has_value($session->data['current_store_id'])){
 				$this->cnfg['current_store_id'] = $session->data['current_store_id'];
 			} elseif (isset($session->data['config_store_id'])){
 				//nothing to do 

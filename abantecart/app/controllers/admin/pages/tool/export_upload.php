@@ -17,24 +17,28 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\lib\AData;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerPagesToolExportUpload extends AController {
-
+	public $data;
 	public function main()
 	{
 		$this->extensions->hk_InitData($this,__FUNCTION__);
         $redirect = $this->html->getSecureURL('tool/import_export', '&active=export');
 
         if ( !$this->request->is_POST() || !$this->user->canModify('tool/import_export') ) {
-            $this->redirect($redirect);
+            abc_redirect($redirect);
             return $this->dispatch('error/permission');
         }
 
         if ( empty($this->request->post['data']) ) {
             $this->session->data['error'] = 'Data for export is empty!';
-            $this->redirect($redirect);
+            abc_redirect($redirect);
         }
 
         $request = $this->validateRequest($this->request->post['data']);
@@ -48,8 +52,6 @@ class ControllerPagesToolExportUpload extends AController {
             } else {
                 $fileName = $this->request->post['options']['file_name'];
             }
-
-            $result = false;
 
             switch ($this->request->post['options']['file_format']) {
                 case 'csv':
@@ -91,14 +93,14 @@ class ControllerPagesToolExportUpload extends AController {
 
                 //update controller data
                 $this->extensions->hk_UpdateData($this,__FUNCTION__);
-                $this->redirect($redirect);
+                abc_redirect($redirect);
                 return null;
             } else {
                 exit('Error: Headers already sent out!');
             }
         } else {
             $this->session->data['error'] = 'Request for export is empty!';
-            $this->redirect($redirect);
+            abc_redirect($redirect);
             return null;
         }
 

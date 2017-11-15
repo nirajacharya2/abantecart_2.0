@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AAttribute;
+use abc\core\AHelperUtils;
+use abc\core\HtmlElementFactory;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -130,7 +135,7 @@ class AAttribute_Manager extends AAttribute{
 			}
 		}
 
-		if (has_value($data['settings'])){
+		if (AHelperUtils::has_value($data['settings'])){
 			$data['settings'] = serialize($data['settings']);
 		}
 
@@ -318,7 +323,7 @@ class AAttribute_Manager extends AAttribute{
 
 	/**
 	 * @param int $group_id
-	 * @return mixed
+	 * @void
 	 */
 	public function deleteAttributeGroup($group_id){
 
@@ -562,7 +567,7 @@ class AAttribute_Manager extends AAttribute{
 	 * @param int $language_id
 	 * @param null|int $attribute_parent_id
 	 * @param string $mode
-	 * @return array
+	 * @return array|int
 	 */
 	public function getAttributes($data = array (), $language_id = 0, $attribute_parent_id = null, $mode = 'default'){
 
@@ -572,8 +577,8 @@ class AAttribute_Manager extends AAttribute{
 
 		//Prepare filter config
 		$filter_params = array ('attribute_parent_id', 'status');
-		if (!has_value($data['attribute_type_id'])){
-			$filter_params[] = 'attribute_type_id'; // to prevent ambigious fields in sql query
+		if (!AHelperUtils::has_value($data['attribute_type_id'])){
+			$filter_params[] = 'attribute_type_id'; // to prevent ambiguous fields in sql query
 		}
 		//Build query string based on GET params first
 		$filter_form = new AFilter(array ('method' => 'get', 'filter_params' => $filter_params));
@@ -638,7 +643,7 @@ class AAttribute_Manager extends AAttribute{
 			$sql .= " ASC";
 		}
 
-		if (has_value($data['start']) || has_value($data['limit'])){
+		if (AHelperUtils::has_value($data['start']) || AHelperUtils::has_value($data['limit'])){
 			if ($data['start'] < 0){
 				$data['start'] = 0;
 			}
@@ -689,7 +694,7 @@ class AAttribute_Manager extends AAttribute{
 	 */
 	public function validateAttributeCommonData($data = array ()){
 		$error = array ();
-		$this->load->language('catalog/attribute');
+		$this->language->load('catalog/attribute');
 		// required
 		if (empty($data['attribute_type_id'])){
 			$this->error['attribute_type'] = $this->language->get('error_required') . ': "attribute_type_id"';
@@ -706,7 +711,7 @@ class AAttribute_Manager extends AAttribute{
 		if (empty($data['element_type'])){
 			$error['element_type'] = $this->language->get('error_required') . ': "element_type"';
 		}
-		if (has_value($data['regexp_pattern'])){
+		if (AHelperUtils::has_value($data['regexp_pattern'])){
 			if (@preg_match($data['regexp_pattern'], "AbanteCart") === false){
 				$error['regexp_pattern'] = $this->language->get('error_regexp_pattern');
 			}

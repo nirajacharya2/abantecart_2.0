@@ -17,15 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (!defined('DIR_CORE')){
+
+namespace abc\core;
+
+use abc\lib\ADebug;
+use abc\lib\AError;
+use abc\lib\AWarning;
+
+if (!defined('DIR_CORE')) {
 	header('Location: static_pages/');
 }
 
 /**
  * Class ADispatcher
- * @property ARequest $request
- * @property AResponse $response
- * @property AView $view
+ * @property \abc\lib\ARequest $request
+ * @property \abc\lib\AResponse $response
+ * @property \abc\lib\AView $view
  * @property ExtensionsApi $extensions
  */
 final class ADispatcher{
@@ -66,14 +73,14 @@ final class ADispatcher{
 
 		$this->registry = Registry::getInstance();
 		$rt = str_replace('../', '', $rt);
-		if (!empty($args)){
+		if (!empty($args)) {
 			$this->args = $args;
 		}
 
 		ADebug::checkpoint('ADispatch: ' . $rt . ' construct start');
 		// We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
-		if (!$this->_process_path($rt)){
-			$warning_txt = 'ADispatch: ' . $rt . ' construct FAILED. Missing or incorrect controller route path. Possibly, layout block is enabled for disabled or missing extension! ' . genExecTrace('full');
+		if (!$this->_process_path($rt)) {
+			$warning_txt = 'ADispatch: ' . $rt . ' construct FAILED. Missing or incorrect controller route path. Possibly, layout block is enabled for disabled or missing extension! ' . AHelperUtils::genExecTrace('full');
 			$warning = new AWarning($warning_txt);
 			$warning->toLog()->toDebug();
 		}
@@ -103,27 +110,29 @@ final class ADispatcher{
 		$path_nodes = explode('/', $rt);
 
 		//looking for controller in admin/storefront section
-		if( IS_ADMIN === true ) {
+		if (IS_ADMIN === true) {
 			$dir_app = DIR_APP . 'controllers/admin/';
-		}else{
+			$namespace = '\abc\controller\admin\\';
+		} else {
 			$dir_app = DIR_APP . 'controllers/storefront/';
+			$namespace = '\abc\controller\storefront\\';
 		}
-		foreach ($path_nodes as $path_node){
-			$path_build .= $path_node;
 
-			if (is_dir($dir_app . $path_build)){
+		foreach ($path_nodes as $path_node) {
+			$path_build .= $path_node;
+			if (is_dir($dir_app . $path_build)) {
 				$path_build .= '/';
 				array_shift($path_nodes);
 				continue;
 			}
 
-			if (is_file($dir_app . $path_build . '.php')){
+			if (is_file($dir_app . $path_build . '.php')) {
 				//Set pure controller route
 				$this->controller = $path_build;
 				//Set full file path to controller
 				$this->file = $dir_app . $path_build . '.php';
 				//Build Controller class name
-				$this->class = 'Controller' . preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
+				$this->class = $namespace.'Controller' . preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
 				array_shift($path_nodes);
 				$pathfound = true;
 				break;
@@ -132,28 +141,28 @@ final class ADispatcher{
 
 		//Last part is the method of function to call
 		$method_to_call = array_shift($path_nodes);
-		if ($method_to_call){
+		if ($method_to_call) {
 			$this->method = $method_to_call;
-		} else{
+		} else {
 			//Set default method
 			$this->method = 'main';
 		}
 
 		//already found the path, so return. This will optimize performance, and will not allow override core controllers. 
-		if ($pathfound == true){
+		if ($pathfound == true) {
 			return $pathfound;
 		}
 
 		// looking for controller in extensions section
 		$result = $this->registry->get('extensions')->isExtensionController($rt);
-		if ($result){
+		if ($result) {
 			$this->controller = $result['route'];
 			$this->file = $result['file'];
-			$this->class = $result['class'];
+			$this->class = $namespace.$result['class'];
 			$this->method = $result['method'];
 			// if controller was found in admin/storefront section && in extensions section
 			// warning will be added to log about controller override
-			if ($pathfound){
+			if ($pathfound) {
 				$warning = new AWarning("Extension <b>{$result['extension']}</b> override controller <b>$rt</b>");
 				$warning->toDebug();
 			}
@@ -166,7 +175,7 @@ final class ADispatcher{
 	// Clear function is public in case controller needs to be cleaned explicitly
 	public function clear(){
 		$vars = get_object_vars($this);
-		foreach ($vars as $key => $val){
+		foreach ($vars as $key => $val) {
 			$this->$key = null;
 		}
 	}
@@ -177,7 +186,7 @@ final class ADispatcher{
 	 */
 	protected function dispatchPrePost($route){
 		$result = '';
-		if ($this->extensions->isExtensionController($route)){
+		if ($this->extensions->isExtensionController($route)) {
 			//save output
 			$output = $this->response->getOutput();
 			//reset to save controller output
@@ -217,64 +226,70 @@ final class ADispatcher{
 		//Process the controller, layout and children
 
 		//check if we have missing class or everything
-		if (empty($this->class) && has_value($this->file)){
+		if (empty($this->class) && AHelperUtils::has_value($this->file)) {
 			#Build back trace of calling functions to provide more details
 			$backtrace = debug_backtrace();
 			$function_stack = '';
-			if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1){
+			if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1) {
 				$function_stack = 'Parent Controller: ' . $parent_controller->rt() . ' | ';
 			}
 
-			for ($i = 1; $i < count($backtrace); $i++){
+			for ($i = 1; $i < count($backtrace); $i++) {
 				$function_stack .= ' < ' . $backtrace[$i]['function'];
 			}
 			$url = $this->request->server['REQUEST_URI'];
-			$error = new AError('Error: URL: ' . $url . ' Could not load controller ' . $this->controller . '! Call stack: ' . $function_stack . '', AC_ERR_CLASS_CLASS_NOT_EXIST);
+			$error = new AError('Error: URL: ' . $url . ' Could not load controller ' . $this->controller . '! Call stack: ' . $function_stack . '',
+					AC_ERR_CLASS_CLASS_NOT_EXIST);
 			$error->toLog()->toDebug();
 			return null;
-		} else if (empty($this->file) && empty($this->class) || empty($this->method)){
-			$warning_txt = 'ADispatch: skipping unavailable controller …';
-			$warning = new AWarning($warning_txt);
-			$warning->toDebug();
-			return null;
+		} else {
+			if (empty($this->file) && empty($this->class) || empty($this->method)) {
+				$warning_txt = 'ADispatch: skipping unavailable controller …';
+				$warning = new AWarning($warning_txt);
+				$warning->toDebug();
+				return null;
+			}
 		}
 
 		//check for controller.pre
 		$output_pre = $this->dispatchPrePost($this->controller . POSTFIX_PRE);
 
-		/** @noinspection PhpIncludeInspection */
 		require_once($this->file);
 		/**
 		 * @var $controller AController
 		 */
 		$controller = null;
-		if (class_exists($this->class)){
-			$controller = new $this->class($this->registry, $this->args["instance_id"], $this->controller, $parent_controller);
+		if (class_exists($this->class)) {
+			$controller = new $this->class($this->registry, $this->args["instance_id"], $this->controller,
+					$parent_controller);
 			$controller->dispatcher = $this;
-		} else{
-			$error = new AError('Error: controller class not exist ' . $this->class . '!', AC_ERR_CLASS_CLASS_NOT_EXIST);
+		} else {
+			$error = new AError('Error: controller class not exist ' . $this->class . '!',
+					AC_ERR_CLASS_CLASS_NOT_EXIST);
 			$error->toLog()->toDebug();
 		}
-		if (is_callable(array ($controller, $this->method))){
+		if (is_callable(array ($controller, $this->method))) {
 			/**
 			 * @var $dispatch ADispatcher
 			 */
 			$dispatch = call_user_func_array(array ($controller, $this->method), $this->args);
 			//Check if return is a dispatch and need to call new page
-			if ($dispatch && is_object($dispatch)){
-				if ($this->args["instance_id"] == 0){
+			if ($dispatch && is_object($dispatch)) {
+				if ($this->args["instance_id"] == 0) {
 					//If main controller come back for new dispatch
 					return $dispatch->getController() . '/' . $dispatch->getMethod();
-				} else{
+				} else {
 					// Call new dispatch for new controller and exit
 					//???? need to put limit for recursion to prevent overflow
 					$dispatch->dispatch();
 					return null;
 				}
-			} else if ($dispatch == 'completed'){
-				//Check if we have message completed in controller response.
-				//If completed. stop further execution.
-				return 'completed';
+			} else {
+				if ($dispatch == 'completed') {
+					//Check if we have message completed in controller response.
+					//If completed. stop further execution.
+					return 'completed';
+				}
 			}
 			/**
 			 * Load layout and process children controllers
@@ -285,16 +300,17 @@ final class ADispatcher{
 			ADebug::variable('Processing children of ' . $this->controller, $children);
 
 			//Process each child controller
-			foreach ($children as $child){
+			foreach ($children as $child) {
 				//Add highest Debug level here with backtrace to review this
 				ADebug::checkpoint($child['controller'] . ' ( child of ' . $this->controller . ', instance_id: ' . $child['instance_id'] . ' ) dispatch START');
 				//Process each child and create dispatch to call recursive
 				$dispatch = new ADispatcher($child['controller'], array ("instance_id" => $child['instance_id']));
 				$dispatch->dispatch($controller);
 				// Append output of child controller to current controller
-				if ($child['position']){ // made for recognizing few custom_blocks in the same placeholder
-					$controller->view->assign($child['block_txt_id'] . '_' . $child['instance_id'], $this->response->getOutput());
-				} else{
+				if ($child['position']) { // made for recognizing few custom_blocks in the same placeholder
+					$controller->view->assign($child['block_txt_id'] . '_' . $child['instance_id'],
+							$this->response->getOutput());
+				} else {
 					$controller->view->assign($child['block_txt_id'], $this->response->getOutput());
 				}
 				//clean up and remove output
@@ -313,8 +329,9 @@ final class ADispatcher{
 			//clean up and destroy the object
 			unset($controller);
 			unset($dispatch);
-		} else{
-			$err = new AError('Error: controller method not exist ' . $this->class . '::' . $this->method . '!', AC_ERR_CLASS_METHOD_NOT_EXIST);
+		} else {
+			$err = new AError('Error: controller method not exist ' . $this->class . '::' . $this->method . '!',
+					AC_ERR_CLASS_METHOD_NOT_EXIST);
 			$err->toLog()->toDebug();
 		}
 		ADebug::checkpoint('' . $this->class . '/' . $this->method . ' dispatch END');

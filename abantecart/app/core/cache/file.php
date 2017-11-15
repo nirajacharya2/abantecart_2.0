@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\cache;
+use abc\core\AHelperUtils;
+use abc\lib\AError;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -362,7 +366,7 @@ class ACacheDriverFile extends ACacheDriver{
 		}
 
 		//check permissions before rename
-		if (!is_writable_dir($path)){
+		if (!AHelperUtils::is_writable_dir($path)){
 			$err_text = sprintf('Error: Cannot delete cache folder: %s! Permission denied.', $path);
 			$error = new AError($err_text);
 			$error->toLog()->toDebug();

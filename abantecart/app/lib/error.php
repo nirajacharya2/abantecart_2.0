@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -66,7 +69,7 @@ class AError{
 		$this->code = $code;
 		$this->msg = $msg . ' in ' . $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
 
-		if (class_exists('Registry')){
+		if (class_exists('\abc\core\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 		//TODO: use registry object instead?? what if registry not accessible?
@@ -146,7 +149,7 @@ class AError{
 	 *            reset_value -> true to reset values in a field (if applicable)
 	 *            reload_page -> true to reload page after dialog close
 	 *            TODO: Add redirect_url on dialog close
-	 * @return mixed
+	 * @return null|mixed
 	 */
 	public function toJSONResponse($status_text_and_code, $err_data = array ()){
 		//detect HTTP response status code based on readable text status
@@ -173,7 +176,7 @@ class AError{
 			 */
 			$response = $this->registry->get('response');
 			/**
-			 * @var $load ALoader
+			 * @var $load \abc\core\ALoader
 			 */
 			$load = $this->registry->get('load');
 			$response->addHeader($http_header_txt);

@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\lib\AEncryption;
+use abc\lib\AMail;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -34,7 +41,7 @@ class ControllerPagesAccountForgotten extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		if ($this->customer->isLogged()) {
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->setTitle( $this->language->get('heading_title') );
@@ -55,7 +62,7 @@ class ControllerPagesAccountForgotten extends AController {
                     $this->loadLanguage('mail/account_forgotten');
 
                     $customer_id = $customer_details['customer_id'];
-                    $code = genToken(32);
+                    $code = AHelperUtils::genToken(32);
                     //save password reset code
                     $this->model_account_customer->updateOtherData($customer_id, array('password_reset' => $code));
                     //build reset link
@@ -82,7 +89,7 @@ class ControllerPagesAccountForgotten extends AController {
                     $mail->send();
 
                     $this->session->data['success'] = $this->language->get('text_success');
-                    redirect($this->html->getSecureURL('account/login'));
+                    abc_redirect($this->html->getSecureURL('account/login'));
                 }
             }
 		}
@@ -161,7 +168,7 @@ class ControllerPagesAccountForgotten extends AController {
 		$this->loadLanguage('mail/account_forgotten');
 
 		if ($this->customer->isLogged()) {
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->setTitle( $this->language->get('heading_title') );
@@ -206,7 +213,7 @@ class ControllerPagesAccountForgotten extends AController {
 			    $this->model_account_customer->updateOtherData($customer_id, $customer_details['data']);
 								
 				$this->session->data['success'] = $this->language->get('text_success');
-				redirect($this->html->getSecureURL('account/login'));
+				abc_redirect($this->html->getSecureURL('account/login'));
 			}
 		}
 
@@ -292,7 +299,7 @@ class ControllerPagesAccountForgotten extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		if ($this->customer->isLogged()) {
-			redirect($this->html->getSecureURL('account/account'));
+			abc_redirect($this->html->getSecureURL('account/account'));
 		}
 
 		$this->document->setTitle( $this->language->get('heading_title_loginname') );
@@ -321,7 +328,7 @@ class ControllerPagesAccountForgotten extends AController {
                     $mail->send();
 
                     $this->session->data['success'] = $this->language->get('text_success_loginname');
-                    redirect($this->html->getSecureURL('account/login'));
+                    abc_redirect($this->html->getSecureURL('account/login'));
                 }
             }
 		}

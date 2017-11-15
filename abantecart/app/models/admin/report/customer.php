@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -131,23 +135,23 @@ class ModelReportCustomer extends Model {
 		$filter = (isset($data['filter']) ? $data['filter'] : array());
 		$implode = array();
 		$where = '';
-		if (has_value($filter['order_status'])) {
+		if (AHelperUtils::has_value($filter['order_status'])) {
 			$implode[] = " o.order_status_id = " . (int)$filter['order_status'] . " ";
 		}
 
-		if (has_value($filter['customer_id'])) {
+		if (AHelperUtils::has_value($filter['customer_id'])) {
 			$implode[] = " o.customer_id = " . (int)$filter['customer_id'] . " ";
 		}
 		if (!empty($filter['date_start'])) {
-			$date_start = dateDisplay2ISO($filter['date_start'],$this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') >= DATE_FORMAT('" . $this->db->escape($date_start) . "','%Y-%m-%d') ";
 		}
 		if (!empty($filter['date_end'])) {
-			$date_end = dateDisplay2ISO($filter['date_end'],$this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') <= DATE_FORMAT('" . $this->db->escape($date_end) . "','%Y-%m-%d') ";
 		}
 		//filter for first and last name
-		if (has_value($filter['customer'])) {
+		if (AHelperUtils::has_value($filter['customer'])) {
 			$implode[] = "CONCAT(o.firstname, ' ', o.lastname) LIKE '%" . $this->db->escape($filter['customer']) . "%' collate utf8_general_ci";
 		}
 
@@ -238,19 +242,19 @@ class ModelReportCustomer extends Model {
 		$filter = (isset($data['filter']) ? $data['filter'] : array());
 		$implode = array();
 		$where = '';
-		if (has_value($filter['customer_id'])) {
+		if (AHelperUtils::has_value($filter['customer_id'])) {
 			$implode[] = " c.customer_id = " . (int)$filter['customer_id'] . " ";
 		}
 		if (!empty($filter['date_start'])) {
-			$date_start = dateDisplay2ISO($filter['date_start'],$this->language->get('date_format_short'));
+			$date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') >= DATE_FORMAT('" . $this->db->escape($date_start) . "','%Y-%m-%d') ";
 		}
 		if (!empty($filter['date_end'])) {
-			$date_end = dateDisplay2ISO($filter['date_end'],$this->language->get('date_format_short'));
+			$date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'],$this->language->get('date_format_short'));
 			$implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') <= DATE_FORMAT('" . $this->db->escape($date_end) . "','%Y-%m-%d') ";
 		}	
 		//filter for first and last name
-		if (has_value($filter['customer'])) {
+		if (AHelperUtils::has_value($filter['customer'])) {
 			$implode[] = "CONCAT(c.firstname, ' ', c.lastname) LIKE '%" . $this->db->escape($filter['customer']) . "%' collate utf8_general_ci";
 		}
 		

@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\ADispatcher;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -87,7 +92,7 @@ class ATaskManager{
 			$this->toLog('Task_id: ' . $task['task_id'] ." state - running.");
 			if ($task['interval'] > 0
 					&&
-				(time() - dateISO2Int($task['last_time_run']) >= $task['interval'] || is_null($task['last_time_run']))){
+				(time() - AHelperUtils::dateISO2Int($task['last_time_run']) >= $task['interval'] || is_null($task['last_time_run']))){
 				$this->toLog('Task_id: ' . $task['task_id'] . ' skipped.');
 				continue;
 			}
@@ -116,7 +121,7 @@ class ATaskManager{
 		//check interval and skip task
 		//check if task ran first time or
 		if ($task['interval'] > 0
-				&& (is_null($task['last_time_run'] || time() - dateISO2Int($task['last_time_run']) >= $task['interval']))
+				&& (is_null($task['last_time_run'] || time() - AHelperUtils::dateISO2Int($task['last_time_run']) >= $task['interval']))
 		){
 			$this->toLog('Warning: task_id ' . $task_id . ' skipped. Task interval.');
 			return false;
@@ -216,7 +221,7 @@ class ATaskManager{
 						'status'        => self::STATUS_READY
 				)
 		);
-
+		$response_message = '';
 		try{
 			$dd = new ADispatcher($step_details['controller'], array($task_id, $step_id, $step_details['settings']));
 			// waiting for result array from step's controller
@@ -351,7 +356,7 @@ class ATaskManager{
 				'progress');
 		$data = array ();
 		foreach ($upd_flds as $fld_name){
-			if (has_value($state[$fld_name])){
+			if (AHelperUtils::has_value($state[$fld_name])){
 				$data[$fld_name] = $state[$fld_name];
 			}
 		}
@@ -371,7 +376,7 @@ class ATaskManager{
 				'status');
 		$data = array ();
 		foreach ($upd_flds as $fld_name){
-			if (has_value($state[$fld_name])){
+			if (AHelperUtils::has_value($state[$fld_name])){
 				$data[$fld_name] = $state[$fld_name];
 			}
 		}
@@ -385,7 +390,7 @@ class ATaskManager{
 	 */
 	public function toLog($message, $msg_code = 1){
 		if(!$message){
-			return null;
+			return false;
 		}
 		if($this->mode=='html'){
 			$this->run_log[] = '<i style="color: ' . ($msg_code ? 'green' : 'red') . '">' . $message . "</i>";
@@ -393,6 +398,7 @@ class ATaskManager{
 			$this->run_log[] = $message;
 		}
 		$this->task_log->write($message);
+		return true;
 	}
 
 	/**
@@ -437,7 +443,7 @@ class ATaskManager{
 						NOW())";
 		$this->db->query($sql);
 		$task_id = $this->db->getLastId();
-		if (has_value($data['created_by']) || has_value($data['settings'])){
+		if (AHelperUtils::has_value($data['created_by']) || AHelperUtils::has_value($data['settings'])){
 			$this->updateTaskDetails($task_id, $data);
 		}
 		return $task_id;
@@ -468,7 +474,7 @@ class ATaskManager{
 		);
 		$update = array ();
 		foreach ($upd_flds as $fld_name => $fld_type){
-			if (has_value($data[$fld_name])){
+			if (AHelperUtils::has_value($data[$fld_name])){
 				switch($fld_type){
 					case 'int':
 						$value = (int)$data[$fld_name];
@@ -492,7 +498,7 @@ class ATaskManager{
 				WHERE task_id = " . (int)$task_id;
 		$this->db->query($sql);
 
-		if (has_value($data['created_by']) || has_value($data['settings'])){
+		if (AHelperUtils::has_value($data['created_by']) || AHelperUtils::has_value($data['settings'])){
 			$this->updateTaskDetails($task_id, $data);
 		}
 		return true;
@@ -520,7 +526,7 @@ class ATaskManager{
 		$result = $this->db->query($sql);
 		if ($result->num_rows) {
 			foreach ($result->row as $k => $ov){
-				if (!has_value($data[$k])){
+				if (!AHelperUtils::has_value($data[$k])){
 					$data[$k] = $ov;
 				}
 			}
@@ -599,7 +605,7 @@ class ATaskManager{
 		);
 		$update = array ();
 		foreach ($upd_flds as $fld_name => $fld_type){
-			if (has_value($data[$fld_name])){
+			if (AHelperUtils::has_value($data[$fld_name])){
 				switch($fld_type){
 					case 'int':
 						$value = (int)$data[$fld_name];
@@ -714,7 +720,7 @@ class ATaskManager{
 				WHERE task_id = " . $task_id . "
 				ORDER BY sort_order";
 			$result = $this->db->query($sql);
-			$memory_limit = getMemoryLimitInBytes();
+			$memory_limit = AHelperUtils::getMemoryLimitInBytes();
 			foreach ($result->rows as $row){
 				$used = memory_get_usage();
 				if($memory_limit - $used <= 204800){
@@ -787,7 +793,7 @@ class ATaskManager{
 			$sql .= " AND " . $data['subsql_filter'];
 		}
 
-		if (has_value($data['filter']['name'])){
+		if (AHelperUtils::has_value($data['filter']['name'])){
 			$sql .= " AND (LCASE(t.name) LIKE '%" . $this->db->escape(mb_strtolower($data['filter']['name'])) . "%'";
 		}
 
@@ -810,7 +816,7 @@ class ATaskManager{
 			$sql .= " AND " . $data['subsql_filter'];
 		}
 
-		if (has_value($data['filter']['name'])){
+		if (AHelperUtils::has_value($data['filter']['name'])){
 			$sql .= " AND (LCASE(t.name) LIKE '%" . $this->db->escape(mb_strtolower($data['filter']['name'])) . "%')";
 		}
 
@@ -857,7 +863,7 @@ class ATaskManager{
 					&&
 					$row['max_execution_time']>0
 					&&
-					(time() - dateISO2Int($row['last_time_run'])) > $row['max_execution_time']
+					(time() - AHelperUtils::dateISO2Int($row['last_time_run'])) > $row['max_execution_time']
 			){
 				//mark task as stuck
 				$row['status'] = -1;

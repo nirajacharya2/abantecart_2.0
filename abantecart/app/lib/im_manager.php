@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+use Exception;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -167,7 +172,7 @@ class AIMManager extends AIM{
 					/** @noinspection PhpIncludeInspection */
 					include_once($driver_file);
 					//if class of driver
-					$classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
+					$classname = "\abc\lib\\".preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 					if (!class_exists($classname)){
 						$error = new AError('IM-driver ' . $driver_txt_id . ' load error.');
 						$error->toLog()->toMessages();
@@ -189,7 +194,7 @@ class AIMManager extends AIM{
 				//send notification to customer, check if selected or forced
 				$force_arr = $sendpoint_data[0]['force_send'];
 				$forced = false;
-				if (has_value($force_arr) && in_array($protocol, $force_arr)){
+				if (AHelperUtils::has_value($force_arr) && in_array($protocol, $force_arr)){
 					$forced = true;
 				}
 				if ($customer_im_settings[$sendpoint][$protocol] || $forced){

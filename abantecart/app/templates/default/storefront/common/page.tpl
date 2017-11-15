@@ -160,9 +160,9 @@ if($scripts_bottom && is_array($scripts_bottom)) {
 			foreach($ga_data['items'] as $item){ ?>
 				ga('ecommerce:addItem', {
 					'id': '<?php  echo $item['id']; ?>',
-					'name': '<?php  js_echo($item['name']); ?>',
-					'sku': '<?php  js_echo($item['sku']); ?>',
-					'brand': '<?php  js_echo($item['brand']); ?>',
+					'name': '<?php  abc_js_echo($item['name']); ?>',
+					'sku': '<?php  abc_js_echo($item['sku']); ?>',
+					'brand': '<?php  abc_js_echo($item['brand']); ?>',
 					'price': '<?php  echo $item['price']; ?>',
 					'quantity': '<?php  echo $item['quantity']; ?>'
 				});

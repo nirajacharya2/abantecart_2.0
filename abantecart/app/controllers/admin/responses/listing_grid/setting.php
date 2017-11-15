@@ -17,6 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AHelperUtils;
+use abc\lib\AConfigManager;
+use abc\lib\AError;
+use abc\lib\AFilter;
+use abc\lib\AJson;
+use stdClass;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
@@ -112,7 +121,7 @@ class ControllerResponsesListingGridSetting extends AController {
 		if (isset($this->request->get[ 'group' ])) {
 			$group = $this->request->get[ 'group' ];
 			//for appearance settings per template
-			if( $this->request->get['group']=='appearance' && has_value($this->request->get['tmpl_id']) && $this->request->get['tmpl_id'] != 'default'){
+			if( $this->request->get['group']=='appearance' && AHelperUtils::has_value($this->request->get['tmpl_id']) && $this->request->get['tmpl_id'] != 'default'){
 				$group = $this->request->get['tmpl_id'];
 			}
 
@@ -126,13 +135,13 @@ class ControllerResponsesListingGridSetting extends AController {
 				$data = array($key => $value);
 
 				//html decode store name
-				if (has_value($data['store_name'])) {
+				if (AHelperUtils::has_value($data['store_name'])) {
 					$data['store_name'] = html_entity_decode($data['store_name'], ENT_COMPAT, 'UTF-8');
 				}
 
 				//when change base currency for default store also change values for all currencies in database before saving
 				if (!(int)$this->request->get[ 'store_id' ]
-						&& has_value($data['config_currency'])
+						&& AHelperUtils::has_value($data['config_currency'])
 						&& $data['config_currency'] != $this->config->get('config_currency')
 				){
 					$this->loadModel('localisation/currency');
@@ -140,7 +149,7 @@ class ControllerResponsesListingGridSetting extends AController {
 				}
 
 				$this->model_setting_setting->editSetting($group, $data, $this->request->get[ 'store_id' ]);
-                startStorefrontSession($this->user->getId());
+                AHelperUtils::startStorefrontSession($this->user->getId());
 			}
 			return null;
 		}

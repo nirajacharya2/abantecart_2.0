@@ -17,22 +17,23 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 class ControllerResponsesIndexHome extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function main() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//temporаry solution for home page - top category list
+		//temporary solution for home page - top category list
 		if($this->config->get('embed_mode') == true){
 			$continue_url = $this->html->getURL('product/category');
-			$this->redirect($continue_url);
+			abc_redirect($continue_url);
 		}
 
 		$this->addChild('responses/embed/head', 'head');
@@ -40,7 +41,5 @@ class ControllerResponsesIndexHome extends AController {
 		$this->processTemplate('embed/index/home.tpl');
 
 		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-
-	}	
-
+	}
 }

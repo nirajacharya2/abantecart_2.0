@@ -17,13 +17,14 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
 class ControllerResponsesCommonFormCollector extends AController
 {
-    private $error = array();
-
     public function main()
     {
         //init controller data
@@ -32,6 +33,8 @@ class ControllerResponsesCommonFormCollector extends AController
         $target = func_get_arg(1);
 		if(func_num_args()>2){
         	$success_script = func_get_arg(2);
+		}else{
+			$success_script = '';
 		}
 
         $this->view->assign('form_id', $form_id);

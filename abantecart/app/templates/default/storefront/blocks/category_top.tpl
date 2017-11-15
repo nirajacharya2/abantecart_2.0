@@ -15,7 +15,7 @@
     						}
     					}?>
     					<!-- Top Nav Start -->
-    					<?php echo  buildStoreFrontMenuTree($storefront_menu); ?>
+    					<?php echo  \abc\core\AHelperHtml::buildStoreFrontMenuTree($storefront_menu); ?>
     				</ul>
     			</div>
     		</li>

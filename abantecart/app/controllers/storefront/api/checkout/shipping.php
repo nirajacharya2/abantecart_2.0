@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -28,7 +31,7 @@ class ControllerApiCheckoutShipping extends AControllerAPI {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 		$request = $this->rest->getRequestParams();
-		
+
 		if (!$this->customer->isLoggedWithToken( $request['token'] )) {
 			$this->rest->sendResponse(401, array( 'error' => 'Not logged in or Login attempt failed!' ) );
 			return null;

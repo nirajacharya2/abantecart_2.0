@@ -17,21 +17,28 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\lib\AError;
+use abc\lib\AJson;
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
 	header('Location: static_pages/');
 }
 
+/**
+ * Class ControllerResponsesLocalisationLanguageDefinitionForm
+ * @package abc\controller\admin
+ * @property \abc\model\admin\ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
+ */
 class ControllerResponsesLocalisationLanguageDefinitionForm extends AController {
 	public $data = array();
 	public $error = array();
-	private $rt = 'localisation/language_definition_form';
-
-
+	protected $rt = 'localisation/language_definition_form';
 	public function update() {
-
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
-
 
 		if (!$this->user->canModify($this->rt)) {
 			$error = new AError('');
@@ -144,7 +151,7 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController 
 		//build the rest of the form and data
 		$ret_data = $this->model_localisation_language_definitions->buildFormData($this->request, $this->data, $form);
 		if ($ret_data['redirect_params']) {
-			$this->redirect($this->data['action'] . $ret_data['redirect_params']);
+			abc_redirect($this->data['action'] . $ret_data['redirect_params']);
 		}
 
 		$this->view->assign('help_url', $this->gen_help_url('language_definition_edit'));

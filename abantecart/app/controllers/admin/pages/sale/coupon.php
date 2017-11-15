@@ -17,6 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\AResource;
+
+
 if (!defined('DIR_CORE') || !IS_ADMIN) {
     header('Location: static_pages/');
 }
@@ -209,25 +216,25 @@ class ControllerPagesSaleCoupon extends AController {
         $this->document->setTitle($this->language->get('heading_title'));
         $this->load->library('json');
         if ( $this->request->is_POST() && $this->_validateForm()) {
-			if (has_value($this->request->post[ 'date_start' ])) {
-				$this->request->post[ 'date_start' ] = dateDisplay2ISO(
+			if (AHelperUtils::has_value($this->request->post[ 'date_start' ])) {
+				$this->request->post[ 'date_start' ] = AHelperUtils::dateDisplay2ISO(
 																		$this->request->post[ 'date_start' ],
 																		$this->language->get('date_format_short')
 				);
 			}
-			if (has_value($this->request->post[ 'date_end' ])) {
-				$this->request->post[ 'date_end' ] = dateDisplay2ISO($this->request->post[ 'date_end' ],$this->language->get('date_format_short'));
+			if (AHelperUtils::has_value($this->request->post[ 'date_end' ])) {
+				$this->request->post[ 'date_end' ] = AHelperUtils::dateDisplay2ISO($this->request->post[ 'date_end' ],$this->language->get('date_format_short'));
 				if(strtotime($this->request->post[ 'date_end' ])<time()){
 					$this->request->post[ 'status' ] = 0;
 				}
 			}
 
-	        $this->request->post['discount'] = preformatFloat($this->request->post['discount'], $this->language->get('decimal_point') );
-	        $this->request->post['total'] = preformatFloat($this->request->post['total'], $this->language->get('decimal_point') );
+	        $this->request->post['discount'] = AHelperUtils::preformatFloat($this->request->post['discount'], $this->language->get('decimal_point') );
+	        $this->request->post['total'] = AHelperUtils::preformatFloat($this->request->post['total'], $this->language->get('decimal_point') );
 
             $coupon_id = $this->model_sale_coupon->addCoupon($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            redirect($this->html->getSecureURL('sale/coupon/update', '&coupon_id=' . $coupon_id));
+            abc_redirect($this->html->getSecureURL('sale/coupon/update', '&coupon_id=' . $coupon_id));
         }
         $this->_getForm();
         $this->view->assign('form_language_switch', '');
@@ -250,23 +257,23 @@ class ControllerPagesSaleCoupon extends AController {
         $this->load->library('json');
         if ( $this->request->is_POST() && $this->_validateForm()) {
         	$post = $this->request->post;
-			if (has_value($post[ 'date_start' ])) {
-				$post[ 'date_start' ] = dateDisplay2ISO($post[ 'date_start' ],$this->language->get('date_format_short'));
+			if (AHelperUtils::has_value($post[ 'date_start' ])) {
+				$post[ 'date_start' ] = AHelperUtils::dateDisplay2ISO($post[ 'date_start' ],$this->language->get('date_format_short'));
 			}
-			if (has_value($post[ 'date_end' ])) {
-				$post[ 'date_end' ] = dateDisplay2ISO($post[ 'date_end' ],$this->language->get('date_format_short'));
+			if (AHelperUtils::has_value($post[ 'date_end' ])) {
+				$post[ 'date_end' ] = AHelperUtils::dateDisplay2ISO($post[ 'date_end' ],$this->language->get('date_format_short'));
 				if(strtotime($post[ 'date_end' ])<time()){
 					$post[ 'status' ] = 0;
 				}
 			}
 
-	        $post['discount'] = preformatFloat($post['discount'], $this->language->get('decimal_point') );
-	        $post['total'] = preformatFloat($post['total'], $this->language->get('decimal_point') );
+	        $post['discount'] = AHelperUtils::preformatFloat($post['discount'], $this->language->get('decimal_point') );
+	        $post['total'] = AHelperUtils::preformatFloat($post['total'], $this->language->get('decimal_point') );
 
             $this->model_sale_coupon->editCoupon($this->request->get['coupon_id'], $post);
             $this->model_sale_coupon->editCouponProducts($this->request->get['coupon_id'], $post);
             $this->session->data['success'] = $this->language->get('text_success');
-            redirect($this->html->getSecureURL('sale/coupon/update', '&coupon_id=' . $this->request->get['coupon_id']));
+            abc_redirect($this->html->getSecureURL('sale/coupon/update', '&coupon_id=' . $this->request->get['coupon_id']));
         }
         $this->_getForm();
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
@@ -294,7 +301,7 @@ class ControllerPagesSaleCoupon extends AController {
             'separator' => ' :: '
         ));
 
-        if (has_value($this->request->get['coupon_id']) && $this->request->is_GET() ) {
+        if (AHelperUtils::has_value($this->request->get['coupon_id']) && $this->request->is_GET() ) {
             $coupon_info = $this->model_sale_coupon->getCouponByID($this->request->get['coupon_id']);
         }
 
@@ -327,22 +334,22 @@ class ControllerPagesSaleCoupon extends AController {
 
 	    //check if coupon is active based on dates and update status
 		$now = time();
-		if ( ($this->data[ 'date_start' ] && dateISO2Int($this->data[ 'date_start' ]) > $now) || ($this->data[ 'date_end' ] && dateISO2Int($this->data[ 'date_end' ]) < $now ) ) {
+		if ( ($this->data[ 'date_start' ] && AHelperUtils::dateISO2Int($this->data[ 'date_start' ]) > $now) || ($this->data[ 'date_end' ] && AHelperUtils::dateISO2Int($this->data[ 'date_end' ]) < $now ) ) {
 			$this->data[ 'status' ] = 0;
 		}
 
         if (isset($this->request->post['date_start'])) {
             $this->data['date_start'] = $this->request->post['date_start'];
         } elseif (isset($coupon_info)) {
-            $this->data['date_start'] = dateISO2Display($coupon_info['date_start'], $this->language->get('date_format_short'));
+            $this->data['date_start'] = AHelperUtils::dateISO2Display($coupon_info['date_start'], $this->language->get('date_format_short'));
         } else {
-            $this->data['date_start'] = dateInt2Display(time(), $this->language->get('date_format_short'));
+            $this->data['date_start'] = AHelperUtils::dateInt2Display(time(), $this->language->get('date_format_short'));
         }
 
         if (isset($this->request->post['date_end'])) {
             $this->data['date_end'] = $this->request->post['date_end'];
         } elseif (isset($coupon_info)) {
-            $this->data['date_end'] = dateISO2Display($coupon_info['date_end'], $this->language->get('date_format_short'));
+            $this->data['date_end'] = AHelperUtils::dateISO2Display($coupon_info['date_end'], $this->language->get('date_format_short'));
         } else {
             $this->data['date_end'] = '';
         }
@@ -360,12 +367,12 @@ class ControllerPagesSaleCoupon extends AController {
         }
 
 
-        if ( !has_value($this->data['status']) ) {
+        if ( !AHelperUtils::has_value($this->data['status']) ) {
             $this->data['status'] = 1;
         }
 
 
-        if (!has_value($this->request->get['coupon_id'])) {
+        if (!AHelperUtils::has_value($this->request->get['coupon_id'])) {
             $this->data['action'] = $this->html->getSecureURL('sale/coupon/insert');
             $this->data['heading_title'] = $this->language->get('text_insert') . ' ' . $this->language->get('text_coupon');
             $this->data['update'] = '';
@@ -449,12 +456,12 @@ class ControllerPagesSaleCoupon extends AController {
         $this->data['form']['fields']['discount'] = $form->getFieldHtml(array(
             'type' => 'input',
             'name' => 'discount',
-            'value' => moneyDisplayFormat($this->data['discount']),
+            'value' => AHelperUtils::moneyDisplayFormat($this->data['discount']),
         ));
         $this->data['form']['fields']['total'] = $form->getFieldHtml(array(
             'type' => 'input',
             'name' => 'total',
-            'value' => moneyDisplayFormat($this->data['total']),
+            'value' => AHelperUtils::moneyDisplayFormat($this->data['total']),
         ));
         $this->data['form']['fields']['logged'] = $form->getFieldHtml(array(
             'type' => 'selectbox',
@@ -480,8 +487,8 @@ class ControllerPagesSaleCoupon extends AController {
         			'type' => 'date',
         			'name' => 'date_start',
         			'value' => $this->data[ 'date_start' ],
-        			'default' => dateNowDisplay(),
-        			'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+        			'default' => AHelperUtils::dateNowDisplay(),
+        			'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
         			'highlight' => 'future',
 				    'required' => true ));
 
@@ -490,7 +497,7 @@ class ControllerPagesSaleCoupon extends AController {
         			'name' => 'date_end',
         			'value' => $this->data[ 'date_end' ],
         			'default' => '',
-        			'dateformat' => format4Datepicker($this->language->get('date_format_short')),
+        			'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
         			'highlight' => 'past',
 					'required' => true ));
 
@@ -598,10 +605,10 @@ class ControllerPagesSaleCoupon extends AController {
             $this->error['code'] = $this->language->get('error_code');
         }
 
-		if (!has_value($this->request->post['date_start'])) {
+		if (!AHelperUtils::has_value($this->request->post['date_start'])) {
 			$this->error['date_start'] = $this->language->get('error_date');
 		}
-		if (!has_value($this->request->post['date_end'])) {
+		if (!AHelperUtils::has_value($this->request->post['date_end'])) {
 			$this->error['date_end'] = $this->language->get('error_date');
 		}
 

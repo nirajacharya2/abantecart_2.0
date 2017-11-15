@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
@@ -57,9 +61,7 @@ class ControllerBlocksManufacturer extends AController {
 				'icon'			  => $thumbnail['thumb_url']
 			);
         	$this->view->assign('manufacturer', $manufacturer );
-
 		} else {
-
 			if (isset($this->request->get['manufacturer_id']) && is_int($this->request->get['manufacturer_id']) ) {
 				$manufacturer_id = $this->request->get['manufacturer_id'];
 			} else {
@@ -81,7 +83,6 @@ class ControllerBlocksManufacturer extends AController {
 					                $this->config->get('config_image_grid_height')
 			);
 			foreach ($results as $result) {
-
 				$thumbnail = $thumbnails[ $result['manufacturer_id'] ];
 				$manufacturers[] = array(
 					'manufacturer_id' => $result['manufacturer_id'],
@@ -93,10 +94,9 @@ class ControllerBlocksManufacturer extends AController {
 	
 	        $this->view->assign('manufacturers', $manufacturers );
 		}
-				// framed needs to show frames for generic block.
+		// framed needs to show frames for generic block.
 		//If tpl used by listing block framed was set by listing block settings
 		$this->view->assign('block_framed',true);
-
 		$this->processTemplate('blocks/manufacturer.tpl');
 
         //init controller data

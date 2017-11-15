@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -25,7 +29,7 @@ if (!defined('DIR_CORE')){
  * Class AFilter
  * @property ARequest $request
  * @property ADB $db
- * @property AHtml $html
+ * @property \abc\core\AHtml $html
  * @property ASession $session
  */
 final class AFilter{
@@ -61,7 +65,7 @@ final class AFilter{
 		//If this data is provided in the input override values of the request.
 		if (sizeof($filter_conf['input_params'])){
 			foreach ($filter_conf['input_params'] as $k => $v){
-				if (has_value($v)){
+				if (AHelperUtils::has_value($v)){
 					$this->data[$k] = $v;
 				}
 			}
@@ -81,7 +85,7 @@ final class AFilter{
 
 			//support table name extension in fields
 			//check if we have associative array
-			if (is_assoc($filter_conf['filter_params'])){
+			if (AHelperUtils::is_assoc($filter_conf['filter_params'])){
 				$keys_arr = array_keys($filter_conf['filter_params']);
 			} else{
 				$keys_arr = $filter_conf['filter_params'];
@@ -96,7 +100,7 @@ final class AFilter{
 				if (isset($value) && !is_null($value)){
 					$this->data['filter_data']['filter'][$filter] = $value;
 
-					if (is_assoc($filter_conf['filter_params'])){
+					if (AHelperUtils::is_assoc($filter_conf['filter_params'])){
 						//support table name extension in fields
 						$field_name = $filter_conf['filter_params'][$filter];
 						if (strpos($field_name, '.')){
@@ -165,14 +169,14 @@ final class AFilter{
 				continue;
 			}
 
-			if (has_value($this->data[$param])){
+			if (AHelperUtils::has_value($this->data[$param])){
 				$process_array[$param] = $this->data[$param];
 			}
 		}
 		$filter_arr = $this->data['filter_data']['filter'];
 		if ($filter_arr){
 			foreach (array_keys($filter_arr) as $param){
-				if (has_value($filter_arr[$param])){
+				if (AHelperUtils::has_value($filter_arr[$param])){
 					$process_array[$param] = $filter_arr[$param];
 				}
 			}
@@ -195,7 +199,7 @@ final class AFilter{
 
 /**
  * Class AGrid
- * @property ALoader $load
+ * @property \abc\core\ALoader $load
  * @property ARequest $request
  * @property ADB $db
  */
@@ -262,7 +266,7 @@ final class AGrid{
 				foreach ($searchData['rules'] as $rule){
 
 					// $allowedFields can be simple or key based array
-					if (is_assoc($allowedFields)){
+					if (AHelperUtils::is_assoc($allowedFields)){
 						if (!array_key_exists($rule['field'], $allowedFields)) continue;
 						$field_name = $allowedFields[$rule['field']];
 					} else{
@@ -295,9 +299,6 @@ final class AGrid{
 							//search encoded
 							$needle = htmlspecialchars($rule['data'],ENT_QUOTES,"UTF-8");
 							$str .= " LIKE '%" . $this->db->escape($needle) . "%') ";
-							//todo: remove this in 2.0.
-							$str .= " OR ( LOWER(" . $colname . ")";
-							$str .= " LIKE '%" . $this->db->escape($rule['data']) . "%') ";
 							break;
 						default:
 							$str = $colname. " = '" . $this->db->escape($rule['data']) . "' ";

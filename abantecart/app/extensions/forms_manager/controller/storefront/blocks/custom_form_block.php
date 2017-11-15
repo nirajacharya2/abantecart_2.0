@@ -17,13 +17,17 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 /**
  * Class ControllerBlocksCustomFormBlock
- * @property ModelToolFormsManager $model_tool_forms_manager
+ * @property \abc\model\storefront\ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerBlocksCustomFormBlock extends AController {
 

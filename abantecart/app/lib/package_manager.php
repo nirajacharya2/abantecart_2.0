@@ -17,17 +17,23 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+use Exception;
+use PharData;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 /**
  * @property  AExtensionManager $extension_manager
  * @property  AMessage $messages
- * @property  ALoader $load
+ * @property  \abc\core\ALoader $load
  * @property  ASession $session
- * @property  ExtensionsApi $extensions
+ * @property  \abc\core\ExtensionsApi $extensions
  * @property  AUser $user
- * @property  ALanguageManager $language
+ * @property  \abc\core\ALanguageManager $language
  * @property  ALog $log
  * @property  ACache $cache
  * @property  ADB $db
@@ -130,7 +136,7 @@ class APackageManager{
 			return false;
 		}
 		$exit_code = 0;
-		if (class_exists('PharData')){
+		if (class_exists('\PharData')){
 			//remove destination folder first
 			//run pathinfo twice for tar.gz. files
 			$this->removeDir($dst_dir . pathinfo(pathinfo($tar_filename, PATHINFO_FILENAME), PATHINFO_FILENAME));
@@ -643,7 +649,7 @@ class APackageManager{
 						return false;
 					}
 
-					$result = $this->extension_manager->install($extension_id, getExtensionConfigXml($extension_id));
+					$result = $this->extension_manager->install($extension_id, AHelperUtils::getExtensionConfigXml($extension_id));
 					if ($result === false){
 						return false;
 					}
@@ -663,7 +669,7 @@ class APackageManager{
 					if (is_file($ext_conf_filename)){
 						$config = simplexml_load_file($ext_conf_filename);
 					}
-					$config = !$config ? getExtensionConfigXml($extension_id) : $config;
+					$config = !$config ? AHelperUtils::getExtensionConfigXml($extension_id) : $config;
 					// running sql upgrade script if it exists
 					if (isset($config->upgrade->sql)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->sql;
@@ -677,7 +683,6 @@ class APackageManager{
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->trigger;
 						$file = !file_exists($file) ? DIR_APP_EXT . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
 						if (file_exists($file)){
-							/** @noinspection PhpIncludeInspection */
 							include($file);
 						}
 					}
@@ -697,7 +702,7 @@ class APackageManager{
 	}
 
 	/**
-	 * @param SimpleXmlElement $config
+	 * @param \SimpleXmlElement $config
 	 */
 	public function upgradeCore($config){
 		//clear all cache
@@ -826,7 +831,7 @@ class APackageManager{
 		if (!is_writable(DIR_APP_EXT)){
 			$this->error .= 'Directory ' . DIR_APP_EXT . ' is not writable. Please change permissions for it.' . "\n";
 		}
-		//2. check temporaty directory. just call method
+		//2. check temporary directory. just call method
 		$this->getTempDir();
 
 		//3. run validation for backup-process before install
@@ -843,14 +848,14 @@ class APackageManager{
 
 	/**
 	 * Method returns absolute path to temporary directory for unpacking package
-	 * if system/temp is unaccessable - use php temp directory
+	 * if system/temp is inaccessible - use php temp directory
 	 * @return string
 	 */
 	public function getTempDir(){
 		$tmp_dir = DIR_APP . 'system/temp';
 		$tmp_install_dir = $tmp_dir . '/install';
-		//try to create tmp dir if not yet created and install.		
-		if (make_writable_dir($tmp_dir) && make_writable_dir($tmp_install_dir)){
+		//try to create tmp dir if not yet created and install.
+		if (AHelperUtils::is_writable_dir($tmp_dir) && AHelperUtils::is_writable_dir($tmp_install_dir)){
 			$dir = $tmp_install_dir . "/";
 		} else{
 			if (!is_dir(sys_get_temp_dir() . '/abantecart_install')){

@@ -1,10 +1,30 @@
 <?php
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2017 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\QueryException;
 
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
-
-use Illuminate\Database\Capsule\Manager as Capsule;
 class ADB{
 	/**
 	 * @var $orm Capsule
@@ -42,7 +62,7 @@ class ADB{
 	/**
 	 * @param string $sql
 	 * @param bool $noexcept
-	 * @return bool|stdClass
+	 * @return bool|\stdClass
 	 */
 	public function query($sql, $noexcept = false){
 
@@ -62,27 +82,45 @@ class ADB{
 		//detect if encryption is enabled
 		$postfix = '';
 		if (is_object($this->registry->get('dcrypt'))){
-			$postfix = $this->registry->get('dcrypt')->posfix($table_name);
+			$postfix = $this->registry->get('dcrypt')->postfix($table_name);
 		}
 		return $this->db_config['prefix'] . $table_name . $postfix;
+	}
+	/**
+	 * Get database name
+	 * @return string
+	 */
+	public function database(){
+		return $this->db_config['database'];
+	}
+	/**
+	 * Get table prefix
+	 * @return string
+	 */
+	public function prefix(){
+		return $this->db_config['prefix'];
 	}
 
 	/**
 	 * @param string $sql
 	 * @param bool $noexcept
-	 * @return bool|stdClass
+	 * @return bool|\stdClass
+	 * @throws AException
 	 */
 	public function _query($sql, $noexcept = false){
 		$orm = $this->orm;
 		try{
 			$result = $orm::select($orm::raw($sql));
 			$data = json_decode(json_encode($result), true);
-			$output = new stdClass();
+			/**
+			 * @var \stdClass $output
+			 */
+			$output = new \stdClass();
 			$output->row = isset($data[0]) ? $data[0] : array ();
 			$output->rows = $data;
 			$output->num_rows = sizeof($data);
 			return $output;
-		}catch(\Illuminate\Database\QueryException $ex){
+		}catch(QueryException $ex){
 			$this->error = 'SQL Error: ' . $ex->getMessage() . '<br />Error No: ' . $ex->getCode() . '<br />SQL: ' . $sql;
 			if( !$noexcept ){
 				throw new AException(AC_ERR_MYSQL, $this->error);
@@ -107,8 +145,8 @@ class ADB{
 	}
 
 	/**
-	 * @param $file
-	 * @return null
+	 * @param string $file
+	 * @return bool
 	 */
 	public function performSql($file){
 
@@ -122,12 +160,27 @@ class ADB{
 						$query = str_replace("`ac_", "`" . $this->db_config['prefix'], $query);
 						$result = $this->_query($query, true);
 						if (!$result){
-							return null;
+							return false;
 						}
 						$query = '';
 					}
 				}
 			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param string $function_name
+	 * @param array $args
+	 * @return \Illuminate\Database\Capsule\Manager | null
+	 */
+	public function __call($function_name, $args){
+		$item = $this->orm;
+		if ( method_exists( $item, $function_name ) ){
+			return call_user_func(array($item, $function_name), $args);
+		} else {
+			return null;
 		}
 	}
 }

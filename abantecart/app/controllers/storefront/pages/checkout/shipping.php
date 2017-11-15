@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -41,7 +46,7 @@ class ControllerPagesCheckoutShipping extends AController{
 
 		//validate if order min/max are met
 		if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()){
-			$this->redirect($this->html->getSecureURL('checkout/cart'));
+			abc_redirect($this->html->getSecureURL('checkout/cart'));
 		}
 
 		if ($this->request->is_POST() && $this->validate()){
@@ -53,16 +58,16 @@ class ControllerPagesCheckoutShipping extends AController{
 			//process data
 			$this->extensions->hk_ProcessData($this);
 
-			$this->redirect($this->html->getSecureURL($payment_rt));
+			abc_redirect($this->html->getSecureURL($payment_rt));
 		}
 
 		if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))){
-			$this->redirect($this->html->getSecureURL($cart_rt));
+			abc_redirect($this->html->getSecureURL($cart_rt));
 		}
 
 		if (!$this->customer->isLogged()){
 			$this->session->data['redirect'] = $this->html->getSecureURL($checkout_rt);
-			$this->redirect($this->html->getSecureURL($login_rt));
+			abc_redirect($this->html->getSecureURL($login_rt));
 		}
 		unset($this->session->data['redirect']);
 
@@ -73,7 +78,7 @@ class ControllerPagesCheckoutShipping extends AController{
 			unset($this->session->data['shipping_methods']);
 
 			$this->tax->setZone($this->session->data['country_id'], $this->session->data['zone_id']);
-			$this->redirect($this->html->getSecureURL($payment_rt, "&back=cart"));
+			abc_redirect($this->html->getSecureURL($payment_rt, "&back=cart"));
 		}
 
 		//If no shipping address is set yet, use default
@@ -83,7 +88,7 @@ class ControllerPagesCheckoutShipping extends AController{
 
 		//still missing address, go to address selection page
 		if (!$this->session->data['shipping_address_id']){
-			$this->redirect($this->html->getSecureURL($address_rt));
+			abc_redirect($this->html->getSecureURL($address_rt));
 		}
 
 		$this->loadModel('account/address');
@@ -91,7 +96,7 @@ class ControllerPagesCheckoutShipping extends AController{
 
 		//something wrong with shipping address go to address selection page
 		if (!$shipping_address){
-			$this->redirect($this->html->getSecureURL($address_rt));
+			abc_redirect($this->html->getSecureURL($address_rt));
 		}
 
 		// if tax zone is taken from shipping address
@@ -124,7 +129,7 @@ class ControllerPagesCheckoutShipping extends AController{
 					//# Add storefront icon if available
 					$ext_setgs = $this->model_checkout_extension->getSettings($result['key']);
 					$icon = $ext_setgs[$result['key'] . "_shipping_storefront_icon"];
-					if (has_value($icon)){
+					if (AHelperUtils::has_value($icon)){
 						$icon_data = $this->model_checkout_extension->getSettingImage($icon);
 						$icon_data['image'] = $icon;
 						$quote_data[$result['key']]['icon'] = $icon_data;
@@ -153,7 +158,7 @@ class ControllerPagesCheckoutShipping extends AController{
 				if ($autoselect){
 					if (sizeof($only_method[$method_name]['quote']) == 1){
 						$this->session->data['shipping_method'] = current($only_method[$method_name]['quote']);
-						$this->redirect($this->html->getSecureURL($payment_rt,"&back=cart"));
+						abc_redirect($this->html->getSecureURL($payment_rt,"&back=cart"));
 					}
 				}
 			}

@@ -17,22 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiCommonCountry extends AControllerAPI {
 	protected $data = array();
-	
 	public function get() {
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		$this->loadModel('localisation/country');
         $this->data = $this->model_localisation_country->getCountries();
 
         $this->extensions->hk_InitData($this,__FUNCTION__);
         
 		$this->rest->setResponseData( $this->data );
-		$this->rest->sendResponse( 200 );	
+		$this->rest->sendResponse( 200 );
 	}
-
 }

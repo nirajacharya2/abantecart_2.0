@@ -17,24 +17,27 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AForm;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
-/** @noinspection PhpUndefinedClassInspection */
-
 /**
  * @property AExtensionManager $extension_manager
- * @property ModelSettingSetting $model_setting_setting
- * @property ModelLocalisationCountry $model_localisation_country
- * @property ModelLocalisationCurrency $model_localisation_currency
- * @property ModelLocalisationLengthClass $model_localisation_length_class
- * @property ModelLocalisationWeightClass $model_localisation_weight_class
- * @property ModelLocalisationStockStatus $model_localisation_stock_status
- * @property ModelLocalisationOrderStatus $model_localisation_order_status
- * @property ModelSaleCustomerGroup $model_sale_customer_group
+ * @property \abc\model\admin\ModelSettingSetting $model_setting_setting
+ * @property \abc\model\admin\ModelLocalisationCountry $model_localisation_country
+ * @property \abc\model\admin\ModelLocalisationCurrency $model_localisation_currency
+ * @property \abc\model\admin\ModelLocalisationLengthClass $model_localisation_length_class
+ * @property \abc\model\admin\ModelLocalisationWeightClass $model_localisation_weight_class
+ * @property \abc\model\admin\ModelLocalisationStockStatus $model_localisation_stock_status
+ * @property \abc\model\admin\ModelLocalisationOrderStatus $model_localisation_order_status
+ * @property \abc\model\admin\ModelSaleCustomerGroup $model_sale_customer_group
  * @property ASession $session
- * @property ALanguageManager $language
- * @property ALoader $load
+ * @property \abc\core\ALanguageManager $language
+ * @property \abc\core\ALoader $load
  * @property AIMManager $im
  * @property AConfig $config
  * @property ARequest $request
@@ -69,7 +72,7 @@ class AConfigManager{
 	/**
 	 *    Build field for provided key setting
 	 * @param string $setting_key
-	 * @param AForm $form - form object where filed will be shown
+	 * @param \abc\core\AForm $form - form object where filed will be shown
 	 * @param array $data - current setting data
 	 * @param int $store_id - Selected store ID for the setting
 	 * @param string $group
@@ -94,7 +97,7 @@ class AConfigManager{
 	/**
 	 *    Build fields array for provided setting group (section)
 	 * @param string $group
-	 * @param AForm $form - form object where filed will be shown
+	 * @param \abc\core\AForm $form - form object where filed will be shown
 	 * @param array $data - current setting data
 	 * @return array
 	 */
@@ -107,15 +110,12 @@ class AConfigManager{
 		return $this->$method_name($form, $data);
 	}
 
-	/**To be removed in v 1.3 or next major release
-	 * @deprecated since 1.2.4
-	 * @param $section
-	 * @return array
+	/**
+	 * @param string $group
+	 * @param array $fields
+	 * @param int $store_id
+	 * @return array|bool
 	 */
-	public function getTemplatesLIst($section){
-		return $this->getTemplates($section);
-	}
-
 	public function validate($group, $fields = array (), $store_id = 0){
 		if (empty($group) || !is_array($fields)){
 			return false;
@@ -145,13 +145,13 @@ class AConfigManager{
 						$error['ssl_url'] = $this->language->get('error_ssl_url');
 					}
 					//when quicksave only ssl_url
-					elseif ($field_name == 'config_ssl_url' && $field_value && !has_value($fields['config_url'])){
+					elseif ($field_name == 'config_ssl_url' && $field_value && !AHelperUtils::has_value($fields['config_url'])){
 						$saved_settings = $this->model_setting_setting->getSetting($group, $store_id);
 						$config_url = $saved_settings['config_url'];
 						$config_ssl_url = $field_value;
 					}
 					//when quicksave only url
-					elseif ($field_name == 'config_url' && $field_value && !has_value($fields['config_ssl_url'])){
+					elseif ($field_name == 'config_url' && $field_value && !AHelperUtils::has_value($fields['config_ssl_url'])){
 						$saved_settings = $this->model_setting_setting->getSetting($group, $store_id);
 						$config_ssl_url = $saved_settings['config_ssl_url'];
 						$config_url = $field_value;
@@ -261,7 +261,7 @@ class AConfigManager{
 						$error['error_filename'] = $this->language->get('error_error_filename');
 					}
 					if ($field_name == 'config_upload_max_size'){
-						$fields[$field_value] = preformatInteger($field_value);
+						$fields[$field_value] = AHelperUtils::preformatInteger($field_value);
 					}
 
 					break;
@@ -273,7 +273,7 @@ class AConfigManager{
 	}
 
 	/**
-	 * @var AForm $form
+	 * @var \abc\core\AForm $form
 	 * @param array $data
 	 * @return array
 	 */
@@ -502,7 +502,7 @@ class AConfigManager{
 		$output = array ();
 		foreach ($props as $n => $properties){
 			//for multilingual settings
-			if (preformatTextID($field_name) == preformatTextID($properties['name'])
+			if (AHelperUtils::preformatTextID($field_name) == AHelperUtils::preformatTextID($properties['name'])
 					|| (is_int(strpos($field_name, 'config_description')) && is_int(strpos($properties['name'], 'config_description')))
 					|| (is_int(strpos($field_name, 'config_title')) && is_int(strpos($properties['name'], 'config_title')))
 					|| (is_int(strpos($field_name, 'config_meta_description')) && is_int(strpos($properties['name'], 'config_meta_description')))
@@ -518,7 +518,7 @@ class AConfigManager{
 	}
 
 	/**
-	 * @var AForm $form
+	 * @var \abc\core\AForm $form
 	 * @param array $data
 	 * @return array
 	 */
@@ -823,10 +823,10 @@ class AConfigManager{
 				'value'   => $data['config_order_status_id'],
 				'options' => $order_statuses,
 		));
-		$fields['customer_cancelation_order_status'] = $form->getFieldHtml($props[] = array (
+		$fields['customer_cancellation_order_status'] = $form->getFieldHtml($props[] = array (
 				'type'    => 'multiselectbox',
-				'name'    => 'config_customer_cancelation_order_status_id[]',
-				'value'   => $data['config_customer_cancelation_order_status_id'] ? $data['config_customer_cancelation_order_status_id'] : array (),
+				'name'    => 'config_customer_cancellation_order_status_id[]',
+				'value'   => $data['config_customer_cancellation_order_status_id'] ? $data['config_customer_cancellation_order_status_id'] : array (),
 				'options' => $order_statuses,
 				'style'   => 'chosen'
 		));
@@ -973,7 +973,7 @@ class AConfigManager{
 					'config_image_grid_height');
 
 			foreach ($fieldset as $name){
-				if (!has_value($data[$name]) && has_value($default_values[$name])){
+				if (!AHelperUtils::has_value($data[$name]) && AHelperUtils::has_value($default_values[$name])){
 					$data[$name] = $default_values[$name];
 				}
 			}
@@ -1175,7 +1175,7 @@ class AConfigManager{
 	 */
 	public function getTemplates($section, $status = 1){
 
-		if (has_value($this->templates[$section])){
+		if (AHelperUtils::has_value($this->templates[$section])){
 			return $this->templates[$section];
 		}
 

@@ -17,9 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
 
 class ControllerCommonColumnLeft extends AController {
-	public function main() {		
+	public function main() {
 
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
@@ -30,4 +32,3 @@ class ControllerCommonColumnLeft extends AController {
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 	}
 }
-?>

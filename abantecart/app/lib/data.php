@@ -17,22 +17,27 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\AHelperUtils;
+use abc\core\Registry;
+use DOMDocument;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
 
 /**
  * Class AData
- * @property ModelToolTableRelationships $model_tool_table_relationships
- * @property ALanguageManager $language
- * @property ALoader $load
+ * @property \abc\model\admin\ModelToolTableRelationships $model_tool_table_relationships
+ * @property \abc\core\ALanguageManager $language
+ * @property \abc\core\ALoader $load
  * @property AConfig $config
  * @property ADataEncryption $dcrypt
  * @property ADB $db
  */
 class AData{
 	/**
-	 * @var Registry
+	 * @var \abc\core\Registry
 	 */
 	protected $registry;
 	/**
@@ -307,7 +312,7 @@ class AData{
 		//generate errors: No space on device (log to message as error too), No permissions, Others
 		//return Success or failed.
 
-		compressTarGZ($tar_filename, $tar_dir . $filename);
+		AHelperUtils::compressTarGZ($tar_filename, $tar_dir . $filename);
 
 		if (!file_exists($tar_filename)){
 			$this->processError('Archive error', 'Error: cannot to pack ' . $tar_filename);
@@ -489,7 +494,7 @@ class AData{
 				} else{
 					preg_match('/^(\w+)(\[(\d+)\])(.*)/', $col_name, $matches);
 					$table_name = $matches[1];
-					$scope1 = $matches[2];
+					//$scope1 = $matches[2];
 					$scope_nbr = $matches[3];
 					$ending = $matches[4];
 					if (count($matches)){
@@ -605,7 +610,6 @@ class AData{
 	 * @return array
 	 */
 	public function XML2Array($xml_str){
-		$ret_array = array ();
 		if (empty($xml_str)){
 			$this->_status2array('error', "XML input is empty.");
 			return $this->status_arr;
@@ -693,7 +697,7 @@ class AData{
 						}
 
 						//recurse
-						$idx = array_push($row_arr['tables'], $this->_process_section($sub_table_name, $sub_request, $sub_table_cfg, $skip_inner_ids));
+						array_push($row_arr['tables'], $this->_process_section($sub_table_name, $sub_request, $sub_table_cfg, $skip_inner_ids));
 					} else{
 						$row_arr['error'] = "Incorrectly configured input array. ".$sub_table_name." cannot be found";
 					}
@@ -818,8 +822,6 @@ class AData{
 		}
 
 		foreach ($data_arr['rows'] as $count => $rnode){
-
-			$action = '';
 			//Set action for the row
 			if (!$action_delete){
 				$action = $this->_get_action($table_name, $table_cfg, $rnode);
@@ -1138,9 +1140,7 @@ class AData{
 	 * @return array
 	 */
 	protected function _update_fromArray($table_name, $table_cfg, $data_row, $parent_vals){
-		$cols = array ();
-		$where = array ();
-
+		$cols = $where = array ();
 		//set ids to where from parent they might not be in there 
 		$where = $this->_build_id_columns($table_cfg, $parent_vals);
 
@@ -1157,8 +1157,8 @@ class AData{
 			// Encrypt column value if encryption is enabled
 			if ($this->dcrypt
 					&& $this->dcrypt->active
-					&& in_array($table_name, $this->dcrypt->getEcryptedTables())
-					&& in_array($col_name, $this->dcrypt->getEcryptedFields($table_name))
+					&& in_array($table_name, $this->dcrypt->getEncryptedTables())
+					&& in_array($col_name, $this->dcrypt->getEncryptedFields($table_name))
 			){
 				$encrypted = $this->dcrypt->encrypt_data(array ($col_name => $col_value), $table_name);
 				$col_value = $encrypted[$col_name];
@@ -1227,8 +1227,8 @@ class AData{
 			// Encrypt column value if encryption is enabled
 			if ($this->dcrypt
 					&& $this->dcrypt->active
-					&& in_array($table_name, $this->dcrypt->getEcryptedTables())
-					&& in_array($col_name, $this->dcrypt->getEcryptedFields($table_name))
+					&& in_array($table_name, $this->dcrypt->getEncryptedTables())
+					&& in_array($col_name, $this->dcrypt->getEncryptedFields($table_name))
 			){
 				$encrypted = $this->dcrypt->encrypt_data(array ($col_name => $col_value), $table_name);
 				$col_value = $encrypted[$col_name];
@@ -1335,7 +1335,6 @@ class AData{
 	 */
 	protected function _update_or_insert_fromArray($table_name, $table_cfg, $data_row, $parent_vals){
 		$return = array ();
-		$where = array ();
 		$cols = array ();
 
 		//set ids to where from parent they might not be in there 
@@ -1354,8 +1353,8 @@ class AData{
 			// Encrypt column value if encryption is enabled
 			if ($this->dcrypt
 					&& $this->dcrypt->active
-					&& in_array($table_name, $this->dcrypt->getEcryptedTables())
-					&& in_array($col_name, $this->dcrypt->getEcryptedFields($table_name))
+					&& in_array($table_name, $this->dcrypt->getEncryptedTables())
+					&& in_array($col_name, $this->dcrypt->getEncryptedFields($table_name))
 			){
 				$encrypted = $this->dcrypt->encrypt_data(array ($col_name => $col_value), $table_name);
 				$col_value = $encrypted[$col_name];
@@ -1486,7 +1485,7 @@ class AData{
 	/**
 	 * recursive function to convert nested array to XML
 	 * @param $data_array
-	 * @param SimpleXMLElement $xml - it is a reference!!!
+	 * @param \SimpleXMLElement $xml - it is a reference!!!
 	 */
 	protected function _array_part2XML($data_array, $xml){
 		foreach ($data_array as $akey => $aval){
@@ -1506,7 +1505,7 @@ class AData{
 					$dom = dom_import_simplexml($new_node);
 					$dom->appendChild($dom->ownerDocument->createCDATASection($aval));
 				} else{
-					$new_node = $xml->addChild($akey, $aval);
+					$xml->addChild($akey, $aval);
 				}
 			}
 		}
@@ -1514,14 +1513,14 @@ class AData{
 
 	/**
 	 * recursive function to convert nested XML to array
-	 * @param SimpleXMLElement $xml
+	 * @param \SimpleXMLElement $xml
 	 * @return array
 	 */
 	protected function _XML_part2array($xml){
 		$results = array ();
 		foreach ($xml->children() as $column){
 			/**
-			 * @var $column SimpleXMLElement
+			 * @var $column \SimpleXMLElement
 			 */
 			$col_name = $column->getName();
 			if ($col_name == "tables" || $col_name == "rows"){
@@ -1538,7 +1537,7 @@ class AData{
 
 	/**
 	 * append message to current node
-	 * @param SimpleXMLElement $node
+	 * @param \SimpleXMLElement $node
 	 * @param $err_message
 	 * @param string $type
 	 * @return null

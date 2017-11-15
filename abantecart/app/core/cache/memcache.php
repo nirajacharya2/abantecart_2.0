@@ -17,6 +17,11 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\cache;
+use abc\lib\AException;
+use Memcache;
+use stdClass;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -91,7 +96,7 @@ class ACacheDriverMemcache extends ACacheDriver{
 	 * @since   1.2.7
 	 */
 	public function isSupported(){
-		if ((extension_loaded('memcache') && class_exists('Memcache')) != true){
+		if ((extension_loaded('memcache') && class_exists('\Memcache')) != true){
 			return false;
 		}
 
@@ -248,9 +253,7 @@ class ACacheDriverMemcache extends ACacheDriver{
 	 * @param   string $key The cache data key
 	 * @param   string $group The cache data group
 	 * @param   integer $locktime Cached item max lock time
-	 *
-	 * @return  boolean
-	 *
+	 * @return  array|false
 	 * @since   1.2.7
 	 */
 	public function lock($key, $group, $locktime){

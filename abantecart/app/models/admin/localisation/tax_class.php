@@ -17,6 +17,10 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\model\admin;
+use abc\core\AHelperUtils;
+use abc\core\Model;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
@@ -127,8 +131,8 @@ class ModelLocalisationTaxClass extends Model {
 			if ( isset($data[$f]) )
 				$update[] = $f." = '".$this->db->escape($data[$f])."'";
 		}
-		$update[] = "rate = '" . preformatFloat($data['rate'], $this->language->get('decimal_point'))."'";
-		$update[] = "threshold = '" . preformatFloat($data['threshold'], $this->language->get('decimal_point'))."'";
+		$update[] = "rate = '" . AHelperUtils::preformatFloat($data['rate'], $this->language->get('decimal_point'))."'";
+		$update[] = "threshold = '" . AHelperUtils::preformatFloat($data['threshold'], $this->language->get('decimal_point'))."'";
 		
 		if ( !empty($update) ) {
 			$this->db->query("UPDATE " . $this->db->table("tax_rates") . " 
@@ -262,7 +266,7 @@ class ModelLocalisationTaxClass extends Model {
 		    if ( !empty($data['subsql_filter']) )
 				$sql .= " WHERE ".$data['subsql_filter'];
 
-			//If for total, we done bulding the query
+			//If for total, we done building the query
 			if ($mode == 'total_only') {
 		 	   $query = $this->db->query($sql);
 		 	   return $query->row['total'];

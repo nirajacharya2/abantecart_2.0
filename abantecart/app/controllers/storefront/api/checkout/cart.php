@@ -17,9 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AControllerAPI;
+use abc\core\AResource;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
+
+/**
+ * Class ControllerApiCheckoutCart
+ * @package abc\controller\storefront
+ * @property \abc\lib\AWeight $weight
+ */
 class ControllerApiCheckoutCart extends AControllerAPI {
 	public $data = array();
 	public $error = array();
@@ -34,7 +44,6 @@ class ControllerApiCheckoutCart extends AControllerAPI {
 
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 		$this->loadModel('catalog/product');
-		$product_id = $request['product_id'];
 
 		//check if we add single or multiple products to cart
 		if (isset($request['quantity']) || is_array($request['products'])) {

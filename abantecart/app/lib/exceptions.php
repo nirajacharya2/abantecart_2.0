@@ -17,6 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\lib;
+use abc\core\Registry;
+
 if (!defined('DIR_CORE')){
 	header('Location: static_pages/');
 }
@@ -29,13 +32,13 @@ require_once(DIR_LIB . 'exceptions/exception.php');
  *
  * @param int $errno
  * @param string $errstr
- * @param string $errfile
- * @param string $errline
+ * @param string $err_file
+ * @param string $err_line
  * @return null
  */
-function ac_error_handler($errno, $errstr, $errfile, $errline){
+function ac_error_handler($errno, $errstr, $err_file, $err_line){
 
-	if (class_exists('Registry')){
+	if (class_exists('\abc\core\Registry')){
 		$registry = Registry::getInstance();
 		if ($registry->get('force_skip_errors')){
 			return null;
@@ -43,14 +46,17 @@ function ac_error_handler($errno, $errstr, $errfile, $errline){
 	}
 
 	//skip notice
-	if ($errno == E_NOTICE)
+	if ($errno == E_NOTICE) {
 		return null;
+	}
 
 	try{
-		throw new AException($errno, $errstr, $errfile, $errline);
+		throw new AException($errno, $errstr, $err_file, $err_line);
 	} catch(AException $e){
+		//var_Dump($e); exit;
 		ac_exception_handler($e);
 	}
+	return true;
 }
 
 /**
@@ -59,7 +65,7 @@ function ac_error_handler($errno, $errstr, $errfile, $errline){
  * @return null
  */
 function ac_exception_handler($e){
-	if (class_exists('Registry')){
+	if (class_exists('\abc\core\Registry')){
 		$registry = Registry::getInstance();
 		if ($registry->get('force_skip_errors')){
 			return null;
@@ -71,7 +77,7 @@ function ac_exception_handler($e){
 		$e = new AException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
-	if (class_exists('Registry')){
+	if (class_exists('\abc\core\Registry')){
 		$registry = Registry::getInstance();
 		$config = $registry->get('config');
 		if (!$config || (!$config->has('config_error_log') && !$config->has('config_error_display'))){
@@ -114,6 +120,6 @@ function ac_shutdown_handler(){
 	$exception->logError();
 }
 
-set_error_handler('ac_error_handler');
-register_shutdown_function("ac_shutdown_handler");
-set_exception_handler('ac_exception_handler');
+set_error_handler("\abc\lib\ac_error_handler");
+register_shutdown_function("\abc\lib\ac_shutdown_handler");
+set_exception_handler("\abc\lib\ac_exception_handler");

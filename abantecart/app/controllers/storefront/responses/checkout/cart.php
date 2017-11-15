@@ -17,21 +17,22 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\storefront;
+use abc\core\AController;
+use abc\core\HtmlElementFactory;
+use abc\lib\AException;
+use abc\lib\AJson;
+
 if (! defined ( 'DIR_CORE' )) {
 	header ( 'Location: static_pages/' );
 }
 
 class ControllerResponsesCheckoutCart extends AController {
-	private $error = array();
 	public $data = array();
-
 	public function main() {
-
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
 		if ($this->request->is_POST()) {
-
       		if (isset($this->request->post['quantity'])) {
 				if (!is_array($this->request->post['quantity'])) {
 					if (isset($this->request->post['option'])) {
@@ -39,7 +40,6 @@ class ControllerResponsesCheckoutCart extends AController {
 					} else {
 						$option = array();
 					}
-
       				$this->cart->add($this->request->post['product_id'], $this->request->post['quantity'], $option);
 				} else {
 					foreach ($this->request->post['quantity'] as $key => $value) {
@@ -70,10 +70,8 @@ class ControllerResponsesCheckoutCart extends AController {
 				unset($this->session->data['payment_method']);
 			}
     	}
-
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-
   	}
 
 	/**
@@ -115,10 +113,7 @@ class ControllerResponsesCheckoutCart extends AController {
 			$results = $this->model_checkout_extension->getExtensions('shipping');
 			foreach ($results as $result) {
 				$this->loadModel('extension/' . $result[ 'key' ]);
-
-				/** @noinspection PhpUndefinedMethodInspection */
 				$quote = $this->{'model_extension_' . $result[ 'key' ]}->getQuote($shipping_address);
-
 				if ($quote) {
 					$output[ $result[ 'key' ] ] = array(
 						'title' => $quote[ 'title' ],
@@ -166,7 +161,6 @@ class ControllerResponsesCheckoutCart extends AController {
 		$this->data = $output;
   		//init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-
 		$this->response->setOutput(AJson::encode( $this->data ));
 	}
 
@@ -208,16 +202,16 @@ class ControllerResponsesCheckoutCart extends AController {
 	public function embed() {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-        
+        $html_out = '';
 		try{
-			$this->config->set('embed_mode', true);		
+			$this->config->set('embed_mode', true);
 			$cart = $this->dispatch('pages/checkout/cart');
-			$cart_html = $cart->dispatchGetOutput();
+			$html_out = $cart->dispatchGetOutput();
 		}catch(AException $e){	}
 	
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
-		$this->response->setOutput($cart_html);
+		$this->response->setOutput($html_out);
 	}
 	
 }

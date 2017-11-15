@@ -17,15 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\controller\admin;
+use abc\core\AControllerAPI;
+use abc\core\AHelperUtils;
+
 if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
 	header ( 'Location: static_pages/' );
 }
 class ControllerApiCustomerDetails extends AControllerAPI {
   
 	public function get() {
-		$customer_details = array();
-		$customer_addresses = array();
-
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -34,7 +35,7 @@ class ControllerApiCustomerDetails extends AControllerAPI {
 
 		$request = $this->rest->getRequestParams();
 		
-		if ( !has_value($request['customer_id']) ) {
+		if ( !AHelperUtils::has_value($request['customer_id']) ) {
 			$this->rest->setResponseData( array('Error' => 'Customer ID is missing') );
 			$this->rest->sendResponse(200);
 			return null;
