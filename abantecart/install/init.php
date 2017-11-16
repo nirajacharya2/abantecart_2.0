@@ -17,7 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+namespace abc\install;
 // set default encoding for multibyte php mod
+use abc\core\Registry;
+use abc\lib\ADataEncryption;
+use abc\lib\ADocument;
+use abc\lib\AException;
+use abc\lib\ALog;
+use abc\lib\ASession;
+use abc\lib\CSRFToken;
+
 mb_internal_encoding('UTF-8');
 ini_set('default_charset', 'utf-8');
 
@@ -54,7 +63,7 @@ define('DIR_DOWNLOAD', DIR_APP . 'download/');
 define('DIR_CONFIG', DIR_APP . 'config/');
 define('DIR_CACHE', DIR_APP . 'var/cache/');
 define('DIR_LOGS', DIR_APP . 'var/logs/');
-define('DIR_VENDOR', DIR_ROOT . 'vendor/');
+define('DIR_VENDOR', dirname(dirname(__FILE__)) . '/vendor/');
 
 // AbanteCart Version
 include(DIR_APP.'core/init/version.php');
@@ -74,16 +83,6 @@ if($_GET['rt']) {
 } else {
 	define('ROUTE', 'index/home');
 }
-
-//detect API call
-$path_nodes = explode('/', ROUTE);
-if($path_nodes[0] == 'a') {
-	define('IS_API', true);
-} else {
-	define('IS_API', false);
-}
-
-
 
 try{
 	//set ini parameters for session
@@ -150,7 +149,9 @@ try{
 
 	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXTENSIONS);
 	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
-
+	/**
+	 * @const DIR_APP
+	 */
 	require_once(DIR_APP.DIRNAME_CORE.'init/base.php');
 	$registry = Registry::getInstance();
 	require_once(DIR_APP.DIRNAME_CORE.'init/admin.php');
@@ -178,10 +179,6 @@ try{
 		}
 	}
 	$registry->set('uri', $_SERVER['REQUEST_URI']);
-
 //main instance of data encryption
 	$registry->set('dcrypt', new ADataEncryption());
-
 }catch(AException $e){}
-
-

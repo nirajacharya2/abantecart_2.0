@@ -1,9 +1,150 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
+DROP TABLE IF EXISTS `ac_encryption_keys` CASCADE;
+DROP TABLE IF EXISTS `ac_ant_messages` CASCADE;
+DROP TABLE IF EXISTS `ac_store_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_weight_class_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_page_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_content_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_form_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_pages_forms` CASCADE;
+DROP TABLE IF EXISTS `ac_form_groups` CASCADE;
+DROP TABLE IF EXISTS `ac_fields_group_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_field_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_field_values` CASCADE;
+DROP TABLE IF EXISTS `ac_fields_groups` CASCADE;
+DROP TABLE IF EXISTS `ac_fields` CASCADE;
+DROP TABLE IF EXISTS `ac_forms` CASCADE;
+
+DROP TABLE IF EXISTS `ac_dataset_properties` CASCADE;
+DROP TABLE IF EXISTS `ac_dataset_column_properties` CASCADE;
+DROP TABLE IF EXISTS `ac_dataset_definition` CASCADE;
+DROP TABLE IF EXISTS `ac_dataset_values` CASCADE;
+DROP TABLE IF EXISTS `ac_datasets` CASCADE;
+DROP TABLE IF EXISTS `ac_messages` CASCADE;
+
+
+DROP TABLE IF EXISTS `ac_resource_types` CASCADE;
+DROP TABLE IF EXISTS `ac_resource_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_resource_map` CASCADE;
+DROP TABLE IF EXISTS `ac_resource_library` CASCADE;
+
+DROP TABLE IF EXISTS `ac_task_steps` CASCADE;
+DROP TABLE IF EXISTS `ac_task_details` CASCADE;
+DROP TABLE IF EXISTS `ac_tasks` CASCADE;
+
+DROP TABLE IF EXISTS `ac_global_attributes_value_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes_values` CASCADE;
+
+DROP TABLE IF EXISTS `ac_global_attributes_groups_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes_groups` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes_type_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes_types` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_global_attributes` CASCADE;
+
+DROP TABLE IF EXISTS `ac_product_filter_ranges_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_product_filter_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_product_filter_ranges` CASCADE;
+DROP TABLE IF EXISTS `ac_product_filters` CASCADE;
+
+DROP TABLE IF EXISTS `ac_contents_to_stores` CASCADE;
+
+DROP TABLE IF EXISTS `ac_block_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_custom_lists` CASCADE;
+DROP TABLE IF EXISTS `ac_block_templates` CASCADE;
+DROP TABLE IF EXISTS `ac_custom_blocks` CASCADE;
+DROP TABLE IF EXISTS `ac_block_layouts` CASCADE;
+DROP TABLE IF EXISTS `ac_blocks` CASCADE;
+
+DROP TABLE IF EXISTS `ac_customer_transactions` CASCADE;
+DROP TABLE IF EXISTS `ac_online_customers` CASCADE;
+DROP TABLE IF EXISTS `ac_url_aliases` CASCADE;
+DROP TABLE IF EXISTS `ac_categories_to_stores` CASCADE;
+DROP TABLE IF EXISTS `ac_products_to_categories` CASCADE;
+DROP TABLE IF EXISTS `ac_products_to_stores` CASCADE;
+DROP TABLE IF EXISTS `ac_manufacturers_to_stores` CASCADE;
+DROP TABLE IF EXISTS `ac_order_downloads_history` CASCADE;
+DROP TABLE IF EXISTS `ac_order_downloads` CASCADE;
+DROP TABLE IF EXISTS `ac_order_products` CASCADE;
+DROP TABLE IF EXISTS `ac_order_data` CASCADE;
+DROP TABLE IF EXISTS `ac_order_data_types` CASCADE;
+DROP TABLE IF EXISTS `ac_order_history` CASCADE;
+DROP TABLE IF EXISTS `ac_order_options` CASCADE;
+DROP TABLE IF EXISTS `ac_order_statuses` CASCADE;
+DROP TABLE IF EXISTS `ac_order_status_ids` CASCADE;
+DROP TABLE IF EXISTS `ac_orders` CASCADE;
+DROP TABLE IF EXISTS `ac_settings` CASCADE;
+
+DROP TABLE IF EXISTS `ac_language_definitions` CASCADE;
+DROP TABLE IF EXISTS `ac_download_attribute_values` CASCADE;
+DROP TABLE IF EXISTS `ac_download_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_downloads`;
+
+DROP TABLE IF EXISTS `ac_banner_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_banner_stat` CASCADE;
+DROP TABLE IF EXISTS `ac_country_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_zone_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_zones_to_locations` CASCADE;
+DROP TABLE IF EXISTS `ac_category_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_length_class_descriptions` CASCADE;
+
+DROP TABLE IF EXISTS `ac_tax_rate_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_tax_class_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_tax_rates` CASCADE;
+
+DROP TABLE IF EXISTS `ac_stock_statuses` CASCADE;
+DROP TABLE IF EXISTS `ac_products_to_downloads` CASCADE;
+DROP TABLE IF EXISTS `ac_coupon_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_categories` CASCADE;
+DROP TABLE IF EXISTS `ac_reviews` CASCADE;
+DROP TABLE IF EXISTS `ac_customer_notifications` CASCADE;
+DROP TABLE IF EXISTS `ac_customer_groups` CASCADE;
+
+
+DROP TABLE IF EXISTS `ac_coupons_products` CASCADE;
+DROP TABLE IF EXISTS `ac_coupons` CASCADE;
+
+DROP TABLE IF EXISTS `ac_currencies` CASCADE;
+DROP TABLE IF EXISTS `ac_stores` CASCADE;
+DROP TABLE IF EXISTS `ac_extension_dependencies` CASCADE;
+DROP TABLE IF EXISTS `ac_extensions` CASCADE;
+DROP TABLE IF EXISTS `ac_banners` CASCADE;
+DROP TABLE IF EXISTS `ac_languages` CASCADE;
+DROP TABLE IF EXISTS `ac_locations` CASCADE;
+DROP TABLE IF EXISTS `ac_countries` CASCADE;
+DROP TABLE IF EXISTS `ac_zones` CASCADE;
+DROP TABLE IF EXISTS `ac_addresses` CASCADE;
+DROP TABLE IF EXISTS `ac_length_classes` CASCADE;
+DROP TABLE IF EXISTS `ac_manufacturers` CASCADE;
+DROP TABLE IF EXISTS `ac_order_totals` CASCADE;
+DROP TABLE IF EXISTS `ac_product_tags` CASCADE;
+DROP TABLE IF EXISTS `ac_products_featured` CASCADE;
+DROP TABLE IF EXISTS `ac_product_options` CASCADE;
+DROP TABLE IF EXISTS `ac_product_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_product_discounts` CASCADE;
+DROP TABLE IF EXISTS `ac_product_option_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_product_option_values` CASCADE;
+DROP TABLE IF EXISTS `ac_product_option_value_descriptions` CASCADE;
+DROP TABLE IF EXISTS `ac_product_specials` CASCADE;
+DROP TABLE IF EXISTS `ac_products_related` CASCADE;
+DROP TABLE IF EXISTS `ac_products` CASCADE;
+DROP TABLE IF EXISTS `ac_tax_classes` CASCADE;
+DROP TABLE IF EXISTS `ac_contents` CASCADE;
+DROP TABLE IF EXISTS `ac_customers` CASCADE;
+DROP TABLE IF EXISTS `ac_user_groups` CASCADE;
+DROP TABLE IF EXISTS `ac_user_notifications` CASCADE;
+DROP TABLE IF EXISTS `ac_users` CASCADE;
+
+DROP TABLE IF EXISTS `ac_weight_classes` CASCADE;
+
+DROP TABLE IF EXISTS `ac_pages_layouts` CASCADE;
+DROP TABLE IF EXISTS `ac_layouts` CASCADE;
+DROP TABLE IF EXISTS `ac_pages` CASCADE;
+
 --
 -- DDL for table `stores`
 --
-DROP TABLE IF EXISTS `ac_stores`;
 CREATE TABLE `ac_stores` (
   `store_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL,
@@ -17,7 +158,6 @@ INSERT INTO `ac_stores` VALUES	(0,'default','default',1);
 --
 -- DDL for table `languages`
 --
-DROP TABLE IF EXISTS `ac_languages`;
 CREATE TABLE `ac_languages` (
   `language_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -43,7 +183,6 @@ INSERT INTO `ac_languages` (`language_id`, `name`, `code`, `locale`, `image`, `d
 --
 -- DDL for table `language_definitions`
 --
-DROP TABLE IF EXISTS `ac_language_definitions`;
 CREATE TABLE `ac_language_definitions` (
   `language_definition_id` int(11) NOT NULL auto_increment,
   `language_id` int(11) NOT NULL,
@@ -64,7 +203,7 @@ CREATE TABLE `ac_language_definitions` (
 -- NOTE: If update table keep in mind ac_customers_enc
 --
 
-DROP TABLE IF EXISTS `ac_customers`;
+
 CREATE TABLE `ac_customers` (
   `customer_id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL DEFAULT '0',
@@ -101,7 +240,6 @@ CREATE FULLTEXT INDEX `ac_customers_name_idx` ON `ac_customers` (`firstname`, `l
 --
 -- DDL for table `locations`
 --
-DROP TABLE IF EXISTS `ac_locations`;
 CREATE TABLE `ac_locations` (
   `location_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -121,7 +259,6 @@ INSERT INTO `ac_locations` (`location_id`, `name`, `description`, `date_added`) 
 --
 -- DDL for table `countries`
 --
-DROP TABLE IF EXISTS `ac_countries`;
 CREATE TABLE `ac_countries` (
   `country_id` int(11) NOT NULL AUTO_INCREMENT,
   `iso_code_2` varchar(2) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -382,7 +519,6 @@ VALUES
 --
 -- DDL for table `ac_country_descriptions`
 --
-DROP TABLE IF EXISTS `ac_country_descriptions`;
 CREATE TABLE `ac_country_descriptions` (
   `country_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -638,7 +774,7 @@ VALUES
 --
 -- DDL for table `zone`
 --
-DROP TABLE IF EXISTS `ac_zones`;
+
 CREATE TABLE `ac_zones` (
   `zone_id` int(11) NOT NULL AUTO_INCREMENT,
   `country_id` int(11) NOT NULL,
@@ -4592,7 +4728,6 @@ INSERT INTO `ac_zones` (`zone_id`, `country_id`, `code`, `status`, `sort_order`)
 --
 -- DDL for table `ac_zone_descriptions`
 --
-DROP TABLE IF EXISTS `ac_zone_descriptions`;
 CREATE TABLE `ac_zone_descriptions` (
   `zone_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8541,7 +8676,6 @@ INSERT INTO `ac_zone_descriptions` (`zone_id`, `language_id`,`name`) VALUES
 --
 -- DDL for table `zone_to_locations`
 --
-DROP TABLE IF EXISTS `ac_zones_to_locations`;
 CREATE TABLE `ac_zones_to_locations` (
   `zone_to_location_id` int(11) NOT NULL AUTO_INCREMENT,
   `country_id` int(11) NOT NULL,
@@ -8634,7 +8768,6 @@ VALUES
 --
 -- NOTE: If update table keep in mind ac_addresses_enc
 --
-DROP TABLE IF EXISTS `ac_addresses`;
 CREATE TABLE `ac_addresses` (
   `address_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
@@ -8657,7 +8790,6 @@ CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`,
 --
 -- DDL for table `categories`
 --
-DROP TABLE IF EXISTS `ac_categories`;
 CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
   --????? Need to update code to read NULL for root categories.
@@ -8674,7 +8806,6 @@ CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`
 --
 -- DDL for table `category_descriptions`
 --
-DROP TABLE IF EXISTS `ac_category_descriptions`;
 CREATE TABLE `ac_category_descriptions` (
   `category_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8691,7 +8822,7 @@ CREATE TABLE `ac_category_descriptions` (
 --
 -- DDL for table `categories_to_stores`
 --
-DROP TABLE IF EXISTS `ac_categories_to_stores`;
+
 CREATE TABLE `ac_categories_to_stores` (
   `category_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -8703,7 +8834,6 @@ CREATE TABLE `ac_categories_to_stores` (
 --
 -- DDL for table `coupons`
 --
-DROP TABLE IF EXISTS `ac_coupons`;
 CREATE TABLE `ac_coupons` (
   `coupon_id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(10) COLLATE utf8_general_ci NOT NULL,
@@ -8725,7 +8855,6 @@ CREATE TABLE `ac_coupons` (
 --
 -- DDL for table `coupon_descriptions`
 --
-DROP TABLE IF EXISTS `ac_coupon_descriptions`;
 CREATE TABLE `ac_coupon_descriptions` (
   `coupon_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8739,7 +8868,6 @@ CREATE TABLE `ac_coupon_descriptions` (
 --
 -- DDL for table `currencies`
 --
-DROP TABLE IF EXISTS `ac_currencies`;
 CREATE TABLE `ac_currencies` (
   `currency_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -8765,7 +8893,6 @@ INSERT INTO `ac_currencies` (`currency_id`, `title`, `code`, `symbol_left`, `sym
 --
 -- DDL for table `customer_groups`
 --
-DROP TABLE IF EXISTS `ac_customer_groups`;
 CREATE TABLE `ac_customer_groups` (
   `customer_group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL,
@@ -8785,8 +8912,6 @@ INSERT INTO `ac_customer_groups` ( `name`, `tax_exempt`) VALUES
 --
 -- DDL for table `ac_online_customers`
 --
-
-DROP TABLE IF EXISTS `ac_online_customers`;
 CREATE TABLE `ac_online_customers` (
   `customer_id` int(11) NOT NULL,
   `ip` varchar(50) NOT NULL,
@@ -8798,9 +8923,28 @@ CREATE TABLE `ac_online_customers` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
+-- DDL for table `download`
+--
+CREATE TABLE `ac_downloads` (
+  `download_id` int(11) NOT NULL AUTO_INCREMENT,
+  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `max_downloads` int(11) DEFAULT NULL, -- remaining, NULL -> No limit
+  `expire_days` int(11) DEFAULT NULL,  -- default to NULL -> No expiration
+  `sort_order` int(11) NOT NULL,
+  `activate` varchar(64) NOT NULL,
+  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
+  `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
+  `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`download_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, `shared` );
+
+--
 -- DDL for table `download_descriptions`
 --
-DROP TABLE IF EXISTS `ac_download_descriptions`;
 CREATE TABLE `ac_download_descriptions` (
   `download_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8812,7 +8956,6 @@ CREATE TABLE `ac_download_descriptions` (
 
 
 -- All data is taken from global attribute
-DROP TABLE IF EXISTS `ac_download_attribute_values`;
 CREATE TABLE `ac_download_attribute_values` (
   `download_attribute_id` int(11) NOT NULL AUTO_INCREMENT,
   `attribute_id` int(11) NOT NULL,
@@ -8827,7 +8970,6 @@ CREATE INDEX `ac_download_attribute_values_idx` ON `ac_download_attribute_values
 --
 -- DDL for table `extensions`
 --
-DROP TABLE IF EXISTS `ac_extensions`;
 CREATE TABLE `ac_extensions` (
   `extension_id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(32) COLLATE utf8_general_ci NOT NULL,
@@ -8877,7 +9019,6 @@ INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `v
 --
 -- DDL for tables of banner manager
 --
-DROP TABLE IF EXISTS `ac_banners`;
 CREATE TABLE `ac_banners` (
 	`banner_id` int(11) NOT NULL AUTO_INCREMENT,
 	`status` int(1) NOT NULL DEFAULT '0',
@@ -8893,7 +9034,7 @@ CREATE TABLE `ac_banners` (
 	PRIMARY KEY (`banner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-DROP TABLE IF EXISTS `ac_banner_descriptions`;
+
 CREATE TABLE `ac_banner_descriptions` (
   `banner_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8907,7 +9048,7 @@ CREATE TABLE `ac_banner_descriptions` (
   FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-DROP TABLE IF EXISTS `ac_banner_stat`;
+
 CREATE TABLE `ac_banner_stat` (
 	`rowid` INT NOT NULL AUTO_INCREMENT,
   `banner_id` int(11) NOT NULL,
@@ -8923,7 +9064,6 @@ CREATE TABLE `ac_banner_stat` (
 --
 -- DDL for table `length_class`
 --
-DROP TABLE IF EXISTS `ac_length_classes`;
 CREATE TABLE `ac_length_classes` (
   `length_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `value` decimal(15,8) NOT NULL,
@@ -8944,7 +9084,6 @@ INSERT INTO `ac_length_classes` (`length_class_id`, `value`, `iso_code`) VALUES
 --
 -- DDL for table `length_class_descriptions`
 --
-DROP TABLE IF EXISTS `ac_length_class_descriptions`;
 CREATE TABLE `ac_length_class_descriptions` (
   `length_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -8966,7 +9105,6 @@ INSERT INTO `ac_length_class_descriptions` (`length_class_id`, `language_id`, `t
 --
 -- DDL for table `manufacturers`
 --
-DROP TABLE IF EXISTS `ac_manufacturers`;
 CREATE TABLE `ac_manufacturers` (
   `manufacturer_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -8978,7 +9116,6 @@ CREATE TABLE `ac_manufacturers` (
 --
 -- DDL for table `manufacturers_to_store`
 --
-DROP TABLE IF EXISTS `ac_manufacturers_to_stores`;
 CREATE TABLE `ac_manufacturers_to_stores` (
   `manufacturer_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -8992,7 +9129,6 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 --
 -- NOTE: If update table keep in mind ac_orders_enc
 --
-DROP TABLE IF EXISTS `ac_orders`;
 CREATE TABLE `ac_orders` (
   `order_id` int(11) NOT NULL AUTO_INCREMENT,
   `invoice_id` int(11) NOT NULL DEFAULT '0',
@@ -9072,7 +9208,7 @@ ON `ac_orders` (
 --
 -- DDL for table table `ac_customer_transactions`
 --
-DROP TABLE IF EXISTS `ac_customer_transactions`;
+
 CREATE TABLE `ac_customer_transactions` (
   `customer_transaction_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL DEFAULT '0',
@@ -9093,255 +9229,8 @@ CREATE TABLE `ac_customer_transactions` (
 CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `customer_id`, `order_id` );
 
 --
--- DDL for table `order_products`
---
-DROP TABLE IF EXISTS `ac_order_products`;
-CREATE TABLE `ac_order_products` (
-  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `model` varchar(24) NOT NULL DEFAULT '',
-  `sku` varchar(64) NOT NULL DEFAULT '',
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `quantity` int(4) NOT NULL DEFAULT '0',
-  `subtract` int(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`order_product_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
-  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
-
---
--- DDL for table `download`
---
-DROP TABLE IF EXISTS `ac_downloads`;
-CREATE TABLE `ac_downloads` (
-  `download_id` int(11) NOT NULL AUTO_INCREMENT,
-  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `max_downloads` int(11) DEFAULT NULL, -- remaining, NULL -> No limit
-  `expire_days` int(11) DEFAULT NULL,  -- default to NULL -> No expiration
-  `sort_order` int(11) NOT NULL,
-  `activate` varchar(64) NOT NULL,
-  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
-  `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
-  `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`download_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, `shared` );
-
---
--- DDL for table `order_downloads`
---
-DROP TABLE IF EXISTS `ac_order_downloads`;
-CREATE TABLE `ac_order_downloads` (
-  `order_download_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
-  `status` int(1) NOT NULL DEFAULT '0',
-  `remaining_count` int(11) DEFAULT NULL,
-  `percentage` int(11) DEFAULT '0',
-  `expire_date` datetime NULL,
-  `sort_order` int(11) NOT NULL,
-  `activate` VARCHAR(64) NOT NULL,
-  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
-  `attributes_data` longtext COLLATE utf8_general_ci  DEFAULT NULL,  -- serialized values
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_id`),
-  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
-  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_downloads_idx`
-ON `ac_order_downloads` (`order_id`, `order_product_id`, `download_id`, `status`, `activate_order_status_id`);
---
--- DDL for table `order_downloads`
---
-DROP TABLE IF EXISTS `ac_order_downloads_history`;
-CREATE TABLE `ac_order_downloads_history` (
-  `order_download_history_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_download_id` int(11) NOT NULL,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
-  `download_percent` int(11) DEFAULT '0',
-  `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`),
-  FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`),
-  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
-  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_downloads_history_idx`
-ON `ac_order_downloads_history` (`download_id`);
-
---
--- DDL for table `ac_order_data`
--- Table to keep other order details (future dev)
---
-DROP TABLE IF EXISTS `ac_order_data`;
-CREATE TABLE `ac_order_data` (
-  `order_id` int(11) NOT NULL,
-  `type_id` int(11) NOT NULL,
-  `data` text COLLATE utf8_general_ci DEFAULT NULL,  -- serialized values
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_id`, `type_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
-  FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`order_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-DROP TABLE IF EXISTS `ac_order_data_types`;
-CREATE TABLE `ac_order_data_types` (
-  `type_id` int(11) NOT NULL AUTO_INCREMENT,
-  `language_id` int(11) NOT NULL,
-  `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY (`type_id`),
-  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
--- write pre-installed IM protocols for guest checkout orders
-INSERT INTO `ac_order_data_types` (`language_id`, `name`, `date_added`) VALUES
-(1, 'email', NOW()),
-(1, 'sms', NOW());
-
-
---
--- DDL for table `order_history`
---
-DROP TABLE IF EXISTS `ac_order_history`;
-CREATE TABLE `ac_order_history` (
-  `order_history_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_status_id` int(5) NOT NULL,
-  `notify` int(1) NOT NULL DEFAULT '0',
-  `comment` text COLLATE utf8_general_ci NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_history_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_history_idx`
-ON `ac_order_history` (`order_id`, `order_status_id`, `notify`);
-
---
--- DDL for table `order_options`
---
-DROP TABLE IF EXISTS `ac_order_options`;
-CREATE TABLE `ac_order_options` (
-  `order_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `product_option_value_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL,
-  `sku` varchar(64) NOT NULL DEFAULT '',
-  `value` text NOT NULL,
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `prefix` char(1) NOT NULL DEFAULT '',
-  `settings` longtext,
-  PRIMARY KEY (`order_option_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_order_options_idx`
-ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`);
-
---
--- DDL for table `order_statuses`
---
-DROP TABLE IF EXISTS `ac_order_statuses`;
-CREATE TABLE `ac_order_statuses` (
-  `order_status_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`order_status_id`,`language_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `order_statuses`
---
-
-INSERT INTO `ac_order_statuses` (`order_status_id`, `language_id`, `name`) VALUES
-(0, 1, 'Incomplete'),
-(1, 1, 'Pending'),
-(2, 1, 'Processing'),
-(3, 1, 'Shipped'),
-(7, 1, 'Canceled'),
-(5, 1, 'Completed'),
-(8, 1, 'Denied'),
-(9, 1, 'Canceled Reversal'),
-(10, 1, 'Failed'),
-(11, 1, 'Refunded'),
-(12, 1, 'Reversed'),
-(13, 1, 'Chargeback'),
-(14, 1, 'Canceled by Customer');
-
---
--- DDL for table `order_status_ids`
---
-DROP TABLE IF EXISTS `ac_order_status_ids`;
-CREATE TABLE `ac_order_status_ids` (
-  `order_status_id` int(11) NOT NULL,
-  `status_text_id` varchar(64) NOT NULL,
-  PRIMARY KEY (`order_status_id`,`status_text_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE UNIQUE INDEX `ac_order_status_ids_idx`
-ON `ac_order_status_ids` ( `status_text_id`);
-
-INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
-(0, 'incomplete'),
-(1, 'pending'),
-(2, 'processing'),
-(3, 'shipped'),
-(7, 'canceled'),
-(5, 'completed'),
-(8, 'denied'),
-(9, 'canceled_reversal'),
-(10, 'failed'),
-(11, 'refunded'),
-(12, 'reversed'),
-(13, 'chargeback'),
-(14, 'canceled_by_customer');
-
---
--- DDL for table `order_totals`
---
-DROP TABLE IF EXISTS `ac_order_totals`;
-CREATE TABLE `ac_order_totals` (
-  `order_total_id` int(10) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `sort_order` int(3) NOT NULL,
-  `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-   `key` varchar(128) NOT NULL DEFAULT '',
- PRIMARY KEY (`order_total_id`),
-  KEY `idx_orders_total_orders_id` (`order_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-
---
 -- DDL for table `products`
 --
-DROP TABLE IF EXISTS `ac_products`;
 CREATE TABLE `ac_products` (
   `product_id` int(11) NOT NULL AUTO_INCREMENT,
   `model` varchar(64) COLLATE utf8_general_ci NOT NULL,
@@ -9381,11 +9270,228 @@ CREATE TABLE `ac_products` (
 CREATE INDEX `ac_products_idx` ON `ac_products` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`);
 CREATE INDEX `ac_products_status_idx` ON `ac_products` (`product_id`, `status`, `date_available`);
 
+--
+-- DDL for table `order_products`
+--
+CREATE TABLE `ac_order_products` (
+  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `model` varchar(24) NOT NULL DEFAULT '',
+  `sku` varchar(64) NOT NULL DEFAULT '',
+  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `quantity` int(4) NOT NULL DEFAULT '0',
+  `subtract` int(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`order_product_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
+
+--
+-- DDL for table `order_downloads`
+--
+CREATE TABLE `ac_order_downloads` (
+  `order_download_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `order_product_id` int(11) NOT NULL,
+  `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `download_id` int(11) NOT NULL,
+  `status` int(1) NOT NULL DEFAULT '0',
+  `remaining_count` int(11) DEFAULT NULL,
+  `percentage` int(11) DEFAULT '0',
+  `expire_date` datetime NULL,
+  `sort_order` int(11) NOT NULL,
+  `activate` VARCHAR(64) NOT NULL,
+  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
+  `attributes_data` longtext COLLATE utf8_general_ci  DEFAULT NULL,  -- serialized values
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_download_id`),
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_downloads_idx`
+ON `ac_order_downloads` (`order_id`, `order_product_id`, `download_id`, `status`, `activate_order_status_id`);
+--
+-- DDL for table `order_downloads`
+--
+CREATE TABLE `ac_order_downloads_history` (
+  `order_download_history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_download_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `order_product_id` int(11) NOT NULL,
+  `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `download_id` int(11) NOT NULL,
+  `download_percent` int(11) DEFAULT '0',
+  `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`),
+  FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`),
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_downloads_history_idx`
+ON `ac_order_downloads_history` (`download_id`);
+
+--
+-- DDL for table `ac_order_data`
+-- Table to keep other order details (future dev)
+--
+
+CREATE TABLE `ac_order_data` (
+  `order_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `data` text COLLATE utf8_general_ci DEFAULT NULL,  -- serialized values
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`, `type_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`order_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+CREATE TABLE `ac_order_data_types` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY (`type_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+-- write pre-installed IM protocols for guest checkout orders
+INSERT INTO `ac_order_data_types` (`language_id`, `name`, `date_added`) VALUES
+(1, 'email', NOW()),
+(1, 'sms', NOW());
+
+
+--
+-- DDL for table `order_history`
+--
+CREATE TABLE `ac_order_history` (
+  `order_history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `order_status_id` int(5) NOT NULL,
+  `notify` int(1) NOT NULL DEFAULT '0',
+  `comment` text COLLATE utf8_general_ci NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_history_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_history_idx`
+ON `ac_order_history` (`order_id`, `order_status_id`, `notify`);
+
+--
+-- DDL for table `order_options`
+--
+
+CREATE TABLE `ac_order_options` (
+  `order_option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `order_product_id` int(11) NOT NULL,
+  `product_option_value_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(255) NOT NULL,
+  `sku` varchar(64) NOT NULL DEFAULT '',
+  `value` text NOT NULL,
+  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `prefix` char(1) NOT NULL DEFAULT '',
+  `settings` longtext,
+  PRIMARY KEY (`order_option_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_order_options_idx`
+ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`);
+
+--
+-- DDL for table `order_statuses`
+--
+
+CREATE TABLE `ac_order_statuses` (
+  `order_status_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  PRIMARY KEY (`order_status_id`,`language_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `order_statuses`
+--
+
+INSERT INTO `ac_order_statuses` (`order_status_id`, `language_id`, `name`) VALUES
+(0, 1, 'Incomplete'),
+(1, 1, 'Pending'),
+(2, 1, 'Processing'),
+(3, 1, 'Shipped'),
+(7, 1, 'Canceled'),
+(5, 1, 'Completed'),
+(8, 1, 'Denied'),
+(9, 1, 'Canceled Reversal'),
+(10, 1, 'Failed'),
+(11, 1, 'Refunded'),
+(12, 1, 'Reversed'),
+(13, 1, 'Chargeback'),
+(14, 1, 'Canceled by Customer');
+
+--
+-- DDL for table `order_status_ids`
+--
+CREATE TABLE `ac_order_status_ids` (
+  `order_status_id` int(11) NOT NULL,
+  `status_text_id` varchar(64) NOT NULL,
+  PRIMARY KEY (`order_status_id`,`status_text_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE UNIQUE INDEX `ac_order_status_ids_idx`
+ON `ac_order_status_ids` ( `status_text_id`);
+
+INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
+(0, 'incomplete'),
+(1, 'pending'),
+(2, 'processing'),
+(3, 'shipped'),
+(7, 'canceled'),
+(5, 'completed'),
+(8, 'denied'),
+(9, 'canceled_reversal'),
+(10, 'failed'),
+(11, 'refunded'),
+(12, 'reversed'),
+(13, 'chargeback'),
+(14, 'canceled_by_customer');
+
+--
+-- DDL for table `order_totals`
+--
+
+CREATE TABLE `ac_order_totals` (
+  `order_total_id` int(10) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `sort_order` int(3) NOT NULL,
+  `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+   `key` varchar(128) NOT NULL DEFAULT '',
+ PRIMARY KEY (`order_total_id`),
+  KEY `idx_orders_total_orders_id` (`order_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
 -- DDL for table `product_descriptions`
 --
-DROP TABLE IF EXISTS `ac_product_descriptions`;
 CREATE TABLE `ac_product_descriptions` (
   `product_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9403,7 +9509,6 @@ CREATE INDEX `ac_product_descriptions_name_idx` ON `ac_product_descriptions` (`p
 --
 -- DDL for table `product_discounts`
 --
-DROP TABLE IF EXISTS `ac_product_discounts`;
 CREATE TABLE `ac_product_discounts` (
   `product_discount_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
@@ -9424,7 +9529,6 @@ CREATE INDEX `ac_product_discounts_idx` ON `ac_product_discounts` (`product_id`,
 --
 -- DDL for table `product_featured`
 --
-DROP TABLE IF EXISTS `ac_products_featured`;
 CREATE TABLE `ac_products_featured` (
   `product_id` int(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`product_id`)
@@ -9434,7 +9538,6 @@ CREATE TABLE `ac_products_featured` (
 --
 -- DDL for table `product_options`
 --
-DROP TABLE IF EXISTS `ac_product_options`;
 CREATE TABLE `ac_product_options` (
   `product_option_id` int(11) NOT NULL AUTO_INCREMENT,
   `attribute_id` int(11) NOT NULL,
@@ -9454,7 +9557,6 @@ CREATE INDEX `ac_product_options_idx` ON `ac_product_options` (`attribute_id`, `
 --
 -- DDL for table `product_option_descriptions`
 --
-DROP TABLE IF EXISTS `ac_product_option_descriptions`;
 CREATE TABLE `ac_product_option_descriptions` (
   `product_option_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9468,7 +9570,6 @@ CREATE INDEX `ac_product_option_descriptions_idx` ON `ac_product_option_descript
 --
 -- DDL for table `product_option_values`
 --
-DROP TABLE IF EXISTS `ac_product_option_values`;
 CREATE TABLE `ac_product_option_values` (
   `product_option_value_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_option_id` int(11) NOT NULL,
@@ -9494,7 +9595,6 @@ CREATE INDEX `ac_product_option_values_idx` ON `ac_product_option_values` ( `pro
 --
 -- DDL for table `product_option_value_descriptions`
 --
-DROP TABLE IF EXISTS `ac_product_option_value_descriptions`;
 CREATE TABLE `ac_product_option_value_descriptions` (
   `product_option_value_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9508,7 +9608,6 @@ CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_va
 --
 -- DDL for table `product_related`
 --
-DROP TABLE IF EXISTS `ac_products_related`;
 CREATE TABLE `ac_products_related` (
   `product_id` int(11) NOT NULL,
   `related_id` int(11) NOT NULL,
@@ -9519,7 +9618,6 @@ CREATE TABLE `ac_products_related` (
 --
 -- DDL for table `product_specials`
 --
-DROP TABLE IF EXISTS `ac_product_specials`;
 CREATE TABLE `ac_product_specials` (
   `product_special_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
@@ -9538,7 +9636,6 @@ CREATE INDEX `ac_product_specials_idx` ON `ac_product_specials` ( `product_id`, 
 --
 -- DDL for table `product_tags`
 --
-DROP TABLE IF EXISTS `ac_product_tags`;
 CREATE TABLE `ac_product_tags` (
   `product_id` int(11) NOT NULL,
   `tag` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
@@ -9550,7 +9647,6 @@ CREATE TABLE `ac_product_tags` (
 --
 -- DDL for table `product_to_categories`
 --
-DROP TABLE IF EXISTS `ac_products_to_categories`;
 CREATE TABLE `ac_products_to_categories` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
@@ -9561,7 +9657,6 @@ CREATE TABLE `ac_products_to_categories` (
 --
 -- DDL for table `product_to_downloads`
 --
-DROP TABLE IF EXISTS `ac_products_to_downloads`;
 CREATE TABLE `ac_products_to_downloads` (
   `product_id` int(11) NOT NULL,
   `download_id` int(11) NOT NULL,
@@ -9572,7 +9667,6 @@ CREATE TABLE `ac_products_to_downloads` (
 --
 -- DDL for table `product_to_stores`
 --
-DROP TABLE IF EXISTS `ac_products_to_stores`;
 CREATE TABLE `ac_products_to_stores` (
   `product_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL DEFAULT 0,
@@ -9582,7 +9676,6 @@ CREATE TABLE `ac_products_to_stores` (
 --
 -- DDL for table `coupon_products`
 --
-DROP TABLE IF EXISTS `ac_coupons_products`;
 CREATE TABLE `ac_coupons_products` (
   `coupon_product_id` int(11) NOT NULL AUTO_INCREMENT,
   `coupon_id` int(11) NOT NULL,
@@ -9597,7 +9690,6 @@ CREATE INDEX `ac_coupons_products_idx` ON `ac_coupons_products` ( `coupon_id`, `
 --
 -- DDL for table `reviews`
 --
-DROP TABLE IF EXISTS `ac_reviews`;
 CREATE TABLE `ac_reviews` (
   `review_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
@@ -9617,7 +9709,6 @@ CREATE INDEX `ac_reviews_idx` ON `ac_reviews` ( `product_id`, `customer_id` );
 --
 -- DDL for table `settings`
 --
-DROP TABLE IF EXISTS `ac_settings`;
 CREATE TABLE `ac_settings` (
   `setting_id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL DEFAULT 0,
@@ -9845,7 +9936,7 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 --
 -- DDL for table `stock_statuses`
 --
-DROP TABLE IF EXISTS `ac_stock_statuses`;
+
 CREATE TABLE `ac_stock_statuses` (
   `stock_status_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9863,7 +9954,7 @@ INSERT INTO `ac_stock_statuses` (`stock_status_id`, `language_id`, `name`) VALUE
 --
 -- DDL for table `store_descriptions`
 --
-DROP TABLE IF EXISTS `ac_store_descriptions`;
+
 CREATE TABLE `ac_store_descriptions` (
   `store_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9878,7 +9969,7 @@ CREATE TABLE `ac_store_descriptions` (
 --
 -- DDL for table `tax_classes`
 --
-DROP TABLE IF EXISTS `ac_tax_classes`;
+
 CREATE TABLE `ac_tax_classes` (
   `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -9895,7 +9986,7 @@ INSERT INTO `ac_tax_classes` (`tax_class_id`, `date_added`) VALUES (1, now());
 --
 -- DDL for table `tax_class_descriptions`
 --
-DROP TABLE IF EXISTS `ac_tax_class_descriptions`;
+
 CREATE TABLE `ac_tax_class_descriptions` (
   `tax_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9909,7 +10000,6 @@ INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`,
 --
 -- DDL for table `tax_rates`
 --
-DROP TABLE IF EXISTS `ac_tax_rates`;
 CREATE TABLE `ac_tax_rates` (
   `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
   `location_id` int(11) NOT NULL DEFAULT '0',
@@ -9936,7 +10026,7 @@ INSERT INTO `ac_tax_rates` (`tax_rate_id`, `location_id`, `tax_class_id`, `prior
 -- DDL for table `tax_rate_descriptions`
 --
 
-DROP TABLE IF EXISTS `ac_tax_rate_descriptions`;
+
 CREATE TABLE `ac_tax_rate_descriptions` (
   `tax_rate_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -9947,13 +10037,11 @@ CREATE TABLE `ac_tax_rate_descriptions` (
 --
 -- Dumping data for table `tax_rate_descriptions`
 --
-
 INSERT INTO `ac_tax_rate_descriptions` (`tax_rate_id`, `language_id`, `description`) VALUES (1, 1, 'Retail 8.5%');
 
 --
 -- DDL for table `url_alias`
 --
-DROP TABLE IF EXISTS `ac_url_aliases`;
 CREATE TABLE `ac_url_aliases` (
   `url_alias_id` int(11) NOT NULL AUTO_INCREMENT,
   `query` varchar(255) COLLATE utf8_general_ci NOT NULL,
@@ -9970,7 +10058,6 @@ ON `ac_url_aliases` ( `query`, `language_id` );
 --
 -- DDL for table `user`
 --
-DROP TABLE IF EXISTS `ac_users`;
 CREATE TABLE `ac_users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_group_id` int(11) NOT NULL,
@@ -9993,7 +10080,7 @@ CREATE TABLE `ac_users` (
 --
 -- DDL for table `user_group`
 --
-DROP TABLE IF EXISTS `ac_user_groups`;
+
 CREATE TABLE `ac_user_groups` (
   `user_group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL,
@@ -10012,7 +10099,7 @@ INSERT INTO `ac_user_groups` (`user_group_id`, `name`, `permission`) VALUES
 (10, 'Demonstration', '');
 
 
-DROP TABLE IF EXISTS `ac_user_notifications`;
+
 CREATE TABLE `ac_user_notifications` (
   `user_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -10025,7 +10112,7 @@ CREATE TABLE `ac_user_notifications` (
   PRIMARY KEY (`user_id`,`store_id`,`section`,`sendpoint`,`protocol`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `ac_customer_notifications`;
+
 CREATE TABLE `ac_customer_notifications` (
   `customer_id` int(11) NOT NULL,
   `sendpoint` varchar(255) NOT NULL,
@@ -10039,7 +10126,7 @@ CREATE TABLE `ac_customer_notifications` (
 --
 -- DDL for table `weight_class`
 --
-DROP TABLE IF EXISTS `ac_weight_classes`;
+
 CREATE TABLE `ac_weight_classes` (
   `weight_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `value` decimal(15,8) NOT NULL DEFAULT '0.00000000',
@@ -10063,7 +10150,7 @@ INSERT INTO `ac_weight_classes` (`weight_class_id`, `value`, `iso_code`) VALUES
 --
 -- DDL for table `weight_class_description`
 --
-DROP TABLE IF EXISTS `ac_weight_class_descriptions`;
+
 CREATE TABLE `ac_weight_class_descriptions` (
   `weight_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -10085,7 +10172,7 @@ INSERT INTO `ac_weight_class_descriptions` (`weight_class_id`, `language_id`, `t
 --
 -- DDL for table `pages`
 --
-DROP TABLE IF EXISTS `ac_pages`;
+
 CREATE TABLE `ac_pages` (
   `page_id` int(10) NOT NULL auto_increment,
   `parent_page_id` int(10) NOT NULL DEFAULT '0',
@@ -10118,7 +10205,7 @@ INSERT INTO `ac_pages` (`page_id`, `parent_page_id`, `controller`, `key_param`, 
 -- DDL for table `page_descriptions`
 --
 
-DROP TABLE IF EXISTS `ac_page_descriptions`;
+
 CREATE TABLE `ac_page_descriptions` (
   `page_id` int(10) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
@@ -10146,7 +10233,7 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 --
 -- DDL for table `contents`
 --
-DROP TABLE IF EXISTS `ac_contents`;
+
 CREATE TABLE `ac_contents` (
     `content_id` int(11) NOT NULL AUTO_INCREMENT,
 	`parent_content_id` int(11) NOT NULL DEFAULT 0,
@@ -10168,8 +10255,6 @@ INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`) VALUES
 --
 -- DDL for table `content_descriptions`
 --
-
-DROP TABLE IF EXISTS `ac_content_descriptions`;
 CREATE TABLE `ac_content_descriptions` (
   `content_id` int(10) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
@@ -10197,7 +10282,6 @@ VALUES
 --
 -- DDL for table `content_to_store`
 --
-DROP TABLE IF EXISTS `ac_contents_to_stores`;
 CREATE TABLE `ac_contents_to_stores` (
   `content_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -10208,7 +10292,7 @@ CREATE TABLE `ac_contents_to_stores` (
 --
 -- DDL for table `blocks`
 --
-DROP TABLE IF EXISTS `ac_blocks`;
+
 CREATE TABLE `ac_blocks` (
   `block_id` int(10) NOT NULL auto_increment,
   `block_txt_id` varchar(255) NOT NULL,
@@ -10255,7 +10339,7 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 -- DDL for table `ac_custom_blocks`
 --
 
-DROP TABLE IF EXISTS `ac_custom_blocks`;
+
 CREATE TABLE `ac_custom_blocks` (
   `custom_block_id` int(10) NOT NULL auto_increment,
   `block_id` int(10) NOT NULL,
@@ -10267,8 +10351,6 @@ CREATE TABLE `ac_custom_blocks` (
 --
 -- DDL for table `ac_custom_lists`
 --
-
-DROP TABLE IF EXISTS `ac_custom_lists`;
 CREATE TABLE `ac_custom_lists` (
 	`rowid` INT(11) NOT NULL AUTO_INCREMENT,
   `custom_block_id` int(10) NOT NULL,
@@ -10284,8 +10366,6 @@ CREATE TABLE `ac_custom_lists` (
 --
 -- DDL for table `block_descriptions`
 --
-
-DROP TABLE IF EXISTS `ac_block_descriptions`;
 CREATE TABLE `ac_block_descriptions` (
   `block_description_id` int(10) NOT NULL auto_increment,
   `custom_block_id` int(10) NOT NULL,
@@ -10304,8 +10384,6 @@ CREATE TABLE `ac_block_descriptions` (
 --
 -- DDL for table `block_templates`
 --
-
-DROP TABLE IF EXISTS `ac_block_templates`;
 CREATE TABLE `ac_block_templates` (
   `block_id` int(10) NOT NULL auto_increment,
   `parent_block_id` int(10) NOT NULL DEFAULT 0, -- Placeholder where this block can be placed. 0 - any location
@@ -10405,8 +10483,6 @@ INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `da
 --
 -- DDL for table `layouts`
 --
-
-DROP TABLE IF EXISTS `ac_layouts`;
 CREATE TABLE `ac_layouts` (
   `layout_id` int(10) NOT NULL auto_increment,
   `template_id` varchar(100) NOT NULL,
@@ -10431,7 +10507,6 @@ INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_nam
 --
 -- DDL for table `pages_layouts`
 --
-DROP TABLE IF EXISTS `ac_pages_layouts`;
 CREATE TABLE `ac_pages_layouts` (
   `layout_id` int(10) NOT NULL,
   `page_id` int(10) NOT NULL,
@@ -10451,7 +10526,7 @@ INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
 --
 -- DDL for table `block_layouts`
 --
-DROP TABLE IF EXISTS `ac_block_layouts`;
+
 CREATE TABLE `ac_block_layouts` (
   `instance_id` int(10) NOT NULL auto_increment,
   `layout_id` int(10) NOT NULL default '0',
@@ -10666,7 +10741,6 @@ VALUES
 --
 -- DDL for table `forms_pages`
 --
-DROP TABLE IF EXISTS `ac_pages_forms`;
 CREATE TABLE `ac_pages_forms` (
   `page_id` int(10) NOT NULL,
   `form_id` int(10) NOT NULL,
@@ -10677,7 +10751,7 @@ CREATE TABLE `ac_pages_forms` (
 --
 -- DDL for table `forms`
 --
-DROP TABLE IF EXISTS `ac_forms`;
+
 CREATE TABLE `ac_forms` (
   `form_id` int(11) NOT NULL auto_increment,
   `form_name` varchar(40) NOT NULL default '',
@@ -10694,7 +10768,7 @@ INSERT INTO `ac_forms` VALUES (2,'ContactUsFrm','content/contact','content/conta
 --
 -- DDL for table `form_descriptions`
 --
-DROP TABLE IF EXISTS `ac_form_descriptions`;
+
 CREATE TABLE `ac_form_descriptions` (
   `form_id` int(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
@@ -10707,7 +10781,7 @@ INSERT INTO `ac_form_descriptions` VALUES (2,1,'Contact Us Form');
 --
 -- DDL for table `fields`
 --
-DROP TABLE IF EXISTS `ac_fields`;
+
 CREATE TABLE `ac_fields` (
   `field_id` int(11) NOT NULL auto_increment,
   `form_id` int(11) NOT NULL DEFAULT '0',
@@ -10737,7 +10811,7 @@ VALUES
 --
 -- DDL for table `field_descriptions`
 --
-DROP TABLE IF EXISTS `ac_field_descriptions`;
+
 CREATE TABLE `ac_field_descriptions` (
   `field_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL COMMENT 'translatable',
@@ -10757,7 +10831,7 @@ VALUES
 --
 -- DDL for table `ac_field_values`
 --
-DROP TABLE IF EXISTS `ac_field_values`;
+
 CREATE TABLE `ac_field_values` (
   `value_id` int(11) NOT NULL auto_increment,
   `field_id` int(11) NOT NULL DEFAULT '0',
@@ -10769,7 +10843,7 @@ CREATE TABLE `ac_field_values` (
 --
 -- DDL for table `fields_groups`
 --
-DROP TABLE IF EXISTS `ac_form_groups`;
+
 CREATE TABLE `ac_form_groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `group_name` varchar(40) NOT NULL default '',
@@ -10783,7 +10857,7 @@ CREATE TABLE `ac_form_groups` (
 --
 -- DDL for table `fields_groups`
 --
-DROP TABLE IF EXISTS `ac_fields_groups`;
+
 CREATE TABLE `ac_fields_groups` (
   `field_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
@@ -10795,7 +10869,7 @@ CREATE TABLE `ac_fields_groups` (
 --
 -- DDL for table `fields_group_descriptions`
 --
-DROP TABLE IF EXISTS `ac_fields_group_descriptions`;
+
 CREATE TABLE `ac_fields_group_descriptions` (
   `group_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL COMMENT 'translatable',
@@ -10808,7 +10882,7 @@ CREATE TABLE `ac_fields_group_descriptions` (
 --
 -- DDL for table `ac_messages`
 --
-DROP TABLE IF EXISTS `ac_messages`;
+
 CREATE TABLE `ac_messages` (
   `msg_id` int(11) NOT NULL auto_increment,
   `title` varchar(128) NOT NULL default '',
@@ -10824,7 +10898,7 @@ CREATE TABLE `ac_messages` (
 --
 -- DDL for table `ac_ant_messages`
 --
-DROP TABLE IF EXISTS `ac_ant_messages`;
+
 CREATE TABLE `ac_ant_messages` (
   `id` varchar(60) NOT NULL,
   `priority` int(11) NOT NULL DEFAULT 0,
@@ -10846,7 +10920,7 @@ CREATE TABLE `ac_ant_messages` (
 --
 -- DDL for table `ac_datasets`
 --
-DROP TABLE IF EXISTS `ac_datasets`;
+
 CREATE TABLE `ac_datasets` (
   `dataset_id` int(11) NOT NULL AUTO_INCREMENT,
   `dataset_name` varchar(255) CHARACTER SET utf8 NOT NULL,
@@ -10858,7 +10932,7 @@ CREATE TABLE `ac_datasets` (
 --
 -- DDL for table `ac_dataset_properties`
 --
-DROP TABLE IF EXISTS `ac_dataset_properties`;
+
 CREATE TABLE `ac_dataset_properties` (
 	`rowid` int(11) NOT NULL AUTO_INCREMENT,
   `dataset_id` int(11) NOT NULL,
@@ -10871,7 +10945,7 @@ CREATE TABLE `ac_dataset_properties` (
 --
 -- DDL for table `ac_dataset_definition`
 --
-DROP TABLE IF EXISTS `ac_dataset_definition`;
+
 CREATE TABLE `ac_dataset_definition` (
   `dataset_id` int(11) NOT NULL,
   `dataset_column_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -10885,7 +10959,7 @@ CREATE TABLE `ac_dataset_definition` (
 --
 -- DDL for table `ac_dataset_column_properties`
 --
-DROP TABLE IF EXISTS `ac_dataset_column_properties`;
+
 CREATE TABLE `ac_dataset_column_properties` (
 	`rowid` INT(11) NOT NULL AUTO_INCREMENT,
   `dataset_column_id` int(11) NOT NULL,
@@ -10898,7 +10972,7 @@ CREATE TABLE `ac_dataset_column_properties` (
 --
 -- DDL for table `ac_dataset_values`
 --
-DROP TABLE IF EXISTS `ac_dataset_values`;
+
 CREATE TABLE `ac_dataset_values` (
   `dataset_column_id` int(11) NOT NULL,
   `value_integer` int(11) DEFAULT NULL,
@@ -12102,7 +12176,7 @@ VALUES  (5,30,'date_added','timestamp',1),
 --
 -- DDL for table `ac_resource_library`
 --
-DROP TABLE IF EXISTS `ac_resource_library`;
+
 CREATE TABLE `ac_resource_library` (
   `resource_id` int(11) NOT NULL auto_increment,
   `type_id` int(11) NOT NULL,
@@ -12117,7 +12191,7 @@ CREATE INDEX `ac_resource_library_idx` ON `ac_resource_library` ( `resource_id`,
 -- DDL for table `ac_resource_descriptions`
 --
 
-DROP TABLE IF EXISTS `ac_resource_descriptions`;
+
 CREATE TABLE `ac_resource_descriptions` (
   `resource_id` int(10) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL, -- use 1 as default
@@ -12323,7 +12397,7 @@ VALUES
 --
 -- DDL for table `ac_resource_types`
 --
-DROP TABLE IF EXISTS `ac_resource_types`;
+
 CREATE TABLE `ac_resource_types` (
   `type_id` int(11) NOT NULL AUTO_INCREMENT,
   `type_name` varchar(40) NOT NULL default '',
@@ -12346,7 +12420,7 @@ INSERT INTO `ac_resource_types` (`type_id`, `type_name`, `default_icon`, `defaul
 --
 -- DDL for table `ac_resource_map`
 --
-DROP TABLE IF EXISTS `ac_resource_map`;
+
 CREATE TABLE `ac_resource_map` (
   `resource_id` int(11) NOT NULL,
   `object_name` varchar(40) NOT NULl,
@@ -12374,7 +12448,7 @@ VALUES
 -- DDL For Global Attributes
 --
 
-DROP TABLE IF EXISTS `ac_global_attributes`;
+
 CREATE TABLE `ac_global_attributes` (
   `attribute_id` 		int(11) NOT NULL AUTO_INCREMENT,
   `attribute_parent_id`	int(11) NOT NULL DEFAULT '0',
@@ -12393,7 +12467,7 @@ CREATE TABLE `ac_global_attributes` (
 CREATE INDEX `ac_global_attributes_idx` ON `ac_global_attributes` ( `attribute_parent_id`, `attribute_group_id`, `attribute_type_id` );
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_descriptions`;
+
 CREATE TABLE `ac_global_attributes_descriptions` (
   `attribute_id` 		int(11) NOT NULL,
   `language_id` 		int(11) NOT NULL,
@@ -12404,7 +12478,7 @@ CREATE TABLE `ac_global_attributes_descriptions` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_values`;
+
 CREATE TABLE `ac_global_attributes_values` (
   `attribute_value_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `attribute_id` 		int(11) NOT NULL,
@@ -12413,7 +12487,7 @@ CREATE TABLE `ac_global_attributes_values` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_global_attributes_values_idx` ON `ac_global_attributes_values` ( `attribute_id` );
 
-DROP TABLE IF EXISTS `ac_global_attributes_value_descriptions`;
+
 CREATE TABLE `ac_global_attributes_value_descriptions` (
   `attribute_value_id` int(11) NOT NULL,
   `attribute_id` int(11) NOT NULL,
@@ -12423,7 +12497,7 @@ CREATE TABLE `ac_global_attributes_value_descriptions` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_groups`;
+
 CREATE TABLE `ac_global_attributes_groups` (
   `attribute_group_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
@@ -12432,7 +12506,7 @@ CREATE TABLE `ac_global_attributes_groups` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_groups_descriptions`;
+
 CREATE TABLE `ac_global_attributes_groups_descriptions` (
   `attribute_group_id` 	int(11) NOT NULL,
   `language_id` 		int(11) NOT NULL,
@@ -12441,7 +12515,7 @@ CREATE TABLE `ac_global_attributes_groups_descriptions` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_types`;
+
 CREATE TABLE `ac_global_attributes_types` (
   `attribute_type_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `type_key` 			varchar(64) NOT NULL,
@@ -12456,7 +12530,7 @@ INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `cont
 (2, 'download_attribute', 'responses/catalog/attribute/getDownloadAttributeSubform', 2, 1);
 
 
-DROP TABLE IF EXISTS `ac_global_attributes_type_descriptions`;
+
 CREATE TABLE `ac_global_attributes_type_descriptions` (
   `attribute_type_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
@@ -12476,7 +12550,7 @@ VALUES
 -- Product Features and Filters
 --
 
-DROP TABLE IF EXISTS `ac_product_filters`;
+
 CREATE TABLE `ac_product_filters` (
   `filter_id` int(11) NOT NULL AUTO_INCREMENT,
   `filter_type` char(1) NOT NULL DEFAULT '',  -- M - manufacture/brand, C - Category  based, F - Feature based, O - Option based, P - Price based
@@ -12489,7 +12563,7 @@ CREATE TABLE `ac_product_filters` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
-DROP TABLE IF EXISTS `ac_product_filter_descriptions`;
+
 CREATE TABLE `ac_product_filter_descriptions` (
   `filter_id` int(11) NOT NULL,
   `value` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
@@ -12498,7 +12572,7 @@ CREATE TABLE `ac_product_filter_descriptions` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
-DROP TABLE IF EXISTS `ac_product_filter_ranges`;
+
 CREATE TABLE `ac_product_filter_ranges` (
   `range_id` int(11) NOT NULL AUTO_INCREMENT,
   `feature_id` int(11),
@@ -12512,7 +12586,7 @@ CREATE TABLE `ac_product_filter_ranges` (
   KEY `feature_id` (`feature_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-DROP TABLE IF EXISTS `ac_product_filter_ranges_descriptions`;
+
 CREATE TABLE `ac_product_filter_ranges_descriptions` (
   `range_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
@@ -12520,14 +12594,14 @@ CREATE TABLE `ac_product_filter_ranges_descriptions` (
   PRIMARY KEY (`range_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-DROP TABLE IF EXISTS `ac_extension_dependencies`;
+
 CREATE TABLE `ac_extension_dependencies` (
   `extension_id` int(11) NOT NULL,
   `extension_parent_id` int(11) NOT NULL,
   PRIMARY KEY (`extension_id`,`extension_parent_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-DROP TABLE IF EXISTS `ac_encryption_keys`;
+
 CREATE TABLE `ac_encryption_keys` (
   `key_id` int(3) NOT NULL AUTO_INCREMENT,
   `key_name` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -12537,7 +12611,7 @@ CREATE TABLE `ac_encryption_keys` (
   UNIQUE KEY `encryption_keys_key_name` (`key_name`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-DROP TABLE IF EXISTS `ac_tasks`;
+
 CREATE TABLE `ac_tasks` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL DEFAULT '',
@@ -12555,7 +12629,7 @@ CREATE TABLE `ac_tasks` (
   UNIQUE KEY `task_name_idx` (`name`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-DROP TABLE IF EXISTS `ac_task_details`;
+
 CREATE TABLE `ac_task_details` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
   `created_by` varchar(255) DEFAULT '',
@@ -12565,7 +12639,7 @@ CREATE TABLE `ac_task_details` (
   PRIMARY KEY (`task_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-DROP TABLE IF EXISTS `ac_task_steps`;
+
 CREATE TABLE `ac_task_steps` (
   `step_id` int(11) NOT NULL AUTO_INCREMENT,
   `task_id` int(11) NOT NULL,

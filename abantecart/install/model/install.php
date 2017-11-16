@@ -20,8 +20,13 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
-
+namespace abc\install;
 use abc\core\AHelperUtils;
+use abc\core\Model;
+use abc\lib\ACache;
+use abc\lib\ADB;
+use abc\lib\AException;
+use DirectoryIterator;
 
 class ModelInstall extends Model{
 	public $errors = array ();
@@ -82,8 +87,16 @@ class ModelInstall extends Model{
 				&& $data['db_name']
 		) {
 			try{
-				//todo: CHECK!!!
-				new ADB($data);
+				new ADB(array(
+						'driver'    => $data['db_driver'],
+						'host'      => $data['db_host'],
+						'database'  => $data['db_name'],
+						'username'  => $data['db_user'],
+						'password'  => $data['db_password'],
+						'charset'   => 'utf8',
+						'collation' => 'utf8_unicode_ci',
+						'prefix'    => $data['db_prefix']
+						));
 			} catch (AException $exception){
 				$this->errors['warning'] = $exception->getMessage();
 			}
@@ -284,8 +297,17 @@ EOD;
 			$this->errors[] = 'Error: cannot open file ' . $file;
 			return false;
 		}
-//TODO: check!!!
-		$db = new ADB($data);
+
+		$db = new ADB(array(
+						'driver'    => $data['db_driver'],
+						'host'      => $data['db_host'],
+						'database'  => $data['db_name'],
+						'username'  => $data['db_user'],
+						'password'  => $data['db_password'],
+						'charset'   => 'utf8',
+						'collation' => 'utf8_unicode_ci',
+						'prefix'    => $data['db_prefix']
+						));
 		$query = '';
 		foreach ($sql as $line) {
 			$tsl = trim($line);
@@ -402,8 +424,17 @@ EOD;
 			$this->errors[] = 'Error: cannot open file ' . $file;
 			return false;
 		}
-		//TODO: CHECK!!!
-		$db = new ADB( $data );
+
+		$db = new ADB( array(
+						'driver'    => $data['db_driver'],
+						'host'      => $data['db_host'],
+						'database'  => $data['db_name'],
+						'username'  => $data['db_user'],
+						'password'  => $data['db_password'],
+						'charset'   => 'utf8',
+						'collation' => 'utf8_unicode_ci',
+						'prefix'    => $data['db_prefix']
+						) );
 		$db->query("SET NAMES 'utf8'");
 		$db->query("SET CHARACTER SET utf8");
 
@@ -463,7 +494,7 @@ EOD;
 		return $language_data;
 	}
 
-	public function buildAssets(){
+	public function buildAssets($data = array()){
 		//process storefront assets
 		$this->_copyDir(DIR_APP.'templates/default/storefront/assets', DIR_ASSETS.'templates/default/storefront');
 		$this->_copyDir(DIR_APP.'templates/default/admin/assets', DIR_ASSETS.'templates/default/admin');

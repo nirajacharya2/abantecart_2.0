@@ -36,6 +36,11 @@
  *                                --email=youremail@example.com
  *                               --http_server=http://localhost/abantecart
  */
+namespace abc\install;
+use abc\core\Registry;
+use abc\lib\ACache;
+use abc\lib\AException;
+use ErrorException;
 
 ini_set('register_argc_argv', 1);
 ini_set('display_errors', 1);
@@ -85,11 +90,11 @@ switch ($command) {
 
             //Check if cart is already installed
             if (file_exists(DIR_CONFIG.'config.php')) {
-                require_once(DIR_CONFIG.'config.php');
+                $file_config = require_once(DIR_CONFIG.'config.php');
             }
 
             $installed = false;
-            if (defined('DB_HOSTNAME') && DB_HOSTNAME) {
+            if (isset($file_config['ADMIN_PATH'])) {
                 $installed = true;
             }
 
@@ -135,23 +140,23 @@ switch ($command) {
 /**
  * @param       $errno
  * @param       $errstr
- * @param       $errfile
- * @param       $errline
- * @param array $errcontext
+ * @param       $err_file
+ * @param       $err_line
+ * @param array $err_context
  *
  * @return bool
  * @throws ErrorException
  */
-function handleError($errno, $errstr, $errfile, $errline, array $errcontext)
+function handleError($errno, $errstr, $err_file, $err_line, array $err_context)
 {
     // error was suppressed with the @-operator
     if (0 === error_reporting()) {
         return false;
     }
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    throw new ErrorException($errstr, 0, $errno, $err_file, $err_line);
 }
 
-set_error_handler('handleError');
+set_error_handler('\abc\install\handleError');
 
 /**
  * @return array
@@ -159,7 +164,7 @@ set_error_handler('handleError');
 function getOptionList()
 {
     return array(
-        '--root_dir'          => dirname(DIR_INSTALL).'/',
+        '--root_dir'         => dirname(DIR_INSTALL).'/',
         '--app_dir'          => dirname(DIR_INSTALL).'/app/',
         '--public_dir'       => dirname(DIR_INSTALL).'/public/',
         '--db_host'          => 'localhost',
@@ -221,9 +226,7 @@ function help()
 
 /**
  * @param string $opt_name
- *
  * @return array|string
- * @throws Exception
  */
 function getOptionValues($opt_name = '')
 {
@@ -355,6 +358,7 @@ function validateOptions($options)
 function install($options)
 {
     $errors = checkRequirements($options);
+
     if ( ! $errors) {
         writeConfigFile($options);
         if (file_exists(DIR_CONFIG.'config.php')) {
@@ -363,9 +367,9 @@ function install($options)
 
         $result = setupDB($options);
         if ( ! $result) {
-            $registry = Registry::getInstance();
-            echo 'FAILED! SQL-run failed: '.implode("\n\t",
-                    $registry->get('model_install')->errors)."\n\n";
+	        $registry = Registry::getInstance();
+	        $model = new ModelInstall($registry);
+            echo 'FAILED! SQL-run failed: '.implode("\n\t", $model->errors)."\n\n";
             exit(1);
         }
         $cache = new ACache();
@@ -381,21 +385,17 @@ function install($options)
 
 function checkRequirements($options)
 {
-
     $options['password_confirm'] = $options['password'];
-
     require_once(DIR_INSTALL.'model/install.php');
     $registry = Registry::getInstance();
-    $registry->set('model_install', new ModelInstall($registry));
-    $registry->get('model_install')->validateRequirements();
-
-    $errors = $registry->get('model_install')->error;
-
+    $model = new ModelInstall($registry);
+    $registry->set('model_install', $model);
+    $model->validateRequirements();
+    $errors = $model->errors;
     if ( ! $errors) {
-        $registry->get('model_install')->validateSettings($options);
-        $errors = $registry->get('model_install')->error;
+        $model->validateSettings($options);
+        $errors = $model->errors;
     }
-
     return $errors;
 }
 
@@ -403,15 +403,17 @@ function setupDB($data)
 {
     require_once(DIR_INSTALL.'model/install.php');
     $registry = Registry::getInstance();
-    $registry->set('model_install', new ModelInstall($registry));
-    $result = $registry->get('model_install')->RunSQL($data);
+	$model = new ModelInstall($registry);
+    $registry->set('model_install', $model);
+
+    $result = $model->RunSQL($data);
     if ($result) {
         $load_data = getOptionValues('with-sample-data');
         if ($load_data) {
-            $result = $registry->get('model_install')->loadDemoData($data);
+            $result = $model->loadDemoData($data);
         }
         if ($result) {
-            $result = $registry->get('model_install')->buildAssets($data);
+            $result = $model->buildAssets($data);
         }
 
         return $result;
@@ -428,7 +430,7 @@ function setupDB($data)
 function writeConfigFile($options)
 {
     $registry = Registry::getInstance();
-    $registry->set('model_install', new ModelInstall($registry));
-
-    return $registry->get('model_install')->configure($options);
+	$model = new ModelInstall($registry);
+    $registry->set('model_install', $model);
+    return $model->configure($options);
 }
