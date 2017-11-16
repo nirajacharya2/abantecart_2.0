@@ -20,7 +20,7 @@
 
 use abc\core\ABC;
 
-$dir_app = dirname(__DIR__) . '/app/';
+$dir_app = dirname(__DIR__) . '/abc/';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	define('IS_WINDOWS', true);

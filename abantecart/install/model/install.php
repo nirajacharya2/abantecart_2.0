@@ -20,7 +20,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
-namespace abc\install;
+namespace abantecart\install\model;
 use abc\core\AHelperUtils;
 use abc\core\Model;
 use abc\lib\ACache;

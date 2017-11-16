@@ -36,7 +36,8 @@
  *                                --email=youremail@example.com
  *                               --http_server=http://localhost/abantecart
  */
-namespace abc\install;
+namespace abantecart\install;
+use abantecart\install\model\ModelInstall;
 use abc\core\Registry;
 use abc\lib\ACache;
 use abc\lib\AException;
@@ -165,7 +166,7 @@ function getOptionList()
 {
     return array(
         '--root_dir'         => dirname(DIR_INSTALL).'/',
-        '--app_dir'          => dirname(DIR_INSTALL).'/app/',
+        '--app_dir'          => dirname(DIR_INSTALL).'/abc/',
         '--public_dir'       => dirname(DIR_INSTALL).'/public/',
         '--db_host'          => 'localhost',
         '--db_user'          => 'root',
@@ -268,12 +269,11 @@ function getOptionValues($opt_name = '')
         }
     }
     if ( ! isset($options['app_dir'])) {
-        if (is_dir($code_dir.'/app')) {
-            $options['app_dir'] = $code_dir.'/app/';
+        if (is_dir($code_dir.'/abc')) {
+            $options['app_dir'] = $code_dir.'/abc/';
         }
     }
-    $options['app_dir'] = (substr($options['app_dir'], -1) == '/'
-            ? substr($options['app_dir'], 0, -1) : $options['app_dir']).'/';
+    $options['app_dir'] = (substr($options['app_dir'], -1) == '/' ? substr($options['app_dir'], 0, -1) : $options['app_dir']).'/';
 
     if ( ! isset($options['public_dir'])) {
         if (is_dir($code_dir.'/public')) {

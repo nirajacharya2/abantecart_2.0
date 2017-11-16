@@ -17,7 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\install;
+namespace abantecart\install;
 // set default encoding for multibyte php mod
 use abc\core\Registry;
 use abc\lib\ADataEncryption;
