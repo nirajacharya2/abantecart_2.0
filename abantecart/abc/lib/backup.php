@@ -297,7 +297,7 @@ class ABackup{
 		if (!$table_list){
 			$error_text = "Error: Can't create sql dump of database during backup. Cannot obtain table list. ";
 			if (DB_DRIVER == 'mysql'){
-				$error_text .= 'Try to change db-driver to "amysqli" in your app/config/database.php file.';
+				$error_text .= 'Try to change db-driver to "amysqli" in your abc/config/database.php file.';
 			}
 			$this->log->write($error_text);
 			$this->error[] = $error_text;
@@ -596,7 +596,7 @@ class ABackup{
 				WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'";
 		$result = $this->db->query($sql, true);
 		if ($result === false && DB_DRIVER == 'mysql'){
-			$this->error[] = 'Probably error will occur. Please change db-driver to "amysqli" in your app/config/database.php file.';
+			$this->error[] = 'Probably error will occur. Please change db-driver to "amysqli" in your abc/config/database.php file.';
 		} elseif ($result === false){
 			$this->error[] = 'Cannot get tables list. Please check privileges of mysql database user.';
 		}

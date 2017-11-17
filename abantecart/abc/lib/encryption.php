@@ -389,7 +389,7 @@ final class ASSLEncryption{
  * These tables need to have specific postfix in the name like '_enc'
  *
  * Configuration:
- * Add below configs to app/config/config.php file.
+ * Add below configs to abc/config/config.php file.
  * define('DATA_ENCRYPTION_ENABLED', true);
  * define('ENCRYPTED_POSTFIX', '_enc');
  * define('DATA_ENCRYPTION_KEYPAIR', 'data_enc_key');

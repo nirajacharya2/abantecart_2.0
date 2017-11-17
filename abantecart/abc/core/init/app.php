@@ -191,7 +191,7 @@ try {
 	}
 
 // relative paths for extensions
-	define('DIRNAME_APP', 'app/');
+	define('DIRNAME_APP', 'abc/');
 	define('DIRNAME_ASSETS', 'assets/');
 	define('DIRNAME_EXTENSIONS', 'extensions/');
 	define('DIRNAME_CORE', 'core/');

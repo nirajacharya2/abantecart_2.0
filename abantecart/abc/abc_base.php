@@ -1,3 +1,3 @@
 <?php
-namespace abc\core;
+namespace abc;
 class ABCBase{}

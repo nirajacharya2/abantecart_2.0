@@ -1,8 +1,10 @@
 <?php
-namespace abc\core;
+namespace abc;
+use abc\core\AHelperUtils;
+use abc\core\ARouter;
 use abc\lib\ADebug;
 
-include 'abc_base.php';
+require 'abc_base.php';
 class ABC extends ABCBase{
 	/**
 	 * ABC constructor.

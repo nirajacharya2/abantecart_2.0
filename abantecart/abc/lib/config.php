@@ -27,6 +27,7 @@ if (!defined('DIR_CORE')){
 
 final class AConfig{
 	public $data;
+	static $DB_DATABASE;
 	private $cnfg = array ();
 	/**
 	 * @var Registry

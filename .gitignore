@@ -8,12 +8,12 @@
 .DS_Store
 
 #abantecart working files
-/abantecart/app/system/updates.xml
-/abantecart/app/system/backup/
-/abantecart/app/system/uploads/
-/abantecart/app/var/cache/*
-/abantecart/app/var/logs/*
-/abantecart/app/config/*
+/abantecart/abc/system/updates.xml
+/abantecart/abc/system/backup/
+/abantecart/abc/system/uploads/
+/abantecart/abc/var/cache/*
+/abantecart/abc/var/logs/*
+/abantecart/abc/config/*
 /abantecart/public/assets/images/thumbnails/*
 /abantecart/public/assets/templates/default/admin/*
 /abantecart/public/assets/templates/default/storefront/*
