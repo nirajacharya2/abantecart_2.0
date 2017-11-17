@@ -18,21 +18,18 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHtml;
-use abc\core\ALanguageManager;
-use abc\core\ALoader;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class AdminCommands
  * @package abc\lib
- * @property ALanguageManager $language
- * @property ALoader $load
- * @property AHtml $html
+ * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\engine\ALoader $load
+ * @property \abc\core\engine\AHtml $html
  */
 class AdminCommands{
 	protected $registry;

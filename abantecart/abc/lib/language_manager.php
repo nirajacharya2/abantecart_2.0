@@ -18,24 +18,22 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-namespace abc\core;
 
-use abc\lib\AConfig;
-use abc\lib\ADebug;
-use abc\lib\AException;
+use abc\core\engine\ALanguage;
+use abc\core\helper\AHelperUtils;
 use abc\Translator;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
-class ALanguageManager extends Alanguage{
+class ALanguageManager extends ALanguage{
 
 	private $translatable_fields = array ();
 
 	//NOTE: This class is loaded in INIT for admin only
 	/**
-	 * @param Registry $registry
+	 * @param \abc\core\engine\Registry $registry
 	 * @param string $code
 	 * @param string $section
 	 * @throws AException
@@ -790,7 +788,7 @@ class ALanguageManager extends Alanguage{
 				throw new AException(AC_ERR_LOAD, 'Error: Could not load translations class ' . $ex_class . '!');
 			}
 
-			$translate_driver = new translator($this->registry->get('config'));
+			$translate_driver = new Translator($this->registry->get('config'));
 			$result_txt = $translate_driver->translate($source_lang_code, $src_text, $dest_lang_code);
 			//fail over to default 'copy_source_text' method
 			if (!$result_txt && $mode == 'safe'){

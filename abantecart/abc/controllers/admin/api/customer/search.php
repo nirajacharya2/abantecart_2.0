@@ -19,12 +19,12 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
-use abc\core\AControllerAPI;
+use abc\core\engine\AControllerAPI;
 use abc\lib\AFilter;
 use stdClass;
 
-if (!defined('DIR_CORE') || !IS_ADMIN) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header('Location: assets/static_pages/');
 }
 
 /**

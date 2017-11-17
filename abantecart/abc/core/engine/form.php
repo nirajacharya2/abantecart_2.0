@@ -18,16 +18,16 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
 
+use abc\core\helper\AHelperUtils;
 use abc\lib\ADataset;
 use abc\lib\AError;
 use abc\lib\AFile;
-use abc\lib\AView;
 use ReCaptcha\ReCaptcha;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -36,13 +36,13 @@ if (!defined('DIR_CORE')) {
  * Class AForm
  * @property ALayout $layout
  * @property AHtml $html
- * @property ALanguageManager $language
+ * @property \abc\lib\ALanguageManager $language
  * @property \abc\lib\ACache $cache
  * @property \abc\lib\ADB $db
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ASession $session
  * @property \abc\lib\ARequest $request
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
  *
  */
@@ -419,7 +419,7 @@ class AForm{
 	 */
 	protected function addFormJs(){
 		/**
-		 * @var ALanguageManager
+		 * @var \abc\lib\ALanguageManager
 		 */
 		$language = $this->registry->get('language');
 		$view = new AView($this->registry, 0);

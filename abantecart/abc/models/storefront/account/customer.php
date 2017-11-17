@@ -18,18 +18,18 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\core\AHelperUtils;
-use abc\core\ALanguage;
-use abc\core\AResource;
-use abc\core\Model;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\ALanguage;
+use abc\core\engine\AResource;
+use abc\core\engine\Model;
 use abc\lib\AEncryption;
 use abc\lib\AMail;
 use abc\lib\AMessage;
-use abc\lib\AView;
+use abc\core\engine\AView;
 use ReCaptcha\ReCaptcha;
 
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 /**
  * Class ModelAccountCustomer

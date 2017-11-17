@@ -18,23 +18,23 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use Exception;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class AIM for Instant Messages
  * @property ACustomer $customer
- * @property \abc\core\ALanguage $language
+ * @property \abc\core\engine\ALanguage $language
  * @property ADB $db
  * @property ALog $log
- * @property \abc\core\ALoader $load
- * @property \abc\core\AHtml $html
- * @property \abc\core\ExtensionsAPI $extensions
+ * @property \abc\core\engine\ALoader $load
+ * @property \abc\core\engine\AHtml $html
+ * @property \abc\core\engine\ExtensionsAPI $extensions
  * @property ASession $session
  * @property AConfig $config
  * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
@@ -611,7 +611,7 @@ final class AMailIM{
 	/**
 	 * Function builds form element for storefront side (customer account page)
 	 *
-	 * @param \abc\core\AForm $form
+	 * @param \abc\core\engine\AForm $form
 	 * @param string $value
 	 * @return object
 	 */

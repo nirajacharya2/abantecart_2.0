@@ -13,6 +13,6 @@
 	    	//HTML tree built in helper/html.php
 	    	//To control look and style of the menu use CSS in styles.css
 	    ?>
-	    <?php echo \abc\core\AHelperHtml::buildStoreFrontMenuTree( $storemenu ); ?>
+	    <?php echo \abc\core\helper\AHelperHtml::buildStoreFrontMenuTree( $storemenu ); ?>
 	</ul>
 </div>

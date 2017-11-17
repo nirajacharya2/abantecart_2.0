@@ -22,8 +22,8 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 // ???? Possibly deprecated

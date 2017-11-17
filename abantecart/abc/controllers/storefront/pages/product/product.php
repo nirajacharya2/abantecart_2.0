@@ -18,17 +18,17 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
-use abc\core\AController;
-use abc\core\AForm;
-use abc\core\AHelperUtils;
-use abc\core\APromotion;
-use abc\core\AResource;
-use abc\core\HtmlElementFactory;
-use abc\core\Registry;
+use abc\core\engine\AController;
+use abc\core\engine\AForm;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\APromotion;
+use abc\core\engine\AResource;
+use abc\core\engine\HtmlElementFactory;
+use abc\core\engine\Registry;
 use abc\lib\AMessage;
 
-if(!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if(!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**

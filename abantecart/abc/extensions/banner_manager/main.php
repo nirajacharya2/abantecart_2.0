@@ -17,8 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if (! defined ( 'DIR_CORE' )) {
-        header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+        header ( 'Location: assets/static_pages/' );
 }
 include_once('core/custom_block_hook.php');
 $controllers = array(

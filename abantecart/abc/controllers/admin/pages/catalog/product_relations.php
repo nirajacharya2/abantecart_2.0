@@ -20,12 +20,12 @@
 
 namespace abc\controllers\admin;
 
-use abc\core\AController;
-use abc\core\AForm;
-use abc\core\AResource;
+use abc\core\engine\AController;
+use abc\core\engine\AForm;
+use abc\core\engine\AResource;
 
-if (!defined('DIR_CORE') || !IS_ADMIN) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header('Location: assets/static_pages/');
 }
 
 class ControllerPagesCatalogProductRelations extends AController{

@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
+use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -102,7 +102,7 @@ class ACustomer{
 	 */
 	protected $dcrypt;
 	/**
-	 * @var \abc\core\ExtensionsApi
+	 * @var \abc\core\engine\ExtensionsApi
 	 */
 	protected $extensions;
 
@@ -112,7 +112,7 @@ class ACustomer{
 	protected $unauth_customer = array ();
 
 	/**
-	 * @param  \abc\core\Registry $registry
+	 * @param  \abc\core\engine\Registry $registry
 	 */
 	public function __construct($registry){
 		$this->cache = $registry->get('cache');

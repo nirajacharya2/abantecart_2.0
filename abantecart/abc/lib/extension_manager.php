@@ -1,23 +1,23 @@
 <?php
 /*incompatibility*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\ExtensionUtils;
-use abc\core\Registry;
+use abc\core\engine\ExtensionUtils;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
- * @property \abc\core\ExtensionsApi $extensions
+ * @property \abc\core\engine\ExtensionsApi $extensions
  * @property ADB $db
  * @property ACache $cache
  * @property AConfig $config
- * @property \abc\core\ALanguage $language
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALanguage $language
+ * @property \abc\core\engine\ALoader $load
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
- * @property \abc\core\AHtml $html
+ * @property \abc\core\engine\AHtml $html
  * @property AUser $user
  * @property ASession $session
  * @property ALog $log
@@ -26,7 +26,7 @@ if (!defined('DIR_CORE')){
  * */
 class AExtensionManager{
 	/**
-	 * @var \abc\core\Registry
+	 * @var \abc\core\engine\Registry
 	 */
 	protected $registry;
 	/**
@@ -374,7 +374,7 @@ class AExtensionManager{
 	 * extension install actions, db queries, copying files etc
 	 *
 	 * @param string $name
-	 * @param \DomNode| \DOMElement $config
+	 * @param \DomNode| \SimpleXMLElement $config
 	 * @return bool|null
 	 */
 	public function install($name, $config){
@@ -584,7 +584,7 @@ class AExtensionManager{
 	/**
 	 *  is dependencies present
 	 * @param string $extension_txt_id
-	 * @param \DOMNode $config
+	 * @param \DOMNode | \SimpleXMLElement $config
 	 * @return bool
 	 */
 	public function validateDependencies($extension_txt_id, $config){
@@ -669,7 +669,7 @@ class AExtensionManager{
 	/**
 	 *  is extension support current core version
 	 * @param string $extension_txt_id
-	 * @param \DOMNode $config
+	 * @param \DOMNode | \SimpleXMLElement $config
 	 * @return bool
 	 */
 	public function validateCoreVersion($extension_txt_id, $config){
@@ -715,7 +715,7 @@ class AExtensionManager{
 	 */
 	/**
 	 * @param string $extension_txt_id
-	 * @param \DOMNode $config
+	 * @param \DOMNode | \SimpleXMLElement $config
 	 * @return bool
 	 */
 	public function validatePhpModules($extension_txt_id, $config){

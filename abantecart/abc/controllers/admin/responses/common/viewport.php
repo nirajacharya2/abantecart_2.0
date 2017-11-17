@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\core\AController;
-use abc\core\ADispatcher;
+use abc\core\engine\AController;
+use abc\core\engine\ADispatcher;
 use abc\lib\AError;
 
-if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header ( 'Location: assets/static_pages/' );
 }
 class ControllerResponsesCommonViewPort extends AController {
 

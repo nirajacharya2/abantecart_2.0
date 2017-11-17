@@ -19,8 +19,8 @@
 ------------------------------------------------------------------------------*/
 use abc\lib\AMenu;
 
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 
 //delete menu item

@@ -18,18 +18,18 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class AFilter
  * @property ARequest $request
  * @property ADB $db
- * @property \abc\core\AHtml $html
+ * @property \abc\core\engine\AHtml $html
  * @property ASession $session
  */
 final class AFilter{
@@ -199,7 +199,7 @@ final class AFilter{
 
 /**
  * Class AGrid
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  * @property ARequest $request
  * @property ADB $db
  */

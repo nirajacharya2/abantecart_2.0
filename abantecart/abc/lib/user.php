@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
+use abc\core\helper\AHelperUtils;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -49,7 +49,7 @@ final class AUser{
 	private $permission = array ();
 
 	/**
-	 * @param $registry \abc\core\Registry
+	 * @param $registry \abc\core\engine\Registry
 	 */
 	public function __construct($registry){
 		$this->db = $registry->get('db');

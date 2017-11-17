@@ -1,20 +1,47 @@
 <?php
 namespace abc;
-use abc\core\AHelperUtils;
-use abc\core\ARouter;
+use abc\core\engine\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\ARouter;
 use abc\lib\ADebug;
 
 require 'abc_base.php';
+
+/**
+ * Class ABC
+ * @package abc
+  */
 class ABC extends ABCBase{
 	/**
 	 * ABC constructor.
-	 * @param array $config
+	 * @param array $config - see folder /abc/config/
 	 */
 	public function __construct($config){
 		//define constants from on config variable
-		foreach($config as $name=>$value){
-			define($name, $value);
-		}
+		//NOTE: do not convert this into loop. IDE code-inspector stops to see them!
+		define('APP_NAME', $config['APP_NAME']);
+		define('MIN_PHP_VERSION', $config['MIN_PHP_VERSION']);
+		define('DIR_ROOT', $config['DIR_ROOT']);
+		define('DIR_APP', $config['DIR_APP']);
+		define('DIR_PUBLIC', $config['DIR_PUBLIC']);
+		define('SEO_URL_SEPARATOR', $config['SEO_URL_SEPARATOR']);
+		define('EMAIL_REGEX_PATTERN', $config['EMAIL_REGEX_PATTERN']);
+		define('POSTFIX_OVERRIDE', $config['POSTFIX_OVERRIDE']);
+		define('POSTFIX_PRE', $config['POSTFIX_PRE']);
+		define('POSTFIX_POST', $config['POSTFIX_POST']);
+		define('APP_CHARSET', $config['APP_CHARSET']);
+		define('DB_DRIVER', $config['DB_DRIVER']);
+		define('DB_HOSTNAME', $config['DB_HOSTNAME']);
+		define('DB_USERNAME', $config['DB_USERNAME']);
+		define('DB_PASSWORD', $config['DB_PASSWORD']);
+		define('DB_DATABASE', $config['DB_DATABASE']);
+		define('DB_PREFIX', $config['DB_PREFIX']);
+		define('DB_CHARSET', $config['DB_CHARSET']);
+		define('DB_COLLATION', $config['DB_COLLATION']);
+		define('SERVER_NAME', $config['SERVER_NAME']);
+		define('ADMIN_PATH', $config['ADMIN_PATH']);
+		define('CACHE_DRIVER', $config['CACHE_DRIVER']);
+		define('UNIQUE_ID', $config['UNIQUE_ID']);
 	}
 
 	public function run(){
@@ -26,7 +53,8 @@ class ABC extends ABCBase{
 			exit;
 		}
 
-		$registry = require 'core/init/app.php';
+		require 'core/init/app.php';
+		$registry = Registry::getInstance();
 		ADebug::checkpoint('init end');
 
 		//Route to request process

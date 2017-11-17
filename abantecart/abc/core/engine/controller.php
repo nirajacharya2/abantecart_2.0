@@ -17,13 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\core;
+namespace abc\core\engine;
+use abc\core\helper\AHelperUtils;
 use abc\lib\AConfig;
-use abc\lib\AView;
 use abc\lib\AWarning;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 
@@ -80,11 +80,10 @@ if (!defined('DIR_CORE')) {
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ADB $db
  * @property \abc\lib\ACache $cache
- * @property ALanguageManager $language
+ * @property \abc\lib\ALanguageManager $language
  * @property AResource $resource
- * @property \abc\lib\AView $view
- * @property \abc\core\ALoader $load
- * @property \abc\core\ARouter $router
+ * @property \abc\core\engine\ALoader $load
+ * @property \abc\core\engine\ARouter $router
  * @property AHtml $html
  * @property \abc\lib\ARequest $request
  * @property \abc\lib\AResponse $response
@@ -125,7 +124,7 @@ abstract class AController{
 	protected $html_cache_key;
 
 	/**
-	 * @param $registry \abc\core\Registry
+	 * @param $registry \abc\core\engine\Registry
 	 * @param int $instance_id
 	 * @param string $controller
 	 * @param string|AController $parent_controller

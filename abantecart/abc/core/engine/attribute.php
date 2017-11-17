@@ -17,23 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\core;
+namespace abc\core\engine;
+use abc\core\helper\AHelperUtils;
 use abc\lib\AFile;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class to handle access to global attributes
  *
- * @property ALanguageManager $language
+ * @property \abc\lib\ALanguageManager $language
  * @property \abc\lib\ADB $db
  * @property \abc\lib\ACache $cache
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ARequest $request
  * @property \abc\lib\ASession $session
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  */
 class AAttribute{
 	protected $registry;

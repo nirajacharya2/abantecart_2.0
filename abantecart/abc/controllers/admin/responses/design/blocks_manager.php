@@ -18,15 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\core\AController;
-use abc\core\AHelperUtils;
-use abc\core\ALanguage;
+use abc\core\engine\AController;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\ALanguage;
 use abc\lib\AJson;
 use abc\lib\ALayoutManager;
-use abc\lib\AView;
+use abc\core\engine\AView;
 
-if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
-  header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
+  header ( 'Location: assets/static_pages/' );
 }
 
 class ControllerResponsesDesignBlocksManager extends AController {

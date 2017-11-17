@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AAttribute;
-use abc\core\AHelperUtils;
-use abc\core\HtmlElementFactory;
+use abc\core\engine\AAttribute;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\HtmlElementFactory;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**

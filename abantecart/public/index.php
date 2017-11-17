@@ -17,8 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
-
-use abc\ABC;
+namespace abc;
 
 $dir_app = dirname(__DIR__) . '/abc/';
 // Windows IIS Compatibility

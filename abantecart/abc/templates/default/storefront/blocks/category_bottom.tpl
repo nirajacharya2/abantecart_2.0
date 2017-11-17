@@ -17,7 +17,7 @@
 								}
 							}?>
 							<!-- Top Nav Start -->
-							<?php echo  \abc\core\AHelperHtml::renderStoreMenu($storefront_menu); ?>
+							<?php echo  \abc\core\helper\AHelperHtml::renderStoreMenu($storefront_menu); ?>
 						</ul>
 					</div>
 				</li>

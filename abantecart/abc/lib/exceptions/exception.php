@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\ARouter;
-use abc\core\Registry;
+use abc\core\engine\ARouter;
+use abc\core\engine\Registry;
 use Exception;
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 class AException extends Exception{
@@ -32,11 +32,12 @@ class AException extends Exception{
 
 	public function __construct($errno = 0, $errstr = '', $file = '', $line = ''){
 		parent::__construct();
+
 		$this->code = $errno ? $errno : $this->code;
 		$this->message = $errstr ? $errstr : $this->message;
 		$this->file = $file ? $file : $this->file;
 		$this->line = $line ? $line : $this->line;
-		if (class_exists('\abc\core\Registry')){
+		if (class_exists('\abc\core\engine\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 

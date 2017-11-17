@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \abc\lib\AView $this
+ * @var \abc\core\engine\AView $this
  */
 if ($logged){ ?>
 	<div class="leftpanel">

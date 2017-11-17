@@ -18,13 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
 use abc\lib\AConfig;
 use abc\lib\AException;
 use abc\lib\AWarning;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -151,7 +151,7 @@ final class ALoader{
 	/**
 	 * @param string $language
 	 * @param string $mode
-	 * @return array|null|void
+	 * @return array|null
 	 */
 	public function language($language, $mode = ''){
 		return $this->language->load($language, $mode);

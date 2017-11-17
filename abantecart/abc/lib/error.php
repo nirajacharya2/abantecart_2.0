@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 class AError{
@@ -69,7 +69,7 @@ class AError{
 		$this->code = $code;
 		$this->msg = $msg . ' in ' . $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
 
-		if (class_exists('\abc\core\Registry')){
+		if (class_exists('\abc\core\engine\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 		//TODO: use registry object instead?? what if registry not accessible?
@@ -176,7 +176,7 @@ class AError{
 			 */
 			$response = $this->registry->get('response');
 			/**
-			 * @var $load \abc\core\ALoader
+			 * @var \abc\core\engine\ALoader $load
 			 */
 			$load = $this->registry->get('load');
 			$response->addHeader($http_header_txt);

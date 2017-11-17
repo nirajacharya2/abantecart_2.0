@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 final class AEncryption{
@@ -91,7 +91,7 @@ final class AEncryption{
 			$registry = Registry::getInstance();
 			$log = $registry->get('log');
 			if (!is_object($log) || !method_exists($log, 'write')){
-				$log = new ALog(DIR_SYSTEM . 'logs/error.txt');
+				$log = new ALog(DIR_LOGS . 'error.txt');
 				$registry->set('log', $log);
 			}
 			$log->write($error_text);

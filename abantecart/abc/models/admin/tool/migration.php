@@ -18,13 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\core\AHelperUtils;
-use abc\core\Model;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Model;
 use abc\lib\AResourceManager;
 use stdClass;
 
-if (!defined('DIR_CORE') || !IS_ADMIN) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header('Location: assets/static_pages/');
 }
 set_time_limit(0);
 

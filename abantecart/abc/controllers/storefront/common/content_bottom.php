@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
-use abc\core\AController;
+use abc\core\engine\AController;
 
 class ControllerCommonContentBottom extends AController {
 	public function main() {

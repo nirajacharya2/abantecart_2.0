@@ -1,6 +1,6 @@
 <?php
 //unique id
-$wrapper_id = \abc\core\AHelperUtils::randomWord(6);
+$wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 ?>
 <div id="<?php echo $wrapper_id ?>" class="text-editor panel panel-default">
 	<ul class="nav nav-tabs" role="tablist">

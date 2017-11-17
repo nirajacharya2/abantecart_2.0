@@ -1,5 +1,5 @@
 <?php
-use abc\core\AHelperUtils;
+use abc\core\helper\AHelperUtils;
 use abc\lib\AConfig;
 use abc\lib\AExtensionManager;
 

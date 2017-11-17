@@ -18,15 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\core\AController;
-use abc\core\AHelperUtils;
+use abc\core\engine\AController;
+use abc\core\helper\AHelperUtils;
 use abc\lib\AError;
 use abc\lib\AFilter;
 use abc\lib\AJson;
 use stdClass;
 
-if (!defined('DIR_CORE') || !IS_ADMIN) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header('Location: assets/static_pages/');
 }
 class ControllerResponsesListingGridLanguage extends AController {
 	public $data = array();

@@ -9,7 +9,7 @@ if ($action == 'list_object') {
 ?>
 <div id="rl_container" class="col-md-9" data-current-url="<?php echo $full_url; ?>">
 	<ul class="nav nav-tabs nav-justified nav-profile">
-		<?php if (\abc\core\AHelperUtils::has_value($object_id)) { ?>
+		<?php if (\abc\core\helper\AHelperUtils::has_value($object_id)) { ?>
 			<li id="object" data-rl-id="<?php echo $resource_id; ?>"
 				data-type="<?php echo $type; ?>" <?php echo $active_object; ?>>
 				<a class="ellipsis" href="#"><strong><i class="fa fa-bookmark fa-fw"></i> <?php echo $object_title." (".$object_name.")"; ?></strong></a>
@@ -61,7 +61,7 @@ if ($action == 'list_object') {
 				</div>
 			</li>
 		<?php }?>
-		<?php if (\abc\core\AHelperUtils::has_value($active_object)) { ?>
+		<?php if (\abc\core\helper\AHelperUtils::has_value($active_object)) { ?>
 			<li>
 				<a class="actionitem disabled rl_save_multiple tooltips" onclick="return false;" href="#" data-original-title="<?php echo $text_save_sort_order; ?>"><i
 							class="fa fa-save"></i></a>
@@ -134,7 +134,7 @@ if ($action == 'list_object') {
 									<input class="checksign" type="checkbox" value="<?php echo $rl['resource_id']; ?>" id="check_<?php echo $rl['resource_id']; ?>">
 									<?php } ?>
 									<label for="check<?php echo $rl['resource_id']; ?>"></label>
-									<?php if (\abc\core\AHelperUtils::has_value($active_object)) { ?>
+									<?php if (\abc\core\helper\AHelperUtils::has_value($active_object)) { ?>
 										<div class="rl_sort_order center ml10 mt10" title="sort order">
 											<input type="text"
 												   class="form-control input-sm"

@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\core\APromotion;
-use abc\core\Model;
+use abc\core\engine\APromotion;
+use abc\core\engine\Model;
 
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 
 class ModelTotalCoupon extends Model {

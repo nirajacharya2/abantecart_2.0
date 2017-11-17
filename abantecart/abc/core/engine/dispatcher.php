@@ -18,21 +18,22 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
 
+use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
 use abc\lib\AWarning;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class ADispatcher
  * @property \abc\lib\ARequest $request
  * @property \abc\lib\AResponse $response
- * @property \abc\lib\AView $view
+ * @property \abc\core\engine\AView $view
  * @property ExtensionsApi $extensions
  */
 final class ADispatcher{

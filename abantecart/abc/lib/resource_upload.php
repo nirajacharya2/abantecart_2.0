@@ -10,10 +10,10 @@
  * http://creativecommons.org/licenses/MIT/
  */
 namespace abc\lib;
-use abc\core\AHelperUtils;
+use abc\core\helper\AHelperUtils;
 use stdClass;
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 class ResourceUploadHandler{

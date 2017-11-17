@@ -18,14 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
+use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\ARequest;
-use abc\lib\AView;
 use abc\lib\AException;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -92,7 +92,7 @@ class AHtml extends AController{
 	 * @return null|string
 	 */
 	public function __call($function_name, $args){
-		$class_name = '\abc\core\\'.ltrim($function_name, 'build') . 'HtmlElement';
+		$class_name = 'abc\core\engine\\'.ltrim($function_name, 'build') . 'HtmlElement';
 		if (class_exists($class_name)) {
 			/**
 			 * @var SelectboxHtmlElement|HiddenHtmlElement| $item
@@ -519,7 +519,7 @@ class AHtml extends AController{
 		}
 		if (sizeof($template['languages']) > 1) {
 			//selected in selectbox
-			$template['language_code'] = $registry->get('language')->getContentLanguageCode();
+			$template['language_code'] = $this->language->getContentLanguageCode();
 			foreach ($registry->get('request')->get as $name => $value) {
 				if ($name == 'content_language_code') {
 					continue;
@@ -559,7 +559,7 @@ class AHtml extends AController{
 		}
 		if (sizeof($template['languages']) > 1) {
 			//selected in selectbox
-			$template['language_code'] = $registry->get('language')->getContentLanguageCode();
+			$template['language_code'] = $this->language->getContentLanguageCode();
 			foreach ($registry->get('request')->get as $name => $value) {
 				if ($name == 'content_language_code') {
 					continue;
@@ -827,7 +827,7 @@ class HtmlElementFactory{
 	 */
 	static function create($data){
 
-		$class = 'abc\core\\'.ucfirst($data['type'] . 'HtmlElement');
+		$class = 'abc\core\engine\\'.ucfirst($data['type'] . 'HtmlElement');
 		if (!class_exists($class)) {
 			throw new AException(AC_ERR_LOAD, 'Error: Could not load HTML element ' . $data['type'] . '!');
 		}
@@ -849,7 +849,7 @@ abstract class HtmlElement{
 	 */
 	protected $data = array ();
 	/**
-	 * @var \abc\lib\AView
+	 * @var \abc\core\engine\AView
 	 */
 	protected $view;
 	/**
@@ -861,7 +861,7 @@ abstract class HtmlElement{
 	 */
 	protected $registry;
 	/**
-	 * @var ALanguageManager
+	 * @var \abc\core\engine\ALanguage $language
 	 */
 	protected $language;
 
@@ -880,7 +880,11 @@ abstract class HtmlElement{
 		}
 
 		$this->registry = Registry::getInstance();
-		$this->language = $this->registry->get('language');
+		/**
+		 * @var \abc\core\engine\ALanguage $lang
+		 */
+		$lang = $this->registry->get('language');
+		$this->language = $lang;
 		$this->view = new AView($this->registry, 0);
 		$this->data = $data;
 		$this->element_id = AHelperUtils::preformatTextID($data['name']);
@@ -998,7 +1002,7 @@ class HiddenHtmlElement extends HtmlElement{
  * @property string $multivalue_hidden_id
  * @property string $return_to
  * @property string $with_sorting
- * @property string $text
+ * @property array $text
  */
 class MultivalueListHtmlElement extends HtmlElement{
 	/**
@@ -1039,7 +1043,7 @@ class MultivalueListHtmlElement extends HtmlElement{
  * @property string $form
  * @property string $return_to
  * @property string $no_save
- * @property string $text
+ * @property array  $text
  * @property int $popup_height
  * @property int $popup_width
  * @property array $js

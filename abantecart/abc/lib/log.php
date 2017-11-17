@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -57,7 +57,7 @@ final class ALog{
 			@fclose($handle);
 		}
 
-		if (class_exists('\abc\core\Registry')){
+		if (class_exists('\abc\core\engine\Registry')){
 			// for disabling via settings
 			$registry = Registry::getInstance();
 			if (is_object($registry->get('config'))){

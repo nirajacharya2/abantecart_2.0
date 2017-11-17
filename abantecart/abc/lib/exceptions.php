@@ -17,11 +17,12 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\lib;
-use abc\core\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+use abc\core\engine\Registry;
+use abc\lib\AException;
+
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 require_once(DIR_LIB . 'exceptions/exception_codes.php');
@@ -38,7 +39,7 @@ require_once(DIR_LIB . 'exceptions/exception.php');
  */
 function ac_error_handler($errno, $errstr, $err_file, $err_line){
 
-	if (class_exists('\abc\core\Registry')){
+	if (class_exists('\abc\core\engine\Registry')){
 		$registry = Registry::getInstance();
 		if ($registry->get('force_skip_errors')){
 			return null;
@@ -53,7 +54,6 @@ function ac_error_handler($errno, $errstr, $err_file, $err_line){
 	try{
 		throw new AException($errno, $errstr, $err_file, $err_line);
 	} catch(AException $e){
-		//var_Dump($e); exit;
 		ac_exception_handler($e);
 	}
 	return true;
@@ -65,7 +65,7 @@ function ac_error_handler($errno, $errstr, $err_file, $err_line){
  * @return null
  */
 function ac_exception_handler($e){
-	if (class_exists('\abc\core\Registry')){
+	if (class_exists('\abc\core\engine\Registry')){
 		$registry = Registry::getInstance();
 		if ($registry->get('force_skip_errors')){
 			return null;
@@ -77,7 +77,7 @@ function ac_exception_handler($e){
 		$e = new AException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
-	if (class_exists('\abc\core\Registry')){
+	if (class_exists('\abc\core\engine\Registry')){
 		$registry = Registry::getInstance();
 		$config = $registry->get('config');
 		if (!$config || (!$config->has('config_error_log') && !$config->has('config_error_display'))){
@@ -120,6 +120,6 @@ function ac_shutdown_handler(){
 	$exception->logError();
 }
 
-set_error_handler("\abc\lib\ac_error_handler");
-register_shutdown_function("\abc\lib\ac_shutdown_handler");
-set_exception_handler("\abc\lib\ac_exception_handler");
+set_error_handler("ac_error_handler");
+register_shutdown_function("ac_shutdown_handler");
+set_exception_handler("ac_exception_handler");

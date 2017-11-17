@@ -18,16 +18,17 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
 
+use abc\core\helper\AHelperUtils;
 use abc\lib\ACache;
 use abc\lib\AConfig;
 use abc\lib\ADB;
 use abc\lib\AException;
 use abc\lib\AWarning;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -38,7 +39,7 @@ if (!defined('DIR_CORE')) {
  * @property  AConfig $config
  * @property  ACache $cache
  * @property  ADB $db
- * @property  ALanguageManager $language
+ * @property  \abc\lib\ALanguageManager $language
  */
 class AResource{
 	/**

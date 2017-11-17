@@ -21,8 +21,8 @@ namespace abc\controllers\Admin;
 use abc\lib\AMenu;
 use abc\lib\AResourceManager;
 
-if (! defined ( 'DIR_CORE' )) {
-header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+header ( 'Location: assets/static_pages/' );
 }
 
 // add new menu item

@@ -18,13 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\core\AHelperUtils;
-use abc\core\ALanguageManager;
-use abc\core\Model;
+use abc\core\helper\AHelperUtils;
+use abc\lib\ALanguageManager;
+use abc\core\engine\Model;
 use abc\lib\AWarning;
 
-if (!defined('DIR_CORE') || !IS_ADMIN) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header('Location: assets/static_pages/');
 }
 class ModelLocalisationLanguageDefinitions extends Model {
     /**
@@ -352,7 +352,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 	 * Load needed data and build form for definitions add or edit
 	 * @param \abc\lib\ARequest $request - Data from request object
 	 * @param array $data  - from requester
-	 * @param \abc\core\AForm $form  - form object
+	 * @param \abc\core\engine\AForm $form  - form object
 	 * @return array ($data imputed processed and returned back)
 	 */
 	public function buildFormData( &$request, &$data, &$form ) {

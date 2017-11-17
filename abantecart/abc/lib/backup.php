@@ -18,22 +18,22 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use DirectoryIterator;
 use FilesystemIterator;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class ABackup
  * @property ALog $log
  * @property ADB $db
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  * @property \abc\models\admin\ModelToolBackup $model_tool_backup
- * @property \abc\core\ExtensionsApi $extensions
+ * @property \abc\core\engine\ExtensionsApi $extensions
  */
 class ABackup{
 	/**

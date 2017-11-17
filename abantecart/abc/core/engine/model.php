@@ -17,9 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\core;
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+namespace abc\core\engine;
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -27,7 +27,7 @@ if (!defined('DIR_CORE')) {
  * @property \abc\lib\ADB $db
  * @property \abc\lib\ACache $cache
  * @property AResource $resource
- * @property \abc\lib\AView $view
+ * @property \abc\core\engine\AView $view
  * @property ALoader $load
  * @property AHtml $html
  * @property \abc\lib\ARequest $request
@@ -44,7 +44,7 @@ if (!defined('DIR_CORE')) {
  * @property \abc\lib\AMessage $messages
  * @property \abc\lib\ACustomer $customer
  * @property \abc\lib\ADocument $document
- * @property ALanguageManager $language
+ * @property \abc\lib\ALanguageManager $language
  * @property \abc\lib\ADataEncryption $dcrypt
  * @property \abc\models\admin\ModelCatalogCategory | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
  * @property \abc\lib\ADownload $download

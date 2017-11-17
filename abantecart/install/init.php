@@ -19,7 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abantecart\install;
 // set default encoding for multibyte php mod
-use abc\core\Registry;
+use abc\core\engine\Registry;
 use abc\lib\ADataEncryption;
 use abc\lib\ADocument;
 use abc\lib\AException;

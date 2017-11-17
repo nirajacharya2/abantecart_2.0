@@ -1,16 +1,16 @@
 <?php
 namespace abc\core\extension;
-use abc\core\Extension;
-use abc\core\Registry;
+use abc\core\engine\Extension;
+use abc\core\engine\Registry;
 use abc\lib\ALayoutManager;
 
-if ( !defined ( 'DIR_CORE' ) ) {
-    header ( 'Location: static_pages/' );
+if ( !defined ( 'DIR_APP' ) ) {
+    header ( 'Location: assets/static_pages/' );
 }
 /**
  * Class ExtensionFormsManager
- * @property \abc\core\ALanguageManager $language
- * @property \abc\core\AHtml $html
+ * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\engine\AHtml $html
  * @property \abc\lib\ARequest $request
  */
 class ExtensionFormsManager extends Extension {

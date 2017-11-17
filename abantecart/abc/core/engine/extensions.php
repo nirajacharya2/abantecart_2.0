@@ -18,16 +18,17 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core;
+namespace abc\core\engine;
 
+use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
 use abc\lib\AException;
 use abc\lib\AWarning;
 use Exception;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -1126,7 +1127,7 @@ class ExtensionUtils{
 	 */
 	protected $name;
 	/**
-	 * @var \SimpleXmlElement|\DOMNode
+	 * @var \SimpleXmlElement | \DOMNode | false
 	 */
 	protected $config;
 	/**

@@ -18,16 +18,16 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AAttribute;
-use abc\core\AHelperUtils;
-use abc\core\ALanguage;
-use abc\core\APromotion;
-use abc\core\HtmlElementFactory;
-use abc\core\Registry;
+use abc\core\engine\AAttribute;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\ALanguage;
+use abc\core\engine\APromotion;
+use abc\core\engine\HtmlElementFactory;
+use abc\core\engine\Registry;
 
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 
@@ -38,7 +38,7 @@ if (!defined('DIR_CORE')){
  * @property ADB $db
  * @property AWeight $weight
  * @property AConfig $config
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property ADownload $download
  */

@@ -18,22 +18,22 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use Exception;
 use PharData;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 /**
  * @property  AExtensionManager $extension_manager
  * @property  AMessage $messages
- * @property  \abc\core\ALoader $load
+ * @property  \abc\core\engine\ALoader $load
  * @property  ASession $session
- * @property  \abc\core\ExtensionsApi $extensions
+ * @property  \abc\core\engine\ExtensionsApi $extensions
  * @property  AUser $user
- * @property  \abc\core\ALanguageManager $language
+ * @property  \abc\lib\ALanguageManager $language
  * @property  ALog $log
  * @property  ACache $cache
  * @property  ADB $db

@@ -18,8 +18,8 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
-use abc\core\AController;
-use abc\core\AResource;
+use abc\core\engine\AController;
+use abc\core\engine\AResource;
 
 class ControllerBlocksCart extends AController {
 	

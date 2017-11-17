@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\core\ALanguage;
-use abc\core\Model;
+use abc\core\engine\ALanguage;
+use abc\core\engine\Model;
 
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 class ModelTotalLowOrderFee extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {

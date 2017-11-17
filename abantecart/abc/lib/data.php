@@ -18,26 +18,26 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use DOMDocument;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class AData
  * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
- * @property \abc\core\ALanguageManager $language
- * @property \abc\core\ALoader $load
+ * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\engine\ALoader $load
  * @property AConfig $config
  * @property ADataEncryption $dcrypt
  * @property ADB $db
  */
 class AData{
 	/**
-	 * @var \abc\core\Registry
+	 * @var \abc\core\engine\Registry
 	 */
 	protected $registry;
 	/**

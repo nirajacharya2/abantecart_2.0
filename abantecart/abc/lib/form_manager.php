@@ -18,14 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
- * @property \abc\core\ALanguageManager $language
+ * @property \abc\lib\ALanguageManager $language
  * @property ADB $db
  */
 class AFormManager{

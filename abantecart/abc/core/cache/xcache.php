@@ -20,8 +20,8 @@
 namespace abc\cache;
 use abc\lib\AException;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 //include abstract cache storage driver class

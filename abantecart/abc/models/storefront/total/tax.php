@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\core\Model;
+use abc\core\engine\Model;
 
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 class ModelTotalTax extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {

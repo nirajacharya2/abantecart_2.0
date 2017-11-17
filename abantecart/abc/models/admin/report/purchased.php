@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\core\AHelperUtils;
-use abc\core\Model;
-if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
-	header ( 'Location: static_pages/' );
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Model;
+if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header ( 'Location: assets/static_pages/' );
 }
 
 /**

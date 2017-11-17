@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 use Exception;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 class ADebug{
@@ -39,7 +39,7 @@ class ADebug{
 			if (defined('INSTALL')){
 				self::$debug = 1;
 				self::$debug_level = 1;
-			} else if (class_exists('\abc\core\Registry')){
+			} else if (class_exists('\abc\core\engine\Registry')){
 				$registry = Registry::getInstance();
 				if ($registry->has('config')){
 

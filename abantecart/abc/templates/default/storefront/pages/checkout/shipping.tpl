@@ -61,7 +61,7 @@
 								<td style="width: 5%"><?php echo $quote['radio']; ?></td>
 								<td>
 									<label for="shipping_shipping_method<?php echo $quote['id']; ?>"
-									       title="<?php echo \abc\core\AHelperUtils::has_value($quote['description']) ? $quote['description'] : ''; ?>"
+									       title="<?php echo \abc\core\helper\AHelperUtils::has_value($quote['description']) ? $quote['description'] : ''; ?>"
 									       style="cursor: pointer;">
 										<?php $icon = $shipping_method['icon'];
 										if (count($icon)){ ?>

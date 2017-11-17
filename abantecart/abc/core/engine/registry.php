@@ -17,9 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\core;
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+namespace abc\core\engine;
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 final class Registry{
@@ -44,7 +44,7 @@ final class Registry{
 
 	/**
 	 * @param $key string
-	 * @return \abc\lib\CSRFToken|\abc\lib\ARequest|ALoader|\abc\lib\ADocument|\abc\lib\ADB|\abc\lib\AConfig|AHtml|ExtensionsApi|\abc\lib\AExtensionManager|ALanguageManager|\abc\lib\ASession|\abc\lib\ACache|\abc\lib\AMessage|\abc\lib\ALog|\abc\lib\AResponse|\abc\lib\AUser|ARouter|\abc\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\lib\ADataEncryption|\abc\lib\ADownload|\abc\lib\AOrderStatus|\abc\lib\AIMManager|\abc\lib\ACustomer
+	 * @return \abc\lib\CSRFToken|\abc\lib\ARequest|ALoader|\abc\lib\ADocument|\abc\lib\ADB|\abc\lib\AConfig|AHtml|ExtensionsApi|\abc\lib\AExtensionManager|\abc\lib\ALanguageManager|\abc\lib\ASession|\abc\lib\ACache|\abc\lib\AMessage|\abc\lib\ALog|\abc\lib\AResponse|\abc\lib\AUser|ARouter|\abc\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\lib\ADataEncryption|\abc\lib\ADownload|\abc\lib\AOrderStatus|\abc\lib\AIMManager|\abc\lib\ACustomer
 	 */
 	public function get($key){
 		return (isset($this->data[$key]) ? $this->data[$key] : null);

@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AForm;
-use abc\core\AHelperUtils;
-use abc\core\Registry;
+use abc\core\engine\AForm;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 /**
  * @property AExtensionManager $extension_manager
@@ -36,8 +36,8 @@ if (!defined('DIR_CORE')){
  * @property \abc\models\admin\ModelLocalisationOrderStatus $model_localisation_order_status
  * @property \abc\models\admin\ModelSaleCustomerGroup $model_sale_customer_group
  * @property ASession $session
- * @property \abc\core\ALanguageManager $language
- * @property \abc\core\ALoader $load
+ * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\engine\ALoader $load
  * @property AIMManager $im
  * @property AConfig $config
  * @property ARequest $request
@@ -72,7 +72,7 @@ class AConfigManager{
 	/**
 	 *    Build field for provided key setting
 	 * @param string $setting_key
-	 * @param \abc\core\AForm $form - form object where filed will be shown
+	 * @param \abc\core\engine\AForm $form - form object where filed will be shown
 	 * @param array $data - current setting data
 	 * @param int $store_id - Selected store ID for the setting
 	 * @param string $group
@@ -97,7 +97,7 @@ class AConfigManager{
 	/**
 	 *    Build fields array for provided setting group (section)
 	 * @param string $group
-	 * @param \abc\core\AForm $form - form object where filed will be shown
+	 * @param \abc\core\engine\AForm $form - form object where filed will be shown
 	 * @param array $data - current setting data
 	 * @return array
 	 */
@@ -273,7 +273,7 @@ class AConfigManager{
 	}
 
 	/**
-	 * @var \abc\core\AForm $form
+	 * @var \abc\core\engine\AForm $form
 	 * @param array $data
 	 * @return array
 	 */
@@ -518,7 +518,7 @@ class AConfigManager{
 	}
 
 	/**
-	 * @var \abc\core\AForm $form
+	 * @var \abc\core\engine\AForm $form
 	 * @param array $data
 	 * @return array
 	 */

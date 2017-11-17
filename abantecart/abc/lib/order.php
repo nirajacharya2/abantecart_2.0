@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-use abc\core\AHelperUtils;
-use abc\core\APromotion;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\APromotion;
 
-if (!defined('DIR_CORE')){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )){
+	header('Location: assets/static_pages/');
 }
 
 /**
@@ -32,9 +32,9 @@ if (!defined('DIR_CORE')){
  * @property ATax $tax
  * @property ACurrency $currency
  * @property ARequest $request
- * @property \abc\core\ALoader $load
+ * @property \abc\core\engine\ALoader $load
  * @property ASession $session
- * @property \abc\core\ExtensionsAPI $extensions
+ * @property \abc\core\engine\ExtensionsAPI $extensions
  * @property \abc\models\storefront\ModelAccountOrder $model_account_order
  * @property \abc\models\storefront\ModelAccountAddress $model_account_address
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
@@ -44,7 +44,7 @@ if (!defined('DIR_CORE')){
  */
 class AOrder{
 	/**
-	 * @var \abc\core\Registry
+	 * @var \abc\core\engine\Registry
 	 */
 	protected $registry;
 	/**
@@ -64,7 +64,7 @@ class AOrder{
 
 	/**
 	 * AOrder constructor.
-	 * @param \abc\core\Registry
+	 * @param \abc\core\engine\Registry
 	 * @param string $order_id
 	 */
 	public function __construct($registry, $order_id = ''){

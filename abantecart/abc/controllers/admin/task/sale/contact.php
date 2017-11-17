@@ -18,16 +18,16 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\core\AController;
+use abc\core\engine\AController;
 use abc\lib\AError;
 use abc\lib\AException;
 use abc\lib\AJson;
 use abc\lib\AMail;
 use abc\lib\ATaskManager;
-use abc\lib\AView;
+use abc\core\engine\AView;
 
-if (!defined('DIR_CORE') || !IS_ADMIN){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
+	header('Location: assets/static_pages/');
 }
 
 class ControllerTaskSaleContact extends AController{

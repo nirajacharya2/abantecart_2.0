@@ -21,8 +21,8 @@
 ------------------------------------------------------------------------------  
 */
 namespace abantecart\install\model;
-use abc\core\AHelperUtils;
-use abc\core\Model;
+use abc\core\helper\AHelperUtils;
+use abc\core\engine\Model;
 use abc\lib\ACache;
 use abc\lib\ADB;
 use abc\lib\AException;

@@ -18,9 +18,9 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
-use abc\core\AController;
-if (! defined ( 'DIR_CORE' )) {
-	header ( 'Location: static_pages/' );
+use abc\core\engine\AController;
+if (! defined ( 'DIR_APP' )) {
+	header ( 'Location: assets/static_pages/' );
 }
 class ControllerCommonTemplateDebug extends AController {
 	public $data = array();

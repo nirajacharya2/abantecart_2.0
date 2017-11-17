@@ -19,8 +19,8 @@
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
 
-if (! defined ( 'DIR_CORE' ) || !IS_ADMIN) {
-	header ( 'Location: static_pages/' );
+if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
+	header ( 'Location: assets/static_pages/' );
 }
 interface Migration {
 	public function getName();

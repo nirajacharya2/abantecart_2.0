@@ -19,9 +19,9 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
-use abc\core\ALanguageManager;
-use abc\core\ExtensionsApi;
-use abc\core\Registry;
+use abc\lib\ALanguageManager;
+use abc\core\engine\ExtensionsApi;
+use abc\core\engine\Registry;
 use abc\lib\ACache;
 use abc\lib\AConfig;
 use abc\lib\ADB;

@@ -18,17 +18,17 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\core\AHelperUtils;
-use abc\core\ALanguageManager;
-use abc\core\HtmlElementFactory;
-use abc\core\Model;
+use abc\core\helper\AHelperUtils;
+use abc\lib\ALanguageManager;
+use abc\core\engine\HtmlElementFactory;
+use abc\core\engine\Model;
 use abc\lib\AAttribute_Manager;
 use abc\lib\ADB;
 use abc\lib\ALayoutManager;
 use abc\lib\AResourceManager;
 
-if (!defined('DIR_CORE') || !IS_ADMIN){
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
+	header('Location: assets/static_pages/');
 }
 
 /**

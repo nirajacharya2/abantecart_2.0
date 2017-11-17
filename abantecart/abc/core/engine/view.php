@@ -17,23 +17,27 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\lib;
+namespace abc\core\engine;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+use abc\lib\ADebug;
+use abc\lib\AError;
+use abc\lib\AWarning;
+
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 /**
  * Class AView
- * @property AConfig $config
- * @property \abc\core\ExtensionsAPI $extensions
- * @property AResponse $response
- * @property ACache $cache
+ * @property \abc\lib\AConfig $config
+ * @property \abc\core\engine\ExtensionsAPI $extensions
+ * @property \abc\lib\AResponse $response
+ * @property \abc\lib\ACache $cache
  *
  */
 class AView{
 	/**
-	 * @var $registry \abc\core\Registry
+	 * @var $registry \abc\core\engine\Registry
 	 */
 	protected $registry;
 	/**
@@ -80,7 +84,7 @@ class AView{
 	protected $html_cache_key;
 
 	/**
-	 * @param \abc\core\Registry $registry
+	 * @param \abc\core\engine\Registry $registry
 	 * @param int $instance_id
 	 */
 	public function __construct($registry, $instance_id){

@@ -38,7 +38,7 @@
  */
 namespace abantecart\install;
 use abantecart\install\model\ModelInstall;
-use abc\core\Registry;
+use abc\core\engine\Registry;
 use abc\lib\ACache;
 use abc\lib\AException;
 use ErrorException;
@@ -60,7 +60,6 @@ switch ($command) {
         try {
             // Real path (operating system web root) to the directory where abantecart is installed
             $root_path = dirname(__FILE__);
-
             if (defined('IS_WINDOWS')) {
                 $root_path = str_replace('\\', '/', $root_path);
             }
@@ -83,7 +82,7 @@ switch ($command) {
             //define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
             // DIR
-            define('DIR_APP', $options['app_dir']);
+            define('DIR_APP', dirname(__DIR__).'/abc/');
             define('DIR_ASSETS', $options['public_dir'].'assets/');
 
             // Startup with local init

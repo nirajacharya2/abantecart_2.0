@@ -19,14 +19,14 @@
 ------------------------------------------------------------------------------*/
 namespace abc;
 // set default encoding for multibyte php mod
-use abc\core\AHook;
-use abc\core\AHtml;
-use abc\core\ALanguage;
-use abc\core\ALanguageManager;
-use abc\core\ALayout;
-use abc\core\ALoader;
-use abc\core\ExtensionsApi;
-use abc\core\Registry;
+use abc\core\engine\AHook;
+use abc\core\engine\AHtml;
+use abc\core\engine\ALanguage;
+use abc\lib\ALanguageManager;
+use abc\core\engine\ALayout;
+use abc\core\engine\ALoader;
+use abc\core\engine\ExtensionsApi;
+use abc\core\engine\Registry;
 use abc\lib\ACache;
 use abc\lib\ACart;
 use abc\lib\AConfig;
@@ -143,7 +143,7 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
 
-try {
+
 	//set ini parameters for session
 	ini_set('session.use_trans_sid', 'Off');
 	ini_set('session.use_cookies', 'On');
@@ -371,9 +371,9 @@ if (IS_ADMIN === true) {
 	$registry->set('download',new ADownload());
 
 //load main language section
+	$lang_obj->load();
 	$registry->set('language', $lang_obj);
 	unset($lang_obj);
-	$registry->get('language')->load();
 	$hook->hk_InitEnd();
 
 //load order status class
@@ -404,8 +404,3 @@ if (IS_ADMIN === true) {
 
 	// Currency
 	$registry->set('currency', new ACurrency($registry));
-	return $registry;
-} //eof try
-catch (AException $e) {
-	\abc\lib\ac_exception_handler($e);
-}

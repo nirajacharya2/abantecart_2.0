@@ -17,14 +17,16 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
-namespace abc\core;
+namespace abc\core\helper;
+use abc\core\engine\Registry;
 use abc\lib\AError;
+use abc\lib\ALanguageManager;
 use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if (!defined('DIR_CORE')) {
-	header('Location: static_pages/');
+if (!defined ( 'DIR_APP' )) {
+	header('Location: assets/static_pages/');
 }
 
 class AHelperSystemCheck extends AHelper{
@@ -37,7 +39,6 @@ class AHelperSystemCheck extends AHelper{
 	 *
 	 * Note: This is English text only. Can be call before database and languages are loaded
 	 */
-
 	static function run_system_check($registry, $mode = 'log'){
 		$mlog = $counts = array ();
 		//run anyway
@@ -148,10 +149,10 @@ class AHelperSystemCheck extends AHelper{
 			}
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'logs') || !is_writable(DIR_SYSTEM . 'logs/error.txt')) {
+		if (!is_writable(DIR_LOGS) || !is_writable(DIR_LOGS . 'error.txt')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect log dir/file permissions',
-					'body'  => DIR_SYSTEM . 'logs' . ' directory or error.txt file needs to be set to full permissions(777)! Error logs can not be saved',
+					'body'  => DIR_LOGS . ' directory or error.txt file needs to be set to full permissions(777)! Error logs can not be saved',
 					'type'  => 'W'
 			);
 		}
@@ -373,7 +374,7 @@ class AHelperSystemCheck extends AHelper{
 	}
 
 	/**
-	 * @param \abc\core\Registry $registry
+	 * @param \abc\core\engine\Registry $registry
 	 * @return array
 	 */
 	static function check_order_statuses($registry){
@@ -381,10 +382,14 @@ class AHelperSystemCheck extends AHelper{
 		$db = $registry->get('db');
 
 		$order_statuses = $registry->get('order_status')->getStatuses();
-		$language_id = (int)$registry->get('language')->getDefaultLanguageID();
+		/**
+		 * @var ALanguageManager $language
+		 */
+		$language = (int)$registry->get('language');
+		$language_id = $language->getDefaultLanguageID();
 
 		$query = $db->query("SELECT osi.order_status_id, osi.status_text_id
-							    FROM " . $db->table('order_statuses') . " os
+								FROM " . $db->table('order_statuses') . " os
 								INNER JOIN " . $db->table('order_status_ids') . " osi
 									ON osi.order_status_id = os.order_status_id
 								WHERE os.language_id = '" . $language_id . "'");
@@ -394,7 +399,6 @@ class AHelperSystemCheck extends AHelper{
 		}
 
 		$ret_array = array ();
-
 		foreach ($order_statuses as $id => $text_id) {
 			if ($text_id != $db_statuses[$id]) {
 				$ret_array[] = array (
@@ -464,7 +468,7 @@ class AHelperSystemCheck extends AHelper{
 	}
 
 	/**
-	 * @param \abc\core\Registry $registry
+	 * @param \abc\core\engine\Registry $registry
 	 * @param string $mode
 	 * @return array
 	 */

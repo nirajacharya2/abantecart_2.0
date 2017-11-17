@@ -20,27 +20,32 @@
 ------------------------------------------------------------------------------  
 */
 // Real path (operating system web root) to the directory where abantecart is installed
-use abc\core\ABC;
+namespace abc;
 use abc\lib\ASession;
 
-$dir_app = dirname(dirname(dirname(__DIR__))) . '/abc/';
+$dir_app = dirname(__DIR__) . '/../../abc/';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	define('IS_WINDOWS', true);
 	$dir_app = str_replace('\\', '/', $dir_app);
 }
 // Load all initial set up
+define('DIR_APP', $dir_app);
+define('DIR_CORE', $dir_app.'core/');
+define('DIR_LIB', $dir_app.'lib/');
 define('DIR_ASSETS', basename(__DIR__).'/');
-require $dir_app.'abc.php';
-$config = require $dir_app.'config/config.php';
-$app = new ABC($config);
-require_once $dir_app.'core/init/app.php';
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
 $dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
-define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
-define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
+// Detect http host
+if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+	define('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
+} else {
+	define('REAL_HOST', $_SERVER['HTTP_HOST']);
+}
+define('HTTP_SERVER', 'http://' . REAL_HOST . $dirname);
+define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . dirname(dirname($dirname)));
 
 
 
@@ -63,6 +68,9 @@ foreach(array_keys($_COOKIE) as $key) {
 define('SESSION_ID', $session_id);
 
 //try to start session. 
+require_once(DIR_CORE . 'engine/registry.php');
+require_once(DIR_CORE . 'helper/helper.php');
+require_once(DIR_CORE . 'helper/utils.php');
 require_once(DIR_LIB . 'session.php');
 $session = new ASession(SESSION_ID);
 
@@ -78,10 +86,10 @@ if($from_admin){
 	$t ='';
 	$count = 0;
 	$log_contents_end = "Log file tail: \n\n";
-	$log_handle = fopen(DIR_APP . "system/logs/error.txt", "r");
+	$log_handle = fopen(DIR_APP . "var/logs/error.txt", "r");
 	//read 100 lines backwards from the eof or less 
 	$max_lines = 100;
-	$max_bytes = filesize(DIR_APP . "system/logs/error.txt");
+	$max_bytes = filesize(DIR_APP . "var/logs/error.txt");
 	$lines = array();
 	while ($count < $max_lines) {
 		//read one line back
