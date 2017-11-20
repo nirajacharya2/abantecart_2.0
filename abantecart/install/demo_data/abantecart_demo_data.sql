@@ -524,7 +524,6 @@ INSERT INTO `ac_orders` (
 `payment_method_data`
 )
 VALUES
-(1,0,'',0,'Your Store','http://localhost/',1,1,'fdsfdsf','czx','(092) 222-2222','','demo@abantecart.com','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Flat Shipping Rate','fdsfdsf','czx','','addresss','','testing','55555','Maryland',3643,'United States',223,'{firstname} {lastname} {company} {address_1} {address_2} {city}, {zone} {postcode} {country}','Cash On Delivery','','1585.4400',1,1,1,'GBP','1.00000000',NULL,'0000-00-00 00:00:00','0000-00-00 00:00:00','127.0.0.1',''),
 (2,0,'',0,'Web Store Name','demo',11,1,'Anthony','Blair','+1 907-842-2240','','anthonyblair@abantecart.com','','','','','','','','',0,'',0,'','','Anthony','Blair','','104 Main Street','','Dillingham','','North Dakota',3657,'United States',223,'{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','Cash On Delivery','','418.8100',1,1,1,'USD','1.00000000',NULL,now(), now(),'109.104.166.98',''),
 (3,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Flat Shipping Rate','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','Please ASAP','246.0000',1,1,1,'USD','1.00000000',NULL,now(), now(),'109.104.166.98',''),
 (4,0,'',0,'Web Store Name','demo',5,1,'Gloria','Macias','+1 418-461-2440','','gloriamacias@abantecart.com','','','','','','','','',0,'',0,'','','Gloria','Macias','','Camille Marcoux 15','','Blanc-Sablon','1569','Nunavut',609,'Canada',38,'','Cash On Delivery','','310.5270',1,1,1,'USD','1.00000000',NULL,now(), now(),'109.104.166.98',''),
@@ -544,7 +543,6 @@ VALUES
 
 INSERT INTO `ac_order_history` 
 VALUES 
-(1,1,1,1,'','2015-06-12 09:56:25','2015-06-12 09:56:25'),
 (2,2,1,1,'','2015-06-12 09:56:25','2015-06-12 09:56:25'),
 (3,3,1,1,'','2013-09-07 08:41:25','2015-06-12 09:56:25'),
 (4,4,1,1,'','2013-09-07 08:51:07','2015-06-12 09:56:25'),
@@ -565,7 +563,6 @@ VALUES
 INSERT INTO `ac_order_options`
 		(`order_option_id`, `order_id`, `order_product_id`, `product_option_value_id`, `name`, `value`, `price`, `prefix`, `settings`)
 VALUES
- (1,1,2,588,'Memory','8GB',99.0000,'+',NULL),
  (2,2,7,684,'Color','brown',10.0000,'+',NULL),
  (3,3,9,651,'Size','33.8 oz',49.0000,'+',NULL),
  (4,3,10,650,'Size','8 oz',19.0000,'+',NULL),
@@ -586,10 +583,10 @@ VALUES
  (19,8,35,646,'Color','Brown',20.0000,'-',NULL),
  (20,8,36,681,'Color','beige',10.0000,'+',NULL),
  (21,12,45,721,'Size','Eau de Toilette',78.5000,'$',NULL),
- (22,12,45,1,'Gift Wrapping','1',78.5000,'$',NULL),
+ (22,12,45,700,'Gift Wrapping','1',78.5000,'$',NULL),
  (23,12,47,738,'Size','30ml',90.0000,'$',NULL),
  (24,13,49,713,'Size','1.7 oz',72.0000,'$',NULL),
- (25,13,49,1,'Gift Wrapping','1',72.0000,'$',NULL);
+ (25,13,49,719,'Gift Wrapping','1',72.0000,'$',NULL);
 
 INSERT INTO `ac_order_products`
 (`order_product_id`, `order_id`, `product_id`, `name`, `model`, `price`, `total`, `tax`, `quantity`, `subtract`)
@@ -644,7 +641,6 @@ VALUES
 --
 
 INSERT INTO `ac_order_totals` VALUES 
-(1,1,'Sub-Total:','£1,583.44',1583.4400,1,'subtotal','sub_total'),
 (2,1,'Flat Shipping Rate:','£2.00',2.0000,3,'shipping','shipping'),
 (3,1,'Total:','£1,585.44',1585.4400,6,'total','total'),
 (4,2,'Sub-Total:','$386.00',386.0000,1,'subtotal','sub_total'),

@@ -9125,6 +9125,64 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
+-- DDL for table `order_status_ids`
+--
+CREATE TABLE `ac_order_status_ids` (
+  `order_status_id` int(11) NOT NULL,
+  `status_text_id` varchar(64) NOT NULL,
+  PRIMARY KEY (`order_status_id`,`status_text_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE UNIQUE INDEX `ac_order_status_ids_idx`
+ON `ac_order_status_ids` ( `status_text_id`);
+
+INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
+(0, 'incomplete'),
+(1, 'pending'),
+(2, 'processing'),
+(3, 'shipped'),
+(7, 'canceled'),
+(5, 'completed'),
+(8, 'denied'),
+(9, 'canceled_reversal'),
+(10, 'failed'),
+(11, 'refunded'),
+(12, 'reversed'),
+(13, 'chargeback'),
+(14, 'canceled_by_customer');
+
+--
+-- DDL for table `order_statuses`
+--
+
+CREATE TABLE `ac_order_statuses` (
+  `order_status_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  PRIMARY KEY (`order_status_id`,`language_id`),
+  FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `order_statuses`
+--
+
+INSERT INTO `ac_order_statuses` (`order_status_id`, `language_id`, `name`) VALUES
+(0, 1, 'Incomplete'),
+(1, 1, 'Pending'),
+(2, 1, 'Processing'),
+(3, 1, 'Shipped'),
+(7, 1, 'Canceled'),
+(5, 1, 'Completed'),
+(8, 1, 'Denied'),
+(9, 1, 'Canceled Reversal'),
+(10, 1, 'Failed'),
+(11, 1, 'Refunded'),
+(12, 1, 'Reversed'),
+(13, 1, 'Chargeback'),
+(14, 1, 'Canceled by Customer');
+
+--
 -- DDL for table `orders`
 --
 -- NOTE: If update table keep in mind ac_orders_enc
@@ -9188,6 +9246,7 @@ CREATE TABLE `ac_orders` (
   FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`),
   FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`),
   FOREIGN KEY (`currency_id`) REFERENCES `ac_currencies`(`currency_id`),
+  FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`),
   FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9227,6 +9286,76 @@ CREATE TABLE `ac_customer_transactions` (
   FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `customer_id`, `order_id` );
+
+--
+-- DDL for table `product_options`
+--
+CREATE TABLE `ac_product_options` (
+  `product_option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attribute_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT '0',
+  `sort_order` int(3) NOT NULL DEFAULT '0',
+  `status` int(1) NOT NULL DEFAULT '1',
+  `element_type` char(1) NOT NULL DEFAULT 'I',
+  `required` smallint(1) NOT NULL default '0',
+  `regexp_pattern` varchar(255) NOT NULL default '',
+  `settings` text COLLATE utf8_general_ci,
+  PRIMARY KEY (`product_option_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_product_options_idx` ON `ac_product_options` (`attribute_id`, `product_id`, `group_id` );
+
+--
+-- DDL for table `product_option_descriptions`
+--
+CREATE TABLE `ac_product_option_descriptions` (
+  `product_option_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  `option_placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
+  `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  PRIMARY KEY (`product_option_id`,`language_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE INDEX `ac_product_option_descriptions_idx` ON `ac_product_option_descriptions` ( `product_id` );
+--
+-- DDL for table `product_option_values`
+--
+CREATE TABLE `ac_product_option_values` (
+  `product_option_value_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_option_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT '0',
+  `sku` varchar(255) DEFAULT NULL,
+  `quantity` int(4) NOT NULL DEFAULT '0',
+  `subtract` int(1) NOT NULL DEFAULT '0',
+  `price` decimal(15,4) NOT NULL,
+  `prefix` char(1) COLLATE utf8_general_ci NOT NULL, -- % or $
+  `weight` decimal(15,8) NOT NULL,
+  `weight_type` varchar(3) COLLATE utf8_general_ci NOT NULL, -- lbs or %
+  `attribute_value_id` int(11),
+  `grouped_attribute_data` text DEFAULT NULL,
+  `sort_order` int(3) NOT NULL,
+  `default` smallint DEFAULT 0,
+  PRIMARY KEY (`product_option_value_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_product_option_values_idx` ON `ac_product_option_values` ( `product_option_id`, `product_id`, `group_id`, `attribute_value_id` );
+
+
+--
+-- DDL for table `product_option_value_descriptions`
+--
+CREATE TABLE `ac_product_option_value_descriptions` (
+  `product_option_value_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` text COLLATE utf8_general_ci DEFAULT NULL COMMENT 'translatable',
+  `grouped_attribute_names` text COLLATE utf8_general_ci DEFAULT NULL,
+  PRIMARY KEY (`product_option_value_id`,`language_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_value_descriptions` ( `product_id` );
 
 --
 -- DDL for table `products`
@@ -9269,6 +9398,83 @@ CREATE TABLE `ac_products` (
 
 CREATE INDEX `ac_products_idx` ON `ac_products` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`);
 CREATE INDEX `ac_products_status_idx` ON `ac_products` (`product_id`, `status`, `date_available`);
+
+--
+-- DDL for table `product_options`
+--
+CREATE TABLE `ac_product_options` (
+  `product_option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attribute_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT '0',
+  `sort_order` int(3) NOT NULL DEFAULT '0',
+  `status` int(1) NOT NULL DEFAULT '1',
+  `element_type` char(1) NOT NULL DEFAULT 'I',
+  `required` smallint(1) NOT NULL default '0',
+  `regexp_pattern` varchar(255) NOT NULL default '',
+  `settings` text COLLATE utf8_general_ci,
+  PRIMARY KEY (`product_option_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_product_options_idx` ON `ac_product_options` (`attribute_id`, `product_id`, `group_id` );
+
+--
+-- DDL for table `product_option_descriptions`
+--
+CREATE TABLE `ac_product_option_descriptions` (
+  `product_option_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  `option_placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
+  `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  PRIMARY KEY (`product_option_id`,`language_id`),
+  FOREIGN KEY (`product_option_id`) REFERENCES `ac_product_options`(`product_option_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE INDEX `ac_product_option_descriptions_idx` ON `ac_product_option_descriptions` ( `product_id` );
+--
+-- DDL for table `product_option_values`
+--
+CREATE TABLE `ac_product_option_values` (
+  `product_option_value_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_option_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT '0',
+  `sku` varchar(255) DEFAULT NULL,
+  `quantity` int(4) NOT NULL DEFAULT '0',
+  `subtract` int(1) NOT NULL DEFAULT '0',
+  `price` decimal(15,4) NOT NULL,
+  `prefix` char(1) COLLATE utf8_general_ci NOT NULL, -- % or $
+  `weight` decimal(15,8) NOT NULL,
+  `weight_type` varchar(3) COLLATE utf8_general_ci NOT NULL, -- lbs or %
+  `attribute_value_id` int(11),
+  `grouped_attribute_data` text DEFAULT NULL,
+  `sort_order` int(3) NOT NULL,
+  `default` smallint DEFAULT 0,
+  PRIMARY KEY (`product_option_value_id`),
+  FOREIGN KEY (`product_option_id`) REFERENCES `ac_product_options`(`product_option_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_product_option_values_idx` ON `ac_product_option_values` ( `product_option_id`, `product_id`, `group_id`, `attribute_value_id` );
+
+--
+-- DDL for table `product_option_value_descriptions`
+--
+CREATE TABLE `ac_product_option_value_descriptions` (
+  `product_option_value_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `name` text COLLATE utf8_general_ci DEFAULT NULL COMMENT 'translatable',
+  `grouped_attribute_names` text COLLATE utf8_general_ci DEFAULT NULL,
+  PRIMARY KEY (`product_option_value_id`,`language_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_value_descriptions` ( `product_id` );
 
 --
 -- DDL for table `order_products`
@@ -9376,7 +9582,6 @@ INSERT INTO `ac_order_data_types` (`language_id`, `name`, `date_added`) VALUES
 (1, 'email', NOW()),
 (1, 'sms', NOW());
 
-
 --
 -- DDL for table `order_history`
 --
@@ -9390,6 +9595,7 @@ CREATE TABLE `ac_order_history` (
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_history_id`),
   FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_history_idx`
@@ -9410,67 +9616,15 @@ CREATE TABLE `ac_order_options` (
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `prefix` char(1) NOT NULL DEFAULT '',
   `settings` longtext,
-  PRIMARY KEY (`order_option_id`)
+  PRIMARY KEY (`order_option_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
+  FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`),
+  FOREIGN KEY (`product_option_value_id`) REFERENCES `ac_product_option_values`(`product_option_value_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_options_idx`
 ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`);
 
---
--- DDL for table `order_statuses`
---
-
-CREATE TABLE `ac_order_statuses` (
-  `order_status_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`order_status_id`,`language_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `order_statuses`
---
-
-INSERT INTO `ac_order_statuses` (`order_status_id`, `language_id`, `name`) VALUES
-(0, 1, 'Incomplete'),
-(1, 1, 'Pending'),
-(2, 1, 'Processing'),
-(3, 1, 'Shipped'),
-(7, 1, 'Canceled'),
-(5, 1, 'Completed'),
-(8, 1, 'Denied'),
-(9, 1, 'Canceled Reversal'),
-(10, 1, 'Failed'),
-(11, 1, 'Refunded'),
-(12, 1, 'Reversed'),
-(13, 1, 'Chargeback'),
-(14, 1, 'Canceled by Customer');
-
---
--- DDL for table `order_status_ids`
---
-CREATE TABLE `ac_order_status_ids` (
-  `order_status_id` int(11) NOT NULL,
-  `status_text_id` varchar(64) NOT NULL,
-  PRIMARY KEY (`order_status_id`,`status_text_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE UNIQUE INDEX `ac_order_status_ids_idx`
-ON `ac_order_status_ids` ( `status_text_id`);
-
-INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
-(0, 'incomplete'),
-(1, 'pending'),
-(2, 'processing'),
-(3, 'shipped'),
-(7, 'canceled'),
-(5, 'completed'),
-(8, 'denied'),
-(9, 'canceled_reversal'),
-(10, 'failed'),
-(11, 'refunded'),
-(12, 'reversed'),
-(13, 'chargeback'),
-(14, 'canceled_by_customer');
 
 --
 -- DDL for table `order_totals`
@@ -9485,7 +9639,8 @@ CREATE TABLE `ac_order_totals` (
   `sort_order` int(3) NOT NULL,
   `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
    `key` varchar(128) NOT NULL DEFAULT '',
- PRIMARY KEY (`order_total_id`),
+  PRIMARY KEY (`order_total_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`),
   KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9501,6 +9656,8 @@ CREATE TABLE `ac_product_descriptions` (
   `description` longtext COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `blurb` text COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   PRIMARY KEY (`product_id`,`language_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`),
   KEY `name` (`name`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -9520,90 +9677,20 @@ CREATE TABLE `ac_product_discounts` (
   `date_end` date NOT NULL DEFAULT '0000-00-00',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_discount_id`)
+  PRIMARY KEY (`product_discount_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_product_discounts_idx` ON `ac_product_discounts` (`product_id`, `customer_group_id`);
-
 
 --
 -- DDL for table `product_featured`
 --
 CREATE TABLE `ac_products_featured` (
   `product_id` int(11) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`product_id`)
+	PRIMARY KEY (`product_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
---
--- DDL for table `product_options`
---
-CREATE TABLE `ac_product_options` (
-  `product_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `attribute_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL DEFAULT '0',
-  `sort_order` int(3) NOT NULL DEFAULT '0',
-  `status` int(1) NOT NULL DEFAULT '1',
-  `element_type` char(1) NOT NULL DEFAULT 'I',
-  `required` smallint(1) NOT NULL default '0',
-  `regexp_pattern` varchar(255) NOT NULL default '',
-  `settings` text COLLATE utf8_general_ci,
-  PRIMARY KEY (`product_option_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_product_options_idx` ON `ac_product_options` (`attribute_id`, `product_id`, `group_id` );
-
---
--- DDL for table `product_option_descriptions`
---
-CREATE TABLE `ac_product_option_descriptions` (
-  `product_option_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `name` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `option_placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
-  `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`product_option_id`,`language_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE INDEX `ac_product_option_descriptions_idx` ON `ac_product_option_descriptions` ( `product_id` );
---
--- DDL for table `product_option_values`
---
-CREATE TABLE `ac_product_option_values` (
-  `product_option_value_id` int(11) NOT NULL AUTO_INCREMENT,
-  `product_option_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL DEFAULT '0',
-  `sku` varchar(255) DEFAULT NULL,
-  `quantity` int(4) NOT NULL DEFAULT '0',
-  `subtract` int(1) NOT NULL DEFAULT '0',
-  `price` decimal(15,4) NOT NULL,
-  `prefix` char(1) COLLATE utf8_general_ci NOT NULL, -- % or $
-  `weight` decimal(15,8) NOT NULL,
-  `weight_type` varchar(3) COLLATE utf8_general_ci NOT NULL, -- lbs or %
-  `attribute_value_id` int(11),
-  `grouped_attribute_data` text DEFAULT NULL,
-  `sort_order` int(3) NOT NULL,
-  `default` smallint DEFAULT 0,
-  PRIMARY KEY (`product_option_value_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_product_option_values_idx` ON `ac_product_option_values` ( `product_option_id`, `product_id`, `group_id`, `attribute_value_id` );
-
-
---
--- DDL for table `product_option_value_descriptions`
---
-CREATE TABLE `ac_product_option_value_descriptions` (
-  `product_option_value_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `name` text COLLATE utf8_general_ci DEFAULT NULL COMMENT 'translatable',
-  `grouped_attribute_names` text COLLATE utf8_general_ci DEFAULT NULL,
-  PRIMARY KEY (`product_option_value_id`,`language_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_value_descriptions` ( `product_id` );
 
 --
 -- DDL for table `product_related`
@@ -9611,9 +9698,9 @@ CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_va
 CREATE TABLE `ac_products_related` (
   `product_id` int(11) NOT NULL,
   `related_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`related_id`)
+  PRIMARY KEY (`product_id`,`related_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 --
 -- DDL for table `product_specials`
@@ -9628,7 +9715,8 @@ CREATE TABLE `ac_product_specials` (
   `date_end` date NOT NULL DEFAULT '0000-00-00',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_special_id`)
+  PRIMARY KEY (`product_special_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_product_specials_idx` ON `ac_product_specials` ( `product_id`, `customer_group_id` );
@@ -9640,9 +9728,10 @@ CREATE TABLE `ac_product_tags` (
   `product_id` int(11) NOT NULL,
   `tag` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY  (`product_id`,`tag`,`language_id`)
+  PRIMARY KEY  (`product_id`,`tag`,`language_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 --
 -- DDL for table `product_to_categories`
@@ -9650,9 +9739,10 @@ CREATE TABLE `ac_product_tags` (
 CREATE TABLE `ac_products_to_categories` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`category_id`)
+  PRIMARY KEY (`product_id`,`category_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 --
 -- DDL for table `product_to_downloads`
@@ -9660,9 +9750,10 @@ CREATE TABLE `ac_products_to_categories` (
 CREATE TABLE `ac_products_to_downloads` (
   `product_id` int(11) NOT NULL,
   `download_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`download_id`)
+  PRIMARY KEY (`product_id`,`download_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 --
 -- DDL for table `product_to_stores`
@@ -9670,7 +9761,9 @@ CREATE TABLE `ac_products_to_downloads` (
 CREATE TABLE `ac_products_to_stores` (
   `product_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`product_id`,`store_id`)
+  PRIMARY KEY (`product_id`,`store_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9700,11 +9793,11 @@ CREATE TABLE `ac_reviews` (
   `status` int(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`review_id`)
+  PRIMARY KEY (`review_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_reviews_idx` ON `ac_reviews` ( `product_id`, `customer_id` );
-
 
 --
 -- DDL for table `settings`
@@ -9718,6 +9811,7 @@ CREATE TABLE `ac_settings` (
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  PRIMARY KEY (`setting_id`, `store_id`, `group`, `key`),
+ FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
  FULLTEXT INDEX `ac_settings_idx` (`value` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9932,7 +10026,6 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('forms_manager','forms_manager_sort_order', '')
 ;
 
-
 --
 -- DDL for table `stock_statuses`
 --
@@ -9941,7 +10034,8 @@ CREATE TABLE `ac_stock_statuses` (
   `stock_status_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`stock_status_id`,`language_id`)
+  PRIMARY KEY (`stock_status_id`,`language_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9962,7 +10056,9 @@ CREATE TABLE `ac_store_descriptions` (
   `title` longtext NOT NULL COMMENT 'translatable',
   `meta_description` longtext NOT NULL COMMENT 'translatable',
   `meta_keywords` longtext NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`store_id`,`language_id`)
+  PRIMARY KEY (`store_id`,`language_id`),
+  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
