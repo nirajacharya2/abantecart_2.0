@@ -241,6 +241,14 @@ ALTER TABLE `ac_reviews` ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`
 ALTER TABLE `ac_settings` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_stock_statuses` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
 
-ALTER TABLE `ac_store_descriptions` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`);
-ALTER TABLE `ac_store_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`);
+ALTER TABLE `ac_store_descriptions` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_store_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_tax_class_descriptions` ADD FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_tax_class_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_tax_rates` CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
+ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL;
 

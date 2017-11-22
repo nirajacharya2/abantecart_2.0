@@ -10057,8 +10057,8 @@ CREATE TABLE `ac_store_descriptions` (
   `meta_description` longtext NOT NULL COMMENT 'translatable',
   `meta_keywords` longtext NOT NULL COMMENT 'translatable',
   PRIMARY KEY (`store_id`,`language_id`),
-  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`),
-  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)
+  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -10088,7 +10088,9 @@ CREATE TABLE `ac_tax_class_descriptions` (
   `language_id` int(11) NOT NULL,
   `title` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`tax_class_id`,`language_id`)
+  PRIMARY KEY (`tax_class_id`,`language_id`),
+  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`, `description`) VALUES (1, 1, 'Taxable Goods', 'Taxed Products');
@@ -10099,7 +10101,7 @@ INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`,
 CREATE TABLE `ac_tax_rates` (
   `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
   `location_id` int(11) NOT NULL DEFAULT '0',
-  `zone_id` int(11) DEFAULT '0',
+  `zone_id` int(11) DEFAULT NULL,
   `tax_class_id` int(11) NOT NULL,
   `priority` int(5) NOT NULL DEFAULT '1',
   `rate` decimal(15,4) NOT NULL DEFAULT '0.0000',
@@ -10109,7 +10111,10 @@ CREATE TABLE `ac_tax_rates` (
   `tax_exempt_groups` text DEFAULT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tax_rate_id`)
+  PRIMARY KEY (`tax_rate_id`),
+  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_tax_rates_idx` ON `ac_tax_rates` ( `location_id`, `zone_id`, `tax_class_id` );
