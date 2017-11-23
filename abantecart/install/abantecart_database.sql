@@ -9288,6 +9288,85 @@ CREATE TABLE `ac_customer_transactions` (
 CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `customer_id`, `order_id` );
 
 --
+-- DDL for table `tax_classes`
+--
+
+CREATE TABLE `ac_tax_classes` (
+  `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`tax_class_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+--
+-- Dumping data for table `tax_class`
+--
+
+INSERT INTO `ac_tax_classes` (`tax_class_id`, `date_added`) VALUES (1, now());
+
+--
+-- DDL for table `tax_class_descriptions`
+--
+
+CREATE TABLE `ac_tax_class_descriptions` (
+  `tax_class_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `title` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
+  PRIMARY KEY (`tax_class_id`,`language_id`),
+  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`, `description`) VALUES (1, 1, 'Taxable Goods', 'Taxed Products');
+
+--
+-- DDL for table `tax_rates`
+--
+CREATE TABLE `ac_tax_rates` (
+  `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location_id` int(11) NOT NULL DEFAULT '0',
+  `zone_id` int(11) DEFAULT NULL,
+  `tax_class_id` int(11) NOT NULL,
+  `priority` int(5) NOT NULL DEFAULT '1',
+  `rate` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `rate_prefix` char(1) COLLATE utf8_general_ci NOT NULL DEFAULT '%', -- % or $
+  `threshold_condition` char(2) COLLATE utf8_general_ci NOT NULL, -- '<=', '>=', '==' or '<'
+  `threshold` decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `tax_exempt_groups` text DEFAULT NULL,
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`tax_rate_id`),
+  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE INDEX `ac_tax_rates_idx` ON `ac_tax_rates` ( `location_id`, `zone_id`, `tax_class_id` );
+--
+-- Dumping data for table `tax_rate`
+--
+INSERT INTO `ac_tax_rates` (`tax_rate_id`, `location_id`, `tax_class_id`, `priority`, `rate`) VALUES (1, 1, 1, 1, '8.5000');
+
+--
+-- DDL for table `tax_rate_descriptions`
+--
+
+CREATE TABLE `ac_tax_rate_descriptions` (
+  `tax_rate_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
+  PRIMARY KEY (`tax_rate_id`,`language_id`),
+  FOREIGN KEY (`tax_rate_id`) REFERENCES `ac_tax_rates`(`tax_rate_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `tax_rate_descriptions`
+--
+INSERT INTO `ac_tax_rate_descriptions` (`tax_rate_id`, `language_id`, `description`) VALUES (1, 1, 'Retail 8.5%');
+
+--
 -- DDL for table `product_options`
 --
 CREATE TABLE `ac_product_options` (
@@ -10063,84 +10142,6 @@ CREATE TABLE `ac_store_descriptions` (
 
 
 --
--- DDL for table `tax_classes`
---
-
-CREATE TABLE `ac_tax_classes` (
-  `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tax_class_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
---
--- Dumping data for table `tax_class`
---
-
-INSERT INTO `ac_tax_classes` (`tax_class_id`, `date_added`) VALUES (1, now());
-
---
--- DDL for table `tax_class_descriptions`
---
-
-CREATE TABLE `ac_tax_class_descriptions` (
-  `tax_class_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `title` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`tax_class_id`,`language_id`),
-  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`, `description`) VALUES (1, 1, 'Taxable Goods', 'Taxed Products');
-
---
--- DDL for table `tax_rates`
---
-CREATE TABLE `ac_tax_rates` (
-  `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
-  `location_id` int(11) NOT NULL DEFAULT '0',
-  `zone_id` int(11) DEFAULT NULL,
-  `tax_class_id` int(11) NOT NULL,
-  `priority` int(5) NOT NULL DEFAULT '1',
-  `rate` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `rate_prefix` char(1) COLLATE utf8_general_ci NOT NULL DEFAULT '%', -- % or $
-  `threshold_condition` char(2) COLLATE utf8_general_ci NOT NULL, -- '<=', '>=', '==' or '<'
-  `threshold` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `tax_exempt_groups` text DEFAULT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tax_rate_id`),
-  FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL,
-  FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_tax_rates_idx` ON `ac_tax_rates` ( `location_id`, `zone_id`, `tax_class_id` );
---
--- Dumping data for table `tax_rate`
---
-INSERT INTO `ac_tax_rates` (`tax_rate_id`, `location_id`, `tax_class_id`, `priority`, `rate`) VALUES (1, 1, 1, 1, '8.5000');
-
---
--- DDL for table `tax_rate_descriptions`
---
-
-
-CREATE TABLE `ac_tax_rate_descriptions` (
-  `tax_rate_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`tax_rate_id`,`language_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `tax_rate_descriptions`
---
-INSERT INTO `ac_tax_rate_descriptions` (`tax_rate_id`, `language_id`, `description`) VALUES (1, 1, 'Retail 8.5%');
-
---
 -- DDL for table `url_alias`
 --
 CREATE TABLE `ac_url_aliases` (
@@ -10148,35 +10149,13 @@ CREATE TABLE `ac_url_aliases` (
   `query` varchar(255) COLLATE utf8_general_ci NOT NULL,
   `keyword` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `language_id` int(11) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`url_alias_id`)
+  PRIMARY KEY (`url_alias_id`),
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE UNIQUE INDEX `ac_url_aliases_idx`
 ON `ac_url_aliases` ( `keyword`, `language_id`);
 CREATE UNIQUE INDEX `ac_url_aliases_idx2`
 ON `ac_url_aliases` ( `query`, `language_id` );
-
-
---
--- DDL for table `user`
---
-CREATE TABLE `ac_users` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_group_id` int(11) NOT NULL,
-  `username` varchar(20) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `salt` varchar(8) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `password` varchar(40) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `lastname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `email` varchar(96) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `status` int(1) NOT NULL,
-  `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `last_login` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=2;
-
-
 
 --
 -- DDL for table `user_group`
@@ -10199,8 +10178,30 @@ INSERT INTO `ac_user_groups` (`user_group_id`, `name`, `permission`) VALUES
 (1, 'Top Administrator', ''),
 (10, 'Demonstration', '');
 
+--
+-- DDL for table `user`
+--
+CREATE TABLE `ac_users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_group_id` int(11) NOT NULL,
+  `username` varchar(20) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `salt` varchar(8) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `password` varchar(40) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `lastname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `email` varchar(96) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `status` int(1) NOT NULL,
+  `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `last_login` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=2;
 
-
+--
+-- DDL for table `user_notifications`
+--
 CREATE TABLE `ac_user_notifications` (
   `user_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -10210,7 +10211,9 @@ CREATE TABLE `ac_user_notifications` (
   `uri` text NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`,`store_id`,`section`,`sendpoint`,`protocol`)
+  PRIMARY KEY (`user_id`,`store_id`,`section`,`sendpoint`,`protocol`),
+  FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
@@ -10221,7 +10224,8 @@ CREATE TABLE `ac_customer_notifications` (
   `status` int(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`customer_id`,`sendpoint`,`protocol`)
+  PRIMARY KEY (`customer_id`,`sendpoint`,`protocol`),
+  FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 --
@@ -10257,7 +10261,9 @@ CREATE TABLE `ac_weight_class_descriptions` (
   `language_id` int(11) NOT NULL,
   `title` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `unit` varchar(4) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`weight_class_id`,`language_id`)
+  PRIMARY KEY (`weight_class_id`,`language_id`),
+  FOREIGN KEY (`weight_class_id`) REFERENCES `ac_weight_classes`(`weight_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10276,13 +10282,14 @@ INSERT INTO `ac_weight_class_descriptions` (`weight_class_id`, `language_id`, `t
 
 CREATE TABLE `ac_pages` (
   `page_id` int(10) NOT NULL auto_increment,
-  `parent_page_id` int(10) NOT NULL DEFAULT '0',
+  `parent_page_id` int(10) DEFAULT NULL,
   `controller` varchar(100) NOT NULL,
   `key_param` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
   `key_value` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`page_id`)
+  PRIMARY KEY  (`page_id`),
+  FOREIGN KEY (`parent_page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE UNIQUE INDEX `ac_pages_idx`
 ON `ac_pages` ( `page_id`, `controller`, `key_param`, `key_value` );
@@ -10301,11 +10308,9 @@ INSERT INTO `ac_pages` (`page_id`, `parent_page_id`, `controller`, `key_param`, 
 (11, 0, 'pages/account', '', '', now() ),
 (12, 0, 'pages/checkout/cart', '', '', now() );
 
-
 --
 -- DDL for table `page_descriptions`
 --
-
 
 CREATE TABLE `ac_page_descriptions` (
   `page_id` int(10) NOT NULL DEFAULT '0',
@@ -10318,7 +10323,9 @@ CREATE TABLE `ac_page_descriptions` (
   `content` text DEFAULT NULL COMMENT 'translatable', -- Contain the page details if custom content
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`page_id`,`language_id`)
+  PRIMARY KEY (`page_id`,`language_id`),
+  FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `seo_url`, `keywords`, `description`, `content`, `date_added`) VALUES
@@ -10336,11 +10343,12 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 --
 
 CREATE TABLE `ac_contents` (
-    `content_id` int(11) NOT NULL AUTO_INCREMENT,
-	`parent_content_id` int(11) NOT NULL DEFAULT 0,
-    `sort_order` int(3) NOT NULL DEFAULT '0',
-    `status` int(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`content_id`,`parent_content_id`)
+  `content_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_content_id` int(11) DEFAULT NULL,
+  `sort_order` int(3) NOT NULL DEFAULT '0',
+  `status` int(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`content_id`),
+  FOREIGN KEY (`parent_content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -10365,7 +10373,9 @@ CREATE TABLE `ac_content_descriptions` (
   `content` longtext NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`content_id`,`language_id`)
+  PRIMARY KEY (`content_id`,`language_id`),
+  FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_content_descriptions` (`content_id`, `language_id`, `name`, `title`, `description`, `content`, `date_added`)
@@ -10373,12 +10383,7 @@ VALUES
 (1, 1, 'About Us', 'About Us', 'some description', 'text about your store', now() ),
 (2, 1, 'Privacy Policy', 'Privacy Policy', 'some description', 'some text about privacy policy', now()),
 (3, 1, 'Return Policy', 'Return Policy', 'some description', 'some text about return policy', now()),
-(4, 1, 'Shipping', 'Shipping', 'some description', 'some text about shipping', now()),
-
-(1, 9, 'Acerca de Nosotros', 'Acerca de Nosotros', 'alguna descripción', 'texto acerca de su tienda', now() ),
-(2, 9, 'Política de Privacidad', 'Política de Privacidad', 'alguna descripción', 'un texto sobre la política', now()),
-(3, 9, 'Política de devoluciones', 'Política de devoluciones', 'alguna descripción', 'un texto sobre la política de retorno', now()),
-(4, 9, 'Entrega', 'Entrega', 'alguna descripción', 'un texto sobre el envío', now());
+(4, 1, 'Shipping', 'Shipping', 'some description', 'some text about shipping', now());
 
 --
 -- DDL for table `content_to_store`
@@ -10386,7 +10391,9 @@ VALUES
 CREATE TABLE `ac_contents_to_stores` (
   `content_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
-  PRIMARY KEY (`content_id`,`store_id`)
+  PRIMARY KEY (`content_id`,`store_id`),
+  FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -10440,13 +10447,13 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 -- DDL for table `ac_custom_blocks`
 --
 
-
 CREATE TABLE `ac_custom_blocks` (
   `custom_block_id` int(10) NOT NULL auto_increment,
   `block_id` int(10) NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`custom_block_id`, `block_id`)
+  PRIMARY KEY (`custom_block_id`, `block_id`),
+  FOREIGN KEY (`block_id`) REFERENCES `ac_blocks`(`block_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10461,6 +10468,7 @@ CREATE TABLE `ac_custom_lists` (
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`rowid`),
+  FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks`(`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	INDEX `ac_custom_block_id_list_idx` (`custom_block_id` )
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -10479,7 +10487,9 @@ CREATE TABLE `ac_block_descriptions` (
   `content` longtext NOT NULL DEFAULT '', -- Contain the block details if custom content
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`block_description_id`, `custom_block_id`, `language_id`)
+  PRIMARY KEY (`block_description_id`, `custom_block_id`, `language_id`),
+  FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks`(`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10491,7 +10501,8 @@ CREATE TABLE `ac_block_templates` (
   `template` varchar(255) NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`block_id`, `parent_block_id`)
+  PRIMARY KEY  (`block_id`, `parent_block_id`),
+  FOREIGN KEY (`block_id`) REFERENCES `ac_blocks`(`block_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `date_added`) VALUES
@@ -10611,7 +10622,9 @@ INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_nam
 CREATE TABLE `ac_pages_layouts` (
   `layout_id` int(10) NOT NULL,
   `page_id` int(10) NOT NULL,
-  PRIMARY KEY  (`layout_id`,`page_id`)
+  PRIMARY KEY  (`layout_id`,`page_id`),
+  FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
@@ -10638,7 +10651,8 @@ CREATE TABLE `ac_block_layouts` (
   `status` smallint(1) NOT NULL default '0',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`instance_id`)
+  PRIMARY KEY  (`instance_id`),
+  FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE UNIQUE INDEX `ac_block_layouts_idx`
 ON `ac_block_layouts` ( `instance_id`, `layout_id`, `block_id`, `parent_instance_id`,`custom_block_id` );
@@ -10840,16 +10854,6 @@ VALUES
 (2020,	19,	28,	0,	2013,	20,	1,	NOW(),	NOW());
 
 --
--- DDL for table `forms_pages`
---
-CREATE TABLE `ac_pages_forms` (
-  `page_id` int(10) NOT NULL,
-  `form_id` int(10) NOT NULL,
-  PRIMARY KEY  (`form_id`,`page_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
---
 -- DDL for table `forms`
 --
 
@@ -10867,6 +10871,17 @@ CREATE TABLE `ac_forms` (
 INSERT INTO `ac_forms` VALUES (2,'ContactUsFrm','content/contact','content/contact/success',1);
 
 --
+-- DDL for table `forms_pages`
+--
+CREATE TABLE `ac_pages_forms` (
+  `page_id` int(10) NOT NULL,
+  `form_id` int(10) NOT NULL,
+  PRIMARY KEY  (`form_id`,`page_id`),
+  FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
 -- DDL for table `form_descriptions`
 --
 
@@ -10874,7 +10889,9 @@ CREATE TABLE `ac_form_descriptions` (
   `form_id` int(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`form_id`,`language_id`)
+  PRIMARY KEY (`form_id`,`language_id`),
+  FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_form_descriptions` VALUES (2,1,'Contact Us Form');
@@ -10898,6 +10915,7 @@ CREATE TABLE `ac_fields` (
   `status` smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`field_id`),
+  FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `field_id` (`field_id`, `form_id`, `status`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -10919,7 +10937,9 @@ CREATE TABLE `ac_field_descriptions` (
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
   `error_text` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`field_id`,`language_id`)
+  PRIMARY KEY (`field_id`,`language_id`),
+  FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_field_descriptions` (`field_id`, `name`, `error_text`, `language_id`)
@@ -10938,7 +10958,8 @@ CREATE TABLE `ac_field_values` (
   `field_id` int(11) NOT NULL DEFAULT '0',
   `value` text COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`value_id`)
+  PRIMARY KEY (`value_id`),
+  FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10952,6 +10973,7 @@ CREATE TABLE `ac_form_groups` (
   `sort_order` int(3) NOT NULL,
   `status` smallint(1) NOT NULL default '0',
   PRIMARY KEY (`group_id`),
+  FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `group_id` (`group_id`, `form_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -10964,6 +10986,8 @@ CREATE TABLE `ac_fields_groups` (
   `group_id` int(11) NOT NULL,
   `sort_order` int(3) NOT NULL,
   PRIMARY KEY (`field_id`),
+  FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`group_id`) REFERENCES `ac_form_groups`(`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `field_id` (`field_id`, `group_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -10976,7 +11000,9 @@ CREATE TABLE `ac_fields_group_descriptions` (
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`group_id`,`language_id`)
+  PRIMARY KEY (`group_id`,`language_id`),
+  FOREIGN KEY (`group_id`) REFERENCES `ac_form_groups`(`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -11040,6 +11066,7 @@ CREATE TABLE `ac_dataset_properties` (
   `dataset_property_name` varchar(255) NOT NULL,
   `dataset_property_value` varchar(255),
 	PRIMARY KEY (`rowid`),
+	FOREIGN KEY (`dataset_id`) REFERENCES `ac_datasets`(`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `dataset_property_idx` (`dataset_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci  AUTO_INCREMENT=1;
 
@@ -11048,12 +11075,13 @@ CREATE TABLE `ac_dataset_properties` (
 --
 
 CREATE TABLE `ac_dataset_definition` (
-  `dataset_id` int(11) NOT NULL,
   `dataset_column_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dataset_id` int(11) NOT NULL,
   `dataset_column_name` varchar(255) NOT NULL,
   `dataset_column_type` varchar(100) NOT NULL,
   `dataset_column_sort_order` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`dataset_column_id`),
+  FOREIGN KEY (`dataset_id`) REFERENCES `ac_datasets`(`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `dataset_definition_idx` (`dataset_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -11062,11 +11090,12 @@ CREATE TABLE `ac_dataset_definition` (
 --
 
 CREATE TABLE `ac_dataset_column_properties` (
-	`rowid` INT(11) NOT NULL AUTO_INCREMENT,
+  `rowid` INT(11) NOT NULL AUTO_INCREMENT,
   `dataset_column_id` int(11) NOT NULL,
   `dataset_column_property_name` varchar(255) NOT NULL,
   `dataset_column_property_value` varchar(255) DEFAULT NULL,
-	PRIMARY KEY (`rowid`),
+  PRIMARY KEY (`rowid`),
+  FOREIGN KEY (`dataset_column_id`) REFERENCES `ac_dataset_definition`(`dataset_column_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `dataset_column_properties_idx` (`dataset_column_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci  AUTO_INCREMENT=1;
 
@@ -11085,6 +11114,7 @@ CREATE TABLE `ac_dataset_values` (
   `value_sort_order` int(11) NOT NULL AUTO_INCREMENT,
   `row_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`value_sort_order`),
+  FOREIGN KEY (`dataset_column_id`) REFERENCES `ac_dataset_definition`(`dataset_column_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `dataset_values_idx` (`value_integer`,`value_float`,`value_varchar`,`value_boolean`,`row_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 --
@@ -12259,9 +12289,6 @@ VALUES  (25,'install','1');
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (26,'admin','1');
 
-
-
-
 -- ## ADD FILE UPLOADS DATASET
 INSERT INTO `ac_datasets` (`dataset_id`,`dataset_name`,`dataset_key`) VALUES (5,'file_uploads','admin');
 INSERT INTO `ac_dataset_properties` (`dataset_id`,`dataset_property_name`,`dataset_property_value`) VALUES (5,'controller','tool/files');
@@ -12275,6 +12302,29 @@ VALUES  (5,30,'date_added','timestamp',1),
         (5,35,'path','varchar',6);
 
 --
+-- DDL for table `ac_resource_types`
+--
+
+CREATE TABLE `ac_resource_types` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(40) NOT NULL default '',
+  `default_directory` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `default_icon` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `file_types` varchar(40) NOT NULL default '',
+  `access_type`tinyint(1) NOT NULL default '0' COMMENT '0-Public, 1-Secured',
+  PRIMARY KEY (`type_id`),
+  KEY `group_id` (`type_id`, `type_name`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+INSERT INTO `ac_resource_types` (`type_id`, `type_name`, `default_icon`, `default_directory`, `file_types`, `access_type`) VALUES
+(1, 'image', 'icon_resource_image.png', 'image/', '/.+(jpe?g|gif|png|ico|svg|svgz)$/i', 0),
+(2, 'audio', 'icon_resource_audio.png', 'audio/', '/.+(mp3|wav)$/i', 0),
+(3, 'video', 'icon_resource_video.png', 'video/', '/.+(avi|mpg|mov|flv)$/i', 0),
+(4, 'pdf', 'icon_resource_pdf.png', 'pdf_document/', '/.+(pdf)$/i', 0),
+(5, 'archive', 'icon_resource_archive.png', 'archive/', '/.+(zip|rar|gz|7z)$/i', 1),
+(6, 'download', 'icon_resource_download.png', 'download/', '/.+$/i', 1);
+
+--
 -- DDL for table `ac_resource_library`
 --
 
@@ -12283,7 +12333,8 @@ CREATE TABLE `ac_resource_library` (
   `type_id` int(11) NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`resource_id`)
+  PRIMARY KEY (`resource_id`),
+  FOREIGN KEY (`type_id`) REFERENCES `ac_resource_types`(`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=100000;
 
 CREATE INDEX `ac_resource_library_idx` ON `ac_resource_library` ( `resource_id`, `type_id`);
@@ -12291,7 +12342,6 @@ CREATE INDEX `ac_resource_library_idx` ON `ac_resource_library` ( `resource_id`,
 --
 -- DDL for table `ac_resource_descriptions`
 --
-
 
 CREATE TABLE `ac_resource_descriptions` (
   `resource_id` int(10) NOT NULL DEFAULT '0',
@@ -12303,7 +12353,9 @@ CREATE TABLE `ac_resource_descriptions` (
   `resource_code` text DEFAULT NULL,
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`resource_id`,`language_id`)
+  PRIMARY KEY (`resource_id`,`language_id`),
+  FOREIGN KEY (`resource_id`) REFERENCES `ac_resource_library`(`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci ;
 
 CREATE INDEX `ac_resource_descriptions_name_idx` ON `ac_resource_descriptions` ( `resource_id`, `name`);
@@ -12494,30 +12546,6 @@ VALUES
   ( 277,1,'Icon Resource Library', '', '', '', '<i class="fa fa-image"></i>&nbsp;', NOW() ),
   ( 278,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() );
 
-
---
--- DDL for table `ac_resource_types`
---
-
-CREATE TABLE `ac_resource_types` (
-  `type_id` int(11) NOT NULL AUTO_INCREMENT,
-  `type_name` varchar(40) NOT NULL default '',
-  `default_directory` varchar(255) COLLATE utf8_general_ci NOT NULL,
-  `default_icon` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
-  `file_types` varchar(40) NOT NULL default '',
-  `access_type`tinyint(1) NOT NULL default '0' COMMENT '0-Public, 1-Secured',
-  PRIMARY KEY (`type_id`),
-  KEY `group_id` (`type_id`, `type_name`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-INSERT INTO `ac_resource_types` (`type_id`, `type_name`, `default_icon`, `default_directory`, `file_types`, `access_type`) VALUES
-(1, 'image', 'icon_resource_image.png', 'image/', '/.+(jpe?g|gif|png|ico|svg|svgz)$/i', 0),
-(2, 'audio', 'icon_resource_audio.png', 'audio/', '/.+(mp3|wav)$/i', 0),
-(3, 'video', 'icon_resource_video.png', 'video/', '/.+(avi|mpg|mov|flv)$/i', 0),
-(4, 'pdf', 'icon_resource_pdf.png', 'pdf_document/', '/.+(pdf)$/i', 0),
-(5, 'archive', 'icon_resource_archive.png', 'archive/', '/.+(zip|rar|gz|7z)$/i', 1),
-(6, 'download', 'icon_resource_download.png', 'download/', '/.+$/i', 1);
-
 --
 -- DDL for table `ac_resource_map`
 --
@@ -12530,7 +12558,8 @@ CREATE TABLE `ac_resource_map` (
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY ( `resource_id`, `object_name`, `object_id` )
+  PRIMARY KEY ( `resource_id`, `object_name`, `object_id` ),
+  FOREIGN KEY (`resource_id`) REFERENCES `ac_resource_library`(`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE INDEX `ac_resource_map_sorting_idx` ON `ac_resource_map` ( `resource_id`, `sort_order`);
@@ -12549,25 +12578,23 @@ VALUES
 -- DDL For Global Attributes
 --
 
-
 CREATE TABLE `ac_global_attributes` (
-  `attribute_id` 		int(11) NOT NULL AUTO_INCREMENT,
-  `attribute_parent_id`	int(11) NOT NULL DEFAULT '0',
-  `attribute_group_id` 	int(11),
-  `attribute_type_id` 	int(11) NOT NULL,
-  `element_type` 		char(1) NOT NULL DEFAULT 'I',
+  `attribute_id`  int(11) NOT NULL AUTO_INCREMENT,
+  `attribute_parent_id` int(11) DEFAULT NULL,
+  `attribute_group_id`  int(11),
+  `attribute_type_id` int(11) NOT NULL,
+  `element_type`  char(1) NOT NULL DEFAULT 'I',
   -- I - text input, T - Text area, S - Select, M - multivalue select, C - Checkbox, R - radio buttons, U - File upload, H - Hidden, G -Checkbox Group, D - Date, E - time, K - Captcha
-  `sort_order` 			int(3) NOT NULL DEFAULT '0',
-  `required` 			smallint(1) NOT NULL default '0',
-  `settings`			text COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `status` 				smallint(1) NOT NULL default '0',
+  `sort_order`  int(3) NOT NULL DEFAULT '0',
+  `required`  smallint(1) NOT NULL default '0',
+  `settings`  text COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `status`  smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255),
-  PRIMARY KEY (`attribute_id`)
+  PRIMARY KEY (`attribute_id`),
+  FOREIGN KEY (`attribute_parent_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_global_attributes_idx` ON `ac_global_attributes` ( `attribute_parent_id`, `attribute_group_id`, `attribute_type_id` );
-
-
 
 CREATE TABLE `ac_global_attributes_descriptions` (
   `attribute_id` 		int(11) NOT NULL,
@@ -12575,26 +12602,29 @@ CREATE TABLE `ac_global_attributes_descriptions` (
   `name` 				varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
   `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`attribute_id`,`language_id`)
+  PRIMARY KEY (`attribute_id`,`language_id`),
+  FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
 
 CREATE TABLE `ac_global_attributes_values` (
   `attribute_value_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `attribute_id` 		int(11) NOT NULL,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`attribute_value_id`)
+  PRIMARY KEY (`attribute_value_id`),
+  FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_global_attributes_values_idx` ON `ac_global_attributes_values` ( `attribute_id` );
-
 
 CREATE TABLE `ac_global_attributes_value_descriptions` (
   `attribute_value_id` int(11) NOT NULL,
   `attribute_id` int(11) NOT NULL,
   `language_id`	int(11) NOT NULL,
   `value` text COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`attribute_value_id`, `attribute_id`, `language_id` )
+  PRIMARY KEY (`attribute_value_id`, `attribute_id`, `language_id` ),
+  FOREIGN KEY (`attribute_value_id`) REFERENCES `ac_global_attributes_values`(`attribute_value_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -12607,14 +12637,12 @@ CREATE TABLE `ac_global_attributes_groups` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
-
 CREATE TABLE `ac_global_attributes_groups_descriptions` (
   `attribute_group_id` 	int(11) NOT NULL,
   `language_id` 		int(11) NOT NULL,
   `name` 				varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   PRIMARY KEY (`attribute_group_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 
 CREATE TABLE `ac_global_attributes_types` (

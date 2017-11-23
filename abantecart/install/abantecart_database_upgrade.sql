@@ -250,5 +250,84 @@ ALTER TABLE `ac_tax_class_descriptions` ADD FOREIGN KEY (`language_id`) REFERENC
 ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_tax_rates` CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
+UPDATE `ac_tax_rates` SET `zone_id` = NULL WHERE `zone_id` = 0;
 ALTER TABLE `ac_tax_rates` ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL;
+
+ALTER TABLE `ac_tax_rate_descriptions` ADD FOREIGN KEY (`tax_rate_id`) REFERENCES `ac_tax_rates`(`tax_rate_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_tax_rate_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_url_aliases` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_users` ADD FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`);
+
+ALTER TABLE `ac_user_notifications` ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_user_notifications` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_customer_notifications` ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_weight_class_descriptions` ADD FOREIGN KEY (`weight_class_id`) REFERENCES `ac_weight_classes`(`weight_class_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_weight_class_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_pages` CHANGE COLUMN `parent_page_id` `parent_page_id` int(10) DEFAULT NULL;
+UPDATE `ac_pages` SET `parent_page_id` = NULL WHERE `parent_page_id` = 0;
+ALTER TABLE `ac_pages` ADD FOREIGN KEY (`parent_page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_page_descriptions` ADD FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_page_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_contents` DROP PRIMARY KEY, ADD PRIMARY KEY(`content_id`);
+ALTER TABLE `ac_contents` CHANGE COLUMN `parent_content_id` `parent_content_id` int(11) DEFAULT NULL;
+UPDATE `ac_contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = 0;
+ALTER TABLE `ac_contents` ADD FOREIGN KEY (`parent_content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_content_descriptions` ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_content_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_contents_to_stores` ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_contents_to_stores` ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_custom_blocks` ADD FOREIGN KEY (`block_id`) REFERENCES `ac_blocks`(`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_custom_lists` ADD FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks`(`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_block_descriptions` ADD FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks`(`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_block_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_block_templates` ADD FOREIGN KEY (`block_id`) REFERENCES `ac_blocks`(`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_pages_layouts` ADD FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_pages_layouts` ADD FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--ALTER TABLE `ac_block_layouts` ADD FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_pages_forms` ADD FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_pages_forms` ADD FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_form_descriptions` ADD FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_form_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_fields` ADD FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_field_descriptions` ADD FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_field_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_field_values` ADD FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_form_groups` ADD FOREIGN KEY (`form_id`) REFERENCES `ac_forms`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_fields_groups` ADD FOREIGN KEY (`field_id`) REFERENCES `ac_fields`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_fields_groups` ADD FOREIGN KEY (`group_id`) REFERENCES `ac_form_groups`(`group_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_fields_group_descriptions` ADD FOREIGN KEY (`group_id`) REFERENCES `ac_form_groups`(`group_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_fields_group_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_dataset_properties` ADD FOREIGN KEY (`dataset_id`) REFERENCES `ac_datasets`(`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_dataset_definition` ADD FOREIGN KEY (`dataset_id`) REFERENCES `ac_datasets`(`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_dataset_column_properties` ADD FOREIGN KEY (`dataset_column_id`) REFERENCES `ac_dataset_definition`(`dataset_column_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_dataset_values` ADD FOREIGN KEY (`dataset_column_id`) REFERENCES `ac_dataset_definition`(`dataset_column_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_resource_library` ADD FOREIGN KEY (`type_id`) REFERENCES `ac_resource_types`(`type_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_resource_descriptions` ADD FOREIGN KEY (`resource_id`) REFERENCES `ac_resource_library`(`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_resource_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_resource_map` ADD FOREIGN KEY (`resource_id`) REFERENCES `ac_resource_library`(`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes` CHANGE COLUMN `attribute_parent_id` `attribute_parent_id` int(11) DEFAULT NULL;
+UPDATE `ac_global_attributes` SET `attribute_parent_id` = NULL WHERE `attribute_parent_id` = 0;
+ALTER TABLE `ac_global_attributes` ADD FOREIGN KEY (`attribute_parent_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE `ac_global_attributes_descriptions` ADD FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_global_attributes_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_global_attributes_values` ADD FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_global_attributes_value_descriptions` ADD FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_global_attributes_value_descriptions` ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+--ALTER TABLE `ac_global_attributes_value_descriptions` ADD FOREIGN KEY (`attribute_value_id`) REFERENCES `ac_global_attributes_values`(`attribute_value_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
