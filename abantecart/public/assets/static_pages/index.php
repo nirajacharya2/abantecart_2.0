@@ -86,10 +86,10 @@ if($from_admin){
 	$t ='';
 	$count = 0;
 	$log_contents_end = "Log file tail: \n\n";
-	$log_handle = fopen(DIR_APP . "var/logs/error.txt", "r");
+	$log_handle = fopen(DIR_APP . "system/logs/error.txt", "r");
 	//read 100 lines backwards from the eof or less 
 	$max_lines = 100;
-	$max_bytes = filesize(DIR_APP . "var/logs/error.txt");
+	$max_bytes = filesize(DIR_APP . "system/logs/error.txt");
 	$lines = array();
 	while ($count < $max_lines) {
 		//read one line back
