@@ -19,12 +19,13 @@
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
 
+use abc\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\helper\AHelperUtils;
 use abc\Translator;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ALanguageManager extends ALanguage{
@@ -40,7 +41,7 @@ class ALanguageManager extends ALanguage{
 	 */
 	public function __construct($registry, $code = '', $section = ''){
 		parent::__construct($registry, $code, $section);
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class ALanguageManager');
 		}
 	}

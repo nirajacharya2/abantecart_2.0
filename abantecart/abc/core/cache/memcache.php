@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\cache;
+use abc\ABC;
 use abc\lib\AException;
 use Memcache;
 use stdClass;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 //include abstract cache storage driver class
@@ -67,7 +68,11 @@ class ACacheDriverMemcache extends ACacheDriver{
 	 * @since   1.2.7
 	 */
 	public function __construct($expiration, $lock_time = 0){
-
+		$this->hostname = ABC::env('CACHE_HOST');
+		$this->port = ABC::env('CACHE_PORT');
+		$this->secret = ABC::env('CACHE_SECRET');
+		$this->persistent = ABC::env('CACHE_PERSISTENT');
+		$this->compress_level = ABC::env('CACHE_COMPRESS_LEVEL');
 
 		if (!$lock_time){
 			$lock_time = 10;

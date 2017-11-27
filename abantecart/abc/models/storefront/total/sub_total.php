@@ -21,8 +21,8 @@ namespace abc\models\storefront;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelTotalSubTotal extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {

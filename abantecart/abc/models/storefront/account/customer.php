@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
@@ -28,8 +29,8 @@ use abc\lib\AMessage;
 use abc\core\engine\AView;
 use ReCaptcha\ReCaptcha;
 
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * Class ModelAccountCustomer
@@ -591,7 +592,7 @@ class ModelAccountCustomer extends Model {
       		$this->error['lastname'] = $this->language->get('error_lastname');
     	}
 
-    	if ((mb_strlen($data['email']) > 96) || (!preg_match(EMAIL_REGEX_PATTERN, $data['email']))) {
+    	if ((mb_strlen($data['email']) > 96) || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email']))) {
       		$this->error['email'] = $this->language->get('error_email');
     	}
 
@@ -696,7 +697,7 @@ class ModelAccountCustomer extends Model {
       		$this->error['lastname'] = $this->language->get('error_lastname');
     	}
 
-    	if ((mb_strlen($data['email']) > 96) || (!preg_match(EMAIL_REGEX_PATTERN, $data['email']))) {
+    	if ((mb_strlen($data['email']) > 96) || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email']))) {
       		$this->error['email'] = $this->language->get('error_email');
     	}
 
@@ -756,7 +757,7 @@ class ModelAccountCustomer extends Model {
 			$this->error['lastname'] = $this->language->get('error_lastname');
 		}
 
-		if ((mb_strlen($data['email']) > 96) || (!preg_match(EMAIL_REGEX_PATTERN, $data['email']))) {
+		if ((mb_strlen($data['email']) > 96) || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email']))) {
 			$this->error['email'] = $this->language->get('error_email');
 		}
 		

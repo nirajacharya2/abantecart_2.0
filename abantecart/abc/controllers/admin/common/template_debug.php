@@ -18,9 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonTemplateDebug extends AController {
 	public function main() {
@@ -36,14 +37,14 @@ class ControllerCommonTemplateDebug extends AController {
 		$tmpl_data['name'] = $block_details['block_txt_id'];
 		$tmpl_data['tpl_path'] = $args['block_tpl'];
 		$tmpl_data['controller'] = $block_details['controller'];
-		$tmpl_data['controller_path'] = str_replace(DIR_ROOT . '/', '', $args['block_controller']);
+		$tmpl_data['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['block_controller']);
 		$tmpl_data['parent_block'] = $parent_block['block_txt_id'];
 		$tmpl_data['parent'] = array();
 		$tmpl_data['parent']['id'] = $parent_block['instance_id'];
 		$tmpl_data['parent']['name'] = $parent_block['block_txt_id'];
 		$tmpl_data['parent']['tpl_path'] = $args['parent_tpl'];
 		$tmpl_data['parent']['controller'] = $parent_block['controller'];
-		$tmpl_data['parent']['controller_path'] = str_replace(DIR_ROOT . '/', '', $args['parent_controller']);
+		$tmpl_data['parent']['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['parent_controller']);
 
 		$this->view->batchAssign($tmpl_data);
 		$this->processTemplate('common/template_debug.tpl');

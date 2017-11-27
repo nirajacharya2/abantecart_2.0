@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -52,7 +53,7 @@ class AOrderManager extends AOrder{
 			$this->order_id = (int)$order_id;
 		}
 		parent::__construct($this->registry, $this->order_id);
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access package manager');
 		}
 	}
@@ -66,7 +67,7 @@ class AOrderManager extends AOrder{
 	 * Consideration: This section needs to be simplified with SF process call.
 	 */
 	public function recalcTotals($skip_totals = array (), $new_totals = array ()){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access order recalculation');
 		}
 		if (!AHelperUtils::has_value($this->order_id)){

@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -90,7 +91,7 @@ class ControllerPagesToolUpdater extends AController{
 
 			$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));
 			$mp_params = '?rt=account/authenticate&return_url=' . $return_url;
-			$mp_params .= '&store_id=' . UNIQUE_ID;
+			$mp_params .= '&store_id=' . ABC::env('UNIQUE_ID');
 			$mp_params .= '&store_url=' . HTTP_SERVER;
 			$mp_params .= '&store_version=' . VERSION;
 			$this->data['amp_connect_url'] = $this->model_tool_mp_api->getMPURL() . $mp_params;

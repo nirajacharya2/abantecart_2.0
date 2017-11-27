@@ -12,43 +12,46 @@ require 'abc_base.php';
  * @package abc
   */
 class ABC extends ABCBase{
+
+	protected static $env = [];
 	/**
 	 * ABC constructor.
 	 * @param array $config - see folder /abc/config/
 	 */
 	public function __construct($config){
-		//define constants from on config variable
-		//NOTE: do not convert this into loop. IDE code-inspector stops to see them!
-		define('APP_NAME', $config['APP_NAME']);
-		define('MIN_PHP_VERSION', $config['MIN_PHP_VERSION']);
-		define('DIR_ROOT', $config['DIR_ROOT']);
-		define('DIR_APP', $config['DIR_APP']);
-		define('DIR_PUBLIC', $config['DIR_PUBLIC']);
-		define('SEO_URL_SEPARATOR', $config['SEO_URL_SEPARATOR']);
-		define('EMAIL_REGEX_PATTERN', $config['EMAIL_REGEX_PATTERN']);
-		define('POSTFIX_OVERRIDE', $config['POSTFIX_OVERRIDE']);
-		define('POSTFIX_PRE', $config['POSTFIX_PRE']);
-		define('POSTFIX_POST', $config['POSTFIX_POST']);
-		define('APP_CHARSET', $config['APP_CHARSET']);
-		define('DB_DRIVER', $config['DB_DRIVER']);
-		define('DB_HOSTNAME', $config['DB_HOSTNAME']);
-		define('DB_USERNAME', $config['DB_USERNAME']);
-		define('DB_PASSWORD', $config['DB_PASSWORD']);
-		define('DB_DATABASE', $config['DB_DATABASE']);
-		define('DB_PREFIX', $config['DB_PREFIX']);
-		define('DB_CHARSET', $config['DB_CHARSET']);
-		define('DB_COLLATION', $config['DB_COLLATION']);
-		define('SERVER_NAME', $config['SERVER_NAME']);
-		define('ADMIN_PATH', $config['ADMIN_PATH']);
-		define('CACHE_DRIVER', $config['CACHE_DRIVER']);
-		define('UNIQUE_ID', $config['UNIQUE_ID']);
+		//put config into environment
+		self::env($config);
+	}
+
+	/**
+	 * Static method for saving environment values into static property
+	 * @param $name
+	 * @param null $value
+	 * @return null
+	 */
+	public static function env($name, $value = null){
+		//if need to get
+		if($value === null && !is_array($name)) {
+			return array_key_exists($name, static::$env) ? self::$env[$name] : null;
+		}
+		// if need to set batch of values
+		else{
+			if(is_array($name)){
+				static::$env = array_merge(static::$env,$name);
+			}else {
+				//when set one value
+				if (!array_key_exists($name, static::$env)) {
+					static::$env[$name] = $value;
+				}
+			}
+		}
 	}
 
 	public function run(){
 		$this->_validate_app();
 
 		// New Installation
-		if (!defined('DB_DATABASE')) {
+		if (!self::env('DB_DATABASE')) {
 			header('Location: install/index.php');
 			exit;
 		}
@@ -65,7 +68,7 @@ class ABC extends ABCBase{
 		// Output
 		$registry->get('response')->output();
 
-		if( IS_ADMIN === true && $registry->get('config')->get('config_maintenance') && $registry->get('user')->isLogged() ) {
+		if( self::env('IS_ADMIN') === true && $registry->get('config')->get('config_maintenance') && $registry->get('user')->isLogged() ) {
 			$user_id = $registry->get('user')->getId();
 			AHelperUtils::startStorefrontSession($user_id);
 		}
@@ -87,8 +90,8 @@ class ABC extends ABCBase{
 
 		// Required PHP Version
 
-		if (version_compare(phpversion(), MIN_PHP_VERSION, '<') == TRUE) {
-			exit( MIN_PHP_VERSION . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
+		if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<') == TRUE) {
+			exit( self::env('MIN_PHP_VERSION') . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
 		}
 
 		if (!function_exists('simplexml_load_file')) {

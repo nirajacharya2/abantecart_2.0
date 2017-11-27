@@ -22,8 +22,8 @@ use abc\core\engine\AController;
 use abc\core\helper\AHelperSystemCheck;
 use abc\core\engine\AResource;
 
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonHead extends AController {
 	public function main() {

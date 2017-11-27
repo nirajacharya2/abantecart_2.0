@@ -19,12 +19,13 @@
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
 
+use abc\ABC;
 use abc\lib\ADebug;
 use abc\lib\AError;
 use abc\lib\AWarning;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -91,7 +92,7 @@ class AView{
 		$this->registry = $registry;
 		$this->has_extensions = $this->registry->has('extensions');
 		if ($this->registry->get('config')) {
-			$this->default_template = IS_ADMIN ? $this->registry->get('config')->get('admin_template') : $this->registry->get('config')->get('config_storefront_template');
+			$this->default_template = ABC::env('IS_ADMIN') ? $this->registry->get('config')->get('admin_template') : $this->registry->get('config')->get('config_storefront_template');
 		}
 		$this->data['template_dir'] = RDIR_TEMPLATE;
 		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . 'common/';
@@ -320,7 +321,7 @@ class AView{
 
 		if (is_file($file)) {
 			$content = '';
-			$file_pre = str_replace('.tpl', POSTFIX_PRE . '.tpl', $filename);
+			$file_pre = str_replace('.tpl', ABC::env('POSTFIX_PRE') . '.tpl', $filename);
 			if ($result = $this->extensions->getAllPrePostTemplates($file_pre)) {
 				foreach ($result as $item) {
 					$content .= $this->_fetch($item['file']);
@@ -329,7 +330,7 @@ class AView{
 
 			$content .= $this->_fetch($file);
 
-			$file_post = str_replace('.tpl', POSTFIX_POST . '.tpl', $filename);
+			$file_post = str_replace('.tpl', ABC::env('POSTFIX_POST') . '.tpl', $filename);
 			if ($result = $this->extensions->getAllPrePostTemplates($file_post)) {
 				foreach ($result as $item) {
 					$content .= $this->_fetch($item['file']);
@@ -602,7 +603,7 @@ class AView{
 		$match = 'original';
 		$dir_assets = $extension_txt_id ? DIRNAME_ASSETS . DIRNAME_EXTENSIONS . $extension_txt_id . '/' : DIRNAME_ASSETS;
 
-		if (IS_ADMIN) {
+		if (ABC::env('IS_ADMIN')) {
 			if (is_file($path . $template . '/' . DIRNAME_ADMIN . $filename)) {
 				$ret_path = $path . $template . '/' . DIRNAME_ADMIN . $filename;
 				if ($mode == 'relative') {
@@ -616,8 +617,8 @@ class AView{
 						$match = 'default';
 					}
 				} else {
-					if (is_file(DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename)) {
-						$ret_path = DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
 						if ($mode == 'relative') {
 							$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
 							$match = 'default';
@@ -640,8 +641,8 @@ class AView{
 					}
 				} //check resource in assets directory
 				else {
-					if (is_file(DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename)) {
-						$ret_path = DIR_PUBLIC . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
 						if ($mode == 'relative') {
 							$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
 						}

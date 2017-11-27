@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AConfig;
 use abc\lib\AWarning;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 
@@ -183,7 +184,7 @@ abstract class AController{
 	 */
 	public function html_cache(){
 		//check is HTML cache is enabled and it is storefront
-		if (!$this->config->get('config_html_cache') || IS_ADMIN) {
+		if (!$this->config->get('config_html_cache') || ABC::env('IS_ADMIN')) {
 			return false;
 		}
 		//build HTML cache key if not yet built for this controller. 
@@ -403,7 +404,7 @@ abstract class AController{
 		if ($this->config) {
 			if ($this->config->get('storefront_template_debug')) {
 				// storefront enabling
-				if (!IS_ADMIN && !isset($this->session->data['tmpl_debug']) && isset($this->request->get['tmpl_debug'])) {
+				if (!ABC::env('IS_ADMIN') && !isset($this->session->data['tmpl_debug']) && isset($this->request->get['tmpl_debug'])) {
 					$this->session->data['tmpl_debug'] = isset($this->request->get['tmpl_debug']);
 				}
 
@@ -477,7 +478,7 @@ abstract class AController{
 	}
 
 	public function can_access(){
-		if (!defined('IS_ADMIN') || !IS_ADMIN) {
+		if (!ABC::env('IS_ADMIN')) {
 			return null;
 		}
 

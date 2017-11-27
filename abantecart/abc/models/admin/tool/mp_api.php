@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\AConnect;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-    header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -217,7 +218,7 @@ class ModelToolMPAPI extends Model {
 			return false;
 		}
 
-		$GET['store_id'] = UNIQUE_ID;
+		$GET['store_id'] = ABC::env('UNIQUE_ID');
 		$GET['store_url'] = HTTP_SERVER;
 		$GET['store_version'] = VERSION;
 		$GET['language_code'] = $this->request->cookie ['language'];

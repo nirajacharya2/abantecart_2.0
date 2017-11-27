@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ABackup;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 if (defined('IS_DEMO') && IS_DEMO) {
@@ -232,7 +233,7 @@ class ControllerPagesToolBackup extends AController {
 						'value' => 1
 				));
 
-		$this->data['entry_compress_backup'] = sprintf($this->language->get('entry_compress_backup'), str_replace(DIR_ROOT,'',DIR_BACKUP) ,str_replace(DIR_ROOT.'/','',DIR_BACKUP));
+		$this->data['entry_compress_backup'] = sprintf($this->language->get('entry_compress_backup'), str_replace(ABC::env('DIR_ROOT'),'',DIR_BACKUP) ,str_replace(ABC::env('DIR_ROOT').'/','',DIR_BACKUP));
 
 		$this->data['form']['build_task_url'] = $this->html->getSecureURL('r/tool/backup/buildTask');
 		$this->data['form']['complete_task_url'] = $this->html->getSecureURL('r/tool/backup/complete');
@@ -294,7 +295,7 @@ class ControllerPagesToolBackup extends AController {
 						'style' => 'button1',
 				));
 
-		$this->data['text_fail_note'] = sprintf($this->language->get('text_fail_note'), DIR_APP.'system/backup');
+		$this->data['text_fail_note'] = sprintf($this->language->get('text_fail_note'), ABC::env('DIR_APP').'system/backup');
 
 		$this->view->batchAssign($this->data);
 		$this->view->assign('help_url', $this->gen_help_url());

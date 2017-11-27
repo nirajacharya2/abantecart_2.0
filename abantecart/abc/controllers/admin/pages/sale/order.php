@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -25,8 +26,8 @@ use abc\core\engine\AResource;
 use abc\lib\AEncryption;
 use abc\lib\AOrderManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesSaleOrder extends AController{
@@ -493,9 +494,9 @@ class ControllerPagesSaleOrder extends AController{
 					$file_settings = unserialize($option['settings']);
 					$filename = $value;
 					if (AHelperUtils::has_value($file_settings['directory'])) {
-						$file = DIR_APP . 'system/uploads/' . $file_settings['directory'] . '/' . $filename;
+						$file = ABC::env('DIR_APP') . 'system/uploads/' . $file_settings['directory'] . '/' . $filename;
 					} else {
-						$file = DIR_APP . 'system/uploads/' . $filename;
+						$file = ABC::env('DIR_APP') . 'system/uploads/' . $filename;
 					}
 
 					if (is_file($file)) {

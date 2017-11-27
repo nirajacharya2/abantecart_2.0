@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
 use PharData;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * @property  AExtensionManager $extension_manager
@@ -52,7 +53,7 @@ class APackageManager{
 	public $dataSize = 0;
 
 	public function __construct(){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access package manager');
 		}
 		/**
@@ -170,7 +171,7 @@ class APackageManager{
 	 */
 	public function backupPrevious($extension_id = ''){
 
-		$old_path = !$extension_id ? DIR_ROOT . '/' . $this->session->data['package_info']['dst_dir'] : DIR_APP_EXT;
+		$old_path = !$extension_id ? ABC::env('DIR_ROOT') . '/' . $this->session->data['package_info']['dst_dir'] : DIR_APP_EXT;
 		$package_id = !$extension_id ? $this->session->data['package_info']['package_id'] : $extension_id;
 		if (!$package_id){
 			return false;
@@ -217,7 +218,7 @@ class APackageManager{
 	}
 
 	public function replaceCoreFiles(){
-		$corefiles = $this->session->data['package_info']['package_content']['core'];
+		$core_files = $this->session->data['package_info']['package_content']['core'];
 		if ($this->session->data['package_info']['ftp']){
 			$ftp_user = $this->session->data['package_info']['ftp_user'];
 			$ftp_password = $this->session->data['package_info']['ftp_password'];
@@ -228,7 +229,7 @@ class APackageManager{
 			ftp_login($fconnect, $ftp_user, $ftp_password);
 			ftp_pasv($fconnect, true);
 
-			foreach ($corefiles as $core_filename){
+			foreach ($core_files as $core_filename){
 				$remote_file = pathinfo($this->session->data['package_info']['ftp_path'] . $core_filename, PATHINFO_BASENAME);
 				$remote_dir = pathinfo($this->session->data['package_info']['ftp_path'] . $core_filename, PATHINFO_DIRNAME) . '/';
 				$src_dir = (string)$this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_dir'] . '/code/' . $core_filename;
@@ -250,12 +251,12 @@ class APackageManager{
 			}// end of loop
 			ftp_close($fconnect);
 		} else{
-			foreach ($corefiles as $core_filename){
-				if (is_file(DIR_ROOT . '/' . $core_filename)){
-					unlink(DIR_ROOT . '/' . $core_filename);
+			foreach ($core_files as $core_filename){
+				if (is_file(ABC::env('DIR_ROOT') . '/' . $core_filename)){
+					unlink(ABC::env('DIR_ROOT') . '/' . $core_filename);
 				}
 				//check is target directory exists before copying
-				$dir = pathinfo(DIR_ROOT . '/' . $core_filename, PATHINFO_DIRNAME);
+				$dir = pathinfo(ABC::env('DIR_ROOT') . '/' . $core_filename, PATHINFO_DIRNAME);
 				if (!is_dir($dir)){
 					mkdir($dir, 0777, true);
 				}
@@ -268,13 +269,13 @@ class APackageManager{
 					continue;
 				}
 
-				$result = rename($this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_dir'] . '/code/' . $core_filename, DIR_ROOT . '/' . $core_filename);
+				$result = rename($this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_dir'] . '/code/' . $core_filename, ABC::env('DIR_ROOT') . '/' . $core_filename);
 				if ($result){
 					// for index.php do not set 777 permissions because hosting providers will ban it
 					if (pathinfo($core_filename, PATHINFO_BASENAME) == 'index.php'){
-						chmod(DIR_ROOT . '/' . $core_filename, 0755);
+						chmod(ABC::env('DIR_ROOT') . '/' . $core_filename, 0755);
 					} else{
-						chmod(DIR_ROOT . '/' . $core_filename, 0777);
+						chmod(ABC::env('DIR_ROOT') . '/' . $core_filename, 0777);
 					}
 
 					$install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
@@ -545,13 +546,13 @@ class APackageManager{
 
 	/**
 	 * @param $fconnect
-	 * @param $ftpbasedir
-	 * @param $ftpath
+	 * @param $ftp_base_dir
+	 * @param $ftp_path
 	 * @return bool
 	 */
-	private function ftp_mksubdirs($fconnect, $ftpbasedir, $ftpath){
-		@ftp_chdir($fconnect, $ftpbasedir); // /var/www/uploads
-		$parts = explode('/', $ftpath); // 2013/06/11/username
+	private function ftp_mksubdirs($fconnect, $ftp_base_dir, $ftp_path){
+		@ftp_chdir($fconnect, $ftp_base_dir); // /var/www/uploads
+		$parts = explode('/', $ftp_path); // 2013/06/11/username
 		foreach ($parts as $part){
 			if (!@ftp_chdir($fconnect, $part)){
 				ftp_mkdir($fconnect, $part);
@@ -852,7 +853,7 @@ class APackageManager{
 	 * @return string
 	 */
 	public function getTempDir(){
-		$tmp_dir = DIR_APP . 'system/temp';
+		$tmp_dir = ABC::env('DIR_APP') . 'system/temp';
 		$tmp_install_dir = $tmp_dir . '/install';
 		//try to create tmp dir if not yet created and install.
 		if (AHelperUtils::is_writable_dir($tmp_dir) && AHelperUtils::is_writable_dir($tmp_install_dir)){
@@ -864,7 +865,7 @@ class APackageManager{
 			$dir = sys_get_temp_dir() . '/abantecart_install/';
 
 			if (!is_writable($dir)){
-				$error_text = 'Error: php tried to use directory ' . DIR_APP . "system/temp/install" . ' but it is non-writable. Temporary php-directory ' . $dir . ' is non-writable too! Please change permissions one of them.' . "\n";
+				$error_text = 'Error: php tried to use directory ' . ABC::env('DIR_APP') . "system/temp/install" . ' but it is non-writable. Temporary php-directory ' . $dir . ' is non-writable too! Please change permissions one of them.' . "\n";
 				$this->error .= $error_text;
 				$this->log->write($error_text);
 			}

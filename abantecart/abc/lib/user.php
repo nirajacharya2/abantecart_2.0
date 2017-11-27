@@ -18,10 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -199,7 +200,7 @@ final class AUser{
 	 * @return bool|int
 	 */
 	public function isLogged(){
-		if (IS_ADMIN && $this->request->get['token'] != $this->session->data['token']){
+		if (ABC::env('IS_ADMIN') && $this->request->get['token'] != $this->session->data['token']){
 			return false;
 		}
 		return $this->user_id;

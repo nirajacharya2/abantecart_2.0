@@ -21,6 +21,7 @@
 ------------------------------------------------------------------------------  
 */
 namespace abantecart\install\model;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\ACache;
@@ -117,8 +118,8 @@ class ModelInstall extends Model{
 	 * @return bool
 	 */
 	public function validateRequirements(){
-		if (version_compare(phpversion(), MIN_PHP_VERSION, '<') == true) {
-			$this->errors['warning'] = 'Warning: You need to use PHP ' . MIN_PHP_VERSION . ' or above for AbanteCart to work!';
+		if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
+			$this->errors['warning'] = 'Warning: You need to use PHP ' . ABC::env('MIN_PHP_VERSION') . ' or above for AbanteCart to work!';
 		}
 
 		if (!ini_get('file_uploads')) {
@@ -182,7 +183,7 @@ class ModelInstall extends Model{
 			}
 		}
 
-		if (!is_writable(DIR_APP . 'downloads')) {
+		if (!is_writable(ABC::env('DIR_APP') . 'downloads')) {
 			$this->errors['warning'] = 'Warning: Download directory needs to be writable for AbanteCart to work!';
 		}
 
@@ -210,7 +211,7 @@ class ModelInstall extends Model{
 			return false;
 		}
 		if (!defined('DIR_CONFIG')) {
-			define('DIR_CONFIG', DIR_APP . 'system/config/');
+			define('DIR_CONFIG', ABC::env('DIR_APP') . 'system/config/');
 		}
 
 		$result = true;
@@ -496,8 +497,8 @@ EOD;
 
 	public function buildAssets($data = array()){
 		//process storefront assets
-		$this->_copyDir(DIR_APP.'templates/default/storefront/assets', DIR_ASSETS.'templates/default/storefront');
-		$this->_copyDir(DIR_APP.'templates/default/admin/assets', DIR_ASSETS.'templates/default/admin');
+		$this->_copyDir(ABC::env('DIR_APP').'templates/default/storefront/assets', DIR_ASSETS.'templates/default/storefront');
+		$this->_copyDir(ABC::env('DIR_APP').'templates/default/admin/assets', DIR_ASSETS.'templates/default/admin');
 		return true;
 	}
 	protected function _copyDir($src, $dest){

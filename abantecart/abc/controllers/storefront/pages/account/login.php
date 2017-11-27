@@ -23,8 +23,8 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AEncryption;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesAccountLogin extends AController{

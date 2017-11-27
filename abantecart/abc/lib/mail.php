@@ -20,8 +20,8 @@
 namespace abc\lib;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 final class AMail{

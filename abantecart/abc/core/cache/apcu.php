@@ -18,8 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\cache;
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+use abc\ABC;
+
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 //include abstract cache storage driver class
@@ -37,7 +39,7 @@ define('CACHE_SECRET', 'your_secret_key');
  */
 class ACacheDriverAPCu extends ACacheDriver{
 
-	protected $secret = CACHE_SECRET;
+	protected $secret;
 
 	/**
 	 * Constructor
@@ -48,6 +50,7 @@ class ACacheDriverAPCu extends ACacheDriver{
 	 * @since   1.2.7
 	 */
 	public function __construct($expiration, $lock_time = 0){
+		$this->secret = ABC::env('CACHE_SECRET');
 		if (!$lock_time) {
 			$lock_time = 10;
 		}

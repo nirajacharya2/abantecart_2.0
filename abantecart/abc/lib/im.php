@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -257,7 +258,7 @@ class AIM{
 	public function send($sendpoint, $msg_details = array ()){
 		$this->load->language('common/im');
 		$customer_im_settings = array ();
-		if (IS_ADMIN !== true){
+		if (!ABC::env('IS_ADMIN')){
 			$sendpoints_list = $this->sendpoints;
 			//do have storefront sendpoint? 
 			if (!empty($sendpoints_list[$sendpoint][0])){
@@ -509,7 +510,7 @@ class AIM{
 	}
 
 	private function _get_admin_im_uri($sendpoint, $protocol){
-		$section = IS_ADMIN === true ? 1 : 0;
+		$section = ABC::env('IS_ADMIN') ? 1 : 0;
 		$output = array ();
 		$sql = "SELECT un.*
 				FROM " . $this->db->table('user_notifications') . " un
@@ -596,7 +597,7 @@ final class AMailIM{
 		$emails = explode(',', $emails);
 		foreach ($emails as $email){
 			$email = trim($email);
-			if ((mb_strlen($email) > 96) || (!preg_match(EMAIL_REGEX_PATTERN, $email))){
+			if ((mb_strlen($email) > 96) || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $email))){
 				$this->errors[] = sprintf($this->language->get('im_error_mail_address'), $email);
 			}
 		}

@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\ADispatcher;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -66,7 +67,7 @@ class ATaskManager{
 		$this->mode = in_array($mode, array('html', 'ajax', 'cli')) ? $mode : 'html';
 		$this->registry = Registry::getInstance();
 		// who is initiator of process, admin or storefront
-		$this->starter = IS_ADMIN === true ? 1 : 0;
+		$this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
 
 		$this->task_log = new ALog(DIR_LOGS . 'task_log.txt');
 	}

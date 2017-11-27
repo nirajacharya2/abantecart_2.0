@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\AAttribute;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -35,7 +36,7 @@ class AAttribute_Manager extends AAttribute{
 
 	public function __construct($attribute_type = '', $language_id = 0){
 		parent::__construct($attribute_type, $language_id);
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AAttribute_Manager');
 		}
 	}

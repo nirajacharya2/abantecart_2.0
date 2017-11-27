@@ -20,13 +20,14 @@
 
 namespace abc\core\engine;
 
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
 use abc\lib\AWarning;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -111,11 +112,11 @@ final class ADispatcher{
 		$path_nodes = explode('/', $rt);
 
 		//looking for controller in admin/storefront section
-		if (IS_ADMIN === true) {
-			$dir_app = DIR_APP . 'controllers/admin/';
+		if (ABC::env('IS_ADMIN') === true) {
+			$dir_app = ABC::env('DIR_APP') . 'controllers/admin/';
 			$namespace = '\abc\controllers\admin\\';
 		} else {
-			$dir_app = DIR_APP . 'controllers/storefront/';
+			$dir_app = ABC::env('DIR_APP') . 'controllers/storefront/';
 			$namespace = '\abc\controllers\storefront\\';
 		}
 
@@ -169,7 +170,10 @@ final class ADispatcher{
 			}
 			$pathfound = true;
 		}
-
+		if(!$pathfound) {
+			var_dump($rt);
+			exit($dir_app);
+		}
 		return $pathfound;
 	}
 
@@ -253,7 +257,7 @@ final class ADispatcher{
 		}
 
 		//check for controller.pre
-		$output_pre = $this->dispatchPrePost($this->controller . POSTFIX_PRE);
+		$output_pre = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_PRE'));
 
 		require_once($this->file);
 		/**
@@ -322,7 +326,7 @@ final class ADispatcher{
 			$controller->finalize();
 
 			//check for controller.pre
-			$output_post = $this->dispatchPrePost($this->controller . POSTFIX_POST);
+			$output_post = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_POST'));
 
 			//add pre and post controllers output
 			$this->response->setOutput($output_pre . $this->response->getOutput() . $output_post);

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -25,8 +26,8 @@ use abc\lib\AError;
 use abc\lib\APackageManager;
 use DOMNode;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-    header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 if (defined('IS_DEMO') && IS_DEMO) {
@@ -381,7 +382,7 @@ class ControllerPagesToolPackageInstaller extends AController {
 				$url = "/?option=com_abantecartrepository&format=raw";
 			}
 			$url .= "&mp_token=".$mp_token;
-			$url .= "&store_id=" . UNIQUE_ID;
+			$url .= "&store_id=" . ABC::env('UNIQUE_ID');
 			$url .= "&store_url=" . HTTP_SERVER;
 			$url .= "&store_version=" . VERSION;
 			$url .= "&extension_key=" . $extension_key;
@@ -597,20 +598,20 @@ class ControllerPagesToolPackageInstaller extends AController {
 
 				if ($dst_dirs) {
 					foreach ($dst_dirs as $dir) {
-                        if (!is_writable(DIR_ROOT . '/' . $dir) && file_exists(DIR_ROOT . '/' . $dir)) {
+                        if (!is_writable(ABC::env('DIR_ROOT') . '/' . $dir) && file_exists(ABC::env('DIR_ROOT') . '/' . $dir)) {
 	                        // enable ftp-mode
                             $ftp_mode = true;
-                            $non_writables[ ] = DIR_ROOT . '/' . $dir;
+                            $non_writables[ ] = ABC::env('DIR_ROOT') . '/' . $dir;
                         }
 					}
 				}
 			} else {
 				foreach ($package_info['package_content']['core'] as $corefile) {
-					$corefile_dir = pathinfo(DIR_ROOT . '/' . $corefile,PATHINFO_DIRNAME);
-					if( (!is_writable(DIR_ROOT . '/' . $corefile) && file_exists(DIR_ROOT . '/' . $corefile))) {
+					$corefile_dir = pathinfo(ABC::env('DIR_ROOT') . '/' . $corefile,PATHINFO_DIRNAME);
+					if( (!is_writable(ABC::env('DIR_ROOT') . '/' . $corefile) && file_exists(ABC::env('DIR_ROOT') . '/' . $corefile))) {
 						// enable ftp-mode
 						$ftp_mode = true;
-						$non_writables[ ] = DIR_ROOT . '/' . $corefile;
+						$non_writables[ ] = ABC::env('DIR_ROOT') . '/' . $corefile;
 					} else if(!is_writable($corefile_dir) && is_dir($corefile_dir)){
 						// enable ftp-mode
 						$ftp_mode = true;

@@ -18,14 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ABackup;
 use abc\lib\AError;
 use abc\lib\AJson;
 
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerTaskToolBackup extends AController {
 	private $error = array();
@@ -91,7 +92,7 @@ class ControllerTaskToolBackup extends AController {
 				);
 
 		$result = true;
-		$files = glob(DIR_ROOT.'/*', GLOB_ONLYDIR);
+		$files = glob(ABC::env('DIR_ROOT').'/*', GLOB_ONLYDIR);
 		foreach($files as $file){
 			$res = true;
 			if(is_dir($file) && in_array(basename($file),$content_dirs)){ //only dirs from white list
@@ -128,7 +129,7 @@ class ControllerTaskToolBackup extends AController {
 		);
 
 		$result = true;
-		$files = array_merge(glob(DIR_ROOT.'/.*'), glob(DIR_ROOT.'/*'));
+		$files = array_merge(glob(ABC::env('DIR_ROOT').'/.*'), glob(ABC::env('DIR_ROOT').'/*'));
 
 		foreach($files as $file){
 			//those file names give glob for hidden files (see above)

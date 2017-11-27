@@ -20,11 +20,13 @@
 ------------------------------------------------------------------------------  
 */
 // Real path (operating system web root) to the directory where abantecart is installed
+use abc\ABC;
+
 $root_path = dirname(__FILE__);
-if (defined('IS_WINDOWS')) {
-		$root_path = str_replace('\\', '/', $root_path);
+if (ABC::env('IS_WINDOWS') === true) {
+	$root_path = str_replace('\\', '/', $root_path);
 }
-define('DIR_ROOT', $root_path); 
+ABC::env('DIR_ROOT', $root_path);
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
@@ -33,14 +35,14 @@ define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
 define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
 
 // DIR
-define('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
+ABC::env('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
 define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP . '../')) . '/');
+define('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
 
 // Startup
-require_once(DIR_APP . 'config/config.php');
+require_once(ABC::env('DIR_APP') . 'config/config.php');
 // New Installation
-if (!defined('DB_DATABASE')) {
+if (!ABC::env('DB_DATABASE')) {
 	header('Location: ../install/index.php');
 	exit;
 }

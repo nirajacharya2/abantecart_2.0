@@ -18,13 +18,14 @@ versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AAttribute;
 use abc\core\helper\AHelperUtils;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesToolFiles extends AController {
@@ -158,9 +159,9 @@ class ControllerPagesToolFiles extends AController {
 			}
 
 			if (AHelperUtils::has_value($attribute_data['settings']['directory'])) {
-				$file = DIR_APP . 'system/uploads/' . $attribute_data['settings']['directory'] . '/' . $filename;
+				$file = ABC::env('DIR_APP') . 'system/uploads/' . $attribute_data['settings']['directory'] . '/' . $filename;
 			} else {
-				$file = DIR_APP . 'system/uploads/' . $filename;
+				$file = ABC::env('DIR_APP') . 'system/uploads/' . $filename;
 			}
 
 			if (file_exists($file)) {

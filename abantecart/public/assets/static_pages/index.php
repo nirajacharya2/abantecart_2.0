@@ -24,13 +24,14 @@ namespace abc;
 use abc\lib\ASession;
 
 $dir_app = dirname(__DIR__) . '/../../abc/';
+require $dir_app.'abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-	define('IS_WINDOWS', true);
+	ABC::env('IS_WINDOWS', true);
 	$dir_app = str_replace('\\', '/', $dir_app);
 }
 // Load all initial set up
-define('DIR_APP', $dir_app);
+ABC::env('DIR_APP', $dir_app);
 define('DIR_CORE', $dir_app.'core/');
 define('DIR_LIB', $dir_app.'lib/');
 define('DIR_ASSETS', basename(__DIR__).'/');
@@ -81,15 +82,15 @@ if($session && isset($session->data['exception_msg']) && $session->data['excepti
 }
 
 if($from_admin){
-	$subject = rawurlencode("AbanteCart Crash Report " . UNIQUE_ID);
+	$subject = rawurlencode("AbanteCart Crash Report " . ABC::env('UNIQUE_ID'));
 	$pos = -2;
 	$t ='';
 	$count = 0;
 	$log_contents_end = "Log file tail: \n\n";
-	$log_handle = fopen(DIR_APP . "system/logs/error.txt", "r");
+	$log_handle = fopen(ABC::env('DIR_APP') . "system/logs/error.txt", "r");
 	//read 100 lines backwards from the eof or less 
 	$max_lines = 100;
-	$max_bytes = filesize(DIR_APP . "system/logs/error.txt");
+	$max_bytes = filesize(ABC::env('DIR_APP') . "system/logs/error.txt");
 	$lines = array();
 	while ($count < $max_lines) {
 		//read one line back

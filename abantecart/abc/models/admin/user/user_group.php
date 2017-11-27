@@ -18,10 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\engine\Model;
 
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelUserUserGroup extends Model {
 
@@ -159,8 +160,8 @@ class ModelUserUserGroup extends Model {
 						'common/menu');
 
 		$controllers_list = array();
-		$files_pages = glob( DIR_APP . 'controllers/pages/*/*.php');
-		$files_response = glob( DIR_APP . 'controllers/responses/*/*.php');
+		$files_pages = glob( ABC::env('DIR_APP') . 'controllers/pages/*/*.php');
+		$files_response = glob( ABC::env('DIR_APP') . 'controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 
 		// looking for controllers inside core
@@ -173,7 +174,7 @@ class ModelUserUserGroup extends Model {
 		}
 		// looking for controllers inside extensions
 		$files_pages = glob( DIR_APP_EXT . '/*/admin/controllers/pages/*/*.php');
-		$files_response = glob(  DIR_APP_EXT . '/*/admin/controllers/responses/*/*.php');
+		$files_response = glob( DIR_APP_EXT . '/*/admin/controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 		foreach ($files as $file) {
 			$data = explode('/', dirname($file));

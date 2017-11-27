@@ -24,8 +24,8 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesCatalogProductRelations extends AController{

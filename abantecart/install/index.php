@@ -21,9 +21,12 @@
 */
 
 // Real path (operating system web root) to the directory where abantecart is installed
+use abc\ABC;
+use abc\lib\ADB;
+
 $root_path = dirname(__FILE__);
 
-if (defined('IS_WINDOWS')) {
+if (ABC::env('IS_WINDOWS') === true) {
 		$root_path = str_replace('\\', '/', $root_path);
 }
 define('DIR_ROOT', $root_path);
@@ -46,14 +49,14 @@ define('HTTP_ABANTECART', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HT
 
 // DIR
 define('DIR_ROOT', str_replace('\'', '/', realpath(dirname(dirname(__FILE__)))) . '/');
-define('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
+ABC::env('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
 define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
 define('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');
 define('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/cache/');
 define('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(DIR_APP . '../')) . '/');
+define('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
 define('DIR_STOREFRONT', DIR_ABANTECART . '/storefront/');
-define('DIR_TEMPLATE', DIR_APP . 'view/template/');
+define('DIR_TEMPLATE', ABC::env('DIR_APP') . 'view/template/');
 define('INSTALL', 'true');
 // Relative paths and directories
 define('RDIR_TEMPLATE',  'view/');
@@ -67,16 +70,16 @@ if (file_exists(DIR_SYSTEM . 'config.php')){
 }
 
 $data_exist = false;
-if ( defined('DB_HOSTNAME') && DB_HOSTNAME ) {
+if ( ABC::env('DB_HOSTNAME') ) {
 	$db = new ADB(array(
-					'driver' => DB_DRIVER,
-					'host' => DB_HOSTNAME,
-					'username' => DB_USERNAME,
-					'password' => DB_PASSWORD,
-					'database' => DB_DATABASE,
-					'prefix'   => DB_PREFIX,
-					'charset'  => DB_CHARSET,
-					'collation'=> DB_COLLATION,
+					'driver' => ABC::env('DB_DRIVER'),
+					'host' => ABC::env('DB_HOSTNAME'),
+					'username' => ABC::env('DB_USERNAME'),
+					'password' => ABC::env('DB_PASSWORD'),
+					'database' => ABC::env('DB_DATABASE'),
+					'prefix'   => ABC::env('DB_PREFIX'),
+					'charset'  => ABC::env('DB_CHARSET'),
+					'collation'=> ABC::env('DB_COLLATION'),
 				));
     $r = $db->query("SELECT * FROM ".$this->db->prefix()."settings");
     $data_exist = $r->num_rows;

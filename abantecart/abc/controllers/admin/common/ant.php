@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AConnect;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -53,7 +54,7 @@ class ControllerCommonANT extends AController {
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		$url = "/index.php?option=com_antresponses&format=raw";
-		$url .= "&store_id=" . UNIQUE_ID;
+		$url .= "&store_id=" . ABC::env('UNIQUE_ID');
 		$url .= "&store_ip=" . $_SERVER ['SERVER_ADDR'];
 		$url .= "&store_url=" . HTTP_SERVER;
 		$url .= "&software_name=AbanteCart";

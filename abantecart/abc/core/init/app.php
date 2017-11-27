@@ -83,19 +83,19 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 //Set up common paths
 if(!defined('DIR_ASSETS')) {
-	define('DIR_ASSETS', DIR_PUBLIC . 'assets/');
+	define('DIR_ASSETS', ABC::env('DIR_PUBLIC') . 'assets/');
 }
 define('DIR_RESOURCE', DIR_ASSETS . 'resources/');
-define('DIR_APP_EXTENSIONS', DIR_APP . 'extensions/');
-define('DIR_SYSTEM', DIR_APP . 'system/');
-define('DIR_CORE', DIR_APP . 'core/');
-define('DIR_LIB', DIR_APP . 'lib/');
+define('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
+define('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
+define('DIR_CORE', ABC::env('DIR_APP') . 'core/');
+define('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
-define('DIR_DOWNLOAD', DIR_APP . 'download/');
-define('DIR_CONFIG', DIR_APP . 'config/');
-define('DIR_CACHE', DIR_APP . 'system/cache/');
-define('DIR_LOGS', DIR_APP . 'system/logs/');
-define('DIR_VENDOR', DIR_ROOT . 'vendor/');
+define('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
+define('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
+define('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
+define('DIR_LOGS', ABC::env('DIR_APP') . 'system/logs/');
+define('DIR_VENDOR', ABC::env('DIR_ROOT') . 'vendor/');
 
 //load vendors classes
 require DIR_VENDOR.'autoload.php';
@@ -127,19 +127,19 @@ if($path_nodes[0] == 'a') {
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
 
-define('DIR_TEMPLATES', DIR_APP . 'templates/');
-if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ADMIN_PATH || $_POST['s'] == ADMIN_PATH)) {
-	define('IS_ADMIN', true);
-	define('DIR_LANGUAGE', DIR_APP . 'languages/admin/');
-	define('DIR_BACKUP', DIR_APP . 'system/backup/');
-	define('DIR_DATA', DIR_APP . 'system/data/');
+define('DIR_TEMPLATES', ABC::env('DIR_APP') . 'templates/');
+if (ABC::env('ADMIN_PATH')!==null && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ABC::env('ADMIN_PATH') || $_POST['s'] == ABC::env('ADMIN_PATH'))) {
+	ABC::env('IS_ADMIN', true);
+	define('DIR_LANGUAGE', ABC::env('DIR_APP') . 'languages/admin/');
+	define('DIR_BACKUP', ABC::env('DIR_APP') . 'system/backup/');
+	define('DIR_DATA', ABC::env('DIR_APP') . 'system/data/');
 	//generate unique session name.
 	//NOTE: This is a session name not to confuse with actual session id. Candidate to renaming 
-	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_CP_PHPSESSID');
+	define('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
-	define('IS_ADMIN', false);
-	define('DIR_LANGUAGE', DIR_APP . '/languages/storefront/');
-	define('SESSION_ID', defined('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(UNIQUE_ID, 0, 10)) : 'AC_SF_PHPSESSID');
+	ABC::env('IS_ADMIN', false);
+	define('DIR_LANGUAGE', ABC::env('DIR_APP') . '/languages/storefront/');
+	define('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
 	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
 
@@ -203,7 +203,7 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 	define('DIRNAME_TEMPLATE', 'template/');
 	define('DIRNAME_TEMPLATES', 'templates/');
 
-	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXTENSIONS);
+	define('DIR_APP_EXT', ABC::env('DIR_APP') . DIRNAME_EXTENSIONS);
 	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
 
 //load base libraries
@@ -235,14 +235,14 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 
 	$registry->set('db', new ADB(
 			array(
-				'driver' => DB_DRIVER,
-				'host' => DB_HOSTNAME,
-				'username' => DB_USERNAME,
-				'password' => DB_PASSWORD,
-				'database' => DB_DATABASE,
-				'prefix'   => DB_PREFIX,
-				'charset'  => DB_CHARSET,
-				'collation'=> DB_COLLATION,
+				'driver' => ABC::env('DB_DRIVER'),
+				'host' => ABC::env('DB_HOSTNAME'),
+				'username' => ABC::env('DB_USERNAME'),
+				'password' => ABC::env('DB_PASSWORD'),
+				'database' => ABC::env('DB_DATABASE'),
+				'prefix'   => ABC::env('DB_PREFIX'),
+				'charset'  => ABC::env('DB_CHARSET'),
+				'collation'=> ABC::env('DB_COLLATION'),
 			)
 		)
 	);
@@ -267,7 +267,7 @@ if (defined('ADMIN_PATH') && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET
 // Set up HTTP and HTTPS based automatic and based on config
 //Admin manager classes
 
-if (IS_ADMIN === true) {
+if (ABC::env('IS_ADMIN') === true) {
 	require_once 'admin.php';
 }else{
 	require_once 'storefront.php';
@@ -298,7 +298,7 @@ if (IS_ADMIN === true) {
 
 // Extensions api
 	$extensions = new ExtensionsApi();
-	if (IS_ADMIN === true) {
+	if (ABC::env('IS_ADMIN') === true) {
 		//for admin we load all available(installed) extensions. 
 		//This is a solution to make controllers and hooks available for extensions that are in the status off. 
 		$extensions->loadAvailableExtensions();
@@ -314,7 +314,7 @@ if (IS_ADMIN === true) {
 
 //check if we specify template directly
 	$template = 'default';
-	if (IS_ADMIN !== true && !empty($request->get['sf'])) {
+	if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
 		$template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
 		$dir = $template . DIRNAME_STORE . DIRNAME_TEMPLATES . $template;
 		if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)) {
@@ -326,7 +326,7 @@ if (IS_ADMIN === true) {
 
 	if (!$is_valid) {
 		//check template defined in settings
-		if (IS_ADMIN===true) {
+		if (ABC::env('IS_ADMIN')===true) {
 			$template = $config->get('admin_template');
 			$dir = 'templates/'.$template .'/'. DIRNAME_ADMIN;
 		} else {
@@ -341,7 +341,7 @@ if (IS_ADMIN === true) {
 		}
 
 		//check if this is default template
-		if (!$is_valid && is_dir(DIR_APP.$dir)) {
+		if (!$is_valid && is_dir(ABC::env('DIR_APP').$dir)) {
 			$is_valid = true;
 		}
 	}
@@ -352,7 +352,7 @@ if (IS_ADMIN === true) {
 		$template = 'default';
 	}
 
-	if (IS_ADMIN === true) {
+	if (ABC::env('IS_ADMIN') === true) {
 		$config->set('original_admin_template', $config->get('admin_template'));
 		$config->set('admin_template', $template);
 		// Load language
@@ -380,13 +380,13 @@ if (IS_ADMIN === true) {
 	$registry->set('order_status',new AOrderStatus($registry));
 
 //IM
-	if(IS_ADMIN===true){
+	if(ABC::env('IS_ADMIN')===true){
 		$registry->set('im', new AIMManager());
 	}else{
 		$registry->set('im', new AIM());
 	}
 
-	if (!defined('IS_ADMIN') || !IS_ADMIN ) { // storefront load
+	if (!ABC::env('IS_ADMIN') ) { // storefront load
 		// Customer
 		$registry->set('customer', new ACustomer($registry));
 		// Tax

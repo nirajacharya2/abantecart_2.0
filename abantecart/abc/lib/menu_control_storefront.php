@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class AMenu_Storefront extends AMenu{
@@ -132,7 +133,7 @@ class AMenu_Storefront extends AMenu{
 	 * @return boolean
 	 */
 	public function insertMenuItem($item = array ()){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
 		}
 
@@ -199,7 +200,7 @@ class AMenu_Storefront extends AMenu{
 	 * @return boolean
 	 */
 	public function deleteMenuItem($item_id){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
 		}
 		//
@@ -218,7 +219,7 @@ class AMenu_Storefront extends AMenu{
 	 */
 	public function updateMenuItem($item_id, $new_values){
 
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
 		}
 
@@ -269,7 +270,7 @@ class AMenu_Storefront extends AMenu{
 
 		$data = !is_array($data) ? array () : $data;
 
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
 		}
 
@@ -308,7 +309,7 @@ class AMenu_Storefront extends AMenu{
 	 * @return void
 	 */
 	public function deleteLanguage($language_id){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
 		}
 		$this->dataset_description->deleteRows(array ("column_name" => "language_id", "operator" => "=", "value" => $language_id));

@@ -47,8 +47,8 @@ echo $header;
 								<tr>
 									<td>PHP Version:</td>
 									<td>><?php echo phpversion(); ?></td>
-									<td><?php echo MIN_PHP_VERSION; ?>+</td>
-									<td align="center"><?php echo version_compare(phpversion(), MIN_PHP_VERSION, '<') == false ? $img_good : $img_bad; ?></td>
+									<td><?php echo ABC::env('MIN_PHP_VERSION'); ?>+</td>
+									<td align="center"><?php echo version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == false ? $img_good : $img_bad; ?></td>
 								</tr>
 								<tr>
 									<td>Register Globals:</td>

@@ -25,8 +25,8 @@ use abc\core\engine\Model;
 use abc\lib\ALayoutManager;
 use abc\lib\AResourceManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ModelCatalogManufacturer extends Model{

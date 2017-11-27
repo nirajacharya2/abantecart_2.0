@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AJson;
 
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -63,14 +64,14 @@ class ControllerResponsesExtensionBannerManager extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$banner_id = (int)$this->request->get['banner_id'];
-		$url = INDEX_FILE;
+		$url = ABC::env('INDEX_FILE');
 		//register click
 		if($banner_id){
 			$this->loadModel('extension/banner_manager');
 			$banner = $this->model_extension_banner_manager->getBanner($banner_id, '');
 			$url = $banner['target_url'];
 			if ( empty($url) || $url[0] == '#') {
-				$url = INDEX_FILE . $url;
+				$url = ABC::env('INDEX_FILE') . $url;
 			}
 			$this->model_extension_banner_manager->writeBannerStat($banner_id,2);
 		}

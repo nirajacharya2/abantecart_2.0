@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -122,7 +123,7 @@ class AFile{
 		if (empty($file_name)){
 			return array ();
 		}
-		$uploads_dir = DIR_ROOT . '/admin/system/uploads';
+		$uploads_dir = ABC::env('DIR_ROOT') . '/admin/system/uploads';
 		AHelperUtils::is_writable_dir($uploads_dir);
 		$file_path = $uploads_dir . '/' . $upload_sub_dir . '/';
 		AHelperUtils::is_writable_dir($file_path);

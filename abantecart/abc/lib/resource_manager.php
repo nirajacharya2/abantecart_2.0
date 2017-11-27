@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -39,7 +40,7 @@ class AResourceManager extends AResource{
 	public $error = array ();
 
 	public function __construct(){
-		if (!IS_ADMIN) { // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to change resources');
 		}
 		$this->registry = Registry::getInstance();
@@ -642,7 +643,9 @@ class AResourceManager extends AResource{
 		}
 
 		if ($data['sort'] == 'sort_order' || !empty($data['object_name']) || !empty($data['object_id'])) {
-			$top_sql .= ", rm.sort_order";
+			if($mode != 'total_only') {
+				$top_sql .= ", rm.sort_order";
+			}
 			$sub_join = '';
 			if (!empty($data['object_name'])) {
 				$sub_join .= " AND rm.object_name = '" . $this->db->escape($data['object_name']) . "'";

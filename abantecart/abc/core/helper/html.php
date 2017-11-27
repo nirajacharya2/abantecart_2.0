@@ -22,8 +22,8 @@ namespace abc\core\helper;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class AHelperHtml extends AHelper{
 	//Possibly legacy and only for old template. Remove in 1.2

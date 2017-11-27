@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use DirectoryIterator;
 use FilesystemIterator;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -61,7 +62,7 @@ class ABackup{
 		 * @var Registry
 		 */
 		$this->registry = Registry::getInstance();
-		$this->slash = IS_WINDOWS === true ? '\\' : '/';
+		$this->slash = ABC::env('IS_WINDOWS') === true ? '\\' : '/';
 		//first of all check backup directory create or set writable permissions
 		// Before backup process need to call validate() method! (see below)
 		if (!AHelperUtils::is_writable_dir(DIR_BACKUP)){
@@ -153,13 +154,13 @@ class ABackup{
 			$table_list[] = $this->db->escape($table);
 		}
 
-		$driver = DB_DRIVER;
+		$driver = ABC::env('DB_DRIVER');
 		/**
 		 * @var \abc\lib\ADB $db
 		 */
 		// use driver directly to exclude hooks calls
-		$db = new $driver(DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
-		$prefix_len = strlen(DB_PREFIX);
+		$db = new $driver(ABC::env('DB_HOSTNAME'), ABC::env('DB_USERNAME'), ABC::env('DB_PASSWORD'), ABC::env('DB_DATABASE'));
+		$prefix_len = strlen(ABC::env('DB_PREFIX'));
 		// get sizes of tables
 
 		$sql = "SELECT TABLE_NAME AS 'table_name',
@@ -296,7 +297,7 @@ class ABackup{
 		$table_list = $this->model_tool_backup->getTables();
 		if (!$table_list){
 			$error_text = "Error: Can't create sql dump of database during backup. Cannot obtain table list. ";
-			if (DB_DRIVER == 'mysql'){
+			if (ABC::env('DB_DRIVER') == 'mysql'){
 				$error_text .= 'Try to change db-driver to "amysqli" in your abc/config/database.php file.';
 			}
 			$this->log->write($error_text);
@@ -410,7 +411,7 @@ class ABackup{
 			return false;
 		}
 		$base_name = pathinfo($file_path, PATHINFO_BASENAME);
-		$path = str_replace(DIR_ROOT . '/', '', $file_path);
+		$path = str_replace(ABC::env('DIR_ROOT') . '/', '', $file_path);
 		$path = str_replace($base_name, '', $path);
 
 		if ($path){ //if nested folders presents in path
@@ -568,7 +569,7 @@ class ABackup{
 	private function _add_empty_index_file($dir){
 		//if empty directory - creates new empty file to prevent
 		// excluding directory during tar.gz compression via PharData class
-		if(IS_WINDOWS === true){
+		if(ABC::env('IS_WINDOWS') === true){
 			$dir = str_replace("\\",'/',$dir);
 		}
 		$fi = new FilesystemIterator($dir, FilesystemIterator::SKIP_DOTS);
@@ -595,7 +596,7 @@ class ABackup{
 				FROM information_schema.TABLES
 				WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'";
 		$result = $this->db->query($sql, true);
-		if ($result === false && DB_DRIVER == 'mysql'){
+		if ($result === false && ABC::env('DB_DRIVER') == 'mysql'){
 			$this->error[] = 'Probably error will occur. Please change db-driver to "amysqli" in your abc/config/database.php file.';
 		} elseif ($result === false){
 			$this->error[] = 'Cannot get tables list. Please check privileges of mysql database user.';

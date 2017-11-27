@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\engine\Model;
 use abc\lib\ABackup;
 use abc\lib\ADataset;
@@ -25,8 +26,8 @@ use abc\lib\AFormManager;
 use abc\lib\ALayoutManager;
 use abc\lib\ATaskManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -146,7 +147,7 @@ class ModelToolBackup extends Model{
 			$bkp->backupDirectory(DIR_RESOURCE, false);
 		}
 		if ($config){
-			$bkp->backupFile(DIR_ROOT . '/config/config.php', false);
+			$bkp->backupFile(ABC::env('DIR_ROOT') . '/config/config.php', false);
 		}
 		$result = $bkp->archive(DIR_BACKUP . $bkp->getBackupName() . '.tar.gz', DIR_BACKUP, $bkp->getBackupName());
 		if (!$result){
@@ -398,7 +399,7 @@ class ModelToolBackup extends Model{
 	 * @return int
 	 */
 	public function getCodeSize(){
-		$all_dirs = scandir(DIR_ROOT);
+		$all_dirs = scandir(ABC::env('DIR_ROOT'));
 		$content_dirs = array ( // black list
 				'.',
 				'..',
@@ -413,7 +414,7 @@ class ModelToolBackup extends Model{
 			if (in_array($d, $content_dirs)){
 				continue;
 			}
-			$item = DIR_ROOT . '/' . $d;
+			$item = ABC::env('DIR_ROOT') . '/' . $d;
 			if (is_dir($item)){
 				$dirs_size += $this->_get_directory_size($item);
 			} elseif (is_file($item)){
@@ -434,7 +435,7 @@ class ModelToolBackup extends Model{
 		);
 		$dirs_size = 0;
 		foreach ($content_dirs as $d){
-			$dirs_size += $this->_get_directory_size(DIR_ROOT . '/' . $d);
+			$dirs_size += $this->_get_directory_size(ABC::env('DIR_ROOT') . '/' . $d);
 		}
 		return $dirs_size;
 	}

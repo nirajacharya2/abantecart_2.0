@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use DOMDocument;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -64,7 +65,7 @@ class AData{
 	protected $imp_log;
 
 	public function __construct(){
-		if (!IS_ADMIN){
+		if (!ABC::env('IS_ADMIN')){
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access this section');
 		}
 		$this->registry = Registry::getInstance();

@@ -23,8 +23,8 @@ use abc\lib\ALanguageManager;
 use abc\core\engine\Model;
 use abc\lib\AWarning;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelLocalisationLanguageDefinitions extends Model {
     /**
@@ -300,7 +300,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 			   $language_count = sizeof($languages);
 			   foreach($result as $k=>$definition){
 				   $sql = "SELECT COUNT( DISTINCT language_id) as cnt
-						   FROM " . DB_PREFIX . "language_definitions
+						   FROM " . ABC::env('DB_PREFIX') . "language_definitions
 						   WHERE section = '".$this->db->escape($definition['section'])."'
 							   AND block = '".$this->db->escape($definition['block'])."'
 							   AND language_key = '".$this->db->escape($definition['language_key'])."'";

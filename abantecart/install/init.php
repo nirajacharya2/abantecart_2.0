@@ -19,6 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abantecart\install;
 // set default encoding for multibyte php mod
+use abc\ABC;
 use abc\core\engine\Registry;
 use abc\lib\ADataEncryption;
 use abc\lib\ADocument;
@@ -54,19 +55,19 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 }
 
 //Set up common paths
-define('DIR_APP_EXTENSIONS', DIR_APP . 'extensions/');
-define('DIR_SYSTEM', DIR_APP . 'system/');
-define('DIR_CORE', DIR_APP . 'core/');
-define('DIR_LIB', DIR_APP . 'lib/');
+define('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
+define('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
+define('DIR_CORE', ABC::env('DIR_APP') . 'core/');
+define('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
 define('DIR_IMAGE', DIR_ASSETS . 'images/');
-define('DIR_DOWNLOAD', DIR_APP . 'download/');
-define('DIR_CONFIG', DIR_APP . 'config/');
-define('DIR_CACHE', DIR_APP . 'system/cache/');
-define('DIR_LOGS', DIR_APP . 'system/logs/');
+define('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
+define('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
+define('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
+define('DIR_LOGS', ABC::env('DIR_APP') . 'system/logs/');
 define('DIR_VENDOR', dirname(dirname(__FILE__)) . '/vendor/');
 
 // AbanteCart Version
-include(DIR_APP.'core/init/version.php');
+include(ABC::env('DIR_APP').'core/init/version.php');
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -147,14 +148,12 @@ try{
 	define('DIRNAME_TEMPLATE', 'template/');
 	define('DIRNAME_TEMPLATES', 'templates/');
 
-	define('DIR_APP_EXT', DIR_APP . DIRNAME_EXTENSIONS);
+	define('DIR_APP_EXT', ABC::env('DIR_APP') . DIRNAME_EXTENSIONS);
 	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
-	/**
-	 * @const DIR_APP
-	 */
-	require_once(DIR_APP.DIRNAME_CORE.'init/base.php');
+
+	require_once(ABC::env('DIR_APP').DIRNAME_CORE.'init/base.php');
 	$registry = Registry::getInstance();
-	require_once(DIR_APP.DIRNAME_CORE.'init/admin.php');
+	require_once(ABC::env('DIR_APP').DIRNAME_CORE.'init/admin.php');
 
 	// Session
 	$registry->set('session', new ASession(SESSION_ID));

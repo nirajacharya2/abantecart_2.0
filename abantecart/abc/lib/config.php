@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 final class AConfig{
@@ -112,8 +113,8 @@ final class AConfig{
 		$cache->enableCache();
 		//set configured driver.
 		$cache_driver = 'file';
-		if (defined('CACHE_DRIVER')){
-			$cache_driver = CACHE_DRIVER;
+		if (ABC::env('CACHE_DRIVER')){
+			$cache_driver = ABC::env('CACHE_DRIVER');
 		}
 		if (!$cache->setCacheStorageDriver($cache_driver)){
 			$error = new AError ('Cache storage driver ' . $cache_driver . ' can not be loaded!');
@@ -223,7 +224,7 @@ final class AConfig{
 		}
 
 		//load specific store if admin and set current_store_id for admin operation on store
-		if (IS_ADMIN){
+		if (ABC::env('IS_ADMIN')){
 			//Check if admin has specific store in session or selected
 			$session = $this->registry->get('session');
 			$store_id = $this->registry->get('request')->get['store_id'];
@@ -251,7 +252,7 @@ final class AConfig{
 		}
 
 		// load extension settings
-		$cache_suffix = IS_ADMIN ? 'admin' : $this->cnfg['config_store_id'];
+		$cache_suffix = ABC::env('IS_ADMIN') ? 'admin' : $this->cnfg['config_store_id'];
 		$settings = $cache->pull('settings.extension.' . $cache_suffix);
 		if (empty($settings)){
 			// all extensions settings of store

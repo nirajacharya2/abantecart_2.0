@@ -20,6 +20,7 @@
 
 namespace abc\core\engine;
 
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
@@ -27,8 +28,8 @@ use abc\lib\AException;
 use abc\lib\AWarning;
 use Exception;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -815,7 +816,7 @@ class ExtensionsApi{
 			return false;
 		}
 
-		$ext_section = (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE);
+		$ext_section = (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE);
 		//mode to force load storefront model is loaded from admin
 		if ($mode == 'storefront') {
 			$ext_section = DIRNAME_STORE;
@@ -835,7 +836,7 @@ class ExtensionsApi{
 				$source = $this->extension_languages;
 				break;
 			case 'T' :
-				$tmpl_id = IS_ADMIN
+				$tmpl_id = ABC::env('IS_ADMIN')
 						? $this->registry->get('config')->get('admin_template')
 						: $this->registry->get('config')->get('config_storefront_template');
 				$file = '/' . $tmpl_id . $ext_section . '/' . $route;
@@ -920,9 +921,9 @@ class ExtensionsApi{
 			return false;
 		}
 
-		$ext_section = (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE);
+		$ext_section = (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE);
 
-		$tmpl_id = IS_ADMIN ? $this->registry->get('config')->get('admin_template')
+		$tmpl_id = ABC::env('IS_ADMIN') ? $this->registry->get('config')->get('admin_template')
 				: $this->registry->get('config')->get('config_storefront_template');
 		$file = $ext_section . DIR_EXT_TEMPLATE . $tmpl_id . '/' . $route;
 		$source = $this->extension_templates;
@@ -970,7 +971,7 @@ class ExtensionsApi{
 	 */
 	public function isExtensionController($route){
 
-		$section = trim((IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE), '/');
+		$section = trim((ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE), '/');
 		$path_build = '';
 		$path_nodes = explode('/', $route);
 
@@ -978,9 +979,12 @@ class ExtensionsApi{
 			$path_build .= $path_node;
 
 			foreach ($this->enabled_extensions as $ext) {
-				$file = DIR_APP_EXT . $ext . '/' . DIRNAME_CONTROLLERS . (IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE) . $path_build . '.php';
+				$file = DIR_APP_EXT . $ext . '/' . DIRNAME_CONTROLLERS . (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE) . $path_build . '.php';
+
 				$ext_controllers = is_array($this->extension_controllers[$ext][$section]) ? $this->extension_controllers[$ext][$section] : array ();
+
 				if (in_array($path_build, $ext_controllers) && is_file($file)) {
+
 					//remove current node
 					array_shift($path_nodes);
 					//check for method

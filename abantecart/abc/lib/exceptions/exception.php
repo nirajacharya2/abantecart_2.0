@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\ARouter;
 use abc\core\engine\Registry;
 use Exception;
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class AException extends Exception{
@@ -87,7 +88,7 @@ class AException extends Exception{
 			exit();
 		}
 		$url = "assets/static_pages/index.php";
-		$url .= (IS_ADMIN === true) ? '?mode=admin' : '';
+		$url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
 		header("Location: $url");
 		exit();
 	}

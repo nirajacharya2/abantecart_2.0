@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\AResourceManager;
 use stdClass;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 set_time_limit(0);
 
@@ -737,7 +738,7 @@ class ModelToolMigration extends Model {
 
 	public function getCartList() {
 		$result = array();
-		$files = glob(DIR_ROOT . '/admin/models/tool/migration/*', GLOB_NOSORT);
+		$files = glob(ABC::env('DIR_ROOT') . '/admin/models/tool/migration/*', GLOB_NOSORT);
 		if ($files) {
 			foreach ($files as $file) {
 				$cart_name = pathinfo($file, PATHINFO_FILENAME);

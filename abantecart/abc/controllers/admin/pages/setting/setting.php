@@ -18,14 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\lib\AConfigManager;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * Class ControllerPagesSettingSetting
@@ -606,8 +607,8 @@ class ControllerPagesSettingSetting extends AController {
 
 		$ret_data['tokens'] = array();
 
-		$files_pages = glob(DIR_APP . 'controllers/pages/*/*.php');
-		$files_response = glob(DIR_APP . 'controllers/responses/*/*.php');
+		$files_pages = glob(ABC::env('DIR_APP') . 'controllers/pages/*/*.php');
+		$files_response = glob(ABC::env('DIR_APP') . 'controllers/responses/*/*.php');
 		$files = array_merge($files_pages, $files_response);
 
 		foreach ($files as $file) {

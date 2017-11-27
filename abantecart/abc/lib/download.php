@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\AAttribute;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -75,7 +76,7 @@ final class ADownload{
 			return array ();
 		}
 		if (!$language_id){
-			if (IS_ADMIN === true){
+			if (ABC::env('IS_ADMIN') === true){
 				$language_id = $this->language->getContentLanguageID();
 			} else{
 				$language_id = $this->language->getLanguageID();
@@ -98,7 +99,7 @@ final class ADownload{
 		if (!(int)$download_id){
 			return array ();
 		}
-		if (IS_ADMIN === true){
+		if (ABC::env('IS_ADMIN') === true){
 			$language_id = $this->language->getContentLanguageID();
 		} else{
 			$language_id = $this->language->getLanguageID();
@@ -123,7 +124,7 @@ final class ADownload{
 			return array ();
 		}
 		if (!$language_id){
-			if (IS_ADMIN === true){
+			if (ABC::env('IS_ADMIN') === true){
 				$language_id = $this->language->getContentLanguageID();
 			} else{
 				$language_id = $this->language->getLanguageID();

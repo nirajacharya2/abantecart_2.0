@@ -19,13 +19,14 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\engine;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\ARequest;
 use abc\lib\AException;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -116,8 +117,8 @@ class AHtml extends AController{
 	private function buildURL($rt, $params = ''){
 		$suburl = '';
 		//#PR Add admin path if we are in admin
-		if (IS_ADMIN) {
-			$suburl .= '&s=' . ADMIN_PATH;
+		if (ABC::env('IS_ADMIN')) {
+			$suburl .= '&s=' . ABC::env('ADMIN_PATH');
 		}
 		//add template if present
 		if (!empty($this->request->get['sf'])) {
@@ -201,7 +202,7 @@ class AHtml extends AController{
 		if ($this->registry->get('session')->data['session_mode'] == 'embed_token') {
 			$params .= '&' . EMBED_TOKEN_NAME . '=' . session_id();
 		}
-		$url = $server . INDEX_FILE . $this->url_encode($this->buildURL($rt, $params), $encode);
+		$url = $server . ABC::env('INDEX_FILE') . $this->url_encode($this->buildURL($rt, $params), $encode);
 		return $url;
 	}
 
@@ -222,7 +223,7 @@ class AHtml extends AController{
 
 		$suburl = $this->buildURL($rt, $params);
 
-		if (IS_ADMIN === true || (defined('IS_API') && IS_API === true)) {
+		if (ABC::env('IS_ADMIN') === true || (defined('IS_API') && IS_API === true)) {
 			//Add session token for admin and API
 			if (isset($session->data['token']) && $session->data['token']) {
 				$suburl .= '&token=' . $this->registry->get('session')->data['token'];
@@ -238,7 +239,7 @@ class AHtml extends AController{
 			$suburl .= '&tmpl_debug=' . $this->request->get['tmpl_debug'];
 		}
 
-		$url = HTTPS_SERVER . INDEX_FILE . $this->url_encode($suburl, $encode);
+		$url = HTTPS_SERVER . ABC::env('INDEX_FILE') . $this->url_encode($suburl, $encode);
 		return $url;
 	}
 
@@ -295,8 +296,7 @@ class AHtml extends AController{
 			$ssl = true;
 		}
 		$http = $ssl ? HTTPS_SERVER : HTTP_SERVER;
-
-		$url = $http . INDEX_FILE . $this->url_encode($suburl, $encode);
+		$url = $http . ABC::env('INDEX_FILE') . $this->url_encode($suburl, $encode);
 		return $url;
 	}
 
@@ -581,7 +581,7 @@ class AHtml extends AController{
 	 * @return string - html code with parsed internal URLs
 	 */
 	public function convertLinks($html, $type = '', $for_admin = false){
-		$is_admin = (IS_ADMIN === true || $for_admin) ? true : false;
+		$is_admin = (ABC::env('IS_ADMIN') === true || $for_admin) ? true : false;
 		$route_sections = $is_admin ? array ("admin", "storefront") : array ("storefront");
 		foreach ($route_sections as $rt_type) {
 			preg_match_all('/(#' . $rt_type . '#rt=){1}[a-z0-9\/_\-\?\&=\%#]{1,255}(\b|\")/', $html, $matches,
@@ -591,8 +591,8 @@ class AHtml extends AController{
 					$href = str_replace('?', '&', $match[0]);
 
 					if ($rt_type == 'admin') {
-						if ($for_admin && IS_ADMIN !== true) {
-							$href .= '&s=' . ADMIN_PATH;
+						if ($for_admin && ABC::env('IS_ADMIN') !== true) {
+							$href .= '&s=' . ABC::env('ADMIN_PATH');
 						}
 						$new_href = str_replace('#admin#', $this->getSecureURL('') . '&', $href);
 					} else {
@@ -1710,7 +1710,7 @@ class FormHtmlElement extends HtmlElement{
 			);
 		}
 
-		if (IS_ADMIN === true) {
+		if (ABC::env('IS_ADMIN') === true) {
 			return $this->view->fetch('form/form_open.tpl');
 		} else {
 			return $this->view->fetch('form/form_open.tpl') . $this->view->fetch('form/form_csrf.tpl');
@@ -1948,7 +1948,7 @@ class DateHtmlElement extends HtmlElement{
 			$doc = $this->registry->get('document');
 			$doc->addScript($this->view->templateResource('js/jquery-ui/js/jquery-ui-1.10.4.custom.min.js'));
 			$doc->addScript($this->view->templateResource('js/jquery-ui/js/jquery.ui.datepicker.js'));
-			if (IS_ADMIN === true) {
+			if (ABC::env('IS_ADMIN') === true) {
 				$doc->addStyle(array (
 						'href'  => $this->view->templateResource('js/jquery-ui/js/css/ui-lightness/ui.all.css'),
 						'rel'   => 'stylesheet',
@@ -2583,7 +2583,7 @@ class LabelHtmlElement extends HtmlElement{
 	 * @return string
 	 */
 	public function getHtml(){
-		if (IS_ADMIN === true) {
+		if (ABC::env('IS_ADMIN') === true) {
 			ADebug::error('labelHtmlElement', E_USER_ERROR, 'You cannot to build Label-field from Admin-side!');
 			return null;
 		}

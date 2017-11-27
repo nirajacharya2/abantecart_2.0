@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AMenu;
 use abc\lib\AResourceManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -166,7 +167,7 @@ class ControllerCommonHeader extends AController {
 
 		//backwards compatibility from 1.2.1. Can remove this check in the future.
 		if (!defined('ENCRYPTION_KEY')) {
-			$cm_body = "To be compatible with v".VERSION." add below line to configuration file: <br>\n" . DIR_APP . '/config/config.php';
+			$cm_body = "To be compatible with v".VERSION." add below line to configuration file: <br>\n" . ABC::env('DIR_APP') . '/config/config.php';
 			$cm_body .= "<br>\n"."define('ENCRYPTION_KEY', '" . $this->config->get('encryption_key') . "');\n"; ;
 			$this->messages->saveWarning('Compatibility warning for v'.VERSION, $cm_body);
 		}

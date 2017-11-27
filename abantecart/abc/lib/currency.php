@@ -18,10 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -89,7 +90,7 @@ final class ACurrency{
 		} elseif (isset($this->session->data['currency']) && array_key_exists($this->session->data['currency'], $this->currencies)){
 			$this->set($this->session->data['currency']);
 		} elseif (isset($this->request->cookie['currency']) && array_key_exists($this->request->cookie['currency'], $this->currencies)){
-			if (IS_ADMIN === true){
+			if (ABC::env('IS_ADMIN') === true){
 				$this->set($this->config->get('config_currency'));
 			} else{
 				$this->set($this->request->cookie['currency']);

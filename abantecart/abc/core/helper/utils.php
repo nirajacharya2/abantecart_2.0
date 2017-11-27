@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\core\helper;
+use abc\ABC;
 use abc\core\engine\Registry;
 use abc\lib\AError;
 use abc\lib\AImage;
@@ -31,8 +32,8 @@ use Exception;
 use PharData;
 use PharException;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -182,7 +183,7 @@ class AHelperUtils extends AHelper{
 		$seo_key = html_entity_decode($string_value, ENT_QUOTES, 'UTF-8');
 		$seo_key = preg_replace('/[^\pL\p{Zs}0-9\s\-_]+/u', '', $seo_key);
 		$seo_key = trim(mb_strtolower($seo_key));
-		$seo_key = str_replace(' ', SEO_URL_SEPARATOR, $seo_key);
+		$seo_key = str_replace(' ', ABC::env('SEO_URL_SEPARATOR'), $seo_key);
 		if (!$object_key_name) {
 			return $seo_key;
 		} else {
@@ -672,7 +673,7 @@ class AHelperUtils extends AHelper{
 			return false;
 		}
 		session_write_close();
-		$session = new ASession(defined('UNIQUE_ID') ? 'AC_SF_' . strtoupper(substr(UNIQUE_ID, 0,10)) : 'AC_SF_PHPSESSID');
+		$session = new ASession(ABC::env('UNIQUE_ID') ? 'AC_SF_' . strtoupper(substr(ABC::env('UNIQUE_ID'), 0,10)) : 'AC_SF_PHPSESSID');
 		foreach ($data as $k => $v) {
 			$session->data[$k] = $v;
 		}

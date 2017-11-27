@@ -18,10 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+use abc\ABC;
+
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
-require_once DIR_ROOT . '/admin/models/tool/migration/interface_migration.php';
+require_once ABC::env('DIR_ROOT') . '/admin/models/tool/migration/interface_migration.php';
 
 class Migration_Cre implements Migration {
 
@@ -42,7 +44,7 @@ class Migration_Cre implements Migration {
 		 * @var \abc\lib\ADB
 		 */
 		if ($migrate_data) {
-			$db_driver = DB_DRIVER;
+			$db_driver = ABC::env('DB_DRIVER');
 			require_once DIR_DATABASE . $db_driver.'.php';
 			$this->src_db = new $db_driver($this->data['db_host'], $this->data['db_user'], $this->data['db_password'], $this->data['db_name'], true);
 		}

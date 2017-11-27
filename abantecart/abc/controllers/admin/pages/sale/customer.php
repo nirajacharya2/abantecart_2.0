@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesSaleCustomer extends AController{
@@ -893,9 +894,9 @@ class ControllerPagesSaleCustomer extends AController{
 			if ($this->config->get('config_url') != $this->model_setting_store->getStoreURL($this->session->data['current_store_id'])){
 				if ($store_settings){
 					if ($store_settings['config_ssl']){
-						$add_store_url = $store_settings['config_ssl_url'] . '?s=' . ADMIN_PATH . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
+						$add_store_url = $store_settings['config_ssl_url'] . '?s=' . ABC::env('ADMIN_PATH') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
 					} else{
-						$add_store_url = $store_settings['config_url'] . '?s=' . ADMIN_PATH . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
+						$add_store_url = $store_settings['config_url'] . '?s=' . ABC::env('ADMIN_PATH') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
 					}
 					abc_redirect($add_store_url);
 				}
@@ -967,7 +968,7 @@ class ControllerPagesSaleCustomer extends AController{
 			$this->error['loginname'] = $this->language->get('error_loginname_notunique');
 		}
 
-		if (mb_strlen($data['email']) > 96 || !preg_match(EMAIL_REGEX_PATTERN, $data['email'])){
+		if (mb_strlen($data['email']) > 96 || !preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])){
 			$this->error['email'] = $this->language->get('error_email');
 		}
 

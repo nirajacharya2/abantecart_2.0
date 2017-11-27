@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AException;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-    header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerCommonListingGrid extends AController {
@@ -39,7 +40,7 @@ class ControllerCommonListingGrid extends AController {
         //Do not load scripts multiple times
         if (!$this->registry->has('jqgrid_script')) {
             $locale = $this->session->data['language'];
-            if (!file_exists(DIR_ROOT . '/' . RDIR_TEMPLATE . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js')) {
+            if (!file_exists(ABC::env('DIR_ROOT') . '/' . RDIR_TEMPLATE . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js')) {
                 $locale = 'en';
             }
             $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js');

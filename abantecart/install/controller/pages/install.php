@@ -19,6 +19,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
+use abc\ABC;
 use abc\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
@@ -223,14 +224,14 @@ class ControllerPagesInstall extends AController{
 		$registry = Registry::getInstance();
 		//This is ran after config is saved and we have database connection now
 		$db = new ADB(array(
-						'driver' => DB_DRIVER,
-						'host' => DB_HOSTNAME,
-						'username' => DB_USERNAME,
-						'password' => DB_PASSWORD,
-						'database' => DB_DATABASE,
-						'prefix'   => DB_PREFIX,
-						'charset'  => DB_CHARSET,
-						'collation'=> DB_COLLATION,
+						'driver' => ABC::env('DB_DRIVER'),
+						'host' => ABC::env('DB_HOSTNAME'),
+						'username' => ABC::env('DB_USERNAME'),
+						'password' => ABC::env('DB_PASSWORD'),
+						'database' => ABC::env('DB_DATABASE'),
+						'prefix'   => ABC::env('DB_PREFIX'),
+						'charset'  => ABC::env('DB_CHARSET'),
+						'collation'=> ABC::env('DB_COLLATION'),
 					));
 		$registry->set('db', $db);
 		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
@@ -306,7 +307,7 @@ class progressbar implements AProgressBar{
 	}
 
 	function get_max(){
-		define('IS_ADMIN', true);
+		ABC::env('IS_ADMIN', true);
 		$language = new ALanguageManager($this->registry, 'en');
 		$language_blocks = $language->getAllLanguageBlocks('english');
 		$language_blocks['admin'] = array_merge($language_blocks['admin'], $language_blocks['extensions']['admin']);
@@ -326,7 +327,7 @@ class progressbar implements AProgressBar{
 	}
 
 	function do_work(){
-		define('IS_ADMIN', true);
+		ABC::env('IS_ADMIN', true);
 		$language = new ALanguageManager($this->registry, 'en');
 		//Load default language (1) English on install only.
 		return $language->definitionAutoLoad(1, 'all', 'all');

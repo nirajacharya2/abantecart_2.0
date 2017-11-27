@@ -18,9 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
-if (! defined ( 'DIR_APP' )) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonTemplateDebug extends AController {
 	public $data = array();
@@ -40,14 +41,14 @@ class ControllerCommonTemplateDebug extends AController {
 		$this->data['name'] = $block_details['block_txt_id'];
 		$this->data['tpl_path'] = $args['block_tpl'];
 		$this->data['controller'] = $block_details['controller'];
-		$this->data['controller_path'] = str_replace(DIR_ROOT . '/', '', $args['block_controller']);
+		$this->data['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['block_controller']);
 		$this->data['parent_block'] = $parent_block['block_txt_id'];
 		$this->data['parent'] = array();
 		$this->data['parent']['id'] = $parent_block['instance_id'];
 		$this->data['parent']['name'] = $parent_block['block_txt_id'];
 		$this->data['parent']['tpl_path'] = $args['parent_tpl'];
 		$this->data['parent']['controller'] = $parent_block['controller'];
-		$this->data['parent']['controller_path'] = str_replace(DIR_ROOT . '/', '', $args['parent_controller']);
+		$this->data['parent']['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['parent_controller']);
 		
 		$this->view->batchAssign($this->data);
 		

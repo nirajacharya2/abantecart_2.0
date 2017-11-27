@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesCommonDoEmbed extends AController {
 	public $data = array();
@@ -137,7 +138,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 			$remote_store_url = $product_stores[0]['store_url'];
 		}
 		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.INDEX_FILE.'?rt=r/embed/js';
+		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
 		$this->data['sf_base_url'] = $remote_store_url;
 		$this->data['help_url'] = $this->gen_help_url('embed');
 
@@ -145,7 +146,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 		$this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/default/css/embed.css';
 		//override css url for extension templates
 		if($template_name != 'default'){
-			$css_file = DIR_ROOT . '/extensions/' . $template_name . '/storefront/view/' . $template_name . '/css/embed.css';
+			$css_file = ABC::env('DIR_ROOT') . '/extensions/' . $template_name . '/storefront/view/' . $template_name . '/css/embed.css';
 			if (is_file($css_file)){
 				$this->data['sf_css_embed_url'] = $remote_store_url . 'extensions/' . $template_name . '/storefront/view/' . $template_name . '/css/embed.css';
 			}
@@ -297,7 +298,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 		$this->data['category_id'] = $this->request->get['category_id'];
 
 		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.INDEX_FILE.'?rt=r/embed/js';
+		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
 		$this->data['sf_base_url'] = $remote_store_url;
 		$this->data['help_url'] = $this->gen_help_url('embed');
 
@@ -431,7 +432,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 
 		$this->data['manufacturer_id'] = $this->request->get['manufacturer_id'];
 		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.INDEX_FILE.'?rt=r/embed/js';
+		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
 		$this->data['sf_base_url'] = $remote_store_url;
 		$this->data['help_url'] = $this->gen_help_url('embed');
 

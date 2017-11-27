@@ -18,8 +18,10 @@ versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+use abc\ABC;
+
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -30,7 +32,7 @@ class AFile_Uploads_Manager extends AFile{
 
 	public function __construct(){
 		parent::__construct();
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AFile_Uploads_Manager');
 		}
 	}

@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * @property AExtensionManager $extension_manager
@@ -52,7 +53,7 @@ class AConfigManager{
 	private $templates = array ();
 
 	public function __construct(){
-		if (!IS_ADMIN){ // forbid for non admin calls
+		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
 			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AConfigManager');
 		}
 		$this->registry = Registry::getInstance();
@@ -174,7 +175,7 @@ class AConfigManager{
 							$error['address'] = $this->language->get('error_address');
 						}
 
-						if (mb_strlen($fields['store_main_email']) > 96 || (!preg_match(EMAIL_REGEX_PATTERN, $fields['store_main_email']))){
+						if (mb_strlen($fields['store_main_email']) > 96 || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $fields['store_main_email']))){
 							$error['email'] = $this->language->get('error_email');
 						}
 
@@ -1179,7 +1180,7 @@ class AConfigManager{
 			return $this->templates[$section];
 		}
 
-		$basedir = $section == 'admin' ? DIR_APP : DIR_STOREFRONT;
+		$basedir = $section == 'admin' ? ABC::env('DIR_APP') : DIR_STOREFRONT;
 
 		$directories = glob($basedir . 'view/*', GLOB_ONLYDIR);
 		//get core templates
@@ -1471,7 +1472,7 @@ class AConfigManager{
 			$cache_drivers[$name] = $name;
 		}
 		sort($cache_drivers, SORT_STRING);
-		$current_cache_driver = strtoupper(defined('CACHE_DRIVER') ? CACHE_DRIVER : 'file');
+		$current_cache_driver = strtoupper(ABC::env('CACHE_DRIVER') ? ABC::env('CACHE_DRIVER') : 'file');
 		unset($cache_drivers[$current_cache_driver]);
 
 		$fields['cache_enable'] = $form->getFieldHtml($props[] = array (

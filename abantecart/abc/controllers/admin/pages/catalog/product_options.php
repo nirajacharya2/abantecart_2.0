@@ -23,8 +23,8 @@ use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\lib\AAttribute_Manager;
 
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesCatalogProductOptions extends AController {
 	private $error = array(); 

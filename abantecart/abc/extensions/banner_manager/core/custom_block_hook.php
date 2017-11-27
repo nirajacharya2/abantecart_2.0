@@ -22,8 +22,8 @@ use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\lib\ALayoutManager;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ExtensionBannerManager extends Extension{

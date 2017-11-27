@@ -18,10 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
+use abc\ABC;
 use abc\lib\AException;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 final class ARouter{
 	/**
@@ -150,7 +151,7 @@ final class ARouter{
 		if ($this->request_type == 'page') {
 			$page_controller = new APage($this->registry);
 
-			if (!defined('IS_ADMIN') || !IS_ADMIN) {
+			if (!ABC::env('IS_ADMIN')) {
 				//Load required controller for storefront
 				$page_controller->addPreDispatch('common/maintenance');
 				$page_controller->addPreDispatch('common/seo_url');
@@ -171,7 +172,7 @@ final class ARouter{
 		} else {
 			if ($this->request_type == 'response') {
 				$resp_controller = new ATypeResponse($this->registry);
-				if (!defined('IS_ADMIN') || !IS_ADMIN) {
+				if (!ABC::env('IS_ADMIN')) {
 					//Load required controller for storefront
 					$resp_controller->addPreDispatch('common/maintenance/response');
 				} else {
@@ -190,7 +191,7 @@ final class ARouter{
 			} else {
 				if ($this->request_type == 'api') {
 					$api_controller = new AAPI($this->registry);
-					if (!defined('IS_ADMIN') || !IS_ADMIN) {
+					if (!ABC::env('IS_ADMIN')) {
 						//CORS pre-flight request
 						$api_controller->addPreDispatch('api/common/preflight');
 						//validate access
@@ -213,7 +214,7 @@ final class ARouter{
 				} else {
 					if ($this->request_type == 'task') {
 						$task_controller = new ATypeTask($this->registry);
-						if (!defined('IS_ADMIN') || !IS_ADMIN) { // do not allow to call task controllers from SF-side
+						if (!ABC::env('IS_ADMIN')) { // do not allow to call task controllers from SF-side
 							$resp_controller = new ATypeResponse($this->registry);
 							$resp_controller->build('error/not_found');
 						} else {
@@ -250,7 +251,7 @@ final class ARouter{
 	 */
 	private function _detect_controller($type){
 		//looking for controller in admin/storefront section
-		$dir_app = DIR_APP . 'controllers/' . (IS_ADMIN === true ? 'admin/' : 'storefront/') . $type . '/';
+		$dir_app = ABC::env('DIR_APP') . 'controllers/' . (ABC::env('IS_ADMIN') === true ? 'admin/' : 'storefront/') . $type . '/';
 		$path_nodes = explode('/', $this->rt);
 		$path_build = '';
 
@@ -259,7 +260,7 @@ final class ARouter{
 		if ($result) {
 			$extension_id = $result['extension'];
 			// set new path if controller was found in admin/storefront section && in extensions section
-			$current_section = IS_ADMIN ? DIRNAME_ADMIN : DIRNAME_STORE;
+			$current_section = ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE;
 			$dir_app = DIR_APP_EXT . $extension_id . '/controllers/' . $current_section . $type . '/';
 		}
 		//process path and try to locate the controller

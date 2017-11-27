@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -25,8 +26,8 @@ use abc\core\engine\HtmlElementFactory;
 use abc\lib\AError;
 use abc\lib\AJson;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 
@@ -405,7 +406,7 @@ class ControllerResponsesFormsManagerFields extends AController {
 		);
 
 		$this->data['entry_upload_dir'] = sprintf($this->language->get('entry_upload_dir'), 'admin/system/uploads/');
-		$uplds_dir = DIR_APP . '/system/uploads';
+		$uplds_dir = ABC::env('DIR_APP') . '/system/uploads';
 		$settgs_dir = $uplds_dir.'/'.trim($this->data['attribute_data']['settings']['directory'], '/');
 		//check or make writable dirs
 		if( !AHelperUtils::is_writable_dir($uplds_dir) || !AHelperUtils::is_writable_dir($settgs_dir) ){

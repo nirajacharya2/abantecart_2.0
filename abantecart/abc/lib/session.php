@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -137,7 +138,7 @@ final class ASession{
 	private function _prepare_session_id($session_id = ''){
 		if (!$session_id || !$this->_is_session_id_valid($session_id)){
 			//if session ID is invalid, generate new one
-			$session_id = uniqid(substr(UNIQUE_ID, 0, 4), true);
+			$session_id = uniqid(substr(ABC::env('UNIQUE_ID'), 0, 4), true);
 			return preg_replace("/[^-,a-zA-Z0-9]/", '', $session_id);
 		} else{
 			return $session_id;

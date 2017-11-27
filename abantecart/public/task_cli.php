@@ -18,9 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 // Required PHP Version
-define('MIN_PHP_VERSION', '5.3.0');
-if (version_compare(phpversion(), MIN_PHP_VERSION, '<') == true){
-	die(MIN_PHP_VERSION . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
+use abc\ABC;
+use abc\lib\ACurrency;
+
+ABC::env('MIN_PHP_VERSION', '7.0.0');
+if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true){
+	die(ABC::env('MIN_PHP_VERSION') . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
 }
 
 if(substr(php_sapi_name(), 0, 3) != 'cli' && !empty($_SERVER['REMOTE_ADDR'])) {
@@ -35,22 +38,22 @@ $root_path = dirname(__FILE__);
 
 // Windows IIS Compatibility  
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-	define('IS_WINDOWS', true);
+	ABC::env('IS_WINDOWS', true);
 	$root_path = str_replace('\\', '/', $root_path);
 }
 
 define('DIR_ROOT', $root_path);
-define('DIR_CORE', DIR_ROOT . '/core/');
+define('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
 
-require_once(DIR_ROOT . '/system/config.php');
+require_once(ABC::env('DIR_ROOT') . '/system/config.php');
 //set server name for correct email sending
-if (defined('SERVER_NAME') && SERVER_NAME != ''){
-	putenv("SERVER_NAME=" . SERVER_NAME);
+if (ABC::env('SERVER_NAME')){
+	putenv("SERVER_NAME=" . ABC::env('SERVER_NAME'));
 }
 // sign of admin side for controllers run from dispatcher
-$_GET['s'] = ADMIN_PATH;
+$_GET['s'] = ABC::env('ADMIN_PATH');
 // Load all initial set up
-require_once(DIR_ROOT . '/core/init.php');
+require_once(ABC::env('DIR_ROOT') . '/core/init.php');
 // not needed anymore
 unset($_GET['s']);
 // Currency for processes that require currency

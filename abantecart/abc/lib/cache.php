@@ -21,8 +21,8 @@ namespace abc\lib;
 use abc\cache\ACacheDriverFile;
 use DirectoryIterator;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -41,7 +41,7 @@ if (!defined ( 'DIR_APP' )){
  * contents available by using a cache key, which is used to name and later retrieve
  * the cache contents.
  *
- * The Object Cache can be replaced by other caching mechanisms by updating CACHE_DRIVER in config.php file
+ * The Object Cache can be replaced by other caching mechanisms by updating CACHE_DRIVER in config/config.php file
  *
  */
 class ACache{

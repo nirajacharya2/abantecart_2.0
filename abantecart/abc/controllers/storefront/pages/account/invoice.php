@@ -18,14 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\lib\AEncryption;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -498,7 +499,7 @@ class ControllerPagesAccountInvoice extends AController{
                 $this->error['order_id'] = $this->language->get('error_order_id');
             }
 
-            if (mb_strlen($this->request->post['email']) > 96 || !preg_match(EMAIL_REGEX_PATTERN, $this->request->post['email'])){
+            if (mb_strlen($this->request->post['email']) > 96 || !preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $this->request->post['email'])){
                 $this->error['email'] = $this->language->get('error_email');
             }
 

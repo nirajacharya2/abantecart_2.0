@@ -18,11 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ModelLocalisationLanguage extends Model{
@@ -38,16 +39,16 @@ class ModelLocalisationLanguage extends Model{
 			foreach ($query->rows as $result){
 				if (empty($result['image'])){
 					$rel_image_path = 'storefront/languages/' . $result['directory'] . '/flag.png';
-					if (file_exists(DIR_ROOT . '/' . $rel_image_path)){
-						$sizes = AHelperUtils::get_image_size(DIR_ROOT . '/' . $rel_image_path);
+					if (file_exists(ABC::env('DIR_ROOT') . '/' . $rel_image_path)){
+						$sizes = AHelperUtils::get_image_size(ABC::env('DIR_ROOT') . '/' . $rel_image_path);
 						$result['image'] = $rel_image_path;
 						$result['image_width'] = $sizes['width'];
 						$result['image_height'] = $sizes['height'];
 					}
 				} else{
 					$rel_image_path = $result['image'];
-					if (file_exists(DIR_ROOT . '/' . $rel_image_path)){
-						$sizes = AHelperUtils::get_image_size(DIR_ROOT . '/' . $rel_image_path);
+					if (file_exists(ABC::env('DIR_ROOT') . '/' . $rel_image_path)){
+						$sizes = AHelperUtils::get_image_size(ABC::env('DIR_ROOT') . '/' . $rel_image_path);
 						$result['image'] = $rel_image_path;
 						$result['image_width'] = $sizes['width'];
 						$result['image_height'] = $sizes['height'];

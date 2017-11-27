@@ -21,14 +21,15 @@
 namespace abc\core\engine;
 
 use abantecart\install\model\ModelInstall;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
 use abc\lib\AWarning;
 use abc\lib\AException;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ALanguage{
@@ -69,7 +70,7 @@ class ALanguage{
 	public function __construct($registry, $code = '', $section = 0){
 		$this->registry = $registry;
 		if ($section === '') {
-			$this->is_admin = ((!defined('IS_ADMIN') || !IS_ADMIN) ? 0 : 1);
+			$this->is_admin = (!ABC::env('IS_ADMIN') ? 0 : 1);
 		} else {
 			$this->is_admin = (int)$section;
 		}
@@ -115,7 +116,7 @@ class ALanguage{
 		//current active language details
 		$this->language_details = $this->getLanguageDetails($this->code);
 
-		$root_path = defined(INSTALL) ? DIR_ABANTECART : DIR_APP;
+		$root_path = defined(INSTALL) ? DIR_ABANTECART : ABC::env('DIR_APP');
 		if ($this->is_admin) {
 			$this->language_path = $root_path . 'languages/' . $this->language_details['directory'] . '/admin/';
 		} else {
@@ -185,7 +186,7 @@ class ALanguage{
 			$e = new AError($log_message);
 			$e->toDebug()->toLog();
 			$result = "Not described error happened.";
-			if (IS_ADMIN === true) {
+			if (ABC::env('IS_ADMIN') === true) {
 				$result .= "Check log for details. Code [" . $ts . "]";
 			}
 		}

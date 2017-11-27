@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if (!defined ( 'DIR_APP' )){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesCheckoutGuestStep1 extends AController{
@@ -604,7 +605,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController{
 			$this->error['lastname'] = $this->language->get('error_lastname');
 		}
 
-		if (!preg_match(EMAIL_REGEX_PATTERN, $data['email'])){
+		if (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])){
 			$this->error['email'] = $this->language->get('error_email');
 		}
 

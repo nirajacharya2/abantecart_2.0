@@ -20,13 +20,14 @@
 
 namespace abc\models\admin;
 
+use abc\ABC;
 use abc\core\engine\Model;
 use abc\lib\AException;
 use abc\lib\AMenu_Storefront;
 use abc\lib\ATaskManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ModelLocalisationLanguage extends Model{
@@ -99,7 +100,7 @@ class ModelLocalisationLanguage extends Model{
 		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("languages") . " WHERE language_id = '" . (int)$language_id . "'");
 		$result = $query->row;
 		if (!$result['image']) {
-			if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')) {
+			if (file_exists(ABC::env('DIR_ROOT') . '/admin/languages/' . $result['directory'] . '/flag.png')) {
 				$result['image'] = HTTP_ABANTECART . 'admin/languages/' . $result['directory'] . '/flag.png';
 			}
 		} else {
@@ -176,7 +177,7 @@ class ModelLocalisationLanguage extends Model{
 			$result = $query->rows;
 			foreach ($result as $i => $row) {
 				if (empty($row['image'])) {
-					if (file_exists(DIR_ROOT . '/admin/languages/' . $row['directory'] . '/flag.png')) {
+					if (file_exists(ABC::env('DIR_ROOT') . '/admin/languages/' . $row['directory'] . '/flag.png')) {
 						$result[$i]['image'] = 'admin/languages/' . $row['directory'] . '/flag.png';
 					}
 				} else {
@@ -194,7 +195,7 @@ class ModelLocalisationLanguage extends Model{
 
 				foreach ($query->rows as $result) {
 					if (empty($result['image'])) {
-						if (file_exists(DIR_ROOT . '/admin/languages/' . $result['directory'] . '/flag.png')) {
+						if (file_exists(ABC::env('DIR_ROOT') . '/admin/languages/' . $result['directory'] . '/flag.png')) {
 							$result['image'] = 'admin/languages/' . $result['directory'] . '/flag.png';
 						}
 					}

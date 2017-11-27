@@ -18,17 +18,16 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc;
-
 $dir_app = dirname(__DIR__) . '/abc/';
+require $dir_app.'abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-	define('IS_WINDOWS', true);
+	ABC::env('IS_WINDOWS', true);
 	$dir_app = str_replace('\\', '/', $dir_app);
 }
-define('INDEX_FILE', basename(__FILE__));
+ABC::env('INDEX_FILE', basename(__FILE__));
 
 // Load all initial set up and Configuration
 $config = require $dir_app.'config/config.php';
-require $dir_app.'abc.php';
 $app = new ABC($config);
 $app->run();

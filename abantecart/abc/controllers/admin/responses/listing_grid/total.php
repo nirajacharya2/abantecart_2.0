@@ -18,13 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AError;
 use abc\lib\AJson;
 use stdClass;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesListingGridTotal extends AController {
 	public $data = array();
@@ -49,7 +50,7 @@ class ControllerResponsesListingGridTotal extends AController {
 			foreach ($ext->rows as $row) {
 				$language_rt = $config_controller = '';
 				// for total-extensions inside engine
-				if (is_file(DIR_APP . 'controllers/pages/total/' . $row['key'] . '.php')) {
+				if (is_file(ABC::env('DIR_APP') . 'controllers/pages/total/' . $row['key'] . '.php')) {
 					$config_controller = $language_rt = 'total/' . $row['key'];
 				} else {
 					// looking for config controller into parent extension.
@@ -76,7 +77,7 @@ class ControllerResponsesListingGridTotal extends AController {
 		}
 
 		//looking for uninstalled engine's total-extensions
-		$files = glob(DIR_APP . 'controllers/pages/total/*.php');
+		$files = glob(ABC::env('DIR_APP') . 'controllers/pages/total/*.php');
 		if ($files) {
 			foreach ($files as $file) {
 				$id = basename($file, '.php');

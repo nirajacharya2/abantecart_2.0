@@ -23,8 +23,8 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperSystemCheck;
 use abc\core\helper\AHelperUtils;
 
-if (! defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header ( 'Location: assets/static_pages/' );
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesIndexLogin extends AController {

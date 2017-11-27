@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\core\helper;
+use abc\ABC;
 use abc\core\engine\Registry;
 use abc\lib\AError;
 use abc\lib\ALanguageManager;
@@ -25,8 +26,8 @@ use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 class AHelperSystemCheck extends AHelper{
@@ -45,10 +46,10 @@ class AHelperSystemCheck extends AHelper{
 		$mlog[] = self::check_install_directory();
 
 		if ( //run on admin side
-				(IS_ADMIN === true && (!$registry->get('config')->get('config_system_check') || $registry->get('config')->get('config_system_check') == 1))
+				(ABC::env('IS_ADMIN') === true && (!$registry->get('config')->get('config_system_check') || $registry->get('config')->get('config_system_check') == 1))
 				||
 				//run on storefront side
-				(IS_ADMIN !== true && (!$registry->get('config')->get('config_system_check') || $registry->get('config')->get('config_system_check') == 2))
+				(ABC::env('IS_ADMIN') !== true && (!$registry->get('config')->get('config_system_check') || $registry->get('config')->get('config_system_check') == 2))
 		) {
 
 			$mlog = array_merge($mlog, self::check_file_permissions($registry));
@@ -90,7 +91,7 @@ class AHelperSystemCheck extends AHelper{
 
 	static function check_install_directory(){
 		//check if install dir existing. warn
-		if (file_exists(DIR_ROOT . '/install')) {
+		if (file_exists(ABC::env('DIR_ROOT') . '/install')) {
 			return array (
 					'title' => 'Security warning',
 					'body'  => 'You still have install directory present in your AbanteCart main directory. It is highly recommended to delete install directory.',
@@ -107,7 +108,7 @@ class AHelperSystemCheck extends AHelper{
 	static function check_file_permissions($registry){
 		//check file permissions.
 		$ret_array = array ();
-		$index = DIR_ROOT . '/index.php';
+		$index = ABC::env('DIR_ROOT') . '/index.php';
 		if (is_writable($index) || substr(sprintf("%o", fileperms($index)), -3) == '777') {
 			$ret_array[] = array (
 					'title' => 'Incorrect index.php file permissions',
@@ -125,7 +126,7 @@ class AHelperSystemCheck extends AHelper{
 		}
 
 		//if cache is enabled
-		if ($registry->get('config')->get('config_cache_enable') && CACHE_DRIVER == 'file') {
+		if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE_DRIVER') == 'file') {
 			$cache_files = self::get_all_files_dirs(DIR_SYSTEM . 'cache/');
 			$cache_message = '';
 			foreach ($cache_files as $file) {
@@ -157,7 +158,7 @@ class AHelperSystemCheck extends AHelper{
 			);
 		}
 		//check resource directories
-		$resource_files = self::get_all_files_dirs(DIR_ROOT . '/resources/');
+		$resource_files = self::get_all_files_dirs(ABC::env('DIR_ROOT') . '/resources/');
 		$resource_message = '';
 		foreach ($resource_files as $file) {
 			if (in_array(basename($file), array ('.htaccess', 'index.php', 'index.html', '.', '', '..'))) {
@@ -193,34 +194,34 @@ class AHelperSystemCheck extends AHelper{
 			);
 		}
 
-		if (!is_writable(DIR_ROOT . '/admin/system')) {
+		if (!is_writable(ABC::env('DIR_ROOT') . '/admin/system')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect directory permission',
-					'body'  => DIR_ROOT . '/admin/system' . ' directory needs to be set to full permissions(777)! AbanteCart backups and upgrade will not work.',
+					'body'  => ABC::env('DIR_ROOT') . '/admin/system' . ' directory needs to be set to full permissions(777)! AbanteCart backups and upgrade will not work.',
 					'type'  => 'W'
 			);
 		}
 
-		if (is_dir(DIR_ROOT . '/admin/system/backup') && !is_writable(DIR_ROOT . '/admin/system/backup')) {
+		if (is_dir(ABC::env('DIR_ROOT') . '/admin/system/backup') && !is_writable(ABC::env('DIR_ROOT') . '/admin/system/backup')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect backup directory permission',
-					'body'  => DIR_ROOT . '/admin/system/backup' . ' directory needs to be set to full permissions(777)! AbanteCart backups and upgrade will not work.',
+					'body'  => ABC::env('DIR_ROOT') . '/admin/system/backup' . ' directory needs to be set to full permissions(777)! AbanteCart backups and upgrade will not work.',
 					'type'  => 'W'
 			);
 		}
 
-		if (is_dir(DIR_ROOT . '/admin/system/temp') && !is_writable(DIR_ROOT . '/admin/system/temp')) {
+		if (is_dir(ABC::env('DIR_ROOT') . '/admin/system/temp') && !is_writable(ABC::env('DIR_ROOT') . '/admin/system/temp')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect temp directory permission',
-					'body'  => DIR_ROOT . '/admin/system/temp' . ' directory needs to be set to full permissions(777)!',
+					'body'  => ABC::env('DIR_ROOT') . '/admin/system/temp' . ' directory needs to be set to full permissions(777)!',
 					'type'  => 'W'
 			);
 		}
 
-		if (is_dir(DIR_ROOT . '/admin/system/uploads') && !is_writable(DIR_ROOT . '/admin/system/uploads')) {
+		if (is_dir(ABC::env('DIR_ROOT') . '/admin/system/uploads') && !is_writable(ABC::env('DIR_ROOT') . '/admin/system/uploads')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect "uploads" directory permission',
-					'body'  => DIR_ROOT . '/admin/system/uploads' . ' directory needs to be set to full permissions(777)! Probably AbanteCart file uploads will not work.',
+					'body'  => ABC::env('DIR_ROOT') . '/admin/system/uploads' . ' directory needs to be set to full permissions(777)! Probably AbanteCart file uploads will not work.',
 					'type'  => 'W'
 			);
 		}
@@ -314,7 +315,7 @@ class AHelperSystemCheck extends AHelper{
 		//check server configurations.
 		$ret_array = array ();
 
-		$size = self::disk_size(DIR_ROOT);
+		$size = self::disk_size(ABC::env('DIR_ROOT'));
 		//check for size to drop below 10mb
 		if (isset($size['bytes']) && $size['bytes'] < 1024 * 10000) {
 			$ret_array[] = array (
@@ -326,7 +327,7 @@ class AHelperSystemCheck extends AHelper{
 
 		//if SEO is enabled
 		if ($registry->get('config')->get('enable_seo_url')) {
-			$htaccess = DIR_ROOT . '/.htaccess';
+			$htaccess = ABC::env('DIR_ROOT') . '/.htaccess';
 			if (!file_exists($htaccess)) {
 				$ret_array[] = array (
 						'title' => 'SEO URLs does not work',
@@ -428,7 +429,7 @@ class AHelperSystemCheck extends AHelper{
 		$ret_array = array ();
 
 		foreach ($areas as $subfolder => $rules) {
-			$dirname = DIR_ROOT . '/' . $subfolder;
+			$dirname = ABC::env('DIR_ROOT') . '/' . $subfolder;
 			if (!is_dir($dirname)) {
 				continue;
 			}

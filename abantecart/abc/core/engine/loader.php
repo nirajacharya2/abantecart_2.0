@@ -19,12 +19,13 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\engine;
+use abc\ABC;
 use abc\lib\AConfig;
 use abc\lib\AException;
 use abc\lib\AWarning;
 
-if (!defined ( 'DIR_APP' )) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -85,17 +86,16 @@ final class ALoader{
 		}
 
 		//mode to force load storefront model
-		if ($mode == 'storefront' || IS_ADMIN !== true) {
-			$section = DIR_APP . 'models/storefront/';
+		if ($mode == 'storefront' || ABC::env('IS_ADMIN') !== true) {
+			$section = ABC::env('DIR_APP') . 'models/storefront/';
 			$namespace = "\abc\models\storefront";
 		} else {
-			$section = DIR_APP . 'models/admin/';
+			$section = ABC::env('DIR_APP') . 'models/admin/';
 			$namespace = "\abc\models\admin";
 		}
 
 		$file = $section . $model . '.php';
-		if ($this->registry->has('extensions') && $result = $this->extensions->isExtensionResource('M', $model, $force,
-						$mode)
+		if ($this->registry->has('extensions') && $result = $this->extensions->isExtensionResource('M', $model, $force,	$mode)
 		) {
 			if (is_file($file)) {
 				$warning = new AWarning("Extension <b>{$result['extension']}</b> override model <b>$model</b>");

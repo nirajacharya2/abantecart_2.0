@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\lib\AException;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN) {
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 if (defined('IS_DEMO') && IS_DEMO) {
 	header('Location: assets/static_pages/demo_mode.php');
@@ -371,7 +372,7 @@ class ControllerPagesToolMigration extends AController {
 		//check db connection
 		if (!$this->error) {
 			try {
-				$db_driver = DB_DRIVER;
+				$db_driver = ABC::env('DB_DRIVER');
 				require_once DIR_DATABASE . $db_driver.'.php';
 				$connection = new $db_driver($this->request->post['db_host'], $this->request->post['db_user'], $this->request->post['db_password'], $this->request->post['db_name'], true);
 			} catch (AException $e) {

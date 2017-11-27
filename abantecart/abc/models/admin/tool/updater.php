@@ -18,12 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\engine\Model;
 use abc\lib\AConnect;
 use abc\lib\AExtensionManager;
 
-if (!defined ( 'DIR_APP' ) || !IS_ADMIN){
-	header('Location: assets/static_pages/');
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -102,7 +103,7 @@ class ModelToolUpdater extends Model{
 
 		$this->load->model('tool/mp_api');
 		$url = $this->model_tool_mp_api->getMPURL() . '?rt=a/product/updates';
-		$url .= "&store_id=" . UNIQUE_ID;
+		$url .= "&store_id=" . ABC::env('UNIQUE_ID');
 		$url .= "&store_ip=" . $_SERVER ['SERVER_ADDR'];
 		$url .= "&store_url=" . HTTP_SERVER;
 		$url .= "&software_name=AbanteCart";
