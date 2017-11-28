@@ -61,7 +61,7 @@ class AException extends Exception{
 	public function displayError(){
 		$this->error->toDebug();
 		//Fatal error
-		if ($this->code >= 10000 && !defined('INSTALL')){
+		if ($this->code >= 10000 && !ABC::env('INSTALL')){
 			if ($this->registry && $this->registry->get('session')){
 				$this->registry->get('session')->data['exception_msg'] = $this->error->msg;
 			} else{

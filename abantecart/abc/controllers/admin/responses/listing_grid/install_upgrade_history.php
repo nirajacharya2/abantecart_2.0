@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AJson;
 use stdClass;
@@ -96,7 +97,7 @@ class ControllerResponsesListingGridInstallUpgradeHistory extends AController {
 						break;
 				}
 
-				if(is_file(DIR_BACKUP.$result ['backup_file'])){
+				if(is_file(ABC::env('DIR_BACKUP').$result ['backup_file'])){
 					$link = '<a target="_blank" title="'.$this->language->get ( 'text_download' ).'" href="'.$this->html->getSecureURL('tool/backup/download','&filename='.urlencode($result ['backup_file']) ).'">'.$result ['backup_file'].'</a>';
 				}else{
 					$link = $result ['backup_file'];

@@ -1,8 +1,8 @@
 <?php
 /**
- * @var AView $this
+ * @var \abc\core\engine\AView $this
  */
-?>
+use abc\ABC; ?>
 <title><?php echo $title; ?></title>
 <meta charset="UTF-8">
 <!--[if IE]>
@@ -14,13 +14,13 @@
 <?php if ($description) { ?>
 <meta name="description" content="<?php echo $description; ?>" />
 <?php } ?>
-<meta name="generator" content="AbanteCart v<?php echo VERSION; ?> - Open Source eCommerce solution" />
+<meta name="generator" content="AbanteCart v<?php echo ABC::env('VERSION'); ?> - Open Source eCommerce solution" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <base href="<?php echo $base; ?>" />
 
-<?php if ( is_file( DIR_RESOURCE . $icon ) ) {  ?>
+<?php if ( is_file( ABC::env('DIR_RESOURCE') . $icon ) ) {  ?>
 <link href="assets/resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 

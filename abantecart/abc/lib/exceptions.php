@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
+use abc\ABC;
 use abc\core\engine\Registry;
 use abc\lib\AException;
 
@@ -25,8 +26,8 @@ if (!class_exists('abc\ABC')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-require_once(DIR_LIB . 'exceptions/exception_codes.php');
-require_once(DIR_LIB . 'exceptions/exception.php');
+require_once(ABC::env('DIR_LIB') . 'exceptions/exception_codes.php');
+require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
 
 /**
  * called for php errors
@@ -93,7 +94,7 @@ function ac_exception_handler($e){
 			}
 		}
 		//do we have fatal error and need to end?
-		if ($e->errorCode() >= 10000 && !defined('INSTALL')){
+		if ($e->errorCode() >= 10000 && !ABC::env('INSTALL')){
 			$e->showErrorPage();
 		} else{
 			//nothing critical

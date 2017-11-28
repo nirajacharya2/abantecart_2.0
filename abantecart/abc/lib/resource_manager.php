@@ -119,22 +119,22 @@ class AResourceManager extends AResource{
 		}
 		$resource_path = $this->getHexPath($resource_id) . strtolower(substr(strrchr($file_path, '.'), 0));
 		$resource_dir = dirname($resource_path);
-		if (!is_dir(DIR_RESOURCE . $this->type_dir . $resource_dir)) {
+		if (!is_dir(ABC::env('DIR_RESOURCE') . $this->type_dir . $resource_dir)) {
 			$path = '';
 			$directories = explode('/', $resource_dir);
 			foreach ($directories as $directory) {
 				$path = $path . '/' . $directory;
-				if (!is_dir(DIR_RESOURCE . $this->type_dir . $path)) {
-					if (!is_dir(DIR_RESOURCE . $this->type_dir)) {
-						@mkdir(DIR_RESOURCE . $this->type_dir, 0777);
+				if (!is_dir(ABC::env('DIR_RESOURCE') . $this->type_dir . $path)) {
+					if (!is_dir(ABC::env('DIR_RESOURCE') . $this->type_dir)) {
+						@mkdir(ABC::env('DIR_RESOURCE') . $this->type_dir, 0777);
 					}
-					@mkdir(DIR_RESOURCE . $this->type_dir . $path, 0777);
-					chmod(DIR_RESOURCE . $this->type_dir . $path, 0777);
+					@mkdir(ABC::env('DIR_RESOURCE') . $this->type_dir . $path, 0777);
+					chmod(ABC::env('DIR_RESOURCE') . $this->type_dir . $path, 0777);
 				}
 			}
 		}
-		if (is_file(DIR_RESOURCE . $this->type_dir . $resource_path)) {
-			unlink(DIR_RESOURCE . $this->type_dir . $resource_path);
+		if (is_file(ABC::env('DIR_RESOURCE') . $this->type_dir . $resource_path)) {
+			unlink(ABC::env('DIR_RESOURCE') . $this->type_dir . $resource_path);
 		}
 		return $resource_path;
 	}
@@ -171,10 +171,10 @@ class AResourceManager extends AResource{
 				return false;
 			}
 			//move file
-			$result = rename(DIR_RESOURCE . $this->type_dir . $resource['resource_path'],
-							DIR_RESOURCE . $this->type_dir . $resource_path);
+			$result = rename(ABC::env('DIR_RESOURCE') . $this->type_dir . $resource['resource_path'],
+							ABC::env('DIR_RESOURCE') . $this->type_dir . $resource_path);
 			if (!$result) {
-				$message = "Error: Cannot move resource to resources directory. Please check permissions of " . dirname(DIR_RESOURCE . $this->type_dir . $resource_path) . ' directory!';
+				$message = "Error: Cannot move resource to resources directory. Please check permissions of " . dirname(ABC::env('DIR_RESOURCE') . $this->type_dir . $resource_path) . ' directory!';
 				$error = new AError ($message);
 				$error->toLog()->toDebug();
 				//remove resource on fail
@@ -267,7 +267,7 @@ class AResourceManager extends AResource{
 
 		foreach ($resource['name'] as $lang_id => $name) {
 			$name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
-			$filemask = DIR_IMAGE . 'thumbnails/' . dirname($resource['resource_path']) . '/' . $name . '-' . $resource_id . '-*';
+			$filemask = ABC::env('DIR_IMAGE') . 'thumbnails/' . dirname($resource['resource_path']) . '/' . $name . '-' . $resource_id . '-*';
 			$file_list = glob($filemask, GLOB_NOSORT);
 			if ($file_list) {
 				foreach ($file_list as $thumb) {
@@ -296,8 +296,8 @@ class AResourceManager extends AResource{
 			return false;
 		}
 
-		if ($resource['resource_path'] && is_file(DIR_RESOURCE . $resource['type_name'] . '/' . $resource['resource_path'])) {
-			unlink(DIR_RESOURCE . $resource['type_name'] . '/' . $resource['resource_path']);
+		if ($resource['resource_path'] && is_file(ABC::env('DIR_RESOURCE') . $resource['type_name'] . '/' . $resource['resource_path'])) {
+			unlink(ABC::env('DIR_RESOURCE') . $resource['type_name'] . '/' . $resource['resource_path']);
 		}
 		//remove thumbnail before removing
 		$this->deleteThumbnail($resource_id);
@@ -366,8 +366,8 @@ class AResourceManager extends AResource{
 			$ids[] = $resource_id;
 			$this->cache->remove('resources');
 
-			if ($resource['resource_path'] && is_file(DIR_RESOURCE . $resource['type_name'] . '/' . $resource['resource_path'])) {
-				unlink(DIR_RESOURCE . $resource['type_name'] . '/' . $resource['resource_path']);
+			if ($resource['resource_path'] && is_file(ABC::env('DIR_RESOURCE') . $resource['type_name'] . '/' . $resource['resource_path'])) {
+				unlink(ABC::env('DIR_RESOURCE') . $resource['type_name'] . '/' . $resource['resource_path']);
 			}
 		}
 

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AError;
 use abc\lib\AException;
@@ -281,7 +282,7 @@ class ControllerTaskSaleContact extends AController{
 		}
 		//use safe usage
 		try{
-			include_once(DIR_EXT . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
+			include_once(ABC::env('DIR_EXT') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			//if class of driver
 			$classname = '\abc\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 			if (!class_exists($classname)){

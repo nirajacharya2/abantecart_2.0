@@ -108,7 +108,7 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
-		tinymce.baseURL = "<?php echo $template_dir; ?>js/tinymce";
+		tinymce.baseURL = "<?php echo $this->templateResource('js/tinymce'); ?>";
 
 		tinymce.init(mcei);
 

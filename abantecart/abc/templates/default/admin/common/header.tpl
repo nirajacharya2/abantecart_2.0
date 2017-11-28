@@ -13,7 +13,7 @@ if ($logged){ ?>
 					echo $this->getHookVar('logoimage_hookvar');
 				} else{
 					?>
-					<img class="logo_image" src="<?php echo $template_dir; ?>images/logo.png" width="190"
+					<img class="logo_image" src="<?php echo $this->templateResource('images/logo.png'); ?>" width="190"
 						 title="<?php echo $heading_title; ?>"/>
 					<?php
 				}
@@ -216,7 +216,7 @@ if ($logged){ ?>
 
 	<!-- modals location outside of headerbar -->
 <?php if ($config_voicecontrol){ ?>
-	<?php include($template_dir . '/common/voice_controls.tpl'); ?>
+	<?php include($tpl_common_dir . 'voice_controls.tpl'); ?>
 <?php }
 
 echo $this->html->buildElement(
@@ -387,7 +387,7 @@ echo $this->html->buildElement(
 					echo $this->getHookVar('logoimage_hookvar');
 				} else{
 					?>
-					<img class="logo_image" src="<?php echo $template_dir; ?>images/logo.png"
+					<img class="logo_image" src="<?php echo $this->templateResource('images/logo.png'); ?>"
 						 title="<?php echo $heading_title; ?>"/>
 					<?php
 				}

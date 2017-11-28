@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
@@ -161,7 +162,7 @@ final class AMail{
 	 */
 	public function send(){
 
-		if (defined('IS_DEMO') && IS_DEMO){
+		if (ABC::env('IS_DEMO')){
 			return null;
 		}
 

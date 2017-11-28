@@ -260,8 +260,8 @@ final class ARouter{
 		if ($result) {
 			$extension_id = $result['extension'];
 			// set new path if controller was found in admin/storefront section && in extensions section
-			$current_section = ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE;
-			$dir_app = DIR_APP_EXT . $extension_id . '/controllers/' . $current_section . $type . '/';
+			$current_section = ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
+			$dir_app = ABC::env('DIR_APP_EXT') . $extension_id . '/controllers/' . $current_section . $type . '/';
 		}
 		//process path and try to locate the controller
 		foreach ($path_nodes as $path_node) {

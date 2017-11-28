@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\engine\Model;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
@@ -44,7 +45,7 @@ class ModelSettingExtension extends Model {
 		$output = array();
 		$output[] = array('' => '');
 		foreach($query->rows as $row){
-			if(file_exists(DIR_APP_EXT.$row['key'].DIRNAME_CORE.'lib/handler.php')){
+			if(file_exists(ABC::env('DIR_APP_EXT').$row['key'].ABC::env('DIRNAME_CORE').'lib/handler.php')){
 				$output[] = $row;
 			}
 		}

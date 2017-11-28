@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AAttribute_Manager;
 use abc\lib\AError;
@@ -52,7 +53,7 @@ class ControllerResponsesListingGridDownload extends AController {
 		$results = $this->model_catalog_download->getDownloads($filter_data);
 		$i = 0;
 		foreach ($results as $result) {
-			if (!is_file(DIR_RESOURCE . $result[ 'filename' ])) {
+			if (!is_file(ABC::env('DIR_RESOURCE') . $result[ 'filename' ])) {
 				$response->userdata->classes[ $result[ 'download_id' ] ] = 'warning';
 			}
 			$response->rows[ $i ][ 'id' ] = $result[ 'download_id' ];

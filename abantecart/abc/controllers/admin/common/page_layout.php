@@ -19,6 +19,7 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
@@ -35,12 +36,12 @@ class ControllerCommonPageLayout extends AController{
 
 		if (!$this->registry->has('layouts_manager_script')) {
 			$this->document->addStyle(array (
-					'href' => RDIR_TEMPLATE . 'css/layouts-manager.css',
+					'href' => ABC::env('RDIR_ASSETS') . 'css/layouts-manager.css',
 					'rel'  => 'stylesheet'
 			));
 
-			$this->document->addScript(RDIR_TEMPLATE . 'js/jquery/sortable.js');
-			$this->document->addScript(RDIR_TEMPLATE . 'js/layouts-manager.js');
+			$this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jquery/sortable.js');
+			$this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/layouts-manager.js');
 
 			//set flag to not include scripts/css twice
 			$this->registry->set('layouts_manager_script', true);

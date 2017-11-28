@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -381,7 +382,7 @@ class ControllerResponsesListingGridBannerManager extends AController {
 
 			$action = '<a class="btn_action" href="JavaScript:void(0);"
 						onclick="showPopup(\'' . $this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $result['banner_id']) . '\')" title="' . $this->language->get('text_view') . '">' .
-					'<img height="27" src="' . RDIR_TEMPLATE . 'images/icons/icon_grid_view.png" alt="' . $this->language->get('text_edit') . '" /></a>';
+					'<img height="27" src="' . $this->view->templateResource('images/icons/icon_grid_view.png').'" alt="' . $this->language->get('text_edit') . '" /></a>';
 
 
 			$response->rows[$i]['id'] = $result['banner_id'];

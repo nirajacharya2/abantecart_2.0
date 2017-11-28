@@ -8,7 +8,7 @@
 	<?php echo $product_tabs ?>
 	  <div class="toolbar">
 	    <?php if ( !empty ($help_url) ) : ?>
-	        <div class="help_element"><a href="<?php echo $help_url; ?>" target="new"><img src="<?php echo $template_dir; ?>images/icons/help.png"/></a></div>
+	        <div class="help_element"><a href="<?php echo $help_url; ?>" target="new"><img src="<?php echo $this->templateResource('images/icons/help.png'); ?>"/></a></div>
 	    <?php endif; ?>
       </div>
   </div></div></div>

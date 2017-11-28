@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AError;
@@ -28,7 +29,7 @@ if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
 	header('Location: assets/static_pages/demo_mode.php');
 }
 
@@ -65,7 +66,7 @@ class ControllerResponsesSaleContact extends AController {
 										));
 			}else{
 				$task_details['task_api_key'] = $task_api_key;
-				$task_details['url'] = HTTPS_SERVER.'task.php';
+				$task_details['url'] = ABC::env('HTTPS_SERVER').'task.php';
 				$this->data['output']['task_details'] = $task_details;
 			}
 
@@ -199,7 +200,7 @@ class ControllerResponsesSaleContact extends AController {
 										));
 			}else{
 				$task_details['task_api_key'] = $task_api_key;
-				$task_details['url'] = HTTPS_SERVER . 'task.php';
+				$task_details['url'] = ABC::env('HTTPS_SERVER') . 'task.php';
 				//change task status
 				$task_details['status'] = $tm::STATUS_READY;
 				$tm->updateTask($task_id, array('status' => $tm::STATUS_READY));

@@ -1,4 +1,5 @@
 <?php
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AConfig;
 use abc\lib\AExtensionManager;
@@ -18,36 +19,37 @@ $lib_list = array(
 					'backup',
 					'file_uploads_manager',
 					'admin_commands',
-					'im_manager');
-
-// Include Engine
+					'im_manager'
+);
+//load admin libraries
+$dir_lib = ABC::env('DIR_LIB');
 foreach($lib_list as $lib_name){
-	require_once DIR_LIB . $lib_name .'.php';
+	require_once $dir_lib . $lib_name .'.php';
 }
 unset($lib_list);
 
 
 
-define('HTTP_DIR_NAME', rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') );
+ABC::env('HTTP_DIR_NAME', rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') );
 // Admin HTTP
-define('AUTO_SERVER', '//' . REAL_HOST . HTTP_DIR_NAME . '/');
-define('HTTP_SERVER', 'http:' . AUTO_SERVER);
-define('HTTP_CATALOG', HTTP_SERVER);
-//define('HTTP_EXT', HTTP_SERVER . 'extensions/');
-define('HTTP_IMAGE', HTTP_SERVER . 'assets/images/');
-define('HTTP_DIR_RESOURCE', HTTP_SERVER . 'assets/resources/');
+ABC::env('AUTO_SERVER', '//' . ABC::env('REAL_HOST') . ABC::env('HTTP_DIR_NAME') . '/');
+ABC::env('HTTP_SERVER', 'http:' . ABC::env('AUTO_SERVER'));
+ABC::env('HTTP_CATALOG', ABC::env('HTTP_SERVER'));
+ABC::env('HTTP_EXT', ABC::env('HTTP_SERVER') . 'extensions/');
+ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER') . 'assets/images/');
+ABC::env('HTTP_DIR_RESOURCE', ABC::env('HTTP_SERVER') . 'assets/resources/');
 //we use Protocol-relative URLs here
-define('HTTPS_IMAGE', AUTO_SERVER . 'assets/images/');
-define('HTTPS_DIR_RESOURCE', AUTO_SERVER . 'assets/resources/');
+ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER') . 'assets/images/');
+ABC::env('HTTPS_DIR_RESOURCE', ABC::env('AUTO_SERVER') . 'assets/resources/');
 //Admin HTTPS
-if ( HTTPS === true) {
-	define('HTTPS_SERVER', 'https:' . AUTO_SERVER);
-	define('HTTPS_CATALOG', HTTPS_SERVER);
-	define('HTTPS_EXT', HTTPS_SERVER . 'assets/extensions/');
+if ( ABC::env('HTTPS') ) {
+	ABC::env('HTTPS_SERVER', 'https:' . ABC::env('AUTO_SERVER'));
+	ABC::env('HTTPS_CATALOG', ABC::env('HTTPS_SERVER'));
+	ABC::env('HTTPS_EXT', ABC::env('HTTPS_SERVER') . 'assets/extensions/');
 } else {
-	define('HTTPS_SERVER', HTTP_SERVER);
-	define('HTTPS_CATALOG', HTTP_CATALOG);
-	define('HTTPS_EXT', HTTP_EXT);
+	ABC::env('HTTPS_SERVER', ABC::env('HTTP_SERVER'));
+	ABC::env('HTTPS_CATALOG', ABC::env('HTTP_CATALOG'));
+	ABC::env('HTTPS_EXT', ABC::env('HTTP_EXT'));
 }
 //Admin specific loads
 
@@ -62,4 +64,5 @@ if (AHelperUtils::has_value($request->get['store_id']) || AHelperUtils::has_valu
 
 // Admin template load
 // Relative paths and directories
-define('RDIR_TEMPLATE',  'assets/templates/default/admin/');
+ABC::env('RDIR_ASSETS',  'assets/templates/default/admin/');
+ABC::env('RDIR_TEMPLATE',  'templates/default/admin/');

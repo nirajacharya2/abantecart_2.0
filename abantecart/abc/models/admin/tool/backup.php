@@ -144,12 +144,12 @@ class ModelToolBackup extends Model{
 		$bkp->dumpTables($tables);
 
 		if ($rl){
-			$bkp->backupDirectory(DIR_RESOURCE, false);
+			$bkp->backupDirectory(ABC::env('DIR_RESOURCE'), false);
 		}
 		if ($config){
 			$bkp->backupFile(ABC::env('DIR_ROOT') . '/config/config.php', false);
 		}
-		$result = $bkp->archive(DIR_BACKUP . $bkp->getBackupName() . '.tar.gz', DIR_BACKUP, $bkp->getBackupName());
+		$result = $bkp->archive(ABC::env('DIR_BACKUP') . $bkp->getBackupName() . '.tar.gz', ABC::env('DIR_BACKUP'), $bkp->getBackupName());
 		if (!$result){
 			$this->errors = array_merge($this->errors, $bkp->error);
 		} else{

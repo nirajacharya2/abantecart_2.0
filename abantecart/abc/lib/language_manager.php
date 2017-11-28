@@ -699,21 +699,21 @@ class ALanguageManager extends ALanguage{
 		                                        'storefront' => array ())
 		);
 		// admin
-		$lang_dir = DIR_LANGUAGE . $language_name;
+		$lang_dir = ABC::env('DIR_LANGUAGE') . $language_name;
 
 		$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 		foreach ($xml_files as $file){
 			$result['admin'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 		}
 		//storefront
-		$lang_dir = DIR_STOREFRONT . 'languages/' . $language_name;
+		$lang_dir = ABC::env('DIR_STOREFRONT') . 'languages/' . $language_name;
 		$xml_files = AHelperUtils::getFilesInDir($lang_dir, 'xml');
 		foreach ($xml_files as $file){
 			$result['storefront'][] = str_replace('.xml', '', str_replace($lang_dir . '/', '', $file));
 		}
 
 		// extensions
-		$extensions_dirs = glob(DIR_APP_EXT . '*', GLOB_ONLYDIR);
+		$extensions_dirs = glob(ABC::env('DIR_APP_EXT') . '*', GLOB_ONLYDIR);
 
 		foreach ($extensions_dirs as $extension_dir){
 			//$extension_name = pathinfo($extension_dir,PATHINFO_BASENAME);
@@ -781,7 +781,7 @@ class ALanguageManager extends ALanguage{
 		$result_txt = '';
 		$extensions = $this->registry->get('extensions')->getEnabledExtensions();
 		if (in_array($translate_method, $extensions)){
-			$ex_class = DIR_APP_EXT . $translate_method . '/core/translator.php';
+			$ex_class = ABC::env('DIR_APP_EXT') . $translate_method . '/core/translator.php';
 			if (file_exists($ex_class)){
 				/** @noinspection PhpIncludeInspection */
 				require_once($ex_class);

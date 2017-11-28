@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 use Exception;
 
@@ -36,7 +37,7 @@ class ADebug{
 
 	static private function isActive(){
 		if (!self::$_is_init){
-			if (defined('INSTALL')){
+			if (ABC::env('INSTALL')){
 				self::$debug = 1;
 				self::$debug_level = 1;
 			} else if (class_exists('\abc\core\engine\Registry')){
@@ -289,12 +290,12 @@ class ADebug{
 				break;
 			case 2:
 				//log
-				require_once(DIR_CORE . 'lib/log.php');
+				require_once(ABC::env('DIR_CORE') . 'lib/log.php');
 				$registry = Registry::getInstance();
 				if ($registry->has('log')){
 					$log = $registry->get('log');
 				} else{
-					$log = new ALog(DIR_LOGS . 'error.txt');
+					$log = new ALog(ABC::env('DIR_LOGS') . 'error.txt');
 				}
 				$log->write(strip_tags(str_replace('<br />', "\r\n", $debug)));
 				break;

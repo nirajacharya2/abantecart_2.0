@@ -41,5 +41,5 @@
         <?php echo $this->getHookVar('rightpanel_tabpanes'); ?>
         
     </div><!-- tab-content -->
-  </div><!-- rightpanel -->
+  </div><!-- right panel -->
 <?php } // END of logged in ?>   

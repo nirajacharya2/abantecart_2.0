@@ -17,6 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+use abc\ABC;
+use abc\core\engine\AController;
 
 /**
  * Class ControllerPagesSettings
@@ -28,7 +30,7 @@ class ControllerPagesSettings extends AController{
 	public function main(){
 		$template_data = array ();
 		if ($this->request->is_POST() && ($this->validate())){
-			$this->redirect(HTTP_SERVER . 'index.php?rt=install');
+			$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=install');
 		}
 
 		if (isset($this->error['warning'])){
@@ -51,22 +53,22 @@ class ControllerPagesSettings extends AController{
 			$template_data['error_warning'] .= 'Warning: Your server have APC (Alternative PHP Cache) php module enabled. Please disable it before installation!';
 		}
 
-		$template_data['action'] = HTTP_SERVER . 'index.php?rt=settings';
-		$template_data['config_catalog'] = DIR_CONFIG . 'config.php';
-		$template_data['system'] = DIR_SYSTEM;
-		$template_data['cache'] = DIR_SYSTEM . 'cache';
-		$template_data['logs'] = DIR_SYSTEM . 'logs';
-		$template_data['image'] = DIR_ABANTECART . 'image';
-		$template_data['image_thumbnails'] = DIR_ABANTECART . 'images/thumbnails';
-		$template_data['download'] = DIR_ABANTECART . 'download';
-		$template_data['extensions'] = DIR_ABANTECART . 'extensions';
-		$template_data['resources'] = DIR_ABANTECART . 'resources';
-		$template_data['admin_system'] = DIR_ABANTECART . 'admin/system';
+		$template_data['action'] = ABC::env('HTTP_SERVER') . 'index.php?rt=settings';
+		$template_data['config_catalog'] = ABC::env('DIR_CONFIG') . 'config.php';
+		$template_data['system'] = ABC::env('DIR_SYSTEM');
+		$template_data['cache'] = ABC::env('DIR_SYSTEM') . 'cache';
+		$template_data['logs'] = ABC::env('DIR_SYSTEM') . 'logs';
+		$template_data['image'] = ABC::env('DIR_ABANTECART') . 'image';
+		$template_data['image_thumbnails'] = ABC::env('DIR_ABANTECART') . 'images/thumbnails';
+		$template_data['download'] = ABC::env('DIR_ABANTECART') . 'download';
+		$template_data['extensions'] = ABC::env('DIR_ABANTECART') . 'extensions';
+		$template_data['resources'] = ABC::env('DIR_ABANTECART') . 'resources';
+		$template_data['admin_system'] = ABC::env('DIR_ABANTECART') . 'admin/system';
 
 		$this->addChild('common/header', 'header', 'common/header.tpl');
 		$this->addChild('common/footer', 'footer', 'common/footer.tpl');
 
-		$this->view->assign('back', HTTP_SERVER . 'index.php?rt=license');
+		$this->view->assign('back', ABC::env('HTTP_SERVER') . 'index.php?rt=license');
 		$this->view->batchAssign($template_data);
 		$this->processTemplate('pages/settings.tpl');
 	}

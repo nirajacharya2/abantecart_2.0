@@ -60,7 +60,7 @@ final class ALoader{
 	 * @throws AException
 	 */
 	public function library($library){
-		$file = DIR_LIB . $library . '.php';
+		$file = ABC::env('DIR_LIB') . $library . '.php';
 
 		if (file_exists($file)) {
 			/** @noinspection PhpIncludeInspection */
@@ -132,7 +132,7 @@ final class ALoader{
 	 * @throws AException
 	 */
 	public function helper($helper){
-		$file = DIR_CORE . 'helper/' . $helper . '.php';
+		$file = ABC::env('DIR_CORE') . 'helper/' . $helper . '.php';
 
 		if (file_exists($file)) {
 			include_once($file);

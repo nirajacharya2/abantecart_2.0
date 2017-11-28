@@ -1,4 +1,6 @@
-<?php echo $head; ?>
+<?php
+use abc\ABC;
+echo $head; ?>
 <h1 class="heading1">
   <span class="maintext"><i class="fa fa-truck"></i> <?php echo $heading_title; ?></span>
   <span class="subtext"></span>
@@ -59,7 +61,7 @@
 				<label for="shipping_shipping_method<?php echo $quote['id']; ?>" title="<?php echo AHelperUtils::has_value($quote['description']) ? $quote['description'] : ''; ?>" style="cursor: pointer;">
 				<?php $icon = $shipping_method['icon'];
 				if ( count ($icon) ) {  ?>
-				<?php if ( is_file(DIR_RESOURCE . $icon['image']) ) { ?>
+				<?php if ( is_file(ABC::env('DIR_RESOURCE') . $icon['image']) ) { ?>
 					<span class="shipping_icon mr10"><img src="resources/<?php echo $icon['image']; ?>" title="<?php echo $icon['title']; ?>" /></span>
 					<?php } else if (!empty( $icon['resource_code'] )) { ?>
 					<span class="shipping_icon mr10"><?php echo $icon['resource_code']; ?></span>

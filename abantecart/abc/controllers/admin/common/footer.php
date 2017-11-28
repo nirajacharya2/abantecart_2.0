@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AMenu;
 
@@ -45,7 +46,7 @@ class ControllerCommonFooter extends AController {
 		$this->view->assign('recent_customers', $this->language->get('recent_customers'));
 
 		$this->view->assign('text_footer_left', sprintf($this->language->get('text_footer_left'), date('Y')));
-		$this->view->assign('text_footer', sprintf($this->language->get('text_footer'),date('Y')).' '.VERSION);
+		$this->view->assign('text_footer', sprintf($this->language->get('text_footer'),date('Y')).' '.ABC::env('VERSION'));
 		
 		if (!$this->user->isLogged() || !isset($this->request->get['token']) || !isset($this->session->data['token']) || ($this->request->get['token'] != $this->session->data['token'])) {
 			$this->view->assign('logged', '');

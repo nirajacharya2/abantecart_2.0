@@ -1180,7 +1180,7 @@ class AConfigManager{
 			return $this->templates[$section];
 		}
 
-		$basedir = $section == 'admin' ? ABC::env('DIR_APP') : DIR_STOREFRONT;
+		$basedir = $section == 'admin' ? ABC::env('DIR_APP') : ABC::env('DIR_STOREFRONT');
 
 		$directories = glob($basedir . 'view/*', GLOB_ONLYDIR);
 		//get core templates
@@ -1413,7 +1413,7 @@ class AConfigManager{
 				'style' => 'btn_switch',
 		));
 		//backwards compatibility. Can remove in the future.
-		if (!defined('ENCRYPTION_KEY')){
+		if (!ABC::env('ENCRYPTION_KEY')){
 			$fields['encryption'] = $form->getFieldHtml($props[] = array (
 					'type'  => 'input',
 					'name'  => 'encryption_key',

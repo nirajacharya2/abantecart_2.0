@@ -18,6 +18,9 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 
+use abc\ABC;
+use abc\core\engine\AController;
+
 class ControllerPagesLicense extends AController {
 	private $error = array();
 	
@@ -26,7 +29,7 @@ class ControllerPagesLicense extends AController {
         $this->session->clear();
 
 		if ($this->request->is_POST() && ($this->validate())) {
-			$this->redirect(HTTP_SERVER . 'index.php?rt=settings');
+			$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=settings');
 		}
 
         if (isset($this->error['warning'])) {
@@ -35,7 +38,7 @@ class ControllerPagesLicense extends AController {
 			$template_data['error_warning'] = '';
 		}
 		$this->view->assign('error_warning', $template_data['error_warning']);
-		$this->view->assign('action', HTTP_SERVER . 'index.php?rt=license');
+		$this->view->assign('action', ABC::env('HTTP_SERVER') . 'index.php?rt=license');
 		$text = nl2br(file_get_contents('../license.txt'));
 		$this->view->assign('text', $text);
 

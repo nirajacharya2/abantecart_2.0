@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
@@ -75,7 +76,7 @@ class AError{
 		//TODO: use registry object instead?? what if registry not accessible?
 		$this->error_descriptions = $GLOBALS['error_descriptions'];
 
-		$this->version = 'AbanteCart core v.' . VERSION;
+		$this->version = 'AbanteCart core v.' . ABC::env('VERSION');
 	}
 
 	/**
@@ -95,7 +96,7 @@ class AError{
 	public function toLog(){
 		if (!is_object($this->registry) || !$this->registry->has('log')){
 			if (class_exists('ALog')){
-				$log = new ALog(DIR_LOGS . 'error.txt');
+				$log = new ALog(ABC::env('DIR_LOGS') . 'error.txt');
 			} else{
 				//we have error way a head of system start
 				echo $this->error_descriptions[$this->code] . ':  ' . $this->msg;
@@ -190,7 +191,7 @@ class AError{
 				header($http_header_txt);
 				header('Content-Type: application/json');
 			}
-			include_once(DIR_CORE . 'lib/json.php');
+			include_once(ABC::env('DIR_CORE') . 'lib/json.php');
 			echo AJson::encode($err_data);
 			exit;
 		}

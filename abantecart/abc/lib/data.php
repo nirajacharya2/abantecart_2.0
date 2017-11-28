@@ -224,12 +224,12 @@ class AData{
 	 */
 	public function array2CSV($in_array, $fileName, $delimIndex = 0, $format = '.csv', $enclose = '"', $escape = '"', $asFile = false){
 
-		if (!is_dir(DIR_DATA)){
-			mkdir(DIR_DATA, 0777, true);
+		if (!is_dir(ABC::env('DIR_DATA'))){
+			mkdir(ABC::env('DIR_DATA'), 0777, true);
 		}
 
-		if (!is_dir(DIR_DATA) || !is_writable(DIR_DATA)){
-			$this->processError('CSV/TXT Export Error', "Error: Data directory in " . DIR_DATA . " is not writable or can not be created!", 'error');
+		if (!is_dir(ABC::env('DIR_DATA')) || !is_writable(ABC::env('DIR_DATA'))){
+			$this->processError('CSV/TXT Export Error', "Error: Data directory in " . ABC::env('DIR_DATA') . " is not writable or can not be created!", 'error');
 			return false;
 		}
 
@@ -247,7 +247,7 @@ class AData{
 		if (count($in_array)){
 
 			$d_name = str_replace('.tar.gz', '', $fileName);
-			$dirName = DIR_DATA . $d_name;
+			$dirName = ABC::env('DIR_DATA') . $d_name;
 
 			if (!file_exists($dirName)){
 				$res = mkdir($dirName);
@@ -289,7 +289,7 @@ class AData{
 			}
 
 			$archive = $dirName . '.tar.gz';
-			$this->_archive($archive, DIR_DATA, $d_name);
+			$this->_archive($archive, ABC::env('DIR_DATA'), $d_name);
 
 			if ($asFile){
 				return $archive;
@@ -309,7 +309,7 @@ class AData{
 	 * @return bool
 	 */
 	protected function _archive($tar_filename, $tar_dir, $filename){
-		//Archive data to DIR_DATA, delete tmp files in directory 
+		//Archive data to ABC::env('DIR_DATA'), delete tmp files in directory
 		//generate errors: No space on device (log to message as error too), No permissions, Others
 		//return Success or failed.
 
@@ -1056,9 +1056,9 @@ class AData{
 				$fl = new AFile();
 				foreach ($sources['source_url'] as $source){
 					$image_basename = basename($source);
-					$target = DIR_RESOURCE . $rm->getTypeDir() . '/' . $image_basename;
-					if (!is_dir(DIR_RESOURCE . $rm->getTypeDir())){
-						@mkdir(DIR_RESOURCE . $rm->getTypeDir(), 0777);
+					$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
+					if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
+						@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
 					}
 					if (($file = $fl->downloadFile($source)) === false){
 						$this->_status2array('error', "Unable to download file from ".$source);
@@ -1077,9 +1077,9 @@ class AData{
 			if ($sources['source_path']){
 				foreach ($sources['source_path'] as $source){
 					$image_basename = basename($source);
-					$target = DIR_RESOURCE . $rm->getTypeDir() . '/' . $image_basename;
-					if (!is_dir(DIR_RESOURCE . $rm->getTypeDir())){
-						@mkdir(DIR_RESOURCE . $rm->getTypeDir(), 0777);
+					$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
+					if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
+						@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
 					}
 					if (!copy($source, $target)){
 						$this->_status2array('error', "Unable to copy ".$source." to ".$target);

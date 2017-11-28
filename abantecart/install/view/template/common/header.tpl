@@ -16,10 +16,10 @@ if (typeof jQuery == 'undefined') {
 }
 </script>
 
-<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="<?php $this->templateResource('js/bootstrap.min.js');?>"></script>
 
 </head>
 <body>
 <div class="container" id="container">
-  <header><img src="<?php echo $template_dir; ?>images/logo.png" alt="AbanteCart" title="AbanteCart" /></header>
+  <header><img src="<?php echo $this->templateResource('images/logo.png'); ?>" alt="AbanteCart" title="AbanteCart" /></header>
   <div class="container-fluid">

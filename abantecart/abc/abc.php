@@ -32,16 +32,16 @@ class ABC extends ABCBase{
 	public static function env($name, $value = null){
 		//if need to get
 		if($value === null && !is_array($name)) {
-			return array_key_exists($name, static::$env) ? self::$env[$name] : null;
+			return array_key_exists($name, self::$env) ? self::$env[$name] : null;
 		}
 		// if need to set batch of values
 		else{
 			if(is_array($name)){
-				static::$env = array_merge(static::$env,$name);
+				self::$env = array_merge(self::$env,$name);
 			}else {
 				//when set one value
-				if (!array_key_exists($name, static::$env)) {
-					static::$env[$name] = $value;
+				if (!array_key_exists($name, self::$env)) {
+					self::$env[$name] = $value;
 				}
 			}
 		}
@@ -63,7 +63,7 @@ class ABC extends ABCBase{
 		//Route to request process
 		$router = new ARouter($registry);
 		$registry->set('router', $router);
-		$router->processRoute(ROUTE);
+		$router->processRoute(self::env('ROUTE'));
 
 		// Output
 		$registry->get('response')->output();

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 
@@ -57,13 +58,13 @@ class ControllerBlocksCustomFormBlock extends AController {
 		$this->view->assign('heading_title', $block_data['title'] );
 		$this->view->assign('stat_url', $this->html->getURL('r/extension/banner_manager') );
 		$this->view->assign('error_required', $this->language->get('error_required'));
-		$this->view->assign('template_dir', RDIR_TEMPLATE);
+		$this->view->assign('template_dir', ABC::env('RDIR_TEMPLATE'));
 
 		$this->view->batchAssign($this->data);
 
 		if($block_data['content']){
 
-			$this->document->addScript(DIR_EXTENSIONS . 'forms_manager'.DIR_EXT_STORE.'js/form_check.js');
+			$this->document->addScript(ABC::env('DIR_EXTENSIONS') . 'forms_manager'.ABC::env('DIRNAME_STORE').'js/form_check.js');
 
 			// need to set wrapper for non products listing blocks
 			if($this->view->isTemplateExists($block_data['block_wrapper'])){

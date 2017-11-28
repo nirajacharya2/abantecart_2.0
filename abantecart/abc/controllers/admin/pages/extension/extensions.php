@@ -202,8 +202,8 @@ class ControllerPagesExtensionExtensions extends AController {
 		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));
 		$mp_params = '?rt=account/authenticate&return_url='.$return_url;
 		$mp_params .= '&store_id='.ABC::env('UNIQUE_ID');
-		$mp_params .= '&store_url='.HTTP_SERVER;
-		$mp_params .= '&store_version='.VERSION;
+		$mp_params .= '&store_url='.ABC::env('HTTP_SERVER');
+		$mp_params .= '&store_version='.ABC::env('VERSION');
 		$this->view->assign('amp_connect_url', $this->model_tool_mp_api->getMPURL().$mp_params);
 		$this->view->assign('amp_disconnect_url', $this->html->getSecureURL('tool/extensions_store/disconnect'));
 
@@ -479,7 +479,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			//if template process differently
 			if ( AHelperUtils::has_value((string)$data['template']) ) {
 		    	//build path to template directory.
-				$dir_template = DIR_EXT.$extension.DIR_EXT_ADMIN.DIR_EXT_TEMPLATE.$this->config->get('admin_template')."/template/".$data['template'];
+				$dir_template = ABC::env('DIR_EXT').$extension.ABC::env('DIRNAME_ADMIN').ABC::env('DIRNAME_TEMPLATES').$this->config->get('admin_template')."/template/".$data['template'];
 				//validate template and report issue
 				if (!file_exists( $dir_template )) {
 					$warning = new AWarning(sprintf($this->language->get('error_could_not_load_override'), $dir_template, $extension));
@@ -636,21 +636,21 @@ class ControllerPagesExtensionExtensions extends AController {
 		$config = $ext->getConfig();
 		if (!empty($config->preview->item)) {
 			foreach ($config->preview->item as $item) {
-				if (!is_file(DIR_EXT . $extension . DIR_EXT_IMAGE . (string)$item))
+				if (!is_file(ABC::env('DIR_EXT') . $extension . ABC::env('DIRNAME_IMAGES') . (string)$item))
 					continue;
-				$this->data['extension_info']['preview'][] = HTTPS_EXT . $extension . DIR_EXT_IMAGE . (string)$item;
+				$this->data['extension_info']['preview'][] = ABC::env('HTTPS_EXT') . $extension . ABC::env('DIRNAME_IMAGES') . (string)$item;
 			}
 			//image gallery scripts and css for previews
 			$this->document->addStyle(array(
-			        'href' => RDIR_TEMPLATE . 'js/blueimp-gallery/css/bootstrap-image-gallery.css',
+			        'href' => ABC::env('RDIR_ASSETS') . 'js/blueimp-gallery/css/bootstrap-image-gallery.css',
 			        'rel' => 'stylesheet'
 			));
 			$this->document->addStyle(array(
-			        'href' => RDIR_TEMPLATE . 'js/blueimp-gallery/css/blueimp-gallery.min.css',
+			        'href' => ABC::env('RDIR_ASSETS') . 'js/blueimp-gallery/css/blueimp-gallery.min.css',
 			        'rel' => 'stylesheet'
 			));
-			$this->document->addScript(RDIR_TEMPLATE.'js/blueimp-gallery/jquery.blueimp-gallery.min.js');
-			$this->document->addScript(RDIR_TEMPLATE.'js/blueimp-gallery/bootstrap-image-gallery.js');
+			$this->document->addScript(ABC::env('RDIR_ASSETS').'js/blueimp-gallery/jquery.blueimp-gallery.min.js');
+			$this->document->addScript(ABC::env('RDIR_ASSETS').'js/blueimp-gallery/bootstrap-image-gallery.js');
 		}
 
 		if($ext->getConfig('help_link')){
@@ -796,7 +796,7 @@ class ControllerPagesExtensionExtensions extends AController {
 		//#PR set custom templates for extension settings page.  
 		if ( AHelperUtils::has_value( (string)$config->custom_settings_template ) ) {
 			//build path to template directory.
-			$dir_template = DIR_EXT . $extension . DIR_EXT_ADMIN . DIR_EXT_TEMPLATE . $this->config->get('admin_template') . "/template/";
+			$dir_template = ABC::env('DIR_EXT') . $extension . ABC::env('DIRNAME_ADMIN') . ABC::env('DIRNAME_TEMPLATES') . $this->config->get('admin_template') . "/template/";
 			$dir_template .= (string)$config->custom_settings_template;
 			//validate template and report issue
 			if (!file_exists( $dir_template )) {
@@ -874,7 +874,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 			$config = AHelperUtils::getExtensionConfigXml($this->request->get['extension']);
 			if ($config === false) {
-				$filename = DIR_EXT . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
+				$filename = ABC::env('DIR_EXT') . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
 				$err = sprintf($this->language->get('error_could_not_load_config'), $this->request->get['extension'], $filename);
 				$this->session->data['error'] = $err;
 			} else {

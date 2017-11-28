@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -40,7 +41,7 @@ class ControllerPagesDesignTemplate extends AController{
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		$this->document->addStyle(array (
-				'href' => RDIR_TEMPLATE . 'css/layouts-manager.css',
+				'href' => ABC::env('RDIR_ASSETS') . 'css/layouts-manager.css',
 				'rel'  => 'stylesheet'
 		));
 
@@ -104,7 +105,7 @@ class ControllerPagesDesignTemplate extends AController{
 					'name'     => $tmpl,
 					'edit_url' => $this->html->getSecureURL('design/template/edit', '&tmpl_id=' . $tmpl),
 					// define template type by directory inside core. if does not exists - it is extension otherwise core-template
-					'template_type' => is_dir(DIR_STOREFRONT.'view/'.$tmpl) ? 'core' : 'extension'
+					'template_type' => is_dir(ABC::env('DIR_STOREFRONT').'view/'.$tmpl) ? 'core' : 'extension'
 			);
 
 			//button for template cloning
@@ -130,7 +131,7 @@ class ControllerPagesDesignTemplate extends AController{
 			}
 
 			//button to extension
-			if (!is_dir('storefront/view/' . $tmpl) && is_dir(DIR_EXT . $tmpl)){
+			if (!is_dir('storefront/view/' . $tmpl) && is_dir(ABC::env('DIR_EXT') . $tmpl)){
 				$templates[$tmpl]['extn_url'] = $this->html->getSecureURL('extension/extensions/edit', '&extension=' . $tmpl);
 			}
 			//set default
@@ -139,12 +140,12 @@ class ControllerPagesDesignTemplate extends AController{
 			}
 
 			$preview_file = $tmpl . '/images/preview.jpg';
-			if (is_file(DIR_EXT . $preview_file)){
-				$preview_img = HTTPS_EXT . $preview_file;
+			if (is_file(ABC::env('DIR_EXT') . $preview_file)){
+				$preview_img = ABC::env('HTTPS_EXT') . $preview_file;
 			} else if (is_file('storefront/view/' . $tmpl . '/images/preview.jpg')){
-				$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl . '/images/preview.jpg';
+				$preview_img = ABC::env('AUTO_SERVER') . 'storefront/view/' . $tmpl . '/images/preview.jpg';
 			} else{
-				$preview_img = HTTPS_IMAGE . 'no_image.jpg';
+				$preview_img = ABC::env('HTTPS_IMAGE') . 'no_image.jpg';
 			}
 			$templates[$tmpl]['preview'] = $preview_img;
 		}
@@ -341,12 +342,12 @@ class ControllerPagesDesignTemplate extends AController{
 		$this->_getForm();
 
 		$preview_file = $tmpl_id . '/images/preview.jpg';
-		if (is_file(DIR_EXT . $preview_file)){
-			$preview_img = HTTPS_EXT . $preview_file;
+		if (is_file(ABC::env('DIR_EXT') . $preview_file)){
+			$preview_img = ABC::env('HTTPS_EXT') . $preview_file;
 		} else if (is_file('storefront/view/' . $tmpl_id . '/images/preview.jpg')){
-			$preview_img = AUTO_SERVER . 'storefront/view/' . $tmpl_id . '/images/preview.jpg';
+			$preview_img = ABC::env('AUTO_SERVER') . 'storefront/view/' . $tmpl_id . '/images/preview.jpg';
 		} else{
-			$preview_img = HTTPS_IMAGE . 'no_image.jpg';
+			$preview_img = ABC::env('HTTPS_IMAGE') . 'no_image.jpg';
 		}
 		$this->data['preview_img'] = $preview_img;
 

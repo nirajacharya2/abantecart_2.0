@@ -20,6 +20,7 @@
 
 namespace abc\core\engine;
 
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADataset;
 use abc\lib\AError;
@@ -648,7 +649,7 @@ class AForm{
 			if ($field['element_type'] == 'K' || $field['element_type'] == 'J') {
 
 				if ($this->config->get('config_recaptcha_secret_key')) {
-					require_once DIR_VENDOR . DIRNAME_ASSETS.'google/recaptcha/src/autoload.php';
+					require_once ABC::env('DIR_VENDOR') . ABC::env('DIRNAME_ASSETS').'google/recaptcha/src/autoload.php';
 					$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 					$resp = $recaptcha->verify($data['g-recaptcha-response'], $this->request->getRemoteIP());
 					if (!$resp->isSuccess() && $resp->getErrorCodes()) {

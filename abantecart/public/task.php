@@ -43,7 +43,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 }
 
 ABC::env('DIR_ROOT', $root_path);
-define('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
+ABC::env('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
 
 require_once(ABC::env('DIR_ROOT') . '/config/config.php');
 
@@ -210,7 +210,7 @@ if( $mode!='ajax' && !$step_id) {
 		runTaskUI(data);
 	});
 
-	var base_url =  '<?php echo HTTPS_SERVER; ?>task.php';
+	var base_url =  '<?php echo ABC::env('HTTPS_SERVER'); ?>task.php';
 	var abort_task_url =  '<?php echo $abort_task_url; ?>';
 	var task_fail = false;
 	var task_complete_text = task_fail_text = '';

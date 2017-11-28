@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AError;
@@ -65,7 +66,7 @@ class ControllerResponsesLocalisationLanguageDescription extends AController{
                 );
 			} else {
 				$task_details['task_api_key'] = $task_api_key;
-				$task_details['url'] = HTTPS_SERVER . 'task.php';
+				$task_details['url'] = ABC::env('HTTPS_SERVER') . 'task.php';
 				$this->data['output']['task_details'] = $task_details;
 			}
 
@@ -283,7 +284,7 @@ class ControllerResponsesLocalisationLanguageDescription extends AController{
                 );
 			} else{
 				$task_details['task_api_key'] = $task_api_key;
-				$task_details['url'] = HTTPS_SERVER . 'task.php';
+				$task_details['url'] = ABC::env('HTTPS_SERVER') . 'task.php';
 				//change task status
 				$task_details['status'] = $tm::STATUS_READY;
 				$tm->updateTask($task_id, array ('status' => $tm::STATUS_READY));

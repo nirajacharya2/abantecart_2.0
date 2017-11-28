@@ -171,7 +171,7 @@ class APackageManager{
 	 */
 	public function backupPrevious($extension_id = ''){
 
-		$old_path = !$extension_id ? ABC::env('DIR_ROOT') . '/' . $this->session->data['package_info']['dst_dir'] : DIR_APP_EXT;
+		$old_path = !$extension_id ? ABC::env('DIR_ROOT') . '/' . $this->session->data['package_info']['dst_dir'] : ABC::env('DIR_APP_EXT');
 		$package_id = !$extension_id ? $this->session->data['package_info']['package_id'] : $extension_id;
 		if (!$package_id){
 			return false;
@@ -193,7 +193,7 @@ class APackageManager{
 				if (!$backup->dumpDatabase()){
 					return false;
 				}
-				if (!$backup->archive(DIR_BACKUP . $backup_dirname . '.tar.gz', DIR_BACKUP, $backup_dirname)){
+				if (!$backup->archive(ABC::env('DIR_BACKUP') . $backup_dirname . '.tar.gz', ABC::env('DIR_BACKUP'), $backup_dirname)){
 					return false;
 				}
 			} else{
@@ -674,7 +674,7 @@ class APackageManager{
 					// running sql upgrade script if it exists
 					if (isset($config->upgrade->sql)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->sql;
-						$file = !file_exists($file) ? DIR_APP_EXT . $extension_id . '/' . (string)$config->upgrade->sql : $file;
+						$file = !file_exists($file) ? ABC::env('DIR_APP_EXT') . $extension_id . '/' . (string)$config->upgrade->sql : $file;
 						if (file_exists($file)){
 							$this->db->performSql($file);
 						}
@@ -682,7 +682,7 @@ class APackageManager{
 					// running php install script if it exists
 					if (isset($config->upgrade->trigger)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->trigger;
-						$file = !file_exists($file) ? DIR_APP_EXT . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
+						$file = !file_exists($file) ? ABC::env('DIR_APP_EXT') . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
 						if (file_exists($file)){
 							include($file);
 						}
@@ -749,13 +749,13 @@ class APackageManager{
 
 		$new_version = preg_replace('/[^0-9\.]/', '', $new_version);
 		list($master, $minor, $built) = explode(".", $new_version);
-		$content = "<?php\n";
-		$content .= "define('MASTER_VERSION', '" . $master . "');\n";
-		$content .= "define('MINOR_VERSION', '" . $minor . "');\n";
-		$content .= "define('VERSION_BUILT', '" . $built . "');\n";
+		$content = "<?php\nuse abc\ABC;\n";
+		$content .= "ABC::env('MASTER_VERSION', '" . $master . "');\n";
+		$content .= "ABC::env('MINOR_VERSION', '" . $minor . "');\n";
+		$content .= "ABC::env('VERSION_BUILT', '" . $built . "');\n";
 
 		if (!$this->session->data['package_info']['ftp']){
-			file_put_contents(DIR_CORE . 'version.php', $content);
+			file_put_contents(ABC::env('DIR_CORE') . 'version.php', $content);
 		} else{
 			file_put_contents($this->session->data['package_info']['tmp_dir'] . 'version.php', $content);
 			$ftp_user = $this->session->data['package_info']['ftp_user'];
@@ -829,8 +829,8 @@ class APackageManager{
 	public function validate(){
 		$this->error = '';
 		//1.check is extension directory writable
-		if (!is_writable(DIR_APP_EXT)){
-			$this->error .= 'Directory ' . DIR_APP_EXT . ' is not writable. Please change permissions for it.' . "\n";
+		if (!is_writable(ABC::env('DIR_APP_EXT'))){
+			$this->error .= 'Directory ' . ABC::env('DIR_APP_EXT') . ' is not writable. Please change permissions for it.' . "\n";
 		}
 		//2. check temporary directory. just call method
 		$this->getTempDir();

@@ -117,17 +117,17 @@ class AHelperSystemCheck extends AHelper{
 			);
 		}
 
-		if (is_writable(DIR_CONFIG . 'config.php')) {
+		if (is_writable(ABC::env('DIR_CONFIG') . 'config.php')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect config.php file permissions',
-					'body'  => DIR_CONFIG . 'config.php' . ' file needs to be set to read and execute modes to keep it secured from editing!',
+					'body'  => ABC::env('DIR_CONFIG') . 'config.php' . ' file needs to be set to read and execute modes to keep it secured from editing!',
 					'type'  => 'W'
 			);
 		}
 
 		//if cache is enabled
 		if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE_DRIVER') == 'file') {
-			$cache_files = self::get_all_files_dirs(DIR_SYSTEM . 'cache/');
+			$cache_files = self::get_all_files_dirs(ABC::env('DIR_SYSTEM') . 'cache/');
 			$cache_message = '';
 			foreach ($cache_files as $file) {
 				if (!is_file($file)) {
@@ -150,10 +150,10 @@ class AHelperSystemCheck extends AHelper{
 			}
 		}
 
-		if (!is_writable(DIR_LOGS) || !is_writable(DIR_LOGS . 'error.txt')) {
+		if (!is_writable(ABC::env('DIR_LOGS')) || !is_writable(ABC::env('DIR_LOGS') . 'error.txt')) {
 			$ret_array[] = array (
 					'title' => 'Incorrect log dir/file permissions',
-					'body'  => DIR_LOGS . ' directory or error.txt file needs to be set to full permissions(777)! Error logs can not be saved',
+					'body'  => ABC::env('DIR_LOGS') . ' directory or error.txt file needs to be set to full permissions(777)! Error logs can not be saved',
 					'type'  => 'W'
 			);
 		}
@@ -176,7 +176,7 @@ class AHelperSystemCheck extends AHelper{
 			);
 		}
 
-		$image_files = self::get_all_files_dirs(DIR_ASSETS . '/images/thumbnails/');
+		$image_files = self::get_all_files_dirs(ABC::env('DIR_ASSETS') . '/images/thumbnails/');
 		$image_message = '';
 		foreach ($image_files as $file) {
 			if (in_array(basename($file), array ('index.php', 'index.html', '.', '', '..'))) {

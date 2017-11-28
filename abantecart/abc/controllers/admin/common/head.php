@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
@@ -35,7 +36,7 @@ class ControllerCommonHead extends AController {
 		$message_link = $this->html->getSecureURL('tool/message_manager');
 
 		$this->data['title'] = $this->document->getTitle();
-		$this->data['base'] = (HTTPS_SERVER ? HTTPS_SERVER : HTTP_SERVER);
+		$this->data['base'] = (ABC::env('HTTPS_SERVER') ? ABC::env('HTTPS_SERVER') : ABC::env('HTTP_SERVER'));
 		$this->data['links'] = $this->document->getLinks();
 		$this->data['styles'] = $this->document->getStyles();
 		$this->data['scripts'] = $this->document->getScripts();
@@ -61,8 +62,7 @@ class ControllerCommonHead extends AController {
 
 		$this->data['icon'] = $this->config->get('config_icon');
 
-        if (isset($this->request->server['HTTPS'])
-		        && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
+        if (ABC::env('HTTPS')) {
 		    $this->data['ssl'] = 1;
         }
 

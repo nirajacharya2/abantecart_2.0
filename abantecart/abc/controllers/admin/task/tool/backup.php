@@ -166,7 +166,7 @@ class ControllerTaskToolBackup extends AController {
 		$backup_name = preg_replace('[^0-9A-z_\.]','', $settings['backup_name']);
 		$backup_name = !$backup_name ? 'manual_backup' : $backup_name;
 		$bkp = new ABackup($backup_name);
-		$result = $bkp->backupFile(DIR_CONFIG . 'config.php', false);
+		$result = $bkp->backupFile(ABC::env('DIR_CONFIG') . 'config.php', false);
 
 		$output = array('result' => ($result ? true : false), 'message' => '( backup config file )');
 
@@ -183,7 +183,7 @@ class ControllerTaskToolBackup extends AController {
 
 		$bkp = new ABackup($backup_name);
 
-		$arc_basename =  DIR_BACKUP . $bkp->getBackupName();
+		$arc_basename =  ABC::env('DIR_BACKUP') . $bkp->getBackupName();
 		if(is_file($arc_basename.'.tar')){
 			unlink($arc_basename.'.tar');
 		}
@@ -191,7 +191,7 @@ class ControllerTaskToolBackup extends AController {
 			unlink($arc_basename.'.tar.gz');
 		}
 
-		$result = $bkp->archive($arc_basename.'.tar.gz', DIR_BACKUP, $bkp->getBackupName());
+		$result = $bkp->archive($arc_basename.'.tar.gz', ABC::env('DIR_BACKUP'), $bkp->getBackupName());
 
 		if($result){
 			$this->load->library('json');

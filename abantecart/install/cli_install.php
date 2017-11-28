@@ -64,8 +64,8 @@ switch ($command) {
             if ( ABC::env('IS_WINDOWS') === true ) {
                 $root_path = str_replace('\\', '/', $root_path);
             }
-            define('DIR_INSTALL', $root_path.'/');
-            define('INSTALL', 'true');
+	        ABC::env('DIR_INSTALL', $root_path.'/');
+	        ABC::env('INSTALL', 'true');
 	        ABC::env('IS_ADMIN', 'true');
 
             $options = getOptionValues();
@@ -79,19 +79,19 @@ switch ($command) {
 
             // HTTP
 
-            //define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
-            //define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
+            //ABC::env('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
+            //ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
             // DIR
 	        ABC::env('DIR_APP', dirname(__DIR__).'/abc/');
-            define('DIR_ASSETS', $options['public_dir'].'assets/');
+	        ABC::env('DIR_ASSETS', $options['public_dir'].'assets/');
 
             // Startup with local init
-            require_once(DIR_INSTALL.'init.php');
+            require_once(ABC::env('DIR_INSTALL').'init.php');
 
             //Check if cart is already installed
-            if (file_exists(DIR_CONFIG.'config.php')) {
-                $file_config = require_once(DIR_CONFIG.'config.php');
+            if (file_exists(ABC::env('DIR_CONFIG').'config.php')) {
+                $file_config = require_once(ABC::env('DIR_CONFIG').'config.php');
             }
 
             $installed = false;
@@ -105,7 +105,7 @@ switch ($command) {
             }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            define('HTTP_ABANTECART', $options['http_server']);
+            ABC::env('HTTP_ABANTECART', $options['http_server']);
             install($options);
             echo "\n";
             echo "SUCCESS! AbanteCart successfully installed on your server\n\n";
@@ -157,7 +157,7 @@ function handleError($errno, $errstr, $err_file, $err_line, array $err_context)
     throw new ErrorException($errstr, 0, $errno, $err_file, $err_line);
 }
 
-set_error_handler('\abc\install\handleError');
+set_error_handler('\abantecart\install\handleError');
 
 /**
  * @return array
@@ -165,9 +165,9 @@ set_error_handler('\abc\install\handleError');
 function getOptionList()
 {
     return array(
-        '--root_dir'         => dirname(DIR_INSTALL).'/',
-        '--app_dir'          => dirname(DIR_INSTALL).'/abc/',
-        '--public_dir'       => dirname(DIR_INSTALL).'/public/',
+        '--root_dir'         => dirname(ABC::env('DIR_INSTALL')).'/',
+        '--app_dir'          => dirname(ABC::env('DIR_INSTALL')).'/abc/',
+        '--public_dir'       => dirname(ABC::env('DIR_INSTALL')).'/public/',
         '--db_host'          => 'localhost',
         '--db_user'          => 'root',
         '--db_password'      => '******',
@@ -261,7 +261,7 @@ function getOptionValues($opt_name = '')
 
         $options[$name] = $value;
     }
-    $code_dir = dirname(DIR_INSTALL);
+    $code_dir = dirname(ABC::env('DIR_INSTALL'));
 
     if ( ! isset($options['root_dir'])) {
         if (is_dir($code_dir)) {
@@ -322,25 +322,19 @@ function validateOptions($options)
         } else {
             if (in_array($r, array('app_dir', 'public_dir'))) {
                 if ( ! is_dir($options[$r])) {
-                    $errors[] = 'Wrong '.$options[$r].' parameter. Directory "'
-                        .$options[$r].'" does not exists!';
+                    $errors[] = 'Wrong '.$options[$r].' parameter. Directory "' .$options[$r].'" does not exists!';
                 }
                 if ($r == 'app_dir') {
                     if ( ! is_writable($options[$r].'config')) {
-                        $errors[] = 'Directory "'.$options[$r]
-                            .'config" is not writable!';
+                        $errors[] = 'Directory "'.$options[$r].'config" is not writable!';
                     }
-                    if (is_file($options[$r].'config/app_config.php')
-                        && ! is_writable($options[$r].'config/app_config.php')
+                    if (is_file($options[$r].'config/app_config.php') && !is_writable($options[$r].'config/app_config.php')
                     ) {
-                        $errors[] = 'File "'.$options[$r]
-                            .'config/app_config.php" is not writable!';
+                        $errors[] = 'File "'.$options[$r].'config/app_config.php" is not writable!';
                     }
-                    if (is_file($options[$r].'config/database.php')
-                        && ! is_writable($options[$r].'config/database.php')
+                    if (is_file($options[$r].'config/database.php') && ! is_writable($options[$r].'config/database.php')
                     ) {
-                        $errors[] = 'File "'.$options[$r]
-                            .'config/database.php" is not writable!';
+                        $errors[] = 'File "'.$options[$r].'config/database.php" is not writable!';
                     }
                 }
             }
@@ -361,8 +355,8 @@ function install($options)
 
     if ( ! $errors) {
         writeConfigFile($options);
-        if (file_exists(DIR_CONFIG.'config.php')) {
-            require_once(DIR_CONFIG.'config.php');
+        if (file_exists(ABC::env('DIR_CONFIG').'config.php')) {
+            require_once(ABC::env('DIR_CONFIG').'config.php');
         }
 
         $result = setupDB($options);
@@ -386,7 +380,7 @@ function install($options)
 function checkRequirements($options)
 {
     $options['password_confirm'] = $options['password'];
-    require_once(DIR_INSTALL.'model/install.php');
+    require_once(ABC::env('DIR_INSTALL').'model/install.php');
     $registry = Registry::getInstance();
     $model = new ModelInstall($registry);
     $registry->set('model_install', $model);
@@ -401,7 +395,7 @@ function checkRequirements($options)
 
 function setupDB($data)
 {
-    require_once(DIR_INSTALL.'model/install.php');
+    require_once(ABC::env('DIR_INSTALL').'model/install.php');
     $registry = Registry::getInstance();
 	$model = new ModelInstall($registry);
     $registry->set('model_install', $model);

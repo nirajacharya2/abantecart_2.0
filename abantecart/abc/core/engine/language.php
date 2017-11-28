@@ -86,7 +86,7 @@ class ALanguage{
 			$model = $registry->get('model_localisation_language');
 			$this->available_languages = $model->getLanguages();
 		} else {
-			if (defined('INSTALL')) {
+			if (ABC::env('INSTALL')) {
 				$this->loader->model('install', 'silent');
 				/**
 				 * @var ModelInstall $model
@@ -116,7 +116,7 @@ class ALanguage{
 		//current active language details
 		$this->language_details = $this->getLanguageDetails($this->code);
 
-		$root_path = defined(INSTALL) ? DIR_ABANTECART : ABC::env('DIR_APP');
+		$root_path = ABC::env('INSTALL') ? ABC::env('DIR_ABANTECART') : ABC::env('DIR_APP');
 		if ($this->is_admin) {
 			$this->language_path = $root_path . 'languages/' . $this->language_details['directory'] . '/admin/';
 		} else {
@@ -388,7 +388,7 @@ class ALanguage{
 					time() + 60 * 60 * 24 * 30,
 					dirname($request->server['PHP_SELF']),
 					null,
-					(defined('HTTPS') && HTTPS)
+					ABC::env('HTTPS')
 			);
 		}
 		//set current language

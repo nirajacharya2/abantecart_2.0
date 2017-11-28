@@ -536,7 +536,7 @@ class AHelperUtils extends AHelper{
 		}
 
 		$extension_txt_id = str_replace('../', '', $extension_txt_id);
-		$filename = DIR_APP_EXT . $extension_txt_id . '/config.xml';
+		$filename = ABC::env('DIR_APP_EXT') . $extension_txt_id . '/config.xml';
 		/**
 		 * @var $ext_configs \SimpleXMLElement|false
 		 */
@@ -584,12 +584,12 @@ class AHelperUtils extends AHelper{
 
 		$xml_files = array (
 				'top'    => array (
-						DIR_CORE . 'extension/' . 'default/config_top.xml',
-						DIR_CORE . 'extension/' . (string)$ext_configs->type . '/config_top.xml'
+						ABC::env('DIR_CORE') . 'extension/' . 'default/config_top.xml',
+						ABC::env('DIR_CORE') . 'extension/' . (string)$ext_configs->type . '/config_top.xml'
 				),
 				'bottom' => array (
-						DIR_CORE . 'extension/' . 'default/config_bottom.xml',
-						DIR_CORE . 'extension/' . (string)$ext_configs->type . '/config_bottom.xml'
+						ABC::env('DIR_CORE') . 'extension/' . 'default/config_bottom.xml',
+						ABC::env('DIR_CORE') . 'extension/' . (string)$ext_configs->type . '/config_bottom.xml'
 				)
 		);
 
@@ -1202,7 +1202,7 @@ class AHelperUtils extends AHelper{
 	 * Function to resize image if needed and put to new location
 	 * NOTE: Resource Library handles resize by itself
 	 * @param string $orig_image (full path)
-	 * @param string $new_image (relative path start from DIR_IMAGE)
+	 * @param string $new_image (relative path start from env DIR_IMAGE)
 	 * @param int $width
 	 * @param int $height
 	 * @param int $quality
@@ -1214,28 +1214,28 @@ class AHelperUtils extends AHelper{
 		}
 
 		//if new file not yet present, check directory
-		if (!file_exists(DIR_IMAGE . $new_image)) {
+		if (!file_exists(ABC::env('DIR_IMAGE') . $new_image)) {
 			$path = '';
 			$directories = explode('/', dirname(str_replace('../', '', $new_image)));
 			foreach ($directories as $directory) {
 				$path = $path . '/' . $directory;
 				//do we have directory?
-				if (!file_exists(DIR_IMAGE . $path)) {
+				if (!file_exists(ABC::env('DIR_IMAGE') . $path)) {
 					// Make sure the index file is there
-					$indexFile = DIR_IMAGE . $path . '/index.php';
-					$result = mkdir(DIR_IMAGE . $path, 0775) && file_put_contents($indexFile,
+					$indexFile = ABC::env('DIR_IMAGE') . $path . '/index.php';
+					$result = mkdir(ABC::env('DIR_IMAGE') . $path, 0775) && file_put_contents($indexFile,
 									"<?php die('Restricted Access!'); ?>");
 					if (!$result) {
-						$error = new AWarning('Cannot to create directory ' . DIR_IMAGE . $path . '. Please check permissions for ' . DIR_IMAGE);
+						$error = new AWarning('Cannot to create directory ' . ABC::env('DIR_IMAGE') . $path . '. Please check permissions for ' . ABC::env('DIR_IMAGE'));
 						$error->toLog();
 					}
 				}
 			}
 		}
 
-		if (!file_exists(DIR_IMAGE . $new_image) || (filemtime($orig_image) > filemtime(DIR_IMAGE . $new_image))) {
+		if (!file_exists(ABC::env('DIR_IMAGE') . $new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGE') . $new_image))) {
 			$image = new AImage($orig_image);
-			$result = $image->resizeAndSave(DIR_IMAGE . $new_image,
+			$result = $image->resizeAndSave(ABC::env('DIR_IMAGE') . $new_image,
 					$width,
 					$height,
 					array (

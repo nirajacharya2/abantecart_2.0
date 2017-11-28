@@ -32,18 +32,18 @@ if (!class_exists('abc\ABC')) {
 final class ASession{
 	public $registry = null;
 	public $data = array ();
-	public $ses_name = SESSION_ID;
+	public $ses_name = '';
 
 	/**
 	 * @param string $ses_name
 	 */
-	public function __construct($ses_name = ''){
+	public function __construct($ses_name){
 
 		if (class_exists('\abc\core\engine\Registry')){
 			$this->registry = Registry::getInstance();
 		}
 
-		if (!session_id() || AHelperUtils::has_value($ses_name)){
+		if (!session_id()){
 			$this->ses_name = $ses_name;
 			$this->init($this->ses_name);
 		}
@@ -69,7 +69,7 @@ final class ASession{
 	public function init($session_name){
 		$session_mode = '';
 		$path = '';
-		if (defined('IS_API') && IS_API === true){
+		if (ABC::env('IS_API')){
 			//set up session specific for API based on the token or create new 
 			$token = '';
 			if ($_GET['token']){
@@ -97,9 +97,9 @@ final class ASession{
 				}
 			}
 
-			if (defined('EMBED_TOKEN_NAME') && isset($_GET[EMBED_TOKEN_NAME]) && !isset($_COOKIE[$session_name])){
+			if (ABC::env('EMBED_TOKEN_NAME') && isset($_GET[ABC::env('EMBED_TOKEN_NAME')]) && !isset($_COOKIE[$session_name])){
 				//check and reset session if it is not valid
-				$final_session_id = $this->_prepare_session_id($_GET[EMBED_TOKEN_NAME]);
+				$final_session_id = $this->_prepare_session_id($_GET[ABC::env('EMBED_TOKEN_NAME')]);
 				session_id($final_session_id);
 				setcookie($session_name, $final_session_id, 0, $path, null, false);
 				$session_mode = 'embed_token';

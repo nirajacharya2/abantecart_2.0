@@ -173,8 +173,8 @@ class ModelUserUserGroup extends Model {
 			}
 		}
 		// looking for controllers inside extensions
-		$files_pages = glob( DIR_APP_EXT . '/*/admin/controllers/pages/*/*.php');
-		$files_response = glob( DIR_APP_EXT . '/*/admin/controllers/responses/*/*.php');
+		$files_pages = glob( ABC::env('DIR_APP_EXT') . '/*/admin/controllers/pages/*/*.php');
+		$files_response = glob( ABC::env('DIR_APP_EXT') . '/*/admin/controllers/responses/*/*.php');
 		$files = array_merge( $files_pages, $files_response);
 		foreach ($files as $file) {
 			$data = explode('/', dirname($file));

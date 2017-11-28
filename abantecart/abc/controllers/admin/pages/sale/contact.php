@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -28,7 +29,7 @@ if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
 	header('Location: assets/static_pages/demo_mode.php');
 }
 

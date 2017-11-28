@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AError;
@@ -149,7 +150,7 @@ class ControllerResponsesListingGridExtension extends AController{
 			//for new extensions
 			if ($row['remote_install']){
 				$response->userdata->installation_key[$id] = $row['installation_key'];
-				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . ABC::env('RDIR_ASSETS') . 'images/default_extension.png' . '" alt="" border="0" />';
 				$category = '';
 				$status = $this->language->get('text_ready_to_install');
 				$response->userdata->classes[$id] = 'success disable-edit disable-delete disable-uninstall disable-install';
@@ -157,14 +158,14 @@ class ControllerResponsesListingGridExtension extends AController{
 			} elseif (in_array($extension, $missing_extensions)){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
 
-				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . ABC::env('RDIR_ASSETS') . 'images/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_missing_extension'), $extension);
 				$category = $status = '';
 				// change it for show it in list first by default sorting
 				$row['date_modified'] = date('Y-m-d H:i:s', time());
-			} elseif (!file_exists(DIR_EXT . $extension . '/main.php') || !file_exists(DIR_EXT . $extension . '/config.xml')){
+			} elseif (!file_exists(ABC::env('DIR_EXT') . $extension . '/main.php') || !file_exists(ABC::env('DIR_EXT') . $extension . '/config.xml')){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
-				$icon = '<img src="' . RDIR_TEMPLATE . 'images/default_extension.png' . '" alt="" border="0" />';
+				$icon = '<img src="' . ABC::env('RDIR_ASSETS') . 'images/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_broken_extension'), $extension);
 				$category = $status = '';
 				// change it for show it in list first by default sorting
@@ -182,9 +183,9 @@ class ControllerResponsesListingGridExtension extends AController{
 					));
 				}
 
-				$icon_ext_img_url = HTTPS_EXT . $extension . '/images/icon.png';
-				$icon_ext_dir = DIR_EXT . $extension . '/images/icon.png';
-				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : RDIR_TEMPLATE . 'images/default_extension.png');
+				$icon_ext_img_url = ABC::env('HTTPS_EXT') . $extension . '/images/icon.png';
+				$icon_ext_dir = ABC::env('DIR_EXT') . $extension . '/images/icon.png';
+				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : ABC::env('RDIR_ASSETS') . 'images/default_extension.png');
 				if (!$this->config->has($extension . '_status')){
 					$icon = '<img src="' . $icon . '" alt="" border="0" />';
 				} else{
@@ -295,8 +296,8 @@ class ControllerResponsesListingGridExtension extends AController{
 		$this->data = array ('license_text' => '', 'error_text' => '');
 		if ($result){
 			// if all fine show license agreement
-			if (file_exists(DIR_EXT . $this->request->get['extension'] . "/license.txt")){
-				$this->data['license_text'] = file_get_contents(DIR_EXT . $this->request->get['extension'] . "/license.txt");
+			if (file_exists(ABC::env('DIR_EXT') . $this->request->get['extension'] . "/license.txt")){
+				$this->data['license_text'] = file_get_contents(ABC::env('DIR_EXT') . $this->request->get['extension'] . "/license.txt");
 				$this->data['license_text'] = htmlentities($this->data['license_text'], ENT_QUOTES, 'UTF-8');
 				$this->data['license_text'] = nl2br($this->data['license_text']);
 			}

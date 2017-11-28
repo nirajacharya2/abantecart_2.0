@@ -30,7 +30,7 @@ if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
     header('Location: assets/static_pages/demo_mode.php');
 }
 
@@ -383,8 +383,8 @@ class ControllerPagesToolPackageInstaller extends AController {
 			}
 			$url .= "&mp_token=".$mp_token;
 			$url .= "&store_id=" . ABC::env('UNIQUE_ID');
-			$url .= "&store_url=" . HTTP_SERVER;
-			$url .= "&store_version=" . VERSION;
+			$url .= "&store_url=" . ABC::env('HTTP_SERVER');
+			$url .= "&store_version=" . ABC::env('VERSION');
 			$url .= "&extension_key=" . $extension_key;
 		} else {
 			$url = $package_info['package_url'];
@@ -592,8 +592,8 @@ class ControllerPagesToolPackageInstaller extends AController {
 				$dst_dirs = $pmanager->getDestinationDirectories();
 				$ftp_mode = false;
 				// if even one destination directory is not writable - use ftp mode
-				if(!is_writable(DIR_EXT)){
-					$non_writables[] = DIR_EXT;
+				if(!is_writable(ABC::env('DIR_EXT'))){
+					$non_writables[] = ABC::env('DIR_EXT');
 				}
 
 				if ($dst_dirs) {
@@ -929,8 +929,8 @@ class ControllerPagesToolPackageInstaller extends AController {
 			$version = (string)$item;
 			$versions[ ] = $version;
 			$subv_arr = explode('.',preg_replace('/[^0-9\.]/', '', $version));
-			$full_check = AHelperUtils::versionCompare($version,VERSION,'<=');
-			$minor_check = AHelperUtils::versionCompare($subv_arr[0].'.'.$subv_arr[1], MASTER_VERSION . '.' . MINOR_VERSION,'==');
+			$full_check = AHelperUtils::versionCompare($version,ABC::env('VERSION'),'<=');
+			$minor_check = AHelperUtils::versionCompare($subv_arr[0].'.'.$subv_arr[1], ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION'),'==');
 
 			if ($full_check && $minor_check ) {
 				break;
@@ -940,7 +940,7 @@ class ControllerPagesToolPackageInstaller extends AController {
 		
 		if (!$full_check || !$minor_check) {
 			$this->session->data['package_info']['confirm_version_incompatibility'] = false;
-			$this->session->data['package_info']['version_incompatibility_text'] = sprintf($this->language->get('confirm_version_incompatibility'), (VERSION), implode(', ', $versions));
+			$this->session->data['package_info']['version_incompatibility_text'] = sprintf($this->language->get('confirm_version_incompatibility'), (ABC::env('VERSION')), implode(', ', $versions));
 		}
 		return $full_check && $minor_check;
 	}
@@ -987,9 +987,9 @@ class ControllerPagesToolPackageInstaller extends AController {
 
 		$pmanager = new APackageManager();
 		// #2. backup previous version
-		if ($already_installed || file_exists(DIR_EXT . $extension_id)) {
-			if(!is_writable(DIR_EXT . $extension_id)){
-				$this->session->data['error'] = $this->language->get('error_move_backup').DIR_EXT . $extension_id;
+		if ($already_installed || file_exists(ABC::env('DIR_EXT') . $extension_id)) {
+			if(!is_writable(ABC::env('DIR_EXT') . $extension_id)){
+				$this->session->data['error'] = $this->language->get('error_move_backup').ABC::env('DIR_EXT') . $extension_id;
 				abc_redirect($this->_get_begin_href());
 			}else{
 				if (!$pmanager->backupPrevious($extension_id)) {
@@ -1016,9 +1016,9 @@ class ControllerPagesToolPackageInstaller extends AController {
 										  $package_info['ftp_path'] . 'extensions/' . $extension_id);
             ftp_close($fconnect);
 		} else {
-			$result = rename($temp_dirname . $package_dirname . "/code/extensions/" . $extension_id, DIR_EXT.$extension_id);
+			$result = rename($temp_dirname . $package_dirname . "/code/extensions/" . $extension_id, ABC::env('DIR_EXT').$extension_id);
 			//this method requires permission set to be set
-			$pmanager->chmod_R(DIR_EXT.$extension_id ,0777, 0777);
+			$pmanager->chmod_R(ABC::env('DIR_EXT').$extension_id ,0777, 0777);
 		}
 
 		/*
@@ -1046,10 +1046,10 @@ class ControllerPagesToolPackageInstaller extends AController {
 			}
 		} else {
 			if ($package_info['ftp']) {
-				$this->session->data['error'] = $this->language->get('error_move_ftp') . DIR_EXT . $extension_id.'<br><br>'.$pmanager->error;
+				$this->session->data['error'] = $this->language->get('error_move_ftp') . ABC::env('DIR_EXT') . $extension_id.'<br><br>'.$pmanager->error;
 				abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
 			} else {
-				$this->session->data['error'] = $this->language->get('error_move') . DIR_EXT . $extension_id.'<br><br>'.$pmanager->error;
+				$this->session->data['error'] = $this->language->get('error_move') . ABC::env('DIR_EXT') . $extension_id.'<br><br>'.$pmanager->error;
 				$this->_removeTempFiles('dir');
 				abc_redirect($this->_get_begin_href());
 			}
@@ -1063,9 +1063,9 @@ class ControllerPagesToolPackageInstaller extends AController {
 	 */
 	private function _upgradeCore() {
 		$package_info = &$this->session->data['package_info'];
-		if (AHelperUtils::versionCompare(VERSION, $package_info['package_version'], ">=")) {
+		if (AHelperUtils::versionCompare(ABC::env('VERSION'), $package_info['package_version'], ">=")) {
 
-			$this->session->data['error'] = str_replace('%VERSION%', VERSION, $this->language->get('error_core_version')) . $package_info['package_version'] . '!';
+			$this->session->data['error'] = str_replace('%VERSION%', ABC::env('VERSION'), $this->language->get('error_core_version')) . $package_info['package_version'] . '!';
 			unset($this->session->data['package_info']);
 			abc_redirect($this->_get_begin_href());
 		}
@@ -1078,7 +1078,7 @@ class ControllerPagesToolPackageInstaller extends AController {
 		 * Do not remove code yet.
 		 *
 		//backup files
-		$backup = new ABackup('abantecart_' . str_replace('.','',VERSION));
+		$backup = new ABackup('abantecart_' . str_replace('.','',ABC::env('VERSION')));
 		//interrupt if backup directory is inaccessible
 		if ($backup->error) {
 			$this->session->data['error'] = implode("\n", $backup->error);
@@ -1099,7 +1099,7 @@ class ControllerPagesToolPackageInstaller extends AController {
 					$this->session->data['error'] = implode("\n", $backup->error);
 					return false;
 				}
-				if (!$backup->archive(DIR_BACKUP . $backup_dirname . '.tar.gz', DIR_BACKUP, $backup_dirname)) {
+				if (!$backup->archive(ABC::env('DIR_BACKUP') . $backup_dirname . '.tar.gz', ABC::env('DIR_BACKUP'), $backup_dirname)) {
 					$this->session->data['error'] = implode("\n", $backup->error);
 					return false;
 				}
@@ -1112,8 +1112,8 @@ class ControllerPagesToolPackageInstaller extends AController {
 			$install_upgrade_history->addRows(
 					array(
 							'date_added' => date("Y-m-d H:i:s", time()),
-							'name' => 'Backup before core upgrade. Core version: ' . VERSION,
-							'version' => VERSION,
+							'name' => 'Backup before core upgrade. Core version: ' . ABC::env('VERSION'),
+							'version' => ABC::env('VERSION'),
 							'backup_file' => $backup_dirname . '.tar.gz',
 							'backup_date' => date("Y-m-d H:i:s", time()),
 							'type' => 'backup',

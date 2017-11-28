@@ -38,51 +38,51 @@ if (!isset($_SERVER['HTTP_HOST'])) {
 
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure' || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], ':443') !== false)) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 }
 
 // Detect http host
 if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-	define('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
 } else {
-	define('REAL_HOST', $_SERVER['HTTP_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
 
 //Set up common paths
-define('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
-define('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
-define('DIR_CORE', ABC::env('DIR_APP') . 'core/');
-define('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
-define('DIR_IMAGE', DIR_ASSETS . 'images/');
-define('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
-define('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
-define('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
-define('DIR_LOGS', ABC::env('DIR_APP') . 'system/logs/');
-define('DIR_VENDOR', dirname(dirname(__FILE__)) . '/vendor/');
+ABC::env('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
+ABC::env('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
+ABC::env('DIR_CORE', ABC::env('DIR_APP') . 'core/');
+ABC::env('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
+ABC::env('DIR_IMAGE', ABC::env('DIR_ASSETS') . 'images/');
+ABC::env('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
+ABC::env('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
+ABC::env('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
+ABC::env('DIR_LOGS', ABC::env('DIR_APP') . 'system/logs/');
+ABC::env('DIR_VENDOR', dirname(dirname(__FILE__)) . '/vendor/');
 
 // AbanteCart Version
 include(ABC::env('DIR_APP').'core/init/version.php');
 
 // Error Reporting
 error_reporting(E_ALL);
-require_once(DIR_LIB . 'debug.php');
-require_once(DIR_LIB . 'exceptions.php');
-require_once(DIR_LIB . 'error.php');
-require_once(DIR_LIB . 'warning.php');
+require_once(ABC::env('DIR_LIB') . 'debug.php');
+require_once(ABC::env('DIR_LIB') . 'exceptions.php');
+require_once(ABC::env('DIR_LIB') . 'error.php');
+require_once(ABC::env('DIR_LIB') . 'warning.php');
 
 //define rt - route for application controller
 if($_GET['rt']) {
-	define('ROUTE', $_GET['rt']);
+	ABC::env('ROUTE', $_GET['rt']);
 } else if($_POST['rt']){
-	define('ROUTE', $_POST['rt']);
+	ABC::env('ROUTE', $_POST['rt']);
 } else {
-	define('ROUTE', 'index/home');
+	ABC::env('ROUTE', 'index/home');
 }
 
 try{
@@ -136,40 +136,43 @@ try{
 	}
 
 // relative paths for extensions
-	define('DIRNAME_APP', 'abc/');
-	define('DIRNAME_ASSETS', 'assets/');
-	define('DIRNAME_EXTENSIONS', 'extensions/');
-	define('DIRNAME_CORE', 'core/');
-	define('DIRNAME_STORE', 'storefront/');
-	define('DIRNAME_ADMIN', 'admin/');
-	define('DIRNAME_IMAGES', 'images/');
-	define('DIRNAME_CONTROLLERS', 'controllers/');
-	define('DIRNAME_LANGUAGES', 'languages/');
-	define('DIRNAME_TEMPLATE', 'template/');
-	define('DIRNAME_TEMPLATES', 'templates/');
+	ABC::env(
+		array(
+			'DIRNAME_APP' => 'abc/',
+			'DIRNAME_ASSETS' => 'assets/',
+			'DIRNAME_EXTENSIONS' => 'extensions/',
+			'DIRNAME_CORE' => 'core/',
+			'DIRNAME_STORE'=> 'storefront/',
+			'DIRNAME_ADMIN' => 'admin/',
+			'DIRNAME_IMAGES'=> 'images/',
+			'DIRNAME_CONTROLLERS' => 'controllers/',
+			'DIRNAME_LANGUAGES' => 'languages/',
+			'DIRNAME_TEMPLATES', 'templates/',
+			'DIRNAME_TEMPLATE' => 'template/'
+		)
+	);
 
-	define('DIR_APP_EXT', ABC::env('DIR_APP') . DIRNAME_EXTENSIONS);
-	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
+	ABC::env('DIR_APP_EXT', ABC::env('DIR_APP') . ABC::env('DIRNAME_EXTENSIONS'));
+	ABC::env('DIR_ASSETS_EXT', ABC::env('DIR_ASSETS') . ABC::env('DIRNAME_EXTENSIONS'));
 
-	require_once(ABC::env('DIR_APP').DIRNAME_CORE.'init/base.php');
+	require_once(ABC::env('DIR_CORE').'init/base.php');
 	$registry = Registry::getInstance();
-	require_once(ABC::env('DIR_APP').DIRNAME_CORE.'init/admin.php');
+	require_once(ABC::env('DIR_CORE').'init/admin.php');
 
 	// Session
-	$registry->set('session', new ASession(SESSION_ID));
+	$registry->set('session', new ASession('PHPSESSID_AC'));
 
 // CSRF Token Class
 	$registry->set('csrftoken', new CSRFToken());
 
 // Log
-	$registry->set('log', new ALog(DIR_LOGS));
+	$registry->set('log', new ALog(ABC::env('DIR_LOGS')));
 
 // Document
 	$registry->set('document', new ADocument());
 
 // AbanteCart Snapshot details
-	$registry->set('snapshot',
-			'AbanteCart/' . VERSION . ' ' . $_SERVER['SERVER_SOFTWARE'] . ' (' . $_SERVER['SERVER_NAME'] . ')');
+	$registry->set('snapshot', 'AbanteCart/' . ABC::env('VERSION') . ' ' . $_SERVER['SERVER_SOFTWARE'] . ' (' . $_SERVER['SERVER_NAME'] . ')');
 //Non-apache fix for REQUEST_URI
 	if (!isset($_SERVER['REQUEST_URI'])) {
 		$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);

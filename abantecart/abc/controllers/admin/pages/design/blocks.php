@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\lib\ALayoutManager;
@@ -605,7 +606,7 @@ class ControllerPagesDesignBlocks extends AController {
 			}
 		}
 
-		$tpls = glob(DIR_TEMPLATES . '*/storefront/blocks/html_block/*.tpl');
+		$tpls = glob(ABC::env('DIR_TEMPLATES') . '*/storefront/blocks/html_block/*.tpl');
 		foreach ($tpls as $tpl) {
 			$pos = strpos($tpl, 'blocks/html_block/');
 			$tpl = substr($tpl, $pos);
@@ -822,7 +823,7 @@ class ControllerPagesDesignBlocks extends AController {
 		}
 
 
-		$tpls = glob(DIR_TEMPLATES . '*/storefront/blocks/listing_block/*.tpl');
+		$tpls = glob(ABC::env('DIR_TEMPLATES') . '*/storefront/blocks/listing_block/*.tpl');
 		foreach ($tpls as $tpl) {
 			$pos = strpos($tpl, 'blocks/listing_block/');
 			$tpl = substr($tpl, $pos);

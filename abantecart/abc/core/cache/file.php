@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\cache;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AError;
 
@@ -64,7 +65,7 @@ class ACacheDriverFile extends ACacheDriver{
 		}
 		parent::__construct($expiration, $lock_time);
 		// note: path with slash at the end!
-		$this->path = DIR_CACHE;
+		$this->path = ABC::env('DIR_CACHE');
 	}
 
 	/**

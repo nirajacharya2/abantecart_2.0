@@ -17,12 +17,15 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+namespace abantecart\install;
+use abc\ABC;
+use abc\core\engine\AController;
 
 class ControllerPagesFinish extends AController {
 
 	public function main() {
 
-		if (!defined('DB_HOSTNAME')) {
+		if (!ABC::env('DB_HOSTNAME')) {
 			header('Location: index.php?rt=license');
 			exit;
 		}
@@ -32,7 +35,7 @@ class ControllerPagesFinish extends AController {
 
 		$this->view->assign('admin_path', 'index.php?s=' . ABC::env('ADMIN_PATH'));
 
-		$message = "Keep your ecommmerce secure! <br /> Delete directory " . DIR_ABANTECART . "install from your AbanteCart installation!";
+		$message = "Keep your ecommerce secure! <br /> Delete directory " . ABC::env('DIR_ABANTECART') . " install from your AbanteCart installation!";
 		$this->view->assign('message', $message);
 
 		$this->addChild('common/header', 'header', 'common/header.tpl');

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
 
@@ -200,8 +201,8 @@ class ACustomer{
 
 		//Supports older passwords for upgraded/migrated stores prior to 1.2.8
 		$add_pass_sql = '';
-		if (defined('SALT')){
-			$add_pass_sql = "OR password = '" . $this->db->escape(md5($password . SALT)) . "'";
+		if (ABC::env('SALT')){
+			$add_pass_sql = "OR password = '" . $this->db->escape(md5($password . ABC::env('SALT'))) . "'";
 		}
 		$customer_data = $this->db->query("SELECT *
 											FROM " . $this->db->table("customers") . "
@@ -236,7 +237,7 @@ class ACustomer{
 					time() + 60 * 60 * 24 * 365,
 					dirname($this->request->server['PHP_SELF']),
 					null,
-					(defined('HTTPS') && HTTPS),
+					ABC::env('HTTPS'),
 					true
 			);
 			//set date of login

@@ -28,7 +28,7 @@ if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
 	header('Location: assets/static_pages/demo_mode.php');
 }
 
@@ -233,7 +233,7 @@ class ControllerPagesToolBackup extends AController {
 						'value' => 1
 				));
 
-		$this->data['entry_compress_backup'] = sprintf($this->language->get('entry_compress_backup'), str_replace(ABC::env('DIR_ROOT'),'',DIR_BACKUP) ,str_replace(ABC::env('DIR_ROOT').'/','',DIR_BACKUP));
+		$this->data['entry_compress_backup'] = sprintf($this->language->get('entry_compress_backup'), str_replace(ABC::env('DIR_ROOT'),'',ABC::env('DIR_BACKUP')) ,str_replace(ABC::env('DIR_ROOT').'/','',ABC::env('DIR_BACKUP')));
 
 		$this->data['form']['build_task_url'] = $this->html->getSecureURL('r/tool/backup/buildTask');
 		$this->data['form']['complete_task_url'] = $this->html->getSecureURL('r/tool/backup/complete');
@@ -345,7 +345,7 @@ class ControllerPagesToolBackup extends AController {
 
 		if ($this->user->canAccess('tool/backup')) {
 			$filename = str_replace(array('../', '..\\', '\\', '/'), '', $this->request->get['filename']);
-			$file = DIR_BACKUP . $filename;
+			$file = ABC::env('DIR_BACKUP') . $filename;
 			if (file_exists($file)) {
 				header('Content-Description: File Transfer');
 				header('Content-Type: application/x-gzip');

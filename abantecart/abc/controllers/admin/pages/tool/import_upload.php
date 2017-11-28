@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AData;
 
@@ -95,7 +96,7 @@ class ControllerPagesToolImportUpload extends AController {
 		}
 
 		//move uploaded file to tmp processing location
-		$res['file'] = DIR_DATA . 'import_' . basename($file['tmp_name']) . ".txt";
+		$res['file'] = ABC::env('DIR_DATA') . 'import_' . basename($file['tmp_name']) . ".txt";
 		$result = move_uploaded_file($file['tmp_name'], $res['file']);
 		if ($result === false){
 			//remove trunk
@@ -148,11 +149,11 @@ class ControllerPagesToolImportUpload extends AController {
 	protected function validateRequest() {
 		$file = $this->request->files['imported_file'];
 		$this->errors = array();
-		if (!is_dir(DIR_DATA)){
-			mkdir(DIR_DATA, 0755, true);
+		if (!is_dir(ABC::env('DIR_DATA'))){
+			mkdir(ABC::env('DIR_DATA'), 0755, true);
 		}
-		if (!is_writable(DIR_DATA)) {
-			$this->errors['error'] = sprintf($this->language->get('error_tmp_dir_non_writable'), DIR_DATA);
+		if (!is_writable(ABC::env('DIR_DATA'))) {
+			$this->errors['error'] = sprintf($this->language->get('error_tmp_dir_non_writable'), ABC::env('DIR_DATA'));
 		} elseif (!in_array($file['type'], $this->file_types)) {
 			$this->errors['error'] = $this->language->get('error_file_format');
 		} elseif (file_exists($file['tmp_name']) && $file['size'] > 0) {

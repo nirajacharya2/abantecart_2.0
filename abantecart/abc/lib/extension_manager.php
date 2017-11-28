@@ -427,14 +427,14 @@ class AExtensionManager{
 
 		// running sql install script if it exists
 		if (isset($config->install->sql)){
-			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
+			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php install script if it exists
 		if (isset($config->install->trigger)){
-			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
+			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -491,14 +491,14 @@ class AExtensionManager{
 		                                         'user'        => $this->user->getUsername()));
 
 		if (isset($config->uninstall->sql)){
-			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
+			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php uninstall script if it exists
 		if (isset($config->uninstall->trigger)){
-			$file = DIR_APP_EXT . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
+			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -535,10 +535,10 @@ class AExtensionManager{
 
 		$this->session->data['package_info']['ftp'] = false;
 		$pmanager = new APackageManager();
-		$result = $pmanager->removeDir(DIR_APP_EXT . $extension_txt_id);
+		$result = $pmanager->removeDir(ABC::env('DIR_APP_EXT') . $extension_txt_id);
 
 		if (!$result){
-			$message = "Error: Can't to delete file or directory: '" . DIR_APP_EXT . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
+			$message = "Error: Can't to delete file or directory: '" . ABC::env('DIR_APP_EXT') . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
 			$this->session->data['error'] = $message;
 		}
 
@@ -686,14 +686,14 @@ class AExtensionManager{
 		}
 		// check is cart version presents on extension cart version list
 		foreach ($cart_versions as $version){
-			$result = AHelperUtils::versionCompare(VERSION, $version, '>=');
+			$result = AHelperUtils::versionCompare(ABC::env('VERSION'), $version, '>=');
 			if ($result){
 				return true;
 			}
 		}
 		// if not - seek cart earlier version then current cart version in the list
 		foreach ($cart_versions as $version){
-			$result = AHelperUtils::versionCompare($version, VERSION, '<');
+			$result = AHelperUtils::versionCompare($version, ABC::env('VERSION'), '<');
 			if ($result){
 				$error_text = 'Extension <b>%s</b> written for earlier version of Abantecart (v.%s) lower that you have. ';
 				$error_text .= 'Probably all will be OK.';

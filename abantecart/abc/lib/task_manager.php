@@ -69,7 +69,7 @@ class ATaskManager{
 		// who is initiator of process, admin or storefront
 		$this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
 
-		$this->task_log = new ALog(DIR_LOGS . 'task_log.txt');
+		$this->task_log = new ALog(ABC::env('DIR_LOGS') . 'task_log.txt');
 	}
 
 	public function __get($key){

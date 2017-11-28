@@ -32,21 +32,21 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 }
 // Load all initial set up
 ABC::env('DIR_APP', $dir_app);
-define('DIR_CORE', $dir_app.'core/');
-define('DIR_LIB', $dir_app.'lib/');
-define('DIR_ASSETS', basename(__DIR__).'/');
+ABC::env('DIR_CORE', $dir_app.'core/');
+ABC::env('DIR_LIB', $dir_app.'lib/');
+ABC::env('DIR_ASSETS', basename(__DIR__).'/');
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
 $dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
 // Detect http host
 if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-	define('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
 } else {
-	define('REAL_HOST', $_SERVER['HTTP_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
-define('HTTP_SERVER', 'http://' . REAL_HOST . $dirname);
-define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . dirname(dirname($dirname)));
+ABC::env('HTTP_SERVER', 'http://' . ABC::env('REAL_HOST') . $dirname);
+ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . dirname(dirname($dirname)));
 
 
 
@@ -66,14 +66,14 @@ foreach(array_keys($_COOKIE) as $key) {
 		break;
 	}
 }
-define('SESSION_ID', $session_id);
+ABC::env('SESSION_ID', $session_id);
 
 //try to start session. 
-require_once(DIR_CORE . 'engine/registry.php');
-require_once(DIR_CORE . 'helper/helper.php');
-require_once(DIR_CORE . 'helper/utils.php');
-require_once(DIR_LIB . 'session.php');
-$session = new ASession(SESSION_ID);
+require_once(ABC::env('DIR_CORE') . 'engine/registry.php');
+require_once(ABC::env('DIR_CORE') . 'helper/helper.php');
+require_once(ABC::env('DIR_CORE') . 'helper/utils.php');
+require_once(ABC::env('DIR_LIB') . 'session.php');
+$session = new ASession(ABC::env('SESSION_ID'));
 
 $error = 'Please check AbanteCart and webserver error logs for more details. You can check error log in the control panel if it is functional. Otherwise, refer to error log located on your web server';
 if($session && isset($session->data['exception_msg']) && $session->data['exception_msg']){
@@ -151,7 +151,7 @@ if($from_admin){
 
 		<br><br>
 		<div>
-			<a href="<?php echo HTTP_ABANTECART; ?>">Go to main page</a>
+			<a href="<?php echo ABC::env('HTTP_ABANTECART'); ?>">Go to main page</a>
 		</div>
 	</center>
     </div>

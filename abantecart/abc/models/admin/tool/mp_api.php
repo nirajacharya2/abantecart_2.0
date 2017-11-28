@@ -36,7 +36,7 @@ class ModelToolMPAPI extends Model {
 	protected $data = array();
 	protected $mp_url = 'bWFya2V0cGxhY2UuYWJhbnRlY2FydC5jb20v';
 	public function getMPURL(){
-		return (HTTPS===true ? 'https://' : 'http://') . base64_decode($this->mp_url);
+		return (ABC::env('HTTPS') ? 'https://' : 'http://') . base64_decode($this->mp_url);
 	}
 
 	/**
@@ -219,14 +219,14 @@ class ModelToolMPAPI extends Model {
 		}
 
 		$GET['store_id'] = ABC::env('UNIQUE_ID');
-		$GET['store_url'] = HTTP_SERVER;
-		$GET['store_version'] = VERSION;
+		$GET['store_url'] = ABC::env('HTTP_SERVER');
+		$GET['store_version'] = ABC::env('VERSION');
 		$GET['language_code'] = $this->request->cookie ['language'];
 
 		// place your affiliate id here
-		define('MP_AFFILIATE_ID','');
-		if (MP_AFFILIATE_ID) {
-			$GET['aff_id'] = MP_AFFILIATE_ID;
+		ABC::env('MP_AFFILIATE_ID','');
+		if (ABC::env('MP_AFFILIATE_ID')) {
+			$GET['aff_id'] = ABC::env('MP_AFFILIATE_ID');
 		}
 
 		$GET = array_merge($params,$GET);

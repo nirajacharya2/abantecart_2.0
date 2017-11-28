@@ -1,4 +1,6 @@
-<?php //populate product div on client side ?>
+<?php
+use abc\ABC;
+//populate product div on client side ?>
 (function(){
 	var html = '';
 	if($('#<?php echo $target;?> .abantecart_name')){
@@ -30,7 +32,7 @@ if($product['price'] && $display_price){?>
 if($product['rating']){?>
 	html ='';
 	if($('<?php echo $target;?> .abantecart_rating')){
-		html = '<?php echo '<img src="' .AUTO_SERVER. $this->templateResource('images/stars_' . (int)$product['rating'] . '.png') . '" alt="' . $product['stars'] . '" />'?>';
+		html = '<?php echo '<img src="' .ABC::env('AUTO_SERVER'). $this->templateResource('images/stars_' . (int)$product['rating'] . '.png') . '" alt="' . $product['stars'] . '" />'?>';
 		$('#<?php echo $target;?> .abantecart_rating').html(html);
 	}
 <?php

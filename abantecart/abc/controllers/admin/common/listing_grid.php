@@ -40,15 +40,14 @@ class ControllerCommonListingGrid extends AController {
         //Do not load scripts multiple times
         if (!$this->registry->has('jqgrid_script')) {
             $locale = $this->session->data['language'];
-            if (!file_exists(ABC::env('DIR_ROOT') . '/' . RDIR_TEMPLATE . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js')) {
+            if (!file_exists(ABC::env('DIR_PUBLIC') . '/' . ABC::env('RDIR_ASSETS') . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js')) {
                 $locale = 'en';
             }
-            $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js');
-
-            $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/js/minified/jquery.jqGrid.min.js');
-            $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/plugins/jquery.grid.fluid.js');
-            $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/plugins/jquery.ba-bbq.min.js');
-            $this->document->addScript(RDIR_TEMPLATE . 'js/jqgrid/plugins/grid.history.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/js/i18n/grid.locale-' . $locale . '.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/js/minified/jquery.jqGrid.min.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/plugins/jquery.grid.fluid.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/plugins/jquery.ba-bbq.min.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/plugins/grid.history.js');
 
             //set flag to not include scripts/css twice
             $this->registry->set('jqgrid_script', true);

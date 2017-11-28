@@ -59,7 +59,7 @@ class ControllerResponsesListingGridTotal extends AController {
 					if ($parents) {
 						foreach ($parents as $parent) {
 							if (!$parent['status']) continue;
-							if (is_file(DIR_APP_EXT . $parent['key'] . '/admin/controllers/pages/total/' . $row['key'] . '.php')) {
+							if (is_file(ABC::env('DIR_APP_EXT') . $parent['key'] . '/admin/controllers/pages/total/' . $row['key'] . '.php')) {
 								$config_controller = 'total/' . $row['key'];
 								$language_rt = $parent['key'] . '/' . $parent['key'];
 								break;

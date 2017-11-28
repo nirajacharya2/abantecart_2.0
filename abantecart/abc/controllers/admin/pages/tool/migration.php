@@ -26,7 +26,7 @@ use abc\lib\AException;
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
 	header('Location: assets/static_pages/demo_mode.php');
 }
 class ControllerPagesToolMigration extends AController {
@@ -373,7 +373,7 @@ class ControllerPagesToolMigration extends AController {
 		if (!$this->error) {
 			try {
 				$db_driver = ABC::env('DB_DRIVER');
-				require_once DIR_DATABASE . $db_driver.'.php';
+				require_once ABC::env('DIR_DATABASE') . $db_driver.'.php';
 				$connection = new $db_driver($this->request->post['db_host'], $this->request->post['db_user'], $this->request->post['db_password'], $this->request->post['db_name'], true);
 			} catch (AException $e) {
 				$this->error['warning'] = $this->language->get('error_db_connection');

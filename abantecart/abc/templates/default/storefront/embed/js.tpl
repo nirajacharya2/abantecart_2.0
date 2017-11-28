@@ -1,6 +1,7 @@
-//set global sign of allowed 3dparty cookies as true by default. This value might be overridden by test cookie js
+<?php use abc\ABC; ?>
+//set global sign of allowed 3d party cookies as true by default. This value might be overridden by test cookie js
 var abc_cookie_allowed = true; 
-var abc_token_name = '<?php echo EMBED_TOKEN_NAME; ?>';
+var abc_token_name = '<?php echo ABC::env('EMBED_TOKEN_NAME'); ?>';
 var abc_token_value = '';
 if(window.abc_count === undefined){
 	window.abc_count = 0;
@@ -149,7 +150,7 @@ var init = function() {
 							'<div class="abcmodal-content">' +
 								'<div class="abcmodal-header">' +
 									'<div class="abcmodal-header-store">' +
-									'<?php if($icon) { ?><img src="<?php echo AUTO_SERVER; ?>assets/resources/<?php echo $icon; ?>"/>&nbsp;<?php } ?>&nbsp;<?php echo $store_name; ?>' +
+									'<?php if($icon) { ?><img src="<?php echo ABC::env('AUTO_SERVER'); ?>assets/resources/<?php echo $icon; ?>"/>&nbsp;<?php } ?>&nbsp;<?php echo $store_name; ?>' +
 									'</div><div class="abcmodal-header-menu">' +
 									'<a class="abcmodal-reload" href="#" data-href="<?php echo $account;?>"><?php echo $text_account;?></a>&nbsp;&nbsp;' +
 									'|&nbsp;<a class="abcmodal-reload" href="#" data-href="<?php echo $cart;?>"><?php echo $text_cart;?></a>&nbsp;&nbsp;' +
@@ -192,11 +193,11 @@ var init = function() {
 				// do cookie-test if session id not retrieved from http-request
 				if($test_cookie) { 
 			?>
-					abc_token_name = '<?php echo EMBED_TOKEN_NAME; ?>';
+					abc_token_name = '<?php echo ABC::env('EMBED_TOKEN_NAME'); ?>';
 					abc_token_value = abc_get_cookie();
 					var testcookieurl  = '<?php echo $abc_embed_test_cookie_url; ?>';
 					if(abc_token_value!=undefined && abc_token_value!=''){
-						testcookieurl +='&<?php echo EMBED_TOKEN_NAME; ?>='+abc_token_value;
+						testcookieurl +='&<?php echo ABC::env('EMBED_TOKEN_NAME'); ?>='+abc_token_value;
 					}
 					abc_process_request(testcookieurl);
 			<?php 

@@ -151,7 +151,7 @@ class AHtml extends AController{
 			//get config_url first 
 			$home_url = $this->registry->get('config')->get('config_url');
 			if (!$home_url) {
-				$home_url = defined('HTTP_SERVER') ? HTTP_SERVER : 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+				$home_url = ABC::env('HTTP_SERVER') ? ABC::env('HTTP_SERVER') : 'http://' . ABC::env('REAL_HOST') . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 			}
 			return $home_url;
 		}
@@ -180,12 +180,11 @@ class AHtml extends AController{
 	 */
 	public function getURL($rt, $params = '', $encode = '', $non_secure = false){
 		//detect if request is using HTTPS
-		$https = $this->request->server['HTTPS'];
-		if ($non_secure === false && HTTPS === true) {
-			$server = HTTPS_SERVER;
+		if ($non_secure === false && ABC::env('HTTPS')) {
+			$server = ABC::env('HTTPS_SERVER');
 		} else {
-			//to prevent garbage session need to check constant HTTP_SERVER
-			$server = defined('HTTP_SERVER') ? HTTP_SERVER : 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+			//to prevent garbage session need to check constant ABC::env('HTTP_SERVER')
+			$server = ABC::env('HTTP_SERVER') ? ABC::env('HTTP_SERVER') : 'http://' . ABC::env('REAL_HOST') . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 		}
 
 		if ($this->registry->get('config')->get('storefront_template_debug')
@@ -194,13 +193,13 @@ class AHtml extends AController{
 			$params .= '&tmpl_debug=' . $this->request->get['tmpl_debug'];
 		}
 		// add session id for cross-domain transition in secure mode
-		if ($this->registry->get('config')->get('config_shared_session') && HTTPS === true) {
+		if ($this->registry->get('config')->get('config_shared_session') && ABC::env('HTTPS')) {
 			$params .= '&session_id=' . session_id();
 		}
 
 		//add token for embed mode with forbidden 3d-party cookies
 		if ($this->registry->get('session')->data['session_mode'] == 'embed_token') {
-			$params .= '&' . EMBED_TOKEN_NAME . '=' . session_id();
+			$params .= '&' . ABC::env('EMBED_TOKEN_NAME') . '=' . session_id();
 		}
 		$url = $server . ABC::env('INDEX_FILE') . $this->url_encode($this->buildURL($rt, $params), $encode);
 		return $url;
@@ -217,13 +216,13 @@ class AHtml extends AController{
 		$session = $this->registry->get('session');
 		$config = $this->registry->get('config');
 		// add session id for cross-domain transition in non-secure mode
-		if ($config->get('config_shared_session') && HTTPS !== true) {
+		if ($config->get('config_shared_session') && !ABC::env('HTTPS')) {
 			$params .= '&session_id=' . session_id();
 		}
 
 		$suburl = $this->buildURL($rt, $params);
 
-		if (ABC::env('IS_ADMIN') === true || (defined('IS_API') && IS_API === true)) {
+		if ( ABC::env('IS_ADMIN') || ABC::env('IS_API') ) {
 			//Add session token for admin and API
 			if (isset($session->data['token']) && $session->data['token']) {
 				$suburl .= '&token=' . $this->registry->get('session')->data['token'];
@@ -232,14 +231,14 @@ class AHtml extends AController{
 
 		//add token for embed mode with forbidden 3d-party cookies
 		if ($session->data['session_mode'] == 'embed_token') {
-			$suburl .= '&' . EMBED_TOKEN_NAME . '=' . session_id();
+			$suburl .= '&' . ABC::env('EMBED_TOKEN_NAME') . '=' . session_id();
 		}
 
 		if ($config->get('storefront_template_debug') && isset($this->request->get['tmpl_debug'])) {
 			$suburl .= '&tmpl_debug=' . $this->request->get['tmpl_debug'];
 		}
 
-		$url = HTTPS_SERVER . ABC::env('INDEX_FILE') . $this->url_encode($suburl, $encode);
+		$url = ABC::env('HTTPS_SERVER') . ABC::env('INDEX_FILE') . $this->url_encode($suburl, $encode);
 		return $url;
 	}
 
@@ -271,7 +270,7 @@ class AHtml extends AController{
 	public function getSecureSEOURL($rt, $params = '', $encode = ''){
 		//add token for embed mode with forbidden 3d-party cookies
 		if ($this->registry->get('session')->data['session_mode'] == 'embed_token') {
-			$params .= '&' . EMBED_TOKEN_NAME . '=' . session_id();
+			$params .= '&' . ABC::env('EMBED_TOKEN_NAME') . '=' . session_id();
 		}
 		//#PR Generate SEO URL based on standard URL
 		$this->loadModel('tool/seo_url');
@@ -288,14 +287,14 @@ class AHtml extends AController{
 	public function getCatalogURL($rt, $params = '', $encode = '', $ssl = false){
 		//add token for embed mode with forbidden 3d-party cookies
 		if ($this->registry->get('session')->data['session_mode'] == 'embed_token') {
-			$params .= '&' . EMBED_TOKEN_NAME . '=' . session_id();
+			$params .= '&' . ABC::env('EMBED_TOKEN_NAME') . '=' . session_id();
 		}
 		$suburl = '?' . ($rt ? 'rt=' . $rt : '') . $params;
 
 		if ($this->registry->get('config')->get('config_ssl') == 2) {
 			$ssl = true;
 		}
-		$http = $ssl ? HTTPS_SERVER : HTTP_SERVER;
+		$http = $ssl ? ABC::env('HTTPS_SERVER') : ABC::env('HTTP_SERVER');
 		$url = $http . ABC::env('INDEX_FILE') . $this->url_encode($suburl, $encode);
 		return $url;
 	}
@@ -421,7 +420,7 @@ class AHtml extends AController{
 				WHERE query<>'" . $db->escape($query) . "' AND keyword='" . $db->escape($seo_key) . "'";
 		$result = $db->query($sql);
 		if ($result->num_rows) {
-			$url = HTTP_CATALOG . $seo_key;
+			$url = ABC::env('HTTP_CATALOG') . $seo_key;
 			return sprintf($this->language->get('error_seo_keyword'), $url, $seo_key);
 		}
 
@@ -948,7 +947,7 @@ abstract class HtmlElement{
 			}
 			$this->value = 0;
 			if ($this->required) {
-				$url = HTTPS_SERVER;
+				$url = ABC::env('HTTPS_SERVER');
 				$query_string = $this->registry->get('request')->server['QUERY_STRING'];
 				if (strpos($query_string, '_route_=') === false) {
 					$url .= '?';

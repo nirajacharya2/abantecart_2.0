@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\cache\ACacheDriverFile;
 use DirectoryIterator;
 
@@ -593,7 +594,7 @@ class ACache{
 	 */
 	public function getCacheStorageDriver($driver_name){
 		$driver = array ();
-		$file_path = DIR_CORE . 'cache/' . $driver_name . '.php';
+		$file_path = ABC::env('DIR_CORE') . 'cache/' . $driver_name . '.php';
 		if (file_exists($file_path)){
 			$class = '\abc\cache\ACacheDriver' . ucfirst($driver_name);
 			$driver = array ('class' => $class, 'file' => $file_path, 'driver_name' => $driver_name);
@@ -612,7 +613,7 @@ class ACache{
 		$drivers = array ();
 
 		// Get an iterator and loop trough the driver php files.
-		$files = new DirectoryIterator(DIR_CORE . 'cache');
+		$files = new DirectoryIterator(ABC::env('DIR_CORE') . 'cache');
 		foreach ($files as $file){
 			//we need only php files.
 			$file_name = $file->getFilename();
@@ -698,7 +699,7 @@ class ACache{
 				$lock = $this->lock($key, $group);
 			}
 			//Minify HTML before saving to cache
-			require_once(DIR_CORE . 'helper/html-css-js-minifier.php');
+			require_once(ABC::env('DIR_CORE') . 'helper/html-css-js-minifier.php');
 			$data = abc_minify_html($data);
 			$ret = $this->cache_driver->put($key, $group, $data);
 

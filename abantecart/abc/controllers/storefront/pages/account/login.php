@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -33,7 +34,7 @@ class ControllerPagesAccountLogin extends AController{
 
 	public function main(){
 		//do redirect to secure page when ssl is enabled
-		if( $this->config->get('config_ssl') &&  $this->config->get('config_ssl_url') && HTTPS !== true){
+		if( $this->config->get('config_ssl') &&  $this->config->get('config_ssl_url') && ! ABC::env('HTTPS')){
 			abc_redirect($this->html->getSecureURL('account/login'));
 		}
 

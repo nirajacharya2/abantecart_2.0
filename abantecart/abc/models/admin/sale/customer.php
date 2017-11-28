@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
@@ -1050,8 +1051,8 @@ class ModelSaleCustomer extends Model {
 			$mail->setSubject(sprintf($this->language->get('text_subject'), $store_info[ 'store_name' ]));
 			$mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, 'UTF-8'));
 			$mail->setHtml($html_body);
-			if (is_file(DIR_RESOURCE . $store_info['config_mail_logo'])) {
-				$mail->addAttachment(DIR_RESOURCE . $store_info['config_mail_logo'],
+			if (is_file(ABC::env('DIR_RESOURCE') . $store_info['config_mail_logo'])) {
+				$mail->addAttachment(ABC::env('DIR_RESOURCE') . $store_info['config_mail_logo'],
 						md5(pathinfo($store_info['config_mail_logo'], PATHINFO_FILENAME))
 						. '.' . pathinfo($store_info['config_mail_logo'], PATHINFO_EXTENSION));
 			}

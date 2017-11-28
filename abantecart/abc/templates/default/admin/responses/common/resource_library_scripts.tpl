@@ -1,12 +1,14 @@
-<?php echo $this->html->buildElement(
+<?php
+use abc\ABC;
+echo $this->html->buildElement(
 		array('type' => 'modal',
 				'id' => 'rl_modal',
 				'modal_type' => 'xlg',
 				'data_source' => 'ajax',
 				'title' => $text_resource_library)); ?>
 
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/fileupload/jquery.fileupload.js"></script>
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/fileupload/jquery.fileupload-ui.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/fileupload/jquery.fileupload.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/fileupload/jquery.fileupload-ui.js'); ?>"></script>
 
 <script type="text/javascript">
 
@@ -21,7 +23,7 @@ var urls = {
 			del: '<?php echo $rl_delete; ?>',
 			download: '<?php echo $rl_download; ?>',
 			upload: '<?php echo $rl_upload; ?>',
-			resource: '<?php echo HTTPS_DIR_RESOURCE; ?>'
+			resource: '<?php echo ABC::env('HTTPS_DIR_RESOURCE'); ?>'
 		},
 		default_type = '<?php echo $default_type["type_name"]; ?>';
 
@@ -364,7 +366,7 @@ var loadSingle = function (type, wrapper_id, resource_id, field) {
 						'data-type="' + type + '" ' +
 						'data-wrapper_id="' + wrapper_id + '" ' +
 						'data-field="' + field + '" ' +
-						'data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><img src="<?php echo $template_dir . 'image/icons/icon_add_media.png'; ?>" alt="<?php abc_echo_html2view($text_add_media); ?>" width="100" /></a>';
+						'data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><img src="<?php echo $this->templateResource('images/icons/icon_add_media.png'); ?>" alt="<?php abc_echo_html2view($text_add_media); ?>" width="100" /></a>';
 				html += '</div></div>';
 
 				$('#'+field).val('');

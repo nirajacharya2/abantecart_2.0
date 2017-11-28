@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperSystemCheck;
 use abc\core\engine\AResource;
@@ -49,11 +50,11 @@ class ControllerCommonHead extends AController {
 			$this->request->deleteCookie('HTTP_IS_RETINA');
 		}
 
-		if (HTTPS === true) {
-			$this->view->assign('base', HTTPS_SERVER);
+		if ( ABC::env('HTTPS') ) {
+			$this->view->assign('base', ABC::env('HTTPS_SERVER'));
 			$this->view->assign('ssl', 1);
 		} else {
-			$this->view->assign('base', HTTP_SERVER);
+			$this->view->assign('base', ABC::env('HTTP_SERVER'));
 		}
 
 		$icon_rl = $this->config->get('config_icon');
@@ -62,13 +63,13 @@ class ControllerCommonHead extends AController {
 			if (is_numeric($icon_rl)) {
 				$resource = new AResource('image');
 				$image_data = $resource->getResource( $icon_rl );
-				if ( is_file(DIR_RESOURCE . $image_data['image']) ) {
+				if ( is_file(ABC::env('DIR_RESOURCE') . $image_data['image']) ) {
 					$icon_rl = 'resources/'.$image_data['image'];
 				} else {
 					$icon_rl = $image_data['resource_code'];
 				}
-			} else if(!is_file(DIR_RESOURCE.$icon_rl)){
-				$this->messages->saveWarning('Check favicon.','Warning: please check favicon in your store settings. Current path is "'.DIR_RESOURCE.$icon_rl.'" but file does not exists.');
+			} else if(!is_file(ABC::env('DIR_RESOURCE').$icon_rl)){
+				$this->messages->saveWarning('Check favicon.','Warning: please check favicon in your store settings. Current path is "'.ABC::env('DIR_RESOURCE').$icon_rl.'" but file does not exists.');
 				$icon_rl ='';
 			}
 		}

@@ -19,54 +19,58 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------  
 */
-
+namespace abantecart\install;
 // Real path (operating system web root) to the directory where abantecart is installed
 use abc\ABC;
+use abc\core\engine\APage;
 use abc\lib\ADB;
+use abc\lib\ADebug;
+use abc\lib\ADocument;
+use abc\lib\AException;
 
 $root_path = dirname(__FILE__);
 
 if (ABC::env('IS_WINDOWS') === true) {
 		$root_path = str_replace('\\', '/', $root_path);
 }
-define('DIR_ROOT', $root_path);
+ABC::env('DIR_ROOT', $root_path);
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure' || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], ':443') !== false)) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 }else{
-	define('HTTPS', false);
+	ABC::env('HTTPS', false);
 }
 
 // HTTP
-define('HTTP_SERVER', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
-define('HTTP_ABANTECART', (HTTPS===true ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
+ABC::env('HTTP_SERVER', (ABC::env('HTTPS') ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/');
+ABC::env('HTTP_ABANTECART', (ABC::env('HTTPS') ? 'https' : 'http').'://' . $_SERVER['HTTP_HOST'] . rtrim(rtrim(dirname($_SERVER['PHP_SELF']), 'install'), '/.\\'). '/');
 
 // DIR
-define('DIR_ROOT', str_replace('\'', '/', realpath(dirname(dirname(__FILE__)))) . '/');
+ABC::env('DIR_ROOT', str_replace('\'', '/', realpath(dirname(dirname(__FILE__)))) . '/');
 ABC::env('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
-define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');
-define('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/cache/');
-define('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
-define('DIR_STOREFRONT', DIR_ABANTECART . '/storefront/');
-define('DIR_TEMPLATE', ABC::env('DIR_APP') . 'view/template/');
-define('INSTALL', 'true');
+ABC::env('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
+ABC::env('DIR_SYSTEM', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/');
+ABC::env('DIR_CACHE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/cache/');
+ABC::env('DIR_LOGS', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/system/logs/');
+ABC::env('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
+ABC::env('DIR_STOREFRONT', ABC::env('DIR_ABANTECART') . '/storefront/');
+ABC::env('DIR_TEMPLATE', ABC::env('DIR_APP') . 'view/template/');
+ABC::env('INSTALL', 'true');
 // Relative paths and directories
-define('RDIR_TEMPLATE',  'view/');
+ABC::env('RDIR_TEMPLATE',  'view/');
 
 // Startup with local init
 require_once('init.php');
 
 //Check if cart is already installed
-if (file_exists(DIR_SYSTEM . 'config.php')){
-	require_once(DIR_SYSTEM . 'config.php');
+if (file_exists(ABC::env('DIR_SYSTEM') . 'config.php')){
+	require_once(ABC::env('DIR_SYSTEM') . 'config.php');
 }
 
 $data_exist = false;
@@ -100,7 +104,7 @@ try {
 
 // Document
 $document = new ADocument();
-$document->setBase( HTTP_SERVER );
+$document->setBase( ABC::env('HTTP_SERVER') );
 $registry->set('document', $document);
 
 // Page Controller 

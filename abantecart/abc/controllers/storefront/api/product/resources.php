@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 
@@ -52,7 +53,7 @@ class ControllerApiProductResources extends AControllerAPI {
 						                                $this->config->get('config_image_additional_height'));
 				if($thumbnail){
 					$images[] = array(
-						'original' => HTTPS_DIR_RESOURCE.'image/'.$result['resource_path'],
+						'original' => ABC::env('HTTPS_DIR_RESOURCE').'image/'.$result['resource_path'],
 						'thumb' => $thumbnail );
 				}
 			}

@@ -70,7 +70,7 @@ class ControllerCommonHeader extends AController {
 			$this->view->assign('home_page', true);
 		} else {
 			$this->view->assign('home_page', false);
-			$this->view->assign('redirect', HTTPS_SERVER.'?'.$_SERVER['QUERY_STRING']);
+			$this->view->assign('redirect', ABC::env('HTTPS_SERVER').'?'.$_SERVER['QUERY_STRING']);
 		}
 
 		if (!$this->user->isLogged()
@@ -166,10 +166,10 @@ class ControllerCommonHeader extends AController {
 															'style' => 'button5')));
 
 		//backwards compatibility from 1.2.1. Can remove this check in the future.
-		if (!defined('ENCRYPTION_KEY')) {
-			$cm_body = "To be compatible with v".VERSION." add below line to configuration file: <br>\n" . ABC::env('DIR_APP') . '/config/config.php';
+		if (!ABC::env('ENCRYPTION_KEY')) {
+			$cm_body = "To be compatible with v".ABC::env('VERSION')." add below line to configuration file: <br>\n" . ABC::env('DIR_APP') . '/config/config.php';
 			$cm_body .= "<br>\n"."define('ENCRYPTION_KEY', '" . $this->config->get('encryption_key') . "');\n"; ;
-			$this->messages->saveWarning('Compatibility warning for v'.VERSION, $cm_body);
+			$this->messages->saveWarning('Compatibility warning for v'.ABC::env('VERSION'), $cm_body);
 		}
 
 		//prepare quick stats 

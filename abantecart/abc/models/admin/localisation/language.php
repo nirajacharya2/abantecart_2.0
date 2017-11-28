@@ -101,10 +101,10 @@ class ModelLocalisationLanguage extends Model{
 		$result = $query->row;
 		if (!$result['image']) {
 			if (file_exists(ABC::env('DIR_ROOT') . '/admin/languages/' . $result['directory'] . '/flag.png')) {
-				$result['image'] = HTTP_ABANTECART . 'admin/languages/' . $result['directory'] . '/flag.png';
+				$result['image'] = ABC::env('HTTP_ABANTECART') . 'admin/languages/' . $result['directory'] . '/flag.png';
 			}
 		} else {
-			$result['image'] = HTTP_ABANTECART . $result['image'];
+			$result['image'] = ABC::env('HTTP_ABANTECART') . $result['image'];
 		}
 		return $query->row;
 	}

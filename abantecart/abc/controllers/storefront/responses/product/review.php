@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
@@ -136,7 +137,7 @@ class ControllerResponsesProductReview extends AController {
 		}
 
 		if($this->config->get('config_recaptcha_secret_key')) {
-			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
+			require_once ABC::env('DIR_VENDOR') . '/google_recaptcha/autoload.php';
 			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$this->request->post['g-recaptcha-response'],
 										$this->request->getRemoteIP());

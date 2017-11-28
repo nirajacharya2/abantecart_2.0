@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
@@ -52,7 +53,7 @@ final class ALog{
 			@fclose($handle);
 		} else if (!is_writable($this->filename)){
 			//create second log file if original is not writable
-			$this->filename = DIR_LOGS . 'error_0.txt';
+			$this->filename = ABC::env('DIR_LOGS') . 'error_0.txt';
 			$handle = @fopen($this->filename, 'a+');
 			@fclose($handle);
 		}

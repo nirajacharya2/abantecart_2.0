@@ -556,7 +556,7 @@ class ModelAccountCustomer extends Model {
 		//If captcha enabled, validate
 		if($this->config->get('config_account_create_captcha')) {
 			if($this->config->get('config_recaptcha_secret_key')) {
-				require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
+				require_once ABC::env('DIR_VENDOR') . '/google_recaptcha/autoload.php';
 				$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 				$resp = $recaptcha->verify(	$data['g-recaptcha-response'],
 											$this->request->getRemoteIP());
@@ -676,7 +676,7 @@ class ModelAccountCustomer extends Model {
 		$this->error = array();
 
 		if($this->config->get('config_recaptcha_secret_key')) {
-			require_once DIR_VENDOR . '/google_recaptcha/autoload.php';
+			require_once ABC::env('DIR_VENDOR') . '/google_recaptcha/autoload.php';
 			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
 			$resp = $recaptcha->verify(	$data['g-recaptcha-response'],
 										$this->request->getRemoteIP());
@@ -996,8 +996,8 @@ class ModelAccountCustomer extends Model {
 		$mail->setSubject($data['subject']);
 		$mail->setText(html_entity_decode($data['txt_body'], ENT_QUOTES, 'UTF-8'));
 
-		if(is_file(DIR_RESOURCE . $data['config_mail_logo'])) {
-			$mail->addAttachment(DIR_RESOURCE . $data['config_mail_logo'],
+		if(is_file(ABC::env('DIR_RESOURCE') . $data['config_mail_logo'])) {
+			$mail->addAttachment(ABC::env('DIR_RESOURCE') . $data['config_mail_logo'],
 								md5(pathinfo($data['config_mail_logo'], PATHINFO_FILENAME))
 								. '.' . pathinfo($data['config_mail_logo'], PATHINFO_EXTENSION));
 		}

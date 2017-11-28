@@ -138,7 +138,7 @@ final class ACurrency{
 					time() + 60 * 60 * 24 * 30,
 					dirname($this->request->server['PHP_SELF']),
 					null,
-					(defined('HTTPS') && HTTPS)
+					ABC::env('HTTPS')
 			);
 		}
 	}

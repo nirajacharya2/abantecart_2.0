@@ -105,9 +105,9 @@ class ModelToolUpdater extends Model{
 		$url = $this->model_tool_mp_api->getMPURL() . '?rt=a/product/updates';
 		$url .= "&store_id=" . ABC::env('UNIQUE_ID');
 		$url .= "&store_ip=" . $_SERVER ['SERVER_ADDR'];
-		$url .= "&store_url=" . HTTP_SERVER;
+		$url .= "&store_url=" . ABC::env('HTTP_SERVER');
 		$url .= "&software_name=AbanteCart";
-		$url .= "&software_version=" . VERSION;
+		$url .= "&software_version=" . ABC::env('VERSION');
 		$url .= "&language_code=" . $this->language->getLanguageCode();
 		foreach ($el as $key => $extension){
 			$url .= '&extensions[' . $key . ']=' . $extension['version'];
@@ -131,7 +131,7 @@ class ModelToolUpdater extends Model{
 					continue 1;
 				}
 				//skip not supported by cart
-				if(!$version_info['cart_versions'] || !in_array(VERSION, $version_info['cart_versions'])){
+				if(!$version_info['cart_versions'] || !in_array(ABC::env('VERSION'), $version_info['cart_versions'])){
 					continue;
 				}
 				//skip old or current versions

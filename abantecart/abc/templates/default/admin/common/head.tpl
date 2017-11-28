@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var \abc\core\engine\AView $this
+ */
+use abc\ABC; ?>
 <meta charset="utf-8">
 <title><?php echo $title; ?></title>
 <base href="<?php echo $base; ?>"/>
@@ -7,11 +12,11 @@
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>"/>
 <?php } ?>
 
-<?php if ( is_file( DIR_RESOURCE . $icon ) ) {  ?>
+<?php if ( is_file( ABC::env('DIR_RESOURCE') . $icon ) ) {  ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="<?php echo $template_dir; ?>css/stylesheet.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('css/stylesheet.css'); ?>" />
 
 <?php foreach ($styles as $style) { ?>
 <link rel="<?php echo $style['rel']; ?>" type="text/css" href="<?php echo $style['href']; ?>"
@@ -22,7 +27,7 @@
         src="<?php echo $ssl ? 'https' : 'http'?>://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script type="text/javascript">
     if (typeof jQuery == 'undefined') {
-        var include = '<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/jquery-1.11.0.min.js"><\/script>';
+        var include = '<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-1.11.0.min.js'); ?>"><\/script>';
         document.write(include);
     }
 <?php if($retina){?>
@@ -31,25 +36,25 @@
     }
 <?php } ?>
 </script>
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/jquery-migrate-1.2.1.min.js"></script>
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/jquery.cookies.js"></script>
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js"></script>
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/bootstrap.min.js"></script>
-<script defer type="text/javascript" src="<?php echo $template_dir; ?>js/tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery.cookies.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/bootstrap.min.js'); ?>"></script>
+<script defer type="text/javascript" src="<?php echo $this->templateResource('js/tinymce/tinymce.min.js'); ?>"></script>
 
 
 <?php foreach ($scripts as $script) { ?>
 <script type="text/javascript" src="<?php echo $script; ?>"></script>
 <?php } ?>
 
-<script type="text/javascript" src="<?php echo $template_dir; ?>js/aform.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/aform.js'); ?>"></script>
 
 <?php 
 	//Generic PHP processed Javascript section
 
-if(is_file(DIR_TEMPLATES.'default/js/tinymce/langs/'.$language_locale.'.js')){
+if(is_file(ABC::env('DIR_TEMPLATES').'default/js/tinymce/langs/'.$language_locale.'.js')){
 	$mce_lang_code = $language_locale;
-} elseif(is_file(DIR_TEMPLATES.'default/js/tinymce/langs/'.substr($language_locale,0,2).'.js')){
+} elseif(is_file(ABC::env('DIR_TEMPLATES').'default/js/tinymce/langs/'.substr($language_locale,0,2).'.js')){
 	$mce_lang_code = substr($language_locale, 0, 2);
 }else{
 	$mce_lang_code = 'en';

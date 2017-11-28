@@ -2,7 +2,7 @@
 	<?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 	<div class="lockedpanel">
 		<div class="loginuser">
-			<img src="<?php echo $template_dir; ?>images/login.png" alt="<?php echo $text_login; ?>" />
+			<img src="<?php echo $this->templateResource('images/login.png'); ?>" alt="<?php echo $text_login; ?>" />
 		</div>
 		<div class="logged">
 			<h4><?php echo $heading_title; ?></h4>

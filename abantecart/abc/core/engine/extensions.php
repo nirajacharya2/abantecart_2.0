@@ -288,12 +288,12 @@ class ExtensionsApi{
 		$this->db_extensions = array ();
 		$this->missing_extensions = array ();
 
-		$extensions = glob(DIR_APP_EXT . '*', GLOB_ONLYDIR);
+		$extensions = glob(ABC::env('DIR_APP_EXT') . '*', GLOB_ONLYDIR);
 		if ($extensions) {
 			foreach ($extensions as $ext) {
 				//skip other directory not containing extensions 
 				if (is_file($ext . '/config.xml')) {
-					$this->extensions_dir[] = str_replace(DIR_APP_EXT, '', $ext);
+					$this->extensions_dir[] = str_replace(ABC::env('DIR_APP_EXT'), '', $ext);
 				}
 			}
 		}
@@ -559,10 +559,10 @@ class ExtensionsApi{
 			return false;
 		}
 		$name = '';
-		if (file_exists(DIR_APP_EXT . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml')) {
-			$filename = DIR_APP_EXT . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml';
+		if (file_exists(ABC::env('DIR_APP_EXT') . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml')) {
+			$filename = ABC::env('DIR_APP_EXT') . $extension . '/admin/languages/' . $this->registry->get('language')->language_details['directory'] . '/' . $extension . '/' . $extension . '.xml';
 		} else {
-			$filename = DIR_APP_EXT . $extension . '/admin/languages/english/' . $extension . '/' . $extension . '.xml';
+			$filename = ABC::env('DIR_APP_EXT') . $extension . '/admin/languages/english/' . $extension . '/' . $extension . '.xml';
 		}
 		if (file_exists($filename)) {
 			/**
@@ -737,9 +737,9 @@ class ExtensionsApi{
 						'storefront' => array (),
 						'admin'      => array (),
 				);
-				if (is_file(DIR_APP_EXT . $ext . '/main.php')) {
+				if (is_file(ABC::env('DIR_APP_EXT') . $ext . '/main.php')) {
 					/** @noinspection PhpIncludeInspection */
-					include(DIR_APP_EXT . $ext . '/main.php');
+					include(ABC::env('DIR_APP_EXT') . $ext . '/main.php');
 				}
 				$ext_controllers[$ext] = $controllers;
 				$ext_models[$ext] = $models;
@@ -783,12 +783,12 @@ class ExtensionsApi{
 			return false;
 		}
 
-		$file = '/' . ($section ? DIRNAME_ADMIN : DIRNAME_STORE) . 'languages/' .
+		$file = '/' . ($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE')) . 'languages/' .
 				$language_name . '/' . $route . '.xml';
 
 		//include language file from first matching extension
 		foreach ($this->extensions_dir as $ext) {
-			$f = DIR_APP_EXT . $ext . $file;
+			$f = ABC::env('DIR_APP_EXT') . $ext . $file;
 			if (is_file($f)) {
 				return array (
 						'file'      => $f,
@@ -816,10 +816,10 @@ class ExtensionsApi{
 			return false;
 		}
 
-		$ext_section = (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE);
+		$ext_section = (ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'));
 		//mode to force load storefront model is loaded from admin
 		if ($mode == 'storefront') {
-			$ext_section = DIRNAME_STORE;
+			$ext_section = ABC::env('DIRNAME_STORE');
 		}
 
 		switch ($resource_type) {
@@ -866,9 +866,9 @@ class ExtensionsApi{
 
 		foreach ($extensions_lookup_list as $ext) {
 			if ($resource_type == 'T') {
-				$f = DIR_ASSETS_EXT . $ext . '/templates' . $file;
+				$f = ABC::env('DIR_ASSETS_EXT') . $ext . '/templates' . $file;
 			} else {
-				$f = DIR_APP_EXT . $ext . $file;
+				$f = ABC::env('DIR_APP_EXT') . $ext . $file;
 			}
 
 			if ($ext_status == 'all' || (is_array($source[$ext][$section]) && in_array($route,
@@ -883,12 +883,12 @@ class ExtensionsApi{
 				}
 				if ($resource_type == 'T') {
 					//check default template
-					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route;
+					$f = ABC::env('DIR_APP_EXT') . $ext . $ext_section . ABC::env('DIRNAME_TEMPLATES') . 'default/' . $route;
 					if (is_file($f)) {
 						return array (
 								'file'      => $f,
 								'extension' => $ext,
-								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route
+								'base_path' => $ext_section . ABC::env('DIRNAME_TEMPLATES') . 'default/' . $route
 						);
 					}
 				}
@@ -898,7 +898,7 @@ class ExtensionsApi{
 		//we can include language file from all extensions too
 		if ($resource_type == 'L') {
 			foreach ($this->extensions_dir as $ext) {
-				$f = DIR_APP_EXT . $ext . $file;
+				$f = ABC::env('DIR_APP_EXT') . $ext . $file;
 				if (is_file($f)) {
 					return array (
 							'file'      => $f,
@@ -921,11 +921,11 @@ class ExtensionsApi{
 			return false;
 		}
 
-		$ext_section = (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE);
+		$ext_section = (ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'));
 
 		$tmpl_id = ABC::env('IS_ADMIN') ? $this->registry->get('config')->get('admin_template')
 				: $this->registry->get('config')->get('config_storefront_template');
-		$file = $ext_section . DIR_EXT_TEMPLATE . $tmpl_id . '/' . $route;
+		$file = $ext_section . ABC::env('DIRNAME_TEMPLATES') . $tmpl_id . '/' . $route;
 		$source = $this->extension_templates;
 
 		$section = trim($ext_section, '/');
@@ -935,7 +935,7 @@ class ExtensionsApi{
 		$output = array ();
 		foreach ($extensions_lookup_list as $ext) {
 			//looking for active template tpl
-			$f = DIR_APP_EXT . $ext . $file;
+			$f = ABC::env('DIR_APP_EXT') . $ext . $file;
 			$ext_tpls = is_array($source[$ext][$section]) ? $source[$ext][$section] : array ();
 			if (in_array($route, $ext_tpls)) {
 				if (is_file($f)) {
@@ -948,12 +948,12 @@ class ExtensionsApi{
 				//if active template tpl not found - looking for default
 				if (!isset($output[$ext])) {
 					//check default template
-					$f = DIR_APP_EXT . $ext . $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route;
+					$f = ABC::env('DIR_APP_EXT') . $ext . $ext_section . ABC::env('DIRNAME_TEMPLATES') . 'default/' . $route;
 					if (is_file($f)) {
 						$output[] = array (
 								'file'      => $f,
 								'extension' => $ext,
-								'base_path' => $ext_section . DIR_EXT_TEMPLATE . 'default/' . $route
+								'base_path' => $ext_section . ABC::env('DIRNAME_TEMPLATES') . 'default/' . $route
 						);
 					}
 				}
@@ -971,7 +971,7 @@ class ExtensionsApi{
 	 */
 	public function isExtensionController($route){
 
-		$section = trim((ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE), '/');
+		$section = trim((ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE')), '/');
 		$path_build = '';
 		$path_nodes = explode('/', $route);
 
@@ -979,7 +979,11 @@ class ExtensionsApi{
 			$path_build .= $path_node;
 
 			foreach ($this->enabled_extensions as $ext) {
-				$file = DIR_APP_EXT . $ext . '/' . DIRNAME_CONTROLLERS . (ABC::env('IS_ADMIN') ? DIRNAME_ADMIN : DIRNAME_STORE) . $path_build . '.php';
+				$file = ABC::env('DIR_APP_EXT')
+						. $ext
+						. '/' . ABC::env('DIRNAME_CONTROLLERS')
+						. (ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
+						. $path_build . '.php';
 
 				$ext_controllers = is_array($this->extension_controllers[$ext][$section]) ? $this->extension_controllers[$ext][$section] : array ();
 
@@ -1158,7 +1162,7 @@ class ExtensionUtils{
 		$this->config = AHelperUtils::getExtensionConfigXml($ext);
 
 		if (!$this->config) {
-			$filename = DIR_APP_EXT . str_replace('../', '', $this->name) . '/config.xml';
+			$filename = ABC::env('DIR_APP_EXT') . str_replace('../', '', $this->name) . '/config.xml';
 			$err = sprintf('Error: Could not load config for <b>%s</b> ( ' . $filename . ')!', $this->name);
 			foreach (libxml_get_errors() as $error) {
 				$err .= "  " . $error->message;
@@ -1183,7 +1187,7 @@ class ExtensionUtils{
 	 * validate extension resources. return warning in case conflict
 	 */
 	public function validateResources(){
-		$filename = DIR_APP_EXT . str_replace('../', '', $this->name) . '/main.php';
+		$filename = ABC::env('DIR_APP_EXT') . str_replace('../', '', $this->name) . '/main.php';
 		if (!is_file($filename)) {
 			return null;
 		}
@@ -1369,7 +1373,7 @@ class ExtensionUtils{
 			}
 		}
 		//2.2 check data by given function from file validate.php
-		$validate_file = DIR_APP_EXT . $this->name . '/validate.php';
+		$validate_file = ABC::env('DIR_APP_EXT') . $this->name . '/validate.php';
 
 		if (file_exists($validate_file)) {
 			/** @noinspection PhpIncludeInspection */

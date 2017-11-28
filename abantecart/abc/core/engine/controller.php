@@ -217,7 +217,7 @@ abstract class AController{
 				'language_id'   => $this->language->getLanguageID(),
 				'currency_code' => $this->currency->getCode(),
 			//in case with shared ssl-domain
-				'https'         => (HTTPS === true ? 1 : 0)
+				'https'         => (ABC::env('HTTPS') ? 1 : 0)
 		);
 		if (!$controller) {
 			$controller = $this->controller;

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 
@@ -38,14 +39,14 @@ class ControllerResponsesEmbedJS extends AController {
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
 		//check is third-party cookie allowed
-		if(!isset($this->request->cookie[SESSION_ID])){
+		if(!isset($this->request->cookie[ABC::env('SESSION_ID')])){
 			$this->data['test_cookie'] = true;
 		}
 
-		if (HTTPS === true) {
-			$this->view->assign('base', HTTPS_SERVER);
+		if ( ABC::env('HTTPS') ) {
+			$this->view->assign('base', ABC::env('HTTPS_SERVER'));
 		} else {
-			$this->view->assign('base', HTTP_SERVER);
+			$this->view->assign('base', ABC::env('HTTP_SERVER'));
 		}
 
 		$this->view->assign('store_name', $this->config->get('store_name'));
@@ -55,12 +56,12 @@ class ControllerResponsesEmbedJS extends AController {
 		if (is_numeric($icon_rl)) {
 		   $resource = new AResource('image');
 		    $image_data = $resource->getResource( $icon_rl );
-		    if ( is_file(DIR_RESOURCE . $image_data['image']) ) {
+		    if ( is_file(ABC::env('DIR_RESOURCE') . $image_data['image']) ) {
 		    	$icon_rl = 'resources/'.$image_data['image'];
 		    } else {
 		    	$icon_rl = $image_data['resource_code'];
 		    }
-		} else if(!is_file(DIR_RESOURCE.$icon_rl)){
+		} else if(!is_file(ABC::env('DIR_RESOURCE').$icon_rl)){
 		   $icon_rl ='';
 		}
 		$this->view->assign('icon', $icon_rl);
@@ -70,14 +71,14 @@ class ControllerResponsesEmbedJS extends AController {
 		if (is_numeric($this->data['logo'])) {
 			$resource = new AResource('image');
 		    $image_data = $resource->getResource( $this->data['logo'] );
- 			if ( is_file(DIR_RESOURCE . $image_data['image']) ) {
+ 			if ( is_file(ABC::env('DIR_RESOURCE') . $image_data['image']) ) {
  				$this->data['logo'] = 'resources/'.$image_data['image'];
 			} else {
 				$this->data['logo'] = $image_data['resource_code'];
 			}
 		}
 	
-		$this->data['homepage'] =  HTTPS_SERVER;
+		$this->data['homepage'] =  ABC::env('HTTPS_SERVER');
 		$this->data['abc_embed_test_cookie_url'] = $this->html->getURL('r/embed/js/testcookie','&timestamp='.time());
 
 		$this->loadLanguage('common/header');
@@ -362,7 +363,7 @@ class ControllerResponsesEmbedJS extends AController {
 	public function testCookie() {
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->data['allowed'] = $this->request->cookie[SESSION_ID] ? true : false;
+		$this->data['allowed'] = $this->request->cookie[ABC::env('SESSION_ID')] ? true : false;
 		$this->data['abc_token'] = session_id();
 
 

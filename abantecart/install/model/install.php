@@ -103,8 +103,8 @@ class ModelInstall extends Model{
 			}
 		}
 
-		if (!is_writable(DIR_CONFIG . 'config.php')) {
-			$this->errors['warning'] = 'Error: Could not write to config.php please check you have set the correct permissions on: ' . DIR_CONFIG . 'config.php!';
+		if (!is_writable(ABC::env('DIR_CONFIG') . 'config.php')) {
+			$this->errors['warning'] = 'Error: Could not write to config.php please check you have set the correct permissions on: ' . ABC::env('DIR_CONFIG') . 'config.php!';
 		}
 
 		if (!$this->errors) {
@@ -149,34 +149,34 @@ class ModelInstall extends Model{
 			$this->errors['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_CONFIG . 'config.php')) {
+		if (!is_writable(ABC::env('DIR_CONFIG') . 'config.php')) {
 			$this->errors['warning'] = 'Warning: config.php needs to be writable for AbanteCart to be installed!';
 		}
 
-		if (!is_writable(DIR_SYSTEM)) {
+		if (!is_writable(ABC::env('DIR_SYSTEM'))) {
 			$this->errors['warning'] = 'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_CACHE)) {
+		if (!is_writable(ABC::env('DIR_CACHE'))) {
 			$this->errors['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_LOGS)) {
+		if (!is_writable(ABC::env('DIR_LOGS'))) {
 			$this->errors['warning'] = 'Warning: Logs directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ASSETS . 'images')) {
+		if (!is_writable(ABC::env('DIR_ASSETS') . 'images')) {
 			$this->errors['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ASSETS . 'images/thumbnails')) {
-			if (file_exists(DIR_ASSETS . 'images/thumbnails') && is_dir(DIR_ASSETS . 'images/thumbnails')) {
+		if (!is_writable(ABC::env('DIR_ASSETS') . 'images/thumbnails')) {
+			if (file_exists(ABC::env('DIR_ASSETS') . 'images/thumbnails') && is_dir(ABC::env('DIR_ASSETS') . 'images/thumbnails')) {
 				$this->errors['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
 			} else {
-				$result = mkdir(DIR_ASSETS . 'images/thumbnails', 0777, true);
+				$result = mkdir(ABC::env('DIR_ASSETS') . 'images/thumbnails', 0777, true);
 				if ($result) {
-					chmod(DIR_ASSETS . 'images/thumbnails', 0777);
-					chmod(DIR_ASSETS . 'image', 0777);
+					chmod(ABC::env('DIR_ASSETS') . 'images/thumbnails', 0777);
+					chmod(ABC::env('DIR_ASSETS') . 'image', 0777);
 				} else {
 					$this->errors['warning'] = 'Warning: images/thumbnails does not exists!';
 				}
@@ -187,15 +187,15 @@ class ModelInstall extends Model{
 			$this->errors['warning'] = 'Warning: Download directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_APP_EXTENSIONS)) {
+		if (!is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
 			$this->errors['warning'] = 'Warning: Extensions directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_ASSETS . 'resources')) {
+		if (!is_writable(ABC::env('DIR_ASSETS') . 'resources')) {
 			$this->errors['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
 		}
 
-		if (!is_writable(DIR_SYSTEM)) {
+		if (!is_writable(ABC::env('DIR_SYSTEM'))) {
 			$this->errors['warning'] = 'Warning: Admin/system directory needs to be writable for AbanteCart to work!';
 		}
 
@@ -210,8 +210,8 @@ class ModelInstall extends Model{
 		if (!$data) {
 			return false;
 		}
-		if (!defined('DIR_CONFIG')) {
-			define('DIR_CONFIG', ABC::env('DIR_APP') . 'system/config/');
+		if (!ABC::env('DIR_CONFIG')) {
+			ABC::env('DIR_CONFIG', ABC::env('DIR_APP') . 'system/config/');
 		}
 
 		$result = true;
@@ -235,7 +235,7 @@ return array(
 		'APP_CHARSET' => 'UTF-8'
 );
 EOD;
-		$file = fopen(DIR_CONFIG . 'app_config.php', 'w');
+		$file = fopen(ABC::env('DIR_CONFIG') . 'app_config.php', 'w');
 		if (!fwrite($file, $content)) {
 			$result = false;
 		}
@@ -256,7 +256,7 @@ return array(
 	'DB_COLLATION' => 'utf8_unicode_ci'
 );
 EOD;
-		$file = fopen(DIR_CONFIG . 'database.php', 'w');
+		$file = fopen(ABC::env('DIR_CONFIG') . 'database.php', 'w');
 		if (!fwrite($file, $content)) {
 			$result = false;
 		}
@@ -278,7 +278,7 @@ return array_merge(
 	)
 );
 EOD;
-		$file = fopen(DIR_CONFIG . 'config.php', 'w');
+		$file = fopen(ABC::env('DIR_CONFIG') . 'config.php', 'w');
 		if (!fwrite($file, $content)) {
 			$result = false;
 		}
@@ -288,7 +288,7 @@ EOD;
 	}
 
 	public function RunSQL($data){
-		$file = DIR_INSTALL . 'abantecart_database.sql';
+		$file = ABC::env('DIR_INSTALL') . 'abantecart_database.sql';
 		if (!is_file($file)) {
 			$this->errors[] = 'Error: file ' . $file . ' not found!';
 			return false;
@@ -346,7 +346,7 @@ EOD;
 				"UPDATE `" . $data['db_prefix'] . "settings` 
 					SET value = '" . $db->escape($data['http_server']) . "' 
 					WHERE `key` = 'config_url'; ");
-		if (HTTPS === true) {
+		if (ABC::env('HTTPS')) {
 			$db->query(
 					"UPDATE `" . $data['db_prefix'] . "settings` 
 						SET value = '" . $db->escape($data['http_server']) . "' 
@@ -414,8 +414,8 @@ EOD;
 	 * @return bool
 	 */
 	public function loadDemoData($data){
-		//define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
-		$file = DIR_INSTALL . 'demo_data/abantecart_demo_data.sql';
+		//ABC::env('DIR_LANGUAGE', ABC::env('DIR_ABANTECART') . 'admin/languages/');
+		$file = ABC::env('DIR_INSTALL') . 'demo_data/abantecart_demo_data.sql';
 		if (!is_file($file)) {
 			$this->errors[] = 'Error: file ' . $file . ' not found!';
 			return false;
@@ -497,8 +497,8 @@ EOD;
 
 	public function buildAssets($data = array()){
 		//process storefront assets
-		$this->_copyDir(ABC::env('DIR_APP').'templates/default/storefront/assets', DIR_ASSETS.'templates/default/storefront');
-		$this->_copyDir(ABC::env('DIR_APP').'templates/default/admin/assets', DIR_ASSETS.'templates/default/admin');
+		$this->_copyDir(ABC::env('DIR_APP').'templates/default/storefront/assets', ABC::env('DIR_ASSETS').'templates/default/storefront');
+		$this->_copyDir(ABC::env('DIR_APP').'templates/default/admin/assets', ABC::env('DIR_ASSETS').'templates/default/admin');
 		return true;
 	}
 	protected function _copyDir($src, $dest){

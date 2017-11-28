@@ -1,21 +1,23 @@
+<?php
+use abc\ABC;
+?>
 <div class="row">
 	<div class="col-sm-12 col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
-
 				<div class="row">
-					<?php foreach ($shortcut as $item){ ?>
+					<?php
+					foreach ($shortcut as $item){ ?>
 						<div class="col-xs-4 col-sm-3 col-md-2 shortcut temp text-center">
 							<a href="<?php echo $item['href'] ?>">
 								<img class="img-circle"
-								     src="<?php echo RDIR_TEMPLATE . 'images/icons/' . $item['icon'] ?>"
+								     src="<?php echo $this->templateResource('images/icons/' . $item['icon']); ?>"
 								     alt="<?php echo $item['text'] ?>"/>
 								<h5><?php echo $item['text'] ?></h5>
 							</a>
 						</div>
 					<?php } ?>
 				</div>
-
 			</div>
 		</div>
 	</div>
@@ -228,9 +230,9 @@ if ($quick_start_url){
 ?>
 
 <!--[if IE]>
-<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>js/jquery/flot/excanvas.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/flot/excanvas.js'); ?>"></script>
 <![endif]-->
-<script type="text/javascript" src="<?php echo RDIR_TEMPLATE; ?>js/jquery/flot/jquery.flot.js"></script>
+<script type="text/javascript" src="<?php $this->templateResource('js/jquery/flot/jquery.flot.js'); ?>"></script>
 <script type="text/javascript">
 
 	<?php

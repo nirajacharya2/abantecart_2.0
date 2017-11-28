@@ -1,4 +1,6 @@
-<?php echo $head; ?>
+<?php
+use abc\ABC;
+echo $head; ?>
 	<h1 class="heading1">
 		<span class="maintext"><?php echo $heading_title; ?></span>
 		<span class="subtext"></span>
@@ -49,7 +51,7 @@
 												   style="cursor: pointer;">
 												<?php $icon = $shipping_method['icon'];
 												if (count($icon)) { ?>
-													<?php if (is_file(DIR_RESOURCE . $icon['image'])) { ?>
+													<?php if (is_file(ABC::env('DIR_RESOURCE') . $icon['image'])) { ?>
 														<span class="shipping_icon mr10"><img
 																	src="resources/<?php echo $icon['image']; ?>"
 																	title="<?php echo $icon['title']; ?>"/></span>
@@ -108,7 +110,7 @@
 												   style="cursor: pointer;">
 												<?php $icon = $payment_method['icon'];
 												if (count($icon)) { ?>
-													<?php if (is_file(DIR_RESOURCE . $icon['image'])) { ?>
+													<?php if (is_file(ABC::env('DIR_RESOURCE') . $icon['image'])) { ?>
 														<span class="payment_icon mr10"><img
 																	src="resources/<?php echo $icon['image']; ?>"
 																	title="<?php echo $icon['title']; ?>"/></span>

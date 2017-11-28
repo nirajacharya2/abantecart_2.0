@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\lib\ALayoutManager;
@@ -45,7 +46,7 @@ class ControllerPagesDesignLayout extends AController{
 		if (isset($this->request->get['preview_id'])){
 			$preview_id = $this->request->get['preview_id'];
 			$layout_data['preview_id'] = $preview_id;
-			$layout_data['preview_url'] = HTTP_CATALOG . '?preview=' . $preview_id . '&layout_id=' . $preview_id . '&page_id=' . $page_id;
+			$layout_data['preview_url'] = ABC::env('HTTP_CATALOG') . '?preview=' . $preview_id . '&layout_id=' . $preview_id . '&page_id=' . $page_id;
 		}
 
 		$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
@@ -62,7 +63,7 @@ class ControllerPagesDesignLayout extends AController{
 
 		// get templates
 		$layout_data['templates'] = array ();
-		$directories = glob(DIR_STOREFRONT . 'view/*', GLOB_ONLYDIR);
+		$directories = glob(ABC::env('DIR_STOREFRONT') . 'view/*', GLOB_ONLYDIR);
 		foreach ($directories as $directory){
 			$layout_data['templates'][] = basename($directory);
 		}

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC')) {
@@ -77,7 +78,7 @@ class ControllerCommonSeoUrl extends AController {
 			if (isset($this->request->get['rt'])) {
 				//build canonical seo-url
 				if(sizeof($parts)>1){
-					$this->_add_canonical_url('url', (HTTPS === true ? HTTPS_SERVER : HTTP_SERVER) . end($parts));
+					$this->_add_canonical_url('url', (ABC::env('HTTPS') ? ABC::env('HTTPS_SERVER') : ABC::env('HTTP_SERVER')) . end($parts));
 				}
 
 				$rt = $this->request->get['rt'];

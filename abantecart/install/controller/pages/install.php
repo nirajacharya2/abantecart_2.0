@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------  
 */
 use abc\ABC;
+use abc\core\engine\AController;
 use abc\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
@@ -43,14 +44,14 @@ class ControllerPagesInstall extends AController{
 
 		if (isset($run_level)){
 			if (!in_array((int)$run_level, array (1, 2, 3, 4, 5))){
-				$this->redirect(HTTP_SERVER . 'index.php?rt=activation' . '&admin_path=' . $this->request->post['admin_path']);
+				$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=activation' . '&admin_path=' . $this->request->post['admin_path']);
 			}
 
 			if (!$this->session->data['install_step_data'] && (int)$run_level == 1){
-				if (filesize(DIR_ABANTECART . 'system/config.php')){
-					$this->redirect(HTTP_SERVER . 'index.php?rt=activation');
+				if (filesize(ABC::env('DIR_ABANTECART') . 'system/config.php')){
+					$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=activation');
 				} else{
-					$this->redirect(HTTP_SERVER . 'index.php?rt=license');
+					$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=license');
 				}
 			}
 
@@ -61,11 +62,11 @@ class ControllerPagesInstall extends AController{
 		if ($this->request->is_POST() && ($this->_validate())){
 
 			$this->session->data['install_step_data'] = $this->request->post;
-			$this->redirect(HTTP_SERVER . 'index.php?rt=install&runlevel=1');
+			$this->redirect(ABC::env('HTTP_SERVER') . 'index.php?rt=install&runlevel=1');
 		}
 
 		$this->data['error'] = $this->error;
-		$this->data['action'] = HTTP_SERVER . 'index.php?rt=install';
+		$this->data['action'] = ABC::env('HTTP_SERVER') . 'index.php?rt=install';
 
 		$fields = array ('db_driver', 'db_host', 'db_user', 'db_password', 'db_name', 'db_prefix', 'username', 'password',
 				'password_confirm', 'email', 'admin_path',
@@ -145,7 +146,7 @@ class ControllerPagesInstall extends AController{
 			}
 		}
 
-		$this->view->assign('back', HTTP_SERVER . 'index.php?rt=settings');
+		$this->view->assign('back', ABC::env('HTTP_SERVER') . 'index.php?rt=settings');
 
 		$this->addChild('common/header', 'header', 'common/header.tpl');
 		$this->addChild('common/footer', 'footer', 'common/footer.tpl');
@@ -197,9 +198,9 @@ class ControllerPagesInstall extends AController{
 			return AJson::encode(array ('ret_code' => 200));
 		}
 
-		$this->view->assign('url', HTTP_SERVER . 'index.php?rt=install');
-		$this->view->assign('redirect', HTTP_SERVER . 'index.php?rt=finish');
-		$temp = $this->dispatch('pages/install/progressbar_scripts', array ('url' => HTTP_SERVER . 'index.php?rt=install/progressbar'));
+		$this->view->assign('url', ABC::env('HTTP_SERVER') . 'index.php?rt=install');
+		$this->view->assign('redirect', ABC::env('HTTP_SERVER') . 'index.php?rt=finish');
+		$temp = $this->dispatch('pages/install/progressbar_scripts', array ('url' => ABC::env('HTTP_SERVER') . 'index.php?rt=install/progressbar'));
 		$this->view->assign('progressbar_scripts', $temp->dispatchGetOutput());
 
 		$this->addChild('common/header', 'header', 'common/header.tpl');
@@ -224,17 +225,17 @@ class ControllerPagesInstall extends AController{
 		$registry = Registry::getInstance();
 		//This is ran after config is saved and we have database connection now
 		$db = new ADB(array(
-						'driver' => ABC::env('DB_DRIVER'),
-						'host' => ABC::env('DB_HOSTNAME'),
-						'username' => ABC::env('DB_USERNAME'),
-						'password' => ABC::env('DB_PASSWORD'),
-						'database' => ABC::env('DB_DATABASE'),
-						'prefix'   => ABC::env('DB_PREFIX'),
-						'charset'  => ABC::env('DB_CHARSET'),
-						'collation'=> ABC::env('DB_COLLATION'),
+						'driver'    => ABC::env('DB_DRIVER'),
+						'host'      => ABC::env('DB_HOSTNAME'),
+						'username'  => ABC::env('DB_USERNAME'),
+						'password'  => ABC::env('DB_PASSWORD'),
+						'database'  => ABC::env('DB_DATABASE'),
+						'prefix'    => ABC::env('DB_PREFIX'),
+						'charset'   => ABC::env('DB_CHARSET'),
+						'collation' => ABC::env('DB_COLLATION'),
 					));
 		$registry->set('db', $db);
-		define('DIR_LANGUAGE', DIR_ABANTECART . 'admin/languages/');
+		ABC::env('DIR_LANGUAGE', ABC::env('DIR_ABANTECART') . 'admin/languages/');
 
 		// Cache
 		$cache = new ACache();
@@ -289,8 +290,8 @@ class ControllerPagesInstall extends AController{
 	}
 }
 
-/** @noinspection PhpIncludeInspection */
-require_once(DIR_CORE . "lib/progressbar.php");
+
+require_once(ABC::env('DIR_CORE') . "lib/progressbar.php");
 
 /*
  * Interface for progressbar

@@ -65,8 +65,8 @@ class ABackup{
 		$this->slash = ABC::env('IS_WINDOWS') === true ? '\\' : '/';
 		//first of all check backup directory create or set writable permissions
 		// Before backup process need to call validate() method! (see below)
-		if (!AHelperUtils::is_writable_dir(DIR_BACKUP)){
-			$this->error[] = 'Directory ' . DIR_BACKUP . ' can not be created or is not writable. Backup operation is not possible';
+		if (!AHelperUtils::is_writable_dir(ABC::env('DIR_BACKUP'))){
+			$this->error[] = 'Directory ' . ABC::env('DIR_BACKUP') . ' can not be created or is not writable. Backup operation is not possible';
 		}
 
 		//Add [date] snapshot to the name and validate if archive is already used.
@@ -75,7 +75,7 @@ class ABackup{
 		$this->backup_name = $name;
 		//Create a tmp directory with backup name
 		//Create subdirectory /files and  /data
-		$this->backup_dir = DIR_BACKUP . $this->backup_name . '/';
+		$this->backup_dir = ABC::env('DIR_BACKUP') . $this->backup_name . '/';
 
 		if (!is_dir($this->backup_dir) && $create_subdirs){
 			$result = mkdir($this->backup_dir, 0755, true);
@@ -374,7 +374,7 @@ class ABackup{
 			return true;
 		}
 		// also skip cache & logs dir
-		if (is_int(strpos($dir_path, DIR_CACHE)) || is_int(strpos($dir_path, DIR_LOGS))){
+		if (is_int(strpos($dir_path, ABC::env('DIR_CACHE'))) || is_int(strpos($dir_path, ABC::env('DIR_LOGS')))){
 			return true;
 		}
 
@@ -460,7 +460,7 @@ class ABackup{
 	 * @return bool
 	 */
 	public function archive($archive_filename, $src_dir, $filename){
-		//Archive the backup to DIR_BACKUP, delete tmp files in directory $this->backup_dir 
+		//Archive the backup to ABC::env('DIR_BACKUP'), delete tmp files in directory $this->backup_dir 
 		//And create record in the database for created archive. 
 		//generate errors: No space on device (log to message as error too), No permissions, Others
 		//return Success or failed.
@@ -586,8 +586,8 @@ class ABackup{
 		//reset errors array before validation
 		$this->error = array ();
 		//1. check is backup directory is writable
-		if (!is_writable(DIR_BACKUP)){
-			$this->error[] = 'Directory ' . DIR_BACKUP . ' is non-writable. It is recommended to set write mode for it.';
+		if (!is_writable(ABC::env('DIR_BACKUP'))){
+			$this->error[] = 'Directory ' . ABC::env('DIR_BACKUP') . ' is non-writable. It is recommended to set write mode for it.';
 		}
 
 		//2. check mysql driver

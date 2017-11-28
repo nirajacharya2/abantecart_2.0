@@ -18,6 +18,7 @@ versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\ExtensionUtils;
 use abc\lib\AAttribute_Manager;
@@ -42,7 +43,7 @@ class ControllerResponsesExtensionExtension extends AController {
 
 		$extension = $this->request->get['extension'];
 		$ext = new ExtensionUtils($extension);
-		$help_file_path = DIR_APP_EXT . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
+		$help_file_path = ABC::env('DIR_APP_EXT') . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
 
 		$this->data['content'] = array();
 		$this->data['title'] = $this->language->get('text_help');

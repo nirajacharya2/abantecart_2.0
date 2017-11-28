@@ -1,4 +1,6 @@
-<?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
+<?php
+use abc\ABC;
+include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <?php echo $summary_form; ?>
 <?php echo $product_tabs ?>
@@ -113,7 +115,7 @@ var setRLparams = function (attr_val_id) {
 				del: '<?php echo $rl_delete; ?>&object_id=' + attr_val_id,
 				download: '<?php echo $rl_download; ?>&object_id=' + attr_val_id,
 				upload: '<?php echo $rl_upload; ?>&object_id=' + attr_val_id,
-				resource: '<?php echo HTTPS_DIR_RESOURCE; ?>'
+				resource: '<?php echo ABC::env('HTTPS_DIR_RESOURCE'); ?>'
 			};
 
 	urls.attr_val_id = attr_val_id;

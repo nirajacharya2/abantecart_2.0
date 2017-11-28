@@ -1,4 +1,6 @@
-<?php if ($download_id != 'new') { ?>
+<?php use abc\ABC;
+
+if ($download_id != 'new') { ?>
 	<tr id="download_<?php echo $download_id; ?>" class="optionRow">
 		<td><?php echo $icon; ?></td>
 		<td class="ui-jqgrid">
@@ -12,11 +14,11 @@
 			<?php if ($push_to_customers) { ?>
 			<a href="<?php echo $push_to_customers->href; ?>" class="align_left push" style="display: inline-block; margin-top: 4px;"
 				title="<?php echo $push_to_customers->title; ?>"<?php echo $push_to_customers->attr; ?>>
-			<img src="<?php echo RDIR_TEMPLATE . 'images/icons/Bluepin.png'; ?>" alt="<?php echo $push_to_customers->text; ?>"/></a>
+			<img src="<?php $this->templateResource('images/icons/Bluepin.png'); ?>" alt="<?php echo $push_to_customers->text; ?>"/></a>
 			<?php } ?>
 			<a href="<?php echo $delete_unmap_href; ?>" class="delete  pull-right"
 				title="<?php echo $text_delete_or_refuse; ?>">
-			<img src="<?php echo RDIR_TEMPLATE . 'images/icons/icon_grid_delete.png'; ?>" alt="<?php echo $text_delete; ?>"/></a>
+			<img src="<?php echo $this->templateResource('images/icons/icon_grid_delete.png'); ?>" alt="<?php echo $text_delete; ?>"/></a>
 		</td>
 	</tr>
 <?php } else { ?>

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\AWarning;
@@ -38,12 +39,12 @@ class ModelToolImage extends Model{
 	 * @return null|string - string is URL or abs file path
 	 */
 	public function resize($filename, $width = 0, $height = 0, $alias = null, $mode = 'url'){
-		if (!is_file(DIR_IMAGE . $filename) && !is_file(DIR_RESOURCE . 'image/' . $filename)){
+		if (!is_file(ABC::env('DIR_IMAGE') . $filename) && !is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename)){
 			return null;
 		}
 
-		$orig_image_filepath = is_file(DIR_IMAGE . $filename) ? DIR_IMAGE . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(DIR_RESOURCE . 'image/' . $filename) ? DIR_RESOURCE . 'image/' . $filename : $orig_image_filepath;
+		$orig_image_filepath = is_file(ABC::env('DIR_IMAGE') . $filename) ? ABC::env('DIR_IMAGE') . $filename : '';
+		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename) ? ABC::env('DIR_RESOURCE') . 'image/' . $filename : $orig_image_filepath;
 
 		$info = pathinfo($filename);
 		$extension = $info['extension'];
@@ -72,10 +73,10 @@ class ModelToolImage extends Model{
 
 		//when need to get abs path of result
 		if ($mode == 'path'){
-			$http_path = DIR_IMAGE;
+			$http_path = ABC::env('DIR_IMAGE');
 		}else{
-			//use auto-path without protocol (AUTOSERVER)
-			$http_path = HTTPS_IMAGE;
+			//use auto-path without protocol (AUTO_SERVER)
+			$http_path = ABC::env('HTTPS_IMAGE');
 		}
 		return $http_path . $new_image;
 	}

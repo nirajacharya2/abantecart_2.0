@@ -92,8 +92,8 @@ class ControllerPagesToolUpdater extends AController{
 			$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));
 			$mp_params = '?rt=account/authenticate&return_url=' . $return_url;
 			$mp_params .= '&store_id=' . ABC::env('UNIQUE_ID');
-			$mp_params .= '&store_url=' . HTTP_SERVER;
-			$mp_params .= '&store_version=' . VERSION;
+			$mp_params .= '&store_url=' . ABC::env('HTTP_SERVER');
+			$mp_params .= '&store_version=' . ABC::env('VERSION');
 			$this->data['amp_connect_url'] = $this->model_tool_mp_api->getMPURL() . $mp_params;
 			$this->data['amp_disconnect_url'] = $this->html->getSecureURL('tool/extensions_store/disconnect');
 
@@ -118,7 +118,7 @@ class ControllerPagesToolUpdater extends AController{
 					}
 
 					//skip versions that not supported by current cart version
-					if (!in_array(VERSION, $version_info['cart_versions'])){
+					if (!in_array(ABC::env('VERSION'), $version_info['cart_versions'])){
 						continue;
 					}
 

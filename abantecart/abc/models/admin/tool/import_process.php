@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\engine\Model;
 use abc\lib\AFile;
 use abc\lib\ALog;
@@ -167,7 +168,7 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/product');
-		$this->imp_log = new ALog(DIR_LOGS . "products_import_{$task_id}.txt");
+		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "products_import_{$task_id}.txt");
 		return $this->addUpdateProduct($data, $settings, $language_id, $store_id);
 	}
 
@@ -175,7 +176,7 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/category');
-		$this->imp_log = new ALog(DIR_LOGS . "categories_import_{$task_id}.txt");
+		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "categories_import_{$task_id}.txt");
 		return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
 	}
 
@@ -183,7 +184,7 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/manufacturer');
-		$this->imp_log = new ALog(DIR_LOGS . "manufacturers_import_{$task_id}.txt");
+		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "manufacturers_import_{$task_id}.txt");
 		return $this->addUpdateManufacture($data, $settings, $language_id, $store_id);
 	}
 
@@ -526,9 +527,9 @@ class ModelToolImportProcess extends Model{
 			//check if image is absolute path or remote URL
 			$host = parse_url($source, PHP_URL_HOST);
 			$image_basename = basename($source);
-			$target = DIR_RESOURCE . $rm->getTypeDir() . '/' . $image_basename;
-			if (!is_dir(DIR_RESOURCE . $rm->getTypeDir())){
-				@mkdir(DIR_RESOURCE . $rm->getTypeDir(), 0777);
+			$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
+			if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
+				@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
 			}
 
 			if ($host === NULL ) {

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use RecursiveDirectoryIterator;
@@ -173,7 +174,7 @@ class ControllerPagesToolCache extends AController{
 							$this->deleteThumbnails();
 							break;
 						case 'error_log':
-							$file = DIR_LOGS . $this->config->get('config_error_filename');
+							$file = ABC::env('DIR_LOGS') . $this->config->get('config_error_filename');
 							if (is_file($file)){
 								unlink($file);
 							}
@@ -211,7 +212,7 @@ class ControllerPagesToolCache extends AController{
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$path = DIR_IMAGE . 'thumbnails/';
+		$path = ABC::env('DIR_IMAGE') . 'thumbnails/';
 
 		$iter = new RecursiveIteratorIterator(
 				new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),

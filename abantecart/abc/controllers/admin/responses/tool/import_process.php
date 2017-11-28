@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AError;
 use abc\lib\AJson;
@@ -27,7 +28,7 @@ if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 
-if (defined('IS_DEMO') && IS_DEMO) {
+if (ABC::env('IS_DEMO')) {
 	header('Location: assets/static_pages/demo_mode.php');
 }
 
@@ -82,7 +83,7 @@ class ControllerResponsesToolImportProcess extends AController {
 				);
 			} else {
 				$task_details['task_api_key'] = $task_api_key;
-				$task_details['url'] = HTTPS_SERVER.'task.php';
+				$task_details['url'] = ABC::env('HTTPS_SERVER').'task.php';
 				$this->data['output']['task_details'] = $task_details;
 			}
 
@@ -123,7 +124,7 @@ class ControllerResponsesToolImportProcess extends AController {
 		}
 
 		$log_file = $task_info['settings']['logfile'];
-		if(is_file(DIR_LOGS.$log_file)) {
+		if(is_file(ABC::env('DIR_LOGS').$log_file)) {
 			$result_text .= '<br>' . sprintf($this->language->get('text_see_log'),
 							$this->html->getSecureURL('tool/error_log', '&filename=' . $log_file), $log_file);
 		}

@@ -38,7 +38,7 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->document->addStyle(array(
-			'href' => RDIR_TEMPLATE . 'css/marketplace.css',
+			'href' => ABC::env('RDIR_ASSETS') . 'css/marketplace.css',
 			'rel' => 'stylesheet'
 		));
 
@@ -101,23 +101,23 @@ class ControllerPagesExtensionExtensionsStore extends AController {
 		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/connect'));
 		$mp_params = '?rt=account/authenticate&return_url='.$return_url;
 		$mp_params .= '&store_id='.ABC::env('UNIQUE_ID');
-		$mp_params .= '&store_url='.HTTP_SERVER;
-		$mp_params .= '&store_version='.VERSION;
+		$mp_params .= '&store_url='.ABC::env('HTTP_SERVER');
+		$mp_params .= '&store_version='.ABC::env('VERSION');
 		$this->view->assign('amp_connect_url', $this->model_tool_mp_api->getMPURL().$mp_params);
 		$this->view->assign('amp_disconnect_url', $this->html->getSecureURL('tool/extensions_store/disconnect'));
 
 		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));
 		$mp_params = '?rt=r/product/product&return_url='.$return_url;
 		$mp_params .= '&store_id='.ABC::env('UNIQUE_ID');
-		$mp_params .= '&store_url='.HTTP_SERVER;
-		$mp_params .= '&store_version='.VERSION;
+		$mp_params .= '&store_url='.ABC::env('HTTP_SERVER');
+		$mp_params .= '&store_version='.ABC::env('VERSION');
 		$this->view->assign('amp_product_url', $this->model_tool_mp_api->getMPURL().$mp_params.$token_param);
 
 		$return_url = base64_encode($this->html->getSecureURL('tool/extensions_store/install'));
 		$mp_params = '?rt=r/checkout/purchase&return_url='.$return_url;
 		$mp_params .= '&store_id='.ABC::env('UNIQUE_ID');
-		$mp_params .= '&store_url='.HTTP_SERVER;
-		$mp_params .= '&store_version='.VERSION;
+		$mp_params .= '&store_url='.ABC::env('HTTP_SERVER');
+		$mp_params .= '&store_version='.ABC::env('VERSION');
 		$this->view->assign('amp_order_url', $this->model_tool_mp_api->getMPURL().$mp_params.$token_param);
 
 		$result = $this->model_tool_mp_api->processRequest($request_data);

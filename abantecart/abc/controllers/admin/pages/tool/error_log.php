@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
@@ -40,12 +41,12 @@ class ControllerPagesToolErrorLog extends AController {
 		}
 
 		$filename = $this->request->get['filename'];
-		if( $filename && is_file(DIR_LOGS . $filename) ){
-			$file = DIR_LOGS . $filename;
+		if( $filename && is_file(ABC::env('DIR_LOGS') . $filename) ){
+			$file = ABC::env('DIR_LOGS') . $filename;
 			$this->data['clear_url'] = '';
 			$heading_title = $this->request->clean($filename);
 		}else {
-			$file = DIR_LOGS . $this->config->get('config_error_filename');
+			$file = ABC::env('DIR_LOGS') . $this->config->get('config_error_filename');
 			$this->data['clear_url'] = $this->html->getSecureURL('tool/error_log/clearlog');
 			$heading_title = $this->language->get('heading_title');
 		}
@@ -75,7 +76,7 @@ class ControllerPagesToolErrorLog extends AController {
 			if($filesize>500000){
 
 				$this->data['log'] = "\n\n\n\n###############################################################################################\n\n".
-strtoupper($this->language->get('text_file_tail')).DIR_LOGS."
+strtoupper($this->language->get('text_file_tail')).ABC::env('DIR_LOGS')."
 
 ###############################################################################################\n\n\n\n";
 				fseek($fp,-500000,SEEK_END);
@@ -119,10 +120,10 @@ strtoupper($this->language->get('text_file_tail')).DIR_LOGS."
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$filename = $this->request->get['filename'];
-		if( $filename && is_file(DIR_LOGS . $filename) ){
-			$file = DIR_LOGS . $filename;
+		if( $filename && is_file(ABC::env('DIR_LOGS') . $filename) ){
+			$file = ABC::env('DIR_LOGS') . $filename;
 		}else {
-			$file = DIR_LOGS . $this->config->get('config_error_filename');
+			$file = ABC::env('DIR_LOGS') . $this->config->get('config_error_filename');
 		}
 
 		$handle = fopen($file, 'w+');

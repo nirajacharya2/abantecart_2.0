@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -1609,9 +1610,9 @@ class ControllerResponsesProductProduct extends AController{
 		$order_store_id = $order_info['store_id'];
 		$this->loadModel('setting/store');
 		$store_info = $this->model_setting_store->getStore($order_store_id);
-		if (HTTPS === true && $store_info['config_ssl_url']){
+		if (ABC::env('HTTPS') && $store_info['config_ssl_url']){
 			$total_calc_url = $store_info['config_ssl_url'] . 'index.php?rt=r/product/product/calculateTotal';
-		} elseif (HTTPS === true && !$store_info['config_ssl_url']){
+		} elseif (ABC::env('HTTPS') && !$store_info['config_ssl_url']){
 			$total_calc_url = str_replace('http://', 'https://', $store_info['config_url']) . 'index.php?rt=r/product/product/calculateTotal';
 		} else{
 			$total_calc_url = $store_info['config_url'] . 'index.php?rt=r/product/product/calculateTotal';

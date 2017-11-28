@@ -31,13 +31,13 @@ ABC::env('DIR_ROOT', $root_path);
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
 $dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
-define('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
-define('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
+ABC::env('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
+ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
 
 // DIR
 ABC::env('DIR_APP', str_replace('\'', '/', realpath(dirname(__FILE__))) . '/');
-define('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
-define('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
+ABC::env('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')) . '/core/');
+ABC::env('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
 
 // Startup
 require_once(ABC::env('DIR_APP') . 'config/config.php');
@@ -69,7 +69,7 @@ $message = 'This feature or page is not available in the demo mode. We apologize
 	</div>
 	<br><br>
 	<div>
-		<a href="<?php echo HTTP_ABANTECART; ?>">Go to Demo</a>
+		<a href="<?php echo ABC::env('HTTP_ABANTECART'); ?>">Go to Demo</a>
 	</div>
     </div>
     <div id="content_bottom"></div>

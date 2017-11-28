@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
@@ -34,13 +35,13 @@ final class ATemplate{
 		$this->config = $registry->get('config');
 
 		//#PR Build the path to the template file
-		if (file_exists(DIR_TEMPLATES . $this->config->get('config_storefront_template') . '/storefront/' . $filename)){
+		if (file_exists(ABC::env('DIR_TEMPLATES') . $this->config->get('config_storefront_template') . '/storefront/' . $filename)){
 			$filename = $this->config->get('config_storefront_template') . '/' . $filename;
 		} else{
 			$filename = 'default/' . $filename;
 		}
 
-		$file = DIR_TEMPLATES . $filename;
+		$file = ABC::env('DIR_TEMPLATES') . $filename;
 
 		if (file_exists($file)){
 			extract($this->data);

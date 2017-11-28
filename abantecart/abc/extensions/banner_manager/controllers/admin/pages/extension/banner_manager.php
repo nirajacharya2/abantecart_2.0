@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -963,7 +964,7 @@ class ControllerPagesExtensionBannerManager extends AController {
 				}
 			}
 
-			$tpls = glob(DIR_STOREFRONT . 'view/*/blocks/banner_block/*.tpl');
+			$tpls = glob(ABC::env('DIR_STOREFRONT') . 'view/*/blocks/banner_block/*.tpl');
 			foreach ($tpls as $tpl) {
 				$pos = strpos($tpl, 'blocks/banner_block/');
 				$tpl = substr($tpl, $pos);

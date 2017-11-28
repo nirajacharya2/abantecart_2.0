@@ -29,16 +29,16 @@
 			<i class="fa fa-comments fa-fw"></i> <a href="http://forum.abantecart.com" target="_abante">Support Forums</a></p>
 
 		<div class="container-fluid text-center">
-			<a href="http://www.abantecart.com/contribute-to-abantecart"><img src="<?php echo $template_dir; ?>images/conrib_btn_sm.png" border="0" alt="Support AbanteCart eCommerce" /></a>
+			<a href="http://www.abantecart.com/contribute-to-abantecart"><img src="<?php echo $this->templateResource('images/conrib_btn_sm.png');?>" border="0" alt="Support AbanteCart eCommerce" /></a>
 		</div>
 
 		<div class="container-fluid">
 	    <div class="snapshots col-md-6">
-		    <a href="../"><img src="<?php echo $template_dir; ?>images/storefront.png" alt="" width="250" style="border: none;" /></a><br />
+		    <a href="../"><img src="<?php echo $this->templateResource('images/storefront.png');?>" alt="" width="250" style="border: none;" /></a><br />
 		    <a href="../">Your Online Shop</a>
 		</div>
 	    <div class="snapshots col-md-6">
-		    <a href="../<?php echo $admin_path ?>"><img src="<?php echo $template_dir; ?>images/admin.png" alt="" width="250" style="border: none;" /></a><br />
+		    <a href="../<?php echo $admin_path ?>"><img src="<?php echo $this->templateResource('images/admin.png');?>" alt="" width="250" style="border: none;" /></a><br />
 		    <a href="../<?php echo $admin_path ?>">Login to your Control Panel</a>
 		</div>
 		</div>

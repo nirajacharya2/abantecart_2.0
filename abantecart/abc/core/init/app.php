@@ -65,82 +65,91 @@ if (!isset($_SERVER['HTTP_HOST'])) {
 
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure' || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], ':443') !== false)) {
-	define('HTTPS', true);
+	ABC::env('HTTPS', true);
 }
 
 // Detect http host
 if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-	define('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
 } else {
-	define('REAL_HOST', $_SERVER['HTTP_HOST']);
+	ABC::env('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
 
 //Set up common paths
-if(!defined('DIR_ASSETS')) {
-	define('DIR_ASSETS', ABC::env('DIR_PUBLIC') . 'assets/');
+if(!ABC::env('DIR_ASSETS')) {
+	ABC::env('DIR_ASSETS', ABC::env('DIR_PUBLIC') . 'assets/');
 }
-define('DIR_RESOURCE', DIR_ASSETS . 'resources/');
-define('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
-define('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
-define('DIR_CORE', ABC::env('DIR_APP') . 'core/');
-define('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
-define('DIR_IMAGE', DIR_ASSETS . 'images/');
-define('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
-define('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
-define('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
-define('DIR_LOGS', ABC::env('DIR_APP') . 'system/logs/');
-define('DIR_VENDOR', ABC::env('DIR_ROOT') . 'vendor/');
+$dir_app = ABC::env('DIR_APP');
+$dir_assets = ABC::env('DIR_ASSETS');
+
+ABC::env(
+		array(
+				'DIR_VENDOR'         => ABC::env('DIR_ROOT') . 'vendor/',
+				'DIR_APP_EXTENSIONS' => $dir_app . 'extensions/',
+				'DIR_SYSTEM'         => $dir_app . 'system/',
+				'DIR_CORE'           => $dir_app . 'core/',
+				'DIR_LIB'            => $dir_app . 'lib/',
+				'DIR_DOWNLOAD'       => $dir_app . 'download/',
+				'DIR_CONFIG'         => $dir_app . 'config/',
+				'DIR_CACHE'          => $dir_app . 'system/cache/',
+				'DIR_LOGS'           => $dir_app . 'system/logs/',
+				'DIR_TEMPLATES'      => $dir_app . 'templates/',
+				'DIR_IMAGE'          => $dir_assets . 'images/',
+				'DIR_RESOURCE'       => $dir_assets . 'resources/',
+		)
+);
 
 //load vendors classes
-require DIR_VENDOR.'autoload.php';
+require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
-require_once(DIR_LIB . 'debug.php');
-require_once(DIR_LIB . 'exceptions.php');
-require_once(DIR_LIB . 'error.php');
-require_once(DIR_LIB . 'warning.php');
+$dir_lib = $dir_app . 'lib/';
+require_once( $dir_lib . 'debug.php');
+require_once( $dir_lib . 'exceptions.php');
+require_once( $dir_lib . 'error.php');
+require_once( $dir_lib . 'warning.php');
 
 //define rt - route for application controller
 if( isset($_GET['rt']) && $_GET['rt'] ) {
-	define('ROUTE', $_GET['rt']);
+	ABC::env('ROUTE', $_GET['rt']);
 } else if( isset($_POST['rt']) && $_POST['rt'] ){
-	define('ROUTE', $_POST['rt']);
+	ABC::env('ROUTE', $_POST['rt']);
 } else {
-	define('ROUTE', 'index/home');
+	ABC::env('ROUTE', 'index/home');
 }
 
 //detect API call
-$path_nodes = explode('/', ROUTE);
-if($path_nodes[0] == 'a') {
-	define('IS_API', true);
-} else {
-	define('IS_API', false);
-}
+$path_nodes = explode('/', ABC::env('ROUTE'));
+ABC::env( 'IS_API', ($path_nodes[0] == 'a' ? true : false));
+
 
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
-
-define('DIR_TEMPLATES', ABC::env('DIR_APP') . 'templates/');
 if (ABC::env('ADMIN_PATH')!==null && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ABC::env('ADMIN_PATH') || $_POST['s'] == ABC::env('ADMIN_PATH'))) {
-	ABC::env('IS_ADMIN', true);
-	define('DIR_LANGUAGE', ABC::env('DIR_APP') . 'languages/admin/');
-	define('DIR_BACKUP', ABC::env('DIR_APP') . 'system/backup/');
-	define('DIR_DATA', ABC::env('DIR_APP') . 'system/data/');
+	ABC::env(
+			array(
+					'IS_ADMIN'     => true,
+					'DIR_LANGUAGE' => $dir_app . 'languages/admin/',
+					'DIR_BACKUP'   => $dir_app . 'system/backup/',
+					'DIR_DATA'     => $dir_app . 'system/data/'
+			)
+	);
+
 	//generate unique session name.
 	//NOTE: This is a session name not to confuse with actual session id. Candidate to renaming 
-	define('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
+	ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
 	ABC::env('IS_ADMIN', false);
-	define('DIR_LANGUAGE', ABC::env('DIR_APP') . '/languages/storefront/');
-	define('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
-	define('EMBED_TOKEN_NAME', 'ABC_TOKEN');
+	ABC::env('DIR_LANGUAGE', $dir_app . '/languages/storefront/');
+	ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
+	ABC::env('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
 
 
@@ -190,21 +199,24 @@ if (ABC::env('ADMIN_PATH')!==null && (isset($_GET['s']) || isset($_POST['s'])) &
 		}
 	}
 
-// relative paths for extensions
-	define('DIRNAME_APP', 'abc/');
-	define('DIRNAME_ASSETS', 'assets/');
-	define('DIRNAME_EXTENSIONS', 'extensions/');
-	define('DIRNAME_CORE', 'core/');
-	define('DIRNAME_STORE', 'storefront/');
-	define('DIRNAME_ADMIN', 'admin/');
-	define('DIRNAME_IMAGES', 'images/');
-	define('DIRNAME_CONTROLLERS', 'controllers/');
-	define('DIRNAME_LANGUAGES', 'languages/');
-	define('DIRNAME_TEMPLATE', 'template/');
-	define('DIRNAME_TEMPLATES', 'templates/');
-
-	define('DIR_APP_EXT', ABC::env('DIR_APP') . DIRNAME_EXTENSIONS);
-	define('DIR_ASSETS_EXT', DIR_ASSETS . DIRNAME_EXTENSIONS);
+//paths for extensions
+ABC::env(
+	array(
+			'DIRNAME_APP'         => 'abc/',
+			'DIRNAME_ASSETS'      => 'assets/',
+			'DIRNAME_EXTENSIONS'  => 'extensions/',
+			'DIRNAME_CORE'        => 'core/',
+			'DIRNAME_STORE'       => 'storefront/',
+			'DIRNAME_ADMIN'       => 'admin/',
+			'DIRNAME_IMAGES'      => 'images/',
+			'DIRNAME_CONTROLLERS' => 'controllers/',
+			'DIRNAME_LANGUAGES'   => 'languages/',
+			'DIRNAME_TEMPLATES'   => 'templates/',
+			'DIRNAME_TEMPLATE'    => 'template/',
+			'DIR_APP_EXT'         => $dir_app . 'extensions/',
+			'DIR_ASSETS_EXT'      => $dir_assets . 'extensions/'
+	)
+);
 
 //load base libraries
 	require_once 'base.php';
@@ -235,14 +247,14 @@ if (ABC::env('ADMIN_PATH')!==null && (isset($_GET['s']) || isset($_POST['s'])) &
 
 	$registry->set('db', new ADB(
 			array(
-				'driver' => ABC::env('DB_DRIVER'),
-				'host' => ABC::env('DB_HOSTNAME'),
-				'username' => ABC::env('DB_USERNAME'),
-				'password' => ABC::env('DB_PASSWORD'),
-				'database' => ABC::env('DB_DATABASE'),
-				'prefix'   => ABC::env('DB_PREFIX'),
-				'charset'  => ABC::env('DB_CHARSET'),
-				'collation'=> ABC::env('DB_COLLATION'),
+					'driver'    => ABC::env('DB_DRIVER'),
+					'host'      => ABC::env('DB_HOSTNAME'),
+					'username'  => ABC::env('DB_USERNAME'),
+					'password'  => ABC::env('DB_PASSWORD'),
+					'database'  => ABC::env('DB_DATABASE'),
+					'prefix'    => ABC::env('DB_PREFIX'),
+					'charset'   => ABC::env('DB_CHARSET'),
+					'collation' => ABC::env('DB_COLLATION'),
 			)
 		)
 	);
@@ -256,7 +268,7 @@ if (ABC::env('ADMIN_PATH')!==null && (isset($_GET['s']) || isset($_POST['s'])) &
 	$registry->set('config', $config);
 
 // Session
-	$registry->set('session', new ASession(SESSION_ID) );
+	$registry->set('session', new ASession(ABC::env('SESSION_ID')) );
 	if($config->has('current_store_id')){
 		$registry->get('session')->data['current_store_id'] = $config->get('current_store_id');
 	}
@@ -277,13 +289,13 @@ if (ABC::env('IS_ADMIN') === true) {
 	$registry->set('messages', new AMessage());
 
 // Log
-	$registry->set('log', new ALog(DIR_LOGS . $config->get('config_error_filename')) );
+	$registry->set('log', new ALog(ABC::env('DIR_LOGS') . $config->get('config_error_filename')) );
 
 // Document
 	$registry->set('document', new ADocument());
 
 // AbanteCart Snapshot details
-	$registry->set('snapshot', 'AbanteCart/' . VERSION . ' ' . $_SERVER['SERVER_SOFTWARE'] . ' (' . $_SERVER['SERVER_NAME'] . ')');
+	$registry->set('snapshot', 'AbanteCart/' . ABC::env('VERSION') . ' ' . $_SERVER['SERVER_SOFTWARE'] . ' (' . $_SERVER['SERVER_NAME'] . ')');
 //Non-apache fix for REQUEST_URI
 	if (!isset($_SERVER['REQUEST_URI'])) {
 		$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
@@ -316,8 +328,8 @@ if (ABC::env('IS_ADMIN') === true) {
 	$template = 'default';
 	if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
 		$template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
-		$dir = $template . DIRNAME_STORE . DIRNAME_TEMPLATES . $template;
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)) {
+		$dir = $template . ABC::env('DIRNAME_STORE') . ABC::env('DIRNAME_TEMPLATES') . $template;
+		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXT') . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;
@@ -328,20 +340,20 @@ if (ABC::env('IS_ADMIN') === true) {
 		//check template defined in settings
 		if (ABC::env('IS_ADMIN')===true) {
 			$template = $config->get('admin_template');
-			$dir = 'templates/'.$template .'/'. DIRNAME_ADMIN;
+			$dir = 'templates/'.$template .'/'. ABC::env('DIRNAME_ADMIN');
 		} else {
 			$template = $config->get('config_storefront_template');
-			$dir = 'templates/'.$template .'/'. DIRNAME_STORE;
+			$dir = 'templates/'.$template .'/'. ABC::env('DIRNAME_STORE');
 		}
 
-		if (in_array($template, $enabled_extensions) && is_dir(DIR_APP_EXT . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXT') . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;
 		}
 
 		//check if this is default template
-		if (!$is_valid && is_dir(ABC::env('DIR_APP').$dir)) {
+		if (!$is_valid && is_dir($dir_app.$dir)) {
 			$is_valid = true;
 		}
 	}

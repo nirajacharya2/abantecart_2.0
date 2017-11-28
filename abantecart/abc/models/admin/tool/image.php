@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\AWarning;
@@ -34,8 +35,8 @@ class ModelToolImage extends Model{
 	 * @return null|string
 	 */
 	function resize($filename, $width, $height){
-		$orig_image_filepath = is_file(DIR_IMAGE . $filename) ? DIR_IMAGE . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(DIR_RESOURCE . 'image/' . $filename) ? DIR_RESOURCE . 'image/' . $filename : $orig_image_filepath;
+		$orig_image_filepath = is_file(ABC::env('DIR_IMAGE') . $filename) ? ABC::env('DIR_IMAGE') . $filename : '';
+		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename) ? ABC::env('DIR_RESOURCE') . 'image/' . $filename : $orig_image_filepath;
 
 		$info = pathinfo($filename);
 		$extension = $info['extension'];
@@ -50,12 +51,10 @@ class ModelToolImage extends Model{
 			}
 		}
 
-		if (isset($this->request->server['HTTPS']) &&
-				(($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))
-		){
-			return HTTPS_IMAGE . $new_image;
+		if (ABC::env('HTTPS')){
+			return ABC::env('HTTPS_IMAGE') . $new_image;
 		} else{
-			return HTTP_IMAGE . $new_image;
+			return ABC::env('HTTP_IMAGE') . $new_image;
 		}
 	}
 }

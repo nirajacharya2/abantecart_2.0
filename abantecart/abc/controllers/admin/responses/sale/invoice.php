@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ACustomer;
@@ -37,12 +38,12 @@ class ControllerResponsesSaleInvoice extends AController {
 		$this->loadLanguage('sale/order');
 
 		$this->data['title'] = $this->language->get('heading_title');
-		$this->data['css_url'] = RDIR_TEMPLATE . 'css/invoice.css';
+		$this->data['css_url'] = ABC::env('RDIR_ASSETS') . 'css/invoice.css';
 
-		if (HTTPS === true) {
-			$this->data['base'] = HTTPS_SERVER;
+		if (ABC::env('HTTPS')) {
+			$this->data['base'] = ABC::env('HTTPS_SERVER');
 		} else {
-			$this->data['base'] = HTTP_SERVER;
+			$this->data['base'] = ABC::env('HTTP_SERVER');
 		}
 
 		$this->data['direction'] = $this->language->get('direction');
@@ -66,8 +67,8 @@ class ControllerResponsesSaleInvoice extends AController {
 		$this->data['column_comment'] = $this->language->get('column_comment');
 
 
-		if (is_file(DIR_RESOURCE . $this->config->get('config_logo'))) {
-			$this->data['logo'] = HTTPS_DIR_RESOURCE . $this->config->get('config_logo');
+		if (is_file(ABC::env('DIR_RESOURCE') . $this->config->get('config_logo'))) {
+			$this->data['logo'] = ABC::env('HTTPS_DIR_RESOURCE') . $this->config->get('config_logo');
 		} else {
 			$this->data['logo'] = $this->config->get('config_logo');
 		}

@@ -10,6 +10,7 @@
  * http://creativecommons.org/licenses/MIT/
  */
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use stdClass;
 if (!class_exists('abc\ABC')) {
@@ -184,24 +185,24 @@ class ResourceUploadHandler{
 		}
 		$error_text = $this->has_error($uploaded_file, $file, $error_text);
 		if (!$error_text && $file->name){
-			if (!is_dir(DIR_RESOURCE . $this->options['upload_dir'])){
+			if (!is_dir(ABC::env('DIR_RESOURCE') . $this->options['upload_dir'])){
 				$path = '';
 				$directories = explode('/', str_replace('../', '', $this->options['upload_dir']));
 				foreach ($directories as $directory){
 					$path = $path . '/' . $directory;
-					if (!is_dir(DIR_RESOURCE . $path)){
-						@mkdir(DIR_RESOURCE . $path, 0777);
-						chmod(DIR_RESOURCE . $path, 0777);
+					if (!is_dir(ABC::env('DIR_RESOURCE') . $path)){
+						@mkdir(ABC::env('DIR_RESOURCE') . $path, 0777);
+						chmod(ABC::env('DIR_RESOURCE') . $path, 0777);
 					}
 				}
 			}
-			$rs_dir = DIR_RESOURCE . $this->options['upload_dir'];
+			$rs_dir = ABC::env('DIR_RESOURCE') . $this->options['upload_dir'];
 			if (!is_dir($rs_dir) || !is_writeable($rs_dir)){
 				$error_text = "Please check 'resources' folder permissions. (" . $rs_dir . ")";
 			}
 		}
 		if (!$error_text && $file->name){
-			$file_path = DIR_RESOURCE . $this->options['upload_dir'] . $file->name;
+			$file_path = ABC::env('DIR_RESOURCE') . $this->options['upload_dir'] . $file->name;
 			$append_file = !$this->options['discard_aborted_uploads'] &&
 					is_file($file_path) && $file->size > filesize($file_path);
 			clearstatcache();

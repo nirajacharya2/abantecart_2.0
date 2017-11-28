@@ -18,6 +18,8 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 
+use abc\ABC;
+
 class ControllerCommonHeader extends AController {
 	public $data = array();
 	public function main() {
@@ -32,7 +34,7 @@ class ControllerCommonHeader extends AController {
 		$this->data['styles'] = $this->document->getStyles();
 		$this->data['scripts'] = $this->document->getScripts();
 		$this->data['breadcrumbs'] = $this->document->getBreadcrumbs();
-		$this->data['ssl'] = HTTPS;
+		$this->data['ssl'] = ABC::env('HTTPS');
 
 		$this->view->batchAssign( $this->data );
 		$this->processTemplate('common/header.tpl' );

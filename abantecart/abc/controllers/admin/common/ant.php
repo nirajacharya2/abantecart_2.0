@@ -56,9 +56,9 @@ class ControllerCommonANT extends AController {
 		$url = "/index.php?option=com_antresponses&format=raw";
 		$url .= "&store_id=" . ABC::env('UNIQUE_ID');
 		$url .= "&store_ip=" . $_SERVER ['SERVER_ADDR'];
-		$url .= "&store_url=" . HTTP_SERVER;
+		$url .= "&store_url=" . ABC::env('HTTP_SERVER');
 		$url .= "&software_name=AbanteCart";
-		$url .= "&store_version=" . VERSION;
+		$url .= "&store_version=" . ABC::env('VERSION');
 		$url .= "&language_code=" . $this->request->cookie ['language'];
 		//check if user login first time 
 		if (!$this->user->getLastLogin()) {

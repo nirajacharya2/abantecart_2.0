@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\lib\AFilter;
@@ -186,7 +187,7 @@ class ControllerResponsesCatalogDownloadListing extends AController {
 					$result[ 'name' ],
 					'<a class="btn_action" href="JavaScript:void(0);"
 						onclick="showPopup(\'' . $this->html->getSecureURL('catalog/download/update', '&' . $data_type . '=' . $result[ $data_type ]) . '\')" title="' . $this->language->get('text_view') . '">' .
-					'<img height="27" src="' . RDIR_TEMPLATE . 'images/icons/icon_grid_view.png" alt="' . $this->language->get('text_edit') . '" /></a>' );
+					'<img height="27" src="' . ABC::env('RDIR_ASSETS') . 'images/icons/icon_grid_view.png" alt="' . $this->language->get('text_edit') . '" /></a>' );
 				$i++;
 			}
 		}

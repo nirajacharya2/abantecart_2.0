@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC')) {
@@ -41,11 +42,11 @@ class ControllerResponsesEmbedHead extends AController {
 		$this->view->assign('template', $this->config->get('config_storefront_template'));
 		$this->view->assign('retina', $this->config->get('config_retina_enable'));
 		
-		if (HTTPS === true) {
-			$this->view->assign('base', HTTPS_SERVER);
+		if ( ABC::env('HTTPS') ) {
+			$this->view->assign('base', ABC::env('HTTPS_SERVER'));
 		    $this->view->assign('ssl', 1);
 		} else {
-			$this->view->assign('base', HTTP_SERVER);
+			$this->view->assign('base', ABC::env('HTTP_SERVER'));
 		}
 
 		$this->view->assign('lang', $this->language->get('code'));

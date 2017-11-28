@@ -42,8 +42,8 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	$root_path = str_replace('\\', '/', $root_path);
 }
 
-define('DIR_ROOT', $root_path);
-define('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
+ABC::env('DIR_ROOT', $root_path);
+ABC::env('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
 
 require_once(ABC::env('DIR_ROOT') . '/system/config.php');
 //set server name for correct email sending

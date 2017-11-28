@@ -94,8 +94,8 @@ class AView{
 		if ($this->registry->get('config')) {
 			$this->default_template = ABC::env('IS_ADMIN') ? $this->registry->get('config')->get('admin_template') : $this->registry->get('config')->get('config_storefront_template');
 		}
-		$this->data['template_dir'] = RDIR_TEMPLATE;
-		$this->data['tpl_common_dir'] = RDIR_TEMPLATE . 'common/';
+		$this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
+		$this->data['tpl_common_dir'] = ABC::env('DIR_APP') .ABC::env('RDIR_TEMPLATE'). 'common/';
 		$this->instance_id = $instance_id;
 
 	}
@@ -297,8 +297,8 @@ class AView{
 			$file = $filename;
 		} else {
 			//#PR Build the path to the template file
-			$path = DIR_TEMPLATES;
-			if (!defined('INSTALL')) {
+			$path = ABC::env('DIR_TEMPLATES');
+			if (!ABC::env('INSTALL')) {
 				$file = $this->_get_template_resource_path($path, $filename, 'full');
 			} else {
 				$file = $path . $filename;
@@ -368,7 +368,7 @@ class AView{
 			return null;
 		}
 		$http_path = '';
-		$res_arr = $this->_extensions_resource_map($filename);
+		$res_arr = $this->_extensions_resource_map($filename, $mode);
 
 		//get first exact template extension resource or default template resource otherwise.
 		if (count($res_arr['original'])) {
@@ -378,9 +378,11 @@ class AView{
 				$output = $res_arr['default'][0];
 			} else {
 				//no extension found, use resource from core templates
-				$output = $this->_get_template_resource_path(DIR_TEMPLATES, $filename,
-						$mode == 'file' ? '' : 'relative');
-
+				$output = $this->_get_template_resource_path(
+													ABC::env('DIR_TEMPLATES'),
+													$filename,
+													$mode == 'file' ? '' : 'relative'
+				);
 			}
 		}
 
@@ -468,7 +470,7 @@ class AView{
 		//check if hash is created and load 
 		$css_data = $this->cache->pull($key);
 		if ($css_data === false) {
-			require_once(DIR_CORE . 'helper/html-css-js-minifier.php');
+			require_once(ABC::env('DIR_CORE') . 'helper/html-css-js-minifier.php');
 			//build minified css and save
 			$path = dirname($this->templateResource($css_file, 'http'));
 			$new_content = file_get_contents($this->templateResource($css_file, 'file'));
@@ -529,7 +531,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_templates_dir($extension_name){
-		return $this->_extension_section_dir($extension_name) . DIRNAME_TEMPLATES;
+		return $this->_extension_section_dir($extension_name) . ABC::env('DIRNAME_TEMPLATES');
 	}
 
 	/**
@@ -538,32 +540,30 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		return DIR_APP_EXT . $extension_name . '/';
+		return ABC::env('DIR_APP_EXT') . $extension_name . '/';
 	}
 
 	/**
 	 * Build template source map for enabled extensions
 	 * @param string $filename
+	 * @param string $mode
 	 * @return array
 	 */
-	protected function _extensions_resource_map($filename){
+	protected function _extensions_resource_map($filename, $mode = 'file'){
 		if (empty($filename)) {
 			return array ();
 		}
-		$ret_arr = array ();
+		$output = array ();
 		$extensions = $this->extensions->getEnabledExtensions();
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used
-
 		foreach ($extensions as $ext) {
-			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, 'file',
-					$ext);
-
+			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, ($mode != 'file' ? 'relative' : $mode), $ext);
 			if ($res_arr) {
-				$ret_arr[$res_arr['match']][] = $res_arr['path'];
+				$output[$res_arr['match']][] = $res_arr['path'];
 			}
 		}
-		return $ret_arr;
+		return $output;
 	}
 
 	/**
@@ -601,50 +601,50 @@ class AView{
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
-		$dir_assets = $extension_txt_id ? DIRNAME_ASSETS . DIRNAME_EXTENSIONS . $extension_txt_id . '/' : DIRNAME_ASSETS;
+		$dir_assets = $extension_txt_id ? ABC::env('DIRNAME_ASSETS') . ABC::env('DIRNAME_EXTENSIONS') . $extension_txt_id . '/' : ABC::env('DIRNAME_ASSETS');
 
 		if (ABC::env('IS_ADMIN')) {
-			if (is_file($path . $template . '/' . DIRNAME_ADMIN . $filename)) {
-				$ret_path = $path . $template . '/' . DIRNAME_ADMIN . $filename;
+			if (is_file($path . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
+				$ret_path = $path . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename;
 				if ($mode == 'relative') {
-					$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_ADMIN . $filename;
+					$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename;
 				}
 			} else {
-				if (is_file($path . 'default/' . DIRNAME_ADMIN . $filename)) {
-					$ret_path = $path . 'default/' . DIRNAME_ADMIN . $filename;
+				if (is_file($path . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
+					$ret_path = $path . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 					if ($mode == 'relative') {
-						$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+						$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 						$match = 'default';
 					}
 				} else {
-					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename)) {
-						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 						if ($mode == 'relative') {
-							$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_ADMIN . $filename;
+							$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 							$match = 'default';
 						}
 					}
 				}
 			}
 		} else {
-			if (is_file($path . $template . '/' . DIRNAME_STORE . $filename)) {
-				$ret_path = $path . $template . '/' . DIRNAME_STORE . $filename;
+			if (is_file($path . $template . '/' . ABC::env('DIRNAME_STORE') . $filename)) {
+				$ret_path = $path . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 				if ($mode == 'relative') {
-					$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+					$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 				}
 			} else {
-				if (is_file($path . 'default/' . DIRNAME_STORE . $filename)) {
-					$ret_path = $path . 'default/' . DIRNAME_STORE . $filename;
+				if (is_file($path . 'default/' . ABC::env('DIRNAME_STORE') . $filename)) {
+					$ret_path = $path . 'default/' . ABC::env('DIRNAME_STORE') . $filename;
 					if ($mode == 'relative') {
-						$ret_path = $dir_assets . DIRNAME_TEMPLATES . 'default/' . DIRNAME_STORE . $filename;
+						$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_STORE') . $filename;
 						$match = 'default';
 					}
 				} //check resource in assets directory
 				else {
-					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename)) {
-						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 						if ($mode == 'relative') {
-							$ret_path = $dir_assets . DIRNAME_TEMPLATES . $template . '/' . DIRNAME_STORE . $filename;
+							$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 						}
 					}
 				}

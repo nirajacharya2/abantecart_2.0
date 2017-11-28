@@ -79,7 +79,7 @@ final class AConfig{
 	 * @return void
 	 */
 	public function load($filename){
-		$file = DIR_CONFIG . $filename . '.php';
+		$file = ABC::env('DIR_CONFIG') . $filename . '.php';
 
 		if (file_exists($file)){
 			$cfg = array ();
@@ -105,7 +105,7 @@ final class AConfig{
 
 		//detect URL for the store
 		$url = str_replace('www.', '', $_SERVER['HTTP_HOST']) . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
-		if (defined('INSTALL')){
+		if (ABC::env('INSTALL')){
 			$url = str_replace('install/', '', $url);
 		}
 
@@ -215,11 +215,11 @@ final class AConfig{
 					$warning->toLog();
 				}
 				//set config url to current domain
-				$this->cnfg['config_url'] = 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+				$this->cnfg['config_url'] = 'http://' . ABC::env('REAL_HOST') . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 			}
 
 			if (!$this->cnfg['config_url']){
-				$this->cnfg['config_url'] = 'http://' . REAL_HOST . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+				$this->cnfg['config_url'] = 'http://' . ABC::env('REAL_HOST') . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
 			}
 		}
 
@@ -276,8 +276,8 @@ final class AConfig{
 		}
 
 		//add encryption key to settings, otherwise use from database (backwards compatibility)
-		if (defined('ENCRYPTION_KEY')){
-			$setting['encryption_key'] = ENCRYPTION_KEY;
+		if (ABC::env('ENCRYPTION_KEY')){
+			$setting['encryption_key'] = ABC::env('ENCRYPTION_KEY');
 		}
 
 		foreach ($settings as $setting){
