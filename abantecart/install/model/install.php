@@ -103,8 +103,8 @@ class ModelInstall extends Model{
 			}
 		}
 
-		if (!is_writable(ABC::env('DIR_CONFIG') . 'config.php')) {
-			$this->errors['warning'] = 'Error: Could not write to config.php please check you have set the correct permissions on: ' . ABC::env('DIR_CONFIG') . 'config.php!';
+		if (!is_writable(ABC::env('DIR_CONFIG')) ) {
+			$this->errors['warning'] = 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: ' . ABC::env('DIR_CONFIG') .'!';
 		}
 
 		if (!$this->errors) {
@@ -149,8 +149,8 @@ class ModelInstall extends Model{
 			$this->errors['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
 		}
 
-		if (!is_writable(ABC::env('DIR_CONFIG') . 'config.php')) {
-			$this->errors['warning'] = 'Warning: config.php needs to be writable for AbanteCart to be installed!';
+		if ( !is_writable(ABC::env('DIR_CONFIG')) ) {
+			$this->errors['warning'] = 'Warning: abc/config folder and files needs to be writable for AbanteCart to be installed!';
 		}
 
 		if (!is_writable(ABC::env('DIR_SYSTEM'))) {
@@ -216,14 +216,19 @@ class ModelInstall extends Model{
 
 		$result = true;
 		//write application config
+		$server_name = getenv("SERVER_NAME");
+		$unique_id = md5(time());
 		$content = <<<EOD
 <?php
-return array(
+return [
 		'APP_NAME' => 'AbanteCart',
 		'MIN_PHP_VERSION' => '7.0',
 		'DIR_ROOT' => '{$data['root_dir']}',
 		'DIR_APP' => '{$data['app_dir']}',
 		'DIR_PUBLIC' => '{$data['public_dir']}',
+		'SERVER_NAME' => '{$server_name}',
+		'ADMIN_PATH' => '{$data['admin_path']}',
+		'UNIQUE_ID' => '{$unique_id}',
 		// SEO URL Keyword separator
 		'SEO_URL_SEPARATOR' => '-',
 		// EMAIL REGEXP PATTERN
@@ -233,9 +238,9 @@ return array(
 		'POSTFIX_PRE' => '.pre',
 		'POSTFIX_POST' => '.post',
 		'APP_CHARSET' => 'UTF-8'
-);
+];
 EOD;
-		$file = fopen(ABC::env('DIR_CONFIG') . 'app_config.php', 'w');
+		$file = fopen(ABC::env('DIR_CONFIG') . 'app.php', 'w');
 		if (!fwrite($file, $content)) {
 			$result = false;
 		}
@@ -245,7 +250,7 @@ EOD;
 		$content = <<<EOD
 <?php
 // Database Configuration
-return array(
+return [
 	'DB_DRIVER' => '{$data['db_driver']}',
 	'DB_HOSTNAME' => '{$data['db_host']}',
 	'DB_USERNAME' => '{$data['db_user']}',
@@ -254,7 +259,7 @@ return array(
 	'DB_PREFIX' => '{$data['db_prefix']}',
 	'DB_CHARSET' => 'utf8',
 	'DB_COLLATION' => 'utf8_unicode_ci'
-);
+];
 EOD;
 		$file = fopen(ABC::env('DIR_CONFIG') . 'database.php', 'w');
 		if (!fwrite($file, $content)) {
@@ -262,23 +267,14 @@ EOD;
 		}
 		fclose($file);
 
-		//write main config
-		$server_name = getenv("SERVER_NAME");
-		$unique_id = md5(time());
+		//write cache config
 		$content = <<<EOD
 <?php
-return array_merge(
-	require 'app_config.php',
-	require 'database.php',
-	array(
-		'SERVER_NAME' => '{$server_name}',
-		'ADMIN_PATH' => '{$data['admin_path']}',
-		'CACHE_DRIVER' => '{$data['cache_driver']}',
-		'UNIQUE_ID' => '{$unique_id}'
-	)
-);
+return [
+		'CACHE_DRIVER' => '{$data['cache_driver']}'
+];
 EOD;
-		$file = fopen(ABC::env('DIR_CONFIG') . 'config.php', 'w');
+		$file = fopen(ABC::env('DIR_CONFIG') . 'cache.php', 'w');
 		if (!fwrite($file, $content)) {
 			$result = false;
 		}

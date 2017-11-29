@@ -16,11 +16,14 @@ class ABC extends ABCBase{
 	protected static $env = [];
 	/**
 	 * ABC constructor.
-	 * @param array $config - see folder /abc/config/
 	 */
-	public function __construct($config){
-		//put config into environment
-		self::env($config);
+	public function __construct(){
+		//load and put config into environment
+		$files = glob(__DIR__.'/config/*.php');
+		foreach($files as $file){
+			$config = include_once($file);
+			self::env((array)$config);
+		}
 	}
 
 	/**
