@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -220,13 +221,13 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 				if ($group == 'appearance'){
 					$section = $this->request->get['tmpl_id'] == 'default' ? 'appearance' : $this->request->get['tmpl_id'];
 					if (AHelperUtils::has_value($this->request->post['config_logo'])){
-						$this->request->post['config_logo'] = html_entity_decode($this->request->post['config_logo'], ENT_COMPAT, 'UTF-8');
+						$this->request->post['config_logo'] = html_entity_decode($this->request->post['config_logo'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 					} else if (!$this->request->post['config_logo'] && isset($this->request->post['config_logo_resource_id'])){
 						//we save resource ID vs resource path
 						$this->request->post['config_logo'] = $this->request->post['config_logo_resource_id'];
 					}
 					if (AHelperUtils::has_value($this->request->post['config_icon'])){
-						$this->request->post['config_icon'] = html_entity_decode($this->request->post['config_icon'], ENT_COMPAT, 'UTF-8');
+						$this->request->post['config_icon'] = html_entity_decode($this->request->post['config_icon'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 					} else if (!$this->request->post['config_icon'] && isset($this->request->post['config_icon_resource_id'])){
 						//we save resource ID vs resource path
 						$this->request->post['config_icon'] = $this->request->post['config_icon_resource_id'];

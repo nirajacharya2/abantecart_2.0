@@ -1447,7 +1447,7 @@ class ExtensionUtils{
 					$value = (string)$item->default_value;
 				} else {
 					$value = $this->registry->get('html')->convertLinks(htmlentities((string)$item->default_value,
-							ENT_QUOTES, 'UTF-8'));
+							ENT_QUOTES, ABC::env('APP_CHARSET')));
 				}
 
 				if ((string)$item->type == 'resource' && $value) {

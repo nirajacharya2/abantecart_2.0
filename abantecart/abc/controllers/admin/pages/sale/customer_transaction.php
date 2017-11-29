@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -234,7 +235,7 @@ class ControllerPagesSaleCustomerTransaction extends AController{
 
 		$this->load->model('setting/store');
 		if (!$this->model_setting_store->isDefaultStore()) {
-			$this->data['warning_actonbehalf'] = htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, 'UTF-8');
+			$this->data['warning_actonbehalf'] = htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, ABC::env('APP_CHARSET'));
 		}
 		$this->data['actas'] = $form->getFieldHtml(array (
 				'type'   => 'button',

@@ -992,7 +992,7 @@ class ALanguageManager extends ALanguage{
 									continue;
 								}
 							} else if ($table == $this->db->table('product_tags')){
-								// TODO. ac_product_tags still an issue. Will be clonned as duplication on each translation.
+								// TODO. ac_product_tags still an issue. Will be cloned as duplication on each translation.
 								//		 Issue. Can not check if translation is present because of no IDs present in ac_product_tags
 								// Offset duplicate error for now.
 								if (!$this->db->query($insert_sql, true)){

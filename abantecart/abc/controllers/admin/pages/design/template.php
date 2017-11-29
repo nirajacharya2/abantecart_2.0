@@ -219,19 +219,19 @@ class ControllerPagesDesignTemplate extends AController{
 		if ($this->request->is_POST() && $this->_validate('appearance')){
 			$post = $this->request->post;
 			if (AHelperUtils::has_value($post['config_logo'])){
-				$post['config_logo'] = html_entity_decode($post['config_logo'], ENT_COMPAT, 'UTF-8');
+				$post['config_logo'] = html_entity_decode($post['config_logo'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			} else if (!$post['config_logo'] && isset($post['config_logo_resource_id'])){
 				//we save resource ID vs resource path
 				$post['config_logo'] = $post['config_logo_resource_id'];
 			}
 			if (AHelperUtils::has_value($post['config_mail_logo'])){
-				$post['config_mail_logo'] = html_entity_decode($post['config_mail_logo'], ENT_COMPAT, 'UTF-8');
+				$post['config_mail_logo'] = html_entity_decode($post['config_mail_logo'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			} else if (!$post['config_mail_logo'] && isset($post['config_mail_logo_resource_id'])){
 				//we save resource ID vs resource path
 				$post['config_mail_logo'] = $post['config_mail_logo_resource_id'];
 			}
 			if (AHelperUtils::has_value($post['config_icon'])){
-				$post['config_icon'] = html_entity_decode($post['config_icon'], ENT_COMPAT, 'UTF-8');
+				$post['config_icon'] = html_entity_decode($post['config_icon'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			} else if (!$post['config_icon'] && isset($post['config_icon_resource_id'])){
 				//we save resource ID vs resource path
 				$post['config_icon'] = $post['config_icon_resource_id'];

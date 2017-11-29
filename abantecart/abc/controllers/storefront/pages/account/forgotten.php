@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -85,7 +86,7 @@ class ControllerPagesAccountForgotten extends AController {
                     $mail->setFrom($this->config->get('store_main_email'));
                     $mail->setSender($this->config->get('store_name'));
                     $mail->setSubject($subject);
-                    $mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+                    $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
                     $mail->send();
 
                     $this->session->data['success'] = $this->language->get('text_success');
@@ -205,7 +206,7 @@ class ControllerPagesAccountForgotten extends AController {
 				$mail->setFrom($this->config->get('store_main_email'));
 				$mail->setSender($this->config->get('store_name'));
 				$mail->setSubject($subject);
-				$mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
 				$mail->send();
 
 			    //update data and remove password_reset code
@@ -324,7 +325,7 @@ class ControllerPagesAccountForgotten extends AController {
                     $mail->setFrom($this->config->get('store_main_email'));
                     $mail->setSender($this->config->get('store_name'));
                     $mail->setSubject($subject);
-                    $mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+                    $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
                     $mail->send();
 
                     $this->session->data['success'] = $this->language->get('text_success_loginname');

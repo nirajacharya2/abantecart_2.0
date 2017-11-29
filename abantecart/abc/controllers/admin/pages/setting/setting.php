@@ -62,7 +62,7 @@ class ControllerPagesSettingSetting extends AController {
 		if ($this->request->is_POST() && $this->_validate($get['active'], $get['store_id'])) {
 			foreach( array('config_logo', 'config_mail_logo', 'config_icon') as $n){
 				if (AHelperUtils::has_value($post[$n])) {
-					$post[$n] = html_entity_decode($post[$n], ENT_COMPAT, 'UTF-8');
+					$post[$n] = html_entity_decode($post[$n], ENT_COMPAT, ABC::env('APP_CHARSET'));
 				} else if(!$post[$n] && isset($post[$n.'_resource_id'])) {
 					//we save resource ID vs resource path
 					$post[$n] = $post[$n.'_resource_id'];
@@ -71,7 +71,7 @@ class ControllerPagesSettingSetting extends AController {
 
 			//html decode store name
 			if (AHelperUtils::has_value($post['store_name'])) {
-				$post['store_name'] = html_entity_decode($post['store_name'], ENT_COMPAT, 'UTF-8');
+				$post['store_name'] = html_entity_decode($post['store_name'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			}
 
 			//when change base currency for default store also change values for all currencies in database before saving

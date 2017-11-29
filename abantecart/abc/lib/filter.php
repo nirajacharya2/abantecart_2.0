@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
@@ -297,7 +298,7 @@ final class AGrid{
 							$str = "( LOWER(" . $colname . ")";
 							$rule['data'] = mb_strtolower($rule['data']);
 							//search encoded
-							$needle = htmlspecialchars($rule['data'],ENT_QUOTES,"UTF-8");
+							$needle = htmlspecialchars($rule['data'],ENT_QUOTES,ABC::env('APP_CHARSET'));
 							$str .= " LIKE '%" . $this->db->escape($needle) . "%') ";
 							break;
 						default:

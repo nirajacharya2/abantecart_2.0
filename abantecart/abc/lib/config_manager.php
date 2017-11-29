@@ -998,7 +998,7 @@ class AConfigManager{
 				$fields['logo'] = $form->getFieldHtml($props[] = array (
 						'type'          => 'resource',
 						'name'          => 'config_logo',
-						'resource_path' => htmlspecialchars($data['config_logo'], ENT_COMPAT, 'UTF-8'),
+						'resource_path' => htmlspecialchars($data['config_logo'], ENT_COMPAT, ABC::env('APP_CHARSET')),
 						'rl_type'       => 'image'
 				));
 			}
@@ -1014,7 +1014,7 @@ class AConfigManager{
 				$fields['mail_logo'] = $form->getFieldHtml($props[] = array (
 						'type'          => 'resource',
 						'name'          => 'config_mail_logo',
-						'resource_path' => htmlspecialchars($data['config_mail_logo'], ENT_COMPAT, 'UTF-8'),
+						'resource_path' => htmlspecialchars($data['config_mail_logo'], ENT_COMPAT, ABC::env('APP_CHARSET')),
 						'rl_type'       => 'image'
 				));
 			}
@@ -1030,7 +1030,7 @@ class AConfigManager{
 				$fields['icon'] = $form->getFieldHtml($props[] = array (
 						'type'          => 'resource',
 						'name'          => 'config_icon',
-						'resource_path' => htmlspecialchars($data['config_icon'], ENT_COMPAT, 'UTF-8'),
+						'resource_path' => htmlspecialchars($data['config_icon'], ENT_COMPAT, ABC::env('APP_CHARSET')),
 						'rl_type'       => 'image'
 				));
 			}

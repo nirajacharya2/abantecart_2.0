@@ -38,7 +38,7 @@ ABC::env('DIR_ASSETS', basename(__DIR__).'/');
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
-$dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
+$dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,ABC::env('APP_CHARSET')));
 // Detect http host
 if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 	ABC::env('REAL_HOST', $_SERVER['HTTP_X_FORWARDED_HOST']);
@@ -112,7 +112,7 @@ if($from_admin){
 }
 
 ?>
-<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php echo '<?xml version="1.0" encoding="'.ABC::env('APP_CHARSET').'"?>'; ?>
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />

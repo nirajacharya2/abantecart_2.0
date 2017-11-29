@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 
@@ -77,7 +78,7 @@ class ControllerApiProductCategory extends AControllerAPI {
 		$category_info['thumbnail'] = $thumbnail['thumb_url'];
 
 		//Process data for category 
-		$category_info['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8'); 
+		$category_info['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET')); 
 		$category_info['total_products'] = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
 		$category_info['total_subcategories'] = $this->model_catalog_category->getTotalCategoriesByCategoryId($category_id);
 		if ($category_info['total_products']) {

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -346,7 +347,7 @@ class ControllerPagesProductProduct extends AController{
 		$this->data['model'] = $product_info['model'];
 		$this->data['manufacturer'] = $product_info['manufacturer'];
 		$this->data['manufacturers'] = $this->html->getSEOURL('product/manufacturer', '&manufacturer_id=' . $product_info['manufacturer_id'], '&encode');
-		$this->data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
+		$this->data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 		$this->data['product_id'] = $product_id;
 		$this->data['average'] = $average;
 

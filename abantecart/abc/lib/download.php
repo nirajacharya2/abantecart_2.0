@@ -369,7 +369,7 @@ final class ADownload{
 
 		$file = ABC::env('DIR_RESOURCE') . $download_info['filename'];
 		$mask = basename($download_info['mask']);
-		$mask = mb_convert_encoding($mask, 'UTF-8', 'UTF-8');
+		$mask = mb_convert_encoding($mask, ABC::env('APP_CHARSET'), ABC::env('APP_CHARSET'));
 		$mask = preg_replace('/[^0-9A-z_\.\-]/', '',$mask);
 		//is mask filename contains only non-latin chars
 		if(pathinfo($mask, PATHINFO_FILENAME) == '' || !$mask){

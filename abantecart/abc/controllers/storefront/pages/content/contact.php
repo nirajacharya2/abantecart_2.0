@@ -61,7 +61,7 @@ class ControllerPagesContentContact extends AController{
 					$resource_info = $r->getResource($config_mail_logo);
 					if ($resource_info) {
 						$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'],
-								ENT_QUOTES, 'UTF-8');
+								ENT_QUOTES, ABC::env('APP_CHARSET'));
 					}
 				} else {
 					$store_logo = md5(pathinfo($config_mail_logo, PATHINFO_FILENAME))
@@ -109,7 +109,7 @@ class ControllerPagesContentContact extends AController{
 			//allow to change email data from extensions
 			$this->extensions->hk_ProcessData($this, 'sf_contact_us_mail');
 
-			$text_body = strip_tags(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, 'UTF-8'));
+			$text_body = strip_tags(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET')));
 			if($this->config->get('config_duplicate_contact_us_to_message')){
 				$this->messages->saveNotice(
 						sprintf($this->language->get('entry_duplicate_message_subject'),$post_data['first_name'], $post_data['email']),

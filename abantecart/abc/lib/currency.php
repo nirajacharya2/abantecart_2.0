@@ -210,15 +210,6 @@ final class ACurrency{
 		return $sign . $formatted_number;
 	}
 
-	/**
-	 * @deprecated since 1.2.10
-	 * @param $number
-	 * @param string $currency
-	 * @return string
-	 */
-	public function wrap_dysplay_format($number, $currency = ''){
-		return $this->wrap_display_format($number, $currency);
-	}
 
 	/**
 	 * Format number part and/or currency symbol

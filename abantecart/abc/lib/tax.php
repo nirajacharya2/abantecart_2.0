@@ -244,17 +244,6 @@ class ATax{
 	}
 
 	/**
-	 * @deprecated
-	 * @since 1.2.7
-	 * @param float $amount
-	 * @param $tax_class_id
-	 * @return array
-	 */
-	public function getAplicableRates($amount, $tax_class_id){
-		return $this->getApplicableRates($amount, $tax_class_id);
-	}
-
-	/**
 	 * Get array with applicable rates for tax class based on the provided amount
 	 * Array returns Absolute and Percent rates in separate arrays
 	 * @since 1.2.7

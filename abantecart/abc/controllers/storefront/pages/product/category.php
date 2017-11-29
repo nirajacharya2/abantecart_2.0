@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 
@@ -105,7 +106,7 @@ class ControllerPagesProductCategory extends AController {
 			$this->document->setDescription( $category_info['meta_description'] );
 
 			$this->view->assign('heading_title', $category_info['name'] );
-			$this->view->assign('description', html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8') );
+			$this->view->assign('description', html_entity_decode($category_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET')) );
 			$this->view->assign('text_sort', $this->language->get('text_sort'));
 
 			if (isset($request['page'])) {
@@ -243,7 +244,7 @@ class ControllerPagesProductCategory extends AController {
 						'special' 	 	=> $special,
 						'href'    	 	=> $this->html->getSEOURL('product/product','&path=' . $request['path'] . '&product_id=' . $result['product_id'], '&encode'),
 						'add'	  	 	=> $add,
-						'description'	=> html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'),
+						'description'	=> html_entity_decode($result['description'], ENT_QUOTES, ABC::env('APP_CHARSET')),
 						'track_stock'   => $track_stock,
 						'in_stock'		=> $in_stock,
 						'no_stock_text' => $no_stock_text,

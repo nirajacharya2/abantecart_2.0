@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\lib\ATaskManager;
@@ -64,7 +65,7 @@ class ModelSaleContact extends Model{
 			$task_controller = 'task/sale/contact/sendEmail';
 
 			//if message does not contains html-tags replace line breaks to <br>
-			$decoded = html_entity_decode($data['message'], ENT_QUOTES, 'UTF-8');
+			$decoded = html_entity_decode($data['message'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 			if ($decoded == strip_tags($decoded)){
 				$data['message'] = nl2br($data['message']);
 			}

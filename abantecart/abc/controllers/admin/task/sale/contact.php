@@ -239,7 +239,7 @@ class ControllerTaskSaleContact extends AController{
 			}
 		}
 
-		$this->data['mail_template_data']['body'] = html_entity_decode($message_body, ENT_QUOTES, 'UTF-8');
+		$this->data['mail_template_data']['body'] = html_entity_decode($message_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
 		$this->data['mail_template'] = 'mail/contact.tpl';
 
 		//allow to change email data from extensions

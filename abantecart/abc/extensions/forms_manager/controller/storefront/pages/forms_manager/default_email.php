@@ -8,7 +8,7 @@
   Copyright © 2011-2017 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
-  Lincence details is bundled with this package in the file LICENSE.txt.
+  License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
 
@@ -19,6 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
 
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
@@ -129,7 +130,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController {
 					}
 				}
 
-				$mail->setText(strip_tags(html_entity_decode($msg, ENT_QUOTES, 'UTF-8')));
+				$mail->setText(strip_tags(html_entity_decode($msg, ENT_QUOTES, ABC::env('APP_CHARSET'))));
 
 				$mail->send();
 

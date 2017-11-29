@@ -71,10 +71,9 @@ class ControllerResponsesSaleOrderHistory extends AController {
 
           //update controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
-			
+
 		$this->load->library('json');
 		$this->response->setOutput(AJson::encode($json));
   	} 
-	
+
 }
-?>

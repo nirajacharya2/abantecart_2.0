@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\lib;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 
 if (!class_exists('abc\ABC')) {
@@ -102,7 +103,7 @@ final class ARequest{
 				$data[$this->clean($key)] = $this->clean($value);
 			}
 		} else{
-			$data = htmlspecialchars($data, ENT_COMPAT, 'UTF-8');
+			$data = htmlspecialchars($data, ENT_COMPAT, ABC::env('APP_CHARSET'));
 		}
 		return $data;
 	}

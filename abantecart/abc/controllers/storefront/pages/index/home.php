@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC')) {
@@ -49,12 +50,12 @@ class ControllerPagesIndexHome extends AController {
 		$this->loadModel('setting/store');
 
 		if (!$this->config->get('config_store_id')) {
-			$this->view->assign('welcome', html_entity_decode($this->config->get('config_description_' .$language_id ), ENT_QUOTES, 'UTF-8') );
+			$this->view->assign('welcome', html_entity_decode($this->config->get('config_description_' .$language_id ), ENT_QUOTES, ABC::env('APP_CHARSET')) );
 		} else {
 			$store_info = $this->model_setting_store->getStore($this->config->get('config_store_id'));
 
 			if ($store_info) {
-				$this->view->assign('welcome', html_entity_decode($store_info['description'], ENT_QUOTES, 'UTF-8') );
+				$this->view->assign('welcome', html_entity_decode($store_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET')) );
 			} else {
 				$this->view->assign('welcome', '');
 			}

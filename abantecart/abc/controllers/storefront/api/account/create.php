@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\lib\AMail;
 
@@ -81,7 +82,7 @@ class ControllerApiAccountCreate extends AControllerAPI {
 	  		$mail->setFrom( $this->config->get('store_main_email') );
 	  		$mail->setSender( $this->config->get('store_name') );
 	  		$mail->setSubject( $subject );
-			$mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+			$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
       		$mail->send();
       		$this->data['status'] = 1;
 			if (!$this->config->get('config_customer_approval')) {

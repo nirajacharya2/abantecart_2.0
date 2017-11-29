@@ -493,8 +493,7 @@ class AHtml extends AController{
 	}
 
 	/**
-	 * @return string
-	 * @throws AException
+	 * @return string 
 	 */
 	public function getContentLanguageSwitcher(){
 		$registry = $this->registry;
@@ -1238,7 +1237,7 @@ class TextareaHtmlElement extends HtmlElement{
 						'name'        => $this->name,
 						'id'          => $this->element_id,
 						'value'       => $this->value,
-						'ovalue'      => htmlentities($this->value, ENT_QUOTES, 'UTF-8'),
+						'ovalue'      => htmlentities($this->value, ENT_QUOTES, ABC::env('APP_CHARSET')),
 						'attr'        => $this->attr,
 						'required'    => $this->required,
 						'style'       => $this->style,
@@ -1278,7 +1277,7 @@ class TextEditorHtmlElement extends HtmlElement{
 						'name'        => $this->name,
 						'id'          => $this->element_id,
 						'value'       => $this->value,
-						'ovalue'      => htmlentities($this->value, ENT_QUOTES, 'UTF-8'),
+						'ovalue'      => htmlentities($this->value, ENT_QUOTES, ABC::env('APP_CHARSET')),
 						'attr'        => $this->attr,
 						'required'    => $this->required,
 						'style'       => $this->style,

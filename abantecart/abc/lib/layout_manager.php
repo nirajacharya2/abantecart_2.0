@@ -1811,7 +1811,7 @@ class ALayoutManager{
 
 		if ($page->page_descriptions->page_description){
 			foreach ($page->page_descriptions->page_description as $page_description){
-				$page_description->language = mb_strtolower($page_description->language, 'UTF-8');
+				$page_description->language = mb_strtolower($page_description->language, ABC::env('APP_CHARSET'));
 				$query = "SELECT language_id FROM " . $this->db->table("languages") . " 
 											WHERE LOWER(name) = '" . $this->db->escape($page_description->language) . "'";
 				$result = $this->db->query($query);
@@ -1929,7 +1929,7 @@ class ALayoutManager{
 				//insert new block details
 				if ($block->block_descriptions->block_description){
 					foreach ($block->block_descriptions->block_description as $block_description){
-						$language_id = $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language, 'UTF-8'));
+						$language_id = $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language, ABC::env('APP_CHARSET')));
 						//if loading language does not exists or installed, skip 
 						if ($language_id){
 							$this->language->replaceDescriptions('block_descriptions',
@@ -1987,7 +1987,7 @@ class ALayoutManager{
 					// insert block's info
 					if ($block->block_descriptions->block_description){
 						foreach ($block->block_descriptions->block_description as $block_description){
-							$language_id = $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language, 'UTF-8'));
+							$language_id = $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language, ABC::env('APP_CHARSET')));
 							//if loading language does not exists or installed, log error on update 
 							if (!$language_id){
 								$error = "ALayout_manager Error. Unknown language for block descriptions.'."
@@ -2334,7 +2334,7 @@ class ALayoutManager{
 	 * @return int
 	 */
 	private function _getLanguageIdByName($language_name = ''){
-		$language_name = mb_strtolower($language_name, 'UTF-8');
+		$language_name = mb_strtolower($language_name, ABC::env('APP_CHARSET'));
 		$query = "SELECT language_id
 				  FROM " . $this->db->table("languages") . " 
 				  WHERE LOWER(filename) = '" . $this->db->escape($language_name) . "'";

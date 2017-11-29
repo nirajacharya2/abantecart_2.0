@@ -379,7 +379,6 @@ class ACustomer{
 
 	/**
 	 * Validate if loginname is the same as email.
-	 * @param none
 	 * @return bool
 	 */
 	public function isLoginnameAsEmail(){
@@ -548,7 +547,6 @@ class ACustomer{
 
 	/**
 	 * Confirm that current customer is valid
-	 * @param none
 	 * @return bool
 	 */
 	public function isValidEnabledCustomer(){
@@ -573,7 +571,6 @@ class ACustomer{
 
 	/**
 	 * Get cart content
-	 * @param none
 	 * @return array()
 	 */
 	public function getCustomerCart(){
@@ -751,7 +748,6 @@ class ACustomer{
 
 	/**
 	 * Get cart content
-	 * @param none
 	 * @return array()
 	 */
 	public function getWishList(){

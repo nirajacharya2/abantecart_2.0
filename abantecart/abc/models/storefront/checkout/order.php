@@ -445,8 +445,8 @@ class ModelCheckoutOrder extends Model{
 		$subject = sprintf($language->get('text_subject'), $order_row['store_name'], $order_id);
 
 		// HTML Mail
-		$this->data['mail_template_data']['title'] = sprintf($language->get('text_subject'), html_entity_decode($order_row['store_name'], ENT_QUOTES, 'UTF-8'), $order_id);
-		$this->data['mail_template_data']['text_greeting'] = sprintf($language->get('text_greeting'), html_entity_decode($order_row['store_name'], ENT_QUOTES, 'UTF-8'));
+		$this->data['mail_template_data']['title'] = sprintf($language->get('text_subject'), html_entity_decode($order_row['store_name'], ENT_QUOTES, ABC::env('APP_CHARSET')), $order_id);
+		$this->data['mail_template_data']['text_greeting'] = sprintf($language->get('text_greeting'), html_entity_decode($order_row['store_name'], ENT_QUOTES, ABC::env('APP_CHARSET')));
 		$this->data['mail_template_data']['text_order_detail'] = $language->get('text_order_detail');
 		$this->data['mail_template_data']['text_order_id'] = $language->get('text_order_id');
 		$this->data['mail_template_data']['text_invoice'] = $language->get('text_invoice');
@@ -486,7 +486,7 @@ class ModelCheckoutOrder extends Model{
 				$resource_info = $r->getResource($config_mail_logo);
 				if ($resource_info) {
 					$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'],
-							ENT_QUOTES, 'UTF-8');
+							ENT_QUOTES, ABC::env('APP_CHARSET'));
 				}
 			} else {
 				$this->data['mail_template_data']['logo_uri'] = 'cid:'
@@ -638,7 +638,7 @@ class ModelCheckoutOrder extends Model{
 		//allow to change email data from extensions
 		$this->extensions->hk_ProcessData($this, 'sf_order_confirm_mail_text');
 		$this->data['mail_plain_text'] = $view->fetch($this->data['mail_template']);
-		$this->data['mail_plain_text'] = html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, 'UTF-8');
+		$this->data['mail_plain_text'] = html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 		//remove html-tags
 		$breaks = array ("<br />", "<br>", "<br/>");
 		$this->data['mail_plain_text'] = str_ireplace($breaks, "\r\n", $this->data['mail_plain_text']);
@@ -681,7 +681,7 @@ class ModelCheckoutOrder extends Model{
 			$this->extensions->hk_ProcessData($this, 'sf_order_confirm_alert_mail_text');
 
 			$this->data['mail_plain_text'] = $view->fetch($this->data['mail_template']);
-			$this->data['mail_plain_text'] = html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, 'UTF-8');
+			$this->data['mail_plain_text'] = html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 			//remove html-tags
 			$breaks = array ("<br />", "<br>", "<br/>");
 			$this->data['mail_plain_text'] = str_ireplace($breaks, "\r\n", $this->data['mail_plain_text']);
@@ -694,7 +694,7 @@ class ModelCheckoutOrder extends Model{
 				}
 			}
 
-			$subject = sprintf($language->get('text_subject'), html_entity_decode($this->config->get('store_name'), ENT_QUOTES, 'UTF-8'), $order_id . ' (' . $order_total . ')');
+			$subject = sprintf($language->get('text_subject'), html_entity_decode($this->config->get('store_name'), ENT_QUOTES, ABC::env('APP_CHARSET')), $order_id . ' (' . $order_total . ')');
 
 			$mail->setSubject($subject);
 			$mail->setTo($this->config->get('store_main_email'));
@@ -793,7 +793,7 @@ class ModelCheckoutOrder extends Model{
 			//notify via email
 			if ($notify){
 
-				$subject = sprintf($language->get('text_subject'), html_entity_decode($order_row['store_name'], ENT_QUOTES, 'UTF-8'), $order_id);
+				$subject = sprintf($language->get('text_subject'), html_entity_decode($order_row['store_name'], ENT_QUOTES, ABC::env('APP_CHARSET')), $order_id);
 
 				$message = $language->get('text_order') . ' ' . $order_id . "\n";
 				$message .= $language->get('text_date_added') . ' ' . AHelperUtils::dateISO2Display($order_row['date_added'], $language->get('date_format_short')) . "\n\n";
@@ -828,7 +828,7 @@ class ModelCheckoutOrder extends Model{
 				$mail->setFrom($this->config->get('store_main_email'));
 				$mail->setSender($order_row['store_name']);
 				$mail->setSubject($subject);
-				$mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
 				$mail->send();
 			}
 		}

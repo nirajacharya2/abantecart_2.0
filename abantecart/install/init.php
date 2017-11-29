@@ -28,7 +28,7 @@ use abc\lib\ALog;
 use abc\lib\ASession;
 use abc\lib\CSRFToken;
 
-mb_internal_encoding('UTF-8');
+mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
 // Detect if localhost is used.

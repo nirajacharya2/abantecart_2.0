@@ -20,6 +20,7 @@
 
 namespace abc\models\admin;
 
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
@@ -670,19 +671,19 @@ class ModelSaleOrder extends Model{
 				if ($order_query->row['customer_id']) {
 					$message .= $language->get('text_invoice') . "\n";
 					$message .= html_entity_decode($order_query->row['store_url'] . 'index.php?rt=account/invoice&order_id=' . $order_id,
-									ENT_QUOTES, 'UTF-8') . "\n\n";
+									ENT_QUOTES, ABC::env('APP_CHARSET')) . "\n\n";
 				} //give link on order page for quest
 				elseif ($this->config->get('config_guest_checkout') && $order_query->row['email']) {
 					$enc = new AEncryption($this->config->get('encryption_key'));
 					$order_token = $enc->encrypt($order_id . '::' . $order_query->row['email']);
 					$message .= $language->get('text_invoice') . "\n";
 					$message .= html_entity_decode($order_query->row['store_url'] . 'index.php?rt=account/invoice&ot=' . $order_token,
-									ENT_QUOTES, 'UTF-8') . "\n\n";
+									ENT_QUOTES, ABC::env('APP_CHARSET')) . "\n\n";
 				}
 
 				if ($data['comment']) {
 					$message .= $language->get('text_comment') . "\n\n";
-					$message .= strip_tags(html_entity_decode($data['comment'], ENT_QUOTES, 'UTF-8')) . "\n\n";
+					$message .= strip_tags(html_entity_decode($data['comment'], ENT_QUOTES, ABC::env('APP_CHARSET'))) . "\n\n";
 				}
 
 				$message .= $language->get('text_footer');
@@ -699,7 +700,7 @@ class ModelSaleOrder extends Model{
 				$mail->setFrom($this->config->get('store_main_email'));
 				$mail->setSender($order_query->row['store_name']);
 				$mail->setSubject($subject);
-				$mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
 				$mail->send();
 
 				//send IMs except emails.

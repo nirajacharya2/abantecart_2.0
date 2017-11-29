@@ -45,7 +45,7 @@ class Migration_Osc implements Migration {
 		 */
 		if($migrate_data){
 			$db_driver = ABC::env('DB_DRIVER');
-			require_once DIR_DATABASE . $db_driver.'.php';
+			require_once ABC::env('DIR_DATABASE') . $db_driver.'.php';
 			$this->src_db = new $db_driver($this->data['db_host'], $this->data['db_user'], $this->data['db_password'], $this->data['db_name'], true);
 		}
 	}

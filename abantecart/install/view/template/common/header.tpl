@@ -1,4 +1,5 @@
-<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php use abc\ABC;
+echo '<?xml version="1.0" encoding="'.ABC::env('APP_CHARSET').'"?>'; ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en" xml:lang="en">
 <head>

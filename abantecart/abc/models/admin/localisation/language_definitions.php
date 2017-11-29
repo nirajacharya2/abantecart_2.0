@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ALanguageManager;
 use abc\core\engine\Model;
@@ -125,7 +126,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 					'section' => (int)$update_data['section'],
 					'block' => $update_data['block'],
 					'language_key' => $update_data['language_key'],
-					'language_value' => html_entity_decode($lang_value, ENT_QUOTES, 'UTF-8')
+					'language_value' => html_entity_decode($lang_value, ENT_QUOTES, ABC::env('APP_CHARSET'))
 				)),
 				$autotranslate
 				);
@@ -136,7 +137,7 @@ class ModelLocalisationLanguageDefinitions extends Model {
 					'language_key' => $update_data['language_key']
 				),
 				array((int)$update_data['language_id'] => array(
-					'language_value' => html_entity_decode($lang_value, ENT_QUOTES, 'UTF-8')
+					'language_value' => html_entity_decode($lang_value, ENT_QUOTES, ABC::env('APP_CHARSET'))
 				)),
 				$autotranslate
 				);

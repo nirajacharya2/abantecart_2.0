@@ -1,4 +1,6 @@
-<div class="ui-jqgrid-wrapper" id="<?php echo $data['table_id'] ?>_wrapper">
+<div class="ui-jqgrid-wrapper" id="<?php use abc\ABC;
+
+echo $data['table_id'] ?>_wrapper">
 	<form class="form-inline" id="<?php echo $data['table_id'] ?>_form" action="<?php echo $data["editurl"] ?>" method="POST" role="form">
 		<table id="<?php echo $data['table_id'] ?>"></table>
 		<div id="<?php echo $data['table_id'] ?>_pager"></div>
@@ -258,7 +260,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 				$html_string .= "actions_urls['".$type."'] = '".$href."';\n";
 				$html_string .= ' actions += \'';
 				$has_children = sizeof($action['children']);
-				$html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_' . $type . '" title="' . htmlentities($action['text'],ENT_QUOTES,'UTF-8') . '" data-action-type="'.$type.'"';
+				$html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_' . $type . '" title="' . htmlentities($action['text'],ENT_QUOTES,ABC::env('APP_CHARSET')) . '" data-action-type="'.$type.'"';
 				if($has_children){
 					$html_btn .= ' data-toggle="dropdown" aria-expanded="false"';
 				}
@@ -317,7 +319,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 
 				//for dropdown
 				if($action['children']){
-					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,'UTF-8').'</h5><ul class="dropdown-list grid-dropdown">';
+					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,ABC::env('APP_CHARSET')).'</h5><ul class="dropdown-list grid-dropdown">';
 					foreach($action['children'] as $child){
 						$li_class = '';
 						$href = \abc\core\helper\AHelperUtils::has_value($child['href']) ? $child['href'] : '#';
@@ -327,7 +329,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 						} else {
 							$href = 'href="'.$href.'"';
 						}
-						$html_children .= '<li class="'.$li_class.'"><a '.$href.' rel="%ID%">'.htmlentities($child['text'],ENT_QUOTES,'UTF-8').'</a></li>';
+						$html_children .= '<li class="'.$li_class.'"><a '.$href.' rel="%ID%">'.htmlentities($child['text'],ENT_QUOTES,ABC::env('APP_CHARSET')).'</a></li>';
 					}
 					$html_children .= '</ul></div>';
 					$html_btn = '<div class="btn-group">'.$html_btn.''.$html_children.'</div>';

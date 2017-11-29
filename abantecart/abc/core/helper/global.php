@@ -4,6 +4,8 @@
  *
  */
 
+use abc\ABC;
+
 /**
  * @param string $url
  * @return bool
@@ -42,5 +44,5 @@ function abc_js_encode($text){
  * @param string $html
  */
 function abc_echo_html2view($html){
-	echo htmlspecialchars($html, ENT_QUOTES, 'UTF-8');
+	echo htmlspecialchars($html, ENT_QUOTES, ABC::env('APP_CHARSET'));
 }

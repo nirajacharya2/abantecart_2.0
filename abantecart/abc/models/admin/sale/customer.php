@@ -1015,7 +1015,7 @@ class ModelSaleCustomer extends Model {
 					$resource_info = $r->getResource($store_info['config_mail_logo']);
 					if ($resource_info) {
 						$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'],
-								ENT_QUOTES, 'UTF-8');
+								ENT_QUOTES, ABC::env('APP_CHARSET'));
 					}
 				} else {
 					$this->data['mail_template_data']['logo_uri'] = 'cid:'
@@ -1049,7 +1049,7 @@ class ModelSaleCustomer extends Model {
 			$mail->setFrom($this->config->get('store_main_email'));
 			$mail->setSender($store_info[ 'store_name' ]);
 			$mail->setSubject(sprintf($this->language->get('text_subject'), $store_info[ 'store_name' ]));
-			$mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, 'UTF-8'));
+			$mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET')));
 			$mail->setHtml($html_body);
 			if (is_file(ABC::env('DIR_RESOURCE') . $store_info['config_mail_logo'])) {
 				$mail->addAttachment(ABC::env('DIR_RESOURCE') . $store_info['config_mail_logo'],

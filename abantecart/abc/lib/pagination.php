@@ -157,5 +157,3 @@ final class APagination{
 		return ($limit_select ? '<div class="' . $this->style_limits . '">' . $limit_select . '</div>' : '') . ($stdout ? '<div class="' . $this->style_links . '">' . $stdout . '</div>' : '') . '<div class="' . $this->style_results . '">' . str_replace($find, $replace, $this->text) . '</div>';
 	}
 }
-
-?>

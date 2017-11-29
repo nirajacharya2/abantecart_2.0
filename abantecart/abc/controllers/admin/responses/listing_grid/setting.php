@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AConfigManager;
@@ -136,7 +137,7 @@ class ControllerResponsesListingGridSetting extends AController {
 
 				//html decode store name
 				if (AHelperUtils::has_value($data['store_name'])) {
-					$data['store_name'] = html_entity_decode($data['store_name'], ENT_COMPAT, 'UTF-8');
+					$data['store_name'] = html_entity_decode($data['store_name'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 				}
 
 				//when change base currency for default store also change values for all currencies in database before saving

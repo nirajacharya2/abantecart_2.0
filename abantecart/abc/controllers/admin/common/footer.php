@@ -32,7 +32,7 @@ class ControllerCommonFooter extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 		$this->loadLanguage('common/header');
 
-		$menu = new AMenu('admin','menu');
+		$menu = new AMenu('admin');
 		$documentation = $menu->getMenuItem('documentation');
 		$support = $menu->getMenuItem('support');
 		$mp = $menu->getMenuItem('marketplace');

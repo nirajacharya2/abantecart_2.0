@@ -125,7 +125,7 @@ class ControllerResponsesEmbedJS extends AController {
 			return null;
 		}
 		//deal with quotes in name
-		$product_info['name'] = htmlentities(html_entity_decode($product_info['name'],ENT_QUOTES,'UTF-8'),ENT_QUOTES,'UTF-8');
+		$product_info['name'] = htmlentities(html_entity_decode($product_info['name'],ENT_QUOTES,ABC::env('APP_CHARSET')),ENT_QUOTES,ABC::env('APP_CHARSET'));
 
 		$resource = new AResource('image');
 		$product_info['thumbnail'] =  $resource->getMainThumb(
@@ -275,7 +275,7 @@ class ControllerResponsesEmbedJS extends AController {
 
 		foreach($categories as &$category){
 			//deal with quotes
-			$category['name'] = htmlentities(html_entity_decode($category['name'],ENT_QUOTES,'UTF-8'),ENT_QUOTES,'UTF-8');
+			$category['name'] = htmlentities(html_entity_decode($category['name'],ENT_QUOTES,ABC::env('APP_CHARSET')),ENT_QUOTES,ABC::env('APP_CHARSET'));
 			$category['thumbnail'] =  $thumbnails[ $category['category_id'] ];
 			$rt = $this->config->get('config_embed_click_action')=='modal' ? 'r/product/category' : 'product/category';
 			$category['details_url'] = $this->html->getURL( $rt, '&category_id=' .$category['category_id']);
@@ -340,7 +340,7 @@ class ControllerResponsesEmbedJS extends AController {
 
 		foreach($manufacturers as &$manufacturer){
 			//deal with quotes
-			$manufacturer['name'] = htmlentities(html_entity_decode($manufacturer['name'],ENT_QUOTES,'UTF-8'),ENT_QUOTES,'UTF-8');
+			$manufacturer['name'] = htmlentities(html_entity_decode($manufacturer['name'],ENT_QUOTES,ABC::env('APP_CHARSET')),ENT_QUOTES,ABC::env('APP_CHARSET'));
 			$manufacturer['thumbnail'] = $thumbnails[$manufacturer['manufacturer_id']];
 			$rt = $this->config->get('config_embed_click_action')=='modal' ? 'r/product/manufacturer' : 'product/manufacturer';
 			$manufacturer['details_url'] = $this->html->getURL( $rt, '&manufacturer_id=' .$manufacturer['manufacturer_id']);

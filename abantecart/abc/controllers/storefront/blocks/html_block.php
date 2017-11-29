@@ -73,4 +73,3 @@ class ControllerBlocksHTMLBlock extends AController {
 		return $output;
 	}
 }
-?>

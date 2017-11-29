@@ -162,7 +162,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		$this->load->model('setting/store');
 		if (!$this->model_setting_store->isDefaultStore()){
-			$this->view->assign('warning_actonbehalf', htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, 'UTF-8'));
+			$this->view->assign('warning_actonbehalf', htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, ABC::env('APP_CHARSET')));
 		}
 
 		$grid_settings['colNames'] = array (
@@ -472,7 +472,7 @@ class ControllerPagesSaleCustomer extends AController{
 
 		$this->load->model('setting/store');
 		if (!$this->model_setting_store->isDefaultStore()){
-			$this->data['warning_actonbehalf'] = htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, 'UTF-8');
+			$this->data['warning_actonbehalf'] = htmlspecialchars($this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES, ABC::env('APP_CHARSET'));
 		}
 
 		$this->data['actas'] = $this->html->buildElement(array (

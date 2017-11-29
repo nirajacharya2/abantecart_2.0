@@ -56,4 +56,3 @@ class ModelToolMessageManager extends Model {
 		return $this->messages->getTotalMessages();
 	}
 }
-?>

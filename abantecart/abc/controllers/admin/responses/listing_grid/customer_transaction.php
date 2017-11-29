@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -147,9 +148,9 @@ class ControllerResponsesListingGridCustomerTransaction extends AController {
 		if(!$output['transaction_type']){
 			$this->error[] = $this->language->get('error_transaction_type');
 		}
-		$output['transaction_type'] = htmlentities($output['transaction_type'],ENT_QUOTES,'UTF-8');
-		$output['comment'] = htmlentities($data['comment'],ENT_QUOTES,'UTF-8');
-		$output['description'] = htmlentities($data['description'],ENT_QUOTES,'UTF-8');
+		$output['transaction_type'] = htmlentities($output['transaction_type'],ENT_QUOTES,ABC::env('APP_CHARSET'));
+		$output['comment'] = htmlentities($data['comment'],ENT_QUOTES,ABC::env('APP_CHARSET'));
+		$output['description'] = htmlentities($data['description'],ENT_QUOTES,ABC::env('APP_CHARSET'));
 		$output['notify'] = (int)$data['notify'] ? 1 : 0;
 		$this->data['output'] = $output;
 		$this->extensions->hk_ValidateData( $this );

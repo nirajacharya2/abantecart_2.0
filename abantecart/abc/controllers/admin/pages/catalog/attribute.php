@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -233,7 +234,7 @@ class ControllerPagesCatalogAttribute extends AController{
 				);
 				$attribute_info['values'] = array ();
 				foreach ($values as $v){
-					$attribute_info['values'][] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, 'UTF-8'));
+					$attribute_info['values'][] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, ABC::env('APP_CHARSET')));
 				}
 			}
 

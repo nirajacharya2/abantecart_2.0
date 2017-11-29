@@ -717,7 +717,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$this->request->post['add_code'] = true;
-		$this->request->post['resource_code'] = html_entity_decode($this->request->post['resource_code'], ENT_COMPAT, 'UTF-8');
+		$this->request->post['resource_code'] = html_entity_decode($this->request->post['resource_code'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 
 		$rm = new AResourceManager();
 		$rm->setType($this->request->get['type']);
@@ -1066,7 +1066,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 				));
 		}
 
-		$this->request->post['resource_code'] = html_entity_decode($this->request->post['resource_code'], ENT_COMPAT, 'UTF-8');
+		$this->request->post['resource_code'] = html_entity_decode($this->request->post['resource_code'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 
 		$post_data = $this->request->post;
 		$rm = new AResourceManager();

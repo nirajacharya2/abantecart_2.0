@@ -298,7 +298,7 @@ class ControllerResponsesListingGridExtension extends AController{
 			// if all fine show license agreement
 			if (file_exists(ABC::env('DIR_EXT') . $this->request->get['extension'] . "/license.txt")){
 				$this->data['license_text'] = file_get_contents(ABC::env('DIR_EXT') . $this->request->get['extension'] . "/license.txt");
-				$this->data['license_text'] = htmlentities($this->data['license_text'], ENT_QUOTES, 'UTF-8');
+				$this->data['license_text'] = htmlentities($this->data['license_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 				$this->data['license_text'] = nl2br($this->data['license_text']);
 			}
 		} else{

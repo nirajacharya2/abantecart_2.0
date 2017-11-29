@@ -41,13 +41,16 @@ class ABC extends ABCBase{
 		else{
 			if(is_array($name)){
 				self::$env = array_merge(self::$env,$name);
+				return true;
 			}else {
 				//when set one value
 				if (!array_key_exists($name, self::$env)) {
 					self::$env[$name] = $value;
+					return true;
 				}
 			}
 		}
+		return null;
 	}
 
 	public function run(){

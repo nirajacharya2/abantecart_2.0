@@ -91,7 +91,7 @@ strtoupper($this->language->get('text_file_tail')).ABC::env('DIR_LOGS')."
 			$log = '';
 		}
 
-		$log = htmlentities(str_replace(array('<br/>','<br />'),"\n",$log), ENT_QUOTES, 'UTF-8');
+		$log = htmlentities(str_replace(array('<br/>','<br />'),"\n",$log), ENT_QUOTES, ABC::env('APP_CHARSET'));
 		//filter empty string
 		$lines = array_filter( explode("\n", $log), 'strlen' );
 		unset($log);

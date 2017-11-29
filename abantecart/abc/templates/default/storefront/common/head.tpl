@@ -4,7 +4,7 @@
  */
 use abc\ABC; ?>
 <title><?php echo $title; ?></title>
-<meta charset="UTF-8">
+<meta charset="<?php echo ABC::env('APP_CHARSET')?>">
 <!--[if IE]>
 	<meta http-equiv="x-ua-compatible" content="IE=Edge" />
 <![endif]-->

@@ -757,14 +757,14 @@ class ControllerPagesToolPackageInstaller extends AController {
 			if(file_exists($license_filepath)){
 				$agreement_text = file_get_contents($license_filepath);
 				//detect encoding of file
-				$is_utf8 = mb_detect_encoding($agreement_text, 'UTF-8', true);
+				$is_utf8 = mb_detect_encoding($agreement_text, ABC::env('APP_CHARSET'), true);
 				if(!$is_utf8){
 					$agreement_text = 'Oops. Something goes wrong. Try to continue or check error log for details.';
 					$err = new AError('Incorrect character set encoding of file '.$license_filepath.' has been detected.');
 					$err->toLog();
 				}
 			}
-			$agreement_text = htmlentities($agreement_text, ENT_QUOTES, 'UTF-8');
+			$agreement_text = htmlentities($agreement_text, ENT_QUOTES, ABC::env('APP_CHARSET'));
 			$this->data['agreement_text'] = nl2br($agreement_text);
 
 			$template = 'pages/tool/package_installer_agreement.tpl';
@@ -829,7 +829,7 @@ class ControllerPagesToolPackageInstaller extends AController {
 				if ($result !== true) {
 					if (isset($result['license'])) {
 						$this->data['agreement_text'] = file_get_contents($temp_dirname . $package_dirname . "/code/extensions/" . $ext . "/license.txt");
-						$this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, 'UTF-8');
+						$this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 						$this->data['agreement_text'] = nl2br($this->data['agreement_text']);
 					} else {
 						$this->data['agreement_text'] = '<h2>Extension "' . $ext . '" will be upgrade from version ' . $result['upgrade'] . '</h2>';
@@ -862,7 +862,7 @@ class ControllerPagesToolPackageInstaller extends AController {
                 if(file_exists($release_notes)){
                     $this->data['agreement_text'] .= file_get_contents($release_notes);
                 }
-                $this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, 'UTF-8');
+                $this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
                 $this->data['agreement_text'] = nl2br($this->data['agreement_text']);
             }
 		}

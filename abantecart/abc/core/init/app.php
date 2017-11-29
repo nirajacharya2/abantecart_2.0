@@ -52,7 +52,7 @@ use abc\lib\AUser;
 use abc\lib\AWeight;
 use abc\lib\CSRFToken;
 
-mb_internal_encoding('UTF-8');
+mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
 // AbanteCart Version

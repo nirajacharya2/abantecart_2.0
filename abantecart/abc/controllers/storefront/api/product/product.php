@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
+use abc\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\APromotion;
 use abc\core\engine\AResource;
@@ -126,7 +127,7 @@ class ControllerApiProductProduct extends AControllerAPI {
 			$product_info['minimum'] = 1;
 		}
 
-		$product_info['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
+		$product_info['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 
 		$product_info['options'] = $this->model_catalog_product->getProductOptions($product_id);
 

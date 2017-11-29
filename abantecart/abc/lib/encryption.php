@@ -490,7 +490,7 @@ final class ADataEncryption{
 	 * Get postfix used to extend tables storing encrypted data
 	 * This is only for tables that require encryption
 	 * This is set in ENCRYPTED_POSTFIX configuration
-	 * @param none
+	 * @param string $table
 	 * @return string
 	 */
 	public function postfix($table){

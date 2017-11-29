@@ -167,7 +167,7 @@ class AFormManager{
 	}
 
 	private function _getLanguageIdByName($language_name = ''){
-		$language_name = mb_strtolower($language_name, 'UTF-8');
+		$language_name = mb_strtolower($language_name, ABC::env('APP_CHARSET'));
 		$query = "SELECT language_id
 				FROM " . $this->db->table("languages") . "
 				WHERE LOWER(name) = '" . $this->db->escape($language_name) . "'";

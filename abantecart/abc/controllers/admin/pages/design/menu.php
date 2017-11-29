@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
@@ -187,7 +188,7 @@ class ControllerPagesDesignMenu extends AController{
 				$post['item_text'][$l['language_id']] = $post['item_text'][$language_id];
 			}
 
-			$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, 'UTF-8');
+			$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			$text_id = AHelperUtils::preformatTextID($post['item_id']);
 			$result = $this->menu->insertMenuItem(array(
 					'item_id'         => $text_id,
@@ -231,7 +232,7 @@ class ControllerPagesDesignMenu extends AController{
 		if(($this->request->is_POST()) && $this->_validateForm($this->request->post)){
 			$post = $this->request->post;
 			if(isset ($post['item_icon'])){
-				$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, 'UTF-8');
+				$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			}
 
 			$item_keys = array(
@@ -464,7 +465,7 @@ class ControllerPagesDesignMenu extends AController{
 		$this->data['form']['fields']['item_icon'] = $form->getFieldHtml(array(
 				'type'          => 'resource',
 				'name'          => 'item_icon',
-				'resource_path' => htmlspecialchars($this->data['item_icon'], ENT_COMPAT, 'UTF-8'),
+				'resource_path' => htmlspecialchars($this->data['item_icon'], ENT_COMPAT, ABC::env('APP_CHARSET')),
 				'resource_id'   => $this->data['item_icon_rl_id'],
 				'rl_type'       => 'image'
 		));

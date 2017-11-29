@@ -179,7 +179,6 @@ abstract class AController{
 
 	/**
 	 * Function to enable caching for this page/block
-	 * @param none
 	 * @return true/false
 	 */
 	public function html_cache(){

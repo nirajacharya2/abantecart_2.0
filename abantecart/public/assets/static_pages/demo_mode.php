@@ -30,7 +30,7 @@ ABC::env('DIR_ROOT', $root_path);
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
-$dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,'UTF-8'));
+$dirname = strip_tags(html_entity_decode($dirname,ENT_QUOTES,ABC::env('APP_CHARSET')));
 ABC::env('HTTP_SERVER', 'http://' . $_SERVER['HTTP_HOST'] . $dirname);
 ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . trim($dirname,'static_pages'));
 
@@ -50,7 +50,7 @@ session_start();
 $message = 'This feature or page is not available in the demo mode. We apologize for this inconvenience. <br> You can install full version of AbanteCart and get it fully functional.';
 
 ?>
-<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php echo '<?xml version="1.0" encoding="'.ABC::env('APP_CHARSET').'"?>'; ?>
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />

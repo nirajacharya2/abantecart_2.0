@@ -20,6 +20,7 @@
 
 namespace abc\models\admin;
 
+use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
@@ -245,7 +246,7 @@ class ModelSaleCustomerTransaction extends Model{
 				$subject = sprintf($language->get('text_transaction_notification_subject'), $store_info['store_name']);
 
 				$url = html_entity_decode($store_info['config_url'] . 'index.php?rt=account/transactions', ENT_QUOTES,
-						'UTF-8');
+						ABC::env('APP_CHARSET'));
 
 				$amount = $this->currency->format($data['credit'] - $data['debit']);
 				$message = sprintf($language->get('text_transaction_notification_message'),
@@ -259,7 +260,7 @@ class ModelSaleCustomerTransaction extends Model{
 				$mail->setFrom($store_info['store_main_email']);
 				$mail->setSender($store_info['store_name']);
 				$mail->setSubject($subject);
-				$mail->setText(html_entity_decode($message, ENT_QUOTES, 'UTF-8'));
+				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
 				$mail->send();
 
 				//notify customer

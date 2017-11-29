@@ -875,7 +875,7 @@ class ModelAccountCustomer extends Model {
 				$r = new AResource('image');
 				$resource_info = $r->getResource($config_mail_logo);
 				if ($resource_info) {
-					$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'], ENT_QUOTES, 'UTF-8');
+					$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'], ENT_QUOTES, ABC::env('APP_CHARSET'));
 				}
 			} else {
 				$this->data['mail_template_data']['logo_uri'] = 'cid:'
@@ -950,7 +950,7 @@ class ModelAccountCustomer extends Model {
 				$resource_info = $r->getResource($config_mail_logo);
 				if ($resource_info) {
 					$this->data['mail_template_data']['logo_html'] = html_entity_decode($resource_info['resource_code'],
-							ENT_QUOTES, 'UTF-8');
+							ENT_QUOTES, ABC::env('APP_CHARSET'));
 				}
 			} else {
 				$this->data['mail_template_data']['logo_uri'] = 'cid:'
@@ -994,7 +994,7 @@ class ModelAccountCustomer extends Model {
 		$mail->setFrom($this->config->get('store_main_email'));
 		$mail->setSender($this->config->get('store_name'));
 		$mail->setSubject($data['subject']);
-		$mail->setText(html_entity_decode($data['txt_body'], ENT_QUOTES, 'UTF-8'));
+		$mail->setText(html_entity_decode($data['txt_body'], ENT_QUOTES, ABC::env('APP_CHARSET')));
 
 		if(is_file(ABC::env('DIR_RESOURCE') . $data['config_mail_logo'])) {
 			$mail->addAttachment(ABC::env('DIR_RESOURCE') . $data['config_mail_logo'],

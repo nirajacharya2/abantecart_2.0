@@ -50,4 +50,3 @@ class ControllerPagesErrorPermission extends AController {
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
   	}
 }
-?>

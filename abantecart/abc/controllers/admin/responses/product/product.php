@@ -580,7 +580,7 @@ class ControllerResponsesProductProduct extends AController{
 		//remove html-code from textarea product option
 		if (in_array($option_info['element_type'], array('T','B')) ){
 			foreach ($this->request->post['name'] as &$v){
-				$v = strip_tags(html_entity_decode($v, ENT_QUOTES, 'UTF-8'));
+				$v = strip_tags(html_entity_decode($v, ENT_QUOTES, ABC::env('APP_CHARSET')));
 				$v = str_replace('\r\n', "\n", $v);
 			}
 		}
@@ -623,7 +623,7 @@ class ControllerResponsesProductProduct extends AController{
 					$values = $this->attribute_manager->getAttributeValues($attribute['attribute_id'], $this->language->getContentLanguageID());
 
 					foreach ($values as $v){
-						$this->data['option_attribute']['group'][$option_id]['values'][$v['attribute_value_id']] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, 'UTF-8'));
+						$this->data['option_attribute']['group'][$option_id]['values'][$v['attribute_value_id']] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, ABC::env('APP_CHARSET')));
 					}
 				}
 			}
@@ -644,7 +644,7 @@ class ControllerResponsesProductProduct extends AController{
 				}
 
 				foreach ($values as $v){
-					$this->data['option_attribute']['values'][$v['attribute_value_id']] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, 'UTF-8'));
+					$this->data['option_attribute']['values'][$v['attribute_value_id']] = addslashes(html_entity_decode($v['value'], ENT_COMPAT, ABC::env('APP_CHARSET')));
 				}
 			}
 
@@ -1062,7 +1062,7 @@ class ControllerResponsesProductProduct extends AController{
 		$this->data['form']['fields']['general']['resource'] = $form->getFieldHtml($props[] = array (
 				'type'          => 'resource',
 				'name'          => 'filename',
-				'resource_path' => htmlspecialchars($file_data['filename'], ENT_COMPAT, 'UTF-8'),
+				'resource_path' => htmlspecialchars($file_data['filename'], ENT_COMPAT, ABC::env('APP_CHARSET')),
 				'rl_type'       => 'download'
 		));
 

@@ -847,7 +847,6 @@ class ModelToolImportProcess extends Model{
 
 	/**
 	 * Array wth configurations for import tables and fields
-	 * @param none
 	 * @return array()
 	 */
 	public function importTableCols() {
