@@ -1,0 +1,70 @@
+banner_id,language_id,name,description,meta,date_added,date_modified
+10,1,"Main Banner 3","&lt;div class=&quot;slide-item-caption-wrap right&quot;&gt;
+&lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+&lt;p class=&quot;product-cat&quot;&gt;On sale today&lt;/p&gt;
+
+&lt;h1 class=&quot;title&quot;&gt;Luxury Collection&lt;/h1&gt;
+
+&lt;h2 class=&quot;subtitle&quot;&gt;Free shipping on orders over $399&lt;/h2&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;img class=&quot;slide-item-banner&quot; src=&quot;extensions/simply_stylish/storefront/view/simply_stylish/images/banner_bg_3.jpg&quot; /&gt;",,"2015-08-24 03:11:13","2015-10-04 00:19:14"
+9,1,"Main Banner 2","&lt;div class=&quot;slide-item-caption-wrap right&quot;&gt;
+&lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+&lt;p class=&quot;product-cat&quot;&gt;On sale today&lt;/p&gt;
+
+&lt;h1 class=&quot;title&quot;&gt;New Trends&lt;/h1&gt;
+
+&lt;h2 class=&quot;subtitle&quot;&gt;For This Season&lt;/h2&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;img class=&quot;slide-item-banner&quot; src=&quot;extensions/simply_stylish/storefront/view/simply_stylish/images/banner_bg_2.jpg&quot; /&gt;",,"2015-08-24 03:11:13","2015-10-04 00:17:49"
+8,1,"Main Banner 1","&lt;div class=&quot;slide-item-caption-wrap right&quot;&gt;
+&lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+&lt;p class=&quot;product-cat&quot;&gt;On sale today&lt;/p&gt;
+
+&lt;h1 class=&quot;title&quot;&gt;$50 off&lt;/h1&gt;
+
+&lt;h2 class=&quot;subtitle&quot;&gt;on orders over $199&lt;/h2&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;img class=&quot;slide-item-banner&quot; src=&quot;extensions/simply_stylish/storefront/view/simply_stylish/images/banner_bg_1.jpg&quot; /&gt;",,"2015-08-24 03:11:13","2015-10-04 00:18:16"
+8,2,"Main Banner 1","&lt;div class=&quot;slide-item-caption-wrap&quot;&gt;
+    &lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+    	&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+    		&lt;p class=&quot;product-cat&quot;&gt;Sale day&lt;/p&gt;
+    		&lt;span class=&quot;divider bg-color3&quot;&gt;&lt;/span&gt;
+    		&lt;h1 class=&quot;title&quot;&gt;$50 off&lt;/h1&gt;
+    		&lt;h2 class=&quot;subtitle&quot;&gt;on orders over $199&lt;/h2&gt;
+    	&lt;/div&gt;	
+    &lt;/div&gt;
+&lt;/div&gt;	
+&lt;img alt=&quot;&quot; class=&quot;wp1_3 slide1_bot&quot; src=&quot;storefront/view/default/image/banner_image_1.png&quot; /&gt;",NULL,"0000-00-00 00:00:00","2015-10-01 16:48:56"
+9,2,"Main Banner 2","&lt;div class=&quot;slide-item-caption-wrap&quot;&gt;
+    &lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+    	&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+    		&lt;p class=&quot;product-cat&quot;&gt;Sale day&lt;/p&gt;
+    		&lt;span class=&quot;divider bg-color3&quot;&gt;&lt;/span&gt;
+    		&lt;h1 class=&quot;title&quot;&gt;All The Trends&lt;/h1&gt;
+    		&lt;h2 class=&quot;subtitle&quot;&gt;You Need This Season&lt;/h2&gt;
+    	&lt;/div&gt;	
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;img alt=&quot;&quot; class=&quot;wp1_3 wp1_left slide2_bot&quot; src=&quot;storefront/view/default/image/banner_image_2.png&quot; /&gt;",NULL,"0000-00-00 00:00:00","2015-10-01 16:52:17"
+10,2,"Main Banner 3","									&lt;div class=&quot;slide-item-caption-wrap&quot;&gt;
+										&lt;div class=&quot;slide-item-caption-cont&quot;&gt;
+											&lt;div class=&quot;slide-item-caption-info&quot;&gt;
+												&lt;p class=&quot;product-cat&quot;&gt;Sale day&lt;/p&gt;
+												&lt;span class=&quot;divider bg-color3&quot;&gt;&lt;/span&gt;
+												&lt;h1 class=&quot;title&quot;&gt;Luxury Collection&lt;/h1&gt;
+												&lt;h2 class=&quot;subtitle&quot;&gt;on orders over $399&lt;/h2&gt;
+											&lt;/div&gt;	
+										&lt;/div&gt;
+									&lt;/div&gt;
+									&lt;img alt=&quot;&quot; class=&quot;wp1_3 slide2_bot&quot; src=&quot;storefront/view/default/image/banner_image_3.png&quot; /&gt; ",NULL,"0000-00-00 00:00:00","2015-10-01 16:53:04"

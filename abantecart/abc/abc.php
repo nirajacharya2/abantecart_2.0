@@ -44,10 +44,11 @@ class ABC extends ABCBase{
 				return true;
 			}else {
 				//when set one value
-				if (!array_key_exists($name, self::$env)) {
+                ///TODO: is really needed readonly mode for env ???? Need to check in cli-install too
+				//if (!array_key_exists($name, self::$env)) {
 					self::$env[$name] = $value;
 					return true;
-				}
+				//}
 			}
 		}
 		return null;

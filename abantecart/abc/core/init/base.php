@@ -2,7 +2,7 @@
 use abc\ABC;
 
 $class_list = [
-		'core'.DIRECTORY_SEPARATOR.'engine'=> [
+		'core/engine'=> [
 					'router',
 					'page',
 					'response',
@@ -24,7 +24,7 @@ $class_list = [
 					'attribute',
 					'promotion',
 					'language'],
-		'core'.DIRECTORY_SEPARATOR.'helper' => [
+		'core/helper' => [
 					'global',
 					'helper',
 					'html',
