@@ -25,7 +25,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\lib\AConfigManager;
 
-if (!class_exists('ABC')) {
+if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
 }
 /**

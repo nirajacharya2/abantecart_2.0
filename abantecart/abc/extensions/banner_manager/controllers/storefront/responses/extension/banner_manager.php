@@ -17,7 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\controllers\admin;
+namespace abc\controllers\storefront;
 use abc\ABC;
 use abc\core\engine\AController;
 use abc\lib\AJson;
