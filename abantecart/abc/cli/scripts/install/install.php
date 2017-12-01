@@ -254,6 +254,9 @@ class Install implements AbcDo
         if(!isset($options['public_dir']) || !$options['public_dir']){
             $options['public_dir'] = ABC::env('DIR_PUBLIC');
         }
+        if(!isset($options['cache_driver']) || !$options['cache_driver']){
+            $options['cache_driver'] = 'file';
+        }
 
         //server name needs to be set for emails
         $server_name = getenv("SERVER_NAME");
@@ -271,23 +274,25 @@ class Install implements AbcDo
         $content = <<<EOD
 <?php
 return [
-    'APP_NAME' => 'AbanteCart',
-    'MIN_PHP_VERSION' => '7.0',
-    'DIR_ROOT' => '{$options['root_dir']}',
-    'DIR_APP' => '{$options['app_dir']}',
-    'DIR_PUBLIC' => '{$options['public_dir']}',
-    'SERVER_NAME' => '{$server_name}',
-    'ADMIN_PATH' => '{$options['admin_path']}',
-    'UNIQUE_ID' => '{$unique_id}',
-    // SEO URL Keyword separator
-    'SEO_URL_SEPARATOR' => '-',
-    // EMAIL REGEXP PATTERN
-    'EMAIL_REGEX_PATTERN' => '/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
-    //postfixes for template override
-    'POSTFIX_OVERRIDE' => '.override',
-    'POSTFIX_PRE' => '.pre',
-    'POSTFIX_POST' => '.post',
-    'APP_CHARSET' => 'UTF-8'
+    'default' => [
+        'APP_NAME' => 'AbanteCart',
+        'MIN_PHP_VERSION' => '7.0',
+        'DIR_ROOT' => '{$options['root_dir']}',
+        'DIR_APP' => '{$options['app_dir']}',
+        'DIR_PUBLIC' => '{$options['public_dir']}',
+        'SERVER_NAME' => '{$server_name}',
+        'ADMIN_PATH' => '{$options['admin_path']}',
+        'UNIQUE_ID' => '{$unique_id}',
+        // SEO URL Keyword separator
+        'SEO_URL_SEPARATOR' => '-',
+        // EMAIL REGEXP PATTERN
+        'EMAIL_REGEX_PATTERN' => '/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
+        //postfixes for template override
+        'POSTFIX_OVERRIDE' => '.override',
+        'POSTFIX_PRE' => '.pre',
+        'POSTFIX_POST' => '.post',
+        'APP_CHARSET' => 'UTF-8'
+    ]
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG') . 'app.php', 'w');
@@ -301,14 +306,16 @@ EOD;
 <?php
 // Database Configuration
 return [
-'DB_DRIVER' => '{$options['db_driver']}',
-'DB_HOSTNAME' => '{$options['db_host']}',
-'DB_USERNAME' => '{$options['db_user']}',
-'DB_PASSWORD' => '{$options['db_password']}',
-'DB_DATABASE' => '{$options['db_name']}',
-'DB_PREFIX' => '{$options['db_prefix']}',
-'DB_CHARSET' => 'utf8',
-'DB_COLLATION' => 'utf8_unicode_ci'
+    'default' => [
+        'DB_DRIVER' => '{$options['db_driver']}',
+        'DB_HOSTNAME' => '{$options['db_host']}',
+        'DB_USERNAME' => '{$options['db_user']}',
+        'DB_PASSWORD' => '{$options['db_password']}',
+        'DB_DATABASE' => '{$options['db_name']}',
+        'DB_PREFIX' => '{$options['db_prefix']}',
+        'DB_CHARSET' => 'utf8',
+        'DB_COLLATION' => 'utf8_unicode_ci'
+        ]
 ];
 EOD;
     $file = fopen(ABC::env('DIR_CONFIG') . 'database.php', 'w');
@@ -321,7 +328,9 @@ EOD;
     $content = <<<EOD
 <?php
 return [
-    'CACHE_DRIVER' => '{$options['cache_driver']}'
+    'default' => [
+        'CACHE_DRIVER' => '{$options['cache_driver']}'
+    ]
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG') . 'cache.php', 'w');
