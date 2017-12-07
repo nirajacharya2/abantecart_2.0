@@ -276,30 +276,120 @@ class AHelperUtils extends AHelper{
     {
        $from = explode('/', $from);
        $to = explode('/', $to);
-       foreach($from as $depth => $dir)
-       {
-
-            if(isset($to[$depth]))
-            {
-                if($dir === $to[$depth])
-                {
-                   unset($to[$depth]);
-                   unset($from[$depth]);
-                }
-                else
-                {
+       foreach($from as $depth => $dir){
+            if(isset($to[$depth])){
+                if($dir === $to[$depth]){
+                   unset($to[$depth], $from[$depth]);
+                }else{
                    break;
                 }
             }
         }
-        //$rawresult = implode('/', $to);
-        for($i=0;$i<count($from)-1;$i++)
-        {
-            //array_unshift($to,'..');
-        }
         $result = implode('/', $to);
         return $result;
     }
+
+    /**
+     * @param $rel_file - relative file path
+     * @param $src_dir - source directory path
+     * @param $dest_dir - destination directory path
+     *
+     * @return array
+     */
+    static function CopyFileRelative($rel_file, $src_dir, $dest_dir)
+    {
+        $src_file = $src_dir.$rel_file;
+        $dest_file = $dest_dir.$rel_file;
+        if(!is_file($src_file)){
+            return [
+                'result' => false,
+                'message'=> 'Error: source file '.$src_file.' not found during copying'
+            ];
+        }
+        $output = [ 'result' => true ];
+
+        //create nested dirs
+
+        $file_dir = dirname($dest_file);
+        if($file_dir!== ''){
+            $output = self::MakeNestedDirs($file_dir);
+        }
+        //copy file
+        if( $output['result'] ){
+            $error = '';
+            $result = copy($src_file,$dest_file);
+            if(!$result){
+                $error = 'Error: source file '.$src_file.' copying error.';
+            }
+            return [
+                    'result' => $output,
+                    'message'=> $error
+            ];
+        }
+        return [
+            'result' => $output['result'],
+            'message'=> $output['message']
+        ];
+    }
+
+    /**
+     * @param string $dir_full_path
+     * @param int    $perms
+     *
+     * @return array
+     */
+    static function MakeNestedDirs($dir_full_path, $perms = 0755)
+    {
+        $dirs = explode('/', $dir_full_path);
+        $dir='';
+        $output = ['result' => true ];
+        foreach ($dirs as $part) {
+            $dir .= $part.'/';
+            if ( !is_dir($dir) && strlen($dir) ) {
+                $result = mkdir($dir, $perms);
+                if ( ! $result) {
+                    return [
+                        'result'  => false,
+                        'message' => 'Cannot to create directory '.$dir
+                    ];
+                }
+            }
+        }
+        return $output;
+    }
+
+    static function RemoveDirRecursively($dir = ''){
+        //block calls from storefront
+        if(!ABC::env('IS_ADMIN') || $dir == '../' || $dir == '/' || $dir == './' ){
+            return false;
+        }
+
+        if (is_dir($dir)){
+            $objects = scandir($dir);
+            foreach ($objects as $obj){
+                if ($obj != "." && $obj != ".."){
+                    @chmod($dir . "/" . $obj, 0777);
+                    $err = is_dir($dir . "/" . $obj) ? self::RemoveDirRecursively($dir . "/" . $obj) : unlink($dir . "/" . $obj);
+                    if (!$err){
+                        $error_text = "Error: Can't to delete file or directory: '" . $dir . "/" . $obj . "'.";
+                        return [
+                                'result' => false,
+                                'message' => $error_text
+                        ];
+                    }
+                }
+            }
+            reset($objects);
+            $result = rmdir($dir);
+            return ['result' => $result ];
+        } else {
+            return [
+                    'result' => false,
+                    'message' => 'Error: '.__FUNCTION__.': Cannot remove '.$dir.'. It is not directory!'
+            ];
+        }
+    }
+
 
 	/**
 	 * Custom function for version compare between store version and extensions
@@ -852,7 +942,7 @@ class AHelperUtils extends AHelper{
 					self::gzip($tar, $compress_level);
 					unlink($tar);
 				}
-			} catch (PharException $e){
+			} catch (\PharException $e){
 				$error = new AError('Tar GZ compressing error: ' . $e->getMessage());
 				$error->toLog()->toDebug();
 				$exit_code = 1;

@@ -278,8 +278,8 @@ class AssetPublisherCopy{
         if ( ! $file_list || ! is_array($file_list)) {
             return false;
         }
-        $src_dir = ABC::env('DIR_VENDOR').'assets/';
-        $dest_dir = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_VENDOR');
+        $src_dir = ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR;
+        $dest_dir = ABC::env('DIR_PUBLIC').'vendor'.DIRECTORY_SEPARATOR;
         return $this->_process_template_assets($file_list,$src_dir,$dest_dir);
     }
 
@@ -290,25 +290,23 @@ class AssetPublisherCopy{
         foreach ($file_list as $template => $list) {
             //remove previous temp-folders before copying
             $live_dir = $dest_dir.$template;
-            $new_temp_dir = $dest_dir.$template.'_new';
-            $old_temp_dir = $dest_dir.$template.'_trash';
-            $temp_dirs = [$new_temp_dir, $old_temp_dir];
-            foreach ($temp_dirs as $temp_dir) {
-                if (is_dir($temp_dir)) {
-                    $this->_remove_dir($temp_dir);
-                    //if cannot to remove files - return false
-                    if ($this->errors) {
-                        return false;
-                    }
-                }
-            }
+            //unique temporary directory name
+            $uid_new = uniqid('apn_');
+            //unique old directory name
+            $uid_old = uniqid('apo_');
+            //use abc/system/temp directory during copying
+            $new_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DIRECTORY_SEPARATOR.$uid_new;
+            $old_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DIRECTORY_SEPARATOR.$uid_old;
 
             //then copy all asset files of template to temporary directory
             foreach ($list as $rel_file) {
-                $this->_copy_asset_file(
+                $res = AHelperUtils::CopyFileRelative(
                     $rel_file,
                     $src_dir.$template.DIRECTORY_SEPARATOR,
                     $new_temp_dir.DIRECTORY_SEPARATOR);
+                if(!$res['result']){
+                    $this->errors[] = $res['message'];
+                }
             }
 
             //if all fine - do renaming of temporary directory
@@ -327,8 +325,8 @@ class AssetPublisherCopy{
                         rename($old_temp_dir, $live_dir);
                         return false;
                     }else{
-                        //if all fine - clean old
-                        $this->_remove_dir($old_temp_dir);
+                        //if all fine - clean old silently
+                        AHelperUtils::RemoveDirRecursively($old_temp_dir);
                     }
                     //if all fine - remove old live directory
                 } else {
@@ -338,131 +336,5 @@ class AssetPublisherCopy{
             }
         } //end foreach
         return true;
-    }
-/*
-    protected function _process_vendor_assets($file_list, $src_dir, $dest_dir){
-        if ( !$file_list || ! is_array($file_list)) {
-            return false;
-        }
-        foreach ($file_list as $template => $list) {
-            //remove previous temp-folders before copying
-            $live_dir = $dest_dir.$template;
-            $new_temp_dir = $dest_dir.$template.'_new';
-            $old_temp_dir = $dest_dir.$template.'_trash';
-            $temp_dirs = [$new_temp_dir, $old_temp_dir];
-            foreach ($temp_dirs as $temp_dir) {
-                if (is_dir($temp_dir)) {
-                    $this->_remove_dir($temp_dir);
-                    //if cannot to remove files - return false
-                    if ($this->errors) {
-                        return false;
-                    }
-                }
-            }
-
-            //then copy all asset files of template to temporary directory
-            foreach ($list as $rel_file) {
-                $this->_copy_asset_file(
-                    $rel_file,
-                    $src_dir.$template.DIRECTORY_SEPARATOR,
-                    $new_temp_dir.DIRECTORY_SEPARATOR);
-            }
-
-            //if all fine - do renaming of temporary directory
-            if ( ! $this->errors) {
-                //if live assets presents - rename it
-                if(is_dir($live_dir)){
-                    $result = rename($live_dir, $old_temp_dir);
-                }else{
-                    $result = true;
-                }
-
-                if ($result) {
-                    if (!rename($new_temp_dir, $live_dir)) {
-                        $this->errors[] = 'Cannot to rename directory ' .$new_temp_dir.' to '.$template;
-                        //revert old assets
-                        rename($old_temp_dir, $live_dir);
-                        return false;
-                    }else{
-                        //if all fine - clean old
-                        $this->_remove_dir($old_temp_dir);
-                    }
-                    //if all fine - remove old live directory
-                } else {
-                    $this->errors[] = 'Cannot to rename directory ' .$live_dir.' to '.$template.'_trash';
-                    return false;
-                }
-            }
-        } //end foreach
-        return true;
-    }
-*/
-    protected function _copy_asset_file($rel_file, $src_dir, $dest_dir)
-    {
-        $src_file = $src_dir.$rel_file;
-        $dest_file = $dest_dir.$rel_file;
-        if(!is_file($src_file)){
-            $this->errors[] = 'Error: asset file '.$src_file.' not found during copying';
-            return false;
-        }
-        $result = true;
-
-        //create nested dirs
-        $file_dir = dirname($dest_file);
-        if($file_dir!== ''){
-            $result = $this->_make_dir_recursive($file_dir);
-        }
-        //copy file
-        if( $result ){
-            $result = copy($src_file,$dest_file);
-            if(!$result){
-                $this->errors[] = 'Error: asset file '.$src_file.' copying error.';
-            }
-            return $result;
-        }
-        return false;
-    }
-
-    protected function _make_dir_recursive($full_dir_name, $perms = 0755)
-    {
-        $dirs = explode('/', $full_dir_name);
-        $dir='';
-        $result = true;
-        foreach ($dirs as $part) {
-            $dir .= $part.'/';
-            if ( !is_dir($dir) && strlen($dir) )
-                $result = mkdir($dir, $perms);
-                if(!$result){
-                    $this->errors[] = 'Cannot to create directory '.$dir;
-                    return false;
-                }
-        }
-        return $result;
-    }
-
-    protected function _remove_dir($dir = ''){
-        if($dir == '../' || $dir == '/' || $dir == './' ){
-            return false;
-        }
-
-        if (is_dir($dir)){
-            $objects = scandir($dir);
-            foreach ($objects as $obj){
-                if ($obj != "." && $obj != ".."){
-                    @chmod($dir . "/" . $obj, 0777);
-                    $err = is_dir($dir . "/" . $obj) ? $this->_remove_dir($dir . "/" . $obj) : unlink($dir . "/" . $obj);
-                    if (!$err){
-                        $error_text = "Error: Can't to delete file or directory: '" . $dir . "/" . $obj . "'.";
-                        $this->errors[] = $error_text;
-                        return false;
-                    }
-                }
-            }
-            reset($objects);
-            $result = rmdir($dir);
-            return $result;
-        } else {
-            return $dir;
-        }
     }
 }
