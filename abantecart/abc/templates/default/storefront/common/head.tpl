@@ -21,14 +21,14 @@ use abc\ABC; ?>
 <base href="<?php echo $base; ?>" />
 
 <?php if ( is_file( ABC::env('DIR_RESOURCE') . $icon ) ) {  ?>
-<link href="assets/resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
+<link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
-<link href="<?php echo $this->templateResource('images/apple-touch-icon.png');?>" rel="apple-touch-icon" />
-<link href="<?php echo $this->templateResource('images/apple-touch-icon-76x76.png');?>" rel="apple-touch-icon" sizes="76x76" />
-<link href="<?php echo $this->templateResource('images/apple-touch-icon-120x120.png');?>" rel="apple-touch-icon" sizes="120x120" />
-<link href="<?php echo $this->templateResource('images/apple-touch-icon-152x152.png');?>" rel="apple-touch-icon" sizes="152x152" />
-<link href="<?php echo $this->templateResource('images/icon-192x192.png');?>" rel="apple-touch-icon" sizes="192x192" />
+<link href="<?php echo $this->templateResource('assets/images/apple-touch-icon.png');?>" rel="apple-touch-icon" />
+<link href="<?php echo $this->templateResource('assets/images/apple-touch-icon-76x76.png');?>" rel="apple-touch-icon" sizes="76x76" />
+<link href="<?php echo $this->templateResource('assets/images/apple-touch-icon-120x120.png');?>" rel="apple-touch-icon" sizes="120x120" />
+<link href="<?php echo $this->templateResource('assets/images/apple-touch-icon-152x152.png');?>" rel="apple-touch-icon" sizes="152x152" />
+<link href="<?php echo $this->templateResource('assets/images/icon-192x192.png');?>" rel="apple-touch-icon" sizes="192x192" />
 
 <?php foreach ($links as $link) { ?>
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>" />
@@ -48,17 +48,17 @@ $faster_browser_rendering = false;
 
 if($faster_browser_rendering == true) {
 ?>
-	<style><?php echo $this->LoadMinifyCSS('css/bootstrap.min.css'); ?></style>
-	<style><?php echo $this->LoadMinifyCSS('css/flexslider.css'); ?></style>
-	<style><?php echo $this->LoadMinifyCSS('css/onebyone.css'); ?></style>
-	<style><?php echo $this->LoadMinifyCSS('css/font-awesome.min.css'); ?></style>
-	<style><?php echo $this->LoadMinifyCSS('css/style.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/bootstrap.min.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/flexslider.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/onebyone.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/font-awesome.min.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/style.css'); ?></style>
 <?php } else { ?>
-	<link href="<?php echo $this->templateResource('css/bootstrap.min.css'); ?>" rel="stylesheet" type='text/css' />
-	<link href="<?php echo $this->templateResource('css/flexslider.css'); ?>" rel="stylesheet" type='text/css' />
-	<link href="<?php echo $this->templateResource('css/onebyone.css'); ?>" rel="stylesheet" type='text/css' />
-	<link href="<?php echo $this->templateResource('css/font-awesome.min.css'); ?>" rel="stylesheet" type='text/css' />
-	<link href="<?php echo $this->templateResource('css/style.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/bootstrap.min.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/flexslider.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/onebyone.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/font-awesome.min.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/style.css'); ?>" rel="stylesheet" type='text/css' />
 <?php } ?>
 
 <?php 
@@ -74,7 +74,7 @@ a[href]:after {
 </style>
 
 <?php if ( $template_debug_mode ) {  ?>
-<link href="<?php echo $this->templateResource('css/template_debug.css'); ?>" rel="stylesheet" />
+<link href="<?php echo $this->templateResource('assets/css/template_debug.css'); ?>" rel="stylesheet" />
 <?php } ?>
 
 <?php foreach ($styles as $style) { ?>
@@ -84,11 +84,11 @@ a[href]:after {
 <?php 
 if($faster_browser_rendering == true) {
 ?>
-	<script type="text/javascript"><?php echo $this->PreloadJS('js/jquery-1.11.0.min.js'); ?></script>
-	<script type="text/javascript"><?php echo $this->PreloadJS('js/jquery-migrate-1.2.1.min.js'); ?></script>
+	<script type="text/javascript"><?php echo $this->PreloadJS('assets/js/jquery-1.11.0.min.js'); ?></script>
+	<script type="text/javascript"><?php echo $this->PreloadJS('assets/js/jquery-migrate-1.2.1.min.js'); ?></script>
 <?php } else { ?>
-	<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery-1.11.0.min.js'); ?>"></script>
-	<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery-migrate-1.2.1.min.js');?>"></script>
+	<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery-1.11.0.min.js'); ?>"></script>
+	<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery-migrate-1.2.1.min.js');?>"></script>
 <?php } ?>
 
 <?php foreach ($scripts as $script) { ?>

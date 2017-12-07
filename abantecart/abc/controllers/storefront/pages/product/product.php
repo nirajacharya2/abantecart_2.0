@@ -29,7 +29,7 @@ use abc\core\engine\Registry;
 use abc\lib\AMessage;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * Class ControllerPagesProductProduct

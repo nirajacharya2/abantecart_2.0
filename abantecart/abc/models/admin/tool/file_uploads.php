@@ -23,7 +23,7 @@ use abc\core\engine\Model;
 use abc\lib\ADataset;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**

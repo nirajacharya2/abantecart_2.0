@@ -19,7 +19,8 @@ $lib_list = array(
 					'backup',
 					'file_uploads_manager',
 					'admin_commands',
-					'im_manager'
+					'im_manager',
+                    'asset_publisher'
 );
 //load admin libraries
 $dir_lib = ABC::env('DIR_LIB');
@@ -36,16 +37,16 @@ ABC::env('AUTO_SERVER', '//' . ABC::env('REAL_HOST') . ABC::env('HTTP_DIR_NAME')
 ABC::env('HTTP_SERVER', 'http:' . ABC::env('AUTO_SERVER'));
 ABC::env('HTTP_CATALOG', ABC::env('HTTP_SERVER'));
 ABC::env('HTTP_EXT', ABC::env('HTTP_SERVER') . 'extensions/');
-ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER') . 'assets/images/');
-ABC::env('HTTP_DIR_RESOURCE', ABC::env('HTTP_SERVER') . 'assets/resources/');
+ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER') . 'images/');
+ABC::env('HTTP_DIR_RESOURCE', ABC::env('HTTP_SERVER') . 'resources/');
 //we use Protocol-relative URLs here
-ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER') . 'assets/images/');
-ABC::env('HTTPS_DIR_RESOURCE', ABC::env('AUTO_SERVER') . 'assets/resources/');
+ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER') . 'images/');
+ABC::env('HTTPS_DIR_RESOURCE', ABC::env('AUTO_SERVER') . 'resources/');
 //Admin HTTPS
 if ( ABC::env('HTTPS') ) {
 	ABC::env('HTTPS_SERVER', 'https:' . ABC::env('AUTO_SERVER'));
 	ABC::env('HTTPS_CATALOG', ABC::env('HTTPS_SERVER'));
-	ABC::env('HTTPS_EXT', ABC::env('HTTPS_SERVER') . 'assets/extensions/');
+	ABC::env('HTTPS_EXT', ABC::env('HTTPS_SERVER') . 'extensions/');
 } else {
 	ABC::env('HTTPS_SERVER', ABC::env('HTTP_SERVER'));
 	ABC::env('HTTPS_CATALOG', ABC::env('HTTP_CATALOG'));
@@ -64,5 +65,5 @@ if (AHelperUtils::has_value($request->get['store_id']) || AHelperUtils::has_valu
 
 // Admin template load
 // Relative paths and directories
-ABC::env('RDIR_ASSETS',  'assets/templates/default/admin/');
+ABC::env('RDIR_ASSETS',  'templates/default/admin/');
 ABC::env('RDIR_TEMPLATE',  'templates/default/admin/');

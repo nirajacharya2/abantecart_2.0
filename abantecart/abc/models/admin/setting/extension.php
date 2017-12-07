@@ -22,7 +22,7 @@ use abc\ABC;
 use abc\core\engine\Model;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelSettingExtension extends Model {
 	/*
@@ -45,7 +45,7 @@ class ModelSettingExtension extends Model {
 		$output = array();
 		$output[] = array('' => '');
 		foreach($query->rows as $row){
-			if(file_exists(ABC::env('DIR_APP_EXT').$row['key'].ABC::env('DIRNAME_CORE').'lib/handler.php')){
+			if(file_exists(ABC::env('DIR_APP_EXTENSIONS').$row['key'].ABC::env('DIRNAME_CORE').'lib/handler.php')){
 				$output[] = $row;
 			}
 		}

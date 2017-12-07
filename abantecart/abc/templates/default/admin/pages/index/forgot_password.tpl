@@ -11,7 +11,7 @@
   
     <div class="lockedpanel">
         <div class="loginuser">
-            <img src="<?php echo $this->templateResource('images/login.png');?>" alt="<?php echo $text_login; ?>" />
+            <img src="<?php echo $this->templateResource('assets/images/login.png');?>" alt="<?php echo $text_login; ?>" />
         </div>
         <div class="logged">
             <h4><?php echo $text_heading; ?></h4>

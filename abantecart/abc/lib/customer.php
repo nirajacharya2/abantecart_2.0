@@ -23,7 +23,7 @@ use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**

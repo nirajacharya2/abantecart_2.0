@@ -27,7 +27,7 @@ use abc\lib\AJson;
 use abc\lib\ATaskManager;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**

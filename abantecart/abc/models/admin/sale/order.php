@@ -30,7 +30,7 @@ use abc\lib\AEncryption;
 use abc\lib\AMail;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**

@@ -26,7 +26,7 @@ use abc\lib\AContentManager;
 use abc\lib\AMenu_Storefront;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesDesignMenu extends AController{

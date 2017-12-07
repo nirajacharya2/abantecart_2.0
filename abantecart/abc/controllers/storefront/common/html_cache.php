@@ -21,7 +21,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonHTMLCache extends AController {
     public function main() {

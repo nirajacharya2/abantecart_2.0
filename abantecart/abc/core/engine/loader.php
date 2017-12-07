@@ -25,7 +25,7 @@ use abc\lib\AException;
 use abc\lib\AWarning;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -60,10 +60,26 @@ final class ALoader{
 	 * @throws AException
 	 */
 	public function library($library){
-		$file = ABC::env('DIR_LIB') . $library . '.php';
+		//try to find in core libs
+	    $file = ABC::env('DIR_LIB') . $library . '.php';
+		if ( !file_exists($file) ) {
+            $file = '';
+        }
 
-		if (file_exists($file)) {
-			/** @noinspection PhpIncludeInspection */
+        //looking for library inside extensions.
+        //Note: library must be defined in main.php file inside $libraries array!
+        if( !$file ){
+		    $extensions = $this->extensions->getDbExtensions();
+            $libs = $this->extensions->getExtensionLibraries();
+            foreach($extensions as $extension_text_id){
+                if( isset( $libs[ $extension_text_id ] ) && in_array($library,$libs[ $extension_text_id ]) ){
+                    $file = ABC::env('DIR_EXTENSIONS') . $extension_text_id . '/lib/' . $library . '.php';
+                    break;
+                }
+            }
+        }
+
+        if($file){
 			include_once($file);
 		} else {
 			throw new AException(AC_ERR_LOAD, 'Error: Could not load library ' . $library . '!');

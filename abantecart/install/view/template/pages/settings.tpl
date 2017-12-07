@@ -1,8 +1,8 @@
 <?php
 use abc\ABC;
 
-$img_good = '<img src="' . $this->templateResource('images/good.png').'" alt="Good" />';
-$img_bad = '<img src="' . $this->templateResource('images/bad.png').'" alt="Bad" />';
+$img_good = '<img src="' . $this->templateResource('assets/images/good.png').'" alt="Good" />';
+$img_bad = '<img src="' . $this->templateResource('assets/images/bad.png').'" alt="Bad" />';
 echo $header;
 ?>
 	<div class="row">

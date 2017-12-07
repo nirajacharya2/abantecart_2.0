@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 include_once('core/custom_block_hook.php');
 $controllers = array(

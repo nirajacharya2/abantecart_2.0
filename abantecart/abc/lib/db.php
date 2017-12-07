@@ -23,7 +23,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ADB{
 	/**

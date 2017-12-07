@@ -33,7 +33,7 @@ use PharData;
 use PharException;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -202,7 +202,8 @@ class AHelperUtils extends AHelper{
 		$object_id = (int)$object_id;
 		$registry = Registry::getInstance();
 		$db = $registry->get('db');
-		$sql = "SELECT `keyword`
+		$sql =
+            "SELECT `keyword`
 			FROM " . $db->table('url_aliases') . "
 			WHERE `keyword` like '" . $db->escape($seo_key) . "%'";
 		if ($object_id) {
@@ -264,6 +265,41 @@ class AHelperUtils extends AHelper{
 		}
 		return $result;
 	}
+
+    /**
+     * @param $from
+     * @param $to
+     *
+     * @return string
+     */
+    static function getRelativePath($from, $to)
+    {
+       $from = explode('/', $from);
+       $to = explode('/', $to);
+       foreach($from as $depth => $dir)
+       {
+
+            if(isset($to[$depth]))
+            {
+                if($dir === $to[$depth])
+                {
+                   unset($to[$depth]);
+                   unset($from[$depth]);
+                }
+                else
+                {
+                   break;
+                }
+            }
+        }
+        //$rawresult = implode('/', $to);
+        for($i=0;$i<count($from)-1;$i++)
+        {
+            //array_unshift($to,'..');
+        }
+        $result = implode('/', $to);
+        return $result;
+    }
 
 	/**
 	 * Custom function for version compare between store version and extensions
@@ -536,7 +572,7 @@ class AHelperUtils extends AHelper{
 		}
 
 		$extension_txt_id = str_replace('../', '', $extension_txt_id);
-		$filename = ABC::env('DIR_APP_EXT') . $extension_txt_id . '/config.xml';
+		$filename = ABC::env('DIR_APP_EXTENSIONS') . $extension_txt_id . '/config.xml';
 		/**
 		 * @var $ext_configs \SimpleXMLElement|false
 		 */

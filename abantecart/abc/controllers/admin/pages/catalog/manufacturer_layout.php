@@ -25,7 +25,7 @@ use abc\core\helper\AHelperUtils;
 use abc\lib\ALayoutManager;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesCatalogManufacturerLayout extends AController {
 	public $data = array();

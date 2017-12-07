@@ -25,7 +25,7 @@ use abc\lib\AError;
 use abc\lib\AWarning;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -378,11 +378,15 @@ class AView{
 				$output = $res_arr['default'][0];
 			} else {
 				//no extension found, use resource from core templates
-				$output = $this->_get_template_resource_path(
-													ABC::env('DIR_TEMPLATES'),
+
+               $mode2 = $mode == 'file' ? '' : 'relative';
+               $src_path = !$mode2 ? ABC::env('DIR_TEMPLATES') : ABC::env('DIR_PUBLIC').'templates/';
+               $output = $this->_get_template_resource_path(
+                                                    $src_path,
 													$filename,
-													$mode == 'file' ? '' : 'relative'
+													$mode2
 				);
+
 			}
 		}
 
@@ -540,7 +544,7 @@ class AView{
 	 * @return string
 	 */
 	protected function _extension_section_dir($extension_name){
-		return ABC::env('DIR_APP_EXT') . $extension_name . '/';
+		return ABC::env('DIR_APP_EXTENSIONS') . $extension_name . DIRECTORY_SEPARATOR;
 	}
 
 	/**
@@ -557,8 +561,16 @@ class AView{
 		$extensions = $this->extensions->getEnabledExtensions();
 		//loop through each extension and locate resource to use 
 		//Note: first extension with exact resource or default resource will be used
+        $test_resource_mode = $mode != 'file' ? 'relative' : $mode;
 		foreach ($extensions as $ext) {
-			$res_arr = $this->_test_template_resource_paths($this->_extension_templates_dir($ext), $filename, ($mode != 'file' ? 'relative' : $mode), $ext);
+		    if($test_resource_mode == 'relative'){
+                $source_dir = ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_EXTENSIONS') . $ext . DIRECTORY_SEPARATOR.ABC::env('DIRNAME_TEMPLATES');
+            }else{
+		        $source_dir = $this->_extension_templates_dir($ext);
+            }
+
+			$res_arr = $this->_test_template_resource_paths($source_dir, $filename, $test_resource_mode, $ext);
+
 			if ($res_arr) {
 				$output[$res_arr['match']][] = $res_arr['path'];
 			}
@@ -601,57 +613,76 @@ class AView{
 		$ret_path = '';
 		$template = $this->default_template;
 		$match = 'original';
-		$dir_assets = $extension_txt_id ? ABC::env('DIRNAME_ASSETS') . ABC::env('DIRNAME_EXTENSIONS') . $extension_txt_id . '/' : ABC::env('DIRNAME_ASSETS');
+
+        if($mode == 'relative') {
+            if($extension_txt_id) {
+                $public_dir_pre = ABC::env('DIRNAME_EXTENSIONS').$extension_txt_id.DIRECTORY_SEPARATOR.ABC::env('DIRNAME_TEMPLATES');
+            }else{
+                $public_dir_pre = ABC::env('DIRNAME_TEMPLATES');
+            }
+        }else{
+            if(ABC::env('IS_ADMIN')){
+                $public_dir_pre = ABC::env('DIRNAME_TEMPLATES');
+            }else {
+                $public_dir_pre = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_TEMPLATES');
+            }
+        }
 
 		if (ABC::env('IS_ADMIN')) {
 			if (is_file($path . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
 				$ret_path = $path . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename;
 				if ($mode == 'relative') {
-					$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename;
+					$ret_path = $public_dir_pre . $template . '/' . ABC::env('DIRNAME_ADMIN') . $filename;
 				}
 			} else {
 				if (is_file($path . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
 					$ret_path = $path . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 					if ($mode == 'relative') {
-						$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
+						$ret_path = $public_dir_pre . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 						$match = 'default';
 					}
 				} else {
-					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
-						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
+					if (is_file(ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 						if ($mode == 'relative') {
-							$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
+							$ret_path = ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_ADMIN') . $filename;
 							$match = 'default';
 						}
 					}
 				}
 			}
 		} else {
+
 			if (is_file($path . $template . '/' . ABC::env('DIRNAME_STORE') . $filename)) {
+
 				$ret_path = $path . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 				if ($mode == 'relative') {
-					$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
+					$ret_path = $public_dir_pre . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 				}
 			} else {
+
 				if (is_file($path . 'default/' . ABC::env('DIRNAME_STORE') . $filename)) {
 					$ret_path = $path . 'default/' . ABC::env('DIRNAME_STORE') . $filename;
 					if ($mode == 'relative') {
-						$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . 'default/' . ABC::env('DIRNAME_STORE') . $filename;
+						$ret_path = $public_dir_pre . 'default/' . ABC::env('DIRNAME_STORE') . $filename;
 						$match = 'default';
 					}
 				} //check resource in assets directory
 				else {
-					if (is_file(ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename)) {
-						$ret_path = ABC::env('DIR_PUBLIC') . $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
+
+					if (is_file(ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename)) {
+						$ret_path = ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 						if ($mode == 'relative') {
-							$ret_path = $dir_assets . ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
+							$ret_path = ABC::env('DIRNAME_TEMPLATES') . $template . '/' . ABC::env('DIRNAME_STORE') . $filename;
 						}
 					}
 				}
 			}
 		}
+
 		//return path. Empty path indicates, nothing found
 		if ($ret_path) {
+
 			return array (
 					'match' => $match,
 					'path'  => $ret_path

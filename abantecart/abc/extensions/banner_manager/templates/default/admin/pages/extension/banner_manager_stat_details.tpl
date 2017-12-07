@@ -30,9 +30,9 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <!--[if IE]>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/flot/excanvas.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/excanvas.js'); ?>"></script>
 <![endif]-->
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/flot/jquery.flot.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/jquery.flot.js'); ?>"></script>
 <script type="text/javascript">
 function getSalesChart(range) {
 	$.ajax({

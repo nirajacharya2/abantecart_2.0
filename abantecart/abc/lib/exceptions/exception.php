@@ -23,7 +23,7 @@ use abc\core\engine\ARouter;
 use abc\core\engine\Registry;
 use Exception;
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class AException extends Exception{
@@ -87,7 +87,7 @@ class AException extends Exception{
 			$this->registry->get('response')->output();
 			exit();
 		}
-		$url = "assets/static_pages/index.php";
+		$url = "static_pages/index.php";
 		$url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
 		header("Location: $url");
 		exit();

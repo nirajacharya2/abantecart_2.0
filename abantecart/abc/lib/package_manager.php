@@ -25,7 +25,7 @@ use Exception;
 use PharData;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * @property  AExtensionManager $extension_manager
@@ -171,7 +171,7 @@ class APackageManager{
 	 */
 	public function backupPrevious($extension_id = ''){
 
-		$old_path = !$extension_id ? ABC::env('DIR_ROOT') . '/' . $this->session->data['package_info']['dst_dir'] : ABC::env('DIR_APP_EXT');
+		$old_path = !$extension_id ? ABC::env('DIR_ROOT') . '/' . $this->session->data['package_info']['dst_dir'] : ABC::env('DIR_APP_EXTENSIONS');
 		$package_id = !$extension_id ? $this->session->data['package_info']['package_id'] : $extension_id;
 		if (!$package_id){
 			return false;
@@ -674,7 +674,7 @@ class APackageManager{
 					// running sql upgrade script if it exists
 					if (isset($config->upgrade->sql)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->sql;
-						$file = !file_exists($file) ? ABC::env('DIR_APP_EXT') . $extension_id . '/' . (string)$config->upgrade->sql : $file;
+						$file = !file_exists($file) ? ABC::env('DIR_APP_EXTENSIONS') . $extension_id . '/' . (string)$config->upgrade->sql : $file;
 						if (file_exists($file)){
 							$this->db->performSql($file);
 						}
@@ -682,7 +682,7 @@ class APackageManager{
 					// running php install script if it exists
 					if (isset($config->upgrade->trigger)){
 						$file = $this->session->data['package_info']['tmp_dir'] . $package_dirname . '/code/extensions/' . $extension_id . '/' . (string)$config->upgrade->trigger;
-						$file = !file_exists($file) ? ABC::env('DIR_APP_EXT') . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
+						$file = !file_exists($file) ? ABC::env('DIR_APP_EXTENSIONS') . $extension_id . '/' . (string)$config->upgrade->trigger : $file;
 						if (file_exists($file)){
 							include($file);
 						}
@@ -829,8 +829,8 @@ class APackageManager{
 	public function validate(){
 		$this->error = '';
 		//1.check is extension directory writable
-		if (!is_writable(ABC::env('DIR_APP_EXT'))){
-			$this->error .= 'Directory ' . ABC::env('DIR_APP_EXT') . ' is not writable. Please change permissions for it.' . "\n";
+		if (!is_writable(ABC::env('DIR_APP_EXTENSIONS'))){
+			$this->error .= 'Directory ' . ABC::env('DIR_APP_EXTENSIONS') . ' is not writable. Please change permissions for it.' . "\n";
 		}
 		//2. check temporary directory. just call method
 		$this->getTempDir();

@@ -27,12 +27,12 @@ ini_set('default_charset', strtolower($charset));
 $dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__,2).'/' : ABC::env('DIR_ROOT');
 $dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__).'/' : ABC::env('DIR_APP');
 $dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public/' : ABC::env('DIR_PUBLIC');
-$dir_assets = ! ABC::env('DIR_ASSETS') ? $dir_public.'assets/' : ABC::env('DIR_ASSETS');
 $dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_root.'vendor/' : ABC::env('DIR_VENDOR');
 
 $defaults = [
-    'DIR_ROOT'             => $dir_root,
+    'DIR_ROOT'            => $dir_root,
     'DIR_APP'             => $dir_app,
+    'DIR_TEMPLATES'       => $dir_app.'templates/',
     'DIR_APP_EXTENSIONS'  => $dir_app.'extensions/',
     'DIR_SYSTEM'          => $dir_app.'system/',
     'DIR_CORE'            => $dir_app.'core/',
@@ -43,7 +43,6 @@ $defaults = [
     'DIR_CACHE'           => $dir_app.'system/cache/',
     'DIR_LOGS'            => $dir_app.'system/logs/',
     'DIR_PUBLIC'          => $dir_public,
-    'DIR_ASSETS'          => $dir_assets,
     'DIR_VENDOR'          => $dir_vendor,
     'DIRNAME_APP'         => 'abc/',
     'DIRNAME_ASSETS'      => 'assets/',
@@ -56,8 +55,7 @@ $defaults = [
     'DIRNAME_LANGUAGES'   => 'languages/',
     'DIRNAME_TEMPLATES'   => 'templates/',
     'DIRNAME_TEMPLATE'    => 'template/',
-    'DIR_APP_EXT'         => $dir_app.'extensions/',
-    'DIR_ASSETS_EXT'      => $dir_assets.'extensions/',
+    'DIR_ASSETS_EXT'      => $dir_public.'extensions/',
 ];
 foreach ($defaults as $name => $value) {
     if ( ! ABC::env($name)) {

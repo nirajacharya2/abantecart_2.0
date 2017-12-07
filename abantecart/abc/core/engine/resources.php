@@ -29,7 +29,7 @@ use abc\lib\AException;
 use abc\lib\AWarning;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -395,7 +395,7 @@ class AResource{
 			}
 			return $http_path . $this->type_dir . $resource_path;
 		} else {
-			return "assets/resources/" . $this->type_dir . $resource_path;
+			return "resources/" . $this->type_dir . $resource_path;
 		}
 	}
 

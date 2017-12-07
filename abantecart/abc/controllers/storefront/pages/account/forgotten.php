@@ -26,7 +26,7 @@ use abc\lib\AEncryption;
 use abc\lib\AMail;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesAccountForgotten extends AController {
 	private $error = array();

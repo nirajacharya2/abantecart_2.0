@@ -17,7 +17,7 @@
 		$('#<?php echo $id ?>').intlTelInput({
 			autoHideDialCode: false,
 			nationalMode: <?php echo $value ? 'false' : 'true'; ?>,
-			utilsScript: "<?php echo $this->templateResource('js/intl-tel-input/js/utils.js'); ?>"
+			utilsScript: "<?php echo $this->templateResource('assets/js/intl-tel-input/js/utils.js'); ?>"
 		});
 
 		$('#<?php echo $id ?>').on("blur", function () {

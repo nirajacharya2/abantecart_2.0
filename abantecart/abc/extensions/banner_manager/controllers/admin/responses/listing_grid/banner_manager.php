@@ -30,7 +30,7 @@ use abc\core\engine\AView;
 use stdClass;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -382,7 +382,7 @@ class ControllerResponsesListingGridBannerManager extends AController {
 
 			$action = '<a class="btn_action" href="JavaScript:void(0);"
 						onclick="showPopup(\'' . $this->html->getSecureURL('extension/banner_manager/edit', '&banner_id=' . $result['banner_id']) . '\')" title="' . $this->language->get('text_view') . '">' .
-					'<img height="27" src="' . $this->view->templateResource('images/icons/icon_grid_view.png').'" alt="' . $this->language->get('text_edit') . '" /></a>';
+					'<img height="27" src="' . $this->view->templateResource('assets/images/icons/icon_grid_view.png').'" alt="' . $this->language->get('text_edit') . '" /></a>';
 
 
 			$response->rows[$i]['id'] = $result['banner_id'];

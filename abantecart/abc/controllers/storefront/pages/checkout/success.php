@@ -24,7 +24,7 @@ use abc\lib\AError;
 use abc\lib\AException;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesCheckoutSuccess extends AController{

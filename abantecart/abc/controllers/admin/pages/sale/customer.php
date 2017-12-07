@@ -24,7 +24,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesSaleCustomer extends AController{
@@ -87,7 +87,7 @@ class ControllerPagesSaleCustomer extends AController{
 				'current' => true
 		));
 		//add phone validation js for quick preview modal
-		$this->document->addScript($this->view->templateResource('js/intl-tel-input/js/intlTelInput.min.js'));
+		$this->document->addScript($this->view->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'));
 
 		//set store selector
 		$this->view->assign('form_store_switch', $this->html->getStoreSwitcher());

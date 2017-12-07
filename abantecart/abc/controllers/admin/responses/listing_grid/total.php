@@ -25,7 +25,7 @@ use abc\lib\AJson;
 use stdClass;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesListingGridTotal extends AController {
 	public $data = array();
@@ -59,7 +59,7 @@ class ControllerResponsesListingGridTotal extends AController {
 					if ($parents) {
 						foreach ($parents as $parent) {
 							if (!$parent['status']) continue;
-							if (is_file(ABC::env('DIR_APP_EXT') . $parent['key'] . '/admin/controllers/pages/total/' . $row['key'] . '.php')) {
+							if (is_file(ABC::env('DIR_APP_EXTENSIONS') . $parent['key'] . '/admin/controllers/pages/total/' . $row['key'] . '.php')) {
 								$config_controller = 'total/' . $row['key'];
 								$language_rt = $parent['key'] . '/' . $parent['key'];
 								break;

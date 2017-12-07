@@ -8,7 +8,7 @@
 		$item['image'] = $product['thumb']['thumb_html'];
 		$item['title'] = $product['name'];
 		$item['description'] = $product['model'];
-		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' width='64' height='12' />" : '';
+		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' width='64' height='12' />" : '';
 
 		$item['info_url'] = $product['href'];
 		$item['buy_url'] = $product['add'];
@@ -106,7 +106,7 @@
 		$item = array();
 		$item['image'] = $product['thumb']['thumb_html'];
 		$item['title'] = $product['name'];
-		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' />" : '';
+		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' />" : '';
 
 		$item['info_url'] = $product['href'];
 		$item['buy_url'] = $product['add'];

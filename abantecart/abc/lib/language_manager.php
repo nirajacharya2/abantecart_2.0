@@ -25,7 +25,7 @@ use abc\core\helper\AHelperUtils;
 use abc\Translator;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ALanguageManager extends ALanguage{
@@ -713,7 +713,7 @@ class ALanguageManager extends ALanguage{
 		}
 
 		// extensions
-		$extensions_dirs = glob(ABC::env('DIR_APP_EXT') . '*', GLOB_ONLYDIR);
+		$extensions_dirs = glob(ABC::env('DIR_APP_EXTENSIONS') . '*', GLOB_ONLYDIR);
 
 		foreach ($extensions_dirs as $extension_dir){
 			//$extension_name = pathinfo($extension_dir,PATHINFO_BASENAME);
@@ -781,7 +781,7 @@ class ALanguageManager extends ALanguage{
 		$result_txt = '';
 		$extensions = $this->registry->get('extensions')->getEnabledExtensions();
 		if (in_array($translate_method, $extensions)){
-			$ex_class = ABC::env('DIR_APP_EXT') . $translate_method . '/core/translator.php';
+			$ex_class = ABC::env('DIR_APP_EXTENSIONS') . $translate_method . '/core/translator.php';
 			if (file_exists($ex_class)){
 				/** @noinspection PhpIncludeInspection */
 				require_once($ex_class);

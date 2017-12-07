@@ -28,7 +28,7 @@
     },
     "extra": {
             "installer-paths": {
-                "./vendor/assets/google/recaptcha": ["google/recaptcha"],
+                "./vendor/google/recaptcha": ["google/recaptcha"],
                 "./vendor/assets/twbs/bootstrap": ["twbs/bootstrap"],
                 "./vendor/assets/jquery/jquery": ["jquery/jquery"]
             }

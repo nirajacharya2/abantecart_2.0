@@ -1,6 +1,6 @@
 <?php if ($reviews) { ?>
 <?php foreach ($reviews as $review) { ?>
-<div class="content"><b><?php echo $review['author']; ?></b> | <img src="<?php echo $this->templateResource('images/stars_'.$review['rating'] . '.png'); ?>" alt="<?php echo $review['stars']; ?>" width="64" height="12" /><br />
+<div class="content"><b><?php echo $review['author']; ?></b> | <img src="<?php echo $this->templateResource('assets/images/stars_'.$review['rating'] . '.png'); ?>" alt="<?php echo $review['stars']; ?>" width="64" height="12" /><br />
   <?php echo $review['date_added']; ?><br />
   <br />
   <?php echo $review['text']; ?></div>

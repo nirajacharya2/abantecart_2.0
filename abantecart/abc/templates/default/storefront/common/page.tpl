@@ -105,18 +105,18 @@ Check Dan Riti's blog for more fine tunning suggestion:
 https://www.appneta.com/blog/bootstrap-pagespeed/
 		*/
 ?>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/bootstrap.min.js'); ?>" defer></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/common.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/respond.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.flexslider.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/easyzoom.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.validate.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.carouFredSel.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.mousewheel.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.touchSwipe.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.ba-throttle-debounce.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery.onebyone.min.js'); ?>" defer async></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/custom.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>" defer></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/common.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/respond.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.flexslider.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/easyzoom.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.validate.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.carouFredSel.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.mousewheel.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.touchSwipe.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.ba-throttle-debounce.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery.onebyone.min.js'); ?>" defer async></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/custom.js'); ?>" defer async></script>
 <?php
 if($scripts_bottom && is_array($scripts_bottom)) {
 	foreach ($scripts_bottom as $script){

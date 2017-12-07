@@ -82,11 +82,9 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 }
 
 //Set up common paths
-if(!ABC::env('DIR_ASSETS')) {
-	ABC::env('DIR_ASSETS', ABC::env('DIR_PUBLIC') . 'assets/');
-}
+
 $dir_app = ABC::env('DIR_APP');
-$dir_assets = ABC::env('DIR_ASSETS');
+$dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
 		array(
@@ -100,8 +98,8 @@ ABC::env(
 				'DIR_CACHE'          => $dir_app . 'system/cache/',
 				'DIR_LOGS'           => $dir_app . 'system/logs/',
 				'DIR_TEMPLATES'      => $dir_app . 'templates/',
-				'DIR_IMAGE'          => $dir_assets . 'images/',
-				'DIR_RESOURCE'       => $dir_assets . 'resources/',
+				'DIR_IMAGE'          => $dir_public . 'images/',
+				'DIR_RESOURCE'       => $dir_public . 'resources/',
 		)
 );
 
@@ -213,8 +211,10 @@ ABC::env(
 			'DIRNAME_LANGUAGES'   => 'languages/',
 			'DIRNAME_TEMPLATES'   => 'templates/',
 			'DIRNAME_TEMPLATE'    => 'template/',
-			'DIR_APP_EXT'         => $dir_app . 'extensions/',
-			'DIR_ASSETS_EXT'      => $dir_assets . 'extensions/'
+			'DIRNAME_VENDOR'      => 'vendor/',
+
+			'DIR_APP_EXTENSIONS'  => $dir_app . 'extensions/',
+			'DIR_ASSETS_EXT'      => $dir_public . 'extensions/'
 	)
 );
 
@@ -329,7 +329,7 @@ if (ABC::env('IS_ADMIN') === true) {
 	if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
 		$template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
 		$dir = $template . ABC::env('DIRNAME_STORE') . ABC::env('DIRNAME_TEMPLATES') . $template;
-		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXT') . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS') . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;
@@ -346,7 +346,7 @@ if (ABC::env('IS_ADMIN') === true) {
 			$dir = 'templates/'.$template .'/'. ABC::env('DIRNAME_STORE');
 		}
 
-		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXT') . $dir)) {
+		if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS') . $dir)) {
 			$is_valid = true;
 		} else {
 			$is_valid = false;

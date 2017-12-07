@@ -7,7 +7,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -427,14 +427,14 @@ class AExtensionManager{
 
 		// running sql install script if it exists
 		if (isset($config->install->sql)){
-			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
+			$file = ABC::env('DIR_APP_EXTENSIONS') . str_replace('../', '', $name) . '/' . (string)$config->install->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php install script if it exists
 		if (isset($config->install->trigger)){
-			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
+			$file = ABC::env('DIR_APP_EXTENSIONS') . str_replace('../', '', $name) . '/' . (string)$config->install->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -491,14 +491,14 @@ class AExtensionManager{
 		                                         'user'        => $this->user->getUsername()));
 
 		if (isset($config->uninstall->sql)){
-			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
+			$file = ABC::env('DIR_APP_EXTENSIONS') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->sql;
 			if (is_file($file)){
 				$this->db->performSql($file);
 			}
 		}
 		// running php uninstall script if it exists
 		if (isset($config->uninstall->trigger)){
-			$file = ABC::env('DIR_APP_EXT') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
+			$file = ABC::env('DIR_APP_EXTENSIONS') . str_replace('../', '', $name) . '/' . (string)$config->uninstall->trigger;
 			if (is_file($file)){
 				include($file);
 			}
@@ -535,10 +535,10 @@ class AExtensionManager{
 
 		$this->session->data['package_info']['ftp'] = false;
 		$pmanager = new APackageManager();
-		$result = $pmanager->removeDir(ABC::env('DIR_APP_EXT') . $extension_txt_id);
+		$result = $pmanager->removeDir(ABC::env('DIR_APP_EXTENSIONS') . $extension_txt_id);
 
 		if (!$result){
-			$message = "Error: Can't to delete file or directory: '" . ABC::env('DIR_APP_EXT') . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
+			$message = "Error: Can't to delete file or directory: '" . ABC::env('DIR_APP_EXTENSIONS') . $extension_txt_id . "'. No file permissions, change permissions to 777 with your FTP access";
 			$this->session->data['error'] = $message;
 		}
 

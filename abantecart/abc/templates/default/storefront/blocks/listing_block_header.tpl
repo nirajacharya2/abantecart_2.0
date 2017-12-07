@@ -17,7 +17,7 @@
 				}
 
 				$item['description'] = $item['model'];
-				$item['rating'] = ($item['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('images/stars_' . $item['rating'] . '.png') . "' alt='" . $item['stars'] . "' width='64' height='12' />" : '';
+				$item['rating'] = ($item['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $item['rating'] . '.png') . "' alt='" . $item['stars'] . "' width='64' height='12' />" : '';
 
 				$item['info_url'] = $item['href'] ? $item['href'] : $item['thumb']['main_url'];
 				$item['buy_url'] = $item['add'];

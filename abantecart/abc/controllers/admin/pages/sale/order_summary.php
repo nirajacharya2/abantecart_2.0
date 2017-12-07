@@ -22,7 +22,7 @@ use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesSaleOrderSummary extends AController {
 
@@ -34,7 +34,7 @@ class ControllerPagesSaleOrderSummary extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
 	    //add phone validation js for quick preview modal
-	    $this->document->addScript($this->view->templateResource('js/intl-tel-input/js/intlTelInput.min.js'));
+	    $this->document->addScript($this->view->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'));
 
     	$this->loadLanguage('sale/order');
     	$this->loadModel('sale/order');

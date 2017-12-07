@@ -21,7 +21,7 @@ namespace abc\models\admin;
 use abc\ABC;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 require_once ABC::env('DIR_ROOT') . '/admin/models/tool/migration/interface_migration.php';

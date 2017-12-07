@@ -22,7 +22,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelTotalBalance extends Model {
 	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {

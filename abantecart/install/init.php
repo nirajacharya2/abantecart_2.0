@@ -59,7 +59,7 @@ ABC::env('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . 'extensions/');
 ABC::env('DIR_SYSTEM', ABC::env('DIR_APP') . 'system/');
 ABC::env('DIR_CORE', ABC::env('DIR_APP') . 'core/');
 ABC::env('DIR_LIB', ABC::env('DIR_APP') . 'lib/');
-ABC::env('DIR_IMAGE', ABC::env('DIR_ASSETS') . 'images/');
+ABC::env('DIR_IMAGE', ABC::env('DIR_PUBLIC') . 'images/');
 ABC::env('DIR_DOWNLOAD', ABC::env('DIR_APP') . 'download/');
 ABC::env('DIR_CONFIG', ABC::env('DIR_APP') . 'config/');
 ABC::env('DIR_CACHE', ABC::env('DIR_APP') . 'system/cache/');
@@ -152,8 +152,8 @@ try{
 		)
 	);
 
-	ABC::env('DIR_APP_EXT', ABC::env('DIR_APP') . ABC::env('DIRNAME_EXTENSIONS'));
-	ABC::env('DIR_ASSETS_EXT', ABC::env('DIR_ASSETS') . ABC::env('DIRNAME_EXTENSIONS'));
+	ABC::env('DIR_APP_EXTENSIONS', ABC::env('DIR_APP') . ABC::env('DIRNAME_EXTENSIONS'));
+	ABC::env('DIR_ASSETS_EXT', ABC::env('DIR_PUBLIC') . ABC::env('DIRNAME_EXTENSIONS'));
 
 	require_once(ABC::env('DIR_CORE').'init/base.php');
 	$registry = Registry::getInstance();

@@ -22,7 +22,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AResource;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -34,7 +34,7 @@ class ControllerBlocksBannerBlock extends AController {
 	public function main() {
 
 		//load JS to register clicks before html-cache
-		$this->document->addScriptBottom($this->view->templateResource('js/banner_manager.js'));
+		$this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
 
 		if($this->html_cache()){
 			return;

@@ -27,7 +27,7 @@ use abc\lib\AMail;
 use abc\core\engine\AView;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesContentContact extends AController{

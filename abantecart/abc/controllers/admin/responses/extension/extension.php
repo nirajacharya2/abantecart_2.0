@@ -24,7 +24,7 @@ use abc\core\engine\ExtensionUtils;
 use abc\lib\AAttribute_Manager;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesExtensionExtension extends AController {
 	public $data = array();
@@ -43,7 +43,7 @@ class ControllerResponsesExtensionExtension extends AController {
 
 		$extension = $this->request->get['extension'];
 		$ext = new ExtensionUtils($extension);
-		$help_file_path = ABC::env('DIR_APP_EXT') . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
+		$help_file_path = ABC::env('DIR_APP_EXTENSIONS') . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
 
 		$this->data['content'] = array();
 		$this->data['title'] = $this->language->get('text_help');

@@ -14,8 +14,8 @@
 /abantecart/abc/var/cache/*
 /abantecart/abc/var/logs/*
 /abantecart/abc/config/*
-/abantecart/public/assets/images/thumbnails/*
-/abantecart/public/assets/templates/default/admin/*
-/abantecart/public/assets/templates/default/storefront/*
+/abantecart/public/images/thumbnails/*
+/abantecart/public/templates/default/admin/*
+/abantecart/public/templates/default/storefront/*
 /abantecart/vendor/*
 /abantecart/composer.lock

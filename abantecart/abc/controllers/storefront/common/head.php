@@ -24,7 +24,7 @@ use abc\core\helper\AHelperSystemCheck;
 use abc\core\engine\AResource;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonHead extends AController {
 	public function main() {

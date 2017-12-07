@@ -368,7 +368,7 @@ if ($error) { ?>
 						<ul class="row side_prd_list">
 						<?php
 						foreach ($related_products as $related_product) {
-							$item['rating'] = ($related_product['rating']) ? "<img src='" . $this->templateResource('images/stars_' . $related_product['rating'] . '.png') . "' alt='" . $related_product['stars'] . "' width='64' height='12' />" : '';
+							$item['rating'] = ($related_product['rating']) ? "<img src='" . $this->templateResource('assets/images/stars_' . $related_product['rating'] . '.png') . "' alt='" . $related_product['stars'] . "' width='64' height='12' />" : '';
 							if (!$display_price) {
 								$related_product['price'] = $related_product['special'] = '';
 							}

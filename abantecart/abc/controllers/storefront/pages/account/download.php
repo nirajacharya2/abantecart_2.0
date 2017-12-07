@@ -25,7 +25,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesAccountDownload extends AController{

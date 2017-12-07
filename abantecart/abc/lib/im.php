@@ -24,7 +24,7 @@ use abc\core\engine\Registry;
 use Exception;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -205,7 +205,7 @@ class AIM{
 			//NOTE! all IM drivers MUST have class by these path
 			try{
 				/** @noinspection PhpIncludeInspection */
-				include_once(ABC::env('DIR_APP_EXT') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
+				include_once(ABC::env('DIR_APP_EXTENSIONS') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			} catch(AException $e){
 			}
 			$classname = "\abc\lib\\".preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
@@ -317,7 +317,7 @@ class AIM{
 				}
 
 				//use safe usage
-				$driver_file = ABC::env('DIR_APP_EXT') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
+				$driver_file = ABC::env('DIR_APP_EXTENSIONS') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php';
 				if (!is_file($driver_file)){
 					$error = new AError('Cannot find file ' . $driver_file . ' to send notification.');
 					$error->toLog()->toMessages();

@@ -7,8 +7,8 @@ echo $this->html->buildElement(
 				'data_source' => 'ajax',
 				'title' => $text_resource_library)); ?>
 
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/fileupload/jquery.fileupload.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/fileupload/jquery.fileupload-ui.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/fileupload/jquery.fileupload.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/fileupload/jquery.fileupload-ui.js'); ?>"></script>
 
 <script type="text/javascript">
 
@@ -366,7 +366,7 @@ var loadSingle = function (type, wrapper_id, resource_id, field) {
 						'data-type="' + type + '" ' +
 						'data-wrapper_id="' + wrapper_id + '" ' +
 						'data-field="' + field + '" ' +
-						'data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><img src="<?php echo $this->templateResource('images/icons/icon_add_media.png'); ?>" alt="<?php abc_echo_html2view($text_add_media); ?>" width="100" /></a>';
+						'data-original-title="<?php abc_echo_html2view($text_add_media) ?>"><img src="<?php echo $this->templateResource('assets/images/icons/icon_add_media.png'); ?>" alt="<?php abc_echo_html2view($text_add_media); ?>" width="100" /></a>';
 				html += '</div></div>';
 
 				$('#'+field).val('');

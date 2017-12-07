@@ -23,7 +23,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -99,7 +99,7 @@ class ALayoutManager{
 			$dir = $template . ABC::env('DIRNAME_STORE') . ABC::env('DIRNAME_TEMPLATES') . $template;
 			$enabled_extensions = $this->extensions->getEnabledExtensions();
 
-			if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXT') . $dir)){
+			if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS') . $dir)){
 				$is_valid = true;
 			} else{
 				$is_valid = false;

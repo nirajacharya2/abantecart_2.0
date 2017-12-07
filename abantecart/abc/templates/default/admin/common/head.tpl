@@ -16,7 +16,7 @@ use abc\ABC; ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('css/stylesheet.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 <?php foreach ($styles as $style) { ?>
 <link rel="<?php echo $style['rel']; ?>" type="text/css" href="<?php echo $style['href']; ?>"
@@ -27,7 +27,7 @@ use abc\ABC; ?>
         src="<?php echo $ssl ? 'https' : 'http'?>://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script type="text/javascript">
     if (typeof jQuery == 'undefined') {
-        var include = '<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-1.11.0.min.js'); ?>"><\/script>';
+        var include = '<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-1.11.0.min.js'); ?>"><\/script>';
         document.write(include);
     }
 <?php if($retina){?>
@@ -36,18 +36,18 @@ use abc\ABC; ?>
     }
 <?php } ?>
 </script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery.cookies.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/bootstrap.min.js'); ?>"></script>
-<script defer type="text/javascript" src="<?php echo $this->templateResource('js/tinymce/tinymce.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
+<script defer type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
 
 
 <?php foreach ($scripts as $script) { ?>
 <script type="text/javascript" src="<?php echo $script; ?>"></script>
 <?php } ?>
 
-<script type="text/javascript" src="<?php echo $this->templateResource('js/aform.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/aform.js'); ?>"></script>
 
 <?php 
 	//Generic PHP processed Javascript section

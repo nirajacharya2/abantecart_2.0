@@ -5,6 +5,7 @@ namespace abc\cli\scripts;
 use abc\ABC;
 use abc\cli\AbcDo;
 use abc\core\helper\AHelperUtils;
+use abc\lib\AAssetPublisher;
 use abc\lib\ACache;
 use abc\lib\ADB;
 use abc\lib\AException;
@@ -134,6 +135,12 @@ class Install implements AbcDo
             if(!$errors && isset( $options['with-sample-data'] )){
                 $errors = $this->_load_demo_data($options);
             }
+            // move assets to public directory
+            if(!$errors ){
+                $ap = new AAssetPublisher();
+                $ap->publish('all');
+                $errors = $ap->errors;
+            }
             $output = $errors;
         }elseif($action == 'help'){
             $output = $this->_help();
@@ -199,18 +206,18 @@ class Install implements AbcDo
             $errors['warning'] = 'Warning: Logs directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_ASSETS') . 'images')) {
+        if (!is_writable(ABC::env('DIR_PUBLIC') . 'images')) {
             $errors['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_ASSETS') . 'images/thumbnails')) {
-            if (file_exists(ABC::env('DIR_ASSETS') . 'images/thumbnails') && is_dir(ABC::env('DIR_ASSETS') . 'images/thumbnails')) {
+        if (!is_writable(ABC::env('DIR_PUBLIC') . 'images/thumbnails')) {
+            if (file_exists(ABC::env('DIR_PUBLIC') . 'images/thumbnails') && is_dir(ABC::env('DIR_PUBLIC') . 'images/thumbnails')) {
                 $errors['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
             } else {
-                $result = mkdir(ABC::env('DIR_ASSETS') . 'images/thumbnails', 0777, true);
+                $result = mkdir(ABC::env('DIR_PUBLIC') . 'images/thumbnails', 0777, true);
                 if ($result) {
-                    chmod(ABC::env('DIR_ASSETS') . 'images/thumbnails', 0777);
-                    chmod(ABC::env('DIR_ASSETS') . 'image', 0777);
+                    chmod(ABC::env('DIR_PUBLIC') . 'images/thumbnails', 0777);
+                    chmod(ABC::env('DIR_PUBLIC') . 'image', 0777);
                 } else {
                     $errors['warning'] = 'Warning: images/thumbnails does not exists!';
                 }
@@ -225,7 +232,7 @@ class Install implements AbcDo
             $errors['warning'] = 'Warning: Extensions directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_ASSETS') . 'resources')) {
+        if (!is_writable(ABC::env('DIR_PUBLIC') . 'resources')) {
             $errors['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
         }
 

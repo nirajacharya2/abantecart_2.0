@@ -22,7 +22,7 @@ use abc\ABC;
 use abc\core\engine\AController;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesSettingTemplateImage extends AController {
 	public function main() {
@@ -32,7 +32,7 @@ class ControllerResponsesSettingTemplateImage extends AController {
 		$extensions = $this->extensions->getEnabledExtensions();
 
         $file = $template . '/images/preview.jpg';
-		if ( in_array( $template, $extensions ) && is_file( ABC::env('DIR_APP_EXT') . $file) ) {
+		if ( in_array( $template, $extensions ) && is_file( ABC::env('DIR_APP_EXTENSIONS') . $file) ) {
             $img = ABC::env('HTTPS_EXT') . $file;
         } else if (is_file( 'storefront/view/' . $template . '/images/preview.jpg')) {
 			$img = ABC::env('HTTPS_SERVER') . 'storefront/view/' . $template . '/images/preview.jpg';

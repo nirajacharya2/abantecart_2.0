@@ -400,7 +400,7 @@ if ($error){ ?>
 								if($config_tax && !$tax_exempt && $related_product['tax_class_id']){
 									$tax_message = '&nbsp;&nbsp;'.$price_with_tax;
 								}
-								$item['rating'] = ($related_product['rating']) ? "<img src='" . $this->templateResource('images/stars_' . $related_product['rating'] . '.png') . "' class='rating' alt='" . $related_product['stars'] . "' width='64' height='12' />" : '';
+								$item['rating'] = ($related_product['rating']) ? "<img src='" . $this->templateResource('assets/images/stars_' . $related_product['rating'] . '.png') . "' class='rating' alt='" . $related_product['stars'] . "' width='64' height='12' />" : '';
 								if (!$display_price){
 									$related_product['price'] = $related_product['special'] = '';
 								}?>

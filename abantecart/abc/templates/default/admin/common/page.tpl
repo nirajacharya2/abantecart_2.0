@@ -33,13 +33,13 @@
 
 <a id="gotop" href="#"><?php echo $text_on_top; ?></a>
 
-<script type="text/javascript" src="<?php echo $this->templateResource('js/modernizr.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery.sparkline.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/jquery.cookies.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/chosen.jquery.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/jquery/ajax-chosen.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/bootstrap-growl.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/fileinput.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('js/general.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/modernizr.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.sparkline.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/chosen.jquery.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/ajax-chosen.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap-growl.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/fileinput.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/general.js'); ?>"></script>
 
 </body></html>

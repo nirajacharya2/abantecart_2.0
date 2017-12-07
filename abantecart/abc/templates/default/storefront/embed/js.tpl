@@ -141,8 +141,8 @@ var init = function() {
 			//for embedding with modal
 			if( $embed_click_action == 'modal' ){ ?>
 			/******** Load custom modal *********/
-			css_loader("<?php echo $base.$this->templateResource('css/bootstrap.embed.css'); ?>");
-			script_loader("<?php echo $base.$this->templateResource('js/bootstrap.embed.js'); ?>");
+			css_loader("<?php echo $base.$this->templateResource('assets/css/bootstrap.embed.css'); ?>");
+			script_loader("<?php echo $base.$this->templateResource('assets/js/bootstrap.embed.js'); ?>");
 
 			// Load bootstrap custom modal (single instance)
 			modal = '<div id="abc_embed_modal" class="abcmodal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'+
@@ -150,7 +150,7 @@ var init = function() {
 							'<div class="abcmodal-content">' +
 								'<div class="abcmodal-header">' +
 									'<div class="abcmodal-header-store">' +
-									'<?php if($icon) { ?><img src="<?php echo ABC::env('AUTO_SERVER'); ?>assets/resources/<?php echo $icon; ?>"/>&nbsp;<?php } ?>&nbsp;<?php echo $store_name; ?>' +
+									'<?php if($icon) { ?><img src="<?php echo ABC::env('AUTO_SERVER'); ?>resources/<?php echo $icon; ?>"/>&nbsp;<?php } ?>&nbsp;<?php echo $store_name; ?>' +
 									'</div><div class="abcmodal-header-menu">' +
 									'<a class="abcmodal-reload" href="#" data-href="<?php echo $account;?>"><?php echo $text_account;?></a>&nbsp;&nbsp;' +
 									'|&nbsp;<a class="abcmodal-reload" href="#" data-href="<?php echo $cart;?>"><?php echo $text_cart;?></a>&nbsp;&nbsp;' +

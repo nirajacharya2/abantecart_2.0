@@ -25,11 +25,11 @@ use abc\core\helper\AHelperUtils;
 use abc\lib\ABackup;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 if (ABC::env('IS_DEMO')) {
-	header('Location: assets/static_pages/demo_mode.php');
+	header('Location: static_pages/demo_mode.php');
 }
 
 class ControllerPagesToolBackup extends AController {

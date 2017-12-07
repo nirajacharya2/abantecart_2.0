@@ -22,7 +22,7 @@ use abc\ABC;
 use abc\lib\AException;
 
 if (!class_exists('abc\ABC')) {
-	header('Location: assets/static_pages/?forbidden='.basename(__FILE__));
+	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 final class ARouter{
 	/**
@@ -261,7 +261,7 @@ final class ARouter{
 			$extension_id = $result['extension'];
 			// set new path if controller was found in admin/storefront section && in extensions section
 			$current_section = ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
-			$dir_app = ABC::env('DIR_APP_EXT') . $extension_id . '/controllers/' . $current_section . $type . '/';
+			$dir_app = ABC::env('DIR_APP_EXTENSIONS') . $extension_id . '/controllers/' . $current_section . $type . '/';
 		}
 		//process path and try to locate the controller
 		foreach ($path_nodes as $path_node) {
