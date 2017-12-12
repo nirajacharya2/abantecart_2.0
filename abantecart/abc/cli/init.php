@@ -3,8 +3,12 @@
 namespace abc\cli;
 
 use abc\ABC;
+use abc\core\engine\ALoader;
 use abc\core\engine\Registry;
+use abc\lib\ACache;
+use abc\lib\AConfig;
 use abc\lib\ADataEncryption;
+use abc\lib\ADB;
 use abc\lib\ADocument;
 use abc\lib\ALog;
 
@@ -78,6 +82,32 @@ require_once(ABC::env('DIR_CORE').'init/base.php');
 $registry = Registry::getInstance();
 require_once(ABC::env('DIR_CORE').'init/admin.php');
 
+// Loader
+	$registry->set('load', new ALoader($registry));
+
+// Database
+
+	$registry->set('db', new ADB(
+			array(
+					'driver'    => ABC::env('DB_DRIVER'),
+					'host'      => ABC::env('DB_HOSTNAME'),
+					'username'  => ABC::env('DB_USERNAME'),
+					'password'  => ABC::env('DB_PASSWORD'),
+					'database'  => ABC::env('DB_DATABASE'),
+					'prefix'    => ABC::env('DB_PREFIX'),
+					'charset'   => ABC::env('DB_CHARSET'),
+					'collation' => ABC::env('DB_COLLATION'),
+			)
+		)
+	);
+
+// Cache
+	$registry->set('cache', new ACache());
+
+// Config
+	$config = new AConfig($registry);
+	$registry->set('config', $config);
+
 // Log
 $registry->set('log', new ALog(ABC::env('DIR_LOGS').'cli_log.txt'));
 
@@ -87,3 +117,155 @@ $registry->set('document', new ADocument());
 //main instance of data encryption
 $registry->set('dcrypt', new ADataEncryption());
 
+
+
+
+
+
+
+
+
+
+// functions
+function showResult($result){
+    if(is_string($result) && $result){
+        echo $result."\n";
+    }elseif(is_array($result) && $result){
+        showError("Runtime errors occurred");
+            foreach($result as $error){
+                showError("\t\t".$error);
+            }
+        exit(1);
+    }
+}
+function parseOptions($args){
+	$options = array ();
+	foreach ($args as $v) {
+		$is_flag = preg_match('/^--(.*)$/', $v, $match);
+		//skip commands
+		if (!$is_flag){
+			continue;
+		}
+
+		$arg = $match[1];
+		$array = explode('=', $arg);
+		if (sizeof($array) > 1) {
+			list($name, $value) = $array;
+		} else {
+			$name = $arg;
+			$value = true;
+		}
+		$options[$name] = trim($value);
+	}
+	return $options;
+}
+
+function showError($text){
+	echo("\n\033[0;31m".$text."\033[0m\n\n");
+}
+
+
+function showHelpPage(){
+	global $registry;
+	//first of all get list of scripts
+	$dirs = glob(__DIR__.'/scripts/*',GLOB_ONLYDIR);
+	$help = [];
+	foreach($dirs as $dir) {
+		$name = basename($dir);
+		$executor = getExecutor($name,true);
+		if( is_array($executor) ){
+			$registry->get('log')->write($executor['message']);
+			continue;
+		}
+        if(method_exists($executor,'help')) {
+		    //get help_info from executor
+            $help[$name] = $executor->help();
+        }
+		unset($executor);
+    }
+
+	echo "AbanteCart version \e[0;32m".ABC::env('VERSION')."\e[0m\n\n";
+	echo "\e[1;33mUsage:\e[0m\n";
+	echo "\t[command]:[action] [--arg1=value] [--arg2=value]...\n";
+	echo "\n\e[1;33mAvailable commands:\e[0m\n\n";
+	foreach($help as $command => $help_info){
+        $output = "\t\e[93m".$command."\n";
+        if(!$help_info){ continue; }
+        foreach($help_info as $action => $desc) {
+            $output .= "\t\t"."\e[0;32m".$command.":".$action." - ".$desc['description']."\e[0m"."\n";
+            if($desc['arguments']){
+                $output .= "\tArguments:\n";
+                foreach($desc['arguments'] as $argument => $arg_info) {
+                    $output .= "\t\t\e[0;32m".$argument."\e[0m";
+                    if($arg_info['default_value']){
+                        $output .= "[=value]";
+                    }
+                    if ($arg_info['required']) {
+                        $output .= " \t\t"."\033[0;31m[required]\e[0m";
+                    } else {
+                        $output .= "     \t\t"."\e[37m[optional]\e[0m";
+                    }
+                    if($arg_info['description']){
+                        $output .= "\t".$arg_info['description'];
+                    }
+                    $output .= "\n";
+                }
+            }
+            if($desc['example']){
+                $output .= "\n\tExample:   ";
+                $output .= $desc['example']."\n\n";
+            }
+        }
+        echo $output."\n\n";
+	}
+
+	echo "\n";
+	exit(1);
+}
+
+/**
+ * @param string $name
+ * @param bool $silent_mode - silent mode
+ *
+ * @return array | \abc\cli\scripts\Install
+ */
+function getExecutor($name, $silent_mode = false){
+	$run_file = __DIR__.'/scripts/'.$name.'/'.$name.'.php';
+	if(!is_file($run_file)){
+		$error_text = "Error: Script ".$name.".php not found in ".__DIR__."/ directory!";
+		if(!$silent_mode) {
+			showError($error_text);
+            exit(1);
+        }else{
+			return [
+					'result' => false,
+					'message'=> $error_text
+					];
+		}
+	}
+	try{
+	    require $run_file;
+		/**
+		 * @var \abc\cli\scripts\Install $executor
+		 */
+		$class_name = "\abc\cli\scripts\\".$name;
+		if(class_exists($class_name)) {
+            return $executor = new $class_name();
+        }else{
+			throw new \Exception('Class '.$class_name.' not found in '.$run_file);
+		}
+	}catch(\Exception $e){
+		$error_text = 'Error: '.$e->getMessage();
+		if(!$silent_mode) {
+			showError($error_text);
+			exit(1);
+		}else{
+			return [
+					'result' => false,
+					'message'=> $error_text
+					];
+		}
+	}
+}
+
+return $registry;

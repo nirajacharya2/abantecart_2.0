@@ -10,16 +10,8 @@ use abc\lib\ACache;
 use abc\lib\ADB;
 use abc\lib\AException;
 
-require dirname(__DIR__,2).'/init.php';
-
 class Install implements AbcDo
 {
-
-    public function help()
-    {
-        return $this->_help();
-    }
-
     public function validate(string $action, array $options)
     {
         $action = !$action ? 'install' : $action;
@@ -38,10 +30,10 @@ class Install implements AbcDo
         //Check if cart is already installed
         $file_config = [];
         if (file_exists(ABC::env('DIR_CONFIG').'app.php')) {
-            $file_config = require '/var/www/github/abantecart_2.0/abantecart/abc/config/app.php';
+            $file_config = include __DIR__.'/../../../config/app.php';
         }
 
-        if (isset($file_config['ADMIN_PATH'])) {
+        if (isset($file_config['default']['ADMIN_PATH'])) {
             return ['AbanteCart is already installed!'];
         }
 
@@ -142,8 +134,6 @@ class Install implements AbcDo
                 $errors = $ap->errors;
             }
             $output = $errors;
-        }elseif($action == 'help'){
-            $output = $this->_help();
         }
 
         return $output;
@@ -242,7 +232,6 @@ class Install implements AbcDo
 
         return $errors;
     }
-
 
     protected function _configure(array $options){
         if (!$options) {
@@ -498,64 +487,118 @@ EOD;
         return $errors;
     }
 
-    protected function _help()
+    public function help()
     {
-        $output = "Usage:"."\n";
-        $output .= "------------------------------------------------"."\n";
-        $output .= "\n";
-        $output .= "Commands:"."\n";
-        $output .= "\t"."help - get help"."\n";
-        $output .= "\t"."install - run installation process"."\n\n";
-
-        $output .= "Parameters:"."\n\n";
         $options = $this->_get_option_list();
-
-        foreach ($options as $opt => $ex) {
-            $output .= "\t".$opt;
-            if ($ex) {
-                $output .= "=<value>"." \t\t"."\033[0;31m[required]\033[0m";
-            } else {
-                $output .= "     \t\t"."[optional]";
+        foreach ($options as $action => $help_info) {
+            $output = "php do install:".$action." ";
+            if ($help_info['arguments']) {
+                foreach ($help_info['arguments'] as $arg => $desc) {
+                    if ($arg == '--demo-mode') {
+                        continue;
+                    }
+                    $output .= $arg.($desc['default_value'] ? "="
+                            .$desc['default_value'] : '')."  ";
+                }
             }
-            $output .= "\n\n";
-
+            $options[$action]['example'] = $output;
         }
-
-        $output .= "\n\nExample:\n";
-
-        $output .= 'php do.php install ';
-        foreach ($options as $opt => $ex) {
-            if ($opt == '--demo-mode') {
-                continue;
-            }
-            $output .= $opt.($ex ? "=".$ex : '')."  ";
-        }
-        $output .= "\n\n";
-
-        return $output;
+        return $options;
     }
-
 
     protected function _get_option_list()
     {
         return [
-            '--root_dir'         => ABC::env('DIR_ROOT'),
-            '--app_dir'          => ABC::env('DIR_APP'),
-            '--public_dir'       => ABC::env('DIR_PUBLIC'),
-            '--db_host'          => 'localhost',
-            '--db_user'          => 'root',
-            '--db_password'      => '******',
-            '--db_name'          => 'abantecart',
-            '--db_driver'        => 'amysqli',
-            '--db_prefix'        => 'ac_',
-            '--cache-driver'     => 'file',
-            '--admin_path'       => 'your_admin',
-            '--username'         => 'admin',
-            '--password'         => 'admin',
-            '--email'            => 'your_email@example.com',
-            '--http_server'      => 'http://localhost/abantecart',
-            '--with-sample-data' => '',
-            '--demo-mode'        => '',
+            'install' =>
+                [
+                    'description' => 'run installation process',
+                    'arguments'   => [
+                        /*'--root_dir'         => [
+                                                'description'   => 'Custom full path to root directory',
+                                                'default_value' => ABC::env('DIR_ROOT')
+                                                ],
+                        '--app_dir'         => [
+                                                'description'   => 'Custom full path to "abc" directory',
+                                                'default_value' => ABC::env('DIR_APP')
+                                                ],
+                        '--public_dir'         => [
+                                                'description'   => 'Custom full path to "public" directory',
+                                                'default_value' => ABC::env('DIR_PUBLIC')
+                                                ],
+                        */
+                        '--db_host'          => [
+                            'description'   => 'Database hostname',
+                            'default_value' => 'localhost',
+                            'required'      => true,
+                        ],
+                        '--db_user'          => [
+                            'description'   => 'Database username',
+                            'default_value' => 'root',
+                            'required'      => true,
+                        ],
+                        '--db_password'      => [
+                            'description'   => 'Database user password',
+                            'default_value' => '******',
+                            'required'      => true,
+                        ],
+                        '--db_name'          => [
+                            'description'   => 'Database username',
+                            'default_value' => 'abantecart',
+                            'required'      => true,
+                        ],
+                        '--db_driver'        => [
+                            'description'   => 'Database driver',
+                            'default_value' => 'mysql',
+                            'required'      => true,
+                        ],
+                        '--db_prefix'        => [
+                            'description'   => 'Database table name prefix',
+                            'default_value' => 'abc_',
+                            'required'      => true,
+                        ],
+                        '--cache-driver'     => [
+                            'description'   => 'Cache driver',
+                            'default_value' => 'file',
+                            'required'      => true,
+                        ],
+                        '--admin_path'       => [
+                            'description'   => 'Secure value of url "s" parameter for admin side',
+                            'default_value' => 'your_admin',
+                            'required'      => true,
+                        ],
+                        '--username'         => [
+                            'description'   => 'Top administrator login name',
+                            'default_value' => 'admin',
+                            'required'      => true,
+                        ],
+                        '--password'         => [
+                            'description'   => 'Top administrator password',
+                            'default_value' => 'admin',
+                            'required'      => true,
+                        ],
+                        '--email'            => [
+                            'description'   => 'Top administrator email',
+                            'default_value' => 'your_email@example.com',
+                            'required'      => true,
+                        ],
+                        '--http_server'      => [
+                            'description'   => 'Top administrator email',
+                            'default_value' => 'http://localhost',
+                            'required'      => true,
+                        ],
+                        '--with-sample-data' => [
+                            'description'   => 'Fill sample demo data during installation',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
+                        '--demo-mode'        => [
+                            'description'   => 'Enable demonstration mode',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
+                    ],
+                    'example'     => ''
+                ],
         ];
     }
 

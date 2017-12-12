@@ -1,0 +1,80 @@
+#!/usr/bin/env php
+<?php
+namespace abc\cli;
+
+require_once 'cli/init.php';
+require 'cli/interface.php';
+
+//process command
+$args = $argv;
+//remove file name from argument list
+array_shift($args);
+//if no arguments - show help page
+if($args){
+	$command = array_shift($args);
+}else{
+	echo "Unknown command.\n\n";
+	$command = 'help:help';
+}
+
+if(!strpos($command,':')){
+	$command = 'help:help';
+}
+
+if(!preg_match('/^--(.*)$/', $command)) {
+	list($class, $action) = explode(':',$command);
+}else{
+	echo "Wrong command.\n\n";
+    $class = $action = '';
+}
+
+if(!$class || $class=='help'){
+	showHelpPage();
+}
+
+//try to get instance of executor or die
+/**
+ * @var \abc\cli\scripts\Install | array $executor
+ */
+$executor = getExecutor($class);
+
+
+//get options
+$options = parseOptions($args);
+
+if(!$options && !$action){
+    echo $executor->help();
+    exit(0);
+}
+
+//validate command and options
+$errors = (array)$executor->validate($action, $options);
+
+if($errors){
+	showError("Validation errors occurred");
+	foreach($errors as $error){
+		showError("\t".$error);
+	}
+	exit(1);
+}
+
+//run command
+try{
+	$result = $executor->run($action, $options);
+    showResult($result);
+}catch(\Exception $e){
+	showError('Error: '.$e->getMessage());
+	exit(1);
+}
+
+//if all fine - run post-trigger
+
+try{
+	$result = $executor->finish($action, $options);
+    showResult($result);
+}catch(\Exception $e){
+	showError('Error: '.$e->getMessage());
+	exit(1);
+}
+
+exit(0);

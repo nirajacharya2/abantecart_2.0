@@ -303,7 +303,7 @@ class AHelperUtils extends AHelper{
         if(!is_file($src_file)){
             return [
                 'result' => false,
-                'message'=> 'Error: source file '.$src_file.' not found during copying'
+                'message'=> __METHOD__.': Error: source file '.$src_file.' not found during copying'
             ];
         }
         $output = [ 'result' => true ];
@@ -319,7 +319,7 @@ class AHelperUtils extends AHelper{
             $error = '';
             $result = copy($src_file,$dest_file);
             if(!$result){
-                $error = 'Error: source file '.$src_file.' copying error.';
+                $error = __METHOD__.': Error: source file '.$src_file.' copying error.';
             }
             return [
                     'result' => $output,
@@ -350,7 +350,7 @@ class AHelperUtils extends AHelper{
                 if ( ! $result) {
                     return [
                         'result'  => false,
-                        'message' => 'Cannot to create directory '.$dir
+                        'message' => __METHOD__.': Cannot to create directory '.$dir
                     ];
                 }
             }
@@ -371,7 +371,7 @@ class AHelperUtils extends AHelper{
                     @chmod($dir . "/" . $obj, 0777);
                     $err = is_dir($dir . "/" . $obj) ? self::RemoveDirRecursively($dir . "/" . $obj) : unlink($dir . "/" . $obj);
                     if (!$err){
-                        $error_text = "Error: Can't to delete file or directory: '" . $dir . "/" . $obj . "'.";
+                        $error_text = __METHOD__.": Error: Can't to delete file or directory: '" . $dir . "/" . $obj . "'.";
                         return [
                                 'result' => false,
                                 'message' => $error_text
@@ -385,7 +385,7 @@ class AHelperUtils extends AHelper{
         } else {
             return [
                     'result' => false,
-                    'message' => 'Error: '.__FUNCTION__.': Cannot remove '.$dir.'. It is not directory!'
+                    'message' => __METHOD__.': Cannot remove '.$dir.'. It is not directory!'
             ];
         }
     }

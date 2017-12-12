@@ -68,7 +68,7 @@ class AAssetPublisher{
             ];
         foreach($vars as $name) {
             if ( !ABC::env($name)) {
-                $this->errors[] = 'Empty environment variable value: '.$name;
+                $this->errors[] = __CLASS__.': Empty environment variable value: '.$name;
             }
         }
         return $this->errors ? false : true;
@@ -126,8 +126,10 @@ class AAssetPublisher{
         if( in_array($source, array('all', 'core')) ){
             $template_dirs = array_map('basename', (array)glob(ABC::env('DIR_TEMPLATES').'*', GLOB_ONLYDIR));
             foreach ($template_dirs as $template) {
-                $dirs = glob(ABC::env('DIR_TEMPLATES').$template.'/*/assets',
-                    GLOB_ONLYDIR);
+                $dirs = glob(
+                    ABC::env('DIR_TEMPLATES').$template.'/*/assets',
+                    GLOB_ONLYDIR
+                );
                 foreach ($dirs as $dir) {
                     $files = AHelperUtils::getFilesInDir($dir);
                     foreach ($files as $file) {
@@ -142,13 +144,16 @@ class AAssetPublisher{
         if( $source == 'all' || $source == 'extensions') {
             //Note: get only enabled extensions for publishing
             $extensions_api = $this->extensions;
+
             if(!is_callable($extensions_api)){
                 // Extensions api
                 $extensions_api = new ExtensionsApi();
                 $extensions_api->loadAvailableExtensions();
                 $this->registry->set('extensions', $extensions_api);
             }
+
             $enabled_extensions = $this->extensions->getEnabledExtensions();
+
             foreach($enabled_extensions as $extension){
                 $extensions_assets[$extension] = $this->_get_extension_assets($extension);
             }
@@ -305,7 +310,7 @@ class AssetPublisherCopy{
                     $src_dir.$template.DIRECTORY_SEPARATOR,
                     $new_temp_dir.DIRECTORY_SEPARATOR);
                 if(!$res['result']){
-                    $this->errors[] = $res['message'];
+                    $this->errors[] = __CLASS__.': '.$res['message'];
                 }
             }
 
@@ -319,8 +324,14 @@ class AssetPublisherCopy{
                 }
 
                 if ($result) {
+                    //check parent directory before rename
+                    $parent_dir = dirname($live_dir);
+                    if(!is_dir($parent_dir)){
+                        AHelperUtils::MakeNestedDirs($parent_dir);
+                    }
+                    //try to move to production
                     if (!rename($new_temp_dir, $live_dir)) {
-                        $this->errors[] = 'Cannot to rename directory ' .$new_temp_dir.' to '.$template;
+                        $this->errors[] = __CLASS__.': Cannot to rename temporary directory ' .$new_temp_dir.' to live '.$live_dir;
                         //revert old assets
                         rename($old_temp_dir, $live_dir);
                         return false;
@@ -330,7 +341,7 @@ class AssetPublisherCopy{
                     }
                     //if all fine - remove old live directory
                 } else {
-                    $this->errors[] = 'Cannot to rename directory ' .$live_dir.' to '.$template.'_trash';
+                    $this->errors[] = __CLASS__.': Cannot to rename back live directory ' .$live_dir.' to '.$old_temp_dir;
                     return false;
                 }
             }
