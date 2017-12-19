@@ -36,7 +36,7 @@ class ABC extends ABCBase
             $stage_name = self::$stage;
             if (isset($config[$stage_name])) {
                 self::env((array)$config[$stage_name]);
-            } elseif(isset($config['default'])) {
+            } elseif (isset($config['default'])) {
                 self::env((array)$config['default']);
             }
         }
@@ -63,12 +63,16 @@ class ABC extends ABCBase
                 return true;
             } else {
                 //when set one value
-                ///TODO: is really needed readonly mode for env ???? Need to check in cli-install too
-                //if (!array_key_exists($name, self::$env)) {
-                self::$env[$name] = $value;
+                if ( ! array_key_exists($name, self::$env)) {
+                    self::$env[$name] = $value;
 
-                return true;
-                //}
+                    return true;
+                } else {
+                    ADebug::warning(
+                        'Environment variable override',
+                        AC_ERR_USER_WARNING,
+                        'Try to put var '.$name.' into abc-environment, but it already exists!');
+                }
             }
         }
 
@@ -123,10 +127,8 @@ class ABC extends ABCBase
 
         // Required PHP Version
 
-        if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<')
-            == true) {
-            exit(self::env('MIN_PHP_VERSION')
-                .'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
+        if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<') == true) {
+            exit(self::env('MIN_PHP_VERSION').'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
         }
 
         if ( ! function_exists('simplexml_load_file')) {

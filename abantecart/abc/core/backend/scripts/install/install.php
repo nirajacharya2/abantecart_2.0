@@ -1,45 +1,61 @@
 <?php
+/*
+  AbanteCart, Ideal Open Source Ecommerce Solution
+  http://www.abantecart.com
 
-namespace abc\cli\scripts;
+  Copyright 2011-2018 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.abantecart.com for more information.
+*/
+
+namespace abc\core\backend\scripts;
 
 use abc\ABC;
-use abc\cli\AbcDo;
+use abc\core\backend\ABCExec;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AAssetPublisher;
 use abc\lib\ACache;
 use abc\lib\ADB;
 use abc\lib\AException;
 
-class Install implements AbcDo
+class Install implements ABCExec
 {
     public function validate(string $action, array $options)
     {
-        $action = !$action ? 'install' : $action;
+        $action = ! $action ? 'install' : $action;
         $errors = [];
         //if now options - check action
-        if(!$options){
-            if(!in_array($action, array('install', 'help'))){
+        if ( ! $options) {
+            if ( ! in_array($action, array('install', 'help'))) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
 
-        if($action == 'help'){
+        if ($action == 'help') {
             return [];
         }
 
         //Check if cart is already installed
         $file_config = [];
         if (file_exists(ABC::env('DIR_CONFIG').'app.php')) {
-            $file_config = include __DIR__.'/../../../config/app.php';
+            $file_config = include ABC::env('DIR_CONFIG').'app.php';
         }
 
         if (isset($file_config['default']['ADMIN_PATH'])) {
-            return ['AbanteCart is already installed!'];
+            return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
         }
 
         //check requirements first
         $errors = $this->validateRequirements();
-        if($errors){
+        if ($errors) {
             return $errors;
         }
         //then check options
@@ -110,25 +126,26 @@ class Install implements AbcDo
         if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
             $errors['warning'] = 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG').'!';
         }
+
         return $errors;
     }
 
     public function run(string $action, array $options)
     {
         $output = null;
-        $action = !$action ? 'install' : $action;
+        $action = ! $action ? 'install' : $action;
 
-        if($action == 'install'){
+        if ($action == 'install') {
             $errors = $this->_configure($options);
 
-            if(!$errors){
+            if ( ! $errors) {
                 $errors = $this->_run_sql($options);
             }
-            if(!$errors && isset( $options['with-sample-data'] )){
+            if ( ! $errors && isset($options['with-sample-data'])) {
                 $errors = $this->_load_demo_data($options);
             }
             // move assets to public directory
-            if(!$errors ){
+            if ( ! $errors) {
                 $ap = new AAssetPublisher();
                 $ap->publish('all');
                 $errors = $ap->errors;
@@ -144,16 +161,21 @@ class Install implements AbcDo
         $output = "\n\nSUCCESS! AbanteCart successfully installed on your server\n\n";
         $output .= "\t"."Store link: ".$options['http_server']."\n\n";
         $output .= "\t"."Admin link: ".$options['http_server']."?s=".$options['admin_path']."\n\n";
+
         return $output;
     }
 
-    protected function validateRequirements(){
+    protected function validateRequirements()
+    {
         $errors = [];
-        if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
-            $errors['warning'] = 'Warning: You need to use PHP ' . ABC::env('MIN_PHP_VERSION') . ' or above for AbanteCart to work!';
+        if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<')
+            == true) {
+            $errors['warning'] = 'Warning: You need to use PHP '
+                .ABC::env('MIN_PHP_VERSION')
+                .' or above for AbanteCart to work!';
         }
 
-        if (!ini_get('file_uploads')) {
+        if ( ! ini_get('file_uploads')) {
             $errors['warning'] = 'Warning: file_uploads needs to be enabled in PHP!';
         }
 
@@ -161,102 +183,110 @@ class Install implements AbcDo
             $errors['warning'] = 'Warning: AbanteCart will not work with session.auto_start enabled!';
         }
 
-        if (!extension_loaded('mysqli') && !extension_loaded('pdo_mysql')) {
+        if ( ! extension_loaded('mysqli') && ! extension_loaded('pdo_mysql')) {
             $errors['warning'] = 'Warning: MySQLi extension needs to be loaded for AbanteCart to work!';
         }
 
-        if (!function_exists('simplexml_load_file')) {
+        if ( ! function_exists('simplexml_load_file')) {
             $errors['warning'] = 'Warning: SimpleXML functions needs to be available in PHP!';
         }
 
-        if (!extension_loaded('gd')) {
-            $errors['warning'] = 'Warning: GD extension needs to be loaded for AbanteCart to work!';
+        if ( ! extension_loaded('gd')) {
+            $errors['warning']
+                = 'Warning: GD extension needs to be loaded for AbanteCart to work!';
         }
 
-        if (!extension_loaded('mbstring') || !function_exists('mb_internal_encoding')) {
+        if ( ! extension_loaded('mbstring')
+            || ! function_exists('mb_internal_encoding')) {
             $errors['warning'] = 'Warning: MultiByte String extension needs to be loaded for AbanteCart to work!';
         }
-        if (!extension_loaded('zlib')) {
+        if ( ! extension_loaded('zlib')) {
             $errors['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
         }
 
-        if ( !is_writable(ABC::env('DIR_CONFIG')) ) {
+        if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
             $errors['warning'] = 'Warning: abc/config folder and files needs to be writable for AbanteCart to be installed!';
         }
 
-        if (!is_writable(ABC::env('DIR_SYSTEM'))) {
+        if ( ! is_writable(ABC::env('DIR_SYSTEM'))) {
             $errors['warning'] = 'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_CACHE'))) {
+        if ( ! is_writable(ABC::env('DIR_CACHE'))) {
             $errors['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_LOGS'))) {
+        if ( ! is_writable(ABC::env('DIR_LOGS'))) {
             $errors['warning'] = 'Warning: Logs directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_PUBLIC') . 'images')) {
+        if ( ! is_writable(ABC::env('DIR_PUBLIC').'images')) {
             $errors['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_PUBLIC') . 'images/thumbnails')) {
-            if (file_exists(ABC::env('DIR_PUBLIC') . 'images/thumbnails') && is_dir(ABC::env('DIR_PUBLIC') . 'images/thumbnails')) {
+        if ( ! is_writable(ABC::env('DIR_PUBLIC').'images/thumbnails')) {
+            if (file_exists(ABC::env('DIR_PUBLIC').'images/thumbnails')
+                && is_dir(ABC::env('DIR_PUBLIC').'images/thumbnails')) {
                 $errors['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
             } else {
-                $result = mkdir(ABC::env('DIR_PUBLIC') . 'images/thumbnails', 0777, true);
+                $result = mkdir(ABC::env('DIR_PUBLIC').'images/thumbnails', 0777, true);
                 if ($result) {
-                    chmod(ABC::env('DIR_PUBLIC') . 'images/thumbnails', 0777);
-                    chmod(ABC::env('DIR_PUBLIC') . 'image', 0777);
+                    chmod(ABC::env('DIR_PUBLIC').'images/thumbnails', 0777);
+                    chmod(ABC::env('DIR_PUBLIC').'image', 0777);
                 } else {
                     $errors['warning'] = 'Warning: images/thumbnails does not exists!';
                 }
             }
         }
 
-        if (!is_writable(ABC::env('DIR_APP') . 'downloads')) {
+        if ( ! is_dir(ABC::env('DIR_APP').'downloads')) {
+            @mkdir(ABC::env('DIR_APP').'downloads');
+        }
+
+        if ( ! is_writable(ABC::env('DIR_APP').'downloads')) {
             $errors['warning'] = 'Warning: Download directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
+        if ( ! is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
             $errors['warning'] = 'Warning: Extensions directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_PUBLIC') . 'resources')) {
+        if ( ! is_writable(ABC::env('DIR_PUBLIC').'resources')) {
             $errors['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_SYSTEM'))) {
+        if ( ! is_writable(ABC::env('DIR_SYSTEM'))) {
             $errors['warning'] = 'Warning: Admin/system directory needs to be writable for AbanteCart to work!';
         }
 
         return $errors;
     }
 
-    protected function _configure(array $options){
-        if (!$options) {
+    protected function _configure(array $options)
+    {
+        if ( ! $options) {
             return ['No options to configure!'];
         }
-        if (!ABC::env('DIR_CONFIG')) {
-            ABC::env('DIR_CONFIG', ABC::env('DIR_APP') . 'system/config/');
+        if ( ! ABC::env('DIR_CONFIG')) {
+            ABC::env('DIR_CONFIG', ABC::env('DIR_APP').'system/config/');
         }
 
-        if(!isset($options['root_dir']) || !$options['root_dir']){
+        if ( ! isset($options['root_dir']) || ! $options['root_dir']) {
             $options['root_dir'] = ABC::env('DIR_ROOT');
         }
-        if(!isset($options['app_dir']) || !$options['app_dir']){
+        if ( ! isset($options['app_dir']) || ! $options['app_dir']) {
             $options['app_dir'] = ABC::env('DIR_APP');
         }
-        if(!isset($options['public_dir']) || !$options['public_dir']){
+        if ( ! isset($options['public_dir']) || ! $options['public_dir']) {
             $options['public_dir'] = ABC::env('DIR_PUBLIC');
         }
-        if(!isset($options['cache_driver']) || !$options['cache_driver']){
+        if ( ! isset($options['cache_driver']) || ! $options['cache_driver']) {
             $options['cache_driver'] = 'file';
         }
 
         //server name needs to be set for emails
         $server_name = getenv("SERVER_NAME");
-        if(!$server_name){
+        if ( ! $server_name) {
             $value = rtrim($options['http_server'], '/.\\').'/';
             $server_name = parse_url($value, PHP_URL_HOST);
         }
@@ -267,7 +297,8 @@ class Install implements AbcDo
         $result = [];
         //write application config
 
-        $content = <<<EOD
+        $content
+            = <<<EOD
 <?php
 return [
     'default' => [
@@ -291,14 +322,15 @@ return [
     ]
 ];
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG') . 'app.php', 'w');
-        if (!fwrite($file, $content)) {
-            $result[] = 'Cannot to write file '. $file;
+        $file = fopen(ABC::env('DIR_CONFIG').'app.php', 'w');
+        if ( ! fwrite($file, $content)) {
+            $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
 
         //write database config
-        $content = <<<EOD
+        $content
+            = <<<EOD
 <?php
 // Database Configuration
 return [
@@ -314,14 +346,15 @@ return [
         ]
 ];
 EOD;
-    $file = fopen(ABC::env('DIR_CONFIG') . 'database.php', 'w');
-    if (!fwrite($file, $content)) {
-        $result[] = 'Cannot to write file '. $file;
-    }
-    fclose($file);
+        $file = fopen(ABC::env('DIR_CONFIG').'database.php', 'w');
+        if ( ! fwrite($file, $content)) {
+            $result[] = 'Cannot to write file '.$file;
+        }
+        fclose($file);
 
-    //write cache config
-    $content = <<<EOD
+        //write cache config
+        $content
+            = <<<EOD
 <?php
 return [
     'default' => [
@@ -329,47 +362,50 @@ return [
     ]
 ];
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG') . 'cache.php', 'w');
-        if (!fwrite($file, $content)) {
-            $result[] = 'Cannot to write file '. $file;
+        $file = fopen(ABC::env('DIR_CONFIG').'cache.php', 'w');
+        if ( ! fwrite($file, $content)) {
+            $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
 
         return $result;
     }
 
-    protected function _run_sql($data){
+    protected function _run_sql($data)
+    {
         $errors = [];
         $file = __DIR__.'/abantecart_database.sql';
-        if (!is_file($file)) {
-            $errors[] = 'Error: file ' . $file . ' not found!';
+        if ( ! is_file($file)) {
+            $errors[] = 'Error: file '.$file.' not found!';
+
             return $errors;
         }
         $sql = file($file);
         if ($sql === false) {
-            $errors[] = 'Error: cannot open file ' . $file;
+            $errors[] = 'Error: cannot open file '.$file;
+
             return $errors;
         }
 
         $db = new ADB(array(
-                        'driver'    => $data['db_driver'],
-                        'host'      => $data['db_host'],
-                        'database'  => $data['db_name'],
-                        'username'  => $data['db_user'],
-                        'password'  => $data['db_password'],
-                        'charset'   => 'utf8',
-                        'collation' => 'utf8_unicode_ci',
-                        'prefix'    => $data['db_prefix']
-                        ));
+            'driver'    => $data['db_driver'],
+            'host'      => $data['db_host'],
+            'database'  => $data['db_name'],
+            'username'  => $data['db_user'],
+            'password'  => $data['db_password'],
+            'charset'   => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix'    => $data['db_prefix'],
+        ));
         $query = '';
         foreach ($sql as $line) {
             $tsl = trim($line);
 
-            if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
+            if (($sql != '') && (substr($tsl, 0, 2) != "--")
+                && (substr($tsl, 0, 1) != '#')) {
                 $query .= $line;
-
                 if (preg_match('/;\s*$/', $line)) {
-                    $query = str_replace(" `ac_", " `" . $data['db_prefix'], $query);
+                    $query = str_replace(" `ac_", " `".$data['db_prefix'],$query);
                     $db->query($query); //no silence mode! if error - will throw to exception
                     $query = '';
                 }
@@ -380,41 +416,41 @@ EOD;
         $db->query("SET @@session.sql_mode = 'MYSQL40';");
         $salt_key = AHelperUtils::genToken(8);
         $db->query(
-                "INSERT INTO `" . $data['db_prefix'] . "users`
+            "INSERT INTO `".$data['db_prefix']."users`
             SET user_id = '1',
                 user_group_id = '1',
-                email = '" . $db->escape($data['email']) . "',
-                username = '" . $db->escape($data['username']) . "',
-                salt = '" . $db->escape($salt_key) . "', 
-                password = '" . $db->escape(sha1($salt_key . sha1($salt_key . sha1($data['password'])))) . "',
-                status = '1',
+                email = '".$db->escape($data['email'])."',
+                username = '".$db->escape($data['username'])."',
+                salt = '".$db->escape($salt_key)."', 
+                PASSWORD = '".$db->escape(sha1($salt_key.sha1($salt_key.sha1($data['password']))))."',
+                STATUS = '1',
                 date_added = NOW();");
 
         $db->query(
-                "UPDATE `" . $data['db_prefix'] . "settings` 
-                    SET value = '" . $db->escape($data['email']) . "' 
+            "UPDATE `".$data['db_prefix']."settings` 
+                    SET value = '".$db->escape($data['email'])."' 
                     WHERE `key` = 'store_main_email'; ");
         $db->query(
-                "UPDATE `" . $data['db_prefix'] . "settings` 
-                    SET value = '" . $db->escape($data['http_server']) . "' 
+            "UPDATE `".$data['db_prefix']."settings` 
+                    SET value = '".$db->escape($data['http_server'])."' 
                     WHERE `key` = 'config_url'; ");
         if (ABC::env('HTTPS')) {
             $db->query(
-                    "UPDATE `" . $data['db_prefix'] . "settings` 
-                        SET value = '" . $db->escape($data['http_server']) . "' 
+                "UPDATE `".$data['db_prefix']."settings` 
+                        SET value = '".$db->escape($data['http_server'])."' 
                         WHERE `key` = 'config_ssl_url'; ");
             $db->query(
-                    "UPDATE `" . $data['db_prefix'] . "settings` 
+                "UPDATE `".$data['db_prefix']."settings` 
                         SET value = '2' 
                         WHERE `key` = 'config_ssl'; ");
         }
         $db->query(
-                "UPDATE `" . $data['db_prefix'] . "settings` 
-                SET value = '" . $db->escape(AHelperUtils::genToken(16)) . "' 
+                "UPDATE `".$data['db_prefix']."settings` 
+                SET value = '".$db->escape(AHelperUtils::genToken(16))."' 
                 WHERE `key` = 'task_api_key'; ");
-        $db->query("INSERT INTO `" . $data['db_prefix'] . "settings` 
+        $db->query("INSERT INTO `".$data['db_prefix']."settings` 
                     SET `group` = 'config', `key` = 'install_date', value = NOW(); ");
-        $db->query("UPDATE `" . $data['db_prefix'] . "products` SET `viewed` = '0';");
+        $db->query("UPDATE `".$data['db_prefix']."products` SET `viewed` = '0';");
 
         //run destructor and close db-connection
         unset($db);
@@ -423,23 +459,25 @@ EOD;
         $cache->setCacheStorageDriver('file');
         $cache->enableCache();
         $cache->remove('*');
+
         return $errors;
     }
 
-    protected function _load_demo_data($options){
+    protected function _load_demo_data($options)
+    {
         $errors = [];
         $file = __DIR__.'/demo_data/abantecart_demo_data.sql';
-        if (!is_file($file)) {
-            $errors[] = 'Error: file ' . $file . ' not found!';
+        if ( ! is_file($file)) {
+            $errors[] = 'Error: file '.$file.' not found!';
             return $errors;
         }
         $sql = file($file);
         if ($sql === false) {
-            $errors[] = 'Error: cannot open file ' . $file;
+            $errors[] = 'Error: cannot open file '.$file;
             return $errors;
         }
 
-        $db = new ADB( array(
+        $db = new ADB(array(
             'driver'    => $options['db_driver'],
             'host'      => $options['db_host'],
             'database'  => $options['db_name'],
@@ -447,8 +485,8 @@ EOD;
             'password'  => $options['db_password'],
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
-            'prefix'    => $options['db_prefix']
-                        ) );
+            'prefix'    => $options['db_prefix'],
+        ));
         $db->query("SET NAMES 'utf8'");
         $db->query("SET CHARACTER SET utf8");
 
@@ -457,18 +495,19 @@ EOD;
         foreach ($sql as $line) {
             $tsl = trim($line);
 
-            if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
+            if (($sql != '') && (substr($tsl, 0, 2) != "--")
+                && (substr($tsl, 0, 1) != '#')) {
                 $query .= $line;
 
                 if (preg_match('/;\s*$/', $line)) {
-                    $query = str_replace("DROP TABLE IF EXISTS `ac_", "DROP TABLE IF EXISTS `" .$options['db_prefix'], $query);
-                    $query = str_replace("CREATE TABLE `ac_", "CREATE TABLE `" .$options['db_prefix'], $query);
-                    $query = str_replace("INSERT INTO `ac_", "INSERT INTO `" .$options['db_prefix'], $query);
+                    $query = str_replace("DROP TABLE IF EXISTS `ac_","DROP TABLE IF EXISTS `".$options['db_prefix'], $query);
+                    $query = str_replace("CREATE TABLE `ac_", "CREATE TABLE `".$options['db_prefix'], $query);
+                    $query = str_replace("INSERT INTO `ac_", "INSERT INTO `".$options['db_prefix'], $query);
 
                     $result = $db->query($query);
 
-                    if (!$result || $db->error) {
-                        $errors[] = $db->error . "\n\t\t" . $query;
+                    if ( ! $result || $db->error) {
+                        $errors[] = $db->error."\n\t\t".$query;
                         break;
                     }
 
@@ -484,6 +523,7 @@ EOD;
         $cache->setCacheStorageDriver('file');
         $cache->enableCache();
         $cache->remove('*');
+
         return $errors;
     }
 
@@ -503,6 +543,7 @@ EOD;
             }
             $options[$action]['example'] = $output;
         }
+
         return $options;
     }
 
@@ -597,7 +638,7 @@ EOD;
                             'required'      => false,
                         ],
                     ],
-                    'example'     => ''
+                    'example'     => '',
                 ],
         ];
     }

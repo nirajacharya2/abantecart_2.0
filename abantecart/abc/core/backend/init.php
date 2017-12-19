@@ -1,6 +1,21 @@
 <?php
+/*
+  AbanteCart, Ideal Open Source Ecommerce Solution
+  http://www.abantecart.com
 
-namespace abc\cli;
+  Copyright 2011-2018 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.abantecart.com for more information.
+*/
+namespace abc\core\backend;
 
 use abc\ABC;
 use abc\core\engine\ALoader;
@@ -14,12 +29,32 @@ use abc\lib\ALog;
 
 // Error Reporting
 error_reporting(E_ALL);
+
+
+if(!is_file( dirname(__DIR__,3).'/vendor/autoload.php')){
+	echo "Initialisation...\n";
+	$composer_phar = dirname(__DIR__,2).'/system/temp/composer.phar';
+	if(!is_file($composer_phar)) {
+        echo "Download Latest Composer into abc/system/temp directory. Please wait..\n";
+        if( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__, 2).'/system/temp/composer.phar') ) {
+            exit( "Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
+                " Please download it manually into "
+                .dirname(__DIR__, 2)."/system/temp/ directory\n"
+                ." OR run composer manually (see composer.json file)" );
+        }
+    }
+
+    exit("\n\e[0;31mError: Vendor folder not found. Please run command \e[0m\n\n
+		cd ".dirname(__DIR__,3)." && php ".$composer_phar." install
+	\n\n\e[0;31m to initialize a project!\e[0m\n\n");
+}
+
 if ( ! ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-require dirname(__DIR__).'/abc.php';
-//run constructor of ABC class to load config
+require dirname(__DIR__,2).'/abc.php';
+//run constructor of ABC class to load environment
 new ABC();
 ABC::env('IS_ADMIN', true);
 $charset = ABC::env('APP_CHARSET');
@@ -28,8 +63,8 @@ mb_internal_encoding($charset);
 ini_set('default_charset', strtolower($charset));
 
 //Set up common paths
-$dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__,2).'/' : ABC::env('DIR_ROOT');
-$dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__).'/' : ABC::env('DIR_APP');
+$dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__,3).'/' : ABC::env('DIR_ROOT');
+$dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__,2).'/' : ABC::env('DIR_APP');
 $dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public/' : ABC::env('DIR_PUBLIC');
 $dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_root.'vendor/' : ABC::env('DIR_VENDOR');
 
@@ -118,15 +153,11 @@ $registry->set('document', new ADocument());
 $registry->set('dcrypt', new ADataEncryption());
 
 
-
-
-
-
-
-
-
-
 // functions
+
+/**
+ * @param string|array $result
+ */
 function showResult($result){
     if(is_string($result) && $result){
         echo $result."\n";
@@ -138,7 +169,13 @@ function showResult($result){
         exit(1);
     }
 }
-function parseOptions($args){
+
+/**
+ * @param array $args
+ *
+ * @return array
+ */
+function parseOptions($args = []){
 	$options = array ();
 	foreach ($args as $v) {
 		$is_flag = preg_match('/^--(.*)$/', $v, $match);
@@ -160,11 +197,16 @@ function parseOptions($args){
 	return $options;
 }
 
+/**
+ * @param string $text
+ */
 function showError($text){
 	echo("\n\033[0;31m".$text."\033[0m\n\n");
 }
 
-
+/**
+ *
+ */
 function showHelpPage(){
 	global $registry;
 	//first of all get list of scripts
@@ -227,7 +269,7 @@ function showHelpPage(){
  * @param string $name
  * @param bool $silent_mode - silent mode
  *
- * @return array | \abc\cli\scripts\Install
+ * @return array | \abc\core\backend\scripts\Install
  */
 function getExecutor($name, $silent_mode = false){
 	$run_file = __DIR__.'/scripts/'.$name.'/'.$name.'.php';
@@ -246,9 +288,9 @@ function getExecutor($name, $silent_mode = false){
 	try{
 	    require $run_file;
 		/**
-		 * @var \abc\cli\scripts\Install $executor
+		 * @var \abc\core\backend\scripts\Install $executor
 		 */
-		$class_name = "\abc\cli\scripts\\".$name;
+		$class_name = "\abc\core\backend\scripts\\".$name;
 		if(class_exists($class_name)) {
             return $executor = new $class_name();
         }else{

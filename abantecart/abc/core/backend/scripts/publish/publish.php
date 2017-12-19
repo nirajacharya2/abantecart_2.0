@@ -1,11 +1,11 @@
 <?php
 
-namespace abc\cli\scripts;
-use abc\cli\AbcDo;
+namespace abc\core\backend\scripts;
+use abc\core\backend\ABCExec;
 use abc\lib\AAssetPublisher;
 
 
-class Publish implements AbcDo
+class Publish implements ABCExec
 {
     public function validate(string $action, array $options)
     {
