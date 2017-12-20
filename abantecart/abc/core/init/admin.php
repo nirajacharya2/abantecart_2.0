@@ -65,5 +65,5 @@ if (AHelperUtils::has_value($request->get['store_id']) || AHelperUtils::has_valu
 
 // Admin template load
 // Relative paths and directories
-ABC::env('RDIR_ASSETS',  'templates/default/admin/');
+ABC::env('RDIR_ASSETS',  'templates/default/admin/assets/');
 ABC::env('RDIR_TEMPLATE',  'templates/default/admin/');
