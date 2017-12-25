@@ -78,6 +78,10 @@
 			type: 'POST',
 			data: $('#tFrm').serializeArray(),
 			dataType: 'json',
+			beforeSend:
+				function() {
+					$('.alert').remove();
+				},
 			success: function (data) {
 				if (data.result == true) {
 					<?php

@@ -117,22 +117,29 @@ class ModelSaleCoupon extends Model {
 		                             'status');
 		$update = array();
 		foreach ( $coupon_table_fields as $f ) {
-			if ( isset($data[$f]) )
+			if (isset($data[$f])) {
 				if(!in_array($f,array('date_start','date_end'))){
 					$update[] = $f." = '".$this->db->escape($data[$f])."'";
 				}else{
 					$update[] = $f." = ".$data[$f]."";
 				}
 		}
-		if ( !empty($update) ) $this->db->query("UPDATE " . $this->db->table("coupons") . " 
+		}
+		if ( !empty($update) ) {
+		    $this->db->query("UPDATE " . $this->db->table("coupons") . " 
 												SET ". implode(',', $update) ."
 												WHERE coupon_id = '" . (int)$coupon_id . "'");
+        }
 
 		if ( !empty($data['coupon_description']) ) {
 			foreach ($data['coupon_description'] as $language_id => $value) {
 				$update = array();
-				if ( isset($value['name']) ) $update["name"] = $value['name'];
-				if ( isset($value['description']) ) $update["description"] = $value['description'];
+				if (isset($value['name'])) {
+					$update["name"] = $value['name'];
+				}
+				if (isset($value['description'])) {
+					$update["description"] = $value['description'];
+				}
 				if ( !empty($update) ){
 					$this->language->replaceDescriptions('coupon_descriptions',
 														 array('coupon_id' => (int)$coupon_id),
@@ -216,8 +223,9 @@ class ModelSaleCoupon extends Model {
 
 		$sql = "SELECT ". $total_sql ." 
 				FROM " . $this->db->table("coupons") . " c
-				JOIN " . $this->db->table("coupon_descriptions") . " cd
-					ON (c.coupon_id = cd.coupon_id AND cd.language_id = '" . $language_id . "')";
+				LEFT JOIN " . $this->db->table("coupon_descriptions") . " cd
+					ON (c.coupon_id = cd.coupon_id AND cd.language_id = '" . $language_id . "')
+				WHERE 1=1 ";
 
         if ( !empty($data['search']) ) {
             $sql .= " AND ".$data['search'];

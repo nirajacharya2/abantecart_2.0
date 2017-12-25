@@ -487,7 +487,7 @@
 			//wraper is a parent div with .afiled
 		    var $wrapper = $(elem).closest('.afield');
 		    $wrapper.find('input, textarea, select').each(function () {
-		        $e = $(this);
+				var $e = $(this);
 		        if ($e.is("select")) {
 		        	//for select data-orgvalue is present in each option regardles of multiselect or single
 		            $e.find('option').each(function () {
@@ -537,7 +537,7 @@
 		    var $wrapper = $(elem).closest('.afield');
 		    
 		    $wrapper.find('input, textarea, select').each(function () {
-		        $e = $(this);
+				var $e = $(this);
 		        if ($e.is("select")) {
 		        	//for select data-orgvalue is present in each option regardles of multiselect or single
 		            $e.find('option').each(function () {
@@ -625,7 +625,7 @@
 			var $wrapper = $field.closest('.afield');
 			//remove all changed states (case with multiple elements in 1 set)
 			$wrapper.find('input, textarea, select').each(function () {
-				$e = $(this);
+				var $e = $(this);
 				$e.removeClass(o.changedClass);
 			});
             //locate btn container if it is present
@@ -673,7 +673,7 @@
 		        }
 		    });
 		
-		    $data = $wrapper.find('input, select, textarea').serialize();
+			var $data = $wrapper.find('input, select, textarea').serialize();
 			//if impty and we have select, need to pass blank value 
 			if (!$data) {
 			    $wrapper.find('select').each(function () {
@@ -897,8 +897,12 @@ var formOnExit = function(){
 
     //put submited or clicked button to loading state   
     $('.lock-on-click').each(function () {
-    	$btn = $(this);
-    	$btn.attr('data-loading-text',"<i class='fa fa-refresh fa-spin fa-fw'></i>");
+		var $btn = $(this);
+		var spinner = "<i class='fa fa-refresh fa-spin fa-fw'></i>";
+		if( $btn.attr('data-loading-text') == spinner ){
+			return false;
+		}
+		$btn.attr('data-loading-text',spinner);
     	$btn.on('click', function (event) {
     		//chrome submit fix
     		//If we detect child was clicked, and not the actual button, stop the propagation and trigger the "click" event on the button.
@@ -916,6 +920,7 @@ var formOnExit = function(){
 function resetLockBtn(){
     $('.lock-on-click').each(function () {
         $(this).button('reset');
+		$(this).prop('disabled', false);
     });
 }
 //------------------------------------------------------------------------------

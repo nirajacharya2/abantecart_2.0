@@ -135,5 +135,13 @@
   <definition>
     <key>tab_layout</key>
     <value><![CDATA[ Layout ]]></value>
+	</definition>
+	<definition>
+		<key>entry_meta_description</key>
+		<value><![CDATA[ Meta Tag Description: ]]></value>
+	</definition>
+	<definition>
+		<key>entry_meta_keywords</key>
+		<value><![CDATA[Meta Tag Keywords:]]></value>
   </definition>
 </definitions>

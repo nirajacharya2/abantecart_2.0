@@ -21,7 +21,7 @@ if ($error){ ?>
 					foreach ($images as $image){
 						?><li class="producthtumb"><?php
 							if ($image['origin'] != 'external'){?>
-								<a href="<?php echo $image['main_url']; ?>"
+								<a href="Javascript:void(0);" data-href="<?php echo $image['main_url']; ?>"
 								   data-standard="<?php echo $image['thumb2_url']; ?>"
 								><img style="width: <?php echo $add_w; ?>px; height: <?php echo $add_h; ?>px;"
 										src="<?php echo $image['thumb_url']; ?>" alt="<?php echo $image['title']; ?>"
@@ -32,7 +32,7 @@ if ($error){ ?>
 			</ul>
 			<div class="hidden-xs hidden-sm mainimage bigimage easyzoom easyzoom--overlay easyzoom--with-thumbnails">
 				<?php if (sizeof($images) > 0){
-					//NOTE: ZOOM is not supported for embeded image tags
+					//NOTE: ZOOM is not supported for embed image tags
 					if ($image_main['origin'] == 'external'){
 						?>
 						<a class="html_with_image">
@@ -56,7 +56,7 @@ if ($error){ ?>
 			<!-- for mobile devices-->
 			<div class="mainimage bigimage hidden-lg hidden-md">
 				<?php if (sizeof($images) > 0){
-					//NOTE: ZOOM is not supported for embeded image tags
+					//NOTE: ZOOM is not supported for embed image tags
 					if ($image_main['origin'] == 'external'){
 						?>
 						<a class="html_with_image">
@@ -111,7 +111,7 @@ if ($error){ ?>
 						if ($average){ ?>
 							<ul class="rate">
 								<?php
-								#Show stars based on avarage rating
+								#Show stars based on average rating
 								for ($i = 1; $i <= 5; $i++){
 									if ($i <= $average){
 										echo '<li class="on"></li>';
@@ -194,7 +194,7 @@ if ($error){ ?>
 
 									<div class="mt20 ">
 										<?php if(!$product_info['call_to_order']){ ?>
-										<?php if ($track_stock && !$in_stock) { ?>
+										<?php if (!$can_buy) { ?>
 										<ul class="productpagecart">
 											<li><span class="nostock"><?php echo $stock; ?></span></li>
 										</ul>
@@ -517,8 +517,8 @@ if ($error){ ?>
 			var $this = $(this);
 			e.preventDefault();
 			// Use EasyZoom's `swap` method
-			api1.swap($this.data('standard'), $this.attr('href'));
-			$('.mainimage.bigimage.hidden-lg').find('img').attr('src', $this.attr('href'));
+			api1.swap($this.data('standard'), $this.attr('data-href'));
+			$('.mainimage.bigimage.hidden-lg').find('img').attr('src', $this.attr('data-href'));
 		});
 	}
 

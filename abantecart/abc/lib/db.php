@@ -71,6 +71,9 @@ class ADB{
 		} else{
 			$result = $this->_query($sql, $noexcept);
 		}
+		if ($noexcept && $result === false){
+			$this->error = $this->driver->error;
+		}
 		return $result;
 	}
 
@@ -130,9 +133,10 @@ class ADB{
 		}
 	}
 
-	public function escape($value){
+	public function escape($value, $with_special_chars = false){
 		$orm = $this->orm;
 		//todo: need to fix sql-queries
+        //Implement second parameter!!!!
 		return trim($orm::connection()->getPdo()->quote($value),"'");
 	}
 
@@ -160,6 +164,9 @@ class ADB{
 						$query = str_replace("`ac_", "`" . $this->db_config['prefix'], $query);
 						$result = $this->_query($query, true);
 						if (!$result){
+						    //todo: need to review
+							$err = $this->driver->getDBError();
+							$this->error = $err['error_text'];
 							return false;
 						}
 						$query = '';

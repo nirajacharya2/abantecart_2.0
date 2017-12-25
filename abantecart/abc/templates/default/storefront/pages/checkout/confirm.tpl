@@ -34,7 +34,6 @@
 </div>
 
 <div class="contentpanel">
-	<?php echo $form['form_open']; ?>
 	<p><?php echo $text_accept_agree ?>&nbsp;<a onclick="openModalRemote('#returnPolicyModal', '<?php echo $text_accept_agree_href; ?>'); return false;"
 				href="<?php echo $text_accept_agree_href; ?>"><b><?php echo $text_accept_agree_href_link; ?></b></a></p>
 

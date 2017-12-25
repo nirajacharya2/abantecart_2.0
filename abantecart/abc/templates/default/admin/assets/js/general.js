@@ -15,7 +15,7 @@ jQuery(document).ready(function() {
 	if (!route) {
 		$('#menu_dashboard').addClass('active').addClass('nav-active');
 	} else {
-		part = route.split('/');
+		var part = route.split('/');
 		url = part[0];
 		if (part[1]) {
 			url += '/' + part[1];
@@ -25,7 +25,7 @@ jQuery(document).ready(function() {
 		}
 		var link = $('#menu_box a[href*=\'' + url + '&\']');
 		if (link.length == 0) {
-			var link = $('#menu_box a[href*=\'' + part[0] + '/' + part[1] + '&\']');
+			link = $('#menu_box a[href*=\'' + part[0] + '/' + part[1] + '&\']');
 		}
 		if (link.length) {
 			link.parents('li').addClass('active').addClass('nav-active');
@@ -301,7 +301,7 @@ jQuery(document).ready(function() {
 	adjust_content_height();
 
 	//edit mode
-	$docW = parseInt($(document).width());
+	var $docW = parseInt($(document).width());
 	$('.postit_icon').click(function () {
 		pos = $(this).siblings('.postit_notes').offset();
 		width = $(this).siblings('.postit_notes').width();
@@ -390,7 +390,7 @@ var bindCustomEvents  = function(elm){
 	});
 	//set visual status
 	statusMarker($obj);
-}
+};
 
 //mark page with status off
 var statusMarker = function($obj) {
@@ -407,7 +407,7 @@ var statusMarker = function($obj) {
 			$input.closest('.panel-body').removeClass('status_off');
 		}
 	}
-}
+};
 
 // Add tooltips to all elements in the selector. In case text does not fit
 var buildTooltips = function(objects, options) {
@@ -417,7 +417,7 @@ var buildTooltips = function(objects, options) {
 		elem.attr('data-original-title', elem.text())
 		elem.tooltip({ container: 'body'});
 	});
-}
+};
 
 function adjust_content_height() {
 	// Adjust content panel height
@@ -557,7 +557,7 @@ $(document).ajaxError(function (e, jqXHR, settings, exception) {
 			return false;
 		}
 		error_alert(text, autohide);
-	}
+	};
 
 	if(!jqXHR.hasOwnProperty('responseText') ) {
 		return false;
@@ -575,6 +575,11 @@ $(document).ajaxError(function (e, jqXHR, settings, exception) {
 					gl_error_alert(err.error_title+' '+errlist[k], false);
 				}
 			}
+			var sent_params = $.parseParams(settings.data);
+			if(err.csrftoken ){
+				$(document).find('[value='+sent_params.csrftoken+']').val(err['csrftoken']);
+				$(document).find('[value='+sent_params.csrfinstance+']').val(err['csrfinstance']);
+			}
 		}
 	} catch (e) {
 		if (jqXHR.responseText.length > 0) {
@@ -591,7 +596,7 @@ function goTo(url, params) {
 }
 
 function addBlock(name) {
-	block = $('[name=\'' + name + '\']').first()
+	var block = $('[name=\'' + name + '\']').first()
 		.clone();
 	$('[name=\'' + name + '\']').last()
 		.closest('.section')
@@ -603,7 +608,7 @@ function addBlock(name) {
 }
 
 function checkAll(fldName, checked) {
-	$field = $('input[name*=\'' + fldName + '\']');
+	var $field = $('input[name*=\'' + fldName + '\']');
 	if (checked) {
 		$field.attr('checked', 'checked').parents('.afield').addClass($.aform.defaults.checkedClass);
 	} else {
@@ -678,6 +683,10 @@ $(document).on('click', ".task_run", function () {
 	run_task_url = $(this).attr('data-run-task-url');
 	complete_task_url = $(this).attr('data-complete-task-url');
 	abort_task_url = $(this).attr('data-abort-task-url');
+	var task_title = $(this).attr('data-task-title');
+	if(!task_title) {
+		task_title = 'Task Processing';
+	}
 
 	var modal =
 		'<div id="task_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
@@ -685,7 +694,7 @@ $(document).on('click', ".task_run", function () {
 		'<div class="modal-content">' +
 		'<div class="modal-header">' +
 		'<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
-		'<h4 class="modal-title">Task Run</h4>'+
+		'<h4 class="modal-title">'+task_title+'</h4>'+
 		'</div>' +
 		'<div class="modal-body panel-body panel-body-nopadding"></div>' +
 		'</div></div></div>';
@@ -704,7 +713,7 @@ $(document).on('click', ".task_run", function () {
 
 	if(abort_task_url && abort_task_url.length > 0){
 		progress_html += '<div class="center abort_button">' +
-							'<a class="abort btn btn-danger" title="Interrupt Task" ><i class="fa fa-times-circle-o"></i> Abort</a>' +
+							'<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle-o fa-fw"></i> Stop</a>' +
 				'</div>';
 	}
 	progress_html += '</div>';
@@ -737,7 +746,7 @@ var runTaskUI = function (data) {
 	} else {
 		runTaskStepsUI(data.task_details);
 	}
-}
+};
 
 var runTaskStepsUI = function (task_details) {
 	if (task_details.status != '1') {
@@ -745,8 +754,7 @@ var runTaskStepsUI = function (task_details) {
 	} else {
 		//then run sequental ajax calls
 		//note: all that calls must be asynchronous to be interruptible!
-		var ajaxes = {};
-		console.log(task_details.steps);
+		var ajaxes = {};		
 		var total_steps_count = Object.keys(task_details.steps).length;
 		var num = 1;
 		for(var k in task_details.steps){
@@ -812,7 +820,7 @@ var runTaskStepsUI = function (task_details) {
 			});
 		}
 	}
-}
+};
 
 /* run post-trigger */
 var runTaskComplete = function (task_id) {
@@ -821,16 +829,17 @@ var runTaskComplete = function (task_id) {
 
 	$('div.progress_description').html('Completing...');
 
+	var className, message, completeText;
 	if(task_fail){
-		// add result message
-		$('#task_modal div.progress-info').addClass('alert-danger').append(defaultTaskMessages.task_failed + collapse_btn + collapse_pnl);
-		$('#tsk_result_details').html(task_fail_text + task_complete_text);
-		task_fail_text = task_complete_text = '';
-		//remove abort button
-		if($('#task_modal .abort_button').length > 0) {
-			$('#task_modal .abort_button').remove();
-		}
+		className = 'alert-danger';
+		message = defaultTaskMessages.task_failed;
+		completeText = task_fail_text + task_complete_text;
 	} else {
+		className = 'alert-success';
+		message = defaultTaskMessages.task_success;
+		completeText = task_complete_text;
+	}
+
 		$.ajax({
 			type: "POST",
 			async: false,
@@ -839,16 +848,13 @@ var runTaskComplete = function (task_id) {
 			datatype: 'json',
 			global: false,
 			success: function (data) {
-				var message = '';
 				if(data.result_text){
-					message = defaultTaskMessages.task_success + '<br>'+data.result_text
-				}else{
-					message = defaultTaskMessages.task_success;
+				message += '<br>'+data.result_text
 				}
 				// add result message
-				$('#task_modal div.progress-info').addClass('alert-success').append(message + collapse_btn + collapse_pnl);
-				$('#tsk_result_details').html(task_complete_text);
-				task_complete_text = '';
+			$('#task_modal div.progress-info').addClass(className).append(message + collapse_btn + collapse_pnl);
+			$('#tsk_result_details').html(completeText);
+			task_fail_text = task_complete_text = '';
 				//remove abort button
 				if($('#task_modal .abort_button').length > 0) {
 					$('#task_modal .abort_button').remove();
@@ -859,9 +865,9 @@ var runTaskComplete = function (task_id) {
 				$('div.progress_description').html('');
 			}
 		});
-	}
+
 	$('#task_modal').data('bs.modal').options.backdrop = true;
-}
+};
 
 var taskRunError = function (jqXHR, textStatus, errorThrown) {
 	var error_txt = '';
@@ -877,11 +883,11 @@ var taskRunError = function (jqXHR, textStatus, errorThrown) {
 		error_txt = getErrorTextByXHR(jqXHR);
 		runTaskShowError(error_txt);
 	}
-}
+};
 
 var runTaskShowError = function (error_text) {
 	$('#task_modal .modal-body').html('<div class="alert alert-danger" role="alert">' + error_text + '</div>');
-}
+};
 
 /**
  * function for sequental ajax calls, one by one
@@ -906,7 +912,8 @@ function do_seqAjax(ajaxes, attempts_count){
 			keys.push(k);
 		}
 		var steps_cnt = keys.length;
-		var attempts = attempts_count || 3;// set attempts count for fail ajax call (for repeating request)
+		// set attempts count for fail ajax call (for repeating request)
+		var attempts = attempts_count || 3;
 		var kill = false;
 
 		//declare your function to run AJAX requests
@@ -1024,7 +1031,7 @@ var getErrorTextByXHR = function(xhr){
 	}
 	console.log(xhr);
 	return 'Connection error occurred. ' + error_txt;
-}
+};
 // end of task js
 
 
@@ -1037,7 +1044,7 @@ var getUrlParameter = function (sParam) {
 			return sParameterName[1];
 		}
 	}
-}
+};
 
 var searchSectionIcon = function(section) {
 	switch(section) {
@@ -1084,7 +1091,7 @@ var searchSectionIcon = function(section) {
 			return '<i class="fa fa-info-circle fa-fw"></i> ';
 			break;
 	}
-}
+};
 
 var updateANT = function (url) {
 	$.ajax({
@@ -1095,7 +1102,7 @@ var updateANT = function (url) {
 			$('.ant_window').find('span.badge').remove();
 		}
 	});
-}
+};
 
 var loadAndShowData = function (url, $elem) {
 	$.ajax({
@@ -1105,14 +1112,14 @@ var loadAndShowData = function (url, $elem) {
 			$elem.html(data);
 		}
 	});
-}
+};
 
 function imgError(image) {
 	image.onerror = "";
 	image.src = "images/broken_image.jpg";
 	image.title = "image not found or broken";
 	return true;
-}
+};
 
 //function adds Resource Library Button into WYSIWYG editor
 function openTextEditRLModal(editor, cursorPosition, baseUrl){
@@ -1163,7 +1170,7 @@ function openTextEditRLModal(editor, cursorPosition, baseUrl){
 
 			});
 	});
-}
+};
 
 //Jquery extension with textarea management
 jQuery.fn.extend({
@@ -1236,3 +1243,25 @@ jQuery.fn.extend({
 		});
 	}
 });
+
+/**
+ * $.parseParams - parse query string parameters into an object.
+ */
+(function($) {
+	var re = /([^&=]+)=?([^&]*)/g;
+	var decodeRE = /\+/g;  // Regex for replacing addition symbol with a space
+	var decode = function (str) {return decodeURIComponent( str.replace(decodeRE, " ") );};
+	$.parseParams = function(query) {
+		var params = {}, e;
+		while ( e = re.exec(query) ) {
+			var k = decode( e[1] ), v = decode( e[2] );
+			if (k.substring(k.length - 2) === '[]') {
+				k = k.substring(0, k.length - 2);
+				(params[k] || (params[k] = [])).push(v);
+			}else{
+				params[k] = v;
+			}
+		}
+		return params;
+	};
+})(jQuery);

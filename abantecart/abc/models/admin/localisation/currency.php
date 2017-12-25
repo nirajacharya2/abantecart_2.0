@@ -17,252 +17,268 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
+
 use abc\core\engine\Model;
 use abc\lib\AConnect;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ModelLocalisationCurrency
+ *
  * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
  */
-class ModelLocalisationCurrency extends Model {
-	/**
-	 * @param array $data
-	 * @return int
-	 */
-	public function addCurrency($data) {
-		$this->db->query("INSERT INTO " . $this->db->table("currencies") . " 
-		                    (`title`,
-		                     `code`,
-		                     `symbol_left`,
-		                     `symbol_right`,
-		                     `decimal_place`,
-		                     `value`,
-		                     `status`,
-		                     `date_modified`)
-						  VALUES ('" . $this->db->escape($data[ 'title' ]) . "',
-						          '" . $this->db->escape($data[ 'code' ]) . "',
-						          '" . $this->db->escape($data[ 'symbol_left' ]) . "',
-						          '" . $this->db->escape($data[ 'symbol_right' ]) . "',
-						          '" . $this->db->escape($data[ 'decimal_place' ]) . "',
-						          '" . $this->db->escape($data[ 'value' ]) . "',
-						          '" . (int)$data[ 'status' ] . "',
-						          NOW())");
+class ModelLocalisationCurrency extends Model
+{
+    /**
+     * @param array $data
+     *
+     * @return int
+     */
+    public function addCurrency($data)
+    {
+        $this->db->query("INSERT INTO ".$this->db->table("currencies")." 
+                            (`title`,
+                             `code`,
+                             `symbol_left`,
+                             `symbol_right`,
+                             `decimal_place`,
+                             `value`,
+                             `status`,
+                             `date_modified`)
+                          VALUES ('".$this->db->escape($data['title'])."',
+                                  '".$this->db->escape($data['code'])."',
+                                  '".$this->db->escape($data['symbol_left'])."',
+                                  '".$this->db->escape($data['symbol_right'])."',
+                                  '".$this->db->escape($data['decimal_place'])."',
+                                  '".$this->db->escape($data['value'])."',
+                                  '".(int)$data['status']."',
+                                  NOW())");
 
-		$this->cache->remove('localization');
-		return $this->db->getLastId();
-	}
+        $this->cache->remove('localization');
 
-	/**
-	 * @param int $currency_id
-	 * @param $data
-	 * @return bool
-	 */
-	public function editCurrency($currency_id, $data) {
-		// prevent disabling the only enabled currency in cart
-		if (isset($data[ 'status' ]) && !$data[ 'status' ]) {
-			$enabled = array();
-			$all = $this->getCurrencies();
-			foreach ($all as $c) {
-				if ($c[ 'status' ] && $c[ 'currency_id' ] != $currency_id) {
-					$enabled[ ] = $c;
-				}
-			}
-			if (!$enabled) {
-				return false;
-			}
-		}
+        return $this->db->getLastId();
+    }
 
-		$fields = array( 'title', 'code', 'symbol_left', 'symbol_right', 'decimal_place', 'value', 'status', );
-		$update = array( 'date_modified = NOW()' );
-		foreach ($fields as $f) {
-			if (isset($data[ $f ]))
-				$update[ ] = $f." = '" . $this->db->escape($data[ $f ]) . "'";
-		}
-		if (!empty($update)) {
-			$this->db->query("UPDATE " . $this->db->table("currencies") . " 
-							  SET " . implode(',', $update) . "
-							  WHERE currency_id = '" . (int)$currency_id . "'");
-			$this->cache->remove('localization');
-		}
-		return true;
-	}
+    /**
+     * @param int $currency_id
+     * @param     $data
+     *
+     * @return bool
+     */
+    public function editCurrency($currency_id, $data)
+    {
+        // prevent disabling the only enabled currency in cart
+        if (isset($data['status']) && ! $data['status']) {
+            $enabled = array();
+            $all = $this->getCurrencies();
+            foreach ($all as $c) {
+                if ($c['status'] && $c['currency_id'] != $currency_id) {
+                    $enabled[] = $c;
+                }
+            }
+            if ( ! $enabled) {
+                return false;
+            }
+        }
 
-	/**
-	 * @param int $currency_id
-	 * @return bool
-	 */
-	public function deleteCurrency($currency_id) {
-		// prevent deleting all currencies
-		if ($this->getTotalCurrencies() < 2) {
-			return false;
-		}
-		$this->db->query("DELETE FROM " . $this->db->table("currencies") . " 
-						  WHERE currency_id = '" . (int)$currency_id . "'");
-		$this->cache->remove('localization');
-		return true;
-	}
+        $fields = array('title', 'code', 'symbol_left', 'symbol_right', 'decimal_place', 'value', 'status',);
+        $update = array('date_modified = NOW()');
+        foreach ($fields as $f) {
+            if (isset($data[$f])) {
+                $update[] = $f." = '".$this->db->escape($data[$f])."'";
+            }
+        }
+        if ( ! empty($update)) {
+            $this->db->query("UPDATE ".$this->db->table("currencies")." 
+                              SET ".implode(',', $update)."
+                              WHERE currency_id = '".(int)$currency_id."'");
+            $this->cache->remove('localization');
+        }
 
-	/**
-	 * @param int $currency_id
-	 * @return array
-	 */
-	public function getCurrency($currency_id) {
-		$query = $this->db->query("SELECT DISTINCT *
-								   FROM " . $this->db->table("currencies") . " 
-								   WHERE currency_id = '" . (int)$currency_id . "'");
+        return true;
+    }
 
-		return $query->row;
-	}
+    /**
+     * @param int $currency_id
+     *
+     * @return bool
+     */
+    public function deleteCurrency($currency_id)
+    {
+        // prevent deleting all currencies
+        if ($this->getTotalCurrencies() < 2) {
+            return false;
+        }
+        $this->db->query("DELETE FROM ".$this->db->table("currencies")." 
+                          WHERE currency_id = '".(int)$currency_id."'");
+        $this->cache->remove('localization');
 
-	/**
-	 * @param array $data
-	 * @return array
-	 */
-	public function getCurrencies($data = array()) {
-		if ($data) {
-			$sql = "SELECT * FROM " . $this->db->table("currencies") . " ";
+        return true;
+    }
 
-			$sort_data = array(
-				'title',
-				'code',
-				'value',
-				'status',
-				'date_modified'
-			);
+    /**
+     * @param int $currency_id
+     *
+     * @return array
+     */
+    public function getCurrency($currency_id)
+    {
+        $query = $this->db->query("SELECT DISTINCT *
+                                   FROM ".$this->db->table("currencies")." 
+                                   WHERE currency_id = '".(int)$currency_id."'");
 
-			if (isset($data[ 'sort' ]) && in_array($data[ 'sort' ], $sort_data)) {
-				$sql .= " ORDER BY " . $data[ 'sort' ];
-			} else {
-				$sql .= " ORDER BY title";
-			}
+        return $query->row;
+    }
 
-			if (isset($data[ 'order' ]) && ($data[ 'order' ] == 'DESC')) {
-				$sql .= " DESC";
-			} else {
-				$sql .= " ASC";
-			}
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    public function getCurrencies($data = array())
+    {
+        if ($data) {
+            $sql = "SELECT * FROM ".$this->db->table("currencies")." ";
 
-			if (isset($data[ 'start' ]) || isset($data[ 'limit' ])) {
-				if ($data[ 'start' ] < 0) {
-					$data[ 'start' ] = 0;
-				}
+            $sort_data = array(
+                'title',
+                'code',
+                'value',
+                'status',
+                'date_modified',
+            );
 
-				if ($data[ 'limit' ] < 1) {
-					$data[ 'limit' ] = 20;
-				}
+            if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+                $sql .= " ORDER BY ".$data['sort'];
+            } else {
+                $sql .= " ORDER BY title";
+            }
 
-				$sql .= " LIMIT " . (int)$data[ 'start' ] . "," . (int)$data[ 'limit' ];
-			}
+            if (isset($data['order']) && ($data['order'] == 'DESC')) {
+                $sql .= " DESC";
+            } else {
+                $sql .= " ASC";
+            }
 
-			$query = $this->db->query($sql);
+            if (isset($data['start']) || isset($data['limit'])) {
+                if ($data['start'] < 0) {
+                    $data['start'] = 0;
+                }
 
-			return $query->rows;
-		} else {
-			$currency_data = $this->cache->pull('localization.currency');
+                if ($data['limit'] < 1) {
+                    $data['limit'] = 20;
+                }
 
-			if ($currency_data === false) {
-				$query = $this->db->query("SELECT *
-											FROM " . $this->db->table("currencies") . " 
-											ORDER BY title ASC");
+                $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+            }
 
-				foreach ($query->rows as $result) {
-					$currency_data[ $result[ 'code' ] ] = array(
-						'currency_id' => $result[ 'currency_id' ],
-						'title' => $result[ 'title' ],
-						'code' => $result[ 'code' ],
-						'symbol_left' => $result[ 'symbol_left' ],
-						'symbol_right' => $result[ 'symbol_right' ],
-						'decimal_place' => $result[ 'decimal_place' ],
-						'value' => $result[ 'value' ],
-						'status' => $result[ 'status' ],
-						'date_modified' => $result[ 'date_modified' ]
-					);
-				}
+            $query = $this->db->query($sql);
 
-				$this->cache->push('localization.currency', $currency_data);
-			}
+            return $query->rows;
+        } else {
+            $currency_data = $this->cache->pull('localization.currency');
 
-			return $currency_data;
-		}
-	}
+            if ($currency_data === false) {
+                $query = $this->db->query("SELECT *
+                                            FROM ".$this->db->table("currencies")." 
+                                            ORDER BY title ASC");
 
-	/**
-	 * NOTE: Update of currency values works only for default store!
-	 */
-	public function updateCurrencies() {
-		if (extension_loaded('curl')) {
-			$this->load->model('setting/setting');
-			$settings = $this->model_setting_setting->getSetting('details', 0);
-			$base_currency_code = $settings['config_currency'];
-			$data = array();
+                foreach ($query->rows as $result) {
+                    $currency_data[$result['code']] = array(
+                        'currency_id'   => $result['currency_id'],
+                        'title'         => $result['title'],
+                        'code'          => $result['code'],
+                        'symbol_left'   => $result['symbol_left'],
+                        'symbol_right'  => $result['symbol_right'],
+                        'decimal_place' => $result['decimal_place'],
+                        'value'         => $result['value'],
+                        'status'        => $result['status'],
+                        'date_modified' => $result['date_modified'],
+                    );
+                }
 
-			$query = $this->db->query("SELECT *
-									   FROM " . $this->db->table("currencies") . " 
-									   WHERE code != '" . $this->db->escape($base_currency_code) . "'
-									        AND date_modified > '" . date(strtotime('-1 day')) . "'");
+                $this->cache->push('localization.currency', $currency_data);
+            }
 
-			foreach ($query->rows as $result) {
-				$data[ ] = $base_currency_code . $result[ 'code' ] . '=X';
-			}
+            return $currency_data;
+        }
+    }
 
-			$url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' . implode(',', $data) . '&f=sl1&e=.csv';
-			$connect = new AConnect(true);
-			$content = $connect->getData($url);
-			$lines = explode("\n", trim($content));
+    /**
+     * NOTE: Update of currency values works only for default store!
+     */
+    public function updateCurrencies()
+    {
+        $this->load->model('setting/setting');
+        $settings = $this->model_setting_setting->getSetting('details', 0);
+        $api_key = isset($settings['alphavantage_api_key']) && $settings['alphavantage_api_key'] ? $settings['alphavantage_api_key'] : 'P6WGY9G9LB22GMBJ';
+        $base_currency_code = $settings['config_currency'];
 
-			foreach ($lines as $line) {
-				$currency = substr($line, 4, 3);
-				$value = substr($line, 11, 6);
-				if ((float)$value) {
-					$sql = "UPDATE " . $this->db->table("currencies") . " 
-							SET value = '" . (float)$value . "', date_modified = NOW()
-							WHERE code = '" . $this->db->escape($currency) . "'";
-					$this->db->query($sql);
-				}
-			}
-			$sql = "UPDATE " . $this->db->table("currencies") . " 
-							  SET value = '1.00000',
-							      date_modified = NOW()
-							  WHERE code = '" . $this->db->escape($base_currency_code) . "'";
-			$this->db->query($sql);
-			$this->cache->remove('localization');
-		}
-	}
+        $query = $this->db->query("SELECT *
+                                       FROM ".$this->db->table("currencies")." 
+                                       WHERE code != '".$this->db->escape($base_currency_code)."'
+                                            AND date_modified > '".date(strtotime('-1 day'))."'");
 
-	/**
-	 * @param string $new_currency_code
-	 * @return bool
-	 */
-	public function switchConfigCurrency($new_currency_code){
-		$new_currency_code = mb_strtoupper(trim($new_currency_code));
-		$all_currencies = $this->getCurrencies();
-		$new_currency = $all_currencies[$new_currency_code];
-		if(!$new_currency_code || !$new_currency){
-			return false;
-		}
-		$scale = 1/$new_currency['value'];
-		foreach($all_currencies as $code => $currency){
-			if($code == $new_currency_code){
-				$new_value = 1.00000;
-			}else{
-				$new_value = $currency['value']*$scale;
-			}
-			$this->editCurrency($currency['currency_id'], array('value' => $new_value));
-		}
-		return true;
-	}
+        foreach ($query->rows as $result) {
+            $url = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code.'&to_currency='.$result['code'].'&apikey='.$api_key;
+            $connect = new AConnect(true);
+            $json = $connect->getData($url);
+            if ( ! isset($json["Error Message"])) {
+                $value = (float)$json["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
+                $this->db->query(
+                    "UPDATE ".$this->db->table("currencies")." 
+                    SET value = '".$value."', 
+                        date_modified = NOW() 
+                    WHERE code = '".$this->db->escape($result['code'])."'");
+            }
+        }
+        $sql = "UPDATE ".$this->db->table("currencies")." 
+              SET value = '1.00000',
+                  date_modified = NOW()
+              WHERE code = '".$this->db->escape($base_currency_code)."'";
+        $this->db->query($sql);
+        $this->cache->remove('localization');
 
+    }
 
-	/**
-	 * @return int
-	 */
-	public function getTotalCurrencies() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table("currencies") . ";");
-		return $query->row[ 'total' ];
-	}
+    /**
+     * @param string $new_currency_code
+     *
+     * @return bool
+     */
+    public function switchConfigCurrency($new_currency_code)
+    {
+        $new_currency_code = mb_strtoupper(trim($new_currency_code));
+        $all_currencies = $this->getCurrencies();
+        $new_currency = $all_currencies[$new_currency_code];
+        if ( ! $new_currency_code || ! $new_currency) {
+            return false;
+        }
+        $scale = 1 / $new_currency['value'];
+        foreach ($all_currencies as $code => $currency) {
+            if ($code == $new_currency_code) {
+                $new_value = 1.00000;
+            } else {
+                $new_value = $currency['value'] * $scale;
+            }
+            $this->editCurrency($currency['currency_id'], array('value' => $new_value));
+        }
+
+        return true;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalCurrencies()
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total FROM ".$this->db->table("currencies").";");
+
+        return $query->row['total'];
+    }
 }
