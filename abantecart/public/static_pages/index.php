@@ -23,7 +23,7 @@
 namespace abc;
 use abc\lib\ASession;
 
-$dir_app = dirname(__DIR__) . '/../../abc/';
+$dir_app = __DIR__ . '/../../abc/';
 require $dir_app.'abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -34,7 +34,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 ABC::env('DIR_APP', $dir_app);
 ABC::env('DIR_CORE', $dir_app.'core/');
 ABC::env('DIR_LIB', $dir_app.'lib/');
-ABC::env('DIR_PUBLIC', basename(__DIR__).'/');
+ABC::env('DIR_PUBLIC', dirname(__DIR__).'/');
 
 // HTTP
 $dirname = rtrim(dirname($_SERVER['PHP_SELF']), '/.\\');
@@ -46,7 +46,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 	ABC::env('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
 ABC::env('HTTP_SERVER', 'http://' . ABC::env('REAL_HOST') . $dirname);
-ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . dirname(dirname($dirname)));
+ABC::env('HTTP_ABANTECART', 'http://' . $_SERVER['HTTP_HOST'] . dirname($dirname,2));
 
 //check if this is admin and show option to report this issue 
 $from_admin = false;

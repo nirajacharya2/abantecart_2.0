@@ -21,8 +21,10 @@
 namespace abc\core\engine;
 
 use abc\ABC;
+use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
+use abc\lib\AException;
 use abc\lib\AWarning;
 
 if ( ! class_exists('abc\ABC')) {
@@ -76,7 +78,9 @@ class AView
      * @var array
      */
     public $data = array();
-
+    /**
+     * @var false|object|\abc\lib\AViewDefaultRender
+     */
     protected $render;
     /**
      * @var bool
@@ -89,7 +93,7 @@ class AView
 
     /**
      * @param \abc\core\engine\Registry $registry
-     * @param int                       $instance_id
+     * @param int $instance_id
      */
     public function __construct($registry, $instance_id)
     {
@@ -103,6 +107,10 @@ class AView
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
         $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common/';
         $this->instance_id = $instance_id;
+        $this->render = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\lib\AViewDefaultRender');
+        if(!$this->render){
+            throw new AException(AC_ERR_LOAD,'AVIew Error: Cannot to load view render!');
+        }
     }
 
     public function __get($key)
@@ -749,17 +757,9 @@ class AView
             return '';
         }
 
-        ADebug::checkpoint('_fetch '.$file.' start');
-        extract($this->data);
-
-        ob_start();
-        /** @noinspection PhpIncludeInspection */
-        require($file);
-        $content = ob_get_contents();
-        ob_end_clean();
-
+        ADebug::checkpoint('_fetch '.$file.' start. View-render: '.get_class($this->render));
+        $content = $this->render->fetch($file, $this->data);
         ADebug::checkpoint('_fetch '.$file.' end');
-
         return $content;
     }
 }

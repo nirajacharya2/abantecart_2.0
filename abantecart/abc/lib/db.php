@@ -185,7 +185,7 @@ class ADB{
 	public function __call($function_name, $args){
 		$item = $this->orm;
 		if ( method_exists( $item, $function_name ) ){
-			return call_user_func(array($item, $function_name), $args);
+			return call_user_func_array(array($item, $function_name), $args);
 		} else {
 			return null;
 		}
