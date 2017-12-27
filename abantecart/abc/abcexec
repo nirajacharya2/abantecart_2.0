@@ -49,7 +49,7 @@ if(!$class || $class=='help'){
 
 //try to get instance of executor or die
 /**
- * @var \abc\core\backend\scripts\Install | array $executor
+ * @var \abc\core\backend\Install | array $executor
  */
 $executor = getExecutor($class);
 

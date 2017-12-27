@@ -210,10 +210,10 @@ function showError($text){
 function showHelpPage(){
 	global $registry;
 	//first of all get list of scripts
-	$dirs = glob(__DIR__.'/scripts/*',GLOB_ONLYDIR);
+	$executors = glob(__DIR__.'/scripts/*.php');
 	$help = [];
-	foreach($dirs as $dir) {
-		$name = basename($dir);
+	foreach($executors as $exec) {
+		$name = basename($exec);
 		$executor = getExecutor($name,true);
 		if( is_array($executor) ){
 			$registry->get('log')->write($executor['message']);
@@ -269,12 +269,12 @@ function showHelpPage(){
  * @param string $name
  * @param bool $silent_mode - silent mode
  *
- * @return array | \abc\core\backend\scripts\Install
+ * @return array | \abc\core\backend\Install
  */
 function getExecutor($name, $silent_mode = false){
-	$run_file = __DIR__.'/scripts/'.$name.'/'.$name.'.php';
+	$run_file = __DIR__.'/scripts/'.$name.'.php';
 	if(!is_file($run_file)){
-		$error_text = "Error: Script ".$name.".php not found in ".__DIR__."/ directory!";
+		$error_text = "Error: Script ".$run_file.".php not found!";
 		if(!$silent_mode) {
 			showError($error_text);
             exit(1);
@@ -288,9 +288,9 @@ function getExecutor($name, $silent_mode = false){
 	try{
 	    require $run_file;
 		/**
-		 * @var \abc\core\backend\scripts\Install $executor
+		 * @var \abc\core\backend\Install $executor
 		 */
-		$class_name = "\abc\core\backend\scripts\\".$name;
+		$class_name = "\abc\core\backend\\".$name;
 		if(class_exists($class_name)) {
             return $executor = new $class_name();
         }else{
