@@ -6,6 +6,7 @@ use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
 use abc\lib\AAssetPublisher;
 use abc\lib\AException;
+use abc\lib\ALanguageManager;
 
 class Cache implements ABCExec
 {
@@ -65,7 +66,8 @@ class Cache implements ABCExec
         $this->errors = [];
         $registry = Registry::getInstance();
         $app_cache = $registry->get('cache');
-        $languages = $registry->get('language')->getActiveLanguages();
+        $lang_obj = new ALanguageManager($registry);
+        $languages = $lang_obj->getActiveLanguages();
         $registry->get('load')->model('setting/store');
         $stores = $registry->get('model_setting_store')->getStores();
         foreach ($cache_groups as $group) {
