@@ -43,8 +43,8 @@ if(!preg_match('/^--(.*)$/', $command)) {
     $class = $action = '';
 }
 
-if(!$class || $class=='help'){
-	showHelpPage();
+if(!$class || $class=='help' || $action == 'help'){
+	showHelpPage($class);
 }
 
 //try to get instance of executor or die
@@ -58,8 +58,7 @@ $executor = getExecutor($class);
 $options = parseOptions($args);
 
 if(!$options && !$action){
-    echo $executor->help();
-    exit(0);
+	showHelpPage($class);
 }
 
 //validate command and options
