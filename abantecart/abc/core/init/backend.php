@@ -20,6 +20,7 @@ namespace abc\core\backend;
 
 use abc\ABC;
 use abc\core\engine\ALoader;
+use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\lib\ACache;
 use abc\lib\AConfig;
@@ -76,7 +77,7 @@ $defaults = [
     'DIR_SYSTEM'          => $dir_app.'system/',
     'DIR_CORE'            => $dir_app.'core/',
     'DIR_LIB'             => $dir_app.'lib/',
-    'DIR_IMAGE'           => $dir_app.'images/',
+    'DIR_IMAGE'           => $dir_public.'images/',
     'DIR_DOWNLOAD'        => $dir_app.'download/',
     'DIR_CONFIG'          => $dir_app.'config/',
     'DIR_CACHE'           => $dir_app.'system/cache/',
@@ -103,7 +104,7 @@ foreach ($defaults as $name => $value) {
 }
 
 // App Version
-include($dir_app.'core/init/version.php');
+include('version.php');
 $dir_lib = ABC::env('DIR_LIB');
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');
@@ -111,10 +112,10 @@ require_once($dir_lib.'error.php');
 require_once($dir_lib.'warning.php');
 
 //load base libraries
-require_once(ABC::env('DIR_CORE').'init/base.php');
+require_once('base.php');
 
 $registry = Registry::getInstance();
-require_once(ABC::env('DIR_CORE').'init/admin.php');
+require_once('admin.php');
 
 // Loader
 $registry->set('load', new ALoader($registry));
@@ -150,6 +151,11 @@ $registry->set('document', new ADocument());
 
 //main instance of data encryption
 $registry->set('dcrypt', new ADataEncryption());
+
+// Extensions api
+$extensions = new ExtensionsApi();
+$extensions->loadAvailableExtensions();
+$registry->set('extensions', $extensions);
 
 // functions
 
@@ -214,7 +220,7 @@ function showHelpPage($script_name = '')
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
     //first of all get list of scripts
-    $executors = glob(__DIR__.'/scripts/*.php');
+    $executors = glob(ABC::env('DIR_CORE').'backend/scripts/*.php');
     $help = [];
     foreach ($executors as $exec) {
 
@@ -284,7 +290,7 @@ function showHelpPage($script_name = '')
  */
 function getExecutor($name, $silent_mode = false)
 {
-    $run_file = __DIR__.'/scripts/'.$name.'.php';
+    $run_file = ABC::env('DIR_CORE').'backend/scripts/'.$name.'.php';
     if ( ! is_file($run_file)) {
         $error_text = "Error: Script ".$run_file.".php not found!";
         if ( ! $silent_mode) {

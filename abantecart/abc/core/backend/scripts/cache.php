@@ -43,7 +43,7 @@ class Cache implements ABCExec
             $alias = $opt_list[$action]['arguments']['--'.$cache_section]['alias'];
             if(!$alias){continue;}
             $cache_groups = explode(',', $alias);
-            array_walk($cache_groups, 'trim');
+            $cache_groups = array_map('trim', $cache_groups);
 
             if($action == 'delete'){
                 $result = $this->_process_delete($cache_groups);
@@ -51,9 +51,6 @@ class Cache implements ABCExec
                 $result = $this->_process_create($cache_groups);
             }
         }
-
-
-
         return $result ? true : $this->errors;
     }
 
@@ -70,14 +67,16 @@ class Cache implements ABCExec
         $languages = $lang_obj->getActiveLanguages();
         $registry->get('load')->model('setting/store');
         $stores = $registry->get('model_setting_store')->getStores();
+        var_dump($cache_groups);
         foreach ($cache_groups as $group) {
             if ($group == 'media') {
                 try {
-                    include(ABC::env('DIR_APP').'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'pages'.DIRECTORY_SEPARATOR.'tool'.DIRECTORY_SEPARATOR.'cache.php');
-                    $cc = new ControllerPagesToolCache(Registry::getInstance(), 0, 'tool/cache');
+                    require(ABC::env('DIR_APP').'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'pages'.DIRECTORY_SEPARATOR.'tool'.DIRECTORY_SEPARATOR.'cache.php');
+                    $cc = new ControllerPagesToolCache($registry, 0, 'tool/cache');
                     $cc->deleteThumbnails();
                 } catch (\Exception $e) {
                     $this->errors[] = 'Cannot to delete thumbnails. '.$e->getMessage();
+
                 }
             } elseif ($group == 'install_upgrade_history') {
                 try {

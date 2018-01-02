@@ -342,7 +342,7 @@ class ALanguage{
 	public function setCurrentLanguage(){
 		$config = $this->registry->get('config');
 		$session = $this->registry->get('session');
-		$request = $this->registry->get('request');
+		$request = (object)$this->registry->get('request');
 
 		//build code based array
 		$languages = array ();
