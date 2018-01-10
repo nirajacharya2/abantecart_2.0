@@ -19,6 +19,7 @@
 namespace abc\core\backend;
 
 use abc\ABC;
+use abc\core\engine\AHtml;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
@@ -27,6 +28,7 @@ use abc\lib\AConfig;
 use abc\lib\ADataEncryption;
 use abc\lib\ADB;
 use abc\lib\ADocument;
+use abc\lib\ALanguageManager;
 use abc\lib\ALog;
 
 // Error Reporting
@@ -58,6 +60,7 @@ require dirname(__DIR__, 2).'/abc.php';
 //run constructor of ABC class to load environment
 new ABC();
 ABC::env('IS_ADMIN', true);
+ABC::env('INDEX_FILE', 'index.php');
 $charset = ABC::env('APP_CHARSET');
 $charset = ! $charset ? 'UTF-8' : $charset;
 mb_internal_encoding($charset);
@@ -120,6 +123,9 @@ require_once('admin.php');
 // Loader
 $registry->set('load', new ALoader($registry));
 
+// URL Class
+$registry->set('html', new AHtml($registry));
+
 // Database
 
 $registry->set('db', new ADB(
@@ -142,7 +148,7 @@ $registry->set('cache', new ACache());
 // Config
 $config = new AConfig($registry);
 $registry->set('config', $config);
-
+$registry->set('language', new ALanguageManager($registry));
 // Log
 $registry->set('log', new ALog(ABC::env('DIR_LOGS').'cli_log.txt'));
 

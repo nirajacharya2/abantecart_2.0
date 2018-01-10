@@ -25,6 +25,7 @@ use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\ARequest;
 use abc\lib\AException;
+use abc\models\storefront\ModelToolSeoUrl;
 
 if ( ! class_exists('abc\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -120,10 +121,11 @@ class AHtml extends AController
      *
      * @param string $rt
      * @param string $params
+     * @param string $mode - can be 'storefront' or empty
      *
      * @return string
      */
-    private function buildURL($rt, $params = '')
+    private function buildURL($rt, $params = '', $mode = '')
     {
         $suburl = '';
         //#PR Add admin path if we are in admin
@@ -144,7 +146,6 @@ class AHtml extends AController
         }
 
         $suburl = '?'.($rt ? 'rt='.$rt : '').$params.$suburl;
-
         return $suburl;
     }
 
@@ -280,12 +281,16 @@ class AHtml extends AController
     {
         //skip SEO for embed mode
         if ($this->registry->get('config')->get('embed_mode') == true) {
-            return $this->getURL($rt, $params);
+            return $this->getCatalogURL($rt, $params);
         }
-        $this->loadModel('tool/seo_url');
+        /**
+         * @var ModelToolSeoUrl $model
+         */
+        $model = $this->loadModel('tool/seo_url', 'storefront');
         //#PR Generate SEO URL based on standard URL
         //NOTE: SEO URL is non secure url
-        return $this->url_encode($this->model_tool_seo_url->rewrite($this->getNonSecureURL($rt, $params)), $encode);
+        //and can be generated only for storefront-side
+        return $this->url_encode($model->rewrite($this->getCatalogURL($rt, $params)), $encode);
     }
 
     /**

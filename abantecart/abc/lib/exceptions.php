@@ -39,6 +39,10 @@ require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
  * @return null
  */
 function ac_error_handler($errno, $errstr, $err_file, $err_line){
+    if ( error_reporting() == 0 ) {
+        // Error reporting is currently turned off or suppressed with @
+        return null;
+    }
 
 	if (class_exists('\abc\core\engine\Registry')){
 		$registry = Registry::getInstance();

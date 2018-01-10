@@ -35,9 +35,9 @@ final class AConfig{
 	private $registry;
 	public $groups = array ('details', 'general', 'checkout', 'appearance', 'mail', 'im', 'api', 'system');
 
-	public function __construct($registry){
+	public function __construct($registry, $store_url = ''){
 		$this->registry = $registry;
-		$this->_load_settings();
+		$this->_load_settings($store_url);
 	}
 
 	/**
@@ -93,7 +93,7 @@ final class AConfig{
 		}
 	}
 
-	private function _load_settings(){
+	private function _load_settings($store_url = ''){
 		/**
 		 * @var ACache $cache
 		 */
@@ -104,10 +104,14 @@ final class AConfig{
 		$db = $this->registry->get('db');
 
 		//detect URL for the store
-		$url = str_replace('www.', '', $_SERVER['HTTP_HOST']) . AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
-		if (ABC::env('INSTALL')){
-			$url = str_replace('install/', '', $url);
-		}
+        if($store_url){
+            $url = $store_url;
+        }else {
+            $url = str_replace('www.', '', $_SERVER['HTTP_HOST']).AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+            if (ABC::env('INSTALL')) {
+                $url = str_replace('install/', '', $url);
+            }
+        }
 
 		//enable cache storage based on configuration
 		$cache->enableCache();

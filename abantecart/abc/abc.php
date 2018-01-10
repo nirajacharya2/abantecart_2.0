@@ -47,25 +47,25 @@ class ABC extends ABCBase
      *
      * @param      $name
      * @param null $value
+     * @param bool $override - force set
      *
      * @return null
      */
-    public static function env($name, $value = null)
+    public static function env($name, $value = null, $override = false)
     {
         //if need to get
         if ($value === null && ! is_array($name)) {
             return isset(self::$env[$name]) ? self::$env[$name] : null;
-        } // if need to set batch of values
+        }
+        // if need to set batch of values
         else {
             if (is_array($name)) {
                 self::$env = array_merge(self::$env, $name);
-
                 return true;
             } else {
                 //when set one value
-                if ( ! array_key_exists($name, self::$env)) {
+                if ( ! array_key_exists($name, self::$env) || $override) {
                     self::$env[$name] = $value;
-
                     return true;
                 } else {
                     ADebug::warning(
@@ -75,7 +75,6 @@ class ABC extends ABCBase
                 }
             }
         }
-
         return null;
     }
 

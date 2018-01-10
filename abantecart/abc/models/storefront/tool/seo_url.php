@@ -20,6 +20,7 @@
 
 namespace abc\models\storefront;
 
+use abc\ABC;
 use abc\core\engine\Model;
 
 if ( ! class_exists('abc\ABC')) {
@@ -103,8 +104,12 @@ class ModelToolSeoUrl extends Model
                         $query = '?'.trim($query, '&');
                     }
                 }
-
-                return $url_data['scheme'].'://'.$url_data['host'].(isset($url_data['port']) ? ':'.$url_data['port'] : '').str_replace('/index.php', '', $url_data['path']).$url.$query;
+                $output = $url_data['scheme'].'://'.$url_data['host'];
+                $output .= (isset($url_data['port']) ? ':'.$url_data['port'] : '');
+                $index_file = ABC::env('INDEX_FILE');
+                $output .= ($index_file ? str_replace('/'.$index_file, '', $url_data['path']) : $url_data['path']);
+                $output .= $url.$query;
+                return $output;
             } else {
                 return $link;
             }
