@@ -5,15 +5,13 @@ namespace abc\core\backend;
 use abc\ABC;
 use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
-use abc\lib\AAssetPublisher;
 use abc\lib\AConfig;
 use abc\lib\AConnect;
 use abc\lib\AContentManager;
 use abc\lib\ACurrency;
-use abc\lib\AException;
 use abc\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
-use abc\models\storefront\ModelCatalogCategory;
+use abc\models\admin\ModelToolInstallUpgradeHistory;
 
 class Cache implements ABCExec
 {
@@ -21,6 +19,9 @@ class Cache implements ABCExec
     protected $results = [];
     protected $languages = [];
     protected $currencies = [];
+    /**
+     * @var AConnect
+     */
     protected $connect;
 
     public function validate(string $action, array $options)
@@ -131,7 +132,11 @@ class Cache implements ABCExec
 
             //loop by all categories of store
             $registry->get('load')->model('catalog/category');
-            $categories = $registry->get('model_catalog_category')->getCategoriesData(null, $store['store_id']);
+            /**
+             * @var \abc\models\admin\ModelCatalogCategory $model
+             */
+            $model = $registry->get('model_catalog_category');
+            $categories = $model->getCategoriesData(null, $store['store_id']);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL('product/category', '&category_id='.$category['category_id']);
                 //loop for all variants
@@ -141,10 +146,14 @@ class Cache implements ABCExec
 
             //loop by all products of store
             $registry->get('load')->model('catalog/product');
-            $total_products = $registry->get('model_catalog_product')->getTotalProducts(array('store_id' => $store['store_id']));
+            /**
+             * @var \abc\models\admin\ModelCatalogProduct $model
+             */
+            $model = $registry->get('model_catalog_product');
+            $total_products = $model->getTotalProducts(array('store_id' => $store['store_id']));
             $i = 0;
             while ($i <= $total_products) {
-                $products = $registry->get('model_catalog_product')->getProducts(
+                $products = $model->getProducts(
                     array(
                         'store_id' => $store['store_id'],
                         'start'    => $i,
@@ -186,22 +195,35 @@ class Cache implements ABCExec
         $lang_obj = new ALanguageManager($registry);
         $languages = $lang_obj->getActiveLanguages();
         $registry->get('load')->model('setting/store');
-        $stores = $registry->get('model_setting_store')->getStores();
+        /**
+         * @var ModelSettingStore $model
+         */
+        $model = $registry->get('model_setting_store');
+        $stores = $model->getStores();
 
         foreach ($cache_groups as $group) {
             if ($group == 'media') {
                 try {
-                    require_once(ABC::env('DIR_APP').'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'pages'.DIRECTORY_SEPARATOR.'tool'.DIRECTORY_SEPARATOR.'cache.php');
+                    $filename = ABC::env('DIR_APP');
+                    $filename .= 'controllers'.DIRECTORY_SEPARATOR;
+                    $filename .= 'admin'.DIRECTORY_SEPARATOR;
+                    $filename .= 'pages'.DIRECTORY_SEPARATOR;
+                    $filename .= 'tool'.DIRECTORY_SEPARATOR;
+                    $filename .= 'cache.php';
+                    require_once($filename);
                     $cc = new ControllerPagesToolCache($registry, 0, 'tool/cache');
                     $cc->deleteThumbnails();
                 } catch (\Exception $e) {
                     $this->errors[] = 'Cannot to delete thumbnails. '.$e->getMessage();
-
                 }
             } elseif ($group == 'install_upgrade_history') {
                 try {
                     $registry->get('load')->model('tool/install_upgrade_history');
-                    $registry->get('model_tool_install_upgrade_history')->deleteData();
+                    /**
+                     * @var ModelToolInstallUpgradeHistory $model
+                     */
+                    $model = $registry->get('model_tool_install_upgrade_history');
+                    $model->deleteData();
                 } catch (\Exception $e) {
                     $this->errors[] = 'Cannot to clear application history. '.$e->getMessage();
                 }
@@ -339,11 +361,4 @@ class Cache implements ABCExec
                 ],
         ];
     }
-
-    //TODO: need to complete
-    protected function _create_cache($section_name)
-    {
-
-    }
-
 }

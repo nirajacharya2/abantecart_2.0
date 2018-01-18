@@ -310,7 +310,7 @@ function getExecutor($name, $silent_mode = false)
         }
     }
     try {
-        require $run_file;
+        require_once $run_file;
         /**
          * @var \abc\core\backend\Install $executor
          */

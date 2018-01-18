@@ -102,7 +102,7 @@ class ACacheDriverFile extends ACacheDriver
 
         if ($check_expire === false || ($check_expire === true && $this->_checkExpire($key, $group) === true)) {
             if (file_exists($path)) {
-                $data = file_get_contents($path);
+                $data = @file_get_contents($path);
                 if ($data) {
                     // Remove security code line
                     $data = str_replace($this->security_code, '', $data);
