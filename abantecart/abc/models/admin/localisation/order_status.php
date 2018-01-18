@@ -46,17 +46,16 @@ class ModelLocalisationOrderStatus extends Model{
 		//check new order status id value. it need to be greater than base order status ids (see AOrderStatus class)
 		$max_base_order_status_id = max(array_keys($this->order_status->getBaseStatuses()));
 		$order_status_id = $order_status_id <= $max_base_order_status_id ? ($max_base_order_status_id + 1) : $order_status_id;
-		$language_id = $this->language->getContentLanguageID();
-		$this->language->replaceDescriptions('order_statuses',
-				array ('order_status_id' => (int)$order_status_id,
-				       'language_id'     => (int)$language_id),
-				array ($language_id => array (
-						'name' => $data['name']
-				)));
-
-		$sql = "INSERT INTO " . $this->db->table('order_status_ids') . " (order_status_id, status_text_id)
+		$sql = "INSERT INTO " . $this->db->table('order_statuses') . " (order_status_id, status_text_id)
 				VALUES (" . $order_status_id . ", '" . $this->db->escape($status_text_id) . "');";
 		$this->db->query($sql);
+        $language_id = $this->language->getContentLanguageID();
+        $this->language->replaceDescriptions('order_status_descriptions',
+                array ('order_status_id' => (int)$order_status_id,
+                       'language_id'     => (int)$language_id),
+                array ($language_id => array (
+                        'name' => $data['name']
+                )));
 
 		$this->cache->remove('localization');
 		return $order_status_id;
@@ -71,7 +70,7 @@ class ModelLocalisationOrderStatus extends Model{
 
 		$language_id = $this->language->getContentLanguageID();
 		if($data['name']){
-			$this->language->updateDescriptions('order_statuses',
+			$this->language->updateDescriptions('order_status_descriptions',
 					array ('order_status_id' => (int)$order_status_id,
 					       'language_id'     => (int)$language_id),
 					array ($language_id => array (
@@ -79,15 +78,13 @@ class ModelLocalisationOrderStatus extends Model{
 					)));
 		}
 
-
 		$status_text_id = AHelperUtils::preformatTextID($data['status_text_id']);
 		if ($status_text_id){
-			$sql = "UPDATE " . $this->db->table('order_status_ids') . "
+			$sql = "UPDATE " . $this->db->table('order_statuses') . "
 					SET status_text_id = '" . $this->db->escape($status_text_id) . "'
 					WHERE order_status_id = '" . $order_status_id . "'";
 			$this->db->query($sql);
 		}
-
 		$this->cache->remove('localization');
 	}
 
@@ -100,9 +97,9 @@ class ModelLocalisationOrderStatus extends Model{
 		if ($order_status_id <= max(array_keys($this->order_status->getBaseStatuses()))){
 			return false;
 		}
-		$this->db->query("DELETE FROM " . $this->db->table('order_statuses') . "
+		$this->db->query("DELETE FROM " . $this->db->table('order_status_descriptions') . "
 							WHERE order_status_id = '" . (int)$order_status_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table('order_status_ids') . "
+		$this->db->query("DELETE FROM " . $this->db->table('order_statuses') . "
 							WHERE order_status_id = '" . (int)$order_status_id . "'");
 
 		$this->cache->remove('localization');
@@ -116,11 +113,12 @@ class ModelLocalisationOrderStatus extends Model{
 	 */
 	public function getOrderStatus($order_status_id, $language_id = null){
 		$language_id = !(int)$language_id ? $this->language->getContentLanguageID() : (int)$language_id;
-		$query = $this->db->query("SELECT os.*, osi.status_text_id
+		$query = $this->db->query("SELECT osi.*, os.*
 								    FROM " . $this->db->table('order_statuses') . " os
-									LEFT JOIN " . $this->db->table('order_status_ids') . " osi ON osi.order_status_id = os.order_status_id
+									LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+									    ON osi.order_status_id = os.order_status_id
 								    WHERE os.order_status_id = '" . (int)$order_status_id . "'
-											AND os.language_id = '" . (int)$language_id . "'");
+											AND osi.language_id = '" . (int)$language_id . "'");
 		return $query->row;
 	}
 
@@ -134,11 +132,13 @@ class ModelLocalisationOrderStatus extends Model{
 			if (isset($data['content_language_id']) && $data['content_language_id'] > 0){
 				$language_id = $data['content_language_id'];
 			}
-			$sql = "SELECT os.*, osi.status_text_id
+
+			$sql = "SELECT osi.*, os.*
 				    FROM " . $this->db->table('order_statuses') . " os
-					LEFT JOIN " . $this->db->table('order_status_ids') . " osi ON osi.order_status_id = os.order_status_id
-				    WHERE os.language_id = '" . (int)$language_id . "'
-				    ORDER BY os.`name`";
+					LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+					    ON osi.order_status_id = os.order_status_id
+				    WHERE osi.language_id = '" . (int)$language_id . "'
+				    ORDER BY osi.`name`";
 
 			if (isset($data['order']) && ($data['order'] == 'DESC')){
 				$sql .= " DESC";
@@ -163,11 +163,12 @@ class ModelLocalisationOrderStatus extends Model{
 			$order_status_data = $this->cache->pull($cache_key);
 
 			if ($order_status_data === false) {
-				$query = $this->db->query("SELECT os.order_status_id, os.`name`, osi.status_text_id
+				$query = $this->db->query("SELECT osi.*, os.*
 										   FROM " . $this->db->table('order_statuses') . " os
-										   LEFT JOIN " . $this->db->table('order_status_ids') . " osi ON osi.order_status_id = os.order_status_id
-										   WHERE os.language_id = '" . $language_id . "'
-										   ORDER BY os.`name`");
+										   LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+										        ON osi.order_status_id = os.order_status_id
+										   WHERE osi.language_id = '" . $language_id . "'
+										   ORDER BY osi.`name`");
 				$order_status_data = $query->rows;
 				$this->cache->push($cache_key, $order_status_data);
 			}
@@ -180,27 +181,8 @@ class ModelLocalisationOrderStatus extends Model{
 	 * @return int
 	 */
 	public function getTotalOrderStatuses(){
-		$query = $this->db->query("SELECT COUNT(DISTINCT order_status_id) AS total
+		$query = $this->db->query("SELECT COUNT(order_status_id) AS total
       	                           FROM " . $this->db->table('order_statuses'));
 		return (int)$query->row['total'];
 	}
-
-
-	/**
-	 * @deprecated since 1.2.5
-	 * @param int $order_status_id
-	 * @return array
-	 */
-	public function getOrderStatusDescriptions($order_status_id){
-		$order_status_data = array ();
-
-		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table('order_statuses') . "
-									WHERE order_status_id = '" . (int)$order_status_id . "'");
-		foreach ($query->rows as $result){
-			$order_status_data[$result['language_id']] = array ('name' => $result['name']);
-		}
-		return $order_status_data;
-	}
-
 }

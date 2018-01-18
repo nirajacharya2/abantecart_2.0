@@ -64,7 +64,7 @@ DROP TABLE IF EXISTS `ac_order_data` CASCADE;
 DROP TABLE IF EXISTS `ac_order_history` CASCADE;
 DROP TABLE IF EXISTS `ac_order_options` CASCADE;
 DROP TABLE IF EXISTS `ac_order_statuses` CASCADE;
-DROP TABLE IF EXISTS `ac_order_status_ids` CASCADE;
+DROP TABLE IF EXISTS `ac_order_status_descriptions` CASCADE;
 DROP TABLE IF EXISTS `ac_orders` CASCADE;
 DROP TABLE IF EXISTS `ac_settings` CASCADE;
 DROP TABLE IF EXISTS `ac_language_definitions` CASCADE;
@@ -9077,17 +9077,18 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
--- DDL for table `order_status_ids`
+-- DDL for table `order_status_description`
 --
-CREATE TABLE `ac_order_status_ids` (
-  `order_status_id` int(11) NOT NULL,
+CREATE TABLE `ac_order_statuses` (
+  `order_status_id` int(11) NOT NULL AUTO_INCREMENT,
   `status_text_id` varchar(64) NOT NULL,
   PRIMARY KEY (`order_status_id`,`status_text_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE UNIQUE INDEX `ac_order_status_ids_idx`
-ON `ac_order_status_ids` ( `status_text_id`);
+CREATE UNIQUE INDEX `ac_order_statuses_idx`
+ON `ac_order_statuses` ( `status_text_id`);
 
-INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
+INSERT INTO `ac_order_statuses` (`order_status_id`, `status_text_id`)
+VALUES
 (0, 'incomplete'),
 (1, 'pending'),
 (2, 'processing'),
@@ -9103,10 +9104,10 @@ INSERT INTO `ac_order_status_ids` (`order_status_id`, `status_text_id`) VALUES
 (14, 'canceled_by_customer');
 
 --
--- DDL for table `order_statuses`
+-- DDL for table `order_status_descriptions`
 --
 
-CREATE TABLE `ac_order_statuses` (
+CREATE TABLE `ac_order_status_descriptions` (
   `order_status_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
@@ -9114,10 +9115,10 @@ CREATE TABLE `ac_order_statuses` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
--- Dumping data for table `order_statuses`
+-- Dumping data for table `order_status_descriptions`
 --
 
-INSERT INTO `ac_order_statuses` (`order_status_id`, `language_id`, `name`) VALUES
+INSERT INTO `ac_order_status_descriptions` (`order_status_id`, `language_id`, `name`) VALUES
 (0, 1, 'Incomplete'),
 (1, 1, 'Pending'),
 (2, 1, 'Processing'),
@@ -12618,7 +12619,7 @@ ALTER TABLE `ac_orders`
 ALTER TABLE `ac_orders`
   ADD FOREIGN KEY (`coupon_id`) REFERENCES `ac_coupons`(`coupon_id`) ON DELETE SET NULL;
 ALTER TABLE `ac_orders`
-  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`);
+  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_statuses`(`order_status_id`);
 
 ALTER TABLE `ac_customer_transactions`
   ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
@@ -12651,13 +12652,14 @@ ALTER TABLE `ac_order_data`
 ALTER TABLE `ac_order_data_types`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)  ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `ac_order_statuses`
-  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`);
-ALTER TABLE `ac_order_statuses`
+ALTER TABLE `ac_order_status_descriptions`
+  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_statuses`(`order_status_id`);
+
+ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_history`
-  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`);
+  ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_statuses`(`order_status_id`);
 
 ALTER TABLE `ac_order_options`
   ADD FOREIGN KEY (`product_option_value_id`) REFERENCES `ac_product_option_values`(`product_option_value_id`);
