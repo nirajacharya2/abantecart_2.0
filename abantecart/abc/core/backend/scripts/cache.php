@@ -136,7 +136,7 @@ class Cache implements ABCExec
              * @var \abc\models\admin\ModelCatalogCategory $model
              */
             $model = $registry->get('model_catalog_category');
-            $categories = $model->getCategoriesData(null, $store['store_id']);
+            $categories = $model->getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL('product/category', '&category_id='.$category['category_id']);
                 //loop for all variants

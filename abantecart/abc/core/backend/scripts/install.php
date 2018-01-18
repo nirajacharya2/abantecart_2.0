@@ -142,11 +142,14 @@ class Install implements ABCExec
             if ( ! $errors && isset($options['with-sample-data'])) {
                 $errors = $this->_load_demo_data($options);
             }
-            // move assets to public directory
+            // deploy assets and generate cache
             if ( ! $errors) {
-                $ap = new AAssetPublisher();
-                $ap->publish('all');
-                $errors = $ap->errors;
+                require_once 'deploy.php';
+                $deploy = new Deploy();
+                $result = $deploy->run('all',['all' => 1]);
+                if(is_array($result)){
+                    $errors = $result;
+                }
             }
             $output = $errors;
         }
