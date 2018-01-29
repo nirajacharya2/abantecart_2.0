@@ -358,6 +358,14 @@ EOD;
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
+
+        try {
+            require_once('deploy.php');
+            $deploy = new Deploy();
+            $deploy->run('config', ['stage' => 'default']);
+        }catch(AException $e){
+            $result[] = 'Deployment error. '.$e->getMessage().'('.$e->getCode().')';
+        }
         return $result;
     }
 

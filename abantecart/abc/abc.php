@@ -6,6 +6,7 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ARouter;
 use abc\lib\ADebug;
+use abc\lib\AException;
 
 require 'abc_base.php';
 
@@ -17,28 +18,41 @@ require 'abc_base.php';
 class ABC extends ABCBase
 {
     protected static $env = [];
-    protected static $stage;
+    static $loaded_config_file;
 
     /**
      * ABC constructor.
      *
-     * @param string $stage
+     * @param string $file
      */
-    public function __construct($stage = 'default')
+    public function __construct($file = '')
     {
-        if (is_null(self::$stage)) {
-            self::$stage = $stage;
+        //load and put config into environment
+        if(!$file || !is_file($file)) {
+            $file = __DIR__.'/config/enabled.php';
         }
+
+        $config = @include($file);
+        if($config) {
+            self::env($config);
+            self::$loaded_config_file = $file;
+        }
+    }
+
+    public function loadDefaultStage(){
         //load and put config into environment
         $files = glob(__DIR__.'/config/*.php');
         foreach ($files as $file) {
-            $config = include_once($file);
-            $stage_name = self::$stage;
-            if (isset($config[$stage_name])) {
-                self::env((array)$config[$stage_name]);
-            } elseif (isset($config['default'])) {
+            if($file == self::$loaded_config_file){
+                continue;
+            }
+            $config = @include($file);
+            if (isset($config['default'])) {
                 self::env((array)$config['default']);
             }
+        }
+        if(!self::$loaded_config_file){
+            self::$loaded_config_file = 'default';
         }
     }
 
@@ -55,6 +69,11 @@ class ABC extends ABCBase
     {
         //if need to get
         if ($value === null && ! is_array($name)) {
+            //check environment values
+            if(!sizeof(self::$env)){
+                // DO NOT ALLOW RUN APP WITH EMPTY ENVIRONMENT
+                exit('Fatal Error: empty environment!');
+            }
             return isset(self::$env[$name]) ? self::$env[$name] : null;
         }
         // if need to set batch of values

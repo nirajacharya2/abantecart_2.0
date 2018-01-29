@@ -381,7 +381,7 @@ class ALanguage{
 			$session->data['language'] = $lang_code;
 		}
 
-		if (!isset($request->cookie['language']) || $request->cookie['language'] != $lang_code) {
+		if (!headers_sent() && (!isset($request->cookie['language']) || $request->cookie['language'] != $lang_code)) {
 			//Set cookie for the language code
 			setcookie('language',
 					$lang_code,

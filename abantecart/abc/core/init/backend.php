@@ -58,7 +58,13 @@ if ( ! ini_get('date.timezone')) {
 
 require dirname(__DIR__, 2).'/abc.php';
 //run constructor of ABC class to load environment
-new ABC();
+
+$ABC = new ABC();
+if(!$ABC::$loaded_config_file){
+    $ABC->loadDefaultStage();
+    echo "Default stage environment loaded.\n";
+}
+
 ABC::env('IS_ADMIN', true);
 ABC::env('INDEX_FILE', 'index.php');
 $charset = ABC::env('APP_CHARSET');

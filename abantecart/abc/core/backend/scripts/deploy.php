@@ -2,6 +2,7 @@
 
 namespace abc\core\backend;
 
+use abc\ABC;
 use abc\lib\AException;
 
 class Deploy implements ABCExec
@@ -26,37 +27,111 @@ class Deploy implements ABCExec
     public function validate(string $action, array $options)
     {
         $action = !$action ? 'all' : $action;
-        //if now options - check action
-        if(!$options){
-            if(!in_array($action, array('all', 'help', 'core', 'extensions', 'vendors'))){
+
+        if(!in_array($action, array('all', 'help', 'core', 'config', 'extensions', 'vendors'))){
                 return ['Error: Unknown Action Parameter!'];
-            }
         }
+
+        if($action=='config' && !$options){
+            return ['Error: Stage name required!'];
+        }
+        if($action=='config' && !is_writable(ABC::env('DIR_CONFIG'))){
+            return ['Error: Directory '.ABC::env('DIR_CONFIG').' is not writable!'];
+        }
+
 
         return [];
     }
 
+    /**
+     * @param string $action
+     * @param array  $options
+     * @return array|bool
+     * @throws AException
+     */
     public function run(string $action, array $options)
     {
         $output = null;
         $action = !$action ? 'all' : $action;
         $result = false;
         $errors = [];
-        if(in_array($action, array('all', 'core', 'extensions', 'vendors') )) {
-            $result = $this->cache->run('clear', ['all'=>1]);
-            if(is_array($result) && $result){
-                $errors += $result;
+        if(in_array($action, array('all', 'core', 'config', 'extensions', 'vendors') )) {
+            $clr_result = $this->cache->run('clear', ['all'=>1]);
+            if(is_array($clr_result) && $clr_result){
+                $errors = $clr_result;
             }else {
-                $this->publish->run('publish', [$action=>1]);
-                $this->results[] = $this->publish->finish('publish', [$action=>1]);
-                $this->cache->run('create', ['build'=>1]);
-                $this->results[] = $this->cache->finish('create', ['build'=>1]);
+                if($action == 'config'){
+                    $result = $this->_make_config($options['stage']);
+                }else {
+                    $this->publish->run('publish', [$action => 1]);
+                    $this->results[] = $this->publish->finish('publish', [$action => 1]);
+                    $this->cache->run('create', ['build' => 1]);
+                    $this->results[] = $this->cache->finish('create', ['build' => 1]);
+                }
             }
         }else{
             $errors = [ 'Error: unknown deploy action!' ];
         }
 
-        return $result ? true : $errors;
+        return $result && !$errors ? true : $errors;
+    }
+
+    /**
+     * @param $stage_name
+     * @return bool
+     * @throws AException
+     */
+    protected function _make_config($stage_name){
+        if(!trim($stage_name)){
+            throw new AException(AC_ERR_USER_ERROR, "Error: Wrong stage name!");
+        }
+        //load and put config into environment
+        $enabled_config = ABC::env('DIR_CONFIG').'enabled.php';
+        $files = glob(ABC::env('DIR_CONFIG').'*.php');
+        $output = [];
+        foreach ($files as $file) {
+            if($file == $enabled_config){
+                continue;
+            }
+            $config = include($file);
+            //check is default stage values presents
+            $default_values = isset($config['default']) ? $config['default'] : [];
+            //if default stage presents
+            if($default_values){
+                foreach($default_values as $n=>$v){
+                    //get default value if key not presents in stage config
+                    $output[$n] = isset($config[$stage_name][$n]) ? $config[$stage_name][$n] : $v;
+                }
+            } elseif(isset($config[$stage_name])) {
+                //merge arrays
+                $output = array_merge($output, $config[$stage_name]);
+            }
+        }
+        //write enabled config. If it already presents - do backup first
+        $tmp_file = ABC::env('DIR_CONFIG').'tmp.php';
+        @unlink($tmp_file);
+        fopen($tmp_file, 'a');
+        $content = '';
+        if($output) {
+            $content = "<?php \n return ".var_export($output, true).";\n";
+        }
+        $result = file_put_contents( $tmp_file, $content );
+        if(!$result){
+            throw new AException(AC_ERR_USER_ERROR, "Cannot save temporary file or file is empty.");
+        }
+
+        if(file_exists($enabled_config)){
+            $result = rename($enabled_config,$enabled_config.'.bkp');
+            if(!$result){
+                throw new AException(AC_ERR_USER_ERROR, "Cannot rename prior config-file ".$enabled_config.". Please check permissions.");
+            }
+        }
+        //let's switch
+        $result = rename($tmp_file, $enabled_config);
+        if(!$result){
+            throw new AException(AC_ERR_USER_ERROR, "Cannot rename temporary file ".$tmp_file." to ".$enabled_config.".");
+        }
+        return true;
     }
 
     public function finish(string $action, array $options)
@@ -85,6 +160,20 @@ class Deploy implements ABCExec
                     'description' => 'deploy only default template asset files',
                     'arguments'   => [],
                     'example'     => 'php abcexec deploy:core'
+                ],
+            'config' =>
+                [
+                    'description' => 'build production config file',
+                    'arguments'   => [
+                                '--stage' =>
+                                    [
+                                        'description'   => 'deploy to stage with given name',
+                                        'default_value' => '',
+                                        'required'      => true,
+                                        'alias'         => '*'
+                                    ]
+                    ],
+                    'example'     => 'php abcexec deploy:config --stage=default'
                 ],
             'extensions' =>
                 [
