@@ -79,9 +79,11 @@ class AAssetPublisher{
     }
 
 
-    public function publish($source = 'all'){
+    public function publish($source = 'all', $options = []){
         $source = !$source ? 'all' : (string)$source;
-        $files_list = $this->getSourceAssetsFiles($source);
+        $filter = '';
+
+        $files_list = $this->getSourceAssetsFiles($source, $options);
         if(!$files_list){
             return true;
         }
@@ -108,19 +110,19 @@ class AAssetPublisher{
     }
 
     /**
-     * @param string $source - can be 'core':
+     * @param string $source   - can be 'core':
      *                         - to publish only assets from abc/templates directory,
      *                         - 'extensions' - only assets from abc/extensions directory,
      *                         - 'vendors' - only assets from vendor directory,
      *                         '{extension_text_id}' - to publish only extension assets,
      *                         and 'all' to publish all
+     * @param array $filter
      * @return array
      */
-    public function getSourceAssetsFiles($source = 'all'){
+    public function getSourceAssetsFiles($source = 'all', $filter = []){
         $core_assets = $extensions_assets = $vendors_assets = [];
-        $extension_name = '';
         if( !in_array($source, array('all', 'core', 'extensions', 'vendors'))){
-            $extension_name = (string)$source;
+            $filter = (string)$source;
         }
 
         if( in_array($source, array('all', 'core')) ){
@@ -158,13 +160,20 @@ class AAssetPublisher{
                 $extensions_assets[$extension] = $this->_get_extension_assets($extension);
             }
         }
-        //when needs to publish assets only for given extension
-        elseif( $extension_name ){
-            $extensions_assets[$extension_name] = $this->_get_extension_assets($extension_name);
+        //when needs to publish assets of extension
+        elseif( isset($filter['extension']) && $filter['extension'] ){
+            $extensions_assets[$filter['extension']] = $this->_get_extension_assets($filter['extension']);
         }
         //when publish only vendors assets
         if( $source == 'all' || $source == 'vendors' ){
-            $dirs = glob(ABC::env('DIR_VENDOR').'assets/*',GLOB_ONLYDIR);
+            if( isset($filter['package']) && $filter['package'] ){
+                list($vendor_name, $package_name) = explode(':',$filter['package']);
+                //only one vendors package
+                $dirs = [ ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR.$vendor_name.DIRECTORY_SEPARATOR.$package_name ];
+            }else {
+                //all vendors packages
+                $dirs = glob(ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR);
+            }
             foreach ($dirs as $dir) {
                 $files = AHelperUtils::getFilesInDir($dir);
                 foreach ($files as $file) {

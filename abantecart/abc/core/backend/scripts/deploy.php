@@ -32,14 +32,19 @@ class Deploy implements ABCExec
                 return ['Error: Unknown Action Parameter!'];
         }
 
-        if($action=='config' && !$options){
-            return ['Error: Stage name required!'];
+        if( $action=='config' ) {
+            if ( ! $options) {
+                return ['Error: Stage name required!'];
+            }
+            if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
+                return ['Error: Directory '.ABC::env('DIR_CONFIG').' is not writable!'];
+            }
+        }else{
+            $errors = $this->publish->validate($action,$options);
+            if($errors){
+                return $errors;
+            }
         }
-        if($action=='config' && !is_writable(ABC::env('DIR_CONFIG'))){
-            return ['Error: Directory '.ABC::env('DIR_CONFIG').' is not writable!'];
-        }
-
-
         return [];
     }
 
@@ -63,8 +68,9 @@ class Deploy implements ABCExec
                 if($action == 'config'){
                     $result = $this->_make_config($options['stage']);
                 }else {
-                    $this->publish->run('publish', [$action => 1]);
-                    $this->results[] = $this->publish->finish('publish', [$action => 1]);
+                    $this->publish->run($action, $options);
+                    $this->results[] = $this->publish->finish($action, $options);
+                    echo "Building all cache...\n";
                     $this->cache->run('create', ['build' => 1]);
                     $this->results[] = $this->cache->finish('create', ['build' => 1]);
                 }
@@ -190,7 +196,13 @@ class Deploy implements ABCExec
             'vendors' =>
                 [
                     'description' => 'deploy only vendors asset files',
-                    'arguments'   => [],
+                    'arguments'   => [
+                        '--package'   => [
+                                            'description'   => 'Publish only assets of vendor package with given package name',
+                                            'default_value' => 'vendor_name:package_name',
+                                            'required'      => false
+                                         ]
+                    ],
                     'example'     => 'php abcexec deploy:vendors'
                 ],
         ];
