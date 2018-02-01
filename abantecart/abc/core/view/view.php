@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core\engine;
+namespace abc\core\view;
 
 use abc\ABC;
 use abc\core\helper\AHelperUtils;
@@ -37,7 +37,7 @@ if ( ! class_exists('abc\ABC')) {
  * @property \abc\lib\AConfig               $config
  * @property \abc\core\engine\ExtensionsAPI $extensions
  * @property \abc\lib\AResponse             $response
- * @property \abc\lib\ACache                $cache
+ * @property \abc\core\cache\ACache                $cache
  *
  */
 class AView
@@ -79,7 +79,7 @@ class AView
      */
     public $data = array();
     /**
-     * @var false|object|\abc\lib\AViewDefaultRender
+     * @var false|object|\abc\core\view\AViewDefaultRender
      */
     protected $render;
     /**
@@ -105,9 +105,9 @@ class AView
                                       : $this->config->get('config_storefront_template');
         }
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
-        $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common/';
+        $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DIRECTORY_SEPARATOR;
         $this->instance_id = $instance_id;
-        $this->render = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\lib\AViewDefaultRender');
+        $this->render = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\core\view\AViewDefaultRender');
         if(!$this->render){
             throw new AException(AC_ERR_LOAD,'AVIew Error: Cannot to load view render!');
         }

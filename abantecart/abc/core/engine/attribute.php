@@ -30,7 +30,7 @@ if (!class_exists('abc\ABC')) {
  *
  * @property \abc\lib\ALanguageManager $language
  * @property \abc\lib\ADB $db
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ARequest $request
  * @property \abc\lib\ASession $session

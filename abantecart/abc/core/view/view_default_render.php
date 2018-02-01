@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\lib;
+namespace abc\core\view;
 
 class AViewDefaultRender
 {
@@ -33,6 +33,7 @@ class AViewDefaultRender
      */
     public function fetch($file, $data)
     {
+        //share AView instance with tpl scope
         $data['this'] = $this->view;
         extract($data);
         ob_start();

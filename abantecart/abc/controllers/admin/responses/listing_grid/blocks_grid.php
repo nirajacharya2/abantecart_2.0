@@ -28,7 +28,7 @@ use abc\lib\AJson;
 use abc\lib\ALayoutManager;
 use abc\lib\AListingManager;
 use abc\lib\AResourceManager;
-use abc\core\engine\AView;
+use abc\core\view\AView;
 use stdClass;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {

@@ -13,7 +13,7 @@ if (!class_exists('abc\ABC')) {
 /**
  * @property \abc\core\engine\ExtensionsApi $extensions
  * @property ADB $db
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property AConfig $config
  * @property \abc\core\engine\ALanguage $language
  * @property \abc\core\engine\ALoader $load

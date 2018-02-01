@@ -86,7 +86,7 @@ class ACustomer
      */
     protected $config;
     /**
-     * @var ACache
+     * @var \abc\core\cache\ACache
      */
     protected $cache;
     /**

@@ -226,7 +226,7 @@ class ExtensionCollection
  * long description.
  *
  * @property \abc\lib\ADb    $db
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
  * @method hk_ProcessData(object $baseObject, string $point_name = '', mixed $array = null)

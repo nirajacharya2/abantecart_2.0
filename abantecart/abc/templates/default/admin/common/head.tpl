@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \abc\core\engine\AView $this
+ * @var \abc\core\view\AView $this
  */
 use abc\ABC; ?>
 <meta charset="utf-8">

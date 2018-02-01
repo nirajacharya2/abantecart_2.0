@@ -34,7 +34,7 @@ if (!class_exists('abc\ABC')) {
 /**
  * @property \abc\lib\ALanguageManager $language
  * @property ADB $db
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property AConfig $config
  */
 class AFile{

@@ -28,7 +28,7 @@ if (!class_exists('abc\ABC')) {
  * Class ATax
  * @property ASession $session
  * @property AConfig $config
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property ADB $db
  * @property ACustomer $customer
  */

@@ -45,7 +45,7 @@ class ALanguage{
 	 */
 	protected $db;
 	/**
-	 * @var \abc\lib\ACache
+	 * @var \abc\core\cache\ACache
 	 */
 	protected $cache;
 	/**

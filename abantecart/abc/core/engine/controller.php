@@ -20,6 +20,7 @@
 namespace abc\core\engine;
 use abc\ABC;
 use abc\core\helper\AHelperUtils;
+use abc\core\view\AView;
 use abc\lib\AConfig;
 use abc\lib\AWarning;
 
@@ -80,7 +81,7 @@ if (!class_exists('abc\ABC')) {
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ADB $db
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property \abc\lib\ALanguageManager $language
  * @property AResource $resource
  * @property \abc\core\engine\ALoader $load

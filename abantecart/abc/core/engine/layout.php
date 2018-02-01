@@ -32,7 +32,7 @@ if (!class_exists('abc\ABC')) {
 
 /**
  * Class ALayout
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property \abc\lib\AUser $user
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ADB $db

@@ -20,7 +20,7 @@
 
 namespace abc\core\engine;
 
-use abc\lib\ACache;
+use abc\core\cache\ACache;
 use abc\lib\ACart;
 use abc\lib\AConfig;
 use abc\lib\ACustomer;

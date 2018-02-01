@@ -26,7 +26,7 @@ use abc\core\engine\Model;
 use abc\lib\AEncryption;
 use abc\lib\AMail;
 use abc\lib\AMessage;
-use abc\core\engine\AView;
+use abc\core\view\AView;
 use stdClass;
 
 if (!class_exists('abc\ABC')) {

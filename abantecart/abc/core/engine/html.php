@@ -22,6 +22,7 @@ namespace abc\core\engine;
 
 use abc\ABC;
 use abc\core\helper\AHelperUtils;
+use abc\core\view\AView;
 use abc\lib\ADebug;
 use abc\lib\ARequest;
 use abc\lib\AException;
@@ -939,7 +940,7 @@ abstract class HtmlElement
      */
     protected $data = array();
     /**
-     * @var \abc\core\engine\AView
+     * @var \abc\core\view\AView
      */
     protected $view;
     /**

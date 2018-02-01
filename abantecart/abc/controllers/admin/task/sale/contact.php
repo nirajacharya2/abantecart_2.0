@@ -25,7 +25,7 @@ use abc\lib\AException;
 use abc\lib\AJson;
 use abc\lib\AMail;
 use abc\lib\ATaskManager;
-use abc\core\engine\AView;
+use abc\core\view\AView;
 
 if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));

@@ -25,9 +25,9 @@ if (!class_exists('abc\ABC')) {
 /**
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ADB $db
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property AResource $resource
- * @property \abc\core\engine\AView $view
+ * @property \abc\core\view\AView $view
  * @property ALoader $load
  * @property AHtml $html
  * @property \abc\lib\ARequest $request

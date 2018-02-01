@@ -21,7 +21,7 @@ namespace abc\core\backend;
 use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AAssetPublisher;
-use abc\lib\ACache;
+use abc\core\cache\ACache;
 use abc\lib\ADB;
 use abc\lib\AException;
 

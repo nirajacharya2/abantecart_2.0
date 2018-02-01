@@ -23,7 +23,7 @@ use abc\core\engine\AHtml;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
-use abc\lib\ACache;
+use abc\core\cache\ACache;
 use abc\lib\AConfig;
 use abc\lib\ADataEncryption;
 use abc\lib\ADB;
@@ -33,16 +33,16 @@ use abc\lib\ALog;
 
 // Error Reporting
 error_reporting(E_ALL);
-
-if ( ! is_file(dirname(__DIR__, 3).'/vendor/autoload.php')) {
+$dir_sep = DIRECTORY_SEPARATOR;
+if ( ! is_file(dirname(__DIR__, 3).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
     echo "Initialisation...\n";
-    $composer_phar = dirname(__DIR__, 2).'/system/temp/composer.phar';
+    $composer_phar = dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
     if ( ! is_file($composer_phar)) {
         echo "Download Latest Composer into abc/system/temp directory. Please wait..\n";
-        if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__, 2).'/system/temp/composer.phar')) {
+        if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
             exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
                 " Please download it manually into "
-                .dirname(__DIR__, 2)."/system/temp/ directory\n"
+                .dirname(__DIR__, 2).$dir_sep."system".$dir_sep."temp directory\n"
                 ." OR run composer manually (see composer.json file)");
         }
     }
@@ -56,7 +56,7 @@ if ( ! ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-require dirname(__DIR__, 2).'/abc.php';
+require dirname(__DIR__, 2).$dir_sep.'abc.php';
 //run constructor of ABC class to load environment
 
 $ABC = new ABC();
@@ -73,38 +73,38 @@ mb_internal_encoding($charset);
 ini_set('default_charset', strtolower($charset));
 
 //Set up common paths
-$dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).'/' : ABC::env('DIR_ROOT');
-$dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__, 2).'/' : ABC::env('DIR_APP');
-$dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public/' : ABC::env('DIR_PUBLIC');
-$dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_root.'vendor/' : ABC::env('DIR_VENDOR');
+$dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).$dir_sep : ABC::env('DIR_ROOT');
+$dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__, 2).$dir_sep : ABC::env('DIR_APP');
+$dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public'.$dir_sep : ABC::env('DIR_PUBLIC');
+$dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_root.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,
     'DIR_APP'             => $dir_app,
-    'DIR_TEMPLATES'       => $dir_app.'templates/',
-    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions/',
-    'DIR_SYSTEM'          => $dir_app.'system/',
-    'DIR_CORE'            => $dir_app.'core/',
-    'DIR_LIB'             => $dir_app.'lib/',
-    'DIR_IMAGE'           => $dir_public.'images/',
-    'DIR_DOWNLOAD'        => $dir_app.'download/',
-    'DIR_CONFIG'          => $dir_app.'config/',
-    'DIR_CACHE'           => $dir_app.'system/cache/',
-    'DIR_LOGS'            => $dir_app.'system/logs/',
+    'DIR_TEMPLATES'       => $dir_app.'templates'.$dir_sep,
+    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.$dir_sep,
+    'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
+    'DIR_CORE'            => $dir_app.'core'.$dir_sep,
+    'DIR_LIB'             => $dir_app.'lib'.$dir_sep,
+    'DIR_IMAGE'           => $dir_public.'images'.$dir_sep,
+    'DIR_DOWNLOAD'        => $dir_app.'download'.$dir_sep,
+    'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
+    'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+    'DIR_LOGS'            => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
     'DIR_PUBLIC'          => $dir_public,
     'DIR_VENDOR'          => $dir_vendor,
-    'DIRNAME_APP'         => 'abc/',
-    'DIRNAME_ASSETS'      => 'assets/',
-    'DIRNAME_EXTENSIONS'  => 'extensions/',
-    'DIRNAME_CORE'        => 'core/',
-    'DIRNAME_STORE'       => 'storefront/',
-    'DIRNAME_ADMIN'       => 'admin/',
-    'DIRNAME_IMAGES'      => 'images/',
-    'DIRNAME_CONTROLLERS' => 'controllers/',
-    'DIRNAME_LANGUAGES'   => 'languages/',
-    'DIRNAME_TEMPLATES'   => 'templates/',
-    'DIRNAME_TEMPLATE'    => 'template/',
-    'DIR_ASSETS_EXT'      => $dir_public.'extensions/',
+    'DIRNAME_APP'         => 'abc'.$dir_sep,
+    'DIRNAME_ASSETS'      => 'assets'.$dir_sep,
+    'DIRNAME_EXTENSIONS'  => 'extensions'.$dir_sep,
+    'DIRNAME_CORE'        => 'core'.$dir_sep,
+    'DIRNAME_STORE'       => 'storefront'.$dir_sep,
+    'DIRNAME_ADMIN'       => 'admin'.$dir_sep,
+    'DIRNAME_IMAGES'      => 'images'.$dir_sep,
+    'DIRNAME_CONTROLLERS' => 'controllers'.$dir_sep,
+    'DIRNAME_LANGUAGES'   => 'languages'.$dir_sep,
+    'DIRNAME_TEMPLATES'   => 'templates'.$dir_sep,
+    'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
+    'DIR_ASSETS_EXT'      => $dir_public.'extensions'.$dir_sep,
 ];
 foreach ($defaults as $name => $value) {
     if ( ! ABC::env($name)) {
@@ -302,7 +302,7 @@ function showHelpPage($script_name = '')
  */
 function getExecutor($name, $silent_mode = false)
 {
-    $run_file = ABC::env('DIR_CORE').'backend/scripts/'.$name.'.php';
+    $run_file = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$name.'.php';
     if ( ! is_file($run_file)) {
         $error_text = "Error: Script ".$run_file.".php not found!";
         if ( ! $silent_mode) {

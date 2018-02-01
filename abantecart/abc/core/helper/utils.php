@@ -1554,10 +1554,14 @@ class AHelperUtils extends AHelper
 
         foreach($classes as $class => $arguments){
             //check is class loaded
+
+            //try to load file
             if(!class_exists($class)){
-                //if class not found - try to load as library from /abc/lib folder. Related only to core libs
-                $library_name = self::getLibraryFilenameByClass($class);
-                Registry::getInstance()->get('load')->library($library_name);
+                $rel_path = self::getFileNameByClass($class);
+                $abs_path = ABC::env('DIR_ROOT').$rel_path;
+                if(is_file($abs_path)) {
+                    include_once $abs_path;
+                }
             }
 
             if(class_exists($class)) {
@@ -1578,20 +1582,22 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Function returns filename of library based on class name.
-     * Example: on "ALanguageManager" will return "language_manager"
+     * Function returns relative path of class based on full class name.
+     * Example: on "\abc\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
      * @param string $class_name - full class name
      *
      * @return string
      */
-    static function getLibraryFilenameByClass($class_name){
-        $library_name = basename(str_replace('\\', '/', $class_name));
+    static function getFileNameByClass($class_name){
+        $dirname = dirname(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
+        $dirname = ltrim($dirname,DIRECTORY_SEPARATOR);
+        $basename = basename(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
         //add spaces to classname based on capital letters.
-        $library_name = preg_replace('/[A-Z]/',' $0',$library_name);
-        $split = explode(' ',$library_name);
+        $basename = preg_replace('/[A-Z]/',' $0',$basename);
+        $split = explode(' ',$basename);
         $split = array_map('strtolower', $split);
         unset($split[array_search('',$split)], $split[array_search('a',$split)]);
-        return $library_name = implode('_',$split);
+        return $dirname.DIRECTORY_SEPARATOR.implode('_',$split).'.php';
     }
 
 }

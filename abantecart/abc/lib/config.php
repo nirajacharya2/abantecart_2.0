@@ -95,7 +95,7 @@ final class AConfig{
 
 	private function _load_settings($store_url = ''){
 		/**
-		 * @var ACache $cache
+		 * @var \abc\core\cache\ACache $cache
 		 */
 		$cache = $this->registry->get('cache');
 		/**

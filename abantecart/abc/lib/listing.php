@@ -26,7 +26,7 @@ if (!class_exists('abc\ABC')) {
 
 /**
  * Class AListing
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property ADB $db
  */
 class AListing{

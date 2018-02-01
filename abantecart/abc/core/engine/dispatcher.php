@@ -34,7 +34,7 @@ if (!class_exists('abc\ABC')) {
  * Class ADispatcher
  * @property \abc\lib\ARequest $request
  * @property \abc\lib\AResponse $response
- * @property \abc\core\engine\AView $view
+ * @property \abc\core\view\AView $view
  * @property ExtensionsApi $extensions
  */
 final class ADispatcher{

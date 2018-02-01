@@ -27,7 +27,7 @@ use abc\core\engine\ALayout;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
-use abc\lib\ACache;
+use abc\core\cache\ACache;
 use abc\lib\ACart;
 use abc\lib\AConfig;
 use abc\lib\ACurrency;

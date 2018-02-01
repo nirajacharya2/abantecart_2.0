@@ -28,7 +28,7 @@ use abc\lib\AFilter;
 use abc\lib\AJson;
 use abc\core\engine\AResource;
 use abc\lib\AResourceManager;
-use abc\core\engine\AView;
+use abc\core\view\AView;
 use stdClass;
 
 if ( ! class_exists('abc\ABC')) {

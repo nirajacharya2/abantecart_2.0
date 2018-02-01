@@ -36,7 +36,7 @@ if (!class_exists('abc\ABC')) {
  * @property  AUser $user
  * @property  \abc\lib\ALanguageManager $language
  * @property  ALog $log
- * @property  ACache $cache
+ * @property  \abc\core\cache\ACache $cache
  * @property  ADB $db
  */
 class APackageManager{

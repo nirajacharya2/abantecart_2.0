@@ -17,7 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\lib;
+namespace abc\core\cache;
 use abc\ABC;
 use abc\cache\ACacheDriverFile;
 use DirectoryIterator;
@@ -243,28 +243,6 @@ class ACache{
 	}
 
 	/**
-	 * Deprecated. Old cache compatibility. Will be removed in 1.3
-	 * @deprecated
-	 * @param $key
-	 * @param $data
-	 * @param int $language_id
-	 * @param int $store_id
-	 * @return bool
-	 */
-	public function set($key, $data, $language_id = 0, $store_id = 0){
-		if ($language_id || $store_id){
-			if ($language_id && $store_id){
-				$key = $key . ".store_" . $store_id . "_lang_" . $language_id;
-			} elseif ($store_id){
-				$key = $key . ".store_" . $store_id;
-			} else{
-				$key = $key . ".lang_" . $language_id;
-			}
-		}
-		return $this->push($key, $data);
-	}
-
-	/**
 	 * Retrieves the cache contents.
 	 *
 	 * The contents will be first attempted to be retrieved by the key from the cache in memory data structure.
@@ -315,34 +293,6 @@ class ACache{
 	}
 
 	/**
-	 * Deprecated. Old cache compatibility. Will be removed in 1.3
-	 * @deprecated
-	 * @param $key
-	 * @param int $language_id
-	 * @param int $store_id
-	 * @return false|mixed|null
-	 */
-	public function get($key, $language_id = 0, $store_id = 0){
-		if ($language_id || $store_id){
-			if ($language_id && $store_id){
-				$key = $key . ".store_" . $store_id . "_lang_" . $language_id;
-			} elseif ($store_id){
-				$key = $key . ".store_" . $store_id;
-			} else{
-				$key = $key . ".lang_" . $language_id;
-			}
-		}
-		$return = $this->pull($key);
-		if ($return === false){
-			//Should return false if no cache present.
-			//for legacy support we return NULL. Starting v1.3 FALSE will be returned. 
-			return null;
-		} else{
-			return $return;
-		}
-	}
-
-	/**
 	 * Removes the contents of the cache key in the group.
 	 *
 	 * If the cache key does not exist in the group, then nothing will happen.
@@ -388,28 +338,6 @@ class ACache{
 		}
 
 		return true;
-	}
-
-	/**
-	 *  Old cache compatibility. Will be removed in 1.3
-	 * @deprecated
-	 * @param $key
-	 * @param int|string $language_id
-	 * @param int|string $store_id
-	 * @return bool
-	 */
-	public function delete($key, $language_id = 0, $store_id = 0){
-		if ($language_id || $store_id){
-			if ($language_id && $store_id){
-				$key = $key . ".store_" . $store_id . "_lang_" . $language_id;
-			} elseif ($store_id){
-				$key = $key . ".store_" . $store_id;
-			} else{
-				$key = $key . ".lang_" . $language_id;
-			}
-		}
-
-		return $this->remove($key);
 	}
 
 	/**

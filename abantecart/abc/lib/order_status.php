@@ -28,7 +28,7 @@ if (!class_exists('abc\ABC')) {
 /**
  * Class AOrderStatus
  * @property ADB $db
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  */
 class AOrderStatus{
 	/**

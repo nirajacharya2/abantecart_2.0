@@ -22,6 +22,7 @@ namespace abc\core\engine;
 
 use abc\ABC;
 use abc\core\helper\AHelperUtils;
+use abc\core\view\AView;
 use abc\lib\ADataset;
 use abc\lib\AError;
 use abc\lib\AFile;
@@ -38,7 +39,7 @@ if (!class_exists('abc\ABC')) {
  * @property ALayout $layout
  * @property AHtml $html
  * @property \abc\lib\ALanguageManager $language
- * @property \abc\lib\ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property \abc\lib\ADB $db
  * @property \abc\lib\AConfig $config
  * @property \abc\lib\ASession $session

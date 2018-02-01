@@ -27,7 +27,7 @@ if (!class_exists('abc\ABC')) {
 }
 
 /**
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property ASession $session
  * @property ADB $db
  * @property AConfig $config

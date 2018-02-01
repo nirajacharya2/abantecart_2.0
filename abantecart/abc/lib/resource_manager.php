@@ -34,7 +34,7 @@ if ( ! class_exists('abc\ABC')) {
  *
  * @property ADB                       $db
  * @property \abc\core\engine\AHtml    $html
- * @property ACache                    $cache
+ * @property \abc\core\cache\ACache                    $cache
  * @property AConfig                   $config
  * @property \abc\lib\ALanguageManager $language
  */

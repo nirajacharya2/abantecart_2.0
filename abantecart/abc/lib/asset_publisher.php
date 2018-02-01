@@ -34,7 +34,7 @@ if (!class_exists('abc\ABC')) {
  * @property ALanguageManager $language
  * @property AConfig $config
  * @property ASession $session
- * @property ACache $cache
+ * @property \abc\core\cache\ACache $cache
  * @property ALoader $load
  * @property ExtensionsApi $extensions
  *
