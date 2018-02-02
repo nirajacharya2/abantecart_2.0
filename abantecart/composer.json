@@ -24,7 +24,8 @@
       "google/recaptcha": "~1.1",
       "twbs/bootstrap": "v4.0.0-beta.2",
       "jquery/jquery": "3.2.1",
-      "illuminate/database": "*"
+      "illuminate/database": "*",
+      "twig/twig": "1.6.5"
     },
     "extra": {
             "installer-paths": {

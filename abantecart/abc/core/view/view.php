@@ -24,7 +24,6 @@ use abc\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\lib\ADebug;
 use abc\lib\AError;
-use abc\lib\AException;
 use abc\lib\AWarning;
 
 if ( ! class_exists('abc\ABC')) {
@@ -107,6 +106,9 @@ class AView
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
         $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DIRECTORY_SEPARATOR;
         $this->instance_id = $instance_id;
+        /**
+         * @var AViewRenderInterface $render_instance
+         */
         $render_instance = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\core\view\AViewDefaultRender');
         //Note: this call will cause fatal error if class is not implements AViewRender interface!
         $this->setRender($render_instance);
@@ -137,8 +139,18 @@ class AView
         }
     }
 
-    public function setRender(AViewRender $render){
+    /**
+     * @param AViewRenderInterface $render
+     */
+    public function setRender(AViewRenderInterface $render){
         $this->render = $render;
+    }
+
+    /**
+     * @return AViewDefaultRender|AViewRender|false
+     */
+    public function getRender(){
+        return $this->render;
     }
 
     /**
