@@ -17,20 +17,28 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 
-if (!class_exists('abc\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists('abc\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ControllerBlocksBreadcrumbs extends AController{
-	public $data = array ();
+class ControllerBlocksBreadcrumbs extends AController
+{
+    public $data = array();
 
-	public function main(){
-		$this->data['breadcrumbs'] = $this->document->getBreadcrumbs();
-		$this->data['text_home'] = $this->language->get('text_home');
-		$this->view->batchAssign($this->data);
-		$this->processTemplate();
-	}
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->data['breadcrumbs'] = $this->document->getBreadcrumbs();
+        $this->data['text_home'] = $this->language->get('text_home');
+        $this->view->batchAssign($this->data);
+        $this->processTemplate();
+        //update controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+    }
 }

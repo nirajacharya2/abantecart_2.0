@@ -72,6 +72,8 @@ if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] 
 	ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], ':443') !== false)) {
 	ABC::env('HTTPS', true);
+}else{
+    ABC::env('HTTPS', false);
 }
 
 // Detect http host

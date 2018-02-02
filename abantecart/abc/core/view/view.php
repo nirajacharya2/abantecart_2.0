@@ -79,7 +79,7 @@ class AView
      */
     public $data = array();
     /**
-     * @var false|object|\abc\core\view\AViewDefaultRender
+     * @var false | AViewRender |\abc\core\view\AViewDefaultRender
      */
     protected $render;
     /**
@@ -107,10 +107,9 @@ class AView
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
         $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DIRECTORY_SEPARATOR;
         $this->instance_id = $instance_id;
-        $this->render = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\core\view\AViewDefaultRender');
-        if(!$this->render){
-            throw new AException(AC_ERR_LOAD,'AVIew Error: Cannot to load view render!');
-        }
+        $render_instance = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\core\view\AViewDefaultRender');
+        //Note: this call will cause fatal error if class is not implements AViewRender interface!
+        $this->setRender($render_instance);
     }
 
     public function __get($key)
@@ -121,6 +120,25 @@ class AView
     public function __set($key, $value)
     {
         $this->registry->set($key, $value);
+    }
+
+    /**
+     * To allow to call methods of render from any point of code
+     * @param string $function_name
+     * @param array $args
+     * @return mixed|null
+     */
+    public function __call($function_name, $args)
+    {
+        if (method_exists($this->render, $function_name) && is_callable([$this->render, $function_name])) {
+            return call_user_func_array(array($this->render, $function_name), $args);
+        } else {
+            return null;
+        }
+    }
+
+    public function setRender(AViewRender $render){
+        $this->render = $render;
     }
 
     /**
@@ -416,10 +434,10 @@ class AView
         $res_arr = $this->_extensions_resource_map($filename, $mode);
 
         //get first exact template extension resource or default template resource otherwise.
-        if (count($res_arr['original'])) {
+        if (isset($res_arr['original'][0])) {
             $output = $res_arr['original'][0];
         } else {
-            if (count($res_arr['default'])) {
+            if ( isset($res_arr['default'][0]) ) {
                 $output = $res_arr['default'][0];
             } else {
                 //no extension found, use resource from core templates

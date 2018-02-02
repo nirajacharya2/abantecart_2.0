@@ -1,28 +1,12 @@
 <?php
 
 namespace abc\core\view;
-
-class AViewDefaultRender
+require 'interface.php';
+class AViewDefaultRender extends AViewRender implements AViewRenderInterface
 {
-    protected $view;
-
     public function __construct($view, $instance_id = 0)
     {
-        $this->view = $view;
-    }
-
-    public function __get($name)
-    {
-        return $this->view->{$name};
-    }
-    //allow to call AView methods from tpl-files
-    public function __call($function_name, $args)
-    {
-        if (method_exists($this->view, $function_name)) {
-            return call_user_func_array(array($this->view, $function_name), $args);
-        } else {
-            return null;
-        }
+        parent::__construct($view,$instance_id);
     }
 
     /**
@@ -43,5 +27,4 @@ class AViewDefaultRender
         ob_end_clean();
         return $content;
     }
-
 }
