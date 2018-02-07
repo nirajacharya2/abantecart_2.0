@@ -22,9 +22,6 @@ if (version_compare(phpversion(), '7.0.0', '<') == true){
 	exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
 }
 
-require_once 'core/init/backend.php';
-require 'core/backend/interface.php';
-
 //process command
 $args = $argv;
 //remove file name from argument list
@@ -47,6 +44,9 @@ if(!preg_match('/^--(.*)$/', $command)) {
 	echo "Wrong command.\n\n";
     $class = $action = '';
 }
+
+require 'core/init/backend.php';
+require 'core/backend/interface.php';
 
 if(!$class || $class=='help' || $action == 'help'){
 	showHelpPage($class);
