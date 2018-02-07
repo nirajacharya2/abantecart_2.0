@@ -19,38 +19,32 @@
 ------------------------------------------------------------------------------*/
 namespace abc\cache;
 use abc\ABC;
+use abc\core\cache\ACacheDriverInterface;
 
 if (!class_exists('abc\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-//include abstract cache storage driver class
-include_once('driver.php');
-
 /**
- * APCu cache driver
+ * Class ACacheDriverAPCu
  *
- * NOTE: to use this driver put lines belong into your system/config.php
-
-define('CACHE_DRIVER', 'apcu');
-define('CACHE_SECRET', 'your_secret_key');
-
- * @since  1.2.7
+ * @package abc\cache
  */
-class ACacheDriverAPCu extends ACacheDriver{
+class ACacheDriverAPCu extends ACacheDriver implements ACacheDriverInterface{
 
 	protected $secret;
 
-	/**
-	 * Constructor
-	 *
-	 * @param int $expiration
-	 * @param int $lock_time
-	 *
-	 * @since   1.2.7
-	 */
-	public function __construct($expiration, $lock_time = 0){
-		$this->secret = ABC::env('CACHE_SECRET');
+    /**
+     * Constructor
+     *
+     * @param array $config
+     * @param int   $expiration
+     * @param int   $lock_time
+     *
+     * @since   1.2.7
+     */
+	public function __construct(array $config, $expiration, $lock_time = 0){
+		$this->secret = $config['CACHE_SECRET'];
 		if (!$lock_time) {
 			$lock_time = 10;
 		}

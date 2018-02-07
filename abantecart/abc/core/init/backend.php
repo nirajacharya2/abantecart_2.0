@@ -161,11 +161,10 @@ if(ABC::env('DB_DRIVER')) {
     );
 }
 
-// Cache
-$registry->set('cache', new ACache());
-
 // Config
 if(ABC::env('DB_DRIVER')) {
+    // Cache
+    $registry->set('cache', new ACache());
     $config = new AConfig($registry);
     $registry->set('config', $config);
     $registry->set('language', new ALanguageManager($registry));

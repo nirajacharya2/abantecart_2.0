@@ -20,23 +20,20 @@
 
 namespace abc\cache;
 
-use abc\ABC;
 use abc\core\helper\AHelperUtils;
+use abc\core\cache\ACacheDriverInterface;
 use abc\lib\AError;
 
 if ( ! class_exists('abc\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-//include abstract cache storage driver class
-include_once('driver.php');
-
 /**
  * File cache driver (default)
  *
  * @since  1.2.7
  */
-class ACacheDriverFile extends ACacheDriver
+class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
 {
     /**
      * Cache directory path
@@ -57,19 +54,20 @@ class ACacheDriverFile extends ACacheDriver
     /**
      * Constructor
      *
+     * @param array $config
      * @param int $expiration
      * @param int $lock_time
      *
      * @since   1.2.7
      */
-    public function __construct($expiration, $lock_time = 0)
+    public function __construct(array $config, $expiration, $lock_time = 0)
     {
         if ( ! $lock_time) {
             $lock_time = 10;
         }
         parent::__construct($expiration, $lock_time);
         // note: path with slash at the end!
-        $this->path = ABC::env('DIR_CACHE');
+        $this->path = $config['DIR_CACHE'];
     }
 
     /**

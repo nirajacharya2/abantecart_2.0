@@ -18,6 +18,8 @@
 */
 namespace abc\core\backend;
 
+use abc\lib\AException;
+
 if (version_compare(phpversion(), '7.0.0', '<') == true){
 	exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
 }
@@ -81,6 +83,9 @@ if($errors){
 try{
 	$result = $executor->run($action, $options);
     showResult($result);
+}catch(AException $e){
+	showError('Error: '.$e->getMessage());
+	exit(1);
 }catch(\Exception $e){
 	showError('Error: '.$e->getMessage());
 	exit(1);
@@ -91,6 +96,9 @@ try{
 try{
 	$result = $executor->finish($action, $options);
     showResult($result);
+}catch(AException $e){
+	showError('Error: '.$e->getMessage());
+	exit(1);
 }catch(\Exception $e){
 	showError('Error: '.$e->getMessage());
 	exit(1);

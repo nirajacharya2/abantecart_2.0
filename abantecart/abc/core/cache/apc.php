@@ -17,212 +17,224 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\cache;
-use abc\ABC;
 
-if (!class_exists('abc\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+namespace abc\cache;
+
+use abc\core\cache\ACacheDriverInterface;
+
+if ( ! class_exists('abc\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-//include abstract cache storage driver class
-include_once('driver.php');
-
 /**
- * APC cache driver
+ * Class ACacheDriverAPC
  *
- * NOTE: to use this driver put lines belong into your system/config.php
-
-define('CACHE_DRIVER', 'apc');
-define('CACHE_SECRET', 'your_secret_key');
-
- * @since  1.2.7
+ * @package abc\cache
  */
-class ACacheDriverAPC extends ACacheDriver{
+class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
+{
 
-	protected $secret;
+    protected $secret;
 
-	/**
-	 * Constructor
-	 *
-	 * @param int $expiration
-	 * @param int $lock_time
-	 *
-	 * @since   1.2.7
-	 */
-	public function __construct($expiration, $lock_time = 0){
-		$this->secret = ABC::env('CACHE_SECRET');
-		if (!$lock_time) {
-			$lock_time = 10;
-		}
+    /**
+     * Constructor
+     *
+     * @param array $config
+     * @param int   $expiration
+     * @param int   $lock_time
+     *
+     * @since   1.2.7
+     */
+    public function __construct(array $config, $expiration, $lock_time = 0)
+    {
+        $this->secret = $config['CACHE_SECRET'];
+        if ( ! $lock_time) {
+            $lock_time = 10;
+        }
 
-		parent::__construct($expiration, $lock_time);
-	}
+        parent::__construct($expiration, $lock_time);
+    }
 
-	/**
-	 * Test to see if the cache directory is writable.
-	 *
-	 * @return  boolean  
-	 *
-	 * @since   1.2.7
-	 */
-	public function isSupported(){
-		$supported = extension_loaded('apc') && ini_get('apc.enabled');
-		// If on the CLI interface, the `apc.enable_cli` option must also be enabled
-		if ($supported && php_sapi_name() === 'cli'){
-			$supported = ini_get('apc.enable_cli');
-		}
-		return (bool)$supported;
-	}
+    /**
+     * Test to see if the cache directory is writable.
+     *
+     * @return  boolean
+     *
+     * @since   1.2.7
+     */
+    public function isSupported()
+    {
+        $supported = extension_loaded('apc') && ini_get('apc.enabled');
+        // If on the CLI interface, the `apc.enable_cli` option must also be enabled
+        if ($supported && php_sapi_name() === 'cli') {
+            $supported = ini_get('apc.enable_cli');
+        }
 
-	protected function _getCacheId($key, $group){
-		return $this->secret . '-cache-'.$group . '.' . $this->_hashCacheKey($key, $group);
-	}
+        return (bool)$supported;
+    }
 
-	/**
-	 * Get cached data from a file by key and group
-	 *
-	 * @param   string	$key	The cache data key
-	 * @param   string	$group	The cache data group
-	 * @param   boolean	$check_expire  True to verify cache time expiration
-	 *
-	 * @return  mixed  Boolean false on failure or a cached data string
-	 *
-	 * @since   1.2.7
-	 */
-	public function get($key, $group, $check_expire = true){
-		$cache_key = $this->_getCacheId($key, $group);
-		return apc_fetch($cache_key);
-	}
+    protected function _getCacheId($key, $group)
+    {
+        return $this->secret.'-cache-'.$group.'.'.$this->_hashCacheKey($key, $group);
+    }
 
-	/**
-	 * Save data to a file by key and group
-	 *
-	 * @param   string	$key	The cache data key
-	 * @param   string	$group	The cache data group
-	 * @param   string  $data   The data to store in cache
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.2.7
-	 */
-	public function put($key, $group, $data) {
-		$cache_key = $this->_getCacheId($key, $group);
-		return apc_store($cache_key, $data, $this->expire);
-	}
+    /**
+     * Get cached data from a file by key and group
+     *
+     * @param   string  $key          The cache data key
+     * @param   string  $group        The cache data group
+     * @param   boolean $check_expire True to verify cache time expiration
+     *
+     * @return  mixed  Boolean false on failure or a cached data string
+     *
+     * @since   1.2.7
+     */
+    public function get($key, $group, $check_expire = true)
+    {
+        $cache_key = $this->_getCacheId($key, $group);
 
-	/**
-	 * Remove a cached data file by key and group
-	 *
-	 * @param   string	$key	The cache data key
-	 * @param   string	$group	The cache data group
-	 *
-	 * @return  boolean 
-	 *
-	 * @since   1.2.7
-	 */
-	public function remove($key, $group){
-		$cache_key = $this->_getCacheId($key, $group);
-		return apc_delete($cache_key);
-	}
+        return apc_fetch($cache_key);
+    }
 
-	/**
-	 * Clean cache for a group provided.
-	 *
-	 * @param   string  $group  The cache data group, passed '*' indicate all cache removal
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.2.7
-	 */
-	public function clean($group){
+    /**
+     * Save data to a file by key and group
+     *
+     * @param   string $key   The cache data key
+     * @param   string $group The cache data group
+     * @param   string $data  The data to store in cache
+     *
+     * @return  boolean
+     *
+     * @since   1.2.7
+     */
+    public function put($key, $group, $data)
+    {
+        $cache_key = $this->_getCacheId($key, $group);
 
-		$cache_info = apc_cache_info('user');
-		$keys       = $cache_info['cache_list'];
+        return apc_store($cache_key, $data, $this->expire);
+    }
 
-		foreach ($keys as $key){
-			// If APCu is being used for this adapter, the internal key name changed with APCu 4.0.7 from key to info
-			$internalKey = isset($key['info']) ? $key['info'] : $key['key'];
-			if ($group == '*' || strpos($internalKey, $this->secret . '-cache-'.$group . '.') === 0 ){
-				apc_delete($internalKey);
-			}
-		}
-		return true;
-	}
+    /**
+     * Remove a cached data file by key and group
+     *
+     * @param   string $key   The cache data key
+     * @param   string $group The cache data group
+     *
+     * @return  boolean
+     *
+     * @since   1.2.7
+     */
+    public function remove($key, $group)
+    {
+        $cache_key = $this->_getCacheId($key, $group);
 
-	/**
-	 * Delete expired cache data
-	 *
-	 * @return  boolean  True on success, false otherwise.
-	 *
-	 * @since   1.2.7
-	 */
-	public function gc(){
-		$cache_info = apc_cache_info('user');
-		$keys    = $cache_info['cache_list'];
-		foreach ($keys as $key){
-			// If APCu is being used for this adapter, the internal key name changed with APCu 4.0.7 from key to info
-			$internalKey = isset($key['info']) ? $key['info'] : $key['key'];
-			if (strpos($internalKey, $this->secret . '-cache-') === 0){
-				apc_fetch($internalKey);
-			}
-		}
+        return apc_delete($cache_key);
+    }
 
-		return true;
-	}
+    /**
+     * Clean cache for a group provided.
+     *
+     * @param   string $group The cache data group, passed '*' indicate all cache removal
+     *
+     * @return  boolean
+     *
+     * @since   1.2.7
+     */
+    public function clean($group)
+    {
 
-	/**
-	 * Lock cached item
-	 *
-	 * @param   string   $key The cache data key
-	 * @param   string   $group The cache data group
-	 * @param   integer  $locktime Cached item max lock time
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.2.7
-	 */
-	public function lock($key, $group, $locktime){
+        $cache_info = apc_cache_info('user');
+        $keys = $cache_info['cache_list'];
 
-		$output = array ();
-		$output['waited'] = false;
+        foreach ($keys as $key) {
+            // If APCu is being used for this adapter, the internal key name changed with APCu 4.0.7 from key to info
+            $internalKey = isset($key['info']) ? $key['info'] : $key['key'];
+            if ($group == '*' || strpos($internalKey, $this->secret.'-cache-'.$group.'.') === 0) {
+                apc_delete($internalKey);
+            }
+        }
 
-		$looptime = $locktime * 10;
+        return true;
+    }
 
-		$cache_key = $this->_getCacheId($key, $group).'_lock';
+    /**
+     * Delete expired cache data
+     *
+     * @return  boolean  True on success, false otherwise.
+     *
+     * @since   1.2.7
+     */
+    public function gc()
+    {
+        $cache_info = apc_cache_info('user');
+        $keys = $cache_info['cache_list'];
+        foreach ($keys as $key) {
+            // If APCu is being used for this adapter, the internal key name changed with APCu 4.0.7 from key to info
+            $internalKey = isset($key['info']) ? $key['info'] : $key['key'];
+            if (strpos($internalKey, $this->secret.'-cache-') === 0) {
+                apc_fetch($internalKey);
+            }
+        }
 
-		$data_lock = apc_add($cache_key, 1, $locktime);
+        return true;
+    }
 
-		if ($data_lock === false){
-			$lock_counter = 0;
-			// Loop until you find that the lock has been released. That implies that data get from other thread has finished
-			while ($data_lock === false){
-				if ($lock_counter > $looptime){
-					$output['locked'] = false;
-					$output['waited'] = true;
-					break;
-				}
+    /**
+     * Lock cached item
+     *
+     * @param   string  $key      The cache data key
+     * @param   string  $group    The cache data group
+     * @param   integer $locktime Cached item max lock time
+     *
+     * @return  array
+     *
+     * @since   1.2.7
+     */
+    public function lock($key, $group, $locktime)
+    {
 
-				usleep(100);
-				$data_lock = apc_add($cache_key, 1, $locktime);
-				$lock_counter++;
-			}
-		}
+        $output = array();
+        $output['waited'] = false;
 
-		$output['locked'] = $data_lock;
-		return $output;
-	}
+        $looptime = $locktime * 10;
 
-	/**
-	 * Unlock cached item
-	 *
-	 * @param   string  $key  The cache data key
-	 * @param   string  $group  The cache data group
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.2.7
-	 */
-	public function unlock($key, $group = null) {
-		return apc_delete($this->_getCacheId($key, $group).'_lock');
-	}
+        $cache_key = $this->_getCacheId($key, $group).'_lock';
+
+        $data_lock = apc_add($cache_key, 1, $locktime);
+
+        if ($data_lock === false) {
+            $lock_counter = 0;
+            // Loop until you find that the lock has been released. That implies that data get from other thread has finished
+            while ($data_lock === false) {
+                if ($lock_counter > $looptime) {
+                    $output['locked'] = false;
+                    $output['waited'] = true;
+                    break;
+                }
+
+                usleep(100);
+                $data_lock = apc_add($cache_key, 1, $locktime);
+                $lock_counter++;
+            }
+        }
+
+        $output['locked'] = $data_lock;
+
+        return $output;
+    }
+
+    /**
+     * Unlock cached item
+     *
+     * @param   string $key   The cache data key
+     * @param   string $group The cache data group
+     *
+     * @return  boolean
+     *
+     * @since   1.2.7
+     */
+    public function unlock($key, $group = null)
+    {
+        return apc_delete($this->_getCacheId($key, $group).'_lock');
+    }
 }

@@ -1521,7 +1521,7 @@ class AConfigManager
             $cache_drivers[$name] = $name;
         }
         sort($cache_drivers, SORT_STRING);
-        $current_cache_driver = strtoupper(ABC::env('CACHE_DRIVER') ? ABC::env('CACHE_DRIVER') : 'file');
+        $current_cache_driver = strtoupper(ABC::env('CACHE')['CACHE_DRIVER'] ? ABC::env('CACHE')['CACHE_DRIVER'] : 'file');
         unset($cache_drivers[$current_cache_driver]);
 
         $fields['cache_enable'] = $form->getFieldHtml($props[] = array(

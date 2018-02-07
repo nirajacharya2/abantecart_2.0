@@ -145,7 +145,8 @@ class Install implements ABCExec
             }
             if(!$errors){
                 $registry = Registry::getInstance();
-                $config = new AConfig($registry);
+                $registry->set('cache', new ACache());
+                $config = new AConfig($registry, (string)$options['http_server']);
                 $registry->set('config', $config);
                 $registry->set('language', new ALanguageManager($registry));
                 require_once('deploy.php');
@@ -385,8 +386,18 @@ EOD;
         $content = <<<EOD
 <?php
 return [
-    'default' => [
-        'CACHE_DRIVER' => '{$options['cache_driver']}'
+    'default' => [ 
+        'CACHE' => 
+                    [
+                        'CACHE_DRIVER' => '{$options['cache_driver']}',                        
+                        //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
+                        //'CACHE_SECRET' => 'your_cache_secret',                        
+                        //for "memcache" and "memcached" cache-drivers
+                        //'CACHE_HOST' => 'your_cache_host',
+                        //'CACHE_PORT' => 'your_cache_port',                        
+                        //'CACHE_PERSISTENT' => false, //boolean
+                        //'CACHE_COMPRESS_LEVEL' => false, //boolean
+                    ]
     ]
 ];
 EOD;
@@ -395,7 +406,7 @@ EOD;
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
-
+        ABC::env('CACHE', ['CACHE_DRIVER' => $options['cache_driver'] ]);
         return $result;
     }
 

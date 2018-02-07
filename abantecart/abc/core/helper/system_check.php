@@ -126,7 +126,7 @@ class AHelperSystemCheck extends AHelper{
 		}
 
 		//if cache is enabled
-		if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE_DRIVER') == 'file') {
+		if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE')['CACHE_DRIVER'] == 'file') {
 			$cache_files = self::get_all_files_dirs(ABC::env('DIR_SYSTEM') . 'cache/');
 			$cache_message = '';
 			foreach ($cache_files as $file) {
