@@ -19,11 +19,14 @@
 namespace abc\core\backend;
 
 use abc\ABC;
+use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\lib\AAssetPublisher;
 use abc\core\cache\ACache;
+use abc\lib\AConfig;
 use abc\lib\ADB;
 use abc\lib\AException;
+use abc\lib\ALanguageManager;
 
 class Install implements ABCExec
 {
@@ -343,6 +346,32 @@ EOD;
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
+        //adds into environment
+        $registry = Registry::getInstance();
+        ABC::env('DB_DRIVER',$options['db_driver']);
+        ABC::env('DB_HOSTNAME',$options['db_host']);
+        ABC::env('DB_USERNAME',$options['db_user']);
+        ABC::env('DB_PASSWORD',$options['db_password']);
+        ABC::env('DB_DATABASE',$options['db_name']);
+        ABC::env('DB_PREFIX',$options['db_prefix']);
+        ABC::env('DB_CHARSET', 'utf8');
+        ABC::env('DB_COLLATION', 'utf8_unicode_ci');
+        $registry->set('db', new ADB(
+                    array(
+                        'driver'    => ABC::env('DB_DRIVER'),
+                        'host'      => ABC::env('DB_HOSTNAME'),
+                        'username'  => ABC::env('DB_USERNAME'),
+                        'password'  => ABC::env('DB_PASSWORD'),
+                        'database'  => ABC::env('DB_DATABASE'),
+                        'prefix'    => ABC::env('DB_PREFIX'),
+                        'charset'   => ABC::env('DB_CHARSET'),
+                        'collation' => ABC::env('DB_COLLATION'),
+                    )
+                )
+            );
+        $config = new AConfig($registry);
+        $registry->set('config', $config);
+        $registry->set('language', new ALanguageManager($registry));
 
         //write cache config
         $content = <<<EOD
@@ -524,7 +553,7 @@ EOD;
     {
         $options = $this->_get_option_list();
         foreach ($options as $action => $help_info) {
-            $output = "php do install:".$action." ";
+            $output = "php abcexec install:".$action." ";
             if ($help_info['arguments']) {
                 foreach ($help_info['arguments'] as $arg => $desc) {
                     if ($arg == '--demo-mode') {

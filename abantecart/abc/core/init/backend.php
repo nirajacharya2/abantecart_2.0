@@ -39,7 +39,17 @@ if($command != 'help:help') {
         echo "Initialisation...\n";
         $composer_phar = dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
         if ( ! is_file($composer_phar)) {
-            echo "Trying to download Latest Composer into abc/system/temp directory. Please wait..\n";
+            $temp_dir = dirname(dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar');
+            if(!is_dir($temp_dir)){
+                @mkdir($temp_dir,0775,true);
+            }
+            if(!is_dir($temp_dir) || !is_writable($temp_dir)){
+                echo "Temporary directory ".$temp_dir." does not exists or not writable!\n\n";
+                exit;
+            }
+
+
+            echo "Composer phar-package not found.\nTrying to download Latest Composer into abc/system/temp directory. Please wait..\n";
             if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
                 exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
                     " Please download it manually into "
@@ -48,9 +58,9 @@ if($command != 'help:help') {
             }
         }
 
+
         exit("\n\e[0;31mError: Vendor folder not found. Please run command \e[0m\n\n
-		cd ".dirname(__DIR__, 3)." && php ".$composer_phar." install
-	\n\n\e[0;31m to initialize a project!\e[0m\n\n");
+		php ".$composer_phar." install -d ".dirname(__DIR__, 3)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
 
@@ -64,7 +74,7 @@ require dirname(__DIR__, 2).$dir_sep.'abc.php';
 $ABC = new ABC();
 if(!$ABC::$loaded_config_file){
     $ABC->loadDefaultStage();
-    echo "Default stage environment loaded.\n";
+    echo "Default stage environment loaded.\n\n";
 }
 
 ABC::env('IS_ADMIN', true);
@@ -135,28 +145,31 @@ $registry->set('load', new ALoader($registry));
 $registry->set('html', new AHtml($registry));
 
 // Database
-
-$registry->set('db', new ADB(
-        array(
-            'driver'    => ABC::env('DB_DRIVER'),
-            'host'      => ABC::env('DB_HOSTNAME'),
-            'username'  => ABC::env('DB_USERNAME'),
-            'password'  => ABC::env('DB_PASSWORD'),
-            'database'  => ABC::env('DB_DATABASE'),
-            'prefix'    => ABC::env('DB_PREFIX'),
-            'charset'   => ABC::env('DB_CHARSET'),
-            'collation' => ABC::env('DB_COLLATION'),
+if(ABC::env('DB_DRIVER')) {
+    $registry->set('db', new ADB(
+            array(
+                'driver'    => ABC::env('DB_DRIVER'),
+                'host'      => ABC::env('DB_HOSTNAME'),
+                'username'  => ABC::env('DB_USERNAME'),
+                'password'  => ABC::env('DB_PASSWORD'),
+                'database'  => ABC::env('DB_DATABASE'),
+                'prefix'    => ABC::env('DB_PREFIX'),
+                'charset'   => ABC::env('DB_CHARSET'),
+                'collation' => ABC::env('DB_COLLATION'),
+            )
         )
-    )
-);
+    );
+}
 
 // Cache
 $registry->set('cache', new ACache());
 
 // Config
-$config = new AConfig($registry);
-$registry->set('config', $config);
-$registry->set('language', new ALanguageManager($registry));
+if(ABC::env('DB_DRIVER')) {
+    $config = new AConfig($registry);
+    $registry->set('config', $config);
+    $registry->set('language', new ALanguageManager($registry));
+}
 // Log
 $registry->set('log', new ALog(ABC::env('DIR_LOGS').'cli_log.txt'));
 
@@ -181,7 +194,7 @@ function showResult($result)
     if (is_string($result) && $result) {
         echo $result."\n";
     } elseif (is_array($result) && $result) {
-        showError("Runtime errors occurred");
+        showError("Runtime errors occurred\n");
         foreach ($result as $error) {
             showError("\t\t".$error);
         }

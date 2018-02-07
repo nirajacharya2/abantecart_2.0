@@ -88,4 +88,4 @@ foreach ($class_list as $sub_dir => $files) {
 unset($class_list);
 
 //load vendors classes
-require(ABC::env('DIR_VENDOR').'autoload.php');
+@include(ABC::env('DIR_VENDOR').'autoload.php');

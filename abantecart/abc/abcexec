@@ -30,7 +30,7 @@ array_shift($args);
 if($args){
 	$command = array_shift($args);
 }else{
-	echo "Unknown command.\n\n";
+	echo "Unknown command. Show help...\n\n";
 	$command = 'help:help';
 }
 
