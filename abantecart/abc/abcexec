@@ -17,6 +17,11 @@
    needs please refer to http://www.abantecart.com for more information.
 */
 namespace abc\core\backend;
+
+if (version_compare(phpversion(), '7.0.0', '<') == true){
+	exit('7.0.0' . '+ Required for AbanteCart to work properly!');
+}
+
 require_once 'core/init/backend.php';
 require 'core/backend/interface.php';
 
