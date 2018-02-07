@@ -137,11 +137,22 @@ class Install implements ABCExec
         $action = ! $action ? 'install' : $action;
 
         if ($action == 'install') {
+            //make config-files
             $errors = $this->_configure($options);
-
+            //fill database
             if ( ! $errors) {
                 $errors = $this->_run_sql($options);
             }
+            if(!$errors){
+                $registry = Registry::getInstance();
+                $config = new AConfig($registry);
+                $registry->set('config', $config);
+                $registry->set('language', new ALanguageManager($registry));
+                require_once('deploy.php');
+                $deploy = new Deploy();
+                $deploy->run('config', ['stage' => 'default']);
+            }
+
             if ( ! $errors && isset($options['with-sample-data'])) {
                 $errors = $this->_load_demo_data($options);
             }
@@ -369,9 +380,6 @@ EOD;
                     )
                 )
             );
-        $config = new AConfig($registry);
-        $registry->set('config', $config);
-        $registry->set('language', new ALanguageManager($registry));
 
         //write cache config
         $content = <<<EOD
@@ -388,13 +396,6 @@ EOD;
         }
         fclose($file);
 
-        try {
-            require_once('deploy.php');
-            $deploy = new Deploy();
-            $deploy->run('config', ['stage' => 'default']);
-        }catch(AException $e){
-            $result[] = 'Deployment error. '.$e->getMessage().'('.$e->getCode().')';
-        }
         return $result;
     }
 
