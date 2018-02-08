@@ -145,24 +145,13 @@ $registry->set('load', new ALoader($registry));
 $registry->set('html', new AHtml($registry));
 
 // Database
-if(ABC::env('DB_DRIVER')) {
-    $registry->set('db', new ADB(
-            array(
-                'driver'    => ABC::env('DB_DRIVER'),
-                'host'      => ABC::env('DB_HOSTNAME'),
-                'username'  => ABC::env('DB_USERNAME'),
-                'password'  => ABC::env('DB_PASSWORD'),
-                'database'  => ABC::env('DB_DATABASE'),
-                'prefix'    => ABC::env('DB_PREFIX'),
-                'charset'   => ABC::env('DB_CHARSET'),
-                'collation' => ABC::env('DB_COLLATION'),
-            )
-        )
-    );
+if(ABC::env('DB_CURRENT_DRIVER')) {
+    $db_config = ABC::env('DATABASES');
+    $registry->set('db', new ADB( $db_config[ABC::env('DB_CURRENT_DRIVER')] ));
 }
 
 // Config
-if(ABC::env('DB_DRIVER')) {
+if(ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
     $registry->set('cache', new ACache());
     $config = new AConfig($registry);

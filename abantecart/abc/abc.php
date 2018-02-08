@@ -102,7 +102,7 @@ class ABC extends ABCBase
         $this->_validate_app();
 
         // New Installation
-        if ( ! self::env('DB_DATABASE')) {
+        if ( ! self::env('DATABASES')) {
             header('Location: install/index.php');
             exit;
         }

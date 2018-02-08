@@ -110,14 +110,14 @@ class Install implements ABCExec
         ) {
             try {
                 new ADB(array(
-                    'driver'    => $options['db_driver'],
-                    'host'      => $options['db_host'],
-                    'database'  => $options['db_name'],
-                    'username'  => $options['db_user'],
-                    'password'  => $options['db_password'],
-                    'charset'   => 'utf8',
-                    'collation' => 'utf8_unicode_ci',
-                    'prefix'    => $options['db_prefix'],
+                    'DB_DRIVER'    => $options['db_driver'],
+                    'DB_HOST'      => $options['db_host'],
+                    'DB_NAME'      => $options['db_name'],
+                    'DB_USER'      => $options['db_user'],
+                    'DB_PASSWORD'  => $options['db_password'],
+                    'DB_CHARSET'   => 'utf8',
+                    'DB_COLLATION' => 'utf8_unicode_ci',
+                    'DB_PREFIX'    => $options['db_prefix'],
                 ));
             } catch (AException $e) {
                 $errors['warning'] = $e->getMessage();
@@ -342,45 +342,47 @@ EOD;
 // Database Configuration
 return [
     'default' => [
-        'DB_DRIVER' => '{$options['db_driver']}',
-        'DB_HOSTNAME' => '{$options['db_host']}',
-        'DB_USERNAME' => '{$options['db_user']}',
-        'DB_PASSWORD' => '{$options['db_password']}',
-        'DB_DATABASE' => '{$options['db_name']}',
-        'DB_PREFIX' => '{$options['db_prefix']}',
-        'DB_CHARSET' => 'utf8',
-        'DB_COLLATION' => 'utf8_unicode_ci'
+            'DB_CURRENT_DRIVER' => '{$options['db_driver']}',
+            'DATABASES' =>[
+                '{$options['db_driver']}' => [
+                            'DB_DRIVER'    => '{$options['db_driver']}',
+                            'DB_HOST'      => '{$options['db_host']}',
+                            'DB_PORT'      => '{$options['db_port']}',
+                            'DB_USER'      => '{$options['db_user']}',
+                            'DB_PASSWORD'  => '{$options['db_password']}',
+                            'DB_NAME'      => '{$options['db_name']}',
+                            'DB_PREFIX'    => '{$options['db_prefix']}',
+                            'DB_CHARSET'   => 'utf8',
+                            'DB_COLLATION' => 'utf8_unicode_ci'
+                ]
+            ]
         ]
 ];
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG').'database.php', 'w');
+        $file = fopen(ABC::env('DIR_CONFIG').'databases.php', 'w');
         if ( ! fwrite($file, $content)) {
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
         //adds into environment
         $registry = Registry::getInstance();
-        ABC::env('DB_DRIVER',$options['db_driver']);
-        ABC::env('DB_HOSTNAME',$options['db_host']);
-        ABC::env('DB_USERNAME',$options['db_user']);
-        ABC::env('DB_PASSWORD',$options['db_password']);
-        ABC::env('DB_DATABASE',$options['db_name']);
-        ABC::env('DB_PREFIX',$options['db_prefix']);
-        ABC::env('DB_CHARSET', 'utf8');
-        ABC::env('DB_COLLATION', 'utf8_unicode_ci');
-        $registry->set('db', new ADB(
-                    array(
-                        'driver'    => ABC::env('DB_DRIVER'),
-                        'host'      => ABC::env('DB_HOSTNAME'),
-                        'username'  => ABC::env('DB_USERNAME'),
-                        'password'  => ABC::env('DB_PASSWORD'),
-                        'database'  => ABC::env('DB_DATABASE'),
-                        'prefix'    => ABC::env('DB_PREFIX'),
-                        'charset'   => ABC::env('DB_CHARSET'),
-                        'collation' => ABC::env('DB_COLLATION'),
-                    )
-                )
-            );
+        $db_config = [
+                        $options['db_driver'] =>
+                        [
+                            'DB_DRIVER'   => $options['db_driver'],
+                            'DB_HOST'     => $options['db_host'],
+                            'DB_PORT'     => $options['db_port'],
+                            'DB_USER'     => $options['db_user'],
+                            'DB_PASSWORD' => $options['db_password'],
+                            'DB_NAME'     => $options['db_name'],
+                            'DB_PREFIX'   => $options['db_prefix'],
+                            'DB_CHARSET'  => 'utf8',
+                            'DB_COLLATION'=> 'utf8_unicode_ci'
+                        ]
+                    ];
+        ABC::env('DB_CURRENT_DRIVER', $options['db_driver']);
+        ABC::env('DATABASES',$db_config);
+        $registry->set('db', new ADB( $db_config[$options['db_driver']] ));
 
         //write cache config
         $content = <<<EOD
@@ -424,17 +426,8 @@ EOD;
             $errors[] = 'Error: cannot open file '.$file;
             return $errors;
         }
-
-        $db = new ADB(array(
-            'driver'    => $data['db_driver'],
-            'host'      => $data['db_host'],
-            'database'  => $data['db_name'],
-            'username'  => $data['db_user'],
-            'password'  => $data['db_password'],
-            'charset'   => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix'    => $data['db_prefix'],
-        ));
+        $db_config = ABC::env('DATABASES');
+        $db = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
         $query = '';
         foreach ($sql as $line) {
             $tsl = trim($line);
@@ -517,17 +510,8 @@ EOD;
             $errors[] = 'Error: cannot open file '.$file;
             return $errors;
         }
-
-        $db = new ADB(array(
-            'driver'    => $options['db_driver'],
-            'host'      => $options['db_host'],
-            'database'  => $options['db_name'],
-            'username'  => $options['db_user'],
-            'password'  => $options['db_password'],
-            'charset'   => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix'    => $options['db_prefix'],
-        ));
+        $db_config = ABC::env('DATABASES');
+        $db = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
         $db->query("SET NAMES 'utf8'");
         $db->query("SET CHARACTER SET utf8");
 
