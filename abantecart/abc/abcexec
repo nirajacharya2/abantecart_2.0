@@ -18,6 +18,7 @@
 */
 namespace abc\core\backend;
 
+use abc\ABC;
 use abc\lib\AException;
 
 if (version_compare(phpversion(), '7.0.0', '<') == true){
@@ -36,7 +37,7 @@ if($args){
 	$command = 'help:help';
 }
 
-if(!strpos($command,':')){
+if(!strpos($command,':') || $command == '?'){
 	$command = 'help:help';
 }
 
@@ -49,6 +50,8 @@ if(!preg_match('/^--(.*)$/', $command)) {
 
 require 'core/init/backend.php';
 require 'core/backend/interface.php';
+//set sign
+ABC::env('abcexec', true);
 
 if(!$class || $class=='help' || $action == 'help'){
 	showHelpPage($class);

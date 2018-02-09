@@ -782,7 +782,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			if ($store_id) {
 				$this->loadModel('setting/store');
 				$store_info = $this->model_setting_store->getStore($store_id);
-				$btn_param['link'] = $store_info['config_url'] . '?s=' . ABC::env('ADMIN_PATH') . '&rt=' . $ext->getConfig('additional_settings');
+				$btn_param['link'] = $store_info['config_url'] . '?s=' . ABC::env('ADMIN_SECRET') . '&rt=' . $ext->getConfig('additional_settings');
 				$btn_param['target'] = '_blank';
 				$btn_param['onclick'] = 'onclick="return confirm(\'' . $this->language->get('additional_settings_confirm') . '\');"';
 			}

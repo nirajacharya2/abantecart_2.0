@@ -4,7 +4,7 @@
     "description": "AbanteCart",
     "keywords": ["abantecart", "ecommerce", "framework", "opensource"],
     "homepage": "http://www.abantecart.com",
-    "license": "OSL 3.0",
+    "license": "OSL-3.0",
     "repositories": [
           {
               "type": "package",

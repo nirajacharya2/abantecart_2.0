@@ -50,7 +50,7 @@ class Install implements ABCExec
             $file_config = include ABC::env('DIR_CONFIG').'app.php';
         }
 
-        if (isset($file_config['default']['ADMIN_PATH'])) {
+        if (isset($file_config['default']['ADMIN_SECRET'])) {
             return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
         }
 
@@ -59,12 +59,14 @@ class Install implements ABCExec
         if ($errors) {
             return $errors;
         }
+
+        $this->_fill_defaults($options);
         //then check options
-        if ( ! $options['admin_path']) {
-            $errors['admin_path'] = 'Admin unique name is required!';
+        if ( ! $options['admin_secret']) {
+            $errors['admin_secret'] = 'Admin unique name is required!';
         } else {
-            if (preg_match('/[^A-Za-z0-9_]/', $options['admin_path'])) {
-                $errors['admin_path'] = 'Admin unique name contains non-alphanumeric characters!';
+            if (preg_match('/[^A-Za-z0-9_]/', $options['admin_secret'])) {
+                $errors['admin_secret'] = 'Admin unique name contains non-alphanumeric characters!';
             }
         }
 
@@ -120,12 +122,16 @@ class Install implements ABCExec
                     'DB_PREFIX'    => $options['db_prefix'],
                 ));
             } catch (AException $e) {
-                $errors['warning'] = $e->getMessage();
+                $errors['error'] = $e->getMessage()."\n";
             }
         }
 
         if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['warning'] = 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG').'!';
+            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG')."!\n";
+        }
+
+        if(!is_file(__DIR__.'/deploy.php')){
+            $errors['warning'] .= 'Dependency Error: deploy.php script not found in '.__DIR__."\n";
         }
 
         return $errors;
@@ -137,6 +143,8 @@ class Install implements ABCExec
         $action = ! $action ? 'install' : $action;
 
         if ($action == 'install') {
+            $this->_fill_defaults($options);
+
             //make config-files
             $errors = $this->_configure($options);
             //fill database
@@ -172,11 +180,39 @@ class Install implements ABCExec
         return $output;
     }
 
+    protected function _fill_defaults(array &$options){
+        if(!$options){
+            return false;
+        }
+        if ( ! isset($options['root_dir']) || ! $options['root_dir']) {
+            $options['root_dir'] = ABC::env('DIR_ROOT');
+        }
+        if ( ! isset($options['app_dir']) || ! $options['app_dir']) {
+            $options['app_dir'] = ABC::env('DIR_APP');
+        }
+        if ( ! isset($options['public_dir']) || ! $options['public_dir']) {
+            $options['public_dir'] = ABC::env('DIR_PUBLIC');
+        }
+        if ( ! isset($options['cache_driver']) || ! $options['cache_driver']) {
+            $options['cache_driver'] = 'file';
+        }
+        if ( ! isset($options['db_host']) || ! $options['db_host']) {
+            $options['db_host'] = 'localhost';
+        }
+        if ( ! isset($options['db_prefix']) || ! $options['db_prefix']) {
+            $options['db_prefix'] = 'ac_';
+        }
+        if ( ! isset($options['db_driver']) || ! $options['db_driver']) {
+            $options['db_driver'] = 'mysql';
+        }
+        return true;
+    }
+
     public function finish(string $action, array $options)
     {
         $output = "\n\nSUCCESS! AbanteCart successfully installed on your server\n\n";
         $output .= "\t"."Store link: ".$options['http_server']."\n\n";
-        $output .= "\t"."Admin link: ".$options['http_server']."?s=".$options['admin_path']."\n\n";
+        $output .= "\t"."Admin link: ".$options['http_server']."?s=".$options['admin_secret']."\n\n";
 
         return $output;
     }
@@ -281,18 +317,7 @@ class Install implements ABCExec
         if ( ! ABC::env('DIR_CONFIG')) {
             ABC::env('DIR_CONFIG', ABC::env('DIR_APP').'system/config/');
         }
-        if ( ! isset($options['root_dir']) || ! $options['root_dir']) {
-            $options['root_dir'] = ABC::env('DIR_ROOT');
-        }
-        if ( ! isset($options['app_dir']) || ! $options['app_dir']) {
-            $options['app_dir'] = ABC::env('DIR_APP');
-        }
-        if ( ! isset($options['public_dir']) || ! $options['public_dir']) {
-            $options['public_dir'] = ABC::env('DIR_PUBLIC');
-        }
-        if ( ! isset($options['cache_driver']) || ! $options['cache_driver']) {
-            $options['cache_driver'] = 'file';
-        }
+
 
         //server name needs to be set for emails
         $server_name = getenv("SERVER_NAME");
@@ -316,7 +341,7 @@ return [
         'DIR_APP' => '{$options['app_dir']}',
         'DIR_PUBLIC' => '{$options['public_dir']}',
         'SERVER_NAME' => '{$server_name}',
-        'ADMIN_PATH' => '{$options['admin_path']}',
+        'ADMIN_SECRET' => '{$options['admin_secret']}',
         'UNIQUE_ID' => '{$unique_id}',
         // SEO URL Keyword separator
         'SEO_URL_SEPARATOR' => '-',
@@ -550,16 +575,20 @@ EOD;
         $options = $this->_get_option_list();
         foreach ($options as $action => $help_info) {
             $output = "php abcexec install:".$action." ";
+            $maximal = $minimal = '';
             if ($help_info['arguments']) {
                 foreach ($help_info['arguments'] as $arg => $desc) {
                     if ($arg == '--demo-mode') {
                         continue;
                     }
-                    $output .= $arg.($desc['default_value'] ? "="
-                            .$desc['default_value'] : '')."  ";
+                    $maximal .= $arg.($desc['default_value'] ? "=" .$desc['default_value'] : '')."  ";
+                    if($desc['required']){
+                        $minimal .= $arg.($desc['default_value'] ? "=" .$desc['default_value'] : '')."  ";
+                    }
                 }
             }
-            $options[$action]['example'] = $output;
+            $options[$action]['example'] = "\n\t\tWith minimal parameters\n\n\t\t\t". $output.$minimal."\n\n";
+            $options[$action]['example'] .= "\t\tWith all parameters\n\n\t\t\t". $output.$maximal."\n\n";
         }
 
         return $options;
@@ -588,7 +617,7 @@ EOD;
                         '--db_host'          => [
                             'description'   => 'Database hostname',
                             'default_value' => 'localhost',
-                            'required'      => true,
+                            'required'      => false,
                         ],
                         '--db_user'          => [
                             'description'   => 'Database username',
@@ -608,19 +637,19 @@ EOD;
                         '--db_driver'        => [
                             'description'   => 'Database driver',
                             'default_value' => 'mysql',
-                            'required'      => true,
+                            'required'      => false,
                         ],
                         '--db_prefix'        => [
                             'description'   => 'Database table name prefix',
-                            'default_value' => 'abc_',
+                            'default_value' => 'ac_',
                             'required'      => true,
                         ],
                         '--cache-driver'     => [
                             'description'   => 'Cache driver',
                             'default_value' => 'file',
-                            'required'      => true,
+                            'required'      => false,
                         ],
-                        '--admin_path'       => [
+                        '--admin_secret'       => [
                             'description'   => 'Secure value of url "s" parameter for admin side',
                             'default_value' => 'your_admin',
                             'required'      => true,

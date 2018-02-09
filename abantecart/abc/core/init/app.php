@@ -135,7 +135,7 @@ ABC::env('IS_API', ($path_nodes[0] == 'a' ? true : false));
 
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
-if (ABC::env('ADMIN_PATH') !== null && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ABC::env('ADMIN_PATH') || $_POST['s'] == ABC::env('ADMIN_PATH'))) {
+if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))) {
     ABC::env(
         array(
             'IS_ADMIN'     => true,

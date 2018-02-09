@@ -894,9 +894,9 @@ class ControllerPagesSaleCustomer extends AController{
 			if ($this->config->get('config_url') != $this->model_setting_store->getStoreURL($this->session->data['current_store_id'])){
 				if ($store_settings){
 					if ($store_settings['config_ssl']){
-						$add_store_url = $store_settings['config_ssl_url'] . '?s=' . ABC::env('ADMIN_PATH') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
+						$add_store_url = $store_settings['config_ssl_url'] . '?s=' . ABC::env('ADMIN_SECRET') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
 					} else{
-						$add_store_url = $store_settings['config_url'] . '?s=' . ABC::env('ADMIN_PATH') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
+						$add_store_url = $store_settings['config_url'] . '?s=' . ABC::env('ADMIN_SECRET') . '&rt=sale/customer/actonbehalf&customer_id=' . $this->request->get['customer_id'];
 					}
 					abc_redirect($add_store_url);
 				}

@@ -17,79 +17,93 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\lib;
+
 use abc\ABC;
 use abc\core\engine\ARouter;
 use abc\core\engine\Registry;
 use Exception;
-if (!class_exists('abc\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+
+if ( ! class_exists('abc\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class AException extends Exception{
+class AException extends Exception
+{
 
-	public $registry;
-	protected $error;
+    public $registry;
+    protected $error;
 
-	public function __construct($errno = 0, $errstr = '', $file = '', $line = ''){
-		parent::__construct();
+    public function __construct($errno = 0, $errstr = '', $file = '', $line = '')
+    {
+        parent::__construct();
 
-		$this->code = $errno ? $errno : $this->code;
-		$this->message = $errstr ? $errstr : $this->message;
-		$this->file = $file ? $file : $this->file;
-		$this->line = $line ? $line : $this->line;
-		if (class_exists('\abc\core\engine\Registry')){
-			$this->registry = Registry::getInstance();
-		}
+        $this->code = $errno ? $errno : $this->code;
+        $this->message = $errstr ? $errstr : $this->message;
+        $this->file = $file ? $file : $this->file;
+        $this->line = $line ? $line : $this->line;
+        if (class_exists('\abc\core\engine\Registry')) {
+            $this->registry = Registry::getInstance();
+        }
 
-		$this->error = new AError($this->message, $this->code);
-		//update message
-		ob_start();
-		echo $this->message . ' in <b>' . $this->file . '</b> on line <b>' . $this->line . '</b>';
-		//echo "\r\n".'<pre>'.$this->getTraceAsString().'</pre>';
-		$this->error->msg = ob_get_clean();
-	}
+        $this->error = new AError($this->message, $this->code);
+        //update message
+        ob_start();
+        echo $this->message.' in <b>'.$this->file.'</b> on line <b>'.$this->line.'</b>';
+        //echo "\r\n".'<pre>'.$this->getTraceAsString().'</pre>';
+        $this->error->msg = ob_get_clean();
+    }
 
-	public function errorCode(){
-		return $this->code;
-	}
+    public function errorCode()
+    {
+        return $this->code;
+    }
 
-	public function errorMessage(){
-		return $this->error->msg;
-	}
+    public function errorMessage()
+    {
+        return $this->error->msg;
+    }
 
-	public function displayError(){
-		$this->error->toDebug();
-		//Fatal error
-		if ($this->code >= 10000 && !ABC::env('INSTALL')){
-			if ($this->registry && $this->registry->get('session')){
-				$this->registry->get('session')->data['exception_msg'] = $this->error->msg;
-			} else{
-				//Fatal error happened before session is started, show to the screen and exit
-				echo $this->error->msg;
-				exit;
-			}
-		}
-	}
+    public function displayError()
+    {
+        $this->error->toDebug();
+        //Fatal error
+        if ($this->code >= 10000 && ! ABC::env('INSTALL')) {
+            if (ABC::env('abcexec')) {
+                echo $this->error->msg;
+            }
+            if ($this->registry && $this->registry->get('session')) {
+                $this->registry->get('session')->data['exception_msg'] = $this->error->msg;
+            } else {
+                //Fatal error happened before session is started, show to the screen and exit
+                echo $this->error->msg;
+                exit;
+            }
+        }
+    }
 
-	public function logError(){
-		$this->error->toLog();
-	}
+    public function logError()
+    {
+        $this->error->toLog();
+    }
 
-	public function mailError(){
-		$this->error->toMail();
-	}
+    public function mailError()
+    {
+        $this->error->toMail();
+    }
 
-	public function showErrorPage(){
-		if ($this->registry && $this->registry->has('router') && $this->registry->get('router')->getRequestType() != 'page'){
-			$router = new ARouter($this->registry);
-			$router->processRoute('error/ajaxerror');
-			$this->registry->get('response')->output();
-			exit();
-		}
-		$url = "static_pages/index.php";
-		$url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
-		header("Location: $url");
-		exit();
-	}
+    public function showErrorPage()
+    {
+        if ($this->registry && $this->registry->has('router') && $this->registry->get('router')->getRequestType() != 'page') {
+            $router = new ARouter($this->registry);
+            $router->processRoute('error/ajaxerror');
+            $this->registry->get('response')->output();
+            exit();
+        }
+        $url = "static_pages/index.php";
+        $url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
+        header("Location: $url");
+        exit();
+    }
 }

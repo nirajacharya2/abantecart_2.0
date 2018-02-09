@@ -131,7 +131,7 @@ class AHtml extends AController
         $suburl = '';
         //#PR Add admin path if we are in admin
         if (ABC::env('IS_ADMIN')) {
-            $suburl .= '&s='.ABC::env('ADMIN_PATH');
+            $suburl .= '&s='.ABC::env('ADMIN_SECRET');
         }
         //add template if present
         if ( ! empty($this->request->get['sf'])) {
@@ -666,7 +666,7 @@ class AHtml extends AController
 
                     if ($rt_type == 'admin') {
                         if ($for_admin && ABC::env('IS_ADMIN') !== true) {
-                            $href .= '&s='.ABC::env('ADMIN_PATH');
+                            $href .= '&s='.ABC::env('ADMIN_SECRET');
                         }
                         $new_href = str_replace('#admin#', $this->getSecureURL('').'&', $href);
                     } else {
