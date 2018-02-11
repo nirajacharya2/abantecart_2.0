@@ -948,10 +948,10 @@ class ModelSaleOrder extends Model
             $total_sql
                 = "o.order_id,
                         CONCAT(o.firstname, ' ', o.lastname) AS name,
-                        (SELECT os.name
-                         FROM ".$this->db->table("order_statuses")." os
-                         WHERE os.order_status_id = o.order_status_id
-                            AND os.language_id = '".(int)$language_id."') AS status,
+                        (SELECT osd.name
+                         FROM ".$this->db->table("order_status_descriptions")." osd
+                         WHERE osd.order_status_id = o.order_status_id
+                            AND osd.language_id = '".(int)$language_id."') AS status,
                          o.order_status_id,
                          o.date_added,
                          o.total,

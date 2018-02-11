@@ -772,10 +772,12 @@ class ModelCheckoutOrder extends Model{
 			$language->load($order_row['filename']);
 			$language->load('mail/order_update');
 
-			$order_status_query = $this->db->query("SELECT *
-													FROM " . $this->db->table("order_statuses") . "
-													WHERE order_status_id = '" . (int)$order_status_id . "'
-														AND language_id = '" . (int)$order_row['language_id'] . "'");
+			$order_status_query = $this->db->query("SELECT osd.*, os.*
+													FROM " . $this->db->table("order_statuses") . " os
+													LEFT JOIN " . $this->db->table("order_status_descriptions") . " osd
+													    ON osd.order_status_id = os.order_status_id
+													WHERE os.order_status_id = '" . (int)$order_status_id . "'
+														AND osd.language_id = '" . (int)$order_row['language_id'] . "'");
 
 			$language_im = new ALanguage($this->registry);
 			$language->load($language->language_details['directory']);

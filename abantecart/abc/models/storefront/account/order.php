@@ -229,12 +229,12 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getOrderStatus($order_id) {
 		$language_id = (int)$this->config->get('storefront_language_id');
-		$query = $this->db->query("SELECT os.name AS status
+		$query = $this->db->query("SELECT osd.name AS status
 									FROM " . $this->db->table("orders") . " o, 
-									" . $this->db->table("order_statuses") . " os
+									" . $this->db->table("order_status_descriptions") . " osd
 									WHERE o.order_id = '" . (int)$order_id . "' 
-										AND o.order_status_id = os.order_status_id 
-										AND os.language_id = '" . (int)$language_id . "'"
+										AND o.order_status_id = osd.order_status_id 
+										AND osd.language_id = '" . (int)$language_id . "'"
 								);
 		return $query->row['status'];
 	}
