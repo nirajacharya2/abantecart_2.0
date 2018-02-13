@@ -70,9 +70,6 @@ class AException extends Exception
         $this->error->toDebug();
         //Fatal error
         if ($this->code >= 10000 && ! ABC::env('INSTALL')) {
-            if (ABC::env('abcexec')) {
-                echo $this->error->msg;
-            }
             if ($this->registry && $this->registry->get('session')) {
                 $this->registry->get('session')->data['exception_msg'] = $this->error->msg;
             } else {
@@ -80,6 +77,10 @@ class AException extends Exception
                 echo $this->error->msg;
                 exit;
             }
+        }
+        if (ABC::env('abcexec')) {
+            echo $this->error->msg."\n\n";
+            exit;
         }
     }
 

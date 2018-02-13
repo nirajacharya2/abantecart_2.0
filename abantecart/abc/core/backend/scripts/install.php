@@ -24,9 +24,11 @@ use abc\core\helper\AHelperUtils;
 use abc\lib\AAssetPublisher;
 use abc\core\cache\ACache;
 use abc\lib\AConfig;
+use abc\lib\AConnect;
 use abc\lib\ADB;
 use abc\lib\AException;
 use abc\lib\ALanguageManager;
+use abc\lib\ASession;
 
 class Install implements ABCExec
 {
@@ -55,7 +57,7 @@ class Install implements ABCExec
         }
 
         //check requirements first
-        $errors = $this->validateRequirements();
+        $errors = $this->validateRequirements($options);
         if ($errors) {
             return $errors;
         }
@@ -70,8 +72,8 @@ class Install implements ABCExec
             }
         }
 
-        if ( ! $options['db_driver']) {
-            $errors['db_driver'] = 'Database driver required!';
+        if ( $options['db_driver'] == 'mysql' && !(extension_loaded('mysqli') || extension_loaded('pdo_mysql')) ) {
+            $errors['db_driver'] = 'MySQLi or PDO_mysql extension needs to be loaded for AbanteCart to work!';
         }
         if ( ! $options['db_host']) {
             $errors['db_host'] = 'Host name required!';
@@ -132,6 +134,22 @@ class Install implements ABCExec
 
         if(!is_file(__DIR__.'/deploy.php')){
             $errors['warning'] .= 'Dependency Error: deploy.php script not found in '.__DIR__."\n";
+        }
+
+        $url_parse_result = parse_url($options['http_server']);
+        if( !$url_parse_result ){
+            $errors['http_server'] = 'Wrong value of http_server parameter!';
+        }
+
+        //check self-connection via http
+        if( !isset($errors['http_server']) && !isset($options['skip-caching'])){
+            $connect = new AConnect();
+            $connect->connect_method = extension_loaded('curl') ? 'curl' : 'socket';
+            $data = $connect->getData($options['http_server'].'robots.txt');
+
+            if ( !$data ){
+                $errors['http_server'] = 'Cannot to connect to '.$options['http_server'].'!';
+            }
         }
 
         return $errors;
@@ -205,6 +223,10 @@ class Install implements ABCExec
         if ( ! isset($options['db_driver']) || ! $options['db_driver']) {
             $options['db_driver'] = 'mysql';
         }
+        if( substr($options['http_server'],-1) != '/' ){
+            $options['http_server'] .= '/';
+        }
+
         return true;
     }
 
@@ -232,10 +254,6 @@ class Install implements ABCExec
             $errors['warning'] = 'Warning: AbanteCart will not work with session.auto_start enabled!';
         }
 
-        if ( ! extension_loaded('mysqli') && ! extension_loaded('pdo_mysql')) {
-            $errors['warning'] = 'Warning: MySQLi extension needs to be loaded for AbanteCart to work!';
-        }
-
         if ( ! function_exists('simplexml_load_file')) {
             $errors['warning'] = 'Warning: SimpleXML functions needs to be available in PHP!';
         }
@@ -250,6 +268,9 @@ class Install implements ABCExec
         }
         if ( ! extension_loaded('zlib')) {
             $errors['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
+        }
+        if ( ! extension_loaded('phar')) {
+            $errors['warning'] = 'Warning: PHAR extension needs to be loaded for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
@@ -676,6 +697,11 @@ EOD;
                         ],
                         '--with-sample-data' => [
                             'description'   => 'Fill sample demo data during installation',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
+                        '--skip-caching'        => [
+                            'description'   => 'Skip cache creation during installation',
                             'default_value' => null,
                             'required'      => false,
                         ],

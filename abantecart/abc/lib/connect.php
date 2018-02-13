@@ -395,7 +395,7 @@ final class AConnect
     {
         //Check if we have connection set in the settings
         //???? will be developed later
-        if ($this->config->get('connection_method')) {
+        if (is_callable($this->config) && $this->config->get('connection_method')) {
             $this->connect_method = $this->config->get('connection_method');
 
             return null;

@@ -30,6 +30,7 @@ use abc\lib\ADB;
 use abc\lib\ADocument;
 use abc\lib\ALanguageManager;
 use abc\lib\ALog;
+use abc\lib\ASession;
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -160,6 +161,9 @@ if(ABC::env('DB_CURRENT_DRIVER')) {
 }
 // Log
 $registry->set('log', new ALog(ABC::env('DIR_LOGS').'cli_log.txt'));
+
+//session
+$registry->set('session', new ASession('backend'));
 
 // Document
 $registry->set('document', new ADocument());
