@@ -60,8 +60,11 @@ class Deploy implements ABCExec
         $action = !$action ? 'all' : $action;
         $result = false;
         $errors = [];
+        $clr_result = [];
         if(in_array($action, array('all', 'core', 'config', 'extensions', 'vendors') )) {
-            $clr_result = $this->cache->run('clear', ['all'=>1]);
+            if(!isset($options['skip-caching'])) {
+                $clr_result = $this->cache->run('clear', ['all' => 1]);
+            }
             if(is_array($clr_result) && $clr_result){
                 $errors = $clr_result;
             }else {
@@ -70,9 +73,12 @@ class Deploy implements ABCExec
                 }else {
                     $this->publish->run($action, $options);
                     $this->results[] = $this->publish->finish($action, $options);
-                    echo "Building all cache...\n";
-                    $this->cache->run('create', ['build' => 1]);
-                    $this->results[] = $this->cache->finish('create', ['build' => 1]);
+
+                    if(!isset($options['skip-caching'])) {
+                        echo "Building all cache...\n";
+                        $this->cache->run('create', ['build' => 1]);
+                        $this->results[] = $this->cache->finish('create', ['build' => 1]);
+                    }
                 }
             }
         }else{
@@ -158,13 +164,25 @@ class Deploy implements ABCExec
             'all' =>
                 [
                     'description' => 'deploy all files',
-                    'arguments'   => [],
+                    'arguments'   => [
+                        '--skip-caching'        => [
+                            'description'   => 'Skip cache re-creation during deployment',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
+                    ],
                     'example'     => 'php abcexec deploy:all'
                 ],
             'core' =>
                 [
                     'description' => 'deploy only default template asset files',
-                    'arguments'   => [],
+                    'arguments'   => [
+                        '--skip-caching'        => [
+                            'description'   => 'Skip cache re-creation during deployment',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
+                    ],
                     'example'     => 'php abcexec deploy:core'
                 ],
             'config' =>
@@ -177,7 +195,12 @@ class Deploy implements ABCExec
                                         'default_value' => '',
                                         'required'      => true,
                                         'alias'         => '*'
-                                    ]
+                                    ],
+                                '--skip-caching'        => [
+                                    'description'   => 'Skip cache re-creation during deployment',
+                                    'default_value' => null,
+                                    'required'      => false,
+                                ],
                     ],
                     'example'     => 'php abcexec deploy:config --stage=default'
                 ],
@@ -190,6 +213,11 @@ class Deploy implements ABCExec
                                                 'default_value' => 'your_extension_txt_id',
                                                 'required'      => false,
                                             ],
+                            '--skip-caching'        => [
+                                'description'   => 'Skip cache re-creation during deployment',
+                                'default_value' => null,
+                                'required'      => false,
+                            ],
                     ],
                     'example'     => 'php abcexec deploy:extensions --extension=your_extension_txt_id'
                 ],
@@ -201,7 +229,12 @@ class Deploy implements ABCExec
                                             'description'   => 'Publish only assets of vendor package with given package name',
                                             'default_value' => 'vendor_name:package_name',
                                             'required'      => false
-                                         ]
+                                         ],
+                        '--skip-caching'        => [
+                            'description'   => 'Skip cache re-creation during deployment',
+                            'default_value' => null,
+                            'required'      => false,
+                        ],
                     ],
                     'example'     => 'php abcexec deploy:vendors'
                 ],
