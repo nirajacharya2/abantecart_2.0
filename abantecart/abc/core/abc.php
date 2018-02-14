@@ -103,7 +103,11 @@ class ABC extends ABCBase
 
         // New Installation
         if ( ! self::env('DATABASES')) {
-            header('Location: install/index.php');
+            if(is_file(self::env('DIR_PUBLIC').'install/index.php')) {
+                header('Location: install/index.php');
+            }else{
+                header('Location: static_pages/?file='.basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
+            }
             exit;
         }
 

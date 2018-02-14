@@ -95,7 +95,7 @@ class AError{
 	 */
 	public function toLog(){
 		if (!is_object($this->registry) || !$this->registry->has('log')){
-			if (class_exists('ALog')){
+			if (class_exists('\abc\core\lib\ALog')){
 				$log = new ALog(ABC::env('DIR_LOGS') . 'error.txt');
 			} else{
 				//we have error way a head of system start
