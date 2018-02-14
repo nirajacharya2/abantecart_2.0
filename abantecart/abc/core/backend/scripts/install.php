@@ -177,7 +177,11 @@ class Install implements ABCExec
                 $registry->set('language', new ALanguageManager($registry));
                 require_once('deploy.php');
                 $deploy = new Deploy();
-                $deploy->run('config', ['stage' => 'default']);
+                $ops = ['stage' => 'default'];
+                if(isset($options['skip-caching'])){
+                    $ops['skip-caching'] = 1;
+                }
+                $deploy->run('config', $ops);
             }
 
             if ( ! $errors && isset($options['with-sample-data'])) {
@@ -187,7 +191,11 @@ class Install implements ABCExec
             if ( ! $errors) {
                 require_once 'deploy.php';
                 $deploy = new Deploy();
-                $result = $deploy->run('all',['all' => 1]);
+                $ops = ['all' => 1];
+                if(isset($options['skip-caching'])){
+                    $ops['skip-caching'] = 1;
+                }
+                $result = $deploy->run('all', $ops);
                 if(is_array($result)){
                     $errors = $result;
                 }
