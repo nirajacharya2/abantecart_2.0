@@ -6,7 +6,6 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
-use abc\core\lib\AException;
 
 require 'abc_base.php';
 
@@ -59,8 +58,8 @@ class ABC extends ABCBase
     /**
      * Static method for saving environment values into static property
      *
-     * @param      $name
-     * @param null $value
+     * @param string | array $name
+     * @param mixed|null $value
      * @param bool $override - force set
      *
      * @return null
