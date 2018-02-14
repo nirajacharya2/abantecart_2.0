@@ -20,10 +20,10 @@
 
 namespace abc\models\admin;
 
-use abc\ABC;
-use abc\lib\ADB;
+use abc\core\ABC;
+use abc\core\lib\ADB;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 require_once 'interface_migration.php';
@@ -34,7 +34,7 @@ class Migration_Osc23 implements Migration
     private $data;
     private $config;
     /**
-     * @var \abc\lib\ADB
+     * @var \abc\core\lib\ADB
      */
     private $src_db;
     private $error_msg;
@@ -46,7 +46,7 @@ class Migration_Osc23 implements Migration
         $this->data = $migrate_data;
         $this->error_msg = "";
         /**
-         * @var \abc\lib\ADB
+         * @var \abc\core\lib\ADB
          */
         if ($migrate_data) {
             $db_config = [

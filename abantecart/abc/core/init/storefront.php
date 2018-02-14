@@ -1,6 +1,6 @@
 <?php
 // Storefront HTTP
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Registry;
 
 $config = Registry::getInstance()->get('config');

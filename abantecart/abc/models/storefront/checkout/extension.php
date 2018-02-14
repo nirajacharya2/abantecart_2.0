@@ -22,7 +22,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelCheckoutExtension extends Model {

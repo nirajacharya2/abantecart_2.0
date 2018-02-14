@@ -21,38 +21,39 @@
 namespace abc;
 
 // set default encoding for multibyte php mod
+use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
-use abc\lib\ALanguageManager;
+use abc\core\lib\ALanguageManager;
 use abc\core\engine\ALayout;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\cache\ACache;
-use abc\lib\ACart;
-use abc\lib\AConfig;
-use abc\lib\ACurrency;
-use abc\lib\ACustomer;
-use abc\lib\ADataEncryption;
-use abc\lib\ADB;
-use abc\lib\ADocument;
-use abc\lib\ADownload;
-use abc\lib\AError;
-use abc\lib\AException;
-use abc\lib\AIM;
-use abc\lib\AIMManager;
-use abc\lib\ALength;
-use abc\lib\ALog;
-use abc\lib\AMessage;
-use abc\lib\AOrderStatus;
-use abc\lib\ARequest;
-use abc\lib\AResponse;
-use abc\lib\ASession;
-use abc\lib\ATax;
-use abc\lib\AUser;
-use abc\lib\AWeight;
-use abc\lib\CSRFToken;
+use abc\core\lib\ACart;
+use abc\core\lib\AConfig;
+use abc\core\lib\ACurrency;
+use abc\core\lib\ACustomer;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
+use abc\core\lib\ADocument;
+use abc\core\lib\ADownload;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
+use abc\core\lib\AIM;
+use abc\core\lib\AIMManager;
+use abc\core\lib\ALength;
+use abc\core\lib\ALog;
+use abc\core\lib\AMessage;
+use abc\core\lib\AOrderStatus;
+use abc\core\lib\ARequest;
+use abc\core\lib\AResponse;
+use abc\core\lib\ASession;
+use abc\core\lib\ATax;
+use abc\core\lib\AUser;
+use abc\core\lib\AWeight;
+use abc\core\lib\CSRFToken;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
@@ -96,7 +97,7 @@ ABC::env(
         'DIR_APP_EXTENSIONS' => $dir_app.'extensions/',
         'DIR_SYSTEM'         => $dir_app.'system/',
         'DIR_CORE'           => $dir_app.'core/',
-        'DIR_LIB'            => $dir_app.'lib/',
+        'DIR_LIB'            => $dir_app.'core/lib/',
         'DIR_DOWNLOAD'       => $dir_app.'download/',
         'DIR_CONFIG'         => $dir_app.'config/',
         'DIR_CACHE'          => $dir_app.'system/cache/',
@@ -112,7 +113,7 @@ require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
-$dir_lib = $dir_app.'lib/';
+$dir_lib = $dir_app.'core/lib/';
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');
 require_once($dir_lib.'error.php');

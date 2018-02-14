@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Model;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelSettingExtension extends Model {

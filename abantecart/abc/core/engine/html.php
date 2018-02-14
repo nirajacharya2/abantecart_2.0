@@ -20,15 +20,15 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\view\AView;
-use abc\lib\ADebug;
-use abc\lib\ARequest;
-use abc\lib\AException;
+use abc\core\lib\ADebug;
+use abc\core\lib\ARequest;
+use abc\core\lib\AException;
 use abc\models\storefront\ModelToolSeoUrl;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -1889,7 +1889,7 @@ class RatingHtmlElement extends HtmlElement
         parent::__construct($data);
         if ( ! $this->registry->has('star-rating')) {
             /**
-             * @var $doc \abc\lib\ADocument
+             * @var $doc \abc\core\lib\ADocument
              */
             $doc = $this->registry->get('document');
             $doc->addScript($this->view->templateResource('assets/js/jquery/star-rating/jquery.MetaData.js'));
@@ -2321,7 +2321,7 @@ class PhoneHtmlElement extends HtmlElement
         }
 
         /**
-         * @var $doc \abc\lib\ADocument
+         * @var $doc \abc\core\lib\ADocument
          */
         $doc = $this->registry->get('document');
         $doc->addScript($this->view->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'));

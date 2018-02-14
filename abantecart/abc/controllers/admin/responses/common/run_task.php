@@ -20,10 +20,10 @@
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AJson;
-use abc\lib\ATaskManager;
+use abc\core\lib\AJson;
+use abc\core\lib\ATaskManager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesCommonRunTask extends AController {

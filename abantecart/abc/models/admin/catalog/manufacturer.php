@@ -22,10 +22,10 @@ namespace abc\models\admin;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
-use abc\lib\ALayoutManager;
-use abc\lib\AResourceManager;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\AResourceManager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

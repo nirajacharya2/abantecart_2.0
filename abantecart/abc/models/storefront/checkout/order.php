@@ -18,18 +18,18 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
-use abc\lib\AEncryption;
-use abc\lib\AMail;
-use abc\lib\AMessage;
+use abc\core\lib\AEncryption;
+use abc\core\lib\AMail;
+use abc\core\lib\AMessage;
 use abc\core\view\AView;
 use stdClass;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

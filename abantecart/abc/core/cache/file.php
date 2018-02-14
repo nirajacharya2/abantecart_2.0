@@ -22,9 +22,9 @@ namespace abc\cache;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\cache\ACacheDriverInterface;
-use abc\lib\AError;
+use abc\core\lib\AError;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

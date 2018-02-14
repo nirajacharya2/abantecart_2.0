@@ -20,12 +20,12 @@
 
 namespace abc\controllers\storefront;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -272,7 +272,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         $im_drivers = $this->im->getIMDriverObjects();
         if ($im_drivers) {
             /**
-             * @var \abc\lib\AMailIM $driver_obj
+             * @var \abc\core\lib\AMailIM $driver_obj
              */
             foreach ($im_drivers as $protocol => $driver_obj) {
                 if ( ! is_object($driver_obj) || $protocol == 'email') {

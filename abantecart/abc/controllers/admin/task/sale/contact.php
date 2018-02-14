@@ -18,16 +18,16 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\lib\AError;
-use abc\lib\AException;
-use abc\lib\AJson;
-use abc\lib\AMail;
-use abc\lib\ATaskManager;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
+use abc\core\lib\AJson;
+use abc\core\lib\AMail;
+use abc\core\lib\ATaskManager;
 use abc\core\view\AView;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -284,14 +284,14 @@ class ControllerTaskSaleContact extends AController{
 		try{
 			include_once(ABC::env('DIR_EXT') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			//if class of driver
-			$classname = '\abc\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
+			$classname = '\abc\core\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 			if (!class_exists($classname)){
 				$error = new AError('IM-driver ' . $driver_txt_id . ' load error.');
 				$error->toLog()->toMessages();
 				return false;
 			}
 			/**
-			 * @var \abc\lib\AMailIM $driver
+			 * @var \abc\core\lib\AMailIM $driver
 			 */
 			$driver = new $classname();
 		} catch(AException $e){	}

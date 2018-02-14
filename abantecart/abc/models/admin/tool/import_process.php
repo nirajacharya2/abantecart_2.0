@@ -18,14 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Model;
-use abc\lib\AFile;
-use abc\lib\ALog;
-use abc\lib\AResourceManager;
-use abc\lib\ATaskManager;
+use abc\core\lib\AFile;
+use abc\core\lib\ALog;
+use abc\core\lib\AResourceManager;
+use abc\core\lib\ATaskManager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -40,7 +40,7 @@ class ModelToolImportProcess extends Model{
 	public $errors = array ();
 	protected $eta = array ();
 	/**
-	 * @var \abc\lib\ALog
+	 * @var \abc\core\lib\ALog
 	 */
 	protected $imp_log = null;
 

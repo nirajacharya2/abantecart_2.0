@@ -21,11 +21,11 @@
 namespace abc\cache;
 
 use abc\core\cache\ACacheDriverInterface;
-use abc\lib\AException;
+use abc\core\lib\AException;
 use Memcache;
 use stdClass;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

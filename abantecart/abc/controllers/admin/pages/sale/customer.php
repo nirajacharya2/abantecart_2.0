@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -549,7 +549,7 @@ class ControllerPagesSaleCustomer extends AController{
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var \abc\lib\AMailIM $driver_obj
+				 * @var \abc\core\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol == 'email'){
 					continue;
@@ -1000,7 +1000,7 @@ class ControllerPagesSaleCustomer extends AController{
 		if ($im_drivers){
 			foreach ($im_drivers as $protocol => $driver_obj){
 				/**
-				 * @var \abc\lib\AMailIM $driver_obj
+				 * @var \abc\core\lib\AMailIM $driver_obj
 				 */
 				if (!is_object($driver_obj) || $protocol == 'email'){
 					continue;

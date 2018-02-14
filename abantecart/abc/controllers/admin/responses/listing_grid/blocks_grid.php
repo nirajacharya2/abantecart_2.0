@@ -22,16 +22,16 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
-use abc\lib\AError;
-use abc\lib\AFilter;
-use abc\lib\AJson;
-use abc\lib\ALayoutManager;
-use abc\lib\AListingManager;
-use abc\lib\AResourceManager;
+use abc\core\lib\AError;
+use abc\core\lib\AFilter;
+use abc\core\lib\AJson;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\AListingManager;
+use abc\core\lib\AResourceManager;
 use abc\core\view\AView;
 use stdClass;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

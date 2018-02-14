@@ -1,8 +1,8 @@
 <?php
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AConfig;
-use abc\lib\AExtensionManager;
+use abc\core\lib\AConfig;
+use abc\core\lib\AExtensionManager;
 
 $lib_list = array(
 					'order_manager',

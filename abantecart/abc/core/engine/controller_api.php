@@ -19,9 +19,9 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\engine;
-use abc\lib\ARest;
+use abc\core\lib\ARest;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

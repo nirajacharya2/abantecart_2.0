@@ -21,12 +21,12 @@
 namespace abc\core\engine;
 
 use abc\core\cache\ACache;
-use abc\lib\ACart;
-use abc\lib\AConfig;
-use abc\lib\ACustomer;
-use abc\lib\ADB;
+use abc\core\lib\ACart;
+use abc\core\lib\AConfig;
+use abc\core\lib\ACustomer;
+use abc\core\lib\ADB;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

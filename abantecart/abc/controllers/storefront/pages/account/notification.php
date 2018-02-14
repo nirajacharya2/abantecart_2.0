@@ -23,7 +23,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesAccountNotification extends AController {
@@ -83,7 +83,7 @@ class ControllerPagesAccountNotification extends AController {
 		$im_drivers = $this->im->getIMDriverObjects();
 		//build protocol list
 		/**
-		 * @var \abc\lib\AMailIM $driver
+		 * @var \abc\core\lib\AMailIM $driver
 		 */
 		foreach($im_drivers as $name=>$driver){
 			$this->data['protocols'][$name] = array( 'name' => $name );

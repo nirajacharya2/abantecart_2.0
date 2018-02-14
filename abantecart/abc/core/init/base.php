@@ -1,6 +1,6 @@
 <?php
 
-use abc\ABC;
+use abc\core\ABC;
 
 $class_list = [
     'core/engine' => [
@@ -38,7 +38,7 @@ $class_list = [
         'utils',
         'system_check',
     ],
-    'lib'         => [
+    'core/lib'         => [
         'config',
         'db',
         'connect',

@@ -20,16 +20,16 @@
 
 namespace abc\models\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
 use abc\core\engine\Registry;
-use abc\lib\AEncryption;
-use abc\lib\AMail;
+use abc\core\lib\AEncryption;
+use abc\core\lib\AMail;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

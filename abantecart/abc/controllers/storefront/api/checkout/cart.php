@@ -21,14 +21,14 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ControllerApiCheckoutCart
  * @package abc\controllers\storefront
- * @property \abc\lib\AWeight $weight
+ * @property \abc\core\lib\AWeight $weight
  */
 class ControllerApiCheckoutCart extends AControllerAPI {
 	public $data = array();

@@ -22,10 +22,10 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
-use abc\lib\ALayoutManager;
-use abc\lib\AListingManager;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\AListingManager;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

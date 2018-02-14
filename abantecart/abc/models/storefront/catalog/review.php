@@ -20,9 +20,9 @@
 namespace abc\models\storefront;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
-use abc\lib\AMessage;
+use abc\core\lib\AMessage;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ModelCatalogReview extends Model {

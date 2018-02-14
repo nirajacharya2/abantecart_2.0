@@ -1,4 +1,4 @@
-<?php use abc\ABC; ?>
+<?php use abc\core\ABC; ?>
 //set global sign of allowed 3d party cookies as true by default. This value might be overridden by test cookie js
 var abc_cookie_allowed = true; 
 var abc_token_name = '<?php echo ABC::env('EMBED_TOKEN_NAME'); ?>';

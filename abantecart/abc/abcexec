@@ -18,8 +18,8 @@
 */
 namespace abc\core\backend;
 
-use abc\ABC;
-use abc\lib\AException;
+use abc\core\ABC;
+use abc\core\lib\AException;
 
 if (version_compare(phpversion(), '7.0.0', '<') == true){
 	exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");

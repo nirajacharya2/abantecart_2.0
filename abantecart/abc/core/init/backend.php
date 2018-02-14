@@ -18,19 +18,19 @@
 
 namespace abc\core\backend;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\cache\ACache;
-use abc\lib\AConfig;
-use abc\lib\ADataEncryption;
-use abc\lib\ADB;
-use abc\lib\ADocument;
-use abc\lib\ALanguageManager;
-use abc\lib\ALog;
-use abc\lib\ASession;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
+use abc\core\lib\ADocument;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\ALog;
+use abc\core\lib\ASession;
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -69,7 +69,7 @@ if ( ! ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-require dirname(__DIR__, 2).$dir_sep.'abc.php';
+require dirname(__DIR__).$dir_sep.'abc.php';
 //run constructor of ABC class to load environment
 
 $ABC = new ABC();
@@ -98,7 +98,7 @@ $defaults = [
     'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.$dir_sep,
     'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
     'DIR_CORE'            => $dir_app.'core'.$dir_sep,
-    'DIR_LIB'             => $dir_app.'lib'.$dir_sep,
+    'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
     'DIR_IMAGE'           => $dir_public.'images'.$dir_sep,
     'DIR_DOWNLOAD'        => $dir_app.'download'.$dir_sep,
     'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,

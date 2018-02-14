@@ -1,8 +1,8 @@
 <?php
 
 namespace abc\core\backend;
-use abc\ABC;
-use abc\lib\AAssetPublisher;
+use abc\core\ABC;
+use abc\core\lib\AAssetPublisher;
 
 
 class Publish implements ABCExec

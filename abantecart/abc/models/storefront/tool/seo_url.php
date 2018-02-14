@@ -20,10 +20,10 @@
 
 namespace abc\models\storefront;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Model;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

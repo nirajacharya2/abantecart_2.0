@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
-use abc\lib\AWarning;
+use abc\core\lib\AWarning;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

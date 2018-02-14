@@ -2,14 +2,14 @@
 
 namespace abc\core\backend;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
-use abc\lib\AConfig;
-use abc\lib\AConnect;
-use abc\lib\AContentManager;
-use abc\lib\ACurrency;
-use abc\lib\ALanguageManager;
+use abc\core\lib\AConfig;
+use abc\core\lib\AConnect;
+use abc\core\lib\AContentManager;
+use abc\core\lib\ACurrency;
+use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
 

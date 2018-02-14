@@ -21,7 +21,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AControllerAPI;
 use abc\core\helper\AHelperUtils;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerApiCommonAccess extends AControllerAPI {

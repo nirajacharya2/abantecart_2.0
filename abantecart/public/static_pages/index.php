@@ -21,10 +21,11 @@
 */
 // Real path (operating system web root) to the directory where abantecart is installed
 namespace abc;
-use abc\lib\ASession;
+use abc\core\ABC;
+use abc\core\lib\ASession;
 
 $dir_app = __DIR__ . '/../../abc/';
-require $dir_app.'abc.php';
+require $dir_app.'core/abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	ABC::env('IS_WINDOWS', true);
@@ -33,7 +34,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 // Load all initial set up
 ABC::env('DIR_APP', $dir_app);
 ABC::env('DIR_CORE', $dir_app.'core/');
-ABC::env('DIR_LIB', $dir_app.'lib/');
+ABC::env('DIR_LIB', $dir_app.'core/lib/');
 ABC::env('DIR_PUBLIC', dirname(__DIR__).'/');
 
 // HTTP

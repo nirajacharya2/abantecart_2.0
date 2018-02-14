@@ -20,9 +20,9 @@
 namespace abc\models\admin;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
-use abc\lib\AFilter;
+use abc\core\lib\AFilter;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

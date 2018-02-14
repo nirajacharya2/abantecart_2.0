@@ -18,15 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\core\helper;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\lib\AError;
-use abc\lib\ALanguageManager;
+use abc\core\lib\AError;
+use abc\core\lib\ALanguageManager;
 use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

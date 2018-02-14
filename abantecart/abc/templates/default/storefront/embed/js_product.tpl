@@ -1,5 +1,5 @@
 <?php
-use abc\ABC;
+use abc\core\ABC;
 //populate product div on client side ?>
 (function(){
 	var html = '';

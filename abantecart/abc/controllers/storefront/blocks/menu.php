@@ -19,9 +19,9 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
-use abc\lib\AMenu_Storefront;
+use abc\core\lib\AMenu_Storefront;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerBlocksMenu extends AController {

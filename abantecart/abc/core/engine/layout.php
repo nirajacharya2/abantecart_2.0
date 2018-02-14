@@ -20,24 +20,24 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AError;
-use abc\lib\AException;
-use abc\lib\AUser;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
+use abc\core\lib\AUser;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ALayout
  * @property \abc\core\cache\ACache $cache
- * @property \abc\lib\AUser $user
- * @property \abc\lib\AConfig $config
- * @property \abc\lib\ADB $db
- * @property \abc\lib\AMessage $messages
- * @property \abc\lib\ARequest $request
+ * @property \abc\core\lib\AUser $user
+ * @property \abc\core\lib\AConfig $config
+ * @property \abc\core\lib\ADB $db
+ * @property \abc\core\lib\AMessage $messages
+ * @property \abc\core\lib\ARequest $request
  */
 class ALayout{
 	/**
@@ -81,7 +81,7 @@ class ALayout{
 	/**
 	 * @param string $controller
 	 * @return int
-	 * @throws \abc\lib\AException
+	 * @throws \abc\core\lib\AException
 	 */
 	public function buildPageData($controller){
 

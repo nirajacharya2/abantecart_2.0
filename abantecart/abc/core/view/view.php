@@ -20,22 +20,22 @@
 
 namespace abc\core\view;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\ADebug;
-use abc\lib\AError;
-use abc\lib\AWarning;
+use abc\core\lib\ADebug;
+use abc\core\lib\AError;
+use abc\core\lib\AWarning;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class AView
  *
- * @property \abc\lib\AConfig               $config
+ * @property \abc\core\lib\AConfig               $config
  * @property \abc\core\engine\ExtensionsAPI $extensions
- * @property \abc\lib\AResponse             $response
+ * @property \abc\core\lib\AResponse             $response
  * @property \abc\core\cache\ACache                $cache
  *
  */

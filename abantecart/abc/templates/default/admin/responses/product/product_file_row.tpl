@@ -1,4 +1,4 @@
-<?php use abc\ABC;
+<?php use abc\core\ABC;
 
 if ($download_id != 'new') { ?>
 	<tr id="download_<?php echo $download_id; ?>" class="optionRow">

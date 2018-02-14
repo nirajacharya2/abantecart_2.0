@@ -18,13 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

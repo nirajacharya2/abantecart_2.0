@@ -1,4 +1,4 @@
-<div class="ui-jqgrid-wrapper" id="<?php use abc\ABC;
+<div class="ui-jqgrid-wrapper" id="<?php use abc\core\ABC;
 
 echo $data['table_id'] ?>_wrapper">
 	<form class="form-inline" id="<?php echo $data['table_id'] ?>_form" action="<?php echo $data["editurl"] ?>" method="POST" role="form">

@@ -1,5 +1,5 @@
 <?php
-use abc\ABC;
+use abc\core\ABC;
 echo $head; ?>
 	<h1 class="heading1">
 		<span class="maintext"><?php echo $heading_title; ?></span>

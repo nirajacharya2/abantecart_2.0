@@ -18,12 +18,12 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 // Required PHP Version
-use abc\ABC;
-use abc\lib\ACurrency;
-use abc\lib\ADebug;
-use abc\lib\AError;
-use abc\lib\AJson;
-use abc\lib\ATaskManager;
+use abc\core\ABC;
+use abc\core\lib\ACurrency;
+use abc\core\lib\ADebug;
+use abc\core\lib\AError;
+use abc\core\lib\AJson;
+use abc\core\lib\ATaskManager;
 
 ABC::env('MIN_PHP_VERSION', '7.0.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true){
@@ -45,7 +45,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 ABC::env('DIR_ROOT', $root_path);
 ABC::env('DIR_CORE', ABC::env('DIR_ROOT') . '/core/');
 
-require_once(ABC::env('DIR_ROOT') . '/config/config.php');
+require_once(ABC::env('DIR_ROOT') . '/config/enabled.php');
 
 //set server name for correct email sending
 if (ABC::env('SERVER_NAME')){
@@ -53,13 +53,13 @@ if (ABC::env('SERVER_NAME')){
 }
 
 // New Installation
-if (!ABC::env('DB_DATABASE')){
+if (!ABC::env('DATABASES')){
 	header('Location: install/index.php');
 	exit;
 }
 
 // sign of admin side for controllers run from dispatcher
-$_GET['s'] = ABC::env('ADMIN_PATH');
+$_GET['s'] = ABC::env('ADMIN_SECRET');
 // Load all initial set up
 require_once(ABC::env('DIR_ROOT') . '/core/init.php');
 // not needed anymore

@@ -20,14 +20,14 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\ADebug;
-use abc\lib\AError;
-use abc\lib\AWarning;
-use abc\lib\AException;
+use abc\core\lib\ADebug;
+use abc\core\lib\AError;
+use abc\core\lib\AWarning;
+use abc\core\lib\AException;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -41,7 +41,7 @@ class ALanguage
 
     protected $code = '';
     /**
-     * @var \abc\lib\ADB
+     * @var \abc\core\lib\ADB
      */
     protected $db;
     /**

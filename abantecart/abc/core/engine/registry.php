@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -44,7 +44,7 @@ final class Registry{
 
 	/**
 	 * @param $key string
-	 * @return \abc\lib\CSRFToken|\abc\lib\ARequest|ALoader|\abc\lib\ADocument|\abc\lib\ADB|\abc\lib\AConfig|AHtml|ExtensionsApi|\abc\lib\AExtensionManager|\abc\lib\ALanguageManager|\abc\lib\ASession|\abc\core\cache\ACache|\abc\lib\AMessage|\abc\lib\ALog|\abc\lib\AResponse|\abc\lib\AUser|ARouter|\abc\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\lib\ADataEncryption|\abc\lib\ADownload|\abc\lib\AOrderStatus|\abc\lib\AIMManager|\abc\lib\ACustomer
+	 * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\cache\ACache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
 	 */
 	public function get($key){
 		return (isset($this->data[$key]) ? $this->data[$key] : null);

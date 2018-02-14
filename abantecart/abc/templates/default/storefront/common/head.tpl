@@ -2,7 +2,7 @@
 /**
  * @var \abc\core\view\AView $this
  */
-use abc\ABC; ?>
+use abc\core\ABC; ?>
 <title><?php echo $title; ?></title>
 <meta charset="<?php echo ABC::env('APP_CHARSET')?>">
 <!--[if IE]>

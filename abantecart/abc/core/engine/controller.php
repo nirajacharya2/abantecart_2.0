@@ -18,13 +18,13 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\view\AView;
-use abc\lib\AConfig;
-use abc\lib\AWarning;
+use abc\core\lib\AConfig;
+use abc\core\lib\AWarning;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -79,35 +79,35 @@ if (!class_exists('abc\ABC')) {
  * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
  * @property \abc\models\admin\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
- * @property \abc\lib\AConfig $config
- * @property \abc\lib\ADB $db
+ * @property \abc\core\lib\AConfig $config
+ * @property \abc\core\lib\ADB $db
  * @property \abc\core\cache\ACache $cache
- * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\lib\ALanguageManager $language
  * @property AResource $resource
  * @property \abc\core\engine\ALoader $load
  * @property \abc\core\engine\ARouter $router
  * @property AHtml $html
- * @property \abc\lib\ARequest $request
- * @property \abc\lib\AResponse $response
- * @property \abc\lib\ASession $session
+ * @property \abc\core\lib\ARequest $request
+ * @property \abc\core\lib\AResponse $response
+ * @property \abc\core\lib\ASession $session
  * @property ExtensionsApi $extensions
- * @property \abc\lib\AExtensionManager $extension_manager
+ * @property \abc\core\lib\AExtensionManager $extension_manager
  * @property ALayout $layout
- * @property \abc\lib\ACurrency $currency
- * @property \abc\lib\ACart $cart
- * @property \abc\lib\ATax $tax
- * @property \abc\lib\AUser $user
- * @property \abc\lib\ALog $log
- * @property \abc\lib\AMessage $messages
- * @property \abc\lib\ACustomer $customer
- * @property \abc\lib\ADocument $document
+ * @property \abc\core\lib\ACurrency $currency
+ * @property \abc\core\lib\ACart $cart
+ * @property \abc\core\lib\ATax $tax
+ * @property \abc\core\lib\AUser $user
+ * @property \abc\core\lib\ALog $log
+ * @property \abc\core\lib\AMessage $messages
+ * @property \abc\core\lib\ACustomer $customer
+ * @property \abc\core\lib\ADocument $document
  * @property ADispatcher $dispatcher
- * @property \abc\lib\ADataEncryption $dcrypt
+ * @property \abc\core\lib\ADataEncryption $dcrypt
  * @property \abc\models\admin\ModelToolFileUploads $model_tool_file_uploads
- * @property \abc\lib\ADownload $download
- * @property \abc\lib\AOrderStatus $order_status
- * @property \abc\lib\AIMManager $im
- * @property \abc\lib\CSRFToken $csrftoken
+ * @property \abc\core\lib\ADownload $download
+ * @property \abc\core\lib\AOrderStatus $order_status
+ * @property \abc\core\lib\AIMManager $im
+ * @property \abc\core\lib\CSRFToken $csrftoken
  */
 abstract class AController{
 	/**

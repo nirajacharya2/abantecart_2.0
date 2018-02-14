@@ -24,7 +24,7 @@ use abc\core\engine\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

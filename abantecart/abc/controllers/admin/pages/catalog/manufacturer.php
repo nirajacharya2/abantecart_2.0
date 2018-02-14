@@ -22,7 +22,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesCatalogManufacturer extends AController {

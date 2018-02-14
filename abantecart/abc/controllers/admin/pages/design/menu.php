@@ -18,14 +18,14 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AContentManager;
-use abc\lib\AMenu_Storefront;
+use abc\core\lib\AContentManager;
+use abc\core\lib\AMenu_Storefront;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -42,7 +42,7 @@ class ControllerPagesDesignMenu extends AController{
 			'sort_order'
 	);
 	/**
-	 * @var \abc\lib\AMenu_Storefront
+	 * @var \abc\core\lib\AMenu_Storefront
 	 */
 	private $menu;
 	private $menu_items;

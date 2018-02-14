@@ -2,16 +2,16 @@
 namespace abc\core\extension;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
-use abc\lib\ALayoutManager;
+use abc\core\lib\ALayoutManager;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 /**
  * Class ExtensionFormsManager
- * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\lib\ALanguageManager $language
  * @property \abc\core\engine\AHtml $html
- * @property \abc\lib\ARequest $request
+ * @property \abc\core\lib\ARequest $request
  */
 class ExtensionFormsManager extends Extension {
 

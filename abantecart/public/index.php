@@ -18,7 +18,9 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc;
-require dirname(__DIR__) . '/abc/abc.php';
+use abc\core\ABC;
+
+require dirname(__DIR__).'/abc/core/abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	ABC::env('IS_WINDOWS', true);

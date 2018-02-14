@@ -21,9 +21,9 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
-use abc\lib\AAttribute_Manager;
+use abc\core\lib\AAttribute_Manager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesCatalogProductOptions extends AController {

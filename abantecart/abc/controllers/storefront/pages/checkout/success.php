@@ -19,11 +19,11 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
-use abc\lib\AEncryption;
-use abc\lib\AError;
-use abc\lib\AException;
+use abc\core\lib\AEncryption;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

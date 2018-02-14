@@ -20,15 +20,15 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\ADebug;
-use abc\lib\AError;
-use abc\lib\AException;
-use abc\lib\AWarning;
+use abc\core\lib\ADebug;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
+use abc\core\lib\AWarning;
 use Exception;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -225,7 +225,7 @@ class ExtensionCollection
  *
  * long description.
  *
- * @property \abc\lib\ADb    $db
+ * @property \abc\core\lib\ADb    $db
  * @property \abc\core\cache\ACache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)

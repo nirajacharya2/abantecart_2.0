@@ -18,17 +18,17 @@
 
 namespace abc\core\backend;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AAssetPublisher;
+use abc\core\lib\AAssetPublisher;
 use abc\core\cache\ACache;
-use abc\lib\AConfig;
-use abc\lib\AConnect;
-use abc\lib\ADB;
-use abc\lib\AException;
-use abc\lib\ALanguageManager;
-use abc\lib\ASession;
+use abc\core\lib\AConfig;
+use abc\core\lib\AConnect;
+use abc\core\lib\ADB;
+use abc\core\lib\AException;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\ASession;
 
 class Install implements ABCExec
 {

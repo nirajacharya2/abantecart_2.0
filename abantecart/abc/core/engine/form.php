@@ -20,15 +20,15 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\view\AView;
-use abc\lib\ADataset;
-use abc\lib\AError;
-use abc\lib\AFile;
+use abc\core\lib\ADataset;
+use abc\core\lib\AError;
+use abc\core\lib\AFile;
 use ReCaptcha\ReCaptcha;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -38,12 +38,12 @@ if (!class_exists('abc\ABC')) {
  * Class AForm
  * @property ALayout $layout
  * @property AHtml $html
- * @property \abc\lib\ALanguageManager $language
+ * @property \abc\core\lib\ALanguageManager $language
  * @property \abc\core\cache\ACache $cache
- * @property \abc\lib\ADB $db
- * @property \abc\lib\AConfig $config
- * @property \abc\lib\ASession $session
- * @property \abc\lib\ARequest $request
+ * @property \abc\core\lib\ADB $db
+ * @property \abc\core\lib\AConfig $config
+ * @property \abc\core\lib\ASession $session
+ * @property \abc\core\lib\ARequest $request
  * @property \abc\core\engine\ALoader $load
  * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
  *
@@ -421,7 +421,7 @@ class AForm{
 	 */
 	protected function addFormJs(){
 		/**
-		 * @var \abc\lib\ALanguageManager
+		 * @var \abc\core\lib\ALanguageManager
 		 */
 		$language = $this->registry->get('language');
 		$view = new AView($this->registry, 0);

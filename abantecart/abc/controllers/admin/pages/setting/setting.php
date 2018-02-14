@@ -20,14 +20,14 @@
 
 namespace abc\controllers\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-use abc\lib\AConfigManager;
+use abc\core\lib\AConfigManager;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -680,7 +680,7 @@ class ControllerPagesSettingSetting extends AController
      * @param int    $store_id
      *
      * @return bool
-     * @throws \abc\lib\AException
+     * @throws \abc\core\lib\AException
      */
     private function _validate($group, $store_id = 0)
     {

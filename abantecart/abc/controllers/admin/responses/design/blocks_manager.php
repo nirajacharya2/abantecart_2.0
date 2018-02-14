@@ -21,11 +21,11 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
-use abc\lib\AJson;
-use abc\lib\ALayoutManager;
+use abc\core\lib\AJson;
+use abc\core\lib\ALayoutManager;
 use abc\core\view\AView;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

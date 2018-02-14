@@ -20,13 +20,13 @@
 
 namespace abc\models\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-use abc\lib\ALanguageManager;
+use abc\core\lib\ALanguageManager;
 use abc\core\engine\Model;
-use abc\lib\AWarning;
+use abc\core\lib\AWarning;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -393,7 +393,7 @@ class ModelLocalisationLanguageDefinitions extends Model
     /**
      * Load needed data and build form for definitions add or edit
      *
-     * @param \abc\lib\ARequest      $request - Data from request object
+     * @param \abc\core\lib\ARequest      $request - Data from request object
      * @param array                  $data    - from requester
      * @param \abc\core\engine\AForm $form    - form object
      *

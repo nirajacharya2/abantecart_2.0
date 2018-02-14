@@ -18,15 +18,15 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Model;
-use abc\lib\ABackup;
-use abc\lib\ADataset;
-use abc\lib\AFormManager;
-use abc\lib\ALayoutManager;
-use abc\lib\ATaskManager;
+use abc\core\lib\ABackup;
+use abc\core\lib\ADataset;
+use abc\core\lib\AFormManager;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\ATaskManager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

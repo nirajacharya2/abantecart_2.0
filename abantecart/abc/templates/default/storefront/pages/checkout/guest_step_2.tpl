@@ -1,4 +1,4 @@
-<?php use abc\ABC; ?>
+<?php use abc\core\ABC; ?>
 <h1 class="heading1">
 	<span class="maintext"><?php echo $heading_title; ?></span>
 	<span class="subtext"></span>

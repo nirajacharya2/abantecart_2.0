@@ -18,20 +18,20 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\APromotion;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
-use abc\lib\AAttribute_Manager;
-use abc\lib\AError;
-use abc\lib\AJson;
-use abc\lib\ATax;
-use abc\lib\AWeight;
+use abc\core\lib\AAttribute_Manager;
+use abc\core\lib\AError;
+use abc\core\lib\AJson;
+use abc\core\lib\ATax;
+use abc\core\lib\AWeight;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

@@ -4,7 +4,7 @@
  *
  */
 
-use abc\ABC;
+use abc\core\ABC;
 
 /**
  * @param string $url

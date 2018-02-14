@@ -2,8 +2,8 @@
 
 namespace abc\core\backend;
 
-use abc\ABC;
-use abc\lib\AException;
+use abc\core\ABC;
+use abc\core\lib\AException;
 
 class Deploy implements ABCExec
 {

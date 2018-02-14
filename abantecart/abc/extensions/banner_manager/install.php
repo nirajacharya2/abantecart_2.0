@@ -18,10 +18,10 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\Admin;
-use abc\lib\AMenu;
-use abc\lib\AResourceManager;
+use abc\core\lib\AMenu;
+use abc\core\lib\AResourceManager;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

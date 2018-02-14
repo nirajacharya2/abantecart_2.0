@@ -20,15 +20,15 @@
 
 namespace abc\core\engine;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\cache\ACache;
-use abc\lib\AConfig;
-use abc\lib\ADB;
-use abc\lib\AException;
-use abc\lib\AWarning;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADB;
+use abc\core\lib\AException;
+use abc\core\lib\AWarning;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -40,7 +40,7 @@ if (!class_exists('abc\ABC')) {
  * @property  AConfig $config
  * @property  ACache $cache
  * @property  ADB $db
- * @property  \abc\lib\ALanguageManager $language
+ * @property  \abc\core\lib\ALanguageManager $language
  */
 class AResource{
 	/**

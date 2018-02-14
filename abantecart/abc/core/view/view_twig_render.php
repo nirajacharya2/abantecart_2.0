@@ -2,7 +2,7 @@
 
 namespace abc\core\view;
 
-use abc\lib\AException;
+use abc\core\lib\AException;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 

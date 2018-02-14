@@ -1,4 +1,4 @@
-<?php use abc\ABC; ?>
+<?php use abc\core\ABC; ?>
 <header>
 <div class="headerstrip navbar navbar-inverse" role="navigation">
 	<div class="container-fluid">

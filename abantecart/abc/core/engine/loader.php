@@ -19,12 +19,12 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\engine;
-use abc\ABC;
-use abc\lib\AConfig;
-use abc\lib\AException;
-use abc\lib\AWarning;
+use abc\core\ABC;
+use abc\core\lib\AConfig;
+use abc\core\lib\AException;
+use abc\core\lib\AWarning;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

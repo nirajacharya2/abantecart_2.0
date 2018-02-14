@@ -20,13 +20,13 @@
 
 namespace abc\controllers\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\lib\ADB;
-use abc\lib\AException;
+use abc\core\lib\ADB;
+use abc\core\lib\AException;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 if (ABC::env('IS_DEMO')) {

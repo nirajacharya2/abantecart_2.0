@@ -19,13 +19,13 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
-use abc\lib\AMail;
+use abc\core\lib\AMail;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

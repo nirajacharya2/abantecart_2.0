@@ -20,7 +20,7 @@
 ------------------------------------------------------------------------------  
 */
 // Real path (operating system web root) to the directory where abantecart is installed
-use abc\ABC;
+use abc\core\ABC;
 
 $root_path = dirname(__FILE__);
 if (ABC::env('IS_WINDOWS') === true) {
@@ -40,9 +40,9 @@ ABC::env('DIR_CORE', str_replace('\'', '/', realpath(dirname(__FILE__) . '/../')
 ABC::env('DIR_ABANTECART', str_replace('\'', '/', realpath(ABC::env('DIR_APP') . '../')) . '/');
 
 // Startup
-require_once(ABC::env('DIR_APP') . 'config/config.php');
+require_once(ABC::env('DIR_APP') . 'config/enabled.php');
 // New Installation
-if (!ABC::env('DB_DATABASE')) {
+if (!ABC::env('DATABASES')) {
 	header('Location: ../install/index.php');
 	exit;
 }

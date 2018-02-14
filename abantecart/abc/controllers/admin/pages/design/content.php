@@ -20,14 +20,14 @@
 
 namespace abc\controllers\admin;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AContentManager;
-use abc\lib\ALayoutManager;
+use abc\core\lib\AContentManager;
+use abc\core\lib\ALayoutManager;
 
-if ( ! class_exists('abc\ABC') || ! \abc\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

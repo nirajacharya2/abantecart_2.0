@@ -1,5 +1,5 @@
 <?php
-use abc\ABC;
+use abc\core\ABC;
 include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <?php echo $summary_form; ?>

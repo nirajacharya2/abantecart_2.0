@@ -18,8 +18,8 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 // Required PHP Version
-use abc\ABC;
-use abc\lib\ACurrency;
+use abc\core\ABC;
+use abc\core\lib\ACurrency;
 
 ABC::env('MIN_PHP_VERSION', '7.0.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true){
@@ -51,7 +51,7 @@ if (ABC::env('SERVER_NAME')){
 	putenv("SERVER_NAME=" . ABC::env('SERVER_NAME'));
 }
 // sign of admin side for controllers run from dispatcher
-$_GET['s'] = ABC::env('ADMIN_PATH');
+$_GET['s'] = ABC::env('ADMIN_SECRET');
 // Load all initial set up
 require_once(ABC::env('DIR_ROOT') . '/core/init.php');
 // not needed anymore

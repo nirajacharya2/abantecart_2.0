@@ -18,11 +18,11 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\lib\AData;
+use abc\core\lib\AData;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerPagesToolImportUpload extends AController {
@@ -36,7 +36,7 @@ class ControllerPagesToolImportUpload extends AController {
 	 */
 	public $file_types = array('text/csv', 'application/vnd.ms-excel', 'text/plain', 'application/octet-stream');
 	/**
-	 * @var \abc\lib\AData
+	 * @var \abc\core\lib\AData
 	 */
 	private $handler;
 

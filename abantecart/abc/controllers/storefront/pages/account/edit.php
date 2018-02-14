@@ -21,7 +21,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -203,7 +203,7 @@ class ControllerPagesAccountEdit extends AController{
 		$im_drivers = $this->im->getIMDriverObjects();
 		if ($im_drivers){
 			/**
-			 * @var \abc\lib\AMailIM $driver_obj
+			 * @var \abc\core\lib\AMailIM $driver_obj
 			 */
 			foreach ($im_drivers as $protocol => $driver_obj){
 				if (!is_object($driver_obj) || $protocol=='email'){

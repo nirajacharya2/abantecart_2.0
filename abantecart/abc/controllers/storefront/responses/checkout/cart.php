@@ -22,10 +22,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\HtmlElementFactory;
-use abc\lib\AException;
-use abc\lib\AJson;
+use abc\core\lib\AException;
+use abc\core\lib\AJson;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 

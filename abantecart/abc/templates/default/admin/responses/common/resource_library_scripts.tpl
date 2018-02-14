@@ -1,5 +1,5 @@
 <?php
-use abc\ABC;
+use abc\core\ABC;
 echo $this->html->buildElement(
 		array('type' => 'modal',
 				'id' => 'rl_modal',

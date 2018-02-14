@@ -20,10 +20,10 @@
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\helper\AHelperHtml;
-use abc\lib\ADataset;
-use abc\lib\AResourceManager;
+use abc\core\lib\ADataset;
+use abc\core\lib\AResourceManager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonMenu extends AController {

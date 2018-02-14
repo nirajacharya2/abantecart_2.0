@@ -19,21 +19,21 @@
 ------------------------------------------------------------------------------*/
 namespace abc\core\engine;
 use abc\core\helper\AHelperUtils;
-use abc\lib\AFile;
+use abc\core\lib\AFile;
 
-if (!class_exists('abc\ABC')) {
+if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class to handle access to global attributes
  *
- * @property \abc\lib\ALanguageManager $language
- * @property \abc\lib\ADB $db
+ * @property \abc\core\lib\ALanguageManager $language
+ * @property \abc\core\lib\ADB $db
  * @property \abc\core\cache\ACache $cache
- * @property \abc\lib\AConfig $config
- * @property \abc\lib\ARequest $request
- * @property \abc\lib\ASession $session
+ * @property \abc\core\lib\AConfig $config
+ * @property \abc\core\lib\ARequest $request
+ * @property \abc\core\lib\ASession $session
  * @property \abc\core\engine\ALoader $load
  */
 class AAttribute{

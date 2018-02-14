@@ -25,17 +25,17 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\APromotion;
 use abc\core\engine\AResource;
-use abc\lib\ADataset;
-use abc\lib\AFile;
+use abc\core\lib\ADataset;
+use abc\core\lib\AFile;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ControllerPagesCheckoutCart
  *
- * @property \abc\lib\AWeight $weight
+ * @property \abc\core\lib\AWeight $weight
  */
 class ControllerPagesCheckoutCart extends AController
 {

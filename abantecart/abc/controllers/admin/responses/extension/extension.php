@@ -18,12 +18,12 @@ versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\ExtensionUtils;
-use abc\lib\AAttribute_Manager;
+use abc\core\lib\AAttribute_Manager;
 
-if (!class_exists('abc\ABC') || !\abc\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerResponsesExtensionExtension extends AController {

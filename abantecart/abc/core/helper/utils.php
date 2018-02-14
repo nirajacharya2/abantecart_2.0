@@ -20,13 +20,13 @@
 
 namespace abc\core\helper;
 
-use abc\ABC;
+use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\lib\AError;
-use abc\lib\AImage;
-use abc\lib\ASession;
-use abc\lib\Atargz;
-use abc\lib\AWarning;
+use abc\core\lib\AError;
+use abc\core\lib\AImage;
+use abc\core\lib\ASession;
+use abc\core\lib\Atargz;
+use abc\core\lib\AWarning;
 use DateTime;
 use DOMDocument;
 use DOMXPath;
@@ -34,7 +34,7 @@ use Exception;
 use PharData;
 use PharException;
 
-if ( ! class_exists('abc\ABC')) {
+if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -1583,7 +1583,7 @@ class AHelperUtils extends AHelper
 
     /**
      * Function returns relative path of class based on full class name.
-     * Example: on "\abc\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
+     * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
      * @param string $class_name - full class name
      *
      * @return string
