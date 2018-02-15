@@ -6,6 +6,8 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
+use abc\core\lib\AError;
+use abc\core\lib\AException;
 
 require 'abc_base.php';
 
@@ -26,15 +28,24 @@ class ABC extends ABCBase
      */
     public function __construct($file = '')
     {
+
         //load and put config into environment
         if(!$file || !is_file($file)) {
-            $file = dirname(__DIR__).'/config/enabled.php';
+            $file_name = @include(dirname(__DIR__).'/config/enabled.config.php');
+            $file = dirname(__DIR__).'/config/'.$file_name;
         }
 
         $config = @include($file);
         if($config) {
             self::env($config);
             self::$loaded_config_file = $file;
+        }else{
+            include('./lib/error.php');
+            if( class_exists('\abc\core\lib\AError')){
+                $error = new AError('Fatal Error: cannot load environment configuration from file "'.$file.'"!');
+                $error->toLog()->toDebug();
+            }
+            exit('Error: cannot load environment configuration from file "/abc/config/'.basename($file).'"!');
         }
     }
 

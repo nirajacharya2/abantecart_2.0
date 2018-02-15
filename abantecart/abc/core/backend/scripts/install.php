@@ -363,7 +363,6 @@ class Install implements ABCExec
         $content = <<<EOD
 <?php
 return [
-    'default' => [
         'APP_NAME' => 'AbanteCart',
         'MIN_PHP_VERSION' => '7.0',
         'DIR_ROOT' => '{$options['root_dir']}',
@@ -380,44 +379,53 @@ return [
         'POSTFIX_OVERRIDE' => '.override',
         'POSTFIX_PRE' => '.pre',
         'POSTFIX_POST' => '.post',
-        'APP_CHARSET' => 'UTF-8'
-    ]
+        'APP_CHARSET' => 'UTF-8',
+
+        'DB_CURRENT_DRIVER' => '{$options['db_driver']}',
+        'DATABASES' =>[
+            '{$options['db_driver']}' => [
+                        'DB_DRIVER'    => '{$options['db_driver']}',
+                        'DB_HOST'      => '{$options['db_host']}',
+                        'DB_PORT'      => '{$options['db_port']}',
+                        'DB_USER'      => '{$options['db_user']}',
+                        'DB_PASSWORD'  => '{$options['db_password']}',
+                        'DB_NAME'      => '{$options['db_name']}',
+                        'DB_PREFIX'    => '{$options['db_prefix']}',
+                        'DB_CHARSET'   => 'utf8',
+                        'DB_COLLATION' => 'utf8_unicode_ci'
+            ]
+        ],
+
+        'CACHE' => 
+                    [
+                        'CACHE_DRIVER' => '{$options['cache_driver']}',                        
+                        //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
+                        //'CACHE_SECRET' => 'your_cache_secret',                        
+                        //for "memcache" and "memcached" cache-drivers
+                        //'CACHE_HOST' => 'your_cache_host',
+                        //'CACHE_PORT' => 'your_cache_port',                        
+                        //'CACHE_PERSISTENT' => false, //boolean
+                        //'CACHE_COMPRESS_LEVEL' => false, //boolean
+                    ]
 ];
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG').'app.php', 'w');
+        $file = fopen(ABC::env('DIR_CONFIG').'default.config.php', 'w');
         if ( ! fwrite($file, $content)) {
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
 
-        //write database config
+        $file = fopen(ABC::env('DIR_CONFIG').'enabled.config.php', 'w');
         $content = <<<EOD
 <?php
-// Database Configuration
-return [
-    'default' => [
-            'DB_CURRENT_DRIVER' => '{$options['db_driver']}',
-            'DATABASES' =>[
-                '{$options['db_driver']}' => [
-                            'DB_DRIVER'    => '{$options['db_driver']}',
-                            'DB_HOST'      => '{$options['db_host']}',
-                            'DB_PORT'      => '{$options['db_port']}',
-                            'DB_USER'      => '{$options['db_user']}',
-                            'DB_PASSWORD'  => '{$options['db_password']}',
-                            'DB_NAME'      => '{$options['db_name']}',
-                            'DB_PREFIX'    => '{$options['db_prefix']}',
-                            'DB_CHARSET'   => 'utf8',
-                            'DB_COLLATION' => 'utf8_unicode_ci'
-                ]
-            ]
-        ]
-];
+// config file with current stage values
+return 'default.config.php';
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG').'databases.php', 'w');
         if ( ! fwrite($file, $content)) {
             $result[] = 'Cannot to write file '.$file;
         }
         fclose($file);
+
         //adds into environment
         $registry = Registry::getInstance();
         $db_config = [
@@ -437,31 +445,6 @@ EOD;
         ABC::env('DB_CURRENT_DRIVER', $options['db_driver']);
         ABC::env('DATABASES',$db_config);
         $registry->set('db', new ADB( $db_config[$options['db_driver']] ));
-
-        //write cache config
-        $content = <<<EOD
-<?php
-return [
-    'default' => [ 
-        'CACHE' => 
-                    [
-                        'CACHE_DRIVER' => '{$options['cache_driver']}',                        
-                        //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
-                        //'CACHE_SECRET' => 'your_cache_secret',                        
-                        //for "memcache" and "memcached" cache-drivers
-                        //'CACHE_HOST' => 'your_cache_host',
-                        //'CACHE_PORT' => 'your_cache_port',                        
-                        //'CACHE_PERSISTENT' => false, //boolean
-                        //'CACHE_COMPRESS_LEVEL' => false, //boolean
-                    ]
-    ]
-];
-EOD;
-        $file = fopen(ABC::env('DIR_CONFIG').'cache.php', 'w');
-        if ( ! fwrite($file, $content)) {
-            $result[] = 'Cannot to write file '.$file;
-        }
-        fclose($file);
         ABC::env('CACHE', ['CACHE_DRIVER' => $options['cache_driver'] ]);
         return $result;
     }

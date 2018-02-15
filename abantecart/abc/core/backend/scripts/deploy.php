@@ -69,7 +69,7 @@ class Deploy implements ABCExec
                 $errors = $clr_result;
             }else {
                 if($action == 'config'){
-                    $result = $this->_make_config($options['stage']);
+                    $result = $this->_switch_config($options['stage']);
                 }else {
                     $this->publish->run($action, $options);
                     $this->results[] = $this->publish->finish($action, $options);
@@ -93,45 +93,35 @@ class Deploy implements ABCExec
      * @return bool
      * @throws AException
      */
-    protected function _make_config($stage_name){
+    protected function _switch_config($stage_name){
         if(!trim($stage_name)){
             throw new AException(AC_ERR_USER_ERROR, "Error: Wrong stage name!");
         }
-        //load and put config into environment
-        $enabled_config = ABC::env('DIR_CONFIG').'enabled.php';
-        $files = glob(ABC::env('DIR_CONFIG').'*.php');
-        $output = [];
-        foreach ($files as $file) {
-            if($file == $enabled_config){
-                continue;
-            }
-            $config = include($file);
-            //check is default stage values presents
-            $default_values = isset($config['default']) ? $config['default'] : [];
-            //if default stage presents
-            if($default_values){
-                foreach($default_values as $n=>$v){
-                    //get default value if key not presents in stage config
-                    $output[$n] = isset($config[$stage_name][$n]) ? $config[$stage_name][$n] : $v;
-                }
-            } elseif(isset($config[$stage_name])) {
-                //merge arrays
-                $output = array_merge($output, $config[$stage_name]);
-            }
-        }
-        //write enabled config. If it already presents - do backup first
-        $tmp_file = ABC::env('DIR_CONFIG').'tmp.php';
-        @unlink($tmp_file);
-        fopen($tmp_file, 'a');
-        $content = '';
-        if($output) {
-            $content = "<?php \n return ".var_export($output, true).";\n";
-        }
-        $result = file_put_contents( $tmp_file, $content );
-        if(!$result){
-            throw new AException(AC_ERR_USER_ERROR, "Cannot save temporary file or file is empty.");
+        $stage_config = ABC::env('DIR_CONFIG').$stage_name.'.config.php';
+        if( !is_file($stage_config)
+            &&
+            !is_file(ABC::env('DIR_CONFIG').$stage_name.'.php')
+        ){
+            throw new AException(AC_ERR_USER_ERROR, "Error: Cannot find config file of stage (looking for ".ABC::env('DIR_CONFIG').$stage_name.'.config.php'.")!");
         }
 
+        $tmp_file = ABC::env('DIR_CONFIG').'tmp.php';
+        @unlink($tmp_file);
+
+        $file = fopen($tmp_file, 'w');
+        $content = "
+<?php
+// config file with current stage values
+return '".$stage_name.".config.php';
+";
+        if ( ! fwrite($file, $content)) {
+            $result[] = 'Cannot to write temporary file '.$file;
+        }
+        fclose($file);
+
+
+        //write enabled config. If it already presents - do backup first
+        $enabled_config = ABC::env('DIR_CONFIG').'enabled.config.php';
         if(file_exists($enabled_config)){
             $result = rename($enabled_config,$enabled_config.'.bkp');
             if(!$result){
