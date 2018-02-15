@@ -39,13 +39,6 @@ class ABC extends ABCBase
         if($config) {
             self::env($config);
             self::$loaded_config_file = $file;
-        }else{
-            include('./lib/error.php');
-            if( class_exists('\abc\core\lib\AError')){
-                $error = new AError('Fatal Error: cannot load environment configuration from file "'.$file.'"!');
-                $error->toLog()->toDebug();
-            }
-            exit('Error: cannot load environment configuration from file "/abc/config/'.basename($file).'"!');
         }
     }
 

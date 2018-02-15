@@ -57,7 +57,7 @@ class Install implements ABCExec
         }
 
         //check requirements first
-        $errors = $this->validateRequirements($options);
+        $errors = $this->_validate_requirements($options);
         if ($errors) {
             return $errors;
         }
@@ -243,11 +243,26 @@ class Install implements ABCExec
         $output = "\n\nSUCCESS! AbanteCart successfully installed on your server\n\n";
         $output .= "\t"."Store link: ".$options['http_server']."\n\n";
         $output .= "\t"."Admin link: ".$options['http_server']."?s=".$options['admin_secret']."\n\n";
-
+        //suggest to change permissions
+        $dirs = [
+                ABC::env('DIR_CONFIG'),
+                ABC::env('DIR_SYSTEM'),
+                ABC::env('DIR_CACHE'),
+                ABC::env('DIR_LOGS'),
+                ABC::env('DIR_PUBLIC').'images',
+                ABC::env('DIR_PUBLIC').'images/thumbnails',
+                ABC::env('DIR_APP').'downloads',
+                ABC::env('DIR_APP_EXTENSIONS'),
+                ABC::env('DIR_PUBLIC').'resources'
+        ];
+        $output .= "Following directories must have write permissions for this server webserver user\n\n";
+        foreach($dirs as $dir){
+            $output .= "\t".$dir."\n";
+        }
         return $output;
     }
 
-    protected function validateRequirements()
+    protected function _validate_requirements()
     {
         $errors = [];
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
@@ -329,10 +344,6 @@ class Install implements ABCExec
 
         if ( ! is_writable(ABC::env('DIR_PUBLIC').'resources')) {
             $errors['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
-        }
-
-        if ( ! is_writable(ABC::env('DIR_SYSTEM'))) {
-            $errors['warning'] = 'Warning: Admin/system directory needs to be writable for AbanteCart to work!';
         }
 
         return $errors;
