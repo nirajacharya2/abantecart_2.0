@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
-use abc\core\engine\APromotion;
+use abc\core\lib\APromotion;
 use abc\core\engine\Model;
 
 if (!class_exists('abc\core\ABC')) {

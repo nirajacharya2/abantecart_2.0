@@ -24,7 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
-use abc\core\engine\APromotion;
+use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;

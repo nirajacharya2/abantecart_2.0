@@ -21,7 +21,6 @@ namespace abc\core\lib;
 use abc\core\engine\AAttribute;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
-use abc\core\engine\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 

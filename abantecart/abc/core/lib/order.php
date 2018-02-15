@@ -19,7 +19,6 @@
 ------------------------------------------------------------------------------*/
 namespace abc\core\lib;
 use abc\core\helper\AHelperUtils;
-use abc\core\engine\APromotion;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));

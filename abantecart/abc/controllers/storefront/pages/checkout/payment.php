@@ -21,7 +21,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
-use abc\core\engine\APromotion;
+use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 
 if (!class_exists('abc\core\ABC')) {

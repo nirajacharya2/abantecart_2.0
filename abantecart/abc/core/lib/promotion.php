@@ -18,13 +18,9 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\core\engine;
-
+namespace abc\core\lib;
 use abc\core\cache\ACache;
-use abc\core\lib\ACart;
-use abc\core\lib\AConfig;
-use abc\core\lib\ACustomer;
-use abc\core\lib\ADB;
+use abc\core\engine\Registry;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -156,8 +152,7 @@ class APromotion
             return $output;
         }
 
-        $sql
-            = "SELECT price
+        $sql = "SELECT price
                 FROM ".$this->db->table("product_discounts")."
                 WHERE product_id = '".(int)$product_id."'
                         AND customer_group_id = '".$customer_group_id."'
@@ -299,8 +294,7 @@ class APromotion
             return $cache;
         }
 
-        $sql
-            = "SELECT DISTINCT ps.product_id, p.*, pd.name, pd.description, pd.blurb, ss.name AS stock,
+        $sql = "SELECT DISTINCT ps.product_id, p.*, pd.name, pd.description, pd.blurb, ss.name AS stock,
                     (SELECT AVG(rating)
                     FROM ".$this->db->table("reviews")." r1
                     WHERE r1.product_id = ps.product_id

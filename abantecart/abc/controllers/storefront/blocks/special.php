@@ -19,7 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
-use abc\core\engine\APromotion;
+use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 
 if (!class_exists('abc\core\ABC')) {
