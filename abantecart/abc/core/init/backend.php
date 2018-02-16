@@ -89,7 +89,7 @@ ini_set('default_charset', strtolower($charset));
 $dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).$dir_sep : ABC::env('DIR_ROOT');
 $dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__, 2).$dir_sep : ABC::env('DIR_APP');
 $dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public'.$dir_sep : ABC::env('DIR_PUBLIC');
-$dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_root.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
+$dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,

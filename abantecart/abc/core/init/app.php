@@ -93,7 +93,7 @@ $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
     array(
-        'DIR_VENDOR'         => ABC::env('DIR_ROOT').'vendor/',
+        'DIR_VENDOR'         => ABC::env('DIR_APP').'vendor/',
         'DIR_APP_EXTENSIONS' => $dir_app.'extensions/',
         'DIR_SYSTEM'         => $dir_app.'system/',
         'DIR_CORE'           => $dir_app.'core/',
