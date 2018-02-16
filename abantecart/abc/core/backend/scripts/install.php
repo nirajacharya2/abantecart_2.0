@@ -463,7 +463,7 @@ EOD;
     protected function _run_sql($data)
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'abantecart_database.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'mysql.database.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
 
@@ -548,7 +548,7 @@ EOD;
     protected function _load_demo_data($options)
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.'abantecart_demo_data.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.'mysql.demo_data.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
             return $errors;
