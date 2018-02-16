@@ -22,7 +22,6 @@ $class_list = [
         'extensions',
         'hook',
         'attribute',
-        'promotion',
         'language',
     ],
     'core/cache'   => [
@@ -75,6 +74,7 @@ $class_list = [
         'task_manager',
         'im',
         'csrf_token',
+        'promotion'
     ],
 ];
 //load classes
