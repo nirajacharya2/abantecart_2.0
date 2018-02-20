@@ -58,6 +58,8 @@ use abc\core\lib\CSRFToken;
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
+$dir_sep = DIRECTORY_SEPARATOR;
+
 // AbanteCart Version
 include('version.php');
 
@@ -93,18 +95,18 @@ $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
     array(
-        'DIR_VENDOR'         => ABC::env('DIR_APP').'vendor/',
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions/',
-        'DIR_SYSTEM'         => $dir_app.'system/',
-        'DIR_CORE'           => $dir_app.'core/',
-        'DIR_LIB'            => $dir_app.'core/lib/',
-        'DIR_DOWNLOAD'       => $dir_app.'download/',
-        'DIR_CONFIG'         => $dir_app.'config/',
-        'DIR_CACHE'          => $dir_app.'system/cache/',
-        'DIR_LOGS'           => $dir_app.'system/logs/',
-        'DIR_TEMPLATES'      => $dir_app.'templates/',
-        'DIR_IMAGE'          => $dir_public.'images/',
-        'DIR_RESOURCE'       => $dir_public.'resources/',
+        'DIR_VENDOR'         => ABC::env('DIR_APP').'vendor'.$dir_sep,
+        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
+        'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
+        'DIR_CORE'           => $dir_app.'core'.$dir_sep,
+        'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
+        'DIR_DOWNLOAD'       => $dir_app.'download'.$dir_sep,
+        'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
+        'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+        'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
+        'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
+        'DIR_IMAGE'          => $dir_public.'images'.$dir_sep,
+        'DIR_RESOURCE'       => $dir_public.'resources'.$dir_sep,
     )
 );
 
@@ -113,7 +115,7 @@ require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
-$dir_lib = $dir_app.'core/lib/';
+$dir_lib = $dir_app.'core'.$dir_sep.'lib'.$dir_sep;
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');
 require_once($dir_lib.'error.php');
@@ -140,9 +142,9 @@ if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s']
     ABC::env(
         array(
             'IS_ADMIN'     => true,
-            'DIR_LANGUAGE' => $dir_app.'languages/admin/',
-            'DIR_BACKUP'   => $dir_app.'system/backup/',
-            'DIR_DATA'     => $dir_app.'system/data/',
+            'DIR_LANGUAGE' => $dir_app.'languages'.$dir_sep.'admin'.$dir_sep,
+            'DIR_BACKUP'   => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
+            'DIR_DATA'     => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
         )
     );
 
@@ -151,7 +153,7 @@ if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s']
     ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
     ABC::env('IS_ADMIN', false);
-    ABC::env('DIR_LANGUAGE', $dir_app.'/languages/storefront/');
+    ABC::env('DIR_LANGUAGE', $dir_app.$dir_sep.'languages'.$dir_sep.'storefront'.$dir_sep);
     ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
     ABC::env('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
@@ -172,7 +174,6 @@ if (ini_get('magic_quotes_gpc')) {
         } else {
             $data = stripslashes($data);
         }
-
         return $data;
     }
 
@@ -207,21 +208,21 @@ if ( ! isset($_SERVER['REQUEST_URI'])) {
 //paths for extensions
 ABC::env(
     array(
-        'DIRNAME_APP'         => 'abc/',
-        'DIRNAME_ASSETS'      => 'assets/',
-        'DIRNAME_EXTENSIONS'  => 'extensions/',
-        'DIRNAME_CORE'        => 'core/',
-        'DIRNAME_STORE'       => 'storefront/',
-        'DIRNAME_ADMIN'       => 'admin/',
-        'DIRNAME_IMAGES'      => 'images/',
-        'DIRNAME_CONTROLLERS' => 'controllers/',
-        'DIRNAME_LANGUAGES'   => 'languages/',
-        'DIRNAME_TEMPLATES'   => 'templates/',
-        'DIRNAME_TEMPLATE'    => 'template/',
-        'DIRNAME_VENDOR'      => 'vendor/',
+        'DIRNAME_APP'         => 'abc'.$dir_sep,
+        'DIRNAME_ASSETS'      => 'assets'.$dir_sep,
+        'DIRNAME_EXTENSIONS'  => 'extensions'.$dir_sep,
+        'DIRNAME_CORE'        => 'core'.$dir_sep,
+        'DIRNAME_STORE'       => 'storefront'.$dir_sep,
+        'DIRNAME_ADMIN'       => 'admin'.$dir_sep,
+        'DIRNAME_IMAGES'      => 'images'.$dir_sep,
+        'DIRNAME_CONTROLLERS' => 'controllers'.$dir_sep,
+        'DIRNAME_LANGUAGES'   => 'languages'.$dir_sep,
+        'DIRNAME_TEMPLATES'   => 'templates'.$dir_sep,
+        'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
+        'DIRNAME_VENDOR'      => 'vendor'.$dir_sep,
 
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions/',
-        'DIR_ASSETS_EXT'     => $dir_public.'extensions/',
+        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
+        'DIR_ASSETS_EXT'     => $dir_public.'extensions'.$dir_sep,
     )
 );
 
