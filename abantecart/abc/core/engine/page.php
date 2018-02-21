@@ -85,7 +85,7 @@ class APage{
 
 		//Process dispatcher in while in case we have new dispatch back
 		while ($dispatch_rt && $dispatch_rt != 'completed') {
-			//Process main level controller			
+			//Process main level controller
 			// load page layout
 			if ($this->layout) {
 				//filter in case we have pages set already

@@ -38,10 +38,10 @@ ABC::env('HTTP_SERVER', 'http:' . ABC::env('AUTO_SERVER'));
 ABC::env('HTTP_CATALOG', ABC::env('HTTP_SERVER'));
 ABC::env('HTTP_EXT', ABC::env('HTTP_SERVER') . 'extensions/');
 ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER') . 'images/');
-ABC::env('HTTP_DIR_RESOURCE', ABC::env('HTTP_SERVER') . 'resources/');
+ABC::env('HTTP_DIR_RESOURCES', ABC::env('HTTP_SERVER') . 'resources/');
 //we use Protocol-relative URLs here
 ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER') . 'images/');
-ABC::env('HTTPS_DIR_RESOURCE', ABC::env('AUTO_SERVER') . 'resources/');
+ABC::env('HTTPS_DIR_RESOURCES', ABC::env('AUTO_SERVER') . 'resources/');
 //Admin HTTPS
 if ( ABC::env('HTTPS') ) {
 	ABC::env('HTTPS_SERVER', 'https:' . ABC::env('AUTO_SERVER'));

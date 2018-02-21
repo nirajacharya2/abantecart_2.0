@@ -35,8 +35,8 @@ class ModelToolImage extends Model{
 	 * @return null|string
 	 */
 	function resize($filename, $width, $height){
-		$orig_image_filepath = is_file(ABC::env('DIR_IMAGE') . $filename) ? ABC::env('DIR_IMAGE') . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename) ? ABC::env('DIR_RESOURCE') . 'image/' . $filename : $orig_image_filepath;
+		$orig_image_filepath = is_file(ABC::env('DIR_IMAGES') . $filename) ? ABC::env('DIR_IMAGES') . $filename : '';
+		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename) ? ABC::env('DIR_RESOURCES') . 'image/' . $filename : $orig_image_filepath;
 
 		$info = pathinfo($filename);
 		$extension = $info['extension'];

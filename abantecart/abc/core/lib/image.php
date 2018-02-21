@@ -281,7 +281,7 @@ class AImage{
 		} else {
 			$message = 'Image file ' . $this->file . ' cannot be resized. Try to decrease original image size ' . $this->info['width'] . 'x' . $this->info['height'] . 'px or reduce file size.';
 			$res = new AResource('image');
-			$resource_id = $res->getIdFromHexPath(str_replace(ABC::env('DIR_RESOURCE').'image/','',$this->file));
+			$resource_id = $res->getIdFromHexPath(str_replace(ABC::env('DIR_RESOURCES').'image/','',$this->file));
 			if($resource_id){
 				$message .= ' View details please visit #admin#rt=tool/rl_manager&resource_id='.$resource_id;
 			}

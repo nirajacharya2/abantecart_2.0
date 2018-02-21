@@ -527,9 +527,9 @@ class ModelToolImportProcess extends Model{
 			//check if image is absolute path or remote URL
 			$host = parse_url($source, PHP_URL_HOST);
 			$image_basename = basename($source);
-			$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
-			if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
-				@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
+			$target = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . '/' . $image_basename;
+			if (!is_dir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir())){
+				@mkdir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir(), 0777);
 			}
 
 			if ($host === NULL ) {

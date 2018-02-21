@@ -223,7 +223,7 @@ class ControllerPagesToolCache extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $path = ABC::env('DIR_IMAGE').'thumbnails/';
+        $path = ABC::env('DIR_IMAGES').'thumbnails/';
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),

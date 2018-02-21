@@ -67,8 +67,8 @@ class ControllerResponsesSaleInvoice extends AController {
 		$this->data['column_comment'] = $this->language->get('column_comment');
 
 
-		if (is_file(ABC::env('DIR_RESOURCE') . $this->config->get('config_logo'))) {
-			$this->data['logo'] = ABC::env('HTTPS_DIR_RESOURCE') . $this->config->get('config_logo');
+		if (is_file(ABC::env('DIR_RESOURCES') . $this->config->get('config_logo'))) {
+			$this->data['logo'] = ABC::env('HTTPS_DIR_RESOURCES') . $this->config->get('config_logo');
 		} else {
 			$this->data['logo'] = $this->config->get('config_logo');
 		}

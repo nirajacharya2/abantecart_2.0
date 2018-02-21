@@ -782,7 +782,7 @@ class ModelToolMigration extends Model {
 			$src_exists = @getimagesize($source); // check is image exists
 			if ($src_exists) {
 				$image_basename = basename($source);
-				$target = ABC::env('DIR_RESOURCE') . 'image/' . $image_basename;
+				$target = ABC::env('DIR_RESOURCES') . 'image/' . $image_basename;
 				if (($file = $this->downloadFile($source)) === false) {
 					$this->is_error = true;
 					if($k=='db'){
@@ -792,8 +792,8 @@ class ModelToolMigration extends Model {
 				}
 
 				if (!$this->is_error) {
-					if (!is_dir(ABC::env('DIR_RESOURCE') . 'image/')) {
-						mkdir(ABC::env('DIR_RESOURCE') . 'image/', 0777);
+					if (!is_dir(ABC::env('DIR_RESOURCES') . 'image/')) {
+						mkdir(ABC::env('DIR_RESOURCES') . 'image/', 0777);
 					}
 					if (!$this->writeToFile($file, $target)) {
 						$this->is_error = true;

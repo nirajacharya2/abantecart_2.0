@@ -102,7 +102,10 @@ final class ALoader{
 		}
 
 		//mode to force load storefront model
-		if ($mode == 'storefront' || ABC::env('IS_ADMIN') !== true) {
+		if (ABC::env('INSTALL') && $model == 'install') {
+			$section = ABC::env('DIR_INSTALL') . 'models/';
+			$namespace = "\install\models";
+		} elseif ($mode == 'storefront' || ABC::env('IS_ADMIN') !== true) {
 			$section = ABC::env('DIR_APP') . 'models/storefront/';
 			$namespace = "\abc\models\storefront";
 		} else {

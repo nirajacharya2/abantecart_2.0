@@ -118,7 +118,7 @@ class ControllerPagesAccountDownload extends AController{
 
 			foreach ($customer_downloads as $download_info){
 				$text_status = $this->download->getTextStatusForOrderDownload($download_info);
-				$size = filesize(ABC::env('DIR_RESOURCE') . $download_info['filename']);
+				$size = filesize(ABC::env('DIR_RESOURCES') . $download_info['filename']);
 				$i = 0;
 				while (($size / 1024) > 1){
 					$size = $size / 1024;

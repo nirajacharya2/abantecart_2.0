@@ -355,7 +355,7 @@ final class ADownload{
 	public function sendDownload($download_info = array ()){
 		// do checks
 		if (!$download_info || !$this->isFileAvailable($download_info['filename'])){
-			$error_text = 'Unable to download file ' . ABC::env('DIR_RESOURCE') . $download_info['filename'] . '! File is unavailable. Please check permissions.';
+			$error_text = 'Unable to download file ' . ABC::env('DIR_RESOURCES') . $download_info['filename'] . '! File is unavailable. Please check permissions.';
 			$err = new AError($error_text);
 			$err->toDebug()->toLog();
 			return false;
@@ -367,7 +367,7 @@ final class ADownload{
 			return false;
 		}
 
-		$file = ABC::env('DIR_RESOURCE') . $download_info['filename'];
+		$file = ABC::env('DIR_RESOURCES') . $download_info['filename'];
 		$mask = basename($download_info['mask']);
 		$mask = mb_convert_encoding($mask, ABC::env('APP_CHARSET'), ABC::env('APP_CHARSET'));
 		$mask = preg_replace('/[^0-9A-z_\.\-]/', '',$mask);
@@ -575,11 +575,11 @@ final class ADownload{
 		if (!$resource_path){
 			return false;
 		}
-		if (!is_file(ABC::env('DIR_RESOURCE') . $resource_path) || !is_readable(ABC::env('DIR_RESOURCE') . $resource_path)){
+		if (!is_file(ABC::env('DIR_RESOURCES') . $resource_path) || !is_readable(ABC::env('DIR_RESOURCES') . $resource_path)){
 			return false;
 		}
 
-		if (!filesize(ABC::env('DIR_RESOURCE') . $resource_path)){
+		if (!filesize(ABC::env('DIR_RESOURCES') . $resource_path)){
 			return false;
 		}
 

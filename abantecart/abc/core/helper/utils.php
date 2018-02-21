@@ -1473,7 +1473,7 @@ class AHelperUtils extends AHelper
      * NOTE: Resource Library handles resize by itself
      *
      * @param string $orig_image (full path)
-     * @param string $new_image  (relative path start from env DIR_IMAGE)
+     * @param string $new_image  (relative path start from env DIR_IMAGES)
      * @param int    $width
      * @param int    $height
      * @param int    $quality
@@ -1487,29 +1487,29 @@ class AHelperUtils extends AHelper
         }
 
         //if new file not yet present, check directory
-        if ( ! file_exists(ABC::env('DIR_IMAGE').$new_image)) {
+        if ( ! file_exists(ABC::env('DIR_IMAGES').$new_image)) {
             $path = '';
             $directories = explode('/', dirname(str_replace('../', '', $new_image)));
             foreach ($directories as $directory) {
                 $path = $path.'/'.$directory;
                 //do we have directory?
-                if ( ! file_exists(ABC::env('DIR_IMAGE').$path)) {
+                if ( ! file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
-                    $indexFile = ABC::env('DIR_IMAGE').$path.'/index.php';
-                    $result = mkdir(ABC::env('DIR_IMAGE').$path, 0775)
+                    $indexFile = ABC::env('DIR_IMAGES').$path.'/index.php';
+                    $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775)
                         && file_put_contents($indexFile,
                             "<?php die('Restricted Access!'); ?>");
                     if ( ! $result) {
-                        $error = new AWarning('Cannot to create directory '.ABC::env('DIR_IMAGE').$path.'. Please check permissions for '.ABC::env('DIR_IMAGE'));
+                        $error = new AWarning('Cannot to create directory '.ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES'));
                         $error->toLog();
                     }
                 }
             }
         }
 
-        if ( ! file_exists(ABC::env('DIR_IMAGE').$new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGE').$new_image))) {
+        if ( ! file_exists(ABC::env('DIR_IMAGES').$new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGES').$new_image))) {
             $image = new AImage($orig_image);
-            $result = $image->resizeAndSave(ABC::env('DIR_IMAGE').$new_image,
+            $result = $image->resizeAndSave(ABC::env('DIR_IMAGES').$new_image,
                 $width,
                 $height,
                 array(

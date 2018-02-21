@@ -108,16 +108,14 @@ class ALanguage
 
         //current active language details
         $this->language_details = $this->getLanguageDetails($this->code);
-
-        $root_path = ABC::env('INSTALL') ? ABC::env('DIR_ABANTECART') : ABC::env('DIR_APP');
-        if ($this->is_admin) {
-            $this->language_path = $root_path.'languages/'.$this->language_details['directory'].'/admin/';
+        if(ABC::env('INSTALL')){
+            $this->language_path = ABC::env('DIR_INSTALL').'languages/'.$this->language_details['directory'].'/';
+        }else if ($this->is_admin) {
+            $this->language_path = ABC::env('DIR_APP').'languages/'.$this->language_details['directory'].'/admin/';
         } else {
-            $this->language_path = $root_path.'languages/'.$this->language_details['directory'].'/storefront/';
+            $this->language_path = ABC::env('DIR_APP').'languages/'.$this->language_details['directory'].'/storefront/';
         }
-
         $this->entries = array();
-
     }
 
     /* Maim Language API methods */

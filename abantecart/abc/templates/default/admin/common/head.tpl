@@ -12,7 +12,7 @@ use abc\core\ABC; ?>
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>"/>
 <?php } ?>
 
-<?php if ( is_file( ABC::env('DIR_RESOURCE') . $icon ) ) {  ?>
+<?php if ( is_file( ABC::env('DIR_RESOURCES') . $icon ) ) {  ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 

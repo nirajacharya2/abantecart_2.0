@@ -23,7 +23,7 @@ var urls = {
 			del: '<?php echo $rl_delete; ?>',
 			download: '<?php echo $rl_download; ?>',
 			upload: '<?php echo $rl_upload; ?>',
-			resource: '<?php echo ABC::env('HTTPS_DIR_RESOURCE'); ?>'
+			resource: '<?php echo ABC::env('HTTPS_DIR_RESOURCES'); ?>'
 		},
 		default_type = '<?php echo $default_type["type_name"]; ?>';
 

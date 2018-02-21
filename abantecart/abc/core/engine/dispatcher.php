@@ -26,362 +26,401 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ADispatcher
- * @property \abc\core\lib\ARequest $request
+ *
+ * @property \abc\core\lib\ARequest  $request
  * @property \abc\core\lib\AResponse $response
- * @property \abc\core\view\AView $view
- * @property ExtensionsApi $extensions
+ * @property \abc\core\view\AView    $view
+ * @property ExtensionsApi           $extensions
  */
-final class ADispatcher{
-	/**
-	 * @var Registry
-	 */
-	protected $registry;
-	/**
-	 * @var string
-	 */
-	protected $file;
-	/**
-	 * @var string
-	 */
-	protected $class;
-	/**
-	 * @var string
-	 */
-	protected $method;
-	/**
-	 * @var string
-	 */
-	protected $controller;
-	/**
-	 * @var string
-	 */
-	protected $controller_type;
-	/**
-	 * @var array
-	 */
-	protected $args = array ();
+final class ADispatcher
+{
+    /**
+     * @var Registry
+     */
+    protected $registry;
+    /**
+     * @var string
+     */
+    protected $file;
+    /**
+     * @var string
+     */
+    protected $class;
+    /**
+     * @var string
+     */
+    protected $method;
+    /**
+     * @var string
+     */
+    protected $controller;
+    /**
+     * @var string
+     */
+    protected $controller_type;
+    /**
+     * @var array
+     */
+    protected $args = array();
 
-	/**
-	 * @param string $rt
-	 * @param array $args
-	 */
-	public function __construct($rt, $args = array ()){
+    /**
+     * @param string $rt
+     * @param array  $args
+     */
+    public function __construct($rt, $args = array())
+    {
 
-		$this->registry = Registry::getInstance();
-		$rt = str_replace('../', '', $rt);
-		if (!empty($args)) {
-			$this->args = $args;
-		}
+        $this->registry = Registry::getInstance();
+        $rt = str_replace('../', '', $rt);
+        if ( ! empty($args)) {
+            $this->args = $args;
+        }
 
-		ADebug::checkpoint('ADispatch: ' . $rt . ' construct start');
-		// We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
-		if (!$this->_process_path($rt)) {
-			$warning_txt = 'ADispatch: ' . $rt . ' construct FAILED. Missing or incorrect controller route path. Possibly, layout block is enabled for disabled or missing extension! ' . AHelperUtils::genExecTrace('full');
-			$warning = new AWarning($warning_txt);
-			$warning->toLog()->toDebug();
-		}
-		ADebug::checkpoint('ADispatch: ' . $rt . ' construct end. file: class: ' . $this->class . '; method: ' . $this->method);
-	}
+        ADebug::checkpoint('ADispatch: '.$rt.' construct start');
+        // We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
+        if ( ! $this->_process_path($rt)) {
+            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. Missing or incorrect controller route path. Possibly, layout block is enabled for disabled or missing extension! '.AHelperUtils::genExecTrace('full');
+            $warning = new AWarning($warning_txt);
+            $warning->toLog()->toDebug();
+        }
+        ADebug::checkpoint('ADispatch: '.$rt.' construct end. file: class: '.$this->class.'; method: '.$this->method);
+    }
 
-	public function __destruct(){
-		$this->clear();
-	}
+    public function __destruct()
+    {
+        $this->clear();
+    }
 
-	public function __get($key){
-		return $this->registry->get($key);
-	}
+    public function __get($key)
+    {
+        return $this->registry->get($key);
+    }
 
-	public function __set($key, $value){
-		$this->registry->set($key, $value);
-	}
+    public function __set($key, $value)
+    {
+        $this->registry->set($key, $value);
+    }
 
-	/**
-	 * @param string $rt
-	 * @return bool
-	 */
-	private function _process_path($rt){
-		$path_build = '';
-		$pathfound = false;
-		// Build the path based on the route, example, rt=information/contact/success
-		$path_nodes = explode('/', $rt);
+    /**
+     * @param string $rt
+     *
+     * @return bool
+     */
+    private function _process_path($rt)
+    {
+        // Build the path based on the route, example, rt=information/contact/success
+        $path_nodes = explode('/', $rt);
 
-		//looking for controller in admin/storefront section
-		if (ABC::env('IS_ADMIN') === true) {
-			$dir_app = ABC::env('DIR_APP') . 'controllers/admin/';
-			$namespace = '\abc\controllers\admin\\';
-		} else {
-			$dir_app = ABC::env('DIR_APP') . 'controllers/storefront/';
-			$namespace = '\abc\controllers\storefront\\';
-		}
+        //looking for controller in admin/storefront section
+        if (ABC::env('INSTALL') === true) {
+            $dir_app = ABC::env('DIR_INSTALL').'controllers/';
+            $namespace = '\install\controllers\\';
+            $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+            if ( ! $pathfound) {
+                $dir_app = ABC::env('DIR_APP').'controllers/admin/';
+                $namespace = '\abc\controllers\admin\\';
+                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+            }
+        } else {
+            if (ABC::env('IS_ADMIN') === true) {
+                $dir_app = ABC::env('DIR_APP').'controllers/admin/';
+                $namespace = '\abc\controllers\admin\\';
+                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+            } else {
+                $dir_app = ABC::env('DIR_APP').'controllers/storefront/';
+                $namespace = '\abc\controllers\storefront\\';
+                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+            }
+        }
 
-		foreach ($path_nodes as $path_node) {
-			$path_build .= $path_node;
-			if (is_dir($dir_app . $path_build)) {
-				$path_build .= '/';
-				array_shift($path_nodes);
-				continue;
-			}
+        //Last part is the method of function to call
+        $method_to_call = array_shift($path_nodes);
+        if ($method_to_call) {
+            $this->method = $method_to_call;
+        } else {
+            //Set default method
+            $this->method = 'main';
+        }
 
-			if (is_file($dir_app . $path_build . '.php')) {
-				//Set pure controller route
-				$this->controller = $path_build;
-				//Set full file path to controller
-				$this->file = $dir_app . $path_build . '.php';
-				//Build Controller class name
-				$this->class = $namespace.'Controller' . preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
-				array_shift($path_nodes);
-				$pathfound = true;
-				break;
-			}
-		}
+        //already found the path, so return. This will optimize performance, and will not allow override core controllers.
+        if ($pathfound == true) {
+            return $pathfound;
+        }
 
-		//Last part is the method of function to call
-		$method_to_call = array_shift($path_nodes);
-		if ($method_to_call) {
-			$this->method = $method_to_call;
-		} else {
-			//Set default method
-			$this->method = 'main';
-		}
+        // looking for controller in extensions section
+        $result = $this->registry->get('extensions')->isExtensionController($rt);
+        if ($result) {
+            $this->controller = $result['route'];
+            $this->file = $result['file'];
+            $this->class = $namespace.$result['class'];
+            $this->method = $result['method'];
+            // if controller was found in admin/storefront section && in extensions section
+            // warning will be added to log about controller override
+            if ($pathfound) {
+                $warning = new AWarning("Extension <b>{$result['extension']}</b> override controller <b>$rt</b>");
+                $warning->toDebug();
+            }
+            $pathfound = true;
+        }
+        return $pathfound;
+    }
 
-		//already found the path, so return. This will optimize performance, and will not allow override core controllers. 
-		if ($pathfound == true) {
-			return $pathfound;
-		}
+    private function _detect_path($dir_app, $namespace, &$path_nodes)
+    {
+        $path_build = '';
+        $pathfound = false;
+        foreach ($path_nodes as $path_node) {
+            $path_build .= $path_node;
+            if (is_dir($dir_app.$path_build)) {
+                $path_build .= '/';
+                array_shift($path_nodes);
+                continue;
+            }
 
-		// looking for controller in extensions section
-		$result = $this->registry->get('extensions')->isExtensionController($rt);
-		if ($result) {
-			$this->controller = $result['route'];
-			$this->file = $result['file'];
-			$this->class = $namespace.$result['class'];
-			$this->method = $result['method'];
-			// if controller was found in admin/storefront section && in extensions section
-			// warning will be added to log about controller override
-			if ($pathfound) {
-				$warning = new AWarning("Extension <b>{$result['extension']}</b> override controller <b>$rt</b>");
-				$warning->toDebug();
-			}
-			$pathfound = true;
-		}
-		if(!$pathfound) {
-			var_dump($rt);
-			exit($dir_app);
-		}
-		return $pathfound;
-	}
+            if (is_file($dir_app.$path_build.'.php')) {
+                //Set pure controller route
+                $this->controller = $path_build;
+                //Set full file path to controller
+                $this->file = $dir_app.$path_build.'.php';
+                //Build Controller class name
+                $this->class = $namespace.'Controller'.preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
+                array_shift($path_nodes);
+                $pathfound = true;
+                break;
+            }
+        }
 
-	// Clear function is public in case controller needs to be cleaned explicitly
-	public function clear(){
-		$vars = get_object_vars($this);
-		foreach ($vars as $key => $val) {
-			$this->$key = null;
-		}
-	}
+        return $pathfound;
+    }
 
-	/**
-	 * @param string $route
-	 * @return string
-	 */
-	protected function dispatchPrePost($route){
-		$result = '';
-		if ($this->extensions->isExtensionController($route)) {
-			//save output
-			$output = $this->response->getOutput();
-			//reset to save controller output
-			$this->response->setOutput('');
+    // Clear function is public in case controller needs to be cleaned explicitly
+    public function clear()
+    {
+        $vars = get_object_vars($this);
+        foreach ($vars as $key => $val) {
+            $this->$key = null;
+        }
+    }
 
-			$dispatch_pre = new ADispatcher($route, array ("instance_id" => ''));
-			$dispatch_pre->dispatch();
-			$result = $this->response->getOutput();
+    /**
+     * @param string $route
+     *
+     * @return string
+     */
+    protected function dispatchPrePost($route)
+    {
+        $result = '';
+        if ($this->extensions->isExtensionController($route)) {
+            //save output
+            $output = $this->response->getOutput();
+            //reset to save controller output
+            $this->response->setOutput('');
 
-			//restore output
-			$this->response->setOutput($output);
-		}
+            $dispatch_pre = new ADispatcher($route, array("instance_id" => ''));
+            $dispatch_pre->dispatch();
+            $result = $this->response->getOutput();
 
-		return $result;
-	}
+            //restore output
+            $this->response->setOutput($output);
+        }
 
-	/**
-	 * This function to dispatch the controller and get and destroy it's output
-	 * @param string $controller
-	 * @return string
-	 */
-	public function dispatchGetOutput($controller = ''){
+        return $result;
+    }
 
-		$this->dispatch($controller);
-		$output = $this->response->getOutput();
-		$this->response->setOutput('');
-		return $output;
-	}
+    /**
+     * This function to dispatch the controller and get and destroy it's output
+     *
+     * @param string $controller
+     *
+     * @return string
+     */
+    public function dispatchGetOutput($controller = '')
+    {
 
-	/**
-	 * @param AController|string $parent_controller
-	 * @return null|string
-	 */
-	public function dispatch($parent_controller = ''){
-		ADebug::checkpoint('' . $this->class . '/' . $this->method . ' dispatch START');
+        $this->dispatch($controller);
+        $output = $this->response->getOutput();
+        $this->response->setOutput('');
 
-		//Process the controller, layout and children
+        return $output;
+    }
 
-		//check if we have missing class or everything
-		if (empty($this->class) && AHelperUtils::has_value($this->file)) {
-			#Build back trace of calling functions to provide more details
-			$backtrace = debug_backtrace();
-			$function_stack = '';
-			if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1) {
-				$function_stack = 'Parent Controller: ' . $parent_controller->rt() . ' | ';
-			}
+    /**
+     * @param AController|string $parent_controller
+     *
+     * @return null|string
+     */
+    public function dispatch($parent_controller = '')
+    {
+        ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch START');
 
-			for ($i = 1; $i < count($backtrace); $i++) {
-				$function_stack .= ' < ' . $backtrace[$i]['function'];
-			}
-			$url = $this->request->server['REQUEST_URI'];
-			$error = new AError('Error: URL: ' . $url . ' Could not load controller ' . $this->controller . '! Call stack: ' . $function_stack . '',
-					AC_ERR_CLASS_CLASS_NOT_EXIST);
-			$error->toLog()->toDebug();
-			return null;
-		} else {
-			if (empty($this->file) && empty($this->class) || empty($this->method)) {
-				$warning_txt = 'ADispatch: skipping unavailable controller …';
-				$warning = new AWarning($warning_txt);
-				$warning->toDebug();
-				return null;
-			}
-		}
+        //Process the controller, layout and children
 
-		//check for controller.pre
-		$output_pre = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_PRE'));
+        //check if we have missing class or everything
+        if (empty($this->class) && AHelperUtils::has_value($this->file)) {
+            #Build back trace of calling functions to provide more details
+            $backtrace = debug_backtrace();
+            $function_stack = '';
+            if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1) {
+                $function_stack = 'Parent Controller: '.$parent_controller->rt().' | ';
+            }
 
-		require_once($this->file);
-		/**
-		 * @var $controller AController
-		 */
-		$controller = null;
-		if (class_exists($this->class)) {
-			$controller = new $this->class($this->registry, $this->args["instance_id"], $this->controller,
-					$parent_controller);
-			$controller->dispatcher = $this;
-		} else {
-			$error = new AError('Error: controller class not exist ' . $this->class . '!',
-					AC_ERR_CLASS_CLASS_NOT_EXIST);
-			$error->toLog()->toDebug();
-		}
-		if (is_callable(array ($controller, $this->method))) {
-			/**
-			 * @var $dispatch ADispatcher
-			 */
-			$dispatch = call_user_func_array(array ($controller, $this->method), $this->args);
-			//Check if return is a dispatch and need to call new page
-			if ($dispatch && is_object($dispatch)) {
-				if ($this->args["instance_id"] == 0) {
-					//If main controller come back for new dispatch
-					return $dispatch->getController() . '/' . $dispatch->getMethod();
-				} else {
-					// Call new dispatch for new controller and exit
-					//???? need to put limit for recursion to prevent overflow
-					$dispatch->dispatch();
-					return null;
-				}
-			} else {
-				if ($dispatch == 'completed') {
-					//Check if we have message completed in controller response.
-					//If completed. stop further execution.
-					return 'completed';
-				}
-			}
-			/**
-			 * Load layout and process children controllers
-			 * @method AController getChildren()
-			 */
-			$children = $controller->getChildren();
+            for ($i = 1; $i < count($backtrace); $i++) {
+                $function_stack .= ' < '.$backtrace[$i]['function'];
+            }
+            $url = $this->request->server['REQUEST_URI'];
+            $error = new AError('Error: URL: '.$url.' Could not load controller '.$this->controller.'! Call stack: '.$function_stack.'',
+                                AC_ERR_CLASS_CLASS_NOT_EXIST);
+            $error->toLog()->toDebug();
 
-			ADebug::variable('Processing children of ' . $this->controller, $children);
+            return null;
+        } else {
+            if (empty($this->file) && empty($this->class) || empty($this->method)) {
+                $warning_txt = 'ADispatch: skipping unavailable controller …';
+                $warning = new AWarning($warning_txt);
+                $warning->toDebug();
 
-			//Process each child controller
-			foreach ($children as $child) {
-				//Add highest Debug level here with backtrace to review this
-				ADebug::checkpoint($child['controller'] . ' ( child of ' . $this->controller . ', instance_id: ' . $child['instance_id'] . ' ) dispatch START');
-				//Process each child and create dispatch to call recursive
-				$dispatch = new ADispatcher($child['controller'], array ("instance_id" => $child['instance_id']));
-				$dispatch->dispatch($controller);
-				// Append output of child controller to current controller
-				if ($child['position']) { // made for recognizing few custom_blocks in the same placeholder
-					$controller->view->assign($child['block_txt_id'] . '_' . $child['instance_id'],
-							$this->response->getOutput());
-				} else {
-					$controller->view->assign($child['block_txt_id'], $this->response->getOutput());
-				}
-				//clean up and remove output
-				$this->response->setOutput('');
-				ADebug::checkpoint($child['controller'] . ' ( child of ' . $this->controller . ' ) dispatch END');
-			}
-			//Request controller to generate output
-			$controller->finalize();
+                return null;
+            }
+        }
 
-			//check for controller.pre
-			$output_post = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_POST'));
+        //check for controller.pre
+        $output_pre = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_PRE'));
 
-			//add pre and post controllers output
-			$this->response->setOutput($output_pre . $this->response->getOutput() . $output_post);
+        require_once($this->file);
+        /**
+         * @var $controller AController
+         */
+        $controller = null;
+        if (class_exists($this->class)) {
+            $controller = new $this->class($this->registry, $this->args["instance_id"], $this->controller,
+                $parent_controller);
+            $controller->dispatcher = $this;
+        } else {
+            $error = new AError('Error: controller class not exist '.$this->class.'!', AC_ERR_CLASS_CLASS_NOT_EXIST);
+            $error->toLog()->toDebug();
+        }
+        if (is_callable(array($controller, $this->method))) {
+            /**
+             * @var $dispatch ADispatcher
+             */
+            $dispatch = call_user_func_array(array($controller, $this->method), $this->args);
+            //Check if return is a dispatch and need to call new page
+            if ($dispatch && is_object($dispatch)) {
+                if ($this->args["instance_id"] == 0) {
+                    //If main controller come back for new dispatch
+                    return $dispatch->getController().'/'.$dispatch->getMethod();
+                } else {
+                    // Call new dispatch for new controller and exit
+                    //???? need to put limit for recursion to prevent overflow
+                    $dispatch->dispatch();
 
-			//clean up and destroy the object
-			unset($controller);
-			unset($dispatch);
-		} else {
-			$err = new AError('Error: controller method not exist ' . $this->class . '::' . $this->method . '!',
-					AC_ERR_CLASS_METHOD_NOT_EXIST);
-			$err->toLog()->toDebug();
-		}
-		ADebug::checkpoint('' . $this->class . '/' . $this->method . ' dispatch END');
-		return null;
-	}
+                    return null;
+                }
+            } else {
+                if ($dispatch == 'completed') {
+                    //Check if we have message completed in controller response.
+                    //If completed. stop further execution.
+                    return 'completed';
+                }
+            }
+            /**
+             * Load layout and process children controllers
+             * @method AController getChildren()
+             */
+            $children = $controller->getChildren();
 
-	/**
-	 * @return string
-	 */
-	public function getType(){
-		return $this->controller_type;
-	}
+            ADebug::variable('Processing children of '.$this->controller, $children);
 
-	/**
-	 * @return string
-	 */
-	public function getController(){
-		return $this->controller;
-	}
+            //Process each child controller
+            foreach ($children as $child) {
+                //Add highest Debug level here with backtrace to review this
+                ADebug::checkpoint($child['controller'].' ( child of '.$this->controller.', instance_id: '.$child['instance_id'].' ) dispatch START');
+                //Process each child and create dispatch to call recursive
+                $dispatch = new ADispatcher($child['controller'], array("instance_id" => $child['instance_id']));
+                $dispatch->dispatch($controller);
+                // Append output of child controller to current controller
+                if ($child['position']) { // made for recognizing few custom_blocks in the same placeholder
+                    $controller->view->assign($child['block_txt_id'].'_'.$child['instance_id'],
+                        $this->response->getOutput());
+                } else {
+                    $controller->view->assign($child['block_txt_id'], $this->response->getOutput());
+                }
+                //clean up and remove output
+                $this->response->setOutput('');
+                ADebug::checkpoint($child['controller'].' ( child of '.$this->controller.' ) dispatch END');
+            }
+            //Request controller to generate output
+            $controller->finalize();
 
-	/**
-	 * @return string
-	 */
-	public function getFile(){
-		return $this->file;
-	}
+            //check for controller.pre
+            $output_post = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_POST'));
 
-	/**
-	 * @return string
-	 */
-	public function getClass(){
-		return $this->class;
-	}
+            //add pre and post controllers output
+            $this->response->setOutput($output_pre.$this->response->getOutput().$output_post);
 
-	/**
-	 * @return string
-	 */
-	public function getMethod(){
-		return $this->method;
-	}
+            //clean up and destroy the object
+            unset($controller);
+            unset($dispatch);
+        } else {
+            $err = new AError('Error: controller method not exist '.$this->class.'::'.$this->method.'!', AC_ERR_CLASS_METHOD_NOT_EXIST);
+            $err->toLog()->toDebug();
+        }
+        ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch END');
 
-	/**
-	 * @return array
-	 */
-	public function getArgs(){
-		return $this->args;
-	}
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->controller_type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->class;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @return array
+     */
+    public function getArgs()
+    {
+        return $this->args;
+    }
 }

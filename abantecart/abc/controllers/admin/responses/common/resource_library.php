@@ -176,7 +176,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 		$res_details = $rm->getResource($resource['resource_id']);
 		if($res_details['resource_path']) {
 			$res_details['res_url'] = $rm->buildResourceURL($res_details['resource_path']);
-			$res_details['file_path'] = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . $res_details['resource_path'];
+			$res_details['file_path'] = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . $res_details['resource_path'];
 			$res_details['file_size'] = AHelperUtils::human_filesize(filesize($res_details['file_path']));
 			$image_details = getimagesize($res_details['file_path']);
 			if($image_details[0]) {
@@ -681,7 +681,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 			//resource_path
 			$resource_path = $rm->buildResourcePath($resource_id, $r->name);
 
-			if ( !rename(ABC::env('DIR_RESOURCE') . $info['type_name'] .'/'. $r->name, ABC::env('DIR_RESOURCE') . $info['type_name']. '/' . $resource_path ) ) {
+			if ( !rename(ABC::env('DIR_RESOURCES') . $info['type_name'] .'/'. $r->name, ABC::env('DIR_RESOURCES') . $info['type_name']. '/' . $resource_path ) ) {
 					$message = sprintf($this->language->get('error_cannot_move'), $r->name);
 					$error = new AError ( $message );
 					$error->toLog()->toDebug();
@@ -690,8 +690,8 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 			}
 			$rm->updateResource($resource_id, array('resource_path' => $resource_path));
 			//remove old file of resource
-			if ( $info['resource_path'] && is_file( ABC::env('DIR_RESOURCE') . $info['type_name'] . '/' . $info['resource_path']) && $info['resource_path']!=$resource_path ) {
-				unlink( ABC::env('DIR_RESOURCE').$info['type_name'].'/'.$info['resource_path'] );
+			if ( $info['resource_path'] && is_file( ABC::env('DIR_RESOURCES') . $info['type_name'] . '/' . $info['resource_path']) && $info['resource_path']!=$resource_path ) {
+				unlink( ABC::env('DIR_RESOURCES').$info['type_name'].'/'.$info['resource_path'] );
 			}
 		}
 
@@ -1016,7 +1016,7 @@ class ControllerResponsesCommonResourceLibrary extends AController {
 					$this->response->setOutput($result['resource_code']);
 				}
 			} else {
-				$file_path = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . $result['resource_path'];
+				$file_path = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . $result['resource_path'];
 				$result['name'] = pathinfo($result['name'], PATHINFO_FILENAME);
 				if (file_exists($file_path) && ($fd = fopen($file_path, "r"))) {
 					$fsize = filesize($file_path);

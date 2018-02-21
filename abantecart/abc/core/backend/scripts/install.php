@@ -375,7 +375,7 @@ class Install implements ABCExec
 <?php
 return [
         'APP_NAME' => 'AbanteCart',
-        'MIN_PHP_VERSION' => '7.0',
+        'MIN_PHP_VERSION' => '7.0.0',
         'DIR_ROOT' => '{$options['root_dir']}',
         'DIR_APP' => '{$options['app_dir']}',
         'DIR_PUBLIC' => '{$options['public_dir']}',

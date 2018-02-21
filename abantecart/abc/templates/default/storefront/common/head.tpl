@@ -20,7 +20,7 @@ use abc\core\ABC; ?>
 
 <base href="<?php echo $base; ?>" />
 
-<?php if ( is_file( ABC::env('DIR_RESOURCE') . $icon ) ) {  ?>
+<?php if ( is_file( ABC::env('DIR_RESOURCES') . $icon ) ) {  ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 

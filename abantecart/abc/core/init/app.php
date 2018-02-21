@@ -100,13 +100,13 @@ ABC::env(
         'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
         'DIR_CORE'           => $dir_app.'core'.$dir_sep,
         'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-        'DIR_DOWNLOAD'       => $dir_app.'download'.$dir_sep,
+        'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
         'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
         'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
         'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
         'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
-        'DIR_IMAGE'          => $dir_public.'images'.$dir_sep,
-        'DIR_RESOURCE'       => $dir_public.'resources'.$dir_sep,
+        'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
+        'DIR_RESOURCES'       => $dir_public.'resources'.$dir_sep,
     )
 );
 
@@ -304,20 +304,20 @@ $registry->set('uri', $_SERVER['REQUEST_URI']);
 $registry->set('dcrypt', new ADataEncryption());
 
 // Extensions api
-$extensions = new ExtensionsApi();
+$dir_extensions = new ExtensionsApi();
 if (ABC::env('IS_ADMIN') === true) {
     //for admin we load all available(installed) extensions.
     //This is a solution to make controllers and hooks available for extensions that are in the status off.
-    $extensions->loadAvailableExtensions();
+    $dir_extensions->loadAvailableExtensions();
 } else {
-    $extensions->loadEnabledExtensions();
+    $dir_extensions->loadEnabledExtensions();
 }
-$registry->set('extensions', $extensions);
+$registry->set('extensions', $dir_extensions);
 
 //validate template
 $is_valid = false;
-$enabled_extensions = $extensions->getEnabledExtensions();
-unset($extensions);
+$enabled_extensions = $dir_extensions->getEnabledExtensions();
+unset($dir_extensions);
 
 //check if we specify template directly
 $template = 'default';

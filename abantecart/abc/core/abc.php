@@ -90,10 +90,12 @@ class ABC extends ABCBase
                     self::$env[$name] = $value;
                     return true;
                 } else {
-                    ADebug::warning(
-                        'Environment variable override',
-                        AC_ERR_USER_WARNING,
-                        'Try to put var '.$name.' into abc-environment, but it already exists!');
+                    if( class_exists('\abc\core\lib\ADebug')) {
+                        ADebug::warning(
+                            'Environment variable override',
+                            AC_ERR_USER_WARNING,
+                            'Try to put var '.$name.' into abc-environment, but it already exists!');
+                    }
                 }
             }
         }

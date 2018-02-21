@@ -650,8 +650,8 @@ class ModelCheckoutOrder extends Model{
 		$mail->setSubject($subject);
 		$mail->setHtml($html_body);
 		$mail->setText($this->data['mail_plain_text']);
-		if(is_file(ABC::env('DIR_RESOURCE') . $config_mail_logo)) {
-			$mail->addAttachment(ABC::env('DIR_RESOURCE') . $config_mail_logo,
+		if(is_file(ABC::env('DIR_RESOURCES') . $config_mail_logo)) {
+			$mail->addAttachment(ABC::env('DIR_RESOURCES') . $config_mail_logo,
 					md5(pathinfo($config_mail_logo, PATHINFO_FILENAME))
 					. '.' . pathinfo($config_mail_logo, PATHINFO_EXTENSION));
 		}

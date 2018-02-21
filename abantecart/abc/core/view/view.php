@@ -368,11 +368,10 @@ class AView
             $file = $filename;
         } else {
             //Build the path to the template file
-            $path = ABC::env('DIR_TEMPLATES');
-            if ( ! ABC::env('INSTALL')) {
-                $file = $this->_get_template_resource_path($path, $filename, 'full');
+            if ( ABC::env('INSTALL') ) {
+                $file = ABC::env('DIR_INSTALL').ABC::env('DIRNAME_TEMPLATES').$filename;
             } else {
-                $file = $path.$filename;
+                $file = $this->_get_template_resource_path( ABC::env('DIR_TEMPLATES'), $filename, 'full');
             }
 
             if ($this->has_extensions && $result = $this->extensions->isExtensionResource('T', $filename)) {

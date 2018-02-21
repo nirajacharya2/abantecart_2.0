@@ -8,7 +8,7 @@ $store_url = $config->get('config_url');
 ABC::env('HTTP_SERVER', $store_url);
 ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER') . 'images/');
 ABC::env('HTTP_EXT', ABC::env('HTTP_SERVER') . 'extensions/');
-ABC::env('HTTP_DIR_RESOURCE', ABC::env('HTTP_SERVER') . 'resources/');
+ABC::env('HTTP_DIR_RESOURCES', ABC::env('HTTP_SERVER') . 'resources/');
 // Storefront HTTPS
 if ($config->get('config_ssl') || ABC::env('HTTPS')) {
 	if ( $config->get('config_ssl_url') ) {
@@ -23,7 +23,7 @@ if ($config->get('config_ssl') || ABC::env('HTTPS')) {
 	ABC::env('HTTPS_EXT', ABC::env('HTTP_EXT'));
 }
 //we use Protocol-relative URLs here
-ABC::env('HTTPS_DIR_RESOURCE', ABC::env('AUTO_SERVER') . 'resources/');
+ABC::env('HTTPS_DIR_RESOURCES', ABC::env('AUTO_SERVER') . 'resources/');
 ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER') . 'images/');
 
 //set internal sign of shared ssl domains

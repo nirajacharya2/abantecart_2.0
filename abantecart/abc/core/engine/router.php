@@ -200,7 +200,7 @@ final class ARouter
                     // Build the response
                     $resp_controller->build($this->rt);
                 } else {
-                    $resp_controller->build('error/not_found');
+				$resp_controller->build('error/ajaxerror/not_found');
                 }
 
             } else {
@@ -224,14 +224,14 @@ final class ARouter
                         // Build the response
                         $api_controller->build($this->rt);
                     } else {
-                        $api_controller->build('error/not_found');
+                        $api_controller->build('error/ajaxerror/not_found');
                     }
                 } else {
                     if ($this->request_type == 'task') {
                         $task_controller = new ATypeTask($this->registry);
                         if ( ! ABC::env('IS_ADMIN')) { // do not allow to call task controllers from SF-side
                             $resp_controller = new ATypeResponse($this->registry);
-                            $resp_controller->build('error/not_found');
+				            $resp_controller->build('error/ajaxerror/not_found');
                         } else {
                             //Load required controller for admin and check authorization
                             $resp_controller = new ATypeResponse($this->registry);
@@ -244,7 +244,7 @@ final class ARouter
                             $task_controller->build($this->rt);
                         } else {
                             $resp_controller = new ATypeResponse($this->registry);
-                            $resp_controller->build('error/not_found');
+                            $resp_controller->build('error/ajaxerror/not_found');
                         }
                     } else {
                         //Security: this is not main controller. Do not allow to run it.

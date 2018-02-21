@@ -39,12 +39,12 @@ class ModelToolImage extends Model{
 	 * @return null|string - string is URL or abs file path
 	 */
 	public function resize($filename, $width = 0, $height = 0, $alias = null, $mode = 'url'){
-		if (!is_file(ABC::env('DIR_IMAGE') . $filename) && !is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename)){
+		if (!is_file(ABC::env('DIR_IMAGES') . $filename) && !is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename)){
 			return null;
 		}
 
-		$orig_image_filepath = is_file(ABC::env('DIR_IMAGE') . $filename) ? ABC::env('DIR_IMAGE') . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCE') . 'image/' . $filename) ? ABC::env('DIR_RESOURCE') . 'image/' . $filename : $orig_image_filepath;
+		$orig_image_filepath = is_file(ABC::env('DIR_IMAGES') . $filename) ? ABC::env('DIR_IMAGES') . $filename : '';
+		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename) ? ABC::env('DIR_RESOURCES') . 'image/' . $filename : $orig_image_filepath;
 
 		$info = pathinfo($filename);
 		$extension = $info['extension'];
@@ -73,7 +73,7 @@ class ModelToolImage extends Model{
 
 		//when need to get abs path of result
 		if ($mode == 'path'){
-			$http_path = ABC::env('DIR_IMAGE');
+			$http_path = ABC::env('DIR_IMAGES');
 		}else{
 			//use auto-path without protocol (AUTO_SERVER)
 			$http_path = ABC::env('HTTPS_IMAGE');

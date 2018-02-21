@@ -1056,9 +1056,9 @@ class AData{
 				$fl = new AFile();
 				foreach ($sources['source_url'] as $source){
 					$image_basename = basename($source);
-					$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
-					if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
-						@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
+					$target = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . '/' . $image_basename;
+					if (!is_dir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir())){
+						@mkdir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir(), 0777);
 					}
 					if (($file = $fl->downloadFile($source)) === false){
 						$this->_status2array('error', "Unable to download file from ".$source);
@@ -1077,9 +1077,9 @@ class AData{
 			if ($sources['source_path']){
 				foreach ($sources['source_path'] as $source){
 					$image_basename = basename($source);
-					$target = ABC::env('DIR_RESOURCE') . $rm->getTypeDir() . '/' . $image_basename;
-					if (!is_dir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir())){
-						@mkdir(ABC::env('DIR_RESOURCE') . $rm->getTypeDir(), 0777);
+					$target = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . '/' . $image_basename;
+					if (!is_dir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir())){
+						@mkdir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir(), 0777);
 					}
 					if (!copy($source, $target)){
 						$this->_status2array('error', "Unable to copy ".$source." to ".$target);

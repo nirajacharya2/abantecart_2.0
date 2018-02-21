@@ -53,7 +53,7 @@ class ControllerResponsesListingGridDownload extends AController {
 		$results = $this->model_catalog_download->getDownloads($filter_data);
 		$i = 0;
 		foreach ($results as $result) {
-			if (!is_file(ABC::env('DIR_RESOURCE') . $result[ 'filename' ])) {
+			if (!is_file(ABC::env('DIR_RESOURCES') . $result[ 'filename' ])) {
 				$response->userdata->classes[ $result[ 'download_id' ] ] = 'warning';
 			}
 			$response->rows[ $i ][ 'id' ] = $result[ 'download_id' ];

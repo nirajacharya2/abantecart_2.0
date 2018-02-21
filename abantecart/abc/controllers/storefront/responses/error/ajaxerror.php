@@ -59,17 +59,16 @@ class ControllerResponsesErrorAjaxError extends AController {
 			'show_dialog' => true,
 			'reload_page' => true,
 		);
-		return $error->toJSONResponse('LOGIN_FAILED_401', $err_data );	
+		return $error->toJSONResponse('LOGIN_FAILED_401', $err_data );
 	}
 
 	public function not_found() {
 		//build not_found response
-		$this->loadLanguage('error/not_found');
 		$error = new AError ( '' );
 		$err_data = array(
-			'error_title' => $this->language->get('heading_title'),
-			'error_text' => $this->language->get('text_not_found')
+			'error_title' => 'The page you requested cannot be found!',
+			'error_text' => 'The page you are looking for could not be found! Please contact your administrator if the problem persists.'
 		);
-		return $error->toJSONResponse('NOT_FOUND_404', $err_data );	
+		return $error->toJSONResponse('NOT_FOUND_404', $err_data );
 	}
 }

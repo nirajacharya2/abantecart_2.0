@@ -294,7 +294,7 @@ class AResource{
 	public function getResizedImageURL($rsrc_info = array (), $width, $height){
 		$resource_id = (int)$rsrc_info['resource_id'];
 		//get original file path & details
-		$origin_path = ABC::env('DIR_RESOURCE') . $this->type_dir . $rsrc_info['resource_path'];
+		$origin_path = ABC::env('DIR_RESOURCES') . $this->type_dir . $rsrc_info['resource_path'];
 		$info = pathinfo($origin_path);
 		$extension = $info['extension'];
 		if (in_array($extension, array ('ico', 'svg', 'svgz'))) {
@@ -302,7 +302,7 @@ class AResource{
 			return $this->buildResourceURL($rsrc_info['resource_path'], 'full');
 		}
 
-		$type_image = is_file(ABC::env('DIR_IMAGE') . 'icon_resource_' . $this->type . '.png') ? 'icon_resource_' . $this->type . '.png' : '';
+		$type_image = is_file(ABC::env('DIR_IMAGES') . 'icon_resource_' . $this->type . '.png') ? 'icon_resource_' . $this->type . '.png' : '';
 
 		//is this a resource with code ?
 		if (!empty($rsrc_info['resource_code'])) {
@@ -391,7 +391,7 @@ class AResource{
 			$this->extensions->hk_ProcessData($this, __FUNCTION__);
 			$http_path = $this->data['http_dir'];
 			if (!$http_path) {
-				$http_path = ABC::env('HTTPS_DIR_RESOURCE');
+				$http_path = ABC::env('HTTPS_DIR_RESOURCES');
 			}
 			return $http_path . $this->type_dir . $resource_path;
 		} else {
@@ -517,13 +517,13 @@ class AResource{
 				$this->extensions->hk_ProcessData($this, __FUNCTION__);
 				$http_path = $this->data['http_dir'];
 				if (!$http_path) {
-					$http_path = ABC::env('HTTPS_DIR_RESOURCE');
+					$http_path = ABC::env('HTTPS_DIR_RESOURCES');
 				}
 
 				$direct_url = $http_path . $this->getTypeDir() . $result['resource_path'];
 				$res_full_path = '';
 				if ($this->getType() == 'image') {
-					$res_full_path = ABC::env('DIR_RESOURCE') . $this->getTypeDir() . $result['resource_path'];
+					$res_full_path = ABC::env('DIR_RESOURCES') . $this->getTypeDir() . $result['resource_path'];
 					if ($sizes['main']) {
 						$main_url = $this->getResizedImageURL(
 								$result,

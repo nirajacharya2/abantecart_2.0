@@ -56,12 +56,12 @@ class ControllerResponsesEmbedJS extends AController {
 		if (is_numeric($icon_rl)) {
 		   $resource = new AResource('image');
 		    $image_data = $resource->getResource( $icon_rl );
-		    if ( is_file(ABC::env('DIR_RESOURCE') . $image_data['image']) ) {
+		    if ( is_file(ABC::env('DIR_RESOURCES') . $image_data['image']) ) {
 		    	$icon_rl = 'resources/'.$image_data['image'];
 		    } else {
 		    	$icon_rl = $image_data['resource_code'];
 		    }
-		} else if(!is_file(ABC::env('DIR_RESOURCE').$icon_rl)){
+		} else if(!is_file(ABC::env('DIR_RESOURCES').$icon_rl)){
 		   $icon_rl ='';
 		}
 		$this->view->assign('icon', $icon_rl);
@@ -71,7 +71,7 @@ class ControllerResponsesEmbedJS extends AController {
 		if (is_numeric($this->data['logo'])) {
 			$resource = new AResource('image');
 		    $image_data = $resource->getResource( $this->data['logo'] );
- 			if ( is_file(ABC::env('DIR_RESOURCE') . $image_data['image']) ) {
+ 			if ( is_file(ABC::env('DIR_RESOURCES') . $image_data['image']) ) {
  				$this->data['logo'] = 'resources/'.$image_data['image'];
 			} else {
 				$this->data['logo'] = $image_data['resource_code'];

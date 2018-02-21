@@ -144,7 +144,7 @@ class ModelToolBackup extends Model{
 		$bkp->dumpTables($tables);
 
 		if ($rl){
-			$bkp->backupDirectory(ABC::env('DIR_RESOURCE'), false);
+			$bkp->backupDirectory(ABC::env('DIR_RESOURCES'), false);
 		}
 		if ($config){
 			$bkp->backupFile(ABC::env('DIR_ROOT') . '/config/config.php', false);

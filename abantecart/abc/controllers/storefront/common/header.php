@@ -36,16 +36,16 @@ class ControllerCommonHeader extends AController {
 		$this->data['store'] = $this->config->get('store_name');
         $this->data['logo'] = $this->config->get('config_logo');
         $this->data['homepage'] = $this->html->getHomeURL();
-		$logo_path = ABC::env('DIR_RESOURCE') . $this->data['logo'];
+		$logo_path = ABC::env('DIR_RESOURCES') . $this->data['logo'];
         
 		//see if we have a resource ID instead of path	
 		if (is_numeric($this->data['logo'])) {
 			$resource = new AResource('image');
 		    $image_data = $resource->getResource( $this->data['logo'] );
 			$img_sub_path = $image_data['type_name'].'/'.$image_data['resource_path'];
- 			if ( is_file(ABC::env('DIR_RESOURCE') . $img_sub_path) ) {
+ 			if ( is_file(ABC::env('DIR_RESOURCES') . $img_sub_path) ) {
  				$this->data['logo'] = $img_sub_path;
- 				$logo_path = ABC::env('DIR_RESOURCE') . $img_sub_path;
+ 				$logo_path = ABC::env('DIR_RESOURCES') . $img_sub_path;
 			} else {
 				$this->data['logo'] = $image_data['resource_code'];
 			}
