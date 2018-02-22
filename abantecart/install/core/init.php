@@ -6,35 +6,19 @@ namespace abc;
 use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\AHtml;
-use abc\core\engine\ALanguage;
-use abc\core\lib\ALanguageManager;
-use abc\core\engine\ALayout;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\cache\ACache;
-use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
-use abc\core\lib\ACurrency;
-use abc\core\lib\ACustomer;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
 use abc\core\lib\ADocument;
-use abc\core\lib\ADownload;
-use abc\core\lib\AError;
-use abc\core\lib\AException;
-use abc\core\lib\AIM;
-use abc\core\lib\AIMManager;
-use abc\core\lib\ALength;
 use abc\core\lib\ALog;
 use abc\core\lib\AMessage;
-use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
 use abc\core\lib\AResponse;
 use abc\core\lib\ASession;
-use abc\core\lib\ATax;
-use abc\core\lib\AUser;
-use abc\core\lib\AWeight;
 use abc\core\lib\CSRFToken;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
@@ -51,6 +35,7 @@ $dir_install = dirname(__DIR__).$dir_sep;
 ABC::env(
     array(
         'DIR_ROOT'           => $dir_root,
+        'DIR_APP'            => $dir_app,
         'DIR_PUBLIC'         => $dir_public,
         'DIR_INSTALL'        => $dir_install,
         'DIR_VENDOR'         => $dir_app.'vendor'.$dir_sep,
@@ -81,7 +66,11 @@ ABC::env(
         'DIRNAME_LANGUAGES'   => 'languages'.$dir_sep,
         'DIRNAME_TEMPLATES'   => 'templates'.$dir_sep,
         'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
-        'DIRNAME_VENDOR'      => 'vendor'.$dir_sep
+        'DIRNAME_VENDOR'      => 'vendor'.$dir_sep,
+
+        'POSTFIX_OVERRIDE'    => '.override',
+        'POSTFIX_PRE'         => '.pre',
+        'POSTFIX_POST'        => '.post'
     )
 );
 
@@ -225,6 +214,7 @@ if( ABC::env('DATABASES') ) {
 
 // Cache
 $registry->set('cache', new ACache());
+$registry->get('cache')->setCacheStorageDriver('file');
 
 // Config
 $config = new AConfig($registry);
@@ -243,12 +233,11 @@ $registry->set('csrftoken', new CSRFToken());
 //Admin manager classes
 require_once $dir_app.'core'.$dir_sep.'init'.$dir_sep.'admin.php';
 
-
 //Messages
 $registry->set('messages', new AMessage());
 
 // Log
-$registry->set('log', new ALog(ABC::env('DIR_LOGS').$config->get('config_error_filename')));
+$registry->set('log', new ALog(ABC::env('DIR_LOGS').'error.txt'));
 
 // Document
 $registry->set('document', new ADocument());
@@ -281,20 +270,3 @@ unset($extensions);
 $template = 'default';
 $config->set('original_admin_template', $template);
 $config->set('admin_template', $template);
-// Load language
-$lang_obj = new ALanguageManager($registry);
-
-// load download class
-$registry->set('download', new ADownload());
-
-//load main language section
-$lang_obj->load();
-$registry->set('language', $lang_obj);
-unset($lang_obj);
-$hook->hk_InitEnd();
-
-//load order status class
-$registry->set('order_status', new AOrderStatus($registry));
-
-// Currency
-$registry->set('currency', new ACurrency($registry));

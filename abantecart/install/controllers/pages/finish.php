@@ -18,27 +18,32 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 
-class ControllerPagesFinish extends AController {
+namespace install\controllers;
 
-	public function main() {
+use abc\core\ABC;
+use abc\core\engine\AController;
 
-		if (!defined('DB_HOSTNAME')) {
-			header('Location: index.php?rt=license');
-			exit;
-		}
+class ControllerPagesFinish extends AController
+{
+    public function main()
+    {
+        if ( ! ABC::env('DATABASES')) {
+            header('Location: index.php?rt=license');
+            exit;
+        }
 
-		$this->session->data['finish'] = 'true';
-		unset($this->session->data ['ant_messages']); // prevent reinstall bugs with ant
+        $this->session->data['finish'] = 'true';
+        unset($this->session->data ['ant_messages']); // prevent reinstall bugs with ant
 
-		$this->view->assign('admin_path', 'index.php?s=' . ADMIN_PATH);
+        $this->view->assign('admin_secret', 'index.php?s='.ABC::env('ADMIN_SECRET'));
 
-		$message = "Keep your ecommmerce secure! <br /> Delete directory " . DIR_ABANTECART . "install from your AbanteCart installation!";
-		$this->view->assign('message', $message);
+        $message = "Keep your e-commerce secure! <br /> Delete directory ".ABC::env('DIR_INSTALL')." install from your AbanteCart installation!";
+        $this->view->assign('message', $message);
 
-		$this->addChild('common/header', 'header', 'common/header.tpl');
-		$this->addChild('common/footer', 'footer', 'common/footer.tpl');
+        $this->addChild('common/header', 'header', 'common/header.tpl');
+        $this->addChild('common/footer', 'footer', 'common/footer.tpl');
 
-		$this->processTemplate('pages/finish.tpl');
-	}
+        $this->processTemplate('pages/finish.tpl');
+    }
 
 }

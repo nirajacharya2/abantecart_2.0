@@ -6,7 +6,6 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
 use abc\core\lib\AJson;
 use abc\core\lib\ALanguageManager;
 use abc\core\lib\AProgressBar;
@@ -29,7 +28,7 @@ class ControllerPagesInstall extends AController
 
         if (isset($run_level)) {
             if ( ! in_array((int)$run_level, array(1, 2, 3, 4, 5))) {
-                abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=activation'.'&admin_path='.$this->request->post['admin_path']);
+                abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=activation'.'&admin_secret='.$this->request->post['admin_secret']);
             }
 
             if ( ! $this->session->data['install_step_data'] && (int)$run_level == 1) {
@@ -45,9 +44,11 @@ class ControllerPagesInstall extends AController
             return null;
         }
 
-        if ($this->request->is_POST() && ($this->_validate())) {
+        if ($this->request->is_POST() && $this->_validate()) {
 
             $this->session->data['install_step_data'] = $this->request->post;
+            //add parameter of URL to "public" subdirectory
+            $this->session->data['install_step_data']['http_server'] = substr(ABC::env('HTTPS_SERVER'),0,-9)."/public/";
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=install&runlevel=1');
         }
 
@@ -65,7 +66,7 @@ class ControllerPagesInstall extends AController
             'password',
             'password_confirm',
             'email',
-            'admin_path',
+            'admin_secret',
         ];
         $defaults = ['', 'localhost', '', '', '', 'abc_', 'admin', '', '', '', ''];
         $place_holder = [
@@ -110,23 +111,15 @@ class ControllerPagesInstall extends AController
                     'name'        => $field,
                     'value'       => $this->data[$field],
                     'placeholder' => $place_holder[$k],
-                    'required'    => in_array($field, ['db_host', 'db_user', 'db_name', 'username', 'password', 'password_confirm', 'email', 'admin_path']),
+                    'required'    => in_array($field, ['db_host', 'db_user', 'db_name', 'username', 'password', 'password_confirm', 'email', 'admin_secret']),
                 ));
             } else {
                 $options = array();
 
-                if (extension_loaded('mysqli')) {
-                    $options['amysqli'] = 'MySQLi';
-                }
-
-                if (extension_loaded('pdo_mysql')) {
-                    $options['apdomysql'] = 'PDO MySQL';
-                }
-
-                //regular mysql is not supported on PHP 5.5.+
-                if (extension_loaded('mysql') && version_compare(phpversion(), '5.5.0', '<') == true) {
+                if (extension_loaded('mysqli') || extension_loaded('pdo_mysql') ){
                     $options['mysql'] = 'MySQL';
                 }
+
                 if ($options) {
                     $this->data['form'][$field] = $form->getFieldHtml(array(
                         'type'     => 'selectbox',
@@ -217,7 +210,7 @@ class ControllerPagesInstall extends AController
     {
         $this->load->model('install');
         $this->model_install->RunSQL($this->session->data['install_step_data']);
-
+        return null;
     }
 
     private function _configure()
@@ -257,9 +250,8 @@ class ControllerPagesInstall extends AController
 
     public function _load_demo_data()
     {
-        $registry = $this->_prepare_registry();
         $this->load->model('install');
-        $this->model_install->loadDemoData($registry);
+        $this->model_install->loadDemoData($this->session->data['install_step_data']);
 
         return null;
     }
@@ -331,9 +323,10 @@ class progressbar implements AProgressBar
     function get_progress()
     {
         $cnt = 0;
-        $res = $this->registry->get('db')->query('SELECT section, COUNT(DISTINCT `block`) AS cnt
-													FROM '.DB_PREFIX.'language_definitions
-													GROUP BY section');
+        $db = $this->registry->get('db');
+        $res = $db->query("SELECT section, COUNT(DISTINCT `block`) AS cnt
+                            FROM ".$db->table('language_definitions')."
+                            GROUP BY section");
         foreach ($res->rows as $row) {
             $cnt += $row['cnt'];
         }

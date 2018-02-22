@@ -57,7 +57,7 @@ class Install implements ABCExec
         }
 
         //check requirements first
-        $errors = $this->_validate_requirements($options);
+        $errors = $this->_validate_requirements( $action, $options);
         if ($errors) {
             return $errors;
         }
@@ -164,10 +164,10 @@ class Install implements ABCExec
             $this->_fill_defaults($options);
 
             //make config-files
-            $errors = $this->_configure($options);
+            $errors = $this->configure($options);
             //fill database
             if ( ! $errors) {
-                $errors = $this->_run_sql($options);
+                $errors = $this->runSQL($options);
             }
             if(!$errors){
                 $registry = Registry::getInstance();
@@ -185,7 +185,7 @@ class Install implements ABCExec
             }
 
             if ( ! $errors && isset($options['with-sample-data'])) {
-                $errors = $this->_load_demo_data($options);
+                $errors = $this->loadDemoData($options);
             }
             // deploy assets and generate cache
             if ( ! $errors) {
@@ -262,7 +262,7 @@ class Install implements ABCExec
         return $output;
     }
 
-    protected function _validate_requirements()
+    protected function _validate_requirements(string $action, array $options)
     {
         $errors = [];
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
@@ -349,7 +349,7 @@ class Install implements ABCExec
         return $errors;
     }
 
-    protected function _configure(array $options)
+    public function configure(array $options)
     {
         if ( ! $options) {
             return ['No options to configure!'];
@@ -460,10 +460,10 @@ EOD;
         return $result;
     }
 
-    protected function _run_sql($data)
+    public function runSQL(array $options)
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'mysql.database.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.$options['db_driver'].'.database.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
 
@@ -475,7 +475,7 @@ EOD;
             return $errors;
         }
         $db_config = ABC::env('DATABASES');
-        $db = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
+        $db = new ADB($db_config[$options['db_driver']]);
         $query = '';
         foreach ($sql as $line) {
             $tsl = trim($line);
@@ -483,7 +483,7 @@ EOD;
                 && (substr($tsl, 0, 1) != '#')) {
                 $query .= $line;
                 if (preg_match('/;\s*$/', $line)) {
-                    $query = str_replace(" `ac_", " `".$data['db_prefix'],$query);
+                    $query = str_replace(" `ac_", " `".$options['db_prefix'],$query);
                     $db->query($query); //no silence mode! if error - will throw to exception
                     $query = '';
                 }
@@ -494,45 +494,45 @@ EOD;
         $db->query("SET @@session.sql_mode = 'MYSQL40';");
         $salt_key = AHelperUtils::genToken(8);
         $db->query(
-           "INSERT INTO `".$data['db_prefix']."users`
+           "INSERT INTO `".$options['db_prefix']."users`
             SET user_id = '1',
                 user_group_id = '1',
-                email = '".$db->escape($data['email'])."',
-                username = '".$db->escape($data['username'])."',
+                email = '".$db->escape($options['email'])."',
+                username = '".$db->escape($options['username'])."',
                 salt = '".$db->escape($salt_key)."', 
-                PASSWORD = '".$db->escape(sha1($salt_key.sha1($salt_key.sha1($data['password']))))."',
+                PASSWORD = '".$db->escape(sha1($salt_key.sha1($salt_key.sha1($options['password']))))."',
                 STATUS = '1',
                 date_added = NOW();");
 
         $db->query(
-            "UPDATE `".$data['db_prefix']."settings` 
-                    SET value = '".$db->escape($data['email'])."' 
+            "UPDATE `".$options['db_prefix']."settings` 
+                    SET value = '".$db->escape($options['email'])."' 
                     WHERE `key` = 'store_main_email'; ");
         $db->query(
-            "UPDATE `".$data['db_prefix']."settings` 
-                    SET value = '".$db->escape($data['http_server'])."' 
+            "UPDATE `".$options['db_prefix']."settings` 
+                    SET value = '".$db->escape($options['http_server'])."' 
                     WHERE `key` = 'config_url'; ");
         if (ABC::env('HTTPS')) {
             $db->query(
-                "UPDATE `".$data['db_prefix']."settings` 
-                        SET value = '".$db->escape($data['http_server'])."' 
+                "UPDATE `".$options['db_prefix']."settings` 
+                        SET value = '".$db->escape($options['http_server'])."' 
                         WHERE `key` = 'config_ssl_url'; ");
             $db->query(
-                "UPDATE `".$data['db_prefix']."settings` 
+                "UPDATE `".$options['db_prefix']."settings` 
                         SET value = '2' 
                         WHERE `key` = 'config_ssl'; ");
         }
         $db->query(
-                "UPDATE `".$data['db_prefix']."settings` 
+                "UPDATE `".$options['db_prefix']."settings` 
                 SET value = '".$db->escape(AHelperUtils::genToken(16))."' 
                 WHERE `key` = 'task_api_key'; ");
         $db->query(
-                   "INSERT INTO `".$data['db_prefix']."settings` 
+                   "INSERT INTO `".$options['db_prefix']."settings` 
                     SET 
                         `group` = 'config', 
                         `key` = 'install_date', 
                         `value` = NOW(); ");
-        $db->query("UPDATE `".$data['db_prefix']."products` SET `viewed` = '0';");
+        $db->query("UPDATE `".$options['db_prefix']."products` SET `viewed` = '0';");
 
         //run destructor and close db-connection
         unset($db);
@@ -545,10 +545,10 @@ EOD;
         return $errors;
     }
 
-    protected function _load_demo_data($options)
+    public function loadDemoData($options)
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.'mysql.demo_data.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.$options['db_driver'].'.demo_data.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
             return $errors;
@@ -559,7 +559,7 @@ EOD;
             return $errors;
         }
         $db_config = ABC::env('DATABASES');
-        $db = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
+        $db = new ADB($db_config[$options['db_driver']]);
         $db->query("SET NAMES 'utf8'");
         $db->query("SET CHARACTER SET utf8");
 

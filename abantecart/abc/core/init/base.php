@@ -74,10 +74,12 @@ $class_list = [
         'task_manager',
         'im',
         'csrf_token',
-        'promotion'
+        'promotion',
+        'json'
     ],
 ];
 //load classes
+
 $dir_app = ABC::env('DIR_APP');
 foreach ($class_list as $sub_dir => $files) {
     $sub_dir = DIRECTORY_SEPARATOR != '/' ? str_replace('/',DIRECTORY_SEPARATOR,$sub_dir) : $sub_dir;
@@ -85,6 +87,7 @@ foreach ($class_list as $sub_dir => $files) {
         require_once $dir_app.$sub_dir.DIRECTORY_SEPARATOR.$name.'.php';
     }
 }
+
 unset($class_list);
 
 //load vendors classes

@@ -29,17 +29,17 @@
 			<i class="fa fa-comments fa-fw"></i> <a href="http://forum.abantecart.com" target="_abante">Support Forums</a></p>
 
 		<div class="container-fluid text-center">
-			<a href="http://www.abantecart.com/contribute-to-abantecart"><img src="<?php echo $template_dir; ?>image/conrib_btn_sm.png" border="0" alt="Support AbanteCart eCommerce" /></a>
+			<a href="http://www.abantecart.com/contribute-to-abantecart"><img src="templates/assets/images/conrib_btn_sm.png" border="0" alt="Support AbanteCart eCommerce" /></a>
 		</div>
 
 		<div class="container-fluid">
 	    <div class="snapshots col-md-6">
-		    <a href="../"><img src="<?php echo $template_dir; ?>image/storefront.png" alt="" width="250" style="border: none;" /></a><br />
+		    <a href="../"><img src="templates/assets/images/storefront.png" alt="" width="250" style="border: none;" /></a><br />
 		    <a href="../">Your Online Shop</a>
 		</div>
 	    <div class="snapshots col-md-6">
-		    <a href="../<?php echo $admin_path ?>"><img src="<?php echo $template_dir; ?>image/admin.png" alt="" width="250" style="border: none;" /></a><br />
-		    <a href="../<?php echo $admin_path ?>">Login to your Control Panel</a>
+		    <a href="../<?php echo $admin_secret ?>"><img src="templates/assets/images/admin.png" alt="" width="250" style="border: none;" /></a><br />
+		    <a href="../<?php echo $admin_secret ?>">Login to your Control Panel</a>
 		</div>
 		</div>
 
@@ -51,33 +51,33 @@
 		<div class="container-fluid">
 			<div class="h4 heading col-md-12 text-center" style="min-height: 50px;">Enable Payment & Shipping</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/install&extension=default_stripe"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../extensions/default_stripe/image/icon.png" alt="Install Stripe Payment" style="border: none;"/></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/install&extension=default_stripe"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/extensions/default_stripe/templates/default/admin/assets/images/icon.png" alt="Install Stripe Payment" style="border: none;"/></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">Stripe</a>
 			</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/install&extension=default_pp_standart"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../extensions/default_pp_standart/image/icon.png" alt="Install Paypal Standart Payment" style="border: none;" /></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/install&extension=default_pp_standart"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/extensions/default_pp_standart/templates/default/admin/assets/images/icon.png" alt="Install Paypal Standart Payment" style="border: none;" /></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">Paypal</a>
 			</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/install&extension=default_free_shipping"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../extensions/default_free_shipping/image/icon.png" alt="Install Free Shipping" style="border: none;" /></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/install&extension=default_free_shipping"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/extensions/default_free_shipping/templates/default/admin/assets/images/icon.png" alt="Install Free Shipping" style="border: none;" /></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">Free Shipping</a>
 			</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/install&extension=default_ups"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../extensions/default_ups/image/icon.png" alt="Install UPS Shipping" style="border: none;" /></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/install&extension=default_ups"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/extensions/default_ups/templates/default/admin/assets/images/icon.png" alt="Install UPS Shipping" style="border: none;" /></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">UPS</a>
 			</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/install&extension=default_fedex"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../extensions/default_fedex/image/icon.png" alt="Install FedEx Shipping" style="border: none;" /></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/install&extension=default_fedex"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/extensions/default_fedex/templates/default/admin/assets/images/icon.png" alt="Install FedEx Shipping" style="border: none;" /></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">FedEx</a>
 			</div>
 		    <div class="snapshots col-md-2">
-			    <?php $url = '../'.$admin_path."&rt=extension/extensions/extensions"; ?>
-			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../admin/view/default/image/default_extension.png" alt="Many other options" style="border: none;" /></a><br />
+			    <?php $url = '../public/'.$admin_secret."&rt=extension/extensions/extensions"; ?>
+			    <a href="<?php echo $url;?>" target="_new_admin"><img src="../public/templates/default/admin/assets/images/default_extension.png" alt="Many other options" style="border: none;" /></a><br />
 			    <a href="<?php echo $url;?>" target="_new_admin">Many Others</a>
 			</div>
 		</div>

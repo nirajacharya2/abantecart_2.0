@@ -38,10 +38,18 @@ final class AConfig
     private $registry;
     public $groups = array('details', 'general', 'checkout', 'appearance', 'mail', 'im', 'api', 'system');
 
+    /**
+     * AConfig constructor.
+     *
+     * @param Registry $registry
+     * @param string $store_url
+     */
     public function __construct($registry, $store_url = '')
     {
         $this->registry = $registry;
-        $this->_load_settings($store_url);
+        if(is_callable($registry->get('db'))) {
+            $this->_load_settings($store_url);
+        }
     }
 
     /**

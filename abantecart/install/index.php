@@ -44,8 +44,6 @@ ABC::env('INDEX_FILE', basename(__FILE__));
 //load default environment
 new ABC();
 
-
-//$app->run();
 require 'core/init.php';
 $registry = Registry::getInstance();
 ADebug::checkpoint('init end');
@@ -55,14 +53,6 @@ $registry->set('request', $request);
 //Route to request process
 $router = new ARouter($registry);
 $registry->set('router', $router);
-//$router->processRoute(ABC::env('ROUTE'));
-
-// Output
-//$registry->get('response')->output();
-
-
-//AHelperUtils::startStorefrontSession($user_id);
-
 
 //Show cache stats if debugging
 if ($registry->get('config')->get('config_debug')) {
@@ -81,8 +71,6 @@ try {
 // Response
 $response = new AResponse();
 $response->addHeader('Content-Type: text/html; charset=utf-8');
-$response->addHeader('X-Frame-Options: SAMEORIGIN;');
-$response->addHeader('X-Content-Type-Options: nosniff');
 $registry->set('response', $response);
 
 // Document
@@ -108,6 +96,3 @@ $response->output();
 catch (AException $e) {
     ac_exception_handler($e);
 }
-
-//display debug info
-//ADebug::display();

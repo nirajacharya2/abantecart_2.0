@@ -298,8 +298,12 @@ final class ADispatcher
          */
         $controller = null;
         if (class_exists($this->class)) {
-            $controller = new $this->class($this->registry, $this->args["instance_id"], $this->controller,
-                $parent_controller);
+            $controller = new $this->class(
+                                            $this->registry,
+                                            $this->args["instance_id"],
+                                            $this->controller,
+                                            $parent_controller
+            );
             $controller->dispatcher = $this;
         } else {
             $error = new AError('Error: controller class not exist '.$this->class.'!', AC_ERR_CLASS_CLASS_NOT_EXIST);
@@ -319,7 +323,6 @@ final class ADispatcher
                     // Call new dispatch for new controller and exit
                     //???? need to put limit for recursion to prevent overflow
                     $dispatch->dispatch();
-
                     return null;
                 }
             } else {
