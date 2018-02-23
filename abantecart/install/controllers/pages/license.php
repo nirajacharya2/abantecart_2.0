@@ -35,7 +35,7 @@ class ControllerPagesLicense extends AController
     public function main()
     {
         $this->session->clear();
-
+        $error = false;
         if ($this->request->is_POST() && ($this->validate())) {
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=settings');
         }
@@ -47,8 +47,13 @@ class ControllerPagesLicense extends AController
         }
         $this->view->assign('error_warning', $template_data['error_warning']);
         $this->view->assign('action', ABC::env('HTTPS_SERVER').'index.php?rt=license');
-        $text = nl2br(file_get_contents('../license.txt'));
-        $this->view->assign('text', $text);
+        if(is_dir(ABC::env('DIR_VENDOR'))) {
+            $text = nl2br(file_get_contents('../license.txt'));
+            $this->view->assign('text', $text);
+        }else{
+            $error = true;
+            $this->view->assign('error','vendor_dir_not_found');
+        }
 
         $this->view->assign('checkbox_agree', $this->html->buildCheckbox(
                 array(
@@ -64,7 +69,12 @@ class ControllerPagesLicense extends AController
         $this->addChild('common/header', 'header', 'common/header.tpl');
         $this->addChild('common/footer', 'footer', 'common/footer.tpl');
 
-        $this->processTemplate('pages/license.tpl');
+        if($error) {
+            $tpl = 'pages/initiate.tpl';
+        }else{
+            $tpl = 'pages/license.tpl';
+        }
+        $this->processTemplate($tpl);
     }
 
     private function validate()

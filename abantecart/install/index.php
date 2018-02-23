@@ -88,6 +88,11 @@ if (!empty($request->get['rt'])) {
 	$dispatch = 'license';
 }
 
+//check is cart already installed
+if(is_file(ABC::env('DIR_CONFIG').'enabled.config.php') && !isset( $registry->get('session')->data['finish']) ){
+    $dispatch = 'finish';
+}
+
 $page_controller->build('pages/'.$dispatch);
 
 // Output

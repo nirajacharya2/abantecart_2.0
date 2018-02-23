@@ -249,6 +249,9 @@ class ControllerPagesInstall extends AController
 
     public function progressbar()
     {
+        $this->load->model('install');
+        $this->model_install->setADB($this->session->data['install_step_data']);
+
         session_write_close(); // unlock session !important!
         $progress = new progressbar($this->registry);
         $this->response->addJSONHeader();
@@ -302,7 +305,6 @@ class progressbar implements AProgressBar
 
     function get_max()
     {
-        define('IS_ADMIN', true);
         $language = new ALanguageManager($this->registry, 'en');
         $language_blocks = $language->getAllLanguageBlocks('english');
         $language_blocks['admin'] = array_merge($language_blocks['admin'], $language_blocks['extensions']['admin']);
@@ -327,8 +329,9 @@ class progressbar implements AProgressBar
 
     function do_work()
     {
+        //do the trick for ALanguage
+        ABC::env('INSTALL', false, true);
         $language = new ALanguageManager($this->registry, 'en');
-
         //Load default language (1) English on install only.
         return $language->definitionAutoLoad(1, 'all', 'all');
     }

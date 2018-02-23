@@ -60,7 +60,7 @@ if($command != 'help:help') {
         }
 
 
-        exit("\n\e[0;31mError: Vendor folder not found. Please run command \e[0m\n\n
+        exit("\n\e[0;31mError: /abc/vendor folder not found. Please run command \e[0m\n\n
 		php ".$composer_phar." install -d ".dirname(__DIR__, 3)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }

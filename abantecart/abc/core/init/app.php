@@ -142,7 +142,7 @@ if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s']
     ABC::env(
         array(
             'IS_ADMIN'     => true,
-            'DIR_LANGUAGE' => $dir_app.'languages'.$dir_sep.'admin'.$dir_sep,
+            'DIR_LANGUAGES' => $dir_app.'languages'.$dir_sep.'admin'.$dir_sep,
             'DIR_BACKUP'   => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
             'DIR_DATA'     => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
         )
@@ -153,7 +153,7 @@ if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s']
     ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
 } else {
     ABC::env('IS_ADMIN', false);
-    ABC::env('DIR_LANGUAGE', $dir_app.$dir_sep.'languages'.$dir_sep.'storefront'.$dir_sep);
+    ABC::env('DIR_LANGUAGES', $dir_app.$dir_sep.'languages'.$dir_sep.'storefront'.$dir_sep);
     ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
     ABC::env('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }

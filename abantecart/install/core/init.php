@@ -43,15 +43,15 @@ ABC::env(
         'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
         'DIR_CORE'           => $dir_app.'core'.$dir_sep,
         'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-        'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
+        'DIR_DOWNLOADS'      => $dir_app.'downloads'.$dir_sep,
         'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
         'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
         'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
-        'DIR_TEMPLATES'      => $dir_public.'templates'.$dir_sep,
+        'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
         'DIR_ASSETS_EXT'     => $dir_public.'extensions'.$dir_sep,
         'DIR_IMAGES'         => $dir_public.'images'.$dir_sep,
         'DIR_RESOURCES'      => $dir_public.'resources'.$dir_sep,
-        'DIR_LANGUAGE'       => $dir_public.'languages'.$dir_sep.'admin'.$dir_sep,
+        'DIR_LANGUAGES'      => $dir_app.'languages'.$dir_sep,
         'DIR_BACKUP'         => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
         'DIR_DATA'           => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
 
@@ -104,7 +104,9 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 
 //load vendors classes
-require ABC::env('DIR_VENDOR').'autoload.php';
+if(is_file(ABC::env('DIR_VENDOR').'autoload.php')) {
+    require ABC::env('DIR_VENDOR').'autoload.php';
+}
 
 // Error Reporting
 error_reporting(E_ALL);

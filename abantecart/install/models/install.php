@@ -236,7 +236,7 @@ class ModelInstall extends Model
     {
         $install = new Install();
         $options = $data;
-        $this->_set_adb( $options );
+        $this->setADB( $options );
         $errors = $install->runSQL($options);
         if ($errors) {
             exit(implode("<br>", $errors));
@@ -251,7 +251,7 @@ class ModelInstall extends Model
     {
         $install = new Install();
         $options = $data;
-        $this->_set_adb( $options );
+        $this->setADB( $options );
         $errors = $install->loadDemoData($options);
         if ($errors) {
             exit(implode("<br>", $errors));
@@ -266,23 +266,31 @@ class ModelInstall extends Model
         return null;
     }
 
-    private function _set_adb($options){
-        $db_config = [
-                        $options['db_driver'] =>
-                        [
-                            'DB_DRIVER'   => $options['db_driver'],
-                            'DB_HOST'     => $options['db_host'],
-                            'DB_PORT'     => $options['db_port'],
-                            'DB_USER'     => $options['db_user'],
-                            'DB_PASSWORD' => $options['db_password'],
-                            'DB_NAME'     => $options['db_name'],
-                            'DB_PREFIX'   => $options['db_prefix'],
-                            'DB_CHARSET'  => 'utf8',
-                            'DB_COLLATION'=> 'utf8_unicode_ci'
-                        ]
-                    ];
-        ABC::env('DB_CURRENT_DRIVER', $options['db_driver']);
-        ABC::env('DATABASES',$db_config);
+    public function setADB($options){
+        if($options) {
+            $db_config = [
+                $options['db_driver'] =>
+                    [
+                        'DB_DRIVER'    => $options['db_driver'],
+                        'DB_HOST'      => $options['db_host'],
+                        'DB_PORT'      => $options['db_port'],
+                        'DB_USER'      => $options['db_user'],
+                        'DB_PASSWORD'  => $options['db_password'],
+                        'DB_NAME'      => $options['db_name'],
+                        'DB_PREFIX'    => $options['db_prefix'],
+                        'DB_CHARSET'   => 'utf8',
+                        'DB_COLLATION' => 'utf8_unicode_ci'
+                    ]
+            ];
+            ABC::env('DB_CURRENT_DRIVER', $options['db_driver']);
+            ABC::env('DATABASES',$db_config);
+            return true;
+        }else if(is_file(ABC::env('DIR_CONFIG').'enabled.config.php')){
+            //load environment form config-file
+            new ABC();
+            return true;
+        }
+        return false;
     }
 
 

@@ -871,10 +871,10 @@ class ExtensionsApi
             return false;
         }
 
-        $file = '/'.($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
-            .'languages/'
-            .$language_name
-            .'/'.$route.'.xml';
+        $file = '/languages/'
+                .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
+                .$language_name
+                .'/'.$route.'.xml';
 
         //include language file from first matching extension
         foreach ($this->extensions_dir as $ext) {

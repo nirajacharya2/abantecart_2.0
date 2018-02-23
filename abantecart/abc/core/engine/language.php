@@ -794,9 +794,11 @@ class ALanguage
         }
         $block_name = str_replace('/', '_', $filename);
         $lang_array = array();
-        $sql = "SELECT * FROM ".$this->db->table("language_definitions")." 
-				WHERE language_id = '".(int)$language_id."'
-							  AND section =".(int)$section." AND block='".$this->db->escape($block_name)."'";
+        $sql = "SELECT * 
+                FROM ".$this->db->table("language_definitions")." 
+                WHERE language_id = '".(int)$language_id."'
+                        AND section =".(int)$section." 
+                        AND block='".$this->db->escape($block_name)."'";
         $language_query = $this->db->query($sql);
         if ($language_query->num_rows) {
             foreach ($language_query->rows as $language) {
@@ -839,11 +841,11 @@ class ALanguage
             }
 
             $values[] = "('".(int)$this->language_details['language_id']."',
-						  '".$this->db->escape($block)."',
-						  '".$this->is_admin."',
-						  '".$this->db->escape($k)."',
-						  '".$this->db->escape($v)."',
-						  NOW() )";
+                          '".$this->db->escape($block)."',
+                          '".$this->is_admin."',
+                          '".$this->db->escape($k)."',
+                          '".$this->db->escape($v)."',
+                          NOW() )";
         }
         if ($values) {
             $sql = $sql.implode(', ', $values);
@@ -868,8 +870,7 @@ class ALanguage
         }
         $file_path = $this->language_path.$filename.'.xml';
         if ($this->registry->has('extensions')
-            && $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name,
-                $this->is_admin)
+            && $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name, $this->is_admin)
         ) {
             if (is_file($file_path)) {
                 $warning = new AWarning("Extension <b>".$result['extension']."</b> overrides language file <b>".$filename."</b>");
@@ -908,6 +909,7 @@ class ALanguage
             $file_name = $filename;
         }
         // get path to actual language
+        $this->registry->get('log')->write($filename .'::'. $this->language_details['directory']);
         $file_path = $this->_detect_language_xml_file($filename, $this->language_details['directory']);
         if (file_exists($file_path)) {
             ADebug::checkpoint('ALanguage '.$this->language_details['name'].' loading XML file '.$file_path);
@@ -1018,8 +1020,8 @@ class ALanguage
 
             if ( ! $this->_is_definition_in_db($update_data)) {
                 $sql = "INSERT INTO ".$this->db->table("language_definitions")."
-						(`".implode("`, `", array_keys($update_data))."`)
-						VALUES ('".implode("', '", $update_data)."') ";
+                        (`".implode("`, `", array_keys($update_data))."`)
+                        VALUES ('".implode("', '", $update_data)."') ";
                 $this->db->query($sql);
                 $this->cache->remove('localization');
                 $this->cache->remove('storefront_menu');
@@ -1038,14 +1040,13 @@ class ALanguage
      */
     protected function _is_definition_in_db($data)
     {
-        $sql
-            = "SELECT *
-					 FROM ".$this->db->table("language_definitions")."
-					 WHERE language_id = '".$data['language_id']."'
-						   AND  BLOCK = '".$data['block']."'
-						   AND section =  '".$data['section']."'
-						   AND language_key =  '".$data['language_key']."'
-						   AND language_value =  '".$data['language_value']."'";
+        $sql  = "SELECT *
+                 FROM ".$this->db->table("language_definitions")."
+                 WHERE language_id = '".$data['language_id']."'
+                       AND `block` = '".$data['block']."'
+                       AND `section` =  '".$data['section']."'
+                       AND `language_key` =  '".$data['language_key']."'
+                       AND `language_value` =  '".$data['language_value']."'";
         $exist = $this->db->query($sql);
 
         return ($exist->num_rows ? true : false);
