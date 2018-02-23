@@ -321,6 +321,8 @@ unset($dir_extensions);
 
 //check if we specify template directly
 $template = 'default';
+
+// see template in extensions
 if (ABC::env('IS_ADMIN') !== true && ! empty($request->get['sf'])) {
     $template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
     $dir = $template.ABC::env('DIRNAME_STORE').ABC::env('DIRNAME_TEMPLATES').$template;
@@ -331,6 +333,7 @@ if (ABC::env('IS_ADMIN') !== true && ! empty($request->get['sf'])) {
     }
 }
 
+//not found? Ok. See it in the core
 if ( ! $is_valid) {
     //check template defined in settings
     if (ABC::env('IS_ADMIN') === true) {

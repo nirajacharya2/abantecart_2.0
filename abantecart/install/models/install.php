@@ -24,11 +24,17 @@
 namespace install\models;
 
 use abc\core\ABC;
+use abc\core\backend\Deploy;
 use abc\core\backend\Install;
 use abc\core\cache\ACache;
 use abc\core\engine\Model;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
+
+$dir_sep = DIRECTORY_SEPARATOR;
+require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'interface.php';
+require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'scripts'.$dir_sep.'install.php';
+require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'scripts'.$dir_sep.'deploy.php';
 
 class ModelInstall extends Model
 {
@@ -204,8 +210,6 @@ class ModelInstall extends Model
             return false;
         }
 
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install.php';
         $install = new Install();
         $options = $data;
         $options['root_dir'] = ABC::env('DIR_ROOT');
@@ -217,13 +221,19 @@ class ModelInstall extends Model
             exit(implode("<br>", $errors));
         }
 
+        //ok. let's publish assets
+        $deploy = new Deploy();
+        $ops = ['all' => 1, 'skip-caching' => 1];
+        $errors = $deploy->run('all', $ops);
+        if ($errors) {
+            exit(implode("<br>", $errors));
+        }
+
         return null;
     }
 
     public function RunSQL($data)
     {
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install.php';
         $install = new Install();
         $options = $data;
         $this->_set_adb( $options );
@@ -231,7 +241,6 @@ class ModelInstall extends Model
         if ($errors) {
             exit(implode("<br>", $errors));
         }
-
     }
 
     /**
@@ -240,8 +249,6 @@ class ModelInstall extends Model
      */
     public function loadDemoData($data)
     {
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install.php';
         $install = new Install();
         $options = $data;
         $this->_set_adb( $options );
@@ -278,26 +285,6 @@ class ModelInstall extends Model
         ABC::env('DATABASES',$db_config);
     }
 
-    public function getLanguages()
-    {
-        $query = $this->db->query("SELECT *
-                                    FROM ".DB_PREFIX."languages
-                                    ORDER BY sort_order, name");
-        $language_data = array();
 
-        foreach ($query->rows as $result) {
-            $language_data[$result['code']] = array(
-                'language_id' => $result['language_id'],
-                'name'        => $result['name'],
-                'code'        => $result['code'],
-                'locale'      => $result['locale'],
-                'directory'   => $result['directory'],
-                'filename'    => $result['filename'],
-                'sort_order'  => $result['sort_order'],
-                'status'      => $result['status'],
-            );
-        }
 
-        return $language_data;
-    }
 }

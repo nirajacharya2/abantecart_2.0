@@ -33,9 +33,11 @@ class ControllerPagesFinish extends AController
         }
 
         $this->session->data['finish'] = 'true';
-        unset($this->session->data ['ant_messages']); // prevent reinstall bugs with ant
-
-        $this->view->assign('admin_secret', 'index.php?s='.ABC::env('ADMIN_SECRET'));
+        // prevent reinstall bugs with ant
+        unset($this->session->data ['ant_messages']);
+        $public_url = $this->_parent_url_dir(ABC::env('HTTPS_SERVER')).'public/';
+        $this->view->assign('storefront_url', $public_url.'index.php');
+        $this->view->assign('admin_url', $public_url.'index.php?s='.ABC::env('ADMIN_SECRET'));
 
         $message = "Keep your e-commerce secure! <br /> Delete directory ".ABC::env('DIR_INSTALL')." install from your AbanteCart installation!";
         $this->view->assign('message', $message);
@@ -44,6 +46,39 @@ class ControllerPagesFinish extends AController
         $this->addChild('common/footer', 'footer', 'common/footer.tpl');
 
         $this->processTemplate('pages/finish.tpl');
+    }
+
+    /**
+     * Function returns parent directory of URL
+     * @param $url
+     *
+     * @return bool|string
+     */
+    protected function _parent_url_dir($url) {
+        // note: parent of "/" is "/" and parent of "http://example.com" is "http://example.com/"
+        // remove filename and query
+        $url = $this->_current_url_dir($url);
+        // get parent
+        $len = strlen($url);
+        return $this->_current_url_dir(substr($url, 0, $len && $url[$len - 1 ] == '/' ? -1 : $len));
+    }
+
+    protected function _current_url_dir($url) {
+        // note: anything without a scheme ("example.com", "example.com:80/", etc.) is a folder
+        // remove query (protection against "?url=http://example.com/")
+        if ($first_query = strpos($url, '?')) $url = substr($url, 0, $first_query);
+        // remove fragment (protection against "#http://example.com/")
+        if ($first_fragment = strpos($url, '#')) $url = substr($url, 0, $first_fragment);
+        // folder only
+        $last_slash = strrpos($url, '/');
+        if (!$last_slash) {
+            return '/';
+        }
+        // add ending slash to "http://example.com"
+        if (($first_colon = strpos($url, '://')) !== false && $first_colon + 2 == $last_slash) {
+            return $url . '/';
+        }
+        return substr($url, 0, $last_slash + 1);
     }
 
 }

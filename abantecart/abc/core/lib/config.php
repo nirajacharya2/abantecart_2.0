@@ -47,7 +47,8 @@ final class AConfig
     public function __construct($registry, $store_url = '')
     {
         $this->registry = $registry;
-        if(is_callable($registry->get('db'))) {
+        //skip during installation
+        if(is_object($registry->get('db'))) {
             $this->_load_settings($store_url);
         }
     }

@@ -203,13 +203,15 @@ unset($response);
 // URL Class
 $registry->set('html', new AHtml($registry));
 
-//Hook class
-$hook = new AHook($registry);
-
 // Database
 if( ABC::env('DATABASES') ) {
     $db_config = ABC::env('DATABASES');
-    $registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
+    //check database and tables in it
+    $adb = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
+    $result = $adb->query("SHOW TABLES;");
+    if($result->num_rows) {
+        $registry->set('db', $adb);
+    }
 }
 
 // Cache

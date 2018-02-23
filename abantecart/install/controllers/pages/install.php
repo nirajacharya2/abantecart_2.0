@@ -28,12 +28,12 @@ class ControllerPagesInstall extends AController
 
         if (isset($run_level)) {
             if ( ! in_array((int)$run_level, array(1, 2, 3, 4, 5))) {
-                abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=activation'.'&admin_secret='.$this->request->post['admin_secret']);
+                abc_redirect(ABC::env('HTTPS_SERVER').'index.php?activation'.'&admin_secret='.$this->request->post['admin_secret']);
             }
 
             if ( ! $this->session->data['install_step_data'] && (int)$run_level == 1) {
                 if (filesize(ABC::env('DIR_CONFIG').'/enabled.config.php')) {
-                    abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=activation');
+                    abc_redirect(ABC::env('HTTPS_SERVER').'index.php?activation');
                 } else {
                     abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=license');
                 }
@@ -56,38 +56,57 @@ class ControllerPagesInstall extends AController
         $this->data['action'] = ABC::env('HTTPS_SERVER').'index.php?rt=install';
 
         $fields = [
-            'db_driver',
-            'db_host',
-            'db_user',
-            'db_password',
-            'db_name',
-            'db_prefix',
-            'username',
-            'password',
-            'password_confirm',
-            'email',
-            'admin_secret',
-        ];
-        $defaults = ['', 'localhost', '', '', '', 'abc_', 'admin', '', '', '', ''];
-        $place_holder = [
-            'Select Database Driver',
-            'Enter Database Hostname',
-            'Enter Database Username',
-            'Enter Password, if any',
-            'Enter Database Name',
-            'Add prefix to database tables',
-            'Enter new admin username',
-            'Enter Secret Admin Password',
-            'Repeat the password',
-            'Provide valid email of administrator',
-            'Enter your secret admin key',
+            'db_driver'        => [
+                                    'mysql',//'',
+                                    'Select Database Driver'
+                                  ],
+            'db_host'          => [
+                                    'localhost',
+                                    'Enter Database Hostname'
+                                  ],
+            'db_user'          => [
+                                    'root',//'',
+                                    'Enter Database Username'
+                                  ],
+            'db_password'      => [
+                                    'abolabo',//'',
+                                    'Enter Password, if any'
+                                  ],
+            'db_name'          => [
+                                    'abc_2',//'',
+                                    'Enter Database Name'
+                                  ],
+            'db_prefix'        => [
+                                    'cba_',//'abc_',
+                                    'Add prefix to database tables'
+                                  ],
+            'username'         => [
+                                    'admin',
+                                    'Enter new admin username'
+                                  ],
+            'password'         => [
+                                    'admin', //'',
+                                    'Enter Secret Admin Password'
+                                  ],
+            'password_confirm' => [
+                                    'admin',//'',
+                                    'Repeat the password'
+                                  ],
+            'email'            => [
+                                    'abolabo@gmail.com', //'',
+                                    'Provide valid email of administrator'
+                                  ],
+            'admin_secret'     => [
+                                    'admin',//'',
+                                    'Enter your secret admin key'
+                                  ]
         ];
 
-        foreach ($fields as $k => $field) {
+        foreach ($fields as $field => $default_value) {
             if (isset($this->request->post[$field])) {
                 $this->data[$field] = $this->request->post[$field];
             } else {
-                $this->data[$field] = $defaults[$k];
+                $this->data[$field] = $default_value[0];
             }
         }
 
@@ -104,13 +123,13 @@ class ControllerPagesInstall extends AController
             'action' => $this->data['action'],
         ));
 
-        foreach ($fields as $k => $field) {
+        foreach ($fields as $field => $default_value) {
             if ($field != 'db_driver') {
                 $this->data['form'][$field] = $form->getFieldHtml(array(
                     'type'        => (in_array($field, ['password', 'password_confirm']) ? 'password' : 'input'),
                     'name'        => $field,
                     'value'       => $this->data[$field],
-                    'placeholder' => $place_holder[$k],
+                    'placeholder' => $default_value[1],
                     'required'    => in_array($field, ['db_host', 'db_user', 'db_name', 'username', 'password', 'password_confirm', 'email', 'admin_secret']),
                 ));
             } else {
@@ -221,45 +240,17 @@ class ControllerPagesInstall extends AController
         return null;
     }
 
-    /**
-     * @return Registry
-     */
-    private function _prepare_registry()
-    {
-        return Registry::getInstance();
-        //This is ran after config is saved and we have database connection now
-       /* $db = new ADB(DB_DRIVER, DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
-        $registry->set('db', $db);
-        define('DIR_LANGUAGE', DIR_ABANTECART.'admin/language/');
-
-        // Cache
-        $cache = new ACache();
-        $registry->set('cache', $cache);
-
-        // Config
-        $config = new AConfig($registry);
-        $registry->set('config', $config);
-
-        // Extensions api
-        $extensions = new ExtensionsApi();
-        $extensions->loadEnabledExtensions();
-        $registry->set('extensions', $extensions);
-
-        return $registry;*/
-    }
-
     public function _load_demo_data()
     {
         $this->load->model('install');
         $this->model_install->loadDemoData($this->session->data['install_step_data']);
-
         return null;
     }
 
     public function progressbar()
     {
         session_write_close(); // unlock session !important!
-        $progress = new progressbar($this->_prepare_registry());
+        $progress = new progressbar($this->registry);
         $this->response->addJSONHeader();
         switch ($this->request->get["work"]) {
             case "max":
