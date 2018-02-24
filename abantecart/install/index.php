@@ -32,6 +32,10 @@ if (version_compare(phpversion(), '7.0.0', '<') == true){
 	exit("Oops... php v7.0.0+  Required for AbanteCart to work properly!\n");
 }
 
+if(!is_writable(__DIR__.'/../abc/system/logs')){
+        exit('Please make directory </br></br>'.realpath(__DIR__.'/../abc/system/logs').'</br></br>writable for PHP to proceed');
+}
+
 require __DIR__.'/../abc/core/abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
