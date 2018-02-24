@@ -909,7 +909,6 @@ class ALanguage
             $file_name = $filename;
         }
         // get path to actual language
-        $this->registry->get('log')->write($filename .'::'. $this->language_details['directory']);
         $file_path = $this->_detect_language_xml_file($filename, $this->language_details['directory']);
         if (file_exists($file_path)) {
             ADebug::checkpoint('ALanguage '.$this->language_details['name'].' loading XML file '.$file_path);
