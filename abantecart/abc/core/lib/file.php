@@ -43,6 +43,7 @@ class AFile{
 	 * @var registry - access to application registry
 	 */
 	protected $registry;
+	public $errors;
 
 	public function __construct(){
 		$this->registry = Registry::getInstance();

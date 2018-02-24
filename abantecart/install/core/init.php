@@ -4,7 +4,6 @@ namespace abc;
 
 // set default encoding for multibyte php mod
 use abc\core\ABC;
-use abc\core\engine\AHook;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
@@ -34,6 +33,7 @@ $dir_install = dirname(__DIR__).$dir_sep;
 //Set up common paths
 ABC::env(
     array(
+        'MIN_PHP_VERSION'    => '7.0.0',
         'DIR_ROOT'           => $dir_root,
         'DIR_APP'            => $dir_app,
         'DIR_PUBLIC'         => $dir_public,

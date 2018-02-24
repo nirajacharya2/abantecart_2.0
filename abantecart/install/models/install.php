@@ -77,6 +77,9 @@ class ModelInstall extends Model
         if ( ! $data['password']) {
             $this->error['password'] = 'Password required!';
         }
+        if ( ! $data['password_confirm']) {
+            $this->error['password_confirm'] = 'Password required!';
+        }
         if ($data['password'] != $data['password_confirm']) {
             $this->error['password_confirm'] = 'Password does not match the confirm password!';
         }

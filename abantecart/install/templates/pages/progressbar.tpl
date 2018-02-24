@@ -6,7 +6,6 @@
 3. progressbarError(); function for handle error of long process
 */
 ?>
-
     var progressbar_percent;
     var asynchronous_percent;
     var progressbar_total;
@@ -26,17 +25,26 @@
             dataType:'json',
             success:function (response) {
                 progressbar_total = response.total;
+            },
+            error:function (jqXHR, exception) {
+                if (!progressbar_skip) {
+                	alert('ddddd');
+                    var text = jqXHR.statusText + ": " + jqXHR.responseText;
+                    text = jqXHR.responseText.length == 0 ? 'Connection failed.' : text;
+                    progressbarError(text);
+                    $.ajaxQ.abortAll();
+                }
             }
         });
-		asynchronous_percent = 0;
+        asynchronous_percent = 0;
         run_asynchronous_work();
         update_asynchronous_progress();
     }
 
     function update_progress( percent ){
-		progressbar_percent = percent;
-		updateProgressbar(percent);
-	}
+        progressbar_percent = percent;
+        updateProgressbar(percent);
+    }
 
     function run_asynchronous_work() {
         $.ajax({
@@ -54,6 +62,7 @@
             },
             error:function (jqXHR, exception) {
                 if (!progressbar_skip) {
+					progressbar_skip = true;
                     var text = jqXHR.statusText + ": " + jqXHR.responseText;
                     text = jqXHR.responseText.length == 0 ? 'Connection failed.' : text;
                     progressbarError(text);
@@ -65,6 +74,7 @@
 
     var pgb_state_error = 0; // errors count of progress status requests
     function update_asynchronous_progress() {
+
         if (pgb_state_error > 9) {
             progressbarStateError();
             $.ajaxQ.abortAll();
@@ -83,9 +93,9 @@
                         return;
                     }
                     asynchronous_percent = response.prc;
-                    //culculate percent for asynchronous relatevely to main processbar percent
-                    progressbar_percent = progressbar_percent + Math.floor(asynchronous_percent * progressbar_percent / progressbar_total)
-                    update_progress (progressbar_percent);    
+                    //culculate percent for asynchronous relatively to main progressbar percent
+                    progressbar_percent = progressbar_percent + Math.floor(asynchronous_percent * progressbar_percent / progressbar_total);
+                    update_progress (progressbar_percent);
                     if (parseInt(asynchronous_percent) < parseInt(progressbar_total)) {
                         func_id = setTimeout("update_asynchronous_progress()", 100);
                     }
@@ -93,10 +103,11 @@
                 error:function () {
                     if (!progressbar_skip) {
                         pgb_state_error++;
-                    }
+                    }else{
+						pgb_state_error = 10;
+					}
                 }
             });
-
         }
     }
     // all ajax calls stopper

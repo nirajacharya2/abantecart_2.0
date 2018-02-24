@@ -34,6 +34,11 @@ class ControllerPagesLicense extends AController
 
     public function main()
     {
+        //check is cart already installed
+        if(is_file(ABC::env('DIR_CONFIG').'enabled.config.php')){
+            abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=finish');
+        }
+
         $this->session->clear();
         $error = false;
         if ($this->request->is_POST() && ($this->validate())) {

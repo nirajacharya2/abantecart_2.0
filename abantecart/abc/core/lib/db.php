@@ -198,8 +198,8 @@ class ADB{
         $orm = $this->orm;
         //todo: need to fix sql-queries
         //Implement second parameter!!!!
-        return str_replace("'","\'",$value);
-        //return trim($orm::connection()->getPdo()->quote($value),"'"); // ??? it does not works
+        $output = $orm::connection()->getPdo()->quote($value);
+        return substr($output, 1,-1);
     }
 
     /**

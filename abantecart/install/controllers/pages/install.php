@@ -3,12 +3,8 @@
 namespace install\controllers;
 
 use abc\core\ABC;
-use abc\core\engine\AController;
-use abc\core\engine\AForm;
-use abc\core\engine\Registry;
-use abc\core\lib\AJson;
-use abc\core\lib\ALanguageManager;
-use abc\core\lib\AProgressBar;
+use abc\core\engine\{ AController, AForm, Registry};
+use abc\core\lib\{AException, AJson, ALanguageManager, AProgressBar};
 
 /**\
  * Class ControllerPagesInstall
@@ -52,12 +48,17 @@ class ControllerPagesInstall extends AController
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=install&runlevel=1');
         }
 
+        //check is cart already installed
+        if(is_file(ABC::env('DIR_CONFIG').'enabled.config.php')){
+            abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=finish');
+        }
+
         $this->data['error'] = $this->error;
         $this->data['action'] = ABC::env('HTTPS_SERVER').'index.php?rt=install';
 
         $fields = [
             'db_driver'        => [
-                                    'mysql',//'',
+                                    'mysql',
                                     'Select Database Driver'
                                   ],
             'db_host'          => [
@@ -65,19 +66,19 @@ class ControllerPagesInstall extends AController
                                     'Enter Database Hostname'
                                   ],
             'db_user'          => [
-                                    'root',//'',
+                                    '',
                                     'Enter Database Username'
                                   ],
             'db_password'      => [
-                                    'abolabo',//'',
+                                    '',
                                     'Enter Password, if any'
                                   ],
             'db_name'          => [
-                                    'abc_2',//'',
+                                    '',
                                     'Enter Database Name'
                                   ],
             'db_prefix'        => [
-                                    'cba_',//'abc_',
+                                    'abc_',
                                     'Add prefix to database tables'
                                   ],
             'username'         => [
@@ -85,19 +86,19 @@ class ControllerPagesInstall extends AController
                                     'Enter new admin username'
                                   ],
             'password'         => [
-                                    'admin', //'',
+                                    '',
                                     'Enter Secret Admin Password'
                                   ],
             'password_confirm' => [
-                                    'admin',//'',
+                                    '',
                                     'Repeat the password'
                                   ],
             'email'            => [
-                                    'abolabo@gmail.com', //'',
+                                    '',
                                     'Provide valid email of administrator'
                                   ],
             'admin_secret'     => [
-                                    'admin',//'',
+                                    '',
                                     'Enter your secret admin key'
                                   ]
         ];
@@ -179,38 +180,38 @@ class ControllerPagesInstall extends AController
     public function runlevel($step)
     {
         $this->load->library('json');
-        if ($step == 2) {
-            $this->_install_SQL();
-            $this->response->addJSONHeader();
-
-            return AJson::encode(array('ret_code' => 50));
-        } elseif ($step == 3) {
-            //NOTE: Create config as late as possible. This will prevent triggering finished installation
-            $this->_configure();
-            //wait for end of writing of file on disk (for slow hdd)
-            sleep(3);
-            $this->session->data['finish'] = 'false';
-            $this->response->addJSONHeader();
-
-            return AJson::encode(array('ret_code' => 100));
-        } elseif ($step == 4) {
-            // Load demo data
-            if ($this->session->data['install_step_data']['load_demo_data'] == 'on') {
-                $this->_load_demo_data();
+        try{
+            if ($step == 2) {
+                $this->_install_SQL();
+                $this->response->addJSONHeader();
+                return AJson::encode(array('ret_code' => 50));
+            } elseif ($step == 3) {
+                //NOTE: Create config as late as possible. This will prevent triggering finished installation
+                $this->_configure();
+                //wait for end of writing of file on disk (for slow hdd)
+                sleep(3);
+                $this->session->data['finish'] = 'false';
+                $this->response->addJSONHeader();
+                return AJson::encode(array('ret_code' => 100));
+            } elseif ($step == 4) {
+                // Load demo data
+                if ($this->session->data['install_step_data']['load_demo_data'] == 'on') {
+                    $this->_load_demo_data();
+                }
+                //Clean session for configurations. We do not need them any more
+                unset($this->session->data['install_step_data']);
+                $this->session->data['finish'] = 'false';
+                $this->response->addJSONHeader();
+                return AJson::encode(array('ret_code' => 150));
+            } elseif ($step == 5) {
+                //install is completed but we are not yet finished
+                $this->session->data['finish'] = 'false';
+                // Load languages with asynchronous approach
+                $this->response->addJSONHeader();
+                return AJson::encode(array('ret_code' => 200));
             }
-            //Clean session for configurations. We do not need them any more
-            unset($this->session->data['install_step_data']);
-            $this->session->data['finish'] = 'false';
-            $this->response->addJSONHeader();
-
-            return AJson::encode(array('ret_code' => 150));
-        } elseif ($step == 5) {
-            //install is completed but we are not yet finished
-            $this->session->data['finish'] = 'false';
-            // Load languages with asynchronous approach
-            $this->response->addJSONHeader();
-
-            return AJson::encode(array('ret_code' => 200));
+        }catch(AException $e){
+            return $e->getMessage();
         }
 
         $this->view->assign('url', ABC::env('HTTPS_SERVER').'index.php?rt=install');
@@ -252,28 +253,36 @@ class ControllerPagesInstall extends AController
         $this->load->model('install');
         $this->model_install->setADB($this->session->data['install_step_data']);
 
-        session_write_close(); // unlock session !important!
-        $progress = new progressbar($this->registry);
-        $this->response->addJSONHeader();
-        switch ($this->request->get["work"]) {
-            case "max":
-                echo AJson::encode(array('total' => $progress->get_max()));
-                break;
-            case "do":
-                $result = $progress->do_work();
-                if ( ! $result) {
-                    $result = array(
-                        'status'    => 406,
-                        'errorText' => $result,
-                    );
-                } else {
-                    $result = array('status' => 100);
-                }
-                echo AJson::encode($result);
-                break;
-            case "progress":
-                echo AJson::encode(array('prc' => (int)$progress->get_progress()));
-                break;
+        // unlock session !important!
+        session_write_close();
+        try {
+            $progress = new progressbar($this->registry);
+            $this->response->addJSONHeader();
+            switch ($this->request->get["work"]) {
+                case "max":
+                    echo AJson::encode(array('total' => $progress->get_max()));
+                    exit;
+                case "do":
+                    $result = $progress->do_work();
+                    if ( ! $result) {
+                        $result = array(
+                            'status'    => 406,
+                            'errorText' => $result,
+                        );
+                        header('HTTP/1.1 402 Application Error');
+                    } else {
+                        $result = array('status' => 100);
+                    }
+                    echo AJson::encode($result);
+                    exit;
+                case "progress":
+                    echo AJson::encode(array('prc' => (int)$progress->get_progress()));
+                    exit;
+            }
+        }catch(AException $e){
+            header('HTTP/1.1 402 Application Error');
+            echo $e->getMessage();
+            exit;
         }
     }
 
@@ -289,7 +298,7 @@ require_once(ABC::env('DIR_LIB')."progressbar.php");
 
 /*
  * Interface for progressbar
- * */
+ */
 
 class progressbar implements AProgressBar
 {

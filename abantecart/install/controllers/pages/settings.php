@@ -34,6 +34,11 @@ class ControllerPagesSettings extends AController
 
     public function main()
     {
+        //check is cart already installed
+        if(is_file(ABC::env('DIR_CONFIG').'enabled.config.php')){
+            abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=finish');
+        }
+
         $template_data = array();
         if ($this->request->is_POST() && ($this->validate())) {
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=install');
@@ -45,13 +50,18 @@ class ControllerPagesSettings extends AController
             $template_data['error_warning'] = '';
         }
 
-        //show warning about opcache and apc but do not block installation
+
+        //try to disable opcache first (see details here http://php.net/manual/en/opcache.configuration.php#ini.opcache.enable)
+        @ini_set('opcache.enable',0);
+        //show warning if still not disabled
         if (ini_get('opcache.enable')) {
             if ($template_data['error_warning']) {
                 $template_data['error_warning'] .= '<br>';
             }
             $template_data['error_warning'] .= 'Warning: Your server have opcache php module enabled. Please disable it before installation!';
         }
+        @ini_set('apc.enabled',0);
+        //show warning if still not disabled
         if (ini_get('apc.enabled')) {
             if ($template_data['error_warning']) {
                 $template_data['error_warning'] .= '<br>';
@@ -60,7 +70,6 @@ class ControllerPagesSettings extends AController
         }
 
         $template_data['action'] = ABC::env('HTTPS_SERVER').'index.php?rt=settings';
-
 
         $template_data['php_ini'] = [
             'PHP Version' => [

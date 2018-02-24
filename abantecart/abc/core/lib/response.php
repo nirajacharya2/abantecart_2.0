@@ -70,16 +70,6 @@ final class AResponse
     }
 
     /**
-     * @deprecated since v1.2.9
-     *
-     * @param string $url
-     */
-    public function redirect($url)
-    {
-        abc_redirect($url);
-    }
-
-    /**
      * @param string   $stdout
      * @param null|int $level
      */
