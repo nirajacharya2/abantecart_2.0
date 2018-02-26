@@ -38,9 +38,9 @@ $dir_sep = DIRECTORY_SEPARATOR;
 if($command != 'help:help') {
     if ( ! is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
         echo "Initialisation...\n";
-        $composer_phar = dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
+        $composer_phar = dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
         if ( ! is_file($composer_phar)) {
-            $temp_dir = dirname(dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar');
+            $temp_dir = dirname(dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar');
             if(!is_dir($temp_dir)){
                 @mkdir($temp_dir,0775,true);
             }
@@ -51,17 +51,17 @@ if($command != 'help:help') {
 
 
             echo "Composer phar-package not found.\nTrying to download Latest Composer into abc/system/temp directory. Please wait..\n";
-            if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
+            if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
                 exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
                     " Please download it manually into "
-                    .dirname(__DIR__, 2).$dir_sep."system".$dir_sep."temp directory\n"
+                    .dirname(__DIR__).$dir_sep."system".$dir_sep."temp directory\n"
                     ." OR run composer manually (see composer.json file)");
             }
         }
 
 
         exit("\n\e[0;31mError: /abc/vendor folder not found. Please run command \e[0m\n\n
-		php ".$composer_phar." install -d ".dirname(__DIR__, 3)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
+		php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
 
