@@ -36,7 +36,7 @@ use abc\core\lib\ASession;
 error_reporting(E_ALL);
 $dir_sep = DIRECTORY_SEPARATOR;
 if($command != 'help:help') {
-    if ( ! is_file(dirname(__DIR__, 3).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
+    if ( ! is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
         echo "Initialisation...\n";
         $composer_phar = dirname(__DIR__, 2).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
         if ( ! is_file($composer_phar)) {
