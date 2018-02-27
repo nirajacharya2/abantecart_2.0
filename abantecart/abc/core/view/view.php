@@ -175,6 +175,8 @@ class AView
     public function setTemplate($template)
     {
         $this->template = $template;
+        //clear output if template has been changed!
+        $this->output = '';
     }
 
     /**
