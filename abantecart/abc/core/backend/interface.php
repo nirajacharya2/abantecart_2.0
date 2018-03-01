@@ -20,7 +20,7 @@ namespace abc\core\backend;
 
 interface ABCExec
 {
-    public function help();
+    public function help( $options = [] );
 
     public function validate(string $action, array $options);
 

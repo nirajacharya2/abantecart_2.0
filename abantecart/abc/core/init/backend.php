@@ -19,18 +19,9 @@
 namespace abc\core\backend;
 
 use abc\core\ABC;
-use abc\core\engine\AHtml;
-use abc\core\engine\ALoader;
-use abc\core\engine\ExtensionsApi;
-use abc\core\engine\Registry;
+use abc\core\engine\{AHtml,ALoader, ExtensionsApi,Registry};
 use abc\core\cache\ACache;
-use abc\core\lib\AConfig;
-use abc\core\lib\ADataEncryption;
-use abc\core\lib\ADB;
-use abc\core\lib\ADocument;
-use abc\core\lib\ALanguageManager;
-use abc\core\lib\ALog;
-use abc\core\lib\ASession;
+use abc\core\lib\{AConfig,ADataEncryption,ADB,ADocument,ALanguageManager,ALog,ASession};
 
 // Error Reporting
 error_reporting(E_ALL);
@@ -99,8 +90,9 @@ $defaults = [
     'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
     'DIR_CORE'            => $dir_app.'core'.$dir_sep,
     'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-    'DIR_IMAGES'           => $dir_public.'images'.$dir_sep,
-    'DIR_DOWNLOADS'        => $dir_app.'downloads'.$dir_sep,
+    'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
+    'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
+    'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep,
     'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
     'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
     'DIR_LOGS'            => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
@@ -233,8 +225,9 @@ function showError($text)
 
 /**
  * @param string $script_name - name of executor
+ * @param array  $options
  */
-function showHelpPage($script_name = '')
+function showHelpPage($script_name = '', $options = [])
 {
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
@@ -255,7 +248,7 @@ function showHelpPage($script_name = '')
         }
         if (method_exists($executor, 'help')) {
             //get help_info from executor
-            $help[$name] = $executor->help();
+            $help[$name] = $executor->help($options);
         }
         unset($executor);
     }
@@ -311,7 +304,7 @@ function getExecutor($name, $silent_mode = false)
 {
     $run_file = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$name.'.php';
     if ( ! is_file($run_file)) {
-        $error_text = "Error: Script ".$run_file.".php not found!";
+        $error_text = "Error: Script ".$run_file."   not found!";
         if ( ! $silent_mode) {
             showError($error_text);
             exit(1);

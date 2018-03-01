@@ -25,6 +25,7 @@
       "twbs/bootstrap": "v4.0.0-beta.2",
       "jquery/jquery": "3.2.1",
       "illuminate/database": "*",
+      "robmorgan/phinx": "*",
       "twig/twig": "1.6.5"
     },
     "extra": {

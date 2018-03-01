@@ -257,7 +257,7 @@ class Cache implements ABCExec
         return $output;
     }
 
-    public function help()
+    public function help( $options = [] )
     {
         return $this->_get_option_list();
     }

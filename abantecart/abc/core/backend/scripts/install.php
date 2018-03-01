@@ -593,7 +593,12 @@ EOD;
         return $errors;
     }
 
-    public function help()
+    /**
+     * @param array $options
+     *
+     * @return array
+     */
+    public function help( $options = [] )
     {
         $options = $this->_get_option_list();
         foreach ($options as $action => $help_info) {

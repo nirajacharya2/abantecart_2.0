@@ -60,8 +60,12 @@ class Publish implements ABCExec
         return 'Success: Assets have been successfully published.';
     }
 
-
-    public function help()
+    /**
+     * @param array $options
+     *
+     * @return array
+     */
+    public function help( $options = [] )
     {
         return $this->_get_option_list();
     }
