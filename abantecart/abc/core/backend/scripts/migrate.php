@@ -3,6 +3,7 @@
 namespace abc\core\backend;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
@@ -27,7 +28,7 @@ class Migrate implements ABCExec
     public function validate(string $action, array $options)
     {
         $errors = [];
-        if( !is_file(ABC::env('DIR_VENDOR').'robmorgan/phinx/bin/phinx')){
+        if( !in_array($action, ['help']) && !is_file(ABC::env('DIR_VENDOR').'robmorgan/phinx/bin/phinx')){
             return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan/phinx/bin/phinx required to run migrations!'];
         }
         return $errors;
@@ -42,16 +43,19 @@ class Migrate implements ABCExec
     public function run(string $action, array $options)
     {
         $output = null;
-        $action = !$action ? 'all' : $action;
-        $this->_call_phinx($action, $options);
+
+        $action = !$action ? 'help' : $action;
+        if($action == 'phinx') {
+            $this->_call_phinx($action, $options);
+        }else{
+            $this->help();
+        }
     }
 
 
     public function finish(string $action, array $options)
     {
-        $output = "Success: Database migration command have been successfully processed.\n";
-        $output .= implode("\n", $this->results);
-        return $output;
+
     }
 
     /**
@@ -67,63 +71,26 @@ class Migrate implements ABCExec
     protected function _get_option_list()
     {
         return [
-            'list' =>
+            'phinx' =>
                 [
-                    'description' => 'Output list of migration files from directory '.ABC::env('DIR_MIGRATIONS'),
-                    'arguments'   => [],
-                    'example'     => 'php abcexec migrate:list'
-                ],
-            'up' =>
-                [
-                    'description' => 'Forward one migration operation (step)',
-                    'arguments'   => [],
-                    'example'     => 'php abcexec migrate:up'
-                ],
-            'down' =>
-                [
-                    'description' => 'Rollback one migration operation (step)',
-                    'arguments'   => [],
-                    'example'     => 'php abcexec migrate:down'
-                ],
-            'rollback' =>
-                [
-                    'description' => 'Rollback all migrations',
+                    'description' => 'Run phinx command. See more details http://docs.phinx.org/en/latest/commands.html'.
+                        "\n Note: Everytime file abc/config/migration.config.php will be recreated.",
                     'arguments'   => [
-                        '--step' => [
-                                        'description'   => 'Rollback a number of migrations',
-                                        'default_value' => '',
-                                        'required'      => false,
-                                    ],
-                        '--all' => [
-                                        'description'   => 'Rollback all app migrations',
-                                        'default_value' => '',
-                                        'required'      => false,
-                                    ],
+                            '--stage' => [
+                                            'description'   => 'stage name',
+                                            'default_value' => 'default',
+                                            'required'      => false,
+                                        ]
                     ],
-                    'example'     => 'php abcexec migrate:rollback'
-                ],
-
-            'create' =>
-                [
-                    'description' => 'make new migration scenario and save into directory '.ABC::env('DIR_MIGRATIONS'),
-                    'arguments'   => [
-                        '--name' => [
-                                        'description'   => 'script name',
-                                        'default_value' => '',
-                                        'required'      => false,
-                                    ]
-                    ],
-                    'example'     => 'php abcexec migrate:create'
-                ],
+                    'example'     => 'php abcexec migrate:phinx help'
+                ]
         ];
     }
 
     protected function _call_phinx( $action, $options ){
 
         $result = $this->_make_migration_config($options['stage_name']);
-        if( !$result ){
-            return false;
-        }
+
 
         $this->_adapt_argv($action);
 
@@ -133,23 +100,25 @@ class Migrate implements ABCExec
     }
 
     protected function _adapt_argv( $action ){
+        //do the trick for help output
+        $_SERVER['PHP_SELF'] = 'abcexec migrate:phinx';
+
         $argv = $_SERVER['argv'];
         //remove abcexec
         array_shift($argv);
-        //replace abcexec with phinx
         array_shift($argv);
-        array_unshift($argv, 'phinx');
 
         switch($action){
             case 'help':
-                $argv[] = '-h';
+                //$argv[] = '-h';
             break;
             default:
-                $argv[] = $action;
-        }
-        if($action !='list') {
+                if($action != 'phinx') {
+                    $argv[] = $action;
+                }
             $argv[] = '-c '.ABC::env('DIR_CONFIG').'migration.config.php';
         }
+
 
         foreach($argv as $k=>$v){
             if(is_int(strpos($v,'--stage_name='))){
@@ -157,8 +126,11 @@ class Migrate implements ABCExec
                 break;
             }
         }
-        //add configuration file
 
+        array_unshift($argv, 'phinx');
+
+
+        //add configuration file
         $_SERVER['argv'] = $argv;
     }
 
@@ -172,18 +144,26 @@ class Migrate implements ABCExec
         }
         $app_config = require $app_config_file;
 
-        $dir = ABC::env('DIR_MIGRATIONS');
+        $dirs = [ABC::env('DIR_MIGRATIONS')];
+        $dirs = array_merge($dirs, glob(ABC::env('DIR_APP_EXTENSIONS').'*/migrations',GLOB_ONLYDIR));
         $db_drv = $app_config['DB_CURRENT_DRIVER'];
         $content = <<<EOD
 <?php
     return [
         'paths' => [
-            'migrations' => ['{$dir}']
+            'migrations' => [
+
+EOD;
+        foreach($dirs as $dir){
+            $content .= "                              '".$dir."',\n";
+        }
+$content .= <<<EOD
+                            ]
         ],
         'environments' => [
             'default_migration_table' => 'abc_migration_log',
             'default_database' => 'dev',
-            'dev' => [
+            '{$stage_name}' => [
                 'adapter' => '{$db_drv}',
                 'host'    => '{$app_config['DATABASES'][ $db_drv ]['DB_HOST']}',
                 'name'    => '{$app_config['DATABASES'][ $db_drv ]['DB_NAME']}',
