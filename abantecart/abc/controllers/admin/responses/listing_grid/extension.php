@@ -163,7 +163,7 @@ class ControllerResponsesListingGridExtension extends AController{
 				$category = $status = '';
 				// change it for show it in list first by default sorting
 				$row['date_modified'] = date('Y-m-d H:i:s', time());
-			} elseif (!file_exists(ABC::env('DIR_EXT') . $extension . '/main.php') || !file_exists(ABC::env('DIR_EXT') . $extension . '/config.xml')){
+			} elseif (!file_exists(ABC::env('DIR_APP_EXTENSIONS') . $extension . '/main.php') || !file_exists(ABC::env('DIR_APP_EXTENSIONS') . $extension . '/config.xml')){
 				$response->userdata->classes[$id] = 'warning disable-edit disable-install disable-uninstall disable-remote-install';
 				$icon = '<img src="' . ABC::env('RDIR_ASSETS') . 'images/default_extension.png' . '" alt="" border="0" />';
 				$name = sprintf($this->language->get('text_broken_extension'), $extension);
@@ -183,13 +183,21 @@ class ControllerResponsesListingGridExtension extends AController{
 					));
 				}
 
-				$icon_ext_img_url = ABC::env('HTTPS_EXT') . $extension . '/images/icon.png';
-				$icon_ext_dir = ABC::env('DIR_EXT') . $extension . '/images/icon.png';
-				$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : ABC::env('RDIR_ASSETS') . 'images/default_extension.png');
+				$icon_relative_url = ABC::env('DIRNAME_EXTENSIONS')
+                                    .$extension
+                                    . '/'.ABC::env('RDIR_ASSETS')
+                                    .'images/icon.png';
+				$icon_filename = ABC::env('DIR_PUBLIC')
+                                .ABC::env('DIRNAME_EXTENSIONS')
+                                . $extension
+                                . DIRECTORY_SEPARATOR
+                                .ABC::env('RDIR_ASSETS')
+                                .'images'.DIRECTORY_SEPARATOR.'icon.png';
+				$icon = (is_file($icon_filename) ? $icon_relative_url : ABC::env('RDIR_ASSETS') . 'images/default_extension.png');
 				if (!$this->config->has($extension . '_status')){
-					$icon = '<img src="' . $icon . '" alt="" border="0" />';
+					$icon = '<img src="' . $icon . '" alt="'.$extension.'" border="0" />';
 				} else{
-					$icon = '<a href="' . $this->html->getSecureURL('extension/extensions/edit', $this->data['url'] . '&extension=' . $extension) . '"><img src="' . $icon . '" alt="" border="0" /></a>';
+					$icon = '<a href="' . $this->html->getSecureURL('extension/extensions/edit', $this->data['url'] . '&extension=' . $extension) . '"><img src="' . $icon . '" alt="'.$extension.'" border="0" /></a>';
 				}
 
 				$category = $row['category'];

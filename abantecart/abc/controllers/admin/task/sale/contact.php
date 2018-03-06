@@ -282,7 +282,7 @@ class ControllerTaskSaleContact extends AController{
 		}
 		//use safe usage
 		try{
-			include_once(ABC::env('DIR_EXT') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
+			include_once(ABC::env('DIR_APP_EXTENSIONS') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
 			//if class of driver
 			$classname = '\abc\core\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 			if (!class_exists($classname)){

@@ -18,17 +18,17 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 include_once('core/custom_block_hook.php');
 $controllers = array(
     'storefront' => array(
-	                'responses/extension/banner_manager',
-	                'blocks/banner_block'
+                    'responses/extension/banner_manager',
+                    'blocks/banner_block'
     ),
     'admin' => array( 'pages/extension/banner_manager',
                       'responses/listing_grid/banner_manager',
-					  'pages/extension/banner_manager_stat',
+                      'pages/extension/banner_manager_stat',
                       'responses/listing_grid/banner_manager_stat',
                       'responses/extension/banner_manager_chart',
     )
@@ -41,18 +41,18 @@ $models = array(
 
 $languages = array(
     'storefront' => array(
-	    'banner_manager/banner_manager'),
+        'banner_manager/banner_manager'),
     'admin' => array(
         'banner_manager/banner_manager'));
 
 $templates = array(
     'storefront' => array(
-	                        'blocks/banner_block.tpl',
-	                        'blocks/banner_block_content.tpl',
-	                        'blocks/banner_block_header.tpl',
-	                        'blocks/banner_block/one_by_one_slider_banner_block.tpl',
-	                        'blocks/banner_block/flex_slider_banner_block.tpl'
-	                        
+                            'blocks/banner_block.tpl',
+                            'blocks/banner_block_content.tpl',
+                            'blocks/banner_block_header.tpl',
+                            'blocks/banner_block/one_by_one_slider_banner_block.tpl',
+                            'blocks/banner_block/flex_slider_banner_block.tpl'
+
     ),
     'admin' => array( 'pages/extension/banner_manager.tpl',
                       'pages/extension/banner_manager_form.tpl',

@@ -33,6 +33,7 @@ use DOMXPath;
 use Exception;
 use PharData;
 use PharException;
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -1598,6 +1599,34 @@ class AHelperUtils extends AHelper
         $split = array_map('strtolower', $split);
         unset($split[array_search('',$split)], $split[array_search('a',$split)]);
         return $dirname.DIRECTORY_SEPARATOR.implode('_',$split).'.php';
+    }
+
+    static function extractArchive($archive_filename, $dest_directory){
+        $archive = UnifiedArchive::open($archive_filename);
+        if( is_null($archive) ){
+            return false;
+        }
+        $files = $archive->getFileNames();
+
+        //check is archive tar.gz
+        if( sizeof($files) == 1 && strtolower(pathinfo($files[0], PATHINFO_EXTENSION)) == 'tar' ){
+            $archive->extractNode($dest_directory, '/');
+            $archive = UnifiedArchive::open(dirname($archive_filename).'/'.$files[0]);
+            if( is_null($archive)){
+                //remove destination folder first
+                //run pathinfo twice for tar.gz. files
+                try {
+                    $phar = new PharData($archive_filename);
+                    $phar->extractTo($dest_directory, null, true);
+                    return true;
+                } catch (Exception $e) {
+                    $error = new AError(__FUNCTION__.': '.$e->getMessage());
+                    $error->toLog()->toDebug();
+                    return false;
+                }
+            }
+        }
+        return $archive->extractNode($dest_directory, '/');
     }
 
 }

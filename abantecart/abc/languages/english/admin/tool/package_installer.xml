@@ -22,7 +22,7 @@
 	</definition>
 	<definition>
 		<key>text_preloading</key>
-		<value><![CDATA[ Package file %file% will be downloaded.]]></value>
+		<value><![CDATA[ Package file %s will be downloaded.]]></value>
 	</definition>
 	<definition>
 		<key>text_loading</key>
@@ -155,7 +155,7 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 	</definition>
 	<definition>
 		<key>error_unpack</key>
-		<value><![CDATA[ Error: Can't unpack package "%PACKAGE%" after download. Archive error. See error log for details. ]]></value>
+		<value><![CDATA[ Error: Can't unpack package "%s" after download. Archive error. See error log for details. ]]></value>
 	</definition>
 	<definition>
 		<key>error_move</key>
@@ -163,11 +163,11 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 	</definition>
 	<definition>
 		<key>error_install_mode</key>
-		<value><![CDATA[ Error: Can't install extension "%package%" because it already installed. You need deinstall and delete it first or get package for upgrade. ]]></value>
+		<value><![CDATA[ Error: Can't install extension "%s" because it already installed. You need deinstall and delete it first or get package for upgrade. ]]></value>
 	</definition>
 	<definition>
 		<key>error_install_mode2</key>
-		<value><![CDATA[ Error: Can't upgrade extension "%package%" because it not installed. You need get package for install. ]]></value>
+		<value><![CDATA[ Error: Can't upgrade extension "%s" because it not installed. You need get package for install. ]]></value>
 	</definition>
 	<definition>
 		<key>error_version_compatibility</key>
@@ -183,7 +183,7 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 	</definition>
 	<definition>
 		<key>error_core_version</key>
-		<value><![CDATA[ Error: You have AbanteCart version %VERSION% installed.<br>This upgrade package only for versions lower than  ]]></value>
+		<value><![CDATA[ Error: You have AbanteCart version %s installed.<br>This upgrade package only for versions lower than  ]]></value>
 	</definition>
 	<definition>
 		<key>text_interrupt</key>

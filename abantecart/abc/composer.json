@@ -26,7 +26,8 @@
       "jquery/jquery": "3.2.1",
       "illuminate/database": "*",
       "robmorgan/phinx": "*",
-      "twig/twig": "1.6.5"
+      "twig/twig": "1.6.5",
+      "wapmorgan/unified-archive": "~0.0.10"
     },
     "extra": {
             "installer-paths": {

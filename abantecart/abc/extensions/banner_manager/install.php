@@ -17,7 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\controllers\Admin;
+namespace abc\controllers\admin;
 use abc\core\lib\AMenu;
 use abc\core\lib\AResourceManager;
 

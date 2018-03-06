@@ -479,7 +479,7 @@ class ControllerPagesExtensionExtensions extends AController {
 			//if template process differently
 			if ( AHelperUtils::has_value((string)$data['template']) ) {
 		    	//build path to template directory.
-				$dir_template = ABC::env('DIR_EXT').$extension.ABC::env('DIRNAME_ADMIN').ABC::env('DIRNAME_TEMPLATES').$this->config->get('admin_template')."/template/".$data['template'];
+				$dir_template = ABC::env('DIR_APP_EXTENSIONS').$extension.ABC::env('DIRNAME_ADMIN').ABC::env('DIRNAME_TEMPLATES').$this->config->get('admin_template')."/template/".$data['template'];
 				//validate template and report issue
 				if (!file_exists( $dir_template )) {
 					$warning = new AWarning(sprintf($this->language->get('error_could_not_load_override'), $dir_template, $extension));
@@ -796,7 +796,8 @@ class ControllerPagesExtensionExtensions extends AController {
 		//#PR set custom templates for extension settings page.  
 		if ( AHelperUtils::has_value( (string)$config->custom_settings_template ) ) {
 			//build path to template directory.
-			$dir_template = ABC::env('DIR_EXT') . $extension . ABC::env('DIRNAME_ADMIN') . ABC::env('DIRNAME_TEMPLATES') . $this->config->get('admin_template') . "/template/";
+		//????
+            $dir_template = ABC::env('DIR_APP_EXTENSIONS') . $extension . ABC::env('DIRNAME_ADMIN') . ABC::env('DIRNAME_TEMPLATES') . $this->config->get('admin_template') . "/template/";
 			$dir_template .= (string)$config->custom_settings_template;
 			//validate template and report issue
 			if (!file_exists( $dir_template )) {
@@ -874,7 +875,8 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 			$config = AHelperUtils::getExtensionConfigXml($this->request->get['extension']);
 			if ($config === false) {
-				$filename = ABC::env('DIR_EXT') . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
+			    //????
+				$filename = ABC::env('DIR_APP_EXTENSIONS') . str_replace('../', '', $this->request->get['extension']) . '/config.xml';
 				$err = sprintf($this->language->get('error_could_not_load_config'), $this->request->get['extension'], $filename);
 				$this->session->data['error'] = $err;
 			} else {

@@ -143,7 +143,7 @@ class AAssetPublisher{
             }
         }
 
-        if( $source == 'all' || $source == 'extensions') {
+        if( $source == 'all' || ($source == 'extensions' && !isset($filter['extension'])) ) {
             //Note: get only enabled extensions for publishing
             $extensions_api = $this->extensions;
 
