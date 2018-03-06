@@ -10885,7 +10885,7 @@ CREATE TABLE `ac_dataset_values` (
   `value_float` float DEFAULT NULL,
   `value_varchar` varchar(255) DEFAULT NULL,
   `value_text` text,
-  `value_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `value_timestamp` timestamp DEFAULT CURRENT_TIMESTAMP,
   `value_boolean` tinyint(1) DEFAULT NULL,
   `value_sort_order` int(11) NOT NULL AUTO_INCREMENT,
   `row_id` int(10) unsigned NOT NULL DEFAULT '0',
