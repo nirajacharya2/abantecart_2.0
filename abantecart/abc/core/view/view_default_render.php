@@ -17,8 +17,6 @@ class AViewDefaultRender extends AViewRender implements AViewRenderInterface
      */
     public function fetch($file, $data)
     {
-        //share AView instance with tpl scope
-        $data['this'] = $this->view;
         extract($data);
         ob_start();
         /** @noinspection PhpIncludeInspection */
