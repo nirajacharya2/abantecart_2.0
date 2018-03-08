@@ -52,7 +52,7 @@ class Install implements ABCExec
             $file_config = include ABC::env('DIR_CONFIG').'app.php';
         }
 
-        if (isset($file_config['default']['ADMIN_SECRET'])) {
+        if ( !isset($options['package']) && isset($file_config['default']['ADMIN_SECRET'])) {
             return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
         }
 
@@ -172,10 +172,11 @@ class Install implements ABCExec
             if(!$errors){
                 $registry = Registry::getInstance();
                 $registry->set('cache', new ACache());
+                $registry->get('cache')->setCacheStorageDriver('file');
                 $config = new AConfig($registry, (string)$options['http_server']);
                 $registry->set('config', $config);
                 $registry->set('language', new ALanguageManager($registry));
-                require_once('deploy.php');
+                require_once ABC::env('DIR_CORE').'backend/scripts/deploy.php';
                 $deploy = new Deploy();
                 $ops = ['stage' => 'default'];
                 if(isset($options['skip-caching'])){
@@ -189,7 +190,7 @@ class Install implements ABCExec
             }
             // deploy assets and generate cache
             if ( ! $errors) {
-                require_once 'deploy.php';
+                require_once ABC::env('DIR_CORE').'backend/scripts/deploy.php';
                 $deploy = new Deploy();
                 $ops = ['all' => 1];
                 if(isset($options['skip-caching'])){

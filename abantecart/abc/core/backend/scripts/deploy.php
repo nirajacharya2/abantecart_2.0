@@ -18,8 +18,8 @@ class Deploy implements ABCExec
     protected $results = [];
     public function __construct()
     {
-        require_once('cache.php');
-        require_once('publish.php');
+        require_once ABC::env('DIR_CORE').'backend/scripts/cache.php';
+        require_once ABC::env('DIR_CORE').'backend/scripts/publish.php';
         $this->cache = new Cache();
         $this->publish = new Publish();
     }

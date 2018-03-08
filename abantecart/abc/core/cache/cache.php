@@ -374,7 +374,9 @@ class ACache
         if (trim($key) != '*' && $group != 'html_cache') {
             //remove HTML cache on any other cache clean up as data changed or expired
             unset($this->cache['html_cache']);
-            $this->cache_driver->clean('html_cache');
+            if(is_object($this->cache_driver)) {
+                $this->cache_driver->clean( 'html_cache' );
+            }
         }
 
         return true;
