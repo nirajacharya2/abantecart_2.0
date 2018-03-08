@@ -66,7 +66,12 @@ class Migrate implements ABCExec
      */
     public function help( $options = [] )
     {
-        $this->_call_phinx( 'help', $options );
+        //show basic suggestion for usage via abcexec
+        if(!$options){
+           return $this->_get_option_list();
+        }
+        //show phinx help
+        return $this->_call_phinx( 'help', $options );
     }
 
     protected function _get_option_list()

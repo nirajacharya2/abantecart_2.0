@@ -48,8 +48,8 @@ if(!preg_match('/^--(.*)$/', $command)) {
     $class = $action = '';
 }
 
-require 'core/init/backend.php';
-require 'core/backend/interface.php';
+require realpath('./core/init/backend.php');
+require realpath('./core/backend/interface.php');
 //set sign
 ABC::env('abcexec', true);
 
