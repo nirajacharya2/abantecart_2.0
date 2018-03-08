@@ -35,7 +35,6 @@ class ModelExtensionBannerManager extends Model {
 	 * @return int
 	 */
 	public function addBanner($data = array()) {
-
 		if (isset($data['start_date'])) {
 			$data['start_date'] = "DATE('" . $data['start_date'] . "')";
 		} else {

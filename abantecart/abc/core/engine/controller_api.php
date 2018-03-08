@@ -19,63 +19,72 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\engine;
+
 use abc\core\lib\ARest;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
-class AControllerAPI extends AController{
-	protected $rest;
-	protected $error = array ();
-	protected $data = array ();
+class AControllerAPI extends AController
+{
+    protected $rest;
+    public $error = [];
+    public $data = [];
 
-	public function __construct($registry, $instance_id, $controller, $parent_controller = ''){
-		parent::__construct($registry, $instance_id, $controller, $parent_controller);
-		$this->rest = new ARest;
-	}
+    public function __construct( $registry, $instance_id, $controller, $parent_controller = '' )
+    {
+        parent::__construct( $registry, $instance_id, $controller, $parent_controller );
+        $this->rest = new ARest;
+    }
 
-	public function main(){
-		//call methods based on REST re	quest type
-		switch ($this->rest->getRequestMethod()) {
-			case 'get':
-				return $this->get();
-				break;
-			case 'post':
-				return $this->post();
-				break;
-			case 'put':
-				return $this->put();
-				break;
-			case 'delete':
-				return $this->delete();
-				break;
-			default:
-				$this->rest->sendResponse(405);
-				return null;
-				break;
-		}
-	}
+    public function main()
+    {
+        //call methods based on REST re	quest type
+        switch ( $this->rest->getRequestMethod() ) {
+            case 'get':
+                return $this->get();
+                break;
+            case 'post':
+                return $this->post();
+                break;
+            case 'put':
+                return $this->put();
+                break;
+            case 'delete':
+                return $this->delete();
+                break;
+            default:
+                $this->rest->sendResponse( 405 );
 
-	//Abstract Methods
-	public function get(){
-		$this->rest->sendResponse(405);
-		return null;
-	}
+                return null;
+                break;
+        }
+    }
 
-	public function post(){
-		$this->rest->sendResponse(405);
-		return null;
-	}
+    //Abstract Methods
+    public function get()
+    {
+        $this->rest->sendResponse( 405 );
+        return null;
+    }
 
-	public function put(){
-		$this->rest->sendResponse(405);
-		return null;
-	}
+    public function post()
+    {
+        $this->rest->sendResponse( 405 );
+        return null;
+    }
 
-	public function delete(){
-		$this->rest->sendResponse(405);
-		return null;
-	}
+    public function put()
+    {
+        $this->rest->sendResponse( 405 );
+        return null;
+    }
+
+    public function delete()
+    {
+        $this->rest->sendResponse( 405 );
+        return null;
+    }
 
 }

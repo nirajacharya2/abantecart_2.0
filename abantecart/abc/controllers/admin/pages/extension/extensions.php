@@ -796,9 +796,14 @@ class ControllerPagesExtensionExtensions extends AController {
 		//#PR set custom templates for extension settings page.  
 		if ( AHelperUtils::has_value( (string)$config->custom_settings_template ) ) {
 			//build path to template directory.
-		//????
-            $dir_template = ABC::env('DIR_APP_EXTENSIONS') . $extension . ABC::env('DIRNAME_ADMIN') . ABC::env('DIRNAME_TEMPLATES') . $this->config->get('admin_template') . "/template/";
-			$dir_template .= (string)$config->custom_settings_template;
+            $dir_template = ABC::env('DIR_APP_EXTENSIONS')
+                            . $extension
+                            . DIRECTORY_SEPARATOR
+                            . ABC::env('DIRNAME_TEMPLATES')
+                            . $this->config->get('admin_template')
+                            . DIRECTORY_SEPARATOR
+                            . ABC::env('DIRNAME_ADMIN')
+			                . (string)$config->custom_settings_template;
 			//validate template and report issue
 			if (!file_exists( $dir_template )) {
 				$warning = new AWarning(sprintf($this->language->get('error_could_not_load_override'), $dir_template, $extension));
