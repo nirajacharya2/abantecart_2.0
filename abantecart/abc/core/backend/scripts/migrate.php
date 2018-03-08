@@ -28,8 +28,9 @@ class Migrate implements ABCExec
     public function validate(string $action, array $options)
     {
         $errors = [];
-        if( !in_array($action, ['help']) && !is_file(ABC::env('DIR_VENDOR').'robmorgan/phinx/bin/phinx')){
-            return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan/phinx/bin/phinx required to run migrations!'];
+        if( !in_array($action, ['help'])
+            && !is_file(ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx')){
+            return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx required to run migrations!'];
         }
         return $errors;
     }
@@ -95,7 +96,7 @@ class Migrate implements ABCExec
         $this->_adapt_argv($action);
 
         //phinx status -e development
-        $app =  require ABC::env('DIR_VENDOR').'robmorgan/phinx/app/phinx.php';
+        $app =  require ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'phinx.php';
         $app->run();
     }
 

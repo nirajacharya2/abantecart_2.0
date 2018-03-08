@@ -176,7 +176,7 @@ class Install implements ABCExec
                 $config = new AConfig($registry, (string)$options['http_server']);
                 $registry->set('config', $config);
                 $registry->set('language', new ALanguageManager($registry));
-                require_once ABC::env('DIR_CORE').'backend/scripts/deploy.php';
+                require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
                 $deploy = new Deploy();
                 $ops = ['stage' => 'default'];
                 if(isset($options['skip-caching'])){
@@ -190,7 +190,7 @@ class Install implements ABCExec
             }
             // deploy assets and generate cache
             if ( ! $errors) {
-                require_once ABC::env('DIR_CORE').'backend/scripts/deploy.php';
+                require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
                 $deploy = new Deploy();
                 $ops = ['all' => 1];
                 if(isset($options['skip-caching'])){
