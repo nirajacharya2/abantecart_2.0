@@ -457,7 +457,7 @@ class AExtensionManager
             'backup_file' => '',
             'backup_date' => '',
             'type'        => 'install',
-            'user'        => $this->user->getUsername(),
+            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
         ) );
 
         // add dependencies into database for required extensions only
@@ -542,7 +542,7 @@ class AExtensionManager
             'backup_file' => '',
             'backup_date' => '',
             'type'        => 'uninstall',
-            'user'        => $this->user->getUsername(),
+            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
         ) );
 
         if ( isset( $config->uninstall->sql ) ) {
@@ -589,13 +589,13 @@ class AExtensionManager
             'backup_file' => '',
             'backup_date' => '',
             'type'        => 'delete',
-            'user'        => $this->user->getUsername(),
+            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
         ) );
         $this->db->query( "DELETE FROM ".$this->db->table( "extensions" )." WHERE `type` = '".$info['type']."' AND `key` = '".$this->db->escape( $extension_txt_id )."'" );
         $this->deleteDependant( $extension_txt_id );
 
         $this->session->data['package_info']['ftp'] = false;
-        $pmanager = new APackageManager();
+        $pmanager = new APackageManager( $this->session->data['package_info'] );
         $result = $pmanager->removeDir( ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id );
 
         if ( ! $result ) {
@@ -625,7 +625,7 @@ class AExtensionManager
             return false;
         }
         $result = $this->isExtensionInstalled( $extension_txt_id );
-        if ( $result ) {
+        if ( !$result ) {
             return false;
         }
         // get config.xml

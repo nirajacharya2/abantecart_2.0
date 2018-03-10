@@ -9,6 +9,7 @@ if (!class_exists('abc\core\ABC')) {
 
 $language_list = $this->model_localisation_language->getLanguages();
 
+
 $rm = new AResourceManager();
 $rm->setType('image');
 $resource = [
@@ -19,6 +20,18 @@ $resource = [
 	'resource_path' => 'secure_paypal_icon.jpg',
 	'resource_code' => ''
 ];
+
+@copy(ABC::env('DIR_APP_EXTENSIONS')
+    .'default_pp_pro'.DIRECTORY_SEPARATOR
+    .ABC::env('DIRNAME_TEMPLATES')
+    .'default'.DIRECTORY_SEPARATOR
+    .ABC::env('DIRNAME_STORE')
+    .ABC::env('DIRNAME_ASSETS')
+    .'images'.DIRECTORY_SEPARATOR
+    .'secure_paypal_icon.jpg',
+     ABC::env('DIR_RESOURCES')
+     .'image'.DIRECTORY_SEPARATOR
+     .$resource['resource_path']);
 
 foreach($language_list as $lang){
 	$resource['name'][$lang['language_id']] = 'secure_paypal_icon.jpg';

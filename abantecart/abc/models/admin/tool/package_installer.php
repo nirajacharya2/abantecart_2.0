@@ -40,7 +40,7 @@ class ModelToolPackageInstaller extends Model {
             return false;
         }
         if ($this->request->get['start'] == 1) {
-            $pmanager = new APackageManager();
+            $pmanager = new APackageManager( $this->session->data['package_info'] );
             $result = $pmanager->getRemoteFile($this->session->data['package_info']['package_url'],
                 true,
                 $this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_name']);

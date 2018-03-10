@@ -21,14 +21,10 @@ namespace abc\core\backend;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
-use abc\core\lib\AAssetPublisher;
 use abc\core\cache\ACache;
-use abc\core\lib\AConfig;
-use abc\core\lib\AConnect;
-use abc\core\lib\ADB;
-use abc\core\lib\AException;
-use abc\core\lib\ALanguageManager;
-use abc\core\lib\ASession;
+use abc\core\lib\{
+    AConfig, AConnect, ADB, AError, AException, ALanguageManager, APackageManager
+};
 
 class Install implements ABCExec
 {
@@ -37,174 +33,204 @@ class Install implements ABCExec
         $action = ! $action ? 'install' : $action;
         //if now options - check action
         if ( ! $options) {
-            if ( ! in_array($action, array('install', 'help'))) {
+            if ( ! in_array($action, array('install', 'package', 'help'))) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
 
-        if ($action == 'help') {
-            return [];
+        switch( $action ){
+            case 'install':
+                return $this->validateAppInstall($options);
+            case 'package':
+                return $this->validatePackageInstall($options);
+            default:
+                return [];
         }
 
-        //Check if cart is already installed
-        $file_config = [];
-        if (file_exists(ABC::env('DIR_CONFIG').'app.php')) {
-            $file_config = include ABC::env('DIR_CONFIG').'app.php';
-        }
-
-        if ( !isset($options['package']) && isset($file_config['default']['ADMIN_SECRET'])) {
-            return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
-        }
-
-        //check requirements first
-        $errors = $this->_validate_requirements( $action, $options);
-        if ($errors) {
-            return $errors;
-        }
-
-        $this->_fill_defaults($options);
-        //then check options
-        if ( ! $options['admin_secret']) {
-            $errors['admin_secret'] = 'Admin unique name is required!';
-        } else {
-            if (preg_match('/[^A-Za-z0-9_]/', $options['admin_secret'])) {
-                $errors['admin_secret'] = 'Admin unique name contains non-alphanumeric characters!';
-            }
-        }
-
-        if ( $options['db_driver'] == 'mysql' && !(extension_loaded('mysqli') || extension_loaded('pdo_mysql')) ) {
-            $errors['db_driver'] = 'MySQLi or PDO_mysql extension needs to be loaded for AbanteCart to work!';
-        }
-        if ( ! $options['db_host']) {
-            $errors['db_host'] = 'Host name required!';
-        }
-
-        if ( ! $options['db_user']) {
-            $errors['db_user'] = 'User name required!';
-        }
-
-        if ( ! $options['db_name']) {
-            $errors['db_name'] = 'Database Name required!';
-        }
-
-        if ( ! $options['username']) {
-            $errors['username'] = 'Username required!';
-        }
-
-        if ( ! $options['password']) {
-            $errors['password'] = 'Password required!';
-        }
-
-        $pattern = '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
-
-        if ( ! preg_match($pattern, $options['email'])) {
-            $errors['email'] = 'Invalid E-Mail!';
-        }
-
-        if ( ! empty($options['db_prefix'])
-            && preg_match('/[^A-Za-z0-9_]/', $options['db_prefix'])) {
-            $errors['db_prefix'] = 'DB prefix contains non-alphanumeric characters!';
-        }
-
-        if ($options['db_driver']
-            && $options['db_host']
-            && $options['db_user']
-            && $options['db_password']
-            && $options['db_name']
-        ) {
-            try {
-                new ADB(array(
-                    'DB_DRIVER'    => $options['db_driver'],
-                    'DB_HOST'      => $options['db_host'],
-                    'DB_NAME'      => $options['db_name'],
-                    'DB_USER'      => $options['db_user'],
-                    'DB_PASSWORD'  => $options['db_password'],
-                    'DB_CHARSET'   => 'utf8',
-                    'DB_COLLATION' => 'utf8_unicode_ci',
-                    'DB_PREFIX'    => $options['db_prefix'],
-                ));
-            } catch (AException $e) {
-                $errors['error'] = $e->getMessage()."\n";
-            }
-        }
-
-        if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG')."!\n";
-        }
-
-        if(!is_file(__DIR__.'/deploy.php')){
-            $errors['warning'] .= 'Dependency Error: deploy.php script not found in '.__DIR__."\n";
-        }
-
-        $url_parse_result = parse_url($options['http_server']);
-        if( !$url_parse_result ){
-            $errors['http_server'] = 'Wrong value of http_server parameter!';
-        }
-
-        //check self-connection via http
-        if( !isset($errors['http_server']) && !isset($options['skip-caching'])){
-            $connect = new AConnect();
-            $connect->connect_method = extension_loaded('curl') ? 'curl' : 'socket';
-            $data = $connect->getData($options['http_server'].'robots.txt');
-
-            if ( !$data ){
-                $errors['http_server'] = 'Cannot to connect to '.$options['http_server'].'!';
-            }
-        }
-
-        return $errors;
     }
 
     public function run(string $action, array $options)
     {
         $output = null;
         $action = ! $action ? 'install' : $action;
-
-        if ($action == 'install') {
-            $this->_fill_defaults($options);
-
-            //make config-files
-            $errors = $this->configure($options);
-            //fill database
-            if ( ! $errors) {
-                $errors = $this->runSQL($options);
-            }
-            if(!$errors){
-                $registry = Registry::getInstance();
-                $registry->set('cache', new ACache());
-                $registry->get('cache')->setCacheStorageDriver('file');
-                $config = new AConfig($registry, (string)$options['http_server']);
-                $registry->set('config', $config);
-                $registry->set('language', new ALanguageManager($registry));
-                require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
-                $deploy = new Deploy();
-                $ops = ['stage' => 'default'];
-                if(isset($options['skip-caching'])){
-                    $ops['skip-caching'] = 1;
-                }
-                $deploy->run('config', $ops);
-            }
-
-            if ( ! $errors && isset($options['with-sample-data'])) {
-                $errors = $this->loadDemoData($options);
-            }
-            // deploy assets and generate cache
-            if ( ! $errors) {
-                require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
-                $deploy = new Deploy();
-                $ops = ['all' => 1];
-                if(isset($options['skip-caching'])){
-                    $ops['skip-caching'] = 1;
-                }
-                $result = $deploy->run('all', $ops);
-                if(is_array($result)){
-                    $errors = $result;
-                }
-            }
-            $output = $errors;
+        if( $action == 'install'){
+            return $this->_install_app( $options );
+        } elseif ( $action == 'package' ){
+            return $this->_install_package( $options );
         }
 
-        return $output;
+        return ['Error: unknown command called!'];
+    }
+
+    protected function _install_app( $options )
+    {
+        $this->_fill_defaults($options);
+
+        //make config-files
+        $errors = $this->configure($options);
+        //fill database
+        if ( ! $errors) {
+            $errors = $this->runSQL($options);
+        }
+        if(!$errors){
+            $registry = Registry::getInstance();
+            $registry->set('cache', new ACache());
+            $registry->get('cache')->setCacheStorageDriver('file');
+            $config = new AConfig($registry, (string)$options['http_server']);
+            $registry->set('config', $config);
+            $registry->set('language', new ALanguageManager($registry));
+            require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
+            $deploy = new Deploy();
+            $ops = ['stage' => 'default'];
+            if(isset($options['skip-caching'])){
+                $ops['skip-caching'] = 1;
+            }
+            $deploy->run('config', $ops);
+        }
+
+        if ( ! $errors && isset($options['with-sample-data'])) {
+            $errors = $this->loadDemoData($options);
+        }
+        // deploy assets and generate cache
+        if ( ! $errors) {
+            require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
+            $deploy = new Deploy();
+            $ops = ['all' => 1];
+            if(isset($options['skip-caching'])){
+                $ops['skip-caching'] = 1;
+            }
+            $result = $deploy->run('all', $ops);
+            if(is_array($result)){
+                $errors = $result;
+            }
+        }
+        return $errors;
+    }
+
+    protected function _install_package($options){
+        if( !$options ){
+            exit('Error: empty options for package installation');
+        }
+        $pm = new APackageManager([]);
+        $basename = basename($options['file']);
+        $temp_dir = $pm->getTempDir().pathinfo(pathinfo($basename,PATHINFO_FILENAME),PATHINFO_FILENAME).'/';
+        //remove temp directory if already exists
+        $result = $pm->removeDir($temp_dir);
+        if( !$result ){
+            $this->_stop_run($pm);
+        }
+        @mkdir($temp_dir);
+        if( !is_dir($temp_dir)){
+            $this->_stop_run($pm, 'Cannot to create temporary directory '.$temp_dir.'. Please check permissions!');
+        }
+
+        $package_info = [
+            'package_source'  => 'file',
+            'tmp_dir' => $temp_dir,
+            'package_name' => basename($options['file']),
+            'package_size' => filesize($options['file']),
+        ];
+        $pm->package_info =& $package_info;
+        //1. try to unpack archive
+        if( !$pm->unpack($options['file'],$package_info['tmp_dir']) ){
+            $this->_stop_run($pm);
+        }
+        $package_info['package_dir'] = current(glob($package_info['tmp_dir'].'*',GLOB_ONLYDIR)).DIRECTORY_SEPARATOR;
+        //2. get package config.xml
+        $config = simplexml_load_string(file_get_contents($package_info['package_dir'].'package.xml'));
+        if ( ! $config) {
+            $this->_stop_run($pm, 'Stopped. File "package.xml" not found inside a package!');
+        }
+
+        //get package info from package.xml
+        $result = $pm->extractPackageInfo();
+        if ( ! $result) {
+            $this->_stop_run($pm);
+        }
+
+        if ( ! $package_info['package_content']
+            || ($package_info['package_content']['core'] && $package_info['package_content']['extensions'])
+        ) {
+            $this->_stop_run($pm, 'Wrong package structure! Cannot find code-file list inside package.xml.');
+        }
+
+        //check cart version compatibility
+
+        if ( !$pm->checkCartVersion()) {
+            if ( $pm->isCorePackage() ) {
+                $this->_stop_run($pm, "Error: Can't install package. Your cart version is ".ABC::env('VERSION').". Version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."  required.");
+            }
+            //do pause and ask user in non-forced mode
+            elseif( !isset($options['force']) ){
+                //for extensions show command prompt
+
+                echo "\t\e[93mCurrent copy of this package is not verified for your version of AbanteCart (v".ABC::env('VERSION').").\n"
+                    ."\tPackage build is specified for AbanteCart version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."\n"
+                    ."\tThis is not a problem, but if you notice issues or incompatibility, please contact extension developer.\n\n"
+                    ."Continue? (Y/N) : ";
+                $stdin = fopen('php://stdin', 'r');
+                $user_response = fgetc($stdin);
+                if (! in_array($user_response, ['Y','YES','y','yes'])) {
+                    $this->_stop_run($pm, 'Aborted.');
+                }
+                @fclose($stdin);
+            }
+        }
+
+        //need to validate destination dirs and files before start
+        $result = $pm->validateDestination();
+        if( !$result ){
+            $this->_stop_run($pm, "Permission denied for files:\n".$pm->error);
+        }
+
+        //ok. let's show license text
+        $license_filepath = $package_info['package_dir']."license.txt";
+        if (file_exists($license_filepath)) {
+            $agreement_text = file_get_contents($license_filepath);
+            //detect encoding of file
+            $is_utf8 = mb_detect_encoding($agreement_text, ABC::env('APP_CHARSET'), true);
+            if ( ! $is_utf8) {
+                $agreement_text = 'Oops. Something goes wrong. Try to continue or check error log for details.';
+                $err = new AError('Incorrect character set encoding of file '.$license_filepath.' has been detected.');
+                $err->toLog();
+            }
+            if($agreement_text && !isset($options['force'])){
+                echo  "\n\nLicense Agreement\n\n";
+                echo  $agreement_text."\n\n";
+                echo "I Agree/ Not Agree (Y/N) : ";
+                $stdin = fopen('php://stdin', 'r');
+                $user_response = fgetc($stdin);
+                if (! in_array($user_response, ['Y','YES','y','yes'])) {
+                    $this->_stop_run($pm, 'Aborted.');
+                }
+                @fclose($stdin);
+            }
+        }
+
+        //ok. let's install all from package
+        //first try to install all extensions
+        $pm->installPackageExtensions();
+        if($pm->message_log){
+            echo "\n\n";
+            echo implode("\n",$pm->message_log);
+        }
+        if($pm->error){
+            echo "\n\n";
+            echo "Errors during installation:\n\n";
+            echo "".$pm->error."\n";
+        }
+
+    }
+
+    /**
+     * @param APackageManager $pm
+     * @param string          $error_text
+     *
+     * @throws AException
+     */
+    protected function _stop_run(APackageManager $pm, $error_text = ''){
+        $pm->removeDir($pm->package_info['tmp_dir']);
+        throw new AException(AC_ERR_USER_ERROR, ($error_text ? $error_text : $pm->error)) ;
     }
 
     protected function _fill_defaults(array &$options){
@@ -239,9 +265,24 @@ class Install implements ABCExec
         return true;
     }
 
-    public function finish(string $action, array $options)
+    public function finish( string $action, array $options )
     {
-        $output = "\n\nSUCCESS! AbanteCart successfully installed on your server\n\n";
+        if( $action == 'install' ){
+            return $this->_final_message_app_install($options);
+        } elseif ( $action == 'package' ){
+            return $this->_final_message_package_install($options);
+        }
+        return '';
+    }
+
+    protected function _final_message_package_install( $options )
+    {
+        return "\n\n Package installation process complete.\n\n";
+    }
+
+    protected function _final_message_app_install( $options )
+    {
+        $output = "\n\nAbanteCart installation process complete\n\n";
         $output .= "\t"."Store link: ".$options['http_server']."\n\n";
         $output .= "\t"."Admin link: ".$options['http_server']."?s=".$options['admin_secret']."\n\n";
         //suggest to change permissions
@@ -263,7 +304,7 @@ class Install implements ABCExec
         return $output;
     }
 
-    protected function _validate_requirements(string $action, array $options)
+    protected function _validate_app_requirements( string $action, array $options )
     {
         $errors = [];
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
@@ -350,7 +391,7 @@ class Install implements ABCExec
         return $errors;
     }
 
-    public function configure(array $options)
+    public function configure( array $options )
     {
         if ( ! $options) {
             return ['No options to configure!'];
@@ -461,7 +502,7 @@ EOD;
         return $result;
     }
 
-    public function runSQL(array $options)
+    public function runSQL( array $options )
     {
         $errors = [];
         $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.$options['db_driver'].'.database.sql';
@@ -546,7 +587,7 @@ EOD;
         return $errors;
     }
 
-    public function loadDemoData($options)
+    public function loadDemoData( $options )
     {
         $errors = [];
         $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.$options['db_driver'].'.demo_data.sql';
@@ -616,8 +657,12 @@ EOD;
                     }
                 }
             }
-            $options[$action]['example'] = "\n\t\tWith minimal parameters\n\n\t\t\t". $output.$minimal."\n\n";
-            $options[$action]['example'] .= "\t\tWith all parameters\n\n\t\t\t". $output.$maximal."\n\n";
+            if( $maximal != $minimal) {
+                $options[$action]['example'] = "\n\t\tWith minimal parameters\n\n\t\t\t".$output.$minimal."\n\n";
+                $options[$action]['example'] .= "\t\tWith all parameters\n\n\t\t\t".$output.$maximal."\n\n";
+            }else{
+                $options[$action]['example'] = "\n\t\t".$output.$minimal."\n\n";
+            }
         }
 
         return $options;
@@ -721,7 +766,154 @@ EOD;
                     ],
                     'example'     => '',
                 ],
+            'package' =>
+                [
+                    'description' => 'Install package',
+                    'arguments'   => [
+                           '--file' => [
+                                            'description'   => 'Full path to package. Only ZIP, TAR and TAR.GZ archives allowed.',
+                                            'default_value' => '/full/path/to/your/package.zip',
+                                            'required'      => true
+                                        ],
+                           '--force' => [
+                                           'description'   => 'Force mode to prevent script pause on command prompt.',
+                                           'default_value' => '',
+                                           'required'      => false
+                                        ],
+                    ],
+                    'example'     => 'php '.$_SERVER['PHP_SELF'].' install:package --file=/full/path/to/your/package.zip',
+                ]
         ];
+    }
+
+    public function validateAppInstall( $options ){
+        //Check if cart is already installed
+        $file_config = [];
+        if (file_exists(ABC::env('DIR_CONFIG').'app.php')) {
+            $file_config = include ABC::env('DIR_CONFIG').'app.php';
+        }
+
+        if ( !isset($options['package']) && isset($file_config['default']['ADMIN_SECRET'])) {
+            return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
+        }
+
+        //check requirements first
+        $errors = $this->_validate_app_requirements( 'install', $options);
+        if ($errors) {
+            return $errors;
+        }
+
+        $this->_fill_defaults($options);
+        //then check options
+        if ( ! $options['admin_secret']) {
+            $errors['admin_secret'] = 'Admin unique name is required!';
+        } else {
+            if (preg_match('/[^A-Za-z0-9_]/', $options['admin_secret'])) {
+                $errors['admin_secret'] = 'Admin unique name contains non-alphanumeric characters!';
+            }
+        }
+
+        if ( $options['db_driver'] == 'mysql' && !(extension_loaded('mysqli') || extension_loaded('pdo_mysql')) ) {
+            $errors['db_driver'] = 'MySQLi or PDO_mysql extension needs to be loaded for AbanteCart to work!';
+        }
+        if ( ! $options['db_host']) {
+            $errors['db_host'] = 'Host name required!';
+        }
+
+        if ( ! $options['db_user']) {
+            $errors['db_user'] = 'User name required!';
+        }
+
+        if ( ! $options['db_name']) {
+            $errors['db_name'] = 'Database Name required!';
+        }
+
+        if ( ! $options['username']) {
+            $errors['username'] = 'Username required!';
+        }
+
+        if ( ! $options['password']) {
+            $errors['password'] = 'Password required!';
+        }
+
+        $pattern = '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
+
+        if ( ! preg_match($pattern, $options['email'])) {
+            $errors['email'] = 'Invalid E-Mail!';
+        }
+
+        if ( ! empty($options['db_prefix'])
+            && preg_match('/[^A-Za-z0-9_]/', $options['db_prefix'])) {
+            $errors['db_prefix'] = 'DB prefix contains non-alphanumeric characters!';
+        }
+
+        if ($options['db_driver']
+            && $options['db_host']
+            && $options['db_user']
+            && $options['db_password']
+            && $options['db_name']
+        ) {
+            try {
+                new ADB(array(
+                    'DB_DRIVER'    => $options['db_driver'],
+                    'DB_HOST'      => $options['db_host'],
+                    'DB_NAME'      => $options['db_name'],
+                    'DB_USER'      => $options['db_user'],
+                    'DB_PASSWORD'  => $options['db_password'],
+                    'DB_CHARSET'   => 'utf8',
+                    'DB_COLLATION' => 'utf8_unicode_ci',
+                    'DB_PREFIX'    => $options['db_prefix'],
+                ));
+            } catch (AException $e) {
+                $errors['error'] = $e->getMessage()."\n";
+            }
+        }
+
+        if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
+            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG')."!\n";
+        }
+
+        if(!is_file(__DIR__.DIRECTORY_SEPARATOR.'deploy.php')){
+            $errors['warning'] .= 'Dependency Error: deploy.php script not found in '.__DIR__."\n";
+        }
+
+        $url_parse_result = parse_url($options['http_server']);
+        if( !$url_parse_result ){
+            $errors['http_server'] = 'Wrong value of http_server parameter!';
+        }
+
+        //check self-connection via http
+        if( !isset($errors['http_server']) && !isset($options['skip-caching'])){
+            $connect = new AConnect();
+            $connect->connect_method = extension_loaded('curl') ? 'curl' : 'socket';
+            $data = $connect->getData($options['http_server'].'robots.txt');
+
+            if ( !$data ){
+                $errors['http_server'] = 'Cannot to connect to '.$options['http_server'].'!';
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param $options
+     *
+     * @return array
+     */
+    public function validatePackageInstall( $options ){
+        $errors = [];
+        if( !is_file($options['file']) ){
+            $errors = ['Cannot find package file '.$options['file'] ];
+        }
+        if (!$errors
+            && !is_int(strpos($options['file'], '.tar.gz'))
+            && strtolower(pathinfo($options['file'], PATHINFO_EXTENSION)) != 'zip'
+            && strtolower(pathinfo($options['file'], PATHINFO_EXTENSION)) != 'tar'
+        ) {
+            $errors = ['Only ZIP, TAR or TAR.GZ files allowed!'];
+        }
+        return $errors;
     }
 
 }

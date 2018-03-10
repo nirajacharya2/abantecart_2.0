@@ -745,10 +745,14 @@ class AHelperUtils extends AHelper
 
         $extension_txt_id = str_replace('../', '', $extension_txt_id);
         $filename = ABC::env('DIR_APP_EXTENSIONS').$extension_txt_id.'/config.xml';
-        /**
-         * @var $ext_configs \SimpleXMLElement|false
-         */
-        $ext_configs = simplexml_load_file($filename);
+        if(!is_file($filename) || !is_readable($filename)){
+            $ext_configs = false;
+        }else {
+            /**
+             * @var $ext_configs \SimpleXMLElement|false
+             */
+            $ext_configs = simplexml_load_file( $filename );
+        }
 
         if ($ext_configs === false) {
             $err_text = 'Error: cannot to load config.xml of extension '.$extension_txt_id.'.';
@@ -1626,7 +1630,7 @@ class AHelperUtils extends AHelper
                 }
             }
         }
-        return $archive->extractNode($dest_directory, '/');
+        return (bool)$archive->extractNode($dest_directory, '/');
     }
 
 }

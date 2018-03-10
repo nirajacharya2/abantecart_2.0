@@ -192,8 +192,8 @@ class AResourceManager extends AResource
                 return false;
             }
             //move file
-            $result = rename(ABC::env('DIR_RESOURCES').$this->type_dir.$resource['resource_path'],
-                ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
+            $result = @rename(ABC::env('DIR_RESOURCES').$this->type_dir.$resource['resource_path'],
+                              ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
             if ( ! $result) {
                 $message = "Error: Cannot move resource to resources directory. Please check permissions of ".dirname(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path).' directory!';
                 $error = new AError ($message);
