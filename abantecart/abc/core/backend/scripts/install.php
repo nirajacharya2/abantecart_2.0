@@ -23,7 +23,7 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\cache\ACache;
 use abc\core\lib\{
-    AConfig, AConnect, ADB, AError, AException, ALanguageManager, APackageManager
+    AConfig, AConnect, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
 
 class Install implements ABCExec
@@ -42,11 +42,10 @@ class Install implements ABCExec
             case 'install':
                 return $this->validateAppInstall($options);
             case 'package':
-                return $this->validatePackageInstall($options);
+                return $this->validatePackageOptions( $options );
             default:
                 return [];
         }
-
     }
 
     public function run(string $action, array $options)
@@ -56,7 +55,13 @@ class Install implements ABCExec
         if( $action == 'install'){
             return $this->_install_app( $options );
         } elseif ( $action == 'package' ){
-            return $this->_install_package( $options );
+            if( isset($options['uninstall']) ){
+                return $this->_uninstall_extension( $options );
+            }elseif( isset($options['remove']) ){
+                return $this->_remove_extension( $options );
+            }else {
+                return $this->_install_package( $options );
+            }
         }
 
         return ['Error: unknown command called!'];
@@ -219,7 +224,61 @@ class Install implements ABCExec
             echo "Errors during installation:\n\n";
             echo "".$pm->error."\n";
         }
+    }
 
+    protected function _uninstall_extension($options){
+        if( !$options ){
+            exit('Error: empty options for uninstall!');
+        }
+        $pm = new APackageManager([]);
+        if( !isset($options['force']) ) {
+            echo "\n\nUninstall extension {$options['extension']}?\n"
+                ."Continue? (Y/N) : ";
+            $stdin = fopen( 'php://stdin', 'r' );
+            $user_response = fgetc( $stdin );
+            if ( ! in_array( $user_response, [ 'Y', 'YES', 'y', 'yes' ] ) ) {
+                $this->_stop_run( $pm, 'Aborted' );
+            }
+            @fclose( $stdin );
+        }
+
+        $result = $pm->uninstallExtension($options['extension']);
+        if( !$result ){
+            echo  $pm->error;
+        }
+        return $result;
+    }
+
+    protected function _remove_extension($options){
+        if( !$options ){
+            exit('Error: empty options for uninstall!');
+        }
+        $pm = new APackageManager([]);
+        if( !isset($options['force']) ) {
+            echo "\n\nPlease confirm extension {$options['extension']} removing.\n"
+                ."Continue? (Y/N) : ";
+            $stdin = fopen( 'php://stdin', 'r' );
+            $user_response = fgetc( $stdin );
+            if ( ! in_array( $user_response, [ 'Y', 'YES', 'y', 'yes' ] ) ) {
+                $this->_stop_run( $pm, 'Aborted' );
+            }
+            @fclose( $stdin );
+        }
+
+        //uninstall first without confirmation
+        $opts = $options;
+        $opts['force'] = true;
+        $result = $this->_uninstall_extension( $opts );
+        if( !$result ){
+            return false;
+        }
+
+        $em = new AExtensionManager();
+        $result = $em->delete( $options['extension'] );
+        if( !$result ){
+            echo  implode("\n",$em->errors);
+        }
+        return $result;
     }
 
     /**
@@ -773,7 +832,32 @@ EOD;
                            '--file' => [
                                             'description'   => 'Full path to package. Only ZIP, TAR and TAR.GZ archives allowed.',
                                             'default_value' => '/full/path/to/your/package.zip',
-                                            'required'      => true
+                                            'required'      => 'conditional'
+                                        ],
+                           '--url' => [
+                                            'description'   => 'URL of package.',
+                                            'default_value' => '',
+                                            'required'      => 'conditional'
+                                        ],
+                           '--installation_key' => [
+                                            'description'   => 'Secret installation Key for remote install from official Abantecart servers',
+                                            'default_value' => '',
+                                            'required'      => 'conditional'
+                                        ],
+                           '--uninstall' => [
+                                           'description'   => 'Uninstall extension. "--extension" option required',
+                                           'default_value' => '',
+                                           'required'      => 'conditional'
+                                        ],
+                           '--remove' => [
+                                           'description'   => 'Uninstall and delete extension. "--extension" option required',
+                                           'default_value' => '',
+                                           'required'      => 'conditional'
+                                        ],
+                           '--extension' => [
+                                           'description'   => 'Extension Text ID. Required parameter for uninstall and remove process.',
+                                           'default_value' => '',
+                                           'required'      => 'conditional'
                                         ],
                            '--force' => [
                                            'description'   => 'Force mode to prevent script pause on command prompt.',
@@ -781,7 +865,8 @@ EOD;
                                            'required'      => false
                                         ],
                     ],
-                    'example'     => 'php '.$_SERVER['PHP_SELF'].' install:package --file=/full/path/to/your/package.zip',
+                    'example'     => "php ".$_SERVER['PHP_SELF']." install:package --file=/full/path/to/your/package.zip\nor\n
+                    php ".$_SERVER['PHP_SELF']." install:package --uninstall --extension=your_extension_id\n",
                 ]
         ];
     }
@@ -901,19 +986,50 @@ EOD;
      *
      * @return array
      */
-    public function validatePackageInstall( $options ){
+    public function validatePackageOptions( $options ){
         $errors = [];
-        if( !is_file($options['file']) ){
-            $errors = ['Cannot find package file '.$options['file'] ];
+        if( !isset($options['file'])
+            && !isset($options['installation_key'])
+            && !isset($options['url'])
+            && !isset($options['uninstall'])
+            && !isset($options['remove'])
+        ){
+            return ['Oops. Have no idea what should i do. Please give me file path, url or installation key of package! See help for syntax.'];
         }
-        if (!$errors
-            && !is_int(strpos($options['file'], '.tar.gz'))
-            && strtolower(pathinfo($options['file'], PATHINFO_EXTENSION)) != 'zip'
-            && strtolower(pathinfo($options['file'], PATHINFO_EXTENSION)) != 'tar'
-        ) {
-            $errors = ['Only ZIP, TAR or TAR.GZ files allowed!'];
+
+        $deleting = isset($options['uninstall']) || isset($options['remove']) ? true : false;
+
+        if( $deleting && (!isset($options['extension']) || !$options['extension']) ){
+            return ['Extension Text ID required!'];
+        }
+
+        if( $deleting ){
+            $registry = Registry::getInstance();
+            $extension_info = $registry->get('extensions')->getExtensionInfo($options['extension']);
+            if(!$extension_info){
+                return ['Extension "'.$options['extension'].'" not found!'];
+            }
+            // check dependencies
+            $ext = new AExtensionManager();
+            $validate = $ext->checkDependantsBeforeUninstall( $options['extension']);
+            if(!$validate){
+                $errors = $ext->errors;
+            }
+        }else {
+            if ( ! is_file( $options['file'] ) ) {
+                $errors = [ 'Cannot find package file '.$options['file'] ];
+            }
+            if ( ! $errors
+                && ! is_int( strpos( $options['file'], '.tar.gz' ) )
+                && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'zip'
+                && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'tar'
+            ) {
+                $errors = [ 'Only ZIP, TAR or TAR.GZ files allowed!' ];
+            }
         }
         return $errors;
     }
+
+
 
 }

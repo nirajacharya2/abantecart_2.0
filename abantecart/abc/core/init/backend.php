@@ -273,7 +273,9 @@ function showHelpPage($script_name = '', $options = [])
                     $arg_text .= $arg_info['default_value'] ? "[=value]" : "";
                     $arg_text = str_pad($arg_text, 40, ' ');
                     $output .= $arg_text;
-                    if ($arg_info['required']) {
+                    if( $arg_info['required'] === 'conditional' ){
+                        $output .= " \t\t"."\e[1;33m[conditional]\e[0m";
+                    }elseif ( $arg_info['required'] ) {
                         $output .= " \t\t"."\033[0;31m[required]\e[0m";
                     } else {
                         $output .= " \t\t"."\e[37m[optional]\e[0m";

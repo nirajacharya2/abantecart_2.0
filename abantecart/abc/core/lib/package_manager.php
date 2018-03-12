@@ -487,6 +487,7 @@ class APackageManager
 
     /**
      * method removes non-empty directory (use it carefully)
+     * TODO: add check for directory inside temp_dir and public/extension_id!
      *
      * @param string $dir
      *
@@ -494,35 +495,33 @@ class APackageManager
      */
     public function removeDir($dir = '')
     {
-            if( !file_exists($dir) ){
-                return true;
-            }
-            if (is_dir($dir)) {
-                $objects = scandir($dir);
-                foreach ($objects as $obj) {
-                    if ($obj != "." && $obj != "..") {
-                        @chmod($dir.DIRECTORY_SEPARATOR.$obj, 0775);
-                        $err = is_dir($dir.DIRECTORY_SEPARATOR.$obj)
+        if( !file_exists($dir) ){
+            return false;
+        }
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $obj) {
+                if ($obj != "." && $obj != "..") {
+                    @chmod($dir.DIRECTORY_SEPARATOR.$obj, 0775);
+                    $err = is_dir($dir.DIRECTORY_SEPARATOR.$obj)
                             ? $this->removeDir($dir.DIRECTORY_SEPARATOR.$obj)
                             : @unlink($dir.DIRECTORY_SEPARATOR.$obj);
-                        if ( ! $err) {
-                            $this->error = "Package manager Error: Cannot delete file or directory: '".$dir.DIRECTORY_SEPARATOR.$obj."'.";
-                            $error = new AError ($this->error);
-                            $error->toLog()->toDebug()->toMessages();
-                            return false;
-                        }
+                    if ( ! $err) {
+                        $this->error = "Package manager Error: Cannot delete file or directory: '". $dir . DIRECTORY_SEPARATOR . $obj ."'.";
+                        $error = new AError ($this->error);
+                        $error->toLog()->toDebug()->toMessages();
+                        return false;
                     }
                 }
-                @reset($objects);
-                return @rmdir($dir);
-            } else {
-                $this->error = "Package manager Error: Cannot delete ".$dir.". It is not a directory!";
-                $error = new AError ($this->error);
-                $error->toLog()->toDebug()->toMessages();
-                return false;
             }
-
-
+            @reset($objects);
+            return @rmdir($dir);
+        } else {
+            $this->error = "Package manager Error: Cannot delete ". $dir .". It is not a directory!";
+            $error = new AError ($this->error);
+            $error->toLog()->toDebug()->toMessages();
+            return false;
+        }
         return true;
     }
 
@@ -931,6 +930,31 @@ class APackageManager
 
         return true;
     }
+    /**
+     * @param string $ext_txt_id
+     * @return bool
+     */
+    public function uninstallExtension( $ext_txt_id )
+    {
+        $ext_txt_id = (string) $ext_txt_id;
+        if( !$ext_txt_id ){
+            return false;
+        }
+
+        $validate = $this->extension_manager->checkDependantsBeforeUninstall( $ext_txt_id );
+        if(!$validate){
+            $this->error = implode("\n", $this->extension_manager->errors);
+            return false;
+        }
+
+        $result = $this->extension_manager->uninstall($ext_txt_id, AHelperUtils::getExtensionConfigXml($ext_txt_id));
+        if ($result === false) {
+            $this->error = implode("\n", $this->extension_manager->errors);
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * @param \SimpleXmlElement $config
@@ -1151,6 +1175,9 @@ class APackageManager
         $versions = array();
         foreach ($config_xml->cartversions->item as $item) {
             $version = (string)$item;
+            if( version_compare($version, '2.0.0', '<') ){
+                return false;
+            }
             $versions[] = $version;
             $subv_arr = explode('.', preg_replace('/[^0-9\.]/', '', $version));
             $full_check = AHelperUtils::versionCompare(
