@@ -117,12 +117,27 @@ class Install implements ABCExec
             exit('Error: empty options for package installation');
         }
         $pm = new APackageManager([]);
+        //confirm start of process
+
+        if( !isset($options['force']) ) {
+            echo 'Do you really want to install package?'."\n\n";
+            echo "Continue? (Y/N) : ";
+            $stdin = fopen( 'php://stdin', 'r' );
+            $user_response = fgetc( $stdin );
+            if ( ! in_array( $user_response, [ 'Y', 'YES', 'y', 'yes' ] ) ) {
+                $this->_stop_run( new APackageManager( [] ), 'Aborted.' );
+            }
+            @fclose( $stdin );
+        }
+
         $basename = basename($options['file']);
         $temp_dir = $pm->getTempDir().pathinfo(pathinfo($basename,PATHINFO_FILENAME),PATHINFO_FILENAME).'/';
         //remove temp directory if already exists
-        $result = $pm->removeDir($temp_dir);
-        if( !$result ){
-            $this->_stop_run($pm);
+        if( is_dir($temp_dir) ) {
+            $result = $pm->removeDir( $temp_dir );
+            if ( ! $result ) {
+                $this->_stop_run( $pm );
+            }
         }
         @mkdir($temp_dir);
         if( !is_dir($temp_dir)){
@@ -130,10 +145,10 @@ class Install implements ABCExec
         }
 
         $package_info = [
-            'package_source'  => 'file',
-            'tmp_dir' => $temp_dir,
-            'package_name' => basename($options['file']),
-            'package_size' => filesize($options['file']),
+                        'package_source'  => 'file',
+                        'tmp_dir' => $temp_dir,
+                        'package_name' => basename($options['file']),
+                        'package_size' => filesize($options['file']),
         ];
         $pm->package_info =& $package_info;
         //1. try to unpack archive
@@ -159,16 +174,17 @@ class Install implements ABCExec
             $this->_stop_run($pm, 'Wrong package structure! Cannot find code-file list inside package.xml.');
         }
 
-        //check cart version compatibility
 
+        //check cart version compatibility
         if ( !$pm->checkCartVersion()) {
             if ( $pm->isCorePackage() ) {
-                $this->_stop_run($pm, "Error: Can't install package. Your cart version is ".ABC::env('VERSION').". Version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."  required.");
+                $error_text = "Error: Can't install package. Your cart version is ".ABC::env('VERSION').". ";
+                $error_text .= "Version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."  required.";
+                $this->_stop_run( $pm, $error_text );
             }
             //do pause and ask user in non-forced mode
             elseif( !isset($options['force']) ){
                 //for extensions show command prompt
-
                 echo "\t\e[93mCurrent copy of this package is not verified for your version of AbanteCart (v".ABC::env('VERSION').").\n"
                     ."\tPackage build is specified for AbanteCart version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."\n"
                     ."\tThis is not a problem, but if you notice issues or incompatibility, please contact extension developer.\n\n"
@@ -185,44 +201,54 @@ class Install implements ABCExec
         //need to validate destination dirs and files before start
         $result = $pm->validateDestination();
         if( !$result ){
-            $this->_stop_run($pm, "Permission denied for files:\n".$pm->error);
+            $this->_stop_run($pm, "Permission denied for files:\n".implode("\n",$pm->errors));
         }
 
         //ok. let's show license text
-        $license_filepath = $package_info['package_dir']."license.txt";
-        if (file_exists($license_filepath)) {
-            $agreement_text = file_get_contents($license_filepath);
-            //detect encoding of file
-            $is_utf8 = mb_detect_encoding($agreement_text, ABC::env('APP_CHARSET'), true);
-            if ( ! $is_utf8) {
-                $agreement_text = 'Oops. Something goes wrong. Try to continue or check error log for details.';
-                $err = new AError('Incorrect character set encoding of file '.$license_filepath.' has been detected.');
-                $err->toLog();
-            }
-            if($agreement_text && !isset($options['force'])){
-                echo  "\n\nLicense Agreement\n\n";
-                echo  $agreement_text."\n\n";
-                echo "I Agree/ Not Agree (Y/N) : ";
-                $stdin = fopen('php://stdin', 'r');
-                $user_response = fgetc($stdin);
-                if (! in_array($user_response, ['Y','YES','y','yes'])) {
-                    $this->_stop_run($pm, 'Aborted.');
-                }
-                @fclose($stdin);
+        if( !isset($options['force']) ) {
+            foreach ( [ $package_info['package_dir']."release_notes.txt", $package_info['package_dir']."license.txt" ] as $file ) {
+                $this->_show_confirmation( $file );
+                echo "\n\n";
             }
         }
 
         //ok. let's install all from package
         //first try to install all extensions
-        $pm->installPackageExtensions();
+        if($pm->isCorePackage()){
+            $pm->upgradeCore();
+        }else {
+            $pm->installPackageExtensions();
+        }
         if($pm->message_log){
             echo "\n\n";
             echo implode("\n",$pm->message_log);
         }
-        if($pm->error){
-            echo "\n\n";
-            echo "Errors during installation:\n\n";
-            echo "".$pm->error."\n";
+        if($pm->errors){
+            $error_text .= implode("\n",$pm->errors)."\n";
+            throw new AException(AC_ERR_LOAD, $error_text);
+        }
+    }
+
+    protected function _show_confirmation( $file_path ){
+        if (file_exists($file_path)) {
+            $agreement_text = file_get_contents($file_path);
+            //detect encoding of file
+            $is_utf8 = mb_detect_encoding($agreement_text, ABC::env('APP_CHARSET'), true);
+            if ( ! $is_utf8) {
+                $agreement_text = 'Oops. Something goes wrong. Try to continue or check error log for details.';
+                $err = new AError('Incorrect character set encoding of file '.$file_path.' has been detected.');
+                $err->toLog();
+            }
+            if( $agreement_text){
+                echo  $agreement_text."\n\n";
+                echo "I Agree/ Not Agree (Y/N) : ";
+                $stdin = fopen('php://stdin', 'r');
+                $user_response = fgetc($stdin);
+                if (! in_array($user_response, ['Y','YES','y','yes'])) {
+                    $this->_stop_run(new APackageManager([]), 'Aborted.');
+                }
+                @fclose($stdin);
+            }
         }
     }
 
@@ -244,7 +270,7 @@ class Install implements ABCExec
 
         $result = $pm->uninstallExtension($options['extension']);
         if( !$result ){
-            echo  $pm->error;
+            echo  implode("\n",$pm->errors);
         }
         return $result;
     }
@@ -276,7 +302,7 @@ class Install implements ABCExec
         $em = new AExtensionManager();
         $result = $em->delete( $options['extension'] );
         if( !$result ){
-            echo  implode("\n",$em->errors);
+            echo implode("\n", $em->errors);
         }
         return $result;
     }
@@ -289,7 +315,8 @@ class Install implements ABCExec
      */
     protected function _stop_run(APackageManager $pm, $error_text = ''){
         $pm->removeDir($pm->package_info['tmp_dir']);
-        throw new AException(AC_ERR_USER_ERROR, ($error_text ? $error_text : $pm->error)) ;
+        $error_text = $error_text ? $error_text : implode("\n",$pm->errors);
+        throw new AException(AC_ERR_USER_ERROR, $error_text) ;
     }
 
     protected function _fill_defaults(array &$options){

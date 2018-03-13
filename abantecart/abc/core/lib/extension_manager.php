@@ -23,7 +23,6 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
  * @property \abc\models\admin\ModelToolUpdater  $model_tool_updater
  * @property \abc\core\engine\AHtml              $html
  * @property AUser                               $user
- * @property ASession                            $session
  * @property ALog                                $log
  * @property AMessage                            $messages
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
@@ -157,9 +156,10 @@ class AExtensionManager
         }
 
         $result = $this->db->query( "SELECT e.*
-                                        FROM ".$this->db->table( "extension_dependencies" )." ed
-                                        LEFT JOIN ".$this->db->table( "extensions" )." e ON ed.extension_id = e.extension_id
-                                        WHERE ed.extension_parent_id = '".$extension_id."'" );
+                                    FROM ".$this->db->table( "extension_dependencies" )." ed
+                                    LEFT JOIN ".$this->db->table( "extensions" )." e 
+                                        ON ed.extension_id = e.extension_id
+                                    WHERE ed.extension_parent_id = '".$extension_id."'" );
 
         return $result->rows;
     }
@@ -182,15 +182,15 @@ class AExtensionManager
 
         $result = $this->db->query( "SELECT *
                                     FROM ".$this->db->table( "extension_dependencies" )." 
-                                    WHERE extension_id = '".$extension_id."' AND extension_parent_id = '".$extension_parent_id."'" );
+                                    WHERE extension_id = '".$extension_id."' 
+                                        AND extension_parent_id = '".$extension_parent_id."'" );
         if ( ! $result->num_rows ) {
-            $sql = "INSERT INTO ".$this->db->table( "extension_dependencies" )." (extension_id, extension_parent_id )
-                            VALUES ('".$extension_id."', '".$extension_parent_id."')";
+            $sql = "INSERT INTO ".$this->db->table( "extension_dependencies" )." 
+                        (extension_id, extension_parent_id )
+                    VALUES ('".$extension_id."', '".$extension_parent_id."')";
             $this->db->query( $sql );
         }
-
         $this->cache->remove( 'extensions' );
-
         return true;
     }
 
@@ -204,7 +204,6 @@ class AExtensionManager
      */
     public function deleteDependant( $extension_txt_id = '', $extension_parent_txt_id = '' )
     {
-
         $info = $this->extensions->getExtensionInfo( $extension_parent_txt_id );
         $extension_parent_id = $info ? (int)$info['extension_id'] : 0;
 
@@ -249,7 +248,6 @@ class AExtensionManager
         if ( empty( $extension_txt_id ) ) {
             $error = new AError ( "Error: Can't edit setting because field \"extension_txt_id\" is empty. Settings array: ".implode( ",", array_keys( $data ) ) );
             $error->toLog()->toDebug();
-
             return false;
         }
         // parameters that placed in extension table
@@ -274,7 +272,9 @@ class AExtensionManager
                 return false;
             }
         }
-        unset( $data['one_field'] ); //remove sign to prevent writing into settings table
+        //remove sign to prevent writing into settings table
+        unset( $data['one_field'] );
+
         $this->db->query( "DELETE FROM ".$this->db->table( "settings" )." 
                           WHERE `group` = '".$this->db->escape( $extension_txt_id )."'
                                 AND `key` IN ('".implode( "', '", $keys )."')
@@ -425,15 +425,11 @@ class AExtensionManager
         // gets extension_id for install.php
         $extension_info = $this->getExtensionsList( array( 'search' => $name ) );
         $validate = $this->validateCoreVersion( $extension_info->row['key'], $config );
-        $errors = $ext->getError();
+        $this->errors = $ext->getError();
 
-        if ( $errors ) {
-            $this->session->data['error'] = implode( "<br>", $errors );
-        }
         if ( ! $validate ) {
-            $error = new AError ( $errors );
+            $error = new AError ( $this->errors );
             $error->toLog()->toDebug();
-
             return false;
         }
 
@@ -520,7 +516,6 @@ class AExtensionManager
         // check dependencies
         $validate = $this->checkDependantsBeforeUninstall( $name );
         if ( ! $validate ) {
-            $this->session->data['error'] = implode( "<br>", $this->errors );
             return false;
         }
 
@@ -529,7 +524,7 @@ class AExtensionManager
 
         if ( $info['type'] == 'payment' && $this->config->get( $name.'_status' ) ) {
             $this->load->language( 'extension/extensions' );
-            $this->session->data['error'] = $this->language->get( 'error_payment_uninstall' );
+            $this->errors = [ $this->language->get( 'error_payment_uninstall' ) ];
             return false;
         }
 
@@ -612,8 +607,8 @@ class AExtensionManager
         $result = $pmanager->removeDir( ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id );
 
         if ( ! $result ) {
-            $message = "Error: Cannot to delete file or directory: '".ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id."'. No file permissions, change permissions to 777 with your FTP access";
-            $this->session->data['error'] = $message;
+            $this->errors[] = "Error: Cannot to delete file or directory: '".ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id."'. No file permissions, change permissions to 777 with your FTP access";
+            $this->errors += $pmanager->errors;
         }
 
         // refresh data about updates
@@ -786,7 +781,6 @@ class AExtensionManager
                 $error_text = 'Extension "%s" written for earlier version of Abantecart (v.%s) lower that you have. ';
                 $error_text .= 'Probably all will be OK.';
                 $error_text = sprintf( $error_text, $extension_txt_id, implode( ', ', $cart_versions ) );
-                $this->session->data['error'] = $error_text;
                 $this->messages->saveWarning( $extension_txt_id.' extension warning', $error_text );
                 return true;
             }
@@ -795,7 +789,6 @@ class AExtensionManager
         $error_text = '%s> extension cannot be installed. AbanteCart version incompatibility. ';
         $error_text .= sizeof( $cart_versions ) > 1 ? 'Versions %s are required.' : 'Version %s is required.';
         $this->errors[] = sprintf( $error_text, $extension_txt_id, implode( ', ', $cart_versions ) );
-
         return false;
     }
 
@@ -804,8 +797,8 @@ class AExtensionManager
      *  is hosting support all php modules used by extension
      */
     /**
-     * @param string                       $extension_txt_id
-     * @param \DOMNode | \SimpleXMLElement $config
+     * @param string            $extension_txt_id
+     * @param \SimpleXMLElement $config
      *
      * @return bool
      */

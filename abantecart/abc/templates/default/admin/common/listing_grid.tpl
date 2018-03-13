@@ -70,7 +70,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 			}
 		}
 		echo "{" . implode(',', $col) . "}";
-		if ($i < count($data['colModel'])) {
+		if ($i < sizeof($data['colModel'])) {
 			echo ',';
 			$i++;
 		}

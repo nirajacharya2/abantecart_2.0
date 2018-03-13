@@ -62,7 +62,7 @@ $dir_sep = DIRECTORY_SEPARATOR;
 
 // AbanteCart Version
 include('version.php');
-
+ABC::env('VERSION', ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION').'.'. ABC::env('VERSION_BUILT'));
 // Detect if localhost is used.
 if ( ! isset($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST'] = 'localhost';

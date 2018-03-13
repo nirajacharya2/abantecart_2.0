@@ -28,7 +28,6 @@ class ABC extends ABCBase
      */
     public function __construct($file = '')
     {
-
         //load and put config into environment
         if(!$file || !is_file($file)) {
             $file_name = @include(dirname(__DIR__).'/config/enabled.config.php');

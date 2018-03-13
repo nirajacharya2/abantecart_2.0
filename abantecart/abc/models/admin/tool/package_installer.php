@@ -41,11 +41,12 @@ class ModelToolPackageInstaller extends Model {
         }
         if ($this->request->get['start'] == 1) {
             $pmanager = new APackageManager( $this->session->data['package_info'] );
-            $result = $pmanager->getRemoteFile($this->session->data['package_info']['package_url'],
-                true,
-                $this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_name']);
+            $result = $pmanager->getRemoteFile(
+                                            $this->session->data['package_info']['package_url'],
+                                            true,
+                                            $this->session->data['package_info']['tmp_dir'] . $this->session->data['package_info']['package_name']);
             if (!$result) {
-                $percents = $pmanager->error;
+                $percents = implode("<br>",$pmanager->errors);
             } else {
                 $percents = 100;
             }

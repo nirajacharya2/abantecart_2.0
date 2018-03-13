@@ -902,6 +902,7 @@ class ControllerPagesExtensionExtensions extends AController {
 		} else {
 			$ext = new ExtensionUtils($this->request->get['extension']);
 			$this->extension_manager->uninstall($this->request->get['extension'], $ext->getConfig());
+			$this->session->data['error'] .= implode("<br>",$this->extension_manager->errors);
 			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		}
 
@@ -930,6 +931,9 @@ class ControllerPagesExtensionExtensions extends AController {
 			}
 
 			$this->extension_manager->delete($this->request->get['extension']);
+			if($this->extension_manager->errors){
+			    $this->session->data['error'] = implode("<br>",$this->extension_manager->errors);
+            }
 			abc_redirect($this->html->getSecureURL('extension/extensions/' . $this->session->data['extension_filter']));
 		}
 

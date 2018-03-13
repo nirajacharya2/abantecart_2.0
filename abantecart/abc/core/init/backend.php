@@ -121,6 +121,7 @@ foreach ($defaults as $name => $value) {
 
 // App Version
 include('version.php');
+ABC::env('VERSION', ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION').'.'. ABC::env('VERSION_BUILT'));
 $dir_lib = ABC::env('DIR_LIB');
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');

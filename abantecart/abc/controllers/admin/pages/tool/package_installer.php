@@ -233,7 +233,7 @@ class ControllerPagesToolPackageInstaller extends AController
     {
         $pmanager = new APackageManager( $this->session->data['package_info'] );
         if ( ! $pmanager->validate()) {
-            $this->data['error_warning'] .= $pmanager->error;
+            $this->data['error_warning'] = implode("<br>",$pmanager->errors);
         }
     }
 
@@ -414,7 +414,7 @@ class ControllerPagesToolPackageInstaller extends AController
 
         $headers = $pmanager->getRemoteFileHeaders($url);
         if ( ! $headers) {
-            $error_text = $pmanager->error;
+            $error_text = implode("<br>", $pmanager->errors);
             $error_text = empty($error_text) ? 'Unknown error happened.' : $error_text;
             $this->session->data['error'] = $this->language->get('error_mp')." ".$error_text;
             abc_redirect($this->_get_begin_href());
@@ -531,8 +531,6 @@ class ControllerPagesToolPackageInstaller extends AController
         }
         if ( ! $pmanager->unpack($package_info['tmp_dir'].$package_name, $package_info['tmp_dir'].$package_info['extension_key'].'/')) {
             $this->session->data['error'] = sprintf($this->language->get('error_unpack'), $package_info['tmp_dir'].$package_name);
-            $error = new AError ($pmanager->error);
-            $error->toLog()->toDebug();
             abc_redirect($this->_get_begin_href());
         }
 
@@ -634,25 +632,10 @@ class ControllerPagesToolPackageInstaller extends AController
             $non_writables = array_unique($non_writables);
         }
 
-        // if ftp mode and user give ftp parameters
-        if (isset($this->request->post['ftp_user']) && $this->request->is_POST()) {
-            $ftp_user = $this->request->post['ftp_user'];
-            $ftp_password = $this->request->post['ftp_password'];
-            $ftp_host = $this->request->post['ftp_host'];
-
-            //let's try to connect
-            if ( ! $pmanager->checkFTP($ftp_user, $ftp_password, $ftp_host)) {
-                $this->session->data['error'] = $pmanager->error;
-                abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
-            }
-            // sign of ftp-form
-            $ftp_mode = false;
-            abc_redirect($this->html->getSecureURL('tool/package_installer/install'));
-        } else {
-            if ( ! $package_info['tmp_dir']) {
-                $package_info['tmp_dir'] = $this->_get_temp_dir();
-            }
+        if ( ! $package_info['tmp_dir']) {
+            $package_info['tmp_dir'] = $this->_get_temp_dir();
         }
+
         // if all fine show license agreement
         if ( ! file_exists($package_info['package_dir']."/license.txt") && ! $ftp_mode) {
             abc_redirect($this->html->getSecureURL('tool/package_installer/install'));
@@ -974,7 +957,7 @@ class ControllerPagesToolPackageInstaller extends AController
                 abc_redirect($this->_get_begin_href());
             } else {
                 if ( ! $pmanager->backupPreviousExtension($extension_id)) {
-                    $this->session->data['error'] = $pmanager->error;
+                    $this->session->data['error'] = implode("<br>",$pmanager->errors);
                     abc_redirect($this->_get_begin_href());
                 }
             }
@@ -982,25 +965,11 @@ class ControllerPagesToolPackageInstaller extends AController
         }
 
         // #3. if all fine - copy extension package files
-        // if ftp-access
-        if ($package_info['ftp']) {
-            $ftp_user = $this->session->data['package_info']['ftp_user'];
-            $ftp_password = $this->session->data['package_info']['ftp_password'];
-            $ftp_port = $this->session->data['package_info']['ftp_port'];
-            $ftp_host = $this->session->data['package_info']['ftp_host'];
 
-            $fconnect = ftp_connect($ftp_host, $ftp_port);
-            ftp_login($fconnect, $ftp_user, $ftp_password);
-            ftp_pasv($fconnect, true);
-            $result = $pmanager->ftp_move($fconnect, $package_dirname."/code/abc/extensions/".$extension_id,
-                $extension_id,
-                $package_info['ftp_path'].'extensions/'.$extension_id);
-            ftp_close($fconnect);
-        } else {
             $result = rename($package_dirname."/code/abc/extensions/".$extension_id, ABC::env('DIR_APP_EXTENSIONS').$extension_id);
             //this method requires permission set to be set
             $pmanager->chmod_R(ABC::env('DIR_APP_EXTENSIONS').$extension_id, 0777, 0777);
-        }
+
 
         /*
          * When extension installed by one-path process (ex.: on upload)
@@ -1021,16 +990,19 @@ class ControllerPagesToolPackageInstaller extends AController
         if ($result) {
             $install_mode = $already_installed ? 'upgrade' : 'install';
             if ( ! $pmanager->installExtension($extension_id, $type, $version, $install_mode)) {
-                $this->session->data['error'] .= $this->language->get('error_install').'<br><br>'.$pmanager->error;
+                $this->session->data['error'] .= $this->language->get('error_install').'<br><br>'.implode("<br>",$pmanager->errors);
                 $this->_removeTempFiles('dir');
                 abc_redirect($this->_get_begin_href());
             }
         } else {
             if ($package_info['ftp']) {
-                $this->session->data['error'] = $this->language->get('error_move_ftp').ABC::env('DIR_APP_EXTENSIONS').$extension_id.'<br><br>'.$pmanager->error;
+                $this->session->data['error'] = $this->language->get('error_move_ftp')
+                                                .ABC::env('DIR_APP_EXTENSIONS')
+                                                .$extension_id.'<br><br>'
+                                                .implode("<br>",$pmanager->errors);
                 abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
             } else {
-                $this->session->data['error'] = $this->language->get('error_move').ABC::env('DIR_APP_EXTENSIONS').$extension_id.'<br><br>'.$pmanager->error;
+                $this->session->data['error'] = $this->language->get('error_move').ABC::env('DIR_APP_EXTENSIONS').$extension_id.'<br><br>'.implode("<br>",$pmanager->errors);
                 $this->_removeTempFiles('dir');
                 abc_redirect($this->_get_begin_href());
             }
@@ -1052,7 +1024,7 @@ class ControllerPagesToolPackageInstaller extends AController
             abc_redirect($this->_get_begin_href());
         }
 
-        //$core_files = $package_info['package_content']['core'];
+
         $pmanager = new APackageManager( $this->session->data['package_info'] );
         /*
          * Commented by decision do not use it in community version.
@@ -1109,8 +1081,8 @@ class ControllerPagesToolPackageInstaller extends AController
         $pmanager->replaceCoreFiles();
         //run sql and php upgrade procedure files
         $package_dirname = $package_info['package_dir'];
-        if ($pmanager->error) {
-            $this->session->data['error'] = $pmanager->error;
+        if ($pmanager->errors) {
+            $this->session->data['error'] = implode("<br>",$pmanager->errors);
         }
         /**
          * @var \SimpleXMLElement|\DOMDocument $config
@@ -1123,8 +1095,8 @@ class ControllerPagesToolPackageInstaller extends AController
         }
         $pmanager->upgradeCore($config);
         $pmanager->updateCoreVersion((string)$config->version);
-        if ($pmanager->error) {
-            $this->session->data['error'] .= "\n".$pmanager->error;
+        if ($pmanager->errors) {
+            $this->session->data['error'] .= implode('<br>',$pmanager->errors);
         }
 
         return true;
@@ -1174,7 +1146,7 @@ class ControllerPagesToolPackageInstaller extends AController
                 break;
         }
         if ( ! $result) {
-            $this->session->data['error'] = $pmanager->error;
+            $this->session->data['error'] = implode("<br>",$pmanager->errors);
 
             return false;
         }
@@ -1197,6 +1169,6 @@ class ControllerPagesToolPackageInstaller extends AController
     protected function _clean_temp_dir()
     {
             $pmanager = new APackageManager( $this->session->data['package_info'] );
-            $pmanager->CleanTempDir();
+            $pmanager->cleanTempDir();
     }
 }

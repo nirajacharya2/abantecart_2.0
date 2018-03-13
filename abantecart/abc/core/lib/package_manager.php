@@ -44,7 +44,7 @@ class APackageManager
      * @var Registry
      */
     protected $registry;
-    public $error = '';
+    public $errors = [];
     public $message_log = [];
     /**
      * size of data in bytes
@@ -95,7 +95,7 @@ class APackageManager
             $result = $file->getResponse($url); // just get data
         }
         if ( ! $result) {
-            $this->error = $file->error;
+            $this->errors[] = $file->error;
 
             return false;
         }
@@ -118,7 +118,7 @@ class APackageManager
         $url = $url.(! is_int(strpos($url, '?')) ? '?file_size=1' : '&file_size=1');
         $result = $file->getDataHeaders($url);
         if ( ! $result) {
-            $this->error = $file->error;
+            $this->errors[] = $file->error;
 
             return false;
         }
@@ -135,22 +135,24 @@ class APackageManager
     public function unpack($archive_filename, $dest_dir)
     {
         if ( ! file_exists($archive_filename)) {
-            $this->error = 'Error: Cannot unpack file "'.$archive_filename.'" because it does not exists.';
-            $error = new AError ($this->error);
+            $error_text = 'Error: Cannot unpack file "'.$archive_filename.'" because it does not exists.';
+            $this->errors[] = $error_text;
+            $error = new AError( $error_text );
             $error->toLog()->toDebug();
 
             return false;
         }
         if ( ! file_exists($dest_dir) || ! is_dir($dest_dir)) {
-            $this->error = 'Error: Cannot unpack file "'.$archive_filename.'" because destination directory "'.$dest_dir.'" does not exists.';
-            $error = new AError ($this->error);
+            $error_text = 'Error: Cannot unpack file "'.$archive_filename.'" because destination directory "'.$dest_dir.'" does not exists.';
+            $this->errors[] = $error_text;
+            $error = new AError( $error_text );
             $error->toLog()->toDebug();
-
             return false;
         }
         if ( ! is_writable($dest_dir)) {
-            $this->error = 'Error: Cannot unpack file "'.$archive_filename.'" because destination directory "'.$dest_dir.'" have no write permission.';
-            $error = new AError ($this->error);
+            $error_text =  'Error: Cannot unpack file "'.$archive_filename.'" because destination directory "'.$dest_dir.'" have no write permission.';
+            $this->errors[] = $error_text;
+            $error = new AError( $error_text );
             $error->toLog()->toDebug();
             return false;
         }
@@ -177,7 +179,7 @@ class APackageManager
          */
         $config = simplexml_load_string(file_get_contents($this->package_info['package_dir'].'package.xml'));
         if(!$config){
-            $this->error = 'Cannot to read file '.$this->package_info['package_dir'].'package.xml';
+            $this->errors[] = 'Cannot to read file '.$this->package_info['package_dir'].'package.xml';
             return false;
         }
         $this->package_info['config'] = $config;
@@ -209,13 +211,13 @@ class APackageManager
 
     public function validateDestination(){
         if( !is_dir($this->package_info['package_dir']) ){
-            $this->error = 'Temporary directory of the package not found.';
+            $this->errors[] = 'Temporary directory of the package not found.';
             return false;
         }
 
         $package_dirs = $this->getDestinationDirectories();
         if(!$package_dirs){
-            $this->error = 'No directories in the package!';
+            $this->errors[] = 'No directories in the package!';
             return false;
         }
         $errors = [];
@@ -260,8 +262,14 @@ class APackageManager
             }
         }
 
+        $version_file = ABC::env('DIR_CORE').'init'.DIRECTORY_SEPARATOR.'version.php';
+
+        if($this->isCorePackage() && !is_writable( $version_file )){
+            $errors[] = $version_file;
+        }
+
         if( $errors ){
-            $this->error = implode("\n", $errors);
+            $this->errors += $errors;
             return false;
         }
         return true;
@@ -288,14 +296,14 @@ class APackageManager
 
         $backup = new ABackup($ext_txt_id.'_'.date('Y-m-d-H-i-s'));
         if ($backup->error) {
-            $this->error = implode("\n", $backup->error)."\n";
+            $this->errors += $backup->error;
             return false;
         }
         $backup_dirname = $backup->getBackupName();
         if ($backup_dirname) {
 
             if ( ! $backup->backupDirectory($ext_dir_path, true)) {
-                $this->error = implode("\n", $backup->error)."\n";
+                $this->errors += $backup->error;
                 return false;
             }
 
@@ -345,7 +353,7 @@ class APackageManager
             if( !is_file( $config_file )){
                 $msg = "Extension ".$ext_txt_id." cannot be installed. Skipped. Cannot find config.xml file inside it.\n";
                 $this->message_log[] = $msg;
-                $this->error .= $msg;
+                $this->errors[] = $msg;
                 continue;
             }
             /**
@@ -355,7 +363,7 @@ class APackageManager
             if( $config === false ){
                 $msg = "Extension ".$ext_txt_id." cannot be installed. Skipped. Invalid config.xml file.\n";
                 $this->message_log[] = $msg;
-                $this->error .= $msg;
+                $this->errors[] = $msg;
                 continue;
             }
 
@@ -396,7 +404,8 @@ class APackageManager
                     $this->message_log[] = "Extension ".$ext_txt_id." has been installed successfully.\n";
                 }
             }else{
-                $this->error .= "Cannot move directory ".$this->package_info['package_dir']."/code/abc/extensions/".$ext_txt_id .' into '.ABC::env('DIR_APP_EXTENSIONS').$ext_txt_id."!\n";
+                $this->errors[] = "Cannot move directory ".$this->package_info['package_dir']."/code/abc/extensions/".$ext_txt_id
+                                .' into '.ABC::env('DIR_APP_EXTENSIONS').$ext_txt_id."!\n";
             }
         }
 
@@ -405,84 +414,66 @@ class APackageManager
 
     public function replaceCoreFiles()
     {
+        $run_errors = [];
         $core_files = $this->package_info['package_content']['core'];
-        if ($this->package_info['ftp']) {
-            $ftp_user = $this->package_info['ftp_user'];
-            $ftp_password = $this->package_info['ftp_password'];
-            $ftp_port = $this->package_info['ftp_port'];
-            $ftp_host = $this->package_info['ftp_host'];
+        foreach ($core_files as $rel_file) {
+            $src_filename = $this->package_info['package_dir'].'code'.DIRECTORY_SEPARATOR.$rel_file;
+            if( !is_file($src_filename) ){
+                $run_errors[] = "Source file ".$src_filename." not found! Skipped. Please check package structure.";
+                continue;
+            }
 
-            $fconnect = ftp_connect($ftp_host, $ftp_port);
-            ftp_login($fconnect, $ftp_user, $ftp_password);
-            ftp_pasv($fconnect, true);
+            if( substr($rel_file,0,3) == 'abc'){
+                $abs_file = ABC::env('DIR_APP').substr($rel_file,4);
+            }elseif( substr($rel_file,0,6) == 'public' ){
+                $abs_file = ABC::env('DIR_PUBLIC').substr($rel_file,7);
+            }else{
+                $abs_file = '';
+            }
 
-            foreach ($core_files as $core_filename) {
-                $remote_file = pathinfo($this->package_info['ftp_path'].$core_filename, PATHINFO_BASENAME);
-                $remote_dir = pathinfo($this->package_info['ftp_path'].$core_filename, PATHINFO_DIRNAME).'/';
-                $src_dir = (string)$this->package_info['tmp_dir'].$this->package_info['package_dir'].'/code/'.$core_filename;
-                $result = $this->ftp_move($fconnect, $src_dir, $remote_file, $remote_dir);
-                if ($result) {
-                    $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-                    $install_upgrade_history->addRows(array(
+            if ( is_file( $abs_file )) {
+                @unlink( $abs_file );
+            }
+            //check is target directory exists before copying
+            $dir = dirname($abs_file);
+            if ( ! is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+
+            if ( ! is_dir($dir) || ! is_writable($dir)) {
+                $error_text = "Cannot upgrade file : '".$rel_file."\n Destination folder ".$dir." is not writable or does not exists";
+                $run_errors[] = $error_text;
+                $error = new AError( $error_text );
+                $error->toLog()->toDebug()->toMessages();
+                continue;
+            }
+
+            $result = @rename($src_filename, $abs_file);
+            if ($result) {
+                // for index.php do not set 775 permissions because hosting providers will ban it
+                $perms = basename($rel_file) == 'index.php' ? 0755 : 0775;
+                chmod($abs_file, $perms);
+
+                $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
+                $install_upgrade_history->addRows(
+                    array(
                         'date_added'  => date("Y-m-d H:i:s", time()),
-                        'name'        => 'Upgrade core file: '.$remote_file,
+                        'name'        => 'Upgrade core file: '.$rel_file,
                         'version'     => $this->package_info['package_version'],
                         'backup_file' => '',
                         'backup_date' => '',
                         'type'        => 'upgrade',
                         'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
-                    ));
-                } else {
-                    $this->error .= " Error: Cannot upgrade file : '".$core_filename."\n";
-                    $error = new AError ($this->error);
-                    $error->toLog()->toDebug();
-                }
-            }// end of loop
-            ftp_close($fconnect);
-        } else {
-            foreach ($core_files as $core_filename) {
-                if (is_file(ABC::env('DIR_ROOT').'/'.$core_filename)) {
-                    unlink(ABC::env('DIR_ROOT').'/'.$core_filename);
-                }
-                //check is target directory exists before copying
-                $dir = pathinfo(ABC::env('DIR_ROOT').'/'.$core_filename, PATHINFO_DIRNAME);
-                if ( ! is_dir($dir)) {
-                    mkdir($dir, 0775, true);
-                }
-
-                if ( ! is_dir($dir) || ! is_writable($dir)) {
-                    $this->error .= " Error: Cannot upgrade file : '".$core_filename."\n Destination folder ".$dir." is not writable or does not exists";
-                    $error = new AError ($this->error);
-                    $error->toLog()->toDebug()->toMessages();
-                    continue;
-                }
-
-                $result = rename($this->package_info['tmp_dir'].$this->package_info['package_dir'].'/code/'.$core_filename, ABC::env('DIR_ROOT').'/'.$core_filename);
-                if ($result) {
-                    // for index.php do not set 775 permissions because hosting providers will ban it
-                    if (pathinfo($core_filename, PATHINFO_BASENAME) == 'index.php') {
-                        chmod(ABC::env('DIR_ROOT').'/'.$core_filename, 0755);
-                    } else {
-                        chmod(ABC::env('DIR_ROOT').'/'.$core_filename, 0775);
-                    }
-
-                    $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-                    $install_upgrade_history->addRows(array(
-                        'date_added'  => date("Y-m-d H:i:s", time()),
-                        'name'        => 'Upgrade core file: '.$core_filename,
-                        'version'     => $this->package_info['package_version'],
-                        'backup_file' => '',
-                        'backup_date' => '',
-                        'type'        => 'upgrade',
-                        'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
-                    ));
-                } else {
-                    $this->error .= " Error: Cannot upgrade file : '".$core_filename."\n";
-                    $error = new AError ($this->error);
-                    $error->toLog()->toDebug();
-                }
+                ));
+            } else {
+                $error_text = " Cannot upgrade file : '".$rel_file;
+                $run_errors[] = $error_text;
+                $error = new AError( $error_text );
+                $error->toLog()->toDebug();
             }
         }
+        $this->errors += $run_errors;
+        return  $run_errors ? false : true;
     }
 
     /**
@@ -507,8 +498,9 @@ class APackageManager
                             ? $this->removeDir($dir.DIRECTORY_SEPARATOR.$obj)
                             : @unlink($dir.DIRECTORY_SEPARATOR.$obj);
                     if ( ! $err) {
-                        $this->error = "Package manager Error: Cannot delete file or directory: '". $dir . DIRECTORY_SEPARATOR . $obj ."'.";
-                        $error = new AError ($this->error);
+                        $error_text = "Package manager Error: Cannot delete file or directory: '". $dir . DIRECTORY_SEPARATOR . $obj ."'.";
+                        $this->errors[] = $error_text;
+                        $error = new AError( $error_text );
                         $error->toLog()->toDebug()->toMessages();
                         return false;
                     }
@@ -517,8 +509,9 @@ class APackageManager
             @reset($objects);
             return @rmdir($dir);
         } else {
-            $this->error = "Package manager Error: Cannot delete ". $dir .". It is not a directory!";
-            $error = new AError ($this->error);
+            $error_text = "Package manager Error: Cannot delete ". $dir .". It is not a directory!";
+            $this->errors[] = $error_text;
+            $error = new AError( $error_text );
             $error->toLog()->toDebug()->toMessages();
             return false;
         }
@@ -561,272 +554,6 @@ class APackageManager
     }
 
     /**
-     * @param string $ftp_user
-     * @param string $ftp_password
-     * @param string $ftp_host
-     * @param string $ftp_path
-     * @param int    $ftp_port
-     *
-     * @return bool
-     */
-    public function checkFTP($ftp_user, $ftp_password = '', $ftp_host = '', $ftp_path = '', $ftp_port = 21)
-    {
-        $this->load->language('tool/package_installer');
-        if ( ! $ftp_host) {
-            $ftp_host = 'localhost';
-        } else {
-            // looking for port number in the host
-            $ftp_host = explode(':', $ftp_host);
-            $ftp_port = (int)$ftp_host[1];
-            $ftp_host = $ftp_host[0];
-        }
-        $ftp_port = ! $ftp_port ? 21 : $ftp_port;
-
-        if ( ! $ftp_user) {
-            $this->error = $this->language->get('error_ftp_user');
-
-            return false;
-        }
-        if ( ! $ftp_password) {
-            $this->error = $this->language->get('error_ftp_password');
-
-            return false;
-        }
-
-        $fconnect = ftp_connect($ftp_host, $ftp_port);
-        if ( ! $fconnect && $ftp_host == 'localhost') {
-            //check dns perversion :-)
-            $ftp_host = '127.0.0.1';
-            $fconnect = ftp_connect($ftp_host, $ftp_port);
-        }
-
-        if ($fconnect) {
-            $login = ftp_login($fconnect, $ftp_user, $ftp_password);
-            if ( ! $login) {
-                $this->error = $this->language->get('error_ftp_login').$ftp_host.':'.$ftp_port;
-
-                return false;
-            }
-
-            $ftp_path = ! $ftp_path ? $this->_ftp_find_app_root($fconnect) : $ftp_path;
-            // if all fine  - write ftp parameters into session
-            $this->package_info['ftp'] = true;
-            $this->package_info['ftp_user'] = $ftp_user;
-            $this->package_info['ftp_password'] = $ftp_password;
-            $this->package_info['ftp_host'] = $ftp_host;
-            $this->package_info['ftp_port'] = $ftp_port;
-            $this->package_info['ftp_path'] = $ftp_path;
-
-            ftp_close($fconnect);
-        } else {
-            $this->error = $this->language->get('error_ftp_connect');
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Try to guess an installation location in the server via FTP
-     *
-     * @param resource $fconnect
-     *
-     * @return string|bool
-     */
-    protected function _ftp_find_app_root($fconnect)
-    {
-        if ( ! $fconnect) {
-            return false;
-        }
-
-        // Turn passive mode on
-        if (@ftp_pasv($fconnect, true) === false) {
-            return false;
-        }
-
-        $abs_path = pathinfo($_SERVER['DOCUMENT_ROOT'].$_SERVER['PHP_SELF'], PATHINFO_DIRNAME);
-
-        $ftp_dir_list = array();
-
-        // first fo all try to change directory to absolute server path
-        //(for case when ftp-user does not locked in ftp root directory)
-        if (@ftp_chdir($fconnect, $abs_path) === true) {
-            return $abs_path.'/';
-        } else {
-            //for ftp chrooted users
-            //get list of directories
-            if ($files = @ftp_nlist($fconnect, '.')) {
-                //get only directories
-                foreach ($files as $file) {
-                    if (ftp_size($fconnect, $file) == "-1") {
-                        $ftp_dir_list[] = $file;
-                    }
-                }
-                //find ftp-directory name inside absolute server path
-                $target_dir = null;
-                if ($ftp_dir_list) {
-                    foreach ($ftp_dir_list as $dir) {
-                        if (is_int($pos = strpos($abs_path, $dir))) {
-                            $target_dir = substr($abs_path, $pos);
-                            break;
-                        }
-                    }
-                    if ($target_dir) {
-                        return '/'.trim($target_dir, '/').'/';
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Function for moving directory or file via ftp-connection
-     *
-     * @param        $fconnect
-     * @param string $local       local path to file or directory
-     * @param string $remote_file remote file  or directory name
-     * @param string $remote_dir
-     *
-     * @return bool
-     */
-    public function ftp_move($fconnect, $local, $remote_file, $remote_dir)
-    {
-        $local = (string)$local;
-        $remote_file = (string)$remote_file;
-        $remote_dir = (string)$remote_dir;
-
-        if ( ! $this->package_info['ftp']) {
-            return false;
-        }
-
-        // if destination folder does not exists - try to create
-        if (@ftp_chdir($fconnect, $remote_dir) === false) {
-            $basedir = $this->package_info['ftp_path'];
-            //relative subdirs
-            $sub_dirs = str_replace($basedir, '', $remote_dir);
-            if (substr($sub_dirs, 0, 1) == '/') {
-                $sub_dirs = substr($sub_dirs, 1);
-            }
-            $result = $this->_ftp_make_nested_dirs($fconnect, $basedir, $sub_dirs);
-            if ( ! $result) {
-                $this->error .= "\nCannot create directory ".$remote_dir." via ftp. ";
-
-                return false;
-            }
-            if ( ! ftp_chmod($fconnect, 0755, $remote_dir)) {
-                $error = new AError('Cannot change mode for directory '.$remote_dir);
-                $error->toLog()->toDebug();
-            }
-            //change current directory to newly created
-            @ftp_chdir($fconnect, $remote_dir);
-        }
-
-        if (is_dir($local)) {
-            $this->_ftp_put_dir($fconnect, $local, $remote_dir);
-        } else {
-            if ( ! ftp_put($fconnect, $remote_file, $local, FTP_BINARY)) {
-                $this->error .= "\nCannot put file ".$remote_file." via ftp.";
-
-                return false;
-            }
-            $remote_file = $remote_dir.pathinfo($local, PATHINFO_BASENAME);
-            $chmod_result = ftp_chmod($fconnect, 0755, $remote_file);
-            if ( ! $chmod_result) {
-                $error = new AError('Cannot change mode for file '.$remote_file);
-                $error->toLog()->toDebug();
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param $fconnect
-     * @param $ftp_base_dir
-     * @param $ftp_path
-     *
-     * @return bool
-     */
-    protected function _ftp_make_nested_dirs($fconnect, $ftp_base_dir, $ftp_path)
-    {
-        @ftp_chdir($fconnect, $ftp_base_dir); // /var/www/uploads
-        $parts = explode('/', $ftp_path); // 2013/06/11/username
-        foreach ($parts as $part) {
-            if ( ! @ftp_chdir($fconnect, $part)) {
-                ftp_mkdir($fconnect, $part);
-                $result = ftp_chdir($fconnect, $part);
-                if ( ! $result) {
-                    return false;
-                }
-                ftp_chmod($fconnect, 0755, $part);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * method for moving directory via ftp connection
-     *
-     * @param resource $conn_id
-     * @param string   $src_dir
-     * @param string   $dst_dir
-     */
-    protected function _ftp_put_dir($conn_id, $src_dir, $dst_dir)
-    {
-        $d = dir($src_dir);
-        // do this for each file in the directory
-        while ($file = $d->read()) {
-            // Stay only with in current directory
-            if ($file != "." && $file != "..") {
-                // do the following if it is a directory
-                if (is_dir($src_dir."/".$file)) {
-                    if ( ! @ftp_chdir($conn_id, $dst_dir."/".$file)) {
-                        // create directories that do not yet exist
-                        ftp_mkdir($conn_id, $dst_dir."/".$file);
-                        ftp_chmod($conn_id, 0755, $dst_dir."/".$file);
-                    }
-                    // recursive part
-                    $this->_ftp_put_dir($conn_id, $src_dir."/".$file, $dst_dir."/".$file);
-                } else {
-                    // put the files
-                    ftp_put($conn_id, $dst_dir."/".$file, $src_dir."/".$file, FTP_BINARY);
-                    ftp_chmod($conn_id, 0755, $dst_dir."/".$file);
-                }
-            }
-        }
-        $d->close();
-    }
-
-    /**
-     * @param resource $conn
-     * @param string   $dir
-     *
-     * @return bool
-     */
-    protected function delete_ftp_dir($conn, $dir)
-    {
-        $files = ftp_nlist($conn, $dir);
-        if ( ! $files) {
-            return ftp_rmdir($conn, $dir);
-        }
-        foreach ($files as $file) {
-            $is_dir = ftp_chdir($conn, $file);
-            if ($is_dir) {
-                $this->delete_ftp_dir($conn, $file);
-            } else {
-                ftp_delete($conn, $file);
-            }
-        }
-        ftp_rmdir($conn, $dir);
-
-        return true;
-    }
-
-    /**
      * @param string $ext_txt_id
      * @param string $type
      * @param string $version
@@ -853,8 +580,8 @@ class APackageManager
                     $validate = $this->extension_manager->validate($ext_txt_id);
                     $validateErrors = $this->extension_manager->errors;
                     if ( ! $validate) {
-                        $this->error = implode('<br>', $validateErrors);
-                        $err = new AError($this->error);
+                        $this->errors += $validateErrors;
+                        $err = new AError( implode("\n",$validateErrors));
                         $err->toLog()->toDebug();
                         return false;
                     }
@@ -910,7 +637,11 @@ class APackageManager
                                 .$ext_txt_id.DIRECTORY_SEPARATOR
                                 .(string)$config->upgrade->trigger;
                         if (file_exists($file)) {
-                            require_once($file);
+                            try {
+                                require_once( $file );
+                            }catch( AException $e){
+                                $this->errors[] = $e->getMessage();
+                            }
                         }
                     }
 
@@ -921,8 +652,9 @@ class APackageManager
                 }
                 break;
             default:
-                $this->error = 'Unknown extension type: "'.$type.'"';
-                $err = new AError($this->error);
+                $error_text = 'Unknown extension type: "'.$type.'"';
+                $this->errors[] = $error_text;
+                $err = new AError( $error_text );
                 $err->toLog()->toDebug();
                 return false;
                 break;
@@ -943,13 +675,13 @@ class APackageManager
 
         $validate = $this->extension_manager->checkDependantsBeforeUninstall( $ext_txt_id );
         if(!$validate){
-            $this->error = implode("\n", $this->extension_manager->errors);
+            $this->errors += $this->extension_manager->errors;
             return false;
         }
 
         $result = $this->extension_manager->uninstall($ext_txt_id, AHelperUtils::getExtensionConfigXml($ext_txt_id));
         if ($result === false) {
-            $this->error = implode("\n", $this->extension_manager->errors);
+            $this->errors += $this->extension_manager->errors;
             return false;
         }
 
@@ -959,39 +691,65 @@ class APackageManager
     /**
      * @param \SimpleXmlElement $config
      */
-    public function upgradeCore($config)
+    public function upgradeCore()
     {
         //clear all cache
         $this->cache->remove('*');
 
         $package_dirname = $this->package_info['package_dir'];
+        $config_file = $package_dirname.'package.xml';
+        if( !is_file($config_file) ){
+            $this->errors[] = 'Cannot find package.xml!';
+            return false;
+        }
+        $config = @simplexml_load_file( $config_file );
+        if( $config === false ){
+            $this->errors[] = 'Invalid package.xml file!';
+            return false;
+        }
         // running sql upgrade script if it exists
         if ( (string)$config->upgrade->sql ) {
-            $file = $package_dirname.'/'.(string)$config->upgrade->sql;
+            $file = $package_dirname.(string)$config->upgrade->sql;
             if (is_file($file)) {
-                $this->db->performSql($file);
+                $result = $this->db->performSql($file);
+                if(!$result){
+                    $this->errors[] = $this->db->error;
+                    return false;
+                }
             }
         }
         // running php upgrade script if it exists
         if ( (string)$config->upgrade->trigger ) {
-            $file = $package_dirname.'/'.(string)$config->upgrade->trigger;
+            $file = $package_dirname.(string)$config->upgrade->trigger;
             if (is_file($file)) {
                 /** @noinspection PhpIncludeInspection */
-                include($file);
+                try {
+                    include( $file );
+                }catch(AException $e){
+                    $this->errors[] = $e->getMessage();
+                    return false;
+                }
             }
         }
 
-        // write to history
-        $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-        $install_upgrade_history->addRows(array(
-            'date_added'  => date("Y-m-d H:i:s", time()),
-            'name'        => 'Core upgrade',
-            'version'     => $this->package_info['package_version'],
-            'backup_file' => '',
-            'backup_date' => '',
-            'type'        => 'upgrade',
-            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
-        ));
+        $result = $this->replaceCoreFiles();
+        if($result) {
+            $this->updateCoreVersion($this->package_info['package_version']);
+            // write to history
+            $install_upgrade_history = new ADataset( 'install_upgrade_history', 'admin' );
+            $install_upgrade_history->addRows( array(
+                'date_added'  => date( "Y-m-d H:i:s", time() ),
+                'name'        => 'Core upgrade',
+                'version'     => $this->package_info['package_version'],
+                'backup_file' => '',
+                'backup_date' => '',
+                'type'        => 'upgrade',
+                'user'        => ( is_object( $this->user ) ? $this->user->getUsername() : 'php-cli' ),
+            ) );
+
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -1012,26 +770,8 @@ class APackageManager
         $content .= "ABC::env('MINOR_VERSION', '".$minor."');\n";
         $content .= "ABC::env('VERSION_BUILT', '".$built."');\n";
 
-        if ( ! $this->package_info['ftp']) {
-            file_put_contents(ABC::env('DIR_CORE').'version.php', $content);
-        } else {
-            file_put_contents($this->package_info['tmp_dir'].'version.php', $content);
-            $ftp_user = $this->package_info['ftp_user'];
-            $ftp_password = $this->package_info['ftp_password'];
-            $ftp_port = $this->package_info['ftp_port'];
-            $ftp_host = $this->package_info['ftp_host'];
-
-            $fconnect = ftp_connect($ftp_host, $ftp_port);
-            ftp_login($fconnect, $ftp_user, $ftp_password);
-            ftp_pasv($fconnect, true);
-
-            $this->ftp_move($fconnect,
-                $this->package_info['tmp_dir'].'version.php',
-                'version.php',
-                $this->package_info['ftp_path'].'core/');
-            ftp_close($fconnect);
-        }
-
+        // upgrade APP VERSION
+        @file_put_contents(ABC::env('DIR_CORE').'init'.DIRECTORY_SEPARATOR.'version.php', $content);
         return true;
     }
 
@@ -1053,7 +793,6 @@ class APackageManager
                 $error_text = "Notice: Failed applying filemode '".$dirmode_str."' on directory '".$path."'.\n";
                 $error_text .= "  `-> the directory '".$path."' will be skipped from recursive chmod.\n";
                 $this->log->write($error_text);
-
                 return null;
             }
             $dh = opendir($path);
@@ -1081,7 +820,6 @@ class APackageManager
             if ( ! chmod($path, $filemode)) {
                 $filemode_str = decoct($filemode);
                 $this->log->write("Notice: Failed applying filemode ".$filemode_str." on file ".$path."\n");
-
                 return null;
             }
         }
@@ -1092,10 +830,10 @@ class APackageManager
      */
     public function validate()
     {
-        $this->error = '';
+        $this->errors = [];
         //1.check is extension directory writable
         if ( ! is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
-            $this->error .= 'Directory '.ABC::env('DIR_APP_EXTENSIONS').' is not writable. Please change permissions for it.'."\n";
+            $this->errors[] = 'Directory '.ABC::env('DIR_APP_EXTENSIONS').' is not writable. Please change permissions for it.';
         }
         //2. check temporary directory. just call method
         $this->getTempDir();
@@ -1103,12 +841,12 @@ class APackageManager
         //3. run validation for backup-process before install
         $bkp = new ABackup('', false);
         if ( ! $bkp->validate()) {
-            $this->error .= implode("\n", $bkp->error);
+            $this->errors += $bkp->error;
         }
 
         $this->extensions->hk_ValidateData($this);
 
-        return ($this->error ? false : true);
+        return ($this->errors ? false : true);
 
     }
 
@@ -1138,7 +876,7 @@ class APackageManager
                 $error_text = 'Error: php tried to use directory '
                         .ABC::env('DIR_SYSTEM')."temp/install".' but it is non-writable. Temporary php-directory '
                         .$dir.' is non-writable too! Please change permissions one of them.'."\n";
-                $this->error .= $error_text;
+                $this->errors[] = $error_text;
                 $this->log->write($error_text);
             }
         }
@@ -1146,7 +884,7 @@ class APackageManager
         return $dir;
     }
     // this method calls before installation of package
-    public function CleanTempDir()
+    public function cleanTempDir()
     {
         $temp_dir = $this->getTempDir();
         $files = glob($temp_dir.'*');
@@ -1175,18 +913,18 @@ class APackageManager
         $versions = array();
         foreach ($config_xml->cartversions->item as $item) {
             $version = (string)$item;
-            if( version_compare($version, '2.0.0', '<') ){
-                return false;
-            }
             $versions[] = $version;
-            $subv_arr = explode('.', preg_replace('/[^0-9\.]/', '', $version));
+            if( version_compare($version, '2.0.0', '>') ){
+                break;
+            }
+            $split_versions = explode('.', preg_replace('/[^0-9\.]/', '', $version));
             $full_check = AHelperUtils::versionCompare(
                                                         $version,
                                                         ABC::env('VERSION'),
                                                         '<='
             );
             $minor_check = AHelperUtils::versionCompare(
-                                                        $subv_arr[0].'.'.$subv_arr[1],
+                                                        $split_versions[0].'.'.$split_versions[1],
                                                         ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION'),
                                                         '=='
             );
@@ -1203,14 +941,17 @@ class APackageManager
                                                                         (ABC::env('VERSION')),
                                                                         implode(', ', $versions)
             );
-            $this->package_info['supported_cart_versions'] = $versions;
         }
-
+        $this->package_info['supported_cart_versions'] = $versions;
         return $full_check && $minor_check;
     }
 
     public function isCorePackage($extension_key = '')
     {
+        if( $this->package_info['package_content']['core'] && !$this->package_info['extension_key'] ){
+            return true;
+        }
+
         if ( ! $extension_key) {
             $extension_key = $this->package_info['extension_key'];
         }

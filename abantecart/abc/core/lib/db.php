@@ -226,9 +226,6 @@ class ADB{
                         $query = str_replace("`ac_", "`" . $this->db_config['prefix'], $query);
                         $result = $this->_query($query, true);
                         if (!$result){
-                            //todo: need to review
-                            $err = $this->driver->getDBError();
-                            $this->error = $err['error_text'];
                             return false;
                         }
                         $query = '';
