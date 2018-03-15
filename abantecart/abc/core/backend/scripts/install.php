@@ -157,7 +157,7 @@ class Install implements ABCExec
         }
         $package_info['package_dir'] = current(glob($package_info['tmp_dir'].'*',GLOB_ONLYDIR)).DIRECTORY_SEPARATOR;
         //2. get package config.xml
-        $config = simplexml_load_string(file_get_contents($package_info['package_dir'].'package.xml'));
+        $config = @simplexml_load_string(file_get_contents($package_info['package_dir'].'package.xml'));
         if ( ! $config) {
             $this->_stop_run($pm, 'Stopped. File "package.xml" not found inside a package!');
         }
@@ -174,7 +174,7 @@ class Install implements ABCExec
             $this->_stop_run($pm, 'Wrong package structure! Cannot find code-file list inside package.xml.');
         }
 
-
+        $error_text = '';
         //check cart version compatibility
         if ( !$pm->checkCartVersion()) {
             if ( $pm->isCorePackage() ) {

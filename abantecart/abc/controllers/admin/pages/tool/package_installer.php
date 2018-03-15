@@ -21,10 +21,12 @@
 namespace abc\controllers\admin;
 
 use abc\core\ABC;
+use abc\core\backend\jobs\APackageInstallerJob;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
+use abc\core\lib\AExtensionManager;
 use abc\core\lib\APackageManager;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
@@ -46,7 +48,7 @@ class ControllerPagesToolPackageInstaller extends AController
 
     public function main()
     {
-        $package_info = &$this->session->data['package_info'];
+        $package_info = $this->session->data['package_info'];
         $extension_key = ! $this->request->get['extension_key'] ? '' : trim($this->request->get['extension_key']);
         $extension_key = ! $this->request->post['extension_key'] ? $extension_key : trim($this->request->post['extension_key']);
         $extension_key = $package_info['extension_key'] ? $package_info['extension_key'] : $extension_key;
@@ -104,8 +106,6 @@ class ControllerPagesToolPackageInstaller extends AController
             unset($package_info['package_dir'], $this->session->data['error'], $error_txt);
         }
         unset($this->session->data['error'], $this->session->data['success']);
-        //run pre-check
-        $this->_pre_check();
 
         $package_info['package_source'] = 'network';
         $this->data['heading_title'] = $this->language->get('heading_title');
@@ -124,9 +124,8 @@ class ControllerPagesToolPackageInstaller extends AController
         $this->_clean_temp_dir();
 
         $this->session->data['package_info'] = array();
-        $package_info =& $this->session->data['package_info'];
+        $package_info = $this->session->data['package_info'];
         $package_info['package_source'] = 'file';
-
         $package_info['tmp_dir'] = $this->_get_temp_dir();
 
         // process post
@@ -138,14 +137,14 @@ class ControllerPagesToolPackageInstaller extends AController
                     unlink($tmp_filename);
                     $this->session->data['error'] .= $this->language->get('error_archive_extension');
                 } else {
-                    $result = move_uploaded_file($tmp_filename,
-                        $package_info['tmp_dir'].$real_file_name);
+                    $result = move_uploaded_file($tmp_filename, $package_info['tmp_dir'].$real_file_name);
                     if ( ! $result || $this->request->files['package_file']['error']) {
                         $this->session->data['error'] .= '<br>Error: '.AHelperUtils::getTextUploadError($this->request->files['package_file']['error']);
                     } else {
                         $package_info['package_name'] = $real_file_name;
                         $package_info['package_size'] = $this->request->files['package_file']['size'];
-                        abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
+                        $this->session->data['package_info'] = $package_info;
+                        abc_redirect($this->html->getSecureURL('tool/package_installer/confirm'));
                     }
                 }
             } else {
@@ -214,10 +213,9 @@ class ControllerPagesToolPackageInstaller extends AController
         }
         unset($this->session->data['error']);
 
-        //run pre-check
-        $this->_pre_check();
 
         $this->data['heading_title'] = $this->language->get('heading_title');
+        $this->data['text_license_agreement'] = $this->language->get('text_license_agreement');
 
         $this->_initTabs('upload');
 
@@ -231,15 +229,103 @@ class ControllerPagesToolPackageInstaller extends AController
 
     protected function _pre_check()
     {
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
-        if ( ! $pmanager->validate()) {
-            $this->data['error_warning'] = implode("<br>",$pmanager->errors);
+        $check_results = [];
+        $package_info = $this->session->data['package_info'];
+        //if package not extracted yet - skip
+        if( !$package_info['package_dir'] ){
+            return false;
         }
+
+        $pm = new APackageManager( $package_info );
+        $pm->extractPackageInfo();
+        $is_core_package = $pm->isCorePackage();
+        // 1. check warnings for package such as version incompatibility etc
+        if ( !$pm->checkCartVersion()) {
+            if ( $is_core_package ) {
+                $error_text = "Error: Can't install package. Your cart version is ".ABC::env('VERSION').". ";
+                $error_text .= "Version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."  required.";
+                $check_results['critical']['common'][] = $error_text;
+            } else {
+                $check_results['warnings']['common'][] = "Current copy of this package is not verified for your version of AbanteCart (v".ABC::env('VERSION').").<br>"
+                    ."Package build is specified for AbanteCart version(s) ".implode(', ',$pm->package_info['supported_cart_versions'])."<br>"
+                    ."This is not a problem, but if you notice issues or incompatibility, please contact extension developer.<br>";
+            }
+        }
+        //2. check destinations and ask about backgroundJob creation for process
+        $result = $pm->validateDestination();
+
+        if( !$result ){
+            $check_results['warnings']['common'][] = "Permission denied for files(directories):<br>".implode("<br>",$pm->errors);
+        }
+        //check extensions pack (install/upgrades) and show info what will do
+        $all_installed = $this->extensions->getDbExtensions();
+        //process for multi-package
+        $em = new AExtensionManager();
+        foreach ($pm->package_info['package_content']['extensions'] as $ext_txt_id) {
+            $config_file = $pm->package_info['package_dir']
+                            ."code".DIRECTORY_SEPARATOR
+                            ."abc".DIRECTORY_SEPARATOR
+                            ."extensions"
+                            .DIRECTORY_SEPARATOR
+                            .$ext_txt_id
+                            .DIRECTORY_SEPARATOR
+                            ."config.xml";
+            if( ($config = @simplexml_load_file( $config_file )) === false ){
+                $check_results['warnings']['extensions'][] = "Extension ".$ext_txt_id." does not contain config.xml file and will be skipped.";
+                continue;
+            }
+
+            $version = (string)$config->version;
+            //if already installed
+            if (in_array($ext_txt_id, $all_installed)) {
+                $installed_info = $this->extensions->getExtensionInfo( $ext_txt_id );
+                $installed_version = $installed_info['version'];
+                if (AHelperUtils::versionCompare($version, $installed_version, '<=')) {
+                    // if installed version the same or higher - do nothing
+                    $check_results['warnings']['extensions'][] = "Extension ".$ext_txt_id." will be skipped. Same or higher version(".$installed_version.") already installed.";
+                    continue;
+                }
+                $check_results['messages']['extensions'][] =  "Extension ".$ext_txt_id." will be upgraded from v".$installed_version." up to v".$version;
+            }else{
+              if ( !$em->validateCoreVersion( $ext_txt_id, $config )) {
+                    // if installed version the same or higher - do nothing
+                    $check_results['warnings']['extensions'][] = implode("<br>",$em->errors);
+                    continue;
+              }
+              $check_results['messages']['extensions'][] = "Extension ".$ext_txt_id." will be installed.";
+            }
+        }
+
+        //in case when all of extensions cannot be installed - mark as warnings as critical
+        if( !$is_core_package && !sizeof($check_results['critical']) && !sizeof($check_results['messages']) && $check_results['warnings']){
+            $check_results['critical']['extensions'] = $check_results['warnings']['extensions'];
+            unset($check_results['warnings']['extensions']);
+        }
+
+        if( $is_core_package && !sizeof($check_results['critical'])){
+            $check_results['messages']['core'][] = 'Upgrade Package will be processed.';
+        }
+
+        //add message about background Job
+        if( !$check_results['critical'] && $check_results['warnings']){
+            if( ABC::classes('\abc\core\backend\jobs\APackageInstallerJob')) {
+                $check_results['need_background_job'] = true;
+                $check_results['messages'][][] = "Do you want to create background job for this process?";
+            }else{
+                $check_results['critical']  = $check_results['warnings'];
+                $check_results['critical'][][] = 'This install process cannot be run in UI-mode. Try to run it in cli-mode with "abcexec" script.'
+                .' See more details <a href="???">here</a>';
+                unset($check_results['warnings']);
+            }
+        }else{
+            $check_results['need_background_job'] = false;
+        }
+
+        return $check_results;
     }
 
     protected function _initTabs($active = null)
     {
-
         $this->data['tabs'] = array();
         $this->data['tabs']['key'] = array(
             'href' => $this->html->getSecureURL('tool/package_installer'),
@@ -261,7 +347,7 @@ class ControllerPagesToolPackageInstaller extends AController
     public function download()
     {
         // for short code
-        $package_info =& $this->session->data['package_info'];
+        $package_info = $this->session->data['package_info'];
         $extension_key = trim($this->request->post_or_get('extension_key'));
         $disclaimer = false;
         $mp_token = '';
@@ -292,8 +378,9 @@ class ControllerPagesToolPackageInstaller extends AController
                 $this->session->data['installer_disclaimer'] = true;
             }
         }
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
-        if ( $pmanager->isCorePackage($extension_key)) {
+        $package_info = $this->session->data['package_info'];
+        $pm = new APackageManager( $package_info );
+        if ( $pm->isCorePackage($extension_key)) {
             $disclaimer = true;
         }
 
@@ -412,16 +499,16 @@ class ControllerPagesToolPackageInstaller extends AController
             $url = $package_info['package_url'];
         }
 
-        $headers = $pmanager->getRemoteFileHeaders($url);
+        $headers = $pm->getRemoteFileHeaders($url);
         if ( ! $headers) {
-            $error_text = implode("<br>", $pmanager->errors);
+            $error_text = implode("<br>", $pm->errors);
             $error_text = empty($error_text) ? 'Unknown error happened.' : $error_text;
             $this->session->data['error'] = $this->language->get('error_mp')." ".$error_text;
             abc_redirect($this->_get_begin_href());
         }
         //if we have json returned, something went wrong.
         if (preg_match("/application\/json/", $headers['Content-Type'])) {
-            $error = $pmanager->getRemoteFile($url, false);
+            $error = $pm->getRemoteFile($url, false);
             $error_text = $error['error'];
             $error_text = empty($error_text) ? 'Unknown error happened.' : $error_text;
             $this->session->data['error'] = $this->language->get('error_mp')." ".$error_text;
@@ -492,48 +579,22 @@ class ControllerPagesToolPackageInstaller extends AController
         $this->processTemplate('pages/tool/package_installer_download.tpl');
     }
 
-    public function agreement()
+    public function confirm()
     {
-
-        $package_info = &$this->session->data['package_info'];
-
-        // if we got decision
-        if ($this->request->is_POST()) {
-            // if does not agree  with agreement of filesize
-            if ($this->request->post['disagree'] == 1) {
-                $this->_removeTempFiles();
-                unset($this->session->data['package_info']);
-                abc_redirect($this->html->getSecureURL('extension/extensions/extensions'));
-            } elseif ($this->request->post['agree_incompatibility']) {
-                $package_info['confirm_version_incompatibility'] = true;
-                abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
-            } // if agree
-            elseif ($this->request->post['agree']) {
-                abc_redirect($this->html->getSecureURL('tool/package_installer/install'));
-            } elseif ( ! $this->request->post['agree'] && ! isset($this->request->post['ftp_user'])) {
-                $this->_removeTempFiles('dir');
-                abc_redirect($this->_get_begin_href());
-            }
-        }
-
+        $package_info = $this->session->data['package_info'];
+        $pm = new APackageManager( $package_info );
         $this->loadLanguage('tool/package_installer');
         $package_name = $package_info['package_name'];
         if ( ! $package_name) { // if direct link - redirect to the beginning
             abc_redirect($this->_get_begin_href());
         }
 
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
         //unpack package
-
-        // if package not unpacked - redirect to the begin and show error message
-        if ( ! is_dir($package_info['tmp_dir'].$package_info['extension_key'])) {
-            mkdir($package_info['tmp_dir'].$package_info['extension_key'], 0777);
-        }
-        if ( ! $pmanager->unpack($package_info['tmp_dir'].$package_name, $package_info['tmp_dir'].$package_info['extension_key'].'/')) {
+        if ( ! $pm->unpack($package_info['tmp_dir'].$package_name, $package_info['tmp_dir'])) {
             $this->session->data['error'] = sprintf($this->language->get('error_unpack'), $package_info['tmp_dir'].$package_name);
             abc_redirect($this->_get_begin_href());
         }
-
+        $package_info = $pm->package_info;
         if ( ! $package_info['package_dir'] || !is_dir($package_info['package_dir'])) {
             $error = 'Error: Cannot to find package directory after unpacking archive. ';
             $error = new AError ($error);
@@ -548,9 +609,11 @@ class ControllerPagesToolPackageInstaller extends AController
         }
 
         // so.. we need to know about install mode of this package
-        $result = $pmanager->extractPackageInfo();
+        $result = $pm->extractPackageInfo();
+        $package_info = $pm->package_info;
         if ( ! $result) {
             $this->session->data['error'] = $this->html->convertLinks($this->language->get('error_package_config_xml'));
+            $this->log->write(implode("\n",$pm->errors));
             $this->_removeTempFiles();
             abc_redirect($this->_get_begin_href());
         }
@@ -559,90 +622,46 @@ class ControllerPagesToolPackageInstaller extends AController
             || ($package_info['package_content']['core'] && $package_info['package_content']['extensions'])
         ) {
             $this->session->data['error'] = $this->language->get('error_package_structure');
+            $this->log->write(implode("\n",$pm->errors));
             $this->_removeTempFiles();
             abc_redirect($this->_get_begin_href());
         }
 
-        //check cart version compatibility
-        if ( ! isset($package_info['confirm_version_incompatibility'])) {
-            if ( !$pmanager->checkCartVersion()) {
-                if ($pmanager->isCorePackage()) {
-                    $this->session->data['error'] = $this->language->get('error_package_version_compatibility');
-                    abc_redirect($this->html->getSecureURL('tool/package_installer'));
-                } else {
-                    abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
+        $this->session->data['package_info'] = $pm->getPackageInfo();
+        //check package before install
+        $this->data['check_results'] = $this->_pre_check();
+
+        //remove temporary files if some critical errors presents
+        if( $this->data['check_results']['critical'] ){
+            $this->_removeTempFiles();
+        }
+
+
+        // if all fine show license confirm or release notes
+        if( !isset($this->data['check_results']['critical'])) {
+            if ( is_file( $package_info['package_dir']."/license.txt" ) ) {
+                $this->data['license_text'] = file_get_contents($package_info['package_dir']."/license.txt");
+
+                //detect encoding of file
+                $is_utf8 = mb_detect_encoding($this->data['license_text'], ABC::env('APP_CHARSET'), true);
+                if ( ! $is_utf8) {
+                    $this->data['license_text'] = '';
+                    $err = new AError('Incorrect character set encoding of file '.$package_info['package_dir']."/license.txt".' has been detected.');
+                    $err->toLog();
                 }
+
+                $this->data['license_text'] = htmlentities($this->data['license_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+                $this->data['license_text'] = nl2br($this->data['license_text']);
+
+            }
+            if ( is_file( $package_info['package_dir']."/release_notes.txt" ) ) {
+                $this->data['release_notes'] = file_get_contents($package_info['package_dir']."/release_notes.txt");
+                $this->data['release_notes'] = htmlentities($this->data['release_notes'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+                $this->data['release_notes'] = nl2br($this->data['release_notes']);
             }
         }
 
-        // if we were redirected
-        if ($this->request->is_GET()) {
-            //check  write permissions
-            // find directory from app_root_dir
-            $non_writables = array();
-            if ($package_info['package_content']['extensions']) {
-                $dst_dirs = $pmanager->getDestinationDirectories();
-                $ftp_mode = false;
-                // if even one destination directory is not writable - use ftp mode
-                if ( ! is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
-                    $non_writables[] = ABC::env('DIR_APP_EXTENSIONS');
-                }
-
-                if ($dst_dirs) {
-                    foreach ($dst_dirs as $dir) {
-                        if ( ! is_writable(ABC::env('DIR_ROOT').'/'.$dir) && file_exists(ABC::env('DIR_ROOT').'/'.$dir)) {
-                            // enable ftp-mode
-                            $ftp_mode = true;
-                            $non_writables[] = ABC::env('DIR_ROOT').'/'.$dir;
-                        }
-                    }
-                }
-            } else {
-                foreach ($package_info['package_content']['core'] as $corefile) {
-                    $corefile_dir = pathinfo(ABC::env('DIR_ROOT').'/'.$corefile, PATHINFO_DIRNAME);
-                    if (( ! is_writable(ABC::env('DIR_ROOT').'/'.$corefile) && file_exists(ABC::env('DIR_ROOT').'/'.$corefile))) {
-                        // enable ftp-mode
-                        $ftp_mode = true;
-                        $non_writables[] = ABC::env('DIR_ROOT').'/'.$corefile;
-                    } else {
-                        if ( ! is_writable($corefile_dir) && is_dir($corefile_dir)) {
-                            // enable ftp-mode
-                            $ftp_mode = true;
-                            $non_writables[] = $corefile_dir;
-                        } else {
-                            if ( ! is_writable($corefile_dir) && ! is_dir($corefile_dir)) {
-                                //detect non-writable parent directory
-                                $dir_part = explode('/', $corefile_dir);
-                                $d = '';
-                                while ( ! is_dir($d)) {
-                                    array_pop($dir_part);
-                                    $d = implode('/', $dir_part);
-                                    if (is_dir($d) && ! is_writable($d)) {
-                                        // enable ftp-mode
-                                        $ftp_mode = true;
-                                        $non_writables[] = $d;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            $non_writables = array_unique($non_writables);
-        }
-
-        if ( ! $package_info['tmp_dir']) {
-            $package_info['tmp_dir'] = $this->_get_temp_dir();
-        }
-
-        // if all fine show license agreement
-        if ( ! file_exists($package_info['package_dir']."/license.txt") && ! $ftp_mode) {
-            abc_redirect($this->html->getSecureURL('tool/package_installer/install'));
-        }
-
-        $this->data['license_text'] = '';
-
+        $this->data['heading_title'] = $this->language->get('heading_title_confirmation');
         $this->document->initBreadcrumb(array(
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
@@ -665,194 +684,81 @@ class ControllerPagesToolPackageInstaller extends AController
         $this->data['form']['form_open'] = $form->getFieldHtml(array(
             'type'   => 'form',
             'name'   => 'Frm',
-            'action' => $this->html->getSecureURL('tool/package_installer/agreement'),
+            'action' => $this->html->getSecureURL('tool/package_installer/install'),
             'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
         ));
 
-        //version incompatibility confirmation
-        if ((isset($package_info['confirm_version_incompatibility']) && ! $package_info['confirm_version_incompatibility'])) {
-
-            $this->data['agreement_text'] = $package_info['version_incompatibility_text'];
-
-            $this->data['form']['disagree_button'] = $form->getFieldHtml(array(
-                'type' => 'button',
-                'href' => $this->_get_begin_href(),
-                'text' => $this->language->get('text_interrupt'),
-            ));
-
-            $this->data['form']['submit'] = $form->getFieldHtml(array(
-                'type' => 'button',
-                'text' => $this->language->get('text_continue'),
-            ));
-
-            $this->data['form']['agree'] = $form->getFieldHtml(array(
+        if($this->data['check_results']['need_background_job']) {
+            $this->data['form']['nbg'] = $form->getFieldHtml( array(
                 'type'  => 'hidden',
-                'name'  => 'agree_incompatibility',
-                'value' => '0',
-            ));
-            $template = 'pages/tool/package_installer_agreement.tpl';
-
-        } // confirmation for ftp access to file system
-        elseif ($ftp_mode) {
-            $template = 'pages/tool/package_installer_ftp_form.tpl';
-            $ftp_user = $package_info['ftp_user'] ? $package_info['ftp_user'] : '';
-            $ftp_host = $package_info['ftp_host'] ? $package_info['ftp_host'] : '';
-
-            $this->data['form']['fuser'] = $form->getFieldHtml(array(
-                'type'     => 'input',
-                'name'     => 'ftp_user',
-                'value'    => $ftp_user,
-                'require'  => true,
-                'help_url' => $this->gen_help_url('ftp_user'),
-                'style'    => 'medium-field',
-            ));
-
-            $this->data['form']['fpass'] = $form->getFieldHtml(array(
-                'type'    => 'password',
-                'name'    => 'ftp_password',
-                'require' => true,
-                'value'   => '',
-                'style'   => 'medium-field',
-            ));
-
-            $this->data['form']['fhost'] = $form->getFieldHtml(array(
-                'type'     => 'input',
-                'name'     => 'ftp_host',
-                'value'    => $ftp_host,
-                'help_url' => $this->gen_help_url('ftp_host'),
-                'style'    => 'medium-field',
-            ));
-
-            $this->data['form']['submit'] = $form->getFieldHtml(array(
-                'type' => 'button',
-                'text' => $this->language->get('text_continue'),
-            ));
-
-            $this->data['fuser'] = $this->language->get('text_ftp_user');
-            $this->data['fpass'] = $this->language->get('text_ftp_password');
-            $this->data['fhost'] = $this->language->get('text_ftp_host');
-            $this->data['heading_title'] = $this->language->get('heading_title_ftp');
-            $this->data['warning_ftp'] = $this->language->get('warning_ftp');
-            $this->data['warning_ftp_details'] = 'Need write permission for:<br><ul><li>'.implode('</li><li>', $non_writables)."</li></ul>";
-
-        } // license agreement
-        else {
-            $license_filepath = $package_info['package_dir']."/license.txt";
-            $agreement_text = '';
-            if (file_exists($license_filepath)) {
-                $agreement_text = file_get_contents($license_filepath);
-                //detect encoding of file
-                $is_utf8 = mb_detect_encoding($agreement_text, ABC::env('APP_CHARSET'), true);
-                if ( ! $is_utf8) {
-                    $agreement_text = 'Oops. Something goes wrong. Try to continue or check error log for details.';
-                    $err = new AError('Incorrect character set encoding of file '.$license_filepath.' has been detected.');
-                    $err->toLog();
-                }
-            }
-            $agreement_text = htmlentities($agreement_text, ENT_QUOTES, ABC::env('APP_CHARSET'));
-            $this->data['agreement_text'] = nl2br($agreement_text);
-
-            $template = 'pages/tool/package_installer_agreement.tpl';
-
-            $this->data['form']['agree'] = $form->getFieldHtml(array(
-                'type'  => 'hidden',
-                'name'  => 'agree',
-                'value' => '0',
-            ));
-
-            $this->data['text_agree'] = $this->language->get('text_i_agree');
-            $this->data['form']['disagree_button'] = $form->getFieldHtml(array(
-                'type' => 'button',
-                'href' => $this->_get_begin_href(),
-                'text' => $this->language->get('text_disagree'),
-            ));
-
-            $this->data['heading_title'] = $this->language->get('heading_title_license');
-            $this->data['form']['submit'] = $form->getFieldHtml(array(
-                'type' => 'button',
-                'text' => $this->language->get('text_agree'),
-            ));
+                'name'  => 'need_background_job',
+                'value' => '1',
+            ) );
         }
 
+        $this->data['text_agree'] = $this->language->get('text_i_agree');
+        $this->data['form']['disagree_button'] = $form->getFieldHtml(array(
+            'type' => 'button',
+            'href' => $this->_get_begin_href(),
+            'text' => $this->language->get('text_disagree'),
+        ));
+
+
+        $this->data['form']['submit'] = $form->getFieldHtml(array(
+            'type' => 'button',
+            'text' => $this->language->get('text_agree'),
+        ));
+
+
         $this->view->batchAssign($this->data);
-        $this->processTemplate($template);
+        $this->processTemplate('pages/tool/package_installer_confirm.tpl');
     }
 
     public function install()
     {
         $this->loadLanguage('tool/package_installer');
-        $package_info = &$this->session->data['package_info'];
-        $package_id = $package_info['package_id'];
+        $package_info = $this->session->data['package_info'];
+
         $package_dirname = $package_info['package_dir'];
-        $temp_dirname = $package_info['tmp_dir'];
-        $extension_id = '';
         $upgrade_confirmed = null;
 
-        if ($this->request->is_POST() && $this->request->post['disagree'] == 1) {
-            //if user disagree clean up and exit
-            $this->_removeTempFiles();
-            unset($this->session->data['package_info']);
+        if ( !$package_info || !$package_dirname) {
             abc_redirect($this->html->getSecureURL('extension/extensions/extensions'));
         }
 
-        if ( ! $package_id || ! file_exists($temp_dirname.$package_dirname."/code")) {
-            // if error
+        if ( !file_exists( $package_dirname."/code" )) {
             $this->session->data['error'] = $this->language->get('error_package_structure');
             $this->_removeTempFiles();
             abc_redirect($this->_get_begin_href());
         }
 
-        if ($this->request->is_POST()) {
-            $upgrade_confirmed = $this->request->post['agree'] == 2 ? true : false;
-            $license_agree = $this->request->post['agree'] == 1 ? true : false;
-            unset($this->request->post['agree']);
+        $check_results = $this->_pre_check();
+        if($check_results['critical']){
+            abc_redirect($this->html->getSecureURL('tool/package_installer/confirm'));
         }
-
-        //check for previous version of package and create backup for it
-        if ($package_info['package_content']['extensions']) {
-            //process for multi-package
-            foreach ($package_info['package_content']['extensions'] as $k => $ext) {
-                $result = $this->_installExtension($ext, $upgrade_confirmed, $license_agree);
-                unset($license_agree);
-                if ($result !== true) {
-                    if (isset($result['license'])) {
-                        $this->data['agreement_text'] = file_get_contents($temp_dirname.$package_dirname."/code/extensions/".$ext."/license.txt");
-                        $this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
-                        $this->data['agreement_text'] = nl2br($this->data['agreement_text']);
-                    } else {
-                        $this->data['agreement_text'] = '<h2>Extension "'.$ext.'" will be upgrade from version '.$result['upgrade'].'</h2>';
-                    }
-                    break;
+        //if need to create background job
+        if( $this->request->post_or_get('nbg') ){
+            if( !ABC::classes('\abc\core\backend\jobs\APackageInstallerJob')){
+                $this->session->data['error'] = 'Error occurred during creating of background Job. Job handler Not Set.';
+            }else {
+                $result = AHelperUtils::createBackgroundJob( new APackageInstallerJob( $package_info ) );
+                if ( $result ) {
+                    $this->session->data['success'] = 'Background Job has been created successfully and will be run soon';
                 } else {
-                    unset($package_info['package_content']['extensions'][$k]);
+                    $this->session->data['error'] = 'Error occurred during creating of background Job. See error log for details.';
                 }
-                $extension_id = $ext;
             }
-            $this->data['heading_title'] = $this->language->get('heading_title_license').'. Extension: '.$ext;
+            abc_redirect($this->html->getSecureURL('tool/package_installer'));
         }
 
+        //if run install process directly
+        $pm = new APackageManager($this->session->data['package_info']);
         // for cart upgrade
-        if ($package_info['package_content']['core']) {
-
-            if ($upgrade_confirmed) {
-                $result = $this->_upgradeCore();
-                if ($result === false) {
-                    $this->_removeTempFiles();
-                    unset($this->session->data['package_info']);
-                    abc_redirect($this->_get_begin_href());
-                }
-            } else {
-                $this->data['heading_title'] = $this->language->get('text_core_upgrade_title');
-                $this->data['attention_text'] = sprintf($this->language->get('text_core_upgrade_attention'), $package_info['package_version'])."\n\n\n\n";
-                $this->data['warning_text'] = $this->language->get('text_core_upgrade_warning');
-
-                $release_notes = $temp_dirname.$package_dirname."/release_notes.txt";
-                if (file_exists($release_notes)) {
-                    $this->data['agreement_text'] .= file_get_contents($release_notes);
-                }
-                $this->data['agreement_text'] = htmlentities($this->data['agreement_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
-                $this->data['agreement_text'] = nl2br($this->data['agreement_text']);
-            }
+        if ( $pm->isCorePackage() ) {
+            $result = $pm->upgradeCore();
+        }else{
+            //process for multi-package
+            $result = $pm->installPackageExtensions();
         }
 
         // if all  was installed
@@ -862,49 +768,22 @@ class ControllerPagesToolPackageInstaller extends AController
             $this->cache->remove('*');
             unset($this->session->data['package_info']);
             $this->session->data['success'] = $this->language->get('text_success');
-            if ($extension_id) {
-                abc_redirect($this->html->getSecureURL('extension/extensions/edit', '&extension='.$extension_id));
+
+            if ($pm->package_info['installed']) {
+                if( sizeof($pm->package_info['installed'])==1 ) {
+                    $redirect_url = $this->html->getSecureURL( 'extension/extensions', '&extension='.$pm->package_info['installed'][0] );
+                }else{
+                    $redirect_url = $this->html->getSecureURL( 'extension/extensions' );
+                }
             } else {
-                abc_redirect($this->html->getSecureURL('tool/install_upgrade_history'));
+                $redirect_url = $this->html->getSecureURL('tool/install_upgrade_history');
             }
+        }else{
+            $this->session->data['error'] = implode("<br>", $pm->errors);
+            $redirect_url = $this->html->getSecureURL('tool/install_upgrade_history');
         }
-
-        $form = new AForm('ST');
-        $form->setForm(array('form_name' => 'Frm'));
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
-            'type'   => 'form',
-            'name'   => 'Frm',
-            'action' => $this->html->getSecureURL('tool/package_installer/install'),
-        ));
-        if (isset($result['license'])) {
-            $this->data['form']['hidden'] = $form->getFieldHtml(array(
-                'id'    => 'agree',
-                'type'  => 'hidden',
-                'name'  => 'agree',
-                'value' => 1,
-            ));
-        } else {
-            $this->data['form']['hidden'] = $form->getFieldHtml(array(
-                'id'    => 'agree',
-                'type'  => 'hidden',
-                'name'  => 'agree',
-                'value' => 2,
-            ));
-        }
-
-        $this->data['form']['disagree_button'] = $form->getFieldHtml(array(
-            'type' => 'button',
-            'href' => $this->_get_begin_href(),
-            'text' => $this->language->get('text_disagree'),
-        ));
-
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
-            'type' => 'button',
-            'text' => $this->language->get('text_agree'),
-        ));
-
-        $this->view->batchAssign($this->data);
-        $this->processTemplate('pages/tool/package_installer_agreement.tpl');
+        $this->_removeTempFiles();
+        abc_redirect( $redirect_url );
     }
 
     /**
@@ -918,13 +797,16 @@ class ControllerPagesToolPackageInstaller extends AController
      */
     protected function _installExtension($extension_id = '', $confirmed = false, $agree = 0)
     {
-        $package_info = &$this->session->data['package_info'];
+        $package_info = $this->session->data['package_info'];
         $package_dirname = $package_info['package_dir'];
-        $temp_dirname = $package_info['tmp_dir'];
         /**
          * @var  \DOMDocument $config
          */
-        $config = simplexml_load_string(file_get_contents($temp_dirname.$package_dirname."/code/extensions/".$extension_id.'/config.xml'));
+        $config = simplexml_load_file($package_dirname."/code/extensions/".$extension_id.'/config.xml');
+        if( $config === false){
+            $this->session->data['error'] = 'Extension '.$extension_id.' cannot be installed. config.xml file not found.';
+            return false;
+        }
 
         $version = (string)$config->version;
         $type = (string)$config->type;
@@ -938,7 +820,6 @@ class ControllerPagesToolPackageInstaller extends AController
             $already_installed = true;
             $installed_info = $this->extensions->getExtensionInfo($extension_id);
             $installed_version = $installed_info['version'];
-
             if (AHelperUtils::versionCompare($version, $installed_version, '<=')) {
                 // if installed version the same or higher - do nothing
                 return true;
@@ -948,27 +829,25 @@ class ControllerPagesToolPackageInstaller extends AController
                 }
             }
         }
-
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
+        $package_info = $this->session->data['package_info'];
+        $pm = new APackageManager( $package_info );
         // #2. backup previous version
         if ($already_installed || file_exists(ABC::env('DIR_APP_EXTENSIONS').$extension_id)) {
             if ( ! is_writable(ABC::env('DIR_APP_EXTENSIONS').$extension_id)) {
                 $this->session->data['error'] = $this->language->get('error_move_backup').ABC::env('DIR_APP_EXTENSIONS').$extension_id;
                 abc_redirect($this->_get_begin_href());
             } else {
-                if ( ! $pmanager->backupPreviousExtension($extension_id)) {
-                    $this->session->data['error'] = implode("<br>",$pmanager->errors);
+                if ( ! $pm->backupPreviousExtension($extension_id)) {
+                    $this->session->data['error'] = implode("<br>",$pm->errors);
                     abc_redirect($this->_get_begin_href());
                 }
             }
-
         }
 
         // #3. if all fine - copy extension package files
-
-            $result = rename($package_dirname."/code/abc/extensions/".$extension_id, ABC::env('DIR_APP_EXTENSIONS').$extension_id);
-            //this method requires permission set to be set
-            $pmanager->chmod_R(ABC::env('DIR_APP_EXTENSIONS').$extension_id, 0777, 0777);
+        $result = rename($package_dirname."/code/abc/extensions/".$extension_id, ABC::env('DIR_APP_EXTENSIONS').$extension_id);
+        //this method requires permission set to be set
+        $pm->chmod_R(ABC::env('DIR_APP_EXTENSIONS').$extension_id, 0777, 0777);
 
 
         /*
@@ -989,8 +868,8 @@ class ControllerPagesToolPackageInstaller extends AController
         // #4. if copied successfully - install(upgrade)
         if ($result) {
             $install_mode = $already_installed ? 'upgrade' : 'install';
-            if ( ! $pmanager->installExtension($extension_id, $type, $version, $install_mode)) {
-                $this->session->data['error'] .= $this->language->get('error_install').'<br><br>'.implode("<br>",$pmanager->errors);
+            if ( ! $pm->installExtension($extension_id, $type, $version, $install_mode)) {
+                $this->session->data['error'] .= $this->language->get('error_install').'<br><br>'.implode("<br>",$pm->errors);
                 $this->_removeTempFiles('dir');
                 abc_redirect($this->_get_begin_href());
             }
@@ -999,10 +878,10 @@ class ControllerPagesToolPackageInstaller extends AController
                 $this->session->data['error'] = $this->language->get('error_move_ftp')
                                                 .ABC::env('DIR_APP_EXTENSIONS')
                                                 .$extension_id.'<br><br>'
-                                                .implode("<br>",$pmanager->errors);
-                abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
+                                                .implode("<br>",$pm->errors);
+                abc_redirect($this->html->getSecureURL('tool/package_installer/confirm'));
             } else {
-                $this->session->data['error'] = $this->language->get('error_move').ABC::env('DIR_APP_EXTENSIONS').$extension_id.'<br><br>'.implode("<br>",$pmanager->errors);
+                $this->session->data['error'] = $this->language->get('error_move').ABC::env('DIR_APP_EXTENSIONS').$extension_id.'<br><br>'.implode("<br>",$pm->errors);
                 $this->_removeTempFiles('dir');
                 abc_redirect($this->_get_begin_href());
             }
@@ -1016,7 +895,7 @@ class ControllerPagesToolPackageInstaller extends AController
      */
     protected function _upgradeCore()
     {
-        $package_info = &$this->session->data['package_info'];
+        $package_info = $this->session->data['package_info'];
         if (AHelperUtils::versionCompare(ABC::env('VERSION'), $package_info['package_version'], ">=")) {
 
             $this->session->data['error'] = sprintf( $this->language->get('error_core_version'), ABC::env('VERSION')).$package_info['package_version'].'!';
@@ -1025,64 +904,14 @@ class ControllerPagesToolPackageInstaller extends AController
         }
 
 
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
-        /*
-         * Commented by decision do not use it in community version.
-         * Pasted alerts before upgrade process start.
-         * Do not remove code yet.
-         *
-        //backup files
-        $backup = new ABackup('abantecart_' . str_replace('.','',ABC::env('VERSION')));
-        //interrupt if backup directory is inaccessible
-        if ($backup->error) {
-            $this->session->data['error'] = implode("\n", $backup->error);
-            return false;
-        }
-        foreach ($corefiles as $core_file) {
-            if (file_exists(DIR_ROOT . '/' . $core_file)) {
-                if (!$backup->backupFile(DIR_ROOT . '/' . $core_file, false)) {
-                    return false;
-                }
-            }
-        }
-        // backup database
-        if ($backup->dumpDatabase()) {
-            $backup_dirname = $backup->getBackupName();
-            if ($backup_dirname) {
-                if (!$backup->dumpDatabase()) {
-                    $this->session->data['error'] = implode("\n", $backup->error);
-                    return false;
-                }
-                if (!$backup->archive(ABC::env('DIR_BACKUP') . $backup_dirname . '.tar.gz', ABC::env('DIR_BACKUP'), $backup_dirname)) {
-                    $this->session->data['error'] = implode("\n", $backup->error);
-                    return false;
-                }
-            } else {
-                $this->session->data['error'] = 'Error: Unknown directory name for backup.';
-                return false;
-            }
-
-            $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-            $install_upgrade_history->addRows(
-                    array(
-                            'date_added' => date("Y-m-d H:i:s", time()),
-                            'name' => 'Backup before core upgrade. Core version: ' . ABC::env('VERSION'),
-                            'version' => ABC::env('VERSION'),
-                            'backup_file' => $backup_dirname . '.tar.gz',
-                            'backup_date' => date("Y-m-d H:i:s", time()),
-                            'type' => 'backup',
-                            'user' => $this->user->getUsername() ));
-        } else {
-            $this->session->data['error'] = implode("\n", $backup->error);
-            return false;
-        }*/
+        $pm = new APackageManager( $this->session->data['package_info'] );
 
         //replace files
-        $pmanager->replaceCoreFiles();
+        $pm->replaceCoreFiles();
         //run sql and php upgrade procedure files
         $package_dirname = $package_info['package_dir'];
-        if ($pmanager->errors) {
-            $this->session->data['error'] = implode("<br>",$pmanager->errors);
+        if ($pm->errors) {
+            $this->session->data['error'] = implode("<br>",$pm->errors);
         }
         /**
          * @var \SimpleXMLElement|\DOMDocument $config
@@ -1093,10 +922,10 @@ class ControllerPagesToolPackageInstaller extends AController
             unset($this->session->data['package_info']);
             abc_redirect($this->_get_begin_href());
         }
-        $pmanager->upgradeCore($config);
-        $pmanager->updateCoreVersion((string)$config->version);
-        if ($pmanager->errors) {
-            $this->session->data['error'] .= implode('<br>',$pmanager->errors);
+        $pm->upgradeCore();
+        $pm->updateCoreVersion((string)$config->version);
+        if ($pm->errors) {
+            $this->session->data['error'] .= implode('<br>',$pm->errors);
         }
 
         return true;
@@ -1118,36 +947,18 @@ class ControllerPagesToolPackageInstaller extends AController
         return null;
     }
 
-    protected function _removeTempFiles($target = 'both')
+    protected function _removeTempFiles()
     {
-        $package_info = &$this->session->data['package_info'];
-        if ( ! in_array($target, array('both', 'pack', 'dir'))
-            || ! $package_info['package_dir']
-        ) {
-            return false;
+
+        $pm = new APackageManager( $this->session->data['package_info'] );
+        $dirs = glob($pm->getTempDir().'*');
+        $result = true;
+        foreach($dirs as $dir) {
+            $result = !$pm->removeDir( $dir ) ? false : $result;
         }
 
-        //set ftp to false. it's not needed for temp files clean, because all files was created by apache user
-        $this->session->data['package_info']['ftp'] = false;
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
-        switch ($target) {
-            case 'both':
-                $result = $pmanager->removeDir($package_info['package_dir']);
-                @unlink($package_info['tmp_dir'].$package_info['package_name']);
-                break;
-            case 'pack':
-                $result = @unlink($package_info['tmp_dir'].$package_info['package_name']);
-                break;
-            case 'dir':
-                $result = $pmanager->removeDir($package_info['package_dir']);
-                break;
-            default:
-                $result = null;
-                break;
-        }
         if ( ! $result) {
-            $this->session->data['error'] = implode("<br>",$pmanager->errors);
-
+            $this->session->data['error'] = implode("<br>",$pm->errors);
             return false;
         }
 
@@ -1156,8 +967,9 @@ class ControllerPagesToolPackageInstaller extends AController
 
     protected function _get_temp_dir()
     {
-        $pmanager = new APackageManager( $this->session->data['package_info'] );
-        return $pmanager->getTempDir();
+        $package_info = (array)$this->session->data['package_info'];
+        $pm = new APackageManager( $package_info );
+        return $pm->getTempDir();
     }
 
     protected function _get_begin_href()
@@ -1168,7 +980,14 @@ class ControllerPagesToolPackageInstaller extends AController
     // this method calls before installation of package
     protected function _clean_temp_dir()
     {
-            $pmanager = new APackageManager( $this->session->data['package_info'] );
-            $pmanager->cleanTempDir();
+       $package_info = (array)$this->session->data['package_info'];
+       $pm = new APackageManager( $package_info );
+       $pm->cleanTempDir();
+    }
+
+    protected function _save_session_package_info($package_info){
+        foreach($package_info as $k=>$v){
+            $this->session->data['package_info'][$k] = $v;
+        }
     }
 }

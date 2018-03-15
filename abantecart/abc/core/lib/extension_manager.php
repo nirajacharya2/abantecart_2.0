@@ -98,6 +98,9 @@ class AExtensionManager
             $type = 'extensions';
             $category = $status = $priority = $version = $license_key = '';
         }
+        if(!$key){
+            return false;
+        }
         $sql = "SELECT extension_id FROM ".$this->db->table( "extensions" )." WHERE `key`= '".$this->db->escape( $key )."'";
         $res = $this->db->query( $sql );
         if ( $res->num_rows ) {
@@ -512,6 +515,9 @@ class AExtensionManager
      */
     public function uninstall( $name, $config )
     {
+        if( !$name ) {
+            return false;
+        }
 
         // check dependencies
         $validate = $this->checkDependantsBeforeUninstall( $name );
@@ -600,23 +606,22 @@ class AExtensionManager
             'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
         ) );
         $this->db->query( "DELETE FROM ".$this->db->table( "extensions" )." 
-                           WHERE `type` = '".$info['type']."' AND `key` = '".$this->db->escape( $extension_txt_id )."'" );
+                           WHERE `type` = '".$info['type']."' 
+                                AND `key` = '".$this->db->escape( $extension_txt_id )."'" );
         $this->deleteDependant( $extension_txt_id );
 
         $pmanager = new APackageManager( [] );
         $result = $pmanager->removeDir( ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id );
-
         if ( ! $result ) {
-            $this->errors[] = "Error: Cannot to delete file or directory: '".ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id."'. No file permissions, change permissions to 777 with your FTP access";
+            $this->errors[] = "Error: Cannot to delete file or directory: '".ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id."'."
+                            . "No file permissions, change permissions to 777 with your FTP access";
             $this->errors += $pmanager->errors;
         }
 
         // refresh data about updates
         $this->load->model( 'tool/updater' );
         $this->model_tool_updater->check4updates();
-
         $this->cache->remove( 'extensions' );
-
         return true;
     }
 
@@ -627,14 +632,12 @@ class AExtensionManager
      */
     public function validate( $extension_txt_id )
     {
-
         $result = $this->isExtensionInstalled( $extension_txt_id );
         if ( !$result ) {
             return false;
         }
         // get config.xml
         $config = AHelperUtils::getExtensionConfigXml( $extension_txt_id );
-
         $result = $this->validateCoreVersion( $extension_txt_id, $config );
         if ( ! $result ) {
             return false;
@@ -661,7 +664,6 @@ class AExtensionManager
      */
     public function validateDependencies( $extension_txt_id, $config )
     {
-
         $extensions = $this->extensions->getEnabledExtensions();
         $all_extensions = $this->extensions->getExtensionsList();
         $versions = array();
@@ -742,7 +744,6 @@ class AExtensionManager
     {
         $installed = $this->config->get( $extension_txt_id.'_status' );
         if( $installed !== null) {
-            $this->errors[] = 'Extension '.$extension_txt_id.' is already installed!';
             return false;
         }
         return true;
@@ -758,6 +759,7 @@ class AExtensionManager
      */
     public function validateCoreVersion( $extension_txt_id, $config )
     {
+        $this->errors = [];
         if ( ! isset( $config->cartversions->item ) ) {
             $this->errors[] = 'Error: config file of extension does not contain any information about versions of AbanteCart where it can be run.';
             return false;
@@ -769,14 +771,15 @@ class AExtensionManager
         }
         // check is cart version presents on extension cart version list
         foreach ( $cart_versions as $version ) {
-            $result = AHelperUtils::versionCompare( ABC::env( 'VERSION' ), $version, '>=' );
+            $result = AHelperUtils::versionCompare( ABC::env( 'VERSION' ), $version, '>=' )  && version_compare($version, '2.0.0','>');
             if ( $result ) {
                 return true;
             }
         }
         // if not - seek cart earlier version then current cart version in the list
         foreach ( $cart_versions as $version ) {
-            $result = AHelperUtils::versionCompare( $version, ABC::env( 'VERSION' ), '<' );
+            $result = (AHelperUtils::versionCompare( $version, ABC::env( 'VERSION' ), '<=' ) && version_compare($version, '2.0.0','<='));
+
             if ( $result ) {
                 $error_text = 'Extension "%s" written for earlier version of Abantecart (v.%s) lower that you have. ';
                 $error_text .= 'Probably all will be OK.';
@@ -785,9 +788,7 @@ class AExtensionManager
                 return true;
             }
         }
-
-        $error_text = '%s> extension cannot be installed. AbanteCart version incompatibility. ';
-        $error_text .= sizeof( $cart_versions ) > 1 ? 'Versions %s are required.' : 'Version %s is required.';
+        $error_text = '%s extension cannot be installed. AbanteCart version incompatibility. Extension designed for version(s) %s.';
         $this->errors[] = sprintf( $error_text, $extension_txt_id, implode( ', ', $cart_versions ) );
         return false;
     }

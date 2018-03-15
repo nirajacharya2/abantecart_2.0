@@ -23,6 +23,8 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -30,13 +32,6 @@ if ( ! class_exists('abc\core\ABC')) {
 
 /**
  * @property  AExtensionManager              $extension_manager
- * @property  \abc\core\engine\ALoader       $load
- * @property  \abc\core\engine\ExtensionsApi $extensions
- * @property  AUser                          $user
- * @property  \abc\core\lib\ALanguageManager $language
- * @property  ALog                           $log
- * @property  \abc\core\cache\ACache         $cache
- * @property  ADB                            $db
  */
 class APackageManager
 {
@@ -44,6 +39,22 @@ class APackageManager
      * @var Registry
      */
     protected $registry;
+    /**
+     * @var ADB
+     */
+    protected $db;
+    /**
+     * @var \abc\core\engine\ExtensionsApi
+     */
+    protected $extensions;
+    /**
+     * @var AExtensionManager
+     */
+    protected $extension_manager;
+    /**
+     * @var \abc\core\lib\ALanguageManager
+     */
+    protected $language;
     public $errors = [];
     public $message_log = [];
     /**
@@ -53,8 +64,9 @@ class APackageManager
      */
     public $dataSize = 0;
     public $package_info = [];
+    protected $package_config;
 
-    public function __construct( array $package_info )
+    public function __construct( $package_info )
     {
         if ( ! ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to access package manager');
@@ -63,17 +75,15 @@ class APackageManager
          * @var Registry
          */
         $this->registry = Registry::getInstance();
+        $this->db = $this->registry->get('db');
+        $this->extensions = $this->registry->get('extensions');
+        $this->extension_manager = new AExtensionManager();
+        $this->language = $this->registry->get('language');
         $this->package_info =& $package_info;
     }
 
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
+    public function getPackageInfo(){
+        return (array)$this->package_info;
     }
 
     /**
@@ -158,16 +168,21 @@ class APackageManager
         }
 
         //remove destination folder first. run pathinfo twice for tar.gz. files
-        $package_dir = $dest_dir.pathinfo(pathinfo($archive_filename, PATHINFO_FILENAME), PATHINFO_FILENAME);
+        $package_dir = $dest_dir.pathinfo(pathinfo($archive_filename, PATHINFO_FILENAME), PATHINFO_FILENAME).DIRECTORY_SEPARATOR;
+        $package_subdir = '';
         $this->removeDir( $package_dir );
         unset($this->package_info['package_dir']);
 
-        $unpack_result = AHelperUtils::extractArchive($archive_filename, $dest_dir);
+        $unpack_result = AHelperUtils::extractArchive($archive_filename, $package_dir);
         if($unpack_result){
             $this->chmod_R($dest_dir.$this->package_info['tmp_dir'], 0775, 0775);
+            $dirs = glob($package_dir.'*', GLOB_ONLYDIR);
+            $package_subdir =  $dirs ? $dirs[0].DIRECTORY_SEPARATOR : '';
         }
-        if( $unpack_result){
-            $this->package_info['package_dir'] = $package_dir;
+        if( $package_subdir){
+            $this->package_info['package_dir'] = $package_subdir;
+            //add package-info
+            $this->extractPackageInfo();
             return true;
         }
         return false;
@@ -177,12 +192,12 @@ class APackageManager
         /**
          * @var \SimpleXMLElement $config
          */
-        $config = simplexml_load_string(file_get_contents($this->package_info['package_dir'].'package.xml'));
+        $config = @simplexml_load_file( $this->package_info['package_dir'].'package.xml');
         if(!$config){
             $this->errors[] = 'Cannot to read file '.$this->package_info['package_dir'].'package.xml';
             return false;
         }
-        $this->package_info['config'] = $config;
+        $this->package_config = $config;
         $this->package_info['package_id'] = (string)$config->id;
         $this->package_info['package_type'] = (string)$config->type;
         $this->package_info['package_priority'] = (string)$config->priority;
@@ -222,6 +237,7 @@ class APackageManager
         }
         $errors = [];
         foreach($package_dirs as $dir){
+            $dir_path = '';
             if(substr($dir,0,3) == 'abc'){
                 $dir_path = ABC::env('DIR_APP').substr($dir,4);
                 $rel_directory = ABC::env('DIR_APP');
@@ -230,16 +246,23 @@ class APackageManager
                 $dir_path = ABC::env('DIR_PUBLIC').substr($dir,7);
                 $rel_directory = ABC::env('DIR_PUBLIC');
             }
+            if(!$dir_path){
+                continue;
+            }
             //try to change permissions
             if( is_dir($dir_path) && !is_writable($dir_path)){
                 @chmod( $dir_path,0775 );
             }
-            //if directory absent - try to create
-            if( !is_dir($dir_path) ) {
+
+
+            //create directories inside core only
+            if( !is_dir($dir_path) && !is_int(strpos($dir_path, ABC::env('DIR_APP_EXTENSIONS')))) {
                 @mkdir( $dir_path, 0775, true);
             }
-            if( !is_dir($dir_path) || !is_writable($dir_path) ){
+            if( (!is_dir($dir_path) || !is_writable($dir_path))  && !is_int(strpos($dir_path, ABC::env('DIR_APP_EXTENSIONS'))) ){
                 $errors[] = $dir_path;
+            }elseif( !is_writable(ABC::env('DIR_APP_EXTENSIONS')) ){
+                $errors['dir_extensions'] = ABC::env('DIR_APP_EXTENSIONS');
             }
             //if we can write into directory - check files if it
             else{
@@ -269,6 +292,7 @@ class APackageManager
         }
 
         if( $errors ){
+            $errors = array_unique($errors);
             $this->errors += $errors;
             return false;
         }
@@ -327,7 +351,7 @@ class APackageManager
             'backup_file' => $backup_dirname.'.tar.gz',
             'backup_date' => date("Y-m-d H:i:s", time()),
             'type'        => 'backup',
-            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
+            'user'        => (is_object( $this->registry->get('user') ) ? $this->registry->get('user')->getUsername() : 'php-cli'),
         ));
 
         //delete previous version
@@ -359,7 +383,7 @@ class APackageManager
             /**
             * @var  \DOMDocument $config
              */
-            $config = simplexml_load_file( $config_file );
+            $config = @simplexml_load_file( $config_file );
             if( $config === false ){
                 $msg = "Extension ".$ext_txt_id." cannot be installed. Skipped. Invalid config.xml file.\n";
                 $this->message_log[] = $msg;
@@ -401,6 +425,7 @@ class APackageManager
 
                 $result = $this->installExtension( $ext_txt_id, $type, $version, $installation_mode );
                 if ( $result ) {
+                    $this->package_info['installed'][] = $ext_txt_id;
                     $this->message_log[] = "Extension ".$ext_txt_id." has been installed successfully.\n";
                 }
             }else{
@@ -463,7 +488,7 @@ class APackageManager
                         'backup_file' => '',
                         'backup_date' => '',
                         'type'        => 'upgrade',
-                        'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
+                        'user'        => (is_object( $this->registry->get('user') ) ? $this->registry->get('user')->getUsername() : 'php-cli'),
                 ));
             } else {
                 $error_text = " Cannot upgrade file : '".$rel_file;
@@ -509,11 +534,14 @@ class APackageManager
             @reset($objects);
             return @rmdir($dir);
         } else {
-            $error_text = "Package manager Error: Cannot delete ". $dir .". It is not a directory!";
-            $this->errors[] = $error_text;
-            $error = new AError( $error_text );
-            $error->toLog()->toDebug()->toMessages();
-            return false;
+            $result = @unlink($dir);
+            if(!$result) {
+                $error_text = "Package manager Error: Cannot delete ".$dir.".";
+                $this->errors[] = $error_text;
+                $error = new AError( $error_text );
+                $error->toLog()->toDebug()->toMessages();
+            }
+            return $result;
         }
         return true;
     }
@@ -531,24 +559,38 @@ class APackageManager
         if ( ! file_exists($package_dirname."code")) {
             return false;
         } else {
-            $dir = $package_dirname."code";
-            $d = array();
-            while ($dirs = glob($dir.'/*', GLOB_ONLYDIR)) {
-                $dir .= '/*';
-                if ( ! $d) {
-                    $d = $dirs;
-                } else {
-                    $d = array_merge($d, $dirs);
+            $base_dir = $package_dirname."code".DIRECTORY_SEPARATOR;
+            if($this->package_info['package_content']['core']) {
+                foreach ( $this->package_info['package_content']['core'] as $rel_path ) {
+                    $rel_path = str_replace( "/", DIRECTORY_SEPARATOR, $rel_path );
+                    if ( is_file( $base_dir.$rel_path ) ) {
+                        $output[] = dirname( $rel_path ).DIRECTORY_SEPARATOR;
+                    } elseif ( is_dir( $rel_path ) ) {
+                        $output[] = $rel_path;
+                    }
+                }
+            }elseif ($this->package_info['package_content']['extensions']){
+                foreach( $this->package_info['package_content']['extensions'] as $ext_dir) {
+                    $base_dir = $package_dirname."code".DIRECTORY_SEPARATOR;
+                    $iteration = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator(
+                            $base_dir.'abc'.DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$ext_dir,
+                            RecursiveDirectoryIterator::SKIP_DOTS ),
+                        RecursiveIteratorIterator::SELF_FIRST,
+                        RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
+                    );
+
+                    foreach ( $iteration as $path => $dir ) {
+                        if ($dir->isDir()){
+                            $output[] = str_replace( $base_dir, '', $path ).DIRECTORY_SEPARATOR;
+                        }
+                    }
+                    unset($iteration);
                 }
             }
         }
 
-        if ($d) {
-            foreach ($d as $dir) {
-                $dir = str_replace($package_dirname."code".DIRECTORY_SEPARATOR, "", $dir);
-                $output[] = $dir.DIRECTORY_SEPARATOR;
-            }
-        }
+
 
         return $output;
     }
@@ -600,7 +642,7 @@ class APackageManager
                         'backup_file' => '',
                         'backup_date' => '',
                         'type'        => 'upgrade',
-                        'user'        => (is_object( $this->user ) ?  $this->user->getUsername() : 'php-cli'),
+                        'user'        => (is_object( $this->registry->get('user') ) ?  $this->registry->get('user')->getUsername() : 'php-cli'),
                     ));
 
                     $config = null;
@@ -694,7 +736,7 @@ class APackageManager
     public function upgradeCore()
     {
         //clear all cache
-        $this->cache->remove('*');
+        $this->registry->get('cache')->remove('*');
 
         $package_dirname = $this->package_info['package_dir'];
         $config_file = $package_dirname.'package.xml';
@@ -744,7 +786,7 @@ class APackageManager
                 'backup_file' => '',
                 'backup_date' => '',
                 'type'        => 'upgrade',
-                'user'        => ( is_object( $this->user ) ? $this->user->getUsername() : 'php-cli' ),
+                'user'        => ( is_object( $this->registry->get('user') ) ? $this->registry->get('user')->getUsername() : 'php-cli' ),
             ) );
 
         }else{
@@ -792,7 +834,7 @@ class APackageManager
                 $dirmode_str = decoct($dirmode);
                 $error_text = "Notice: Failed applying filemode '".$dirmode_str."' on directory '".$path."'.\n";
                 $error_text .= "  `-> the directory '".$path."' will be skipped from recursive chmod.\n";
-                $this->log->write($error_text);
+                $this->registry->get('log')->write($error_text);
                 return null;
             }
             $dh = opendir($path);
@@ -810,7 +852,7 @@ class APackageManager
             }
 
             if (is_link($path)) {
-                $this->log->write('Package manager Notice: Recursive chmod. Symlink '.$path.' is skipped.');
+                $this->registry->get('log')->write('Package manager Notice: Recursive chmod. Symlink '.$path.' is skipped.');
                 return null;
             }
             // for index.php do not set 775 permissions because hosting providers will ban it
@@ -819,7 +861,7 @@ class APackageManager
             }
             if ( ! chmod($path, $filemode)) {
                 $filemode_str = decoct($filemode);
-                $this->log->write("Notice: Failed applying filemode ".$filemode_str." on file ".$path."\n");
+                $this->registry->get('log')->write("Notice: Failed applying filemode ".$filemode_str." on file ".$path."\n");
                 return null;
             }
         }
@@ -858,6 +900,7 @@ class APackageManager
      */
     public function getTempDir()
     {
+        $dir = '';
         $tmp_dir = ABC::env('DIR_SYSTEM').'temp';
         $tmp_install_dir = $tmp_dir.'/install';
         if (is_dir($tmp_dir) && ! is_dir($tmp_install_dir)) {
@@ -868,7 +911,7 @@ class APackageManager
             $dir = $tmp_install_dir."/";
         } else {
             if ( ! is_dir(sys_get_temp_dir().'/abantecart_install')) {
-                mkdir(sys_get_temp_dir().'/abantecart_install/', 0775);
+                @mkdir(sys_get_temp_dir().'/abantecart_install/', 0775);
             }
             $dir = sys_get_temp_dir().'/abantecart_install/';
 
@@ -877,7 +920,7 @@ class APackageManager
                         .ABC::env('DIR_SYSTEM')."temp/install".' but it is non-writable. Temporary php-directory '
                         .$dir.' is non-writable too! Please change permissions one of them.'."\n";
                 $this->errors[] = $error_text;
-                $this->log->write($error_text);
+                $this->registry->get('log')->write($error_text);
             }
         }
 
@@ -907,16 +950,14 @@ class APackageManager
      */
     public function checkCartVersion(\SimpleXMLElement $config_xml = null)
     {
-        $config_xml = $config_xml === null ? $this->package_info['config'] : $config_xml;
+        $config_xml = $config_xml === null ? $this->package_config : $config_xml;
         $full_check = false;
         $minor_check = false;
         $versions = array();
         foreach ($config_xml->cartversions->item as $item) {
             $version = (string)$item;
             $versions[] = $version;
-            if( version_compare($version, '2.0.0', '>') ){
-                break;
-            }
+
             $split_versions = explode('.', preg_replace('/[^0-9\.]/', '', $version));
             $full_check = AHelperUtils::versionCompare(
                                                         $version,

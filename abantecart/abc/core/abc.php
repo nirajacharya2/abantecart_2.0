@@ -19,6 +19,7 @@ require 'abc_base.php';
 class ABC extends ABCBase
 {
     protected static $env = [];
+    protected static $class_map = [];
     static $loaded_config_file;
 
     /**
@@ -99,6 +100,20 @@ class ABC extends ABCBase
             }
         }
         return null;
+    }
+
+    /**
+     * Method returns full name of class if it exists
+     * @param $class_name
+     *
+     * @return bool|string
+     */
+    static function classes(string $class_name){
+        if(isset( self::$class_map[$class_name])){
+            return self::$class_map[$class_name];
+        }else{
+            return class_exists($class_name) ? $class_name : false;
+        }
     }
 
     public function run()

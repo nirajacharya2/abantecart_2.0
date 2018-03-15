@@ -9,12 +9,8 @@
 		<value><![CDATA[Package Installer]]></value>
 	</definition>
 	<definition>
-		<key>heading_title_license</key>
-		<value><![CDATA[Package License Agreement]]></value>
-	</definition>
-	<definition>
-		<key>heading_title_ftp</key>
-		<value><![CDATA[FTP access parameters]]></value>
+		<key>heading_title_confirmation</key>
+		<value><![CDATA[Package Install Confirmation]]></value>
 	</definition>
 	<definition>
 		<key>heading_title_download</key>
@@ -33,20 +29,12 @@
 		<value><![CDATA[Enter Installation Key Here]]></value>
 	</definition>
 	<definition>
-		<key>text_ftp_user</key>
-		<value><![CDATA[ FTP User Name: ]]></value>
+		<key>text_license_agreement</key>
+		<value><![CDATA[ License Agreement ]]></value>
 	</definition>
 	<definition>
-		<key>text_ftp_password</key>
-		<value><![CDATA[ FTP User Password: ]]></value>
-	</definition>
-	<definition>
-		<key>text_ftp_host</key>
-		<value><![CDATA[ FTP Host:]]></value>
-	</definition>
-	<definition>
-		<key>text_i_agree</key>
-		<value><![CDATA[ I agree to the license ]]></value>
+		<key>text_release_notes</key>
+		<value><![CDATA[ Release Notes ]]></value>
 	</definition>
 	<definition>
 		<key>text_agree</key>
@@ -108,30 +96,6 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 	<definition>
 		<key>error_repository</key>
 		<value><![CDATA[ Error: Cannot download file. Repository error or invalid extension key. Try one more time. If problem persist download file in your order history and install manually. ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_user</key>
-		<value><![CDATA[ Error: FTP User Name is empty. ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_password</key>
-		<value><![CDATA[ Error: FTP User Password is empty. ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_connect</key>
-		<value><![CDATA[ Error: Can't connect to ftp-server ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_login</key>
-		<value><![CDATA[ Error: Can't login to ftp-server. Invalid Username or Password. ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_path</key>
-		<value><![CDATA[ Error: Can't find root directory of AbanteCart by FTP path.<br>Try leave it empty for automatic search. ]]></value>
-	</definition>
-	<definition>
-		<key>error_ftp_path_array</key>
-		<value><![CDATA[ Error: Can't automatic recognize root directory of AbanteCart in FTP-mode.<br>Please fill FTP-path form field.<br>Path suggestions are:  ]]></value>
 	</definition>
 	<definition>
 		<key>error_dir_permission</key>
@@ -199,10 +163,6 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 		This is not a problem, but if you notice issues or incompatibility, please contact extension developer. ]]></value>
 	</definition>
 	<definition>
-		<key>error_move_ftp</key>
-		<value><![CDATA[ Error: Can't move package code after unpacking. Probably FTP path is incorrect.<br>Also, please, try to check write permissions of directory: ]]></value>
-	</definition>
-	<definition>
 		<key>text_network_install</key>
 		<value><![CDATA[ Network Install ]]></value>
 	</definition>
@@ -212,7 +172,7 @@ Ideal OpenSource Ecommerce Solution ]]></value>
 	</definition>
 	<definition>
 		<key>error_archive_extension</key>
-		<value><![CDATA[ Error: Only .tar.gz files supported. ]]></value>
+		<value><![CDATA[ Error: Only *.TAR.GZ and *.ZIP files supported. ]]></value>
 	</definition>
 	<definition>
 		<key>entry_upload_file</key>

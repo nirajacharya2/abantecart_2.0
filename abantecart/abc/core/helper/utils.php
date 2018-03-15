@@ -21,6 +21,7 @@
 namespace abc\core\helper;
 
 use abc\core\ABC;
+use abc\core\backend\jobs\ABackgroundJobInterface;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AImage;
@@ -751,7 +752,7 @@ class AHelperUtils extends AHelper
             /**
              * @var $ext_configs \SimpleXMLElement|false
              */
-            $ext_configs = simplexml_load_file( $filename );
+            $ext_configs = @simplexml_load_file( $filename );
         }
 
         if ($ext_configs === false) {
@@ -1631,6 +1632,11 @@ class AHelperUtils extends AHelper
             }
         }
         return (bool)$archive->extractNode($dest_directory, '/');
+    }
+
+    static function createBackgroundJob( ABackgroundJobInterface $handler ){
+        //TODO: !!!! ????
+        return $handler->scheduleJob();
     }
 
 }
