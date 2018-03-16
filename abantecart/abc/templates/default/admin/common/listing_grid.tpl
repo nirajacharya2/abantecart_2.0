@@ -259,7 +259,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 
 				$html_string .= "actions_urls['".$type."'] = '".$href."';\n";
 				$html_string .= ' actions += \'';
-				$has_children = sizeof($action['children']);
+				$has_children = isset($action['children']) && $action['children'];
 				$html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_' . $type . '" title="' . htmlentities($action['text'],ENT_QUOTES,ABC::env('APP_CHARSET')) . '" data-action-type="'.$type.'"';
 				if($has_children){
 					$html_btn .= ' data-toggle="dropdown" aria-expanded="false"';

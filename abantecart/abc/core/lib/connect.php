@@ -46,7 +46,7 @@ final class AConnect
      *
      * @var array
      */
-    public $error = array();
+    public $errors = array();
     /**
      * enable/disable silent mode, mode without any messages to web-page
      *
@@ -206,7 +206,7 @@ final class AConnect
             $new_filename = $this->_checkFilename($url);
         }
         if ( ! $new_filename) {
-            $this->error = "Error: unknown file name for saving. ";
+            $this->errors[] = "Error: unknown file name for saving. ";
 
             return false;
         }
@@ -225,7 +225,7 @@ final class AConnect
             }
 
             if ( ! $file_name) {
-                $this->error = "Error: Cannot to download file. Attachment is absent.";
+                $this->errors[] = "Error: Cannot to download file. Attachment is absent.";
 
                 return false;
             }
@@ -245,8 +245,8 @@ final class AConnect
         $url = trim($url);
 
         if ( ! $url) {
-            $this->error = "Error: empty URL was given for connection.";
-            $this->registry->get('log')->write($this->error);
+            $this->errors[] = "Error: empty URL was given for connection.";
+            $this->registry->get('log')->write(implode("\n",$this->errors));
 
             return false;
         }
@@ -331,14 +331,14 @@ final class AConnect
         //check url
         $protocol = parse_url($url, PHP_URL_SCHEME);
         if ( ! in_array($protocol, array('http', 'https'))) {
-            $this->error = "ERROR: wrong URL!";
+            $this->errors[] = "ERROR: wrong URL!";
 
             return false;
         }
 
         $port = ! $port ? ($protocol == 'http' ? 80 : 443) : (int)$port;
         if ( ! $port) {
-            $this->error = "ERROR: wrong port number!";
+            $this->errors[] = "ERROR: wrong port number!";
 
             return false;
         }
@@ -377,7 +377,7 @@ final class AConnect
             return $this->_convertToArray($ret_buffer);
         } else {
             if ( ! file_put_contents($save_filename, $ret_buffer["data"])) {
-                $this->error = "ERROR: Can't save file as ".$save_filename."!";
+                $this->errors[] = "ERROR: Can't save file as ".$save_filename."!";
 
                 return false;
             }
@@ -501,9 +501,9 @@ final class AConnect
         curl_setopt_array($curl_sock, $this->curl_options);
         if ( ! ($response = curl_exec($curl_sock))) {
             if (curl_errno($curl_sock)) {
-                $this->error = 'Error: '.curl_error($curl_sock);
+                $this->errors[] = 'Error: '.curl_error($curl_sock);
             } else {
-                $this->error = 'Error: Response contain zero byte.';
+                $this->errors[] = 'Error: Response contain zero byte.';
             }
 
             return false;
@@ -512,7 +512,7 @@ final class AConnect
             $content_length = curl_getinfo($curl_sock, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
             $status = (int)curl_getinfo($curl_sock, CURLINFO_HTTP_CODE);
             if ( ! in_array($status, array(0, 200, 300, 301, 302, 304, 305, 307))) {
-                $this->error = 'Error: Can\'t get data(file '.$filename.') by URL '.$url.', HTTP status code : '.$status;
+                $this->errors[] = 'Error: Can\'t get data(file '.$filename.') by URL '.$url.', HTTP status code : '.$status;
 
                 return false;
             }
@@ -556,7 +556,7 @@ final class AConnect
         $fsockhost = $url['scheme'] == 'ssl' ? 'ssl://'.$url['host'] : $url['host'];
         $sock = fsockopen($fsockhost, $port, $errno, $errstr, 5);
         if ( ! $sock) {
-            $this->error = "Error: ".$errstr."(".$errno.")";
+            $this->errors[] = "Error: ".$errstr."(".$errno.")";
 
             return false;
         }
@@ -591,7 +591,7 @@ final class AConnect
             $status = (int)$status[1];
 
             if ( ! in_array($status, array(0, 200, 300, 301, 302, 304, 305, 307))) {
-                $this->error = 'Error: Can\'t get length of data(file). HTTP status code : '.$headers['status'];
+                $this->errors[] = 'Error: Can\'t get length of data(file). HTTP status code : '.$headers['status'];
 
                 return false;
             }
@@ -614,7 +614,7 @@ final class AConnect
             if ($headers['Content-Length']) {
                 return (int)$headers['Content-Length'];
             } else {
-                $this->error = 'Error: http status code : '.$headers['status'];
+                $this->errors[] = 'Error: http status code : '.$headers['status'];
 
                 return false;
             }
@@ -633,7 +633,7 @@ final class AConnect
         $status = explode(' ', $headers['status']);
         $status = (int)$status[1];
         if ( ! in_array($status, array(0, 200, 300, 301, 302, 304, 305, 307))) {
-            $this->error = 'Error: Can\'t get data(file) by url '.print_r($url).':'.$port.'. HTTP status code : '.$headers['status'];
+            $this->errors[] = 'Error: Can\'t get data(file) by url '.print_r($url).':'.$port.'. HTTP status code : '.$headers['status'];
 
             return false;
         }
@@ -686,7 +686,7 @@ final class AConnect
                 $this->curl_options = $this->curl_options + $opt;
             }
         } else {
-            $this->error['curl_options'] = 'AConnect: Cannot to set curl options. Parameter must be an array. Given: '.var_export($opt, true);
+            $this->errors['curl_options'] = 'AConnect: Cannot to set curl options. Parameter must be an array. Given: '.var_export($opt, true);
         }
 
         return true;
@@ -709,7 +709,7 @@ final class AConnect
                 $this->socket_options = $this->socket_options  + $opt;
             }
         } else {
-            $this->error['socket_options'] = 'AConnect: Cannot to set socket options. Parameter must be an array. Given: '.var_export($opt, true);
+            $this->errors['socket_options'] = 'AConnect: Cannot to set socket options. Parameter must be an array. Given: '.var_export($opt, true);
         }
 
         return true;
@@ -732,7 +732,7 @@ final class AConnect
                 $output = $out->toArray($output);
             } elseif (strpos($response_array["mime"], 'json')) {
                 if ( ! $output = json_decode($response_array["data"], true)) {
-                    $this->error = "Error: json parse error. ";
+                    $this->errors[] = "Error: json parse error. ";
 
                     return false;
                 }

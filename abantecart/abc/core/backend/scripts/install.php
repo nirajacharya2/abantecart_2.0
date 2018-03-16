@@ -30,17 +30,19 @@ class Install implements ABCExec
 {
     public function validate(string $action, array $options)
     {
-        $action = ! $action ? 'install' : $action;
+        $action = ! $action ? 'app' : $action;
         //if now options - check action
         if ( ! $options) {
-            if ( ! in_array($action, array('install', 'package', 'help'))) {
+            if ( ! in_array($action, array('app', 'package', 'extension', 'help'))) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
 
         switch( $action ){
-            case 'install':
+            case 'app':
                 return $this->validateAppInstall($options);
+            case 'extension':
+                return $this->validateExtensionOptions($options);
             case 'package':
                 return $this->validatePackageOptions( $options );
             default:
@@ -55,12 +57,14 @@ class Install implements ABCExec
         if( $action == 'install'){
             return $this->_install_app( $options );
         } elseif ( $action == 'package' ){
-            if( isset($options['uninstall']) ){
+            return $this->_install_package( $options );
+        }elseif($action == 'extension'){
+            if( isset($options['install']) ){
+                return $this->_install_extension( $options );
+            }elseif( isset($options['uninstall']) ){
                 return $this->_uninstall_extension( $options );
             }elseif( isset($options['remove']) ){
                 return $this->_remove_extension( $options );
-            }else {
-                return $this->_install_package( $options );
             }
         }
 
@@ -118,7 +122,6 @@ class Install implements ABCExec
         }
         $pm = new APackageManager([]);
         //confirm start of process
-
         if( !isset($options['force']) ) {
             echo 'Do you really want to install package?'."\n\n";
             echo "Continue? (Y/N) : ";
@@ -130,37 +133,43 @@ class Install implements ABCExec
             @fclose( $stdin );
         }
 
-        $basename = basename($options['file']);
-        $temp_dir = $pm->getTempDir().pathinfo(pathinfo($basename,PATHINFO_FILENAME),PATHINFO_FILENAME).'/';
-        //remove temp directory if already exists
-        if( is_dir($temp_dir) ) {
-            $result = $pm->removeDir( $temp_dir );
-            if ( ! $result ) {
-                $this->_stop_run( $pm );
+        if( isset($options['file']) ) {
+            $basename = basename( $options['file'] );
+            $temp_dir = $pm->getTempDir().pathinfo( pathinfo( $basename, PATHINFO_FILENAME ), PATHINFO_FILENAME ).'/';
+            //remove temp directory if already exists
+            if ( is_dir( $temp_dir ) ) {
+                $result = $pm->removeDir( $temp_dir );
+                if ( ! $result ) {
+                    $this->_stop_run( $pm );
+                }
             }
-        }
-        @mkdir($temp_dir);
-        if( !is_dir($temp_dir)){
-            $this->_stop_run($pm, 'Cannot to create temporary directory '.$temp_dir.'. Please check permissions!');
+            @mkdir( $temp_dir );
+            if ( ! is_dir( $temp_dir ) ) {
+                $this->_stop_run( $pm, 'Cannot to create temporary directory '.$temp_dir.'. Please check permissions!' );
+            }
+            $archive_filename = $options['file'];
+        }elseif ( isset($options['url']) ){
+            $result = $pm->downloadPackageByURL($options['url']);
+            if(!$result){
+                $this->_stop_run($pm);
+            }
+            $temp_dir = $pm->getTempDir();
+            $archive_filename = $temp_dir.$pm->package_info['package_name'];
         }
 
         $package_info = [
                         'package_source'  => 'file',
                         'tmp_dir' => $temp_dir,
-                        'package_name' => basename($options['file']),
-                        'package_size' => filesize($options['file']),
+                        'package_name' => basename($archive_filename),
+                        'package_size' => filesize($archive_filename),
         ];
-        $pm->package_info =& $package_info;
+
         //1. try to unpack archive
-        if( !$pm->unpack($options['file'],$package_info['tmp_dir']) ){
+        if( !$pm->unpack($archive_filename,$package_info['tmp_dir']) ){
             $this->_stop_run($pm);
         }
-        $package_info['package_dir'] = current(glob($package_info['tmp_dir'].'*',GLOB_ONLYDIR)).DIRECTORY_SEPARATOR;
-        //2. get package config.xml
-        $config = @simplexml_load_string(file_get_contents($package_info['package_dir'].'package.xml'));
-        if ( ! $config) {
-            $this->_stop_run($pm, 'Stopped. File "package.xml" not found inside a package!');
-        }
+
+        $package_info = $pm->package_info;
 
         //get package info from package.xml
         $result = $pm->extractPackageInfo();
@@ -258,7 +267,7 @@ class Install implements ABCExec
         }
         $pm = new APackageManager([]);
         if( !isset($options['force']) ) {
-            echo "\n\nUninstall extension {$options['extension']}?\n"
+            echo "\n\nUninstall extension {$options['extension_text_id']}?\n"
                 ."Continue? (Y/N) : ";
             $stdin = fopen( 'php://stdin', 'r' );
             $user_response = fgetc( $stdin );
@@ -267,21 +276,52 @@ class Install implements ABCExec
             }
             @fclose( $stdin );
         }
-
-        $result = $pm->uninstallExtension($options['extension']);
+        $em = new AExtensionManager();
+        $all_installed = $em->getInstalled('exts');
+        if( !in_array($options['extension_text_id'], $all_installed)){
+            exit('Error: '.$options['extension_text_id'].' is not installed!'."\n");
+        }
+        $result = $em->uninstall($options['extension_text_id'], AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
         if( !$result ){
-            echo  implode("\n",$pm->errors);
+            echo  implode("\n",$em->errors)."\n";
+        }
+        return $result;
+    }
+    protected function _install_extension($options){
+        if( !$options ){
+            exit('Error: empty options for extension install!');
+        }
+        $pm = new APackageManager([]);
+        if( !isset($options['force']) ) {
+            echo "\n\nDo you want to install extension {$options['extension_text_id']}?\n"
+                ."Continue? (Y/N) : ";
+            $stdin = fopen( 'php://stdin', 'r' );
+            $user_response = fgetc( $stdin );
+            if ( ! in_array( $user_response, [ 'Y', 'YES', 'y', 'yes' ] ) ) {
+                $this->_stop_run( $pm, 'Aborted' );
+            }
+            @fclose( $stdin );
+        }
+        $em = new AExtensionManager();
+        $all_installed = $em->getInstalled('exts');
+        if( in_array($options['extension_text_id'], $all_installed)){
+            exit('Error: '.$options['extension_text_id'].' already installed!');
+        }
+
+        $result = $em->install($options['extension_text_id'], AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
+        if( !$result ){
+            echo  implode("\n",$em->errors)."\n";
         }
         return $result;
     }
 
     protected function _remove_extension($options){
         if( !$options ){
-            exit('Error: empty options for uninstall!');
+            exit('Error: empty options for extension uninstall!');
         }
         $pm = new APackageManager([]);
         if( !isset($options['force']) ) {
-            echo "\n\nPlease confirm extension {$options['extension']} removing.\n"
+            echo "\n\nPlease confirm extension {$options['extension_text_id']} removing.\n"
                 ."Continue? (Y/N) : ";
             $stdin = fopen( 'php://stdin', 'r' );
             $user_response = fgetc( $stdin );
@@ -292,15 +332,18 @@ class Install implements ABCExec
         }
 
         //uninstall first without confirmation
+        $em = new AExtensionManager();
         $opts = $options;
         $opts['force'] = true;
-        $result = $this->_uninstall_extension( $opts );
-        if( !$result ){
-            return false;
+        $all_installed = $em->getInstalled('exts');
+        if( in_array($options['extension_text_id'], $all_installed)) {
+            $result = $this->_uninstall_extension( $opts );
+            if ( ! $result ) {
+                return false;
+            }
         }
 
-        $em = new AExtensionManager();
-        $result = $em->delete( $options['extension'] );
+        $result = $em->delete( $options['extension_text_id'] );
         if( !$result ){
             echo implode("\n", $em->errors);
         }
@@ -357,6 +400,8 @@ class Install implements ABCExec
             return $this->_final_message_app_install($options);
         } elseif ( $action == 'package' ){
             return $this->_final_message_package_install($options);
+        } elseif ( $action == 'extension' ){
+            return $this->_final_message_extension_install($options);
         }
         return '';
     }
@@ -364,6 +409,10 @@ class Install implements ABCExec
     protected function _final_message_package_install( $options )
     {
         return "\n\n Package installation process complete.\n\n";
+    }
+    protected function _final_message_extension_install( $options )
+    {
+        return "\n\n Process complete.\n\n";
     }
 
     protected function _final_message_app_install( $options )
@@ -743,11 +792,11 @@ EOD;
                     }
                 }
             }
-            if( $maximal != $minimal) {
+            if( $action=='app' && $maximal != $minimal) {
                 $options[$action]['example'] = "\n\t\tWith minimal parameters\n\n\t\t\t".$output.$minimal."\n\n";
                 $options[$action]['example'] .= "\t\tWith all parameters\n\n\t\t\t".$output.$maximal."\n\n";
             }else{
-                $options[$action]['example'] = "\n\t\t".$output.$minimal."\n\n";
+                $options[$action]['example'] = "\n\t\t".$help_info['example']."\n\n";
             }
         }
 
@@ -757,9 +806,9 @@ EOD;
     protected function _get_option_list()
     {
         return [
-            'install' =>
+            'app' =>
                 [
-                    'description' => 'run installation process',
+                    'description' => 'Run AbanteCart installation process',
                     'arguments'   => [
                         /*'--root_dir'         => [
                                                 'description'   => 'Custom full path to root directory',
@@ -871,20 +920,39 @@ EOD;
                                             'default_value' => '',
                                             'required'      => 'conditional'
                                         ],
+                           '--force' => [
+                                           'description'   => 'Force mode to prevent script pause on command prompt.',
+                                           'default_value' => '',
+                                           'required'      => false
+                                        ],
+                    ],
+                    'example'     => "php ".$_SERVER['PHP_SELF']." install:package --file=/full/path/to/your/package.zip\n\tor\n".
+                    "\t\tphp ".$_SERVER['PHP_SELF']." install:package --url=http://your_url_to_package\n\tor\n".
+                    "\t\tphp ".$_SERVER['PHP_SELF']." install:package --installation_key=****************\n",
+                ],
+            'extension' =>
+                [
+                    'description' => 'Run install/uninstall/remove process of extension',
+                    'arguments'   => [
+                           '--install' => [
+                                           'description'   => 'Install extension',
+                                           'default_value' => '',
+                                           'required'      => 'conditional'
+                                        ],
                            '--uninstall' => [
-                                           'description'   => 'Uninstall extension. "--extension" option required',
+                                           'description'   => 'Uninstall extension',
                                            'default_value' => '',
                                            'required'      => 'conditional'
                                         ],
                            '--remove' => [
-                                           'description'   => 'Uninstall and delete extension. "--extension" option required',
+                                           'description'   => 'Uninstall and delete extension',
                                            'default_value' => '',
                                            'required'      => 'conditional'
                                         ],
-                           '--extension' => [
+                           '--extension_text_id' => [
                                            'description'   => 'Extension Text ID. Required parameter for uninstall and remove process.',
                                            'default_value' => '',
-                                           'required'      => 'conditional'
+                                           'required'      => true
                                         ],
                            '--force' => [
                                            'description'   => 'Force mode to prevent script pause on command prompt.',
@@ -892,8 +960,9 @@ EOD;
                                            'required'      => false
                                         ],
                     ],
-                    'example'     => "php ".$_SERVER['PHP_SELF']." install:package --file=/full/path/to/your/package.zip\nor\n
-                    php ".$_SERVER['PHP_SELF']." install:package --uninstall --extension=your_extension_id\n",
+                    'example'     => "php ".$_SERVER['PHP_SELF']." install:extension --install --extension_text_id=default_cod\n\tor\n".
+                    "\t\tphp ".$_SERVER['PHP_SELF']." install:extension --uninstall --extension_text_id=default_cod\n\tor\n".
+                    "\t\tphp ".$_SERVER['PHP_SELF']." install:extension --remove --extension_text_id=default_cod\n",
                 ]
         ];
     }
@@ -910,7 +979,7 @@ EOD;
         }
 
         //check requirements first
-        $errors = $this->_validate_app_requirements( 'install', $options);
+        $errors = $this->_validate_app_requirements( 'app', $options);
         if ($errors) {
             return $errors;
         }
@@ -1008,6 +1077,34 @@ EOD;
         return $errors;
     }
 
+    public function validateExtensionOptions( $options ){
+        $errors = [];
+        if( !isset($options['extension_text_id'])
+            && !isset($options['install'])
+            && !isset($options['uninstall'])
+            && !isset($options['remove'])
+        ){
+            return ['Oops. Have no idea what should i do. Please give me extension_text_id and action (--install, --uninstall or --remove).'];
+        }
+
+
+        $deleting = isset($options['uninstall']) || isset($options['remove']) ? true : false;
+
+        if( $deleting ) {
+            $registry = Registry::getInstance();
+            $extension_info = $registry->get( 'extensions' )->getExtensionInfo( $options['extension'] );
+            if ( ! $extension_info ) {
+                return [ 'Extension "'.$options['extension_text_id'].'" not found!' ];
+            }
+            // check dependencies
+            $ext = new AExtensionManager();
+            $validate = $ext->checkDependantsBeforeUninstall( $options['extension'] );
+            if ( ! $validate ) {
+                $errors = $ext->errors;
+            }
+        }
+        return $errors;
+    }
     /**
      * @param $options
      *
@@ -1018,42 +1115,26 @@ EOD;
         if( !isset($options['file'])
             && !isset($options['installation_key'])
             && !isset($options['url'])
-            && !isset($options['uninstall'])
-            && !isset($options['remove'])
         ){
             return ['Oops. Have no idea what should i do. Please give me file path, url or installation key of package! See help for syntax.'];
         }
 
-        $deleting = isset($options['uninstall']) || isset($options['remove']) ? true : false;
-
-        if( $deleting && (!isset($options['extension']) || !$options['extension']) ){
-            return ['Extension Text ID required!'];
+        //check for file install
+        if ( isset($options['file']) && !is_file( $options['file'] ) ) {
+            $errors = [ 'Cannot find package file '.$options['file'] ];
+        }
+        if ( isset($options['file']) &&  ! $errors
+            && ! is_int( strpos( $options['file'], '.tar.gz' ) )
+            && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'zip'
+            && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'tar'
+        ) {
+            $errors = [ 'Only ZIP, TAR or TAR.GZ files allowed!' ];
         }
 
-        if( $deleting ){
-            $registry = Registry::getInstance();
-            $extension_info = $registry->get('extensions')->getExtensionInfo($options['extension']);
-            if(!$extension_info){
-                return ['Extension "'.$options['extension'].'" not found!'];
-            }
-            // check dependencies
-            $ext = new AExtensionManager();
-            $validate = $ext->checkDependantsBeforeUninstall( $options['extension']);
-            if(!$validate){
-                $errors = $ext->errors;
-            }
-        }else {
-            if ( ! is_file( $options['file'] ) ) {
-                $errors = [ 'Cannot find package file '.$options['file'] ];
-            }
-            if ( ! $errors
-                && ! is_int( strpos( $options['file'], '.tar.gz' ) )
-                && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'zip'
-                && strtolower( pathinfo( $options['file'], PATHINFO_EXTENSION ) ) != 'tar'
-            ) {
-                $errors = [ 'Only ZIP, TAR or TAR.GZ files allowed!' ];
-            }
+        if( !$options['url'] || parse_url( $options['file'] ) === 'false' ){
+            $errors = [ 'Incorrect URL!' ];
         }
+
         return $errors;
     }
 

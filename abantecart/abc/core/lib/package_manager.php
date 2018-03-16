@@ -86,6 +86,47 @@ class APackageManager
         return (array)$this->package_info;
     }
 
+    public function downloadPackageByURL($url){
+        if( !$url || parse_url($url)===false ){
+            return false;
+        }
+
+        $connect = new AConnect();
+        $headers = $this->getRemoteFileHeaders($url);
+
+        if( !in_array($headers['Content-Type'], ['application/zip', 'application/x-gzip'])){
+            $this->errors[] = 'Unknown archive-type. Waiting for zip or tar.gz archive!';
+            return false;
+        }
+
+        $package_name = str_replace("attachment; filename=", "", $headers['Content-Disposition']);
+        $package_name = str_replace(array('"', ';'), '', $package_name);
+        if ( ! $package_name) {
+            $package_name = parse_url($url);
+            if (pathinfo($package_name['path'], PATHINFO_EXTENSION)) {
+                $package_name = pathinfo($package_name['path'], PATHINFO_BASENAME);
+            } else {
+                $package_name = '';
+            }
+        }
+        //if still don't know what the name of file
+        if(!$package_name){
+            if($headers['Content-Type'] == 'application/zip'){
+                $package_name = 'package_'.time().".zip";
+            }else{
+                $package_name = 'package_'.time().".tar.gz";
+            }
+        }
+
+        $result = $connect->getData($url, null, false, $this->getTempDir().$package_name);
+        if(!$result){
+            $this->errors += $connect->errors;
+            return false;
+        }
+        $this->package_info['package_name'] = $package_name;
+        return true;
+    }
+
     /**
      * @param string  $url
      * @param boolean $save
@@ -105,7 +146,7 @@ class APackageManager
             $result = $file->getResponse($url); // just get data
         }
         if ( ! $result) {
-            $this->errors[] = $file->error;
+            $this->errors[] = $file->errors;
 
             return false;
         }
@@ -128,7 +169,7 @@ class APackageManager
         $url = $url.(! is_int(strpos($url, '?')) ? '?file_size=1' : '&file_size=1');
         $result = $file->getDataHeaders($url);
         if ( ! $result) {
-            $this->errors[] = $file->error;
+            $this->errors[] = $file->errors;
 
             return false;
         }

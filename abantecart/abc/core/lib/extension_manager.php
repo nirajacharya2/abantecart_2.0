@@ -305,7 +305,6 @@ class AExtensionManager
                         $value = 0; // disable extension
                         if ( ! isset( $validate['errors'] ) ) {
                             $error = "Cannot enable extension \"".$extension_txt_id."\". Please fill all required fields on settings edit page. ";
-                            $this->messages->saveError( 'App Error', $error );
                             $this->errors[] = $error;
                             $error = new AError ( $error );
                             $error->toLog()->toDebug();
@@ -313,7 +312,6 @@ class AExtensionManager
                             $this->load->language( $extension_txt_id.'/'.$extension_txt_id );
                             foreach ( $validate['errors'] as $field_id => $error_text ) {
                                 $error = $error_text ? $error_text : $this->language->get( $field_id.'_validation_error' );
-                                $this->messages->saveError( 'App Error: '.$field_id, $error );
                                 $this->errors[] = $error;
                                 $error = new AError ( $error );
                                 $error->toLog()->toDebug();
@@ -326,7 +324,6 @@ class AExtensionManager
                         foreach ( $parents as $parent ) {
                             if ( ! in_array( $parent['key'], $enabled ) ) {
                                 $error = "Cannot enable extension \"".$extension_txt_id."\". It's depends on extension \"".$parent['key']."\" which not enabled. ";
-                                $this->messages->saveError( 'Extension App Error', $error );
                                 $this->errors[] = $error;
                                 $error = new AError ( $error );
                                 $error->toLog()->toDebug();
@@ -417,7 +414,7 @@ class AExtensionManager
      * @param string                      $name
      * @param \DomNode| \SimpleXMLElement $config
      *
-     * @return bool|null
+     * @return bool
      */
     public function install( $name, $config )
     {
@@ -428,10 +425,10 @@ class AExtensionManager
         // gets extension_id for install.php
         $extension_info = $this->getExtensionsList( array( 'search' => $name ) );
         $validate = $this->validateCoreVersion( $extension_info->row['key'], $config );
-        $this->errors = $ext->getError();
+        $this->errors += $ext->getError();
 
         if ( ! $validate ) {
-            $error = new AError ( $this->errors );
+            $error = new AError ( implode("\n",$this->errors) );
             $error->toLog()->toDebug();
             return false;
         }
@@ -504,7 +501,7 @@ class AExtensionManager
             $this->editSetting( $name, $settings );
         }
 
-        return null;
+        return true;
     }
 
     /**
@@ -779,12 +776,11 @@ class AExtensionManager
         // if not - seek cart earlier version then current cart version in the list
         foreach ( $cart_versions as $version ) {
             $result = (AHelperUtils::versionCompare( $version, ABC::env( 'VERSION' ), '<=' ) && version_compare($version, '2.0.0','<='));
-
             if ( $result ) {
                 $error_text = 'Extension "%s" written for earlier version of Abantecart (v.%s) lower that you have. ';
                 $error_text .= 'Probably all will be OK.';
                 $error_text = sprintf( $error_text, $extension_txt_id, implode( ', ', $cart_versions ) );
-                $this->messages->saveWarning( $extension_txt_id.' extension warning', $error_text );
+                $this->errors[] = $error_text;
                 return true;
             }
         }

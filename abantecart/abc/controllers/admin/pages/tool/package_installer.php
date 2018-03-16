@@ -149,7 +149,7 @@ class ControllerPagesToolPackageInstaller extends AController
                 }
             } else {
                 if ($this->request->post['package_url']) {
-                    $package_info['package_url'] = $this->request->post['package_url'];
+                    $this->session->data['package_info']['package_url'] = $this->request->post['package_url'];
                     abc_redirect($this->html->getSecureURL('tool/package_installer/download'));
                 } else {
                     $this->session->data['error'] .= '<br>Error: '.AHelperUtils::getTextUploadError($this->request->files['package_file']['error']);
@@ -212,7 +212,6 @@ class ControllerPagesToolPackageInstaller extends AController
             unset($package_info['package_dir'], $error_txt);
         }
         unset($this->session->data['error']);
-
 
         $this->data['heading_title'] = $this->language->get('heading_title');
         $this->data['text_license_agreement'] = $this->language->get('text_license_agreement');
@@ -423,7 +422,7 @@ class ControllerPagesToolPackageInstaller extends AController
             ));
 
             $this->view->batchAssign($this->data);
-            $this->processTemplate('pages/tool/package_installer_agreement.tpl');
+            $this->processTemplate('pages/tool/package_installer_confirm.tpl');
 
             return null;
         }
@@ -542,16 +541,16 @@ class ControllerPagesToolPackageInstaller extends AController
                 @unlink($package_info['tmp_dir'].$package_name);
             } else {
                 if ($this->request->get['agree'] == '1') {
-                    abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
+                    abc_redirect($this->html->getSecureURL('tool/package_installer/confirm'));
                 } else {
                     $already_downloaded = true;
-                    abc_redirect($this->html->getSecureURL('tool/package_installer/agreement'));
+                    abc_redirect($this->html->getSecureURL('tool/package_installer/confirm'));
                 }
             }
         }
 
         $this->data['url'] = $this->html->getSecureURL('tool/package_download');
-        $this->data['redirect'] = $this->html->getSecureURL('tool/package_installer/agreement');
+        $this->data['redirect'] = $this->html->getSecureURL('tool/package_installer/confirm');
 
         $this->document->initBreadcrumb(array(
             'href'      => $this->html->getSecureURL('index/home'),
