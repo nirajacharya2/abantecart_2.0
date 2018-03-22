@@ -570,12 +570,6 @@ class AExtensionManager
         //uninstall settings
         $this->deleteSetting( $name );
 
-        //remove assets
-        $extension_public_dir = ABC::env( 'DIR_PUBLIC' ).ABC::env( 'DIRNAME_EXTENSIONS' ).$name;
-        if( is_dir( $extension_public_dir )) {
-            $pmanager = new APackageManager( [] );
-            $pmanager->removeDir( $extension_public_dir );
-        }
         return true;
     }
 
@@ -613,6 +607,13 @@ class AExtensionManager
             $this->errors[] = "Error: Cannot to delete file or directory: '".ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_txt_id."'."
                             . "No file permissions, change permissions to 777 with your FTP access";
             $this->errors += $pmanager->errors;
+        }
+
+        //remove assets
+        $extension_public_dir = ABC::env( 'DIR_PUBLIC' ).ABC::env( 'DIRNAME_EXTENSIONS' ).$extension_txt_id;
+        if( is_dir( $extension_public_dir )) {
+            $pmanager = new APackageManager( [] );
+            $pmanager->removeDir( $extension_public_dir );
         }
 
         // refresh data about updates
