@@ -197,24 +197,22 @@ function showResult($result)
 function parseOptions($args = [])
 {
     $options = array();
-    foreach ($args as $v) {
-        $is_flag = preg_match('/^--(.*)$/', $v, $match);
-        //skip commands
-        if ( ! $is_flag) {
-            continue;
-        }
 
+    foreach ($args as $v) {
+        preg_match('/^--(.*)$/', $v, $match);
         $arg = $match[1];
         $array = explode('=', $arg);
-        if (sizeof($array) > 1) {
+        if ($match && sizeof($array) > 1) {
             list($name, $value) = $array;
-        } else {
+        } elseif($match) {
             $name = $arg;
+            $value = true;
+        }else{
+            $name = $v;
             $value = true;
         }
         $options[$name] = trim($value);
     }
-
     return $options;
 }
 

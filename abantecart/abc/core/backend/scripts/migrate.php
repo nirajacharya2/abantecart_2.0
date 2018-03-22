@@ -32,6 +32,9 @@ class Migrate implements ABCExec
             && !is_file(ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx')){
             return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx required to run migrations!'];
         }
+        if(isset($options['init'])){
+            return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically!'];
+        }
         return $errors;
     }
 
@@ -43,6 +46,7 @@ class Migrate implements ABCExec
      */
     public function run(string $action, array $options)
     {
+
         $output = null;
 
         $action = !$action ? 'help' : $action;
@@ -80,7 +84,7 @@ class Migrate implements ABCExec
             'phinx' =>
                 [
                     'description' => 'Run phinx command. See more details http://docs.phinx.org/en/latest/commands.html'.
-                        "\n Note: Everytime file abc/config/migration.config.php will be recreated.",
+                        "\n Note: Every time file abc/config/migration.config.php will be recreated.",
                     'arguments'   => [
                             '--stage' => [
                                             'description'   => 'stage name',
@@ -88,16 +92,23 @@ class Migrate implements ABCExec
                                             'required'      => false,
                                         ]
                     ],
-                    'example'     => 'php abcexec migrate:phinx help'
+                    'example'     => "php abcexec migrate:phinx help\n".
+                        "\t  To create new migration:\n\t\t   php abcexec migrate::phinx create YourMigrationClassName\n"
+                        ."\t  To run all new migrations:\n\t\t   php abcexec migrate::phinx migrate\n"
+                        ."\t  To rollback last migration:\n\t\t   php abcexec migrate::phinx rollback\n"
+                        ."\t  To rollback all migrations (reset):\n\t\t   php abcexec migrate::phinx rollback -t 0\n"
+
+
                 ]
         ];
     }
 
     protected function _call_phinx( $action, $options ){
-
-        $result = $this->_make_migration_config($options['stage_name']);
-
-
+        $stage_name = $options['stage_name'] ? $options['stage_name'] : 'default';
+        $result = $this->_make_migration_config($stage_name);
+        if(!$result){
+            throw new AException(AC_ERR_LOAD, implode("\n",$this->results)."\n");
+        }
         $this->_adapt_argv($action);
 
         //phinx status -e development
@@ -116,13 +127,24 @@ class Migrate implements ABCExec
 
         switch($action){
             case 'help':
+            case 'init':
                 //$argv[] = '-h';
             break;
             default:
                 if($action != 'phinx') {
                     $argv[] = $action;
                 }
-            $argv[] = '-c '.ABC::env('DIR_CONFIG').'migration.config.php';
+            $argv[] = '--configuration='.ABC::env('DIR_CONFIG').'migration.config.php';
+        }
+
+        //add migration template parameter for new migrations
+        if(in_array('create',$argv)){
+            $template = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'Migration.template.txt';
+            if(!is_file($template) || !is_readable($template)){
+                $this->results[] = 'Cannot to find migration template file '.$template.'!';
+                return false;
+            }
+            $argv[] = '--template='.$template;
         }
 
 
@@ -138,6 +160,8 @@ class Migrate implements ABCExec
 
         //add configuration file
         $_SERVER['argv'] = $argv;
+
+        return true;
     }
 
     protected function _make_migration_config($stage_name = 'default'){
@@ -168,7 +192,7 @@ $content .= <<<EOD
         ],
         'environments' => [
             'default_migration_table' => 'abc_migration_log',
-            'default_database' => 'dev',
+            'default_database' => '{$stage_name}',
             '{$stage_name}' => [
                 'adapter' => '{$db_drv}',
                 'host'    => '{$app_config['DATABASES'][ $db_drv ]['DB_HOST']}',
