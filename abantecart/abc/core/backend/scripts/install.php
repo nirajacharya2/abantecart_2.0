@@ -606,8 +606,8 @@ EOD;
         $file = fopen(ABC::env('DIR_CONFIG').'enabled.config.php', 'w');
         $content = <<<EOD
 <?php
-// config file with current stage values
-return 'default.config.php';
+// name of current stage. Will be used to find filename with current config by mask your_stage_name.config.php 
+return 'default';
 EOD;
         if ( ! fwrite($file, $content)) {
             $result[] = 'Cannot to write file '.$file;

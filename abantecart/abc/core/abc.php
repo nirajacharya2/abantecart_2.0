@@ -20,7 +20,7 @@ class ABC extends ABCBase
 {
     protected static $env = [];
     protected static $class_map = [];
-    static $loaded_config_file;
+    static $stage_name;
 
     /**
      * ABC constructor.
@@ -30,33 +30,31 @@ class ABC extends ABCBase
     public function __construct($file = '')
     {
         //load and put config into environment
+        $stage_name = '';
         if(!$file || !is_file($file)) {
-            $file_name = @include(dirname(__DIR__).'/config/enabled.config.php');
+            $stage_name = @include(dirname(__DIR__).'/config/enabled.config.php');
+            $file_name = $stage_name.'.config.php';
             $file = dirname(__DIR__).'/config/'.$file_name;
         }
 
         $config = @include($file);
         if($config) {
             self::env($config);
-            self::$loaded_config_file = $file;
+            self::$stage_name = $stage_name;
         }
+    }
+
+    static function getStageName(){
+        return self::$stage_name;
     }
 
     public function loadDefaultStage(){
         //load and put config into environment
-        $files = glob(dirname(__DIR__).'/config/*.php');
-        foreach ($files as $file) {
-            if($file == self::$loaded_config_file){
-                continue;
-            }
-            $config = @include($file);
-            if (isset($config['default'])) {
-                self::env((array)$config['default']);
-            }
+        $config = @include(dirname(__DIR__).'/config/default.config.php');
+        if (isset($config['default'])) {
+            self::env((array)$config['default']);
         }
-        if(!self::$loaded_config_file){
-            self::$loaded_config_file = 'default';
-        }
+        self::$stage_name = 'default';
     }
 
     /**

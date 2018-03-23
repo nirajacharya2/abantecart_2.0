@@ -95,18 +95,19 @@ $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
     array(
-        'DIR_VENDOR'         => ABC::env('DIR_APP').'vendor'.$dir_sep,
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
-        'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
-        'DIR_CORE'           => $dir_app.'core'.$dir_sep,
-        'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
+        'DIR_VENDOR'          => $dir_app.'vendor'.$dir_sep,
+        'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.$dir_sep,
+        'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
+        'DIR_CORE'            => $dir_app.'core'.$dir_sep,
+        'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
         'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
-        'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
-        'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
-        'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
-        'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
+        'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
+        'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+        'DIR_LOGS'            => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
+        'DIR_TEMPLATES'       => $dir_app.'templates'.$dir_sep,
         'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
         'DIR_RESOURCES'       => $dir_public.'resources'.$dir_sep,
+        'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep
     )
 );
 
@@ -338,10 +339,10 @@ if ( ! $is_valid) {
     //check template defined in settings
     if (ABC::env('IS_ADMIN') === true) {
         $template = $config->get('admin_template');
-        $dir = 'templates/'.$template.'/'.ABC::env('DIRNAME_ADMIN');
+        $dir = 'templates'.$dir_sep.$template.$dir_sep.ABC::env('DIRNAME_ADMIN');
     } else {
         $template = $config->get('config_storefront_template');
-        $dir = 'templates/'.$template.'/'.ABC::env('DIRNAME_STORE');
+        $dir = 'templates'.$dir_sep.$template.$dir_sep.ABC::env('DIRNAME_STORE');
     }
 
     if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$dir)) {

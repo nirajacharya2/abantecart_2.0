@@ -4,6 +4,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\backend\Migrate;
 use abc\core\backend\Publish;
 use abc\core\engine\ExtensionUtils;
 use abc\core\helper\AHelperUtils;
@@ -418,8 +419,6 @@ class AExtensionManager
      */
     public function install( $name, $config )
     {
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'publish.php';
 
         $ext = new ExtensionUtils( $name );
         // gets extension_id for install.php
@@ -444,18 +443,6 @@ class AExtensionManager
 
         $settings = array_merge( $settings, $default_settings );
 
-        //write info about install into install log
-        $install_upgrade_history = new ADataset( 'install_upgrade_history', 'admin' );
-        $install_upgrade_history->addRows( array(
-            'date_added'  => date( "Y-m-d H:i:s", time() ),
-            'name'        => $name,
-            'version'     => $settings[$name.'_version'],
-            'backup_file' => '',
-            'backup_date' => '',
-            'type'        => 'install',
-            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
-        ) );
-
         // add dependencies into database for required extensions only
         if ( isset( $config->dependencies->item ) ) {
             foreach ( $config->dependencies->item as $item ) {
@@ -465,13 +452,12 @@ class AExtensionManager
             }
         }
 
-        // running sql install script if it exists
-        if ( isset( $config->install->sql ) ) {
-            $file = ABC::env( 'DIR_APP_EXTENSIONS' ).str_replace( '../', '', $name ).'/'.(string)$config->install->sql;
-            if ( is_file( $file ) ) {
-                $this->db->performSql( $file );
-            }
+        //run migrations
+        if( !$this->_run_migrations( $name, 'getMigrate' )){
+            $this->errors[] = 'Migrations of '.$name.' extension runtime error!';
+            return false;
         }
+
         // running php install script if it exists
         if ( isset( $config->install->trigger ) ) {
             $file = ABC::env( 'DIR_APP_EXTENSIONS' ).str_replace( '../', '', $name ).'/'.(string)$config->install->trigger;
@@ -486,6 +472,8 @@ class AExtensionManager
         }
 
         //publish assets
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'interface.php';
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'publish.php';
         $publish = new Publish();
         $publish->run( 'extensions', [ 'extension' => $name ] );
 
@@ -501,8 +489,86 @@ class AExtensionManager
             $this->editSetting( $name, $settings );
         }
 
+        //write info about install into install log
+        $install_upgrade_history = new ADataset( 'install_upgrade_history', 'admin' );
+        $install_upgrade_history->addRows( array(
+            'date_added'  => date( "Y-m-d H:i:s", time() ),
+            'name'        => $name,
+            'version'     => $settings[$name.'_version'],
+            'backup_file' => '',
+            'backup_date' => '',
+            'type'        => 'install',
+            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
+        ) );
+
         return true;
     }
+
+    /**
+     * @param string $extension_text_id
+     * @param string $command - can be 'getMigrate' for Up and 'getRollback' for Down
+     *
+     * @return bool
+     */
+    protected function _run_migrations( $extension_text_id, $command = 'getMigrate' )
+    {
+        $migrations_dir = ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_text_id.DIRECTORY_SEPARATOR.'migrations'.DIRECTORY_SEPARATOR;
+        if( !is_dir($migrations_dir) ){
+            return true;
+        }
+        //if not migrations - skip
+        $files = glob($migrations_dir.'*');
+        if(!$files){
+            return true;
+        }
+
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'interface.php';
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'migrate.php';
+        $migrate = new Migrate();
+        if( !$migrate->createMigrationConfig( [ 'stage' => ABC::getStageName(), 'extension_text_id' => $extension_text_id] )){
+            $this->errors[] += $migrate->results;
+            return false;
+        }
+
+        try {
+            // Get the phinx console application and inject it into TextWrapper.
+            $app = require_once ABC::env('DIR_VENDOR'). 'robmorgan/phinx/app/phinx.php';
+            $wrap = new \Phinx\Wrapper\TextWrapper($app, ['configuration' => ABC::env('DIR_CONFIG').'migration.config.php']);
+            //up all migrations of extension
+            if( $command == 'getMigrate' ) {
+                // Execute the command and determine if it was successful.
+                call_user_func( [ $wrap, 'getMigrate' ], ABC::getStageName() );
+                if($wrap->getExitCode() > 0){
+                    $this->errors[] = 'Migration script runtime error!';
+                    return false;
+                }
+            }
+            //rollback al migrations of extension
+            elseif($command == 'getRollback'){
+                foreach($files as $filename) {
+                    $tmp = explode("_",basename($filename));
+                    $target = $tmp[0];
+                    if(preg_match('/[^0-9]/',$target)){
+                        continue;
+                    }
+                    // Execute the command and determine if it was successful.
+                    call_user_func( [ $wrap, 'getRollback' ], ABC::getStageName(), $target );
+                    if ( $wrap->getExitCode() > 0 ) {
+                        $this->errors[] = 'Migration script runtime error!';
+                    }
+                    $this->log->write($wrap->getStatus(ABC::getStageName()));
+                }
+            }
+
+            $this->log->write($wrap->getStatus(ABC::getStageName()));
+        }catch(AException $e){
+            $this->errors[] = 'Migration script runtime error!';
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * @param string   $name
@@ -531,23 +597,12 @@ class AExtensionManager
             return false;
         }
 
-        $install_upgrade_history = new ADataset( 'install_upgrade_history', 'admin' );
-        $install_upgrade_history->addRows( array(
-            'date_added'  => date( "Y-m-d H:i:s", time() ),
-            'name'        => $name,
-            'version'     => $info['version'],
-            'backup_file' => '',
-            'backup_date' => '',
-            'type'        => 'uninstall',
-            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
-        ) );
-
-        if ( isset( $config->uninstall->sql ) ) {
-            $file = ABC::env( 'DIR_APP_EXTENSIONS' ).str_replace( '../', '', $name ).'/'.(string)$config->uninstall->sql;
-            if ( is_file( $file ) ) {
-                $this->db->performSql( $file );
-            }
+        //rollback all extension migrations
+        if( !$this->_run_migrations( $name, 'getRollback' )){
+            $this->errors[] = 'Migrations of '.$name.' extension runtime error!';
+            return false;
         }
+
         // running php uninstall script if it exists
         if ( isset( $config->uninstall->trigger ) ) {
             $file = ABC::env( 'DIR_APP_EXTENSIONS' )
@@ -569,6 +624,17 @@ class AExtensionManager
         $this->editSetting( $name, array( 'status' => 0 ) );
         //uninstall settings
         $this->deleteSetting( $name );
+
+        $install_upgrade_history = new ADataset( 'install_upgrade_history', 'admin' );
+        $install_upgrade_history->addRows( array(
+            'date_added'  => date( "Y-m-d H:i:s", time() ),
+            'name'        => $name,
+            'version'     => $info['version'],
+            'backup_file' => '',
+            'backup_date' => '',
+            'type'        => 'uninstall',
+            'user'        => (is_object( $this->user ) ? $this->user->getUsername() : 'php-cli'),
+        ) );
 
         return true;
     }

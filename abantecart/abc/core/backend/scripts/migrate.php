@@ -5,6 +5,7 @@ namespace abc\core\backend;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
+use abc\core\lib\AExtensionManager;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\Migrations\Migrator;
@@ -19,7 +20,7 @@ class Migrate implements ABCExec
      * @var Publish
      */
     protected $publish;
-    protected $results = [];
+    public $results = [];
     public function __construct()
     {
         //$this->cache = new Cache();
@@ -33,7 +34,10 @@ class Migrate implements ABCExec
             return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx required to run migrations!'];
         }
         if(isset($options['init'])){
-            return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically!'];
+            return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically.'];
+        }
+        if( $action == 'phinx' && !isset($options['stage']) ){
+            return ["Please provide stage name! For example: --stage='default'"];
         }
         return $errors;
     }
@@ -41,7 +45,6 @@ class Migrate implements ABCExec
     /**
      * @param string $action
      * @param array  $options
-     * @return array|bool
      * @throws AException
      */
     public function run(string $action, array $options)
@@ -60,7 +63,7 @@ class Migrate implements ABCExec
 
     public function finish(string $action, array $options)
     {
-
+    //nothing to do here. Use Phinx output here
     }
 
     /**
@@ -89,14 +92,14 @@ class Migrate implements ABCExec
                             '--stage' => [
                                             'description'   => 'stage name',
                                             'default_value' => 'default',
-                                            'required'      => false,
+                                            'required'      => true,
                                         ]
                     ],
                     'example'     => "php abcexec migrate:phinx help\n".
-                        "\t  To create new migration:\n\t\t   php abcexec migrate::phinx create YourMigrationClassName\n"
-                        ."\t  To run all new migrations:\n\t\t   php abcexec migrate::phinx migrate\n"
-                        ."\t  To rollback last migration:\n\t\t   php abcexec migrate::phinx rollback\n"
-                        ."\t  To rollback all migrations (reset):\n\t\t   php abcexec migrate::phinx rollback -t 0\n"
+                        "\t  To create new migration:\n\n\t\t   php abcexec migrate::phinx create YourMigrationClassName\n\n"
+                        ."\t  To run all new migrations:\n\n\t\t   php abcexec migrate::phinx migrate --stage=default\n\n"
+                        ."\t  To rollback last migration:\n\n\t\t   php abcexec migrate::phinx rollback --stage=default\n\n"
+                        ."\t  To rollback all migrations (reset):\n\n\t\t   php abcexec migrate::phinx rollback --target=0 --stage=default\n\n"
 
 
                 ]
@@ -104,8 +107,8 @@ class Migrate implements ABCExec
     }
 
     protected function _call_phinx( $action, $options ){
-        $stage_name = $options['stage_name'] ? $options['stage_name'] : 'default';
-        $result = $this->_make_migration_config($stage_name);
+        $stage_name = $options['stage'] ? $options['stage'] : 'default';
+        $result = $this->createMigrationConfig(['stage' => $stage_name]);
         if(!$result){
             throw new AException(AC_ERR_LOAD, implode("\n",$this->results)."\n");
         }
@@ -149,7 +152,7 @@ class Migrate implements ABCExec
 
 
         foreach($argv as $k=>$v){
-            if(is_int(strpos($v,'--stage_name='))){
+            if(is_int(strpos($v,'--stage='))){
                 unset($argv[$k]);
                 break;
             }
@@ -164,18 +167,41 @@ class Migrate implements ABCExec
         return true;
     }
 
-    protected function _make_migration_config($stage_name = 'default'){
+    public function createMigrationConfig(array $data ){
         $migration_config_file = ABC::env('DIR_CONFIG').'migration.config.php';
+        $stage_name = $data['stage'];
         $app_config_file = ABC::env('DIR_CONFIG').$stage_name.'.config.php';
         @unlink($migration_config_file);
         if(!$stage_name || !is_file($app_config_file)){
             $this->results[] = 'Cannot to create migration configuration. Unknown stage name!';
             return false;
         }
-        $app_config = require $app_config_file;
+        $app_config = @include $app_config_file;
+        if( !$app_config ){
+            $this->results[] = 'Cannot to create migration configuration. Empty stage environment!';
+            return false;
+        }
 
-        $dirs = [ABC::env('DIR_MIGRATIONS')];
-        $dirs = array_merge($dirs, glob(ABC::env('DIR_APP_EXTENSIONS').'*/migrations',GLOB_ONLYDIR));
+
+        //if need to run only extensions migration - set only one path with migrations files
+        if($data['extension_text_id']){
+            $dirs = [ABC::env('DIR_APP_EXTENSIONS').$data['extension_text_id'].DIRECTORY_SEPARATOR.'migrations'];
+        }
+        //otherwise include all paths (core + extensions migrations)
+        else {
+            $dirs = [ABC::env('DIR_MIGRATIONS')];
+            $ext_dirs = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'*/migrations', GLOB_ONLYDIR );
+
+            $em = new AExtensionManager();
+            $all_installed = $em->getInstalled('exts');
+            //filter only installed extensions (including disabled)
+            foreach($ext_dirs as $ext_dir) {
+                $ext_txt_id = basename(dirname($ext_dir));
+                if ( in_array( $ext_txt_id, $all_installed ) ) {
+                    $dirs[] = $ext_dir;
+                }
+            }
+        }
         $db_drv = $app_config['DB_CURRENT_DRIVER'];
         $content = <<<EOD
 <?php

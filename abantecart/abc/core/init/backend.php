@@ -64,7 +64,7 @@ require dirname(__DIR__).$dir_sep.'abc.php';
 //run constructor of ABC class to load environment
 
 $ABC = new ABC();
-if(!$ABC::$loaded_config_file){
+if( !$ABC::getStageName() ){
     $ABC->loadDefaultStage();
     echo "Default stage environment loaded.\n\n";
 }
