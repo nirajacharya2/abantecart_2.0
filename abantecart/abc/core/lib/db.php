@@ -242,11 +242,25 @@ class ADB{
      * @return \Illuminate\Database\Capsule\Manager | null
      */
     public function __call($function_name, $args){
-        $item = $this->orm;
+        $item = $this->orm::schema();
         if ( method_exists( $item, $function_name ) ){
             return call_user_func_array(array($item, $function_name), $args);
         } else {
             return null;
         }
+    }
+
+    public function getORM()
+    {
+        return $this->orm;
+    }
+
+    public function getSchema()
+    {
+        return $this->orm::schema();
+    }
+    public function CurrentTimeStamp()
+    {
+        return $this->orm::raw('CURRENT_TIMESTAMP');
     }
 }

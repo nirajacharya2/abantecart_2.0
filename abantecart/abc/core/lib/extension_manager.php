@@ -452,11 +452,6 @@ class AExtensionManager
             }
         }
 
-        //run migrations
-        if( !$this->_run_migrations( $name, 'getMigrate' )){
-            $this->errors[] = 'Migrations of '.$name.' extension runtime error!';
-            return false;
-        }
 
         // running php install script if it exists
         if ( isset( $config->install->trigger ) ) {
@@ -504,71 +499,6 @@ class AExtensionManager
         return true;
     }
 
-    /**
-     * @param string $extension_text_id
-     * @param string $command - can be 'getMigrate' for Up and 'getRollback' for Down
-     *
-     * @return bool
-     */
-    protected function _run_migrations( $extension_text_id, $command = 'getMigrate' )
-    {
-        $migrations_dir = ABC::env( 'DIR_APP_EXTENSIONS' ).$extension_text_id.DIRECTORY_SEPARATOR.'migrations'.DIRECTORY_SEPARATOR;
-        if( !is_dir($migrations_dir) ){
-            return true;
-        }
-        //if not migrations - skip
-        $files = glob($migrations_dir.'*');
-        if(!$files){
-            return true;
-        }
-
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'migrate.php';
-        $migrate = new Migrate();
-        if( !$migrate->createMigrationConfig( [ 'stage' => ABC::getStageName(), 'extension_text_id' => $extension_text_id] )){
-            $this->errors[] += $migrate->results;
-            return false;
-        }
-
-        try {
-            // Get the phinx console application and inject it into TextWrapper.
-            $app = require_once ABC::env('DIR_VENDOR'). 'robmorgan/phinx/app/phinx.php';
-            $wrap = new \Phinx\Wrapper\TextWrapper($app, ['configuration' => ABC::env('DIR_CONFIG').'migration.config.php']);
-            //up all migrations of extension
-            if( $command == 'getMigrate' ) {
-                // Execute the command and determine if it was successful.
-                call_user_func( [ $wrap, 'getMigrate' ], ABC::getStageName() );
-                if($wrap->getExitCode() > 0){
-                    $this->errors[] = 'Migration script runtime error!';
-                    return false;
-                }
-            }
-            //rollback al migrations of extension
-            elseif($command == 'getRollback'){
-                foreach($files as $filename) {
-                    $tmp = explode("_",basename($filename));
-                    $target = $tmp[0];
-                    if(preg_match('/[^0-9]/',$target)){
-                        continue;
-                    }
-                    // Execute the command and determine if it was successful.
-                    call_user_func( [ $wrap, 'getRollback' ], ABC::getStageName(), $target );
-                    if ( $wrap->getExitCode() > 0 ) {
-                        $this->errors[] = 'Migration script runtime error!';
-                    }
-                    $this->log->write($wrap->getStatus(ABC::getStageName()));
-                }
-            }
-
-            $this->log->write($wrap->getStatus(ABC::getStageName()));
-        }catch(AException $e){
-            $this->errors[] = 'Migration script runtime error!';
-            return false;
-        }
-
-        return true;
-    }
-
 
     /**
      * @param string   $name
@@ -594,12 +524,6 @@ class AExtensionManager
         if ( $info['type'] == 'payment' && $this->config->get( $name.'_status' ) ) {
             $this->load->language( 'extension/extensions' );
             $this->errors = [ $this->language->get( 'error_payment_uninstall' ) ];
-            return false;
-        }
-
-        //rollback all extension migrations
-        if( !$this->_run_migrations( $name, 'getRollback' )){
-            $this->errors[] = 'Migrations of '.$name.' extension runtime error!';
             return false;
         }
 

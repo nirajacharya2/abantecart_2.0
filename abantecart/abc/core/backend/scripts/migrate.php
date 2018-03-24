@@ -36,7 +36,7 @@ class Migrate implements ABCExec
         if(isset($options['init'])){
             return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically.'];
         }
-        if( $action == 'phinx' && !isset($options['stage']) ){
+        if( $action == 'phinx' && !isset($options['stage'])  && !isset($options['help']) ){
             return ["Please provide stage name! For example: --stage='default'"];
         }
         return $errors;
@@ -182,26 +182,13 @@ class Migrate implements ABCExec
             return false;
         }
 
-
-        //if need to run only extensions migration - set only one path with migrations files
+        $dirs = [ABC::env('DIR_MIGRATIONS')];
         if($data['extension_text_id']){
-            $dirs = [ABC::env('DIR_APP_EXTENSIONS').$data['extension_text_id'].DIRECTORY_SEPARATOR.'migrations'];
+            $dirs[] = ABC::env('DIR_APP_EXTENSIONS').$data['extension_text_id'].DIRECTORY_SEPARATOR.'migrations';
         }
         //otherwise include all paths (core + extensions migrations)
-        else {
-            $dirs = [ABC::env('DIR_MIGRATIONS')];
-            $ext_dirs = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'*/migrations', GLOB_ONLYDIR );
 
-            $em = new AExtensionManager();
-            $all_installed = $em->getInstalled('exts');
-            //filter only installed extensions (including disabled)
-            foreach($ext_dirs as $ext_dir) {
-                $ext_txt_id = basename(dirname($ext_dir));
-                if ( in_array( $ext_txt_id, $all_installed ) ) {
-                    $dirs[] = $ext_dir;
-                }
-            }
-        }
+        $dirs = array_merge($dirs, glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'*/migrations', GLOB_ONLYDIR ));
         $db_drv = $app_config['DB_CURRENT_DRIVER'];
         $content = <<<EOD
 <?php

@@ -18,12 +18,53 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\core\lib\AExtensionManager;
 use abc\core\lib\AMenu;
 use abc\core\lib\AResourceManager;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
+
+/**
+ * @var AExtensionManager $this
+ */
+$db_schema = $this->db->getSchema();
+
+$db_schema->create('banners', function (Blueprint $table) {
+        $table->increments('banner_id');
+        $table->tinyInteger('status')->default(0);
+        $table->integer('banner_type')->default(1);
+        $table->string('banner_group_name');
+        $table->dateTime('start_date');
+        $table->dateTime('end_date');
+        $table->tinyInteger('blank')->default(0);
+        $table->text('target_url');
+        $table->timestamp('date_added');
+        $table->timestamp('date_modified')->default($this->db->CurrentTimeStamp());
+});
+$db_schema->create('banner_descriptions', function (Blueprint $table) {
+        $table->integer('banner_id');
+        $table->integer('language_id');
+        $table->string('name');
+        $table->text('description');
+        $table->text('meta');
+        $table->timestamp('date_added');
+        $table->timestamp('date_modified')->default($this->db->CurrentTimeStamp());
+        $table->primary(['banner_id','language_id']);
+});
+$db_schema->create('banner_stat', function (Blueprint $table) {
+        $table->integer('banner_id');
+        $table->integer('store_id');
+        $table->integer('type');
+        $table->text('user_info');
+        $table->text('meta');
+        $table->timestamp('time')->default($this->db->CurrentTimeStamp());
+        $table->index(['banner_id', 'store_id', 'type', 'time'],'banner_stat_idx');
+});
+
 
 
 
