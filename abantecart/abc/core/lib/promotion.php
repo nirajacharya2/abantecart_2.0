@@ -153,7 +153,7 @@ class APromotion
         }
 
         $sql = "SELECT price
-                FROM ".$this->db->table("product_discounts")."
+                FROM ".$this->db->table_name("product_discounts")."
                 WHERE product_id = '".(int)$product_id."'
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity <= '".(int)$discount_quantity."'
@@ -184,7 +184,7 @@ class APromotion
         }
 
         $query = $this->db->query("SELECT price
-                                    FROM ".$this->db->table("product_discounts")."
+                                    FROM ".$this->db->table_name("product_discounts")."
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
                                         AND quantity = '1'
@@ -218,7 +218,7 @@ class APromotion
             return $output;
         }
         $query = $this->db->query("	SELECT *
-                                    FROM ".$this->db->table("product_discounts")."
+                                    FROM ".$this->db->table_name("product_discounts")."
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".(int)$customer_group_id."'
                                         AND quantity > 1
@@ -248,7 +248,7 @@ class APromotion
 
         $output = '';
         $query = $this->db->query("SELECT price
-                                    FROM ".$this->db->table("product_specials")."
+                                    FROM ".$this->db->table_name("product_specials")."
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
                                         AND ((date_start = '0000-00-00' OR date_start < NOW())
@@ -296,17 +296,17 @@ class APromotion
 
         $sql = "SELECT DISTINCT ps.product_id, p.*, pd.name, pd.description, pd.blurb, ss.name AS stock,
                     (SELECT AVG(rating)
-                    FROM ".$this->db->table("reviews")." r1
+                    FROM ".$this->db->table_name("reviews")." r1
                     WHERE r1.product_id = ps.product_id
                         AND r1.status = '1'
                     GROUP BY r1.product_id) AS rating
-                FROM ".$this->db->table("product_specials")." ps
-                LEFT JOIN ".$this->db->table("products")." p ON (ps.product_id = p.product_id)
-                LEFT JOIN ".$this->db->table("product_descriptions")." pd
+                FROM ".$this->db->table_name("product_specials")." ps
+                LEFT JOIN ".$this->db->table_name("products")." p ON (ps.product_id = p.product_id)
+                LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
                     ON (p.product_id = pd.product_id AND language_id=".$language_id.")
-                LEFT JOIN ".$this->db->table("products_to_stores")." p2s
+                LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
                     ON (p.product_id = p2s.product_id)
-                LEFT JOIN ".$this->db->table("stock_statuses")." ss
+                LEFT JOIN ".$this->db->table_name("stock_statuses")." ss
                     ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '".$language_id."')
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
@@ -386,13 +386,13 @@ class APromotion
         if ($data['avg_rating']) {
             $sql
                 .= ", (SELECT AVG(rating)
-                    FROM ".$this->db->table("reviews")." r1
+                    FROM ".$this->db->table_name("reviews")." r1
                     WHERE r1.product_id = ps.product_id AND r1.status = '1'
                     GROUP BY r1.product_id) AS rating\n";
         }
         $sql
             .= ", (SELECT price
-                    FROM ".$this->db->table("product_discounts")." rd
+                    FROM ".$this->db->table_name("product_discounts")." rd
                     WHERE rd.product_id = ps.product_id
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity = '1'
@@ -401,13 +401,13 @@ class APromotion
                     ORDER BY priority ASC, price ASC
                     LIMIT 1) as discount_price\n ";
 
-        $sql .= "FROM ".$this->db->table("product_specials")." ps
-                LEFT JOIN ".$this->db->table("products")." p ON (ps.product_id = p.product_id)
-                LEFT JOIN ".$this->db->table("product_descriptions")." pd
+        $sql .= "FROM ".$this->db->table_name("product_specials")." ps
+                LEFT JOIN ".$this->db->table_name("products")." p ON (ps.product_id = p.product_id)
+                LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
                     ON (p.product_id = pd.product_id AND language_id=".$language_id.")
-                LEFT JOIN ".$this->db->table("products_to_stores")." p2s
+                LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
                     ON (p.product_id = p2s.product_id)
-                LEFT JOIN ".$this->db->table("stock_statuses")." ss
+                LEFT JOIN ".$this->db->table_name("stock_statuses")." ss
                     ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '".$language_id."')
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
@@ -471,10 +471,10 @@ class APromotion
         }
 
         $query = $this->db->query("SELECT COUNT(DISTINCT ps.product_id) AS total
-                                    FROM ".$this->db->table("product_specials")." ps
-                                    LEFT JOIN ".$this->db->table("products")." p
+                                    FROM ".$this->db->table_name("product_specials")." ps
+                                    LEFT JOIN ".$this->db->table_name("products")." p
                                         ON (ps.product_id = p.product_id)
-                                    LEFT JOIN ".$this->db->table("products_to_stores")." p2s
+                                    LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
                                         ON (p.product_id = p2s.product_id)
                                     WHERE p.status = '1'
                                         AND p.date_available <= NOW()
@@ -502,8 +502,8 @@ class APromotion
 
         $status = true;
         $coupon_query = $this->db->query("SELECT *
-                                          FROM ".$this->db->table("coupons")." c
-                                          LEFT JOIN ".$this->db->table("coupon_descriptions")." cd
+                                          FROM ".$this->db->table_name("coupons")." c
+                                          LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
                                                 ON (c.coupon_id = cd.coupon_id AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
                                           WHERE c.code = '".$this->db->escape($coupon_code)."'
                                                 AND ((date_start = '0000-00-00' OR date_start < NOW())
@@ -515,7 +515,7 @@ class APromotion
                 $status = false;
             }
             $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
-                                                     FROM `".$this->db->table("orders")."`
+                                                     FROM `".$this->db->table_name("orders")."`
                                                      WHERE order_status_id > '0' AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
 
             if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total'] && $coupon_query->row['uses_total'] > 0) {
@@ -527,7 +527,7 @@ class APromotion
 
             if ( ! is_null($this->customer) && $this->customer->getId()) {
                 $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
-                                                         FROM `".$this->db->table("orders")."`
+                                                         FROM `".$this->db->table_name("orders")."`
                                                          WHERE order_status_id > '0'
                                                                 AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'
                                                                 AND customer_id = '".(int)$this->customer->getId()."'");
@@ -538,7 +538,7 @@ class APromotion
             }
 
             $coupon_product_query = $this->db->query("SELECT *
-                                                       FROM ".$this->db->table("coupons_products")."
+                                                       FROM ".$this->db->table_name("coupons_products")."
                                                        WHERE coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
 
             foreach ($coupon_product_query->rows as $result) {

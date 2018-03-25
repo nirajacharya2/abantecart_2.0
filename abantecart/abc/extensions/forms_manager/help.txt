@@ -23,7 +23,7 @@ Ability to program custom controller to process submitted data and handle in som
 <br>Note: New page can be created just for form in admin -> design -> content section and form block can be added to this page.  
 <br/><br/>
 
-3. Check and test your storefornt and adjust form settings if needed. 
+3. Check and test your storefront and adjust form settings if needed.
 <br/><br/>
 
 <p>

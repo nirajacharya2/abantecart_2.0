@@ -480,7 +480,7 @@ class AHtml extends AController
         $db = $this->registry->get('db');
         $sql
             = "SELECT *
-				FROM ".$db->table('url_aliases')."
+				FROM ".$db->table_name('url_aliases')."
 				WHERE query<>'".$db->escape($query)."' AND keyword='".$db->escape($seo_key)."'";
         $result = $db->query($sql);
         if ($result->num_rows) {

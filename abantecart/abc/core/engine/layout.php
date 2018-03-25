@@ -207,9 +207,9 @@ class ALayout{
 		}
 
 		$sql = "SELECT p.page_id, controller, key_param, key_value, p.date_added, p.date_modified "
-				. "FROM " . $this->db->table("pages") . " p "
-				. "LEFT JOIN " . $this->db->table("pages_layouts") . " pl ON pl.page_id = p.page_id "
-				. "LEFT JOIN " . $this->db->table("layouts") . " l ON l.layout_id = pl.layout_id "
+				. "FROM " . $this->db->table_name("pages") . " p "
+				. "LEFT JOIN " . $this->db->table_name("pages_layouts") . " pl ON pl.page_id = p.page_id "
+				. "LEFT JOIN " . $this->db->table_name("layouts") . " l ON l.layout_id = pl.layout_id "
 				. $where
 				. "ORDER BY key_param DESC, key_value DESC, p.page_id ASC";
 		$query = $this->db->query($sql);
@@ -258,7 +258,7 @@ class ALayout{
 			$where = "WHERE template_id = '" . $this->db->escape($this->tmpl_id) . "' AND layout_type = '0' ";
 
 			$sql = "SELECT layout_id, layout_type, layout_name, date_added, date_modified
-					FROM " . $this->db->table("layouts") . "
+					FROM " . $this->db->table_name("layouts") . "
 					" . $where . "
 					ORDER BY layout_id ASC";
 
@@ -288,7 +288,7 @@ class ALayout{
 		if ($layouts === false) {
 
 			$where = 'WHERE template_id = "' . $this->db->escape($this->tmpl_id) . '" ';
-			$join = ", " . $this->db->table("pages_layouts") . " as pl ";
+			$join = ", " . $this->db->table_name("pages_layouts") . " as pl ";
 			$where .= " AND pl.page_id = '" . (int)$this->page_id . "' AND l.layout_id = pl.layout_id ";
 
 			if (!empty($layout_type)) {
@@ -302,7 +302,7 @@ class ALayout{
 					. "l.date_added as date_added, "
 					. "l.date_modified as date_modified "
 					. "FROM "
-					. $this->db->table("layouts") . " as l "
+					. $this->db->table_name("layouts") . " as l "
 					. $join
 					. $where
 					. " ORDER BY "
@@ -342,8 +342,8 @@ class ALayout{
 					. "b.block_txt_id as block_txt_id, "
 					. "b.controller as controller "
 					. "FROM "
-					. $this->db->table("blocks") . " as b, "
-					. $this->db->table("block_layouts") . " as bl "
+					. $this->db->table_name("blocks") . " as b, "
+					. $this->db->table_name("block_layouts") . " as bl "
 					. $where
 					. "ORDER BY "
 					. "bl.parent_instance_id Asc, bl.position Asc";
@@ -468,7 +468,7 @@ class ALayout{
 						. "bt.date_added as date_added, "
 						. "bt.date_modified as date_modified "
 						. "FROM "
-						. $this->db->table("block_templates") . " as bt "
+						. $this->db->table_name("block_templates") . " as bt "
 						. $where
 						. "ORDER BY "
 						. "bt.parent_block_id Desc";
@@ -498,8 +498,8 @@ class ALayout{
 
 		$output = array ();
 		$result = $this->db->query("SELECT bd.*, COALESCE(bl.status,0) as status
-									FROM " . $this->db->table("block_descriptions") . " bd
-									LEFT JOIN " . $this->db->table("block_layouts") . " bl
+									FROM " . $this->db->table_name("block_descriptions") . " bd
+									LEFT JOIN " . $this->db->table_name("block_layouts") . " bl
 										ON bl.custom_block_id = bd.custom_block_id
 									WHERE bd.custom_block_id = '" . ( int )$custom_block_id . "'");
 		if ($result->num_rows) {

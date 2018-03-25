@@ -101,7 +101,7 @@ class AResourceManager extends AResource
         if (empty($data) || ! AHelperUtils::has_value($data['type_id'])) {
             return null;
         }
-        $sql = "UPDATE ".$this->db->table('resource_types')."
+        $sql = "UPDATE ".$this->db->table_name('resource_types')."
                 SET type_name='".$this->db->escape($data['type_name'])."',
                     default_directory='".$this->db->escape($data['default_directory'])."',
                     default_icon='".$this->db->escape($data['default_icon'])."',
@@ -174,7 +174,7 @@ class AResourceManager extends AResource
             return false;
         }
 
-        $sql = "INSERT INTO ".$this->db->table("resource_library")."
+        $sql = "INSERT INTO ".$this->db->table_name("resource_library")."
                 SET type_id = '".$this->type_id."',
                     date_added = NOW()";
         $this->db->query($sql);
@@ -266,7 +266,7 @@ class AResourceManager extends AResource
         }
 
         if ($data['resource_path']) {
-            $sql = "UPDATE ".$this->db->table('resource_descriptions')."
+            $sql = "UPDATE ".$this->db->table_name('resource_descriptions')."
                     SET resource_path='".$this->db->escape($data['resource_path'])."'
                     WHERE resource_id =  ".$resource_id;
             $this->db->query($sql);
@@ -332,9 +332,9 @@ class AResourceManager extends AResource
         //remove thumbnail before removing
         $this->deleteThumbnail($resource_id);
 
-        $this->db->query("DELETE FROM ".$this->db->table("resource_map")." WHERE resource_id = '".(int)$resource_id."' ");
-        $this->db->query("DELETE FROM ".$this->db->table("resource_descriptions")." WHERE resource_id = '".(int)$resource_id."' ");
-        $this->db->query("DELETE FROM ".$this->db->table("resource_library")." WHERE resource_id = '".(int)$resource_id."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_map")." WHERE resource_id = '".(int)$resource_id."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id = '".(int)$resource_id."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_library")." WHERE resource_id = '".(int)$resource_id."' ");
 
         $this->cache->remove('resources');
 
@@ -412,9 +412,9 @@ class AResourceManager extends AResource
         }
 
         $ids = implode(', ', $ids);
-        $this->db->query("DELETE FROM ".$this->db->table("resource_map")." WHERE resource_id IN (".$ids.")");
-        $this->db->query("DELETE FROM ".$this->db->table("resource_descriptions")." WHERE resource_id IN (".$ids.")");
-        $this->db->query("DELETE FROM ".$this->db->table("resource_library")." WHERE resource_id IN (".$ids.")");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_map")." WHERE resource_id IN (".$ids.")");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id IN (".$ids.")");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_library")." WHERE resource_id IN (".$ids.")");
 
         $this->cache->remove('resources');
 
@@ -437,7 +437,7 @@ class AResourceManager extends AResource
         }
 
         $sql = "SELECT resource_id 
-                FROM ".$this->db->table("resource_map")." 
+                FROM ".$this->db->table_name("resource_map")." 
                 WHERE resource_id = '".(int)$resource_id."'
                       AND object_name = '".$this->db->escape($object_name)."'
                       AND object_id = '".(int)$object_id."'";
@@ -450,13 +450,13 @@ class AResourceManager extends AResource
         //need to get sort order
         $sql
             = "SELECT MAX(sort_order) AS sort_order
-                FROM ".$this->db->table("resource_map")." 
+                FROM ".$this->db->table_name("resource_map")." 
                 WHERE object_name = '".$this->db->escape($object_name)."'
                       AND object_id = '".(int)$object_id."'";
         $result = $this->db->query($sql);
         $new_sort_order = $result->row['sort_order'] + 1;
 
-        $sql = "INSERT INTO ".$this->db->table("resource_map")."
+        $sql = "INSERT INTO ".$this->db->table_name("resource_map")."
                 SET resource_id = '".(int)$resource_id."',
                     object_name = '".$this->db->escape($object_name)."',
                     object_id = '".(int)$object_id."',
@@ -492,7 +492,7 @@ class AResourceManager extends AResource
             }
             //skip already mapped
             $sql = "SELECT resource_id
-                    FROM ".$this->db->table("resource_map")." 
+                    FROM ".$this->db->table_name("resource_map")." 
                     WHERE resource_id = '".(int)$id."'
                           AND object_name = '".$this->db->escape($object_name)."'
                           AND object_id = '".(int)$object_id."'";
@@ -509,13 +509,13 @@ class AResourceManager extends AResource
         foreach ($ids as $resource_id) {
             //need to get sort order
             $sql = "SELECT MAX(sort_order) AS sort_order
-                    FROM ".$this->db->table("resource_map")." 
+                    FROM ".$this->db->table_name("resource_map")." 
                     WHERE object_name = '".$this->db->escape($object_name)."'
                           AND object_id = '".(int)$object_id."'";
             $result = $this->db->query($sql);
             $new_sort_order = $result->row['sort_order'] + 1;
 
-            $sql = "INSERT INTO ".$this->db->table("resource_map")." 
+            $sql = "INSERT INTO ".$this->db->table_name("resource_map")." 
                     SET resource_id = '".(int)$resource_id."',
                         object_name = '".$this->db->escape($object_name)."',
                         object_id = '".(int)$object_id."',
@@ -542,7 +542,7 @@ class AResourceManager extends AResource
             return false;
         }
 
-        $sql = "DELETE FROM ".$this->db->table("resource_map")." 
+        $sql = "DELETE FROM ".$this->db->table_name("resource_map")." 
                 WHERE resource_id = '".(int)$resource_id."'
                     AND object_name = '".$this->db->escape($object_name)."'
                     AND object_id = '".(int)$object_id."'";
@@ -578,7 +578,7 @@ class AResourceManager extends AResource
             $this->cache->remove('resources');
         }
 
-        $sql = "DELETE FROM ".$this->db->table("resource_map")." 
+        $sql = "DELETE FROM ".$this->db->table_name("resource_map")." 
                 WHERE resource_id IN (".implode(", ", $ids).")
                     AND object_name = '".$this->db->escape($object_name)."'
                     AND object_id = '".(int)$object_id."'";
@@ -605,7 +605,7 @@ class AResourceManager extends AResource
             if (empty($resource)) {
                 continue;
             }
-            $sql = "UPDATE ".$this->db->table("resource_map")."
+            $sql = "UPDATE ".$this->db->table_name("resource_map")."
                     SET sort_order = '".(int)$sort_order."'
                     WHERE resource_id = '".(int)$resource_id."'
                             AND object_name = '".$this->db->escape($object_name)."'
@@ -678,7 +678,7 @@ class AResourceManager extends AResource
                           rd.name,
                           rd.title,
                           rd.description,
-                          (SELECT COUNT(resource_id) FROM ".$this->db->table("resource_map")." rm1 WHERE rm1.resource_id = rd.resource_id) as mapped, 
+                          (SELECT COUNT(resource_id) FROM ".$this->db->table_name("resource_map")." rm1 WHERE rm1.resource_id = rd.resource_id) as mapped, 
             ";
             if ($language_id == (int)$this->language->getDefaultLanguageID()) {
                 //only 1 language
@@ -695,11 +695,11 @@ class AResourceManager extends AResource
         }
 
         $where = $join = '';
-        $join = " LEFT JOIN ".$this->db->table("resource_descriptions")." rd 
+        $join = " LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd 
                     ON (rl.resource_id = rd.resource_id AND rd.language_id = '".$language_id."') ";
         if ($language_id != (int)$this->language->getDefaultLanguageID()) {
             //add default language
-            $join .= " LEFT JOIN ".$this->db->table("resource_descriptions")." rdd 
+            $join .= " LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd 
                         ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '".$this->language->getDefaultLanguageID()."') ";
         }
 
@@ -714,7 +714,7 @@ class AResourceManager extends AResource
             if ( ! empty($data['object_id'])) {
                 $sub_join .= " AND rm.object_id = '".(int)$data['object_id']."'";
             }
-            $join .= " INNER JOIN ".$this->db->table("resource_map")." rm ON (rl.resource_id = rm.resource_id ".$sub_join.") ";
+            $join .= " INNER JOIN ".$this->db->table_name("resource_map")." rm ON (rl.resource_id = rm.resource_id ".$sub_join.") ";
         }
 
         if ( ! empty($data['keyword'])) {
@@ -728,7 +728,7 @@ class AResourceManager extends AResource
             $where .= " rl.type_id = '".(int)$data['type_id']."'";
         }
 
-        $sql = "SELECT ".$top_sql." FROM ".$this->db->table("resource_library")." rl".$join.$where;
+        $sql = "SELECT ".$top_sql." FROM ".$this->db->table_name("resource_library")." rl".$join.$where;
 
         if ( ! empty($data['subsql_filter'])) {
             $sql .= ($where ? " AND " : 'WHERE ').$data['subsql_filter'];
@@ -819,7 +819,7 @@ class AResourceManager extends AResource
             return null;
         }
         $sql = "SELECT count(*) AS total
-                FROM ".$this->db->table('resource_map')." rm
+                FROM ".$this->db->table_name('resource_map')." rm
                 WHERE rm.resource_id = '".(int)$resource_id."'";
 
         if ($object_name) {
@@ -851,8 +851,8 @@ class AResourceManager extends AResource
         $resource_objects = $this->cache->pull($cache_key);
         if ($resource_objects === false) {
             $sql = "SELECT rm.object_id, 'products' AS object_name, pd.name
-                    FROM ".$this->db->table("resource_map")." rm
-                    LEFT JOIN ".$this->db->table("product_descriptions")." pd
+                    FROM ".$this->db->table_name("resource_map")." rm
+                    LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
                         ON ( rm.object_id = pd.product_id AND pd.language_id = '".(int)$language_id."')
                     WHERE rm.resource_id = '".(int)$resource_id."'
                         AND rm.object_name = 'products'";
@@ -894,10 +894,10 @@ class AResourceManager extends AResource
         $resource_objects = $this->cache->pull($cache_key);
         if ($resource_objects === false) {
             $sql = "SELECT rm.object_id, 'product_option_value' AS object_name, pd.name, pov.product_id, pov.product_option_id
-                    FROM ".$this->db->table("resource_map")." rm
-                    LEFT JOIN ".$this->db->table("product_option_value_descriptions")." pd
+                    FROM ".$this->db->table_name("resource_map")." rm
+                    LEFT JOIN ".$this->db->table_name("product_option_value_descriptions")." pd
                         ON ( rm.object_id = pd.product_option_value_id AND pd.language_id = '".(int)$language_id."')
-                    LEFT JOIN ".$this->db->table("product_option_values")." pov
+                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
                         ON ( pd.product_option_value_id = pov.product_option_value_id )
                     WHERE rm.resource_id = '".(int)$resource_id."'
                         AND rm.object_name = 'product_option_value'";
@@ -940,8 +940,8 @@ class AResourceManager extends AResource
         $resource_objects = $this->cache->pull($cache_key);
         if ($resource_objects === false) {
             $sql = "SELECT rm.object_id, 'categories' AS object_name, cd.name
-                    FROM ".$this->db->table("resource_map")." rm
-                    LEFT JOIN ".$this->db->table("category_descriptions")." cd
+                    FROM ".$this->db->table_name("resource_map")." rm
+                    LEFT JOIN ".$this->db->table_name("category_descriptions")." cd
                         ON ( rm.object_id = cd.category_id AND cd.language_id = '".(int)$language_id."')
                     WHERE rm.resource_id = '".(int)$resource_id."'
                         AND rm.object_name = 'categories'";
@@ -982,8 +982,8 @@ class AResourceManager extends AResource
         $resource_objects = $this->cache->pull($cache_key);
         if ($resource_objects === false) {
             $sql = "SELECT rm.object_id, 'manufacturers' AS object_name, m.name
-                    FROM ".$this->db->table("resource_map")." rm
-                    LEFT JOIN ".$this->db->table("manufacturers")." m
+                    FROM ".$this->db->table_name("resource_map")." rm
+                    LEFT JOIN ".$this->db->table_name("manufacturers")." m
                         ON ( rm.object_id = m.manufacturer_id )
                     WHERE rm.resource_id = '".(int)$resource_id."'
                         AND rm.object_name = 'manufacturers'";

@@ -17,7 +17,7 @@ class ModelExtensionDefaultPpPro extends Model
     {
         $this->language->load( 'default_pp_pro/default_pp_pro' );
 
-        $sql = "INSERT INTO ".$this->db->table( 'order_totals' )." 
+        $sql = "INSERT INTO ".$this->db->table_name( 'order_totals' )." 
                 (`order_id`,`title`,`text`,`value`,`sort_order`,`type`)
                 VALUES ('".(int)$data['order_id']."',
                         '".$this->db->escape( $this->language->get( 'paypal_refund_title' ) )."',
@@ -28,12 +28,12 @@ class ModelExtensionDefaultPpPro extends Model
         $this->db->query( $sql );
 
         $sql = "SELECT * 
-                FROM ".$this->db->table( "order_totals" )." 
+                FROM ".$this->db->table_name( "order_totals" )." 
                 WHERE type='total' AND order_id = '".(int)$data['order_id']."'";
         $res = $this->db->query( $sql );
         $total = $res->row;
 
-        $sql = "UPDATE ".$this->db->table( "order_totals" )." 
+        $sql = "UPDATE ".$this->db->table_name( "order_totals" )." 
                 SET `text` = '".$this->currency->format( ( $total['value'] - $data['amount'] ), $data['currency'] )."',
                 `value` = '".( (float)$total['value'] - (float)$data['amount'] )."'
                 WHERE order_id = '".(int)$data['order_id']."'
@@ -47,7 +47,7 @@ class ModelExtensionDefaultPpPro extends Model
             $data = serialize( $data );
         }
         return $this->db->query(
-                                "UPDATE ".$this->db->table( 'orders' )."
+                                "UPDATE ".$this->db->table_name( 'orders' )."
                                     SET payment_method_data = '".$this->db->escape( $data )."'
                                     WHERE order_id = '".(int)$order_id."'"
         );
@@ -55,7 +55,7 @@ class ModelExtensionDefaultPpPro extends Model
 
     public function addOrderHistory( $data )
     {
-        $this->db->query( "INSERT INTO ".$this->db->table( "order_history" )."
+        $this->db->query( "INSERT INTO ".$this->db->table_name( "order_history" )."
                             SET order_id = '".(int)$data['order_id']."',
                             order_status_id = '".(int)$data['order_status_id']."',
                             notify = '".(int)$data['notify']."',

@@ -28,7 +28,7 @@ class ModelLocalisationCurrency extends Model {
 		$currency_data = $this->cache->pull('localization.currency');
 
 		if ($currency_data === false) {
-			$query = $this->db->query("SELECT * FROM " . $this->db->table("currencies") . " ORDER BY title ASC");
+			$query = $this->db->query("SELECT * FROM " . $this->db->table_name("currencies") . " ORDER BY title ASC");
 	
 			foreach ($query->rows as $result) {
       			$currency_data[$result['code']] = array(

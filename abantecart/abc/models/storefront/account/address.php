@@ -47,7 +47,7 @@ class ModelAccountAddress extends Model{
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
 
-		$this->db->query("INSERT INTO `" . $this->db->table("addresses") . "`
+		$this->db->query("INSERT INTO `" . $this->db->table_name("addresses") . "`
 						SET customer_id = '" . (int)$this->customer->getId() . "',
 							company = '" . $this->db->escape($data['company']) . "',
 							firstname = '" . $this->db->escape($data['firstname']) . "',
@@ -62,7 +62,7 @@ class ModelAccountAddress extends Model{
 		$address_id = $this->db->getLastId();
 
 		if (isset($data['default']) && $data['default'] == '1'){
-			$this->db->query("UPDATE " . $this->db->table("customers") . "
+			$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 							SET address_id = '" . (int)$address_id . "'
 							WHERE customer_id = '" . (int)$this->customer->getId() . "'");
 		}
@@ -89,7 +89,7 @@ class ModelAccountAddress extends Model{
 		}
 
 		$this->db->query(
-				"UPDATE " . $this->db->table("addresses") . "
+				"UPDATE " . $this->db->table_name("addresses") . "
 				SET company = '" . $this->db->escape($data['company']) . "',
 					firstname = '" . $this->db->escape($data['firstname']) . "',
 					lastname = '" . $this->db->escape($data['lastname']) . "',
@@ -103,7 +103,7 @@ class ModelAccountAddress extends Model{
 
 		if (isset($data['default'])){
 			$this->db->query(
-					"UPDATE " . $this->db->table("customers") . "
+					"UPDATE " . $this->db->table_name("customers") . "
 					SET address_id = '" . (int)$address_id . "'
 					WHERE customer_id = '" . (int)$this->customer->getId() . "'");
 		}
@@ -115,7 +115,7 @@ class ModelAccountAddress extends Model{
 	 */
 	public function deleteAddress($address_id){
 		$this->db->query(
-				"DELETE FROM " . $this->db->table("addresses") . "
+				"DELETE FROM " . $this->db->table_name("addresses") . "
 				WHERE address_id = '" . (int)$address_id . "' AND customer_id = '" . (int)$this->customer->getId() . "'");
 	}
 
@@ -126,7 +126,7 @@ class ModelAccountAddress extends Model{
 	public function getAddress($address_id){
 		$address_query = $this->db->query(
 				"SELECT DISTINCT *
-				 FROM " . $this->db->table("addresses") . "
+				 FROM " . $this->db->table_name("addresses") . "
 				 WHERE address_id = '" . (int)$address_id . "' and customer_id = '" . (int)$this->customer->getId() . "'");
 
 		if ($address_query->num_rows){
@@ -144,7 +144,7 @@ class ModelAccountAddress extends Model{
 
 		$query = $this->db->query(
 				"SELECT *
-				FROM " . $this->db->table("addresses") . "
+				FROM " . $this->db->table_name("addresses") . "
 				WHERE customer_id = '" . (int)$this->customer->getId() . "'");
 
 		foreach ($query->rows as $result){
@@ -160,7 +160,7 @@ class ModelAccountAddress extends Model{
 	public function getTotalAddresses(){
 		$query = $this->db->query(
 				"SELECT COUNT(*) AS total
-				FROM " . $this->db->table("addresses") . "
+				FROM " . $this->db->table_name("addresses") . "
 				WHERE customer_id = '" . (int)$this->customer->getId() . "'");
 
 		return (int)$query->row['total'];
@@ -201,7 +201,7 @@ class ModelAccountAddress extends Model{
 		}
 
 		if (!$this->error){
-			$sql = "SELECT * FROM " . $this->db->table("zones") . "
+			$sql = "SELECT * FROM " . $this->db->table_name("zones") . "
 					WHERE country_id = '" . (int)$data['country_id'] . "'
 						AND zone_id = '" . (int)$data['zone_id'] . "';";
 			$result = $this->db->query($sql);

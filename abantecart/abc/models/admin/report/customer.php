@@ -49,8 +49,8 @@ class ModelReportCustomer extends Model
                         ";
         }
 
-        $sql = $total_sql." FROM ".$this->db->table("online_customers")." co 
-                            LEFT JOIN ".$this->db->table("customers")." c ON (co.customer_id = c.customer_id) ";
+        $sql = $total_sql." FROM ".$this->db->table_name("online_customers")." co 
+                            LEFT JOIN ".$this->db->table_name("customers")." c ON (co.customer_id = c.customer_id) ";
 
         $where = '';
         if ( ! empty($data['subsql_filter'])) {
@@ -139,9 +139,9 @@ class ModelReportCustomer extends Model
                         ";
         }
 
-        $sql = $total_sql." FROM `".$this->db->table("orders")."` o 
-                                LEFT JOIN `".$this->db->table("customers")."` c ON (o.customer_id = c.customer_id) 
-                                LEFT JOIN `".$this->db->table("customer_groups")."` cg ON (o.customer_group_id = cg.customer_group_id) 
+        $sql = $total_sql." FROM `".$this->db->table_name("orders")."` o 
+                                LEFT JOIN `".$this->db->table_name("customers")."` c ON (o.customer_id = c.customer_id) 
+                                LEFT JOIN `".$this->db->table_name("customer_groups")."` cg ON (o.customer_group_id = cg.customer_group_id) 
                             ";
 
         $filter = (isset($data['filter']) ? $data['filter'] : array());
@@ -253,9 +253,9 @@ class ModelReportCustomer extends Model
                         ";
         }
 
-        $sql = $total_sql." FROM `".$this->db->table("customer_transactions")."` ct 
-                                LEFT JOIN `".$this->db->table("customers")."` c ON (ct.customer_id = c.customer_id) 
-                                LEFT JOIN `".$this->db->table("users")."` u ON u.user_id = ct.created_by 
+        $sql = $total_sql." FROM `".$this->db->table_name("customer_transactions")."` ct 
+                                LEFT JOIN `".$this->db->table_name("customers")."` c ON (ct.customer_id = c.customer_id) 
+                                LEFT JOIN `".$this->db->table_name("users")."` u ON u.user_id = ct.created_by 
                             ";
 
         $filter = (isset($data['filter']) ? $data['filter'] : array());
@@ -354,7 +354,7 @@ class ModelReportCustomer extends Model
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, HOUR(date_added) AS hour 
-                FROM `".$this->db->table("customers")."` 
+                FROM `".$this->db->table_name("customers")."` 
                 WHERE DATE(date_added) = DATE(NOW()) 
                 GROUP BY HOUR(date_added) 
                 ORDER BY date_added ASC");
@@ -384,7 +384,7 @@ class ModelReportCustomer extends Model
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
-                FROM `".$this->db->table("customers")."` 
+                FROM `".$this->db->table_name("customers")."` 
                 WHERE DATE(date_added) >= DATE('".$this->db->escape(date('Y-m-d', $date_start))."') 
                 GROUP BY DAYNAME(date_added)");
         foreach ($query->rows as $result) {
@@ -412,7 +412,7 @@ class ModelReportCustomer extends Model
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
-                FROM `".$this->db->table("customers")."` 
+                FROM `".$this->db->table_name("customers")."` 
                 WHERE DATE(date_added) >= '".$this->db->escape(date('Y').'-'.date('m').'-1')."' 
                 GROUP BY DATE(date_added)");
 
@@ -440,7 +440,7 @@ class ModelReportCustomer extends Model
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
-                FROM `".$this->db->table("customers")."` 
+                FROM `".$this->db->table_name("customers")."` 
                 WHERE YEAR(date_added) = YEAR(NOW()) 
                 GROUP BY MONTH(date_added)");
         foreach ($query->rows as $result) {

@@ -76,7 +76,7 @@ class ModelToolFileUploads extends Model {
 	 * @return array
 	 */
 	public function getField($field_id) {
-		$result = $this->db->query('SELECT * FROM ' . $this->db->table('fields') . ' WHERE field_id =	"' . (int)$field_id . '"');
+		$result = $this->db->query('SELECT * FROM ' . $this->db->table_name('fields') . ' WHERE field_id =	"' . (int)$field_id . '"');
 
 		if ( $result->num_rows ) {
 

@@ -687,7 +687,7 @@ final class ADataEncryption{
 		$this->keys = $cache->pull($cache_key);
 		if (empty($this->keys)){
 			$db = $this->registry->get('db');
-			$query = $db->query("SELECT * FROM " . $db->table('encryption_keys') . " WHERE status = 1");
+			$query = $db->query("SELECT * FROM " . $db->table_name('encryption_keys') . " WHERE status = 1");
 			if (!$query->num_rows){
 				return null;
 			}

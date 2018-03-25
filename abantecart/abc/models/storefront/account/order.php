@@ -49,7 +49,7 @@ class ModelAccountOrder extends Model {
 		}
 
 		$sql = "SELECT *
-				FROM `" . $this->db->table("orders") . "`
+				FROM `" . $this->db->table_name("orders") . "`
 				WHERE order_id = '" . (int)$order_id . "' ";
 		if($mode==''){
 			$sql .= " AND customer_id = '" . (int)$this->customer->getId() . "'";
@@ -172,8 +172,8 @@ class ModelAccountOrder extends Model {
 						o.total, 
 						o.currency, 
 						o.value
-				FROM `" . $this->db->table("orders") . "` o 
-				LEFT JOIN " . $this->db->table("order_statuses") . " os 
+				FROM `" . $this->db->table_name("orders") . "` o 
+				LEFT JOIN " . $this->db->table_name("order_statuses") . " os 
 					ON (o.order_status_id = os.order_status_id 
 							AND os.language_id = '" . (int)$language_id . "')
 				WHERE customer_id = '" . (int)$this->customer->getId() . "' 
@@ -189,7 +189,7 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getOrderProducts($order_id) {
 		$query = $this->db->query( "SELECT *
-									FROM " . $this->db->table("order_products") . "
+									FROM " . $this->db->table_name("order_products") . "
 									WHERE order_id = '" . (int)$order_id . "'" );
 		return $query->rows;
 	}
@@ -201,10 +201,10 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getOrderOptions($order_id, $order_product_id) {
 		$query = $this->db->query("SELECT oo.*, po.element_type
-									FROM " . $this->db->table("order_options") . " oo
-									LEFT JOIN ".$this->db->table('product_option_values')." pov 
+									FROM " . $this->db->table_name("order_options") . " oo
+									LEFT JOIN ".$this->db->table_name('product_option_values')." pov 
 										ON pov.product_option_value_id = oo.product_option_value_id
-									LEFT JOIN ".$this->db->table('product_options')." po 
+									LEFT JOIN ".$this->db->table_name('product_options')." po 
 										ON po.product_option_id = pov.product_option_id
 									WHERE oo.order_id = '" . (int)$order_id . "' 
 										AND oo.order_product_id = '" . (int)$order_product_id . "'");
@@ -217,7 +217,7 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getOrderTotals($order_id) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("order_totals") . "
+									FROM " . $this->db->table_name("order_totals") . "
 									WHERE order_id = '" . (int)$order_id . "'
 									ORDER BY sort_order");
 		return $query->rows;
@@ -230,8 +230,8 @@ class ModelAccountOrder extends Model {
 	public function getOrderStatus($order_id) {
 		$language_id = (int)$this->config->get('storefront_language_id');
 		$query = $this->db->query("SELECT osd.name AS status
-									FROM " . $this->db->table("orders") . " o, 
-									" . $this->db->table("order_status_descriptions") . " osd
+									FROM " . $this->db->table_name("orders") . " o, 
+									" . $this->db->table_name("order_status_descriptions") . " osd
 									WHERE o.order_id = '" . (int)$order_id . "' 
 										AND o.order_status_id = osd.order_status_id 
 										AND osd.language_id = '" . (int)$language_id . "'"
@@ -249,8 +249,8 @@ class ModelAccountOrder extends Model {
 											os.name AS status, 
 											oh.comment, 
 											oh.notify 
-									FROM " . $this->db->table("order_history") . " oh 
-									LEFT JOIN " . $this->db->table("order_statuses") . " os 
+									FROM " . $this->db->table_name("order_history") . " oh 
+									LEFT JOIN " . $this->db->table_name("order_statuses") . " os 
 										ON oh.order_status_id = os.order_status_id 
 									WHERE oh.order_id = '" . (int)$order_id . "' 
 											AND oh.notify = '1' 
@@ -265,7 +265,7 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getOrderDownloads($order_id) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("order_downloads") . "
+									FROM " . $this->db->table_name("order_downloads") . "
 									WHERE order_id = '" . (int)$order_id . "'
 									ORDER BY sort_order ASC");
 		return $query->rows; 
@@ -276,7 +276,7 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getTotalOrders() {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM `" . $this->db->table("orders") . "`
+									FROM `" . $this->db->table_name("orders") . "`
 									WHERE customer_id = '" . (int)$this->customer->getId() . "' AND order_status_id > '0'");
 		return (int)$query->row['total'];
 	}
@@ -287,7 +287,7 @@ class ModelAccountOrder extends Model {
 	 */
 	public function getTotalOrderProductsByOrderId($order_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("order_products") . "
+									FROM " . $this->db->table_name("order_products") . "
 									WHERE order_id = '" . (int)$order_id . "'");
 		return (int)$query->row['total'];
 	}

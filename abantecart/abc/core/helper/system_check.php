@@ -390,8 +390,8 @@ class AHelperSystemCheck extends AHelper{
 		$language_id = $language->getDefaultLanguageID();
 
 		$query = $db->query("SELECT osi.order_status_id, osi.status_text_id
-								FROM " . $db->table('order_statuses') . " os
-								INNER JOIN " . $db->table('order_status_ids') . " osi
+								FROM " . $db->table_name('order_statuses') . " os
+								INNER JOIN " . $db->table_name('order_status_ids') . " osi
 									ON osi.order_status_id = os.order_status_id
 								WHERE os.language_id = '" . $language_id . "'");
 		$db_statuses = array ();
@@ -403,9 +403,9 @@ class AHelperSystemCheck extends AHelper{
 		foreach ($order_statuses as $id => $text_id) {
 			if ($text_id != $db_statuses[$id]) {
 				$ret_array[] = array (
-						'title' => 'Incorrect order status with id ' . $id,
-						'body'  => 'Incorrect status text id for order status #' . $id . '. Value must be "' . $text_id . '" (' . $db_statuses[$id] . '). Please check data of tables ' . $db->table('order_status_ids') . ' and ' . $db->table('order_statuses'),
-						'type'  => 'W'
+                    'title' => 'Incorrect order status with id ' . $id,
+                    'body'  => 'Incorrect status text id for order status #' . $id . '. Value must be "' . $text_id . '" (' . $db_statuses[$id] . '). Please check data of tables ' . $db->table_name('order_status_ids') . ' and ' . $db->table_name('order_statuses'),
+                    'type'  => 'W'
 				);
 			}
 		}

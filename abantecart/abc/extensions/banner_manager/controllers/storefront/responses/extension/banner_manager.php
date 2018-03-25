@@ -1,4 +1,4 @@
-<?php   
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,68 +17,74 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
 /**
  * Class ControllerResponsesExtensionBannerManager
+ *
  * @property \abc\models\storefront\ModelExtensionBannerManager $model_extension_banner_manager
  */
-class ControllerResponsesExtensionBannerManager extends AController {
-	public $data = array();
-	
-	public function main() {
-    	//default controller function to register view or click
+class ControllerResponsesExtensionBannerManager extends AController
+{
+    public $data = array();
+
+    public function main()
+    {
+        //default controller function to register view or click
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$banner_id = (int)$this->request->get['banner_id'];
-		//type of registered activity 1 = view and 2 = click
-		$type = (int)$this->request->get['type'];
+        $banner_id = (int)$this->request->get['banner_id'];
+        //type of registered activity 1 = view and 2 = click
+        $type = (int)$this->request->get['type'];
 
-		if($banner_id){
-			$this->loadModel('extension/banner_manager');
-			$this->model_extension_banner_manager->writeBannerStat($banner_id,$type);
-		}
+        if ( $banner_id ) {
+            $this->loadModel( 'extension/banner_manager' );
+            $this->model_extension_banner_manager->writeBannerStat( $banner_id, $type );
+        }
 
-		$output = array();
-		$output['success'] = 'OK';
+        $output = array();
+        $output['success'] = 'OK';
         //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($output));	
-	}
+        $this->load->library( 'json' );
+        $this->response->setOutput( AJson::encode( $output ) );
+    }
 
-	public function click() {
-		//controller function to register click and redirect
-		//NOTE: Work only for banners with target_url
-		//For security reason, do not allow URL as parameter for this redirect
+    public function click()
+    {
+        //controller function to register click and redirect
+        //NOTE: Work only for banners with target_url
+        //For security reason, do not allow URL as parameter for this redirect
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$banner_id = (int)$this->request->get['banner_id'];
-		$url = ABC::env('INDEX_FILE');
-		//register click
-		if($banner_id){
-			$this->loadModel('extension/banner_manager');
-			$banner = $this->model_extension_banner_manager->getBanner($banner_id, '');
-			$url = $banner['target_url'];
-			if ( empty($url) || $url[0] == '#') {
-				$url = ABC::env('INDEX_FILE') . $url;
-			}
-			$this->model_extension_banner_manager->writeBannerStat($banner_id,2);
-		}
-		//go to URL
-		$this->redirect($url);
+        $banner_id = (int)$this->request->get['banner_id'];
+        $url = ABC::env( 'INDEX_FILE' );
+        //register click
+        if ( $banner_id ) {
+            $this->loadModel( 'extension/banner_manager' );
+            $banner = $this->model_extension_banner_manager->getBanner( $banner_id, '' );
+            $url = $banner['target_url'];
+            if ( empty( $url ) || $url[0] == '#' ) {
+                $url = ABC::env( 'INDEX_FILE' ).$url;
+            }
+            $this->model_extension_banner_manager->writeBannerStat( $banner_id, 2 );
+        }
+        //go to URL
+        $this->redirect( $url );
 
         //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+    }
 }

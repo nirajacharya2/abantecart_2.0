@@ -30,7 +30,7 @@ class ModelLocalisationLengthClass extends Model{
 	 * @return int
 	 */
 	public function addLengthClass($data){
-		$this->db->query("INSERT INTO " . $this->db->table("length_classes") . " 
+		$this->db->query("INSERT INTO " . $this->db->table_name("length_classes") . " 
 						SET value = '" . (float)$data['value'] . "', 
 							iso_code = UPPER('" . $this->db->escape($data['iso_code']) . "')");
 
@@ -58,7 +58,7 @@ class ModelLocalisationLengthClass extends Model{
 	 */
 	public function editLengthClass($length_class_id, $data){
 		if ( isset($data['value']) || isset($data['iso_code'])) {
-			$sql = "UPDATE " . $this->db->table("length_classes") . "
+			$sql = "UPDATE " . $this->db->table_name("length_classes") . "
 					SET ";
 			$inc = array();
 			if(isset($data['value'])){
@@ -96,9 +96,9 @@ class ModelLocalisationLengthClass extends Model{
 	 * @param int $length_class_id
 	 */
 	public function deleteLengthClass($length_class_id){
-		$this->db->query("DELETE FROM " . $this->db->table("length_classes") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("length_classes") . " 
 						WHERE length_class_id = '" . (int)$length_class_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("length_class_descriptions") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("length_class_descriptions") . " 
 						WHERE length_class_id = '" . (int)$length_class_id . "'");
 
 		$this->cache->remove('localization');
@@ -118,8 +118,8 @@ class ModelLocalisationLengthClass extends Model{
 
 		if ($data) {
 			$sql = "SELECT *
-					FROM " . $this->db->table("length_classes") . " wc
-					LEFT JOIN " . $this->db->table("length_class_descriptions") . " wcd 
+					FROM " . $this->db->table_name("length_classes") . " wc
+					LEFT JOIN " . $this->db->table_name("length_class_descriptions") . " wcd 
 						ON (wc.length_class_id = wcd.length_class_id AND wcd.language_id = '" . $language_id . "')";
 
 			$sort_data = array (
@@ -158,8 +158,8 @@ class ModelLocalisationLengthClass extends Model{
 			$length_class_data = $this->cache->pull($cache_key);
 			if ($length_class_data === false) {
 				$query = $this->db->query("SELECT *
-											FROM " . $this->db->table("length_classes") . " wc
-											LEFT JOIN " . $this->db->table("length_class_descriptions") . " wcd
+											FROM " . $this->db->table_name("length_classes") . " wc
+											LEFT JOIN " . $this->db->table_name("length_class_descriptions") . " wcd
 												ON (wc.length_class_id = wcd.length_class_id 
 													AND wcd.language_id = '" . $language_id . "')");
 				$length_class_data = $query->rows;
@@ -180,8 +180,8 @@ class ModelLocalisationLengthClass extends Model{
 			$language_id = (int)$this->language->getContentLanguageID();
 		}
 		$query = $this->db->query("SELECT *, wc.length_class_id
-									FROM " . $this->db->table("length_classes") . " wc
-									LEFT JOIN " . $this->db->table("length_class_descriptions") . " wcd
+									FROM " . $this->db->table_name("length_classes") . " wc
+									LEFT JOIN " . $this->db->table_name("length_class_descriptions") . " wcd
 										ON (wc.length_class_id = wcd.length_class_id 
 											AND wcd.language_id = '" . (int)$language_id . "')
 									WHERE wc.length_class_id = '" . (int)$length_class_id . "'");
@@ -199,7 +199,7 @@ class ModelLocalisationLengthClass extends Model{
 			$language_id = (int)$this->language->getContentLanguageID();
 		}
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("length_class_descriptions") . " 
+									FROM " . $this->db->table_name("length_class_descriptions") . " 
 									WHERE unit = '" . $this->db->escape($unit) . "'
 										AND language_id = '" . (int)$language_id . "'");
 		return $query->row;
@@ -216,8 +216,8 @@ class ModelLocalisationLengthClass extends Model{
 			$language_id = (int)$this->language->getContentLanguageID();
 		}
 		$query = $this->db->query("SELECT *, wc.length_class_id
-									FROM " . $this->db->table("length_classes") . " wc
-									LEFT JOIN " . $this->db->table("length_class_descriptions") . " wcd
+									FROM " . $this->db->table_name("length_classes") . " wc
+									LEFT JOIN " . $this->db->table_name("length_class_descriptions") . " wcd
 										ON (wc.length_class_id = wcd.length_class_id 
 											AND wcd.language_id = '" . $language_id . "')
 									WHERE wc.iso_code = '" . $this->db->escape($iso_code) . "'");
@@ -231,7 +231,7 @@ class ModelLocalisationLengthClass extends Model{
 	public function getLengthClassDescriptions($length_class_id){
 		$length_class_data = array ();
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("length_class_descriptions") . " 
+									FROM " . $this->db->table_name("length_class_descriptions") . " 
 									WHERE length_class_id = '" . (int)$length_class_id . "'");
 		foreach ($query->rows as $row) {
 			$length_class_data[$row['language_id']] = $row;
@@ -244,7 +244,7 @@ class ModelLocalisationLengthClass extends Model{
 	 */
 	public function getTotalLengthClasses(){
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("length_classes"));
+									FROM " . $this->db->table_name("length_classes"));
 		return (int)$query->row['total'];
 	}
 }

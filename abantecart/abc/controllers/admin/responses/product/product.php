@@ -837,9 +837,9 @@ class ControllerResponsesProductProduct extends AController{
 			$language_id = $this->language->getContentLanguageID();
 		}
 		$query = $this->db->query("SELECT pov.*, povd.name as value
-									FROM `" . $this->db->table('product_options') . "` po
-									LEFT JOIN `" . $this->db->table('product_option_values') . "` pov ON po.product_option_id = pov.product_option_id
-									LEFT JOIN `" . $this->db->table('product_option_value_descriptions') . "` povd
+									FROM `" . $this->db->table_name('product_options') . "` po
+									LEFT JOIN `" . $this->db->table_name('product_option_values') . "` pov ON po.product_option_id = pov.product_option_id
+									LEFT JOIN `" . $this->db->table_name('product_option_value_descriptions') . "` povd
 										ON ( pov.product_option_value_id = povd.product_option_value_id AND povd.language_id = '" . (int)$language_id . "' )
 									WHERE po.attribute_id = '" . $this->db->escape($attribute_id) . "'
 									ORDER BY pov.sort_order");

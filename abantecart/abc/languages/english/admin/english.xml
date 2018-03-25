@@ -683,7 +683,7 @@
 	</definition>
 	<definition>
 		<key>text_copy_embed_code</key>
-		<value><![CDATA[Сopy and paste this into your HTML-code where you'd like to sell]]></value>
+		<value><![CDATA[Copy and paste this into your HTML-code where you'd like to sell]]></value>
 	</definition>
 	<definition>
 		<key>button_retry</key>

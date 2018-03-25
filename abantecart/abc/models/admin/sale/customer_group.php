@@ -29,7 +29,7 @@ class ModelSaleCustomerGroup extends Model {
 	 * @return int
 	 */
 	public function addCustomerGroup($data) {
-		$this->db->query("INSERT INTO " . $this->db->table("customer_groups") . " 
+		$this->db->query("INSERT INTO " . $this->db->table_name("customer_groups") . " 
 							SET name = '" . $this->db->escape($data['name']) . "',
 								tax_exempt = '" . $this->db->escape($data['tax_exempt']) . "'
 						");
@@ -43,14 +43,14 @@ class ModelSaleCustomerGroup extends Model {
 	public function editCustomerGroup($customer_group_id, $data) {
 		if ( !empty($data['name']) ) {
 			$this->db->query(
-					"UPDATE " . $this->db->table("customer_groups") . " 
+					"UPDATE " . $this->db->table_name("customer_groups") . " 
 					SET 
 						name = '" . $this->db->escape($data['name']) . "'
 					WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		}
 		if ( isset($data['tax_exempt']) ) {
 			$this->db->query(
-					"UPDATE " . $this->db->table("customer_groups") . " 
+					"UPDATE " . $this->db->table_name("customer_groups") . " 
 					SET 
 						tax_exempt = '" . $this->db->escape($data['tax_exempt']) . "'
 					WHERE customer_group_id = '" . (int)$customer_group_id . "'");
@@ -61,9 +61,9 @@ class ModelSaleCustomerGroup extends Model {
 	 * @param int $customer_group_id
 	 */
 	public function deleteCustomerGroup($customer_group_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("customer_groups") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("customer_groups") . " 
 						WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("product_discounts") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("product_discounts") . " 
 						WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 	}
 
@@ -74,7 +74,7 @@ class ModelSaleCustomerGroup extends Model {
 	public function getCustomerGroup($customer_group_id) {
 		$query = $this->db->query(
 				"SELECT DISTINCT * 
-				FROM " . $this->db->table("customer_groups") . " 
+				FROM " . $this->db->table_name("customer_groups") . " 
 				WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		return $query->row;
 	}
@@ -87,10 +87,10 @@ class ModelSaleCustomerGroup extends Model {
 	public function getCustomerGroups($data = array(), $mode = 'default') {
 		if ($mode == 'total_only') {
 			$sql = "SELECT count(*) as total 
-					FROM " . $this->db->table("customer_groups") . " ";
+					FROM " . $this->db->table_name("customer_groups") . " ";
 		} else {
 			$sql = "SELECT * 
-					FROM " . $this->db->table("customer_groups") . " ";
+					FROM " . $this->db->table_name("customer_groups") . " ";
 		}
 
 		if ( !empty($data['subsql_filter']) ) {

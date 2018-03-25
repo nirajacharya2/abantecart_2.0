@@ -355,7 +355,7 @@ class ALanguageManager extends ALanguage
                 $del_index[] = $i." = '".$this->db->escape($v)."'";
             }
         }
-        $sql = "DELETE FROM ".$this->db->table($table_name)." ";
+        $sql = "DELETE FROM ".$this->db->table_name($table_name)." ";
         $sql .= "WHERE ".implode(" AND ", $del_index);
         $this->db->query($sql);
 
@@ -383,7 +383,7 @@ class ALanguageManager extends ALanguage
                 $sel_index[] = $i." = '".$this->db->escape($v)."'";
             }
         }
-        $sql = "SELECT * FROM ".$this->db->table($table_name)." ";
+        $sql = "SELECT * FROM ".$this->db->table_name($table_name)." ";
         $sql .= "WHERE ".implode(" AND ", $sel_index);
         if ( ! is_null($language_id)) {
             $sql .= " AND language_id=".(int)$language_id;
@@ -429,7 +429,7 @@ class ALanguageManager extends ALanguage
                 $update_data[] = $i." = '".$this->db->escape($v)."'";
             }
 
-            $sql = "UPDATE ".$this->db->table($table_name)." ";
+            $sql = "UPDATE ".$this->db->table_name($table_name)." ";
             $sql .= "SET ".implode(", ", $update_data)." WHERE ".implode(" AND ", $update_index);
             $this->db->query($sql);
         }
@@ -457,7 +457,7 @@ class ALanguageManager extends ALanguage
                 $lang_data[$key] = $this->db->escape($value);
             }
             $load_data = array_merge($lang_data, $index, array('language_id' => $lang_id));
-            $sql = "INSERT INTO ".$this->db->table($table_name)." ";
+            $sql = "INSERT INTO ".$this->db->table_name($table_name)." ";
             $sql .= "(`".implode("`, `", array_keys($load_data))."`) VALUES ('".implode("', '", $load_data)."') ";
             $this->db->query($sql);
         }
@@ -862,7 +862,7 @@ class ALanguageManager extends ALanguage
         $section = $this->is_admin ? 1 : 0;
         $specific_sql = " AND block = '".$block."' AND section = '".$section."'";
 
-        return $this->cloneLanguageRows($this->db->table('language_definitions'), $pkeys, $language_id, $source_language, $specific_sql);
+        return $this->cloneLanguageRows($this->db->table_name('language_definitions'), $pkeys, $language_id, $source_language, $specific_sql);
     }
 
     /**
@@ -1113,7 +1113,7 @@ class ALanguageManager extends ALanguage
 
                             ADebug::variable('class ALanguage cloning data: ', $insert_sql);
 
-                            if ($table == $this->db->table('language_definitions')) {
+                            if ($table == $this->db->table_name('language_definitions')) {
                                 //#PR There are some key condition in definitions that can be duplicate (CASE: block = 'english' main language ) skip
                                 //We assume that main language XML need to be present
                                 //TODO rename main language file to common.xml
@@ -1123,9 +1123,9 @@ class ALanguageManager extends ALanguage
                                     continue;
                                 }
                             } else {
-                                if ($table == $this->db->table('product_tags')) {
+                                if ($table == $this->db->table_name('product_tags')) {
                                     // TODO. ac_product_tags still an issue. Will be cloned as duplication on each translation.
-                                    //		 Issue. Can not check if translation is present because of no IDs present in ac_product_tags
+                                    // Issue. Can not check if translation is present because of no IDs present in ac_product_tags
                                     // Offset duplicate error for now.
                                     if ( ! $this->db->query($insert_sql, true)) {
                                         //skip count on error
@@ -1163,7 +1163,7 @@ class ALanguageManager extends ALanguage
         if ( ! $load_data) {
             $sql = "SELECT DISTINCT table_name 
                     FROM information_schema.columns 
-                    WHERE column_name = 'language_id' AND table_schema='".$this->db->database()."'";
+                    WHERE column_name = 'language_id' AND table_schema='".$this->db->getDatabaseName()."'";
             $load_sql = $this->db->query($sql);
             $load_data = $load_sql->rows;
             if ($this->cache) {

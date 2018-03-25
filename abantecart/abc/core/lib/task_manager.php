@@ -142,7 +142,7 @@ class ATaskManager{
 		$task_id = (int)$task_id;
 		//get list only ready tasks for needed start-side (sf, admin or both)
 		$sql = "SELECT *
-				FROM " . $this->db->table('tasks') . " t
+				FROM " . $this->db->table_name('tasks') . " t
 				WHERE t.status = ".self::STATUS_READY."
 					AND t.starter IN ('" . $this->starter . "','2')
 					" . ($task_id ? " AND t.task_id = " . $task_id : '');
@@ -413,7 +413,7 @@ class ATaskManager{
 		}
 		// check
 		$sql = "SELECT *
-				FROM " . $this->db->table('tasks') . "
+				FROM " . $this->db->table_name('tasks') . "
 				WHERE name = '" . $this->db->escape($data['name']) . "'";
 		$res = $this->db->query($sql);
 		if ($res->num_rows){
@@ -421,7 +421,7 @@ class ATaskManager{
 			$this->toLog('Error: Task with name "' . $data['name'] . '" is already exists. Override!');
 		}
 
-		$sql = "INSERT INTO " . $this->db->table('tasks') . "
+		$sql = "INSERT INTO " . $this->db->table_name('tasks') . "
 				(`name`,
 				`starter`,
 				`status`,
@@ -494,7 +494,7 @@ class ATaskManager{
 			return false;
 		}
 
-		$sql = "UPDATE " . $this->db->table('tasks') . "
+		$sql = "UPDATE " . $this->db->table_name('tasks') . "
 				SET " . implode(', ', $update) . "
 				WHERE task_id = " . (int)$task_id;
 		$this->db->query($sql);
@@ -522,7 +522,7 @@ class ATaskManager{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table('task_details') . "
+				FROM " . $this->db->table_name('task_details') . "
 				WHERE task_id = " . $task_id;
 		$result = $this->db->query($sql);
 		if ($result->num_rows) {
@@ -531,12 +531,12 @@ class ATaskManager{
 					$data[$k] = $ov;
 				}
 			}
-			$sql = "UPDATE " . $this->db->table('task_details') . "
+			$sql = "UPDATE " . $this->db->table_name('task_details') . "
 					SET settings = '" . $this->db->escape($data['settings']) . "'
 					WHERE task_id = " . $task_id;
 		} else {
 			$data['created_by'] = isset($data['created_by']) ? $data['created_by'] : 1;
-			$sql = "INSERT INTO " . $this->db->table('task_details') . "
+			$sql = "INSERT INTO " . $this->db->table_name('task_details') . "
 					(task_id, created_by, settings, date_modified)
 					 VALUES (   '" . $task_id . "',
 								'" . $this->db->escape($data['created_by']) . "',
@@ -557,7 +557,7 @@ class ATaskManager{
 			return false;
 		}
 		$data['settings'] = !is_string($data['settings']) ? serialize($data['settings']) : $data['settings'];
-		$sql = "INSERT INTO " . $this->db->table('task_steps') . "
+		$sql = "INSERT INTO " . $this->db->table_name('task_steps') . "
 				(`task_id`,
 				`sort_order`,
 				`status`,
@@ -625,7 +625,7 @@ class ATaskManager{
 			return false;
 		}
 
-		$sql = "UPDATE " . $this->db->table('task_steps') . "
+		$sql = "UPDATE " . $this->db->table_name('task_steps') . "
 				SET " . implode(', ', $update) . "
 				WHERE step_id = " . (int)$step_id;
 		$this->db->query($sql);
@@ -636,9 +636,9 @@ class ATaskManager{
 	 * @param int $task_id
 	 */
 	public function deleteTask($task_id){
-		$sql[] = "DELETE FROM " . $this->db->table('tasks') . " WHERE task_id = '" . (int)$task_id . "'";
-		$sql[] = "DELETE FROM " . $this->db->table('task_steps') . " WHERE task_id = '" . (int)$task_id . "'";
-		$sql[] = "DELETE FROM " . $this->db->table('task_details') . " WHERE task_id = '" . (int)$task_id . "'";
+		$sql[] = "DELETE FROM " . $this->db->table_name('tasks') . " WHERE task_id = '" . (int)$task_id . "'";
+		$sql[] = "DELETE FROM " . $this->db->table_name('task_steps') . " WHERE task_id = '" . (int)$task_id . "'";
+		$sql[] = "DELETE FROM " . $this->db->table_name('task_details') . " WHERE task_id = '" . (int)$task_id . "'";
 		foreach ($sql as $q){
 			$this->db->query($q);
 		}
@@ -648,7 +648,7 @@ class ATaskManager{
 	 * @param int $step_id
 	 */
 	public function deleteStep($step_id){
-		$sql = "DELETE FROM " . $this->db->table('task_steps') . " WHERE step_id = '" . (int)$step_id . "'";
+		$sql = "DELETE FROM " . $this->db->table_name('task_steps') . " WHERE step_id = '" . (int)$step_id . "'";
 		$this->db->query($sql);
 	}
 
@@ -662,8 +662,8 @@ class ATaskManager{
 			return array ();
 		}
 		$sql = "SELECT *
-				FROM " . $this->db->table('tasks') . " t
-				LEFT JOIN " . $this->db->table('task_details') . " td ON td.task_id = t.task_id
+				FROM " . $this->db->table_name('tasks') . " t
+				LEFT JOIN " . $this->db->table_name('task_details') . " td ON td.task_id = t.task_id
 				WHERE t.task_id = '" . $task_id . "'";
 		$result = $this->db->query($sql);
 		$output = $result->row;
@@ -689,8 +689,8 @@ class ATaskManager{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table('tasks') . " t
-				LEFT JOIN " . $this->db->table('task_details') . " td ON td.task_id = t.task_id
+				FROM " . $this->db->table_name('tasks') . " t
+				LEFT JOIN " . $this->db->table_name('task_details') . " td ON td.task_id = t.task_id
 				WHERE t.name = '" . $task_name . "'";
 		$result = $this->db->query($sql);
 		$output = $result->row;
@@ -717,7 +717,7 @@ class ATaskManager{
 		$output = array ();
 		try{
 			$sql = "SELECT *
-				FROM " . $this->db->table('task_steps') . "
+				FROM " . $this->db->table_name('task_steps') . "
 				WHERE task_id = " . $task_id . "
 				ORDER BY sort_order";
 			$result = $this->db->query($sql);
@@ -749,7 +749,7 @@ class ATaskManager{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table('task_steps') . "
+				FROM " . $this->db->table_name('task_steps') . "
 				WHERE task_id = " . $task_id . " AND step_id = " . $step_id;
 		$result = $this->db->query($sql);
 		$output = $result->row;
@@ -787,7 +787,7 @@ class ATaskManager{
 	 */
 	public function getTotalTasks($data = array ()){
 		$sql = "SELECT COUNT(*) as total
-				FROM " . $this->db->table('tasks');
+				FROM " . $this->db->table_name('tasks');
 		$sql .= ' WHERE 1=1 ';
 
 		if (!empty($data['subsql_filter'])){
@@ -809,8 +809,8 @@ class ATaskManager{
 	public function getTasks($data = array ()){
 
 		$sql = "SELECT td.*, t.*
-				FROM " . $this->db->table('tasks') . " t
-				LEFT JOIN " . $this->db->table('task_details') . " td ON td.task_id = t.task_id
+				FROM " . $this->db->table_name('tasks') . " t
+				LEFT JOIN " . $this->db->table_name('task_details') . " td ON td.task_id = t.task_id
 				WHERE 1=1 ";
 
 		if (!empty($data['subsql_filter'])){

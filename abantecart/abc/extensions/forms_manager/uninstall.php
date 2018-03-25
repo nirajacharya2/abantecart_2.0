@@ -17,12 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 use abc\core\lib\AMenu;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
 //delete menu item
 $menu = new AMenu ( "admin" );
-$menu->deleteMenuItem ("forms_manager");
+$menu->deleteMenuItem( "forms_manager" );

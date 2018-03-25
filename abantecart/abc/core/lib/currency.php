@@ -68,7 +68,7 @@ final class ACurrency
         if ($cache_data !== false) {
             $this->currencies = $cache_data;
         } else {
-            $query = $this->db->query("SELECT * FROM ".$this->db->table("currencies"));
+            $query = $this->db->query("SELECT * FROM ".$this->db->table_name("currencies"));
             foreach ($query->rows as $result) {
                 $this->currencies[$result['code']] = array(
                     'code'          => $result['code'],

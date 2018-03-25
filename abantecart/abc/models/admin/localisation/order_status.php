@@ -40,13 +40,13 @@ class ModelLocalisationOrderStatus extends Model{
 			return false;
 		}
 
-		$result = $this->db->query("SELECT MAX(order_status_id) as max_id FROM " . $this->db->table("order_statuses"));
+		$result = $this->db->query("SELECT MAX(order_status_id) as max_id FROM " . $this->db->table_name("order_statuses"));
 		$order_status_id = (int)$result->row['max_id'] + 1;
 
 		//check new order status id value. it need to be greater than base order status ids (see AOrderStatus class)
 		$max_base_order_status_id = max(array_keys($this->order_status->getBaseStatuses()));
 		$order_status_id = $order_status_id <= $max_base_order_status_id ? ($max_base_order_status_id + 1) : $order_status_id;
-		$sql = "INSERT INTO " . $this->db->table('order_statuses') . " (order_status_id, status_text_id)
+		$sql = "INSERT INTO " . $this->db->table_name('order_statuses') . " (order_status_id, status_text_id)
 				VALUES (" . $order_status_id . ", '" . $this->db->escape($status_text_id) . "');";
 		$this->db->query($sql);
         $language_id = $this->language->getContentLanguageID();
@@ -80,7 +80,7 @@ class ModelLocalisationOrderStatus extends Model{
 
 		$status_text_id = AHelperUtils::preformatTextID($data['status_text_id']);
 		if ($status_text_id){
-			$sql = "UPDATE " . $this->db->table('order_statuses') . "
+			$sql = "UPDATE " . $this->db->table_name('order_statuses') . "
 					SET status_text_id = '" . $this->db->escape($status_text_id) . "'
 					WHERE order_status_id = '" . $order_status_id . "'";
 			$this->db->query($sql);
@@ -97,9 +97,9 @@ class ModelLocalisationOrderStatus extends Model{
 		if ($order_status_id <= max(array_keys($this->order_status->getBaseStatuses()))){
 			return false;
 		}
-		$this->db->query("DELETE FROM " . $this->db->table('order_status_descriptions') . "
+		$this->db->query("DELETE FROM " . $this->db->table_name('order_status_descriptions') . "
 							WHERE order_status_id = '" . (int)$order_status_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table('order_statuses') . "
+		$this->db->query("DELETE FROM " . $this->db->table_name('order_statuses') . "
 							WHERE order_status_id = '" . (int)$order_status_id . "'");
 
 		$this->cache->remove('localization');
@@ -114,8 +114,8 @@ class ModelLocalisationOrderStatus extends Model{
 	public function getOrderStatus($order_status_id, $language_id = null){
 		$language_id = !(int)$language_id ? $this->language->getContentLanguageID() : (int)$language_id;
 		$query = $this->db->query("SELECT osi.*, os.*
-								    FROM " . $this->db->table('order_statuses') . " os
-									LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+								    FROM " . $this->db->table_name('order_statuses') . " os
+									LEFT JOIN " . $this->db->table_name('order_status_descriptions') . " osi 
 									    ON osi.order_status_id = os.order_status_id
 								    WHERE os.order_status_id = '" . (int)$order_status_id . "'
 											AND osi.language_id = '" . (int)$language_id . "'");
@@ -134,8 +134,8 @@ class ModelLocalisationOrderStatus extends Model{
 			}
 
 			$sql = "SELECT osi.*, os.*
-				    FROM " . $this->db->table('order_statuses') . " os
-					LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+				    FROM " . $this->db->table_name('order_statuses') . " os
+					LEFT JOIN " . $this->db->table_name('order_status_descriptions') . " osi 
 					    ON osi.order_status_id = os.order_status_id
 				    WHERE osi.language_id = '" . (int)$language_id . "'
 				    ORDER BY osi.`name`";
@@ -164,8 +164,8 @@ class ModelLocalisationOrderStatus extends Model{
 
 			if ($order_status_data === false) {
 				$query = $this->db->query("SELECT osi.*, os.*
-										   FROM " . $this->db->table('order_statuses') . " os
-										   LEFT JOIN " . $this->db->table('order_status_descriptions') . " osi 
+										   FROM " . $this->db->table_name('order_statuses') . " os
+										   LEFT JOIN " . $this->db->table_name('order_status_descriptions') . " osi 
 										        ON osi.order_status_id = os.order_status_id
 										   WHERE osi.language_id = '" . $language_id . "'
 										   ORDER BY osi.`name`");
@@ -182,7 +182,7 @@ class ModelLocalisationOrderStatus extends Model{
 	 */
 	public function getTotalOrderStatuses(){
 		$query = $this->db->query("SELECT COUNT(order_status_id) AS total
-      	                           FROM " . $this->db->table('order_statuses'));
+      	                           FROM " . $this->db->table_name('order_statuses'));
 		return (int)$query->row['total'];
 	}
 }

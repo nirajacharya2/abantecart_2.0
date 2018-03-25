@@ -27,7 +27,7 @@ class ModelReportViewed extends Model {
 	public function getProductViewedReport($start = 0, $limit = 20) {
 		$product_data = array();
 		$query = $this->db->query("SELECT SUM(viewed) AS total 
-									FROM " . $this->db->table("products") . " ");
+									FROM " . $this->db->table_name("products") . " ");
 		$total = (int)$query->row['total'];
 
 		if ($start < 0) {
@@ -38,8 +38,8 @@ class ModelReportViewed extends Model {
 		}
 
 		$sql = "SELECT p.product_id, p.model, p.viewed, pd.name
-				FROM " . $this->db->table("products") . " p
-				LEFT JOIN " . $this->db->table("product_descriptions") . " pd 
+				FROM " . $this->db->table_name("products") . " p
+				LEFT JOIN " . $this->db->table_name("product_descriptions") . " pd 
 					ON (p.product_id = pd.product_id 
 							AND pd.language_id = '" . (int)$this->config->get('storefront_language_id') . "')
 				ORDER BY viewed DESC LIMIT " . (int)$start . "," . (int)$limit;
@@ -64,6 +64,6 @@ class ModelReportViewed extends Model {
 	}
 
 	public function reset() {
-		$this->db->query("UPDATE " . $this->db->table("products") . " SET viewed = '0'");
+		$this->db->query("UPDATE " . $this->db->table_name("products") . " SET viewed = '0'");
 	}
 }

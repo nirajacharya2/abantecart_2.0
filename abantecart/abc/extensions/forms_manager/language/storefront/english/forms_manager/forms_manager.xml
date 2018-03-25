@@ -18,7 +18,7 @@
 	</definition>
 	<definition>
 		<key>error_captcha_not_valid</key>
-		<value><![CDATA[Human verification has failed! Please try agan.]]></value>
+		<value><![CDATA[Human verification has failed! Please try again.]]></value>
 	</definition>
 	<definition>
 		<key>error_file_extension</key>

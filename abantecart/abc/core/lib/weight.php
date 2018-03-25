@@ -90,8 +90,8 @@ class AWeight{
 			$this->weights = $cache_data;
 		} else{
 			$sql = "SELECT *, wc.weight_class_id
-					FROM " . $this->db->table("weight_classes") . " wc
-					LEFT JOIN " . $this->db->table("weight_class_descriptions") . " wcd
+					FROM " . $this->db->table_name("weight_classes") . " wc
+					LEFT JOIN " . $this->db->table_name("weight_class_descriptions") . " wcd
 						ON (wc.weight_class_id = wcd.weight_class_id)
 					WHERE wcd.language_id = '" . $this->language_id . "'";
 			$weight_class_query = $this->db->query($sql);
@@ -207,7 +207,7 @@ class AWeight{
 			//TODO: remove this in 2.0
 			//if language was switched try to find weight by unit
 			$sql = "SELECT weight_class_id
-					FROM " . $this->db->table("weight_class_descriptions") . "
+					FROM " . $this->db->table_name("weight_class_descriptions") . "
 					WHERE unit = '" . $this->db->escape($weight_unit) . "'";
 			$result = $this->db->query($sql);
 			if($result->row['weight_class_id']){

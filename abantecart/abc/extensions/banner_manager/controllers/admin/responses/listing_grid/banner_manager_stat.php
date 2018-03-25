@@ -17,72 +17,76 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
 /**
  * Class ControllerResponsesListingGridBannerManagerStat
+ *
  * @package abc\controllers\admin
  * @property \abc\models\admin\ModelExtensionBannerManager $model_extension_banner_manager
  */
-class ControllerResponsesListingGridBannerManagerStat extends AController {
+class ControllerResponsesListingGridBannerManagerStat extends AController
+{
 
-    public function main() {
+    public function main()
+    {
 
-	    //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$this->loadLanguage('banner_manager/banner_manager');
-		$this->loadModel('extension/banner_manager');
+        $this->loadLanguage( 'banner_manager/banner_manager' );
+        $this->loadModel( 'extension/banner_manager' );
 
-	    $filter_params = array('name', 'banner_group_name', 'type', 'cnt');
-	    $filter_grid = new AFilter( array( 'method' => 'post',
-	                                       'grid_filter_params' => $filter_params,
-	                                       'additional_filter_string' => '') );
+        $filter_params = array( 'name', 'banner_group_name', 'type', 'cnt' );
+        $filter_grid = new AFilter( array(
+            'method'                   => 'post',
+            'grid_filter_params'       => $filter_params,
+            'additional_filter_string' => '',
+        ) );
 
+        $total = $this->model_extension_banner_manager->getBannersStat( $filter_grid->getFilterData(), 'total_only' );
+        if ( $total > 0 ) {
+            $total_pages = ceil( $total / 10 );
+        } else {
+            $total_pages = 0;
+        }
 
+        $response = new stdClass();
+        $response->page = $page;
+        $response->total = $total_pages;
+        $response->records = $total;
 
-		$total = $this->model_extension_banner_manager->getBannersStat($filter_grid->getFilterData(),'total_only');
-	    if( $total > 0 ) {
-			$total_pages = ceil($total/10);
-		} else {
-			$total_pages = 0;
-		}
+        $results = $this->model_extension_banner_manager->getBannersStat( $filter_grid->getFilterData() );
 
-	    $response = new stdClass();
-		$response->page = $page;
-		$response->total = $total_pages;
-		$response->records = $total;
-
-
-	    $results = $this->model_extension_banner_manager->getBannersStat($filter_grid->getFilterData());
-
-	    $i = 0;
-		foreach ($results as $result) {
+        $i = 0;
+        foreach ( $results as $result ) {
 
             $response->rows[$i]['id'] = $result['banner_id'];
-			$response->rows[$i]['cell'] = array(
-												$result['name'],
-												$result['banner_group_name'],
-												$result['clicked'],
-												$result['viewed'],
-												$result['percent']
-												);
-			$i++;
-		}
+            $response->rows[$i]['cell'] = array(
+                $result['name'],
+                $result['banner_group_name'],
+                $result['clicked'],
+                $result['viewed'],
+                $result['percent'],
+            );
+            $i++;
+        }
 
-		//update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($response));
-	}
+        $this->load->library( 'json' );
+        $this->response->setOutput( AJson::encode( $response ) );
+    }
 
 }

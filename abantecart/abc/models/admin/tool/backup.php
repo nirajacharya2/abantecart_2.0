@@ -98,11 +98,11 @@ class ModelToolBackup extends Model{
 		$table_data = array ();
 		$prefix_len = strlen($this->db->prefix());
 
-		$query = $this->db->query("SHOW TABLES FROM `" . $this->db->database() . "`", true);
+		$query = $this->db->query("SHOW TABLES FROM `" . $this->db->getDatabaseName() . "`", true);
 		if (!$query){
 			$sql = "SELECT TABLE_NAME
 					FROM information_schema.TABLES
-					WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "' ";
+					WHERE information_schema.TABLES.table_schema = '" . $this->db->getDatabaseName() . "' ";
 			$query = $this->db->query($sql, true);
 		}
 
@@ -111,12 +111,12 @@ class ModelToolBackup extends Model{
 		}
 
 		foreach ($query->rows as $result){
-			$table_name = $result['Tables_in_' . $this->db->database()];
+			$table_name = $result['Tables_in_' . $this->db->getDatabaseName()];
 			//if database prefix present - select only abantecart tables. If not - select all
 			if ($this->db->prefix() && substr($table_name, 0, $prefix_len) != $this->db->prefix()){
 				continue;
 			}
-			$table_data[] = $result['Tables_in_' . $this->db->database()];
+			$table_data[] = $result['Tables_in_' . $this->db->getDatabaseName()];
 		}
 		return $table_data;
 	}
@@ -214,7 +214,7 @@ class ModelToolBackup extends Model{
 			}
 			$sql = "SELECT SUM(data_length + index_length - data_free) AS 'db_size'
 					FROM information_schema.TABLES
-					WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'
+					WHERE information_schema.TABLES.table_schema = '" . $this->db->getDatabaseName() . "'
 						AND TABLE_NAME IN ('" . implode("','", $table_list) . "')	";
 
 			$result = $this->db->query($sql);
@@ -375,7 +375,7 @@ class ModelToolBackup extends Model{
 		$sql = "SELECT TABLE_NAME AS 'table_name',
 					table_rows AS 'num_rows', (data_length + index_length - data_free) AS 'size'
 				FROM information_schema.TABLES
-				WHERE information_schema.TABLES.table_schema = '" . $this->db->database() . "'
+				WHERE information_schema.TABLES.table_schema = '" . $this->db->getDatabaseName() . "'
 					AND TABLE_NAME IN ('" . implode("','", $tables) . "')	";
 		$result = $this->db->query($sql);
 		$output = array ();

@@ -59,7 +59,7 @@ final class AUser{
 
 		if (isset($this->session->data['user_id'])){
 			$user_query = $this->db->query("SELECT * 
-											FROM " . $this->db->table("users") . " 
+											FROM " . $this->db->table_name("users") . " 
 											WHERE user_id = '" . (int)$this->session->data['user_id'] . "'");
 			if ($user_query->num_rows){
 				$this->user_id = (int)$user_query->row['user_id'];
@@ -88,7 +88,7 @@ final class AUser{
 		$sql = "SELECT *, SHA1(CONCAT(salt,
 										SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "')))
 									))
-				FROM " . $this->db->table("users") . "
+				FROM " . $this->db->table_name("users") . "
 				WHERE username = '" . $this->db->escape($username) . "'
 				AND password = 	SHA1(CONCAT(salt,
 								SHA1(CONCAT(salt, SHA1('" . $this->db->escape($password) . "')))
@@ -124,12 +124,12 @@ final class AUser{
 	private function _user_init(){
 
 		$this->db->query("SET @USER_ID = '" . $this->user_id . "';");
-		$this->db->query("UPDATE " . $this->db->table("users") . " 
+		$this->db->query("UPDATE " . $this->db->table_name("users") . " 
 							SET ip = '" . $this->db->escape($this->request->getRemoteIP()) . "'
 							WHERE user_id = '" . $this->user_id . "';");
 
 		$user_group_query = $this->db->query("SELECT permission
-											  FROM " . $this->db->table("user_groups") . "
+											  FROM " . $this->db->table_name("user_groups") . "
 											  WHERE user_group_id = '" . $this->user_group_id . "'");
 		if (unserialize($user_group_query->row['permission'])){
 			foreach (unserialize($user_group_query->row['permission']) as $key => $value){
@@ -139,7 +139,7 @@ final class AUser{
 	}
 
 	private function _update_last_login(){
-		$this->db->query("UPDATE " . $this->db->table("users") . " 
+		$this->db->query("UPDATE " . $this->db->table_name("users") . " 
 						SET last_login = NOW()
 						WHERE user_id = '" . $this->user_id . "';");
 	}
@@ -241,7 +241,7 @@ final class AUser{
 	 */
 	public function validate($username, $email){
 		$user_query = $this->db->query(
-				"SELECT * FROM " . $this->db->table("users") . "
+				"SELECT * FROM " . $this->db->table_name("users") . "
 				WHERE username = '" . $this->db->escape($username) . "'
 						AND email = '" . $this->db->escape($email) . "'");
 		if ($user_query->num_rows) {

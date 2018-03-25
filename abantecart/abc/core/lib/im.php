@@ -436,8 +436,8 @@ class AIM{
 			}
 
 			$sql = "SELECT DISTINCT odt.`type_id`, odt.`name` as protocol, od.data
-					FROM " . $this->db->table('order_data_types') . " odt
-					LEFT JOIN " . $this->db->table('order_data') . " od
+					FROM " . $this->db->table_name('order_data_types') . " odt
+					LEFT JOIN " . $this->db->table_name('order_data') . " od
 						ON (od.type_id = odt.type_id AND od.order_id = '" . (int)$this->session->data['order_id'] . "')
 					WHERE odt.`name` IN ('" . implode("', '", $p) . "')";
 			$result = $this->db->query($sql);
@@ -479,7 +479,7 @@ class AIM{
 		//for registered customers - get address from database
 		if ($customer_id && !$order_id){
 			$sql = "SELECT *
-					FROM " . $this->db->table('customers') . "
+					FROM " . $this->db->table_name('customers') . "
 					WHERE customer_id=" . $customer_id;
 			$customer_info = $this->db->query($sql, true);
 			return $customer_info->row[$protocol];
@@ -487,9 +487,9 @@ class AIM{
 			//if guests - get im-data from order_data tables
 
 			$sql = "SELECT *
-					FROM " . $this->db->table('order_data') . " od
+					FROM " . $this->db->table_name('order_data') . " od
 					WHERE `type_id` in ( SELECT DISTINCT type_id
-										 FROM " . $this->db->table('order_data_types') . "
+										 FROM " . $this->db->table_name('order_data_types') . "
 										 WHERE `name`='" . $this->db->escape($protocol) . "' )
 						AND order_id = '" . $order_id . "'";
 			$result = $this->db->query($sql);
@@ -513,8 +513,8 @@ class AIM{
 		$section = ABC::env('IS_ADMIN') ? 1 : 0;
 		$output = array ();
 		$sql = "SELECT un.*
-				FROM " . $this->db->table('user_notifications') . " un
-				INNER JOIN " . $this->db->table('users') . " u
+				FROM " . $this->db->table_name('user_notifications') . " un
+				INNER JOIN " . $this->db->table_name('users') . " u
 									ON (u.user_id = un.user_id AND u.status = 1)
 				WHERE un.protocol='" . $this->db->escape($protocol) . "'
 					AND un.sendpoint = '" . $this->db->escape($sendpoint) . "'

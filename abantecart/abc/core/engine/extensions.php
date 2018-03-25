@@ -389,24 +389,24 @@ class ExtensionsApi
         if (in_array($type, $this->extension_types)) {
             $sql
                 = "SELECT DISTINCT e.key
-                    FROM ".$this->db->table("extensions")." e
-                    RIGHT JOIN ".$this->db->table("settings")." s ON s.group = e.key
+                    FROM ".$this->db->table_name("extensions")." e
+                    RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type = '".$this->db->escape($type)."'";
         } elseif ($type == 'exts') {
             $sql
                 = "SELECT DISTINCT e.key
-                    FROM ".$this->db->table("extensions")." e
-                    RIGHT JOIN ".$this->db->table("settings")." s ON s.group = e.key
+                    FROM ".$this->db->table_name("extensions")." e
+                    RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type IN ('".implode("', '", $this->extension_types)."')";
         } elseif ($type == '') {
             $sql
                 = "SELECT DISTINCT e.key
-                    FROM ".$this->db->table("extensions")." e
-                    RIGHT JOIN ".$this->db->table("settings")." s ON s.group = e.key";
+                    FROM ".$this->db->table_name("extensions")." e
+                    RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key";
         } else {
             $sql
                 = "SELECT DISTINCT e.key
-                    FROM ".$this->db->table("extensions")." e";
+                    FROM ".$this->db->table_name("extensions")." e";
         }
 
         $query = $this->db->query($sql);
@@ -445,7 +445,7 @@ class ExtensionsApi
 
         $sql
             = "SELECT * 
-                FROM ".$this->db->table("extensions")."
+                FROM ".$this->db->table_name("extensions")."
                 ".($key ? " WHERE `key` = '".$this->db->escape($key)."'" : '');
         $query = $this->db->query($sql);
         $extension_data = array();
@@ -509,10 +509,10 @@ class ExtensionsApi
                       s.store_id,
                       st.alias AS store_name,
                       s.value AS status
-                FROM ".$this->db->table("extensions")." e
-                LEFT JOIN ".$this->db->table("settings")." s
+                FROM ".$this->db->table_name("extensions")." e
+                LEFT JOIN ".$this->db->table_name("settings")." s
                     ON ( s.`group` = e.`key` AND s.`key` = CONCAT(e.`key`,'_status') )
-                LEFT JOIN ".$this->db->table("stores")." st ON st.store_id = s.store_id
+                LEFT JOIN ".$this->db->table_name("stores")." st ON st.store_id = s.store_id
                 WHERE e.`type` ";
 
         if (AHelperUtils::has_value($data['filter']) && $data['filter'] != 'extensions') {
@@ -924,7 +924,7 @@ class ExtensionsApi
             case 'L' :
                 $query = $this->registry->get('db')->query(
                     "SELECT directory 
-                        FROM ".$this->db->table("languages")." 
+                        FROM ".$this->db->table_name("languages")." 
                         WHERE code='".$this->registry->get('session')->data['language']."'");
                 $file = $ext_section.'languages/'.$query->row['directory'].'/'.$route.'.xml';
                 $source = $this->extension_languages;

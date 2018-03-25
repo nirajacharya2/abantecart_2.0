@@ -96,8 +96,8 @@ class AAttribute{
 			return false;
 		}
 		$query = $this->db->query("SELECT at.*, gatd.type_name
-									FROM " . $this->db->table("global_attributes_types") . " at
-									LEFT JOIN " . $this->db->table("global_attributes_type_descriptions") . " gatd
+									FROM " . $this->db->table_name("global_attributes_types") . " at
+									LEFT JOIN " . $this->db->table_name("global_attributes_type_descriptions") . " gatd
 										ON (gatd.attribute_type_id = at.attribute_type_id AND gatd.language_id = " . (int)$language_id . ")
 									WHERE at.status = 1 order by at.sort_order");
 		if (!$query->num_rows) {
@@ -135,8 +135,8 @@ class AAttribute{
 		}
 
 		$query = $this->db->query(" SELECT ga.*, gad.name
-									FROM " . $this->db->table("global_attributes") . " ga
-									LEFT JOIN " . $this->db->table("global_attributes_descriptions") . " gad
+									FROM " . $this->db->table_name("global_attributes") . " ga
+									LEFT JOIN " . $this->db->table_name("global_attributes_descriptions") . " gad
 										ON ( ga.attribute_id = gad.attribute_id AND gad.language_id = '" . (int)$language_id . "' )
 									WHERE ga.attribute_type_id = '" . $this->db->escape($attribute_type_id) . "' AND ga.status = 1
 									ORDER BY ga.sort_order");
@@ -168,8 +168,8 @@ class AAttribute{
 		}
 
 		$query = $this->db->query("SELECT gag.*, gagd.name
-									FROM " . $this->db->table("global_attributes_groups") . " gag
-									LEFT JOIN " . $this->db->table("global_attributes_groups_descriptions") . " gagd
+									FROM " . $this->db->table_name("global_attributes_groups") . " gag
+									LEFT JOIN " . $this->db->table_name("global_attributes_groups_descriptions") . " gagd
 										ON ( gag.attribute_group_id = gagd.attribute_group_id AND gagd.language_id = '" . (int)$language_id . "' )
 									WHERE gag.attribute_group_id = '" . $this->db->escape($group_id) . "' AND gag.status = 1
 									ORDER BY gag.sort_order");
@@ -239,16 +239,18 @@ class AAttribute{
 		return array ();
 	}
 
-	/**
-	 * @param  $attribute_id
-	 * Returns total count of children for the attribute. No children returns 0
-	 */
+    /**
+     * @param  $attribute_id
+     * Returns total count of children for the attribute. No children returns 0
+     *
+     * @return int
+     */
 	public function totalChildren($attribute_id){
 		$sql = "SELECT count(*) as total_count
-				FROM " . $this->db->table("global_attributes") . "
+				FROM " . $this->db->table_name("global_attributes") . "
 				WHERE attribute_parent_id = '" . (int)$attribute_id . "'";
 		$attribute_data = $this->db->query($sql);
-		return $attribute_data->rows[0]['total_count'];
+		return (int)$attribute_data->rows[0]['total_count'];
 	}
 
 	/**
@@ -283,7 +285,7 @@ class AAttribute{
 	 */
 	public function getAttributeByProductOptionId($option_id){
 		$sql = "SELECT attribute_id
-				FROM " . $this->db->table("product_options") . "
+				FROM " . $this->db->table_name("product_options") . "
 				WHERE product_option_id = '" . (int)$option_id . "' AND attribute_id != 0";
 		$attribute_id = $this->db->query($sql);
 		if ($attribute_id->num_rows) {
@@ -333,8 +335,8 @@ class AAttribute{
 
 		$query = $this->db->query("
 			SELECT gav.sort_order, gav.attribute_value_id, gavd.*
-			FROM " . $this->db->table("global_attributes_values") . " gav
-			LEFT JOIN " . $this->db->table("global_attributes_value_descriptions") . " gavd
+			FROM " . $this->db->table_name("global_attributes_values") . " gav
+			LEFT JOIN " . $this->db->table_name("global_attributes_value_descriptions") . " gavd
 				ON ( gav.attribute_value_id = gavd.attribute_value_id AND gavd.language_id = '" . (int)$language_id . "' )
 			WHERE gav.attribute_id = '" . $this->db->escape($attribute_id) . "'
 			order by gav.sort_order"

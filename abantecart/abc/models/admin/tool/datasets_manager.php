@@ -35,7 +35,7 @@ class ModelToolDatasetsManager extends Model {
 		if(!$dataset_id){
 			return array();
 		}
-		$sql = "SELECT dataset_name, dataset_key FROM " . $this->db->table("datasets") . " WHERE dataset_id = ".$dataset_id;
+		$sql = "SELECT dataset_name, dataset_key FROM " . $this->db->table_name("datasets") . " WHERE dataset_id = ".$dataset_id;
 		$result = $this->db->query($sql);
 		if(!$result->row['dataset_name']){
 			return array();
@@ -69,7 +69,7 @@ class ModelToolDatasetsManager extends Model {
 		$order_by = !trim($order_by) ? 'dataset_id' : $order_by;
 
 		$sql = "SELECT *
-				FROM ".$this->db->table("datasets") . " 
+				FROM ".$this->db->table_name("datasets") . " 
 				ORDER BY ".$this->db->escape($order_by)."
 				LIMIT ".$limit." OFFSET ".$offset;
 		$result = $this->db->query($sql);
@@ -77,7 +77,7 @@ class ModelToolDatasetsManager extends Model {
 	}
 
 	public function getTotalDatasets( $search = '' ) {
-		$sql = "SELECT COUNT(*) as cnt FROM " . $this->db->table("datasets") . " ORDER BY dataset_id";
+		$sql = "SELECT COUNT(*) as cnt FROM " . $this->db->table_name("datasets") . " ORDER BY dataset_id";
 		$result = $this->db->query($sql);
 		return $result->row['cnt'];
 	}

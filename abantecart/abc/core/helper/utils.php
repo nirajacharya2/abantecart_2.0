@@ -237,7 +237,7 @@ class AHelperUtils extends AHelper
         $registry = Registry::getInstance();
         $db = $registry->get('db');
         $sql = "SELECT `keyword`
-			FROM ".$db->table('url_aliases')."
+			FROM ".$db->table_name('url_aliases')."
 			WHERE `keyword` LIKE '".$db->escape($seo_key)."%'";
         if ($object_id) {
             // exclude keyword of given object (product, category, content etc)

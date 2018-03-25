@@ -72,20 +72,20 @@ class ModelAccountCustomer extends Model {
 				
 		// delete subscription accounts for given email
 		$subscriber = $this->db->query("SELECT customer_id
-										FROM " . $this->db->table("customers") . "
+										FROM " . $this->db->table_name("customers") . "
 										WHERE LOWER(`email`) = LOWER('" . $this->db->escape($data['email']) . "')
 											AND customer_group_id IN (SELECT customer_group_id
-																	  FROM ".$this->db->table('customer_groups')."
+																	  FROM ".$this->db->table_name('customer_groups')."
 																	  WHERE `name` = 'Newsletter Subscribers')");
 		foreach($subscriber->rows as $row){
-			$this->db->query("DELETE FROM " . $this->db->table("customers") . " 
+			$this->db->query("DELETE FROM " . $this->db->table_name("customers") . " 
 								WHERE customer_id = '" . (int)$row['customer_id'] . "'");
-			$this->db->query("DELETE FROM " . $this->db->table("addresses") . " 
+			$this->db->query("DELETE FROM " . $this->db->table_name("addresses") . " 
 								WHERE customer_id = '" . (int)$row['customer_id'] . "'");
 		}
 
     	$salt_key = AHelperUtils::genToken(8);
-      	$sql = "INSERT INTO " . $this->db->table("customers") . "
+      	$sql = "INSERT INTO " . $this->db->table_name("customers") . "
 			  SET	store_id = '" . (int)$this->config->get('config_store_id') . "',
 					loginname = '" . $this->db->escape($data['loginname']) . "',
 					firstname = '" . $this->db->escape(trim($data['firstname'])) . "',
@@ -110,7 +110,7 @@ class ModelAccountCustomer extends Model {
 			$data = $this->dcrypt->encrypt_data($data, 'addresses');
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
-      	$this->db->query("INSERT INTO " . $this->db->table("addresses") . " 
+      	$this->db->query("INSERT INTO " . $this->db->table_name("addresses") . " 
       					  SET 	customer_id = '" . (int)$customer_id . "', 
       					  		firstname = '" . $this->db->escape($data['firstname']) . "', 
       					  		lastname = '" . $this->db->escape($data['lastname']) . "', 
@@ -124,7 +124,7 @@ class ModelAccountCustomer extends Model {
       					  		zone_id = '" . (int)$data['zone_id'] . "'");
 		
 		$address_id = $this->db->getLastId();
-      	$this->db->query("UPDATE " . $this->db->table("customers") . "
+      	$this->db->query("UPDATE " . $this->db->table_name("customers") . "
       	                    SET address_id = '" . (int)$address_id . "'
       	                    WHERE customer_id = '" . (int)$customer_id . "'");
 
@@ -146,7 +146,7 @@ class ModelAccountCustomer extends Model {
 
 		//enable notification setting for newsletter via email
 		if($data['newsletter']){
-			$sql = "INSERT INTO " . $this->db->table('customer_notifications') . "
+			$sql = "INSERT INTO " . $this->db->table_name('customer_notifications') . "
 					(customer_id, sendpoint, protocol, status, date_added)
 				VALUES
 				('" . $customer_id . "',
@@ -219,7 +219,7 @@ class ModelAccountCustomer extends Model {
 			$data[$f] = str_replace('  ', ' ', trim($data[$f]));
 		}
 
-		$sql = "UPDATE " . $this->db->table("customers") . "
+		$sql = "UPDATE " . $this->db->table_name("customers") . "
 			  SET 	firstname = '" . $this->db->escape($data['firstname']) . "',
 			        lastname = '" . $this->db->escape($data['lastname']) . "', " . $loginname . "
 			        email = '" . $this->db->escape($data['email']) . "',
@@ -258,7 +258,7 @@ class ModelAccountCustomer extends Model {
 		//get all columns
 		$sql = "SELECT COLUMN_NAME
 				FROM INFORMATION_SCHEMA.COLUMNS
-				WHERE TABLE_SCHEMA = '".$this->db->database()."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
+				WHERE TABLE_SCHEMA = '".$this->db->getDatabaseName()."' AND TABLE_NAME = '" . $this->db->table_name("customers") . "'";
 		$result = $this->db->query($sql);
 		$columns = array();
 		foreach($result->rows as $row){
@@ -277,7 +277,7 @@ class ModelAccountCustomer extends Model {
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
 
-		$sql = "UPDATE ".$this->db->table('customers')."
+		$sql = "UPDATE ".$this->db->table_name('customers')."
 				SET ".implode(', ',$upd)."\n"
 				. $key_sql .
 				" WHERE customer_id = '" . $customer_id . "'";
@@ -294,7 +294,7 @@ class ModelAccountCustomer extends Model {
 		$im_protocols = $this->im->getProtocols();
 		$im_settings = array();
 		$sql = "SELECT *
-				FROM ".$this->db->table('customer_notifications')."
+				FROM ".$this->db->table_name('customer_notifications')."
 				WHERE customer_id = ".(int)$this->customer->getId();
 		$result = $this->db->query($sql);
 
@@ -330,12 +330,12 @@ class ModelAccountCustomer extends Model {
 		}
 
 		if($update){
-			$sql = "DELETE FROM ".$this->db->table('customer_notifications')." WHERE customer_id = ".$customer_id;
+			$sql = "DELETE FROM ".$this->db->table_name('customer_notifications')." WHERE customer_id = ".$customer_id;
 			$this->db->query($sql);
 
 			foreach($update as $sendpoint=>$row){
 				foreach($row as $protocol=>$status){
-					$sql = "INSERT INTO " . $this->db->table('customer_notifications') . "
+					$sql = "INSERT INTO " . $this->db->table_name('customer_notifications') . "
 							(customer_id, sendpoint, protocol, status, date_added)
 						VALUES
 						('" . $customer_id . "',
@@ -368,14 +368,14 @@ class ModelAccountCustomer extends Model {
 	 */
 	public function editPassword($loginname, $password) {
     	$salt_key = AHelperUtils::genToken(8);
-      	$this->db->query("UPDATE " . $this->db->table("customers") . "
+      	$this->db->query("UPDATE " . $this->db->table_name("customers") . "
       	                SET
 							salt = '" . $this->db->escape($salt_key) . "', 
 							password = '" . $this->db->escape(sha1($salt_key.sha1($salt_key.sha1($password)))) . "'
       	                WHERE loginname = '" . $this->db->escape($loginname) . "'");
 		//send IM
 		$sql = "SELECT customer_id
- 				FROM " . $this->db->table("customers") . "
+ 				FROM " . $this->db->table_name("customers") . "
 		      	WHERE loginname = '" . $this->db->escape($loginname) . "'";
 		$result = $this->db->query($sql);
 		$customer_id = $result->row['customer_id'];
@@ -397,7 +397,7 @@ class ModelAccountCustomer extends Model {
 	public function editNewsletter($newsletter,$customer_id=0) {
 		$customer_id = (int)$customer_id ? (int)$customer_id : (int)$this->customer->getId();
 		$this->db->query(
-				"UPDATE " . $this->db->table("customers") . "
+				"UPDATE " . $this->db->table_name("customers") . "
 				SET newsletter = '" . (int)$newsletter . "'
 				WHERE customer_id = '" . $customer_id . "'");
 	}
@@ -411,7 +411,7 @@ class ModelAccountCustomer extends Model {
 		$customer_id = (int)$customer_id;
 		$status = (int)$status;
 		if(!$customer_id){ return false; }
-		$this->db->query( "UPDATE " . $this->db->table("customers") . "
+		$this->db->query( "UPDATE " . $this->db->table_name("customers") . "
 						   SET status = '" . (int)$status . "'
 						   WHERE customer_id = '" . $customer_id . "'" );
 		return true;
@@ -425,7 +425,7 @@ class ModelAccountCustomer extends Model {
 	public function updateOtherData($customer_id, $data) {
 		$customer_id = (int)$customer_id;
 		if(!$customer_id){ return false; }
-		$this->db->query( "UPDATE " . $this->db->table("customers") . "
+		$this->db->query( "UPDATE " . $this->db->table_name("customers") . "
 						   SET data = '" . $this->db->escape(serialize($data)) . "'
 						   WHERE customer_id = '" . $customer_id . "'" );
 		return true;
@@ -438,7 +438,7 @@ class ModelAccountCustomer extends Model {
 	public function getCustomer($customer_id) {
 		$query = $this->db->query(
 				"SELECT *
-				FROM " . $this->db->table("customers") . "
+				FROM " . $this->db->table_name("customers") . "
 				WHERE customer_id = '" . (int)$customer_id . "'");
 		$result_row = $this->dcrypt->decrypt_data($query->row, 'customers');
 		$result_row['data'] = unserialize($result_row['data']);
@@ -452,12 +452,12 @@ class ModelAccountCustomer extends Model {
 	 */
 	public function getTotalCustomersByEmail($email, $no_subscribers=true) {
 		$sql = "SELECT COUNT(*) AS total
-				FROM " . $this->db->table("customers") . "
+				FROM " . $this->db->table_name("customers") . "
 				WHERE LOWER(`email`) = LOWER('" . $this->db->escape($email) . "')";
 		if($no_subscribers){
 			$sql .= " AND customer_group_id NOT IN
 							(SELECT customer_group_id
-							FROM ".$this->db->table('customer_groups')."
+							FROM ".$this->db->table_name('customer_groups')."
 							WHERE `name` = 'Newsletter Subscribers')";
 		}
 		$query = $this->db->query($sql);
@@ -472,7 +472,7 @@ class ModelAccountCustomer extends Model {
 	public function getCustomerByEmail($email) {
 		//assuming that data is not encrypted. Can not call these otherwise
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("customers") . "
+									FROM " . $this->db->table_name("customers") . "
 									WHERE LOWER(`email`) = LOWER('" . $this->db->escape($email) . "')");
 		return $query->row;
 	}
@@ -483,7 +483,7 @@ class ModelAccountCustomer extends Model {
 	 */
 	public function getCustomerByLoginname($loginname) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("customers") . "
+									FROM " . $this->db->table_name("customers") . "
 									WHERE LOWER(`loginname`) = LOWER('" . $this->db->escape($loginname) . "')");
 		return $this->dcrypt->decrypt_data($query->row, 'customers');
 	}
@@ -510,7 +510,7 @@ class ModelAccountCustomer extends Model {
 	 */
 	public function getCustomerByLastnameAndEmail($lastname, $email) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("customers") . "
+									FROM " . $this->db->table_name("customers") . "
 									WHERE LOWER(`lastname`) = LOWER('" . $this->db->escape($lastname) . "')");
 		//validate if we have row with matching decrypted email;
 		$result_row = array();
@@ -538,7 +538,7 @@ class ModelAccountCustomer extends Model {
 			return false;
 		}
       	$query = $this->db->query("SELECT COUNT(*) AS total
-      	                           FROM " . $this->db->table("customers") . "
+      	                           FROM " . $this->db->table_name("customers") . "
       	                           WHERE LOWER(`loginname`) = LOWER('" . $loginname . "')");
       	if ($query->row['total'] > 0) {
       		return false;
@@ -799,7 +799,7 @@ class ModelAccountCustomer extends Model {
 
 	public function getTotalTransactions() {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-								   FROM `" . $this->db->table("customer_transactions") . "`
+								   FROM `" . $this->db->table_name("customer_transactions") . "`
 								   WHERE customer_id = '" . (int)$this->customer->getId() . "'" );
 		return (int)$query->row['total'];
 	}
@@ -818,7 +818,7 @@ class ModelAccountCustomer extends Model {
 										t.transaction_type,
 										t.description,
 										t.date_added
-								FROM `" . $this->db->table("customer_transactions") . "` t
+								FROM `" . $this->db->table_name("customer_transactions") . "` t
 								WHERE customer_id = '" . (int)$this->customer->getId() . "'
 								ORDER BY t.date_added DESC
 								LIMIT " . (int)$start . "," . (int)$limit);
@@ -828,7 +828,7 @@ class ModelAccountCustomer extends Model {
 	public function getSubscribersCustomerGroupId() {
 		$query = $this->db->query(
 								"SELECT customer_group_id
-								FROM `" . $this->db->table("customer_groups") . "`
+								FROM `" . $this->db->table_name("customer_groups") . "`
 								WHERE `name` = 'Newsletter Subscribers'
 								LIMIT 0,1");
 		$result = !$query->row['customer_group_id'] ? (int)$this->config->get('config_customer_group_id') :  $query->row['customer_group_id'];

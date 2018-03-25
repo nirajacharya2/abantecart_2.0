@@ -28,7 +28,7 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 class ModelUserUser extends Model {
 	public function addUser($data) {
 		$salt_key = AHelperUtils::genToken(8);
-		$this->db->query("INSERT INTO " . $this->db->table("users") . " 
+		$this->db->query("INSERT INTO " . $this->db->table_name("users") . " 
 						  SET username = '" . $this->db->escape($data['username']) . "',
 						      firstname = '" . $this->db->escape($data['firstname']) . "',
 						      lastname = '" . $this->db->escape($data['lastname']) . "',
@@ -67,26 +67,26 @@ class ModelUserUser extends Model {
 		}
 
 		if ( !empty($update) ){
-			$sql = "UPDATE " . $this->db->table("users") . " SET ". implode(',', $update) ." WHERE user_id = '" . (int)$user_id . "'";
+			$sql = "UPDATE " . $this->db->table_name("users") . " SET ". implode(',', $update) ." WHERE user_id = '" . (int)$user_id . "'";
 			$this->db->query( $sql );
 		}
 	}
 	
 	public function deleteUser($user_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("users") . " WHERE user_id = '" . (int)$user_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("users") . " WHERE user_id = '" . (int)$user_id . "'");
 	}
 	
 	public function getUser($user_id) {
-		$query = $this->db->query("SELECT * FROM " . $this->db->table("users") . " WHERE user_id = '" . (int)$user_id . "'");
+		$query = $this->db->query("SELECT * FROM " . $this->db->table_name("users") . " WHERE user_id = '" . (int)$user_id . "'");
 	
 		return $query->row;
 	}
 	
 	public function getUsers($data = array(), $mode = 'default') {
 		if ($mode == 'total_only') {
-			$sql = "SELECT count(*) as total FROM " . $this->db->table("users") . " ";
+			$sql = "SELECT count(*) as total FROM " . $this->db->table_name("users") . " ";
 		} else {
-			$sql = "SELECT * FROM " . $this->db->table("users") . " ";		
+			$sql = "SELECT * FROM " . $this->db->table_name("users") . " ";		
 		}
 		if ( !empty($data['subsql_filter']) )
 			$sql .= " WHERE ".$data['subsql_filter'];
@@ -138,7 +138,7 @@ class ModelUserUser extends Model {
 	}
 
 	public function getTotalUsersByGroupId($user_group_id) {
-      	$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table("users") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
+      	$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table_name("users") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
 		
 		return $query->row['total'];
 	}

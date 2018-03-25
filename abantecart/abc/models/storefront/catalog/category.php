@@ -44,12 +44,12 @@ class ModelCatalogCategory extends Model {
         if ($cache === false) {
 		    $query = $this->db->query("SELECT DISTINCT *,
 										(SELECT COUNT(p2c.product_id) as cnt
-										 FROM ".$this->db->table('products_to_categories')." p2c
-										 INNER JOIN " . $this->db->table('products')." p ON p.product_id = p2c.product_id AND p.status = '1'
+										 FROM ".$this->db->table_name('products_to_categories')." p2c
+										 INNER JOIN " . $this->db->table_name('products')." p ON p.product_id = p2c.product_id AND p.status = '1'
 										 WHERE  p2c.category_id = c.category_id) as products_count
-									FROM " . $this->db->table("categories") . " c
-									LEFT JOIN " . $this->db->table("category_descriptions") . " cd ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
-									LEFT JOIN " . $this->db->table("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
+									FROM " . $this->db->table_name("categories") . " c
+									LEFT JOIN " . $this->db->table_name("category_descriptions") . " cd ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
+									LEFT JOIN " . $this->db->table_name("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
 									WHERE c.category_id = '" . (int)$category_id . "'
 										AND c2s.store_id = '" . $store_id . "'
 										AND c.status = '1'");
@@ -73,9 +73,9 @@ class ModelCatalogCategory extends Model {
 
 		if($cache === false){
 			$query = $this->db->query("SELECT *
-										FROM " . $this->db->table("categories") . " c
-										LEFT JOIN " . $this->db->table("category_descriptions") . " cd ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
-										LEFT JOIN " . $this->db->table("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
+										FROM " . $this->db->table_name("categories") . " c
+										LEFT JOIN " . $this->db->table_name("category_descriptions") . " cd ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
+										LEFT JOIN " . $this->db->table_name("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
 										WHERE ".($parent_id < 0 ? "" : "c.parent_id = '" . (int)$parent_id . "' AND ")."
 										     c2s.store_id = '" . $store_id . "' AND c.status = '1'
 										ORDER BY c.sort_order, LCASE(cd.name)
@@ -88,8 +88,8 @@ class ModelCatalogCategory extends Model {
             }
             if(count($category_ids)) {
                 $query = $this->db->query("SELECT p2c.category_id as category_id, count(*) as product_count
-						  			    FROM ".$this->db->table('products_to_categories')." p2c
-						  				INNER JOIN " . $this->db->table('products')." p ON p.product_id = p2c.product_id
+						  			    FROM ".$this->db->table_name('products_to_categories')." p2c
+						  				INNER JOIN " . $this->db->table_name('products')." p ON p.product_id = p2c.product_id
 						  				WHERE p2c.category_id in (" . implode(",", $category_ids) . ") AND p.status = '1' GROUP BY p2c.category_id
 						  			  ");
 
@@ -135,8 +135,8 @@ class ModelCatalogCategory extends Model {
 			$total_sql = "*,
 						  c.category_id,
 						  (SELECT count(*) as cnt
-						  	FROM ".$this->db->table('products_to_categories')." p2c
-						  	INNER JOIN " . $this->db->table('products')." p ON p.product_id = p2c.product_id
+						  	FROM ".$this->db->table_name('products_to_categories')." p2c
+						  	INNER JOIN " . $this->db->table_name('products')." p ON p.product_id = p2c.product_id
 						  	WHERE p2c.category_id = c.category_id AND p.status = '1') as products_count ";
 		}
         $where = (isset($data['parent_id']) ? " c.parent_id = '" . (int)$data['parent_id'] . "'" : '' );
@@ -155,10 +155,10 @@ class ModelCatalogCategory extends Model {
 		$where = $where ? 'WHERE '.$where : '';
 
 		$sql = "SELECT ". $total_sql ."
-				FROM " . $this->db->table('categories')." c
-				LEFT JOIN " . $this->db->table('category_descriptions')." cd
+				FROM " . $this->db->table_name('categories')." c
+				LEFT JOIN " . $this->db->table_name('category_descriptions')." cd
 					ON (c.category_id = cd.category_id AND cd.language_id = '" . $language_id . "')
-				INNER JOIN " . $this->db->table('categories_to_stores')." cs
+				INNER JOIN " . $this->db->table_name('categories_to_stores')." cs
 					ON (c.category_id = cs.category_id AND cs.store_id = '" . $store_id . "')
 				" . $where;
 
@@ -230,8 +230,8 @@ class ModelCatalogCategory extends Model {
 	 */
 	public function getTotalCategoriesByCategoryId($parent_id = 0) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("categories") . " c
-									LEFT JOIN " . $this->db->table("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
+									FROM " . $this->db->table_name("categories") . " c
+									LEFT JOIN " . $this->db->table_name("categories_to_stores") . " c2s ON (c.category_id = c2s.category_id)
 									WHERE c.parent_id = '" . (int)$parent_id . "'
 										AND c2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
 										AND c.status = '1'");
@@ -322,8 +322,8 @@ class ModelCatalogCategory extends Model {
 		$categories = array_unique($categories);
 		if($categories){
 			$query = $this->db->query( "SELECT COUNT(DISTINCT p2c.product_id) AS total
-										FROM " . $this->db->table("products_to_categories") . " p2c
-										INNER JOIN " . $this->db->table('products') . " p
+										FROM " . $this->db->table_name("products_to_categories") . " p2c
+										INNER JOIN " . $this->db->table_name('products') . " p
 											ON p.product_id = p2c.product_id
 										WHERE p.status = '1' AND p2c.category_id IN (" . implode(', ', $categories) . ");");
 			$output = (int)$query->row['total'];
@@ -348,11 +348,11 @@ class ModelCatalogCategory extends Model {
 		$categories = array_unique($categories);
 		if($categories){
 			$sql = "SELECT DISTINCT p.manufacturer_id, m.name
-				FROM " . $this->db->table('products') . " p
-				LEFT JOIN " . $this->db->table('manufacturers') . " m ON p.manufacturer_id = m.manufacturer_id
+				FROM " . $this->db->table_name('products') . " p
+				LEFT JOIN " . $this->db->table_name('manufacturers') . " m ON p.manufacturer_id = m.manufacturer_id
 				WHERE p.product_id IN (SELECT DISTINCT p2c.product_id
-									   FROM " . $this->db->table('products_to_categories') . " p2c
-									   INNER JOIN " . $this->db->table('products') . " p ON p.product_id = p2c.product_id AND p.status = '1'
+									   FROM " . $this->db->table_name('products_to_categories') . " p2c
+									   INNER JOIN " . $this->db->table_name('products') . " p ON p.product_id = p2c.product_id AND p.status = '1'
 									   WHERE p2c.category_id IN (" . implode(', ', $categories) . "));";
 			$query = $this->db->query($sql);
 			$output = $query->rows;
@@ -368,7 +368,7 @@ class ModelCatalogCategory extends Model {
 	 */
 	public function buildPath($category_id) {
 		$query = $this->db->query("SELECT c.category_id, c.parent_id
-		                            FROM " . $this->db->table("categories") . " c
+		                            FROM " . $this->db->table_name("categories") . " c
 		                            WHERE c.category_id = '" . (int)$category_id . "'
 		                            ORDER BY c.sort_order");
 		

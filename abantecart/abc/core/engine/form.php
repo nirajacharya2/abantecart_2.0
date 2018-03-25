@@ -163,8 +163,8 @@ class AForm{
 		}
 
 		$query = $this->db->query("SELECT f.*, fd.description
-									FROM " . $this->db->table("forms") . " f
-									LEFT JOIN " . $this->db->table("form_descriptions") . " fd
+									FROM " . $this->db->table_name("forms") . " f
+									LEFT JOIN " . $this->db->table_name("form_descriptions") . " fd
 										ON ( f.form_id = fd.form_id AND fd.language_id = '" . $language_id . "' )
 									WHERE f.form_name = '" . $this->db->escape($name) . "'
 											AND f.status = 1 "
@@ -199,8 +199,8 @@ class AForm{
 
 		$query = $this->db->query("
 			SELECT f.*, fd.name, fd.description, fd.error_text
-			FROM " . $this->db->table("fields") . " f
-			LEFT JOIN " . $this->db->table("field_descriptions") . " fd
+			FROM " . $this->db->table_name("fields") . " f
+			LEFT JOIN " . $this->db->table_name("field_descriptions") . " fd
 				ON ( f.field_id = fd.field_id AND fd.language_id = '" . $language_id . "' )
 			WHERE f.form_id = '" . $this->form['form_id'] . "'
 				AND f.status = 1
@@ -214,7 +214,7 @@ class AForm{
 				$this->fields[$row['field_id']] = $row;
 				$query = $this->db->query("
 					SELECT *
-					FROM " . $this->db->table("field_values") . " 
+					FROM " . $this->db->table_name("field_values") . " 
 					WHERE field_id = '" . $row['field_id'] . "'
 					AND language_id = '" . $language_id . "'");
 				if ($query->num_rows) {
@@ -261,9 +261,9 @@ class AForm{
 
 		$query = $this->db->query("
 			SELECT fg.*, fgd.name, fgd.description
-			FROM " . $this->db->table("form_groups") . " g
-				LEFT JOIN " . $this->db->table("fields_groups") . " fg ON ( g.group_id = fg.group_id)
-				LEFT JOIN " . $this->db->table("fields_group_descriptions") . " fgd
+			FROM " . $this->db->table_name("form_groups") . " g
+				LEFT JOIN " . $this->db->table_name("fields_groups") . " fg ON ( g.group_id = fg.group_id)
+				LEFT JOIN " . $this->db->table_name("fields_group_descriptions") . " fgd
 					ON ( fg.group_id = fgd.group_id AND fgd.language_id = '" . $language_id . "' )
 			WHERE g.form_id = '" . $this->form['form_id'] . "'
 				AND g.status = 1

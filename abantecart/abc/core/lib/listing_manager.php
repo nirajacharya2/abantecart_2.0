@@ -67,20 +67,20 @@ class AListingManager extends AListing{
 		}
 
 		$result = $this->db->query("SELECT *
-									FROM  " . $this->db->table("custom_lists") . " 
+									FROM  " . $this->db->table_name("custom_lists") . " 
 									WHERE custom_block_id = '" . $custom_block_id . "'
 											AND id='" . $data['id'] . "'
 											AND data_type='" . $data['data_type'] . "'");
 
 		if ($result->num_rows && $custom_block_id){
-			$this->db->query("UPDATE " . $this->db->table("custom_lists") . "
+			$this->db->query("UPDATE " . $this->db->table_name("custom_lists") . "
 								SET custom_block_id = '" . $custom_block_id . "'
 								" . (!is_null($data['sort_order']) ? ", sort_order = '" . (int)$data['sort_order'] . "'" : "") . "
 								WHERE custom_block_id = '" . $custom_block_id . "'
 									  AND id='" . $data['id'] . "'
 										AND data_type='" . $data['data_type'] . "'");
 		} else{
-			$this->db->query("INSERT INTO " . $this->db->table("custom_lists") . " 
+			$this->db->query("INSERT INTO " . $this->db->table_name("custom_lists") . " 
 								( custom_block_id,
 								  data_type,
 								  id,
@@ -109,7 +109,7 @@ class AListingManager extends AListing{
 		}
 		$custom_block_id = (int)$this->custom_block_id;
 
-		$sql = "DELETE FROM  " . $this->db->table("custom_lists") . " 
+		$sql = "DELETE FROM  " . $this->db->table_name("custom_lists") . " 
 									WHERE custom_block_id = '" . $custom_block_id . "'
 											AND id='" . $data['id'] . "'
 											AND data_type='" . $data['data_type'] . "'";
@@ -121,7 +121,7 @@ class AListingManager extends AListing{
 
 	public function deleteCustomListing(){
 		$custom_block_id = (int)$this->custom_block_id;
-		$sql = "DELETE FROM  " . $this->db->table("custom_lists") . "
+		$sql = "DELETE FROM  " . $this->db->table_name("custom_lists") . "
 				WHERE custom_block_id = '" . $custom_block_id . "'";
 		$this->db->query($sql);
 		$this->cache->remove('blocks.custom.' . $custom_block_id);

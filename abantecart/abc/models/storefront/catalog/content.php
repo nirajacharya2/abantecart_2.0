@@ -42,10 +42,10 @@ class ModelCatalogContent extends Model {
 
 		$cache = array();
 		$sql = "SELECT DISTINCT i.content_id, id.*
-				FROM " . $this->db->table("contents") . " i
-				LEFT JOIN " . $this->db->table("content_descriptions") . " id
+				FROM " . $this->db->table_name("contents") . " i
+				LEFT JOIN " . $this->db->table_name("content_descriptions") . " id
 					ON (i.content_id = id.content_id AND id.language_id = '" . $language_id . "')
-				LEFT JOIN " . $this->db->table("contents_to_stores") . " i2s
+				LEFT JOIN " . $this->db->table_name("contents_to_stores") . " i2s
 					ON (i.content_id = i2s.content_id)
 				WHERE i.content_id = '" . $content_id . "' AND COALESCE(i2s.store_id,0) = '" . $store_id . "' AND i.status = '1'";
 		$query = $this->db->query($sql);
@@ -69,12 +69,12 @@ class ModelCatalogContent extends Model {
 		if($output === false){
 			$output = array();
 			$sql = "SELECT i.*, id.*
-					FROM " . $this->db->table("contents") . " i
-					LEFT JOIN " . $this->db->table("content_descriptions") . " id
+					FROM " . $this->db->table_name("contents") . " i
+					LEFT JOIN " . $this->db->table_name("content_descriptions") . " id
 							ON (i.content_id = id.content_id
 									AND id.language_id = '" . (int)$this->config->get('storefront_language_id') . "')";
 
-			$sql .=	"LEFT JOIN " . $this->db->table("contents_to_stores") . " i2s ON (i.content_id = i2s.content_id)";
+			$sql .=	"LEFT JOIN " . $this->db->table_name("contents_to_stores") . " i2s ON (i.content_id = i2s.content_id)";
 			$sql .=	"WHERE i.status = '1' ";
 			$sql .= " AND COALESCE(i2s.store_id,0) = '" . (int)$this->config->get('config_store_id') . "'";
 

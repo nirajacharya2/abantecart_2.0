@@ -48,7 +48,7 @@ class ModelSaleCustomer extends Model {
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
 		$salt_key = AHelperUtils::genToken(8);
-		$this->db->query("INSERT INTO " . $this->db->table("customers") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("customers") . "
 						SET loginname = '" . $this->db->escape($data['loginname']) . "',
 							firstname = '" . $this->db->escape($data['firstname']) . "',
 							lastname = '" . $this->db->escape($data['lastname']) . "',
@@ -89,7 +89,7 @@ class ModelSaleCustomer extends Model {
 			$address = $this->dcrypt->encrypt_data($address, 'addresses');
 			$key_sql = ", key_id = '" . (int)$address['key_id'] . "'";
 		}
-		$this->db->query("INSERT INTO " . $this->db->table("addresses") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("addresses") . "
 						  SET customer_id = '" . (int)$customer_id . "',
 								firstname = '" . $this->db->escape($address['firstname']) . "',
 								lastname = '" . $this->db->escape($address['lastname']) . "',
@@ -116,7 +116,7 @@ class ModelSaleCustomer extends Model {
 			$data = $this->dcrypt->encrypt_data($data, 'customers');
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
-		$this->db->query("UPDATE " . $this->db->table("customers") . "
+		$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 						SET loginname = '" . $this->db->escape($data['loginname']) . "',
 							firstname = '" . $this->db->escape($data['firstname']) . "',
 							lastname = '" . $this->db->escape($data['lastname']) . "',
@@ -132,7 +132,7 @@ class ModelSaleCustomer extends Model {
 	
 		if ($data['password']) {
 			$salt_key = AHelperUtils::genToken(8);
-			$this->db->query("UPDATE " . $this->db->table("customers") . "
+			$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 							SET
 								salt = '" . $this->db->escape($salt_key) . "', 
 								password = '" . $this->db->escape(sha1($salt_key.sha1($salt_key.sha1($data['password'])))) . "'
@@ -164,7 +164,7 @@ class ModelSaleCustomer extends Model {
 			$address = $this->dcrypt->encrypt_data($address, 'addresses');
 			$key_sql = ", key_id = '" . (int)$address['key_id'] . "'";
 		}
-		$this->db->query("INSERT INTO " . $this->db->table("addresses"). "
+		$this->db->query("INSERT INTO " . $this->db->table_name("addresses"). "
 						  SET   address_id = '" . (int)$address_id . "',
 								customer_id = '" . (int)$customer_id . "',
 								firstname = '" . $this->db->escape($address['firstname']) . "',
@@ -189,7 +189,7 @@ class ModelSaleCustomer extends Model {
 		if(!(int)$customer_id || !(int)$address_id ){
 			return false;
 		}
-		$this->db->query("DELETE FROM " . $this->db->table("addresses") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("addresses") . " 
 						WHERE customer_id = '" . (int)$customer_id . "' AND address_id = '".(int)$address_id."'");
 		return true;
 	}
@@ -231,18 +231,18 @@ class ModelSaleCustomer extends Model {
 				//check key_id to use 
 				$query_key = $this->db->query(
 									"SELECT key_id
-									 FROM " . $this->db->table("customers") . "
+									 FROM " . $this->db->table_name("customers") . "
 									 WHERE customer_id = '" . (int)$customer_id . "'");
 				$key_id = $query_key->rows[0]['key_id'];
 				$value = $this->dcrypt->encrypt_field($value, $key_id);
 			}
-			$this->db->query("UPDATE " . $this->db->table("customers") . "
+			$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 							  SET ".$field." = '" . $this->db->escape($value) . "'
 							  WHERE customer_id = '" . (int)$customer_id . "'");
 
 		if ($field == 'password') {
 			$salt_key = AHelperUtils::genToken(8);
-			$this->db->query("UPDATE " . $this->db->table("customers") . "
+			$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 							SET 
 								salt = '" . $this->db->escape($salt_key) . "', 
 								password = '" . $this->db->escape(sha1($salt_key.sha1($salt_key.sha1($value)))) . "'
@@ -272,7 +272,7 @@ class ModelSaleCustomer extends Model {
         //TODO: replace this query with DB-
 		$sql = "SELECT COLUMN_NAME
 				FROM INFORMATION_SCHEMA.COLUMNS
-				WHERE TABLE_SCHEMA = '".$this->db->database()."' AND TABLE_NAME = '" . $this->db->table("customers") . "'";
+				WHERE TABLE_SCHEMA = '".$this->db->getDatabaseName()."' AND TABLE_NAME = '" . $this->db->table_name("customers") . "'";
 		$result = $this->db->query($sql);
 		$columns = array();
 		foreach($result->rows as $row){
@@ -291,7 +291,7 @@ class ModelSaleCustomer extends Model {
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
 
-		$sql = "UPDATE ".$this->db->table('customers')."
+		$sql = "UPDATE ".$this->db->table_name('customers')."
 				SET ".implode(', ',$upd)."\n"
 				. $key_sql .
 				" WHERE customer_id = '" . (int)$customer_id . "'";
@@ -323,13 +323,13 @@ class ModelSaleCustomer extends Model {
 			foreach($update as $sendpoint=>$row){
 				foreach($row as $protocol=>$status){
 
-					$sql = "DELETE FROM ".$this->db->table('customer_notifications')."
+					$sql = "DELETE FROM ".$this->db->table_name('customer_notifications')."
 							WHERE customer_id = ".$customer_id."
 								AND sendpoint = '" . $this->db->escape($sendpoint) . "'
 								AND protocol = '" . $this->db->escape($protocol) . "'";
 					$this->db->query($sql);
 
-					$sql = "INSERT INTO " . $this->db->table('customer_notifications') . "
+					$sql = "INSERT INTO " . $this->db->table_name('customer_notifications') . "
 							(customer_id, sendpoint,protocol,status, date_added)
 						VALUES
 						('" . $customer_id . "',
@@ -350,7 +350,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function setDefaultAddress($customer_id, $default_address_id) {
 		if ($customer_id && $default_address_id) {
-			$this->db->query("UPDATE " . $this->db->table("customers") . "
+			$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 							  SET address_id = '" . (int)$default_address_id . "'
 							  WHERE customer_id = '" . (int)$customer_id . "'");
 		}
@@ -368,12 +368,12 @@ class ModelSaleCustomer extends Model {
 			if ( $this->dcrypt->active && in_array($field_name, $this->dcrypt->getEncryptedFields("addresses")) ) {
 				//check key_id to use
 				$query_key = $this->db->query( "SELECT key_id
-												FROM " . $this->db->table("addresses") . "
+												FROM " . $this->db->table_name("addresses") . "
 												WHERE customer_id = '" . (int)$address_id . "'");
 				$key_id = $query_key->rows[0]['key_id'];
 				$value = $this->dcrypt->encrypt_field($value, $key_id);
 			}
-			$this->db->query("UPDATE " . $this->db->table("addresses") . "
+			$this->db->query("UPDATE " . $this->db->table_name("addresses") . "
 							  SET ".$field_name." = '" . $this->db->escape($value) . "'
 							  WHERE address_id = '" . (int)$address_id . "'");
 	}
@@ -385,7 +385,7 @@ class ModelSaleCustomer extends Model {
 	public function getAddressesByCustomerId($customer_id) {
 		$address_data = array();
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("addresses") . "
+									FROM " . $this->db->table_name("addresses") . "
 									WHERE customer_id = '" . (int)$customer_id . "'");
 
 		foreach ($query->rows as $result) {
@@ -440,9 +440,9 @@ class ModelSaleCustomer extends Model {
 	 * @param int $customer_id
 	 */
 	public function deleteCustomer($customer_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("customers") . " WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("addresses") . " WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("customer_notifications") . " WHERE customer_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("customers") . " WHERE customer_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("addresses") . " WHERE customer_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("customer_notifications") . " WHERE customer_id = '" . (int)$customer_id . "'");
 	}
 
 	/**
@@ -452,10 +452,10 @@ class ModelSaleCustomer extends Model {
 	public function getCustomer($customer_id) {
 		$query = $this->db->query("SELECT DISTINCT *,
 									(SELECT COUNT(order_id)
-										FROM " . $this->db->table("orders") . "
+										FROM " . $this->db->table_name("orders") . "
 										WHERE customer_id = '" . (int)$customer_id . "'
 												AND order_status_id>0) as orders_count
-								   FROM " . $this->db->table("customers") . "
+								   FROM " . $this->db->table_name("customers") . "
 								   WHERE customer_id = '" . (int)$customer_id . "'");
 
 		$result_row = $this->dcrypt->decrypt_data($query->row, 'customers');
@@ -497,7 +497,7 @@ class ModelSaleCustomer extends Model {
 		}
 		if ( $mode != 'total_only' && $mode != 'quick'){
 			$sql .= ", (SELECT COUNT(o.order_id) as cnt
-						FROM " . $this->db->table("orders") . " o
+						FROM " . $this->db->table_name("orders") . " o
 						WHERE c.customer_id = o.customer_id AND o.order_status_id>0) as orders_count";
 		}
 
@@ -505,8 +505,8 @@ class ModelSaleCustomer extends Model {
 			$sql .= ", c.key_id ";
 		}
 
-		$sql .= " FROM " . $this->db->table("customers") . " c
-					LEFT JOIN " . $this->db->table("customer_groups") . " cg ON (c.customer_group_id = cg.customer_group_id) ";
+		$sql .= " FROM " . $this->db->table_name("customers") . " c
+					LEFT JOIN " . $this->db->table_name("customer_groups") . " cg ON (c.customer_group_id = cg.customer_group_id) ";
 
 		$implode = array();
 		$filter = (isset($data['filter']) ? $data['filter'] : array());
@@ -586,7 +586,7 @@ class ModelSaleCustomer extends Model {
 		}
 
 		if(($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']){
-			$sql .= "RIGHT JOIN ".$this->db->table('customer_notifications')." cn
+			$sql .= "RIGHT JOIN ".$this->db->table_name('customer_notifications')." cn
 					ON (cn.customer_id = c.customer_id
 						AND cn.sendpoint='newsletter'
 						AND cn.status=1
@@ -694,7 +694,7 @@ class ModelSaleCustomer extends Model {
 	 * @param int $customer_id
 	 */
 	public function approve($customer_id) {
-		$this->db->query("UPDATE " . $this->db->table("customers") . "
+		$this->db->query("UPDATE " . $this->db->table_name("customers") . "
 						  SET approved = '1'
 								WHERE customer_id = '" . (int)$customer_id . "'");
 	}
@@ -708,7 +708,7 @@ class ModelSaleCustomer extends Model {
 			$store_based = " AND store_id = " . (int)$this->session->data['current_store_id'];
 		}
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("customers") . "
+									FROM " . $this->db->table_name("customers") . "
 									WHERE newsletter = '1' " . $store_based . "
 									ORDER BY firstname, lastname, email");
 		$result_rows = array();
@@ -730,7 +730,7 @@ class ModelSaleCustomer extends Model {
 
 		if ($keyword) {
 			$query = $this->db->query("SELECT *
-									   FROM " . $this->db->table("customers") . "
+									   FROM " . $this->db->table_name("customers") . "
 									   WHERE LCASE(CONCAT(firstname, ' ', lastname)) LIKE '%" . $this->db->escape(strtolower($keyword),true) . "%'
 											OR LCASE(email) LIKE '%" . $this->db->escape(strtolower($keyword),true) . "%' " . $store_based . "
 									   ORDER BY firstname, lastname, email");
@@ -757,7 +757,7 @@ class ModelSaleCustomer extends Model {
 		$where = array();
 		if ($emails) {
 			$sql = "SELECT *
-				   FROM " . $this->db->table("customers") . "
+				   FROM " . $this->db->table_name("customers") . "
 				   WHERE ";
 			foreach($emails as $email){
 				$where[] = "LCASE(email) LIKE '%" . $this->db->escape(strtolower($email),true) . "%'";
@@ -786,11 +786,11 @@ class ModelSaleCustomer extends Model {
 		}
 
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("customers") . "
+									FROM " . $this->db->table_name("customers") . "
 									WHERE customer_id IN (
 										SELECT DISTINCT `customer_id`
-										FROM `" . $this->db->table("orders") . "` o
-										INNER JOIN " . $this->db->table("order_products") . " op
+										FROM `" . $this->db->table_name("orders") . "` o
+										INNER JOIN " . $this->db->table_name("order_products") . " op
 											ON (o.order_id = op.order_id AND op.product_id = '" . (int)$product_id . "')
 										WHERE o.order_status_id <> '0')");
 
@@ -807,7 +807,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getAddresses($customer_id) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("addresses") . "
+									FROM " . $this->db->table_name("addresses") . "
 									WHERE customer_id = '" . (int)$customer_id . "'");
 		$result_rows = array();
 		foreach ($query->rows as $row) {
@@ -831,7 +831,7 @@ class ModelSaleCustomer extends Model {
 			$not_current_customer = "AND customer_id <> '$customer_id'";
 		}
 		$query = $this->db->query("SELECT COUNT(*) AS total
-								   FROM " . $this->db->table("customers") . "
+								   FROM " . $this->db->table_name("customers") . "
 								   WHERE LOWER(`loginname`) = LOWER('" . $loginname . "') " . $not_current_customer);
 		if ($query->row['total'] > 0) {
 			return false;
@@ -845,7 +845,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getTotalCustomersAwaitingApproval() {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-								   FROM " . $this->db->table("customers") . "
+								   FROM " . $this->db->table_name("customers") . "
 								   WHERE approved = '0'");
 		return $query->row['total'];
 	}
@@ -856,7 +856,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getTotalAddressesByCustomerId($customer_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("addresses") . "
+									FROM " . $this->db->table_name("addresses") . "
 									WHERE customer_id = '" . (int)$customer_id . "'");
 		return $query->row['total'];
 	}
@@ -867,7 +867,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getTotalAddressesByCountryId($country_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("addresses") . "
+									FROM " . $this->db->table_name("addresses") . "
 									WHERE country_id = '" . (int)$country_id . "'");
 		return (int)$query->row['total'];
 	}
@@ -878,7 +878,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getTotalAddressesByZoneId($zone_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table("addresses") . "
+									FROM " . $this->db->table_name("addresses") . "
 									WHERE zone_id = '" . (int)$zone_id . "'");
 		return (int)$query->row['total'];
 	}
@@ -889,7 +889,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getTotalCustomersByCustomerGroupId($customer_group_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total
-								   FROM " . $this->db->table("customers") . "
+								   FROM " . $this->db->table_name("customers") . "
 								   WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 		return (int)$query->row['total'];
 	}
@@ -955,7 +955,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function getSubscribersCustomerGroupId() {
 		$query = $this->db->query("SELECT customer_group_id
-									FROM `" . $this->db->table("customer_groups") . "`
+									FROM `" . $this->db->table_name("customer_groups") . "`
 									WHERE `name` = 'Newsletter Subscribers'
 									LIMIT 0,1");
 		$result = !$query->row['customer_group_id'] ? (int)$this->config->get('config_customer_group_id') : (int)$query->row['customer_group_id'];
@@ -968,7 +968,7 @@ class ModelSaleCustomer extends Model {
 	 */
 	public function isSubscriber($customer_id){
 		$sql = "SELECT * 
-				FROM `" . $this->db->table("customers") . "`
+				FROM `" . $this->db->table_name("customers") . "`
 				WHERE customer_id = ".(int)$customer_id." AND customer_group_id = '".$this->getSubscribersCustomerGroupId()."'";
 		$result = $this->db->query($sql);
 		return $result->num_rows ? true : false;

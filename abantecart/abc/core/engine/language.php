@@ -795,7 +795,7 @@ class ALanguage
         $block_name = str_replace('/', '_', $filename);
         $lang_array = array();
         $sql = "SELECT * 
-                FROM ".$this->db->table("language_definitions")." 
+                FROM ".$this->db->table_name("language_definitions")." 
                 WHERE language_id = '".(int)$language_id."'
                         AND section =".(int)$section." 
                         AND block='".$this->db->escape($block_name)."'";
@@ -824,7 +824,7 @@ class ALanguage
         $block = str_replace('/', '_', $filename);
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$block.' saving to database');
 
-        $sql = "INSERT INTO ".$this->db->table("language_definitions")." ";
+        $sql = "INSERT INTO ".$this->db->table_name("language_definitions")." ";
         $sql .= "(language_id,block,section,language_key,language_value,date_added) VALUES ";
         $values = array();
         foreach ($definitions as $k => $v) {
@@ -1018,7 +1018,7 @@ class ALanguage
             }
 
             if ( ! $this->_is_definition_in_db($update_data)) {
-                $sql = "INSERT INTO ".$this->db->table("language_definitions")."
+                $sql = "INSERT INTO ".$this->db->table_name("language_definitions")."
                         (`".implode("`, `", array_keys($update_data))."`)
                         VALUES ('".implode("', '", $update_data)."') ";
                 $this->db->query($sql);
@@ -1040,7 +1040,7 @@ class ALanguage
     protected function _is_definition_in_db($data)
     {
         $sql  = "SELECT *
-                 FROM ".$this->db->table("language_definitions")."
+                 FROM ".$this->db->table_name("language_definitions")."
                  WHERE language_id = '".$data['language_id']."'
                        AND `block` = '".$data['block']."'
                        AND `section` =  '".$data['section']."'

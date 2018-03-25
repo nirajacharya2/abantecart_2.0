@@ -26,7 +26,7 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 class ModelLocalisationStockStatus extends Model {
 	public function addStockStatus($data) {
 
-		$result = $this->db->query("SELECT MAX(stock_status_id) as max_id FROM " . $this->db->table("stock_statuses") . " ");
+		$result = $this->db->query("SELECT MAX(stock_status_id) as max_id FROM " . $this->db->table_name("stock_statuses") . " ");
 		$stock_status_id = (int)$result->row['max_id']+1;
 
 		foreach ($data['stock_status'] as $language_id => $value) {
@@ -59,14 +59,14 @@ class ModelLocalisationStockStatus extends Model {
 	}
 	
 	public function deleteStockStatus($stock_status_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("stock_statuses") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("stock_statuses") . " 
 						WHERE stock_status_id = '" . (int)$stock_status_id . "'");
 		$this->cache->remove('localization');
 	}
 		
 	public function getStockStatus($stock_status_id) {
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("stock_statuses") . " 
+									FROM " . $this->db->table_name("stock_statuses") . " 
 									WHERE stock_status_id = '" . (int)$stock_status_id . "'
 										AND language_id = '" . (int)$this->config->get('storefront_language_id') . "'");
 		
@@ -82,7 +82,7 @@ class ModelLocalisationStockStatus extends Model {
 		}
 
 		if ($data) {
-			$sql = "SELECT * FROM " . $this->db->table("stock_statuses") . " WHERE language_id = '" . $language_id . "'";
+			$sql = "SELECT * FROM " . $this->db->table_name("stock_statuses") . " WHERE language_id = '" . $language_id . "'";
       		
 			$sql .= " ORDER BY name";	
 			
@@ -113,7 +113,7 @@ class ModelLocalisationStockStatus extends Model {
 		
 			if ($stock_status_data === false) {
 				$query = $this->db->query( "SELECT stock_status_id, name
-											FROM " . $this->db->table("stock_statuses") . " 
+											FROM " . $this->db->table_name("stock_statuses") . " 
 											WHERE language_id = '" . $language_id . "'
 											ORDER BY name");
 				$stock_status_data = $query->rows;
@@ -127,7 +127,7 @@ class ModelLocalisationStockStatus extends Model {
 	public function getStockStatusDescriptions($stock_status_id) {
 		$stock_status_data = array();
 		
-		$query = $this->db->query("SELECT * FROM " . $this->db->table("stock_statuses") . " WHERE stock_status_id = '" . (int)$stock_status_id . "'");
+		$query = $this->db->query("SELECT * FROM " . $this->db->table_name("stock_statuses") . " WHERE stock_status_id = '" . (int)$stock_status_id . "'");
 		
 		foreach ($query->rows as $result) {
 			$stock_status_data[$result['language_id']] = array('name' => $result['name']);
@@ -137,7 +137,7 @@ class ModelLocalisationStockStatus extends Model {
 	}
 	
 	public function getTotalStockStatuses() {
-      	$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table("stock_statuses") . " WHERE language_id = '" . (int)$this->config->get('storefront_language_id') . "'");
+      	$query = $this->db->query("SELECT COUNT(*) AS total FROM " . $this->db->table_name("stock_statuses") . " WHERE language_id = '" . (int)$this->config->get('storefront_language_id') . "'");
 		
 		return $query->row['total'];
 	}	

@@ -131,8 +131,8 @@ class ACustomer
 
         if (isset($this->session->data['customer_id'])) {
             $customer_data = $this->db->query(
-                "SELECT c.*, cg.* FROM ".$this->db->table("customers")." c
-                    LEFT JOIN ".$this->db->table("customer_groups")." cg ON c.customer_group_id = cg.customer_group_id
+                "SELECT c.*, cg.* FROM ".$this->db->table_name("customers")." c
+                    LEFT JOIN ".$this->db->table_name("customer_groups")." cg ON c.customer_group_id = cg.customer_group_id
                     WHERE customer_id = '".(int)$this->session->data['customer_id']."' 
                     AND STATUS = '1'"
             );
@@ -212,7 +212,7 @@ class ACustomer
             $add_pass_sql = " OR password = '".$this->db->escape(md5($password.ABC::env('SALT')))."'";
         }
         $customer_data = $this->db->query("SELECT *
-                                            FROM ".$this->db->table("customers")."
+                                            FROM ".$this->db->table_name("customers")."
                                             WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
                                             AND (
                                                 password = 	SHA1(CONCAT(salt, 
@@ -307,7 +307,7 @@ class ACustomer
         }
 
         //insert new record
-        $this->db->query("UPDATE `".$this->db->table("customers")."`
+        $this->db->query("UPDATE `".$this->db->table_name("customers")."`
                         SET `last_login` = NOW()
                         WHERE customer_id = ".$customer_id);
 
@@ -528,7 +528,7 @@ class ACustomer
         }
 
         $query = $this->db->query("SELECT sum(credit) - sum(debit) AS balance
-                                    FROM ".$this->db->table("customer_transactions")."
+                                    FROM ".$this->db->table_name("customer_transactions")."
                                     WHERE customer_id = '".(int)$this->getId()."'");
         $balance = (float)$query->row['balance'];
 
@@ -575,7 +575,7 @@ class ACustomer
 
         //before write get cart-info from db to non-override cart for other stores of multistore
         $result = $this->db->query("SELECT cart
-                                    FROM ".$this->db->table("customers")."
+                                    FROM ".$this->db->table_name("customers")."
                                     WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
         $cart = unserialize($result->row['cart']);
         //check is format of cart old or new
@@ -585,7 +585,7 @@ class ACustomer
             $cart = array(); //clean cart from old format
         }
         $cart['store_'.$store_id] = $this->session->data['cart'];
-        $this->db->query("UPDATE ".$this->db->table("customers")."
+        $this->db->query("UPDATE ".$this->db->table_name("customers")."
                           SET
                                 cart = '".$this->db->escape(serialize($cart))."',
                                 ip = '".$this->db->escape($this->request->getRemoteIP())."'
@@ -608,7 +608,7 @@ class ACustomer
         }
 
         $sql = "SELECT cart
-                FROM ".$this->db->table("customers")."
+                FROM ".$this->db->table_name("customers")."
                 WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
         $result = $this->db->query($sql);
         if ($result->num_rows) {
@@ -636,7 +636,7 @@ class ACustomer
 
         $cart = array();
         $sql = "SELECT cart
-                FROM ".$this->db->table("customers")."
+                FROM ".$this->db->table_name("customers")."
                 WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
 
         $result = $this->db->query($sql);
@@ -659,7 +659,7 @@ class ACustomer
                         $cart_products[] = (int)$k[0]; // <-product_id
                     }
                     $sql = "SELECT product_id
-                            FROM ".$this->db->table('products_to_stores')." pts
+                            FROM ".$this->db->table_name('products_to_stores')." pts
                             WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
 
                     $result = $this->db->query($sql);
@@ -725,7 +725,7 @@ class ACustomer
         if ( ! $customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table("customers")."
+        $this->db->query("UPDATE ".$this->db->table_name("customers")."
                         SET
                             cart = '".$this->db->escape(serialize($cart))."'
                         WHERE customer_id = '".(int)$customer_id."'");
@@ -811,7 +811,7 @@ class ACustomer
         if ( ! $customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table("customers")."
+        $this->db->query("UPDATE ".$this->db->table_name("customers")."
                             SET
                                 wishlist = '".$this->db->escape(serialize($whishlist))."',
                                 ip = '".$this->db->escape($this->request->getRemoteIP())."'
@@ -835,7 +835,7 @@ class ACustomer
             return array();
         }
         $customer_data = $this->db->query("SELECT wishlist
-                                            FROM ".$this->db->table("customers")."
+                                            FROM ".$this->db->table_name("customers")."
                                             WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
         if ($customer_data->num_rows) {
             //load customer saved cart
@@ -873,7 +873,7 @@ class ACustomer
             }
         }
 
-        $this->db->query("INSERT INTO ".$this->db->table("customer_transactions")."
+        $this->db->query("INSERT INTO ".$this->db->table_name("customer_transactions")."
                         SET customer_id 		= '".(int)$this->getId()."',
                             order_id 			= '".(int)$tr_details['order_id']."',
                             transaction_type 	= '".$this->db->escape($tr_details['transaction_type'])."',

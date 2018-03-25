@@ -30,6 +30,7 @@ class ADB{
      * @var $orm Capsule
      */
     protected $orm;
+    static $ORM;
     protected $db_config = array();
     public $error = '';
     public $registry;
@@ -58,6 +59,7 @@ class ADB{
             $this->orm->addConnection($this->db_config);
             $this->orm->setAsGlobal();  //this is important
             $this->orm->bootEloquent();
+            self::$ORM = $this->orm;
         }catch(AException $e){
             throw new AException(AC_ERR_MYSQL, 'Error: Could not load ORM-database!');
         }
@@ -171,7 +173,7 @@ class ADB{
      * @param string $table_name
      * @return string
      */
-    public function table($table_name){
+    public function table_name($table_name){
         //detect if encryption is enabled
         $postfix = '';
         if (is_object($this->registry->get('dcrypt'))){
@@ -183,7 +185,7 @@ class ADB{
      * Get database name
      * @return string
      */
-    public function database(){
+    public function getDatabaseName(){
         return $this->db_config['database'];
     }
     /**
@@ -242,7 +244,7 @@ class ADB{
      * @return \Illuminate\Database\Capsule\Manager | null
      */
     public function __call($function_name, $args){
-        $item = $this->orm::schema();
+        $item = $this->orm;
         if ( method_exists( $item, $function_name ) ){
             return call_user_func_array(array($item, $function_name), $args);
         } else {
@@ -250,15 +252,27 @@ class ADB{
         }
     }
 
+    /**
+     * @param string $table_name - table name without prefix
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function table($table_name){
+        return $this->orm::table($table_name);
+    }
+
     public function getORM()
     {
         return $this->orm;
     }
 
-    public function getSchema()
+    public function database()
     {
         return $this->orm::schema();
     }
+
+    /**
+     * @return mixed
+     */
     public function CurrentTimeStamp()
     {
         return $this->orm::raw('CURRENT_TIMESTAMP');

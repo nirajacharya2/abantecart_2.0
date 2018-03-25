@@ -33,7 +33,7 @@ class ModelSettingSetting extends Model {
 	 */
 	public function getGroups() {
 		$data = array();
-		$query = $this->db->query("SELECT DISTINCT `group` FROM " . $this->db->table("settings") . " ");
+		$query = $this->db->query("SELECT DISTINCT `group` FROM " . $this->db->table_name("settings") . " ");
 		foreach ($query->rows as $result) {
 			$data[] = $result['group'];
 		}
@@ -47,7 +47,7 @@ class ModelSettingSetting extends Model {
 	 */
 	public function getSettingGroup( $setting_key, $store_id = 0 ) {
 		$data = array();
-		$query = $this->db->query("SELECT DISTINCT `group` FROM " . $this->db->table("settings") . " 
+		$query = $this->db->query("SELECT DISTINCT `group` FROM " . $this->db->table_name("settings") . " 
 						  WHERE `key` = '" . $this->db->escape($setting_key) . "'
 						  AND `store_id` = '".$store_id."'");
 		
@@ -72,8 +72,8 @@ class ModelSettingSetting extends Model {
 		}
 		
 		$sql = "SELECT $total_sql
-				FROM " . $this->db->table("settings") . " s
-				LEFT JOIN  " . $this->db->table("stores") . " st ON st.store_id = s.store_id
+				FROM " . $this->db->table_name("settings") . " s
+				LEFT JOIN  " . $this->db->table_name("stores") . " st ON st.store_id = s.store_id
                 WHERE s.group IN ('".implode("', '",$this->config->groups)."') ";
 
         if(isset( $data['store_id'] )){
@@ -138,7 +138,7 @@ class ModelSettingSetting extends Model {
 
 		$query = $this->db->query(
 			"SELECT *
-			FROM " . $this->db->table("settings") . " 
+			FROM " . $this->db->table_name("settings") . " 
 			WHERE `group` = '" . $this->db->escape($group) . "'
 					AND store_id = '".(int)$store_id."'" );
 		foreach ($query->rows as $result) {
@@ -258,13 +258,13 @@ class ModelSettingSetting extends Model {
 				}
 			}
 
-			$sql = "DELETE FROM " . $this->db->table("settings") . " 
+			$sql = "DELETE FROM " . $this->db->table_name("settings") . " 
 					WHERE `group` = '" . $this->db->escape($group) . "'
 							AND `key` = '" . $this->db->escape($key) . "'
 							AND `store_id` = '" . $store_id . "'";
 			$this->db->query($sql);
 
-			$sql = "INSERT INTO " . $this->db->table("settings") . " 
+			$sql = "INSERT INTO " . $this->db->table_name("settings") . " 
 					( `store_id`, `group`, `key`, `value`, `date_added`)
 				VALUES (  '".$store_id."',
 				          '" . $this->db->escape($group) . "',
@@ -289,7 +289,7 @@ class ModelSettingSetting extends Model {
 	 */
 	public function deleteSetting($group, $store_id=0) {
 		$store_id = (int)$store_id;
-		$this->db->query("DELETE FROM " . $this->db->table("settings") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("settings") . " 
 						  WHERE `group` = '" . $this->db->escape($group) . "'
 						  AND `store_id` = '".$store_id."'");
 

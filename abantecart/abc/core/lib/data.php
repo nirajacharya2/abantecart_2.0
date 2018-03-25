@@ -729,7 +729,7 @@ class AData{
 			return null;
 		}
 
-		$sql = "SELECT * FROM " . $this->db->table($table_name);
+		$sql = "SELECT * FROM " . $this->db->table_name($table_name);
 
 		$sub_sql = '';
 
@@ -1183,7 +1183,7 @@ class AData{
 			return array ();
 		}
 
-		$sql = "UPDATE `" . $this->db->table($table_name) . "`";
+		$sql = "UPDATE `" . $this->db->table_name($table_name) . "`";
 		$sql .= " SET " . implode(', ', $cols);
 		$sql .= " WHERE " . implode(' AND ', $where);
 
@@ -1244,7 +1244,7 @@ class AData{
 			return array ();
 		}
 
-		$sql = "INSERT INTO `" . $this->db->table($table_name) . "`";
+		$sql = "INSERT INTO `" . $this->db->table_name($table_name) . "`";
 		$sql .= " SET " . implode(', ', $cols);
 
 		if ($this->run_mode == 'commit'){
@@ -1310,7 +1310,7 @@ class AData{
 			return array ();
 		}
 
-		$sql = "DELETE FROM `" . $this->db->table($table_name) . "`";
+		$sql = "DELETE FROM `" . $this->db->table_name($table_name) . "`";
 		$sql .= " WHERE " . implode(' AND ', $where);
 
 		if ($this->run_mode == 'commit'){
@@ -1395,7 +1395,7 @@ class AData{
 		}
 		if (!empty ($where)){
 			$check_sql = "SELECT count(*) AS total 
-						FROM `" . $this->db->table($table_name) . "` 
+						FROM `" . $this->db->table_name($table_name) . "` 
 						WHERE " . implode(' AND ', $where);
 			if ($this->db->query($check_sql)->row['total'] == 1){
 				// We are trying to update table where all columns are keys. We have to skip it.
@@ -1411,11 +1411,11 @@ class AData{
 				$this->_status2array('error', "Update ".$table_name.". No Data to update.");
 				return array ();
 			}
-			$sql = "UPDATE `" . $this->db->table($table_name) . "`";
+			$sql = "UPDATE `" . $this->db->table_name($table_name) . "`";
 			$sql .= " SET " . implode(', ', $cols);
 			$sql .= " WHERE " . implode(' AND ', $where);
 		} else{
-			$sql = "INSERT INTO `" . $this->db->table($table_name) . "`";
+			$sql = "INSERT INTO `" . $this->db->table_name($table_name) . "`";
 			$sql .= " SET ";
 			$set_cols = array_unique(array_merge($where, $cols));
 			$sql .= implode(', ', $set_cols);
@@ -1653,8 +1653,8 @@ class AData{
 	protected function _get_layout_ids($key_param, $key_value){
 		$result = $this->db->query(
 				"SELECT p.page_id, pl.layout_id 
-				FROM " . $this->db->table("pages") . " p
-				INNER JOIN " . $this->db->table("pages_layouts") . " pl 
+				FROM " . $this->db->table_name("pages") . " p
+				INNER JOIN " . $this->db->table_name("pages_layouts") . " pl 
 					ON p.page_id = pl.page_id
 				WHERE p.key_param = '" . $this->db->escape($key_param) . "'
 						AND p.key_value = '" . (int)$key_value . "'"
@@ -1671,11 +1671,11 @@ class AData{
 	 */
 	protected function _clear_pages($page_id){
 		$this->db->query(
-				"DELETE FROM " . $this->db->table("pages") . "
+				"DELETE FROM " . $this->db->table_name("pages") . "
 				WHERE page_id = '" . (int)$page_id . "'"
 		);
 		$this->db->query(
-				"DELETE FROM " . $this->db->table("page_descriptions") . "
+				"DELETE FROM " . $this->db->table_name("page_descriptions") . "
 				WHERE page_id = '" . (int)$page_id . "'"
 		);
 	}
@@ -1686,7 +1686,7 @@ class AData{
 	 */
 	protected function _clear_pages_layouts($page_id){
 		$this->db->query(
-				"DELETE FROM " . $this->db->table("pages_layouts") . "
+				"DELETE FROM " . $this->db->table_name("pages_layouts") . "
 				WHERE page_id = '" . (int)$page_id . "'"
 		);
 		return true;
@@ -1698,7 +1698,7 @@ class AData{
 	 */
 	protected function _clear_layouts($layout_id){
 		$this->db->query(
-				"DELETE FROM " . $this->db->table("layouts") . "
+				"DELETE FROM " . $this->db->table_name("layouts") . "
 				WHERE layout_id = '" . (int)$layout_id . "'"
 		);
 		return true;

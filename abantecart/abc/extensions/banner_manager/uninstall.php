@@ -21,8 +21,8 @@
 use abc\core\lib\AExtensionManager;
 use abc\core\lib\AMenu;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 /**
  * @var AExtensionManager $this
@@ -30,12 +30,12 @@ if (!class_exists('abc\core\ABC')) {
 
 //delete menu item
 $menu = new AMenu ( "admin" );
-$menu->deleteMenuItem ("banner_manager");
-$menu->deleteMenuItem ("banner_manager_stat");
+$menu->deleteMenuItem( "banner_manager" );
+$menu->deleteMenuItem( "banner_manager_stat" );
 
-$db_schema = $this->db->getSchema();
-$tables = ['banner_stat', 'banner_descriptions', 'banners' ];
-foreach($tables as $table_name) {
+$db_schema = $this->db->database();
+$tables = [ 'banner_stat', 'banner_descriptions', 'banners' ];
+foreach ( $tables as $table_name ) {
     if ( $db_schema->hasTable( $table_name ) ) {
         $db_schema->drop( $table_name );
     }

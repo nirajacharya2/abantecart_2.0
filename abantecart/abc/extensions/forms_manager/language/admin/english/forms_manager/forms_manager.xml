@@ -178,11 +178,13 @@
 	</definition>
 	<definition>
 		<key>note_create_form_block</key>
-		<value><![CDATA[NOTE: To see this form shown on storefront, create form block at Design-><a href="%s">Blocks</a> and add it to appropriate page at Design-><a href="%s">Layouts</a> page.]]></value>
+		<value>
+			<![CDATA[NOTE: To see this form shown on storefront, create form block at Design-><a href="%s">Blocks</a> and add it to appropriate page at Design-><a href="%s">Layouts</a> page.]]></value>
 	</definition>
 	<definition>
 		<key>note_edit_layout</key>
-		<value><![CDATA[NOTE: To see this block shown on storefront, add it to appropriate page	at Design-><a href="%s">Layouts</a>. To create new form go to Design-><a href="%s">Form Manager</a> page.]]></value>
+		<value>
+			<![CDATA[NOTE: To see this block shown on storefront, add it to appropriate page	at Design-><a href="%s">Layouts</a>. To create new form go to Design-><a href="%s">Form Manager</a> page.]]></value>
 	</definition>
 	<definition>
 		<key>text_select_field_type</key>
@@ -205,13 +207,13 @@
 		<value><![CDATA[Placeholder:]]></value>
 	</definition>
 	<definition>
-        <key>entry_regexp_pattern</key>
-        <value><![CDATA[Regular Expression Pattern:]]></value>
-    </definition>
+		<key>entry_regexp_pattern</key>
+		<value><![CDATA[Regular Expression Pattern:]]></value>
+	</definition>
 	<definition>
-        <key>entry_error_text</key>
-        <value><![CDATA[Error Message about invalid Value:]]></value>
-    </definition>
+		<key>entry_error_text</key>
+		<value><![CDATA[Error Message about invalid Value:]]></value>
+	</definition>
 	<definition>
 		<key>entry_form</key>
 		<value><![CDATA[Form]]></value>
@@ -234,6 +236,7 @@
 	</definition>
 	<definition>
 		<key>forms_manager_error_empty_sender</key>
-		<value><![CDATA[Warning! Please set default sender name and default sender email in <a href="#admin#rt=extension/extensions/edit&extension=forms_manager" target="_blank">forms manager settings</a>]]></value>
+		<value>
+			<![CDATA[Warning! Please set default sender name and default sender email in <a href="#admin#rt=extension/extensions/edit&extension=forms_manager" target="_blank">forms manager settings</a>]]></value>
 	</definition>
 </definitions>

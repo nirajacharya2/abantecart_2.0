@@ -180,7 +180,7 @@ class AListing{
 			return $output;
 		}
 		$result = $this->db->query("SELECT *
-									FROM `" . $this->db->table('custom_lists') . "`
+									FROM `" . $this->db->table_name('custom_lists') . "`
 									WHERE custom_block_id = '" . $custom_block_id . "'
 									ORDER BY sort_order");
 		$output = $result->rows;

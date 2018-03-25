@@ -30,7 +30,7 @@ class ModelSettingExtension extends Model {
 	*/
 	public function getEnabledPayments() {
 		$query = $this->db->query("SELECT *
-								   FROM " . $this->db->table("extensions") . "
+								   FROM " . $this->db->table_name("extensions") . "
 								   WHERE `type` = 'payment' and status = 1");
 		return $query->rows;
 	}
@@ -40,7 +40,7 @@ class ModelSettingExtension extends Model {
 	*/
 	public function getPaymentsWithHandler() {
 		$query = $this->db->query("SELECT *
-								   FROM " . $this->db->table("extensions") . "
+								   FROM " . $this->db->table_name("extensions") . "
 								   WHERE `type` = 'payment' and status = 1");
 		$output = array();
 		$output[] = array('' => '');
@@ -54,14 +54,14 @@ class ModelSettingExtension extends Model {
 	
 	
 	public function install($type, $key) {
-		$this->db->query("INSERT INTO " . $this->db->table("extensions") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("extensions") . "
 							SET
 								`type` = '" . $this->db->escape($type) . "',
 								`key` = '" . $this->db->escape($key) . "'");
 	}
 	
 	public function uninstall($type, $key) {
-		$this->db->query("DELETE FROM " . $this->db->table("extensions") . "
+		$this->db->query("DELETE FROM " . $this->db->table_name("extensions") . "
 						WHERE `type` = '" . $this->db->escape($type) . "'
 								AND `key` = '" . $this->db->escape($key) . "'");
 	}

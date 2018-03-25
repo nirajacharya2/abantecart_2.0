@@ -772,7 +772,7 @@ class APackageManager
     }
 
     /**
-     * @param \SimpleXmlElement $config
+     * @return bool
      */
     public function upgradeCore()
     {

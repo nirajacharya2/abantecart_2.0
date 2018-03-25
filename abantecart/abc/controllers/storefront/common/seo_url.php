@@ -34,7 +34,7 @@ class ControllerCommonSeoUrl extends AController {
 			//Possible area for improvement. Only need to check last node in the path
 			foreach ($parts as $part) {
 				$query = $this->db->query("SELECT query
-											FROM " . $this->db->table('url_aliases') . "
+											FROM " . $this->db->table_name('url_aliases') . "
 											WHERE keyword = '" . $this->db->escape($part) . "'");
 				//Add caching of the result.
 				if ($query->num_rows) {

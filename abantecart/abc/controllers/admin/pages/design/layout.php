@@ -233,7 +233,7 @@ class ControllerPagesDesignLayout extends AController{
 		$success = false;
 		if (($this->request->is_GET() && $this->request->get['confirmed_delete'] == 'yes')){
 			$layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-			//do delete this page/layout validate that it is alowed to delete
+			//do delete this page/layout validate that it is allowed to delete
 			$page = $layout->getPageData();
 			if ($page['restricted']){
 				$this->session->data['warning'] = $this->language->get('text_delete_restricted');

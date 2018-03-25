@@ -37,7 +37,7 @@ class ModelUserUserGroup extends Model {
 				}
 			}
 		}
-		$this->db->query("INSERT INTO " . $this->db->table("user_groups") . " 
+		$this->db->query("INSERT INTO " . $this->db->table_name("user_groups") . " 
 						  SET name = '" . $this->db->escape($data['name']) . "',
 							  permission = '" . (isset($data['permission']) ? serialize($data['permission']) : '') . "'");
 		return $this->db->getLastId();
@@ -76,30 +76,30 @@ class ModelUserUserGroup extends Model {
 		}
 
 		if ( !empty($update) ){
-			$this->db->query("UPDATE " . $this->db->table("user_groups") . " SET ". implode(',', $update) ." WHERE user_group_id = '" . (int)$user_group_id . "'");
+			$this->db->query("UPDATE " . $this->db->table_name("user_groups") . " SET ". implode(',', $update) ." WHERE user_group_id = '" . (int)$user_group_id . "'");
 		}
 	}
 	
 	public function deleteUserGroup($user_group_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("user_groups") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("user_groups") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
 	}
 
 	public function addPermission($user_id, $type, $page) {
-		$user_query = $this->db->query("SELECT DISTINCT user_group_id FROM " . $this->db->table("users") . " WHERE user_id = '" . (int)$user_id . "'");
+		$user_query = $this->db->query("SELECT DISTINCT user_group_id FROM " . $this->db->table_name("users") . " WHERE user_id = '" . (int)$user_id . "'");
 		
 		if ($user_query->num_rows) {
-			$user_group_query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("user_groups") . " WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
+			$user_group_query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table_name("user_groups") . " WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
 		
 			if ($user_group_query->num_rows) {
 				$data = unserialize($user_group_query->row['permission']);
 				$data[$type][$page] = 1;
-				$this->db->query("UPDATE " . $this->db->table("user_groups") . " SET permission = '" . serialize($data) . "' WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
+				$this->db->query("UPDATE " . $this->db->table_name("user_groups") . " SET permission = '" . serialize($data) . "' WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
 			}
 		}
 	}
 	
 	public function getUserGroup($user_group_id) {
-		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("user_groups") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
+		$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table_name("user_groups") . " WHERE user_group_id = '" . (int)$user_group_id . "'");
 		
 		$user_group = array(
 			'name'       => $query->row['name'],
@@ -110,7 +110,7 @@ class ModelUserUserGroup extends Model {
 	
 	public function getUserGroups($data = array()) {
 		$sql = "SELECT *
-				FROM " . $this->db->table("user_groups") . " 
+				FROM " . $this->db->table_name("user_groups") . " 
 				ORDER BY name";
 			
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -136,7 +136,7 @@ class ModelUserUserGroup extends Model {
 	}
 	
 	public function getTotalUserGroups() {
-      	$sql = "SELECT COUNT(*) AS total FROM " . $this->db->table("user_groups") . " ";
+      	$sql = "SELECT COUNT(*) AS total FROM " . $this->db->table_name("user_groups") . " ";
       	$query = $this->db->query($sql);
 
 		return $query->row['total'];

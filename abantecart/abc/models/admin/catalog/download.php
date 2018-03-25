@@ -45,7 +45,7 @@ class ModelCatalogDownload extends Model {
 			$data['max_downloads'] = 0;
 		}
 
-		$this->db->query("INSERT INTO " . $this->db->table('downloads') . "
+		$this->db->query("INSERT INTO " . $this->db->table_name('downloads') . "
 						  SET filename  = '" . $this->db->escape($data[ 'filename' ]) . "',
 							  mask = '" . $this->db->escape($data[ 'mask' ]) . "',
 							  max_downloads = " .( (int)$data[ 'max_downloads' ] ? "'".(int)$data[ 'max_downloads' ]."'" : 'NULL' ). ",
@@ -116,7 +116,7 @@ class ModelCatalogDownload extends Model {
 			}
 		}
 		if($update){
-			$this->db->query("UPDATE " . $this->db->table('downloads')."
+			$this->db->query("UPDATE " . $this->db->table_name('downloads')."
 									  SET ".implode(', ',$update)."
 							   WHERE download_id = ".(int)$download_id);
 		}
@@ -154,11 +154,11 @@ class ModelCatalogDownload extends Model {
 			return false;
 		}
 
-		$this->db->query("DELETE FROM " . $this->db->table('products_to_downloads')."
+		$this->db->query("DELETE FROM " . $this->db->table_name('products_to_downloads')."
 						  WHERE product_id = '" . (int)$product_id . "'
 							AND download_id = '" . (int)$download_id."'");
 
-		$this->db->query("INSERT INTO " . $this->db->table('products_to_downloads') . "
+		$this->db->query("INSERT INTO " . $this->db->table_name('products_to_downloads') . "
 							SET
 								product_id = '" . (int)$product_id . "',
 								download_id = '" . (int)$download_id . "'");
@@ -179,7 +179,7 @@ class ModelCatalogDownload extends Model {
 			return false;
 		}
 
-		$this->db->query("DELETE FROM " . $this->db->table('products_to_downloads') . "
+		$this->db->query("DELETE FROM " . $this->db->table_name('products_to_downloads') . "
 						  WHERE product_id = '" . (int)$product_id . "'
 							AND download_id = '" . (int)$download_id."'");
 		$this->cache->remove('html_cache');
@@ -196,7 +196,7 @@ class ModelCatalogDownload extends Model {
 			return false;
 		}
 
-		$this->db->query("DELETE FROM " . $this->db->table('products_to_downloads') . "
+		$this->db->query("DELETE FROM " . $this->db->table_name('products_to_downloads') . "
 						  WHERE product_id = '" . (int)$product_id . "'");
 		$this->cache->remove('html_cache');
 		return true;
@@ -214,8 +214,8 @@ class ModelCatalogDownload extends Model {
 		$output = array();
 
 		$result = $this->db->query("SELECT  pd.product_id, pd.name
-									  FROM " . $this->db->table('products_to_downloads') . " ptd
-									  LEFT JOIN " . $this->db->table('product_descriptions') . " pd
+									  FROM " . $this->db->table_name('products_to_downloads') . " ptd
+									  LEFT JOIN " . $this->db->table_name('product_descriptions') . " pd
 										ON (pd.product_id = ptd.product_id AND pd.language_id = '".$this->language->getContentLanguageID()."')
 									  WHERE ptd.download_id = '" . (int)$download_id."'");
 		foreach($result->rows as $row){
@@ -243,10 +243,10 @@ class ModelCatalogDownload extends Model {
 			$rm->deleteResource($rl_id);
 		}
 
-		$this->db->query("DELETE FROM " . $this->db->table("downloads") . " WHERE download_id = '" . (int)$download_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("download_descriptions") . " WHERE download_id = '" . (int)$download_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("download_attribute_values") . " WHERE download_id = '" . (int)$download_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("products_to_downloads") . " WHERE download_id = '" . (int)$download_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("downloads") . " WHERE download_id = '" . (int)$download_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("download_descriptions") . " WHERE download_id = '" . (int)$download_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("download_attribute_values") . " WHERE download_id = '" . (int)$download_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("products_to_downloads") . " WHERE download_id = '" . (int)$download_id . "'");
 		$this->cache->remove('html_cache');
 		return true;
 	}
@@ -272,8 +272,8 @@ class ModelCatalogDownload extends Model {
 										  shared,
 										  date_added,
 										  date_modified
-									FROM " . $this->db->table('downloads') . " d
-									LEFT JOIN ".$this->db->table('download_descriptions')." dc
+									FROM " . $this->db->table_name('downloads') . " d
+									LEFT JOIN ".$this->db->table_name('download_descriptions')." dc
 										ON d.download_id=dc.download_id AND dc.language_id = '".(int)$this->language->getContentLanguageID()."'
 									WHERE d.download_id = '" . (int)$download_id . "'");
 		return $query->row;
@@ -289,9 +289,9 @@ class ModelCatalogDownload extends Model {
 			return array();
 		}
 		$sql = "SELECT dd.*, d.*, p2d.*
-							 FROM " . $this->db->table("products_to_downloads") . " p2d
-							 LEFT JOIN " . $this->db->table("downloads") . " d ON (p2d.download_id = d.download_id)
-							 LEFT JOIN " . $this->db->table("download_descriptions") . " dd
+							 FROM " . $this->db->table_name("products_to_downloads") . " p2d
+							 LEFT JOIN " . $this->db->table_name("downloads") . " d ON (p2d.download_id = d.download_id)
+							 LEFT JOIN " . $this->db->table_name("download_descriptions") . " dd
 								ON (d.download_id = dd.download_id
 										AND dd.language_id = '" . (int)$this->language->getContentLanguageID() . "')
 							 WHERE p2d.product_id = '" . (int)$product_id . "'";
@@ -321,12 +321,12 @@ class ModelCatalogDownload extends Model {
 			$total_sql = 'count(*) as total';
 		}
 		else {
-			$total_sql = 'dd.*, d.*, (SELECT COUNT(*) as cnt FROM ' . $this->db->table("products_to_downloads") . ' ptd WHERE ptd.download_id = d.download_id) as product_count';
+			$total_sql = 'dd.*, d.*, (SELECT COUNT(*) as cnt FROM ' . $this->db->table_name("products_to_downloads") . ' ptd WHERE ptd.download_id = d.download_id) as product_count';
 		}
 
 		$sql = "SELECT $total_sql
-				FROM " . $this->db->table("downloads") . " d
-				LEFT JOIN " . $this->db->table("download_descriptions") . " dd
+				FROM " . $this->db->table_name("downloads") . " d
+				LEFT JOIN " . $this->db->table_name("download_descriptions") . " dd
 					ON (d.download_id = dd.download_id AND dd.language_id = '" . $language_id . "')";
 
 		if (!empty($data[ 'subsql_filter' ])){
@@ -395,7 +395,7 @@ class ModelCatalogDownload extends Model {
 		$download_description_data = array();
 
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("download_descriptions") . " 
+									FROM " . $this->db->table_name("download_descriptions") . " 
 									WHERE download_id = '" . (int)$download_id . "'");
 
 		foreach ($query->rows as $result) {
@@ -418,7 +418,7 @@ class ModelCatalogDownload extends Model {
 		foreach($attributes as $attribute){
 			if(isset($data[$attribute['attribute_id']])){
 				$value = serialize($data[$attribute['attribute_id']]);
-				$this->db->query("INSERT INTO ".$this->db->table('download_attribute_values')." (attribute_id, download_id, attribute_value_ids)
+				$this->db->query("INSERT INTO ".$this->db->table_name('download_attribute_values')." (attribute_id, download_id, attribute_value_ids)
 								 VALUES ('".$attribute['attribute_id']."', '".$download_id."', '".$value."')");
 			}
 		}
@@ -440,10 +440,10 @@ class ModelCatalogDownload extends Model {
 				$value = serialize($data[$attribute['attribute_id']]);
 
 				$this->db->query( "DELETE
-								   FROM ".$this->db->table('download_attribute_values')."
+								   FROM ".$this->db->table_name('download_attribute_values')."
 								   WHERE attribute_id = '".$attribute['attribute_id']."' AND download_id = '".$download_id."'");
 
-				$this->db->query("INSERT INTO ".$this->db->table('download_attribute_values')."
+				$this->db->query("INSERT INTO ".$this->db->table_name('download_attribute_values')."
 								SET attribute_value_ids = '".$this->db->escape($value)."',
 									attribute_id = '".$attribute['attribute_id']."',
 									download_id = '".$download_id."'");
@@ -476,7 +476,7 @@ class ModelCatalogDownload extends Model {
 		}
 		if($ids){
 			$result = $this->db->query( "SELECT attribute_id, attribute_value_ids as value
-										  FROM ".$this->db->table('download_attribute_values')."
+										  FROM ".$this->db->table_name('download_attribute_values')."
 										  WHERE attribute_id IN (".implode(',',$ids).") AND download_id = '".$download_id."'");
 
 			foreach($result->rows as $row){
@@ -517,7 +517,7 @@ class ModelCatalogDownload extends Model {
 			$update[] = "`status` = '" . (int)$data[ 'status' ]."'";
 		}
 		if($update){
-			$this->db->query("UPDATE " . $this->db->table("order_downloads") . " 
+			$this->db->query("UPDATE " . $this->db->table_name("order_downloads") . " 
 							  SET ".implode(', ',$update)."
 							  WHERE order_download_id='".(int)$order_download_id."'");
 		}
@@ -534,14 +534,14 @@ class ModelCatalogDownload extends Model {
 		if( !(int)$product_id ){ return array(); }
 		if ($download_id) {
 			$sql = "SELECT DISTINCT op.order_id, op.order_product_id
-				FROM ".$this->db->table('order_products')." op, 
-					 ".$this->db->table('order_downloads')." od
+				FROM ".$this->db->table_name('order_products')." op, 
+					 ".$this->db->table_name('order_downloads')." od
 				WHERE 	od.order_id = op.order_id 
 						AND op.product_id = '" . (int)$product_id."' 
 						AND od.download_id='".(int)$download_id."'";
 		} else {
 			$sql = "SELECT DISTINCT op.order_id, op.order_product_id
-				FROM ".$this->db->table('order_products')." op 
+				FROM ".$this->db->table_name('order_products')." op 
 				WHERE  op.product_id = '" . (int)$product_id."'";
 		} 				
 						

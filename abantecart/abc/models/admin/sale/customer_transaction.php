@@ -41,7 +41,7 @@ class ModelSaleCustomerTransaction extends Model{
 	 * @param int $customer_transaction_id
 	 */
 	public function deleteCustomerTransaction($customer_transaction_id){
-		$this->db->query("DELETE FROM " . $this->db->table('customer_transactions') . "
+		$this->db->query("DELETE FROM " . $this->db->table_name('customer_transactions') . "
                          WHERE customer_transaction_id = '" . (int)$customer_transaction_id . "'");
 	}
 
@@ -61,8 +61,8 @@ class ModelSaleCustomerTransaction extends Model{
                     ELSE
                         ''
                      END as user
-                FROM " . $this->db->table("customer_transactions") . " t
-                LEFT JOIN " . $this->db->table("users") . " u ON u.user_id = t.created_by
+                FROM " . $this->db->table_name("customer_transactions") . " t
+                LEFT JOIN " . $this->db->table_name("users") . " u ON u.user_id = t.created_by
                 WHERE t.customer_transaction_id = '" . (int)$customer_transaction_id . "'";
 		$result = $this->db->query($sql);
 		$row = $result->row;
@@ -90,8 +90,8 @@ class ModelSaleCustomerTransaction extends Model{
                     ELSE
                         '" . $customer_info['firstname'] . ' ' . $customer_info['lastname'] . "'
                      END as user
-                FROM " . $this->db->table("customer_transactions") . " t
-                LEFT JOIN " . $this->db->table("users") . " u ON u.user_id = t.created_by
+                FROM " . $this->db->table_name("customer_transactions") . " t
+                LEFT JOIN " . $this->db->table_name("users") . " u ON u.user_id = t.created_by
                 WHERE t.customer_id = '" . (int)$data['customer_id'] . "'";
 
 		$filter = (isset($data['filter']) ? $data['filter'] : array ());
@@ -180,7 +180,7 @@ class ModelSaleCustomerTransaction extends Model{
 	public function getBalance($customer_id){
 		$customer_id = (int)$customer_id;
 		$sql = "SELECT SUM(credit) - SUM(debit) as balance
-                FROM " . $this->db->table("customer_transactions") . "
+                FROM " . $this->db->table_name("customer_transactions") . "
                 WHERE customer_id=" . (int)$customer_id;
 		$query = $this->db->query($sql);
 		$balance = (float)$query->row['balance'];
@@ -196,7 +196,7 @@ class ModelSaleCustomerTransaction extends Model{
 		if ((!(float)$data['credit'] && !(float)$data['debit']) || !(int)$data['customer_id']) {
 			return false;
 		}
-		$sql = "INSERT INTO " . $this->db->table("customer_transactions") . "
+		$sql = "INSERT INTO " . $this->db->table_name("customer_transactions") . "
                     (`customer_id`,`order_id`,`created_by`,`credit`,`debit`,`section`, `transaction_type`,`comment`,`description`,`date_added`)
                 VALUES (
                         '" . (int)$data['customer_id'] . "',
@@ -221,7 +221,7 @@ class ModelSaleCustomerTransaction extends Model{
 			if ($customer_info) {
 				//detect customer's language
 				$sql = "SELECT language_id
-                        FROM " . $this->db->table('orders') . "
+                        FROM " . $this->db->table_name('orders') . "
                         WHERE customer_id = '" . (int)$data['customer_id'] . "'
                         ORDER BY date_added DESC";
 				$result = $this->db->query($sql);
@@ -287,7 +287,7 @@ class ModelSaleCustomerTransaction extends Model{
 		if ($output === false) {
 			$output = array ();
 			$sql = "SELECT DISTINCT `transaction_type`
-                    FROM " . $this->db->table("customer_transactions") . "
+                    FROM " . $this->db->table_name("customer_transactions") . "
                     ORDER BY `transaction_type` ASC";
 			$result = $this->db->query($sql);
 			foreach ($result->rows as $row) {

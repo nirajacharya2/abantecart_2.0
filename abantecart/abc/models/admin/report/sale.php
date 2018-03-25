@@ -70,7 +70,7 @@ class ModelReportSale extends Model{
 		}
 
 		$sql = "SELECT " . $inc_sql . " 
-				FROM `" . $this->db->table("orders") . "`";
+				FROM `" . $this->db->table_name("orders") . "`";
 
 		if ($filter['order_status'] == 'confirmed'){
 			$sql .= " WHERE order_status_id > 0 ";
@@ -198,8 +198,8 @@ class ModelReportSale extends Model{
 		}
 
 		$sql = "SELECT " . $inc_sql . "
-				FROM `" . $this->db->table("orders") . "` o 
-				LEFT JOIN `" . $this->db->table("order_totals") . "` ot 
+				FROM `" . $this->db->table_name("orders") . "` o 
+				LEFT JOIN `" . $this->db->table_name("order_totals") . "` ot 
 					ON (o.order_id = ot.order_id) 
 				WHERE ot.type = 'tax' ";
 
@@ -315,8 +315,8 @@ class ModelReportSale extends Model{
 		}
 
 		$sql = "SELECT " . $inc_sql . " 
-				FROM `" . $this->db->table("orders") . "` o 
-				LEFT JOIN `" . $this->db->table("order_totals") . "` ot 
+				FROM `" . $this->db->table_name("orders") . "` o 
+				LEFT JOIN `" . $this->db->table_name("order_totals") . "` ot 
 					ON (o.order_id = ot.order_id) 
 				WHERE ot.type = 'shipping' ";
 
@@ -411,16 +411,16 @@ class ModelReportSale extends Model{
 		}
 
 		$sql = "SELECT " . $inc_sql . " 
-				FROM `" . $this->db->table("orders") . "` o 
-				LEFT JOIN `" . $this->db->table("coupons") . "` c 
+				FROM `" . $this->db->table_name("orders") . "` o 
+				LEFT JOIN `" . $this->db->table_name("coupons") . "` c 
 					ON (o.coupon_id = c.coupon_id) ";
 
 		if ($mode == 'default'){
-			$sql .= "LEFT JOIN `" . $this->db->table("coupon_descriptions") . "` cd
+			$sql .= "LEFT JOIN `" . $this->db->table_name("coupon_descriptions") . "` cd
 						ON (c.coupon_id = cd.coupon_id AND cd.language_id=" . (int)$this->language->getContentLanguageID() . ")";
 		}
 
-		$sql .= "LEFT JOIN `" . $this->db->table("order_totals") . "` ot ON (o.order_id = ot.order_id)
+		$sql .= "LEFT JOIN `" . $this->db->table_name("order_totals") . "` ot ON (o.order_id = ot.order_id)
 				WHERE ot.type = 'discount' ";
 
 		if (isset($filter['date_start'])){

@@ -48,7 +48,7 @@ class ModelSaleCoupon extends Model {
 			$data[ 'date_end' ] = "NULL";
 		}
 
-      	$this->db->query(  "INSERT INTO " . $this->db->table("coupons") . " 
+      	$this->db->query(  "INSERT INTO " . $this->db->table_name("coupons") . " 
 							SET code = '" . $this->db->escape($data['code']) . "',
 								discount = '" . (float)$data['discount'] . "',
 								type = '" . $this->db->escape($data['type']) . "',
@@ -74,7 +74,7 @@ class ModelSaleCoupon extends Model {
       	}
 		if (isset($data['coupon_product'])) {
       		foreach ($data['coupon_product'] as $product_id) {
-        		$this->db->query(  "INSERT INTO " . $this->db->table("coupons_products") . " 
+        		$this->db->query(  "INSERT INTO " . $this->db->table_name("coupons_products") . " 
         		                    SET coupon_id = '" . (int)$coupon_id . "', product_id = '" . (int)$product_id . "'");
       		}			
 		}
@@ -126,7 +126,7 @@ class ModelSaleCoupon extends Model {
 		}
 		}
 		if ( !empty($update) ) {
-		    $this->db->query("UPDATE " . $this->db->table("coupons") . " 
+		    $this->db->query("UPDATE " . $this->db->table_name("coupons") . " 
 												SET ". implode(',', $update) ."
 												WHERE coupon_id = '" . (int)$coupon_id . "'");
         }
@@ -158,12 +158,12 @@ class ModelSaleCoupon extends Model {
 	 * @param array $data
 	 */
 	public function editCouponProducts($coupon_id, $data) {
-		$this->db->query("DELETE FROM " . $this->db->table("coupons_products") . " 
+		$this->db->query("DELETE FROM " . $this->db->table_name("coupons_products") . " 
 						  WHERE coupon_id = '" . (int)$coupon_id . "'");
 
 		if (isset($data['coupon_product'])) {
       		foreach ($data['coupon_product'] as $product_id) {
-				$this->db->query(  "INSERT INTO " . $this->db->table("coupons_products") . " 
+				$this->db->query(  "INSERT INTO " . $this->db->table_name("coupons_products") . " 
 									SET coupon_id = '" . (int)$coupon_id . "',
 										product_id = '" . (int)$product_id . "'");
       		}
@@ -174,9 +174,9 @@ class ModelSaleCoupon extends Model {
 	 * @param int $coupon_id
 	 */
 	public function deleteCoupon($coupon_id) {
-      	$this->db->query("DELETE FROM " . $this->db->table("coupons") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
-      	$this->db->query("DELETE FROM " . $this->db->table("coupon_descriptions") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("coupons_products") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
+      	$this->db->query("DELETE FROM " . $this->db->table_name("coupons") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
+      	$this->db->query("DELETE FROM " . $this->db->table_name("coupon_descriptions") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("coupons_products") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
 	}
 
 	/**
@@ -184,7 +184,7 @@ class ModelSaleCoupon extends Model {
 	 * @return array
 	 */
 	public function getCouponByID($coupon_id) {
-      	$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table("coupons") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
+      	$query = $this->db->query("SELECT DISTINCT * FROM " . $this->db->table_name("coupons") . " WHERE coupon_id = '" . (int)$coupon_id . "'");
 		
 		return $query->row;
 	}
@@ -222,8 +222,8 @@ class ModelSaleCoupon extends Model {
 		}
 
 		$sql = "SELECT ". $total_sql ." 
-				FROM " . $this->db->table("coupons") . " c
-				LEFT JOIN " . $this->db->table("coupon_descriptions") . " cd
+				FROM " . $this->db->table_name("coupons") . " c
+				LEFT JOIN " . $this->db->table_name("coupon_descriptions") . " cd
 					ON (c.coupon_id = cd.coupon_id AND cd.language_id = '" . $language_id . "')
 				WHERE 1=1 ";
 
@@ -292,7 +292,7 @@ class ModelSaleCoupon extends Model {
 		$coupon_description_data = array();
 		
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("coupon_descriptions") . " 
+									FROM " . $this->db->table_name("coupon_descriptions") . " 
 									WHERE coupon_id = '" . (int)$coupon_id . "'");
 		
 		foreach ($query->rows as $result) {
@@ -313,7 +313,7 @@ class ModelSaleCoupon extends Model {
 		$coupon_product_data = array();
 		
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("coupons_products") . " 
+									FROM " . $this->db->table_name("coupons_products") . " 
 									WHERE coupon_id = '" . (int)$coupon_id . "'");
 		
 		foreach ($query->rows as $result) {

@@ -40,8 +40,8 @@ class ModelCheckoutExtension extends Model {
 		}
 		$output = array();
 		$query = $this->db->query("SELECT e.*, s.value as status
-									FROM " . $this->db->table("extensions") . " e
-									LEFT JOIN " . $this->db->table("settings") . " s
+									FROM " . $this->db->table_name("extensions") . " e
+									LEFT JOIN " . $this->db->table_name("settings") . " s
 										ON ( s.`group` = e.`key` AND s.`key` = CONCAT(e.`key`,'_status') )
 									WHERE e.`type` = '" . $this->db->escape($type) . "'
 										AND s.`value`='1' AND s.store_id = '".$store_id."'");
@@ -63,8 +63,8 @@ class ModelCheckoutExtension extends Model {
 	public function getExtensionsByPosition($type, $position) {
 		$extension_data = array();
 		$query = $this->db->query("SELECT e.*, s.value as status
-									FROM " . $this->db->table("extensions") . " e
-									LEFT JOIN " . $this->db->table("settings") . " s 
+									FROM " . $this->db->table_name("extensions") . " e
+									LEFT JOIN " . $this->db->table_name("settings") . " s 
 										ON ( TRIM(s.`group`) = TRIM(e.`key`) AND TRIM(s.`key`) = CONCAT(TRIM(e.`key`),'_status') )
 									WHERE e.`type` = '" . $this->db->escape($type) . "'
 										AND s.`value`='1' 
@@ -95,7 +95,7 @@ class ModelCheckoutExtension extends Model {
 
 		$query = $this->db->query(
 			"SELECT *
-			FROM " . $this->db->table("settings") . " 
+			FROM " . $this->db->table_name("settings") . " 
 			WHERE `group` = '" . $this->db->escape($extension_name) . "'
 					AND store_id = '".(int)$store_id."'" );
 		foreach ($query->rows as $result) {

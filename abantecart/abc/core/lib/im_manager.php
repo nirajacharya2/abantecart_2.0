@@ -336,7 +336,7 @@ class AIMManager extends AIM{
 		$im_protocols = $this->getProtocols();
 		$im_settings = array ();
 		$sql = "SELECT *
-				FROM " . $this->db->table('customer_notifications') . "
+				FROM " . $this->db->table_name('customer_notifications') . "
 				WHERE customer_id = " . (int)$customer_id;
 		$result = $this->db->query($sql);
 
@@ -357,7 +357,7 @@ class AIMManager extends AIM{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table('user_notifications') . "
+				FROM " . $this->db->table_name('user_notifications') . "
 				WHERE user_id=" . $user_id . "
 					AND store_id = '" . $store_id . "'
 				ORDER BY `sendpoint`, `protocol`";
@@ -505,8 +505,8 @@ class AIMManager extends AIM{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table('user_notifications') . " un
-				INNER JOIN " . $this->db->table('users') . " u
+				FROM " . $this->db->table_name('user_notifications') . " un
+				INNER JOIN " . $this->db->table_name('users') . " u
 					ON (u.user_id = un.user_id AND u.status = 1)
 				WHERE un.user_id=" . $user_id . "
 					AND un.store_id = '" . $store_id . "'
@@ -567,7 +567,7 @@ class AIMManager extends AIM{
 		}
 
 		foreach ($settings as $protocol => $uri){
-			$sql = "DELETE FROM " . $this->db->table('user_notifications') . "
+			$sql = "DELETE FROM " . $this->db->table_name('user_notifications') . "
 				WHERE user_id=" . $user_id . "
 					AND store_id = '" . $store_id . "'";
 			if ($section != ''){
@@ -581,7 +581,7 @@ class AIMManager extends AIM{
 			$sections = $section ? array ($section) : array ('admin', 'storefront');
 			foreach ($sections as $s){
 				$s = $s == 'admin' ? 1 : 0;
-				$sql = "INSERT INTO " . $this->db->table('user_notifications') . "
+				$sql = "INSERT INTO " . $this->db->table_name('user_notifications') . "
 					(user_id, store_id, section, sendpoint, protocol, uri, date_added)
 					VALUES ('" . $user_id . "',
 							'" . $store_id . "',

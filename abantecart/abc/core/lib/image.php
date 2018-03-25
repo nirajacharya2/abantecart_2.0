@@ -50,7 +50,6 @@ class AImage{
 
 	/**
 	 * @param string $filename
-	 * @throws AException
 	 */
 	public function __construct($filename){
 		ini_set("gd.jpeg_ignore_warning", 1);

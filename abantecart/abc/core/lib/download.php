@@ -84,10 +84,10 @@ final class ADownload{
 		}
 
 		$result = $this->db->query("SELECT d.*, dd.*, ptd.*
-									FROM " . $this->db->table('downloads') . " d
-									RIGHT JOIN " . $this->db->table('products_to_downloads') . " ptd 
+									FROM " . $this->db->table_name('downloads') . " d
+									RIGHT JOIN " . $this->db->table_name('products_to_downloads') . " ptd 
 										ON ptd.download_id = d.download_id
-									LEFT JOIN " . $this->db->table('download_descriptions') . " dd 
+									LEFT JOIN " . $this->db->table_name('download_descriptions') . " dd 
 										ON d.download_id = dd.download_id AND dd.language_id = '" . $language_id . "'
 									WHERE ptd.product_id='" . (int)$product_id . "'
 										AND d.activate='before_order'
@@ -106,8 +106,8 @@ final class ADownload{
 		}
 
 		$result = $this->db->query("SELECT dd.*, d.*
-									FROM " . $this->db->table('downloads') . " d
-									LEFT JOIN " . $this->db->table('download_descriptions') . " dd
+									FROM " . $this->db->table_name('downloads') . " d
+									LEFT JOIN " . $this->db->table_name('download_descriptions') . " dd
 										ON (d.download_id = dd.download_id AND dd.language_id = '" . $language_id . "')
 									WHERE d.download_id='" . (int)$download_id . "'");
 		return $result->row;
@@ -132,10 +132,10 @@ final class ADownload{
 		}
 
 		$result = $this->db->query("SELECT dd.*, d.*, od.*
-									FROM " . $this->db->table('order_downloads') . " od
-									LEFT JOIN " . $this->db->table('downloads') . " d 
+									FROM " . $this->db->table_name('order_downloads') . " od
+									LEFT JOIN " . $this->db->table_name('downloads') . " d 
 										ON od.download_id = d.download_id
-									LEFT JOIN " . $this->db->table('download_descriptions') . " dd 
+									LEFT JOIN " . $this->db->table_name('download_descriptions') . " dd 
 										ON d.download_id = dd.download_id AND dd.language_id = '" . $language_id . "'
 									WHERE od.order_download_id='" . (int)$order_download_id . "'");
 		return $result->row;
@@ -152,10 +152,10 @@ final class ADownload{
 		}
 		$query = $this->db->query(
 				"SELECT dd.*, d.*, p2d.*
-				FROM " . $this->db->table("products_to_downloads") . " p2d
-				INNER JOIN " . $this->db->table("downloads") . " d 
+				FROM " . $this->db->table_name("products_to_downloads") . " p2d
+				INNER JOIN " . $this->db->table_name("downloads") . " d 
 					ON (p2d.download_id = d.download_id)
-				LEFT JOIN " . $this->db->table("download_descriptions") . " dd
+				LEFT JOIN " . $this->db->table_name("download_descriptions") . " dd
 					ON (d.download_id = dd.download_id
 						AND dd.language_id = '" . (int)$this->config->get('storefront_language_id') . "')
 				WHERE p2d.product_id = '" . (int)$product_id . "'
@@ -186,7 +186,7 @@ final class ADownload{
 
 		//check if we have download yet
 		$check = $this->db->query("SELECT od.order_download_id
-									FROM " . $this->db->table('order_downloads') . " od
+									FROM " . $this->db->table_name('order_downloads') . " od
 									WHERE od.order_id='" . (int)$order_id . "'
 											AND od.order_product_id='" . (int)$order_product_id . "' 
 											AND od.download_id='" . (int)$download['download_id'] . "'");
@@ -220,7 +220,7 @@ final class ADownload{
 			$expire = 'NULL';
 		}
 
-		$this->db->query("UPDATE " . $this->db->table("order_downloads") . "
+		$this->db->query("UPDATE " . $this->db->table_name("order_downloads") . "
 							SET name = '" . $this->db->escape($download['name']) . "',
 								filename = '" . $this->db->escape($download['filename']) . "',
 								mask = '" . $this->db->escape($download['mask']) . "',
@@ -251,7 +251,7 @@ final class ADownload{
 		} else{
 			$expire = 'NULL';
 		}
-		$this->db->query("INSERT INTO " . $this->db->table("order_downloads") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("order_downloads") . "
 							SET order_id = '" . (int)$order_id . "',
 								order_product_id = '" . (int)$order_product_id . "',
 								download_id = '" . (int)$download['download_id'] . "',
@@ -299,8 +299,8 @@ final class ADownload{
 
 		if ($ids){
 			$result = $this->db->query("SELECT dav.attribute_id, dav.attribute_value_ids as value
-										  FROM " . $this->db->table('download_attribute_values') . " dav
-										  LEFT JOIN " . $this->db->table('global_attributes') . " ga
+										  FROM " . $this->db->table_name('download_attribute_values') . " dav
+										  LEFT JOIN " . $this->db->table_name('global_attributes') . " ga
 												ON ga.attribute_id = dav.attribute_id
 										  WHERE dav.attribute_id IN (" . implode(',', $ids) . ") AND dav.download_id = '" . $download_id . "'
 										  ORDER BY ga.sort_order ASC");
@@ -403,7 +403,7 @@ final class ADownload{
 						$prc = round($bytes_sent * 100 / $filesize, 0);
 						$prc = $prc > 100 ? 100 : $prc;
 						//do insert or update
-						$sql = "INSERT INTO " . $this->db->table('order_downloads_history') . "
+						$sql = "INSERT INTO " . $this->db->table_name('order_downloads_history') . "
 														(order_download_history_id,
 														 order_download_id,
 														 order_id,
@@ -454,7 +454,7 @@ final class ADownload{
 	 * @param $order_download_id
 	 */
 	public function updateRemaining($order_download_id){
-		$this->db->query("UPDATE " . $this->db->table("order_downloads") . "
+		$this->db->query("UPDATE " . $this->db->table_name("order_downloads") . "
 						  SET remaining_count = (remaining_count - 1)
 						  WHERE order_download_id = '" . (int)$order_download_id . "'");
 	}
@@ -483,10 +483,10 @@ final class ADownload{
 					  od.remaining_count,
 					  od.expire_date,
 					  op.product_id
-			   FROM " . $this->db->table("order_downloads") . " od
-			   LEFT JOIN " . $this->db->table("orders") . " o ON (od.order_id = o.order_id)
-			   LEFT JOIN " . $this->db->table("downloads") . " d ON (d.download_id = od.download_id)
-			   LEFT JOIN " . $this->db->table("order_products") . " op ON (op.order_product_id = od.order_product_id)
+			   FROM " . $this->db->table_name("order_downloads") . " od
+			   LEFT JOIN " . $this->db->table_name("orders") . " o ON (od.order_id = o.order_id)
+			   LEFT JOIN " . $this->db->table_name("downloads") . " d ON (d.download_id = od.download_id)
+			   LEFT JOIN " . $this->db->table_name("order_products") . " op ON (op.order_product_id = od.order_product_id)
 			   WHERE o.customer_id = '" . $customer_id . "'
 			   ORDER BY  o.date_added DESC, od.sort_order ASC ";
 		if ($limit){
@@ -526,10 +526,10 @@ final class ADownload{
 					  od.remaining_count,
 					  od.expire_date,
 					  op.product_id
-			   FROM " . $this->db->table("order_downloads") . " od
-			   INNER JOIN " . $this->db->table("orders") . " o ON (od.order_id = o.order_id)
-			   LEFT JOIN " . $this->db->table("downloads") . " d ON (d.download_id = od.download_id)
-			   LEFT JOIN " . $this->db->table("order_products") . " op ON (op.order_product_id = od.order_product_id)
+			   FROM " . $this->db->table_name("order_downloads") . " od
+			   INNER JOIN " . $this->db->table_name("orders") . " o ON (od.order_id = o.order_id)
+			   LEFT JOIN " . $this->db->table_name("downloads") . " d ON (d.download_id = od.download_id)
+			   LEFT JOIN " . $this->db->table_name("order_products") . " op ON (op.order_product_id = od.order_product_id)
 			   WHERE o.order_id = '" . $order_id . "'
 			   " . ($customer_id ? " AND o.customer_id = '" . $customer_id . "'" : "") . "
 			   ORDER BY  o.date_added DESC, od.sort_order ASC ";

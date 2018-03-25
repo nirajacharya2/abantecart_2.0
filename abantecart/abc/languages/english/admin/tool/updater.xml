@@ -46,7 +46,7 @@
 	</definition>
 	<definition>
 		<key>entry_restore_exts</key>
-		<value><![CDATA[Restore Backuped extension:]]></value>
+		<value><![CDATA[Restore Backup of extension:]]></value>
 	</definition>
 	<definition>
 		<key>entry_update</key>
@@ -58,7 +58,7 @@
 	</definition>
 	<definition>
 		<key>warning_server</key>
-		<value><![CDATA[Server with updates is inaccesible.]]></value>
+		<value><![CDATA[Server with updates is inaccessible.]]></value>
 	</definition>
 	<definition>
 		<key>text_notice_title</key>

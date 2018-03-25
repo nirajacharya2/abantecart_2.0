@@ -70,8 +70,8 @@ class ModelReportPurchased extends Model {
 			$data['order'] = 'DESC';
 		}
 		$sql = "SELECT op.product_id, op.name, op.model, SUM(op.quantity) AS quantity, SUM(op.total + op.tax) AS total
-				FROM `" . $this->db->table("orders") . "` o
-				LEFT JOIN " . $this->db->table("order_products") . " op 
+				FROM `" . $this->db->table_name("orders") . "` o
+				LEFT JOIN " . $this->db->table_name("order_products") . " op 
 					ON (op.order_id = o.order_id)
 				WHERE ".implode(' AND ',$implode)."
 				GROUP BY op.product_id, op.name, op.model
@@ -106,8 +106,8 @@ class ModelReportPurchased extends Model {
 		}
 
 		$sql = "SELECT COUNT(DISTINCT op.product_id) as total
-				FROM `" . $this->db->table("orders") . "` o
-				LEFT JOIN " . $this->db->table("order_products") . " op 
+				FROM `" . $this->db->table_name("orders") . "` o
+				LEFT JOIN " . $this->db->table_name("order_products") . " op 
 										ON (op.order_id = o.order_id)
 				WHERE ".implode(' AND ',$implode);
 

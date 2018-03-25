@@ -42,7 +42,7 @@ class ModelLocalisationLanguage extends Model
      */
     public function addLanguage($data)
     {
-        $this->db->query("INSERT INTO ".$this->db->table("languages")." 
+        $this->db->query("INSERT INTO ".$this->db->table_name("languages")." 
                             SET name = '".$this->db->escape($data['name'])."',
                                 CODE = '".$this->db->escape($data['code'])."',
                                 locale = '".$this->db->escape($data['locale'])."',
@@ -73,7 +73,7 @@ class ModelLocalisationLanguage extends Model
         foreach ($data as $key => $val) {
             $update_data[] = "`$key` = '".$this->db->escape($val)."' ";
         }
-        $this->db->query("UPDATE ".$this->db->table("languages")." SET ".implode(',',
+        $this->db->query("UPDATE ".$this->db->table_name("languages")." SET ".implode(',',
                 $update_data)." WHERE language_id = '".(int)$language_id."'");
 
         $this->cache->remove('localization');
@@ -86,7 +86,7 @@ class ModelLocalisationLanguage extends Model
      */
     public function deleteLanguage($language_id)
     {
-        $this->db->query("DELETE FROM ".$this->db->table("languages")." WHERE language_id = '".(int)$language_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("languages")." WHERE language_id = '".(int)$language_id."'");
 
         $this->language->deleteAllLanguageEntries($language_id);
 
@@ -105,7 +105,7 @@ class ModelLocalisationLanguage extends Model
      */
     public function getLanguage($language_id)
     {
-        $query = $this->db->query("SELECT DISTINCT * FROM ".$this->db->table("languages")." WHERE language_id = '".(int)$language_id."'");
+        $query = $this->db->query("SELECT DISTINCT * FROM ".$this->db->table_name("languages")." WHERE language_id = '".(int)$language_id."'");
         $result = $query->row;
         if ( ! $result['image']) {
             if (file_exists(ABC::env('DIR_ROOT').'/admin/languages/'.$result['directory'].'/flag.png')) {
@@ -129,9 +129,9 @@ class ModelLocalisationLanguage extends Model
         if ($data || $mode == 'total_only') {
             $filter = (isset($data['filter']) ? $data['filter'] : array());
             if ($mode == 'total_only') {
-                $sql = "SELECT count(*) AS total FROM ".$this->db->table("languages")." ";
+                $sql = "SELECT count(*) AS total FROM ".$this->db->table_name("languages")." ";
             } else {
-                $sql = "SELECT * FROM ".$this->db->table("languages")." ";
+                $sql = "SELECT * FROM ".$this->db->table_name("languages")." ";
             }
 
             if (isset($filter['status']) && ! is_null($filter['status'])) {
@@ -203,7 +203,7 @@ class ModelLocalisationLanguage extends Model
 
             if ($language_data === false) {
                 $query = $this->db->query("SELECT *
-                                            FROM ".$this->db->table("languages")." 
+                                            FROM ".$this->db->table_name("languages")." 
                                             ORDER BY sort_order, name");
 
                 foreach ($query->rows as $result) {
@@ -416,9 +416,9 @@ class ModelLocalisationLanguage extends Model
             return false;
         }
         $excludes = array(
-            $this->db->table('languages'),
-            $this->db->table('language_definitions'),
-            $this->db->table('orders'),
+            $this->db->table_name('languages'),
+            $this->db->table_name('language_definitions'),
+            $this->db->table_name('orders'),
         );
         foreach ($lang_tables as $table) {
             $table_name = $table['table_name'];
@@ -426,8 +426,7 @@ class ModelLocalisationLanguage extends Model
                 continue;
             }
 
-            $sql
-                = "SELECT COUNT(*) AS cnt
+            $sql = "SELECT COUNT(*) AS cnt
                     FROM ".$table_name."
                     WHERE language_id = ".$src_language_id;
             $result = $this->db->query($sql);

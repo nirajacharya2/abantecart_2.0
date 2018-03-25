@@ -139,7 +139,7 @@ class ModelToolSeoUrl extends Model
             if ($aliases === false) {
                 $aliases = array();
                 $sql = "SELECT query, keyword
-                    FROM ".$this->db->table('url_aliases')."
+                    FROM ".$this->db->table_name('url_aliases')."
                     WHERE `query` LIKE '".$this->db->escape($param_key, true)."=%'
                         AND language_id='".$language_id."'";
                 $result = $this->db->query($sql);
@@ -155,7 +155,7 @@ class ModelToolSeoUrl extends Model
 
         } else {
             $sql = "SELECT keyword
-                    FROM ".$this->db->table('url_aliases')."
+                    FROM ".$this->db->table_name('url_aliases')."
                     WHERE `query`='".$this->db->escape($param_key)."=".$param_value."'
                         AND language_id='".$language_id."'";
             $result = $this->db->query($sql);

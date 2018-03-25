@@ -328,7 +328,7 @@ class ModelToolTableRelationships extends Model {
 		if (!$this->tables_data) {
 			$sql = "SELECT table_name, column_name, extra 
 			    	FROM information_schema.columns 
-			    	WHERE table_schema='" . $this->db->database() . "' group by table_name";
+			    	WHERE table_schema='" . $this->db->getDatabaseName() . "' group by table_name";
 			$load_sql = $this->db->query($sql);
 			$tables = $load_sql->rows;
 
@@ -401,7 +401,7 @@ class ModelToolTableRelationships extends Model {
 	 */
 	public function get_table_columns ( $table_name ) {
 		$sql = 'SHOW COLUMNS 
-				FROM `' . $this->db->escape($this->db->prefix().$table_name) . '` FROM `' . $this->db->database() . '`';
+				FROM `' . $this->db->escape($this->db->prefix().$table_name) . '` FROM `' . $this->db->getDatabaseName() . '`';
 
 		$results = $this->db->query($sql);
 		return $results->rows;

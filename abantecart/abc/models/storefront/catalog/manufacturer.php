@@ -37,8 +37,8 @@ class ModelCatalogManufacturer extends Model{
 			return $output;
 		}
 		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table("manufacturers") . " m
-									LEFT JOIN " . $this->db->table("manufacturers_to_stores") . " m2s
+									FROM " . $this->db->table_name("manufacturers") . " m
+									LEFT JOIN " . $this->db->table_name("manufacturers_to_stores") . " m2s
 										ON (m.manufacturer_id = m2s.manufacturer_id)
 									WHERE m.manufacturer_id = '" . $manufacturer_id . "'
 										AND m2s.store_id = '" . $store_id . "'");
@@ -77,8 +77,8 @@ class ModelCatalogManufacturer extends Model{
 		}
 
 		$sql = "SELECT *
-				FROM " . $this->db->table("manufacturers") . " m
-				LEFT JOIN " . $this->db->table("manufacturers_to_stores") . " m2s
+				FROM " . $this->db->table_name("manufacturers") . " m
+				LEFT JOIN " . $this->db->table_name("manufacturers_to_stores") . " m2s
 					ON (m.manufacturer_id = m2s.manufacturer_id)
 				WHERE m2s.store_id = '" . $store_id . "'
 				ORDER BY sort_order, LCASE(m.name) ASC";
@@ -98,8 +98,8 @@ class ModelCatalogManufacturer extends Model{
 	 */
 	public function getManufacturerByProductId($product_id){
 		$query = $this->db->query("SELECT *
-										FROM " . $this->db->table("manufacturers") . " m
-										RIGHT JOIN " . $this->db->table("products") . " p ON (m.manufacturer_id = p.manufacturer_id)
+										FROM " . $this->db->table_name("manufacturers") . " m
+										RIGHT JOIN " . $this->db->table_name("products") . " p ON (m.manufacturer_id = p.manufacturer_id)
 										WHERE p.product_id = '" . (int)$product_id . "'");
 		return $query->rows;
 	}
@@ -111,10 +111,10 @@ class ModelCatalogManufacturer extends Model{
 	public function getManufacturersData($data = array ()){
 		$sql = "SELECT *,
 						(SELECT count(*) as cnt
-				        FROM " . $this->db->table('products') . " p
+				        FROM " . $this->db->table_name('products') . " p
 				        WHERE p.manufacturer_id = m.manufacturer_id and p.status=1) as products_count
-					FROM " . $this->db->table("manufacturers") . " m
-					LEFT JOIN " . $this->db->table("manufacturers_to_stores") . " m2s ON (m.manufacturer_id = m2s.manufacturer_id)";
+					FROM " . $this->db->table_name("manufacturers") . " m
+					LEFT JOIN " . $this->db->table_name("manufacturers_to_stores") . " m2s ON (m.manufacturer_id = m2s.manufacturer_id)";
 
 		$sql .= " WHERE m2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ";
 		if (!empty($data['subsql_filter'])){

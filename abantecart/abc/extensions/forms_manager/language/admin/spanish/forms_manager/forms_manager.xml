@@ -170,11 +170,13 @@
 	</definition>
 	<definition>
 		<key>note_create_form_block</key>
-		<value><![CDATA[NOTA: Para ver el formulario que aparece en escaparate, crear el bloque forma en Diseño-><a href="%s">Bloques</a> y agregarlo a la página correspondiente en Diseño-><a href="%s">Diseños</a> page.]]></value>
+		<value>
+			<![CDATA[NOTA: Para ver el formulario que aparece en escaparate, crear el bloque forma en Diseño-><a href="%s">Bloques</a> y agregarlo a la página correspondiente en Diseño-><a href="%s">Diseños</a> page.]]></value>
 	</definition>
 	<definition>
 		<key>note_edit_layout</key>
-		<value><![CDATA[NOTA: Para ver este bloque se muestra en la tienda, añadirlo a la página apropiada en Diseño-><a href="%s">Diseños</a>. Para crear nueva forma ir a la Diseño-><a href="%s">Gerente de Formularios</a> page.]]></value>
+		<value>
+			<![CDATA[NOTA: Para ver este bloque se muestra en la tienda, añadirlo a la página apropiada en Diseño-><a href="%s">Diseños</a>. Para crear nueva forma ir a la Diseño-><a href="%s">Gerente de Formularios</a> page.]]></value>
 	</definition>
 	<definition>
 		<key>text_select_field_type</key>
@@ -185,15 +187,15 @@
 		<value><![CDATA[Campo nota]]></value>
 	</definition>
 	<definition>
-        <key>entry_field_placeholder</key>
-        <value><![CDATA[Marcador de posición:]]></value>
-    </definition>
+		<key>entry_field_placeholder</key>
+		<value><![CDATA[Marcador de posición:]]></value>
+	</definition>
 	<definition>
-        <key>entry_regexp_pattern</key>
-        <value><![CDATA[Patrón de expresión regular:]]></value>
-    </definition>
+		<key>entry_regexp_pattern</key>
+		<value><![CDATA[Patrón de expresión regular:]]></value>
+	</definition>
 	<definition>
-        <key>entry_error_text</key>
-        <value><![CDATA[Mensaje de error sobre el Valor válido:]]></value>
-    </definition>
+		<key>entry_error_text</key>
+		<value><![CDATA[Mensaje de error sobre el Valor válido:]]></value>
+	</definition>
 </definitions>

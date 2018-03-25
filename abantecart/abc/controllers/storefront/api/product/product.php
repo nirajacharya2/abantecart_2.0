@@ -20,7 +20,7 @@
 namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
-use abc\core\engine\APromotion;
+use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 
 if (!class_exists('abc\core\ABC')) {

@@ -74,7 +74,7 @@ class AContentManager
         if ( ! is_array($data) || ! $data) {
             return false;
         }
-        $sql = "INSERT INTO ".$this->db->table("contents")." 
+        $sql = "INSERT INTO ".$this->db->table_name("contents")." 
                             (parent_content_id, sort_order, status)
                              VALUES ('".(int)$data['parent_content_id'][0]."',  '".( int )$data ['sort_order'][0]."',
                                   '".( int )$data ['status']."')";
@@ -94,14 +94,14 @@ class AContentManager
                 array((int)$this->language->getContentLanguageID() => array('keyword' => $seo_key)));
         } else {
             $this->db->query("DELETE
-                            FROM ".$this->db->table("url_aliases")." 
+                            FROM ".$this->db->table_name("url_aliases")." 
                             WHERE query = 'content_id=".( int )$content_id."'
                                 AND language_id = '".(int)$this->language->getContentLanguageID()."'");
         }
 
         if ($data['parent_content_id']) {
             foreach ($data['parent_content_id'] as $k => $parent_id) {
-                $sql = "INSERT INTO ".$this->db->table("contents")." (content_id,parent_content_id, sort_order, status)
+                $sql = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status)
                                             VALUES ('".( int )$content_id."',
                                                     '".(int)$parent_id."',
                                                     '".( int )$data['sort_order'][$k]."',
@@ -126,7 +126,7 @@ class AContentManager
         }
         if ($data ['store_id']) {
             foreach ($data ['store_id'] as $store_id) {
-                $sql = "INSERT INTO ".$this->db->table("contents_to_stores")." (content_id,store_id)
+                $sql = "INSERT INTO ".$this->db->table_name("contents_to_stores")." (content_id,store_id)
                                 VALUES ('".$content_id."','".(int)$store_id."')";
                 $this->db->query($sql);
             }
@@ -152,12 +152,12 @@ class AContentManager
 
         //Delete store and insert back again with the same ID.
         //Area for improvement
-        $sql = "DELETE FROM ".$this->db->table("contents")." 
+        $sql = "DELETE FROM ".$this->db->table_name("contents")." 
                     WHERE content_id='".$content_id."'; ";
         $this->db->query($sql);
         //insert back
         foreach ($data['parent_content_id'] as $parent_id) {
-            $sql = "INSERT INTO ".$this->db->table("contents")." (content_id,parent_content_id, sort_order, status)
+            $sql = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status)
                     VALUES ('".( int )$content_id."',
                             '".(int)$parent_id."',
                             '".( int )$data['sort_order'][$parent_id]."',
@@ -185,17 +185,17 @@ class AContentManager
                     array((int)$this->language->getContentLanguageID() => array('keyword' => $data['keyword'])));
             } else {
                 $this->db->query("DELETE
-                                FROM ".$this->db->table("url_aliases")." 
+                                FROM ".$this->db->table_name("url_aliases")." 
                                 WHERE query = 'content_id=".( int )$content_id."'
                                     AND language_id = '".(int)$this->language->getContentLanguageID()."'");
             }
         }
         if ($data['store_id']) {
-            $sql = "DELETE FROM ".$this->db->table("contents_to_stores")." WHERE content_id='".$content_id."'";
+            $sql = "DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id='".$content_id."'";
             $this->db->query($sql);
 
             foreach ($data['store_id'] as $store_id) {
-                $sql = "INSERT INTO ".$this->db->table("contents_to_stores")." (content_id,store_id)
+                $sql = "INSERT INTO ".$this->db->table_name("contents_to_stores")." (content_id,store_id)
                                 VALUES ('".$content_id."','".(int)$store_id."')";
                 $this->db->query($sql);
             }
@@ -223,12 +223,12 @@ class AContentManager
 
         switch ($field) {
             case 'status' :
-                $this->db->query("UPDATE ".$this->db->table("contents")." 
+                $this->db->query("UPDATE ".$this->db->table_name("contents")." 
                                     SET `status` = '".(int)$value."'
                                     WHERE content_id = '".(int)$content_id."'");
                 break;
             case 'sort_order' :
-                $this->db->query("UPDATE ".$this->db->table("contents")." 
+                $this->db->query("UPDATE ".$this->db->table_name("contents")." 
                                 SET `sort_order` = '".(int)$value."'
                                 WHERE content_id = '".(int)$content_id."'
                                     AND parent_content_id='".(int)$parent_content_id."'");
@@ -252,7 +252,7 @@ class AContentManager
                         array((int)$this->language->getContentLanguageID() => array('keyword' => $value)));
                 } else {
                     $this->db->query("DELETE
-                                    FROM ".$this->db->table("url_aliases")." 
+                                    FROM ".$this->db->table_name("url_aliases")." 
                                     WHERE query = 'content_id=".( int )$content_id."'
                                         AND language_id = '".(int)$this->language->getContentLanguageID()."'");
                 }
@@ -276,7 +276,7 @@ class AContentManager
 
                 $query
                     = "SELECT parent_content_id, sort_order, status
-                            FROM ".$this->db->table("contents")." 
+                            FROM ".$this->db->table_name("contents")." 
                             WHERE content_id='".$content_id."'";
                 $result = $this->db->query($query);
                 $sort_orders = array();
@@ -288,7 +288,7 @@ class AContentManager
                     }
                 }
 
-                $query = "DELETE FROM ".$this->db->table("contents")." WHERE content_id='".$content_id."'";
+                $query = "DELETE FROM ".$this->db->table_name("contents")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
 
                 $value = ! $value ? array(0) : $value;
@@ -297,7 +297,7 @@ class AContentManager
                     if ($parent_content_id == $content_id) {
                         continue;
                     }
-                    $query = "INSERT INTO ".$this->db->table("contents")." (content_id,parent_content_id, sort_order, status)
+                    $query = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status)
                                     VALUES ('".$content_id."',
                                             '".$parent_content_id."',
                                             '".(int)$sort_orders[$parent_content_id]."',
@@ -306,11 +306,11 @@ class AContentManager
                 }
                 break;
             case 'store_id':
-                $query = "DELETE FROM ".$this->db->table("contents_to_stores")." WHERE content_id='".$content_id."'";
+                $query = "DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
                 foreach ($value as $store_id) {
                     if (AHelperUtils::has_value($store_id)) {
-                        $query = "INSERT INTO ".$this->db->table("contents_to_stores")." (content_id,store_id)
+                        $query = "INSERT INTO ".$this->db->table_name("contents_to_stores")." (content_id,store_id)
                                         VALUES ('".$content_id."','".(int)$store_id."')";
                         $this->db->query($query);
                     }
@@ -331,10 +331,10 @@ class AContentManager
         $lm = new ALayoutManager();
         $lm->deletePageLayout('pages/content/content', 'content_id', ( int )$content_id);
 
-        $this->db->query("DELETE FROM ".$this->db->table("contents")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table("content_descriptions")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table("contents_to_stores")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table("url_aliases")." WHERE `query` = 'content_id=".( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("contents")." WHERE content_id = '".( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("content_descriptions")." WHERE content_id = '".( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id = '".( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("url_aliases")." WHERE `query` = 'content_id=".( int )$content_id."'");
 
         $this->cache->remove('content');
     }
@@ -358,8 +358,8 @@ class AContentManager
         }
         $sql
             = "SELECT *
-                FROM ".$this->db->table("contents")." i
-                LEFT JOIN ".$this->db->table("content_descriptions")." id
+                FROM ".$this->db->table_name("contents")." i
+                LEFT JOIN ".$this->db->table_name("content_descriptions")." id
                     ON (i.content_id = id.content_id AND id.language_id = '".$language_id."')
                 WHERE i.content_id = '".( int )$content_id."'
                 ORDER BY i.content_id";
@@ -380,7 +380,7 @@ class AContentManager
             }
             $sql
                 = "SELECT *
-                    FROM ".$this->db->table("url_aliases")." 
+                    FROM ".$this->db->table_name("url_aliases")." 
                     WHERE `query` = 'content_id=".( int )$content_id."'
                         AND language_id='".$language_id."'";
             $keyword = $this->db->query($sql);
@@ -408,7 +408,7 @@ class AContentManager
             }
             $data["subsql_filter"]
                 .= "i.content_id IN (SELECT parent_content_id
-                                                        FROM ".$this->db->table("contents")." 
+                                                        FROM ".$this->db->table_name("contents")." 
                                                         WHERE parent_content_id> 0)";
             $data['sort'] = 'i.parent_content_id, i.sort_order';
         }
@@ -427,20 +427,20 @@ class AContentManager
             $select_columns
                 = "id.*,
                         cd.title as parent_name,
-                        ( SELECT COUNT(*) FROM ".$this->db->table("contents")." 
+                        ( SELECT COUNT(*) FROM ".$this->db->table_name("contents")." 
                         WHERE parent_content_id=i.content_id ) as cnt,
                         i.*	";
         }
 
         $sql = "SELECT ".$select_columns."
-                FROM ".$this->db->table("contents")." i
-                LEFT JOIN ".$this->db->table("content_descriptions")." id
+                FROM ".$this->db->table_name("contents")." i
+                LEFT JOIN ".$this->db->table_name("content_descriptions")." id
                     ON (i.content_id = id.content_id
                         AND id.language_id = '".( int )$this->language->getContentLanguageID()."')
-                LEFT JOIN ".$this->db->table("content_descriptions")." cd
+                LEFT JOIN ".$this->db->table_name("content_descriptions")." cd
                     ON (cd.content_id = i.parent_content_id
                         AND cd.language_id = '".( int )$this->language->getContentLanguageID()."')
-                LEFT JOIN ".$this->db->table('contents_to_stores')." cs
+                LEFT JOIN ".$this->db->table_name('contents_to_stores')." cs
                     ON i.content_id = cs.content_id
                 ";
 
@@ -530,8 +530,8 @@ class AContentManager
     {
         $query = $this->db->query(
             "SELECT t1.content_id AS content_id
-                 FROM ".$this->db->table("contents")." AS t1
-                 LEFT JOIN ".$this->db->table("contents")." AS t2	ON t1.content_id = t2.parent_content_id
+                 FROM ".$this->db->table_name("contents")." AS t1
+                 LEFT JOIN ".$this->db->table_name("contents")." AS t2	ON t1.content_id = t2.parent_content_id
                  WHERE t2.content_id IS NULL");
         $result = array();
         foreach ($query->rows as $r) {
@@ -619,8 +619,8 @@ class AContentManager
         $output = array();
         $query
             = "SELECT s.store_id, COALESCE(cs.content_id,0) AS content_id, s.name
-                 FROM ".$this->db->table("contents_to_stores")." cs
-                 RIGHT JOIN ".$this->db->table("stores")." s ON s.store_id = cs.store_id;";
+                 FROM ".$this->db->table_name("contents_to_stores")." cs
+                 RIGHT JOIN ".$this->db->table_name("stores")." s ON s.store_id = cs.store_id;";
 
         $result = $this->db->query($query);
         if ($result->num_rows) {

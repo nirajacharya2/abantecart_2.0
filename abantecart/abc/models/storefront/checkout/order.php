@@ -48,7 +48,7 @@ class ModelCheckoutOrder extends Model{
 	public function getOrder($order_id){
 		$order_query = $this->db->query(
 				"SELECT *
-				FROM `" . $this->db->table("orders") . "`
+				FROM `" . $this->db->table_name("orders") . "`
 				WHERE order_id = '" . (int)$order_id . "'"
 		);
 
@@ -125,12 +125,12 @@ class ModelCheckoutOrder extends Model{
 		//reuse same order_id or unused one order_status_id = 0
 		if ($set_order_id){
 			$query = $this->db->query("SELECT order_id
-										FROM `" . $this->db->table("orders") . "`
+										FROM `" . $this->db->table_name("orders") . "`
 										WHERE order_id = " . $set_order_id . " AND order_status_id = '0'");
 
 			if (!$query->num_rows){ // for already processed orders do redirect
 				$query = $this->db->query("SELECT order_id
-											FROM `" . $this->db->table("orders") . "`
+											FROM `" . $this->db->table_name("orders") . "`
 											WHERE order_id = " . $set_order_id . " AND order_status_id > '0'");
 				if ($query->num_rows){
 					return false;
@@ -145,7 +145,7 @@ class ModelCheckoutOrder extends Model{
 		if ((int)$this->config->get('config_expire_order_days')){
 			$query = $this->db->query(
 					"SELECT order_id
-					FROM " . $this->db->table("orders") . "
+					FROM " . $this->db->table_name("orders") . "
 					WHERE date_modified < '" . date('Y-m-d', strtotime('-' . (int)$this->config->get('config_expire_order_days') . ' days')) . "'
 						AND order_status_id = '0'");
 			foreach ($query->rows as $result){
@@ -155,7 +155,7 @@ class ModelCheckoutOrder extends Model{
 
 		if (!$set_order_id && (int)$this->config->get('config_start_order_id')){
 			$query = $this->db->query("SELECT MAX(order_id) AS order_id
-										FROM `" . $this->db->table("orders") . "`");
+										FROM `" . $this->db->table_name("orders") . "`");
 			if ($query->row['order_id'] && $query->row['order_id'] >= $this->config->get('config_start_order_id')){
 				$set_order_id = (int)$query->row['order_id'] + 1;
 			} elseif ($this->config->get('config_start_order_id')){
@@ -177,7 +177,7 @@ class ModelCheckoutOrder extends Model{
 			$key_sql = ", key_id = '" . (int)$data['key_id'] . "'";
 		}
 
-		$this->db->query("INSERT INTO `" . $this->db->table("orders") . "`
+		$this->db->query("INSERT INTO `" . $this->db->table_name("orders") . "`
 							SET " . $set_order_id . " store_id = '" . (int)$data['store_id'] . "',
 								store_name = '" . $this->db->escape($data['store_name']) . "',
 								store_url = '" . $this->db->escape($data['store_url']) . "',
@@ -231,7 +231,7 @@ class ModelCheckoutOrder extends Model{
 		$order_id = $this->db->getLastId();
 
 		foreach ($data['products'] as $product){
-			$this->db->query("INSERT INTO " . $this->db->table("order_products") . "
+			$this->db->query("INSERT INTO " . $this->db->table_name("order_products") . "
 								SET order_id = '" . (int)$order_id . "',
 								product_id = '" . (int)$product['product_id'] . "',
 								name = '" . $this->db->escape($product['name']) . "',
@@ -246,7 +246,7 @@ class ModelCheckoutOrder extends Model{
 			$order_product_id = $this->db->getLastId();
 
 			foreach ($product['option'] as $option){
-				$this->db->query("INSERT INTO " . $this->db->table("order_options") . "
+				$this->db->query("INSERT INTO " . $this->db->table_name("order_options") . "
 									SET order_id = '" . (int)$order_id . "',
 										order_product_id = '" . (int)$order_product_id . "',
 										product_option_value_id = '" . (int)$option['product_option_value_id'] . "',
@@ -268,7 +268,7 @@ class ModelCheckoutOrder extends Model{
 			}
 		}
 		foreach ($data['totals'] as $total){
-			$this->db->query("INSERT INTO " . $this->db->table("order_totals") . "
+			$this->db->query("INSERT INTO " . $this->db->table_name("order_totals") . "
 								SET `order_id` = '" . (int)$order_id . "',
 									`title` = '" . $this->db->escape($total['title']) . "',
 									`text` = '" . $this->db->escape($total['text']) . "',
@@ -292,7 +292,7 @@ class ModelCheckoutOrder extends Model{
 		}
 
 		$sql = "SELECT DISTINCT `type_id`, `name` as protocol
-				FROM " . $this->db->table('order_data_types') . "
+				FROM " . $this->db->table_name('order_data_types') . "
 				WHERE `name` IN ('" . implode("', '", $p) . "')";
 		$result = $this->db->query($sql);
 		if(!$result->num_rows){
@@ -314,7 +314,7 @@ class ModelCheckoutOrder extends Model{
 						)
 				);
 
-				$sql = "REPLACE INTO " . $this->db->table('order_data') . "
+				$sql = "REPLACE INTO " . $this->db->table_name('order_data') . "
 						(`order_id`, `type_id`, `data`, `date_added`)
 						VALUES (" . (int)$order_id . ", " . (int)$type_id . ", '" . $this->db->escape($im_data) . "', NOW() )";
 
@@ -342,8 +342,8 @@ class ModelCheckoutOrder extends Model{
 		$order_query = $this->db->query("SELECT *,
 												l.filename AS filename,
 												l.directory AS directory
-										 FROM `" . $this->db->table("orders") . "` o
-										 LEFT JOIN " . $this->db->table("languages") . " l
+										 FROM `" . $this->db->table_name("orders") . "` o
+										 LEFT JOIN " . $this->db->table_name("languages") . " l
 										    ON (o.language_id = l.language_id)
 										 WHERE o.order_id = '" . (int)$order_id . "'
 										        AND o.order_status_id = '0'");
@@ -355,13 +355,13 @@ class ModelCheckoutOrder extends Model{
 
         //update order status
 		$update[] = "order_status_id = '" . (int)$order_status_id . "'";
-		$sql = "UPDATE `" . $this->db->table("orders") . "`
+		$sql = "UPDATE `" . $this->db->table_name("orders") . "`
 			    SET " . implode(", ", $update) . "
 				WHERE order_id = '" . (int)$order_id . "'";
 		$this->db->query($sql);
 
 		//record history
-		$this->db->query("INSERT INTO " . $this->db->table("order_history") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("order_history") . "
 						   SET order_id = '" . (int)$order_id . "',
 						        order_status_id = '" . (int)$order_status_id . "',
 						        notify = '1',
@@ -370,7 +370,7 @@ class ModelCheckoutOrder extends Model{
 		$order_row['comment'] = $order_row['comment'] . ' ' . $comment;
 
 		$order_product_query = $this->db->query("SELECT *
-												 FROM " . $this->db->table("order_products") . "
+												 FROM " . $this->db->table_name("order_products") . "
 												 WHERE order_id = '" . (int)$order_id . "'");
 		// load language for IM
 		$language = new ALanguage($this->registry);
@@ -380,19 +380,19 @@ class ModelCheckoutOrder extends Model{
         //update products inventory
 		foreach ($order_product_query->rows as $product) {
             $order_option_query = $this->db->query("SELECT *
-													FROM " . $this->db->table("order_options") . "
+													FROM " . $this->db->table_name("order_options") . "
 													WHERE order_id = '" . (int)$order_id . "'
 															AND order_product_id = '" . (int)$product['order_product_id'] . "'");
             //update options stock
             $stock_updated = false;
 			foreach ($order_option_query->rows as $option){
-				$this->db->query("UPDATE " . $this->db->table("product_option_values") . "
+				$this->db->query("UPDATE " . $this->db->table_name("product_option_values") . "
 								  SET quantity = (quantity - " . (int)$product['quantity'] . ")
 								  WHERE product_option_value_id = '" . (int)$option['product_option_value_id'] . "'
 								        AND subtract = 1");
                 $stock_updated = true;
 				$sql = "SELECT quantity
-				        FROM " . $this->db->table("product_option_values") . "
+				        FROM " . $this->db->table_name("product_option_values") . "
 						WHERE product_option_value_id = '" . (int)$option['product_option_value_id'] . "'
 							AND subtract = 1";
 				$res = $this->db->query($sql);
@@ -406,13 +406,13 @@ class ModelCheckoutOrder extends Model{
 			}
 
 			if (!$stock_updated) {
-                $this->db->query("UPDATE " . $this->db->table("products") . "
+                $this->db->query("UPDATE " . $this->db->table_name("products") . "
 							  SET quantity = (quantity - " . (int)$product['quantity'] . ")
 							  WHERE product_id = '" . (int)$product['product_id'] . "' AND subtract = 1");
 
                 //check quantity and send notification when 0 or less
                 $sql = "SELECT quantity
-			        FROM " . $this->db->table("products") . "
+			        FROM " . $this->db->table_name("products") . "
 					WHERE product_id = '" . (int)$product['product_id'] . "' AND subtract = 1";
                 $res = $this->db->query($sql);
                 if ($res->num_rows && $res->row['quantity'] <= 0){
@@ -435,10 +435,10 @@ class ModelCheckoutOrder extends Model{
 
 		$this->load->model('localisation/currency');
 		$order_product_query = $this->db->query("SELECT *
-												FROM " . $this->db->table("order_products") . "
+												FROM " . $this->db->table_name("order_products") . "
 												WHERE order_id = '" . (int)$order_id . "'");
 		$order_total_query = $this->db->query("SELECT *
-												FROM " . $this->db->table("order_totals") . "
+												FROM " . $this->db->table_name("order_totals") . "
 												WHERE order_id = '" . (int)$order_id . "'
 												ORDER BY sort_order ASC");
 
@@ -587,12 +587,12 @@ class ModelCheckoutOrder extends Model{
 
 			$order_option_query = $this->db->query(
 					"SELECT oo.*, po.element_type, p.sku, p.product_id
-					FROM " . $this->db->table("order_options") . " oo
-					LEFT JOIN " . $this->db->table("product_option_values") . " pov
+					FROM " . $this->db->table_name("order_options") . " oo
+					LEFT JOIN " . $this->db->table_name("product_option_values") . " pov
 						ON pov.product_option_value_id = oo.product_option_value_id
-					LEFT JOIN " . $this->db->table("product_options") . " po
+					LEFT JOIN " . $this->db->table_name("product_options") . " po
 						ON po.product_option_id = pov.product_option_id
-					LEFT JOIN " . $this->db->table("products") . " p
+					LEFT JOIN " . $this->db->table_name("products") . " p
 						ON p.product_id = po.product_id
 					WHERE oo.order_id = '" . (int)$order_id . "' AND oo.order_product_id = '" . (int)$product['order_product_id'] . "'");
 
@@ -748,19 +748,19 @@ class ModelCheckoutOrder extends Model{
 	 */
 	public function _update($order_id, $order_status_id, $comment = '', $notify = FALSE) {
 		$order_query = $this->db->query("SELECT *
-										 FROM `" . $this->db->table("orders") . "` o
-										 LEFT JOIN " . $this->db->table("languages") . " l ON (o.language_id = l.language_id)
+										 FROM `" . $this->db->table_name("orders") . "` o
+										 LEFT JOIN " . $this->db->table_name("languages") . " l ON (o.language_id = l.language_id)
 										 WHERE o.order_id = '" . (int)$order_id . "' AND o.order_status_id > '0'");
 
 		if ($order_query->num_rows){
 			$order_row = $this->dcrypt->decrypt_data($order_query->row, 'orders');
 
-			$this->db->query("UPDATE `" . $this->db->table("orders") . "`
+			$this->db->query("UPDATE `" . $this->db->table_name("orders") . "`
 								SET order_status_id = '" . (int)$order_status_id . "',
 									date_modified = NOW()
 								WHERE order_id = '" . (int)$order_id . "'");
 
-			$this->db->query("INSERT INTO " . $this->db->table("order_history") . "
+			$this->db->query("INSERT INTO " . $this->db->table_name("order_history") . "
 								SET order_id = '" . (int)$order_id . "',
 									order_status_id = '" . (int)$order_status_id . "',
 									notify = '" . (int)$notify . "',
@@ -773,8 +773,8 @@ class ModelCheckoutOrder extends Model{
 			$language->load('mail/order_update');
 
 			$order_status_query = $this->db->query("SELECT osd.*, os.*
-													FROM " . $this->db->table("order_statuses") . " os
-													LEFT JOIN " . $this->db->table("order_status_descriptions") . " osd
+													FROM " . $this->db->table_name("order_statuses") . " os
+													LEFT JOIN " . $this->db->table_name("order_status_descriptions") . " osd
 													    ON osd.order_status_id = os.order_status_id
 													WHERE os.order_status_id = '" . (int)$order_status_id . "'
 														AND osd.language_id = '" . (int)$order_row['language_id'] . "'");
@@ -843,7 +843,7 @@ class ModelCheckoutOrder extends Model{
 	 * @return null
 	 */
 	public function addHistory($order_id, $order_status_id, $comment){
-		$this->db->query("INSERT INTO " . $this->db->table('order_history') . " 
+		$this->db->query("INSERT INTO " . $this->db->table_name('order_history') . " 
 							SET order_id = '" . (int)$order_id . "', 
 								order_status_id = '" . (int)$order_status_id . "', 
 								notify = '0', 
@@ -865,7 +865,7 @@ class ModelCheckoutOrder extends Model{
 		}
 
 		return $this->db->query(
-				'UPDATE ' . $this->db->table('orders') . '
+				'UPDATE ' . $this->db->table_name('orders') . '
 				SET payment_method_data = "' . $this->db->escape($data) . '"
 				WHERE order_id = "' . (int)$order_id . '"'
 		);
@@ -881,13 +881,13 @@ class ModelCheckoutOrder extends Model{
 			return false;
 		}
 
-		$this->db->query("DELETE FROM `" . $this->db->table("orders") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_history") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_products") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_options") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_downloads") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_totals") . "` WHERE order_id = '" . $order_id . "'");
-		$this->db->query("DELETE FROM `" . $this->db->table("order_data") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("orders") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_history") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_products") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_options") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_downloads") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_totals") . "` WHERE order_id = '" . $order_id . "'");
+		$this->db->query("DELETE FROM `" . $this->db->table_name("order_data") . "` WHERE order_id = '" . $order_id . "'");
 
 		return true;
 	}

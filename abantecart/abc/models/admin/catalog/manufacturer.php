@@ -38,13 +38,13 @@ class ModelCatalogManufacturer extends Model{
 		$seo_keys = array ();
 		$language_id = (int)$this->language->getContentLanguageID();
 		$this->db->query(
-				"INSERT INTO " . $this->db->table("manufacturers") . " 
+				"INSERT INTO " . $this->db->table_name("manufacturers") . " 
 				SET name = '" . $this->db->escape($data['name']) . "', sort_order = '" . (int)$data['sort_order'] . "'");
 		$manufacturer_id = $this->db->getLastId();
 		if (isset($data['manufacturer_store'])) {
 			foreach ($data['manufacturer_store'] as $store_id) {
 				$this->db->query(
-						"INSERT INTO " . $this->db->table("manufacturers_to_stores") . " 
+						"INSERT INTO " . $this->db->table_name("manufacturers_to_stores") . " 
 						SET manufacturer_id = '" . (int)$manufacturer_id . "', store_id = '" . (int)$store_id . "'");
 			}
 		}
@@ -91,7 +91,7 @@ class ModelCatalogManufacturer extends Model{
 			}
 		} else {
 			$this->db->query("DELETE
-							FROM " . $this->db->table("url_aliases") . "
+							FROM " . $this->db->table_name("url_aliases") . "
 							WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'
 								AND language_id = '" . (int)$language_id . "'");
 		}
@@ -115,14 +115,14 @@ class ModelCatalogManufacturer extends Model{
 			}
 		}
 		if (!empty($update)) {
-			$this->db->query("UPDATE " . $this->db->table("manufacturers") . " SET " . implode(',',
+			$this->db->query("UPDATE " . $this->db->table_name("manufacturers") . " SET " . implode(',',
 							$update) . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 		}
 
 		if (isset($data['manufacturer_store'])) {
-			$this->db->query("DELETE FROM " . $this->db->table("manufacturers_to_stores") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+			$this->db->query("DELETE FROM " . $this->db->table_name("manufacturers_to_stores") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 			foreach ($data['manufacturer_store'] as $store_id) {
-				$this->db->query("INSERT INTO " . $this->db->table("manufacturers_to_stores") . " SET manufacturer_id = '" . (int)$manufacturer_id . "', store_id = '" . (int)$store_id . "'");
+				$this->db->query("INSERT INTO " . $this->db->table_name("manufacturers_to_stores") . " SET manufacturer_id = '" . (int)$manufacturer_id . "', store_id = '" . (int)$store_id . "'");
 			}
 		}
 
@@ -135,7 +135,7 @@ class ModelCatalogManufacturer extends Model{
 						array ((int)$this->session->data['content_language_id'] => array ('keyword' => $data['keyword'])));
 			} else {
 				$this->db->query("DELETE
-								FROM " . $this->db->table("url_aliases") . " 
+								FROM " . $this->db->table_name("url_aliases") . " 
 								WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'
 									AND language_id = '" . (int)$this->session->data['content_language_id'] . "'");
 			}
@@ -148,9 +148,9 @@ class ModelCatalogManufacturer extends Model{
 	 * @param int $manufacturer_id
 	 */
 	public function deleteManufacturer($manufacturer_id){
-		$this->db->query("DELETE FROM " . $this->db->table("manufacturers") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("manufacturers_to_stores") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("url_aliases") . " WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("manufacturers") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("manufacturers_to_stores") . " WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("url_aliases") . " WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
 
 		$lm = new ALayoutManager();
 		$lm->deletePageLayout('pages/product/manufacturer', 'manufacturer_id', (int)$manufacturer_id);
@@ -177,10 +177,10 @@ class ModelCatalogManufacturer extends Model{
 	 */
 	public function getManufacturer($manufacturer_id){
 		$query = $this->db->query("SELECT DISTINCT *, ( SELECT keyword
-														FROM " . $this->db->table("url_aliases") . " 
+														FROM " . $this->db->table_name("url_aliases") . " 
 														WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'
 														  AND language_id='" . (int)$this->session->data['content_language_id'] . "') AS keyword
-									FROM " . $this->db->table("manufacturers") . " 
+									FROM " . $this->db->table_name("manufacturers") . " 
 									WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 
 		return $query->row;
@@ -205,8 +205,8 @@ class ModelCatalogManufacturer extends Model{
 			} else {
 				$total_sql = 'ms.*, m.*';
 			}
-			$sql = "SELECT $total_sql FROM " . $this->db->table("manufacturers") . " m
-						INNER JOIN " . $this->db->table('manufacturers_to_stores') . " ms				
+			$sql = "SELECT $total_sql FROM " . $this->db->table_name("manufacturers") . " m
+						INNER JOIN " . $this->db->table_name('manufacturers_to_stores') . " ms				
 						ON (m.manufacturer_id = ms.manufacturer_id AND ms.store_id = '" . $store_id . "')";
 
 			if (!empty($data['subsql_filter'])) {
@@ -255,8 +255,8 @@ class ModelCatalogManufacturer extends Model{
 			$manufacturer_data = $this->cache->pull($cache_key);
 			if ($manufacturer_data === false) {
 				$query = $this->db->query("SELECT *
-											FROM " . $this->db->table("manufacturers") . " m
-											LEFT JOIN " . $this->db->table("manufacturers_to_stores") . " m2s
+											FROM " . $this->db->table_name("manufacturers") . " m
+											LEFT JOIN " . $this->db->table_name("manufacturers_to_stores") . " m2s
 												ON (m.manufacturer_id = m2s.manufacturer_id)
 											WHERE m2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
 											ORDER BY sort_order, LCASE(m.name) ASC");
@@ -291,11 +291,11 @@ class ModelCatalogManufacturer extends Model{
 										s.name as store_name,
 										ss.`value` as store_url,
 										sss.`value` as store_ssl_url
-									FROM " . $this->db->table("manufacturers_to_stores") . " m2s
-									LEFT JOIN " . $this->db->table("stores") . " s ON s.store_id = m2s.store_id
-									LEFT JOIN " . $this->db->table("settings") . " ss
+									FROM " . $this->db->table_name("manufacturers_to_stores") . " m2s
+									LEFT JOIN " . $this->db->table_name("stores") . " s ON s.store_id = m2s.store_id
+									LEFT JOIN " . $this->db->table_name("settings") . " ss
 										ON (ss.store_id = m2s.store_id AND ss.`key`='config_url')
-									LEFT JOIN " . $this->db->table("settings") . " sss
+									LEFT JOIN " . $this->db->table_name("settings") . " sss
 										ON (sss.store_id = m2s.store_id AND sss.`key`='config_ssl_url')
 									WHERE m2s.manufacturer_id = '" . (int)$manufacturer_id . "'");
 		return $query->rows;

@@ -33,7 +33,7 @@ class ModelToolOnlineNow extends Model
     {
         $sql
             = "SELECT count(*) AS total
-                FROM `".$this->db->table("online_customers")."` cn 
+                FROM `".$this->db->table_name("online_customers")."` cn 
                 WHERE DATE_FORMAT(cn.date_added,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d') ";
         if ($mode == 'new') {
             $sql .= " AND  cn.customer_id = 0";
@@ -57,8 +57,8 @@ class ModelToolOnlineNow extends Model
         }
 
         $sql = "SELECT ".$total_sql."
-                FROM `".$this->db->table("online_customers")."` cn 
-                LEFT JOIN `".$this->db->table("customers")."` c ON (cn.customer_id = c.customer_id)";
+                FROM `".$this->db->table_name("online_customers")."` cn 
+                LEFT JOIN `".$this->db->table_name("customers")."` c ON (cn.customer_id = c.customer_id)";
 
         $where = array();
         if (isset($data['filter_ip']) && ! is_null($data['filter_ip'])) {

@@ -6,7 +6,7 @@
 
 	<div class="content container-fluid">
 
-		<h4 class="heading4"><?php echo $text_critea; ?></h4>
+		<h4 class="heading4"><?php echo $text_criteria; ?></h4>
 
 		<div class="form-inline">
 			<fieldset>

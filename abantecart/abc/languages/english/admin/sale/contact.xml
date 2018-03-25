@@ -18,7 +18,7 @@
 	</definition>
 	<definition>
 		<key>text_custom_send</key>
-		<value><![CDATA[Manualy selected customers]]></value>
+		<value><![CDATA[Manually selected customers]]></value>
 	</definition>
 	<definition>
 		<key>text_all_subscribers</key>
@@ -170,7 +170,7 @@
 	</definition>
 	<definition>
 		<key>text_task_failed</key>
-		<value><![CDATA[Some errors occured during task process. Please see log for details or restart this task.]]></value>
+		<value><![CDATA[Some errors occurred during task process. Please see log for details or restart this task.]]></value>
 	</definition>
 	<definition>
 		<key>text_sent</key>

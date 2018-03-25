@@ -592,9 +592,9 @@ class ModelToolImportProcess extends Model{
 		if ($name) {
 			$query = $this->db->query(
 				"SELECT p.product_id as product_id
-				FROM " . $this->db->table("products") . " p
-				LEFT JOIN " . $this->db->table("product_descriptions") . " pd ON (p.product_id = pd.product_id AND pd.language_id = '" . (int)$language_id . "')
-				LEFT JOIN " . $this->db->table("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
+				FROM " . $this->db->table_name("products") . " p
+				LEFT JOIN " . $this->db->table_name("product_descriptions") . " pd ON (p.product_id = pd.product_id AND pd.language_id = '" . (int)$language_id . "')
+				LEFT JOIN " . $this->db->table_name("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
 				WHERE LCASE(pd.name) = '" . $this->db->escape(mb_strtolower($name)) . "' AND p2s.store_id = '" . (int)$store_id . "' limit 1");
 			return $query->row['product_id'];
 		} else {
@@ -606,8 +606,8 @@ class ModelToolImportProcess extends Model{
 		if ($model) {
 			$query = $this->db->query(
 				"SELECT p.product_id as product_id
-					 FROM " . $this->db->table("products") . " p
-				LEFT JOIN " . $this->db->table("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
+					 FROM " . $this->db->table_name("products") . " p
+				LEFT JOIN " . $this->db->table_name("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
 				WHERE LCASE(p.model) = '" . $this->db->escape(mb_strtolower($model)) . "' AND p2s.store_id = '" . (int)$store_id . "' limit 1");
 			return $query->row['product_id'];
 		} else {
@@ -619,8 +619,8 @@ class ModelToolImportProcess extends Model{
 		if ($sku) {
 			$query = $this->db->query(
 				"SELECT p.product_id as product_id
-				FROM " . $this->db->table("products") . " p
-				LEFT JOIN " . $this->db->table("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
+				FROM " . $this->db->table_name("products") . " p
+				LEFT JOIN " . $this->db->table_name("products_to_stores") . " p2s ON (p.product_id = p2s.product_id)
 				WHERE LCASE(p.sku) = '" . $this->db->escape(mb_strtolower($sku)) . "' AND p2s.store_id = " . (int)$store_id . " limit 1");
 			return $query->row['product_id'];
 		} else {
@@ -630,7 +630,7 @@ class ModelToolImportProcess extends Model{
 
 	protected function _process_manufacturer($manufacturer_name, $sort_order, $store_id) {
 		$manufacturer_id = null;
-		$sql = $this->db->query("SELECT manufacturer_id from " . $this->db->table("manufacturers")
+		$sql = $this->db->query("SELECT manufacturer_id from " . $this->db->table_name("manufacturers")
 			. " WHERE LCASE(name) = '" . $this->db->escape(mb_strtolower($manufacturer_name)) . "' limit 1");
 		$manufacturer_id = $sql->row['manufacturer_id'];
 		if (!$manufacturer_id) {
@@ -699,8 +699,8 @@ class ModelToolImportProcess extends Model{
 	}
 
 	protected function _get_category($category_name, $language_id, $store_id, $parent_id){
-		$sql = "SELECT cd.category_id from " . $this->db->table("category_descriptions") . " cd
-			  INNER JOIN " . $this->db->table("categories_to_stores") . " c2s ON (cd.category_id = c2s.category_id)
+		$sql = "SELECT cd.category_id from " . $this->db->table_name("category_descriptions") . " cd
+			  INNER JOIN " . $this->db->table_name("categories_to_stores") . " c2s ON (cd.category_id = c2s.category_id)
 			  WHERE language_id = " . (int)$language_id . " AND  c2s.store_id = " . (int)$store_id . "
 					AND LCASE(name) = '" . $this->db->escape(mb_strtolower($category_name)) . "'";
 		$res = $this->db->query($sql);
@@ -709,7 +709,7 @@ class ModelToolImportProcess extends Model{
 		} else if($res->num_rows > 1) {
 			//we have categories with same names, locate based on parent.
 			$cids = array_column($res->rows, 'category_id');
-			$sql2 = "SELECT category_id from " . $this->db->table("categories") . "
+			$sql2 = "SELECT category_id from " . $this->db->table_name("categories") . "
 				WHERE category_id in(".implode(', ', $cids).") AND parent_id = $parent_id ORDER BY parent_id DESC ";
 			$res2 = $this->db->query( $sql2 );
 			return $res2->row['category_id'];

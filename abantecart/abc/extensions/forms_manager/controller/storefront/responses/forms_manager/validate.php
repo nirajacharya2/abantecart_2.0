@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,16 +17,24 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
-class ControllerResponsesFormsManagerValidate extends AController {
-	public function main(){}
-  	public function captcha() {
-		$result = $this->session->data['captcha'] == $this->request->get['captcha'] ? 'true' : 'false';
-		$this->response->setOutput($result);
-	}
+
+class ControllerResponsesFormsManagerValidate extends AController
+{
+    public function main()
+    {
+    }
+
+    public function captcha()
+    {
+        $result = $this->session->data['captcha'] == $this->request->get['captcha'] ? 'true' : 'false';
+        $this->response->setOutput( $result );
+    }
 }

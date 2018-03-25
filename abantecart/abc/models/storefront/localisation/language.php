@@ -32,7 +32,7 @@ class ModelLocalisationLanguage extends Model{
 		$language_data = $this->cache->pull('localization.language.sf');
 		if ($language_data === false){
 			$query = $this->db->query("SELECT * 
-									FROM " . $this->db->table("languages") . " 
+									FROM " . $this->db->table_name("languages") . " 
 									WHERE status = 1 
 									ORDER BY sort_order, name");
 

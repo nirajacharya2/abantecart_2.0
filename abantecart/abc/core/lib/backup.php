@@ -179,7 +179,7 @@ class ABackup
                     table_rows AS 'num_rows', 
                     (data_length + index_length - data_free) AS 'size'
                 FROM information_schema.TABLES
-                WHERE information_schema.TABLES.table_schema = '".$this->db->database()."'
+                WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'
                     AND TABLE_NAME IN ('".implode("','", $table_list)."')";
         if ($prefix_len) {
             $sql .= " AND TABLE_NAME like '".$this->db->prefix()."%'";
@@ -189,7 +189,7 @@ class ABackup
         $memory_limit = (AHelperUtils::getMemoryLimitInBytes() - memory_get_usage()) / 4;
 
         // sql-file for small tables
-        $dump_file = ! $dump_file ? $this->backup_dir.'data'.$this->slash.'dump_'.$this->db->database().'_'.date('Y-m-d-His').'.sql' : $dump_file;
+        $dump_file = ! $dump_file ? $this->backup_dir.'data'.$this->slash.'dump_'.$this->db->getDatabaseName().'_'.date('Y-m-d-His').'.sql' : $dump_file;
         $file = fopen($dump_file, 'w');
         if ( ! $file) {
             $error_text = 'Error: Cannot create file as "'.$dump_file.'" during sql-dumping. Check is it writable.';
@@ -216,7 +216,7 @@ class ABackup
             // 1. - get column name with primary key and data type integer
             $sql = "SELECT COLUMN_NAME
                     FROM information_schema.COLUMNS c
-                    WHERE c.`TABLE_SCHEMA` = '".$this->db->database()."'
+                    WHERE c.`TABLE_SCHEMA` = '".$this->db->getDatabaseName()."'
                         AND c.`TABLE_NAME` = '".$table_name."'
                         AND c.`COLUMN_KEY` = 'PRI'
                         AND c.`DATA_TYPE`='int'
@@ -341,7 +341,7 @@ class ABackup
 
         $table_name = $this->registry->get('db')->escape($table_name); // for any case
 
-        $backupFile = $this->backup_dir.'data/'.$this->db->database().'_'.$table_name.'_dump_'.date("Y-m-d-H-i-s").'.sql';
+        $backupFile = $this->backup_dir.'data/'.$this->db->getDatabaseName().'_'.$table_name.'_dump_'.date("Y-m-d-H-i-s").'.sql';
 
         $result = $this->dumpTables($tables = array($table_name), $backupFile);
 
@@ -631,7 +631,7 @@ class ABackup
         $sql = "SELECT TABLE_NAME AS 'table_name',
                     table_rows AS 'num_rows', (data_length + index_length - data_free) AS 'size'
                 FROM information_schema.TABLES
-                WHERE information_schema.TABLES.table_schema = '".$this->db->database()."'";
+                WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'";
         $result = $this->db->query($sql, true);
         if ($result === false) {
             $this->error[] = 'Cannot get tables list. Please check privileges of mysql database user.';

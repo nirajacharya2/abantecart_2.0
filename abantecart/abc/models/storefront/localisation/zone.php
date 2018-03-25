@@ -38,10 +38,10 @@ class ModelLocalisationZone extends Model {
 		$default_lang_id = $this->language->getDefaultLanguageID();
 		
 		$query = $this->db->query("SELECT z.*, COALESCE(zd1.name,zd2.name) as name 
-									FROM " . $this->db->table("zones") . " z
-									LEFT JOIN " . $this->db->table("zone_descriptions") . " zd1
+									FROM " . $this->db->table_name("zones") . " z
+									LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd1
 									ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "')
-									LEFT JOIN " . $this->db->table("zone_descriptions") . " zd2
+									LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd2
 									ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_lang_id . "')
 								  	WHERE z.zone_id = '" . (int)$zone_id . "' AND status = '1'");
 		return $query->row;
@@ -61,10 +61,10 @@ class ModelLocalisationZone extends Model {
 
 		if ($zone_data === false) {
 			$query = $this->db->query("SELECT z.*, COALESCE(zd1.name,zd2.name) as name 
-										FROM " . $this->db->table("zones") . " z
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd1
+										FROM " . $this->db->table_name("zones") . " z
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd1
 											ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "')
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd2
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd2
 											ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_lang_id . "')
 										WHERE z.country_id = '" . (int)$country_id . "' AND status = '1'
 										ORDER BY zd1.name,zd2.name");
@@ -95,10 +95,10 @@ class ModelLocalisationZone extends Model {
 		$default_language_id = $this->language->getDefaultLanguageID();
 		
 		$query = $this->db->query("SELECT c.country_id
-									FROM " . $this->db->table("countries") . " c
-									LEFT JOIN " . $this->db->table("country_descriptions") . " cd1
+									FROM " . $this->db->table_name("countries") . " c
+									LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd1
 										ON (c.country_id = cd1.country_id AND cd1.language_id = '" . (int)$language_id . "')
-									LEFT JOIN " . $this->db->table("country_descriptions") . " cd2
+									LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd2
 										ON (c.country_id = cd2.country_id AND cd2.language_id = '" . (int)$default_language_id . "')
 									WHERE (cd1.name = '" . $this->db->escape($name) . "' OR cd2.name = '" . $this->db->escape($name) . "')
 										AND status = '1'

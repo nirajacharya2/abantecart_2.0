@@ -29,7 +29,7 @@ class ModelLocalisationZone extends Model {
 	 * @return int
 	 */
 	public function addZone($data) {
-		$this->db->query("INSERT INTO " . $this->db->table("zones") . "
+		$this->db->query("INSERT INTO " . $this->db->table_name("zones") . "
 						  SET status = '" . (int)$data['status'] . "',
 						        code = '" . $this->db->escape($data['code']) . "',
 						        country_id = '" . (int)$data['country_id'] . "'");
@@ -60,7 +60,7 @@ class ModelLocalisationZone extends Model {
 				$update[] = $f." = '".$this->db->escape($data[$f])."'";
 		}
 		if ( !empty($update) ) {
-			$this->db->query("UPDATE " . $this->db->table("zones") . " SET ". implode(',', $update) ." WHERE zone_id = '" . (int)$zone_id . "'");
+			$this->db->query("UPDATE " . $this->db->table_name("zones") . " SET ". implode(',', $update) ." WHERE zone_id = '" . (int)$zone_id . "'");
 			$this->cache->remove('localization');
 		}
 		
@@ -80,8 +80,8 @@ class ModelLocalisationZone extends Model {
 	 * @param int $zone_id
 	 */
 	public function deleteZone($zone_id) {
-		$this->db->query("DELETE FROM " . $this->db->table("zones") . " WHERE zone_id = '" . (int)$zone_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table("zone_descriptions") . " WHERE zone_id = '" . (int)$zone_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("zones") . " WHERE zone_id = '" . (int)$zone_id . "'");
+		$this->db->query("DELETE FROM " . $this->db->table_name("zone_descriptions") . " WHERE zone_id = '" . (int)$zone_id . "'");
 
 		$this->cache->remove('localization');
 	}
@@ -100,8 +100,8 @@ class ModelLocalisationZone extends Model {
 										  z.sort_order, 
 										  zd.name, 
 										  zd.language_id
-										FROM " . $this->db->table("zones") . " z
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd 
+										FROM " . $this->db->table_name("zones") . " z
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd 
 										ON (z.zone_id = zd.zone_id AND zd.language_id = '" . (int)$language_id . "')
 										WHERE z.zone_id = '" . (int)$zone_id . "'");
 		$ret_data = $query->row;
@@ -116,7 +116,7 @@ class ModelLocalisationZone extends Model {
 	public function getZoneDescriptions($zone_id) {
 		$zone_data = array();
 		$query = $this->db->query( "SELECT *
-									FROM " . $this->db->table("zone_descriptions") . " 
+									FROM " . $this->db->table_name("zone_descriptions") . " 
 									WHERE zone_id = '" . (int)$zone_id . "'");
 		foreach ($query->rows as $result) {
 			$zone_data[$result['language_id']] = array('name' => $result['name']);
@@ -134,7 +134,7 @@ class ModelLocalisationZone extends Model {
 		$default_language_id = $this->language->getDefaultLanguageID();
 		
 		if ($mode == 'total_only') {
-		    $sql = "SELECT count(*) as total FROM " . $this->db->table("zones") . " z ";
+		    $sql = "SELECT count(*) as total FROM " . $this->db->table_name("zones") . " z ";
 		}
 		else {
 		    $sql = "SELECT	z.zone_id, 
@@ -144,12 +144,12 @@ class ModelLocalisationZone extends Model {
 							zd.name, 
 							zd.language_id, 
 		    				COALESCE( cd1.name,cd2.name) as country 
-		    		FROM " . $this->db->table("zones") . " z ";
+		    		FROM " . $this->db->table_name("zones") . " z ";
 		}
-		$sql .= "LEFT JOIN " . $this->db->table("zone_descriptions") . " zd ON (z.zone_id = zd.zone_id AND zd.language_id = '" . (int)$language_id . "') ";
-		$sql .= "LEFT JOIN " . $this->db->table("countries") . " c ON (z.country_id = c.country_id)";
-		$sql .= "LEFT JOIN " . $this->db->table("country_descriptions") . " cd1 ON (c.country_id = cd1.country_id AND cd1.language_id = '" . (int)$language_id . "') ";
-		$sql .= "LEFT JOIN " . $this->db->table("country_descriptions") . " cd2 ON (c.country_id = cd2.country_id AND cd2.language_id = '" . (int)$default_language_id . "') ";
+		$sql .= "LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd ON (z.zone_id = zd.zone_id AND zd.language_id = '" . (int)$language_id . "') ";
+		$sql .= "LEFT JOIN " . $this->db->table_name("countries") . " c ON (z.country_id = c.country_id)";
+		$sql .= "LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd1 ON (c.country_id = cd1.country_id AND cd1.language_id = '" . (int)$language_id . "') ";
+		$sql .= "LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd2 ON (c.country_id = cd2.country_id AND cd2.language_id = '" . (int)$default_language_id . "') ";
 
 		if ( !empty($data['search']) )
 			$sql .= " WHERE ".$data['search'];
@@ -215,10 +215,10 @@ class ModelLocalisationZone extends Model {
 	
 		if ($zone_data === false) {
 			$query = $this->db->query( "SELECT *, COALESCE( zd1.name, zd2.name) as name 
-										FROM " . $this->db->table("zones") . " z
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd1
+										FROM " . $this->db->table_name("zones") . " z
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd1
 											ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "')
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd2
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd2
 											ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_language_id . "')
 										WHERE z.country_id = '" . (int)$country_id . "'
 										ORDER BY zd1.name, zd2.name");
@@ -242,10 +242,10 @@ class ModelLocalisationZone extends Model {
 
 		if ($zone_data === false) {
 			$query = $this->db->query( "SELECT z.*, COALESCE( zd1.name, zd2.name) as name
-										FROM " . $this->db->table("zones") . " z
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd1 ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "') 
-										LEFT JOIN " . $this->db->table("zone_descriptions") . " zd2 ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_language_id . "') 
-										INNER JOIN " . $this->db->table("zones_to_locations") . " zl
+										FROM " . $this->db->table_name("zones") . " z
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd1 ON (z.zone_id = zd1.zone_id AND zd1.language_id = '" . (int)$language_id . "') 
+										LEFT JOIN " . $this->db->table_name("zone_descriptions") . " zd2 ON (z.zone_id = zd2.zone_id AND zd2.language_id = '" . (int)$default_language_id . "') 
+										INNER JOIN " . $this->db->table_name("zones_to_locations") . " zl
 											ON ( zl.zone_id = z.zone_id AND zl.location_id = '".(int)$location_id."' )
 										ORDER BY zd1.name, zd2.name");
 			$zone_data = $query->rows;
@@ -261,7 +261,7 @@ class ModelLocalisationZone extends Model {
 	 */
 	public function getTotalZonesByCountryId($country_id) {
 		$query = $this->db->query( "SELECT count(*) AS total
-									FROM " . $this->db->table("zones") . " 
+									FROM " . $this->db->table_name("zones") . " 
 									WHERE country_id = '" . (int)$country_id . "'");
 	
 		return (int)$query->row['total'];
@@ -275,9 +275,9 @@ class ModelLocalisationZone extends Model {
 		$language_id = $this->language->getContentLanguageID();
 		$default_language_id = $this->language->getDefaultLanguageID();
 		
-		$query = $this->db->query("SELECT c.country_id FROM " . $this->db->table("countries") . " c
-								   LEFT JOIN " . $this->db->table("country_descriptions") . " cd1 ON (c.country_id = cd1.country_id AND cd1.language_id = '" . (int)$language_id . "')
-								   LEFT JOIN " . $this->db->table("country_descriptions") . " cd2 ON (c.country_id = cd2.country_id AND cd2.language_id = '" . (int)$default_language_id . "')
+		$query = $this->db->query("SELECT c.country_id FROM " . $this->db->table_name("countries") . " c
+								   LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd1 ON (c.country_id = cd1.country_id AND cd1.language_id = '" . (int)$language_id . "')
+								   LEFT JOIN " . $this->db->table_name("country_descriptions") . " cd2 ON (c.country_id = cd2.country_id AND cd2.language_id = '" . (int)$default_language_id . "')
 								   WHERE cd1.name = '" . $this->db->escape($name) . "' OR cd2.name = '" . $this->db->escape($name) . "' AND status = '1' LIMIT 1");
 
 		if ( $query->num_rows > 0 ) {

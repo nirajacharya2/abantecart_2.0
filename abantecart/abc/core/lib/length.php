@@ -81,8 +81,8 @@ class ALength{
 			$this->lengths = $cache_data;
 		} else{
 			$sql = "SELECT *, mc.length_class_id
-					FROM " . $this->db->table("length_classes") . " mc
-					LEFT JOIN " . $this->db->table("length_class_descriptions") . " mcd
+					FROM " . $this->db->table_name("length_classes") . " mc
+					LEFT JOIN " . $this->db->table_name("length_class_descriptions") . " mcd
 						ON (mc.length_class_id = mcd.length_class_id)
 					WHERE mcd.language_id = '" . $language_id . "'";
 			$length_class_query = $this->db->query($sql);

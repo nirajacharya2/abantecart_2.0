@@ -155,9 +155,9 @@ final class AConfig
         if (empty($settings)) {
             // set global settings (without extensions settings)
             $sql = "SELECT se.*
-                    FROM ".$db->table("settings")." se
+                    FROM ".$db->table_name("settings")." se
                     WHERE se.store_id = '0'
-                        AND se.`group` NOT IN (SELECT `key` FROM ".$db->table("extensions").")";
+                        AND se.`group` NOT IN (SELECT `key` FROM ".$db->table_name("extensions").")";
             $query = $db->query($sql);
             $settings = $query->rows;
             foreach ($settings as &$setting) {
@@ -208,9 +208,9 @@ final class AConfig
 
             if (empty($store_settings)) {
                 $sql = "SELECT se.`key`, se.`value`, st.store_id
-                      FROM ".$db->table('settings')." se
-                      RIGHT JOIN ".$db->table('stores')." st ON se.store_id = st.store_id
-                      WHERE se.store_id = (SELECT DISTINCT store_id FROM ".$db->table('settings')."
+                      FROM ".$db->table_name('settings')." se
+                      RIGHT JOIN ".$db->table_name('stores')." st ON se.store_id = st.store_id
+                      WHERE se.store_id = (SELECT DISTINCT store_id FROM ".$db->table_name('settings')."
                                            WHERE `group`='details'
                                            AND
                                            ( (`key` = 'config_url' AND (`value` LIKE '%".$db->escape($url)."'))
@@ -220,7 +220,7 @@ final class AConfig
                             AND st.status = 1
                             AND TRIM(se.`group`) NOT IN
                                                     (SELECT TRIM(`key`) AS `key`
-                                                    FROM ".$db->table("extensions").")";
+                                                    FROM ".$db->table_name("extensions").")";
                 $query = $db->query($sql);
                 $store_settings = $query->rows;
             }
@@ -289,8 +289,8 @@ final class AConfig
         if (empty($settings)) {
             // all extensions settings of store
             $sql = "SELECT se.*, e.type AS extension_type, e.key AS extension_txt_id
-                    FROM ".$db->table('settings')." se
-                    LEFT JOIN ".$db->table('extensions')." e ON se.`group` = e.`key`
+                    FROM ".$db->table_name('settings')." se
+                    LEFT JOIN ".$db->table_name('extensions')." e ON se.`group` = e.`key`
                     WHERE se.store_id='".(int)$this->cnfg['config_store_id']."' AND e.extension_id IS NOT NULL
                     ORDER BY se.store_id ASC, se.group ASC";
             $query = $db->query($sql);
@@ -322,11 +322,11 @@ final class AConfig
         //we don't use cache here cause domain may be different and we cannot change cache from control panel
         $db = $this->registry->get('db');
         $sql = "SELECT se.`key`, se.`value`, st.store_id
-                    FROM ".$db->table('settings')." se
-                    RIGHT JOIN ".$db->table('stores')." st 
+                    FROM ".$db->table_name('settings')." se
+                    RIGHT JOIN ".$db->table_name('stores')." st 
                             ON se.store_id = st.store_id
                     WHERE se.store_id = ".(int)$store_id." AND st.status = 1
-                    AND se.`group` NOT IN (SELECT `key` FROM ".$db->table("extensions").");";
+                    AND se.`group` NOT IN (SELECT `key` FROM ".$db->table_name("extensions").");";
         $query = $db->query($sql);
         $store_settings = $query->rows;
         foreach ($store_settings as $row) {

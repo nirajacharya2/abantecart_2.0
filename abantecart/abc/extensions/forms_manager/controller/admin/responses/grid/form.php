@@ -17,171 +17,186 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
+
 /**
  * Class ControllerResponsesGridForm
+ *
  * @property \abc\models\admin\ModelToolFormsManager $model_tool_forms_manager
  */
-class ControllerResponsesGridForm extends AController {
-	public function main() {
-		$this->loadLanguage('forms_manager/forms_manager');
-		$this->loadModel('tool/forms_manager');
+class ControllerResponsesGridForm extends AController
+{
+    public function main()
+    {
+        $this->loadLanguage( 'forms_manager/forms_manager' );
+        $this->loadModel( 'tool/forms_manager' );
 
-		//Clean up parametres if needed
-		if (isset($this->request->get[ 'keyword' ]) && $this->request->get[ 'keyword' ] == $this->language->get('filter_form')) {
-			unset($this->request->get[ 'keyword' ]);
-		}
+        //Clean up parameters if needed
+        if ( isset( $this->request->get['keyword'] ) && $this->request->get['keyword'] == $this->language->get( 'filter_form' ) ) {
+            unset( $this->request->get['keyword'] );
+        }
 
-		//Prepare filter config
-		$filter_params = array( 'status', 'keyword', 'match' );
-		$grid_filter_params = array( 'form_name', 'description', 'status' );
+        //Prepare filter config
+        $filter_params = array( 'status', 'keyword', 'match' );
+        $grid_filter_params = array( 'form_name', 'description', 'status' );
 
-		$filter_form = new AFilter(array( 'method' => 'get', 'filter_params' => $filter_params ));
-		$filter_grid = new AFilter(array( 'method' => 'post', 'grid_filter_params' => $grid_filter_params ));
+        $filter_form = new AFilter( array( 'method' => 'get', 'filter_params' => $filter_params ) );
+        $filter_grid = new AFilter( array( 'method' => 'post', 'grid_filter_params' => $grid_filter_params ) );
 
-		$total = $this->model_tool_forms_manager->getTotalForms(array_merge($filter_form->getFilterData(), $filter_grid->getFilterData()));
-		$response = new stdClass();
-		$response->page = $filter_grid->getParam('page');
-		$response->total = $filter_grid->calcTotalPages($total);
-		$response->records = $total;
+        $total = $this->model_tool_forms_manager->getTotalForms( array_merge( $filter_form->getFilterData(), $filter_grid->getFilterData() ) );
+        $response = new stdClass();
+        $response->page = $filter_grid->getParam( 'page' );
+        $response->total = $filter_grid->calcTotalPages( $total );
+        $response->records = $total;
 
-		$results = $this->model_tool_forms_manager->getForms(array_merge($filter_form->getFilterData(), $filter_grid->getFilterData()));
+        $results = $this->model_tool_forms_manager->getForms( array_merge( $filter_form->getFilterData(), $filter_grid->getFilterData() ) );
 
-		$i = 0;
-		foreach ($results as $result) {
+        $i = 0;
+        foreach ( $results as $result ) {
 
 
-			$response->rows[ $i ][ 'id' ] = $result[ 'form_id' ];
-			$response->rows[ $i ][ 'cell' ] = array(
-				$this->html->buildInput(array(
-					'name' => 'form_name[' . $result[ 'form_id' ] . ']',
-					'value' => $result[ 'form_name' ],
-				)),
-				$this->html->buildInput(array(
-					'name' => 'form_description[' . $result[ 'form_id' ] . ']',
-					'value' => $result[ 'description' ],
-				)),
-				$this->html->buildCheckbox(array(
-					'name' => 'form_status[' . $result[ 'form_id' ] . ']',
-					'value' => $result[ 'status' ],
-					'style' => 'btn_switch',
-				)),
-			);
-			$i++;
-		}
+            $response->rows[$i]['id'] = $result['form_id'];
+            $response->rows[$i]['cell'] = array(
+                $this->html->buildInput( array(
+                    'name'  => 'form_name['.$result['form_id'].']',
+                    'value' => $result['form_name'],
+                ) ),
+                $this->html->buildInput( array(
+                    'name'  => 'form_description['.$result['form_id'].']',
+                    'value' => $result['description'],
+                ) ),
+                $this->html->buildCheckbox( array(
+                    'name'  => 'form_status['.$result['form_id'].']',
+                    'value' => $result['status'],
+                    'style' => 'btn_switch',
+                ) ),
+            );
+            $i++;
+        }
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($response));
-	}
+        $this->load->library( 'json' );
+        $this->response->setOutput( AJson::encode( $response ) );
+    }
 
-	public function update() {
+    public function update()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		if (!$this->user->canModify('tool/forms_manager')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'tool/forms_manager'),
-						'reset_value' => true
-				));
-		}
+        if ( ! $this->user->canModify( 'tool/forms_manager' ) ) {
+            $error = new AError( '' );
 
-		$this->loadModel('tool/forms_manager');
-		$this->loadLanguage('forms_manager/forms_manager');
+            return $error->toJSONResponse( 'NO_PERMISSIONS_402',
+                array(
+                    'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'tool/forms_manager' ),
+                    'reset_value' => true,
+                ) );
+        }
 
-		switch ($this->request->post[ 'oper' ]) {
-			case 'del':
-				$ids = explode(',', $this->request->post[ 'id' ]);
-				if (!empty($ids))
-					foreach ($ids as $id) {
-						$this->model_tool_forms_manager->deleteForm($id);
-					}
-				break;
-			case 'save':
-				$fields = array( 'form_name', 'form_description', 'form_status' );
-				$ids = explode(',', $this->request->post[ 'id' ]);
-				if (!empty($ids))
-					foreach ($ids as $id) {
-						foreach ($fields as $f) {
+        $this->loadModel( 'tool/forms_manager' );
+        $this->loadLanguage( 'forms_manager/forms_manager' );
 
-							if ( $f == 'form_status' && !isset($this->request->post[ 'form_status' ][ $id ]) ) {
-								$this->request->post[ 'form_status' ][ $id ] = 0;
-							}
-							if ( isset($this->request->post[ $f ][ $id ]) ) {
-								$err = $this->_validateField($f, $this->request->post[ $f ][ $id ]);
-								if (!empty($err)) {
-									$error = new AError('');
-									return $error->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $err ));
-								}
-								$this->model_tool_forms_manager->updateForm(array( 'form_id' => $id, $f => $this->request->post[ $f ][ $id ] ));
-							}
-						}
-					}
+        switch ( $this->request->post['oper'] ) {
+            case 'del':
+                $ids = explode( ',', $this->request->post['id'] );
+                if ( ! empty( $ids ) ) {
+                    foreach ( $ids as $id ) {
+                        $this->model_tool_forms_manager->deleteForm( $id );
+                    }
+                }
+                break;
+            case 'save':
+                $fields = array( 'form_name', 'form_description', 'form_status' );
+                $ids = explode( ',', $this->request->post['id'] );
+                if ( ! empty( $ids ) ) {
+                    foreach ( $ids as $id ) {
+                        foreach ( $fields as $f ) {
 
-				break;
+                            if ( $f == 'form_status' && ! isset( $this->request->post['form_status'][$id] ) ) {
+                                $this->request->post['form_status'][$id] = 0;
+                            }
+                            if ( isset( $this->request->post[$f][$id] ) ) {
+                                $err = $this->_validateField( $f, $this->request->post[$f][$id] );
+                                if ( ! empty( $err ) ) {
+                                    $error = new AError( '' );
 
-			default:
+                                    return $error->toJSONResponse( 'VALIDATION_ERROR_406', array( 'error_text' => $err ) );
+                                }
+                                $this->model_tool_forms_manager->updateForm( array( 'form_id' => $id, $f => $this->request->post[$f][$id] ) );
+                            }
+                        }
+                    }
+                }
 
-		}
+                break;
 
-	}
+            default:
 
-	/**
-	 * update only one field
-	 *
-	 * @return void
-	 */
-	public function update_field() {
+        }
 
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+    }
 
-		if ( $this->request->is_POST() ) {
-			$this->loadModel('tool/forms_manager');
+    /**
+     * update only one field
+     *
+     * @return void
+     */
+    public function update_field()
+    {
 
-			foreach ($this->request->post as $field => $value ) {
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-				if(is_array($value)){
-					$data = array();
-					foreach($value as $id=>$val){
-						$data['form_id'] = $id;
-						$data[$field] = $val;
-						$this->model_tool_forms_manager->updateForm($data);
-					}
-				}else{
-					if((int)$this->request->get['form_id']){
-						$this->model_tool_forms_manager->updateForm(array('form_id' => $this->request->get['form_id'],$field => $value));
-					}
-				}
-			}
-		}
+        if ( $this->request->is_POST() ) {
+            $this->loadModel( 'tool/forms_manager' );
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+            foreach ( $this->request->post as $field => $value ) {
 
-	private function _validateField($field, $value) {
-		$err = '';
+                if ( is_array( $value ) ) {
+                    $data = array();
+                    foreach ( $value as $id => $val ) {
+                        $data['form_id'] = $id;
+                        $data[$field] = $val;
+                        $this->model_tool_forms_manager->updateForm( $data );
+                    }
+                } else {
+                    if ( (int)$this->request->get['form_id'] ) {
+                        $this->model_tool_forms_manager->updateForm( array( 'form_id' => $this->request->get['form_id'], $field => $value ) );
+                    }
+                }
+            }
+        }
 
-		if ( mb_strlen($value) < 1 ) {
-			$err = $field.": ". $this->language->get('error_required');
-		}
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+    }
 
-		return $err;
-	}
+    private function _validateField( $field, $value )
+    {
+        $err = '';
 
-	private function _validateDelete($id) {
-		return null;
-	}
+        if ( mb_strlen( $value ) < 1 ) {
+            $err = $field.": ".$this->language->get( 'error_required' );
+        }
+
+        return $err;
+    }
+
+    private function _validateDelete( $id )
+    {
+        return null;
+    }
 
 }

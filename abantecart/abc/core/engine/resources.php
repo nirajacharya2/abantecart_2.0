@@ -105,7 +105,7 @@ class AResource{
 		$type_data = $this->cache->pull($cache_key);
 		if ($type_data === false || empty($type_data['type_id'])) {
 			$sql = "SELECT * "
-					. "FROM " . $this->db->table("resource_types") . " "
+					. "FROM " . $this->db->table_name("resource_types") . " "
 					. "WHERE type_name = '" . $this->db->escape($this->type) . "'";
 			$query = $this->db->query($sql);
 			$type_data = $query->row;
@@ -184,7 +184,7 @@ class AResource{
 	 */
 	public function getIdByName($filename){
 		$sql = "SELECT resource_id
-				FROM " . $this->db->table("resource_descriptions") . "
+				FROM " . $this->db->table_name("resource_descriptions") . "
 				WHERE name like '%" . $this->db->escape($filename) . "%'
 				ORDER BY language_id";
 		$query = $this->db->query($sql);
@@ -252,12 +252,12 @@ class AResource{
 						COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
 						rt.type_name,
 						rt.default_icon
-					FROM " . $this->db->table("resource_library") . " rl " . "
-					LEFT JOIN " . $this->db->table("resource_descriptions") . " rd
+					FROM " . $this->db->table_name("resource_library") . " rl " . "
+					LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
 						ON (rl.resource_id = rd.resource_id)
-					LEFT JOIN " . $this->db->table("resource_descriptions") . " rdd
+					LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
 						ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '" . $this->language->getDefaultLanguageID() . "')
-					LEFT JOIN " . $this->db->table("resource_types") . " rt
+					LEFT JOIN " . $this->db->table_name("resource_types") . " rt
 						ON (rl.type_id = rt.type_id )
 					" . $where;
 
@@ -410,7 +410,7 @@ class AResource{
 			return $types;
 		}
 
-		$sql = "SELECT * FROM " . $this->db->table("resource_types") . " ";
+		$sql = "SELECT * FROM " . $this->db->table_name("resource_types") . " ";
 		$query = $this->db->query($sql);
 		$types = $query->rows;
 		$this->cache->push($cache_key, $types);
@@ -674,12 +674,12 @@ class AResource{
 					COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
 					rm.default,
 					rm.sort_order
-				FROM " . $this->db->table("resource_library") . " rl " . "
-				LEFT JOIN " . $this->db->table("resource_map") . " rm
+				FROM " . $this->db->table_name("resource_library") . " rl " . "
+				LEFT JOIN " . $this->db->table_name("resource_map") . " rm
 					ON rm.resource_id = rl.resource_id " . "
-				LEFT JOIN " . $this->db->table("resource_descriptions") . " rd
+				LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
 					ON (rl.resource_id = rd.resource_id AND rd.language_id = '" . $language_id . "')
-				LEFT JOIN " . $this->db->table("resource_descriptions") . " rdd
+				LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
 					ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '" . $this->language->getDefaultLanguageID() . "')
 				" . $where . "
 				ORDER BY rm.sort_order ASC";
@@ -754,13 +754,13 @@ class AResource{
 				COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
 				rm.default,
 				rm.sort_order
-			FROM " . $this->db->table("resource_library") . " rl " . "
-			LEFT JOIN " . $this->db->table("resource_map") . " rm
+			FROM " . $this->db->table_name("resource_library") . " rl " . "
+			LEFT JOIN " . $this->db->table_name("resource_map") . " rm
 				ON rm.resource_id = rl.resource_id " . "
-			LEFT JOIN " . $this->db->table("resource_descriptions") . " rd
+			LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
 				ON (rl.resource_id = rd.resource_id
 					AND rd.language_id = '" . $language_id . "')
-			LEFT JOIN " . $this->db->table("resource_descriptions") . " rdd
+			LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
 				ON (rl.resource_id = rdd.resource_id
 					AND rdd.language_id = '" . $default_language_id . "')
 			WHERE rm.object_name = '" . $this->db->escape($object_name) . "'

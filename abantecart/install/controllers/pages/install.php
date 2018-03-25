@@ -327,7 +327,7 @@ class progressbar implements AProgressBar
         $cnt = 0;
         $db = $this->registry->get('db');
         $res = $db->query("SELECT section, COUNT(DISTINCT `block`) AS cnt
-                            FROM ".$db->table('language_definitions')."
+                            FROM ".$db->table_name('language_definitions')."
                             GROUP BY section");
         foreach ($res->rows as $row) {
             $cnt += $row['cnt'];

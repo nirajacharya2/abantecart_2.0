@@ -178,11 +178,13 @@
 	</definition>
 	<definition>
 		<key>note_create_form_block</key>
-		<value><![CDATA[Внимание: Чтобы увидеть форму на витрине следует создать блок формы в меню Дизайн-><a href="%s">Блоки</a> и добавить его в макет страницы в Дизайн-><a href="%s">Макеты</a>.]]></value>
+		<value>
+			<![CDATA[Внимание: Чтобы увидеть форму на витрине следует создать блок формы в меню Дизайн-><a href="%s">Блоки</a> и добавить его в макет страницы в Дизайн-><a href="%s">Макеты</a>.]]></value>
 	</definition>
 	<definition>
 		<key>note_edit_layout</key>
-		<value><![CDATA[Внимание: Чтобы увидеть блок формы на витрине следует добавить его в макет страницы в Дизайн-><a href="%s">Макеты</a>. Чтобы создать новую форму перейди в меню Дизайн-><a href="%s">Менеджер форм</a> page.]]></value>
+		<value>
+			<![CDATA[Внимание: Чтобы увидеть блок формы на витрине следует добавить его в макет страницы в Дизайн-><a href="%s">Макеты</a>. Чтобы создать новую форму перейди в меню Дизайн-><a href="%s">Менеджер форм</a> page.]]></value>
 	</definition>
 	<definition>
 		<key>text_select_field_type</key>
@@ -205,13 +207,13 @@
 		<value><![CDATA[Метка-заполнитель :]]></value>
 	</definition>
 	<definition>
-        <key>entry_regexp_pattern</key>
-        <value><![CDATA[Паттерн Регулярного выражения:]]></value>
-    </definition>
+		<key>entry_regexp_pattern</key>
+		<value><![CDATA[Паттерн Регулярного выражения:]]></value>
+	</definition>
 	<definition>
-        <key>entry_error_text</key>
-        <value><![CDATA[Текст ошибки о неверном значении:]]></value>
-    </definition>
+		<key>entry_error_text</key>
+		<value><![CDATA[Текст ошибки о неверном значении:]]></value>
+	</definition>
 	<definition>
 		<key>entry_form</key>
 		<value><![CDATA[Форма]]></value>

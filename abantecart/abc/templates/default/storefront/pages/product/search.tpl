@@ -5,7 +5,7 @@
 
 <div class="contentpanel">
 
-	<h4 class="heading4"><?php echo $text_critea; ?></h4>
+	<h4 class="heading4"><?php echo $text_criteria; ?></h4>
 	<div class="form-inline">
 		<fieldset>
 			<div class="form-group col-xs-6 col-sm-2 col-lg-2">

@@ -34,7 +34,7 @@ class ModelExtensionDefaultPPPro extends Model
 
         if ( $this->config->get( 'default_pp_pro_status' ) ) {
             $sql = "SELECT *
-                    FROM ".$this->db->table("zones_to_locations")."
+                    FROM ".$this->db->table_name("zones_to_locations")."
                     WHERE location_id = '".(int)$this->config->get( 'default_pp_pro_location_id' )."'
                            AND country_id = '".(int)$address['country_id']."'
                            AND (zone_id = '".(int)$address['zone_id']."' OR zone_id = '0')";
@@ -93,7 +93,7 @@ class ModelExtensionDefaultPPPro extends Model
         }
 
         $this->db->query(
-            "INSERT INTO ".$this->db->table( "addresses" )."
+            "INSERT INTO ".$this->db->table_name( "addresses" )."
             SET
                 customer_id = '".(int)$this->customer->getId()."',
                 company = '".( has_value( $data['company'] ) ? $this->db->escape( $data['company'] ) : '' )."',
@@ -112,7 +112,7 @@ class ModelExtensionDefaultPPPro extends Model
 
         if ( isset( $data['default'] ) && $data['default'] == '1' ) {
             $this->db->query(
-                "UPDATE ".$this->db->table( "customers" )."
+                "UPDATE ".$this->db->table_name( "customers" )."
                 SET address_id = '".(int)$address_id."'
                 WHERE customer_id = '".(int)$this->customer->getId()."'" );
         }
@@ -124,7 +124,7 @@ class ModelExtensionDefaultPPPro extends Model
     {
         $result = $this->db->query(
                                     "SELECT country_id 
-                                     FROM ".$this->db->table( 'countries' )."
+                                     FROM ".$this->db->table_name( 'countries' )."
                                      WHERE iso_code_2 = '".strtoupper( $this->db->escape( $code ) )."'"
         );
         if ( $result->num_rows > 0 ) {
@@ -137,7 +137,7 @@ class ModelExtensionDefaultPPPro extends Model
     {
         $result = $this->db->query(
             'SELECT zone_id 
-            FROM '.$this->db->table( 'zones' ).'
+            FROM '.$this->db->table_name( 'zones' ).'
             WHERE country_id = "'.(int)$country_id.'"
             AND code = "'.strtoupper( $this->db->escape( $zone_code ) ).'"'
         );
