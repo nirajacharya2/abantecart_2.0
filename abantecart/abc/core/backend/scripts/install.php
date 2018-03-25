@@ -53,8 +53,8 @@ class Install implements ABCExec
     public function run(string $action, array $options)
     {
         $output = null;
-        $action = ! $action ? 'install' : $action;
-        if( $action == 'install'){
+        $action = ! $action ? 'app' : $action;
+        if( $action == 'app'){
             return $this->_install_app( $options );
         } elseif ( $action == 'package' ){
             return $this->_install_package( $options );
@@ -396,7 +396,7 @@ class Install implements ABCExec
 
     public function finish( string $action, array $options )
     {
-        if( $action == 'install' ){
+        if( $action == 'app' ){
             return $this->_final_message_app_install($options);
         } elseif ( $action == 'package' ){
             return $this->_final_message_package_install($options);

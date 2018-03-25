@@ -112,7 +112,7 @@ class Deploy implements ABCExec
         $content = "
 <?php
 // config file with current stage values
-return '".$stage_name.".config.php';
+return '".$stage_name."';
 ";
         if ( ! fwrite($file, $content)) {
             $result[] = 'Cannot to write temporary file '.$file;
