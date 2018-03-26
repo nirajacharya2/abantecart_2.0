@@ -48,9 +48,13 @@ if(!preg_match('/^--(.*)$/', $command)) {
 	echo "Wrong command.\n\n";
     $class = $action = '';
 }
-
-require realpath('./core/init/backend.php');
-require realpath('./core/backend/interface.php');
+try {
+    require realpath( './core/init/backend.php' );
+    require realpath( './core/backend/interface.php' );
+}catch(AException $e){
+	showError('Error: '.$e->getMessage());
+	exit(1);
+}
 //set sign
 ABC::env('abcexec', true);
 

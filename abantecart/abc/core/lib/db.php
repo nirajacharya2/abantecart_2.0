@@ -30,7 +30,6 @@ class ADB{
      * @var $orm Capsule
      */
     protected $orm;
-    static $ORM;
     protected $db_config = array();
     public $error = '';
     public $registry;
@@ -59,9 +58,11 @@ class ADB{
             $this->orm->addConnection($this->db_config);
             $this->orm->setAsGlobal();  //this is important
             $this->orm->bootEloquent();
-            self::$ORM = $this->orm;
-        }catch(AException $e){
-            throw new AException(AC_ERR_MYSQL, 'Error: Could not load ORM-database!');
+            $this->orm::connection()->getDatabaseName();
+            //check connection
+            $this->orm::connection()->table($this->orm::raw('DUAL'))->first([$this->orm::raw(1)]);
+        }catch(\PDOException $e){
+            throw new AException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
         }
         $this->registry = Registry::getInstance();
     }

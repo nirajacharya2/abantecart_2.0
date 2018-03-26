@@ -840,7 +840,7 @@ EOD;
                         ],
                         '--db_name'          => [
                             'description'   => 'Database username',
-                            'default_value' => 'abantecart',
+                            'default_value' => 'your_database_name',
                             'required'      => true,
                         ],
                         '--db_driver'        => [
