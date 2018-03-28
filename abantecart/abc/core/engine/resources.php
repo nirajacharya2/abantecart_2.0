@@ -276,7 +276,7 @@ class AResource{
 		} else {
 			if (!empty($resource)) {
 				reset($resource);
-				list(, $result) = each($resource);
+				$result = current($resource);
 			}
 		}
 

@@ -22,6 +22,7 @@ namespace abc\models\admin;
 
 use abc\core\engine\Model;
 use abc\core\lib\AConnect;
+use abc\core\lib\AError;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -228,14 +229,25 @@ class ModelLocalisationCurrency extends Model
             $url = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code.'&to_currency='.$result['code'].'&apikey='.$api_key;
             $connect = new AConnect(true);
             $json = $connect->getData($url);
-            if ( ! isset($json["Error Message"])) {
+            if(!$json){
+                $msg = 'Currency Auto Updater Warning: Currency rate code '.$result['code'].' not updated.';
+                $error = new AError($msg);
+                $error->toLog()->toMessages();
+                continue;
+            }
+            if ( isset( $json["Realtime Currency Exchange Rate"]["5. Exchange Rate"] )) {
                 $value = (float)$json["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
                 $this->db->query(
                     "UPDATE ".$this->db->table_name("currencies")." 
                     SET value = '".$value."', 
                         date_modified = NOW() 
                     WHERE code = '".$this->db->escape($result['code'])."'");
+            }elseif( isset($json['Information']) ){
+                $msg = 'Currency Auto Updater Info: '.$json['Information'];
+                $error = new AError($msg);
+                $error->toLog()->toMessages();
             }
+            usleep(500);
         }
         $sql = "UPDATE ".$this->db->table_name("currencies")." 
               SET value = '1.00000',

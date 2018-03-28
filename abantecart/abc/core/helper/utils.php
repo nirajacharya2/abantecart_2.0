@@ -253,7 +253,7 @@ class AHelperUtils extends AHelper
 
             $i = 0;
             while (in_array($seo_key, $keywords) && $i < 20) {
-                $seo_key = $seo_key.'_'.($object_id ? $object_id : $i);
+                $seo_key = $seo_key.ABC::env('SEO_URL_SEPARATOR').($object_id ? $object_id : $i);
                 $i++;
             }
         }
