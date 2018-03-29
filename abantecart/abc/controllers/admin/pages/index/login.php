@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperSystemCheck;
@@ -121,6 +122,11 @@ class ControllerPagesIndexLogin extends AController {
 				$this->error['warning'] .= $log['body']."\n";
 			}
 		}
+
+        //non-secure check
+        if( ABC::env('HTTPS') !== true && $this->config->get('config_ssl_url') ){
+            $this->error['warning'] .= sprintf($this->language->get('error_login_secure'),'https://' . ABC::env('REAL_HOST') . ABC::env('HTTP_DIR_NAME') . '/?s='.ABC::env('ADMIN_SECRET'));
+        }
 
 		$this->view->assign('error_warning', $this->error['warning']);
 		$this->view->assign('forgot_password', $this->html->getSecureURL('index/forgot_password'));

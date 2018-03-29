@@ -455,7 +455,7 @@ class ControllerPagesCheckoutPayment extends AController{
             unset($this->session->data['used_balance'], $this->request->get['balance'], $this->session->data['used_balance_full']);
         }
         if ($action == 'apply' || $action == 'reapply'){
-            $balance = $this->currency->convert($this->customer->getBalance(), $this->config->get('config_currency'), $this->session->data['currency']);
+            $balance = $this->customer->getBalance();
             $order_totals = $this->cart->buildTotalDisplay(true);
             $order_total = $order_totals['total'];
             if ($this->session->data['used_balance']){

@@ -67,26 +67,30 @@ class ModelCatalogProduct extends Model
      *
      * @return int
      */
-    public function isStockTrackable($product_id)
+    public function isStockTrackable( $product_id )
     {
-        if ( ! (int)$product_id) {
+        if ( ! (int)$product_id ) {
             return 0;
         }
-        //check main product
-        $query = $this->db->query("SELECT subtract
-                                    FROM ".$this->db->table_name("products")." p
-                                    WHERE p.product_id = '".(int)$product_id."'");
-
-        $track_status = (int)$query->row['subtract'];
+        $track_status = 0;
         //check product option values
-        $query = $this->db->query("SELECT pov.subtract AS subtract
-                                    FROM ".$this->db->table_name("product_options")." po
-                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+        $query = $this->db->query( "SELECT pov.product_option_value_id, pov.subtract AS subtract
+                                    FROM ".$this->db->table( "product_options" )." po
+                                    LEFT JOIN ".$this->db->table( "product_option_values" )." pov
                                         ON (po.product_option_id = pov.product_option_id)
-                                    WHERE po.product_id = '".(int)$product_id."'  AND po.status = 1");
+                                    WHERE po.product_id = '".(int)$product_id."'  AND po.status = 1" );
 
-        foreach ($query->rows as $row) {
-            $track_status += $row['subtract'];
+        foreach ( $query->rows as $row ) {
+            $track_status += (int)$row['subtract'];
+        }
+        //if no options - check whole product subtract
+        if ( ! $track_status && ! $query->num_rows ) {
+            //check main product
+            $query = $this->db->query( "SELECT subtract
+                                       FROM ".$this->db->table( "products" )." p
+                                       WHERE p.product_id = '".(int)$product_id."'" );
+
+            $track_status = (int)$query->row['subtract'];
         }
 
         return $track_status;
@@ -156,7 +160,7 @@ class ModelCatalogProduct extends Model
      *
      * @param int $product_id
      *
-     * @return int
+     * @return int|true - integer as quantity, true as availability when trackstock is off
      */
     public function hasAnyStock($product_id)
     {
@@ -182,7 +186,7 @@ class ModelCatalogProduct extends Model
             }
             //if some of option value have subtract NO - think product is available
             if ($total_quantity == 0 && $notrack_qnt) {
-                $total_quantity = $notrack_qnt;
+                $total_quantity = true;
             }
         } else {
             //get product quantity without options
