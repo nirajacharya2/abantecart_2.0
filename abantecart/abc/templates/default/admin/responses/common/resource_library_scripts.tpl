@@ -203,16 +203,8 @@ var loadMedia = function (type, wrapper) {
 		dataType: 'json',
 		global: false,
 		success: function (json) {
-			if (json.items.length<1 && type != default_type) {
-				$( '#type_' + type).hide();
-				$( '#panel_' + type ).hide();
-				return;
-			}
-
-			if(json.items.length>0 || type == default_type){
-				$( '#type_' + type).show();
-				$( '#panel_' + type ).show();
-			}
+			$( '#type_' + type).show();
+			$( '#panel_' + type ).show();
 
 			var html = '';
 			var t = new Date().getTime();
