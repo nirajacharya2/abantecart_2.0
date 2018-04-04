@@ -118,6 +118,7 @@ class ControllerPagesSettings extends AController
             'GD' => (extension_loaded('gd') ? true : false),
             'CURL' => (extension_loaded('curl') ? true : false),
             'ZLIB' => (extension_loaded('zlib') ? true : false),
+            'PHAR' => (extension_loaded('phar') ? true : false),
             'MultiByte String (mbstring)' => (extension_loaded('mbstring') && function_exists('mb_internal_encoding') ? true : false),
             'OpenSSL' => (extension_loaded('openssl') ? true : false),
         ];

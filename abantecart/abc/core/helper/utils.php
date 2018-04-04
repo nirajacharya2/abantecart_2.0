@@ -812,7 +812,7 @@ class AHelperUtils extends AHelper
         foreach ($xml_files as $place => $files) {
             foreach ($files as $filename) {
                 if (file_exists($filename)) {
-                    $additional_config = simplexml_load_file($filename);
+                    $additional_config = @simplexml_load_file($filename);
                     //if error - writes all
                     if ($additional_config === false) {
                         foreach (libxml_get_errors() as $error) {

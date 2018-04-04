@@ -153,6 +153,12 @@ class ModelInstall extends Model
         if ( ! extension_loaded('zlib')) {
             $this->error['warning'] = 'Warning: ZLIB extension needs to be loaded for AbanteCart to work!';
         }
+        if ( ! extension_loaded('openssl')) {
+            $this->error['warning'] = 'Warning: OpenSSL extension needs to be loaded for AbanteCart to work!';
+        }
+        if ( ! extension_loaded('phar')) {
+            $this->error['warning'] = 'Warning: PHAR extension needs to be loaded for AbanteCart to work!';
+        }
 
         if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
             $this->error['warning'] = 'Warning: Config directory needs to be writable for AbanteCart to work!';

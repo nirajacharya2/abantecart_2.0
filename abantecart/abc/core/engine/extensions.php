@@ -320,7 +320,12 @@ class ExtensionsApi
             foreach ($extensions as $ext) {
                 //skip other directory not containing extensions
                 if (is_file($ext.'/config.xml')) {
-                    $this->extensions_dir[] = str_replace(ABC::env('DIR_APP_EXTENSIONS'), '', $ext);
+                    $ext_text_id = basename($ext);
+                    $xml = @simplexml_load_file($ext . '/config.xml');
+                    //be sure that extension dirname equal extension-text-id in config.xml
+                    if( $xml !== false && (string)$xml->id == $ext_text_id) {
+                        $this->extensions_dir[] = $ext_text_id;
+                    }
                 }
             }
         }
@@ -330,7 +335,9 @@ class ExtensionsApi
             //get extensions from db
             $query = $this->getExtensionsList();
             foreach ($query->rows as $result) {
-                $this->db_extensions[] = $result['key'];
+                if(trim($result['key'])) {
+                    $this->db_extensions[] = $result['key'];
+                }
             }
 
             //check if we have extensions that has record in db, but missing files
@@ -494,8 +501,7 @@ class ExtensionsApi
             }
         }
 
-        $sql
-            = "SELECT DISTINCT
+        $sql = "SELECT DISTINCT
                       e.extension_id,
                       e.type,
                       e.key,
@@ -513,7 +519,7 @@ class ExtensionsApi
                 LEFT JOIN ".$this->db->table_name("settings")." s
                     ON ( s.`group` = e.`key` AND s.`key` = CONCAT(e.`key`,'_status') )
                 LEFT JOIN ".$this->db->table_name("stores")." st ON st.store_id = s.store_id
-                WHERE e.`type` ";
+                WHERE e.key<>'' AND  e.`type` ";
 
         if (AHelperUtils::has_value($data['filter']) && $data['filter'] != 'extensions') {
             $sql .= " = '".$this->db->escape($data['filter'])."'";

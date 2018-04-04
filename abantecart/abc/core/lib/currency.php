@@ -219,7 +219,7 @@ final class ACurrency
         }
         //check if number is negative
         $sign = '';
-        if ($value < 0) {
+        if (round($value, $decimal_place) < 0) {
             $sign = '-';
         }
 
