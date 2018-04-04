@@ -29,7 +29,7 @@
 	</li>
 	<li>
 	<a title="<?php echo $text_address; ?>" data-toggle="tooltip" href="<?php echo $address; ?>" data-original-title="<?php echo $text_address; ?>">
-	<i class="fa fa-book"></i> <span class="badge badge-success"><?php echo $total_adresses; ?></span>
+	<i class="fa fa-book"></i> <span class="badge badge-success"><?php echo $total_addresses; ?></span>
 	</a>
 	</li>
 	<?php echo $this->getHookVar('account_dash_icons'); ?>
@@ -80,7 +80,7 @@
 			<?php echo $text_address; ?>
 			</div>
 			<div class="dash-tile-icon"><i class="fa fa-book"></i></div>
-			<div class="dash-tile-text"><?php echo $total_adresses; ?></div>
+			<div class="dash-tile-text"><?php echo $total_addresses; ?></div>
 		</div>
 	</a>	
 	</div>

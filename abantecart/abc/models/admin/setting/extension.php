@@ -30,13 +30,14 @@ if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
 class ModelSettingExtension extends Model
 {
     /*
-    * Get enabled payment extensions. Used in configuration for shipping extensions
+    * Get installed payment extensions. Used in configuration for shipping extensions
     */
     public function getPayments()
     {
-        $query = $this->db->query( "SELECT *
-                                   FROM " . $this->db->table( "extensions" ) . "
-                                   WHERE `type` = 'payment'" );
+        $query = $this->db->query( "SELECT e.*
+                                   FROM " . $this->db->table("extensions") . " e
+                                   RIGHT JOIN " . $this->db->table("settings") . " s ON s.group = e.key
+                                   WHERE e.`type` = 'payment'" );
 
         return $query->rows;
     }
