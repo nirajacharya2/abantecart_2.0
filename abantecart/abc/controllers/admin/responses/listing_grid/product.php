@@ -32,6 +32,12 @@ if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
+/**
+ * Class ControllerResponsesListingGridProduct
+ *
+ * @package abc\controllers\admin
+ * @property \abc\models\admin\ModelCatalogProduct $model_catalog_product
+ */
 class ControllerResponsesListingGridProduct extends AController
 {
     public $data = array();
@@ -64,14 +70,16 @@ class ControllerResponsesListingGridProduct extends AController
         $filter_grid = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
         $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
 
-        $total = $this->model_catalog_product->getTotalProducts($data);
+        $results = $this->model_catalog_product->getProducts($data);
+
+        $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter_grid->getParam('page');
         $response->total = $filter_grid->calcTotalPages($total);
         $response->records = $total;
         $response->userdata = new stdClass();
         $response->userdata->classes = array();
-        $results = $this->model_catalog_product->getProducts($data);
+
 
         $product_ids = array();
         foreach ($results as $result) {

@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\lib;
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
@@ -157,6 +158,11 @@ class ADB{
              */
             $output = new \stdClass();
             $output->row = isset($data[0]) ? $data[0] : array ();
+            //get total rows count for pagination
+            if($data) {
+                $output->total_num_rows = $this->sql_get_row_count();
+                $data[0]['total_num_rows'] = $output->total_num_rows;
+            }
             $output->rows = $data;
             $output->num_rows = sizeof($data);
             return $output;
@@ -211,6 +217,29 @@ class ADB{
     public function getLastId(){
         $orm = $this->orm;
         return $orm::connection()->getPdo()->lastInsertId();
+    }
+
+    /**
+     * TODO: need to add support other db-drivers
+     * @return bool
+     */
+    public function raw_sql_row_count(){
+        if($this->db_config['driver'] == 'mysql'){
+            // turn on total row calculation
+            return $this->orm::raw( 'SQL_CALC_FOUND_ROWS');
+        }
+        return false;
+    }
+    /**
+     * TODO: need to add support other db-drivers
+     * @return bool
+     */
+    public function sql_get_row_count(){
+        if($this->db_config['driver'] == 'mysql'){
+            // turn on total row calculation
+            return $this->orm::selectOne( 'select found_rows() as total' )->total;
+        }
+        return false;
     }
 
     /**
