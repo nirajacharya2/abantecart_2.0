@@ -75,8 +75,8 @@ class ModelCatalogProduct extends Model
         $track_status = 0;
         //check product option values
         $query = $this->db->query( "SELECT pov.product_option_value_id, pov.subtract AS subtract
-                                    FROM ".$this->db->table( "product_options" )." po
-                                    LEFT JOIN ".$this->db->table( "product_option_values" )." pov
+                                    FROM ".$this->db->table_name( "product_options" )." po
+                                    LEFT JOIN ".$this->db->table_name( "product_option_values" )." pov
                                         ON (po.product_option_id = pov.product_option_id)
                                     WHERE po.product_id = '".(int)$product_id."'  AND po.status = 1" );
 
@@ -87,7 +87,7 @@ class ModelCatalogProduct extends Model
         if ( ! $track_status && ! $query->num_rows ) {
             //check main product
             $query = $this->db->query( "SELECT subtract
-                                       FROM ".$this->db->table( "products" )." p
+                                       FROM ".$this->db->table_name( "products" )." p
                                        WHERE p.product_id = '".(int)$product_id."'" );
 
             $track_status = (int)$query->row['subtract'];
