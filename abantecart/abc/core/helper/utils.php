@@ -389,7 +389,7 @@ class AHelperUtils extends AHelper
         foreach ($dirs as $part) {
             $dir .= $part.'/';
             if ( ! is_dir($dir) && strlen($dir)) {
-                $result = mkdir($dir, $perms);
+                $result = @mkdir($dir, $perms);
                 if ( ! $result) {
                     return [
                         'result'  => false,
@@ -414,7 +414,7 @@ class AHelperUtils extends AHelper
             foreach ($objects as $obj) {
                 if ($obj != "." && $obj != "..") {
                     @chmod($dir."/".$obj, 0777);
-                    $err = is_dir($dir."/".$obj) ? self::RemoveDirRecursively($dir."/".$obj) : unlink($dir."/".$obj);
+                    $err = is_dir($dir."/".$obj) ? self::RemoveDirRecursively($dir."/".$obj) : @unlink($dir."/".$obj);
                     if ( ! $err) {
                         $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir."/".$obj."'.";
 
@@ -426,7 +426,7 @@ class AHelperUtils extends AHelper
                 }
             }
             reset($objects);
-            $result = rmdir($dir);
+            $result = @rmdir($dir);
 
             return ['result' => $result];
         } else {

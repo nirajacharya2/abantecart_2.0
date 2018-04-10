@@ -336,7 +336,10 @@ class AssetPublisherCopy{
                     //check parent directory before rename
                     $parent_dir = dirname($live_dir);
                     if(!is_dir($parent_dir)){
-                        AHelperUtils::MakeNestedDirs($parent_dir);
+                        $results = AHelperUtils::MakeNestedDirs($parent_dir);
+                        if(!$results['result']){
+                            $this->errors[] = $results['message'];
+                        }
                     }
                     //try to move to production
                     if (!rename($new_temp_dir, $live_dir)) {

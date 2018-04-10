@@ -447,7 +447,7 @@ class Install implements ABCExec
         }
 
         if ( ! ini_get('file_uploads')) {
-            $errors['warning'] = 'Warning: file_uploads needs to be enabled in PHP!';
+            $errors['warning'] = 'Warning: "file_uploads" needs to be enabled in PHP!';
         }
 
         if (ini_get('session.auto_start')) {
@@ -474,35 +474,35 @@ class Install implements ABCExec
         }
 
         if ( ! is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['warning'] = 'Warning: abc/config folder and files needs to be writable for AbanteCart to be installed!';
+            $errors['warning'] = 'Warning: '.ABC::env('DIR_CONFIG').' folder and files needs to be writable for AbanteCart to be installed!';
         }
 
         if ( ! is_writable(ABC::env('DIR_SYSTEM'))) {
-            $errors['warning'] = 'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: System directory '.ABC::env('DIR_SYSTEM').' and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_CACHE'))) {
-            $errors['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Cache directory '.ABC::env('DIR_CACHE').' needs to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_LOGS'))) {
-            $errors['warning'] = 'Warning: Logs directory needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Logs directory '.ABC::env('DIR_LOGS').' needs to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_PUBLIC').'images')) {
-            $errors['warning'] = 'Warning: Image directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Image directory '.ABC::env('DIR_PUBLIC').'images and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_PUBLIC').'images/thumbnails')) {
             if ( is_dir(ABC::env('DIR_PUBLIC').'images/thumbnails') ) {
-                $errors['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
+                $errors['warning'] = 'Warning: '.ABC::env('DIR_PUBLIC').'images/thumbnails directory needs to be writable for AbanteCart to work!';
             } else {
                 $result = mkdir(ABC::env('DIR_PUBLIC').'images/thumbnails', 0777, true);
                 if ($result) {
                     chmod(ABC::env('DIR_PUBLIC').'images/thumbnails', 0777);
                     chmod(ABC::env('DIR_PUBLIC').'image', 0777);
                 } else {
-                    $errors['warning'] = 'Warning: images/thumbnails does not exists!';
+                    $errors['warning'] = 'Warning: '.ABC::env('DIR_PUBLIC').' images/thumbnails does not exists!';
                 }
             }
         }
@@ -512,15 +512,15 @@ class Install implements ABCExec
         }
 
         if ( ! is_writable(ABC::env('DIR_APP').'downloads')) {
-            $errors['warning'] = 'Warning: Download directory needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Download directory '.ABC::env('DIR_APP').'downloads'.' needs to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
-            $errors['warning'] = 'Warning: Extensions directory needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Extensions directory '.ABC::env('DIR_APP_EXTENSIONS').' needs to be writable for AbanteCart to work!';
         }
 
         if ( ! is_writable(ABC::env('DIR_PUBLIC').'resources')) {
-            $errors['warning'] = 'Warning: Resources directory needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Resources directory '.ABC::env('DIR_PUBLIC').'resources needs to be writable for AbanteCart to work!';
         }
 
         return $errors;
