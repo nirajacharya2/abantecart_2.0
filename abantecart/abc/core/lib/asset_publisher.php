@@ -342,10 +342,10 @@ class AssetPublisherCopy{
                         }
                     }
                     //try to move to production
-                    if (!rename($new_temp_dir, $live_dir)) {
+                    if (! @rename($new_temp_dir, $live_dir)) {
                         $this->errors[] = __CLASS__.': Cannot to rename temporary directory ' .$new_temp_dir.' to live '.$live_dir;
                         //revert old assets
-                        rename($old_temp_dir, $live_dir);
+                        @rename($old_temp_dir, $live_dir);
                         return false;
                     }else{
                         //if all fine - clean old silently
