@@ -35,8 +35,8 @@ class ModelSettingExtension extends Model
     public function getPayments()
     {
         $query = $this->db->query( "SELECT e.*
-                                   FROM " . $this->db->table("extensions") . " e
-                                   RIGHT JOIN " . $this->db->table("settings") . " s ON s.group = e.key
+                                   FROM " . $this->db->table_name("extensions") . " e
+                                   RIGHT JOIN " . $this->db->table_name("settings") . " s ON s.group = e.key
                                    WHERE e.`type` = 'payment'" );
 
         return $query->rows;

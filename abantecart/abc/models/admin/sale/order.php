@@ -945,8 +945,7 @@ class ModelSaleOrder extends Model
         if ($mode == 'total_only') {
             $total_sql = 'count(*) as total';
         } else {
-            $total_sql
-                = "o.order_id,
+            $total_sql = $this->db->raw_sql_row_count(). " o.order_id,
                         CONCAT(o.firstname, ' ', o.lastname) AS name,
                         (SELECT osd.name
                          FROM ".$this->db->table_name("order_status_descriptions")." osd

@@ -32,6 +32,12 @@ if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
+/**
+ * Class ControllerResponsesListingGridCategory
+ *
+ * @package abc\controllers\admin
+ * @property \abc\models\admin\ModelCatalogCategory $model_catalog_category
+ */
 class ControllerResponsesListingGridCategory extends AController
 {
     public $data = array();
@@ -77,14 +83,13 @@ class ControllerResponsesListingGridCategory extends AController
             $new_level = (integer)$this->request->post["n_level"] + 1;
         }
 
-        $total = $this->model_catalog_category->getTotalCategories($filter_data);
+        $results = $this->model_catalog_category->getCategoriesData($filter_data);
+        $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter->getParam('page');
         $response->total = $filter->calcTotalPages($total);
         $response->records = $total;
         $response->userdata = new stdClass();
-
-        $results = $this->model_catalog_category->getCategoriesData($filter_data);
 
         //build thumbnails list
         $category_ids = array();
@@ -107,8 +112,6 @@ class ControllerResponsesListingGridCategory extends AController
         foreach ($results as $result) {
             $thumbnail = $thumbnails[$result['category_id']];
             $response->rows[$i]['id'] = $result['category_id'];
-            $cnt = $this->model_catalog_category->getCategoriesData(array('parent_id' => $result['category_id']), 'total_only');
-
             if ( ! $result['products_count']) {
                 $products_count = 0;
             } else {
@@ -146,8 +149,9 @@ class ControllerResponsesListingGridCategory extends AController
                     'style' => 'btn_switch',
                 )),
                 $products_count,
-                $cnt
-                .($cnt ?
+                //TODO: need to think how to remove html-code from here
+                $result['subcategory_count']
+                .($result['subcategory_count'] ?
                     '&nbsp;<a class="btn_action btn_grid grid_action_expand" href="#" rel="parent_id='.$result['category_id'].'" title="'.$this->language->get('text_view').'">'.
                     '<i class="fa fa-folder-open"></i></a>'
                     : ''),

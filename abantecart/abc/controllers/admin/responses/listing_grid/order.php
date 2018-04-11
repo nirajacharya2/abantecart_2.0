@@ -17,262 +17,283 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
-class ControllerResponsesListingGridOrder extends AController {
-	public $error = array();
-	public $data = array();
-	public function main() {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+class ControllerResponsesListingGridOrder extends AController
+{
+    public $error = array();
+    public $data = array();
 
-		$this->loadLanguage('sale/order');
-		$this->loadModel('sale/order');
+    public function main()
+    {
 
-		$page = $this->request->post[ 'page' ]; // get the requested page
-		$limit = $this->request->post[ 'rows' ]; // get how many rows we want to have into the grid
-		$sidx = $this->request->post[ 'sidx' ]; // get index row - i.e. user click to sort
-		$sord = $this->request->post[ 'sord' ]; // get the direction
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
+        $this->loadLanguage( 'sale/order' );
+        $this->loadModel( 'sale/order' );
 
-		// process jGrid search parameter
-		$allowedFields = array_merge(array ('name', 'order_id', 'date_added', 'total'), (array)$this->data['allowed_fields']);
-		$allowedSortFields = array_merge(array ('customer_id', 'order_id', 'name', 'status', 'date_added', 'total'), (array)$this->data['allowed_sort_fields']);
+        $page = $this->request->post['page']; // get the requested page
+        $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
+        $sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
+        $sord = $this->request->post['sord']; // get the direction
 
-		$allowedDirection = array( 'asc', 'desc' );
+        // process jGrid search parameter
+        $allowedFields = array_merge( array( 'name', 'order_id', 'date_added', 'total' ), (array)$this->data['allowed_fields'] );
+        $allowedSortFields = array_merge( array( 'customer_id', 'order_id', 'name', 'status', 'date_added', 'total' ), (array)$this->data['allowed_sort_fields'] );
 
-		if (!in_array($sidx, $allowedSortFields)) $sidx = $allowedSortFields[ 0 ];
-		if (!in_array($sord, $allowedDirection)) $sord = $allowedDirection[ 0 ];
+        $allowedDirection = array( 'asc', 'desc' );
 
-		if (in_array($sidx,array('customer_id','order_id','date_added','total'))) {
-			$sidx = 'o.' . $sidx;
-		}
+        if ( ! in_array( $sidx, $allowedSortFields ) ) {
+            $sidx = $allowedSortFields[0];
+        }
+        if ( ! in_array( $sord, $allowedDirection ) ) {
+            $sord = $allowedDirection[0];
+        }
 
-		$data = array(
-			'sort' => $sidx,
-			'order' => $sord,
-			'start' => ($page - 1) * $limit,
-			'limit' => $limit,
-		);
-		if (isset($this->request->get[ 'status' ]) && $this->request->get[ 'status' ] != ''){
-			$data[ 'filter_order_status_id' ] = $this->request->get[ 'status' ];
-		}
-		if (AHelperUtils::has_value($this->request->get[ 'customer_id' ])){
-			$data[ 'filter_customer_id' ] = $this->request->get[ 'customer_id' ];
-		}
-		if (AHelperUtils::has_value($this->request->get[ 'product_id' ])){
-			$data[ 'filter_product_id' ] = $this->request->get[ 'product_id' ];
-		}
+        if ( in_array( $sidx, array( 'customer_id', 'order_id', 'date_added', 'total' ) ) ) {
+            $sidx = 'o.'.$sidx;
+        }
 
-		if (isset($this->request->post[ '_search' ]) && $this->request->post[ '_search' ] == 'true') {
-			$searchData = json_decode(htmlspecialchars_decode($this->request->post[ 'filters' ]), true);
+        $data = array(
+            'sort'  => $sidx,
+            'order' => $sord,
+            'start' => ( $page - 1 ) * $limit,
+            'limit' => $limit,
+        );
+        if ( isset( $this->request->get['status'] ) && $this->request->get['status'] != '' ) {
+            $data['filter_order_status_id'] = $this->request->get['status'];
+        }
+        if ( AHelperUtils::has_value( $this->request->get['customer_id'] ) ) {
+            $data['filter_customer_id'] = $this->request->get['customer_id'];
+        }
+        if ( AHelperUtils::has_value( $this->request->get['product_id'] ) ) {
+            $data['filter_product_id'] = $this->request->get['product_id'];
+        }
 
-			foreach ($searchData[ 'rules' ] as $rule) {
-				if (!in_array($rule[ 'field' ], $allowedFields)) continue;
-				$data[ 'filter_' . $rule[ 'field' ] ] = $rule[ 'data' ];
-				if ($rule[ 'field' ] == 'date_added') {
-					$data[ 'filter_' . $rule[ 'field' ] ] = AHelperUtils::dateDisplay2ISO($rule[ 'data' ]);
-				}
-			}
-		}
+        if ( isset( $this->request->post['_search'] ) && $this->request->post['_search'] == 'true' ) {
+            $searchData = json_decode( htmlspecialchars_decode( $this->request->post['filters'] ), true );
 
-		$this->loadModel('localisation/order_status');
-		$results = $this->model_localisation_order_status->getOrderStatuses();
-		$statuses = array( '' => $this->language->get('text_select_status'), );
-		foreach ($results as $item) {
-			$statuses[ $item[ 'order_status_id' ] ] = $item[ 'name' ];
-		}
+            foreach ( $searchData['rules'] as $rule ) {
+                if ( ! in_array( $rule['field'], $allowedFields ) ) {
+                    continue;
+                }
+                $data['filter_'.$rule['field']] = $rule['data'];
+                if ( $rule['field'] == 'date_added' ) {
+                    $data['filter_'.$rule['field']] = AHelperUtils::dateDisplay2ISO( $rule['data'] );
+                }
+            }
+        }
 
+        $this->loadModel( 'localisation/order_status' );
+        $results = $this->model_localisation_order_status->getOrderStatuses();
+        $statuses = array( '' => $this->language->get( 'text_select_status' ), );
+        foreach ( $results as $item ) {
+            $statuses[$item['order_status_id']] = $item['name'];
+        }
 
-		$total = $this->model_sale_order->getTotalOrders($data);
-		if ($total > 0) {
-			$total_pages = ceil($total / $limit);
-		} else {
-			$total_pages = 0;
-		}
+        $results = $this->model_sale_order->getOrders( $data );
+        $total = $results[0]['total_num_rows'];
+        if ( $total > 0 ) {
+            $total_pages = ceil( $total / $limit );
+        } else {
+            $total_pages = 0;
+        }
 
+        if ( $page > $total_pages ) {
+            $page = $total_pages;
+            $data['start'] = ( $page - 1 ) * $limit;
+        }
 
-		if($page > $total_pages){
-			$page = $total_pages;
-			$data['start'] = ($page - 1) * $limit;
-		}
+        $response = new stdClass();
+        $response->page = $page;
+        $response->total = $total_pages;
+        $response->records = $total;
 
-		$response = new stdClass();
-		$response->page = $page;
-		$response->total = $total_pages;
-		$response->records = $total;
+        $i = 0;
+        foreach ( $results as $result ) {
 
-		$results = $this->model_sale_order->getOrders($data);
+            $response->rows[$i]['id'] = $result['order_id'];
+            $response->rows[$i]['cell'] = array(
+                $result['order_id'],
+                $result['name'],
+                $this->html->buildSelectBox( array(
+                    'name'    => 'order_status_id['.$result['order_id'].']',
+                    'value'   => array_search( $result['status'], $statuses ),
+                    'options' => $statuses,
+                ) ),
+                AHelperUtils::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
+                $this->currency->format( $result['total'], $result['currency'], $result['value'] ),
+            );
+            $i++;
+        }
+        $this->data['response'] = $response;
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+        $this->load->library( 'json' );
+        $this->response->setOutput( AJson::encode( $this->data['response'] ) );
+    }
 
-		$i = 0;
-		foreach ($results as $result) {
+    public function update()
+    {
 
-			$response->rows[ $i ][ 'id' ] = $result[ 'order_id' ];
-			$response->rows[ $i ][ 'cell' ] = array(
-				$result[ 'order_id' ],
-				$result[ 'name' ],
-				$this->html->buildSelectBox(array(
-					'name' => 'order_status_id[' . $result[ 'order_id' ] . ']',
-					'value' => array_search($result[ 'status' ], $statuses),
-					'options' => $statuses,
-				)),
-				AHelperUtils::dateISO2Display($result[ 'date_added' ], $this->language->get('date_format_short')),
-				$this->currency->format($result[ 'total' ], $result[ 'currency' ], $result[ 'value' ]),
-			);
-			$i++;
-		}
-		$this->data['response'] = $response;
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
-	}
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-	public function update() {
+        $this->loadModel( 'sale/order' );
+        $this->loadLanguage( 'sale/order' );
+        if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
+            $error = new AError( '' );
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+            return $error->toJSONResponse( 'NO_PERMISSIONS_402',
+                array(
+                    'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'listing_grid/order' ),
+                    'reset_value' => true,
+                ) );
+        }
 
-		$this->loadModel('sale/order');
-		$this->loadLanguage('sale/order');
-		if (!$this->user->canModify('listing_grid/order')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/order'),
-					'reset_value' => true
-				));
-		}
+        switch ( $this->request->post['oper'] ) {
+            case 'del':
+                $ids = explode( ',', $this->request->post['id'] );
+                if ( ! empty( $ids ) ) {
+                    foreach ( $ids as $id ) {
+                        $this->model_sale_order->deleteOrder( $id );
+                    }
+                }
+                break;
+            case 'save':
+                $ids = explode( ',', $this->request->post['id'] );
+                if ( ! empty( $ids ) ) {
+                    foreach ( $ids as $id ) {
+                        $this->model_sale_order->editOrder( $id, array( 'order_status_id' => $this->request->post['order_status_id'][$id] ) );
+                    }
+                }
+                break;
+            default:
+        }
 
-		switch ($this->request->post[ 'oper' ]) {
-			case 'del':
-				$ids = explode(',', $this->request->post[ 'id' ]);
-				if (!empty($ids))
-					foreach ($ids as $id) {
-						$this->model_sale_order->deleteOrder($id);
-					}
-				break;
-			case 'save':
-				$ids = explode(',', $this->request->post[ 'id' ]);
-				if (!empty($ids))
-					foreach ($ids as $id) {
-						$this->model_sale_order->editOrder($id, array( 'order_status_id' => $this->request->post[ 'order_status_id' ][ $id ] ));
-					}
-				break;
-			default:
-		}
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * update only one field
-	 *
-	 * @return void
-	 */
-	public function update_field() {
+    /**
+     * update only one field
+     *
+     * @return void
+     */
+    public function update_field()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$this->loadLanguage('sale/order');
-		$this->loadModel('sale/order');
+        $this->loadLanguage( 'sale/order' );
+        $this->loadModel( 'sale/order' );
 
-		if (!$this->user->canModify('listing_grid/order')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/order'),
-					'reset_value' => true
-				));
-		}
+        if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
+            $error = new AError( '' );
 
-		if(AHelperUtils::has_value($this->request->post['downloads'])){
-			$data = $this->request->post['downloads'];
-			$this->loadModel('catalog/download');
-			foreach($data as $order_download_id=>$item){
-				if (isset($item['expire_date'])) {
-					$item['expire_date'] = $item['expire_date'] ? AHelperUtils::dateDisplay2ISO($item['expire_date'], $this->language->get('date_format_short')) : '';
-				}
-				$this->model_catalog_download->editOrderDownload($order_download_id, $item);
-			}
-			return null;
-		}
+            return $error->toJSONResponse( 'NO_PERMISSIONS_402',
+                array(
+                    'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'listing_grid/order' ),
+                    'reset_value' => true,
+                ) );
+        }
 
-		if (isset($this->request->get[ 'id' ])) {
-			$this->model_sale_order->editOrder($this->request->get[ 'id' ], $this->request->post);
-			return null;
-		}
+        if ( AHelperUtils::has_value( $this->request->post['downloads'] ) ) {
+            $data = $this->request->post['downloads'];
+            $this->loadModel( 'catalog/download' );
+            foreach ( $data as $order_download_id => $item ) {
+                if ( isset( $item['expire_date'] ) ) {
+                    $item['expire_date'] = $item['expire_date'] ? AHelperUtils::dateDisplay2ISO( $item['expire_date'], $this->language->get( 'date_format_short' ) ) : '';
+                }
+                $this->model_catalog_download->editOrderDownload( $order_download_id, $item );
+            }
 
-		//request sent from jGrid. ID is key of array
-		foreach ($this->request->post as $field => $value) {
-			foreach ($value as $k => $v) {
-				$this->model_sale_order->editOrder($k, array( $field => $v ));
-			}
-		}
+            return null;
+        }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        if ( isset( $this->request->get['id'] ) ) {
+            $this->model_sale_order->editOrder( $this->request->get['id'], $this->request->post );
 
-	public function summary() {
+            return null;
+        }
 
-		//update controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //request sent from jGrid. ID is key of array
+        foreach ( $this->request->post as $field => $value ) {
+            foreach ( $value as $k => $v ) {
+                $this->model_sale_order->editOrder( $k, array( $field => $v ) );
+            }
+        }
 
-		$this->loadLanguage('sale/order');
-		$this->loadModel('sale/order');
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+    }
 
-		$response = new stdClass();
+    public function summary()
+    {
 
-		if (isset($this->request->get[ 'order_id' ])) {
-			$order_id = $this->request->get[ 'order_id' ];
-		} else {
-			$order_id = 0;
-		}
+        //update controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$order_info = $this->model_sale_order->getOrder($order_id);
+        $this->loadLanguage( 'sale/order' );
+        $this->loadModel( 'sale/order' );
 
-		if (empty($order_info)) {
-			$response->error = $this->language->get('error_order_load');
-		} else {
-			$response->order = array(
-				'order_id' => '#' . $order_info[ 'order_id' ],
-				'name' => $order_info[ 'firstname' ] . '' . $order_info[ 'lastname' ],
-				'email' => $order_info[ 'email' ],
-				'telephone' => $order_info[ 'telephone' ],
-				'date_added' => AHelperUtils::dateISO2Display($order_info[ 'date_added' ], $this->language->get('date_format_short')),
-				'total' => $this->currency->format($order_info[ 'total' ], $order_info[ 'currency' ], $order_info[ 'value' ]),
-				'order_status' => $order_info[ 'order_status_id' ],
-				'shipping_method' => $order_info[ 'shipping_method' ],
-				'payment_method' => $order_info[ 'payment_method' ],
-			);
+        $response = new stdClass();
 
-			if ($order_info[ 'customer_id' ]) {
-				$response->order[ 'name' ] = '<a href="' . $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $order_info[ 'customer_id' ]) . '">' . $response->order[ 'name' ] . '</a>';
-			}
+        if ( isset( $this->request->get['order_id'] ) ) {
+            $order_id = $this->request->get['order_id'];
+        } else {
+            $order_id = 0;
+        }
 
-			$this->loadModel('localisation/order_status');
-			$status = $this->model_localisation_order_status->getOrderStatus($order_info[ 'order_status_id' ]);
-			if ($status)
-				$response->order[ 'order_status' ] = $status[ 'name' ];
+        $order_info = $this->model_sale_order->getOrder( $order_id );
 
-		}
-		$this->data['response'] = $response;
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+        if ( empty( $order_info ) ) {
+            $response->error = $this->language->get( 'error_order_load' );
+        } else {
+            $response->order = array(
+                'order_id'        => '#'.$order_info['order_id'],
+                'name'            => $order_info['firstname'].''.$order_info['lastname'],
+                'email'           => $order_info['email'],
+                'telephone'       => $order_info['telephone'],
+                'date_added'      => AHelperUtils::dateISO2Display( $order_info['date_added'], $this->language->get( 'date_format_short' ) ),
+                'total'           => $this->currency->format( $order_info['total'], $order_info['currency'], $order_info['value'] ),
+                'order_status'    => $order_info['order_status_id'],
+                'shipping_method' => $order_info['shipping_method'],
+                'payment_method'  => $order_info['payment_method'],
+            );
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
-	}
+            if ( $order_info['customer_id'] ) {
+                $response->order['name'] = '<a href="'.$this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$order_info['customer_id'] ).'">'.$response->order['name'].'</a>';
+            }
+
+            $this->loadModel( 'localisation/order_status' );
+            $status = $this->model_localisation_order_status->getOrderStatus( $order_info['order_status_id'] );
+            if ( $status ) {
+                $response->order['order_status'] = $status['name'];
+            }
+
+        }
+        $this->data['response'] = $response;
+        //update controller data
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+
+        $this->load->library( 'json' );
+        $this->response->setOutput( AJson::encode( $this->data['response'] ) );
+    }
 
 }
