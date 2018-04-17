@@ -17,21 +17,34 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
-use abc\core\ABC;
-use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
+class AException extends \Exception
+{
+
+    public $registry;
+    protected $error;
 
 
-require_once(ABC::env('DIR_LIB') . 'exceptions/aexception.php');
-require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
-require_once(ABC::env('DIR_LIB') . 'exceptions/handler.php');
 
-$app_config = Registry::getInstance()->get('config')->
-$config = [
-    'debug' => false
-];
-new AHandleExceptions($config,new AExceptionHandler($config['debug']));
+    public function __construct($errstr = '',$errno = 0,  $file = '', $line = '')
+    {
+
+
+        $this->code = $errno ? $errno : $this->code;
+        $this->message = $errstr ? $errstr : $this->message;
+        $this->file = $file ? $file : $this->file;
+        $this->line = $line ? $line : $this->line;
+
+        parent::__construct();
+    }
+
+    public function mailError()
+    {
+        $this->error->toMail();
+    }
+}

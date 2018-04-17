@@ -22,6 +22,9 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -32,38 +35,99 @@ if ( ! class_exists('abc\core\ABC')) {
  */
 final class ALog
 {
-    private $filename;
     private $mode = true;
+    protected $error_filename = 'error.log';
+    protected $security_filename, $warning_filename, $debug_filename;
+    protected $loggers = [];
 
     /**
-     * @param string $filename
+     * ALog constructor.
      *
-     * @throws AException
+     * @param string $error_filename - required
+     * @param string $security_filename
+     * @param string $warning_filename
+     * @param string $debug_filename
      */
-    public function __construct($filename)
+    public function __construct( string $error_filename, $security_filename = '', $warning_filename = '', $debug_filename = '' )
     {
-        if (is_dir($filename)) {
-            $filename .= (substr($filename, -1) != '/' ? '/' : '').'error.txt';
-        }
-        $this->filename = $filename;
-
-        if ( ! is_writable(pathinfo($filename, PATHINFO_DIRNAME))) {
-            // if it happens see errors in httpd-error log!
-            throw new AException (AC_ERR_LOAD, 'Error: Log directory '.pathinfo($filename, PATHINFO_DIRNAME).' is non-writable. Please change permissions.');
+        $dir_logs = ABC::env('DIR_LOGS');
+        if ( !$dir_logs || !is_writable($dir_logs) ) {
+            error_log('Error: Log directory "'.$dir_logs.'" is non-writable or undefined! Please check or change permissions.');
         }
 
-        //1.create file if it not exists
-        if ( ! file_exists($this->filename)) {
-            $handle = @fopen($this->filename, 'a+');
-            @fclose($handle);
-        } else {
-            if ( ! is_writable($this->filename)) {
-                //create second log file if original is not writable
-                $this->filename = ABC::env('DIR_LOGS').'error_0.txt';
-                $handle = @fopen($this->filename, 'a+');
-                @fclose($handle);
+        if( !$error_filename ){
+            error_log('ALog Error: Please set error Log filename as argument! Empty value given!');
+        }else{
+            $security_filename = !$security_filename ? $error_filename : $security_filename;
+            $warning_filename = !$warning_filename ? $error_filename : $warning_filename;
+            $debug_filename = !$debug_filename ? $error_filename : $debug_filename;
+        }
+
+        $this->error_filename = $dir_logs.$error_filename;
+        if(is_file($this->error_filename) && !is_writable($this->error_filename)){
+            error_log('ALog Error: Log file '.$this->error_filename.' is not writable!');
+        }else{
+            $this->security_filename = $dir_logs.$security_filename;
+            if(is_file($this->security_filename) && !is_writable($this->security_filename)){
+                error_log('ALog Error: Log file '.$this->security_filename.' is not writable!');
+                $this->security_filename = $this->error_filename;
+            }
+            $this->warning_filename = $dir_logs.$warning_filename;
+            if(is_file($this->warning_filename) && !is_writable($this->warning_filename)){
+                error_log('ALog Error: Log file '. $this->warning_filename .' is not writable!');
+                $this->warning_filename = $this->error_filename;
+            }
+
+            $this->debug_filename = $dir_logs.$debug_filename;
+            if(is_file($this->debug_filename) && !is_writable($this->debug_filename)){
+                error_log('ALog Error: Log file '. $this->debug_filename .' is not writable!');
+                $this->debug_filename = $this->error_filename;
             }
         }
+
+
+        $stream = new StreamHandler($this->error_filename, Logger::DEBUG);
+        // the default date format is "Y-m-d H:i:s"
+        $dateFormat = "Y-m-d H:i:s";
+        // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
+        $output = "%datetime% > ".ABC::env('APP_NAME')." v" . ABC::env('VERSION') ." > %level_name% > %message%\n";
+        // finally, create a formatter
+        $formatter = new LineFormatter($output, $dateFormat);
+        $stream->setFormatter($formatter);
+        $logger = new Logger('error_logger');
+        $logger->pushHandler($stream);
+        $this->loggers['error'] = $logger;
+
+        if( $this->error_filename != $this->security_filename ){
+            $stream = new StreamHandler($this->security_filename, Logger::DEBUG);
+            $stream->setFormatter($formatter);
+            $logger = new Logger('security_logger');
+            $logger->pushHandler($stream);
+            $this->loggers['security'] = $logger;
+        }else{
+            $this->loggers['security'] = $this->loggers['error'];
+        }
+
+        if( $this->error_filename != $this->warning_filename ){
+            $stream = new StreamHandler($this->warning_filename, Logger::DEBUG);
+            $stream->setFormatter($formatter);
+            $logger = new Logger('warning_logger');
+            $logger->pushHandler($stream);
+            $this->loggers['warning'] = $logger;
+        }else{
+            $this->loggers['warning'] = $this->loggers['error'];
+        }
+
+        if( $this->error_filename != $this->debug_filename ){
+            $stream = new StreamHandler($this->debug_filename, Logger::DEBUG);
+            $stream->setFormatter($formatter);
+            $logger = new Logger('debug_logger');
+            $logger->pushHandler($stream);
+            $this->loggers['debug'] = $logger;
+        }else{
+            $this->loggers['debug'] = $this->loggers['error'];
+        }
+
 
         if (class_exists('\abc\core\engine\Registry')) {
             // for disabling via settings
@@ -84,9 +148,68 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $file = $this->filename;
-        $handle = fopen($file, 'a+');
-        fwrite($handle, date('Y-m-d G:i:s').' - '.$message."\n");
-        fclose($handle);
+        $this->loggers['error']->error($message);
+    }
+    /**
+     * @param string $message
+     *
+     * @return null
+     */
+    public function error($message)
+    {
+        if ( ! $this->mode) {
+            return null;
+        }
+        $this->loggers['error']->error($message);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return null
+     */
+    public function security($message)
+    {
+        if ( ! $this->mode) {
+            return null;
+        }
+        $this->loggers['security']->alert($message);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return null
+     */
+    public function warning($message)
+    {
+        if ( ! $this->mode) {
+            return null;
+        }
+        $this->loggers['warning']->notice($message);
+    }
+    /**
+     * @param string $message
+     *
+     * @return null
+     */
+    public function debug($message)
+    {
+        if ( ! $this->mode) {
+            return null;
+        }
+        $this->loggers['debug']->debug($message);
+    }
+    /**
+     * @param string $message
+     *
+     * @return null
+     */
+    public function critical($message)
+    {
+        if ( ! $this->mode) {
+            return null;
+        }
+        $this->loggers['error']->critical($message);
     }
 }

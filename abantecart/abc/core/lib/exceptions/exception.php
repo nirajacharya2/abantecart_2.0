@@ -1,110 +1,154 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2017 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
-
 namespace abc\core\lib;
 
-use abc\core\ABC;
-use abc\core\engine\ARouter;
-use abc\core\engine\Registry;
+use ErrorException;
 use Exception;
+use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
-class AException extends Exception
+class AHandleExceptions
 {
+    /**
+     * The ABC instance.
+     */
+    protected $registry;
+    protected $handler;
 
-    public $registry;
-    protected $error;
-
-    public function __construct($errno = 0, $errstr = '', $file = '', $line = '')
+    /**
+     * Bootstrap the given application.
+     *
+     * @param array $config
+     *
+     * @param object $handler
+     *
+     * @return void
+     */
+    public function __construct(array $config, $handler )
     {
-        parent::__construct();
+        $this->registry = $config;
+        $this->handler = $handler;
 
-        $this->code = $errno ? $errno : $this->code;
-        $this->message = $errstr ? $errstr : $this->message;
-        $this->file = $file ? $file : $this->file;
-        $this->line = $line ? $line : $this->line;
-        if (class_exists('\abc\core\engine\Registry')) {
-            $this->registry = Registry::getInstance();
-        }
+        error_reporting(E_ALL & ~E_NOTICE);
+        set_error_handler([$this, 'handleError'], E_ALL & ~E_NOTICE);
+        set_exception_handler([$this, 'handleException']);
+        register_shutdown_function([$this, 'handleShutdown']);
 
-        $this->error = new AError($this->message, $this->code);
-        //update message
-        ob_start();
-        echo $this->message.' in <b>'.$this->file.'</b> on line <b>'.$this->line.'</b>';
-        //echo "\r\n".'<pre>'.$this->getTraceAsString().'</pre>';
-        $this->error->msg = ob_get_clean();
     }
 
-    public function errorCode()
+    /**
+     * Convert PHP errors to ErrorException instances.
+     *
+     * @param  int  $level
+     * @param  string  $message
+     * @param  string  $file
+     * @param  int  $line
+     * @param  array  $context
+     * @return void
+     *
+     */
+    public function handleError($level, $message, $file = '', $line = 0, $context = [])
     {
-        return $this->code;
-    }
-
-    public function errorMessage()
-    {
-        return $this->error->msg;
-    }
-
-    public function displayError()
-    {
-        $this->error->toDebug();
-        //Fatal error
-        if ($this->code >= 10000 && ! ABC::env('INSTALL')) {
-            if ($this->registry && $this->registry->get('session')) {
-                $this->registry->get('session')->data['exception_msg'] = $this->error->msg;
-            } else {
-                //Fatal error happened before session is started, show to the screen and exit
-                echo $this->error->msg;
-                exit;
-            }
-        }
-        if (ABC::env('abcexec')) {
-            echo $this->error->msg."\n\n";
-            exit;
+        if (error_reporting() & $level) {
+            $this->getExceptionHandler()->report(new ErrorException($message, 0, $level, $file, $line));
+            //throw
         }
     }
 
-    public function logError()
+    /**
+     * Handle an uncaught exception from the application.
+     *
+     * Note: Most exceptions can be handled via the try / catch block in
+     * the HTTP and Console kernels. But, fatal error exceptions must
+     * be handled differently since they are not normal exceptions.
+     *
+     * @param  \Throwable  $e
+     * @return void
+     */
+    public function handleException($e)
     {
-        $this->error->toLog();
-    }
-
-    public function mailError()
-    {
-        $this->error->toMail();
-    }
-
-    public function showErrorPage()
-    {
-        if ($this->registry && $this->registry->has('router') && $this->registry->get('router')->getRequestType() != 'page') {
-            $router = new ARouter($this->registry);
-            $router->processRoute('error/ajaxerror');
-            $this->registry->get('response')->output();
-            exit();
+        if (! $e instanceof Exception) {
+            $e = new FatalThrowableError($e);
         }
-        $url = "static_pages/index.php";
-        $url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
-        header("Location: $url");
-        exit();
+
+        try {
+            $this->getExceptionHandler()->report($e);
+        } catch (Exception $e) {
+            //
+        }
+
+        if (php_sapi_name() == 'cli') {
+            $this->getExceptionHandler()->renderForConsole($e, 'cli');
+        } else {
+            $this->renderHttpResponse($e);
+        }
+    }
+
+    /**
+     * Render an exception to the console.
+     *
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function renderForConsole(Exception $e)
+    {
+        $this->getExceptionHandler()->render($e, 'cli');
+    }
+
+    /**
+     * Render an exception as an HTTP response and send it.
+     *
+     * @param  \Exception  $e
+     * @return void
+     */
+    protected function renderHttpResponse(Exception $e)
+    {
+        $this->getExceptionHandler()->render($e, 'http');
+    }
+
+    /**
+     * Handle the PHP shutdown event.
+     *
+     * @return void
+     */
+    public function handleShutdown()
+    {
+        if (! is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
+            $this->handleException($this->fatalExceptionFromError($error, 0));
+        }
+    }
+
+    /**
+     * Create a new fatal exception instance from an error array.
+     *
+     * @param  array  $error
+     * @param  int|null  $traceOffset
+     * @return \Symfony\Component\Debug\Exception\FatalErrorException
+     */
+    protected function fatalExceptionFromError(array $error, $traceOffset = null)
+    {
+        return new FatalErrorException(
+            $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
+        );
+    }
+
+    /**
+     * Determine if the error type is fatal.
+     *
+     * @param  int  $type
+     * @return bool
+     */
+    protected function isFatal($type)
+    {
+        return in_array($type, [E_COMPILE_ERROR, E_CORE_ERROR, E_ERROR, E_PARSE]);
+    }
+
+    /**
+     * Get an instance of the exception handler.
+     *
+     * @return \abc\core\lib\AExceptionHandler
+     */
+    protected function getExceptionHandler()
+    {
+        return $this->handler;
     }
 }

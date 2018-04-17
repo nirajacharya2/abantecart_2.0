@@ -307,7 +307,7 @@ class ControllerPagesToolPackageInstaller extends AController
 
         //add message about background Job
         if( !$check_results['critical'] && $check_results['warnings']){
-            if( ABC::classes('\abc\core\backend\jobs\APackageInstallerJob')) {
+            if( ABC::getFullClassName('APackageInstallerJob')) {
                 $check_results['need_background_job'] = true;
                 $check_results['messages'][][] = "Do you want to create background job for this process?";
             }else{
@@ -737,7 +737,7 @@ class ControllerPagesToolPackageInstaller extends AController
         }
         //if need to create background job
         if( $this->request->post_or_get('nbg') ){
-            if( !ABC::classes('\abc\core\backend\jobs\APackageInstallerJob')){
+            if( !ABC::getFullClassName('APackageInstallerJob')){
                 $this->session->data['error'] = 'Error occurred during creating of background Job. Job handler Not Set.';
             }else {
                 $result = AHelperUtils::createBackgroundJob( new APackageInstallerJob( $package_info ) );

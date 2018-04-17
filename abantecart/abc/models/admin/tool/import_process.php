@@ -168,7 +168,10 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/product');
-		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "products_import_{$task_id}.txt");
+        $log_classname = ABC::getFullClassName('ALog');
+        if($log_classname) {
+            $this->imp_log = new $log_classname( "products_import_{$task_id}.txt" );
+        }
 		return $this->addUpdateProduct($data, $settings, $language_id, $store_id);
 	}
 
@@ -176,7 +179,10 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/category');
-		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "categories_import_{$task_id}.txt");
+        $log_classname = ABC::getFullClassName('ALog');
+        if($log_classname) {
+            $this->imp_log = new $log_classname( "categories_import_{$task_id}.txt" );
+        }
 		return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
 	}
 
@@ -184,7 +190,10 @@ class ModelToolImportProcess extends Model{
 		$language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
 		$store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
 		$this->load->model('catalog/manufacturer');
-		$this->imp_log = new ALog(ABC::env('DIR_LOGS') . "manufacturers_import_{$task_id}.txt");
+        $log_classname = ABC::getFullClassName('ALog');
+        if($log_classname) {
+            $this->imp_log = new $log_classname( "manufacturers_import_{$task_id}.txt" );
+        }
 		return $this->addUpdateManufacture($data, $settings, $language_id, $store_id);
 	}
 
@@ -838,7 +847,7 @@ class ModelToolImportProcess extends Model{
 	 * @return null
 	 */
 	protected function toLog($message){
-		if(!$message){
+		if(!$message || !$this->imp_log){
 			return null;
 		}
 		$this->imp_log->write($message);

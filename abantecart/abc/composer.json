@@ -20,6 +20,10 @@
       ],
     "require": {
       "php": ">=7.0.0",
+      "ext-mbstring": "*",
+      "ext-openssl": "*",
+      "ext-gd": "*",
+      "ext-phar": "*",
       "mnsami/composer-custom-directory-installer": "1.1.*",
       "google/recaptcha": "~1.1",
       "twbs/bootstrap": "v4.0.0-beta.2",
@@ -27,7 +31,12 @@
       "illuminate/database": "*",
       "robmorgan/phinx": "*",
       "twig/twig": "1.6.5",
-      "wapmorgan/unified-archive": "~0.0.10"
+      "wapmorgan/unified-archive": "~0.0.10",
+      "symfony/debug": "~3.2",
+      "symfony/var-dumper": "~3.2",
+      "maximebf/debugbar": "1.13.1",
+      "filp/whoops": "2.1.14",
+      "monolog/monolog": "1.23.0"
     },
     "extra": {
             "installer-paths": {

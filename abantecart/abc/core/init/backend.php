@@ -23,8 +23,6 @@ use abc\core\engine\{AHtml,ALoader, ExtensionsApi,Registry};
 use abc\core\cache\ACache;
 use abc\core\lib\{AConfig,ADataEncryption,ADB,ADocument,ALanguageManager,ALog,ASession};
 
-// Error Reporting
-error_reporting(E_ALL);
 $dir_sep = DIRECTORY_SEPARATOR;
 if($command != 'help:help') {
     if ( ! is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
@@ -52,7 +50,7 @@ if($command != 'help:help') {
 
 
         exit("\n\e[0;31mError: /abc/vendor folder not found. Please run command \e[0m\n\n
-		php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
+        php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
 
@@ -155,7 +153,8 @@ if(ABC::env('DB_CURRENT_DRIVER')) {
     $registry->set('language', new ALanguageManager($registry));
 }
 // Log
-$registry->set('log', new ALog(ABC::env('DIR_LOGS').'cli_log.txt'));
+$log_classname = ABC::getFullClassName('ALog');
+$registry->set('log', new $log_classname('backend.log'));
 
 //session
 $registry->set('session', new ASession('backend'));

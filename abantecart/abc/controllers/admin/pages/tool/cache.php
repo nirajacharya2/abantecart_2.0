@@ -182,10 +182,11 @@ class ControllerPagesToolCache extends AController
                             $this->deleteThumbnails();
                             break;
                         case 'error_log':
-                            $file = ABC::env('DIR_LOGS').$this->config->get('config_error_filename');
+                            //TODO: make it later
+                            /*$file = ABC::env('DIR_LOGS').$this->config->get('config_error_filename');
                             if (is_file($file)) {
                                 unlink($file);
-                            }
+                            }*/
                             break;
                         case 'install_upgrade_history':
                             $this->loadModel('tool/install_upgrade_history');

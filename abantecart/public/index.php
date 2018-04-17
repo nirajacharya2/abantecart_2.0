@@ -20,7 +20,7 @@
 namespace abc;
 use abc\core\ABC;
 
-require dirname(__DIR__).'/abc/core/abc.php';
+require dirname(__DIR__).DIRECTORY_SEPARATOR.'abc'.DIRECTORY_SEPARATOR.'core'.DIRECTORY_SEPARATOR.'abc.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	ABC::env('IS_WINDOWS', true);

@@ -46,7 +46,8 @@ class ControllerPagesToolErrorLog extends AController {
 			$this->data['clear_url'] = '';
 			$heading_title = $this->request->clean($filename);
 		}else {
-			$file = ABC::env('DIR_LOGS') . $this->config->get('config_error_filename');
+		    //TODO: made it later
+			//$file = ABC::env('DIR_LOGS') . $this->config->get('config_error_filename');
 			$this->data['clear_url'] = $this->html->getSecureURL('tool/error_log/clearlog');
 			$heading_title = $this->language->get('heading_title');
 		}
@@ -115,9 +116,9 @@ strtoupper($this->language->get('text_file_tail')).ABC::env('DIR_LOGS')."
 	}
 
 	public function clearLog() {
-
+//TODO: made it later
 		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+		/*$this->extensions->hk_InitData($this,__FUNCTION__);
 
 		$filename = $this->request->get['filename'];
 		if( $filename && is_file(ABC::env('DIR_LOGS') . $filename) ){
@@ -132,6 +133,6 @@ strtoupper($this->language->get('text_file_tail')).ABC::env('DIR_LOGS')."
 		abc_redirect($this->html->getSecureURL('tool/error_log'));
 
 		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
+		$this->extensions->hk_UpdateData($this,__FUNCTION__);*/
 	}
 }

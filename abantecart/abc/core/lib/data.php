@@ -84,7 +84,8 @@ class AData{
 	}
 
 	public function setLogFile($filename){
-		$this->imp_log = new ALog($filename);
+	    $log_classname = ABC::getFullClassName('ALog');
+		$this->imp_log = new $log_classname($filename);
 	}
 
 	protected function _toLog($text){

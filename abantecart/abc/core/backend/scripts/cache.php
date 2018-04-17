@@ -228,10 +228,11 @@ class Cache implements ABCExec
                     $this->errors[] = 'Cannot to clear application history. '.$e->getMessage();
                 }
             } elseif ($group == 'logs') {
-                $file = ABC::env('DIR_LOGS').$registry->get('config')->get('config_error_filename');
+                //TODO: make clear logs
+                /*$file = ABC::env('DIR_LOGS').$registry->get('config')->get('config_error_filename');
                 if (is_file($file)) {
                     unlink($file);
-                }
+                }*/
             } elseif ($group == 'html_cache') {
                 $app_cache->remove('html_cache');
             } else {

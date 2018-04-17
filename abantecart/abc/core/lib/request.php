@@ -53,10 +53,10 @@ final class ARequest{
 		$this->server = $_SERVER;
 
 		//check if there is any encrypted data
-		if (AHelperUtils::has_value($this->get['__e'])){
+		if (isset($this->get['__e']) && $this->get['__e']){
 			$this->get = array_replace_recursive($this->get, $this->decodeURI($this->get['__e']));
 		}
-		if (AHelperUtils::has_value($this->post['__e'])){
+		if ( isset($this->post['__e']) && $this->post['__e']){
 			$this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
 		}
 		$this->_detectBrowser();

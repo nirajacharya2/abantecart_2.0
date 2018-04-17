@@ -6,10 +6,9 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
-use abc\core\lib\AError;
-use abc\core\lib\AException;
+use ReflectionClass;
 
-require 'abc_base.php';
+require __DIR__.DIRECTORY_SEPARATOR.'abc_base.php';
 
 /**
  * Class ABC
@@ -22,6 +21,7 @@ class ABC extends ABCBase
     protected static $class_map = [];
     static $stage_name;
 
+
     /**
      * ABC constructor.
      *
@@ -32,15 +32,17 @@ class ABC extends ABCBase
         //load and put config into environment
         $stage_name = '';
         if(!$file || !is_file($file)) {
-            $stage_name = @include(dirname(__DIR__).'/config/enabled.config.php');
+            $stage_name = @include(dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'enabled.config.php');
             $file_name = $stage_name.'.config.php';
-            $file = dirname(__DIR__).'/config/'.$file_name;
+            $file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$file_name;
         }
 
         $config = @include($file);
         if($config) {
             self::env($config);
             self::$stage_name = $stage_name;
+            //load classmap
+            self::loadClassMap($stage_name);
         }
     }
 
@@ -50,11 +52,22 @@ class ABC extends ABCBase
 
     public function loadDefaultStage(){
         //load and put config into environment
-        $config = @include(dirname(__DIR__).'/config/default.config.php');
+        $config = @include(dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'default.config.php');
         if (isset($config['default'])) {
             self::env((array)$config['default']);
         }
         self::$stage_name = 'default';
+        //load classmap
+        self::loadClassMap('default');
+    }
+
+    public static function loadClassMap($stage_name = 'default')
+    {
+        $classmap_file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+        if(is_file($classmap_file)){
+            self::$class_map = @include_once($classmap_file);
+        }
+        return self::$class_map ? true : false;
     }
 
     /**
@@ -102,16 +115,57 @@ class ABC extends ABCBase
 
     /**
      * Method returns full name of class if it exists
-     * @param $class_name
+     *
+     * @param $class_alias
      *
      * @return bool|string
      */
-    static function classes(string $class_name){
-        if(isset( self::$class_map[$class_name])){
-            return self::$class_map[$class_name];
+    static function getFullClassName(string $class_alias){
+        if(isset( self::$class_map[$class_alias])){
+            if(is_array( self::$class_map[$class_alias])){
+                return self::$class_map[$class_alias][0];
+            }else {
+                return self::$class_map[$class_alias];
+            }
         }else{
-            return class_exists($class_name) ? $class_name : false;
+            return class_exists( $class_alias ) ? $class_alias : false;
         }
+    }
+    /**
+     * Method returns full name of class if it exists
+     *
+     * @param $class_alias
+     *
+     * @return bool|string
+     */
+    static function getObject(string $class_alias){
+        if(isset( self::$class_map[$class_alias])){
+            if(is_array( self::$class_map[$class_alias])){
+                $class_name = self::$class_map[$class_alias][0];
+            }else {
+                $class_name = self::$class_map[$class_alias];
+            }
+            $args = self::class_arguments($class_alias);
+
+            $reflector = new ReflectionClass( $class_name );
+            return $reflector->newInstanceArgs( $args );
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Get arguments for class constructor
+     * @param string $class_alias
+     * @return array|mixed
+     */
+    static function class_arguments(string $class_alias){
+        if( !isset( self::$class_map[$class_alias]) || !is_array( self::$class_map[$class_alias]) ) {
+            return [];
+        }
+        $args = self::$class_map[$class_alias];
+        array_shift($args);
+        return $args;
     }
 
     public function run()
@@ -120,7 +174,7 @@ class ABC extends ABCBase
 
         // New Installation
         if ( ! self::env('DATABASES')) {
-            if(is_file(self::env('DIR_ROOT').'install/index.php')) {
+            if(is_file(self::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'index.php')) {
                 header('Location: ../install/index.php');
             }else{
                 header('Location: static_pages/?file='.basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
@@ -128,7 +182,7 @@ class ABC extends ABCBase
             exit;
         }
 
-        require 'init/app.php';
+        require __DIR__.DIRECTORY_SEPARATOR.'init'.DIRECTORY_SEPARATOR.'app.php';
         $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 
@@ -163,16 +217,12 @@ class ABC extends ABCBase
 
     protected function _validate_app()
     {
-
         // Required PHP Version
-
         if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<') == true) {
             exit(self::env('MIN_PHP_VERSION').'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
         }
-
         if ( ! function_exists('simplexml_load_file')) {
             exit("simpleXML functions are not available. Please contact your system administrator or host service provider.");
         }
-
     }
 }

@@ -68,8 +68,10 @@ class ATaskManager{
 		$this->registry = Registry::getInstance();
 		// who is initiator of process, admin or storefront
 		$this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
-
-		$this->task_log = new ALog(ABC::env('DIR_LOGS') . 'task_log.txt');
+        $log_classname = ABC::getFullClassName('ALog');
+        if($log_classname) {
+            $this->task_log = new $log_classname( 'task_log.txt' );
+        }
 	}
 
 	public function __get($key){
@@ -398,7 +400,9 @@ class ATaskManager{
 		}else{
 			$this->run_log[] = $message;
 		}
-		$this->task_log->write($message);
+		if($this->task_log) {
+            $this->task_log->write( $message );
+        }
 		return true;
 	}
 

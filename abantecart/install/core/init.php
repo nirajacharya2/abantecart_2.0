@@ -241,7 +241,7 @@ require_once $dir_app.'core'.$dir_sep.'init'.$dir_sep.'admin.php';
 $registry->set('messages', new AMessage());
 
 // Log
-$registry->set('log', new ALog(ABC::env('DIR_LOGS').'error.txt'));
+$registry->set('log', new ALog('error.txt'));
 
 // Document
 $registry->set('document', new ADocument());

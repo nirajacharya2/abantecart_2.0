@@ -1,0 +1,166 @@
+<?php
+
+namespace abc\core\lib;
+
+use abc\core\ABC;
+use abc\core\engine\ARouter;
+use abc\core\engine\Registry;
+use ErrorException;
+use Exception;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Whoops\Handler\PrettyPageHandler;
+use Symfony\Component\Console\Application as ConsoleApplication;
+use Whoops\Run;
+
+class AExceptionHandler
+{
+    /**
+     * A list of the exception types that are not reported.
+     *
+     * @var array
+     */
+    protected $dontReport = [];
+
+    /**
+     * A list of the internal exception types that should not be reported.
+     *
+     * @var array
+     */
+    protected $internalDontReport = [];
+
+    protected $debug;
+
+    /**
+     * Create a new exception handler instance.
+     *
+     * @param  bool  $debug
+     * @return void
+     */
+    public function __construct($debug = false)
+    {
+        $this->debug = $debug;
+    }
+
+    /**
+     * Report or log an exception.
+     *
+     * @param  \Exception  $e
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    public function report(Exception $e)
+    {
+        if ($this->shouldntReport($e)) {
+            return null;
+        }
+
+        if (method_exists($e, 'report')) {
+            return $e->report();
+        }
+
+        if($e instanceof ErrorException){
+            $logger_message_type = 'error';
+        }else{
+            $logger_message_type = 'critical';
+        }
+
+        if(!$this->debug && class_exists('\abc\core\engine\Registry') && Registry::getInstance()->get('log')) {
+            Registry::getInstance()->get('log')->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
+        }else {
+            /**
+             * @var ALog $log
+             */
+            try {
+                $log = ABC::getObject('ALog');
+                $log->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
+            } catch (Exception $ex) {
+                throw $e; // throw the original exception
+            }
+        }
+    }
+
+    /**
+     * Determine if the exception should be reported.
+     *
+     * @param  \Exception  $e
+     * @return bool
+     */
+    public function shouldReport(Exception $e)
+    {
+        return ! $this->shouldntReport($e);
+    }
+
+    /**
+     * Determine if the exception is in the "do not report" list.
+     *
+     * @param  \Exception  $e
+     * @return bool
+     */
+    protected function shouldntReport(Exception $e)
+    {
+        return false;
+    }
+
+
+    /**
+     * Render an exception into a response.
+     *
+     * @param  \Exception  $e
+     * @param  string  $to - can be http, cli, debug
+     * @return mixed
+     */
+    public function render( Exception $e, $to = 'http')
+    {
+        $e = $this->prepareException($e);
+
+        if($to == 'http' && $this->debug){
+            $whoops = new Run;
+            $whoops->pushHandler(new PrettyPageHandler);
+            $whoops->register();
+            $whoops->handleException($e);
+        }elseif( $to == 'cli'){
+            //echo output_to_console
+            $this->renderForConsole(new ConsoleOutput, $e);
+        }else{
+            //http output when debug is disabled
+            if(class_exists('\abc\core\engine\Registry')) {
+                $registry = Registry::getInstance();
+                if ( $registry->has( 'router' ) && $registry->get( 'router' )->getRequestType() != 'page' ) {
+                    $router = new ARouter( $registry );
+                    $router->processRoute( 'error/ajaxerror' );
+                    $registry->get( 'response' )->output();
+                    exit();
+                }
+            }
+            $url = "static_pages/index.php";
+            $url .= (ABC::env('IS_ADMIN') === true) ? '?mode=admin' : '';
+            header("Location: $url");
+            exit();
+        }
+    }
+
+    /**
+     * Prepare exception for rendering.
+     *
+     * @param  \Exception  $e
+     * @return \Exception
+     */
+    protected function prepareException(Exception $e)
+    {
+        return $e;
+    }
+
+    /**
+     * Render an exception to the console.
+     *
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @param  \Exception  $e
+     * @return void
+     */
+    public function renderForConsole($output, Exception $e)
+    {
+        (new ConsoleApplication)->renderException($e, $output);
+    }
+
+}

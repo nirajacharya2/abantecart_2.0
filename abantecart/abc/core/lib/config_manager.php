@@ -273,9 +273,6 @@ class AConfigManager
                     break;
 
                 case 'system':
-                    if ($field_name == 'config_error_filename' && ! $field_value) {
-                        $error['error_filename'] = $this->language->get('error_error_filename');
-                    }
                     if ($field_name == 'config_upload_max_size') {
                         $fields[$field_value] = AHelperUtils::preformatInteger($field_value);
                     }
@@ -1584,12 +1581,6 @@ class AConfigManager
             'value' => $data['storefront_template_debug'],
             'style' => 'btn_switch',
             'attr'  => 'reload_on_save="true"',
-        ));
-        $fields['error_filename'] = $form->getFieldHtml($props[] = array(
-            'type'     => 'input',
-            'name'     => 'config_error_filename',
-            'value'    => $data['config_error_filename'],
-            'required' => true,
         ));
         $fields['system_check'] = $form->getFieldHtml($props[] = array(
             'type'    => 'selectbox',

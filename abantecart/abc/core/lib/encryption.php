@@ -92,7 +92,7 @@ final class AEncryption{
 			$registry = Registry::getInstance();
 			$log = $registry->get('log');
 			if (!is_object($log) || !method_exists($log, 'write')){
-				$log = new ALog(ABC::env('DIR_LOGS') . 'error.txt');
+				$log = ABC::getObject('ALog');
 				$registry->set('log', $log);
 			}
 			$log->write($error_text);

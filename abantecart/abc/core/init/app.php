@@ -118,6 +118,8 @@ require ABC::env('DIR_VENDOR').'autoload.php';
 error_reporting(E_ALL);
 $dir_lib = $dir_app.'core'.$dir_sep.'lib'.$dir_sep;
 require_once($dir_lib.'debug.php');
+require_once($dir_lib.'error.php');
+require_once($dir_lib.'log.php');
 require_once($dir_lib.'exceptions.php');
 require_once($dir_lib.'error.php');
 require_once($dir_lib.'warning.php');
@@ -285,7 +287,7 @@ if (ABC::env('IS_ADMIN') === true) {
 $registry->set('messages', new AMessage());
 
 // Log
-$registry->set('log', new ALog(ABC::env('DIR_LOGS').$config->get('config_error_filename')));
+$registry->set('log', ABC::getObject('ALog'));
 
 // Document
 $registry->set('document', new ADocument());
