@@ -229,10 +229,11 @@ class Cache implements ABCExec
                 }
             } elseif ($group == 'logs') {
                 //TODO: make clear logs
-                /*$file = ABC::env('DIR_LOGS').$registry->get('config')->get('config_error_filename');
+                $args = ABC::class_arguments('ALog');
+                $file = ABC::env('DIR_LOGS').$args[0];
                 if (is_file($file)) {
                     unlink($file);
-                }*/
+                }
             } elseif ($group == 'html_cache') {
                 $app_cache->remove('html_cache');
             } else {

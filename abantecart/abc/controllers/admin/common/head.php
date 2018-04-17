@@ -1,4 +1,4 @@
-<?php   
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,59 +17,91 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+use abc\core\lib\ADebug;
+use DebugBar\StandardDebugBar;
+
+if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
-class ControllerCommonHead extends AController {
-	public $data = array();
-	public function main(){
 
-		//use to init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+class ControllerCommonHead extends AController
+{
+    public $data = array();
 
-		$this->load->helper('html');
-		$this->loadLanguage('common/header');
+    public function main()
+    {
 
-		$message_link = $this->html->getSecureURL('tool/message_manager');
+        //use to init controller data
+        $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-		$this->data['title'] = $this->document->getTitle();
-		$this->data['base'] = (ABC::env('HTTPS_SERVER') ? ABC::env('HTTPS_SERVER') : ABC::env('HTTP_SERVER'));
-		$this->data['links'] = $this->document->getLinks();
-		$this->data['styles'] = $this->document->getStyles();
-		$this->data['scripts'] = $this->document->getScripts();
-		$this->data['notifier_updater_url'] = $this->html->getSecureURL('listing_grid/message_grid/getnotifies');
-		$this->data['system_checker_url'] = $this->html->getSecureURL('common/common/checksystem');
-		$this->data['language_code'] = $this->session->data['language'];
-		$this->data['language_details'] = $this->language->getCurrentLanguage();
-		$locale = explode('.',$this->data['language_details']['locale']);
-		$this->data['language_locale'] = $locale[0];
+        $this->load->helper( 'html' );
+        $this->loadLanguage( 'common/header' );
 
-		$retina = $this->config->get('config_retina_enable');
-		$this->data['retina'] = $retina;
-		//remove cookie for retina
-		if(!$retina){
-			$this->request->deleteCookie('HTTP_IS_RETINA');
-		}
-
-		$this->data['message_manager_url'] = $message_link;
-
-		if( $this->session->data['checkupdates'] ){
-			$this->data['check_updates_url'] = $this->html->getSecureURL('r/common/common/checkUpdates');
-		}
-
-		$this->data['icon'] = $this->config->get('config_icon');
-
-        if (ABC::env('HTTPS')) {
-		    $this->data['ssl'] = 1;
+        /**
+         * @var \DebugBar\StandardDebugBar $debug_bar
+         */
+        $debug_bar = ADebug::$debug_bar;
+        if ( $debug_bar ) {
+            $debugbar_assets = ADebug::getDebugBarAssets();
+            $dbg_js_set = $debugbar_assets['js'];
+            $dbg_css_set = $debugbar_assets['css'];
+            foreach ( $dbg_css_set as $src ) {
+                $this->document->addStyle(
+                    array(
+                        // remove forward slash
+                        'href'  => substr( $src, 1 ),
+                        'rel'   => 'stylesheet',
+                        'media' => 'screen',
+                    )
+                );
+            }
+            foreach ( $dbg_js_set as $src ) {
+                $this->document->addScript( substr( $src, 1 ) );
+            }
         }
 
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('common/head.tpl');
+        $message_link = $this->html->getSecureURL( 'tool/message_manager' );
+
+        $this->data['title'] = $this->document->getTitle();
+        $this->data['base'] = ( ABC::env( 'HTTPS_SERVER' ) ? ABC::env( 'HTTPS_SERVER' ) : ABC::env( 'HTTP_SERVER' ) );
+        $this->data['links'] = $this->document->getLinks();
+        $this->data['styles'] = $this->document->getStyles();
+        $this->data['scripts'] = $this->document->getScripts();
+        $this->data['notifier_updater_url'] = $this->html->getSecureURL( 'listing_grid/message_grid/getnotifies' );
+        $this->data['system_checker_url'] = $this->html->getSecureURL( 'common/common/checksystem' );
+        $this->data['language_code'] = $this->session->data['language'];
+        $this->data['language_details'] = $this->language->getCurrentLanguage();
+        $locale = explode( '.', $this->data['language_details']['locale'] );
+        $this->data['language_locale'] = $locale[0];
+
+        $retina = $this->config->get( 'config_retina_enable' );
+        $this->data['retina'] = $retina;
+        //remove cookie for retina
+        if ( ! $retina ) {
+            $this->request->deleteCookie( 'HTTP_IS_RETINA' );
+        }
+
+        $this->data['message_manager_url'] = $message_link;
+
+        if ( $this->session->data['checkupdates'] ) {
+            $this->data['check_updates_url'] = $this->html->getSecureURL( 'r/common/common/checkUpdates' );
+        }
+
+        $this->data['icon'] = $this->config->get( 'config_icon' );
+
+        if ( ABC::env( 'HTTPS' ) ) {
+            $this->data['ssl'] = 1;
+        }
+
+        $this->view->batchAssign( $this->data );
+        $this->processTemplate( 'common/head.tpl' );
 
         //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+    }
 }

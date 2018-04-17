@@ -25,6 +25,7 @@ use abc\core\engine\Registry;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use DebugBar\Bridge\MonologCollector;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -36,57 +37,55 @@ if ( ! class_exists('abc\core\ABC')) {
 final class ALog
 {
     private $mode = true;
-    protected $error_filename = 'error.log';
-    protected $security_filename, $warning_filename, $debug_filename;
+    protected $app_filename, $security_filename, $warning_filename, $debug_filename;
     protected $loggers = [];
 
     /**
      * ALog constructor.
      *
-     * @param string $error_filename - required
+     * @param string $application_log_filename - required
      * @param string $security_filename
      * @param string $warning_filename
      * @param string $debug_filename
      */
-    public function __construct( string $error_filename, $security_filename = '', $warning_filename = '', $debug_filename = '' )
+    public function __construct( string $application_log_filename, $security_filename = '', $warning_filename = '', $debug_filename = '' )
     {
         $dir_logs = ABC::env('DIR_LOGS');
         if ( !$dir_logs || !is_writable($dir_logs) ) {
             error_log('Error: Log directory "'.$dir_logs.'" is non-writable or undefined! Please check or change permissions.');
         }
 
-        if( !$error_filename ){
+        if( !$application_log_filename ){
             error_log('ALog Error: Please set error Log filename as argument! Empty value given!');
         }else{
-            $security_filename = !$security_filename ? $error_filename : $security_filename;
-            $warning_filename = !$warning_filename ? $error_filename : $warning_filename;
-            $debug_filename = !$debug_filename ? $error_filename : $debug_filename;
+            $security_filename = !$security_filename ? $application_log_filename : $security_filename;
+            $warning_filename = !$warning_filename ? $application_log_filename : $warning_filename;
+            $debug_filename = !$debug_filename ? $application_log_filename : $debug_filename;
         }
 
-        $this->error_filename = $dir_logs.$error_filename;
-        if(is_file($this->error_filename) && !is_writable($this->error_filename)){
-            error_log('ALog Error: Log file '.$this->error_filename.' is not writable!');
+        $this->app_filename = $dir_logs.$application_log_filename;
+        if(is_file($this->app_filename) && !is_writable($this->app_filename)){
+            error_log('ALog Error: Log file '.$this->app_filename.' is not writable!');
         }else{
             $this->security_filename = $dir_logs.$security_filename;
             if(is_file($this->security_filename) && !is_writable($this->security_filename)){
                 error_log('ALog Error: Log file '.$this->security_filename.' is not writable!');
-                $this->security_filename = $this->error_filename;
+                $this->security_filename = $this->app_filename;
             }
             $this->warning_filename = $dir_logs.$warning_filename;
             if(is_file($this->warning_filename) && !is_writable($this->warning_filename)){
                 error_log('ALog Error: Log file '. $this->warning_filename .' is not writable!');
-                $this->warning_filename = $this->error_filename;
+                $this->warning_filename = $this->app_filename;
             }
 
             $this->debug_filename = $dir_logs.$debug_filename;
             if(is_file($this->debug_filename) && !is_writable($this->debug_filename)){
                 error_log('ALog Error: Log file '. $this->debug_filename .' is not writable!');
-                $this->debug_filename = $this->error_filename;
+                $this->debug_filename = $this->app_filename;
             }
         }
 
-
-        $stream = new StreamHandler($this->error_filename, Logger::DEBUG);
+        $stream = new StreamHandler($this->app_filename, Logger::DEBUG);
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y-m-d H:i:s";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
@@ -95,39 +94,54 @@ final class ALog
         $formatter = new LineFormatter($output, $dateFormat);
         $stream->setFormatter($formatter);
         $logger = new Logger('error_logger');
+        $debug_bar = ADebug::$debug_bar;
+        if($debug_bar && !$debug_bar->hasCollector('monolog')) {
+            $debug_bar->addCollector( new MonologCollector( $logger ) );
+        }
         $logger->pushHandler($stream);
         $this->loggers['error'] = $logger;
 
-        if( $this->error_filename != $this->security_filename ){
+        if( $this->app_filename != $this->security_filename ){
             $stream = new StreamHandler($this->security_filename, Logger::DEBUG);
             $stream->setFormatter($formatter);
             $logger = new Logger('security_logger');
+            $debug_bar = ADebug::$debug_bar;
+            if($debug_bar && !$debug_bar->hasCollector('monolog')) {
+                $debug_bar->addCollector( new MonologCollector( $logger ) );
+            }
             $logger->pushHandler($stream);
             $this->loggers['security'] = $logger;
         }else{
             $this->loggers['security'] = $this->loggers['error'];
         }
 
-        if( $this->error_filename != $this->warning_filename ){
+        if( $this->app_filename != $this->warning_filename ){
             $stream = new StreamHandler($this->warning_filename, Logger::DEBUG);
             $stream->setFormatter($formatter);
             $logger = new Logger('warning_logger');
+            $debug_bar = ADebug::$debug_bar;
+            if($debug_bar && !$debug_bar->hasCollector('monolog')) {
+                $debug_bar->addCollector( new MonologCollector( $logger ) );
+            }
             $logger->pushHandler($stream);
             $this->loggers['warning'] = $logger;
         }else{
             $this->loggers['warning'] = $this->loggers['error'];
         }
 
-        if( $this->error_filename != $this->debug_filename ){
+        if( $this->app_filename != $this->debug_filename ){
             $stream = new StreamHandler($this->debug_filename, Logger::DEBUG);
             $stream->setFormatter($formatter);
             $logger = new Logger('debug_logger');
+            $debug_bar = ADebug::$debug_bar;
+            if($debug_bar && !$debug_bar->hasCollector('monolog')) {
+                $debug_bar->addCollector( new MonologCollector( $logger ) );
+            }
             $logger->pushHandler($stream);
             $this->loggers['debug'] = $logger;
         }else{
             $this->loggers['debug'] = $this->loggers['error'];
         }
-
 
         if (class_exists('\abc\core\engine\Registry')) {
             // for disabling via settings
@@ -136,6 +150,10 @@ final class ALog
                 $this->mode = $registry->get('config')->get('config_error_log') ? true : false;
             }
         }
+    }
+
+    public function getLoggers(){
+        return $this->loggers;
     }
 
     /**

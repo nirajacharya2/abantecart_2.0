@@ -113,6 +113,11 @@ class ABC extends ABCBase
         return null;
     }
 
+    static function getEnv()
+    {
+        return self::$env;
+    }
+
     /**
      * Method returns full name of class if it exists
      *

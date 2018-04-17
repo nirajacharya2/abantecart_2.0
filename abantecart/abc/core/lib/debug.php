@@ -17,291 +17,379 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
+
 use abc\core\ABC;
-use abc\core\engine\Registry;
+use DebugBar\DataCollector\ConfigCollector;
+use DebugBar\StandardDebugBar;
 use Exception;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if ( ! class_exists( 'abc\core\ABC' ) ) {
+    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
-class ADebug{
-	static public $checkpoints = array ();
-	static public $queries = array ();
-	static public $queries_time = 0;
-	static private $debug = 0; //off
-	static private $debug_level = 0; //only exceptions
-	static private $_is_init = false; //class init
-	static private $_is_error = false;
+class ADebug
+{
+    static public $checkpoints = array();
+    static public $queries = array();
+    static public $queries_time = 0;
+    static private $debug = 0; //off
+    static private $debug_level = 0; //only exceptions
+    static private $_is_init = false; //class init
+    static private $_is_error = false;
+    /**
+     * @var \DebugBar\StandardDebugBar
+     */
+    static public $debug_bar;
 
-	static private function isActive(){
-		if (!self::$_is_init){
-			if (ABC::env('INSTALL')){
-				self::$debug = 1;
-				self::$debug_level = 1;
-			} else if (class_exists('\abc\core\engine\Registry')){
-				$registry = Registry::getInstance();
-				if ($registry->has('config')){
+    static function register()
+    {
+        if ( ! self::isActive() ) {
+            return false;
+        }
+        self::$debug_bar = new StandardDebugBar();
+    }
 
-					if ($registry->get('config')->has('config_debug'))
-						self::$debug = $registry->get('config')->get('config_debug');
+    static function getDebugBarAssets()
+    {
+        if ( ! self::$debug_bar ) {
+            return [];
+        }
+        $js_dbg_render = self::$debug_bar->getJavascriptRenderer();
+        $js_dbg_render->disableVendor( 'jquery' );
+        $output['js'] = $js_dbg_render->getAssets( 'js', 'url' );
+        $output['css'] = $js_dbg_render->getAssets( 'css', 'url' );
 
-					if ($registry->get('config')->has('config_debug_level'))
-						self::$debug_level = $registry->get('config')->get('config_debug_level');
+        return $output;
+    }
 
-				}
-			}
-			self::$_is_init = true;
-		}
+    static private function isActive()
+    {
+        if ( ! self::$_is_init ) {
+            if ( ABC::env( 'INSTALL' ) ) {
+                self::$debug = 1;
+                self::$debug_level = 1;
+            } else {
+                self::$debug = ABC::env( 'DEBUG' );
+                self::$debug_level = ABC::env( 'DEBUG_LEVEL' );
+            }
+            self::$_is_init = true;
+        }
 
-		return self::$debug;
-	}
+        return self::$debug;
+    }
 
-	static function set_query($query, $time, $backtrace){
-		if (!self::isActive()){
-			return false;
-		}
-		self::$queries[] = array (
-				'sql'  => $query,
-				'time' => sprintf('%01.5f', $time),
-				'file' => $backtrace['file'],
-				'line' => $backtrace['line']
-		);
-		self::$queries_time += $time;
-	}
+    static function set_query( $query, $time, $backtrace )
+    {
+        if ( ! self::isActive() ) {
+            return false;
+        }
+        self::$queries[] = array(
+            'sql'  => $query,
+            'time' => sprintf( '%01.5f', $time ),
+            'file' => $backtrace['file'],
+            'line' => $backtrace['line'],
+        );
+        self::$queries_time += $time;
+    }
 
-	static function checkpoint($name){
-		if (!self::isActive()){
-			return false;
-		}
+    static function checkpoint( $name )
+    {
+        if ( ! self::isActive() ) {
+            return false;
+        }
 
-		$e = new Exception();
-		self::$checkpoints[] = array (
-				'name'           => $name,
-				'time'           => self::microtime(),
-				'memory'         => memory_get_usage(),
-				'included_files' => count(get_included_files()),
-				'queries'        => count(self::$queries),
-				'type'           => 'checkpoint',
-				'trace'          => $e->getTraceAsString(),
-		);
-	}
+        $e = new Exception();
+        $array = array(
+            'name'           => $name,
+            'time'           => self::microtime(),
+            'memory'         => memory_get_usage(),
+            'included_files' => count( get_included_files() ),
+            'queries'        => count( self::$queries ),
+            'type'           => 'checkpoint',
+            'trace'          => $e->getTraceAsString(),
+        );
+        self::$checkpoints[] = $array;
 
-	static function variable($name, $variable){
-		if (!self::isActive()){
-			return false;
-		}
+    }
 
-		ob_start();
-		echo '<pre>';
-		print_r($variable);
-		echo '</pre>';
-		$msg = ob_get_clean();
+    static function variable( $name, $variable )
+    {
+        if ( ! self::isActive() ) {
+            return false;
+        }
 
-		self::$checkpoints[] = array (
-				'name' => $name,
-				'msg'  => $msg,
-				'type' => 'variable',
-		);
-		return true;
-	}
+        ob_start();
+        echo '<pre>';
+        var_export( $variable );
+        echo '</pre>';
+        $msg = ob_get_clean();
 
-	static function error($name, $code, $msg){
-		self::$checkpoints[] = array (
-				'name'           => $name,
-				'time'           => self::microtime(),
-				'memory'         => memory_get_usage(),
-				'included_files' => count(get_included_files()),
-				'queries'        => count(self::$queries),
-				'msg'            => $msg,
-				'code'           => $code,
-				'type'           => 'error',
-		);
-		self::$_is_error = true;
-	}
+        self::$checkpoints[] = array(
+            'name' => $name,
+            'msg'  => $msg,
+            'type' => 'variable',
+        );
 
-	static function warning($name, $code, $msg){
+        return true;
+    }
 
-		self::$checkpoints[] = array (
-				'name'           => $name,
-				'time'           => self::microtime(),
-				'memory'         => memory_get_usage(),
-				'included_files' => count(get_included_files()),
-				'queries'        => count(self::$queries),
-				'msg'            => $msg,
-				'code'           => $code,
-				'type'           => 'warning',
-		);
-		self::$_is_error = true;
-	}
+    static function error( $name, $code, $msg )
+    {
+        self::$checkpoints[] = array(
+            'name'           => $name,
+            'time'           => self::microtime(),
+            'memory'         => memory_get_usage(),
+            'included_files' => count( get_included_files() ),
+            'queries'        => count( self::$queries ),
+            'msg'            => $msg,
+            'code'           => $code,
+            'type'           => 'error',
+        );
+        self::$_is_error = true;
+    }
 
-	static function microtime(){
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float)$usec + (float)$sec);
-	}
+    static function warning( $name, $code, $msg )
+    {
+        self::$checkpoints[] = array(
+            'name'           => $name,
+            'time'           => self::microtime(),
+            'memory'         => memory_get_usage(),
+            'included_files' => count( get_included_files() ),
+            'queries'        => count( self::$queries ),
+            'msg'            => $msg,
+            'code'           => $code,
+            'type'           => 'warning',
+        );
+        self::$_is_error = true;
+    }
 
-	static function display_queries($start, $end){
+    static function microtime()
+    {
+        list( $usec, $sec ) = explode( ' ', microtime() );
 
-		if ($end - $start <= 0) return null;
+        return ( (float)$usec + (float)$sec );
+    }
 
-		echo '<table class="mysql" cellpadding=5>
-            <tr>
-                <td><b>Time</b></td>
-                <td><b>File</b></td>
-                <td><b>Line</b></td>
-                <td><b>SQL</b></td>
-            </tr>';
-		for ($i = $start; $i < $end; $i++){
-			$key = $i;
-			$query = self::$queries[$key];
+    static function display_queries( $start, $end )
+    {
 
-			echo '<tr valign="top" ' . ($key % 2 ? 'class="even"' : '') . '>
-                       <td><b>' . $query['time'] . '</b></td>
-                       <td>' . $query['file'] . '</td>
-                       <td>' . $query['line'] . '</td>
-                       <td>' . $query['sql'] . '</td>
-                  </tr>';
-		}
-		echo '</table>';
-	}
+        if ( $end - $start <= 0 ) {
+            return null;
+        }
 
-	static function display_errors(){
-		if (!self::$_is_error) return null;
-		echo '<table class="debug_info" cellpadding=5>
-                    <tr>
-                        <td><b>Name</b></td>
-                        <td><b>Info</b></td>
-                    </tr>';
+        $output = "Time File Line SQL\n";
+        for ( $i = $start; $i < $end; $i++ ) {
+            $key = $i;
+            $query = self::$queries[$key];
+            $output .= $query['time'].' '.$query['file'].' '.$query['line'].' '.$query['sql']."\n";
+        }
+        $output = "\n";
 
-		$show = array ('error', 'warning');
-		foreach (self::$checkpoints as $c){
-			if (!in_array($c['type'], $show)) continue;
-			echo '<tr valign="top" class="debug_' . $c['type'] . '"><td><b>' . $c['code'] . '::' . $c['name'] . '</b><br /></td>';
-			echo '<td>' . $c['msg'] . '<br /></td>';
-		}
-		echo '</table>';
-	}
+        return $output;
+    }
 
-	static function display(){
-		if (!self::isActive()){
-			return false;
-		}
-		$previous = array ();
-		$cumulative = array ();
+    static function display_errors()
+    {
+        if ( ! self::$_is_error ) {
+            return null;
+        }
+        $output = "Name Info\n";
 
-		$first = true;
+        $show = array( 'error', 'warning' );
+        foreach ( self::$checkpoints as $c ) {
+            if ( ! in_array( $c['type'], $show ) ) {
+                continue;
+            }
+            $output .= $c['code'].'::'.$c['name'].'      '.$c['msg']."\n";
+        }
+        $output .= "\n";
 
-		ob_start();
+        return $output;
+    }
 
-		switch(self::$debug_level){
+    static function display()
+    {
+        if ( ! self::isActive() ) {
+            return false;
+        }
 
-			case 0 :
-				//show only exceptions
-				//shown in Abc_Exception::displayError
-				break;
-			case 1 :
-				//show errors and warnings
-				self::display_errors();
-				break;
-			case 2 :
-				// #1 + mysql site load, php file execution time and page elements load time
-				self::display_errors();
+        $env_data = ABC::getEnv();
+        //remove credentials by security reason
+        unset( $env_data['DATABASES'], $env_data['ADMIN_SECRET'] );
+        self::$debug_bar->addCollector( new ConfigCollector( $env_data ) );
 
-				//count php execution time
-				foreach (self::$checkpoints as $name => $c){
-					if ($c['type'] != 'checkpoint') continue;
-					if ($first == true){
-						$first = false;
-						$cumulative = $c;
-					}
-					$time = sprintf("%01.4f", $c['time'] - $cumulative['time']);
-				}
-				echo '<div class="debug_info">';
-				echo 'Queries - ' . count(self::$queries) . '<br />';
-				echo 'Queries execution time - ' . sprintf('%01.5f', self::$queries_time) . '<br />';
-				echo 'PHP Execution time - ' . $time . '<br />';
-				echo '</div>';
-				break;
+        $previous = array();
+        $cumulative = array();
 
-			case 3 :
-			case 4 :
-			case 5 :
-				// #2 + basic logs and stack of execution
-				// #3 + dump mysql statements
-				// #4 + call stack
-				echo '<table class="debug_info" cellpadding=5>
-                    <tr>
-                        <td><b>Name</b></td>
-                        <td><b>Info</b></td>
-                    </tr>';
+        $first = true;
+        $msg = '';
+        switch ( self::$debug_level ) {
 
-				foreach (self::$checkpoints as $c){
-					echo '<tr valign="top" class="debug_' . $c['type'] . '" ><td><b>' . $c['name'] . '</b><br /></td>';
-					echo '<td>';
-					if ($first == true && $c['type'] != 'variable'){
-						$previous = array (
-								'time'           => $c['time'],
-								'memory'         => 0,
-								'included_files' => 0,
-								'queries'        => 0,
-						);
-						$first = false;
-						$cumulative = $c;
-					}
+            case 0 :
+                //show only exceptions
+                //shown in debug_bar
+                break;
+            case 1 :
+                //show errors and warnings
+                $msg .= self::display_errors();
+                break;
+            case 2 :
+                // #1 + mysql site load, php file execution time and page elements load time
+                $msg .= self::display_errors();
 
-					switch($c['type']){
-						case 'variable':
-							echo $c['msg'] . '<br />';
-							break;
-						case 'error':
-						case 'warning':
-							echo $c['msg'] . '<br />';
-						case 'checkpoint':
-							echo '- Memory: ' . (number_format($c['memory'] - $previous['memory'])) . ' (' . number_format($c['memory']) . ')' . '<br />';
-							echo '- Files: ' . ($c['included_files'] - $previous['included_files']) . ' (' . $c['included_files'] . ')' . '<br />';
-							echo '- Queries: ' . ($c['queries'] - $previous['queries']) . ' (' . $c['queries'] . ')' . '<br />';
-							echo '- Time: ' . sprintf("%01.4f", $c['time'] - $previous['time']) . ' (' . sprintf("%01.4f", $c['time'] - $cumulative['time']) . ')' . '<br />';
-							if (self::$debug_level > 3){
-								self::display_queries($previous['queries'], $c['queries']);
-							}
-							if (self::$debug_level > 4){
-								echo '<pre>' . $c['trace'] . '</pre>';
-							}
-							$previous = $c;
-							break;
-					}
+                //count php execution time
+                foreach ( self::$checkpoints as $name => $c ) {
+                    if ( $c['type'] != 'checkpoint' ) {
+                        continue;
+                    }
+                    if ( $first == true ) {
+                        $first = false;
+                        $cumulative = $c;
+                    }
+                    $time = sprintf( "%01.4f", $c['time'] - $cumulative['time'] );
+                }
 
-					echo '</td></tr>';
-				}
-				echo '</table>';
+                $msg .= 'Queries - '.count( self::$queries )."\n";
+                $msg .= 'Queries execution time - '.sprintf( '%01.5f', self::$queries_time )."\n";
+                $msg .= 'PHP Execution time - '.$time."\n";
+                break;
 
-				break;
+            case 3 :
+            case 4 :
+            case 5 :
+                // #2 + basic logs and stack of execution
+                // #3 + dump mysql statements
+                // #4 + call stack
+                $msg .= "\tName\tInfo\n";
 
-			default:
+                foreach ( self::$checkpoints as $c ) {
+                    $msg .= $c['name'];
 
-		}
+                    if ( $first == true && $c['type'] != 'variable' ) {
+                        $previous = array(
+                            'time'           => $c['time'],
+                            'memory'         => 0,
+                            'included_files' => 0,
+                            'queries'        => 0,
+                        );
+                        $first = false;
+                        $cumulative = $c;
+                    }
 
-		$debug = ob_get_clean();
-		switch(self::$debug){
-			case 1:
-				//show
-				echo $debug;
-				break;
-			case 2:
-				//log
-				require_once(ABC::env('DIR_CORE') . 'lib/log.php');
-				$registry = Registry::getInstance();
-				if ($registry->has('log')){
-					$log = $registry->get('log');
-				} else{
-					$log = new ALog(ABC::env('DIR_LOGS') . 'error.txt');
-				}
-				$log->write(strip_tags(str_replace('<br />', "\r\n", $debug)));
-				break;
-			default:
-		}
+                    switch ( $c['type'] ) {
+                        case 'variable':
+                            $msg .= $c['msg']."\n";
+                            break;
+                        case 'error':
+                        case 'warning':
+                            $msg .= $c['msg']."\n";
+                        case 'checkpoint':
+                            $msg .= '- Memory: '.( number_format( $c['memory'] - $previous['memory'] ) ).' ('.number_format( $c['memory'] ).')'."\n";
+                            $msg .= '- Files: '.( $c['included_files'] - $previous['included_files'] ).' ('.$c['included_files'].')'."\n";
+                            $msg .= '- Queries: '.( $c['queries'] - $previous['queries'] ).' ('.$c['queries'].')'."\n";
+                            $msg .= '- Time: '.sprintf( "%01.4f", $c['time'] - $previous['time'] ).' ('.sprintf( "%01.4f", $c['time'] - $cumulative['time'] ).')'."\n";
+                            if ( self::$debug_level > 3 ) {
+                                $msg .= self::display_queries( $previous['queries'], $c['queries'] );
+                            }
+                            if ( self::$debug_level > 4 ) {
+                                $msg .= $c['trace'];
+                            }
+                            $previous = $c;
+                            break;
+                    }
+                    $msg .= "\n";
+                }
+                $msg .= "\n";
 
-	}
+                break;
 
+            default:
+
+        }
+
+        if ( self::$debug ) {
+            //display debug-bar js and html
+            if ( self::$debug_bar ) {
+                self::$debug_bar["messages"]->addMessage( $msg );
+                $debugbarRenderer = self::$debug_bar->getJavascriptRenderer();
+                echo $debugbarRenderer->render();
+            }
+
+
+            $file = ABC::env('DIR_LOGS').'debug-'.time().'.log';
+            $handle = fopen($file, 'a+');
+            fwrite($handle, strip_tags( str_replace( '<br />', "\r\n", $msg )));
+            fclose($handle);
+
+        }
+    }
+}
+
+class PHPDebugBarEloquentCollector extends \DebugBar\DataCollector\PDO\PDOCollector
+{
+    /**
+     * @var \Illuminate\Database\Capsule\Manager
+     */
+    protected $orm;
+
+    /**
+     * PHPDebugBarEloquentCollector constructor.
+     *
+     * @param \Illuminate\Database\Capsule\Manager $orm
+     */
+    public function __construct( \Illuminate\Database\Capsule\Manager $orm )
+    {
+        $this->orm = $orm;
+        parent::__construct();
+        $this->addConnection( $this->getTraceablePdo(), 'Eloquent PDO' );
+    }
+
+    /**
+     * @return \Illuminate\Database\Capsule\Manager;
+     */
+    protected function getEloquentCapsule()
+    {
+        return $this->orm;
+    }
+
+    /**
+     * @return \PDO
+     */
+    protected function getEloquentPdo()
+    {
+        return $this->orm::connection()->getPdo();
+    }
+
+    /**
+     * @return \DebugBar\DataCollector\PDO\TraceablePDO
+     */
+    protected function getTraceablePdo()
+    {
+        return new \DebugBar\DataCollector\PDO\TraceablePDO( $this->getEloquentPdo() );
+    }
+
+    // Override
+    public function getName()
+    {
+        return "eloquent_pdo";
+    }
+
+    // Override
+    public function getWidgets()
+    {
+        return array(
+            "eloquent"       => array(
+                "icon"    => "inbox",
+                "widget"  => "PhpDebugBar.Widgets.SQLQueriesWidget",
+                "map"     => "eloquent_pdo",
+                "default" => "[]",
+            ),
+            "eloquent:badge" => array(
+                "map"     => "eloquent_pdo.nb_statements",
+                "default" => 0,
+            ),
+        );
+    }
 }

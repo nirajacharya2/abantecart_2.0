@@ -3,6 +3,7 @@ namespace abc\core\lib;
 
 use ErrorException;
 use Exception;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
@@ -77,8 +78,12 @@ class AHandleExceptions
         }
 
         if (php_sapi_name() == 'cli') {
-            $this->getExceptionHandler()->renderForConsole($e, 'cli');
+            $this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
         } else {
+            $debug_bar = ADebug::$debug_bar;
+            if($debug_bar){
+                $debug_bar['exceptions']->addException($e);
+            }
             $this->renderHttpResponse($e);
         }
     }

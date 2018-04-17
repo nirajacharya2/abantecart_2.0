@@ -65,7 +65,7 @@ class AExceptionHandler
             $logger_message_type = 'critical';
         }
 
-        if(!$this->debug && class_exists('\abc\core\engine\Registry') && Registry::getInstance()->get('log')) {
+        if($logger_message_type == 'error' && class_exists('\abc\core\engine\Registry') && Registry::getInstance()->get('log')) {
             Registry::getInstance()->get('log')->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
         }else {
             /**

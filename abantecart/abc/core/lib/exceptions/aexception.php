@@ -33,8 +33,6 @@ class AException extends \Exception
 
     public function __construct($errstr = '',$errno = 0,  $file = '', $line = '')
     {
-
-
         $this->code = $errno ? $errno : $this->code;
         $this->message = $errstr ? $errstr : $this->message;
         $this->file = $file ? $file : $this->file;
@@ -43,8 +41,4 @@ class AException extends \Exception
         parent::__construct();
     }
 
-    public function mailError()
-    {
-        $this->error->toMail();
-    }
 }
