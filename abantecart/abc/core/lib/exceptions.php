@@ -19,7 +19,6 @@
 ------------------------------------------------------------------------------*/
 namespace abc\core\lib;
 use abc\core\ABC;
-use abc\core\engine\Registry;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -30,8 +29,7 @@ require_once(ABC::env('DIR_LIB') . 'exceptions/aexception.php');
 require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
 require_once(ABC::env('DIR_LIB') . 'exceptions/handler.php');
 
-$app_config = Registry::getInstance()->get('config')->
 $config = [
-    'debug' => false
+    'debug' => (ABC::env('DEBUG') ? true : false)
 ];
 new AHandleExceptions($config,new AExceptionHandler($config['debug']));
