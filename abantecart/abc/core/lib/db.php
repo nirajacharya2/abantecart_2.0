@@ -72,6 +72,9 @@ class ADB
             if ( $debug_bar ) {
                 $debug_bar->addCollector( new PHPDebugBarEloquentCollector( $this->orm ) );
             }
+            if($this->db_config['driver'] == 'mysql'){
+                $this->orm::select( $this->orm::raw( "SET SQL_MODE='';" ) );
+            }
         } catch ( \PDOException $e ) {
             throw new AException( $e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine() );
         }
