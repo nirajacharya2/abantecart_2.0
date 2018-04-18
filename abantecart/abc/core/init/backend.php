@@ -116,7 +116,8 @@ foreach ($defaults as $name => $value) {
         ABC::env($name, $value);
     }
 }
-
+//load vendors classes
+require ABC::env('DIR_VENDOR').'autoload.php';
 // App Version
 include('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION').'.'. ABC::env('VERSION_BUILT'));
