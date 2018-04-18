@@ -34,7 +34,6 @@
       "wapmorgan/unified-archive": "~0.0.10",
       "symfony/debug": "~3.2",
       "symfony/var-dumper": "~3.2",
-      "maximebf/debugbar": "1.13.1",
       "filp/whoops": "2.1.14",
       "monolog/monolog": "1.23.0"
     },

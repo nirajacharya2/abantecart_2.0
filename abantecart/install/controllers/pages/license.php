@@ -52,12 +52,12 @@ class ControllerPagesLicense extends AController
         }
         $this->view->assign('error_warning', $template_data['error_warning']);
         $this->view->assign('action', ABC::env('HTTPS_SERVER').'index.php?rt=license');
-        if(is_dir(ABC::env('DIR_VENDOR'))) {
+        if(is_file(ABC::env('DIR_VENDOR').'autoload.php')) {
             $text = nl2br(file_get_contents('../license.txt'));
             $this->view->assign('text', $text);
         }else{
             $error = true;
-            $this->view->assign('error','vendor_dir_not_found');
+            $this->view->assign('error','not-initiated');
         }
 
         $this->view->assign('checkbox_agree', $this->html->buildCheckbox(
@@ -75,6 +75,7 @@ class ControllerPagesLicense extends AController
         $this->addChild('common/footer', 'footer', 'common/footer.tpl');
 
         if($error) {
+            //show message about composer
             $tpl = 'pages/initiate.tpl';
         }else{
             $tpl = 'pages/license.tpl';

@@ -14,15 +14,14 @@
 
     <div class="panel-body">
 
-        <?php if ($error == 'vendor_dir_not_found') { ?>
+        <?php if ($error == 'not-initiated') { ?>
         <div >
             Thank you for choosing AbanteCart Ecommerce Software.</br>
             To proceed install you should to initiate project first.
             <br>
             <br>
-            Just open terminal and run composer install inside abc directory
-            (need to change text here!!!!!)
-
+            Just open terminal and run composer install inside abc directory</br>
+			See more details on <a href="https://getcomposer.org/doc/" target="_blank">https://getcomposer.org/doc/</a>
         </div>
         <?php } ?>
 
