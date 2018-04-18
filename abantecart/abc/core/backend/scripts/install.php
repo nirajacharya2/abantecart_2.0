@@ -594,7 +594,20 @@ return [
                         //'CACHE_PORT' => 'your_cache_port',                        
                         //'CACHE_PERSISTENT' => false, //boolean
                         //'CACHE_COMPRESS_LEVEL' => false, //boolean
-                    ]
+                    ],
+        //enable debug info collection
+        // 1 - output to debug-bar and logging, 2 - only logging (see log-directory)
+        'DEBUG' => 1,
+        /*
+         * Level 0 - no logs , only exception errors
+         * Level 1 - errors and warnings
+         * Level 2 - #1 + mysql site load, php file execution time and page elements load time
+         * Level 3 - #2 + basic logs and stack of execution
+         * Level 4 - #3 + dump mysql statements
+         * Level 5 - #4 + intermediate variable
+         *
+         * */
+        'DEBUG_LEVEL' => 5
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG').'default.config.php', 'w');
