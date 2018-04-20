@@ -25,6 +25,7 @@ use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\ALanguageManager;
 use abc\core\engine\ALayout;
@@ -259,6 +260,9 @@ $hook = new AHook($registry);
 // Database
 $db_config = ABC::env('DATABASES');
 $registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
+if( php_sapi_name() == 'cli' ){
+    AHelperUtils::setDBUserVars();
+}
 
 // Cache
 $registry->set('cache', new ACache());

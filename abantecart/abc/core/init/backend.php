@@ -21,6 +21,7 @@ namespace abc\core\backend;
 use abc\core\ABC;
 use abc\core\engine\{AHtml,ALoader, ExtensionsApi,Registry};
 use abc\core\cache\ACache;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\{AConfig,ADataEncryption,ADB,ADocument,ALanguageManager,ALog,ASession};
 
 $dir_sep = DIRECTORY_SEPARATOR;
@@ -143,6 +144,7 @@ $registry->set('html', new AHtml($registry));
 if(ABC::env('DB_CURRENT_DRIVER')) {
     $db_config = ABC::env('DATABASES');
     $registry->set('db', new ADB( $db_config[ABC::env('DB_CURRENT_DRIVER')] ));
+    AHelperUtils::setDBUserVars();
 }
 
 // Config

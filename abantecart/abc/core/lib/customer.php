@@ -94,6 +94,10 @@ class ACustomer
      */
     protected $db;
     /**
+     * @var \abc\core\cache\ALoader
+     */
+    protected $load;
+    /**
      * @var ARequest
      */
     protected $request;
@@ -206,6 +210,9 @@ class ACustomer
             $approved_only = " AND approved = '1'";
         }
 
+        /**
+         * @deprecated !!!
+         */
         //Supports older passwords for upgraded/migrated stores prior to 1.2.8
         $add_pass_sql = '';
         if (ABC::env('SALT')) {
@@ -215,12 +222,8 @@ class ACustomer
                                             FROM ".$this->db->table_name("customers")."
                                             WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
                                             AND (
-                                                password = 	SHA1(CONCAT(salt, 
-                                                            SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
-                                                        ))
-                                                ".$add_pass_sql."
-                                            )
-                                            AND status = '1' ".$approved_only);
+                                                password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
+                                                        ))" . $add_pass_sql . ") AND status = '1' ".$approved_only);
         if ($customer_data->num_rows) {
 
             $this->_customer_init($customer_data->row);
@@ -296,7 +299,7 @@ class ACustomer
 
         $this->address_id = (int)$data['address_id'];
 
-        $this->db->query("SET @CUSTOMER_ID = '".(int)$this->customer_id."'");
+        AHelperUtils::setDBUserVars();
     }
 
     public function setLastLogin($customer_id)

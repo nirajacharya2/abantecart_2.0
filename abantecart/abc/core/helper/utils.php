@@ -1639,4 +1639,77 @@ class AHelperUtils extends AHelper
         return $handler->scheduleJob();
     }
 
+    /**
+     * Function returns array with user_type, user name and user id for database audit log
+     * This data will be set as database global variables and used by database triggers
+     */
+    static function recognizeUser()
+    {
+
+        if(ABC::env('IS_ADMIN')){
+            if(!class_exists(Registry::class)){
+                return [];
+            }
+            $registry = Registry::getInstance();
+            $user_id = $registry->get('user')->getId();
+            $output = [
+                'user_type' => 1,
+                'user_id' => $user_id,
+                'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin')
+            ];
+        }elseif(php_sapi_name() == 'cli'){
+            $user_id = posix_geteuid();
+            $output = [
+                'user_type' => 0,
+                'user_id' => $user_id,
+                'user_name' => posix_getpwuid( $user_id )['name']
+            ];
+        }else{
+            if(!class_exists(Registry::class)){
+                return [];
+            }
+            $registry = Registry::getInstance();
+            $user_id = $registry->get('customer')->getId();
+            $output = [
+                'user_type' => 2,
+                'user_id' => $user_id,
+                'user_name' => ($user_id ? $registry->get('customer')->getLoginName() : 'guest')
+            ];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Function put abc-user info into sql-server variables
+     * Used by triggers of audit-log
+     * @return array|bool
+     */
+    static function setDBUserVars()
+    {
+        if(!class_exists(Registry::class)){
+            return [];
+        }
+        $user_info = self::recognizeUser();
+        if(!$user_info || !$user_info['user_name']){
+            return false;
+        }
+        $registry = Registry::getInstance();
+        $db = $registry->get('db');
+        if(!$db){
+            return false;
+        }
+
+        switch(ABC::env('DB_CURRENT_DRIVER')){
+            case 'mysql':
+                $db->query(
+                    "SET @global.abc_user_id = '".$user_info['user_id']."';
+                     SET @global.abc_user_name = '".$user_info['user_name']."';
+                     SET @global.abc_user_type = '".$user_info['user_type']."';",
+                    true);
+                return true;
+        }
+        return false;
+    }
+
 }
