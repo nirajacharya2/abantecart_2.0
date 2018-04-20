@@ -290,6 +290,10 @@ class AExtensionManager
             if ( is_array( $value ) ) {
                 //validate values in array. If setting is array of all members = 0 save only single value of 0
                 //This is to match standard post format in regular form submit
+                foreach($value as &$v){
+                    //remove empty value from multiselectbox with empty set of options
+                    $v = $v == "''" ? null : $v;
+                }
                 $concat = implode( '', $value );
                 if ( preg_match( '/[^0]/', $concat ) ) {
                     $value = serialize( $value );

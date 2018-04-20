@@ -1521,11 +1521,13 @@ class ALayoutManager
             return array();
         }
 
-        $sql = "SELECT DISTINCT l.*
+        $sql = "SELECT DISTINCT l.*, pl.page_id
                 FROM  ".$this->db->table_name( 'layouts' )." l
                 INNER JOIN ".$this->db->table_name( 'block_layouts' )." bl
                     ON (bl.layout_id = l.layout_id 
-                        AND ".( $custom_block_id ? "bl.custom_block_id = ".$custom_block_id : "bl.block_id=".$block_id ).")";
+                        AND ".( $custom_block_id ? "bl.custom_block_id = ".$custom_block_id : "bl.block_id=".$block_id ).")
+                LEFT JOIN " . $this->db->table_name('pages_layouts') . " pl
+                    ON l.layout_id = pl.layout_id ";
 
         $result = $this->db->query( $sql );
 
