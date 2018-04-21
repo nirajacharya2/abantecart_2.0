@@ -51,9 +51,9 @@ To receive developer notifications about release information, sign up to the new
 2. Inscall composer and run 'composer update'
 
 3. Run installation command from abc/ directory with required parameters. 
-php abcexec install:app --db_host=localhost --db_user=[DB USER] --db_password=[DB PASSWORD] --db_name=[DB NAME] --db_driver=mysql --admin_secret=[YOUR SECRET WORD] --username=[USER_NAME] --password=[PASSWORD] --email=[EMAIL] --http_server=[URL] --with-sample-data
+**php abcexec install:app --db_host=localhost --db_user=[DB USER] --db_password=[DB PASSWORD] --db_name=[DB NAME] --db_driver=mysql --admin_secret=[YOUR SECRET WORD] --username=[USER_NAME] --password=[PASSWORD] --email=[EMAIL] --http_server=[URL] --with-sample-data
 
-See php abcexec --help for more options
+See php **abcexec --help** for more options
 
 NOTE: You can run installation for the URL as well. You will need to point your web server to directory above install and load [URL]/install for installation steps.
 
