@@ -48,7 +48,7 @@ To receive developer notifications about release information, sign up to the new
 ## How to install
 1. Clone repository 
 
-2. Inscall composer and run 'composer update'
+2. Install composer and run **'composer update'**
 
 3. Run installation command from abc/ directory with required parameters. 
 
