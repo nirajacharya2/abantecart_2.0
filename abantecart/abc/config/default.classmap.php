@@ -8,12 +8,6 @@ return [
         'ALog' => [
                     ALog::class,
                     //all errors
-                    'application.log',
-                    //security alerts
-                    'application.log',
-                    //warnings
-                    'application.log',
-                    //debug info
                     'application.log'
         ],
         'APackageInstallerJob' => APackageInstallerJob::class

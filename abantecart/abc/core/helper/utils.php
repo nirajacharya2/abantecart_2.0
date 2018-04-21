@@ -1647,7 +1647,7 @@ class AHelperUtils extends AHelper
     {
 
         if(ABC::env('IS_ADMIN')){
-            if(!class_exists(Registry::class)){
+            if(!class_exists(Registry::class) || !Registry::getInstance()->get('user')){
                 return [];
             }
             $registry = Registry::getInstance();
