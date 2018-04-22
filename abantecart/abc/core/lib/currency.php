@@ -84,25 +84,25 @@ final class ACurrency
             $cache->push($cache_key, $this->currencies);
         }
 
-        if (isset($this->request->get['currency']) && array_key_exists($this->request->get['currency'], $this->currencies)) {
-            $this->set($this->request->get['currency']);
-            $this->is_switched = true; // set sign for external use via isSwitched method
-            unset($this->request->get['currency'],
-                $this->session->data['shipping_methods'],
-                $this->session->data['shipping_method']);
+        $currencyCode = $this->isValidCodeFormat($this->request->get['currency']) ? $this->request->get['currency'] : '';
+        if ($currencyCode && array_key_exists($currencyCode, $this->currencies)){
+            $this->set($currencyCode);
+            // Currency is switched, set sign for external use via isSwitched method
+            $this->is_switched = true;
+            unset($this->request->get['currency'], $this->session->data['shipping_methods'], $this->session->data['shipping_method']);
 
-        } elseif (isset($this->session->data['currency']) && array_key_exists($this->session->data['currency'], $this->currencies)) {
+        } elseif (isset($this->session->data['currency']) && array_key_exists($this->session->data['currency'], $this->currencies)){
             $this->set($this->session->data['currency']);
-        } elseif (isset($this->request->cookie['currency']) && array_key_exists($this->request->cookie['currency'], $this->currencies)) {
-            if (ABC::env('IS_ADMIN') === true) {
+        } elseif (isset($this->request->cookie['currency']) && array_key_exists($this->request->cookie['currency'], $this->currencies)){
+            if (IS_ADMIN === true){
                 $this->set($this->config->get('config_currency'));
-            } else {
+            } else{
                 $this->set($this->request->cookie['currency']);
             }
-        } else {
+        } else{
             // need to know about currency switch. Check if currency was set but not in list of available currencies
-            if (isset($this->request->get['currency']) || isset($this->session->data['currency']) || isset($this->request->cookie['currency'])) {
-                $this->is_switched = true; // set sign for external use via isSwitched method
+            if (isset($currencyCode) || isset($this->session->data['currency']) || isset($this->request->cookie['currency'])){
+                $this->is_switched = true;
             }
             $this->set($this->config->get('config_currency'));
         }
@@ -350,5 +350,17 @@ final class ACurrency
     public function has($code)
     {
         return isset($this->currencies[$code]);
+    }
+
+    /**
+     * @param string $code
+     * @return bool
+     */
+    public function isValidCodeFormat($code){
+        if(preg_match('/^[a-zA-Z0-9]{3}$/', $code)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
