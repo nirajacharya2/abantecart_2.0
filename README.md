@@ -1,5 +1,5 @@
 
-# AbanteCart eCommerce Platform v2.0
+# AbanteCart eCommerce Platform v2.0 DEV
 
 **Important!**
 ## This is a development branch for v2.0. Do not use on live sites!!
