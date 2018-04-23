@@ -408,6 +408,7 @@ if (ABC::env('IS_ADMIN') === true) {
 if ( ! ABC::env('IS_ADMIN')) { // storefront load
     // Customer
     $registry->set('customer', new ACustomer($registry));
+    AHelperUtils::setDBUserVars();
     // Tax
     $registry->set('tax', new ATax($registry));
     // Weight
@@ -419,6 +420,7 @@ if ( ! ABC::env('IS_ADMIN')) { // storefront load
 } else {
     // User
     $registry->set('user', new AUser($registry));
+    AHelperUtils::setDBUserVars();
 }// end admin load
 
 // Currency

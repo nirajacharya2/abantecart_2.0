@@ -140,7 +140,6 @@ final class AUser
      */
     private function _user_init()
     {
-        AHelperUtils::setDBUserVars();
         $this->db->query( "UPDATE ".$this->db->table_name( "users" )." 
                             SET ip = '".$this->db->escape( $this->request->getRemoteIP() )."'
                             WHERE user_id = '".$this->user_id."';" );

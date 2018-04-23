@@ -299,7 +299,6 @@ class ACustomer
 
         $this->address_id = (int)$data['address_id'];
 
-        AHelperUtils::setDBUserVars();
     }
 
     public function setLastLogin($customer_id)

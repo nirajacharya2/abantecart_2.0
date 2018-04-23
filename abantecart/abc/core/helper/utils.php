@@ -1702,11 +1702,20 @@ class AHelperUtils extends AHelper
 
         switch(ABC::env('DB_CURRENT_DRIVER')){
             case 'mysql':
-                $db->query(
-                    "SET @global.abc_user_id = '".$user_info['user_id']."';
-                     SET @global.abc_user_name = '".$user_info['user_name']."';
-                     SET @global.abc_user_type = '".$user_info['user_type']."';",
-                    true);
+                try {
+                    $orm = $db->getORM();
+                    $orm::select(
+                            $orm::raw( "SET @GLOBAL.abc_user_id = '".$user_info['user_id']."';" )
+                    );
+                    $orm::select(
+                            $orm::raw( "SET @GLOBAL.abc_user_name = '".$user_info['user_name']."';" )
+                    );
+                    $orm::select(
+                            $orm::raw( "SET @GLOBAL.abc_user_type = '".$user_info['user_type']."';" )
+                    );
+                }catch(\Exception $e){
+
+                }
                 return true;
         }
         return false;

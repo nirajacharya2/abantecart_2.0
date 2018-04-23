@@ -305,7 +305,8 @@ class ModelCatalogCategory extends Model
                        WHERE p.category_id = c.category_id) as products_count,
                       (SELECT count(*) as cnt
                        FROM ".$this->db->table_name( 'categories' )." cc
-                       WHERE cc.parent_id = c.category_id) as subcategory_count                       
+                       WHERE cc.parent_id = c.category_id) as subcategory_count,
+                       cd.name as basename
                 FROM ".$this->db->table_name( 'categories' )." c
                 LEFT JOIN ".$this->db->table_name( 'category_descriptions' )." cd
                     ON (c.category_id = cd.category_id AND cd.language_id = '".$language_id."')
