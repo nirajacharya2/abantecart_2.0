@@ -258,7 +258,7 @@ class ControllerPagesAccountLogin extends AController
             if ( $this->config->get( 'config_customer_email_activation' ) ) {
                 //check if account is not confirmed in the email.
                 $this->loadModel( 'account/customer' );
-                $customer_info = $this->model_account_customer->getCustomerByLoginname( $loginname );
+                $customer_info = $this->model_account_customer->getCustomerByLogin($loginname);
                 if ( $customer_info
                     && ! $customer_info['status']
                     && isset( $customer_info['data']['email_activation'] )

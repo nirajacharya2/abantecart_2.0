@@ -501,6 +501,22 @@ class ModelAccountCustomer extends Model
     }
 
     /**
+     * Detect type of login configured and select customer
+     *
+     * @param string $login
+     *
+     * @return array
+     */
+    public function getCustomerByLogin( $login )
+    {
+        if ($this->config->get('prevent_email_as_login')) {
+            return $this->getCustomerByLoginname( $login );
+        } else {
+            return $this->getCustomerByEmail( $login );
+        }
+    }
+
+    /**
      * @param string $email
      *
      * @return array
@@ -509,11 +525,15 @@ class ModelAccountCustomer extends Model
     {
         //assuming that data is not encrypted. Can not call these otherwise
         $query = $this->db->query( "SELECT *
-                                    FROM ".$this->db->table_name( "customers" )."
+                                    FROM ".$this->db->table( "customers" )."
                                     WHERE LOWER(`email`) = LOWER('".$this->db->escape( $email )."')" );
-
-        return $query->row;
+        $output = $this->dcrypt->decrypt_data( $query->row, 'customers' );
+        if ( $output['data'] ) {
+            $output['data'] = unserialize( $output['data'] );
+        }
+        return $output;
     }
+
 
     /**
      * @param string $loginname
