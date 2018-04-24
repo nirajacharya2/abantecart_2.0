@@ -31,7 +31,7 @@
       "illuminate/database": "*",
       "robmorgan/phinx": "*",
       "twig/twig": "1.6.5",
-      "wapmorgan/unified-archive": "~0.0.10",
+      "wapmorgan/unified-archive": "~0.1.0",
       "symfony/debug": "~3.2",
       "symfony/var-dumper": "~3.2",
       "maximebf/debugbar": "1.13.1",
