@@ -1355,6 +1355,9 @@ class ExtensionUtils
                     continue;
                 }
                 foreach ($checked_resources as $section => $section_resources) {
+                    if(!$resources[$section] || !is_array($resources[$section])){
+                        continue;
+                    }
                     $conflict = array_intersect($resources[$section], $section_resources);
                     if ( ! empty($conflict)) {
                         $conflict_resources[$checked_name][$resource_type][$section] = $conflict;
