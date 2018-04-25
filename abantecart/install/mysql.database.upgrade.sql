@@ -446,3 +446,5 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+

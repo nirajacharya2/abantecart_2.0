@@ -12856,20 +12856,3 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`attribute_id`) REFERENCES `ac_global_attributes`(`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-DROP TABLE IF EXISTS `abc_audit_history_log` CASCADE;
-CREATE TABLE `abc_audit_history_log` (
-  `table_name` varchar(128) NOT NULL,
-  `row_id` int(11) NOT NULL,
-  `revision` int(11) NOT NULL AUTO_INCREMENT,
-  `operation` varchar(45) NOT NULL,
-  `data` json DEFAULT NULL,
-  `user_type` int(11) DEFAULT NULL COMMENT '0 - System user\n1 - Admin user\n2 - Customer',
-  `user_id` int(11) NOT NULL,
-  `user_name` varchar(128) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`table_name`,`row_id`,`revision`),
-  KEY `audit_log_idx_3` (`table_name`,`row_id`,`revision`),
-  KEY `audit_log_idx_1` (`table_name`,`row_id`,`user_id`,`user_type`),
-  KEY `audit_log_idx_2` (`row_id`,`user_name`,`table_name`,`user_type`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
