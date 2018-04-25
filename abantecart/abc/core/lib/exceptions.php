@@ -28,6 +28,8 @@ if (!class_exists('abc\core\ABC')) {
 require_once(ABC::env('DIR_LIB') . 'exceptions/aexception.php');
 require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
 require_once(ABC::env('DIR_LIB') . 'exceptions/handler.php');
+require_once(ABC::env('DIR_LIB') . 'exceptions/exception_codes.php');
+
 
 $config = [
     'debug' => (ABC::env('DEBUG') ? true : false)
