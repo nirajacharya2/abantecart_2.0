@@ -177,7 +177,7 @@ class ADB
             $output = new \stdClass();
             $output->row = isset( $data[0] ) ? $data[0] : array();
             //get total rows count for pagination
-            if ( $data ) {
+            if ( $data && is_int(strpos($this->raw_sql_row_count(),$sql))) {
                 $output->total_num_rows = $this->sql_get_row_count();
                 $data[0]['total_num_rows'] = $output->total_num_rows;
             }
@@ -219,6 +219,15 @@ class ADB
     public function getDatabaseName()
     {
         return $this->db_config['database'];
+    }
+    /**
+     * Get database name
+     *
+     * @return array
+     */
+    public function getDBConfig()
+    {
+        return $this->db_config;
     }
 
     /**

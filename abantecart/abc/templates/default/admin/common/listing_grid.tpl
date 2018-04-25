@@ -1,6 +1,7 @@
-<div class="ui-jqgrid-wrapper" id="<?php use abc\core\ABC;
-
-echo $data['table_id'] ?>_wrapper">
+<?php
+use abc\core\ABC;
+?>
+<div class="ui-jqgrid-wrapper" id="<?php echo $data['table_id'] ?>_wrapper">
 	<form class="form-inline" id="<?php echo $data['table_id'] ?>_form" action="<?php echo $data["editurl"] ?>" method="POST" role="form">
 		<table id="<?php echo $data['table_id'] ?>"></table>
 		<div id="<?php echo $data['table_id'] ?>_pager"></div>
