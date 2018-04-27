@@ -48,9 +48,15 @@ To receive developer notifications about release information, sign up to the new
 ## How to install
 1. Clone repository 
 
-2. Install composer and run **'composer update'**
+2. go to abantecart/abc/ directory in terminal
 
-3. Run installation command from abc/ directory with required parameters. 
+3. run command: wget https://getcomposer.org/composer.phar
+
+4. run command:  php composer.phar install
+
+5. set write permissions to: abc/system/logs ,  /public/, /public/resources/, /public/images/, abc/config/, abc/system/, abc/system/cache/, abc/downloads/, abc/extensions/…
+
+6. run installation command from abc/ directory with required parameters. 
 
 **php abcexec install:app --db_host=localhost --db_user=[DB USER] --db_password=[DB PASSWORD] --db_name=[DB NAME] --db_driver=mysql --admin_secret=[YOUR SECRET WORD] --username=[USER_NAME] --password=[PASSWORD] --email=[EMAIL] --http_server=[URL] --with-sample-data**
 
@@ -58,7 +64,7 @@ See php **abcexec --help** for more options
 
 NOTE: You can run installation for the URL as well. You will need to point your web server to directory above install and load [URL]/install for installation steps.
 
-4. Point your webserver web root to public/ directory  
+7. Point your webserver web root to public/ directory  
 
 
 ## Command line tools:
