@@ -41,7 +41,7 @@ use abc\core\ABC;
 	);
 ?>
 
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jqgrid/plugins/jquery.tablednd.js'); ?>"></script>
+<script type="text/javascript" src="vendor/jqGrid/plugins/jquery.tablednd.js"></script>
 <script type="text/javascript">
 
 var initGrid_<?php echo $data['table_id'] ?> = function ($) {
@@ -149,7 +149,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 	});
 	<?php } ?>
 
-	$(table_id).jqGrid<?php echo $history_mode ? 'History' : ''; ?>({
+	$(table_id).jqGrid({
 		url: '<?php echo $data["url"] ?>',
 		editurl: '<?php echo $data["editurl"] ?>',
 		datatype: "json",
@@ -165,7 +165,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		viewrecords: true,
 		altRows: <?php echo $data['altRows'] ?>,
 		height: '100%',
-		width: ($.browser.msie ? ($(window).width()-100) : '100%'),// memory leak in damn msie
+		width:  '100%',// memory leak in damn msie
 		shrinkToFit: false,
 		autowidth: true,
 		sortname: '<?php echo $data['sortname'] ?>',
@@ -242,7 +242,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 			});
 
 			//add grid filter fields for saved state
-			var gridInfo = $.parseJSON($.cookie("grid_params"));
+			var gridInfo = $.parseJSON(Cookies.get("grid_params"));
 			if(gridInfo && gridInfo.postData && gridInfo.postData.filters){
 				var $filters = $.parseJSON(gridInfo.postData.filters);
 				$.each ($filters.rules, function( index, value ){
@@ -511,8 +511,8 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 				//apply saved grid for initial grid load only
 				var grid = $(table_id);
 				if(gridFirstLoad === true) {
-					if ($.cookie("grid_params") != null && $.cookie("grid_params") != "") {
-						var gridInfo = $.parseJSON($.cookie("grid_params"));
+					if (Cookies.get("grid_params") != null && Cookies.get("grid_params") != "") {
+						var gridInfo = $.parseJSON(Cookies.get("grid_params"));
 						//TODO: merge this calls
 						grid.jqGrid('setGridParam', {sortname: gridInfo.sortname});
 						grid.jqGrid('setGridParam', {sortorder: gridInfo.sortorder});
@@ -525,7 +525,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 						grid.jqGrid('setGridParam', {search: gridInfo.search});
 
 						//do we have external search form?
-						var search_data = $.parseJSON($.cookie("grid_search_form"));
+						var search_data = $.parseJSON(Cookies.get("grid_search_form"));
 						if (search_data != null && search_data.table_id == _table_id) {
 							var $form = $(table_id + '_search');
 							var new_url = '<?php echo $data["url"] ?>&' + $form.serialize();
@@ -538,7 +538,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 			<?php } else { ?>
 				//reset grid search for initial load only
 				if(gridFirstLoad === true) {
-					$.cookie("grid_search_form", "");
+					Cookies.set("grid_search_form", "");
 				}
 				save_grid_parameters($(table_id));
 			<?php } ?>
@@ -588,8 +588,8 @@ if ($custom_buttons) {
 	//reset
 	$(table_id + '_search button[type="reset"]').click(function () {
 		//reset pre-saved cookies and search form fields
-		$.cookie("grid_search_form", "");
-		$.cookie("grid_params", "");
+		Cookies.set("grid_search_form", "");
+		Cookies.set("grid_params", "");
 		$(table_id + '_search').find("input[type=text]").attr('value', '');
 		$(table_id + '_search').find("select").each(function () {
 			$s = $(this);
@@ -726,7 +726,7 @@ if ($custom_buttons) {
 		gridInfo.rowNum = $grid.jqGrid('getGridParam', 'rowNum');
 		gridInfo.postData = $grid.jqGrid('getGridParam', 'postData');
 		gridInfo.search = $grid.jqGrid('getGridParam', 'search');
-		$.cookie("grid_params", JSON.stringify(gridInfo));
+		Cookies.set("grid_params", JSON.stringify(gridInfo));
 	}
 
 	function save_grid_search_form_parameters(){
@@ -734,7 +734,7 @@ if ($custom_buttons) {
 		var searchInfo = new Object();
 		searchInfo.params = params;
 		searchInfo.table_id = _table_id;
-		$.cookie("grid_search_form", JSON.stringify(searchInfo));
+		Cookies.set("grid_search_form", JSON.stringify(searchInfo));
 	}
 
 	//resize jqgrid

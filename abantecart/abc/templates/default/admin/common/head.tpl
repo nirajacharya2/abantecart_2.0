@@ -16,6 +16,22 @@ use abc\core\ABC; ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
+<link rel="stylesheet" type="text/css" href="vendor/components/bootstrap/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/bootstrap.custom.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="vendor/components/jqueryui/themes/ui-lightness/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/abantecart.jquery.ui.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/form.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
+<link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
+<link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
+<link rel="stylesheet" type="text/css" href="vendor/components/bootstrap-fileinput/css/fileinput.min.css" />
+
+<?php
+//TODO: check what is it!
+//	@import url('chosen.bootstrap.css');
+?>
+
+
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 <?php foreach ($styles as $style) { ?>
@@ -23,24 +39,28 @@ use abc\core\ABC; ?>
       media="<?php echo $style['media']; ?>"/>
 <?php } ?>
 
-<script type="text/javascript"
-        src="<?php echo $ssl ? 'https' : 'http'?>://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript">
     if (typeof jQuery == 'undefined') {
-        var include = '<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-1.12.4.min.js'); ?>"><\/script>';
-        document.write(include);
+        document.write('<script type="text\/javascript" src="vendor\/components\/jquery\/jquery-3.3.1.min.js"><\/script>');
+        document.write('<script type="text\/javascript" src="vendor\/components\/jquery-migrate\/jquery-migrate-3.0.1.min.js"><\/script>');
+    }else{
+        document.write('<script src="\/\/code.jquery.com\/jquery-migrate-3.0.1.js"><\/script>')
     }
+
 <?php if($retina){?>
     if((window.devicePixelRatio===undefined?1:window.devicePixelRatio)>1) {
         document.cookie = 'HTTP_IS_RETINA=1;path=/';
     }
 <?php } ?>
+
 </script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
-<script defer type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
+
+<script type="text/javascript" src="vendor/components/jquery-cookie/js.cookie.min.js"></script>
+<script type="text/javascript" src="vendor/components/jqueryui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="vendor/components/popper/popper.min.js"></script>
+<script type="text/javascript" src="vendor/components/bootstrap/js/bootstrap.min.js"></script>
+<script defer type="text/javascript" src="vendor/tinymce/tinymce/tinymce.min.js"></script>
 
 
 <?php foreach ($scripts as $script) { ?>
@@ -52,15 +72,16 @@ use abc\core\ABC; ?>
 <?php 
 	//Generic PHP processed Javascript section
 
-if(is_file(ABC::env('DIR_TEMPLATES').'default/js/tinymce/langs/'.$language_locale.'.js')){
+if(is_file(ABC::env('DIR_PUBLIC').'vendor/tinymce/tinymce/languages/'.$language_locale.'.js')){
 	$mce_lang_code = $language_locale;
-} elseif(is_file(ABC::env('DIR_TEMPLATES').'default/js/tinymce/langs/'.substr($language_locale,0,2).'.js')){
+} elseif(is_file(ABC::env('DIR_PUBLIC').'vendor/tinymce/tinymce/languages/'.substr($language_locale,0,2).'.js')){
 	$mce_lang_code = substr($language_locale, 0, 2);
 }else{
 	$mce_lang_code = 'en';
 }
 ?>
 <script type="text/javascript">
+
 //define tinymce config
 var mcei = {
 	theme: "modern",
@@ -124,7 +145,7 @@ var mcei = {
 
 
 $(document).ready(function () {
-
+	jQuery.migrateMute = true;
 	//system check warnings
 	<?php if($system_error) { ?>
 		error_alert(<?php abc_js_echo($system_error); ?>, false);

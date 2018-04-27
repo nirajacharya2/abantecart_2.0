@@ -49,7 +49,7 @@
     $('#category_grid_wrapper a.grid_action_expand').click(function(){
         var new_url = '<?php echo $grid_url; ?>&'+$(this).attr('rel');
         $('#category_grid')
-            .jqGridHistory('setGridParam',{url:new_url})
+            .jqGrid('setGridParam',{url:new_url})
             .trigger("reloadGrid");
         return false;
     });

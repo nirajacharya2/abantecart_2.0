@@ -230,9 +230,9 @@ if ($quick_start_url){
 ?>
 
 <!--[if IE]>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/excanvas.js'); ?>"></script>
+<script type="text/javascript" src="vendor/components/flot/excanvas.min.js"></script>
 <![endif]-->
-<script type="text/javascript" src="<?php $this->templateResource('assets/js/jquery/flot/jquery.flot.js'); ?>"></script>
+<script type="text/javascript" src="vendor/components/flot/jquery.flot.min.js"></script>
 <script type="text/javascript">
 
 	<?php

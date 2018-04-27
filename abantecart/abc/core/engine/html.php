@@ -2137,22 +2137,12 @@ class DateHtmlElement extends HtmlElement
         if ( ! $this->registry->has('date-field')) {
 
             $doc = $this->registry->get('document');
-            $doc->addScript($this->view->templateResource('assets/js/jquery-ui/js/jquery-ui-1.10.4.custom.min.js'));
-            $doc->addScript($this->view->templateResource('assets/js/jquery-ui/js/jquery.ui.datepicker.js'));
-            if (ABC::env('IS_ADMIN') === true) {
-                $doc->addStyle(array(
-                    'href'  => $this->view->templateResource('assets/js/jquery-ui/js/css/ui-lightness/ui.all.css'),
-                    'rel'   => 'stylesheet',
-                    'media' => 'screen',
-                ));
-            } else {
-                $doc->addStyle(array(
-                    'href'  => $this->view->templateResource('assets/js/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.min.css'),
-                    'rel'   => 'stylesheet',
-                    'media' => 'screen',
-                ));
-            }
 
+            $doc->addStyle(array(
+                'href'  => 'vendor/components/jqueryui/themes/ui-lightness/jquery-ui.min.css',
+                'rel'   => 'stylesheet',
+                'media' => 'screen',
+            ));
             $this->registry->set('date-field', 1);
         }
     }
