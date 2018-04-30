@@ -40,7 +40,7 @@ foreach ($pages as $page) {
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
 			  <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown" title="<?php echo $text_select_template; ?>">
-			    <i class="fa fa-photo"></i>
+			    <i class="fa fa-images"></i>
 			    <?php echo $tmpl_id; ?> <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu">

@@ -170,7 +170,7 @@
 							</div>
 						<?php } ?>
 						<button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle">
-							<i class="fa fa-external-link fa-lg"></i>&nbsp;
+							<i class="fa fa-external-link-alt fa-lg"></i>&nbsp;
 							<span class="caret"></span>&nbsp;
 							<span class="badge"><?php echo $total_cnt; ?></span>&nbsp;
 						</button>

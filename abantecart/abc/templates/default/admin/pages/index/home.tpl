@@ -13,7 +13,7 @@ use abc\core\ABC;
 								<img class="img-circle"
 								     src="<?php echo $this->templateResource('assets/images/icons/' . $item['icon']); ?>"
 								     alt="<?php echo $item['text'] ?>"/>
-								<h5><?php echo $item['text'] ?></h5>
+								<h6><?php echo $item['text'] ?></h6>
 							</a>
 						</div>
 					<?php } ?>
