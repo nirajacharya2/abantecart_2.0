@@ -40,14 +40,14 @@ class ControllerCommonListingGrid extends AController {
         //Do not load scripts multiple times
         if (!$this->registry->has('jqgrid_script')) {
             $locale = $this->session->data['language'];
-            if (!file_exists(ABC::env('DIR_PUBLIC') . 'vendor/jqGrid/js/i18n/grid.locale-' . $locale . '.js')) {
+            if (!file_exists(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js')) {
                 $locale = 'en';
             }
             //$this->document->addScript('vendor/require-js/require.js');
-            $this->document->addScript('vendor/jqGrid/js/i18n/grid.locale-' . $locale . '.js');
-            $jss = glob(ABC::env('DIR_PUBLIC') . 'vendor/jqGrid/js/minified/*.js');
+            $this->document->addScript('vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js');
+            $jss = glob(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/minified/*.js');
             foreach($jss as $js){
-                $this->document->addScript('vendor/jqGrid/js/minified/'.basename($js));
+                $this->document->addScript('vendor/components/jqGrid/js/minified/'.basename($js));
             }
 
             //$this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jqgrid/plugins/jquery.grid.fluid.js');
