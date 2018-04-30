@@ -42,8 +42,19 @@
           {
               "type": "package",
               "package": {
+                  "name": "css/bootstrap4c-chosen",
+                  "version": "1.0.8",
+                  "dist": {
+                      "url": "https://github.com/haubek/bootstrap4c-chosen/archive/master.zip",
+                      "type": "zip"
+                  }
+              }
+          },
+          {
+              "type": "package",
+              "package": {
                   "name": "components/bootstrap",
-                  "version": "4.1",
+                  "version": "4.1.0",
                   "dist": {
                       "url": "https://github.com/components/bootstrap/archive/4.zip",
                       "type": "zip"
@@ -183,14 +194,15 @@
       "components/jqueryui": "1.12.1",
       "components/jquery-migrate": "3.0.1",
       "components/jquery-cookie": "1.4.1.2",
-      "components/bootstrap": "4.0.0-beta",
       "components/popper": "1.4.13",
       "components/modernizr": "3.5.0",
       "components/font-awesome": "5.0.6",
       "blueimp/jquery-file-upload": "9.21.0",
       "drmonty/animate.css": "3.5.2",
       "kartik-v/bootstrap-fileinput": "dev-master",
+      "components/bootstrap": "4.1.0",
       "components/chosen": "1.8.5",
+      "css/bootstrap4c-chosen": "1.0.8",
       "components/flot": "0.8.3",
       "tinymce/tinymce": "4.7.11",
       "tinymce/languages": "4.7.11",
@@ -220,6 +232,7 @@
                 "./vendor/assets/components/bootstrap-fileinput": ["kartik-v/bootstrap-fileinput"],
                 "./vendor/assets/components/flot": ["components/flot"],
                 "./vendor/assets/css/animate.css": ["drmonty/animate.css"],
+                "./vendor/assets/css/bootstrap4c-chosen": ["css/bootstrap4c-chosen"],
                 "./vendor/assets/components/chosen": ["components/chosen"],
                 "./vendor/assets/tinymce/tinymce": ["tinymce/tinymce"],
                 "./vendor/assets/tinymce/tinymce/languages": ["tinymce/languages"]
