@@ -92,8 +92,7 @@ class ControllerPagesSaleCustomer extends AController
             'text'    => $this->language->get( 'heading_title' ),
             'current' => true,
         ) );
-        //add phone validation js for quick preview modal
-        $this->document->addScript( $this->view->templateResource( 'assets/js/intl-tel-input/js/intlTelInput.min.js' ) );
+
 
         //set store selector
         $this->view->assign( 'form_store_switch', $this->html->getStoreSwitcher() );
@@ -557,8 +556,12 @@ class ControllerPagesSaleCustomer extends AController
             if ( $viewport_mode == 'modal' && in_array( $f, array( 'password' ) ) ) {
                 continue;
             }
+
+            $field_type = ( $f == 'password' ? 'passwordset' : 'input' );
+            $field_type = ($f == 'telephone' ? 'phone' : $field_type );
+
             $this->data['form']['fields']['details'][$f] = $form->getFieldHtml( array(
-                'type'     => ( $f == 'password' ? 'passwordset' : 'input' ),
+                'type'     => $field_type,
                 'name'     => $f,
                 'value'    => $this->data[$f],
                 'required' => ( in_array( $f, array( 'password', 'fax', 'telephone' ) ) ? false : true ),

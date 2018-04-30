@@ -191,10 +191,22 @@
                       "type": "zip"
                   }
               }
+          },
+          {
+              "type": "package",
+              "package": {
+                  "name": "components/intl-tel-input",
+                  "version": "12.1.13",
+                  "dist": {
+                      "url": "https://github.com/jackocnr/intl-tel-input/archive/master.zip",
+                      "type": "zip"
+                  }
+              }
           }
       ],
     "require": {
       "php": ">=7.0.0",
+      "ext-zip": "*",
       "ext-mbstring": "*",
       "ext-openssl": "*",
       "ext-gd": "*",
@@ -214,6 +226,7 @@
       "kartik-v/bootstrap-fileinput": "dev-master",
       "components/bootstrap": "4.1.0",
       "components/chosen": "1.8.5",
+      "components/intl-tel-input": "12.1.13",
       "css/bootstrap4c-chosen": "1.0.8",
       "components/flot": "0.8.3",
       "tinymce/tinymce": "4.7.11",
@@ -226,8 +239,7 @@
       "symfony/var-dumper": "~3.2",
       "maximebf/debugbar": "1.13.1",
       "filp/whoops": "2.1.14",
-      "monolog/monolog": "1.23.0",
-      "twbs/bootstrap": "^4.1"
+      "monolog/monolog": "1.23.0"
     },
     "extra": {
             "installer-paths": {
@@ -247,6 +259,7 @@
                 "./vendor/assets/css/animate.css"               :["drmonty/animate.css"],
                 "./vendor/assets/css/bootstrap4c-chosen"        :["css/bootstrap4c-chosen"],
                 "./vendor/assets/components/chosen"             :["components/chosen"],
+                "./vendor/assets/components/intl-tel-input"     :["components/intl-tel-input"],
                 "./vendor/assets/tinymce/tinymce"               :["tinymce/tinymce"],
                 "./vendor/assets/tinymce/tinymce/languages"     :["tinymce/languages"]
             }

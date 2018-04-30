@@ -14,17 +14,21 @@
 
 <script type="application/javascript">
 	$(document).ready(function () {
-		$('#<?php echo $id ?>').intlTelInput({
-			autoHideDialCode: false,
-			nationalMode: <?php echo $value ? 'false' : 'true'; ?>,
-			utilsScript: "<?php echo $this->templateResource('assets/js/intl-tel-input/js/utils.js'); ?>"
-		});
+		try {
+			$('#<?php echo $id ?>').intlTelInput({
+				autoHideDialCode: false,
+				nationalMode: <?php echo $value ? 'false' : 'true'; ?>,
+				utilsScript: "vendor/components/intl-tel-input/build/js/utils.js"
+			});
 
-		$('#<?php echo $id ?>').on("blur", function () {
-			var intlNumber = $(this).intlTelInput("getNumber");
-			intlNumber = intlNumber.replace(/[^0-9\+]+/g, '');
-			$(this).val(intlNumber);
-		});
+			$('#<?php echo $id ?>').on("blur", function () {
+				var intlNumber = $(this).intlTelInput("getNumber");
+				intlNumber = intlNumber.replace(/[^0-9\+]+/g, '');
+				$(this).val(intlNumber);
+			});
+		}catch(){
+			console.log('intlTelInput initiation failed for input id "<?php echo $id ?>" !');
+		}
 
 	});
 </script>

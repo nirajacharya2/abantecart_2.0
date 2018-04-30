@@ -2318,16 +2318,6 @@ class PhoneHtmlElement extends HtmlElement
             $this->value = $this->default;
         }
 
-        /**
-         * @var $doc \abc\core\lib\ADocument
-         */
-        $doc = $this->registry->get('document');
-        $doc->addScript($this->view->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'));
-        $doc->addStyle(array(
-            'href' => $this->view->templateResource('assets/js/intl-tel-input/css/intlTelInput.css'),
-            'rel'  => 'stylesheet'
-        ));
-
         $this->view->batchAssign(
             array(
                 'name'           => $this->name,

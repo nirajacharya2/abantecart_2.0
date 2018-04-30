@@ -43,5 +43,6 @@
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap-growl.min.js'); ?>"></script>
 <script type="text/javascript" src="vendor/components/bootstrap-fileinput/js/fileinput.min.js"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/general.js'); ?>"></script>
+<script type="text/javascript" src="'vendor/components/intl-tel-input/build/js/intlTelInput.min.js'"></script>
 
 </body></html>
