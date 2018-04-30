@@ -43,7 +43,7 @@
               "type": "package",
               "package": {
                   "name": "components/bootstrap",
-                  "version": "4.0.0-beta",
+                  "version": "4.1",
                   "dist": {
                       "url": "https://github.com/components/bootstrap/archive/4.zip",
                       "type": "zip"
@@ -202,7 +202,8 @@
       "symfony/var-dumper": "~3.2",
       "maximebf/debugbar": "1.13.1",
       "filp/whoops": "2.1.14",
-      "monolog/monolog": "1.23.0"
+      "monolog/monolog": "1.23.0",
+      "twbs/bootstrap": "^4.1"
     },
     "extra": {
             "installer-paths": {
