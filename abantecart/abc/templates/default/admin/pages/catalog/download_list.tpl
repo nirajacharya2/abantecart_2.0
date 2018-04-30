@@ -31,7 +31,7 @@
 						<div class="form-group">
 							<button type="submit"
 									class="btn btn-xs btn-primary"><?php echo $search_form['submit']->text ?></button>
-							<button type="reset" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i></button>
+							<button type="reset" class="btn btn-xs btn-default"><i class="fa fa-sync"></i></button>
 						</div>
 					</form>
 				<?php

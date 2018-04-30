@@ -268,7 +268,7 @@
 						<a class="reculc_total btn btn-xs btn-info-alt tooltips"
 						   	data-original-title="<?php echo $text_recalc; ?>"
 					   		data-order-total-id="<?php echo $total_row['order_total_id']; ?>">
-					    	<i class="fa fa-refresh"></i>
+					    	<i class="fa fa-sync"></i>
 						</a>
 						<?php } ?>
 						<?php if ($total_key_count[$total_row['key']] == 1 ) { // do not alloe delete of duplicate keys?>
@@ -359,7 +359,7 @@
 			</button>
 			<?php if (!$no_recalc_allowed) { ?>
 			<a class="btn btn-default save_and_recalc" href="#">
-			<i class="fa fa-save fa-fw"></i><i class="fa fa-refresh fa-fw"></i> <?php echo $button_save.' & '.$text_recalc.' '.$text_all; ?>
+			<i class="fa fa-save fa-fw"></i><i class="fa fa-sync fa-fw"></i> <?php echo $button_save.' & '.$text_recalc.' '.$text_all; ?>
 			</a>
 			<?php } ?>			
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">

@@ -24,7 +24,7 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-justified">
         <li class="active"><a href="#rp-alluser" data-toggle="tab"><i class="fa fa-users"></i></a></li>
-        <li><a href="#rp-orders" data-toggle="tab"><i class="fa fa-money"></i></a></li>
+        <li><a href="#rp-orders" data-toggle="tab"><i class="fa fa-money-bill-alt"></i></a></li>
         <?php echo $this->getHookVar('rightpanel_tabs'); ?>
     </ul>
         

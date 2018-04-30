@@ -175,7 +175,7 @@
 								?>
 								<div class="ext_icons">
 									<a href="<?php echo $item['install_url']; ?>" class="productinstall tooltips" data-original-title="<?php echo $text_install; ?>">
-									<i class="fa fa-cloud-download"></i>
+									<i class="fa fa-cloud-download-alt"></i>
 									</a>
 								</div>
 								<?php
@@ -184,7 +184,7 @@
 								?>
 								<div class="ext_icons">
 									<span class="grey_out">
-									<i class="fa fa-cloud-download"></i>
+									<i class="fa fa-cloud-download-alt"></i>
 									</span>
 								</div>
 								<?php

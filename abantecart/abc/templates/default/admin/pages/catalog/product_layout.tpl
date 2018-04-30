@@ -37,7 +37,7 @@ foreach ($templates as $template) {
 
 			<div class="btn-group mr10 toolbar">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reset; ?>">
-					<i class="fa fa-refresh fa-fw"></i>
+					<i class="fa fa-sync fa-fw"></i>
 				</a>
 			</div>
 
@@ -76,7 +76,7 @@ foreach ($templates as $template) {
 			<i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $current_url; ?>">
-			<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</a>
 		</div>
 	</div>

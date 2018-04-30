@@ -27,7 +27,7 @@ use abc\core\ABC;
 	<div class="col-sm-6 col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<h5 class="title"><i class="fa fa-money fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
+				<h5 class="title"><i class="fa fa-money-bill-alt fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
 					<span class="pull-right"><a
 								href="<?php echo $orders_url; ?>"><?php echo $orders_text_all; ?></a></span>
 				</h5>
@@ -133,7 +133,7 @@ use abc\core\ABC;
 	<div class="col-sm-5 col-lg-5">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<h5 class="title"><i class="fa fa-tachometer fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_overview; ?>
+				<h5 class="title"><i class="fa fa-tachometer-alt fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_overview; ?>
 				</h5>
 
 				<div class="table-responsive">
@@ -191,7 +191,7 @@ use abc\core\ABC;
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<h5 class="title"><i
-							class="fa fa-bar-chart-o fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_statistics; ?>
+							class="fa fa-chart-bar fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_statistics; ?>
 					<span class="pull-right">
 			<?php echo $entry_range; ?>
 						<select id="range" onchange="loadPerformanceChart(this.value)">

@@ -72,7 +72,7 @@
 			 </button>
 			 &nbsp;
 			 <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-			     <i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+			     <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			 </a>
 		</div>
 	</div>
@@ -92,7 +92,7 @@
 					<?php if($with_default){?>
 					<th class="left">
 						<a href="#" title="Click to uncheck default value" class="uncheck tooltips">
-							<?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-refresh"></i>
+							<?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-sync"></i>
 						</a>
 					</th>
 					<?php }
@@ -127,7 +127,7 @@
 			</button>
 			&nbsp;
 			<a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-			    <i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+			    <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			</a>
 		</div>
 	</div>

@@ -46,7 +46,7 @@
 			     <i class="fa fa-save"></i> <?php echo $button_save; ?>
 			     </button>&nbsp;
 			     <a class="btn btn-default" data-dismiss="modal" href="#">
-			     <i class="fa fa-refresh"></i> <?php echo $button_close; ?>
+			     <i class="fa fa-sync"></i> <?php echo $button_close; ?>
 			     </a>
 			   </div>
 			</div>

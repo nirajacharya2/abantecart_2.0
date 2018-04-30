@@ -12,7 +12,7 @@
 
 			<div class="btn-group toolbar mr10">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reload; ?>">
-					<i class="fa fa-refresh fa-fw"></i>
+					<i class="fa fa-sync fa-fw"></i>
 				</a>
 				<?php echo $this->getHookVar('template_toolbar_buttons'); ?>
 			</div>			

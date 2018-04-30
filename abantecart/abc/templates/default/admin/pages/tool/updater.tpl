@@ -49,13 +49,13 @@
 								</td>
 								<td><?php if ($extension['install_url']){ ?>
 										<a href="<?php echo $extension['install_url']; ?>" target="_new"
-										   title="<?php echo $text_upgrade_now; ?>"><i class="fa fa-cloud-download"></i></a>
+										   title="<?php echo $text_upgrade_now; ?>"><i class="fa fa-cloud-download-alt"></i></a>
 									<?php } elseif (!$mp_connected){ ?>
 										<a class="btn btn-orange mp-connect tooltips"
 										   title="<?php echo $text_marketplace_connect; ?>"
 										   data-toggle="modal"
 										   data-target="#amp_modal">
-											<i class="fa fa-cloud-download"></i>
+											<i class="fa fa-cloud-download-alt"></i>
 										</a>
 									<?php } ?>
 								</td>

@@ -24,7 +24,7 @@
 			<?php }  ?>
 			<div class="btn-group">
 			    <a class="btn btn-primary" href="<?php echo $btn_extensions_store->href;?>">
-			    	<i class="fa fa-cloud-download fa-fw"></i> <?php echo $btn_extensions_store->text ?>
+			    	<i class="fa fa-cloud-download-alt fa-fw"></i> <?php echo $btn_extensions_store->text ?>
 			    </a>
 			</div>
 

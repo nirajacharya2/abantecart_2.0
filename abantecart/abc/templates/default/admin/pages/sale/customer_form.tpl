@@ -127,7 +127,7 @@
 				<?php if($name == 'email') { ?>
 				<span class="input-group-btn">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
-					<i class="fa fa-envelope-o fa-fw"></i>
+					<i class="fa fa-envelope fa-fw"></i>
 					</a>
 				</span>
 				<?php } ?>
@@ -147,7 +147,7 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<?php if($form['delete']){?>
 				<a class="btn btn-danger" data-confirmation="delete"

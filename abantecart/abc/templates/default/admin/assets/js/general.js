@@ -1052,7 +1052,7 @@ var searchSectionIcon = function(section) {
 			return '<i class="fa fa-bullhorn fa-fw"></i> ';
 			break;
 		case 'orders':
-			return '<i class="fa fa-money fa-fw"></i> ';
+			return '<i class="fa fa-money-bill-alt fa-fw"></i> ';
 			break;
 		case 'customers':
 			return '<i class="fa fa-group fa-fw"></i> ';

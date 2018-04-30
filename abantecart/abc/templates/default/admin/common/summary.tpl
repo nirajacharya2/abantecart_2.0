@@ -20,7 +20,7 @@
           
     </li>
     <li>
-    	<div class="icon"><i class="fa fa-money fa-2x fa-fw"></i></div> 
+    	<div class="icon"><i class="fa fa-money-bill-alt fa-2x fa-fw"></i></div>
         <div class="stats_info">
             <span class="text-muted"><?php echo $text_today_sales; ?></span>
             <h4><?php echo $today_sales_amount; ?></h4>

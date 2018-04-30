@@ -52,7 +52,7 @@
 
     $.fn.aform = function (op) {
         var o = $.extend({}, $.aform.defaults, op);
-		var $buttons = '<span class="abuttons_grp"><a class="icon_save fa fa-check" data-toggle="tooltip" title="' + o.buttons.save + '"></a><a class="icon_reset fa fa-refresh" data-toggle="tooltip" title="' + o.buttons.reset + '"></a></span>';
+		var $buttons = '<span class="abuttons_grp"><a class="icon_save fa fa-check" data-toggle="tooltip" title="' + o.buttons.save + '"></a><a class="icon_reset fa fa-sync" data-toggle="tooltip" title="' + o.buttons.reset + '"></a></span>';
 
         function doInput(elem) {
             var $field = $(elem);
@@ -898,7 +898,7 @@ var formOnExit = function(){
     //put submited or clicked button to loading state   
     $('.lock-on-click').each(function () {
 		var $btn = $(this);
-		var spinner = "<i class='fa fa-refresh fa-spin fa-fw'></i>";
+		var spinner = "<i class='fa fa-sync fa-spin fa-fw'></i>";
 		if( $btn.attr('data-loading-text') == spinner ){
 			return false;
 		}
