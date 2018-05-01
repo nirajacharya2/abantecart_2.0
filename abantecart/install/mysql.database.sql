@@ -12250,7 +12250,7 @@ VALUES
   ( 215,1,'Icon Payment', '', '', '', '<i class="fa fa-university"></i>&nbsp;', NOW() ),
   ( 216,1,'Icon Templates', '', '', '', '<i class="fa fa-outdent"></i>&nbsp;', NOW() ),
   ( 217,1,'Icon Languages', '', '', '', '<i class="fa fa-language"></i>&nbsp;', NOW() ),
-  ( 218,1,'Icon Total', '', '', '', '<i class="fa fa-sign-in"></i>&nbsp;', NOW() ),
+  ( 218,1,'Icon Total', '', '', '', '<i class="fa fa-sign-in-alt"></i>&nbsp;', NOW() ),
   ( 219,1,'Icon Add extension', '', '', '', '<i class="fa fa-magic"></i>&nbsp;', NOW() ),
   ( 220,1,'Icon Get Extensions', '', '', '', '<i class="fa fa-cloud-download-alt"></i>&nbsp;', NOW() ),
   ( 221,1,'Icon Order', '', '', '', '<i class="fa fa-dollar-sign"></i>&nbsp;', NOW() ),

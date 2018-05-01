@@ -9,11 +9,11 @@ AbanteCart brand color styles: #064770 (dark blue) #F19013 (Orange)
 
 body {
    /*background: #1d2939;*/
-   background: #064770;
-   font-family: 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif !important;
-   line-height: 21px;
-   font-size: 14px;
-   color: #636e7b;
+    background: #064770;
+    font-family: Helvetica,sans-serif !important;
+    line-height: 21px;
+    font-size: 14px;
+    color: #636e7b;
 }
 
 .abc_orange {
@@ -25,7 +25,7 @@ body {
 }
 
 input,select,textarea {
-   font-family: 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif !important;
+    font-family: Helvetica,sans-serif !important;
     color: #636e7b;
 }
 
@@ -40,7 +40,7 @@ a:hover, .btn-default:hover {
 a:focus, a:active { outline: none; }
 
 h1,h2,h3,h4,h5 {
-   font-family: 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif;
+    font-family: Helvetica,sans-serif !important;
 }
 h1 a:hover, h2 a:hover, h3  a:hover {
     text-decoration: none;
@@ -515,9 +515,9 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 
 .gen-list li .name {
     font-size: 13px;
-   font-family: 'LatoBold','Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif;
-   line-height: 21px;
-   display: block;
+    font-family: Helvetica,sans-serif !important;
+    line-height: 21px;
+    display: block;
 }
 
 .gen-list li .msg {
@@ -695,7 +695,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 }
 
 .nav-bracket > li.nav-parent.active > a {
-   background-image: url(../images/plus.png);
+    background-image: url(../images/plus.png);
     background-repeat: no-repeat;   
 }
 

@@ -17,10 +17,7 @@ use abc\core\ABC; ?>
 <?php } ?>
 
 <link rel="stylesheet" type="text/css" href="vendor/components/bootstrap/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/bootstrap.custom.css'); ?>" />
 <link rel="stylesheet" type="text/css" href="vendor/components/jqueryui/themes/ui-lightness/jquery-ui.min.css" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/abantecart.jquery.ui.css'); ?>" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/form.css'); ?>" />
 <link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
 <link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
@@ -33,13 +30,16 @@ use abc\core\ABC; ?>
 //	@import url('chosen.bootstrap.css');
 ?>
 
-
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/bootstrap.custom.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/abantecart.jquery.ui.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/form.css'); ?>" />
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 <?php foreach ($styles as $style) { ?>
 <link rel="<?php echo $style['rel']; ?>" type="text/css" href="<?php echo $style['href']; ?>"
       media="<?php echo $style['media']; ?>"/>
 <?php } ?>
+
 
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript">

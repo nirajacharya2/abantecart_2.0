@@ -143,7 +143,7 @@ if ($logged){ ?>
                         </button>
                         <div class="dropdown-menu dropdown-menu-head pull-right switcher">
                             <h5 class="title"><?php echo $cur_lang['name']; ?>
-                                <a href="<?php echo $language_settings; ?>"><i class="fa fa-gears"></i></a>
+                                <a href="<?php echo $language_settings; ?>"><i class="fa fa-cogs"></i></a>
                             </h5>
                             <form action="<?php echo str_replace('&', '&amp;', $action); ?>" method="post"
                                   enctype="multipart/form-data" id="language_form">
@@ -181,7 +181,7 @@ if ($logged){ ?>
                         <div class="dropdown-menu dropdown-menu-head pull-right">
                             <h5 class="title">
                                 <?php echo $last_login; ?>
-                                <a href="<?php echo $account_edit; ?>"><i class="fa fa-gears"></i></a>
+                                <a href="<?php echo $account_edit; ?>"><i class="fa fa-cogs"></i></a>
                             </h5>
                             <ul class="dropdown-list gen-list">
                                 <li><a href="<?php echo $account_edit; ?>"><i

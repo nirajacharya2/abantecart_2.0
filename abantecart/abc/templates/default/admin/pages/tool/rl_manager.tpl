@@ -60,7 +60,7 @@
 					   data-toggle="modal"
 					   data-target="#rl_types_modal"
 					   title="<?php echo $button_edit; ?>">
-					<i class="fa fa-gears"></i>
+					<i class="fa fa-cogs"></i>
 				</a>		  	
 				&nbsp;
 		  	</span>
