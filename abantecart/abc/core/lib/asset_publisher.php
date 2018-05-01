@@ -226,7 +226,8 @@ class AAssetPublisher
             if ($template === '') {
                 continue;
             }
-            $dirs = glob(ABC::env('DIR_APP_EXTENSIONS').$extension_name . '/templates/'.$template.'/*/assets', GLOB_ONLYDIR);
+            $dir_pattern = ABC::env('DIR_APP_EXTENSIONS').$extension_name . '/templates/'.$template.'/*/assets';
+            $dirs = glob($dir_pattern, GLOB_ONLYDIR);
             foreach ($dirs as $dir) {
                 $files = AHelperUtils::getFilesInDir($dir);
                 foreach ($files as $file) {

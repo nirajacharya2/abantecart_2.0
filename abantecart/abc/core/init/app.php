@@ -102,6 +102,7 @@ ABC::env(
         'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
         'DIR_CORE'            => $dir_app.'core'.$dir_sep,
         'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
+        'DIR_MODULES'         => $dir_app.'core'.$dir_sep.'modules'.$dir_sep,
         'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
         'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
         'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,

@@ -19,29 +19,30 @@
 namespace abc\core\backend;
 
 use abc\core\ABC;
-use abc\core\engine\{AHtml,ALoader, ExtensionsApi,Registry};
+use abc\core\engine\{AHtml, ALoader, ExtensionsApi, Registry};
 use abc\core\cache\ACache;
 use abc\core\helper\AHelperUtils;
-use abc\core\lib\{AConfig,ADataEncryption,ADB,ADocument,ALanguageManager,ALog,ASession};
+use abc\core\lib\{
+    AConfig, ADataEncryption, ADB, ADocument, ALanguageManager, ALog, ASession
+};
 
 $dir_sep = DIRECTORY_SEPARATOR;
-if($command != 'help:help') {
-    if ( ! is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
+if ($command != 'help:help') {
+    if (!is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
         echo "Initialisation...\n";
         $composer_phar = dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
-        if ( ! is_file($composer_phar)) {
+        if (!is_file($composer_phar)) {
             $temp_dir = dirname(dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar');
-            if(!is_dir($temp_dir)){
-                @mkdir($temp_dir,0775,true);
+            if (!is_dir($temp_dir)) {
+                @mkdir($temp_dir, 0775, true);
             }
-            if(!is_dir($temp_dir) || !is_writable($temp_dir)){
+            if (!is_dir($temp_dir) || !is_writable($temp_dir)) {
                 echo "Temporary directory ".$temp_dir." does not exists or not writable!\n\n";
                 exit;
             }
 
-
             echo "Composer phar-package not found.\nTrying to download Latest Composer into abc/system/temp directory. Please wait..\n";
-            if ( ! copy('https://getcomposer.org/composer.phar', dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
+            if (!copy('https://getcomposer.org/composer.phar', dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
                 exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
                     " Please download it manually into "
                     .dirname(__DIR__).$dir_sep."system".$dir_sep."temp directory\n"
@@ -49,13 +50,12 @@ if($command != 'help:help') {
             }
         }
 
-
         exit("\n\e[0;31mError: /abc/vendor/autoload.php file not found. Please run command \e[0m\n\n
         php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
 
-if ( ! ini_get('date.timezone')) {
+if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
@@ -63,7 +63,7 @@ require dirname(__DIR__).$dir_sep.'abc.php';
 //run constructor of ABC class to load environment
 
 $ABC = new ABC();
-if( !$ABC::getStageName() ){
+if (!$ABC::getStageName()) {
     $ABC->loadDefaultStage();
     echo "Default stage environment loaded.\n\n";
 }
@@ -71,15 +71,15 @@ if( !$ABC::getStageName() ){
 ABC::env('IS_ADMIN', true);
 ABC::env('INDEX_FILE', 'index.php');
 $charset = ABC::env('APP_CHARSET');
-$charset = ! $charset ? 'UTF-8' : $charset;
+$charset = !$charset ? 'UTF-8' : $charset;
 mb_internal_encoding($charset);
 ini_set('default_charset', strtolower($charset));
 
 //Set up common paths
-$dir_root = ! ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).$dir_sep : ABC::env('DIR_ROOT');
-$dir_app = ! ABC::env('DIR_APP') ? dirname(__DIR__, 2).$dir_sep : ABC::env('DIR_APP');
-$dir_public = ! ABC::env('DIR_PUBLIC') ? $dir_root.'public'.$dir_sep : ABC::env('DIR_PUBLIC');
-$dir_vendor = ! ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
+$dir_root = !ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).$dir_sep : ABC::env('DIR_ROOT');
+$dir_app = !ABC::env('DIR_APP') ? dirname(__DIR__, 2).$dir_sep : ABC::env('DIR_APP');
+$dir_public = !ABC::env('DIR_PUBLIC') ? $dir_root.'public'.$dir_sep : ABC::env('DIR_PUBLIC');
+$dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,
@@ -90,6 +90,7 @@ $defaults = [
     'DIR_BACKUP'          => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
     'DIR_CORE'            => $dir_app.'core'.$dir_sep,
     'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
+    'DIR_MODULES'         => $dir_app.'core'.$dir_sep.'modules'.$dir_sep,
     'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
     'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
     'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep,
@@ -113,7 +114,7 @@ $defaults = [
     'DIR_ASSETS_EXT'      => $dir_public.'extensions'.$dir_sep,
 ];
 foreach ($defaults as $name => $value) {
-    if ( ! ABC::env($name)) {
+    if (!ABC::env($name)) {
         ABC::env($name, $value);
     }
 }
@@ -121,7 +122,7 @@ foreach ($defaults as $name => $value) {
 require ABC::env('DIR_VENDOR').'autoload.php';
 // App Version
 include('version.php');
-ABC::env('VERSION', ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION').'.'. ABC::env('VERSION_BUILT'));
+ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
 $dir_lib = ABC::env('DIR_LIB');
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');
@@ -141,14 +142,14 @@ $registry->set('load', new ALoader($registry));
 $registry->set('html', new AHtml($registry));
 
 // Database
-if(ABC::env('DB_CURRENT_DRIVER')) {
+if (ABC::env('DB_CURRENT_DRIVER')) {
     $db_config = ABC::env('DATABASES');
-    $registry->set('db', new ADB( $db_config[ABC::env('DB_CURRENT_DRIVER')] ));
+    $registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
     AHelperUtils::setDBUserVars();
 }
 
 // Config
-if(ABC::env('DB_CURRENT_DRIVER')) {
+if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
     $registry->set('cache', new ACache());
     $config = new AConfig($registry);
@@ -206,10 +207,10 @@ function parseOptions($args = [])
         $array = explode('=', $arg);
         if ($match && sizeof($array) > 1) {
             list($name, $value) = $array;
-        } elseif($match) {
+        } elseif ($match) {
             $name = $arg;
             $value = true;
-        }else{
+        } else {
             $name = $v;
             $value = true;
         }
@@ -262,7 +263,7 @@ function showHelpPage($script_name = '', $options = [])
     echo "\n\e[1;33mAvailable commands:\e[0m\n\n";
     foreach ($help as $command => $help_info) {
         $output = "\t\e[93m".$command."\n";
-        if ( ! $help_info) {
+        if (!$help_info) {
             continue;
         }
         foreach ($help_info as $action => $desc) {
@@ -274,9 +275,9 @@ function showHelpPage($script_name = '', $options = [])
                     $arg_text .= $arg_info['default_value'] ? "[=value]" : "";
                     $arg_text = str_pad($arg_text, 40, ' ');
                     $output .= $arg_text;
-                    if( $arg_info['required'] === 'conditional' ){
+                    if ($arg_info['required'] === 'conditional') {
                         $output .= " \t\t"."\e[1;33m[conditional]\e[0m";
-                    }elseif ( $arg_info['required'] ) {
+                    } elseif ($arg_info['required']) {
                         $output .= " \t\t"."\033[0;31m[required]\e[0m";
                     } else {
                         $output .= " \t\t"."\e[37m[optional]\e[0m";
@@ -308,9 +309,9 @@ function showHelpPage($script_name = '', $options = [])
 function getExecutor($name, $silent_mode = false)
 {
     $run_file = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$name.'.php';
-    if ( ! is_file($run_file)) {
+    if (!is_file($run_file)) {
         $error_text = "Error: Script ".$run_file."   not found!";
-        if ( ! $silent_mode) {
+        if (!$silent_mode) {
             showError($error_text);
             exit(1);
         } else {
@@ -333,7 +334,7 @@ function getExecutor($name, $silent_mode = false)
         }
     } catch (\Exception $e) {
         $error_text = 'Error: '.$e->getMessage();
-        if ( ! $silent_mode) {
+        if (!$silent_mode) {
             showError($error_text);
             exit(1);
         } else {
