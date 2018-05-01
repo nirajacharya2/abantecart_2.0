@@ -51,13 +51,13 @@ class AAssetPublisher
     public function __construct()
     {
         // forbid for non admin calls
-        if (!ABC::env('IS_ADMIN')){
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied. ');
+        if (!ABC::env('IS_ADMIN')) {
+            throw new AException(AC_ERR_LOAD, 'Error: permission denied. ');
         }
         $this->registry = Registry::getInstance();
 
-        if(!$this->validate()){
-            throw new AException (AC_ERR_LOAD, 'Error: '.implode("\n",$this->errors));
+        if (!$this->validate()) {
+            throw new AException(AC_ERR_LOAD, 'Error: '.implode("\n", $this->errors));
         }
     }
 
@@ -70,8 +70,8 @@ class AAssetPublisher
             'DIR_VENDOR',
             'DIR_APP_EXTENSIONS'
             ];
-        foreach($vars as $name) {
-            if ( !ABC::env($name)) {
+        foreach ($vars as $name) {
+            if (!ABC::env($name)) {
                 $this->errors[] = __CLASS__.': Empty environment variable value: '.$name;
             }
         }
@@ -169,11 +169,11 @@ class AAssetPublisher
             $enabled_extensions = $this->extensions->getEnabledExtensions();
 
             foreach ($enabled_extensions as $extension) {
-                $extensions_assets[$extension] = $this->_get_extension_assets($extension);
+                $extensions_assets[$extension] = $this->getExtensionAssets($extension);
             }
         } elseif (isset($filter['extension']) && $filter['extension']) {
             //when needs to publish assets of extension
-            $extensions_assets[$filter['extension']] = $this->_get_extension_assets($filter['extension']);
+            $extensions_assets[$filter['extension']] = $this->getExtensionAssets($filter['extension']);
         }
         //when publish only vendors assets
         if ($source == 'all' || $source == 'vendors') {
@@ -214,7 +214,8 @@ class AAssetPublisher
      *
      * @return array
      */
-    protected function _get_extension_assets($extension_name){
+    protected function getExtensionAssets($extension_name)
+    {
         if (!$extension_name) {
             return array();
         }
@@ -316,7 +317,8 @@ class AssetPublisherCopy{
         return $this->processTemplateAssets($file_list, $src_dir, $dest_dir);
     }
 
-    protected function processTemplateAssets($file_list, $src_dir, $dest_dir){
+    protected function processTemplateAssets($file_list, $src_dir, $dest_dir)
+    {
         if (!$file_list || !is_array($file_list)) {
             return false;
         }
