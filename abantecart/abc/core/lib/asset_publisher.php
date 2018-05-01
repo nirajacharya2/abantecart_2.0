@@ -51,13 +51,13 @@ class AAssetPublisher
     public function __construct()
     {
         // forbid for non admin calls
-        if (!ABC::env('IS_ADMIN')){
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied. ');
+        if (!ABC::env('IS_ADMIN')) {
+            throw new AException(AC_ERR_LOAD, 'Error: permission denied. ');
         }
         $this->registry = Registry::getInstance();
 
-        if(!$this->validate()){
-            throw new AException (AC_ERR_LOAD, 'Error: '.implode("\n",$this->errors));
+        if (!$this->validate()) {
+            throw new AException(AC_ERR_LOAD, 'Error: '.implode("\n", $this->errors));
         }
     }
 
@@ -70,8 +70,8 @@ class AAssetPublisher
             'DIR_VENDOR',
             'DIR_APP_EXTENSIONS'
             ];
-        foreach($vars as $name) {
-            if ( !ABC::env($name)) {
+        foreach ($vars as $name) {
+            if (!ABC::env($name)) {
                 $this->errors[] = __CLASS__.': Empty environment variable value: '.$name;
             }
         }
