@@ -307,7 +307,6 @@ class AssetPublisherCopy{
         return true;
     }
 
-
     protected function publishVendorAssets($file_list)
     {
         if (!$file_list || !is_array($file_list)) {
