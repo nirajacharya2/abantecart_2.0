@@ -21,10 +21,11 @@
 namespace abc\core\helper;
 
 use abc\core\ABC;
-use abc\core\backend\jobs\ABackgroundJobInterface;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AImage;
+use abc\core\lib\AJobManager;
 use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
@@ -33,7 +34,6 @@ use DOMDocument;
 use DOMXPath;
 use Exception;
 use PharData;
-use PharException;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 if ( ! class_exists('abc\core\ABC')) {
@@ -1539,6 +1539,7 @@ class AHelperUtils extends AHelper
      * @param array  $default_args
      *
      * @return object|false
+     * @throws AException
      */
     static function getInstance($class_name, $args = [], $default_class_name = '', $default_args = [])
     {
@@ -1565,6 +1566,7 @@ class AHelperUtils extends AHelper
             if(!class_exists($class)){
                 $rel_path = self::getFileNameByClass($class);
                 $abs_path = ABC::env('DIR_ROOT').$rel_path;
+
                 if(is_file($abs_path)) {
                     include_once $abs_path;
                 }
@@ -1584,6 +1586,9 @@ class AHelperUtils extends AHelper
             }
         }
 
+        if(!$instance){
+            throw new AException('Class '.$class_name.' not found in config/*.classmap.php file',1000);
+        }
         return $instance;
     }
 
@@ -1634,9 +1639,32 @@ class AHelperUtils extends AHelper
         return (bool)$archive->extractNode($dest_directory, '/');
     }
 
-    static function createBackgroundJob( ABackgroundJobInterface $handler ){
-        //TODO: !!!! ????
-        return $handler->scheduleJob();
+    /**
+     * @param array  $data
+     * @param string $handler_alias
+     *
+     * @return array
+     * @throws AException
+     */
+    static function createJob( array $data, $handler_alias = 'AJobManager'){
+
+        $class_name = ABC::getFullClassName($handler_alias);
+        if(!$class_name){
+            $output = ['job_id' => false,
+                       'errors' => [
+                           'Handler alias "'.$handler_alias.'"" not registered in config/classmap'
+                       ]
+            ];
+        }else{
+            /**
+             * @var $handler AJobManager
+             */
+            $handler = self::getInstance($class_name,['registry'=>Registry::getInstance()]);
+            $result = $handler->addJob($data);
+            $output = ['job_id' => $result, 'errors' => $handler->errors];
+        }
+
+        return $output;
     }
 
     /**

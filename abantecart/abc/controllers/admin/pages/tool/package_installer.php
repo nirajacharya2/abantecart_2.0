@@ -740,7 +740,7 @@ class ControllerPagesToolPackageInstaller extends AController
             if( !ABC::getFullClassName('APackageInstallerJob')){
                 $this->session->data['error'] = 'Error occurred during creating of background Job. Job handler Not Set.';
             }else {
-                $result = AHelperUtils::createBackgroundJob( new APackageInstallerJob( $package_info ) );
+                $result = AHelperUtils::createJob( new APackageInstallerJob( $package_info ) );
                 if ( $result ) {
                     $this->session->data['success'] = 'Background Job has been created successfully and will be run soon';
                 } else {

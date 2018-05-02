@@ -20,18 +20,13 @@
 
 namespace abc\core\lib;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 class AException extends \Exception
 {
 
     public $registry;
     protected $error;
 
-
-
-    public function __construct($errstr = '',$errno = 0,  $file = '', $line = '')
+    public function __construct($errstr = '', $errno = 0, $file = '', $line = '')
     {
         $this->code = $errno ? $errno : $this->code;
         $this->message = $errstr ? $errstr : $this->message;
@@ -40,5 +35,4 @@ class AException extends \Exception
 
         parent::__construct();
     }
-
 }

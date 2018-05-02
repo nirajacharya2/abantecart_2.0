@@ -39,7 +39,7 @@ class ControllerResponsesToolBackup extends AController {
 
 		if ($this->request->is_POST() && $this->_validate()) {
 			$this->loadModel('tool/backup');
-			$task_details = $this->model_tool_backup->createBackupTask('manual_backup', $this->request->post);
+			$task_details = $this->model_tool_backup->createBackupJob('manual_backup', $this->request->post);
 			$task_api_key = $this->config->get('task_api_key');
 
 			if(!$task_details){

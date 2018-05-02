@@ -589,7 +589,7 @@ class ControllerPagesToolImportExport extends AController{
 				$this->session->data['error'] = implode('<br>', $this->model_tool_import_process->errors);
 			} else {
 				$this->session->data['success'] = sprintf($this->language->get('text_success_scheduled'),
-														 $this->html->getSecureURL('tool/task'));
+														 $this->html->getSecureURL('tool/job'));
 			}
 			abc_redirect($this->html->getSecureURL('tool/import_export/'.($file_format=='internal' ? 'internal_import' : 'import_wizard')));
 		}

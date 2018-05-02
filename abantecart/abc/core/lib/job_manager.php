@@ -24,7 +24,8 @@ use abc\core\ABC;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-use abc\core\lib\AException;
+
+include_once __DIR__.DIRECTORY_SEPARATOR.'job_manager_interface.php';
 
 /**
  * Class AJobManager
@@ -33,7 +34,7 @@ use abc\core\lib\AException;
  * @property ADB  $db
  * @property ALog $log
  */
-class AJobManager implements AJobInterface
+class AJobManager implements AJobManagerInterface
 {
     protected $registry;
     public $errors = array(); // errors during process
@@ -74,19 +75,16 @@ class AJobManager implements AJobInterface
         if ($log_classname) {
             $this->job_log = new $log_classname('job_log.txt');
         }
+        $this->db = $registry->get('db');
     }
 
-    public function setRunLogLevel($level = 'simple')
-    {
-        $this->log_level = $level;
-    }
 
     /**
      * @param int $job_id
      *
      * @return bool
      */
-    public function runJob($job_id)
+ /*   public function runJob($job_id)
     {
 
         $job_id = (int)$job_id;
@@ -127,7 +125,7 @@ class AJobManager implements AJobInterface
         }
         return $status;
     }
-
+*/
     /**
      * @param int   $job_id
      * @param array $state
@@ -170,7 +168,7 @@ class AJobManager implements AJobInterface
 
         $this->run_log[] = $message;
         if ($this->job_log) {
-            $method = $msg_code ? 'notice' : 'error';
+            $method = $msg_code ? 'warning' : 'error';
             $this->job_log->{$method}($message);
         }
 
@@ -178,7 +176,14 @@ class AJobManager implements AJobInterface
     }
 
     /**
-     * @param array $data
+     * @param array $data - array must contains key:
+     *                    'worker' with array as value.
+     *                    for example: 'worker' => [
+     *                                          'file'       => $filename,
+     *                                          'class'      => $full_class_name,
+     *                                          'method'     => $method_name,
+     *                                          'parameters' => $mixed_value],
+     *                                  'misc' => $some_additional_values
      *
      * @return int
      */
@@ -186,21 +191,26 @@ class AJobManager implements AJobInterface
     {
         if (!$data) {
             $this->errors[] = 'Error: Can not to create a new background job. Empty data given.';
-
             return false;
         }
+
         // check
+
         $sql = "SELECT *
                 FROM ".$this->db->table_name('jobs')."
-                WHERE name = '".$this->db->escape($data['name'])."'";
+                WHERE job_name = '".$this->db->escape($data['name'])."'";
         $res = $this->db->query($sql);
         if ($res->num_rows) {
             $this->deleteJob($res->row['job_id']);
             $this->toLog('Error: Job with name "'.$data['name'].'" is already exists. Override!');
         }
 
-        list($user_type, $user_id, $user_name) = AHelperUtils::recognizeUser();
-        $configuration = serialize($data['configuration']);
+        $user_info = AHelperUtils::recognizeUser();
+        $user_type = $user_info['user_type'];
+        $user_id = $user_info['user_id'];
+        $user_name = $user_info['user_name'];
+
+        $configuration = $this->serialize($data['configuration']);
         $sql = "INSERT INTO ".$this->db->table_name('jobs')."
                 (`job_name`,
                 `actor_type`,
@@ -256,7 +266,7 @@ class AJobManager implements AJobInterface
         $update = array();
         foreach ($upd_flds as $fld_name => $fld_type) {
             if ($fld_name == 'configuration' && is_array($data[$fld_name])) {
-                $data[$fld_name] = serialize($data[$fld_name]);
+                $data[$fld_name] = $this->serialize($data[$fld_name]);
             }
 
             if (AHelperUtils::has_value($data[$fld_name])) {
@@ -297,7 +307,10 @@ class AJobManager implements AJobInterface
             return false;
         }
 
-        $this->db->query("DELETE FROM ".$this->db->table_name('jobs')." WHERE job_id = '".(int)$job_id."'");
+        $this->db->query(
+            "DELETE 
+            FROM ".$this->db->table_name('jobs')." 
+            WHERE job_id = '".(int)$job_id."'");
         return true;
     }
 
@@ -319,7 +332,7 @@ class AJobManager implements AJobInterface
         $output = $result->row;
 
         if ($output['configuration']) {
-            $output['configuration'] = unserialize($output['configuration']);
+            $output['configuration'] = $this->unserialize($output['configuration']);
         }
 
         return $output;
@@ -344,7 +357,7 @@ class AJobManager implements AJobInterface
         $output = $result->row;
 
         if ($output['configuration']) {
-            $output['configuration'] = unserialize($output['configuration']);
+            $output['configuration'] = $this->unserialize($output['configuration']);
         }
 
         return $output;
@@ -429,7 +442,7 @@ class AJobManager implements AJobInterface
         $output = $result->rows;
         foreach ($output as &$row) {
             if ($row['configuration']) {
-                $row['configuration'] = unserialize($row['configuration']);
+                $row['configuration'] = $this->unserialize($row['configuration']);
             }
 
             //check is task stuck
@@ -445,8 +458,24 @@ class AJobManager implements AJobInterface
         return $output;
     }
 
-    public function getRunLog($job_id = null)
+    protected function serialize($value)
     {
-        return $this->run_log;
+        $class_name = ABC::getFullClassName('AJson');
+        /**
+         * @var AJson $json_lib
+         */
+        $json_lib = AHelperUtils::getInstance($class_name);
+        return $json_lib->encode($value);
     }
+
+    protected function unserialize($value)
+    {
+        $class_name = ABC::getFullClassName('AJson');
+        /**
+         * @var AJson $json_lib
+         */
+        $json_lib = AHelperUtils::getInstance($class_name);
+        return $json_lib->decode($value);
+    }
+
 }

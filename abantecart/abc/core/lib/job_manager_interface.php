@@ -18,13 +18,11 @@
 
 namespace abc\core\lib;
 
-interface AJobInterface
+interface AJobManagerInterface
 {
-    public function AddJob( array $data );
-    public function RunJob( $job_id );
-    public function GetJobs( array $data );
-    public function GetJobByID( $job_id );
-    public function UpdateJob( $job_id, array $data = [] );
-    public function DeleteJob( $job_id );
-    public function GetRunLog( $job_id = null );
+    public function addJob( array $data );
+    public function getJobs( array $data );
+    public function getJobById( $job_id );
+    public function updateJob( $job_id, array $data = [] );
+    public function deleteJob( $job_id );
 }

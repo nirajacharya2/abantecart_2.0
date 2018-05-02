@@ -96,7 +96,7 @@
 	</definition>
 	<definition>
 		<key>text_success_scheduled</key>
-		<value><![CDATA[Success: You have successfully created scheduled backup task! <a href="%s">See details</a>]]></value>
+		<value><![CDATA[Success: You have successfully created scheduled backup job! <a href="%s">See details</a>]]></value>
 	</definition>
 	<definition>
 		<key>text_fail_note</key>

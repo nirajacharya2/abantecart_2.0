@@ -218,6 +218,6 @@
 	</definition>
 	<definition>
 		<key>text_success_scheduled</key>
-		<value><![CDATA[Success: You have successfully created scheduled import task! <a href="%s">See details</a>]]></value>
+		<value><![CDATA[Success: You have successfully created scheduled import job! <a href="%s">See details</a>]]></value>
 </definition>
 </definitions>
