@@ -54,7 +54,7 @@ class ControllerPagesToolErrorLog extends AController
             $heading_title = $this->request->clean( $filename );
         } else {
             //TODO: add ability to delete other logs
-            $args = ABC::class_arguments( 'ALog' );
+            $args = ABC::getClassDefaultArgs( 'ALog' );
             $file = ABC::env( 'DIR_LOGS' ).$args[0];
             $this->data['clear_url'] = $this->html->getSecureURL( 'tool/error_log/clearlog' );
             $heading_title = $this->language->get( 'heading_title' );
@@ -133,7 +133,7 @@ class ControllerPagesToolErrorLog extends AController
         if( $filename && is_file(ABC::env('DIR_LOGS') . $filename) ){
             $file = ABC::env('DIR_LOGS') . $filename;
         }else {
-            $args = ABC::class_arguments('ALog');
+            $args = ABC::getClassDefaultArgs('ALog');
             $file = ABC::env('DIR_LOGS').$args[0];
         }
 

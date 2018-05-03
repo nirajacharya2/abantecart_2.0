@@ -183,7 +183,7 @@ class ControllerPagesToolCache extends AController
                             break;
                         case 'error_log':
                             //TODO: add ability to delete other logs
-                            $args = ABC::class_arguments('ALog');
+                            $args = ABC::getClassDefaultArgs('ALog');
                             $file = ABC::env('DIR_LOGS').$args[0];
                             if (is_file($file)) {
                                 unlink($file);

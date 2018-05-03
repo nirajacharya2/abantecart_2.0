@@ -48,7 +48,11 @@ class ABC extends ABCBase
         //load and put config into environment
         $stage_name = '';
         if(!$file || !is_file($file)) {
-            $stage_name = @include(dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'enabled.config.php');
+            $stage_name = @include(
+                dirname(__DIR__)
+                .DIRECTORY_SEPARATOR.'config'
+                .DIRECTORY_SEPARATOR.'enabled.config.php'
+            );
             $file_name = $stage_name.'.config.php';
             $file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$file_name;
         }
@@ -83,7 +87,38 @@ class ABC extends ABCBase
         if(is_file($classmap_file)){
             self::$class_map = @include_once($classmap_file);
         }
-        return self::$class_map ? true : false;
+
+        if(!self::$class_map){
+            return false;
+        }
+
+        $ext_dirs = glob(
+            dirname(__DIR__).DIRECTORY_SEPARATOR
+            .'extensions'.DIRECTORY_SEPARATOR
+            .'*'.DIRECTORY_SEPARATOR
+            .'config'.DIRECTORY_SEPARATOR
+        );
+        foreach($ext_dirs as $cfg_dir){
+            $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+            if(is_file($classmap_file)){
+                $ext_classmap = @include_once($classmap_file);
+                if(is_array($ext_classmap)){
+                    self::$class_map += $ext_classmap;
+                }
+            }
+            //load default stage values
+            elseif($stage_name != 'default'){
+               $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+               if(is_file($classmap_file)){
+                   $ext_classmap = @include_once($classmap_file);
+                   if(is_array($ext_classmap)){
+                       self::$class_map += $ext_classmap;
+                   }
+               }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -142,22 +177,27 @@ class ABC extends ABCBase
      * @return bool|string
      */
     static function getFullClassName(string $class_alias){
+
         if(isset( self::$class_map[$class_alias])){
             if(is_array( self::$class_map[$class_alias])){
                 return self::$class_map[$class_alias][0];
+
             }else {
                 return self::$class_map[$class_alias];
             }
         }else{
+
             return class_exists( $class_alias ) ? $class_alias : false;
         }
     }
+
     /**
      * Method returns full name of class if it exists
      *
      * @param $class_alias
      *
      * @return bool|string
+     * @throws \ReflectionException
      */
     static function getObject(string $class_alias){
         if(isset( self::$class_map[$class_alias])){
@@ -166,7 +206,7 @@ class ABC extends ABCBase
             }else {
                 $class_name = self::$class_map[$class_alias];
             }
-            $args = self::class_arguments($class_alias);
+            $args = self::getClassDefaultArgs($class_alias);
 
             $reflector = new ReflectionClass( $class_name );
             return $reflector->newInstanceArgs( $args );
@@ -180,12 +220,16 @@ class ABC extends ABCBase
      * @param string $class_alias
      * @return array|mixed
      */
-    static function class_arguments(string $class_alias){
+    static function getClassDefaultArgs(string $class_alias){
         if( !isset( self::$class_map[$class_alias]) || !is_array( self::$class_map[$class_alias]) ) {
             return [];
         }
         $args = self::$class_map[$class_alias];
-        array_shift($args);
+        if(is_array($args)) {
+            array_shift($args);
+        }else{
+            $args = [];
+        }
         return $args;
     }
 

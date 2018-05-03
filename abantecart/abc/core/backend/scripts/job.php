@@ -42,6 +42,8 @@ class Job implements ABCExec
                 $result = $this->runJobById($options['job-id']);
             }elseif(isset($options['next-job'])){
                 $result = $this->runNextJob();
+            }elseif(isset($options['worker'])){
+                $result = $this->runWorker($options);
             }
         }elseif($action == 'consumer'){
             $result = $this->queueConsume();
@@ -93,7 +95,9 @@ class Job implements ABCExec
             $worker_module  = new $worker_class();
 
             if($job_info['status'] == $handler::STATUS_READY || $worker_module->isReRunAllowed()) {
-                $handler->updateJob($job_id,['status' => $handler::STATUS_RUNNING]);
+                $handler->updateJob(
+                    $job_id,
+                    ['status' => $handler::STATUS_RUNNING, 'last_time_run' => date("Y-m-d H:i:s", time())]);
                 $result = $worker_module->runJob(
                     $job_info['configuration']['worker']['method'],
                     $job_info['configuration']['worker']['parameters']
@@ -105,16 +109,37 @@ class Job implements ABCExec
 
             if (!$result) {
 
-                $handler->updateJob($job_id,['status' => $handler::STATUS_FAILED]);
+                $handler->updateJob(
+                    $job_id,
+                    [
+                        'status' => $handler::STATUS_FAILED,
+                        'last_result' => 0,
+
+                    ]
+                );
                 $this->errors = array_merge($this->errors, $worker_module->errors);
             }else{
-                $handler->updateJob($job_id,['status' => $handler::STATUS_COMPLETED]);
+                $handler->updateJob($job_id,['status' => $handler::STATUS_COMPLETED, 'last_result' => 1]);
             }
         }catch(Error $e){
-            $handler->updateJob($job_id,['status' => $handler::STATUS_FAILED]);
+            $handler->updateJob(
+                                $job_id,
+                                [
+                                    'status' => $handler::STATUS_FAILED,
+                                    'last_result' => 0,
+
+                                ]
+                            );
             $this->errors[] = $e->getMessage() . PHP_EOL . $e->getTraceAsString();
         }catch(Exception $e){
-            $handler->updateJob($job_id,['status' => $handler::STATUS_FAILED]);
+            $handler->updateJob(
+                                $job_id,
+                                [
+                                    'status' => $handler::STATUS_FAILED,
+                                    'last_result' => 0,
+
+                                ]
+                            );
             $this->errors[] = $e->getMessage() . PHP_EOL . $e->getTraceAsString();
         }
 
@@ -143,6 +168,50 @@ class Job implements ABCExec
     {
 
 
+    }
+
+    protected function runWorker($options)
+    {
+        if(!$options['worker']){
+            $this->errors[] = 'Empty worker alias given.';
+            return false;
+        }
+
+        $worker_class_name = ABC::getFullClassName($options['worker']);
+        if(!$worker_class_name){
+            $this->errors[] = 'Worker with alias name "'.$options['worker'].'" not found in the classmap!';
+            return false;
+        }
+
+        $worker_args = ABC::getClassDefaultArgs($options['worker']);
+        $result = false;
+        try {
+            require_once ABC::env('DIR_MODULES').'moduleInterface.php';
+            require_once ABC::env('DIR_MODULES').'moduleBase.php';
+            /**
+             * @var AModuleBase $worker
+             */
+            $worker = AHelperUtils::getInstance($worker_class_name, $worker_args);
+
+            if(!$worker instanceof AModuleBase){
+                throw new AException('Class  "'.$worker_class_name.'" is not not worker!');
+            }
+            //check methods/ If method not set - try to find "main"
+            $run_method = $options['method'];
+            $run_method = !$run_method ? 'main' : $run_method;
+            $methods = $worker->getModuleMethods();
+            if(!in_array($run_method, $methods)){
+                throw new AException('Cannot to find method '.$run_method.' of worker class'.$worker_class_name.'!');
+            }
+            $result = call_user_func([$worker,$run_method],$worker_args);
+            if(!$result){
+                $this->errors = array_merge($this->errors, $worker->errors);
+            }
+        }catch (AException $e){
+            $this->errors[] = $e->getMessage();
+        }
+
+        return $result;
     }
 
 
@@ -176,9 +245,21 @@ class Job implements ABCExec
                             'default_value' => '',
                             'required'      => false,
                             'alias'         => '*'
+                        ],
+                        '--worker' => [
+                            'description'   => 'Alias of worker class from config/classmap',
+                            'default_value' => '',
+                            'required'      => false,
+                            'alias'         => '*'
+                        ],
+                        '--method' => [
+                            'description'   => 'Method of worker class which will be called. Used with --worker options',
+                            'default_value' => '',
+                            'required'      => false,
+                            'alias'         => '*'
                         ]
                     ],
-                    'example'     => 'php abcexec runJob:run --job-id=1234'
+                    'example'     => 'php abcexec job:run --job-id=1234'
                 ],
             'consumer' =>
                 [
