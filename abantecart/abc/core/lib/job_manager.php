@@ -399,6 +399,10 @@ class AJobManager implements AJobManagerInterface
                 FROM ".$this->db->table_name('jobs')." 
                 WHERE 1=1 ";
 
+        if (!empty($data['status'])) {
+            $sql .= " AND status = ".(int)$data['status'];
+        }
+
         if (!empty($data['subsql_filter'])) {
             $sql .= " AND ".$data['subsql_filter'];
         }
@@ -458,6 +462,19 @@ class AJobManager implements AJobManagerInterface
         return $output;
     }
 
+    /**
+     * @return array|bool
+     */
+    public function getReadyJob(){
+        $output = [];
+        $jobs = $this->getJobs(['status' => self::STATUS_READY, 'limit'=>1]);
+        if($jobs){
+            $output = $jobs[0];
+        }
+
+        return $output ? $output : false;
+    }
+
     protected function serialize($value)
     {
         $class_name = ABC::getFullClassName('AJson');
@@ -475,7 +492,7 @@ class AJobManager implements AJobManagerInterface
          * @var AJson $json_lib
          */
         $json_lib = AHelperUtils::getInstance($class_name);
-        return $json_lib->decode($value);
+        return $json_lib->decode($value, true);
     }
 
 }

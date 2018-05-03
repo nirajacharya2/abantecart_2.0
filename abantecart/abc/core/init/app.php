@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -42,11 +42,9 @@ use abc\core\lib\ADB;
 use abc\core\lib\ADocument;
 use abc\core\lib\ADownload;
 use abc\core\lib\AError;
-use abc\core\lib\AException;
 use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALength;
-use abc\core\lib\ALog;
 use abc\core\lib\AMessage;
 use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
@@ -64,16 +62,20 @@ $dir_sep = DIRECTORY_SEPARATOR;
 
 // AbanteCart Version
 include('version.php');
-ABC::env('VERSION', ABC::env('MASTER_VERSION') . '.' . ABC::env('MINOR_VERSION').'.'. ABC::env('VERSION_BUILT'));
+ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
 // Detect if localhost is used.
-if ( ! isset($_SERVER['HTTP_HOST'])) {
+if (!isset($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST'] = 'localhost';
 }
 
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
     ABC::env('HTTPS', true);
-} elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure' || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
+} elseif (
+    isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
+    && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure'
+        || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')
+) {
     ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
     ABC::env('HTTPS', true);
@@ -97,20 +99,20 @@ $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
     array(
-        'DIR_VENDOR'          => $dir_app.'vendor'.$dir_sep,
-        'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.$dir_sep,
-        'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
-        'DIR_CORE'            => $dir_app.'core'.$dir_sep,
-        'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-        'DIR_MODULES'         => $dir_app.'core'.$dir_sep.'modules'.$dir_sep,
-        'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
-        'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
-        'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
-        'DIR_LOGS'            => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
-        'DIR_TEMPLATES'       => $dir_app.'templates'.$dir_sep,
-        'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
-        'DIR_RESOURCES'       => $dir_public.'resources'.$dir_sep,
-        'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep
+        'DIR_VENDOR'         => $dir_app.'vendor'.$dir_sep,
+        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
+        'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
+        'DIR_CORE'           => $dir_app.'core'.$dir_sep,
+        'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
+        'DIR_MODULES'        => $dir_app.'modules'.$dir_sep,
+        'DIR_DOWNLOADS'      => $dir_app.'downloads'.$dir_sep,
+        'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
+        'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+        'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
+        'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
+        'DIR_IMAGES'         => $dir_public.'images'.$dir_sep,
+        'DIR_RESOURCES'      => $dir_public.'resources'.$dir_sep,
+        'DIR_MIGRATIONS'     => $dir_app.'migrations'.$dir_sep,
     )
 );
 
@@ -145,23 +147,32 @@ ABC::env('IS_API', ($path_nodes[0] == 'a' ? true : false));
 
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
-if (ABC::env('ADMIN_SECRET') !== null && (isset($_GET['s']) || isset($_POST['s'])) && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))) {
+if (ABC::env('ADMIN_SECRET') !== null
+        && (isset($_GET['s']) || isset($_POST['s']))
+            && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))
+) {
     ABC::env(
         array(
-            'IS_ADMIN'     => true,
+            'IS_ADMIN'      => true,
             'DIR_LANGUAGES' => $dir_app.'languages'.$dir_sep.'admin'.$dir_sep,
-            'DIR_BACKUP'   => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
-            'DIR_DATA'     => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
+            'DIR_BACKUP'    => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
+            'DIR_DATA'      => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
         )
     );
 
     //generate unique session name.
     //NOTE: This is a session name not to confuse with actual session id. Candidate to renaming
-    ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID');
+    ABC::env(
+            'SESSION_ID',
+            ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID'
+    );
 } else {
     ABC::env('IS_ADMIN', false);
     ABC::env('DIR_LANGUAGES', $dir_app.$dir_sep.'languages'.$dir_sep.'storefront'.$dir_sep);
-    ABC::env('SESSION_ID', ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
+    ABC::env(
+        'SESSION_ID',
+        ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID'
+    );
     ABC::env('EMBED_TOKEN_NAME', 'ABC_TOKEN');
 }
 
@@ -189,23 +200,31 @@ if (ini_get('magic_quotes_gpc')) {
     $_COOKIE = clean($_COOKIE);
 }
 
-if ( ! ini_get('date.timezone')) {
+if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-if ( ! isset($_SERVER['DOCUMENT_ROOT'])) {
+if (!isset($_SERVER['DOCUMENT_ROOT'])) {
     if (isset($_SERVER['SCRIPT_FILENAME'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['PHP_SELF'])));
+        $_SERVER['DOCUMENT_ROOT'] = str_replace(
+            '\\',
+            '/',
+            substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['PHP_SELF']))
+        );
     }
 }
 
-if ( ! isset($_SERVER['DOCUMENT_ROOT'])) {
+if (!isset($_SERVER['DOCUMENT_ROOT'])) {
     if (isset($_SERVER['PATH_TRANSLATED'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0 - strlen($_SERVER['PHP_SELF'])));
+        $_SERVER['DOCUMENT_ROOT'] = str_replace(
+            '\\',
+            '/',
+            substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0 - strlen($_SERVER['PHP_SELF']))
+        );
     }
 }
 
-if ( ! isset($_SERVER['REQUEST_URI'])) {
+if (!isset($_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
     if (isset($_SERVER['QUERY_STRING'])) {
         $_SERVER['REQUEST_URI'] .= '?'.$_SERVER['QUERY_STRING'];
@@ -261,7 +280,7 @@ $hook = new AHook($registry);
 // Database
 $db_config = ABC::env('DATABASES');
 $registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
-if( php_sapi_name() == 'cli' ){
+if (php_sapi_name() == 'cli') {
     AHelperUtils::setDBUserVars();
 }
 
@@ -300,9 +319,12 @@ $registry->set('log', ABC::getObject('ALog'));
 $registry->set('document', new ADocument());
 
 // AbanteCart Snapshot details
-$registry->set('snapshot', 'AbanteCart/'.ABC::env('VERSION').' '.$_SERVER['SERVER_SOFTWARE'].' ('.$_SERVER['SERVER_NAME'].')');
+$registry->set(
+    'snapshot',
+    'AbanteCart/'.ABC::env('VERSION').' '.$_SERVER['SERVER_SOFTWARE'].' ('.$_SERVER['SERVER_NAME'].')'
+);
 //Non-apache fix for REQUEST_URI
-if ( ! isset($_SERVER['REQUEST_URI'])) {
+if (!isset($_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
     if (isset($_SERVER['QUERY_STRING'])) {
         $_SERVER['REQUEST_URI'] .= '?'.$_SERVER['QUERY_STRING'];
@@ -333,7 +355,7 @@ unset($dir_extensions);
 $template = 'default';
 
 // see template in extensions
-if (ABC::env('IS_ADMIN') !== true && ! empty($request->get['sf'])) {
+if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
     $template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
     $dir = $template.ABC::env('DIRNAME_STORE').ABC::env('DIRNAME_TEMPLATES').$template;
     if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$dir)) {
@@ -344,7 +366,7 @@ if (ABC::env('IS_ADMIN') !== true && ! empty($request->get['sf'])) {
 }
 
 //not found? Ok. See it in the core
-if ( ! $is_valid) {
+if (!$is_valid) {
     //check template defined in settings
     if (ABC::env('IS_ADMIN') === true) {
         $template = $config->get('admin_template');
@@ -361,12 +383,12 @@ if ( ! $is_valid) {
     }
 
     //check if this is default template
-    if ( ! $is_valid && is_dir($dir_app.$dir)) {
+    if (!$is_valid && is_dir($dir_app.$dir)) {
         $is_valid = true;
     }
 }
 
-if ( ! $is_valid) {
+if (!$is_valid) {
     $error = new AError ('Template '.$template.' is not found - roll back to default');
     $error->toLog()->toDebug();
     $template = 'default';
@@ -406,7 +428,7 @@ if (ABC::env('IS_ADMIN') === true) {
     $registry->set('im', new AIM());
 }
 
-if ( ! ABC::env('IS_ADMIN')) { // storefront load
+if (!ABC::env('IS_ADMIN')) { // storefront load
     // Customer
     $registry->set('customer', new ACustomer($registry));
     AHelperUtils::setDBUserVars();

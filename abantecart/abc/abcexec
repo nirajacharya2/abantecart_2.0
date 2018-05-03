@@ -21,9 +21,11 @@ namespace abc\core\backend;
 
 use abc\core\ABC;
 use abc\core\lib\AException;
+use Error;
+use Exception;
 
-if (version_compare(phpversion(), '7.0.0', '<') == true){
-	exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
+if (version_compare(phpversion(), '7.0.0', '<') == true) {
+    exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
 }
 set_include_path(__DIR__);
 
@@ -32,36 +34,39 @@ $args = $argv;
 //remove file name from argument list
 array_shift($args);
 //if no arguments - show help page
-if($args){
-	$command = array_shift($args);
-	$command = str_replace("::",":", $command);
-}else{
-	echo "Unknown command. Show help...\n\n";
-	$command = 'help:help';
+if ($args) {
+    $command = array_shift($args);
+    $command = str_replace("::", ":", $command);
+} else {
+    echo "Unknown command. Show help...\n\n";
+    $command = 'help:help';
 }
 
-if(!strpos($command,':') || $command == '?'){
-	$command = 'help:help';
+if (!strpos($command, ':') || $command == '?') {
+    $command = 'help:help';
 }
 
-if(!preg_match('/^--(.*)$/', $command)) {
-	list($class, $action) = explode(':',$command);
-}else{
-	echo "Wrong command.\n\n";
+if (!preg_match('/^--(.*)$/', $command)) {
+    list($class, $action) = explode(':', $command);
+} else {
+    echo "Wrong command.\n\n";
     $class = $action = '';
 }
 try {
-    require realpath( './core/init/backend.php' );
-    require realpath( './core/backend/interface.php' );
-}catch(AException $e){
-	showError('Error: '.$e->getMessage());
-	exit(1);
+    require realpath('./core/init/backend.php');
+    require realpath('./core/backend/interface.php');
+} catch (Exception $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
+} catch (Error $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
 }
 //set sign
 ABC::env('abcexec', true);
 
-if(!$class || $class=='help' || $action == 'help'){
-	showHelpPage($class);
+if (!$class || $class == 'help' || $action == 'help') {
+    showHelpPage($class);
 }
 
 //try to get instance of executor or die
@@ -70,48 +75,47 @@ if(!$class || $class=='help' || $action == 'help'){
  */
 $executor = getExecutor($class);
 
-
 //get options
 $options = parseOptions($args);
 
-if(!$options && !$action){
-	showHelpPage($class);
+if (!$options && !$action) {
+    showHelpPage($class);
 }
 
 //validate command and options
 $errors = (array)$executor->validate($action, $options);
 
-if($errors){
-	showError("Validation errors occurred");
-	foreach($errors as $error){
-		showError("\t".$error);
-	}
-	exit(1);
+if ($errors) {
+    showError("Validation errors occurred");
+    foreach ($errors as $error) {
+        showError("\t".$error);
+    }
+    exit(1);
 }
 
 //run command
-try{
-	$result = $executor->run($action, $options);
+try {
+    $result = $executor->run($action, $options);
     showResult($result);
-}catch(AException $e){
-	showError('Error: '.$e->getMessage());
-	exit(1);
-}catch(\Exception $e){
-	showError('Error: '.$e->getMessage());
-	exit(1);
+} catch (Exception $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
+} catch (Error $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
 }
 
 //if all fine - run post-trigger
 
-try{
-	$result = $executor->finish($action, $options);
+try {
+    $result = $executor->finish($action, $options);
     showResult($result);
-}catch(AException $e){
-	showError('Error: '.$e->getMessage());
-	exit(1);
-}catch(\Exception $e){
-	showError('Error: '.$e->getMessage());
-	exit(1);
+} catch (Exception $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
+} catch (Error $e) {
+    showError('Error: '.$e->getMessage());
+    exit(1);
 }
 
 exit(0);

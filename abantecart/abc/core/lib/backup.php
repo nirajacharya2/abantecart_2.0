@@ -21,22 +21,22 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALoader;
+use abc\core\engine\ExtensionsApi;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use abc\models\admin\ModelToolBackup;
 use DirectoryIterator;
 use FilesystemIterator;
 
 /**
  * Class ABackup
  *
- * @property ALog                              $log
- * @property ADB                               $db
- * @property \abc\core\engine\ALoader          $load
- * @property \abc\models\admin\ModelToolBackup $model_tool_backup
- * @property \abc\core\engine\ExtensionsApi    $extensions
+ * @package abc\core\lib
  */
 class ABackup
 {
+    public $errors = [];
     /**
      * @var string - mode of sql dump. can be "data_only" and "recreate"
      */
@@ -44,6 +44,26 @@ class ABackup
     private $backup_name;
     private $backup_dir;
     private $slash;
+    /**
+     * @var ALog
+     */
+    private $log;
+    /**
+     * @var ADB
+     */
+    private $db;
+    /**
+     * @var ALoader
+     */
+    private $load;
+    /**
+     * @var ModelToolBackup
+     */
+    private $model_tool_backup;
+    /**
+     * @var ExtensionsApi
+     */
+    private $extensions;
     /**
      * @var Registry
      */
@@ -63,7 +83,42 @@ class ABackup
          * @var Registry
          */
         $this->registry = Registry::getInstance();
+        $this->log = $this->registry->get('log');
+        $this->db = $this->registry->get('db');
+        $this->extensions = $this->registry->get('extensions');
         $this->slash = DIRECTORY_SEPARATOR;
+        if($name){
+           $result = $this->setBackupName($name);
+           if(!$result){
+               return false;
+           }
+        }
+        return true;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getBackupName()
+    {
+        return $this->backup_name;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function setBackupName($name)
+    {
+        $this->backup_name = $name;
+        $this->createTempBackupDir();
+        return $this->errors ? false : true;
+    }
+
+    protected function createTempBackupDir($create_subdirs = true)
+    {
         //first of all check backup directory create or set writable permissions
         // Before backup process need to call validate() method! (see below)
         $app_backup_dir = ABC::env('DIR_BACKUP');
@@ -72,11 +127,8 @@ class ABackup
                 .$app_backup_dir
                 .'" is not writable or cannot be created! Backup operation is not possible';
         }
-
         //Add [date] snapshot to the name and validate if archive is already used.
         //Return error if archive can not be created
-        $name = !$name ? 'backup_'.time() : $name;
-        $this->backup_name = $name;
         //Create a tmp directory with backup name
         //Create subdirectory /files and  /data
         $this->backup_dir = $app_backup_dir.$this->backup_name.'/';
@@ -104,43 +156,6 @@ class ABackup
                 chmod($this->backup_dir.'data', 0775);
             }
         }
-    }
-
-    /**
-     * @param $key
-     *
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
-    /**
-     * @param string $key
-     * @param mixed  $value
-     */
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
-    }
-
-    /**
-     * @return string
-     */
-    public function getBackupName()
-    {
-        return $this->backup_name;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return mixed
-     */
-    public function setBackupName($name)
-    {
-        return $this->backup_name = $name;
     }
 
     /**

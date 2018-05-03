@@ -25,4 +25,5 @@ interface AJobManagerInterface
     public function getJobById( $job_id );
     public function updateJob( $job_id, array $data = [] );
     public function deleteJob( $job_id );
+    public function getReadyJob();
 }

@@ -21,4 +21,5 @@ namespace abc\modules;
 interface AModuleInterface
 {
 
+    public function postProcessing();
 }

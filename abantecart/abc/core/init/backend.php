@@ -90,7 +90,7 @@ $defaults = [
     'DIR_BACKUP'          => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
     'DIR_CORE'            => $dir_app.'core'.$dir_sep,
     'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-    'DIR_MODULES'         => $dir_app.'core'.$dir_sep.'modules'.$dir_sep,
+    'DIR_MODULES'         => $dir_app.'modules'.$dir_sep,
     'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
     'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
     'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep,
@@ -236,17 +236,20 @@ function showHelpPage($script_name = '', $options = [])
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
     //first of all get list of scripts
-    $executors = glob(ABC::env('DIR_CORE').'backend/scripts/*.php');
+    $executors = glob(ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'*.php');
     $help = [];
+
     foreach ($executors as $exec) {
 
-        $name = pathinfo($exec, PATHINFO_FILENAME);
+        $name = strtolower(pathinfo($exec, PATHINFO_FILENAME));
         $executor = getExecutor($name, true);
+
         //skip if
         if ($script_name && $script_name != $name) {
             continue;
         }
         if (is_array($executor)) {
+            echo $executor['message']."\n";
             $registry->get('log')->write($executor['message']);
             continue;
         }
