@@ -298,7 +298,7 @@ class AssetPublisherCopy{
                             .$extension.DIRECTORY_SEPARATOR
                             .ABC::env('DIRNAME_TEMPLATES');
 
-            $result = $this->_process_template_assets($file_list, $src_dir, $dst_dir);
+            $result = $this->processTemplateAssets($file_list, $src_dir, $dst_dir);
 
             if (!$result) {
                 return false;
