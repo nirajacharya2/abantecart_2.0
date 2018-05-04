@@ -12857,8 +12857,8 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
 ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-  DROP TABLE IF EXISTS `jobs`;
-  CREATE TABLE `jobs` (
+  DROP TABLE IF EXISTS `ac_jobs`;
+  CREATE TABLE `ac_jobs` (
       `job_id` int(11) NOT NULL AUTO_INCREMENT,
       `job_name` varchar(255) NOT NULL,
       `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
