@@ -37,7 +37,6 @@ class ABC extends ABCBase
     protected static $class_map = [];
     static $stage_name;
 
-
     /**
      * ABC constructor.
      *
@@ -47,7 +46,7 @@ class ABC extends ABCBase
     {
         //load and put config into environment
         $stage_name = '';
-        if(!$file || !is_file($file)) {
+        if (!$file || !is_file($file)) {
             $stage_name = @include(
                 dirname(__DIR__)
                 .DIRECTORY_SEPARATOR.'config'
@@ -58,7 +57,7 @@ class ABC extends ABCBase
         }
 
         $config = @include($file);
-        if($config) {
+        if ($config) {
             self::env($config);
             self::$stage_name = $stage_name;
             //load classmap
@@ -66,11 +65,13 @@ class ABC extends ABCBase
         }
     }
 
-    static function getStageName(){
+    static function getStageName()
+    {
         return self::$stage_name;
     }
 
-    public function loadDefaultStage(){
+    public function loadDefaultStage()
+    {
         //load and put config into environment
         $config = @include(dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'default.config.php');
         if (isset($config['default'])) {
@@ -84,11 +85,11 @@ class ABC extends ABCBase
     public static function loadClassMap($stage_name = 'default')
     {
         $classmap_file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
-        if(is_file($classmap_file)){
+        if (is_file($classmap_file)) {
             self::$class_map = @include_once($classmap_file);
         }
 
-        if(!self::$class_map){
+        if (!self::$class_map) {
             return false;
         }
 
@@ -98,23 +99,22 @@ class ABC extends ABCBase
             .'*'.DIRECTORY_SEPARATOR
             .'config'.DIRECTORY_SEPARATOR
         );
-        foreach($ext_dirs as $cfg_dir){
+        foreach ($ext_dirs as $cfg_dir) {
             $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
-            if(is_file($classmap_file)){
+            if (is_file($classmap_file)) {
                 $ext_classmap = @include_once($classmap_file);
-                if(is_array($ext_classmap)){
+                if (is_array($ext_classmap)) {
                     self::$class_map += $ext_classmap;
                 }
-            }
-            //load default stage values
-            elseif($stage_name != 'default'){
-               $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
-               if(is_file($classmap_file)){
-                   $ext_classmap = @include_once($classmap_file);
-                   if(is_array($ext_classmap)){
-                       self::$class_map += $ext_classmap;
-                   }
-               }
+            } //load default stage values
+            elseif ($stage_name != 'default') {
+                $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+                if (is_file($classmap_file)) {
+                    $ext_classmap = @include_once($classmap_file);
+                    if (is_array($ext_classmap)) {
+                        self::$class_map += $ext_classmap;
+                    }
+                }
             }
         }
 
@@ -125,34 +125,33 @@ class ABC extends ABCBase
      * Static method for saving environment values into static property
      *
      * @param string | array $name
-     * @param mixed|null $value
-     * @param bool $override - force set
+     * @param mixed|null     $value
+     * @param bool           $override - force set
      *
      * @return null
      */
     public static function env($name, $value = null, $override = false)
     {
         //if need to get
-        if ($value === null && ! is_array($name)) {
+        if ($value === null && !is_array($name)) {
             //check environment values
-            if(!sizeof(self::$env)){
+            if (!sizeof(self::$env)) {
                 // DO NOT ALLOW RUN APP WITH EMPTY ENVIRONMENT
                 exit('Fatal Error: empty environment!');
             }
             return isset(self::$env[$name]) ? self::$env[$name] : null;
-        }
-        // if need to set batch of values
+        } // if need to set batch of values
         else {
             if (is_array($name)) {
                 self::$env = array_merge(self::$env, $name);
                 return true;
             } else {
                 //when set one value
-                if ( ! array_key_exists($name, self::$env) || $override) {
+                if (!array_key_exists($name, self::$env) || $override) {
                     self::$env[$name] = $value;
                     return true;
                 } else {
-                    if( class_exists('\abc\core\lib\ADebug')) {
+                    if (class_exists('\abc\core\lib\ADebug')) {
                         ADebug::warning(
                             'Environment variable override',
                             AC_ERR_USER_WARNING,
@@ -176,18 +175,19 @@ class ABC extends ABCBase
      *
      * @return bool|string
      */
-    static function getFullClassName(string $class_alias){
+    static function getFullClassName(string $class_alias)
+    {
 
-        if(isset( self::$class_map[$class_alias])){
-            if(is_array( self::$class_map[$class_alias])){
+        if (isset(self::$class_map[$class_alias])) {
+            if (is_array(self::$class_map[$class_alias])) {
                 return self::$class_map[$class_alias][0];
 
-            }else {
+            } else {
                 return self::$class_map[$class_alias];
             }
-        }else{
+        } else {
 
-            return class_exists( $class_alias ) ? $class_alias : false;
+            return class_exists($class_alias) ? $class_alias : false;
         }
     }
 
@@ -199,35 +199,39 @@ class ABC extends ABCBase
      * @return bool|string
      * @throws \ReflectionException
      */
-    static function getObject(string $class_alias){
-        if(isset( self::$class_map[$class_alias])){
-            if(is_array( self::$class_map[$class_alias])){
+    static function getObject(string $class_alias)
+    {
+        if (isset(self::$class_map[$class_alias])) {
+            if (is_array(self::$class_map[$class_alias])) {
                 $class_name = self::$class_map[$class_alias][0];
-            }else {
+            } else {
                 $class_name = self::$class_map[$class_alias];
             }
             $args = self::getClassDefaultArgs($class_alias);
 
-            $reflector = new ReflectionClass( $class_name );
-            return $reflector->newInstanceArgs( $args );
-        }else{
+            $reflector = new ReflectionClass($class_name);
+            return $reflector->newInstanceArgs($args);
+        } else {
             return false;
         }
     }
 
     /**
      * Get arguments for class constructor
+     *
      * @param string $class_alias
+     *
      * @return array|mixed
      */
-    static function getClassDefaultArgs(string $class_alias){
-        if( !isset( self::$class_map[$class_alias]) || !is_array( self::$class_map[$class_alias]) ) {
+    static function getClassDefaultArgs(string $class_alias)
+    {
+        if (!isset(self::$class_map[$class_alias]) || !is_array(self::$class_map[$class_alias])) {
             return [];
         }
         $args = self::$class_map[$class_alias];
-        if(is_array($args)) {
+        if (is_array($args)) {
             array_shift($args);
-        }else{
+        } else {
             $args = [];
         }
         return $args;
@@ -235,14 +239,15 @@ class ABC extends ABCBase
 
     public function run()
     {
-        $this->_validate_app();
+        $this->validateApp();
 
         // New Installation
-        if ( ! self::env('DATABASES')) {
-            if(is_file(self::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'index.php')) {
+        if (!self::env('DATABASES')) {
+            if (is_file(self::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'index.php')) {
                 header('Location: ../install/index.php');
-            }else{
-                header('Location: static_pages/?file='.basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
+            } else {
+                header('Location: static_pages/?file='
+                    .basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
             }
             exit;
         }
@@ -280,14 +285,17 @@ class ABC extends ABCBase
         }
     }
 
-    protected function _validate_app()
+    protected function validateApp()
     {
         // Required PHP Version
         if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<') == true) {
-            exit(self::env('MIN_PHP_VERSION').'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
+            exit(self::env('MIN_PHP_VERSION')
+                .'+ Required for AbanteCart to work properly! '
+                .'Please contact your system administrator or host service provider.');
         }
-        if ( ! function_exists('simplexml_load_file')) {
-            exit("simpleXML functions are not available. Please contact your system administrator or host service provider.");
+        if (!function_exists('simplexml_load_file')) {
+            exit("simpleXML functions are not available.'
+            .' Please contact your system administrator or host service provider.");
         }
     }
 }
