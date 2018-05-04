@@ -23,37 +23,13 @@ namespace abc;
 // set default encoding for multibyte php mod
 use abc\core\ABC;
 use abc\core\engine\AHook;
-use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\ALanguageManager;
-use abc\core\engine\ALayout;
-use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
-use abc\core\cache\ACache;
-use abc\core\lib\ACart;
-use abc\core\lib\AConfig;
-use abc\core\lib\ACurrency;
-use abc\core\lib\ACustomer;
-use abc\core\lib\ADataEncryption;
-use abc\core\lib\ADB;
-use abc\core\lib\ADocument;
-use abc\core\lib\ADownload;
 use abc\core\lib\AError;
-use abc\core\lib\AIM;
-use abc\core\lib\AIMManager;
-use abc\core\lib\ALength;
-use abc\core\lib\AMessage;
-use abc\core\lib\AOrderStatus;
-use abc\core\lib\ARequest;
-use abc\core\lib\AResponse;
-use abc\core\lib\ASession;
-use abc\core\lib\ATax;
-use abc\core\lib\AUser;
-use abc\core\lib\AWeight;
-use abc\core\lib\CSRFToken;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
@@ -148,8 +124,8 @@ ABC::env('IS_API', ($path_nodes[0] == 'a' ? true : false));
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
 if (ABC::env('ADMIN_SECRET') !== null
-        && (isset($_GET['s']) || isset($_POST['s']))
-            && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))
+    && (isset($_GET['s']) || isset($_POST['s']))
+    && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))
 ) {
     ABC::env(
         array(
@@ -163,8 +139,8 @@ if (ABC::env('ADMIN_SECRET') !== null
     //generate unique session name.
     //NOTE: This is a session name not to confuse with actual session id. Candidate to renaming
     ABC::env(
-            'SESSION_ID',
-            ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID'
+        'SESSION_ID',
+        ABC::env('UNIQUE_ID') ? 'AC_CP_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_CP_PHPSESSID'
     );
 } else {
     ABC::env('IS_ADMIN', false);
@@ -259,46 +235,53 @@ require_once 'base.php';
 $registry = Registry::getInstance();
 
 // Loader
-$registry->set('load', new ALoader($registry));
+registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
 
 // Request
-$request = new ARequest();
-$registry->set('request', $request);
-
+registerClass($registry, 'request', 'ARequest', [$registry], '\abc\core\lib\ARequest', [$registry]);
+$request = $registry->get('request');
 // Response
-$response = new AResponse();
-$response->addHeader('Content-Type: text/html; charset=utf-8');
-$registry->set('response', $response);
-unset($response);
+registerClass($registry, 'response', 'AResponse', [$registry], '\abc\core\lib\AResponse', [$registry]);
+$registry->get('response')->addHeader('Content-Type: text/html; charset=utf-8');
 
 // URL Class
-$registry->set('html', new AHtml($registry));
+registerClass($registry, 'html', 'AHtml', [$registry], '\abc\core\engine\AHtml', [$registry]);
 
 //Hook class
 $hook = new AHook($registry);
 
 // Database
 $db_config = ABC::env('DATABASES');
-$registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
+registerClass(
+    $registry,
+    'db',
+    'ADB',
+    [$db_config[ABC::env('DB_CURRENT_DRIVER')]],
+    '\abc\core\lib\ADB',
+    [$db_config[ABC::env('DB_CURRENT_DRIVER')]]
+);
+
 if (php_sapi_name() == 'cli') {
     AHelperUtils::setDBUserVars();
 }
 
 // Cache
-$registry->set('cache', new ACache());
+registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
 
 // Config
-$config = new AConfig($registry);
-$registry->set('config', $config);
+registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);
+$config = $registry->get('config');
 
 // Session
-$registry->set('session', new ASession(ABC::env('SESSION_ID')));
+$session_id = ABC::env('SESSION_ID');
+registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\ASession', [$session_id]);
+
 if ($config->has('current_store_id')) {
     $registry->get('session')->data['current_store_id'] = $config->get('current_store_id');
 }
 
 // CSRF Token Class
-$registry->set('csrftoken', new CSRFToken());
+registerClass($registry, 'csrftoken', 'CSRFToken', [], '\abc\core\lib\CSRFToken', []);
 
 // Set up HTTP and HTTPS based automatic and based on config
 //Admin manager classes
@@ -310,13 +293,13 @@ if (ABC::env('IS_ADMIN') === true) {
 }
 
 //Messages
-$registry->set('messages', new AMessage());
+registerClass($registry, 'messages', 'AMessage', [], '\abc\core\lib\AMessage', []);
 
 // Log
 $registry->set('log', ABC::getObject('ALog'));
 
 // Document
-$registry->set('document', new ADocument());
+registerClass($registry, 'document', 'ADocument', [], '\abc\core\lib\ADocument', []);
 
 // AbanteCart Snapshot details
 $registry->set(
@@ -332,8 +315,8 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 }
 $registry->set('uri', $_SERVER['REQUEST_URI']);
 
-//main instance of data encryption 
-$registry->set('dcrypt', new ADataEncryption());
+//main instance of data encryption
+registerClass($registry, 'dcrypt', 'ADataEncryption', [], '\abc\core\lib\ADataEncryption', []);
 
 // Extensions api
 $dir_extensions = new ExtensionsApi();
@@ -355,6 +338,7 @@ unset($dir_extensions);
 $template = 'default';
 
 // see template in extensions
+
 if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
     $template = preg_replace('/[^A-Za-z0-9_]+/', '', $request->get['sf']);
     $dir = $template.ABC::env('DIRNAME_STORE').ABC::env('DIRNAME_TEMPLATES').$template;
@@ -394,23 +378,34 @@ if (!$is_valid) {
     $template = 'default';
 }
 
+/**
+ * @var ALanguage | ALanguageManager $lang_obj
+ */
 if (ABC::env('IS_ADMIN') === true) {
     $config->set('original_admin_template', $config->get('admin_template'));
     $config->set('admin_template', $template);
     // Load language
-    $lang_obj = new ALanguageManager($registry);
+    $class_name = ABC::getFullClassName('ALanguageManager');
+    $lang_obj = AHelperUtils::getInstance($class_name, [$registry], "\abc\core\lib\ALanguageManager", [$registry]);
 } else {
     $config->set('original_config_storefront_template', $config->get('config_storefront_template'));
     $config->set('config_storefront_template', $template);
     // Load language
-    $lang_obj = new ALanguage($registry);
+    $class_name = ABC::getFullClassName('ALanguage');
+    $lang_obj = AHelperUtils::getInstance($class_name, [$registry], "\abc\core\\engine\ALanguage", [$registry]);
 }
 
 // Create Global Layout Instance
-$registry->set('layout', new ALayout($registry, $template));
+registerClass(
+    $registry,
+    'layout',
+    'ALayout',
+    [$registry, $template],
+    "\abc\core\\engine\ALayout",
+    [$registry, $template]);
 
 // load download class
-$registry->set('download', new ADownload());
+registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
 
 //load main language section
 $lang_obj->load();
@@ -419,32 +414,45 @@ unset($lang_obj);
 $hook->hk_InitEnd();
 
 //load order status class
-$registry->set('order_status', new AOrderStatus($registry));
+registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
 
 //IM
-if (ABC::env('IS_ADMIN') === true) {
-    $registry->set('im', new AIMManager());
-} else {
-    $registry->set('im', new AIM());
-}
+
+$im_alias = ABC::env('IS_ADMIN') === true ? 'AIMManager' : 'AIM';
+registerClass($registry, 'im', $im_alias, [$registry], "\abc\core\lib\\".$im_alias, [$registry]);
 
 if (!ABC::env('IS_ADMIN')) { // storefront load
     // Customer
-    $registry->set('customer', new ACustomer($registry));
+    registerClass($registry, 'customer', 'ACustomer', [$registry], '\abc\core\lib\ACustomer', [$registry]);
     AHelperUtils::setDBUserVars();
     // Tax
-    $registry->set('tax', new ATax($registry));
+    registerClass($registry, 'tax', 'ATax', [$registry], '\abc\core\lib\ATax', [$registry]);
     // Weight
-    $registry->set('weight', new AWeight($registry));
+    registerClass($registry, 'weight', 'AWeight', [$registry], '\abc\core\lib\AWeight', [$registry]);
     // Length
-    $registry->set('length', new ALength($registry));
+    registerClass($registry, 'length', 'ALength', [$registry], '\abc\core\lib\ALength', [$registry]);
     // Cart
-    $registry->set('cart', new ACart($registry));
+    registerClass($registry, 'cart', 'ACart', [$registry], '\abc\core\lib\ACart', [$registry]);
 } else {
     // User
-    $registry->set('user', new AUser($registry));
+    registerClass($registry, 'user', 'AUser', [$registry], '\abc\core\lib\AUser', [$registry]);
     AHelperUtils::setDBUserVars();
 }// end admin load
 
 // Currency
-$registry->set('currency', new ACurrency($registry));
+registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\ACurrency', [$registry]);
+/**
+ * @param Registry $registry
+ * @param string   $item_name
+ * @param string   $alias
+ * @param array    $arguments
+ * @param string   $default_class
+ * @param array    $default_arguments
+ *
+ * @throws core\lib\AException
+ */
+function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
+{
+    $class_name = ABC::getFullClassName($alias);
+    $registry->set($item_name, AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments));
+}

@@ -28,7 +28,7 @@ use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use Exception;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -85,7 +85,9 @@ abstract class Extension
      *
      * @param ExtensionsApi $ExtensionsApi
      *
-     * @internal param \ExtensionsApi $object The current {@link ExtensionsApi} that has loaded this extension. that has loaded this extension.
+     * @internal param \ExtensionsApi $object
+     *  The current {@link ExtensionsApi}
+     *  that has loaded this extension.
      */
     public function loadExtensionsApi(ExtensionsApi $ExtensionsApi)
     {
@@ -133,11 +135,12 @@ class ExtensionCollection
 
             if (is_object($extension) === false) {
                 $extension = new $extension();
+
             }
 
             if (($extension instanceof Extension) === false) {
                 $class = get_class($extension);
-                if ( ! ($parent = get_parent_class($extension))) {
+                if (!($parent = get_parent_class($extension))) {
                     $parent = $class;
                 }
                 throw new Exception(
@@ -158,7 +161,7 @@ class ExtensionCollection
          * @var Extension $extension
          */
         foreach ($this->extensions as $extension) {
-            if ( ! method_exists($extension, $method) && ($extension->overloadHooks === false)) {
+            if (!method_exists($extension, $method) && ($extension->overloadHooks === false)) {
                 continue;
             }
 
@@ -225,7 +228,7 @@ class ExtensionCollection
  *
  * long description.
  *
- * @property \abc\core\lib\ADb    $db
+ * @property \abc\core\lib\ADb      $db
  * @property \abc\core\cache\ACache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
@@ -321,9 +324,9 @@ class ExtensionsApi
                 //skip other directory not containing extensions
                 if (is_file($ext.'/config.xml')) {
                     $ext_text_id = basename($ext);
-                    $xml = @simplexml_load_file($ext . '/config.xml');
+                    $xml = @simplexml_load_file($ext.'/config.xml');
                     //be sure that extension dirname equal extension-text-id in config.xml
-                    if( $xml !== false && (string)$xml->id == $ext_text_id) {
+                    if ($xml !== false && (string)$xml->id == $ext_text_id) {
                         $this->extensions_dir[] = $ext_text_id;
                     }
                 }
@@ -335,7 +338,7 @@ class ExtensionsApi
             //get extensions from db
             $query = $this->getExtensionsList();
             foreach ($query->rows as $result) {
-                if(trim($result['key'])) {
+                if (trim($result['key'])) {
                     $this->db_extensions[] = $result['key'];
                 }
             }
@@ -343,7 +346,7 @@ class ExtensionsApi
             //check if we have extensions that has record in db, but missing files
             // if so, disable them
             $this->missing_extensions = array_diff($this->db_extensions, $this->extensions_dir);
-            if ( ! empty($this->missing_extensions)) {
+            if (!empty($this->missing_extensions)) {
                 foreach ($this->missing_extensions as $ext) {
                     $warning = new AWarning($ext.' directory is missing');
                     $warning->toLog();
@@ -352,7 +355,7 @@ class ExtensionsApi
 
             //check if we have extensions in dir that has no record in db
             $diff = array_diff($this->extensions_dir, $this->db_extensions);
-            if ( ! empty($diff)) {
+            if (!empty($diff)) {
                 foreach ($diff as $ext) {
                     $data['key'] = $ext;
                     $data['status'] = 0;
@@ -375,6 +378,7 @@ class ExtensionsApi
      * @param string $type
      *
      * @return array
+     * @throws Exception
      */
     public function getInstalled($type = '')
     {
@@ -394,25 +398,21 @@ class ExtensionsApi
         $type = (string)$type;
         $extension_data = array();
         if (in_array($type, $this->extension_types)) {
-            $sql
-                = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.key
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type = '".$this->db->escape($type)."'";
         } elseif ($type == 'exts') {
-            $sql
-                = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.key
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type IN ('".implode("', '", $this->extension_types)."')";
         } elseif ($type == '') {
-            $sql
-                = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.key
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key";
         } else {
-            $sql
-                = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.key
                     FROM ".$this->db->table_name("extensions")." e";
         }
 
@@ -434,6 +434,7 @@ class ExtensionsApi
      * @param string $key
      *
      * @return array
+     * @throws Exception
      */
     public function getExtensionInfo($key = '')
     {
@@ -484,13 +485,14 @@ class ExtensionsApi
      * @param string $mode - can be "force" to prevent cache load
      *
      * @return bool|\stdClass object array of extensions
+     * @throws Exception
      */
     public function getExtensionsList($data = array(), $mode = '')
     {
         $cache_key = '';
         if ($mode == '' && $this->cache && $this->cache->isCacheEnabled()) {
             $cache_key = 'extensions.list';
-            if ( ! empty($data)) {
+            if (!empty($data)) {
                 $cache_key .= $this->cache->paramsToString($data);
             }
 
@@ -557,7 +559,8 @@ class ExtensionsApi
         if (AHelperUtils::has_value($data['store_id'])) {
             $sql .= " AND COALESCE(s.`store_id`,0) = '".(int)$data['store_id']."' ";
         } else {
-            $sql .= " AND COALESCE(s.`store_id`,0) = '".(int)$this->registry->get('config')->get('config_store_id')."' ";
+            $sql .= " AND COALESCE(s.`store_id`,0) = '".
+                (int)$this->registry->get('config')->get('config_store_id')."' ";
         }
 
         if (AHelperUtils::has_value($data['sort_order']) && $data['sort_order'][0] != 'name') {
@@ -604,15 +607,28 @@ class ExtensionsApi
      */
     public function getExtensionName($extension = '')
     {
-        if ( ! $extension) {
+        if (!$extension) {
             return false;
         }
         $name = '';
         $lang_dir = $this->registry->get('language')->language_details['directory'];
-        $filename = ABC::env('DIR_APP_EXTENSIONS').$extension.'/admin/languages/'.$lang_dir.'/'.$extension.'/'.$extension.'.xml';
-        if ( ! file_exists($filename)) {
-            $filename = ABC::env('DIR_APP_EXTENSIONS').$extension.'/admin/languages/english/'.$extension.'/'.$extension.'.xml';
+        $filename = ABC::env('DIR_APP_EXTENSIONS')
+            .$extension
+            .'/admin/languages/'
+            .$lang_dir
+            .'/'
+            .$extension
+            .'/'
+            .$extension.'.xml';
+        if (!file_exists($filename)) {
+            $filename = ABC::env('DIR_APP_EXTENSIONS')
+                .$extension
+                .'/admin/languages/english/'
+                .$extension
+                .'/'
+                .$extension.'.xml';
         }
+
         if (file_exists($filename)) {
             /**
              * @var \SimpleXMLElement $xml
@@ -813,7 +829,7 @@ class ExtensionsApi
                 (($force_enabled_off && AHelperUtils::has_value($this->registry->get('config')->get($ext.'_status')))
                     || $this->registry->get('config')->get($ext.'_status')
                 )
-                && ! in_array($ext, $enabled_extensions)
+                && !in_array($ext, $enabled_extensions)
                 && AHelperUtils::has_value($ext)
             ) {
 
@@ -835,12 +851,16 @@ class ExtensionsApi
                 $ext_templates[$ext] = $templates;
                 $ext_libraries[$ext] = $libraries;
 
-                $class = 'Extension'.preg_replace('/[^a-zA-Z0-9]/', '', $ext);
+                $class_alias = preg_replace('/[^a-zA-Z0-9]/', ' ', $ext);
+                $class_alias = ucwords($class_alias);
+                $class_alias = str_replace(" ", "", $class_alias);
+                $class = '\abc\core\extension\Extension'.$class_alias;
                 if (class_exists($class)) {
                     $hook_extensions[] = $class;
                 }
             }
         }
+
         $this->enabled_extensions = $enabled_extensions;
         $this->setExtensionCollection(new ExtensionCollection($hook_extensions));
 
@@ -873,14 +893,14 @@ class ExtensionsApi
      */
     public function isExtensionLanguageFile($route, $language_name, $section)
     {
-        if ( ! $this->registry->has('config')) {
+        if (!$this->registry->has('config')) {
             return false;
         }
 
         $file = '/languages/'
-                .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
-                .$language_name
-                .'/'.$route.'.xml';
+            .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
+            .$language_name
+            .'/'.$route.'.xml';
 
         //include language file from first matching extension
         foreach ($this->extensions_dir as $ext) {
@@ -905,6 +925,7 @@ class ExtensionsApi
      * @param  $mode          - mode to force storefront
      *
      * @return array|bool - false if not found, array with extension name and file name if found
+     * @throws Exception
      */
     public function isExtensionResource($resource_type, $route, $ext_status = '', $mode = '')
     {
@@ -912,7 +933,7 @@ class ExtensionsApi
             $ext_status = 'enabled';
         }
 
-        if ( ! $this->registry->has('config')) {
+        if (!$this->registry->has('config')) {
             return false;
         }
 
@@ -985,7 +1006,13 @@ class ExtensionsApi
                 }
                 if ($resource_type == 'T') {
                     //check default template
-                    $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route;
+                    $f = ABC::env('DIR_APP_EXTENSIONS')
+                        .$ext
+                        .$ext_section
+                        .ABC::env('DIRNAME_TEMPLATES')
+                        .'default/'
+                        .$route;
+
                     if (is_file($f)) {
                         return array(
                             'file'      => $f,
@@ -1023,7 +1050,7 @@ class ExtensionsApi
     public function getAllPrePostTemplates($route)
     {
 
-        if ( ! $this->registry->has('config')) {
+        if (!$this->registry->has('config')) {
             return false;
         }
 
@@ -1052,9 +1079,15 @@ class ExtensionsApi
                     );
                 }
                 //if active template tpl not found - looking for default
-                if ( ! isset($output[$ext])) {
+                if (!isset($output[$ext])) {
                     //check default template
-                    $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route;
+                    $f = ABC::env('DIR_APP_EXTENSIONS')
+                        .$ext
+                        .$ext_section
+                        .ABC::env('DIRNAME_TEMPLATES')
+                        .'default/'
+                        .$route;
+
                     if (is_file($f)) {
                         $output[] = array(
                             'file'      => $f,
@@ -1093,7 +1126,9 @@ class ExtensionsApi
                     .(ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                     .$path_build.'.php';
 
-                $ext_controllers = is_array($this->extension_controllers[$ext][$section]) ? $this->extension_controllers[$ext][$section] : array();
+                $ext_controllers = is_array($this->extension_controllers[$ext][$section])
+                    ? $this->extension_controllers[$ext][$section]
+                    : [];
 
                 if (in_array($path_build, $ext_controllers) && is_file($file)) {
 
@@ -1200,8 +1235,9 @@ class ExtensionsApi
         }
 
         $method = strtolower($method[0]).substr($method, 1);
+        $class_base_name = basename(str_replace("\\", "/", get_class($baseObject)));
 
-        $extension_method = ucfirst(get_class($baseObject)).ucfirst($method);
+        $extension_method = $class_base_name.ucfirst($method);
 
         // before hook - runs before method; allows parameters to be changed
         $before_args = $args;
@@ -1283,7 +1319,7 @@ class ExtensionUtils
         $this->store_id = (int)$store_id;
         $this->config = AHelperUtils::getExtensionConfigXml($ext);
 
-        if ( ! $this->config) {
+        if (!$this->config) {
             $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).'/config.xml';
             $err = sprintf('Error: Could not load config for <b>%s</b> ( '.$filename.')!', $this->name);
             foreach (libxml_get_errors() as $error) {
@@ -1306,7 +1342,7 @@ class ExtensionUtils
      */
     public function getConfig($val = null)
     {
-        return ! empty($val) ? isset($this->config->$val) ? (string)$this->config->$val : null : $this->config;
+        return !empty($val) ? isset($this->config->$val) ? (string)$this->config->$val : null : $this->config;
     }
 
     /**
@@ -1315,7 +1351,7 @@ class ExtensionUtils
     public function validateResources()
     {
         $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).'/main.php';
-        if ( ! is_file($filename)) {
+        if (!is_file($filename)) {
             return null;
         }
 
@@ -1355,11 +1391,11 @@ class ExtensionUtils
                     continue;
                 }
                 foreach ($checked_resources as $section => $section_resources) {
-                    if(!$resources[$section] || !is_array($resources[$section])){
+                    if (!$resources[$section] || !is_array($resources[$section])) {
                         continue;
                     }
                     $conflict = array_intersect($resources[$section], $section_resources);
-                    if ( ! empty($conflict)) {
+                    if (!empty($conflict)) {
                         $conflict_resources[$checked_name][$resource_type][$section] = $conflict;
                     }
                 }
@@ -1463,14 +1499,18 @@ class ExtensionUtils
     public function validateSettings($data = array())
     {
         // if values not set or we change only status of extension
-        if ( ! $data || (isset($data['one_field']) && isset($data[$this->name.'_status']) && $data[$this->name.'_status'] == 1)) {
+        if (!$data
+            || (isset($data['one_field'])
+                && isset($data[$this->name.'_status'])
+                && $data[$this->name.'_status'] == 1)
+        ) {
             $this->registry->get('load')->model('setting/setting');
             $data = $this->registry->get('model_setting_setting')->getSetting($this->name, $this->store_id);
         }
 
         //1. check is all required fields are set
         $result = $this->checkRequiredSettings($data);
-        if ( ! $result) {
+        if (!$result) {
             return array('result' => false);
         }
 
@@ -1478,11 +1518,11 @@ class ExtensionUtils
         //2.1 - check by regex pattern from entity of config.xml
         if (isset($this->config->settings->item)) {
             foreach ($this->config->settings->item as $item) {
-                if ( ! isset($data[(string)$item['id']])) {
+                if (!isset($data[(string)$item['id']])) {
                     continue;//if data for check not given - do nothing
                 }
                 $value = $data[(string)$item['id']];
-                if ( ! AHelperUtils::is_multi($value)) {
+                if (!AHelperUtils::is_multi($value)) {
                     if (is_array($value)) {
                         $value = array_map('trim', $value);
                     } else {
@@ -1502,7 +1542,7 @@ class ExtensionUtils
                             ),
                         );
                     } else {
-                        if ( ! $matches) {
+                        if (!$matches) {
                             return array('result' => false, 'errors' => array((string)$item['id'] => ''));
                         }
                     }
@@ -1515,13 +1555,17 @@ class ExtensionUtils
         if (file_exists($validate_file)) {
             /** @noinspection PhpIncludeInspection */
             include_once($validate_file);
-            //function settingsValidation in validate.php must to return formatted array as in caller (see phpdoc-comment: @return)
+            //function settingsValidation in validate.php must to return formatted
+            // array as in caller (see phpdoc-comment: @return)
             if (function_exists('settingsValidation')) {
                 $result = call_user_func('settingsValidation', $data);
-                if ( ! isset($result['result']) || ! isset($result['errors']) || ! is_array($result['errors'])) {
+                if (!isset($result['result']) || !isset($result['errors']) || !is_array($result['errors'])) {
                     return array(
                         'result' => false,
-                        'errors' => array('pattern' => 'Error: Cannot to validate data by validate.php file. Function returns incorrect formatted data.'),
+                        'errors' => array(
+                            'pattern' => 'Error: Cannot to validate data by validate.php file. '
+                                        .'Function returns incorrect formatted data.'
+                        ),
                     );
                 }
 
@@ -1546,12 +1590,12 @@ class ExtensionUtils
              */
             $items = $this->config->settings->item;
             foreach ($items as $item) {
-                if ( ! isset($data[(string)$item['id']])) {
+                if (!isset($data[(string)$item['id']])) {
                     //if data for check not given - do nothing
                     continue;
                 }
                 $value = $data[(string)$item['id']];
-                if ( ! AHelperUtils::is_multi($value)) {
+                if (!AHelperUtils::is_multi($value)) {
                     if (is_array($value)) {
                         $value = array_map('trim', $value);
                     } else {
@@ -1561,7 +1605,7 @@ class ExtensionUtils
 
                 /** @noinspection PhpUndefinedMethodInspection */
                 $type_attr = $item->type->attributes();
-                if ((string)$type_attr['required'] == 'true' && ! $value) {
+                if ((string)$type_attr['required'] == 'true' && !$value) {
                     return false;
                 }
             }

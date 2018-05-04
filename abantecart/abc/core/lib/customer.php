@@ -23,15 +23,16 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
+use ALibBase;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ACustomer
  */
-class ACustomer
+class ACustomer extends ALibBase
 {
     /**
      * @var int
@@ -121,6 +122,8 @@ class ACustomer
 
     /**
      * @param  \abc\core\engine\Registry $registry
+     *
+     * @throws AException
      */
     public function __construct($registry)
     {
@@ -136,13 +139,14 @@ class ACustomer
         if (isset($this->session->data['customer_id'])) {
             $customer_data = $this->db->query(
                 "SELECT c.*, cg.* FROM ".$this->db->table_name("customers")." c
-                    LEFT JOIN ".$this->db->table_name("customer_groups")." cg ON c.customer_group_id = cg.customer_group_id
+                    LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
+                    ON c.customer_group_id = cg.customer_group_id
                     WHERE customer_id = '".(int)$this->session->data['customer_id']."' 
                     AND STATUS = '1'"
             );
 
             if ($customer_data->num_rows) {
-                $this->_customer_init($customer_data->row);
+                $this->customerInit($customer_data->row);
             } else {
                 $this->logout();
             }
@@ -153,7 +157,7 @@ class ACustomer
             //customer is not valid or not from the same store (under the same domain)
             if (
                 $this->unauth_customer['script_name'] != $this->request->server['SCRIPT_NAME']
-                || ! $this->isValidEnabledCustomer()
+                || !$this->isValidEnabledCustomer()
             ) {
                 //clean up
                 $this->unauth_customer = array();
@@ -163,7 +167,7 @@ class ACustomer
             }
             //check if unauthenticated customer cart content was found and merge with session
             $saved_cart = $this->getCustomerCart();
-            if ( ! empty($saved_cart) && count($saved_cart)) {
+            if (!empty($saved_cart) && count($saved_cart)) {
                 $this->mergeCustomerCart($saved_cart);
             }
         }
@@ -218,15 +222,16 @@ class ACustomer
         if (ABC::env('SALT')) {
             $add_pass_sql = " OR password = '".$this->db->escape(md5($password.ABC::env('SALT')))."'";
         }
-        $customer_data = $this->db->query("SELECT *
-                                            FROM ".$this->db->table_name("customers")."
-                                            WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
-                                            AND (
-                                                password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
-                                                        ))" . $add_pass_sql . ") AND status = '1' ".$approved_only);
+        $customer_data = $this->db->query(
+            "SELECT *
+            FROM ".$this->db->table_name("customers")."
+            WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
+            AND (
+                password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
+                        ))".$add_pass_sql.") AND status = '1' ".$approved_only);
         if ($customer_data->num_rows) {
 
-            $this->_customer_init($customer_data->row);
+            $this->customerInit($customer_data->row);
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
             $cart = $this->getCustomerCart();
@@ -269,7 +274,7 @@ class ACustomer
      *
      * @return void
      */
-    private function _customer_init($data)
+    private function customerInit($data)
     {
 
         $this->customer_id = (int)$data['customer_id'];
@@ -304,7 +309,7 @@ class ACustomer
     public function setLastLogin($customer_id)
     {
         $customer_id = (int)$customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return false;
         }
 
@@ -350,7 +355,7 @@ class ACustomer
      */
     public function isLoggedWithToken($token)
     {
-        if ((isset($this->session->data['token']) && ! isset($token))
+        if ((isset($this->session->data['token']) && !isset($token))
             || ((isset($token) && (isset($this->session->data['token']) && ($token != $this->session->data['token']))))
         ) {
             return false;
@@ -503,7 +508,13 @@ class ACustomer
         $data_array = (array)$data_array;
         // Set default format
         if ($format == '') {
-            $format = '{firstname} {lastname}'."\n".'{company}'."\n".'{address_1}'."\n".'{address_2}'."\n".'{city} {postcode}'."\n".'{zone}'."\n".'{country}';
+            $format = '{firstname} {lastname}'
+                ."\n".'{company}'
+                ."\n".'{address_1}'
+                ."\n".'{address_2}'
+                ."\n".'{city} {postcode}'
+                ."\n".'{zone}'
+                ."\n".'{country}';
         }
         //Set default variable to be set for address based on the data
         if (count($locate) <= 0) {
@@ -513,7 +524,13 @@ class ACustomer
             }
         }
 
-        return str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($locate, $data_array, $format))));
+        return str_replace(
+            array("\r\n", "\r", "\n"),
+            '<br />',
+            preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"),
+                '<br />',
+                trim(str_replace($locate, $data_array, $format)))
+        );
 
     }
 
@@ -525,7 +542,7 @@ class ACustomer
      */
     public function getBalance()
     {
-        if ( ! $this->isLogged()) {
+        if (!$this->isLogged()) {
             return false;
         }
 
@@ -568,10 +585,10 @@ class ACustomer
     {
         $customer_id = $this->customer_id;
         $store_id = (int)$this->config->get('config_store_id');
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return null;
         }
 
@@ -581,9 +598,9 @@ class ACustomer
                                     WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
         $cart = unserialize($result->row['cart']);
         //check is format of cart old or new
-        $new = $this->_is_new_cart_format($cart);
+        $new = $this->isNewCartFormat($cart);
 
-        if ( ! $new) {
+        if (!$new) {
             $cart = array(); //clean cart from old format
         }
         $cart['store_'.$store_id] = $this->session->data['cart'];
@@ -602,10 +619,10 @@ class ACustomer
     public function isValidEnabledCustomer()
     {
         $customer_id = $this->customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return false;
         }
 
@@ -624,15 +641,16 @@ class ACustomer
      * Get cart content
      *
      * @return array()
+     * @throws \Exception
      */
     public function getCustomerCart()
     {
         $store_id = (int)$this->config->get('config_store_id');
         $customer_id = $this->customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return array();
         }
 
@@ -647,7 +665,7 @@ class ACustomer
             if (($result->row['cart']) && (is_string($result->row['cart']))) {
                 $cart = unserialize($result->row['cart']);
                 //check is format of cart old or new
-                $new = $this->_is_new_cart_format($cart);
+                $new = $this->isNewCartFormat($cart);
                 if (isset($cart['store_'.$store_id])) {
                     $cart = $cart['store_'.$store_id];
                 } elseif ($new) {
@@ -691,20 +709,23 @@ class ACustomer
     public function mergeCustomerCart($cart)
     {
         $store_id = (int)$this->config->get('config_store_id');
-        $cart = ! is_array($cart) ? array() : $cart;
+        $cart = !is_array($cart) ? array() : $cart;
         //check is format of cart old or new
-        $new = $this->_is_new_cart_format($cart);
+        $new = $this->isNewCartFormat($cart);
 
         if ($new) {
             $cart = $cart['store_'.$store_id];
         }
-        $cart = ! is_array($cart) ? array() : $cart; // for case when data format is new but cart for store does not yet created
+        // for case when data format is new but cart for store does not yet created
+        $cart = !is_array($cart)
+            ? array()
+            : $cart;
 
-        if ($cart && ! is_array($this->session->data['cart'])) {
+        if ($cart && !is_array($this->session->data['cart'])) {
             $this->session->data['cart'] = array();
         }
         foreach ($cart as $key => $value) {
-            if ( ! array_key_exists($key, $this->session->data['cart'])) {
+            if (!array_key_exists($key, $this->session->data['cart'])) {
                 $this->session->data['cart'][$key] = $value;
             }
         }
@@ -721,10 +742,10 @@ class ACustomer
 
         $cart = array();
         $customer_id = $this->customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return false;
         }
         $this->db->query("UPDATE ".$this->db->table_name("customers")."
@@ -742,13 +763,13 @@ class ACustomer
      *
      * @return bool
      */
-    protected function _is_new_cart_format($cart_data = array())
+    protected function isNewCartFormat($cart_data = array())
     {
         if (empty($cart_data)) {
             return false;
         }
         $keys = array_keys($cart_data);
-        if (is_array($keys) && ! empty($keys)) {
+        if (is_array($keys) && !empty($keys)) {
             foreach ($keys as $k) {
                 if (is_int(strpos($k, 'store_'))) {
                     return true;
@@ -768,7 +789,7 @@ class ACustomer
      */
     public function addToWishList($product_id)
     {
-        if ( ! AHelperUtils::has_value($product_id) || ! is_numeric($product_id)) {
+        if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
         $whishlist = $this->getWishList();
@@ -787,7 +808,7 @@ class ACustomer
      */
     public function removeFromWishList($product_id)
     {
-        if ( ! AHelperUtils::has_value($product_id) || ! is_numeric($product_id)) {
+        if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
         $whishlist = $this->getWishList();
@@ -803,14 +824,15 @@ class ACustomer
      * @param array $whishlist
      *
      * @return null
+     * @throws \Exception
      */
     public function saveWishList($whishlist = array())
     {
         $customer_id = $this->customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return false;
         }
         $this->db->query("UPDATE ".$this->db->table_name("customers")."
@@ -826,14 +848,15 @@ class ACustomer
      * Get cart content
      *
      * @return array()
+     * @throws \Exception
      */
     public function getWishList()
     {
         $customer_id = $this->customer_id;
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
-        if ( ! $customer_id) {
+        if (!$customer_id) {
             return array();
         }
         $customer_data = $this->db->query("SELECT wishlist
@@ -854,14 +877,17 @@ class ACustomer
      * @param array  $tr_details - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
+     * @throws \Exception
      */
-    protected function _record_transaction($type, $tr_details)
+    protected function recordTransaction($type, $tr_details)
     {
 
-        if ( ! $this->isLogged()) {
+        if (!$this->isLogged()) {
             return false;
         }
-        if ( ! AHelperUtils::has_value($tr_details['transaction_type']) || ! AHelperUtils::has_value($tr_details['created_by'])) {
+        if (!AHelperUtils::has_value($tr_details['transaction_type'])
+            || !AHelperUtils::has_value($tr_details['created_by'])
+        ) {
             return false;
         }
 

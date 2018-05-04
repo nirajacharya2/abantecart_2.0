@@ -24,7 +24,7 @@ $class_list = [
         'attribute',
         'language',
     ],
-    'core/cache'   => [
+    'core/cache'  => [
         'cache',
     ],
     'core/view'   => [
@@ -37,7 +37,7 @@ $class_list = [
         'utils',
         'system_check',
     ],
-    'core/lib'         => [
+    'core/lib'    => [
         'config',
         'db',
         'connect',
@@ -75,14 +75,16 @@ $class_list = [
         'im',
         'csrf_token',
         'promotion',
-        'json'
+        'json',
     ],
 ];
 //load classes
 
 $dir_app = ABC::env('DIR_APP');
+require_once $dir_app.'core'.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.'libBase.php';
+
 foreach ($class_list as $sub_dir => $files) {
-    $sub_dir = DIRECTORY_SEPARATOR != '/' ? str_replace('/',DIRECTORY_SEPARATOR,$sub_dir) : $sub_dir;
+    $sub_dir = DIRECTORY_SEPARATOR != '/' ? str_replace('/', DIRECTORY_SEPARATOR, $sub_dir) : $sub_dir;
     foreach ($files as $name) {
         require_once $dir_app.$sub_dir.DIRECTORY_SEPARATOR.$name.'.php';
     }
