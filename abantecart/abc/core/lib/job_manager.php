@@ -84,48 +84,48 @@ class AJobManager implements AJobManagerInterface
      *
      * @return bool
      */
- /*   public function runJob($job_id)
-    {
+    /*   public function runJob($job_id)
+       {
 
-        $job_id = (int)$job_id;
-        $job_info = $this->getJobById($job_id);
-        if (!$job_info) {
-            $this->toLog('Skipped: job ID '.$job_id.' not found.');
+           $job_id = (int)$job_id;
+           $job_info = $this->getJobById($job_id);
+           if (!$job_info) {
+               $this->toLog('Skipped: job ID '.$job_id.' not found.');
 
-            return false;
-        }
-        if ($job_info['status'] != self::STATUS_READY) {
-            $this->toLog('Skipped: job ID '.$job_id.' it not ready to start. Please change job status.');
+               return false;
+           }
+           if ($job_info['status'] != self::STATUS_READY) {
+               $this->toLog('Skipped: job ID '.$job_id.' it not ready to start. Please change job status.');
 
-            return false;
-        }
+               return false;
+           }
 
-        $this->updateJobState($job_id, ['status'=>self::STATUS_RUNNING]);
-        $this->toLog('Job ID '.$job_id.': state - running.');
+           $this->updateJobState($job_id, ['status'=>self::STATUS_RUNNING]);
+           $this->toLog('Job ID '.$job_id.': state - running.');
 
-        $job_result_status = $this->run($job_info['configuration']);
+           $job_result_status = $this->run($job_info['configuration']);
 
-        $this->toLog('Job ID '.$job_id.': state - finished. Status - '.$job_result_status);
+           $this->toLog('Job ID '.$job_id.': state - finished. Status - '.$job_result_status);
 
-        return $job_result_status;
-    }
+           return $job_result_status;
+       }
 
-    protected function run($configuration)
-    {
-        try {
-            require_once(ABC::env(DIR_MODULES) . $configuration['module_filename']);
-            $class_name = $configuration['module_class'];
-            $module = new $class_name();
-            $module_method = $configuration['module_method'];
-            $module->{$module_method}($configuration);
-            $status = self::STATUS_COMPLETED;
-        } catch (AException $e) {
-            $this->toLog('Job Run Failed', 0);
-            $status = self::STATUS_FAILED;
-        }
-        return $status;
-    }
-*/
+       protected function run($configuration)
+       {
+           try {
+               require_once(ABC::env(DIR_MODULES) . $configuration['module_filename']);
+               $class_name = $configuration['module_class'];
+               $module = new $class_name();
+               $module_method = $configuration['module_method'];
+               $module->{$module_method}($configuration);
+               $status = self::STATUS_COMPLETED;
+           } catch (AException $e) {
+               $this->toLog('Job Run Failed', 0);
+               $status = self::STATUS_FAILED;
+           }
+           return $status;
+       }
+   */
     /**
      * @param int   $job_id
      * @param array $state
@@ -176,14 +176,14 @@ class AJobManager implements AJobManagerInterface
     }
 
     /**
-     * @param array $data - array must contains key:
-     *                    'worker' with array as value.
-     *                    for example: 'worker' => [
+     * @param array $data                       - array must contains key:
+     *                                          'worker' with array as value.
+     *                                          for example: 'worker' => [
      *                                          'file'       => $filename,
      *                                          'class'      => $full_class_name,
      *                                          'method'     => $method_name,
      *                                          'parameters' => $mixed_value],
-     *                                  'misc' => $some_additional_values
+     *                                          'misc' => $some_additional_values
      *
      * @return int
      */
@@ -244,6 +244,7 @@ class AJobManager implements AJobManagerInterface
      * @param array $data
      *
      * @return bool
+     * @throws \Exception
      */
     public function updateJob($job_id, array $data = [])
     {
@@ -263,6 +264,14 @@ class AJobManager implements AJobManagerInterface
             'last_time_run' => 'timestamp',
             'last_result'   => 'int',
         );
+        if (!isset($data['actor_name'])) {
+
+            $actor = AHelperUtils::recognizeUser();
+            $data['actor_type'] = $actor['user_type'];
+            $data['actor_id'] = $actor['user_id'];
+            $data['actor_name'] = $actor['user_name'];
+        }
+
         $update = array();
         foreach ($upd_flds as $fld_name => $fld_type) {
             if ($fld_name == 'configuration' && is_array($data[$fld_name])) {
@@ -465,10 +474,11 @@ class AJobManager implements AJobManagerInterface
     /**
      * @return array|bool
      */
-    public function getReadyJob(){
+    public function getReadyJob()
+    {
         $output = [];
-        $jobs = $this->getJobs(['status' => self::STATUS_READY, 'limit'=>1]);
-        if($jobs){
+        $jobs = $this->getJobs(['status' => self::STATUS_READY, 'limit' => 1]);
+        if ($jobs) {
             $output = $jobs[0];
         }
 

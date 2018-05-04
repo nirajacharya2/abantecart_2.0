@@ -36,7 +36,7 @@ use Exception;
 use PharData;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -117,14 +117,14 @@ class AHelperUtils extends AHelper
         $registry = Registry::getInstance();
 
         $decimal_point = $registry->get('language')->get('decimal_point');
-        $decimal_point = ! $decimal_point ? '.' : $decimal_point;
+        $decimal_point = !$decimal_point ? '.' : $decimal_point;
 
         $thousand_point = $registry->get('language')->get('thousand_point');
-        $thousand_point = ! $thousand_point ? '' : $thousand_point;
+        $thousand_point = !$thousand_point ? '' : $thousand_point;
 
         $currency = $registry->get('currency')->getCurrency();
         $decimal_place = (int)$currency['decimal_place'];
-        $decimal_place = ! $decimal_place ? 2 : $decimal_place;
+        $decimal_place = !$decimal_place ? 2 : $decimal_place;
 
         // detect if need to show raw number for decimal points
         // In admin, this is regardless of currency format. Need to show real number
@@ -202,7 +202,8 @@ class AHelperUtils extends AHelper
 
     /**
      * Function convert input text to alpha numeric string for SEO URL use
-     * if optional parameter object_key_name (product, category, content etc) given function will return unique SEO keyword
+     * if optional parameter object_key_name
+     * (product, category, content etc) given function will return unique SEO keyword
      *
      * @param        $string_value
      * @param string $object_key_name
@@ -216,7 +217,7 @@ class AHelperUtils extends AHelper
         $seo_key = preg_replace('/[^\pL\p{Zs}0-9\s\-_]+/u', '', $seo_key);
         $seo_key = trim(mb_strtolower($seo_key));
         $seo_key = str_replace(' ', ABC::env('SEO_URL_SEPARATOR'), $seo_key);
-        if ( ! $object_key_name) {
+        if (!$object_key_name) {
             return $seo_key;
         } else {
             //if $object_key_name given - check is seo-key unique and return unique
@@ -268,7 +269,9 @@ class AHelperUtils extends AHelper
      */
     static function echo_array($array_data)
     {
-        $wrapper = '<div class="debug_alert alert alert-info alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>';
+        $wrapper = '<div class="debug_alert alert alert-info alert-dismissible"'
+            .' role="alert"><button type="button" class="close" data-dismiss="alert">'
+            .'<span aria-hidden="true">&times;</span></button>';
         echo $wrapper;
         echo "<pre>";
         print_r($array_data);
@@ -286,7 +289,7 @@ class AHelperUtils extends AHelper
      */
     static function getFilesInDir($dir, $file_ext = '')
     {
-        if ( ! is_dir($dir)) {
+        if (!is_dir($dir)) {
             return array();
         }
         $dir = rtrim($dir, '\\/');
@@ -341,7 +344,7 @@ class AHelperUtils extends AHelper
     {
         $src_file = $src_dir.$rel_file;
         $dest_file = $dest_dir.$rel_file;
-        if ( ! is_file($src_file)) {
+        if (!is_file($src_file)) {
             return [
                 'result'  => false,
                 'message' => __METHOD__.': Error: source file '.$src_file.' not found during copying',
@@ -359,7 +362,7 @@ class AHelperUtils extends AHelper
         if ($output['result']) {
             $error = '';
             $result = copy($src_file, $dest_file);
-            if ( ! $result) {
+            if (!$result) {
                 $error = __METHOD__.': Error: source file '.$src_file.' copying error.';
             }
 
@@ -388,9 +391,9 @@ class AHelperUtils extends AHelper
         $output = ['result' => true];
         foreach ($dirs as $part) {
             $dir .= $part.'/';
-            if ( ! is_dir($dir) && strlen($dir)) {
+            if (!is_dir($dir) && strlen($dir)) {
                 $result = @mkdir($dir, $perms);
-                if ( ! $result) {
+                if (!$result) {
                     return [
                         'result'  => false,
                         'message' => __METHOD__.': Cannot to create directory '.$dir,
@@ -405,7 +408,7 @@ class AHelperUtils extends AHelper
     static function RemoveDirRecursively($dir = '')
     {
         //block calls from storefront
-        if ( ! ABC::env('IS_ADMIN') || $dir == '../' || $dir == '/' || $dir == './') {
+        if (!ABC::env('IS_ADMIN') || $dir == '../' || $dir == '/' || $dir == './') {
             return false;
         }
 
@@ -415,7 +418,7 @@ class AHelperUtils extends AHelper
                 if ($obj != "." && $obj != "..") {
                     @chmod($dir."/".$obj, 0777);
                     $err = is_dir($dir."/".$obj) ? self::RemoveDirRecursively($dir."/".$obj) : @unlink($dir."/".$obj);
-                    if ( ! $err) {
+                    if (!$err) {
                         $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir."/".$obj."'.";
 
                         return [
@@ -486,10 +489,12 @@ class AHelperUtils extends AHelper
     {
         switch ($error) {
             case UPLOAD_ERR_INI_SIZE:
-                $error_txt = 'The uploaded file exceeds the upload_max_filesize directive in php.ini (now '.ini_get('upload_max_filesize').')';
+                $error_txt = 'The uploaded file exceeds the upload_max_filesize directive in php.ini (now '
+                    .ini_get('upload_max_filesize').')';
                 break;
             case UPLOAD_ERR_FORM_SIZE:
-                $error_txt = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+                $error_txt = 'The uploaded file exceeds the MAX_FILE_SIZE'
+                    .' directive that was specified in the HTML form';
                 break;
             case UPLOAD_ERR_PARTIAL:
                 $error_txt = 'The uploaded file was only partially uploaded';
@@ -615,7 +620,7 @@ class AHelperUtils extends AHelper
             $format = $registry->get('language')->get('date_format_short');
         }
         $empties = array('0000-00-00', '0000-00-00 00:00:00', '1970-01-01', '1970-01-01 00:00:00');
-        if ($iso_date && ! in_array($iso_date, $empties)) {
+        if ($iso_date && !in_array($iso_date, $empties)) {
             return date($format, self::dateISO2Int($iso_date));
         } else {
             return '';
@@ -714,7 +719,7 @@ class AHelperUtils extends AHelper
         );
 
         $regexp = "#".strtr(preg_quote($format), $masks)."#";
-        if ( ! preg_match($regexp, $date, $out)) {
+        if (!preg_match($regexp, $date, $out)) {
             return false;
         }
 
@@ -740,19 +745,19 @@ class AHelperUtils extends AHelper
         $registry = Registry::getInstance();
         $result = $registry->get($extension_txt_id.'_configXML');
 
-        if ( ! is_null($result)) {
+        if (!is_null($result)) {
             return $result;
         }
 
         $extension_txt_id = str_replace('../', '', $extension_txt_id);
         $filename = ABC::env('DIR_APP_EXTENSIONS').$extension_txt_id.'/config.xml';
-        if(!is_file($filename) || !is_readable($filename)){
+        if (!is_file($filename) || !is_readable($filename)) {
             $ext_configs = false;
-        }else {
+        } else {
             /**
              * @var $ext_configs \SimpleXMLElement|false
              */
-            $ext_configs = @simplexml_load_file( $filename );
+            $ext_configs = @simplexml_load_file($filename);
         }
 
         if ($ext_configs === false) {
@@ -828,11 +833,11 @@ class AHelperUtils extends AHelper
                         $attr = $setting_item->attributes();
                         $item_id = $extension_txt_id.'_'.$attr['id'];
                         $is_exists = $ext_configs->xpath('/extension/settings/item[@id=\''.$item_id.'\']');
-                        if ( ! $is_exists) {
+                        if (!$is_exists) {
                             // remove item that was appended on previous cycle from additional xml (override)
                             $qry = "/extension/settings/item[@id='".$item_id."']";
                             $existed = $xpath->query($qry);
-                            if ( ! is_null($existed)) {
+                            if (!is_null($existed)) {
                                 foreach ($existed as $node) {
                                     $node->parentNode->removeChild($node);
                                 }
@@ -843,7 +848,7 @@ class AHelperUtils extends AHelper
                             $item_dom_node = dom_import_simplexml($setting_item);
                             $item_dom_node = $base_dom->importNode($item_dom_node, true);
                             $setting_node = $base_dom->getElementsByTagName('settings')->item(0);
-                            if ($place == 'top' && ! is_null($firstNode)) {
+                            if ($place == 'top' && !is_null($firstNode)) {
                                 $setting_node->insertBefore($item_dom_node, $firstNode);
                             } else {
                                 $setting_node->appendChild($item_dom_node);
@@ -857,7 +862,7 @@ class AHelperUtils extends AHelper
         //remove all disabled items from list
         $qry = '/extension/settings/item[disabled="true"]';
         $existed = $xpath->query($qry);
-        if ( ! is_null($existed)) {
+        if (!is_null($existed)) {
             foreach ($existed as $node) {
                 $node->parentNode->removeChild($node);
             }
@@ -881,17 +886,21 @@ class AHelperUtils extends AHelper
      */
     static function startStorefrontSession($user_id, $data = array())
     {
-        //NOTE: do not allow create sf-session via POST-request. Related to language-switcher and enabled maintenance mode(see usages)
+        //NOTE: do not allow create sf-session via POST-request.
+        // Related to language-switcher and enabled maintenance mode(see usages)
         if ($_SERVER['REQUEST_METHOD'] != 'GET') {
             return false;
         }
         $data = (array)$data;
         $data['merchant'] = (int)$user_id;
-        if ( ! $data['merchant']) {
+        if (!$data['merchant']) {
             return false;
         }
         session_write_close();
-        $session = new ASession(ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID');
+        $session = new ASession(ABC::env('UNIQUE_ID')
+                                ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
+                                : 'AC_SF_PHPSESSID'
+        );
         foreach ($data as $k => $v) {
             $session->data[$k] = $v;
         }
@@ -1017,7 +1026,7 @@ class AHelperUtils extends AHelper
 
     static function compressTarGZ($tar_filename, $tar_dir, $compress_level = 5)
     {
-        if ( ! $tar_filename || ! $tar_dir) {
+        if (!$tar_filename || !$tar_dir) {
             return false;
         }
         $compress_level = ($compress_level < 1 || $compress_level > 9) ? 5 : $compress_level;
@@ -1080,7 +1089,7 @@ class AHelperUtils extends AHelper
      */
     static function gzip($src, $level = 5, $dst = false)
     {
-        if ( ! $src) {
+        if (!$src) {
             return false;
         }
 
@@ -1089,9 +1098,9 @@ class AHelperUtils extends AHelper
         }
         if (file_exists($src)) {
             $src_handle = fopen($src, "r");
-            if ( ! file_exists($dst)) {
+            if (!file_exists($dst)) {
                 $dst_handle = gzopen($dst, "w$level");
-                while ( ! feof($src_handle)) {
+                while (!feof($src_handle)) {
                     $chunk = fread($src_handle, 2048);
                     gzwrite($dst_handle, $chunk);
                 }
@@ -1248,7 +1257,7 @@ class AHelperUtils extends AHelper
             $finfo = finfo_open(FILEINFO_MIME);
             $mimetype = finfo_file($finfo, $filename);
             finfo_close($finfo);
-            $mimetype = ! $mimetype ? 'application/octet-stream' : $mimetype;
+            $mimetype = !$mimetype ? 'application/octet-stream' : $mimetype;
 
             return $mimetype;
         } else {
@@ -1423,7 +1432,7 @@ class AHelperUtils extends AHelper
             } else {
                 //recurse if parent directory does not exists
                 $parent = dirname($path);
-                if (strlen($parent) > 1 && ! file_exists($parent)) {
+                if (strlen($parent) > 1 && !file_exists($parent)) {
                     self::make_writable_path($parent);
                 }
                 mkdir($path, 0777, true);
@@ -1488,24 +1497,24 @@ class AHelperUtils extends AHelper
      */
     static function check_resize_image($orig_image, $new_image, $width, $height, $quality)
     {
-        if ( ! is_file($orig_image) || empty($new_image)) {
+        if (!is_file($orig_image) || empty($new_image)) {
             return null;
         }
 
         //if new file not yet present, check directory
-        if ( ! file_exists(ABC::env('DIR_IMAGES').$new_image)) {
+        if (!file_exists(ABC::env('DIR_IMAGES').$new_image)) {
             $path = '';
             $directories = explode('/', dirname(str_replace('../', '', $new_image)));
             foreach ($directories as $directory) {
                 $path = $path.'/'.$directory;
                 //do we have directory?
-                if ( ! file_exists(ABC::env('DIR_IMAGES').$path)) {
+                if (!file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
                     $indexFile = ABC::env('DIR_IMAGES').$path.'/index.php';
                     $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775)
                         && file_put_contents($indexFile,
                             "<?php die('Restricted Access!'); ?>");
-                    if ( ! $result) {
+                    if (!$result) {
                         $error = new AWarning('Cannot to create directory '.ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES'));
                         $error->toLog();
                     }
@@ -1513,7 +1522,7 @@ class AHelperUtils extends AHelper
             }
         }
 
-        if ( ! file_exists(ABC::env('DIR_IMAGES').$new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGES').$new_image))) {
+        if (!file_exists(ABC::env('DIR_IMAGES').$new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGES').$new_image))) {
             $image = new AImage($orig_image);
             $result = $image->resizeAndSave(ABC::env('DIR_IMAGES').$new_image,
                 $width,
@@ -1522,7 +1531,7 @@ class AHelperUtils extends AHelper
                     'quality' => $quality,
                 ));
             unset($image);
-            if ( ! $result) {
+            if (!$result) {
                 return null;
             }
         }
@@ -1544,50 +1553,50 @@ class AHelperUtils extends AHelper
     static function getInstance($class_name, $args = [], $default_class_name = '', $default_args = [])
     {
         $instance = false;
-        if(!$class_name){
+        if (!$class_name) {
             $class_name = $default_class_name;
         }
-        if(!$class_name){
+        if (!$class_name) {
             return false;
         }
-        if(!$default_args){
+        if (!$default_args) {
             $default_args = $args;
         }
 
-        $classes = [ $class_name => $args ];
-        if($class_name != $default_class_name ){
+        $classes = [$class_name => $args];
+        if ($class_name != $default_class_name) {
             $classes[$default_class_name] = $default_args;
         }
 
-        foreach($classes as $class => $arguments){
+        foreach ($classes as $class => $arguments) {
             //check is class loaded
 
             //try to load file
-            if(!class_exists($class)){
+            if (!class_exists($class)) {
                 $rel_path = self::getFileNameByClass($class);
                 $abs_path = ABC::env('DIR_ROOT').$rel_path;
 
-                if(is_file($abs_path)) {
+                if (is_file($abs_path)) {
                     include_once $abs_path;
                 }
             }
 
-            if(class_exists($class)) {
+            if (class_exists($class)) {
                 try {
                     $reflection = new \ReflectionClass($class);
                     $instance = $reflection->newInstanceArgs($arguments);
-                }catch(\ReflectionException $e){
+                } catch (\ReflectionException $e) {
                     Registry::getInstance()->get('log')->write('AHelperUtils Error: '.$e->getMessage().' '.$e->getLine());
                 }
             }
 
-            if(is_object($instance)){
+            if (is_object($instance)) {
                 break;
             }
         }
 
-        if(!$instance){
-            throw new AException('Class '.$class_name.' not found in config/*.classmap.php file',1000);
+        if (!$instance) {
+            throw new AException('Class '.$class_name.' not found in config/*.classmap.php file', 1000);
         }
         return $instance;
     }
@@ -1595,34 +1604,37 @@ class AHelperUtils extends AHelper
     /**
      * Function returns relative path of class based on full class name.
      * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
+     *
      * @param string $class_name - full class name
      *
      * @return string
      */
-    static function getFileNameByClass($class_name){
+    static function getFileNameByClass($class_name)
+    {
         $dirname = dirname(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
-        $dirname = ltrim($dirname,DIRECTORY_SEPARATOR);
+        $dirname = ltrim($dirname, DIRECTORY_SEPARATOR);
         $basename = basename(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
         //add spaces to classname based on capital letters.
-        $basename = preg_replace('/[A-Z]/',' $0',$basename);
-        $split = explode(' ',$basename);
+        $basename = preg_replace('/[A-Z]/', ' $0', $basename);
+        $split = explode(' ', $basename);
         $split = array_map('strtolower', $split);
-        unset($split[array_search('',$split)], $split[array_search('a',$split)]);
-        return $dirname.DIRECTORY_SEPARATOR.implode('_',$split).'.php';
+        unset($split[array_search('', $split)], $split[array_search('a', $split)]);
+        return $dirname.DIRECTORY_SEPARATOR.implode('_', $split).'.php';
     }
 
-    static function extractArchive($archive_filename, $dest_directory){
+    static function extractArchive($archive_filename, $dest_directory)
+    {
         $archive = UnifiedArchive::open($archive_filename);
-        if( is_null($archive) ){
+        if (is_null($archive)) {
             return false;
         }
         $files = $archive->getFileNames();
 
         //check is archive tar.gz
-        if( sizeof($files) == 1 && strtolower(pathinfo($files[0], PATHINFO_EXTENSION)) == 'tar' ){
+        if (sizeof($files) == 1 && strtolower(pathinfo($files[0], PATHINFO_EXTENSION)) == 'tar') {
             $archive->extractNode($dest_directory, '/');
             $archive = UnifiedArchive::open(dirname($archive_filename).'/'.$files[0]);
-            if( is_null($archive)){
+            if (is_null($archive)) {
                 //remove destination folder first
                 //run pathinfo twice for tar.gz. files
                 try {
@@ -1646,20 +1658,22 @@ class AHelperUtils extends AHelper
      * @return array
      * @throws AException
      */
-    static function createJob( array $data, $handler_alias = 'AJobManager'){
+    static function createJob(array $data, $handler_alias = 'AJobManager')
+    {
 
         $class_name = ABC::getFullClassName($handler_alias);
-        if(!$class_name){
-            $output = ['job_id' => false,
-                       'errors' => [
-                           'Handler alias "'.$handler_alias.'"" not registered in config/classmap'
-                       ]
+        if (!$class_name) {
+            $output = [
+                'job_id' => false,
+                'errors' => [
+                    'Handler alias "'.$handler_alias.'"" not registered in config/classmap',
+                ],
             ];
-        }else{
+        } else {
             /**
              * @var $handler AJobManager
              */
-            $handler = self::getInstance($class_name,['registry'=>Registry::getInstance()]);
+            $handler = self::getInstance($class_name, ['registry' => Registry::getInstance()]);
             $result = $handler->addJob($data);
             $output = ['job_id' => $result, 'errors' => $handler->errors];
         }
@@ -1674,34 +1688,34 @@ class AHelperUtils extends AHelper
     static function recognizeUser()
     {
 
-        if(ABC::env('IS_ADMIN')){
-            if(!class_exists(Registry::class) || !Registry::getInstance()->get('user')){
+        if (php_sapi_name() == 'cli') {
+            $user_id = posix_geteuid();
+            $output = [
+                'user_type' => 0,
+                'user_id'   => $user_id,
+                'user_name' => posix_getpwuid($user_id)['name'],
+            ];
+        } elseif (ABC::env('IS_ADMIN')) {
+            if (!class_exists(Registry::class) || !Registry::getInstance()->get('user')) {
                 return [];
             }
             $registry = Registry::getInstance();
             $user_id = $registry->get('user')->getId();
             $output = [
                 'user_type' => 1,
-                'user_id' => $user_id,
-                'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin')
+                'user_id'   => $user_id,
+                'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin'),
             ];
-        }elseif(php_sapi_name() == 'cli'){
-            $user_id = posix_geteuid();
-            $output = [
-                'user_type' => 0,
-                'user_id' => $user_id,
-                'user_name' => posix_getpwuid( $user_id )['name']
-            ];
-        }else{
-            if(!class_exists(Registry::class)){
+        } else {
+            if (!class_exists(Registry::class)) {
                 return [];
             }
             $registry = Registry::getInstance();
             $user_id = $registry->get('customer')->getId();
             $output = [
                 'user_type' => 2,
-                'user_id' => $user_id,
-                'user_name' => ($user_id ? $registry->get('customer')->getLoginName() : 'guest')
+                'user_id'   => $user_id,
+                'user_name' => ($user_id ? $registry->get('customer')->getLoginName() : 'guest'),
             ];
         }
 
@@ -1711,37 +1725,38 @@ class AHelperUtils extends AHelper
     /**
      * Function put abc-user info into sql-server variables
      * Used by triggers of audit-log
+     *
      * @return array|bool
      */
     static function setDBUserVars()
     {
-        if(!class_exists(Registry::class)){
+        if (!class_exists(Registry::class)) {
             return [];
         }
         $user_info = self::recognizeUser();
-        if(!$user_info || !$user_info['user_name']){
+        if (!$user_info || !$user_info['user_name']) {
             return false;
         }
         $registry = Registry::getInstance();
         $db = $registry->get('db');
-        if(!$db){
+        if (!$db) {
             return false;
         }
 
-        switch(ABC::env('DB_CURRENT_DRIVER')){
+        switch (ABC::env('DB_CURRENT_DRIVER')) {
             case 'mysql':
                 try {
                     $orm = $db->getORM();
                     $orm::select(
-                            $orm::raw( "SET @GLOBAL.abc_user_id = '".$user_info['user_id']."';" )
+                        $orm::raw("SET @GLOBAL.abc_user_id = '".$user_info['user_id']."';")
                     );
                     $orm::select(
-                            $orm::raw( "SET @GLOBAL.abc_user_name = '".$user_info['user_name']."';" )
+                        $orm::raw("SET @GLOBAL.abc_user_name = '".$user_info['user_name']."';")
                     );
                     $orm::select(
-                            $orm::raw( "SET @GLOBAL.abc_user_type = '".$user_info['user_type']."';" )
+                        $orm::raw("SET @GLOBAL.abc_user_type = '".$user_info['user_type']."';")
                     );
-                }catch(\Exception $e){
+                } catch (\Exception $e) {
 
                 }
                 return true;

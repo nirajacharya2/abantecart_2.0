@@ -93,9 +93,13 @@ class Job implements ABCExec
             $worker_module = new $worker_class();
 
             if ($job_info['status'] == $handler::STATUS_READY || $worker_module->isReRunAllowed()) {
+
                 $handler->updateJob(
                     $job_id,
-                    ['status' => $handler::STATUS_RUNNING, 'last_time_run' => date("Y-m-d H:i:s", time())]);
+                    [
+                        'status'        => $handler::STATUS_RUNNING,
+                        'last_time_run' => date("Y-m-d H:i:s", time())
+                    ]);
                 $result = $worker_module->runJob(
                     $job_info['configuration']['worker']['method'],
                     $job_info['configuration']['worker']['parameters']
