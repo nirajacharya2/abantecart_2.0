@@ -16,10 +16,9 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\modules;
+namespace abc\modules\workers;
 
-interface AModuleInterface
+interface AWorkerInterface
 {
-
     public function postProcessing();
 }

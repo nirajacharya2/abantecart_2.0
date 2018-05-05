@@ -34,8 +34,6 @@ use abc\core\lib\AError;
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
-$dir_sep = DS;
-
 // AbanteCart Version
 include('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
@@ -75,20 +73,21 @@ $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
     array(
-        'DIR_VENDOR'         => $dir_app.'vendor'.$dir_sep,
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
-        'DIR_SYSTEM'         => $dir_app.'system'.$dir_sep,
-        'DIR_CORE'           => $dir_app.'core'.$dir_sep,
-        'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-        'DIR_MODULES'        => $dir_app.'modules'.$dir_sep,
-        'DIR_DOWNLOADS'      => $dir_app.'downloads'.$dir_sep,
-        'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
-        'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
-        'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
-        'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
-        'DIR_IMAGES'         => $dir_public.'images'.$dir_sep,
-        'DIR_RESOURCES'      => $dir_public.'resources'.$dir_sep,
-        'DIR_MIGRATIONS'     => $dir_app.'migrations'.$dir_sep,
+        'DIR_VENDOR'         => $dir_app.'vendor'.DS,
+        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
+        'DIR_SYSTEM'         => $dir_app.'system'.DS,
+        'DIR_CORE'           => $dir_app.'core'.DS,
+        'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
+        'DIR_MODULES'        => $dir_app.'modules'.DS,
+        'DIR_WORKERS'         => $dir_app.'modules'.DS.'workers'.DS,
+        'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
+        'DIR_CONFIG'         => $dir_app.'config'.DS,
+        'DIR_CACHE'          => $dir_app.'system'.DS.'cache'.DS,
+        'DIR_LOGS'           => $dir_app.'system'.DS.'logs'.DS,
+        'DIR_TEMPLATES'      => $dir_app.'templates'.DS,
+        'DIR_IMAGES'         => $dir_public.'images'.DS,
+        'DIR_RESOURCES'      => $dir_public.'resources'.DS,
+        'DIR_MIGRATIONS'     => $dir_app.'migrations'.DS,
     )
 );
 
@@ -97,7 +96,7 @@ require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
-$dir_lib = $dir_app.'core'.$dir_sep.'lib'.$dir_sep;
+$dir_lib = $dir_app.'core'.DS.'lib'.DS;
 require_once($dir_lib.'debug.php');
 ADebug::register();
 require_once($dir_lib.'error.php');
@@ -130,9 +129,9 @@ if (ABC::env('ADMIN_SECRET') !== null
     ABC::env(
         array(
             'IS_ADMIN'      => true,
-            'DIR_LANGUAGES' => $dir_app.'languages'.$dir_sep.'admin'.$dir_sep,
-            'DIR_BACKUP'    => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
-            'DIR_DATA'      => $dir_app.'system'.$dir_sep.'data'.$dir_sep,
+            'DIR_LANGUAGES' => $dir_app.'languages'.DS.'admin'.DS,
+            'DIR_BACKUP'    => $dir_app.'system'.DS.'backup'.DS,
+            'DIR_DATA'      => $dir_app.'system'.DS.'data'.DS,
         )
     );
 
@@ -144,7 +143,7 @@ if (ABC::env('ADMIN_SECRET') !== null
     );
 } else {
     ABC::env('IS_ADMIN', false);
-    ABC::env('DIR_LANGUAGES', $dir_app.$dir_sep.'languages'.$dir_sep.'storefront'.$dir_sep);
+    ABC::env('DIR_LANGUAGES', $dir_app.DS.'languages'.DS.'storefront'.DS);
     ABC::env(
         'SESSION_ID',
         ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID'
@@ -210,21 +209,21 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 //paths for extensions
 ABC::env(
     array(
-        'DIRNAME_APP'         => 'abc'.$dir_sep,
-        'DIRNAME_ASSETS'      => 'assets'.$dir_sep,
-        'DIRNAME_EXTENSIONS'  => 'extensions'.$dir_sep,
-        'DIRNAME_CORE'        => 'core'.$dir_sep,
-        'DIRNAME_STORE'       => 'storefront'.$dir_sep,
-        'DIRNAME_ADMIN'       => 'admin'.$dir_sep,
-        'DIRNAME_IMAGES'      => 'images'.$dir_sep,
-        'DIRNAME_CONTROLLERS' => 'controllers'.$dir_sep,
-        'DIRNAME_LANGUAGES'   => 'languages'.$dir_sep,
-        'DIRNAME_TEMPLATES'   => 'templates'.$dir_sep,
-        'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
-        'DIRNAME_VENDOR'      => 'vendor'.$dir_sep,
+        'DIRNAME_APP'         => 'abc'.DS,
+        'DIRNAME_ASSETS'      => 'assets'.DS,
+        'DIRNAME_EXTENSIONS'  => 'extensions'.DS,
+        'DIRNAME_CORE'        => 'core'.DS,
+        'DIRNAME_STORE'       => 'storefront'.DS,
+        'DIRNAME_ADMIN'       => 'admin'.DS,
+        'DIRNAME_IMAGES'      => 'images'.DS,
+        'DIRNAME_CONTROLLERS' => 'controllers'.DS,
+        'DIRNAME_LANGUAGES'   => 'languages'.DS,
+        'DIRNAME_TEMPLATES'   => 'templates'.DS,
+        'DIRNAME_TEMPLATE'    => 'template'.DS,
+        'DIRNAME_VENDOR'      => 'vendor'.DS,
 
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.$dir_sep,
-        'DIR_ASSETS_EXT'     => $dir_public.'extensions'.$dir_sep,
+        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
+        'DIR_ASSETS_EXT'     => $dir_public.'extensions'.DS,
     )
 );
 
@@ -354,10 +353,10 @@ if (!$is_valid) {
     //check template defined in settings
     if (ABC::env('IS_ADMIN') === true) {
         $template = $config->get('admin_template');
-        $dir = 'templates'.$dir_sep.$template.$dir_sep.ABC::env('DIRNAME_ADMIN');
+        $dir = 'templates'.DS.$template.DS.ABC::env('DIRNAME_ADMIN');
     } else {
         $template = $config->get('config_storefront_template');
-        $dir = 'templates'.$dir_sep.$template.$dir_sep.ABC::env('DIRNAME_STORE');
+        $dir = 'templates'.DS.$template.DS.ABC::env('DIRNAME_STORE');
     }
 
     if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$dir)) {

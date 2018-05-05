@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\modules;
+namespace abc\modules\workers;
 
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
@@ -27,8 +27,10 @@ use abc\core\lib\ABackup;
  *
  * @package abc\modules
  */
-class ABackupModule extends AModuleBase implements AModuleInterface
+class ABackupWorker extends ABaseWorker  implements AWorkerInterface
 {
+
+    public $workerName = 'Backup Worker';
 
     public function __construct()
     {
@@ -58,8 +60,6 @@ class ABackupModule extends AModuleBase implements AModuleInterface
          * @var string $sql_dump_mode
          * @var ABackup $bkp
          */
-
-
 
         $bkp = AHelperUtils::getInstance(ABC::getFullClassName('ABackup'));
 
@@ -100,5 +100,7 @@ class ABackupModule extends AModuleBase implements AModuleInterface
     {
         return ['backup'];
     }
-    public function postProcessing(){}
+    public function postProcessing()
+    {
+    }
 }

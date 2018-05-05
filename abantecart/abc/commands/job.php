@@ -102,8 +102,8 @@ class Job extends BaseCommand
 
         $result = false;
         try {
-            require_once ABC::env('DIR_MODULES').'moduleInterface.php';
-            require_once ABC::env('DIR_MODULES').'moduleBase.php';
+            require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
+            require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
             require_once $job_info['configuration']['worker']['file'];
             //run worker
             $worker_class = $job_info['configuration']['worker']['class'];
@@ -204,8 +204,8 @@ class Job extends BaseCommand
         $worker_args = ABC::getClassDefaultArgs($options['worker']);
         $result = false;
         try {
-            require_once ABC::env('DIR_MODULES').'moduleInterface.php';
-            require_once ABC::env('DIR_MODULES').'moduleBase.php';
+            require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
+            require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
             /**
              * @var AModuleBase $worker
              */

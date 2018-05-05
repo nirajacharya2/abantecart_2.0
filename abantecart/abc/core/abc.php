@@ -266,7 +266,8 @@ class ABC extends ABCBase
 
         if (self::env('IS_ADMIN') === true
             && $registry->get('config')->get('config_maintenance')
-            && $registry->get('user')->isLogged()) {
+            && $registry->get('user')->isLogged()
+        ) {
             $user_id = $registry->get('user')->getId();
             AHelperUtils::startStorefrontSession($user_id);
         }

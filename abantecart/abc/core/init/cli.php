@@ -95,6 +95,7 @@ $defaults = [
     'DIR_CORE'            => $dir_app.'core'.DS,
     'DIR_LIB'             => $dir_app.'core'.DS.'lib'.DS,
     'DIR_MODULES'         => $dir_app.'modules'.DS,
+    'DIR_WORKERS'         => $dir_app.'modules'.DS.'workers'.DS,
     'DIR_IMAGES'          => $dir_public.'images'.DS,
     'DIR_DOWNLOADS'       => $dir_app.'downloads'.DS,
     'DIR_MIGRATIONS'      => $dir_app.'migrations'.DS,

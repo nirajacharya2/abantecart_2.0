@@ -182,11 +182,11 @@ class ModelToolBackup extends Model
         }
 
         $job_configuration = ['worker' =>
-                                  [
-                                      'file'   => ABC::env('DIR_MODULES').'backup.php',
-                                      'class'  => '\abc\modules\ABackupModule',
-                                      'method' => 'backup'
-                                  ]
+            [
+              'file'   => ABC::env('DIR_WORKERS').'backup.php',
+              'class'  => '\abc\modules\workers\ABackupWorker',
+              'method' => 'backup'
+            ]
         ];
 
         //create step for table backup
