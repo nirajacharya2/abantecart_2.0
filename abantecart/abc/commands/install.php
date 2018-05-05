@@ -90,7 +90,7 @@ class Install extends BaseCommand
             $config = new AConfig($registry, (string)$options['http_server']);
             $registry->set('config', $config);
             $registry->set('language', new ALanguageManager($registry));
-            require_once ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'deploy.php';
+            require_once ABC::env('DIR_CORE').'commands'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['stage' => 'default'];
             if (isset($options['skip-caching'])) {
@@ -104,7 +104,7 @@ class Install extends BaseCommand
         }
         // deploy assets and generate cache
         if (!$errors) {
-            require_once ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'deploy.php';
+            require_once ABC::env('DIR_CORE').'commands'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['all' => 1];
             if (isset($options['skip-caching'])) {

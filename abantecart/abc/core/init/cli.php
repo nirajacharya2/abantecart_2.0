@@ -1,20 +1,20 @@
 <?php
-/*
-  AbanteCart, Ideal Open Source Ecommerce Solution
-  http://www.abantecart.com
-
-  Copyright 2011-2018 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.abantecart.com for more information.
-*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2018 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\commands;
 
@@ -29,13 +29,13 @@ use abc\core\lib\{
 };
 
 define('DS', DIRECTORY_SEPARATOR);
-$dir_sep = DS;
+/* TODO Dima, Check wht this is for?  $command never defined
 if ($command != 'help:help') {
-    if (!is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
+    if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
         echo "Initialisation...\n";
-        $composer_phar = dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar';
+        $composer_phar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar';
         if (!is_file($composer_phar)) {
-            $temp_dir = dirname(dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar');
+            $temp_dir = dirname(dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar');
             if (!is_dir($temp_dir)) {
                 @mkdir($temp_dir, 0775, true);
             }
@@ -45,10 +45,10 @@ if ($command != 'help:help') {
             }
 
             echo "Composer phar-package not found.\nTrying to download Latest Composer into abc/system/temp directory. Please wait..\n";
-            if (!copy('https://getcomposer.org/composer.phar', dirname(__DIR__).$dir_sep.'system'.$dir_sep.'temp'.$dir_sep.'composer.phar')) {
+            if (!copy('https://getcomposer.org/composer.phar', dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar')) {
                 exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
                     " Please download it manually into "
-                    .dirname(__DIR__).$dir_sep."system".$dir_sep."temp directory\n"
+                    .dirname(__DIR__).DS."system".DS."temp directory\n"
                     ." OR run composer manually (see composer.json file)");
             }
         }
@@ -57,12 +57,13 @@ if ($command != 'help:help') {
         php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
+*/
 
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-require dirname(__DIR__).$dir_sep.'abc.php';
+require dirname(__DIR__).DS.'abc.php';
 //run constructor of ABC class to load environment
 
 $ABC = new ABC();
@@ -79,42 +80,42 @@ mb_internal_encoding($charset);
 ini_set('default_charset', strtolower($charset));
 
 //Set up common paths
-$dir_root = !ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).$dir_sep : ABC::env('DIR_ROOT');
-$dir_app = !ABC::env('DIR_APP') ? dirname(__DIR__, 2).$dir_sep : ABC::env('DIR_APP');
-$dir_public = !ABC::env('DIR_PUBLIC') ? $dir_root.'public'.$dir_sep : ABC::env('DIR_PUBLIC');
-$dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.$dir_sep : ABC::env('DIR_VENDOR');
+$dir_root = !ABC::env('DIR_ROOT') ? dirname(__DIR__, 3).DS : ABC::env('DIR_ROOT');
+$dir_app = !ABC::env('DIR_APP') ? dirname(__DIR__, 2).DS : ABC::env('DIR_APP');
+$dir_public = !ABC::env('DIR_PUBLIC') ? $dir_root.'public'.DS : ABC::env('DIR_PUBLIC');
+$dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.DS : ABC::env('DIR_VENDOR');
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,
     'DIR_APP'             => $dir_app,
-    'DIR_TEMPLATES'       => $dir_app.'templates'.$dir_sep,
-    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.$dir_sep,
-    'DIR_SYSTEM'          => $dir_app.'system'.$dir_sep,
-    'DIR_BACKUP'          => $dir_app.'system'.$dir_sep.'backup'.$dir_sep,
-    'DIR_CORE'            => $dir_app.'core'.$dir_sep,
-    'DIR_LIB'             => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
-    'DIR_MODULES'         => $dir_app.'modules'.$dir_sep,
-    'DIR_IMAGES'          => $dir_public.'images'.$dir_sep,
-    'DIR_DOWNLOADS'       => $dir_app.'downloads'.$dir_sep,
-    'DIR_MIGRATIONS'      => $dir_app.'migrations'.$dir_sep,
-    'DIR_CONFIG'          => $dir_app.'config'.$dir_sep,
-    'DIR_CACHE'           => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
-    'DIR_LOGS'            => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
+    'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
+    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,
+    'DIR_SYSTEM'          => $dir_app.'system'.DS,
+    'DIR_BACKUP'          => $dir_app.'system'.DS.'backup'.DS,
+    'DIR_CORE'            => $dir_app.'core'.DS,
+    'DIR_LIB'             => $dir_app.'core'.DS.'lib'.DS,
+    'DIR_MODULES'         => $dir_app.'modules'.DS,
+    'DIR_IMAGES'          => $dir_public.'images'.DS,
+    'DIR_DOWNLOADS'       => $dir_app.'downloads'.DS,
+    'DIR_MIGRATIONS'      => $dir_app.'migrations'.DS,
+    'DIR_CONFIG'          => $dir_app.'config'.DS,
+    'DIR_CACHE'           => $dir_app.'system'.DS.'cache'.DS,
+    'DIR_LOGS'            => $dir_app.'system'.DS.'logs'.DS,
     'DIR_PUBLIC'          => $dir_public,
-    'DIR_RESOURCES'       => $dir_public.$dir_sep.'resources'.$dir_sep,
+    'DIR_RESOURCES'       => $dir_public.DS.'resources'.DS,
     'DIR_VENDOR'          => $dir_vendor,
-    'DIRNAME_APP'         => 'abc'.$dir_sep,
-    'DIRNAME_ASSETS'      => 'assets'.$dir_sep,
-    'DIRNAME_EXTENSIONS'  => 'extensions'.$dir_sep,
-    'DIRNAME_CORE'        => 'core'.$dir_sep,
-    'DIRNAME_STORE'       => 'storefront'.$dir_sep,
-    'DIRNAME_ADMIN'       => 'admin'.$dir_sep,
-    'DIRNAME_IMAGES'      => 'images'.$dir_sep,
-    'DIRNAME_CONTROLLERS' => 'controllers'.$dir_sep,
-    'DIRNAME_LANGUAGES'   => 'languages'.$dir_sep,
-    'DIRNAME_TEMPLATES'   => 'templates'.$dir_sep,
-    'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
-    'DIR_ASSETS_EXT'      => $dir_public.'extensions'.$dir_sep,
+    'DIRNAME_APP'         => 'abc'.DS,
+    'DIRNAME_ASSETS'      => 'assets'.DS,
+    'DIRNAME_EXTENSIONS'  => 'extensions'.DS,
+    'DIRNAME_CORE'        => 'core'.DS,
+    'DIRNAME_STORE'       => 'storefront'.DS,
+    'DIRNAME_ADMIN'       => 'admin'.DS,
+    'DIRNAME_IMAGES'      => 'images'.DS,
+    'DIRNAME_CONTROLLERS' => 'controllers'.DS,
+    'DIRNAME_LANGUAGES'   => 'languages'.DS,
+    'DIRNAME_TEMPLATES'   => 'templates'.DS,
+    'DIRNAME_TEMPLATE'    => 'template'.DS,
+    'DIR_ASSETS_EXT'      => $dir_public.'extensions'.DS,
 ];
 foreach ($defaults as $name => $value) {
     if (!ABC::env($name)) {
@@ -161,10 +162,10 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
 }
 // Log
 $log_classname = ABC::getFullClassName('ALog');
-$registry->set('log', new $log_classname('backend.log'));
+$registry->set('log', new $log_classname('cli.log'));
 
 //session
-$registry->set('session', new ASession('backend'));
+$registry->set('session', new ASession('cli'));
 
 // Document
 $registry->set('document', new ADocument());
@@ -317,7 +318,7 @@ function showHelpPage($script_name = '', $options = [])
  * @param string $name
  * @param bool   $silent_mode - silent mode
  *
- * @return array | \abc\core\backend\Install
+ * @return array | \abc\commands\Install
  */
 function getExecutor($name, $silent_mode = false)
 {
@@ -337,7 +338,7 @@ function getExecutor($name, $silent_mode = false)
     try {
         require_once $run_file;
         /**
-         * @var \abc\core\backend\Install $executor
+         * @var \abc\commands\Install $executor
          */
         $class_name = "\abc\commands\\".$name;
         if (class_exists($class_name)) {

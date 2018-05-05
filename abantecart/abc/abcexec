@@ -53,7 +53,7 @@ if (!preg_match('/^--(.*)$/', $command)) {
     $class = $action = '';
 }
 try {
-    require realpath('./core/init/backend.php');
+    require realpath('./core/init/cli.php');
 } catch (Exception $e) {
     showException($e);
     exit(1);
@@ -70,7 +70,7 @@ if (!$class || $class == 'help' || $action == 'help') {
 
 //try to get instance of executor or die
 /**
- * @var \abc\core\backend\Install | array $executor
+ * @var \abc\commands\Install | array $executor
  */
 $executor = getExecutor($class);
 

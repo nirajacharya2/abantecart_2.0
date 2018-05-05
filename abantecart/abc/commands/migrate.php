@@ -156,7 +156,7 @@ class Migrate extends BaseCommand
 
         //add migration template parameter for new migrations
         if (in_array('create', $argv)) {
-            $template = ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'Migration.template.txt';
+            $template = ABC::env('DIR_APP').'commands'.DS.'base'.DS.'migration.template.txt';
             if (!is_file($template) || !is_readable($template)) {
                 $this->results[] = 'Cannot to find migration template file '.$template.'!';
                 return false;
