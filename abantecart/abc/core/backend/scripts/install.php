@@ -88,7 +88,7 @@ class Install implements ABCExec
             $config = new AConfig($registry, (string)$options['http_server']);
             $registry->set('config', $config);
             $registry->set('language', new ALanguageManager($registry));
-            require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
+            require_once ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['stage' => 'default'];
             if(isset($options['skip-caching'])){
@@ -102,7 +102,7 @@ class Install implements ABCExec
         }
         // deploy assets and generate cache
         if ( ! $errors) {
-            require_once ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'deploy.php';
+            require_once ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['all' => 1];
             if(isset($options['skip-caching'])){
@@ -653,7 +653,7 @@ EOD;
     public function runSQL( array $options )
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.$options['db_driver'].'.database.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DS.$options['db_driver'].'.database.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
 
@@ -738,7 +738,7 @@ EOD;
     public function loadDemoData( $options )
     {
         $errors = [];
-        $file = ABC::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'demo_data'.DIRECTORY_SEPARATOR.$options['db_driver'].'.demo_data.sql';
+        $file = ABC::env('DIR_ROOT').'install'.DS.'demo_data'.DS.$options['db_driver'].'.demo_data.sql';
         if ( ! is_file($file)) {
             $errors[] = 'Error: file '.$file.' not found!';
             return $errors;
@@ -1067,7 +1067,7 @@ EOD;
             $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG')."!\n";
         }
 
-        if(!is_file(__DIR__.DIRECTORY_SEPARATOR.'deploy.php')){
+        if(!is_file(__DIR__.DS.'deploy.php')){
             $errors['warning'] .= 'Dependency Error: deploy.php script not found in '.__DIR__."\n";
         }
 

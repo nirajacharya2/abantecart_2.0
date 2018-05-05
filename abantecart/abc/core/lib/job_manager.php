@@ -25,7 +25,7 @@ use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-include_once __DIR__.DIRECTORY_SEPARATOR.'job_manager_interface.php';
+include_once __DIR__.DS.'job_manager_interface.php';
 
 /**
  * Class AJobManager

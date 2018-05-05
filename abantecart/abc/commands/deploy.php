@@ -35,8 +35,8 @@ class Deploy extends BaseCommand
     protected $results = [];
     public function __construct()
     {
-        require_once ABC::env('DIR_APP') . 'commands' . DIRECTORY_SEPARATOR . 'cache.php';
-        require_once ABC::env('DIR_APP') . 'commands' . DIRECTORY_SEPARATOR . 'publish.php';
+        require_once ABC::env('DIR_APP') . 'commands' . DS . 'cache.php';
+        require_once ABC::env('DIR_APP') . 'commands' . DS . 'publish.php';
         $this->cache = new Cache();
         $this->publish = new Publish();
     }

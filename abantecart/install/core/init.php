@@ -23,7 +23,7 @@ use abc\core\lib\CSRFToken;
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
-$dir_sep = DIRECTORY_SEPARATOR;
+$dir_sep = DS;
 $dir_root = dirname(__DIR__, 2).$dir_sep;
 $dir_app = $dir_root.'abc'.$dir_sep;
 $dir_public = $dir_root.'public'.$dir_sep;

@@ -471,8 +471,8 @@ class AExtensionManager
         }
 
         //publish assets
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'interface.php';
-        require_once ABC::env( 'DIR_CORE' ).'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'publish.php';
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DS.'interface.php';
+        require_once ABC::env( 'DIR_CORE' ).'backend'.DS.'scripts'.DS.'publish.php';
         $publish = new Publish();
         $publish->run( 'extensions', [ 'extension' => $name ] );
 
@@ -535,7 +535,7 @@ class AExtensionManager
         if ( isset( $config->uninstall->trigger ) ) {
             $file = ABC::env( 'DIR_APP_EXTENSIONS' )
                     . $name
-                    . DIRECTORY_SEPARATOR
+                    . DS
                     . (string)$config->uninstall->trigger;
 
             if ( is_file( $file ) ) {

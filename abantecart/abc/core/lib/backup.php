@@ -86,7 +86,7 @@ class ABackup
         $this->log = $this->registry->get('log');
         $this->db = $this->registry->get('db');
         $this->extensions = $this->registry->get('extensions');
-        $this->slash = DIRECTORY_SEPARATOR;
+        $this->slash = DS;
         if($name){
            $result = $this->setBackupName($name);
            if(!$result){

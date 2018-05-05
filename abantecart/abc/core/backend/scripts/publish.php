@@ -28,7 +28,7 @@ class Publish implements ABCExec
                 list($vendor_name, $package_name) = explode(':',$options['package']);
                 $vendor_name = trim($vendor_name);
                 $package_name = trim($package_name);
-                $dir_name = ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR.$vendor_name.DIRECTORY_SEPARATOR.$package_name;
+                $dir_name = ABC::env('DIR_VENDOR').'assets'.DS.$vendor_name.DS.$package_name;
                 if(!$vendor_name || !$package_name){
                     return ['Error: Incorrect vendor package name "'.$options['package'].'"!'];
                 }elseif(!is_dir($dir_name)){

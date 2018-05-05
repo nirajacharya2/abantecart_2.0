@@ -34,7 +34,7 @@ use abc\core\lib\AError;
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
-$dir_sep = DIRECTORY_SEPARATOR;
+$dir_sep = DS;
 
 // AbanteCart Version
 include('version.php');

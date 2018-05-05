@@ -22,15 +22,15 @@ $resource = [
 ];
 
 @copy(ABC::env('DIR_APP_EXTENSIONS')
-    .'default_pp_pro'.DIRECTORY_SEPARATOR
+    .'default_pp_pro'.DS
     .ABC::env('DIRNAME_TEMPLATES')
-    .'default'.DIRECTORY_SEPARATOR
+    .'default'.DS
     .ABC::env('DIRNAME_STORE')
     .ABC::env('DIRNAME_ASSETS')
-    .'images'.DIRECTORY_SEPARATOR
+    .'images'.DS
     .'secure_paypal_icon.jpg',
      ABC::env('DIR_RESOURCES')
-     .'image'.DIRECTORY_SEPARATOR
+     .'image'.DS
      .$resource['resource_path']);
 
 foreach($language_list as $lang){

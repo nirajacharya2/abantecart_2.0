@@ -205,10 +205,10 @@ class Cache implements ABCExec
             if ($group == 'media') {
                 try {
                     $filename = ABC::env('DIR_APP');
-                    $filename .= 'controllers'.DIRECTORY_SEPARATOR;
-                    $filename .= 'admin'.DIRECTORY_SEPARATOR;
-                    $filename .= 'pages'.DIRECTORY_SEPARATOR;
-                    $filename .= 'tool'.DIRECTORY_SEPARATOR;
+                    $filename .= 'controllers'.DS;
+                    $filename .= 'admin'.DS;
+                    $filename .= 'pages'.DS;
+                    $filename .= 'tool'.DS;
                     $filename .= 'cache.php';
                     require_once($filename);
                     $cc = new ControllerPagesToolCache($registry, 0, 'tool/cache');

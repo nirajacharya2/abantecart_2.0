@@ -31,7 +31,7 @@ use abc\core\engine\Model;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
 
-$dir_sep = DIRECTORY_SEPARATOR;
+$dir_sep = DS;
 require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'interface.php';
 require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'scripts'.$dir_sep.'install.php';
 require_once ABC::env('DIR_CORE').'backend'.$dir_sep.'scripts'.$dir_sep.'deploy.php';

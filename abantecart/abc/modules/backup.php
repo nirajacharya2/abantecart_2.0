@@ -79,7 +79,7 @@ class ABackupModule extends AModuleBase implements AModuleInterface
             $bkp->backupDirectory(ABC::env('DIR_RESOURCES'), false);
         }
         if ($config) {
-            $bkp->backupFile(ABC::env('DIR_ROOT').DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.php', false);
+            $bkp->backupFile(ABC::env('DIR_ROOT').DS.'config'.DS.'config.php', false);
         }
         $result = $bkp->archive(
             ABC::env('DIR_BACKUP').$bkp->getBackupName().'.tar.gz',

@@ -47,8 +47,8 @@ class Migrate extends BaseCommand
     {
         $errors = [];
         if( !in_array($action, ['help'])
-            && !is_file(ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx')){
-            return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phinx required to run migrations!'];
+            && !is_file(ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'bin'.DS.'phinx')){
+            return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'bin'.DS.'phinx required to run migrations!'];
         }
         if(isset($options['init'])){
             return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically.'];
@@ -124,7 +124,7 @@ class Migrate extends BaseCommand
         $this->_adapt_argv($action);
 
         //phinx status -e development
-        $app =  require ABC::env('DIR_VENDOR').'robmorgan'.DIRECTORY_SEPARATOR.'phinx'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'phinx.php';
+        $app =  require ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'app'.DS.'phinx.php';
         $app->run();
     }
 
@@ -151,7 +151,7 @@ class Migrate extends BaseCommand
 
         //add migration template parameter for new migrations
         if(in_array('create',$argv)){
-            $template = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'Migration.template.txt';
+            $template = ABC::env('DIR_CORE').'backend'.DS.'scripts'.DS.'Migration.template.txt';
             if(!is_file($template) || !is_readable($template)){
                 $this->results[] = 'Cannot to find migration template file '.$template.'!';
                 return false;
@@ -193,7 +193,7 @@ class Migrate extends BaseCommand
 
         $dirs = [ABC::env('DIR_MIGRATIONS')];
         if($data['extension_text_id']){
-            $dirs[] = ABC::env('DIR_APP_EXTENSIONS').$data['extension_text_id'].DIRECTORY_SEPARATOR.'migrations';
+            $dirs[] = ABC::env('DIR_APP_EXTENSIONS').$data['extension_text_id'].DS.'migrations';
         }
         //otherwise include all paths (core + extensions migrations)
 

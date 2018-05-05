@@ -837,10 +837,10 @@ class ControllerPagesExtensionExtensions extends AController
             //build path to template directory.
             $dir_template = ABC::env( 'DIR_APP_EXTENSIONS' )
                 .$extension
-                .DIRECTORY_SEPARATOR
+                .DS
                 .ABC::env( 'DIRNAME_TEMPLATES' )
                 .$this->config->get( 'admin_template' )
-                .DIRECTORY_SEPARATOR
+                .DS
                 .ABC::env( 'DIRNAME_ADMIN' )
                 .(string)$config->custom_settings_template;
             //validate template and report issue

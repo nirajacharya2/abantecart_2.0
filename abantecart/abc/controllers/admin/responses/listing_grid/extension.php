@@ -190,9 +190,9 @@ class ControllerResponsesListingGridExtension extends AController{
 				$icon_filename = ABC::env('DIR_PUBLIC')
                                 .ABC::env('DIRNAME_EXTENSIONS')
                                 . $extension
-                                . DIRECTORY_SEPARATOR
+                                . DS
                                 .ABC::env('RDIR_ASSETS')
-                                .'images'.DIRECTORY_SEPARATOR.'icon.png';
+                                .'images'.DS.'icon.png';
 				$icon = (is_file($icon_filename) ? $icon_relative_url : ABC::env('RDIR_ASSETS') . 'images/default_extension.png');
 				if (!$this->config->has($extension . '_status')){
 					$icon = '<img src="' . $icon . '" alt="'.$extension.'" border="0" />';

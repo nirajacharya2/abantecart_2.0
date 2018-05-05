@@ -180,21 +180,21 @@ class AAssetPublisher
             if (isset($filter['package']) && $filter['package']) {
                 list($vendor_name, $package_name) = explode(':', $filter['package']);
                 //only one vendors package
-                $dirs = [ ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR
-                    .$vendor_name.DIRECTORY_SEPARATOR.$package_name ];
+                $dirs = [ ABC::env('DIR_VENDOR').'assets'.DS
+                    .$vendor_name.DS.$package_name ];
             } else {
                 //all vendors packages
-                $dirs = glob(ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR);
+                $dirs = glob(ABC::env('DIR_VENDOR').'assets'.DS.'*', GLOB_ONLYDIR);
             }
             foreach ($dirs as $dir) {
                 $files = AHelperUtils::getFilesInDir($dir);
                 foreach ($files as $file) {
                     $rel_file = AHelperUtils::getRelativePath(ABC::env('DIR_VENDOR')
-                        .'assets'.DIRECTORY_SEPARATOR, $file);
-                    $vendor_name = explode(DIRECTORY_SEPARATOR, $rel_file);
+                        .'assets'.DS, $file);
+                    $vendor_name = explode(DS, $rel_file);
                     $vendor_name = $vendor_name[0];
                     $rel_file = AHelperUtils::getRelativePath(ABC::env('DIR_VENDOR')
-                        .'assets'.DIRECTORY_SEPARATOR.$vendor_name.DIRECTORY_SEPARATOR, $file);
+                        .'assets'.DS.$vendor_name.DS, $file);
                     $vendors_assets[$vendor_name][] = $rel_file;
                 }
             }
@@ -233,7 +233,7 @@ class AAssetPublisher
                 foreach ($files as $file) {
                     $extensions_assets[$template][]= AHelperUtils::getRelativePath(
                         ABC::env('DIR_APP_EXTENSIONS')
-                        .$extension_name.DIRECTORY_SEPARATOR
+                        .$extension_name.DS
                         .ABC::env('DIRNAME_TEMPLATES').$template.'/',
                         $file
                     );
@@ -292,10 +292,10 @@ class AssetPublisherCopy{
         }
         foreach ($extensions_files_list as $extension => $file_list) {
             $src_dir = ABC::env('DIR_APP_EXTENSIONS').$extension
-                .DIRECTORY_SEPARATOR.ABC::env('DIRNAME_TEMPLATES');
+                .DS.ABC::env('DIRNAME_TEMPLATES');
             $dst_dir = ABC::env('DIR_PUBLIC')
                             .ABC::env('DIRNAME_EXTENSIONS')
-                            .$extension.DIRECTORY_SEPARATOR
+                            .$extension.DS
                             .ABC::env('DIRNAME_TEMPLATES');
 
             $result = $this->processTemplateAssets($file_list, $src_dir, $dst_dir);
@@ -312,8 +312,8 @@ class AssetPublisherCopy{
         if (!$file_list || !is_array($file_list)) {
             return false;
         }
-        $src_dir = ABC::env('DIR_VENDOR').'assets'.DIRECTORY_SEPARATOR;
-        $dest_dir = ABC::env('DIR_PUBLIC').'vendor'.DIRECTORY_SEPARATOR;
+        $src_dir = ABC::env('DIR_VENDOR').'assets'.DS;
+        $dest_dir = ABC::env('DIR_PUBLIC').'vendor'.DS;
         return $this->processTemplateAssets($file_list, $src_dir, $dest_dir);
     }
 
@@ -330,15 +330,15 @@ class AssetPublisherCopy{
             //unique old directory name
             $uid_old = uniqid('apo_');
             //use abc/system/temp directory during copying
-            $new_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DIRECTORY_SEPARATOR.$uid_new;
-            $old_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DIRECTORY_SEPARATOR.$uid_old;
+            $new_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DS.$uid_new;
+            $old_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DS.$uid_old;
 
             //then copy all asset files of template to temporary directory
             foreach ($list as $rel_file) {
                 $res = AHelperUtils::CopyFileRelative(
                     $rel_file,
-                    $src_dir.$template.DIRECTORY_SEPARATOR,
-                    $new_temp_dir.DIRECTORY_SEPARATOR
+                    $src_dir.$template.DS,
+                    $new_temp_dir.DS
                 );
                 if (!$res['result']) {
                     $this->errors[] = __CLASS__.': '.$res['message'];

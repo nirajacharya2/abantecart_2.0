@@ -104,7 +104,7 @@ class AView
                                       : $this->config->get('config_storefront_template');
         }
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
-        $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DIRECTORY_SEPARATOR;
+        $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DS;
         $this->instance_id = $instance_id;
         /**
          * @var AViewRenderInterface $render_instance
@@ -634,7 +634,7 @@ class AView
      */
     protected function _extension_section_dir($extension_name)
     {
-        return ABC::env('DIR_APP_EXTENSIONS').$extension_name.DIRECTORY_SEPARATOR;
+        return ABC::env('DIR_APP_EXTENSIONS').$extension_name.DS;
     }
 
     /**
@@ -657,7 +657,7 @@ class AView
         $test_resource_mode = $mode != 'file' ? 'relative' : $mode;
         foreach ($extensions as $ext) {
             if ($test_resource_mode == 'relative') {
-                $source_dir = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_EXTENSIONS').$ext.DIRECTORY_SEPARATOR.ABC::env('DIRNAME_TEMPLATES');
+                $source_dir = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_EXTENSIONS').$ext.DS.ABC::env('DIRNAME_TEMPLATES');
             } else {
                 $source_dir = $this->_extension_templates_dir($ext);
             }
@@ -711,7 +711,7 @@ class AView
         $dir_public = ABC::env('DIR_PUBLIC');
         $section_dirname = ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
         $dirname_templates = ABC::env('DIRNAME_TEMPLATES');
-        $slash = DIRECTORY_SEPARATOR;
+        $slash = DS;
         if ($mode == 'relative') {
             if ($extension_txt_id) {
                 $public_dir_pre = ABC::env('DIRNAME_EXTENSIONS').$extension_txt_id.$slash.$dirname_templates;

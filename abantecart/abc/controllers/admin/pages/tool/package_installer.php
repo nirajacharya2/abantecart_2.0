@@ -274,12 +274,12 @@ class ControllerPagesToolPackageInstaller extends AController
         $em = new AExtensionManager();
         foreach ($pm->package_info['package_content']['extensions'] as $ext_txt_id) {
             $config_file = $pm->package_info['package_dir']
-                ."code".DIRECTORY_SEPARATOR
-                ."abc".DIRECTORY_SEPARATOR
+                ."code".DS
+                ."abc".DS
                 ."extensions"
-                .DIRECTORY_SEPARATOR
+                .DS
                 .$ext_txt_id
-                .DIRECTORY_SEPARATOR
+                .DS
                 ."config.xml";
             if (($config = @simplexml_load_file($config_file)) === false) {
                 $check_results['warnings']['extensions'][] = "Extension "

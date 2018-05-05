@@ -1611,15 +1611,15 @@ class AHelperUtils extends AHelper
      */
     static function getFileNameByClass($class_name)
     {
-        $dirname = dirname(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
-        $dirname = ltrim($dirname, DIRECTORY_SEPARATOR);
-        $basename = basename(str_replace('\\', DIRECTORY_SEPARATOR, $class_name));
+        $dirname = dirname(str_replace('\\', DS, $class_name));
+        $dirname = ltrim($dirname, DS);
+        $basename = basename(str_replace('\\', DS, $class_name));
         //add spaces to classname based on capital letters.
         $basename = preg_replace('/[A-Z]/', ' $0', $basename);
         $split = explode(' ', $basename);
         $split = array_map('strtolower', $split);
         unset($split[array_search('', $split)], $split[array_search('a', $split)]);
-        return $dirname.DIRECTORY_SEPARATOR.implode('_', $split).'.php';
+        return $dirname.DS.implode('_', $split).'.php';
     }
 
     static function extractArchive($archive_filename, $dest_directory)

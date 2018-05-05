@@ -24,7 +24,7 @@ use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
 use ReflectionClass;
 
-require __DIR__.DIRECTORY_SEPARATOR.'abc_base.php';
+require __DIR__.DS.'abc_base.php';
 
 /**
  * Class ABC
@@ -49,11 +49,11 @@ class ABC extends ABCBase
         if (!$file || !is_file($file)) {
             $stage_name = @include(
                 dirname(__DIR__)
-                .DIRECTORY_SEPARATOR.'config'
-                .DIRECTORY_SEPARATOR.'enabled.config.php'
+                .DS.'config'
+                .DS.'enabled.config.php'
             );
             $file_name = $stage_name.'.config.php';
-            $file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$file_name;
+            $file = dirname(__DIR__).DS.'config'.DS.$file_name;
         }
 
         $config = @include($file);
@@ -73,7 +73,7 @@ class ABC extends ABCBase
     public function loadDefaultStage()
     {
         //load and put config into environment
-        $config = @include(dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'default.config.php');
+        $config = @include(dirname(__DIR__).DS.'config'.DS.'default.config.php');
         if (isset($config['default'])) {
             self::env((array)$config['default']);
         }
@@ -84,7 +84,7 @@ class ABC extends ABCBase
 
     public static function loadClassMap($stage_name = 'default')
     {
-        $classmap_file = dirname(__DIR__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+        $classmap_file = dirname(__DIR__).DS.'config'.DS.$stage_name.'.classmap.php';
         if (is_file($classmap_file)) {
             self::$class_map = @include_once($classmap_file);
         }
@@ -94,13 +94,13 @@ class ABC extends ABCBase
         }
 
         $ext_dirs = glob(
-            dirname(__DIR__).DIRECTORY_SEPARATOR
-            .'extensions'.DIRECTORY_SEPARATOR
-            .'*'.DIRECTORY_SEPARATOR
-            .'config'.DIRECTORY_SEPARATOR
+            dirname(__DIR__).DS
+            .'extensions'.DS
+            .'*'.DS
+            .'config'.DS
         );
         foreach ($ext_dirs as $cfg_dir) {
-            $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+            $classmap_file = $cfg_dir.DS.$stage_name.'.classmap.php';
             if (is_file($classmap_file)) {
                 $ext_classmap = @include_once($classmap_file);
                 if (is_array($ext_classmap)) {
@@ -108,7 +108,7 @@ class ABC extends ABCBase
                 }
             } //load default stage values
             elseif ($stage_name != 'default') {
-                $classmap_file = $cfg_dir.DIRECTORY_SEPARATOR.$stage_name.'.classmap.php';
+                $classmap_file = $cfg_dir.DS.$stage_name.'.classmap.php';
                 if (is_file($classmap_file)) {
                     $ext_classmap = @include_once($classmap_file);
                     if (is_array($ext_classmap)) {
@@ -243,7 +243,7 @@ class ABC extends ABCBase
 
         // New Installation
         if (!self::env('DATABASES')) {
-            if (is_file(self::env('DIR_ROOT').'install'.DIRECTORY_SEPARATOR.'index.php')) {
+            if (is_file(self::env('DIR_ROOT').'install'.DS.'index.php')) {
                 header('Location: ../install/index.php');
             } else {
                 header('Location: static_pages/?file='
@@ -252,7 +252,7 @@ class ABC extends ABCBase
             exit;
         }
 
-        require __DIR__.DIRECTORY_SEPARATOR.'init'.DIRECTORY_SEPARATOR.'app.php';
+        require __DIR__.DS.'init'.DS.'app.php';
         $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 

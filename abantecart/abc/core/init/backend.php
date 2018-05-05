@@ -26,7 +26,7 @@ use abc\core\lib\{
     AConfig, ADataEncryption, ADB, ADocument, ALanguageManager, ALog, ASession
 };
 
-$dir_sep = DIRECTORY_SEPARATOR;
+$dir_sep = DS;
 if ($command != 'help:help') {
     if (!is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
         echo "Initialisation...\n";
@@ -245,7 +245,7 @@ function showHelpPage($script_name = '', $options = [])
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
     //first of all get list of scripts
-    $executors = glob(ABC::env('DIR_APP') .'commands' . DIRECTORY_SEPARATOR . '*.php');
+    $executors = glob(ABC::env('DIR_APP') .'commands' . DS . '*.php');
     $help = [];
 
     foreach ($executors as $exec) {
@@ -320,7 +320,7 @@ function showHelpPage($script_name = '', $options = [])
  */
 function getExecutor($name, $silent_mode = false)
 {
-    $run_file = ABC::env('DIR_APP') . 'commands' . DIRECTORY_SEPARATOR . $name . '.php';
+    $run_file = ABC::env('DIR_APP') . 'commands' . DS . $name . '.php';
     if (!is_file($run_file)) {
         $error_text = "Error: Script " . $run_file . "   not found!";
         if (!$silent_mode) {

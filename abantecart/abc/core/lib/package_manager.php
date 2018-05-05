@@ -209,7 +209,7 @@ class APackageManager
         }
 
         //remove destination folder first. run pathinfo twice for tar.gz. files
-        $package_dir = $dest_dir.pathinfo(pathinfo($archive_filename, PATHINFO_FILENAME), PATHINFO_FILENAME).DIRECTORY_SEPARATOR;
+        $package_dir = $dest_dir.pathinfo(pathinfo($archive_filename, PATHINFO_FILENAME), PATHINFO_FILENAME).DS;
         $package_subdir = '';
         $this->removeDir( $package_dir );
         unset($this->package_info['package_dir']);
@@ -218,7 +218,7 @@ class APackageManager
         if($unpack_result){
             $this->chmod_R($dest_dir.$this->package_info['tmp_dir'], 0775, 0775);
             $dirs = glob($package_dir.'*', GLOB_ONLYDIR);
-            $package_subdir =  $dirs ? $dirs[0].DIRECTORY_SEPARATOR : '';
+            $package_subdir =  $dirs ? $dirs[0].DS : '';
         }
         if( $package_subdir){
             $this->package_info['package_dir'] = $package_subdir;
@@ -307,12 +307,12 @@ class APackageManager
             }
             //if we can write into directory - check files if it
             else{
-                $files = glob($this->package_info['package_dir']."code".DIRECTORY_SEPARATOR.$dir.'*');
+                $files = glob($this->package_info['package_dir']."code".DS.$dir.'*');
                 foreach($files as $file){
                     if( !is_file($file) ){ continue; }
                     //ok compound filename in destination directory and check if is exists
                     $dest_filename = str_replace(
-                        $this->package_info['package_dir']."code".DIRECTORY_SEPARATOR.basename($rel_directory).DIRECTORY_SEPARATOR,
+                        $this->package_info['package_dir']."code".DS.basename($rel_directory).DS,
                         $rel_directory,
                         $file
                         );
@@ -326,7 +326,7 @@ class APackageManager
             }
         }
 
-        $version_file = ABC::env('DIR_CORE').'init'.DIRECTORY_SEPARATOR.'version.php';
+        $version_file = ABC::env('DIR_CORE').'init'.DS.'version.php';
 
         if($this->isCorePackage() && !is_writable( $version_file )){
             $errors[] = $version_file;
@@ -353,7 +353,7 @@ class APackageManager
         if ( !$ext_txt_id) {
             return false;
         }
-        $ext_dir_path = ABC::env('DIR_APP_EXTENSIONS').$ext_txt_id.DIRECTORY_SEPARATOR;
+        $ext_dir_path = ABC::env('DIR_APP_EXTENSIONS').$ext_txt_id.DS;
         //if directory does not exists thinks that's ok
         if( !is_dir($ext_dir_path) ){
             return true;
@@ -408,12 +408,12 @@ class APackageManager
         //process for multi-package
         foreach ($this->package_info['package_content']['extensions'] as $ext_txt_id) {
             $config_file = $this->package_info['package_dir']
-                            ."code".DIRECTORY_SEPARATOR
-                            ."abc".DIRECTORY_SEPARATOR
+                            ."code".DS
+                            ."abc".DS
                             ."extensions"
-                            .DIRECTORY_SEPARATOR
+                            .DS
                             .$ext_txt_id
-                            .DIRECTORY_SEPARATOR
+                            .DS
                             ."config.xml";
             if( !is_file( $config_file )){
                 $msg = "Extension ".$ext_txt_id." cannot be installed. Skipped. Cannot find config.xml file inside it.\n";
@@ -454,9 +454,9 @@ class APackageManager
             $this->backupPreviousExtension($ext_txt_id);
             //move code from temporary into app-directory
             $old_path = $this->package_info['package_dir']
-                        ."code".DIRECTORY_SEPARATOR
-                        ."abc".DIRECTORY_SEPARATOR
-                        ."extensions".DIRECTORY_SEPARATOR
+                        ."code".DS
+                        ."abc".DS
+                        ."extensions".DS
                         .$ext_txt_id;
             $new_path = ABC::env('DIR_APP_EXTENSIONS').$ext_txt_id;
             $result = @rename($old_path, $new_path);
@@ -483,7 +483,7 @@ class APackageManager
         $run_errors = [];
         $core_files = $this->package_info['package_content']['core'];
         foreach ($core_files as $rel_file) {
-            $src_filename = $this->package_info['package_dir'].'code'.DIRECTORY_SEPARATOR.$rel_file;
+            $src_filename = $this->package_info['package_dir'].'code'.DS.$rel_file;
             if( !is_file($src_filename) ){
                 $run_errors[] = "Source file ".$src_filename." not found! Skipped. Please check package structure.";
                 continue;
@@ -559,12 +559,12 @@ class APackageManager
             $objects = scandir($dir);
             foreach ($objects as $obj) {
                 if ($obj != "." && $obj != "..") {
-                    @chmod($dir.DIRECTORY_SEPARATOR.$obj, 0775);
-                    $err = is_dir($dir.DIRECTORY_SEPARATOR.$obj)
-                            ? $this->removeDir($dir.DIRECTORY_SEPARATOR.$obj)
-                            : @unlink($dir.DIRECTORY_SEPARATOR.$obj);
+                    @chmod($dir.DS.$obj, 0775);
+                    $err = is_dir($dir.DS.$obj)
+                            ? $this->removeDir($dir.DS.$obj)
+                            : @unlink($dir.DS.$obj);
                     if ( ! $err) {
-                        $error_text = "Package manager Error: Cannot delete file or directory: '". $dir . DIRECTORY_SEPARATOR . $obj ."'.";
+                        $error_text = "Package manager Error: Cannot delete file or directory: '". $dir . DS . $obj ."'.";
                         $this->errors[] = $error_text;
                         $error = new AError( $error_text );
                         $error->toLog()->toDebug()->toMessages();
@@ -600,22 +600,22 @@ class APackageManager
         if ( ! file_exists($package_dirname."code")) {
             return false;
         } else {
-            $base_dir = $package_dirname."code".DIRECTORY_SEPARATOR;
+            $base_dir = $package_dirname."code".DS;
             if($this->package_info['package_content']['core']) {
                 foreach ( $this->package_info['package_content']['core'] as $rel_path ) {
-                    $rel_path = str_replace( "/", DIRECTORY_SEPARATOR, $rel_path );
+                    $rel_path = str_replace( "/", DS, $rel_path );
                     if ( is_file( $base_dir.$rel_path ) ) {
-                        $output[] = dirname( $rel_path ).DIRECTORY_SEPARATOR;
+                        $output[] = dirname( $rel_path ).DS;
                     } elseif ( is_dir( $rel_path ) ) {
                         $output[] = $rel_path;
                     }
                 }
             }elseif ($this->package_info['package_content']['extensions']){
                 foreach( $this->package_info['package_content']['extensions'] as $ext_dir) {
-                    $base_dir = $package_dirname."code".DIRECTORY_SEPARATOR;
+                    $base_dir = $package_dirname."code".DS;
                     $iteration = new RecursiveIteratorIterator(
                         new RecursiveDirectoryIterator(
-                            $base_dir.'abc'.DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$ext_dir,
+                            $base_dir.'abc'.DS.'extensions'.DS.$ext_dir,
                             RecursiveDirectoryIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST,
                         RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
@@ -623,7 +623,7 @@ class APackageManager
 
                     foreach ( $iteration as $path => $dir ) {
                         if ($dir->isDir()){
-                            $output[] = str_replace( $base_dir, '', $path ).DIRECTORY_SEPARATOR;
+                            $output[] = str_replace( $base_dir, '', $path ).DS;
                         }
                     }
                     unset($iteration);
@@ -688,10 +688,10 @@ class APackageManager
 
                     $config = null;
                     $ext_conf_filename = $package_dirname
-                                        .'code'.DIRECTORY_SEPARATOR
-                                        .'abc'.DIRECTORY_SEPARATOR
-                                        .'extensions'.DIRECTORY_SEPARATOR
-                                        .$ext_txt_id.DIRECTORY_SEPARATOR.
+                                        .'code'.DS
+                                        .'abc'.DS
+                                        .'extensions'.DS
+                                        .$ext_txt_id.DS.
                                         'config.xml';
                     if (is_file($ext_conf_filename)) {
                         $config = simplexml_load_file($ext_conf_filename);
@@ -700,10 +700,10 @@ class APackageManager
                     // running sql upgrade script if it exists
                     if ( (string)$config->upgrade->sql ) {
                         $file = $package_dirname
-                                .'code'.DIRECTORY_SEPARATOR
-                                .'abc'.DIRECTORY_SEPARATOR
-                                .'extensions'.DIRECTORY_SEPARATOR
-                                .$ext_txt_id.DIRECTORY_SEPARATOR
+                                .'code'.DS
+                                .'abc'.DS
+                                .'extensions'.DS
+                                .$ext_txt_id.DS
                                 .(string)$config->upgrade->sql;
                         if (file_exists($file)) {
                             $this->db->performSql($file);
@@ -714,10 +714,10 @@ class APackageManager
                     // running php install script if it exists
                     if ( (string)$config->upgrade->trigger ) {
                         $file = $package_dirname
-                                .'code'.DIRECTORY_SEPARATOR
-                                .'abc'.DIRECTORY_SEPARATOR
-                                .'extensions'.DIRECTORY_SEPARATOR
-                                .$ext_txt_id.DIRECTORY_SEPARATOR
+                                .'code'.DS
+                                .'abc'.DS
+                                .'extensions'.DS
+                                .$ext_txt_id.DS
                                 .(string)$config->upgrade->trigger;
                         if (file_exists($file)) {
                             try {
@@ -854,7 +854,7 @@ class APackageManager
         $content .= "ABC::env('VERSION_BUILT', '".$built."');\n";
 
         // upgrade APP VERSION
-        @file_put_contents(ABC::env('DIR_CORE').'init'.DIRECTORY_SEPARATOR.'version.php', $content);
+        @file_put_contents(ABC::env('DIR_CORE').'init'.DS.'version.php', $content);
         return true;
     }
 
