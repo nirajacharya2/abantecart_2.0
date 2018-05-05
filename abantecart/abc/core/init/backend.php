@@ -26,6 +26,7 @@ use abc\core\lib\{
     AConfig, ADataEncryption, ADB, ADocument, ALanguageManager, ALog, ASession
 };
 
+define('DS', DIRECTORY_SEPARATOR);
 $dir_sep = DS;
 if ($command != 'help:help') {
     if (!is_file(dirname(__DIR__, 2).$dir_sep.'vendor'.$dir_sep.'autoload.php')) {
