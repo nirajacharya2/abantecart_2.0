@@ -20,6 +20,7 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\lib\AAssetPublisher;
+
 include_once('base/BaseCommand.php');
 
 class Publish extends BaseCommand
@@ -28,27 +29,27 @@ class Publish extends BaseCommand
     {
         $action = !$action ? 'all' : $action;
         //if now options - check action
-        if(!$options){
-            if(!in_array($action, array('all', 'help', 'core', 'extensions', 'vendors'))){
+        if (!$options) {
+            if (!in_array($action, array('all', 'help', 'core', 'extensions', 'vendors'))) {
                 return ['Error: Unknown Action Parameter!'];
             }
-        }elseif( $options && $action == 'extensions'){
-            if(isset($options['extension'])){
+        } elseif ($options && $action == 'extensions') {
+            if (isset($options['extension'])) {
                 $extension_name = trim($options['extension']);
                 $dir_name = ABC::env('DIR_APP_EXTENSIONS').$extension_name;
-                if(!is_dir($dir_name)){
+                if (!is_dir($dir_name)) {
                     return ['Error: directory of extension "'.$extension_name.'" not found!'];
                 }
             }
-        }elseif( $options && $action == 'vendors'){
-            if(isset($options['package'])){
-                list($vendor_name, $package_name) = explode(':',$options['package']);
+        } elseif ($options && $action == 'vendors') {
+            if (isset($options['package'])) {
+                list($vendor_name, $package_name) = explode(':', $options['package']);
                 $vendor_name = trim($vendor_name);
                 $package_name = trim($package_name);
                 $dir_name = ABC::env('DIR_VENDOR').'assets'.DS.$vendor_name.DS.$package_name;
-                if(!$vendor_name || !$package_name){
+                if (!$vendor_name || !$package_name) {
                     return ['Error: Incorrect vendor package name "'.$options['package'].'"!'];
-                }elseif(!is_dir($dir_name)){
+                } elseif (!is_dir($dir_name)) {
                     return ['Error: directory of vendor package "'.$dir_name.'" not found!'];
                 }
             }
@@ -61,11 +62,11 @@ class Publish extends BaseCommand
         parent::run($action, $options);
         $action = !$action ? 'all' : $action;
         $result = false;
-        if(in_array($action, array('all', 'core', 'extensions', 'vendors') )) {
+        if (in_array($action, array('all', 'core', 'extensions', 'vendors'))) {
             $ap = new AAssetPublisher();
             $result = $ap->publish($action, $options);
             $errors = $ap->errors;
-        }else{
+        } else {
             $errors = ['Error: unknown public action!'];
         }
 
@@ -74,48 +75,48 @@ class Publish extends BaseCommand
 
     public function finish(string $action, array $options)
     {
-        return 'Success: Assets have been published.';
+        $this->write('Success: Assets have been published.');
         parent::finish($action, $options);
     }
 
-    protected function _get_option_list()
+    protected function getOptionList()
     {
         return [
-            'all' =>
+            'all'        =>
                 [
                     'description' => 'publish all asset files',
                     'arguments'   => [],
-                    'example'     => 'php abcexec publish:all'
+                    'example'     => 'php abcexec publish:all',
                 ],
-            'core' =>
+            'core'       =>
                 [
                     'description' => 'publish only default template asset files',
                     'arguments'   => [],
-                    'example'     => 'php abcexec publish:core'
+                    'example'     => 'php abcexec publish:core',
                 ],
             'extensions' =>
                 [
                     'description' => 'publish only extensions asset files',
                     'arguments'   => [
-                        '--extension'   => [
-                                            'description'   => 'Publish only assets of extension with given text ID',
-                                            'default_value' => 'your_extension_txt_id',
-                                            'required'      => false
-                                        ],
+                        '--extension' => [
+                            'description'   => 'Publish only assets of extension with given text ID',
+                            'default_value' => 'your_extension_txt_id',
+                            'required'      => false,
+                        ],
                     ],
-                    'example'     => 'php abcexec publish:extensions --extension=your_extension_txt_id'
+                    'example'     => 'php abcexec publish:extensions --extension=your_extension_txt_id',
                 ],
-            'vendors' =>
+            'vendors'    =>
                 [
                     'description' => 'publish only vendors asset files',
                     'arguments'   => [
-                        '--package'   => [
-                                                'description'   => 'Publish only assets of vendor package with given package name',
-                                                'default_value' => 'vendor_name:package_name',
-                                                'required'      => false
-                                         ]
+                        '--package' => [
+                            'description'   => 'Publish only assets of vendor package with given package name',
+                            'default_value' => 'vendor_name:package_name',
+                            'required'      => false,
+                        ],
                     ],
-                    'example'     => 'php abcexec publish:vendors --vendor=vendor_name:package_name'
+                    'example'     => 'php abcexec publish:vendors --vendor=vendor_name:package_name',
                 ],
         ];
     }

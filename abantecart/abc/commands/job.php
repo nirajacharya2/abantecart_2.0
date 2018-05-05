@@ -26,6 +26,7 @@ use abc\core\lib\AJobManager;
 use abc\modules\AModuleBase;
 use Error;
 use Exception;
+
 include_once('base/BaseCommand.php');
 
 class Job extends BaseCommand
@@ -60,6 +61,9 @@ class Job extends BaseCommand
                 $result = $this->runNextJob();
             } elseif (isset($options['worker'])) {
                 $result = $this->runWorker($options);
+            } else {
+                $this->errors[] = 'Incorect options to run the job!';
+                $result = false;
             }
         } elseif ($action == 'consumer') {
             $result = $this->queueConsume();
@@ -109,13 +113,13 @@ class Job extends BaseCommand
             $worker_module = new $worker_class();
 
             if ($job_info['status'] == $handler::STATUS_READY || $worker_module->isReRunAllowed()) {
-
                 $handler->updateJob(
                     $job_id,
                     [
                         'status'        => $handler::STATUS_RUNNING,
-                        'last_time_run' => date("Y-m-d H:i:s", time())
-                    ]);
+                        'last_time_run' => date("Y-m-d H:i:s", time()),
+                    ]
+                );
                 $result = $worker_module->runJob(
                     $job_info['configuration']['worker']['method'],
                     $job_info['configuration']['worker']['parameters']
@@ -126,7 +130,6 @@ class Job extends BaseCommand
             }
 
             if (!$result) {
-
                 $handler->updateJob(
                     $job_id,
                     [
@@ -183,8 +186,6 @@ class Job extends BaseCommand
 
     protected function queueConsume()
     {
-
-
     }
 
     protected function runWorker($options)
@@ -264,7 +265,7 @@ class Job extends BaseCommand
                         ],
                         '--method'   => [
                             'description'   => 'Method of worker class which will be called.'
-                                                .' Used with --worker options',
+                                .' Used with --worker options',
                             'default_value' => '',
                             'required'      => false,
                             'alias'         => '*',

@@ -62,7 +62,7 @@ class Cache extends BaseCommand
             return ['Error: Unknown action or missing option.'];
         }
         //looking for "ALL" parameter in option set. If presents - skip other.
-        $opt_list = $this->_get_option_list();
+        $opt_list = $this->getOptionList();
         if ($action == 'clear') {
             $k = array_search('all', array_keys($options));
             if ($k !== false) {
@@ -109,7 +109,7 @@ class Cache extends BaseCommand
     {
         //clear all cache if need to rebuild
         if ($action == 'rebuild') {
-            $opt_list = $this->_get_option_list();
+            $opt_list = $this->getOptionList();
             $this->_process_clear([
                 'all'                     => '*',
                 'media'                   => $opt_list['clear']['arguments']['--media']['alias'],
@@ -282,12 +282,7 @@ class Cache extends BaseCommand
         parent::finish($action, $options);
     }
 
-    public function help( $options = [] )
-    {
-        return $this->_get_option_list();
-    }
-
-    protected function _get_option_list()
+    protected function getOptionList()
     {
         return [
             'create' =>

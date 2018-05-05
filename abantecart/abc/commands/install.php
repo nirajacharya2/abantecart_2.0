@@ -25,6 +25,7 @@ use abc\core\cache\ACache;
 use abc\core\lib\{
     AConfig, AConnect, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
+
 include_once('base/BaseCommand.php');
 
 class Install extends BaseCommand
@@ -789,7 +790,7 @@ EOD;
      */
     public function help($options = [])
     {
-        $options = $this->_get_option_list();
+        $options = $this->getOptionList();
         foreach ($options as $action => $help_info) {
             $output = "php abcexec install:".$action." ";
             $maximal = $minimal = '';
@@ -815,7 +816,7 @@ EOD;
         return $options;
     }
 
-    protected function _get_option_list()
+    protected function getOptionList()
     {
         return [
             'app'       =>

@@ -19,7 +19,9 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\engine\{AHtml, ALoader, ExtensionsApi, Registry};
+use abc\core\engine\{
+    AHtml, ALoader, ExtensionsApi, Registry
+};
 use abc\core\cache\ACache;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\{
@@ -233,9 +235,8 @@ function showError($text)
  */
 function showException($e)
 {
-    showError('Error: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+    showError('Error: '.$e->getMessage().PHP_EOL.$e->getTraceAsString());
 }
-
 
 /**
  * @param string $script_name - name of executor
@@ -246,11 +247,10 @@ function showHelpPage($script_name = '', $options = [])
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
     //first of all get list of scripts
-    $executors = glob(ABC::env('DIR_APP') .'commands' . DS . '*.php');
+    $executors = glob(ABC::env('DIR_APP').'commands'.DS.'*.php');
     $help = [];
 
     foreach ($executors as $exec) {
-
         $name = strtolower(pathinfo($exec, PATHINFO_FILENAME));
         $executor = getExecutor($name, true);
 
@@ -321,9 +321,9 @@ function showHelpPage($script_name = '', $options = [])
  */
 function getExecutor($name, $silent_mode = false)
 {
-    $run_file = ABC::env('DIR_APP') . 'commands' . DS . $name . '.php';
+    $run_file = ABC::env('DIR_APP').'commands'.DS.$name.'.php';
     if (!is_file($run_file)) {
-        $error_text = "Error: Script " . $run_file . "   not found!";
+        $error_text = "Error: Script ".$run_file."   not found!";
         if (!$silent_mode) {
             showError($error_text);
             exit(1);
