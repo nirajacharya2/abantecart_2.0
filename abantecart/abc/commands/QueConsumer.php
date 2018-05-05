@@ -16,14 +16,17 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
+namespace abc\commands;
+
 use PhpAmqpLib\Connection\AMQPConnection;
-use application\components\workers\WorkerException;
+
+include_once('base/BaseCommand.php');
 
 /**
- * QueConsumerCmnd for starting AbanteCart consumers of RabbitMQ message broker.
+ * QueConsumer for starting AbanteCart consumers of RabbitMQ message broker.
  *
  */
-class QueConsumerCommand extends BaseCommand
+class QueConsumer extends BaseCommand
 {
     /**
      * @var int Timeout limit.
@@ -31,12 +34,6 @@ class QueConsumerCommand extends BaseCommand
      */
     protected $queTimeout = QUE_TIMEOUT;
 
-    public function init()
-    {
-        /**
-         * Override for parent method
-         */
-    }
     
     /**
      * Start action method
@@ -90,7 +87,7 @@ class QueConsumerCommand extends BaseCommand
                 foreach ($methods as $queWorkMethod) {
                     if (!method_exists($workerClass, $queWorkMethod)) {
                         throw new QueConsumerException(
-                            'Class ' . $className . ' hasn\'t method named ' . $queWorkMethod
+                            'Class ' . $className . ' does not have method ' . $queWorkMethod
                         );
                     }
 

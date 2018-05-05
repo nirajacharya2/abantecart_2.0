@@ -223,7 +223,6 @@ abstract class BaseWorker
             $this->init();
             echoCLI('****************************************************************');
             try {
-                /** @var boolean $result */
                 $result = $this->{$method}();
             } catch (Exception $e) {
                 if ($e instanceof WorkerException) {

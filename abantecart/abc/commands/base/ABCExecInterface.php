@@ -16,10 +16,15 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\modules;
+namespace abc\commands;
 
-interface AModuleInterface
+interface ABCExecInterface
 {
+    public function help($options = []);
 
-    public function postProcessing();
+    public function validate(string $action, array $options);
+
+    public function run(string $action, array $options);
+
+    public function finish(string $action, array $options);
 }

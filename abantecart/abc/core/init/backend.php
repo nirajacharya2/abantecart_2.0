@@ -16,7 +16,7 @@
    needs please refer to http://www.abantecart.com for more information.
 */
 
-namespace abc\core\backend;
+namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\engine\{AHtml, ALoader, ExtensionsApi, Registry};
@@ -186,7 +186,7 @@ function showResult($result)
     } elseif (is_array($result) && $result) {
         showError("Runtime errors occurred\n");
         foreach ($result as $error) {
-            showError("\t\t".$error);
+            showError($error);
         }
         exit(1);
     }
@@ -224,8 +224,17 @@ function parseOptions($args = [])
  */
 function showError($text)
 {
-    echo("\n\033[0;31m".$text."\033[0m\n\n");
+    echo("\033[0;31m".$text."\033[0m\n");
 }
+
+/**
+ * @param Exception $e | Error $e
+ */
+function showException($e)
+{
+    showError('Error: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+}
+
 
 /**
  * @param string $script_name - name of executor
@@ -236,7 +245,7 @@ function showHelpPage($script_name = '', $options = [])
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
     //first of all get list of scripts
-    $executors = glob(ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'*.php');
+    $executors = glob(ABC::env('DIR_APP') .'commands' . DIRECTORY_SEPARATOR . '*.php');
     $help = [];
 
     foreach ($executors as $exec) {
@@ -311,9 +320,9 @@ function showHelpPage($script_name = '', $options = [])
  */
 function getExecutor($name, $silent_mode = false)
 {
-    $run_file = ABC::env('DIR_CORE').'backend'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$name.'.php';
+    $run_file = ABC::env('DIR_APP') . 'commands' . DIRECTORY_SEPARATOR . $name . '.php';
     if (!is_file($run_file)) {
-        $error_text = "Error: Script ".$run_file."   not found!";
+        $error_text = "Error: Script " . $run_file . "   not found!";
         if (!$silent_mode) {
             showError($error_text);
             exit(1);
@@ -329,7 +338,7 @@ function getExecutor($name, $silent_mode = false)
         /**
          * @var \abc\core\backend\Install $executor
          */
-        $class_name = "\abc\core\backend\\".$name;
+        $class_name = "\abc\commands\\".$name;
         if (class_exists($class_name)) {
             return $executor = new $class_name();
         } else {

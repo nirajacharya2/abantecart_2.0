@@ -15,7 +15,8 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
-namespace abc\core\backend;
+
+namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
@@ -25,8 +26,9 @@ use abc\core\lib\AJobManager;
 use abc\modules\AModuleBase;
 use Error;
 use Exception;
+include_once('base/BaseCommand.php');
 
-class Job implements ABCExec
+class Job extends BaseCommand
 {
     public $errors = [];
 
@@ -45,7 +47,7 @@ class Job implements ABCExec
 
     public function run(string $action, array $options)
     {
-        $output = null;
+        parent::run($action, $options);
         $result = false;
         if (!in_array($action, array('run', 'consumer')) || !$options) {
             return ['Error: Unknown action.'];
@@ -74,7 +76,6 @@ class Job implements ABCExec
      */
     protected function runJobById($job_id)
     {
-
         $class_name = ABC::getFullClassName('AJobManager');
 
         /**
@@ -161,7 +162,6 @@ class Job implements ABCExec
         }
 
         return $result ? true : false;
-
     }
 
     protected function runNextJob()
@@ -176,10 +176,9 @@ class Job implements ABCExec
         if ($job_info) {
             return $this->runJobById($job_info['job_id']);
         } else {
-            $this->errors[] = 'Ready Jobs not found.';
-            return false;
+            $this->write('No job found for processing!');
+            return true;
         }
-
     }
 
     protected function queueConsume()
@@ -234,14 +233,8 @@ class Job implements ABCExec
 
     public function finish(string $action, array $options)
     {
-        $output = "Success: Job have been successfully processed.\n";
-        return $output;
-    }
-
-    public function help($options = [])
-    {
-
-        return $this->getOptionList();
+        parent::finish($action, $options);
+        $this->write("Finished processing job.");
     }
 
     protected function getOptionList()
