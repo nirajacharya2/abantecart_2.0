@@ -1619,7 +1619,12 @@ class AHelperUtils extends AHelper
         $split = explode(' ', $basename);
         $split = array_map('strtolower', $split);
         unset($split[array_search('', $split)], $split[array_search('a', $split)]);
-        return $dirname.DS.implode('_', $split).'.php';
+
+        $rel_path = ABC::env('DIR_ROOT').$dirname.DS.implode('_', $split).'.php';
+        if(!is_file($rel_path)){
+            $rel_path = $dirname.DS.str_replace(' ','',ucwords(implode(' ', $split))).'.php';
+        }
+        return $rel_path;
     }
 
     static function extractArchive($archive_filename, $dest_directory)
