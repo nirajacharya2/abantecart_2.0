@@ -23,7 +23,7 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AException;
 use abc\core\lib\AJobManager;
-use abc\modules\ABaseWorker;
+use abc\modules\workers\ABaseWorker;
 use Error;
 use Exception;
 
