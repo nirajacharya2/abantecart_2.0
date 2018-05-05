@@ -23,7 +23,7 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AException;
 use abc\core\lib\AJobManager;
-use abc\modules\AModuleBase;
+use abc\modules\ABaseWorker;
 use Error;
 use Exception;
 
@@ -108,7 +108,7 @@ class Job extends BaseCommand
             //run worker
             $worker_class = $job_info['configuration']['worker']['class'];
             /**
-             * @var AModuleBase $worker_module
+             * @var ABaseWorker $worker_module
              */
             $worker_module = new $worker_class();
 
@@ -207,12 +207,12 @@ class Job extends BaseCommand
             require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
             require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
             /**
-             * @var AModuleBase $worker
+             * @var ABaseWorker $worker
              */
             $worker = AHelperUtils::getInstance($worker_class_name, $worker_args);
 
-            if (!$worker instanceof AModuleBase) {
-                throw new AException('Class  "'.$worker_class_name.'" is not not worker!');
+            if (!$worker instanceof ABaseWorker) {
+                throw new AException('Class  "'.$worker_class_name.'" is not a worker class!');
             }
             //check methods/ If method not set - try to find "main"
             $run_method = $options['method'];
