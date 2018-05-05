@@ -147,7 +147,7 @@ $conf = array (
 $enc = new ASSLEncryption ();
 $keys = $enc->generate_ssl_key_pair($conf, $password);
 $enc->save_ssl_key_pair($keys, 'key_with_pass');
-AHelperUtils::echo_array($keys);
+AHelperUtils::echoArray($keys);
 
 2. Encrypt
 

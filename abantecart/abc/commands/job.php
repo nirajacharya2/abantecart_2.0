@@ -124,6 +124,10 @@ class Job extends BaseCommand
                     $job_info['configuration']['worker']['method'],
                     $job_info['configuration']['worker']['parameters']
                 );
+                //pass workers output to command
+                if ($worker_module->output) {
+                    $this->write($worker_module->output);
+                }
             } else {
                 $this->errors[] = 'Rerun of Job forbidden by worker module '
                     .$worker_class.'! Please change Job status to "Ready" first.';
@@ -222,6 +226,10 @@ class Job extends BaseCommand
                 throw new AException('Cannot to find method '.$run_method.' of worker class'.$worker_class_name.'!');
             }
             $result = call_user_func([$worker, $run_method], $worker_args);
+            //pass workers output to command
+            if ($worker->output) {
+                $this->write($worker->output);
+            }
             if (!$result) {
                 $this->errors = array_merge($this->errors, $worker->errors);
             }
@@ -234,8 +242,8 @@ class Job extends BaseCommand
 
     public function finish(string $action, array $options)
     {
-        parent::finish($action, $options);
         $this->write("Finished processing job.");
+        parent::finish($action, $options);
     }
 
     protected function getOptionList()

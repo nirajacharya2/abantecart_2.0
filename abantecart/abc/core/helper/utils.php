@@ -1,22 +1,20 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2017 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2018 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\core\helper;
 
@@ -52,7 +50,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function isFunctionAvailable($func_name)
+    public static function isFunctionAvailable($func_name)
     {
         return function_exists($func_name);
     }
@@ -66,7 +64,7 @@ class AHelperUtils extends AHelper
      *
      * @return float
      */
-    static function preformatFloat($value, $decimal_point = '.')
+    public static function preformatFloat($value, $decimal_point = '.')
     {
         if ($decimal_point != '.') {
             $value = str_replace('.', '~', $value);
@@ -84,7 +82,7 @@ class AHelperUtils extends AHelper
      *
      * @return int
      */
-    static function preformatInteger($value)
+    public static function preformatInteger($value)
     {
         return (int)preg_replace('/[^0-9\-]/', '', $value);
     }
@@ -96,7 +94,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function preformatTextID($value)
+    public static function preformatTextID($value)
     {
         return strtolower(preg_replace("/[^A-Za-z0-9_]/", "", $value));
     }
@@ -112,7 +110,7 @@ class AHelperUtils extends AHelper
      * @return string
      */
 
-    static function moneyDisplayFormat($value, $mode = 'no_round')
+    public static function moneyDisplayFormat($value, $mode = 'no_round')
     {
         $registry = Registry::getInstance();
 
@@ -151,7 +149,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function has_value($value)
+    public static function has_value($value)
     {
         if ($value !== (array)$value && $value !== '' && $value !== null) {
             return true;
@@ -171,7 +169,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_serialized($value)
+    public static function is_serialized($value)
     {
         if (gettype($value) !== 'string') {
             return false;
@@ -191,7 +189,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_multi($array)
+    public static function is_multi($array)
     {
         if ($array === (array)$array && count($array) != count($array, COUNT_RECURSIVE)) {
             return true;
@@ -211,7 +209,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function SEOEncode($string_value, $object_key_name = '', $object_id = 0)
+    public static function SEOEncode($string_value, $object_key_name = '', $object_id = 0)
     {
         $seo_key = html_entity_decode($string_value, ENT_QUOTES, ABC::env('APP_CHARSET'));
         $seo_key = preg_replace('/[^\pL\p{Zs}0-9\s\-_]+/u', '', $seo_key);
@@ -232,14 +230,14 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function getUniqueSeoKeyword($seo_key, $object_key_name = '', $object_id = 0)
+    public static function getUniqueSeoKeyword($seo_key, $object_key_name = '', $object_id = 0)
     {
         $object_id = (int)$object_id;
         $registry = Registry::getInstance();
         $db = $registry->get('db');
         $sql = "SELECT `keyword`
-			FROM ".$db->table_name('url_aliases')."
-			WHERE `keyword` LIKE '".$db->escape($seo_key)."%'";
+            FROM ".$db->table_name('url_aliases')."
+            WHERE `keyword` LIKE '".$db->escape($seo_key)."%'";
         if ($object_id) {
             // exclude keyword of given object (product, category, content etc)
             $sql .= " AND query<>'".$db->escape($object_key_name)."=".$object_id."'";
@@ -267,7 +265,7 @@ class AHelperUtils extends AHelper
      *
      * @param array $array_data
      */
-    static function echo_array($array_data)
+    public static function echoArray($array_data)
     {
         $wrapper = '<div class="debug_alert alert alert-info alert-dismissible"'
             .' role="alert"><button type="button" class="close" data-dismiss="alert">'
@@ -287,7 +285,7 @@ class AHelperUtils extends AHelper
      *
      * @return array
      */
-    static function getFilesInDir($dir, $file_ext = '')
+    public static function getFilesInDir($dir, $file_ext = '')
     {
         if (!is_dir($dir)) {
             return array();
@@ -315,7 +313,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function getRelativePath($from, $to)
+    public static function getRelativePath($from, $to)
     {
         $from = explode('/', $from);
         $to = explode('/', $to);
@@ -340,7 +338,7 @@ class AHelperUtils extends AHelper
      *
      * @return array
      */
-    static function CopyFileRelative($rel_file, $src_dir, $dest_dir)
+    public static function CopyFileRelative($rel_file, $src_dir, $dest_dir)
     {
         $src_file = $src_dir.$rel_file;
         $dest_file = $dest_dir.$rel_file;
@@ -384,7 +382,7 @@ class AHelperUtils extends AHelper
      *
      * @return array
      */
-    static function MakeNestedDirs($dir_full_path, $perms = 0755)
+    public static function MakeNestedDirs($dir_full_path, $perms = 0755)
     {
         $dirs = explode('/', $dir_full_path);
         $dir = '';
@@ -405,7 +403,7 @@ class AHelperUtils extends AHelper
         return $output;
     }
 
-    static function RemoveDirRecursively($dir = '')
+    public static function RemoveDirRecursively($dir = '')
     {
         //block calls from storefront
         if (!ABC::env('IS_ADMIN') || $dir == '../' || $dir == '/' || $dir == './') {
@@ -450,7 +448,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool|mixed
      */
-    static function versionCompare($version1, $version2, $operator)
+    public static function versionCompare($version1, $version2, $operator)
     {
         $version1 = explode('.', preg_replace('/[^0-9\.]/', '', $version1));
         $version2 = explode('.', preg_replace('/[^0-9\.]/', '', $version2));
@@ -485,7 +483,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function getTextUploadError($error)
+    public static function getTextUploadError($error)
     {
         switch ($error) {
             case UPLOAD_ERR_INI_SIZE:
@@ -535,7 +533,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function format4Datepicker($date_format)
+    public static function format4Datepicker($date_format)
     {
         $new_format = $date_format;
         $new_format = preg_replace('/d/', 'dd', $new_format);
@@ -557,7 +555,7 @@ class AHelperUtils extends AHelper
      *
      * @return int
      */
-    static function dateISO2Int($string_date)
+    public static function dateISO2Int($string_date)
     {
         $string_date = trim($string_date);
         $is_datetime = strlen($string_date) > 10 ? true : false;
@@ -572,7 +570,7 @@ class AHelperUtils extends AHelper
      *
      * @return false|string
      */
-    static function dateInt2ISO($int_date)
+    public static function dateInt2ISO($int_date)
     {
         return date('Y-m-d H:i:s', $int_date);
     }
@@ -587,7 +585,7 @@ class AHelperUtils extends AHelper
      *
      * @return false|string
      */
-    static function dateDisplay2ISO($string_date, $format = '')
+    public static function dateDisplay2ISO($string_date, $format = '')
     {
 
         if (empty($format)) {
@@ -612,7 +610,7 @@ class AHelperUtils extends AHelper
      *
      * @return false|string
      */
-    static function dateISO2Display($iso_date, $format = '')
+    public static function dateISO2Display($iso_date, $format = '')
     {
 
         if (empty($format)) {
@@ -638,7 +636,7 @@ class AHelperUtils extends AHelper
      *
      * @return false|string
      */
-    static function dateInt2Display($int_date, $format = '')
+    public static function dateInt2Display($int_date, $format = '')
     {
 
         if (empty($format)) {
@@ -663,7 +661,7 @@ class AHelperUtils extends AHelper
      *
      * @return false|string
      */
-    static function dateNowDisplay($format = '')
+    public static function dateNowDisplay($format = '')
     {
         if (empty($format)) {
             $registry = Registry::getInstance();
@@ -680,7 +678,7 @@ class AHelperUtils extends AHelper
      *
      * @return int|null
      */
-    static function dateFromFormat($string_date, $date_format, $timezone = null)
+    public static function dateFromFormat($string_date, $date_format, $timezone = null)
     {
         $date = new DateTime();
         $timezone = is_null($timezone) ? $date->getTimezone() : $timezone;
@@ -702,7 +700,7 @@ class AHelperUtils extends AHelper
      *
      * @return array|bool
      */
-    static function strptime($date, $format)
+    public static function strptime($date, $format)
     {
         if (function_exists("\strptime")) {
             return strptime($date, $format);
@@ -740,7 +738,7 @@ class AHelperUtils extends AHelper
      *
      * @return \SimpleXMLElement | false
      */
-    static function getExtensionConfigXml($extension_txt_id)
+    public static function getExtensionConfigXml($extension_txt_id)
     {
         $registry = Registry::getInstance();
         $result = $registry->get($extension_txt_id.'_configXML');
@@ -884,7 +882,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function startStorefrontSession($user_id, $data = array())
+    public static function startStorefrontSession($user_id, $data = array())
     {
         //NOTE: do not allow create sf-session via POST-request.
         // Related to language-switcher and enabled maintenance mode(see usages)
@@ -898,8 +896,8 @@ class AHelperUtils extends AHelper
         }
         session_write_close();
         $session = new ASession(ABC::env('UNIQUE_ID')
-                                ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
-                                : 'AC_SF_PHPSESSID'
+            ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
+            : 'AC_SF_PHPSESSID'
         );
         foreach ($data as $k => $v) {
             $session->data[$k] = $v;
@@ -919,7 +917,7 @@ class AHelperUtils extends AHelper
      *
      * @return array with sort order added.
      */
-    static function build_sort_order($array, $min, $max, $sort_direction = 'asc')
+    public static function build_sort_order($array, $min, $max, $sort_direction = 'asc')
     {
         if (empty($array)) {
             return array();
@@ -968,7 +966,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_assoc($test_array)
+    public static function is_assoc($test_array)
     {
         return is_array($test_array) && array_diff_key($test_array, array_keys(array_keys($test_array)));
     }
@@ -978,7 +976,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function project_base()
+    public static function project_base()
     {
         $base = 'PGEgaHJlZj0iaHR0cDovL3d3dy5hYmFudGVjYXJ0LmNvbSIgdGFyZ2V0PSJfYWJhbnRlY2FydCI';
         $base .= 'gdGl0bGU9IklkZWFsIE9wZW5Tb3VyY2UgRS1jb21tZXJjZSBTb2x1dGlvbiI+QWJhbnRlQ2FydDwvYT4=';
@@ -993,7 +991,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_html($test_string)
+    public static function is_html($test_string)
     {
         if ($test_string != strip_tags($test_string)) {
             return true;
@@ -1012,7 +1010,7 @@ class AHelperUtils extends AHelper
      *
      * @return String containing either just a URL or a complete image tag
      */
-    static function getGravatar($email = '', $s = 80, $d = 'mm', $r = 'g')
+    public static function getGravatar($email = '', $s = 80, $d = 'mm', $r = 'g')
     {
         if (empty($email)) {
             return null;
@@ -1024,7 +1022,7 @@ class AHelperUtils extends AHelper
         return $url;
     }
 
-    static function compressTarGZ($tar_filename, $tar_dir, $compress_level = 5)
+    public static function compressTarGZ($tar_filename, $tar_dir, $compress_level = 5)
     {
         if (!$tar_filename || !$tar_dir) {
             return false;
@@ -1087,7 +1085,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function gzip($src, $level = 5, $dst = false)
+    public static function gzip($src, $level = 5, $dst = false)
     {
         if (!$src) {
             return false;
@@ -1125,7 +1123,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function randomWord($length = 4)
+    public static function randomWord($length = 4)
     {
         $new_code_length = 0;
         $new_code = '';
@@ -1160,7 +1158,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function genToken($chars = 32)
+    public static function genToken($chars = 32)
     {
         $token = '';
         $codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1180,7 +1178,7 @@ class AHelperUtils extends AHelper
      * @param $zip_filename
      * @param $zip_dir
      */
-    static function compressZIP($zip_filename, $zip_dir)
+    public static function compressZIP($zip_filename, $zip_dir)
     {
     }
 
@@ -1189,7 +1187,7 @@ class AHelperUtils extends AHelper
      *
      * @return mixed|string
      */
-    static function getMimeType($filename)
+    public static function getMimeType($filename)
     {
         $filename = (string)$filename;
         $mime_types = array(
@@ -1270,7 +1268,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function canChangeExecTime()
+    public static function canChangeExecTime()
     {
         $old_set = ini_get('max_execution_time');
         set_time_limit('1234');
@@ -1286,7 +1284,7 @@ class AHelperUtils extends AHelper
     /**
      * @return int|string
      */
-    static function getMemoryLimitInBytes()
+    public static function getMemoryLimitInBytes()
     {
         $size_str = ini_get('memory_limit');
         switch (substr($size_str, -1)) {
@@ -1309,7 +1307,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_valid_url($validate_url)
+    public static function is_valid_url($validate_url)
     {
         if (filter_var($validate_url, FILTER_VALIDATE_URL) === false) {
             return false;
@@ -1325,7 +1323,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function get_url_path($url)
+    public static function get_url_path($url)
     {
         $url_path1 = parse_url($url, PHP_URL_PATH);
         //do we have path with php in the string? Treat case: /abantecart120/index.php/storefront/view/resources/images/18/6c/index.php
@@ -1346,7 +1344,7 @@ class AHelperUtils extends AHelper
      * @param $depth int/string  - depth of the trace back ('full' to get complete stack)
      * @return string
     */
-    static function genExecTrace($depth = 5)
+    public static function genExecTrace($depth = 5)
     {
         $e = new Exception();
         $trace = explode("\n", $e->getTraceAsString());
@@ -1371,7 +1369,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function is_writable_dir($dir)
+    public static function is_writable_dir($dir)
     {
         if (empty($dir)) {
             return false;
@@ -1391,7 +1389,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function make_writable_dir($dir)
+    public static function make_writable_dir($dir)
     {
         if (empty($dir)) {
             return false;
@@ -1422,7 +1420,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    static function make_writable_path($path)
+    public static function make_writable_path($path)
     {
         if (empty($path)) {
             return false;
@@ -1451,7 +1449,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function human_filesize($bytes, $decimals = 2)
+    public static function human_filesize($bytes, $decimals = 2)
     {
         $sz = 'BKMGTP';
         $factor = floor((strlen($bytes) - 1) / 3);
@@ -1466,7 +1464,7 @@ class AHelperUtils extends AHelper
      *
      * @return array|bool
      */
-    static function get_image_size($filename)
+    public static function get_image_size($filename)
     {
         if (file_exists($filename) && ($info = getimagesize($filename))) {
             return array(
@@ -1495,7 +1493,7 @@ class AHelperUtils extends AHelper
      *
      * @return string / path to new image
      */
-    static function check_resize_image($orig_image, $new_image, $width, $height, $quality)
+    public static function check_resize_image($orig_image, $new_image, $width, $height, $quality)
     {
         if (!is_file($orig_image) || empty($new_image)) {
             return null;
@@ -1550,7 +1548,7 @@ class AHelperUtils extends AHelper
      * @return object|false
      * @throws AException
      */
-    static function getInstance($class_name, $args = [], $default_class_name = '', $default_args = [])
+    public static function getInstance($class_name, $args = [], $default_class_name = '', $default_args = [])
     {
         $instance = false;
         if (!$class_name) {
@@ -1569,9 +1567,7 @@ class AHelperUtils extends AHelper
         }
 
         foreach ($classes as $class => $arguments) {
-            //check is class loaded
-
-            //try to load file
+            //check if class loaded & try to load file
             if (!class_exists($class)) {
                 $rel_path = self::getFileNameByClass($class);
                 $abs_path = ABC::env('DIR_ROOT').$rel_path;
@@ -1609,7 +1605,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    static function getFileNameByClass($class_name)
+    public static function getFileNameByClass($class_name)
     {
         $dirname = dirname(str_replace('\\', DS, $class_name));
         $dirname = ltrim($dirname, DS);
@@ -1621,13 +1617,13 @@ class AHelperUtils extends AHelper
         unset($split[array_search('', $split)], $split[array_search('a', $split)]);
 
         $rel_path = ABC::env('DIR_ROOT').$dirname.DS.implode('_', $split).'.php';
-        if(!is_file($rel_path)){
-            $rel_path = $dirname.DS.str_replace(' ','',ucwords(implode(' ', $split))).'.php';
+        if (!is_file($rel_path)) {
+            $rel_path = $dirname.DS.str_replace(' ', '', ucwords(implode(' ', $split))).'.php';
         }
         return $rel_path;
     }
 
-    static function extractArchive($archive_filename, $dest_directory)
+    public static function extractArchive($archive_filename, $dest_directory)
     {
         $archive = UnifiedArchive::open($archive_filename);
         if (is_null($archive)) {
@@ -1663,7 +1659,7 @@ class AHelperUtils extends AHelper
      * @return array
      * @throws AException
      */
-    static function createJob(array $data, $handler_alias = 'AJobManager')
+    public static function createJob(array $data, $handler_alias = 'AJobManager')
     {
 
         $class_name = ABC::getFullClassName($handler_alias);
@@ -1690,7 +1686,7 @@ class AHelperUtils extends AHelper
      * Function returns array with user_type, user name and user id for database audit log
      * This data will be set as database global variables and used by database triggers
      */
-    static function recognizeUser()
+    public static function recognizeUser()
     {
 
         if (php_sapi_name() == 'cli') {
@@ -1733,7 +1729,7 @@ class AHelperUtils extends AHelper
      *
      * @return array|bool
      */
-    static function setDBUserVars()
+    public static function setDBUserVars()
     {
         if (!class_exists(Registry::class)) {
             return [];

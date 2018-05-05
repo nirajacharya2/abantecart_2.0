@@ -18,14 +18,23 @@
 
 namespace abc\modules\workers;
 
+use abc\commands\BaseCommand;
 use Exception;
 
 abstract class ABaseWorker
 {
     public $errors = [];
-    public $run_log = [];
+    public $output = [];
     public $hasError;
     protected $reRunIfFailed = false;
+    protected $outputType = 'cli';
+    protected $EOF = "\n";
+
+    public function __construct()
+    {
+        $this->outputType = BaseCommand::$outputType;
+        $this->EOF = BaseCommand::$EOF;
+    }
 
     abstract public function getModuleMethods();
 
@@ -78,8 +87,11 @@ abstract class ABaseWorker
 
     public function echoCli($text)
     {
-        $this->run_log[] = $text;
-        echo $text."\n";
+        if ($this->outputType == 'cli') {
+            echo $text.$this->EOF;
+        } else {
+            $this->output[] = $text;
+        }
     }
 
     public function isReRunAllowed()

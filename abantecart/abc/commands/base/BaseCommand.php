@@ -46,12 +46,14 @@ class BaseCommand implements ABCExecInterface
      */
     public $verbose = 0;
 
-    public $EOF = "\n";
-
     /**
      * @var array
      */
     protected $output = [];
+
+    public static $EOF = "\n";
+    public static $outputType = "cli";
+
 
     public function __construct()
     {
@@ -94,11 +96,19 @@ class BaseCommand implements ABCExecInterface
 
     protected function write($output)
     {
-        $this->output[] = $output;
+        if ($this::$outputType == 'cli') {
+            echo $output.$this::$EOF;
+        } else {
+            if (is_array($output)) {
+                $this->output = array_merge($this->output, $output);
+            } else {
+                $this->output[] = $output;
+            }
+        }
     }
 
     public function getOutput()
     {
-        return implode($this->EOF, $this->output);
+        return implode($this::$EOF, $this->output);
     }
 }
