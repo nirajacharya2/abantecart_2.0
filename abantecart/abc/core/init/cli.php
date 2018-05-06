@@ -193,7 +193,6 @@ function showResult($result)
         foreach ($result as $error) {
             showError($error);
         }
-        exit(1);
     }
 }
 

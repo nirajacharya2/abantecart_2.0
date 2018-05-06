@@ -21,7 +21,7 @@ namespace abc\modules\workers;
 use abc\commands\BaseCommand;
 use Exception;
 
-abstract class ABaseWorker
+abstract class ABaseWorker implements AWorkerInterface
 {
     public $errors = [];
     public $output = [];

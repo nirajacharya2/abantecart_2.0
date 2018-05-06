@@ -27,7 +27,7 @@ use abc\core\lib\ABackup;
  *
  * @package abc\modules
  */
-class ABackupWorker extends ABaseWorker  implements AWorkerInterface
+class ABackupWorker extends ABaseWorker
 {
 
     public $workerName = 'Backup Worker';
