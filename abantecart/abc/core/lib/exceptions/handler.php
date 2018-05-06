@@ -65,8 +65,13 @@ class AExceptionHandler
             $logger_message_type = 'critical';
         }
 
-        if($logger_message_type == 'error' && class_exists('\abc\core\engine\Registry') && Registry::getInstance()->get('log')) {
-            Registry::getInstance()->get('log')->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
+        if($logger_message_type == 'error'
+            && class_exists('\abc\core\engine\Registry')
+            && Registry::getInstance()->get('log')
+        ) {
+            Registry::getInstance()->get('log')->{$logger_message_type}(
+                $e->getMessage().' in '.$e->getFile().':'.$e->getLine()."\n".$this->getExceptionTraceAsString($e)
+            );
         }else {
             /**
              * @var ALog $log
@@ -102,13 +107,14 @@ class AExceptionHandler
         return false;
     }
 
-
     /**
      * Render an exception into a response.
      *
-     * @param  \Exception  $e
-     * @param  string  $to - can be http, cli, debug
+     * @param  \Exception $e
+     * @param  string     $to - can be http, cli, debug
+     *
      * @return mixed
+     * @throws AException
      */
     public function render( Exception $e, $to = 'http')
     {
@@ -161,6 +167,48 @@ class AExceptionHandler
     public function renderForConsole($output, Exception $e)
     {
         (new ConsoleApplication)->renderException($e, $output);
+    }
+
+    /**
+     * @param Exception $exception
+     *
+     * @return string
+     */
+    public function getExceptionTraceAsString(Exception $exception) {
+        $rtn = "";
+        $count = 0;
+        foreach ($exception->getTrace() as $frame) {
+            $args = "";
+            if (isset($frame['args'])) {
+                $args = array();
+                foreach ($frame['args'] as $arg) {
+                    if (is_string($arg)) {
+                        $args[] = "'" . $arg . "'";
+                    } elseif (is_array($arg)) {
+                        $args[] = "Array";
+                    } elseif (is_null($arg)) {
+                        $args[] = 'NULL';
+                    } elseif (is_bool($arg)) {
+                        $args[] = ($arg) ? "true" : "false";
+                    } elseif (is_object($arg)) {
+                        $args[] = get_class($arg);
+                    } elseif (is_resource($arg)) {
+                        $args[] = get_resource_type($arg);
+                    } else {
+                        $args[] = $arg;
+                    }
+                }
+                $args = join(", ", $args);
+            }
+            $rtn .= sprintf( "#%s %s(%s): %s(%s)\n",
+                                     $count,
+                                     $frame['file'],
+                                     $frame['line'],
+                                     $frame['function'],
+                                     $args );
+            $count++;
+        }
+        return $rtn;
     }
 
 }

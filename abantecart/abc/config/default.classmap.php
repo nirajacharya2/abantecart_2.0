@@ -10,6 +10,7 @@ use abc\core\lib\ALog as ALog;
 use abc\core\lib\ABackup as ABackup;
 
 return [
+    'AViewRender' => \abc\core\view\AViewDefaultRender::class,
     'ALog'                 => [
         ALog::class,
         //all errors

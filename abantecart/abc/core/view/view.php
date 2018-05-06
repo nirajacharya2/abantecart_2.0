@@ -26,17 +26,19 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
+
+require_once __DIR__.DS.'ViewRenderBase.php';
 
 /**
  * Class AView
  *
- * @property \abc\core\lib\AConfig               $config
+ * @property \abc\core\lib\AConfig          $config
  * @property \abc\core\engine\ExtensionsAPI $extensions
- * @property \abc\core\lib\AResponse             $response
- * @property \abc\core\cache\ACache                $cache
+ * @property \abc\core\lib\AResponse        $response
+ * @property \abc\core\cache\ACache         $cache
  *
  */
 class AView
@@ -92,7 +94,9 @@ class AView
 
     /**
      * @param \abc\core\engine\Registry $registry
-     * @param int $instance_id
+     * @param int                       $instance_id
+     *
+     * @throws \abc\core\lib\AException
      */
     public function __construct($registry, $instance_id)
     {
@@ -100,16 +104,23 @@ class AView
         $this->has_extensions = $this->registry->has('extensions');
         if ($this->config) {
             $this->default_template = ABC::env('IS_ADMIN')
-                                      ? $this->config->get('admin_template')
-                                      : $this->config->get('config_storefront_template');
+                ? $this->config->get('admin_template')
+                : $this->config->get('config_storefront_template');
         }
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
         $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DS;
         $this->instance_id = $instance_id;
+
+        $view_render_class = ABC::getFullClassName('AViewRender');
         /**
          * @var AViewRenderInterface $render_instance
          */
-        $render_instance = AHelperUtils::getInstance(ABC::env('VIEW_RENDER_CLASS'), [$this, $instance_id], '\abc\core\view\AViewDefaultRender');
+        $render_instance = AHelperUtils::getInstance(
+            $view_render_class,
+            [$this, $instance_id],
+            '\abc\core\view\AViewDefaultRender',
+            [$this, $instance_id]
+        );
         //Note: this call will cause fatal error if class is not implements AViewRender interface!
         $this->setRender($render_instance);
     }
@@ -126,8 +137,10 @@ class AView
 
     /**
      * To allow to call methods of render from any point of code
+     *
      * @param string $function_name
-     * @param array $args
+     * @param array  $args
+     *
      * @return mixed|null
      */
     public function __call($function_name, $args)
@@ -142,14 +155,16 @@ class AView
     /**
      * @param AViewRenderInterface $render
      */
-    public function setRender(AViewRenderInterface $render){
+    public function setRender(AViewRenderInterface $render)
+    {
         $this->render = $render;
     }
 
     /**
      * @return AViewDefaultRender|AViewRender|false
      */
-    public function getRender(){
+    public function getRender()
+    {
         return $this->render;
     }
 
@@ -189,7 +204,9 @@ class AView
 
     /**
      * Return array with available variables and types in the view
+     *
      * @param string $key - optional parameter to specify variable type of array.
+     *
      * @return array
      */
     public function getVariables($key = '')
@@ -210,6 +227,7 @@ class AView
 
     /**
      * @param string $key - optional parameter for better access from hook that called by "_UpdateData".
+     *
      * @return array | mixed - reference to $this->data
      */
     public function &getData($key = '')
@@ -233,7 +251,7 @@ class AView
         if (empty($template_variable)) {
             return false;
         }
-        if ( !is_null($value) ) {
+        if (!is_null($value)) {
             $this->data[$template_variable] = $value;
         } else {
             $this->data[$template_variable] = $default_value;
@@ -256,7 +274,7 @@ class AView
         if (empty($template_variable)) {
             return false;
         }
-        if ( ! is_null($value)) {
+        if (!is_null($value)) {
             $this->data[$template_variable] = $this->data[$template_variable].$value;
         } else {
             $this->data[$template_variable] = $this->data[$template_variable].$default_value;
@@ -271,20 +289,23 @@ class AView
      */
     public function batchAssign($assign_arr)
     {
-        if (empty($assign_arr) || ! is_array($assign_arr)) {
+        if (empty($assign_arr) || !is_array($assign_arr)) {
             return false;
         }
 
         foreach ($assign_arr as $key => $value) {
             //when key already defined and type of old and new values are different send warning in debug-mode
             if (isset($this->data[$key]) && is_object($this->data[$key])) {
-                $warning_text = 'Warning! Variable "'.$key.'" in template "'.$this->template.'" overriding value and data type "object." ';
-                $warning_text .= 'Possibly need to review your code! (also check that extensions do not load language definitions in UpdateData hook).';
+                $warning_text = 'Warning! Variable "'.$key.'" in template "'
+                    .$this->template.'" overriding value and data type "object." ';
+                $warning_text .= 'Possibly need to review your code! (also check that '
+                    .'extensions do not load language definitions in UpdateData hook).';
                 $warning = new AWarning($warning_text);
                 $warning->toDebug();
                 continue; // prevent overriding.
             } elseif (isset($this->data[$key]) && gettype($this->data[$key]) != gettype($value)) {
-                $warning_text = 'Warning! Variable "'.$key.'" in template "'.$this->template.'" overriding value and data type "'.gettype($this->data[$key]).'" ';
+                $warning_text = 'Warning! Variable "'.$key.'" in template "'.$this->template
+                    .'" overriding value and data type "'.gettype($this->data[$key]).'" ';
                 $warning_text .= 'Forcing new data type '.gettype($value).'. Possibly need to review your code!';
                 $warning = new AWarning($warning_text);
                 $warning->toDebug();
@@ -301,7 +322,7 @@ class AView
      */
     public function addHookVar($name, $value)
     {
-        if ( ! empty($name)) {
+        if (!empty($name)) {
             $this->hook_vars[$name] .= $value;
         }
     }
@@ -323,12 +344,12 @@ class AView
     public function render()
     {
         // If no template return empty. We might have controller that has no templates
-        if ( ! empty($this->template) && $this->enableOutput) {
+        if (!empty($this->template) && $this->enableOutput) {
             $compression = '';
             if ($this->config) {
                 $compression = $this->config->get('config_compression');
             }
-            if ( ! empty($this->output)) {
+            if (!empty($this->output)) {
                 $this->response->setOutput($this->output, $compression);
             } else {
                 $this->response->setOutput($this->fetch($this->template), $compression);
@@ -338,10 +359,11 @@ class AView
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function getOutput()
     {
-        return ! empty($this->output) ? $this->output : ! empty($this->template) ? $this->fetch($this->template) : '';
+        return !empty($this->output) ? $this->output : !empty($this->template) ? $this->fetch($this->template) : '';
     }
 
     /**
@@ -360,6 +382,7 @@ class AView
      * @param $filename
      *
      * @return string
+     * @throws \Exception
      */
     public function fetch($filename)
     {
@@ -370,15 +393,18 @@ class AView
             $file = $filename;
         } else {
             //Build the path to the template file
-            if ( ABC::env('INSTALL') ) {
+            if (ABC::env('INSTALL')) {
                 $file = ABC::env('DIR_INSTALL').ABC::env('DIRNAME_TEMPLATES').$filename;
             } else {
-                $file = $this->_get_template_resource_path( ABC::env('DIR_TEMPLATES'), $filename, 'full');
+                $file = $this->getTemplateResourcePath(ABC::env('DIR_TEMPLATES'), $filename, 'full');
             }
 
             if ($this->has_extensions && $result = $this->extensions->isExtensionResource('T', $filename)) {
                 if (is_file($file)) {
-                    $warning = new AWarning("Extension <b>".$result['extension']."</b> overrides core template with <b>".$filename."</b>");
+                    $warning = new AWarning(
+                        "Extension <b>".$result['extension']
+                        ."</b> overrides core template with <b>".$filename."</b>"
+                    );
                     $warning->toDebug();
                 }
                 $file = $result['file'];
@@ -387,7 +413,8 @@ class AView
 
         if (empty($file)) {
             $error = new AError(
-                'Error: Unable to identify file path to template '.$filename.'! Check blocks in the layout or enable debug mode to get more details. ',
+                'Error: Unable to identify file path to template '
+                .$filename.'! Check blocks in the layout or enable debug mode to get more details. ',
                 AC_ERR_LOAD
             );
             $error->toDebug()->toLog();
@@ -417,7 +444,8 @@ class AView
             if ($this->config && $this->config->get('config_html_cache') && $this->html_cache_key) {
                 if ($this->cache->save_html_cache($this->html_cache_key, $content) === false) {
                     $error = new AError(
-                        'Error: Cannot create HTML cache for file '.$this->html_cache_key.'! Directory to write cache is not writable',
+                        'Error: Cannot create HTML cache for file '
+                        .$this->html_cache_key.'! Directory to write cache is not writable',
                         AC_ERR_LOAD);
                     $error->toDebug()->toLog();
                 }
@@ -425,8 +453,11 @@ class AView
             return $content;
         } else {
             $error = new AError(
-                    'Error: Cannot load template '.$filename.'! File '.$file.' is missing or incorrect. Check blocks in the layout or enable debug mode to get more details. ',
-                    AC_ERR_LOAD);
+                'Error: Cannot load template '
+                .$filename.'! File '.$file
+                .' is missing or incorrect. '
+                .'Check blocks in the layout or enable debug mode to get more details. ',
+                AC_ERR_LOAD);
             $error->toDebug()->toLog();
         }
         return '';
@@ -434,33 +465,35 @@ class AView
 
     /**
      * Storefront function to return path to the resource
+     *
      * @param string $filename
      * @param string $mode Mode to return format: http | file
+     *
      * @return string with relative path
      */
     public function templateResource($filename, $mode = 'http')
     {
-        if ( ! $filename) {
+        if (!$filename) {
             return null;
         }
         $http_path = '';
-        $res_arr = $this->_extensions_resource_map($filename, $mode);
+        $res_arr = $this->extensionsResourceMap($filename, $mode);
 
         //get first exact template extension resource or default template resource otherwise.
         if (isset($res_arr['original'][0])) {
             $output = $res_arr['original'][0];
         } else {
-            if ( isset($res_arr['default'][0]) ) {
+            if (isset($res_arr['default'][0])) {
                 $output = $res_arr['default'][0];
             } else {
                 //no extension found, use resource from core templates
                 $mode2 = $mode == 'file' ? '' : 'relative';
-                $src_path = ! $mode2 ? ABC::env('DIR_TEMPLATES') : ABC::env('DIR_PUBLIC').'templates/';
-                $output = $this->_get_template_resource_path( $src_path, $filename, $mode2 );
+                $src_path = !$mode2 ? ABC::env('DIR_TEMPLATES') : ABC::env('DIR_PUBLIC').'templates/';
+                $output = $this->getTemplateResourcePath($src_path, $filename, $mode2);
             }
         }
 
-        if ( ! in_array(pathinfo($filename, PATHINFO_EXTENSION), array('tpl', 'php'))) {
+        if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array('tpl', 'php'))) {
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $http_path = $this->data['http_dir'];
         }
@@ -483,7 +516,7 @@ class AView
      */
     public function isTemplateExists($filename)
     {
-        if ( ! $filename) {
+        if (!$filename) {
             return false;
         }
 
@@ -510,12 +543,14 @@ class AView
 
     /**
      * Check if HTML Cache file present
+     *
      * @param string $key
+     *
      * @return bool
      */
     public function checkHTMLCache($key)
     {
-        if ( ! $key) {
+        if (!$key) {
             return false;
         }
         $this->html_cache_key = $key;
@@ -620,9 +655,9 @@ class AView
      *
      * @return string
      */
-    protected function _extension_templates_dir($extension_name)
+    protected function extensionTemplatesDir($extension_name)
     {
-        return $this->_extension_section_dir($extension_name).ABC::env('DIRNAME_TEMPLATES');
+        return $this->extensionSectionDir($extension_name).ABC::env('DIRNAME_TEMPLATES');
     }
 
     /**
@@ -632,7 +667,7 @@ class AView
      *
      * @return string
      */
-    protected function _extension_section_dir($extension_name)
+    protected function extensionSectionDir($extension_name)
     {
         return ABC::env('DIR_APP_EXTENSIONS').$extension_name.DS;
     }
@@ -645,7 +680,7 @@ class AView
      *
      * @return array
      */
-    protected function _extensions_resource_map($filename, $mode = 'file')
+    protected function extensionsResourceMap($filename, $mode = 'file')
     {
         if (empty($filename)) {
             return array();
@@ -657,11 +692,14 @@ class AView
         $test_resource_mode = $mode != 'file' ? 'relative' : $mode;
         foreach ($extensions as $ext) {
             if ($test_resource_mode == 'relative') {
-                $source_dir = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_EXTENSIONS').$ext.DS.ABC::env('DIRNAME_TEMPLATES');
+                $source_dir = ABC::env('DIR_PUBLIC')
+                    .ABC::env('DIRNAME_EXTENSIONS')
+                    .$ext.DS
+                    .ABC::env('DIRNAME_TEMPLATES');
             } else {
-                $source_dir = $this->_extension_templates_dir($ext);
+                $source_dir = $this->extensionTemplatesDir($ext);
             }
-            $res_arr = $this->_test_template_resource_paths($source_dir, $filename, $test_resource_mode, $ext);
+            $res_arr = $this->testTemplateResourcePaths($source_dir, $filename, $test_resource_mode, $ext);
             if ($res_arr) {
                 $output[$res_arr['match']][] = $res_arr['path'];
             }
@@ -678,10 +716,10 @@ class AView
      *
      * @return mixed
      */
-    protected function _get_template_resource_path($path, $filename, $mode)
+    protected function getTemplateResourcePath($path, $filename, $mode)
     {
         //look into extensions first
-        $res_arr = $this->_extensions_resource_map($filename);
+        $res_arr = $this->extensionsResourceMap($filename);
         //get first exact template extension resource or default template resource otherwise.
         if (isset($res_arr['original'][0])) {
             return $res_arr['original'][0];
@@ -690,7 +728,7 @@ class AView
                 return $res_arr['default'][0];
             }
         }
-        $template_path_arr = $this->_test_template_resource_paths($path, $filename, $mode);
+        $template_path_arr = $this->testTemplateResourcePaths($path, $filename, $mode);
         return $template_path_arr['path'];
     }
 
@@ -704,7 +742,7 @@ class AView
      *
      * @return array|null
      */
-    protected function _test_template_resource_paths($path, $filename, $mode = 'relative', $extension_txt_id = '')
+    protected function testTemplateResourcePaths($path, $filename, $mode = 'relative', $extension_txt_id = '')
     {
         $template = $this->default_template;
         $match = 'original';
@@ -719,32 +757,31 @@ class AView
                 $public_dir_pre = $dirname_templates;
             }
         } else {
-                $public_dir_pre = ABC::env('IS_ADMIN') ? $dirname_templates : $dir_public.$dirname_templates;
+            $public_dir_pre = ABC::env('IS_ADMIN') ? $dirname_templates : $dir_public.$dirname_templates;
         }
 
-        $ret_path = $this->_get_path(
-                                    $path,
-                                    $public_dir_pre,
-                                    $template.$slash.$section_dirname.$filename, $mode
+        $ret_path = $this->getPath(
+            $path,
+            $public_dir_pre,
+            $template.$slash.$section_dirname.$filename, $mode
         );
         //try to find file in default template of extension or core
-        if(!$ret_path){
-            $ret_path = $this->_get_path(
-                                        $path,
-                                        $public_dir_pre,
-                                        'default'.$slash.$section_dirname.$filename, $mode
+        if (!$ret_path) {
+            $ret_path = $this->getPath(
+                $path,
+                $public_dir_pre,
+                'default'.$slash.$section_dirname.$filename, $mode
             );
-            if($ret_path){
+            if ($ret_path) {
                 $match = 'default';
             } else {
-                $ret_path = $this->_get_path(
-                                            $dir_public.$dirname_templates,
-                                            $dirname_templates,
-                                            'default'.$slash.$section_dirname.$filename, $mode
+                $ret_path = $this->getPath(
+                    $dir_public.$dirname_templates,
+                    $dirname_templates,
+                    'default'.$slash.$section_dirname.$filename, $mode
                 );
             }
         }
-
 
         //return path. Empty path indicates, nothing found
         if ($ret_path) {
@@ -759,13 +796,14 @@ class AView
 
     /**
      * @param string $full_path_pre - full path to directory which contains template file
-     * @param string $rel_path_pre - relative path to directory which contains template file
+     * @param string $rel_path_pre  - relative path to directory which contains template file
      * @param string $template_path - relative path of template file. starts with template_txt_id
-     * @param string $mode - can be "relative" or other. Mode of returning (full path or relative)
+     * @param string $mode          - can be "relative" or other. Mode of returning (full path or relative)
      *
      * @return string
      */
-    protected function _get_path($full_path_pre, $rel_path_pre, $template_path, $mode = ''){
+    protected function getPath($full_path_pre, $rel_path_pre, $template_path, $mode = '')
+    {
         $full_file_path = $full_path_pre.$template_path;
         if (is_file($full_file_path)) {
             $ret_path = $full_path_pre.$template_path;
@@ -784,7 +822,7 @@ class AView
      */
     public function _fetch($file)
     {
-        if ( ! file_exists($file)) {
+        if (!file_exists($file)) {
             return '';
         }
 

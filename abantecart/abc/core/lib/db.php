@@ -165,7 +165,7 @@ class ADB
      *
      * @return bool|\stdClass
      *
-     * @throws \Exception
+     * @throws AException
      */
     public function _query($sql, $noexcept = false)
     {
@@ -188,9 +188,9 @@ class ADB
 
             return $output;
         } catch (QueryException $ex) {
-            $this->error = 'SQL Error: '.$ex->getMessage().'<br />Error No: '.$ex->getCode().'<br />SQL: '.$sql;
+            $this->error = 'SQL Error: '.$ex->getMessage()."\nError No: ".$ex->getCode()."\nSQL: \n".$sql;
             if (!$noexcept) {
-                throw new \Exception(AC_ERR_MYSQL, $this->error);
+                throw new AException($this->error, AC_ERR_MYSQL);
             } else {
                 return false;
             }

@@ -1,28 +1,27 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2017 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2018 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use DebugBar\Bridge\MonologCollector;
@@ -47,12 +46,22 @@ final class ALog
      * @param string $security_filename
      * @param string $warning_filename
      * @param string $debug_filename
+     *
+     * @throws \DebugBar\DebugBarException
      */
-    public function __construct( string $application_log_filename, $security_filename = '', $warning_filename = '', $debug_filename = '' )
+    public function __construct(
+        string $application_log_filename,
+        $security_filename = '',
+        $warning_filename = '',
+        $debug_filename = '' )
     {
         $dir_logs = ABC::env('DIR_LOGS');
         if ( !$dir_logs || !is_writable($dir_logs) ) {
-            error_log('Error: Log directory "'.$dir_logs.'" is non-writable or undefined! Please check or change permissions.');
+            error_log(
+                'Error: Log directory "'
+                .$dir_logs
+                .'" is non-writable or undefined! Please check or change permissions.'
+            );
         }
 
         if( !$application_log_filename ){
@@ -90,8 +99,8 @@ final class ALog
         $dateFormat = "Y-m-d H:i:s";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         $output = "%datetime% > ".ABC::env('APP_NAME')." v" . ABC::env('VERSION') ." > %level_name% > %message%\n";
-        // finally, create a formatter
-        $formatter = new LineFormatter($output, $dateFormat);
+        // create a formatter which allows line breaks in the message
+        $formatter = new LineFormatter($output, $dateFormat, true);
         $stream->setFormatter($formatter);
         $logger = new Logger('error_logger');
         $debug_bar = ADebug::$debug_bar;
@@ -167,6 +176,7 @@ final class ALog
             return null;
         }
         $this->loggers['error']->error($message);
+        return true;
     }
     /**
      * @param string $message

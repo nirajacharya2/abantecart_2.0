@@ -1,11 +1,10 @@
 <?php
-namespace abc\core\view;
-interface AViewRenderInterface
-{
-    public function fetch($file, $data);
-}
 
-class AViewRender
+namespace abc\core\view;
+
+require_once __DIR__.DS.'ViewRenderInterface.php';
+
+abstract class AViewRender implements AViewRenderInterface
 {
     protected $view;
 
@@ -24,11 +23,12 @@ class AViewRender
         return $this->view->{$name};
     }
 
-
     /**
      * To allow to call AView methods from tpl-files
+     *
      * @param string $function_name
-     * @param array $args
+     * @param array  $args
+     *
      * @return mixed|null
      */
     public function __call($function_name, $args)

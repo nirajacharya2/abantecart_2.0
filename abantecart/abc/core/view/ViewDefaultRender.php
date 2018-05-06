@@ -1,12 +1,12 @@
 <?php
 
 namespace abc\core\view;
-require 'interface.php';
-class AViewDefaultRender extends AViewRender implements AViewRenderInterface
+
+class AViewDefaultRender extends AViewRender
 {
     public function __construct($view, $instance_id = 0)
     {
-        parent::__construct($view,$instance_id);
+        parent::__construct($view, $instance_id);
     }
 
     /**

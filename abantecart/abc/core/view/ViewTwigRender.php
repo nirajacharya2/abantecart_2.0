@@ -6,7 +6,7 @@ use abc\core\lib\AException;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
-class AViewTwigRender extends AViewRender implements AViewRenderInterface
+class AViewTwigRender extends AViewRender
 {
     protected $view;
     protected $twig;
@@ -15,13 +15,14 @@ class AViewTwigRender extends AViewRender implements AViewRenderInterface
     public function __construct($view, $instance_id = 0)
     {
         //check vendor classes
-        if(!class_exists('Twig_Environment')){
-            throw new AException(AC_ERR_LOAD,'Twig_Environment class not found!');
+        if (!class_exists('Twig_Environment')) {
+            throw new AException(AC_ERR_LOAD, 'Twig_Environment class not found!');
         }
-        parent::__construct($view,$instance_id);
+        parent::__construct($view, $instance_id);
     }
 
-    public function setTwigEnv(array $env = []){
+    public function setTwigEnv(array $env = [])
+    {
         $this->twig_env = array_merge($this->twig_env, $env);
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\core\lib;
 
 use ErrorException;
@@ -18,13 +19,13 @@ class AHandleExceptions
     /**
      * Bootstrap the given application.
      *
-     * @param array $config
+     * @param array  $config
      *
-     * @param object $handler
+     * @param AExceptionHandler $handler
      *
      * @return void
      */
-    public function __construct(array $config, $handler )
+    public function __construct(array $config, $handler)
     {
         $this->registry = $config;
         $this->handler = $handler;
@@ -39,15 +40,16 @@ class AHandleExceptions
     /**
      * Convert PHP errors to ErrorException instances.
      *
-     * @param  int  $level
-     * @param  string  $message
-     * @param  string  $file
-     * @param  int  $line
-     * @param  array  $context
+     * @param  int    $level
+     * @param  string $message
+     * @param  string $file
+     * @param  int    $line
+     *
      * @return void
      *
+     * @throws Exception
      */
-    public function handleError($level, $message, $file = '', $line = 0, $context = [])
+    public function handleError($level, $message, $file = '', $line = 0)
     {
         if (error_reporting() & $level) {
             $this->getExceptionHandler()->report(new ErrorException($message, 0, $level, $file, $line));
@@ -62,12 +64,14 @@ class AHandleExceptions
      * the HTTP and Console kernels. But, fatal error exceptions must
      * be handled differently since they are not normal exceptions.
      *
-     * @param  \Throwable  $e
+     * @param  \Throwable $e
+     *
      * @return void
+     * @throws AException
      */
     public function handleException($e)
     {
-        if (! $e instanceof Exception) {
+        if (!$e instanceof Exception) {
             $e = new FatalThrowableError($e);
         }
 
@@ -81,7 +85,7 @@ class AHandleExceptions
             $this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
         } else {
             $debug_bar = ADebug::$debug_bar;
-            if($debug_bar){
+            if ($debug_bar) {
                 $debug_bar['exceptions']->addException($e);
             }
             $this->renderHttpResponse($e);
@@ -91,8 +95,10 @@ class AHandleExceptions
     /**
      * Render an exception to the console.
      *
-     * @param  \Exception  $e
+     * @param  \Exception $e
+     *
      * @return void
+     * @throws AException
      */
     protected function renderForConsole(Exception $e)
     {
@@ -102,8 +108,10 @@ class AHandleExceptions
     /**
      * Render an exception as an HTTP response and send it.
      *
-     * @param  \Exception  $e
+     * @param  \Exception $e
+     *
      * @return void
+     * @throws AException
      */
     protected function renderHttpResponse(Exception $e)
     {
@@ -114,10 +122,11 @@ class AHandleExceptions
      * Handle the PHP shutdown event.
      *
      * @return void
+     * @throws AException
      */
     public function handleShutdown()
     {
-        if (! is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
+        if (!is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
             $this->handleException($this->fatalExceptionFromError($error, 0));
         }
     }
@@ -125,8 +134,9 @@ class AHandleExceptions
     /**
      * Create a new fatal exception instance from an error array.
      *
-     * @param  array  $error
-     * @param  int|null  $traceOffset
+     * @param  array    $error
+     * @param  int|null $traceOffset
+     *
      * @return \Symfony\Component\Debug\Exception\FatalErrorException
      */
     protected function fatalExceptionFromError(array $error, $traceOffset = null)
@@ -139,7 +149,8 @@ class AHandleExceptions
     /**
      * Determine if the error type is fatal.
      *
-     * @param  int  $type
+     * @param  int $type
+     *
      * @return bool
      */
     protected function isFatal($type)
@@ -150,7 +161,7 @@ class AHandleExceptions
     /**
      * Get an instance of the exception handler.
      *
-     * @return \abc\core\lib\AExceptionHandler
+     * @return AExceptionHandler
      */
     protected function getExceptionHandler()
     {
