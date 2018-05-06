@@ -205,7 +205,6 @@ class Job extends BaseCommand
             return false;
         }
 
-        $worker_args = ABC::getClassDefaultArgs($options['worker']);
         $result = false;
         try {
             require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
@@ -213,7 +212,7 @@ class Job extends BaseCommand
             /**
              * @var ABaseWorker $worker
              */
-            $worker = AHelperUtils::getInstance($worker_class_name, $worker_args);
+            $worker = AHelperUtils::getInstance($worker_class_name, $options);
 
             if (!$worker instanceof ABaseWorker) {
                 throw new AException('Class  "'.$worker_class_name.'" is not a worker class!');
@@ -225,7 +224,7 @@ class Job extends BaseCommand
             if (!in_array($run_method, $methods)) {
                 throw new AException('Cannot to find method '.$run_method.' of worker class'.$worker_class_name.'!');
             }
-            $result = call_user_func([$worker, $run_method], $worker_args);
+            $result = call_user_func([$worker, $run_method], $options);
             //pass workers output to command
             if ($worker->output) {
                 $this->write($worker->output);
