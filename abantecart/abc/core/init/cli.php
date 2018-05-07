@@ -29,7 +29,7 @@ use abc\core\lib\{
 };
 
 define('DS', DIRECTORY_SEPARATOR);
-/* TODO Dima, Check wht this is for?  $command never defined
+//NOTE: see $command var inside abc/abcexec file
 if ($command != 'help:help') {
     if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
         echo "Initialisation...\n";
@@ -44,9 +44,14 @@ if ($command != 'help:help') {
                 exit;
             }
 
-            echo "Composer phar-package not found.\nTrying to download Latest Composer into abc/system/temp directory. Please wait..\n";
-            if (!copy('https://getcomposer.org/composer.phar', dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar')) {
-                exit("Error: Tried to download latest composer.phar file from https://getcomposer.org/composer.phar but failed.\n".
+            echo "Composer phar-package not found.\n"
+                ."Trying to download Latest Composer into abc/system/temp directory. Please wait..\n";
+            if (!copy(
+                'https://getcomposer.org/composer.phar',
+                dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar')
+            ) {
+                exit("Error: Tried to download latest composer.phar file"
+                    ." from https://getcomposer.org/composer.phar but failed.\n".
                     " Please download it manually into "
                     .dirname(__DIR__).DS."system".DS."temp directory\n"
                     ." OR run composer manually (see composer.json file)");
@@ -57,7 +62,6 @@ if ($command != 'help:help') {
         php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
     }
 }
-*/
 
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
@@ -141,10 +145,11 @@ $registry = Registry::getInstance();
 require_once('admin.php');
 
 // Loader
+registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
 $registry->set('load', new ALoader($registry));
 
 // URL Class
-$registry->set('html', new AHtml($registry));
+registerClass($registry, 'html', 'AHtml', [$registry], '\abc\core\engine\AHtml', [$registry]);
 
 // Database
 if (ABC::env('DB_CURRENT_DRIVER')) {
@@ -156,23 +161,34 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
 // Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
-    $registry->set('cache', new ACache());
-    $config = new AConfig($registry);
-    $registry->set('config', $config);
-    $registry->set('language', new ALanguageManager($registry));
+    registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
+    registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);
+    registerClass(
+        $registry,
+        'language',
+        'ALanguageManager',
+        [$registry],
+        '\abc\core\lib\ALanguageManager',
+        [$registry]);
 }
+
+registerClass($registry, 'im', 'AIMManager', [], "\abc\core\lib\AIMManager", []);
+registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
+
 // Log
 $log_classname = ABC::getFullClassName('ALog');
 $registry->set('log', new $log_classname('cli.log'));
 
 //session
-$registry->set('session', new ASession('cli'));
+$session_id = 'CLI';
+registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\ASession', [$session_id]);
 
 // Document
-$registry->set('document', new ADocument());
+registerClass($registry, 'document', 'ADocument', [], '\abc\core\lib\ADocument', []);
 
 //main instance of data encryption
-$registry->set('dcrypt', new ADataEncryption());
+registerClass($registry, 'dcrypt', 'ADataEncryption', [], '\abc\core\lib\ADataEncryption', []);
 
 // Extensions api
 $extensions = new ExtensionsApi();
@@ -358,6 +374,23 @@ function getExecutor($name, $silent_mode = false)
             ];
         }
     }
+}
+
+/**
+ * @param Registry $registry
+ * @param string   $item_name
+ * @param string   $alias
+ * @param array    $arguments
+ * @param string   $default_class
+ * @param array    $default_arguments
+ *
+ * @throws \abc\core\lib\AException
+ */
+function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
+{
+    $class_name = ABC::getFullClassName($alias);
+    $instance = AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments);
+    $registry->set($item_name, $instance);
 }
 
 return $registry;
