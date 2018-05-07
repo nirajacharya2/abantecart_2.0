@@ -79,7 +79,7 @@ ABC::env(
         'DIR_CORE'           => $dir_app.'core'.DS,
         'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
         'DIR_MODULES'        => $dir_app.'modules'.DS,
-        'DIR_WORKERS'         => $dir_app.'modules'.DS.'workers'.DS,
+        'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
         'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
         'DIR_CONFIG'         => $dir_app.'config'.DS,
         'DIR_CACHE'          => $dir_app.'system'.DS.'cache'.DS,
@@ -418,7 +418,7 @@ registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core
 //IM
 
 $im_alias = ABC::env('IS_ADMIN') === true ? 'AIMManager' : 'AIM';
-registerClass($registry, 'im', $im_alias, [$registry], "\abc\core\lib\\".$im_alias, [$registry]);
+registerClass($registry, 'im', $im_alias, [], "\abc\core\lib\\".$im_alias, []);
 
 if (!ABC::env('IS_ADMIN')) { // storefront load
     // Customer
@@ -453,5 +453,6 @@ registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\AC
 function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
 {
     $class_name = ABC::getFullClassName($alias);
-    $registry->set($item_name, AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments));
+    $instance = AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments);
+    $registry->set($item_name, $instance);
 }
