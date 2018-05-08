@@ -48,7 +48,7 @@ class ControllerBlocksListingBlock extends AController {
 		$extension_controllers = $this->extensions->getExtensionControllers();
 		$exists = false;
 		foreach($extension_controllers as $ext){
-			if(in_array($this->data['controller'],$ext['storefront'])){
+			if(in_array($this->data['controller'],(array)$ext['storefront'])){
 				$exists = true;
 				break;
 			}
