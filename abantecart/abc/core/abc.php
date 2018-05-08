@@ -1,21 +1,4 @@
 <?php
-/**
- * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
- *
- * Copyright 2011-2018 Belavier Commerce LLC
- *
- * This source file is subject to Open Software License (OSL 3.0)
- * License details is bundled with this package in the file LICENSE.txt.
- * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
- *
- * UPGRADE NOTE:
- * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
- * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
- */
-
 namespace abc\core;
 
 use abc\core\engine\Registry;
@@ -35,12 +18,12 @@ class ABC extends ABCBase
 {
     protected static $env = [];
     protected static $class_map = [];
-    static $stage_name;
+    static $stage_name = '';
 
     /**
      * ABC constructor.
      *
-     * @param string $file
+     * @param string $file - full filename of file that returns active environment stage name
      */
     public function __construct($file = '')
     {
@@ -52,36 +35,86 @@ class ABC extends ABCBase
                 .DS.'config'
                 .DS.'enabled.config.php'
             );
-            $file_name = $stage_name.'.config.php';
-            $file = dirname(__DIR__).DS.'config'.DS.$file_name;
         }
 
-        $config = @include($file);
-        if ($config) {
-            self::env($config);
-            self::$stage_name = $stage_name;
-            //load classmap
-            self::loadClassMap($stage_name);
-        }
+        //load config and classmap from abc/config and extensions/*/config directories
+        self::loadConfig($stage_name);
+
     }
 
+    /**
+     * @return string
+     */
     static function getStageName()
     {
         return self::$stage_name;
     }
 
+    /**
+     * Load default stage environment
+     */
     public function loadDefaultStage()
     {
         //load and put config into environment
-        $config = @include(dirname(__DIR__).DS.'config'.DS.'default.config.php');
-        if (isset($config['default'])) {
-            self::env((array)$config['default']);
-        }
-        self::$stage_name = 'default';
-        //load classmap
-        self::loadClassMap('default');
+        self::loadConfig('default');
     }
 
+    /**
+     * @param string $stage_name
+     *
+     * @return bool
+     */
+    public static function loadConfig($stage_name = 'default')
+    {
+        $file_name = $stage_name.'.config.php';
+        $file = dirname(__DIR__).DS.'config'.DS.$file_name;
+        $config = @include($file);
+        if ($config) {
+            self::env($config);
+            self::$stage_name = $stage_name;
+        } else {
+            //interrupt when stage config not found
+            return false;
+        }
+
+        $ext_dirs = glob(
+            dirname(__DIR__).DS
+            .'extensions'.DS
+            .'*'.DS
+            .'config'.DS
+        );
+
+        foreach ($ext_dirs as $cfg_dir) {
+            $cfg_file = $cfg_dir.DS
+                        .$stage_name.'.config.php';
+
+            if (is_file($cfg_file)) {
+                $ext_config = @include_once($cfg_file);
+                if (is_array($ext_config)) {
+                    self::$env += $ext_config;
+                }
+            } //load default stage values
+            elseif ($stage_name != 'default') {
+                $cfg_file = $cfg_dir.DS
+                            .$stage_name.'.config.php';
+                if (is_file($cfg_file)) {
+                    $ext_config = @include_once($cfg_file);
+                    if (is_array($ext_config)) {
+                        self::$env += $ext_config;
+                    }
+                }
+            }
+        }
+
+        self::loadClassMap($stage_name);
+        return true;
+    }
+
+    /**
+     * @param string $stage_name
+     *
+     * @return bool
+     */
     public static function loadClassMap($stage_name = 'default')
     {
         $classmap_file = dirname(__DIR__).DS.'config'.DS.$stage_name.'.classmap.php';
