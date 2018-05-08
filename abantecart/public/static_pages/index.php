@@ -24,6 +24,7 @@ namespace abc;
 use abc\core\ABC;
 use abc\core\lib\ASession;
 
+define('DS', DIRECTORY_SEPARATOR);
 $dir_app = __DIR__ . '/../../abc/';
 require $dir_app.'core/abc.php';
 // Windows IIS Compatibility

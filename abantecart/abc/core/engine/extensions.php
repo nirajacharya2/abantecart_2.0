@@ -857,6 +857,14 @@ class ExtensionsApi
                 $class = '\abc\core\extension\Extension'.$class_alias;
                 if (class_exists($class)) {
                     $hook_extensions[] = $class;
+                }elseif(class_exists('\\Extension'.$class_alias)){
+
+                    $warning = new AWarning(
+                        'Class '.$class.' not found but class '
+                        .'\\Extension'.$class_alias.' has been founded. '
+                        .'Please check namespace defining in the class file!'
+                    );
+                    $warning->toLog()->toDebug();
                 }
             }
         }
@@ -1243,6 +1251,7 @@ class ExtensionsApi
         $before_args = $args;
         array_shift($before_args);
         $args[] =& $before_args;
+
         call_user_func_array(array($this->extensions, 'before'.$extension_method), $args);
         $args = $before_args;
         array_unshift($args, $baseObject);
@@ -1268,6 +1277,7 @@ class ExtensionsApi
         if ($can_run !== false) {
             $on_args = $args;
             $on_args[] =& $return;
+
             call_user_func_array(array($this->extensions, 'on'.$extension_method), $on_args);
         }
 

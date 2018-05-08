@@ -19,17 +19,15 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\engine\{
-    AHtml, ALoader, ExtensionsApi, Registry
-};
-use abc\core\cache\ACache;
+use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
 use abc\core\helper\AHelperUtils;
-use abc\core\lib\{
-    AConfig, ADataEncryption, ADB, ADocument, ALanguageManager, ALog, ASession
-};
+use abc\core\lib\ADB;
+use Exception;
 
-define('DS', DIRECTORY_SEPARATOR);
-//NOTE: see $command var inside abc/abcexec file
+/**
+ * @var string $command
+ * @see abc/abcexec file
+ */
 if ($command != 'help:help') {
     if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
         echo "Initialisation...\n";
@@ -288,42 +286,48 @@ function showHelpPage($script_name = '', $options = [])
     }
 
     echo "AbanteCart version \e[0;32m".ABC::env('VERSION')."\e[0m\n\n";
-    echo "\e[1;33mUsage:\e[0m\n";
-    echo "\t[command]:[action] [--arg1=value] [--arg2=value]...\n";
-    echo "\n\e[1;33mAvailable commands:\e[0m\n\n";
-    foreach ($help as $command => $help_info) {
-        $output = "\t\e[93m".$command."\n";
-        if (!$help_info) {
-            continue;
-        }
-        foreach ($help_info as $action => $desc) {
-            $output .= "\t\t"."\e[0;32m".$command.":".$action." - ".$desc['description']."\e[0m"."\n";
-            if ($desc['arguments']) {
-                $output .= "\tArguments:\n";
-                foreach ($desc['arguments'] as $argument => $arg_info) {
-                    $arg_text = "\t\t\e[0;32m".$argument."\e[0m";
-                    $arg_text .= $arg_info['default_value'] ? "[=value]" : "";
-                    $arg_text = str_pad($arg_text, 40, ' ');
-                    $output .= $arg_text;
-                    if ($arg_info['required'] === 'conditional') {
-                        $output .= " \t\t"."\e[1;33m[conditional]\e[0m";
-                    } elseif ($arg_info['required']) {
-                        $output .= " \t\t"."\033[0;31m[required]\e[0m";
-                    } else {
-                        $output .= " \t\t"."\e[37m[optional]\e[0m";
+
+
+    if($help) {
+        echo "\e[1;33mUsage:\e[0m\n";
+        echo "\t[command]:[action] [--arg1=value] [--arg2=value]...\n";
+        echo "\n\e[1;33mAvailable commands:\e[0m\n\n";
+        foreach ($help as $command => $help_info) {
+            $output = "\t\e[93m".$command."\n";
+            if (!$help_info) {
+                continue;
+            }
+            foreach ($help_info as $action => $desc) {
+                $output .= "\t\t"."\e[0;32m".$command.":".$action." - ".$desc['description']."\e[0m"."\n";
+                if ($desc['arguments']) {
+                    $output .= "\tArguments:\n";
+                    foreach ($desc['arguments'] as $argument => $arg_info) {
+                        $arg_text = "\t\t\e[0;32m".$argument."\e[0m";
+                        $arg_text .= $arg_info['default_value'] ? "[=value]" : "";
+                        $arg_text = str_pad($arg_text, 40, ' ');
+                        $output .= $arg_text;
+                        if ($arg_info['required'] === 'conditional') {
+                            $output .= " \t\t"."\e[1;33m[conditional]\e[0m";
+                        } elseif ($arg_info['required']) {
+                            $output .= " \t\t"."\033[0;31m[required]\e[0m";
+                        } else {
+                            $output .= " \t\t"."\e[37m[optional]\e[0m";
+                        }
+                        if ($arg_info['description']) {
+                            $output .= "\t".$arg_info['description'];
+                        }
+                        $output .= "\n";
                     }
-                    if ($arg_info['description']) {
-                        $output .= "\t".$arg_info['description'];
-                    }
-                    $output .= "\n";
+                }
+                if ($desc['example']) {
+                    $output .= "\n\tExample:   ";
+                    $output .= $desc['example']."\n\n";
                 }
             }
-            if ($desc['example']) {
-                $output .= "\n\tExample:   ";
-                $output .= $desc['example']."\n\n";
-            }
+            echo $output."\n\n";
         }
-        echo $output."\n\n";
+    }else{
+        echo showError('Command "'. $script_name.'" not found.');
     }
 
     echo "\n";
