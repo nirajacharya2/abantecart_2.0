@@ -38,24 +38,29 @@ final class ALog
     private $mode = true;
     protected $app_filename, $security_filename, $warning_filename, $debug_filename;
     protected $loggers = [];
+    //maximum of file count for rotation log
+    const MAX_FILE_COUNT = 10;
 
     /**
      * ALog constructor.
      *
-     * @param string $application_log_filename - required
-     * @param string $security_filename
-     * @param string $warning_filename
-     * @param string $debug_filename
+     * @param array  $file_names
+     * @param string $dir_logs
      *
      * @throws \DebugBar\DebugBarException
      */
-    public function __construct(
-        string $application_log_filename,
-        $security_filename = '',
-        $warning_filename = '',
-        $debug_filename = '' )
+    public function __construct(array $file_names, $dir_logs = '')
+
     {
-        $dir_logs = ABC::env('DIR_LOGS');
+        $application_log_filename = (string)$file_names['app'];
+        $security_filename = (string)$file_names['security'];
+        $warning_filename = (string)$file_names['warn'];
+        $debug_filename = (string)$file_names['debug'];
+
+        $dir_logs = !$dir_logs || !is_dir($dir_logs) || !is_writable($dir_logs)
+                    ?  ABC::env('DIR_LOGS')
+                    : $dir_logs;
+
         if ( !$dir_logs || !is_writable($dir_logs) ) {
             error_log(
                 'Error: Log directory "'
@@ -139,7 +144,12 @@ final class ALog
         }
 
         if( $this->app_filename != $this->debug_filename ){
-            $stream = new StreamHandler($this->debug_filename, Logger::DEBUG);
+            $stream = new RotatingFileHandler($this->debug_filename, 10, Logger::DEBUG, true, 0664);
+            $stream->setFilenameFormat('{filename}-{date}', 'Y-m-d');
+
+            $output = "%datetime% > ".ABC::env('APP_NAME')." v"
+                . ABC::env('VERSION') ." > ".$_GET['rt']."> %level_name% > %message%\n";
+            $formatter = new LineFormatter($output, $dateFormat, true);
             $stream->setFormatter($formatter);
             $logger = new Logger('debug_logger');
             $debug_bar = ADebug::$debug_bar;
@@ -188,7 +198,7 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $this->loggers['error']->error($message);
+        return $this->loggers['error']->error($message);
     }
 
     /**
@@ -201,7 +211,7 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $this->loggers['security']->alert($message);
+        return $this->loggers['security']->alert($message);
     }
 
     /**
@@ -214,7 +224,7 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $this->loggers['warning']->notice($message);
+        return $this->loggers['warning']->notice($message);
     }
     /**
      * @param string $message
@@ -226,7 +236,7 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $this->loggers['debug']->debug($message);
+        return $this->loggers['debug']->debug($message);
     }
     /**
      * @param string $message
@@ -238,6 +248,6 @@ final class ALog
         if ( ! $this->mode) {
             return null;
         }
-        $this->loggers['error']->critical($message);
+        return $this->loggers['error']->critical($message);
     }
 }

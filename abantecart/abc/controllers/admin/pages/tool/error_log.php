@@ -23,7 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
+if ( ! class_exists( 'abc\core\ABC' ) || ! ABC::env( 'IS_ADMIN' ) ) {
     header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
 }
 
@@ -55,7 +55,7 @@ class ControllerPagesToolErrorLog extends AController
         } else {
             //TODO: add ability to delete other logs
             $args = ABC::getClassDefaultArgs( 'ALog' );
-            $file = ABC::env( 'DIR_LOGS' ).$args[0];
+            $file = ABC::env( 'DIR_LOGS' ).$args[0]['app'];
             $this->data['clear_url'] = $this->html->getSecureURL( 'tool/error_log/clearlog' );
             $heading_title = $this->language->get( 'heading_title' );
         }
@@ -85,9 +85,8 @@ class ControllerPagesToolErrorLog extends AController
             if ( $filesize > 500000 ) {
 
                 $this->data['log'] = "\n\n\n\n###############################################################################################\n\n".
-                    strtoupper( $this->language->get( 'text_file_tail' ) ).ABC::env( 'DIR_LOGS' )."
-
-###############################################################################################\n\n\n\n";
+                    strtoupper( $this->language->get( 'text_file_tail' ) ).ABC::env( 'DIR_LOGS' )
+                    ."###############################################################################################\n\n\n\n";
                 fseek( $fp, -500000, SEEK_END );
                 fgets( $fp );
             }
@@ -105,6 +104,7 @@ class ControllerPagesToolErrorLog extends AController
         $lines = array_filter( explode( "\n", $log ), 'strlen' );
         unset( $log );
         $k = 0;
+        $data = [];
         foreach ( $lines as $line ) {
             if ( preg_match( '(^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2})', $line, $match ) ) {
                 $k++;
@@ -134,7 +134,7 @@ class ControllerPagesToolErrorLog extends AController
             $file = ABC::env('DIR_LOGS') . $filename;
         }else {
             $args = ABC::getClassDefaultArgs('ALog');
-            $file = ABC::env('DIR_LOGS').$args[0];
+            $file = ABC::env('DIR_LOGS').$args[0]['app'];
         }
 
         $handle = fopen($file, 'w+');

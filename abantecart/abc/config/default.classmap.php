@@ -13,8 +13,13 @@ return [
     'AViewRender' => \abc\core\view\AViewDefaultRender::class,
     'ALog'                 => [
         ALog::class,
-        //all errors
-        'application.log',
+        [
+
+        'app' => 'application.log',
+        'security' => 'security.log',
+        'warn' => 'application.log',
+        'debug' => 'debug.log'
+        ]
     ],
     'ABackup'              => ABackup::class,
     'AJobManager'          => AJobManager::class,

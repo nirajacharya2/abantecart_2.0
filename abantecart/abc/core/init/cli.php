@@ -175,8 +175,7 @@ registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core
 registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
 
 // Log
-$log_classname = ABC::getFullClassName('ALog');
-$registry->set('log', new $log_classname('cli.log'));
+$registry->set('log', ABC::getObjectByAlias('ALog', ['app' => 'cli.log']));
 
 //session
 $session_id = 'CLI';
@@ -327,7 +326,7 @@ function showHelpPage($script_name = '', $options = [])
             echo $output."\n\n";
         }
     }else{
-        echo showError('Command "'. $script_name.'" not found.');
+        showError('Command "'. $script_name.'" not found.');
     }
 
     echo "\n";

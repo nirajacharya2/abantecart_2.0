@@ -104,11 +104,12 @@ class AError
      * write error message to log file
      *
      * @return AError
+     * @throws \ReflectionException
      */
     public function toLog()
     {
         if ( ! is_object( $this->registry ) || ! $this->registry->has( 'log' ) ) {
-            $log_obj = ABC::getObject( 'ALog' );
+            $log_obj = ABC::getObjectByAlias( 'ALog' );
             if ( $log_obj ) {
                 $log = $log_obj;
             } else {
@@ -160,20 +161,22 @@ class AError
     /**
      * add error message to JSON output
      *
-     * @param string $status_text_and_code - any human readable text string with 3 digit at the end to represent HTTP response code
-     *                                     For ex.
-     *                                     VALIDATION_ERROR_406
+     * @param string $status_text_and_code - any human readable
+     *                                    text string with 3 digit at the end to represent HTTP response code
+     *                                    For ex. VALIDATION_ERROR_406
      *
-     * @param array  $err_data             - array with error text and params to control ajax
-     *                                     error_code -> HTTP error code if missing in $status_text_and_code
-     *                                     error_title -> Title for error dialog and header (error constant used be default)
-     *                                     error_text -> Error message ( Class construct used by default )
-     *                                     show_dialog -> true to show dialog with error
-     *                                     reset_value -> true to reset values in a field (if applicable)
-     *                                     reload_page -> true to reload page after dialog close
-     *                                     TODO: Add redirect_url on dialog close
+     * @param array  $err_data  - array with error text and params to control ajax
+     *                           error_code -> HTTP error code if missing in $status_text_and_code
+     *                           error_title -> Title for error dialog and
+     *                           header (error constant used be default)
+     *                           error_text -> Error message ( Class construct used by default )
+     *                           show_dialog -> true to show dialog with error
+     *                           reset_value -> true to reset values in a field (if applicable)
+     *                           reload_page -> true to reload page after dialog close
+     *                          TODO: Add redirect_url on dialog close
      *
      * @return null|mixed
+     * @throws AException
      */
     public function toJSONResponse( $status_text_and_code, $err_data = array() )
     {
@@ -216,7 +219,7 @@ class AError
                 header( $http_header_txt );
                 header( 'Content-Type: application/json' );
             }
-            include_once( ABC::env( 'DIR_CORE' ).'lib/json.php' );
+            include_once( ABC::env( 'DIR_LIB' ).'json.php' );
             echo AJson::encode( $err_data );
             exit;
         }

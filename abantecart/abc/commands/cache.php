@@ -85,12 +85,12 @@ class Cache extends BaseCommand
             $cache_groups = array_map('trim', $cache_groups);
 
             if ($action == 'clear') {
-                $result = $this->_process_clear($cache_groups);
+                $result = $this->processClear($cache_groups);
                 if ($result) {
                     $this->write("Success: $cache_section cache was cleared.");
                 }
             } elseif ($action == 'create') {
-                $result = $this->_process_create($cache_section);
+                $result = $this->processCreate($cache_section);
                 if ($result) {
                     $this->write("Success: Cache have been successfully processed.");
                     if ($this->results) {
@@ -105,12 +105,12 @@ class Cache extends BaseCommand
         return $result ? true : $this->errors;
     }
 
-    protected function _process_create($action = '')
+    protected function processCreate($action = '')
     {
         //clear all cache if need to rebuild
         if ($action == 'rebuild') {
             $opt_list = $this->getOptionList();
-            $this->_process_clear([
+            $this->processClear([
                 'all'                     => '*',
                 'media'                   => $opt_list['clear']['arguments']['--media']['alias'],
                 'install_upgrade_history' => $opt_list['clear']['arguments']['--install_upgrade_history']['alias'],
@@ -154,7 +154,7 @@ class Cache extends BaseCommand
             foreach ($contents as $content) {
                 $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id='.$content['content_id']);
                 //loop for all variants
-                $this->_touch_url($seo_url);
+                $this->touchUrl($seo_url);
                 $this->results['contents']++;
             }
 
@@ -166,9 +166,12 @@ class Cache extends BaseCommand
             $model = $registry->get('model_catalog_category');
             $categories = $model->getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
-                $seo_url = $registry->get('html')->getSEOURL('product/category', '&category_id='.$category['category_id']);
+                $seo_url = $registry->get('html')->getSEOURL(
+                                                        'product/category',
+                                                        '&category_id='.$category['category_id']
+                );
                 //loop for all variants
-                $this->_touch_url($seo_url);
+                $this->touchUrl($seo_url);
                 $this->results['categories']++;
             }
 
@@ -188,9 +191,12 @@ class Cache extends BaseCommand
                         'limit'    => 20,
                     ));
                 foreach ($products as $product) {
-                    $seo_url = $registry->get('html')->getSEOURL('product/product', '&product_id='.$product['product_id']);
+                    $seo_url = $registry->get('html')->getSEOURL(
+                                                            'product/product',
+                                                            '&product_id='.$product['product_id']
+                    );
                     //loop for all variants
-                    $this->_touch_url($seo_url);
+                    $this->touchUrl($seo_url);
                     $this->results['products']++;
                 }
 
@@ -201,7 +207,7 @@ class Cache extends BaseCommand
         return true;
     }
 
-    protected function _touch_url($url)
+    protected function touchUrl($url)
     {
         foreach ($this->languages as $lang) {
             foreach ($this->currencies as $curr) {
@@ -215,7 +221,7 @@ class Cache extends BaseCommand
         }
     }
 
-    protected function _process_clear($cache_groups)
+    protected function processClear($cache_groups)
     {
         $this->errors = [];
         $registry = Registry::getInstance();
@@ -258,7 +264,7 @@ class Cache extends BaseCommand
             } elseif ($group == 'logs') {
                 //TODO: make clear logs
                 $args = ABC::getClassDefaultArgs('ALog');
-                $file = ABC::env('DIR_LOGS').$args[0];
+                $file = ABC::env('DIR_LOGS').$args[0]['app'];
                 if (is_file($file)) {
                     unlink($file);
                 }
@@ -359,7 +365,8 @@ class Cache extends BaseCommand
                             'alias'         => 'manufacturer',
                         ],
                         '--localizations'       => [
-                            'description'   => 'Clear localizations data cache (languages, definitions, currencies etc)',
+                            'description'   =>
+                                'Clear localizations data cache (languages, definitions, currencies etc)',
                             'default_value' => '',
                             'required'      => false,
                             'alias'         => 'localization',

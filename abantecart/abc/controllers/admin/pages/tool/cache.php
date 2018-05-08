@@ -26,7 +26,7 @@ use abc\core\engine\AForm;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
+if ( ! class_exists('abc\core\ABC') || ! ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -59,7 +59,9 @@ class ControllerPagesToolCache extends AController
                 'id'          => 'configuration',
                 'text'        => $this->language->get('text_configuration'),
                 'description' => $this->language->get('desc_configuration'),
-                'keywords'    => 'settings,extensions,store,stores,attribute,attributes,length_class,contents,tax_class,order_status,stock_status,weight_class,storefront_menu,tables'
+                'keywords'    => 'settings,extensions,store,stores,attribute,attributes,'
+                                .'length_class,contents,tax_class,order_status,stock_status,'
+                                .'weight_class,storefront_menu,tables'
             ),
             array(
                 'id'          => 'layout',
@@ -166,7 +168,7 @@ class ControllerPagesToolCache extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $selected = $this->request->get_or_post('selected');
 
-        if (is_array($selected) && count($selected) && $this->_validateDelete()) {
+        if (is_array($selected) && count($selected) && $this->validateDelete()) {
 
             $languages = $this->language->getActiveLanguages();
             $this->loadModel('setting/store');
@@ -184,7 +186,7 @@ class ControllerPagesToolCache extends AController
                         case 'error_log':
                             //TODO: add ability to delete other logs
                             $args = ABC::getClassDefaultArgs('ALog');
-                            $file = ABC::env('DIR_LOGS').$args[0];
+                            $file = ABC::env('DIR_LOGS').$args[0]['app'];
                             if (is_file($file)) {
                                 unlink($file);
                             }
@@ -245,7 +247,7 @@ class ControllerPagesToolCache extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validateDelete()
+    protected function validateDelete()
     {
         if ( ! $this->user->canModify('tool/cache')) {
             $this->error['warning'] = $this->language->get('error_permission');

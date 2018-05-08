@@ -43,7 +43,9 @@ class ATaskManager{
 	 */
 	protected $task_log;
 	/**
-	 * @var string - can be 'html' for running task.php directly from browser, 'ajax' - for running task by ajax-requests and 'cli' - shell run
+     * @var string - can be 'html' for running task.php directly from browser,
+     *                      'ajax' - for running task by ajax-requests and
+     *                      'cli' - shell run
 	 */
 	private $mode = 'html';
 
@@ -68,10 +70,7 @@ class ATaskManager{
 		$this->registry = Registry::getInstance();
 		// who is initiator of process, admin or storefront
 		$this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
-        $log_classname = ABC::getFullClassName('ALog');
-        if($log_classname) {
-            $this->task_log = new $log_classname( 'task_log.txt' );
-        }
+        $this->task_log = ABC::getObjectByAlias( 'ALog', ['app' => 'task.log']);
 	}
 
 	public function __get($key){

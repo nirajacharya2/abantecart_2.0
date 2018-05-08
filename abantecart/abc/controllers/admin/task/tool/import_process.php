@@ -103,7 +103,7 @@ class ControllerTaskToolImportProcess extends AController{
 		//read records from source file
 		if($file_format == 'internal'){
 			$a_data = new AData();
-			$a_data->setLogFile("import_".$task_id.".txt");
+			$a_data->initLogger("import_".$task_id.".txt");
 			//import each row separately
 			for ($i = $start; $i <= $stop; $i++) {
 				$csv_array = $a_data->CSV2ArrayFromFile($filename, array_search($delimiter, $a_data->csvDelimiters),$i,1);

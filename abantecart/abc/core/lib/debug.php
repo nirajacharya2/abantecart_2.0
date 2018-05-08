@@ -21,12 +21,13 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\StandardDebugBar;
 use Exception;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
+if (!class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ADebug
@@ -36,8 +37,8 @@ class ADebug
     static public $queries_time = 0;
     static private $debug = 0; //off
     static private $debug_level = 0; //only exceptions
-    static private $_is_init = false; //class init
-    static private $_is_error = false;
+    static private $isInit = false;
+    static private $isError = false;
     /**
      * @var \DebugBar\StandardDebugBar
      */
@@ -45,58 +46,60 @@ class ADebug
 
     static function register()
     {
-        if ( ! self::isActive() ) {
+        if (!self::isActive()) {
             return false;
         }
         self::$debug_bar = new StandardDebugBar();
+        return true;
     }
 
     static function getDebugBarAssets()
     {
-        if ( ! self::$debug_bar ) {
+        if (!self::$debug_bar) {
             return [];
         }
         $js_dbg_render = self::$debug_bar->getJavascriptRenderer();
-        $js_dbg_render->disableVendor( 'jquery' );
-        $output['js'] = $js_dbg_render->getAssets( 'js', 'url' );
-        $output['css'] = $js_dbg_render->getAssets( 'css', 'url' );
+        $js_dbg_render->disableVendor('jquery');
+        $output['js'] = $js_dbg_render->getAssets('js', 'url');
+        $output['css'] = $js_dbg_render->getAssets('css', 'url');
 
         return $output;
     }
 
     static private function isActive()
     {
-        if ( ! self::$_is_init ) {
-            if ( ABC::env( 'INSTALL' ) ) {
+        if (!self::$isInit) {
+            if (ABC::env('INSTALL')) {
                 self::$debug = 1;
                 self::$debug_level = 1;
             } else {
-                self::$debug = ABC::env( 'DEBUG' );
-                self::$debug_level = ABC::env( 'DEBUG_LEVEL' );
+                self::$debug = ABC::env('DEBUG');
+                self::$debug_level = ABC::env('DEBUG_LEVEL');
             }
-            self::$_is_init = true;
+            self::$isInit = true;
         }
 
         return self::$debug;
     }
 
-    static function set_query( $query, $time, $backtrace )
+    static function set_query($query, $time, $backtrace)
     {
-        if ( ! self::isActive() ) {
+        if (!self::isActive()) {
             return false;
         }
         self::$queries[] = array(
             'sql'  => $query,
-            'time' => sprintf( '%01.5f', $time ),
+            'time' => sprintf('%01.5f', $time),
             'file' => $backtrace['file'],
             'line' => $backtrace['line'],
         );
         self::$queries_time += $time;
+        return true;
     }
 
-    static function checkpoint( $name )
+    static function checkpoint($name)
     {
-        if ( ! self::isActive() ) {
+        if (!self::isActive()) {
             return false;
         }
 
@@ -105,24 +108,30 @@ class ADebug
             'name'           => $name,
             'time'           => self::microtime(),
             'memory'         => memory_get_usage(),
-            'included_files' => count( get_included_files() ),
-            'queries'        => count( self::$queries ),
+            'included_files' => count(get_included_files()),
+            'queries'        => count(self::$queries),
             'type'           => 'checkpoint',
             'trace'          => $e->getTraceAsString(),
         );
         self::$checkpoints[] = $array;
-
+        return true;
     }
 
-    static function variable( $name, $variable )
+    /**
+     * @param string $name
+     * @param mixed  $variable
+     *
+     * @return bool
+     */
+    static function variable(string $name, $variable)
     {
-        if ( ! self::isActive() ) {
+        if (!self::isActive()) {
             return false;
         }
 
         ob_start();
         echo '<pre>';
-        var_export( $variable );
+        var_export($variable);
         echo '</pre>';
         $msg = ob_get_clean();
 
@@ -135,52 +144,52 @@ class ADebug
         return true;
     }
 
-    static function error( $name, $code, $msg )
+    static function error($name, $code, $msg)
     {
         self::$checkpoints[] = array(
             'name'           => $name,
             'time'           => self::microtime(),
             'memory'         => memory_get_usage(),
-            'included_files' => count( get_included_files() ),
-            'queries'        => count( self::$queries ),
+            'included_files' => count(get_included_files()),
+            'queries'        => count(self::$queries),
             'msg'            => $msg,
             'code'           => $code,
             'type'           => 'error',
         );
-        self::$_is_error = true;
+        self::$isError = true;
     }
 
-    static function warning( $name, $code, $msg )
+    static function warning($name, $code, $msg)
     {
         self::$checkpoints[] = array(
             'name'           => $name,
             'time'           => self::microtime(),
             'memory'         => memory_get_usage(),
-            'included_files' => count( get_included_files() ),
-            'queries'        => count( self::$queries ),
+            'included_files' => count(get_included_files()),
+            'queries'        => count(self::$queries),
             'msg'            => $msg,
             'code'           => $code,
             'type'           => 'warning',
         );
-        self::$_is_error = true;
+        self::$isError = true;
     }
 
     static function microtime()
     {
-        list( $usec, $sec ) = explode( ' ', microtime() );
+        list($usec, $sec) = explode(' ', microtime());
 
-        return ( (float)$usec + (float)$sec );
+        return ((float)$usec + (float)$sec);
     }
 
-    static function display_queries( $start, $end )
+    static function display_queries($start, $end)
     {
 
-        if ( $end - $start <= 0 ) {
+        if ($end - $start <= 0) {
             return null;
         }
 
         $output = "Time File Line SQL\n";
-        for ( $i = $start; $i < $end; $i++ ) {
+        for ($i = $start; $i < $end; $i++) {
             $key = $i;
             $query = self::$queries[$key];
             $output .= $query['time'].' '.$query['file'].' '.$query['line'].' '.$query['sql']."\n";
@@ -192,14 +201,14 @@ class ADebug
 
     static function display_errors()
     {
-        if ( ! self::$_is_error ) {
+        if (!self::$isError) {
             return null;
         }
         $output = "Name Info\n";
 
-        $show = array( 'error', 'warning' );
-        foreach ( self::$checkpoints as $c ) {
-            if ( ! in_array( $c['type'], $show ) ) {
+        $show = array('error', 'warning');
+        foreach (self::$checkpoints as $c) {
+            if (!in_array($c['type'], $show)) {
                 continue;
             }
             $output .= $c['code'].'::'.$c['name'].'      '.$c['msg']."\n";
@@ -211,21 +220,21 @@ class ADebug
 
     static function display()
     {
-        if ( ! self::isActive() ) {
+        if (!self::isActive()) {
             return false;
         }
 
         $env_data = ABC::getEnv();
         //remove credentials by security reason
-        unset( $env_data['DATABASES'], $env_data['ADMIN_SECRET'] );
-        self::$debug_bar->addCollector( new ConfigCollector( $env_data ) );
+        unset($env_data['DATABASES'], $env_data['ADMIN_SECRET']);
+        self::$debug_bar->addCollector(new ConfigCollector($env_data));
 
         $previous = array();
         $cumulative = array();
 
         $first = true;
         $msg = '';
-        switch ( self::$debug_level ) {
+        switch (self::$debug_level) {
 
             case 0 :
                 //show only exceptions
@@ -240,19 +249,19 @@ class ADebug
                 $msg .= self::display_errors();
 
                 //count php execution time
-                foreach ( self::$checkpoints as $name => $c ) {
-                    if ( $c['type'] != 'checkpoint' ) {
+                foreach (self::$checkpoints as $name => $c) {
+                    if ($c['type'] != 'checkpoint') {
                         continue;
                     }
-                    if ( $first == true ) {
+                    if ($first == true) {
                         $first = false;
                         $cumulative = $c;
                     }
-                    $time = sprintf( "%01.4f", $c['time'] - $cumulative['time'] );
+                    $time = sprintf("%01.4f", $c['time'] - $cumulative['time']);
                 }
 
-                $msg .= 'Queries - '.count( self::$queries )."\n";
-                $msg .= 'Queries execution time - '.sprintf( '%01.5f', self::$queries_time )."\n";
+                $msg .= 'Queries - '.count(self::$queries)."\n";
+                $msg .= 'Queries execution time - '.sprintf('%01.5f', self::$queries_time)."\n";
                 $msg .= 'PHP Execution time - '.$time."\n";
                 break;
 
@@ -264,10 +273,10 @@ class ADebug
                 // #4 + call stack
                 $msg .= "\tName\tInfo\n";
 
-                foreach ( self::$checkpoints as $c ) {
+                foreach (self::$checkpoints as $c) {
                     $msg .= $c['name'];
 
-                    if ( $first == true && $c['type'] != 'variable' ) {
+                    if ($first == true && $c['type'] != 'variable') {
                         $previous = array(
                             'time'           => $c['time'],
                             'memory'         => 0,
@@ -278,7 +287,7 @@ class ADebug
                         $cumulative = $c;
                     }
 
-                    switch ( $c['type'] ) {
+                    switch ($c['type']) {
                         case 'variable':
                             $msg .= $c['msg']."\n";
                             break;
@@ -286,14 +295,17 @@ class ADebug
                         case 'warning':
                             $msg .= $c['msg']."\n";
                         case 'checkpoint':
-                            $msg .= '- Memory: '.( number_format( $c['memory'] - $previous['memory'] ) ).' ('.number_format( $c['memory'] ).')'."\n";
-                            $msg .= '- Files: '.( $c['included_files'] - $previous['included_files'] ).' ('.$c['included_files'].')'."\n";
-                            $msg .= '- Queries: '.( $c['queries'] - $previous['queries'] ).' ('.$c['queries'].')'."\n";
-                            $msg .= '- Time: '.sprintf( "%01.4f", $c['time'] - $previous['time'] ).' ('.sprintf( "%01.4f", $c['time'] - $cumulative['time'] ).')'."\n";
-                            if ( self::$debug_level > 3 ) {
-                                $msg .= self::display_queries( $previous['queries'], $c['queries'] );
+                            $msg .= '- Memory: '.(number_format($c['memory'] - $previous['memory'])).' ('
+                                .number_format($c['memory']).')'."\n";
+                            $msg .= '- Files: '.($c['included_files'] - $previous['included_files']).' ('
+                                .$c['included_files'].')'."\n";
+                            $msg .= '- Queries: '.($c['queries'] - $previous['queries']).' ('.$c['queries'].')'."\n";
+                            $msg .= '- Time: '.sprintf("%01.4f", $c['time'] - $previous['time']).' ('.sprintf("%01.4f",
+                                    $c['time'] - $cumulative['time']).')'."\n";
+                            if (self::$debug_level > 3) {
+                                $msg .= self::display_queries($previous['queries'], $c['queries']);
                             }
-                            if ( self::$debug_level > 4 ) {
+                            if (self::$debug_level > 4) {
                                 $msg .= $c['trace'];
                             }
                             $previous = $c;
@@ -309,21 +321,27 @@ class ADebug
 
         }
 
-        if ( self::$debug ) {
+        if (self::$debug) {
             //display debug-bar js and html
-            if ( self::$debug_bar ) {
-                self::$debug_bar["messages"]->addMessage( $msg );
-                $debugbarRenderer = self::$debug_bar->getJavascriptRenderer();
-                echo $debugbarRenderer->render();
+            if (self::$debug_bar) {
+                self::$debug_bar["messages"]->addMessage($msg);
+                $debug_renderer = self::$debug_bar->getJavascriptRenderer();
+                echo $debug_renderer->render();
             }
 
-
-            $file = ABC::env('DIR_LOGS').'debug-'.time().'.log';
-            $handle = fopen($file, 'a+');
-            fwrite($handle, strip_tags( str_replace( '<br />', "\r\n", $msg )));
-            fclose($handle);
-
+            self::toLog($msg);
         }
+        return true;
+    }
+
+    static function toLog($message)
+    {
+        if (class_exists('\abc\core\engine\Registry')) {
+            $logger = Registry::getInstance()->get('log');
+        } else {
+            $logger = ABC::getObjectByAlias( 'ALog', ['debug.log'] );
+        }
+        $logger->debug(strip_tags(str_replace('<br />', "\r\n", $message)));
     }
 }
 
@@ -339,11 +357,11 @@ class PHPDebugBarEloquentCollector extends \DebugBar\DataCollector\PDO\PDOCollec
      *
      * @param \Illuminate\Database\Capsule\Manager $orm
      */
-    public function __construct( \Illuminate\Database\Capsule\Manager $orm )
+    public function __construct(\Illuminate\Database\Capsule\Manager $orm)
     {
         $this->orm = $orm;
         parent::__construct();
-        $this->addConnection( $this->getTraceablePdo(), 'Eloquent PDO' );
+        $this->addConnection($this->getTraceablePdo(), 'Eloquent PDO');
     }
 
     /**
@@ -367,7 +385,7 @@ class PHPDebugBarEloquentCollector extends \DebugBar\DataCollector\PDO\PDOCollec
      */
     protected function getTraceablePdo()
     {
-        return new \DebugBar\DataCollector\PDO\TraceablePDO( $this->getEloquentPdo() );
+        return new \DebugBar\DataCollector\PDO\TraceablePDO($this->getEloquentPdo());
     }
 
     // Override

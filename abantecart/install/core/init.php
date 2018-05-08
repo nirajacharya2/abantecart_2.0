@@ -29,7 +29,6 @@ $dir_app = $dir_root.'abc'.$dir_sep;
 $dir_public = $dir_root.'public'.$dir_sep;
 $dir_install = dirname(__DIR__).$dir_sep;
 
-
 //Set up common paths
 ABC::env(
     array(
@@ -68,9 +67,9 @@ ABC::env(
         'DIRNAME_TEMPLATE'    => 'template'.$dir_sep,
         'DIRNAME_VENDOR'      => 'vendor'.$dir_sep,
 
-        'POSTFIX_OVERRIDE'    => '.override',
-        'POSTFIX_PRE'         => '.pre',
-        'POSTFIX_POST'        => '.post'
+        'POSTFIX_OVERRIDE' => '.override',
+        'POSTFIX_PRE'      => '.pre',
+        'POSTFIX_POST'     => '.post',
     )
 );
 
@@ -78,14 +77,16 @@ ABC::env(
 include($dir_app.'core'.$dir_sep.'init'.$dir_sep.'version.php');
 
 // Detect if localhost is used.
-if ( ! isset($_SERVER['HTTP_HOST'])) {
+if (!isset($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST'] = 'localhost';
 }
 
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
     ABC::env('HTTPS', true);
-} elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure' || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
+} elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
+    && ($_SERVER['HTTP_X_FORWARDED_SERVER'] == 'secure'
+        || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')) {
     ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
     ABC::env('HTTPS', true);
@@ -102,9 +103,8 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
     ABC::env('REAL_HOST', $_SERVER['HTTP_HOST']);
 }
 
-
 //load vendors classes
-if(is_file(ABC::env('DIR_VENDOR').'autoload.php')) {
+if (is_file(ABC::env('DIR_VENDOR').'autoload.php')) {
     require ABC::env('DIR_VENDOR').'autoload.php';
 }
 
@@ -135,7 +135,6 @@ ABC::env('IS_API', ($path_nodes[0] == 'a' ? true : false));
 //NOTE: This is a session name not to confuse with actual session id. Candidate to renaming
 ABC::env('SESSION_ID', 'AC_INSTALL');
 
-
 //set ini parameters for session
 ini_set('session.use_trans_sid', 'Off');
 ini_set('session.use_cookies', 'On');
@@ -160,23 +159,25 @@ if (ini_get('magic_quotes_gpc')) {
     $_COOKIE = clean($_COOKIE);
 }
 
-if ( ! ini_get('date.timezone')) {
+if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-if ( ! isset($_SERVER['DOCUMENT_ROOT'])) {
+if (!isset($_SERVER['DOCUMENT_ROOT'])) {
     if (isset($_SERVER['SCRIPT_FILENAME'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['PHP_SELF'])));
+        $_SERVER['DOCUMENT_ROOT'] =
+            str_replace('\\', '/', substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['PHP_SELF'])));
     }
 }
 
-if ( ! isset($_SERVER['DOCUMENT_ROOT'])) {
+if (!isset($_SERVER['DOCUMENT_ROOT'])) {
     if (isset($_SERVER['PATH_TRANSLATED'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0 - strlen($_SERVER['PHP_SELF'])));
+        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/',
+            substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0 - strlen($_SERVER['PHP_SELF'])));
     }
 }
 
-if ( ! isset($_SERVER['REQUEST_URI'])) {
+if (!isset($_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
     if (isset($_SERVER['QUERY_STRING'])) {
         $_SERVER['REQUEST_URI'] .= '?'.$_SERVER['QUERY_STRING'];
@@ -206,12 +207,12 @@ unset($response);
 $registry->set('html', new AHtml($registry));
 
 // Database
-if( ABC::env('DATABASES') ) {
+if (ABC::env('DATABASES')) {
     $db_config = ABC::env('DATABASES');
     //check database and tables in it
     $adb = new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]);
     $result = $adb->query("SHOW TABLES;");
-    if($result->num_rows) {
+    if ($result->num_rows) {
         $registry->set('db', $adb);
     }
 }
@@ -241,15 +242,18 @@ require_once $dir_app.'core'.$dir_sep.'init'.$dir_sep.'admin.php';
 $registry->set('messages', new AMessage());
 
 // Log
-$registry->set('log', new ALog('error.txt'));
+$registry->set('log', new ALog(['app' => 'error.txt']));
 
 // Document
 $registry->set('document', new ADocument());
 
 // AbanteCart Snapshot details
-$registry->set('snapshot', 'AbanteCart/'.ABC::env('VERSION').' '.$_SERVER['SERVER_SOFTWARE'].' ('.$_SERVER['SERVER_NAME'].')');
+$registry->set(
+    'snapshot',
+    'AbanteCart/'.ABC::env('VERSION').' '.$_SERVER['SERVER_SOFTWARE'].' ('.$_SERVER['SERVER_NAME'].')'
+);
 //Non-apache fix for REQUEST_URI
-if ( ! isset($_SERVER['REQUEST_URI'])) {
+if (!isset($_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
     if (isset($_SERVER['QUERY_STRING'])) {
         $_SERVER['REQUEST_URI'] .= '?'.$_SERVER['QUERY_STRING'];
@@ -269,7 +273,6 @@ $extensions->loadAvailableExtensions();
 
 $registry->set('extensions', $extensions);
 unset($extensions);
-
 
 $template = 'default';
 $config->set('original_admin_template', $template);

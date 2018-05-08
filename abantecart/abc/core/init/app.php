@@ -295,7 +295,7 @@ if (ABC::env('IS_ADMIN') === true) {
 registerClass($registry, 'messages', 'AMessage', [], '\abc\core\lib\AMessage', []);
 
 // Log
-$registry->set('log', ABC::getObject('ALog'));
+$registry->set('log', ABC::getObjectByAlias('ALog'));
 
 // Document
 registerClass($registry, 'document', 'ADocument', [], '\abc\core\lib\ADocument', []);

@@ -227,12 +227,14 @@ class ABC extends ABCBase
     /**
      * Method returns full name of class if it exists
      *
-     * @param $class_alias
+     * @param string $class_alias
+     *
+     * @param array  $args
      *
      * @return bool|string
      * @throws \ReflectionException
      */
-    static function getObject(string $class_alias)
+    static function getObjectByAlias(string $class_alias, $args = [])
     {
         if (isset(self::$class_map[$class_alias])) {
             if (is_array(self::$class_map[$class_alias])) {
@@ -240,7 +242,7 @@ class ABC extends ABCBase
             } else {
                 $class_name = self::$class_map[$class_alias];
             }
-            $args = self::getClassDefaultArgs($class_alias);
+            $args = $args ? $args : self::getClassDefaultArgs($class_alias);
 
             $reflector = new ReflectionClass($class_name);
             return $reflector->newInstanceArgs($args);
