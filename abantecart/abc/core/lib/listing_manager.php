@@ -17,113 +17,125 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
+
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class AListingManager extends AListing{
-	/**
-	 * @var Registry
-	 */
-	protected $registry;
-	/**
-	 * @var int
-	 */
-	public $errors = 0;
-	/**
-	 * @var int
-	 */
-	protected $custom_block_id;
-	/**
-	 * @var array
-	 */
-	public $data_sources;
+class AListingManager extends AListing
+{
+    /**
+     * @var Registry
+     */
+    protected $registry;
+    /**
+     * @var int
+     */
+    public $errors = 0;
+    /**
+     * @var int
+     */
+    protected $custom_block_id;
+    /**
+     * @var array
+     */
+    public $data_sources;
 
-	//NOTE: This class is loaded in INIT for admin only
-	/**
-	 * @param int $custom_block_id
-	 * @throws AException
-	 */
-	public function __construct($custom_block_id){
-		parent::__construct($custom_block_id);
-		if (!ABC::env('IS_ADMIN')){ // forbid for non admin calls
-			throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AListingManager');
-		}
-	}
+    //NOTE: This class is loaded in INIT for admin only
 
-	/**
-	 * @param array $data
-	 * @return bool
-	 */
-	public function saveCustomListItem($data){
-		$custom_block_id = (int)$this->custom_block_id;
-		if (!isset($data['data_type']) && isset($data['listing_datasource'])){
-			$listing_properties = $this->getListingDataSources();
-			$data['data_type'] = $listing_properties[$data['listing_datasource']]['data_type'];
-		}
+    /**
+     * @param int $custom_block_id
+     *
+     * @throws AException
+     */
+    public function __construct($custom_block_id)
+    {
+        parent::__construct($custom_block_id);
+        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AListingManager');
+        }
+    }
 
-		$result = $this->db->query("SELECT *
-									FROM  " . $this->db->table_name("custom_lists") . " 
-									WHERE custom_block_id = '" . $custom_block_id . "'
-											AND id='" . $data['id'] . "'
-											AND data_type='" . $data['data_type'] . "'");
+    /**
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function saveCustomListItem($data)
+    {
+        $custom_block_id = (int)$this->custom_block_id;
+        if (!isset($data['data_type']) && isset($data['listing_datasource'])) {
+            $listing_properties = $this->getListingDataSources();
+            $data['data_type'] = $listing_properties[$data['listing_datasource']]['data_type'];
+        }
 
-		if ($result->num_rows && $custom_block_id){
-			$this->db->query("UPDATE " . $this->db->table_name("custom_lists") . "
-								SET custom_block_id = '" . $custom_block_id . "'
-								" . (!is_null($data['sort_order']) ? ", sort_order = '" . (int)$data['sort_order'] . "'" : "") . "
-								WHERE custom_block_id = '" . $custom_block_id . "'
-									  AND id='" . $data['id'] . "'
-										AND data_type='" . $data['data_type'] . "'");
-		} else{
-			$this->db->query("INSERT INTO " . $this->db->table_name("custom_lists") . " 
+        $result = $this->db->query("SELECT *
+									FROM  ".$this->db->table_name("custom_lists")." 
+									WHERE custom_block_id = '".$custom_block_id."'
+											AND id='".$data['id']."'
+											AND data_type='".$data['data_type']."'");
+
+        if ($result->num_rows && $custom_block_id) {
+            $this->db->query("UPDATE ".$this->db->table_name("custom_lists")."
+								SET custom_block_id = '".$custom_block_id."'
+								".(!is_null($data['sort_order']) ? ", sort_order = '".(int)$data['sort_order']."'" : "")
+                ."
+								WHERE custom_block_id = '".$custom_block_id."'
+									  AND id='".$data['id']."'
+										AND data_type='".$data['data_type']."'");
+        } else {
+            $this->db->query("INSERT INTO ".$this->db->table_name("custom_lists")." 
 								( custom_block_id,
 								  data_type,
 								  id,
 								  sort_order,
 								  date_added )
-							  VALUES ('" . $custom_block_id . "',
-							          '" . $data['data_type'] . "',
-							          '" . (int)$data['id'] . "',
-							          '" . ( int )$data ['sort_order'] . "',
+							  VALUES ('".$custom_block_id."',
+							          '".$data['data_type']."',
+							          '".(int)$data['id']."',
+							          '".( int )$data ['sort_order']."',
 								      NOW())");
-		}
+        }
 
-		$this->cache->remove('blocks.custom.' . $custom_block_id);
-		return true;
-	}
+        $this->cache->remove('blocks.custom.'.$custom_block_id);
+        return true;
+    }
 
-	// delete one item from custom list of custom listing block
-	/**
-	 * @param array $data
-	 */
-	public function deleteCustomListItem($data){
+    // delete one item from custom list of custom listing block
 
-		$listing_properties = $this->getListingDataSources();
-		if (!isset($data['data_type']) && isset($data['listing_datasource'])){
-			$data['data_type'] = $listing_properties[$data['listing_datasource']]['data_type'];
-		}
-		$custom_block_id = (int)$this->custom_block_id;
+    /**
+     * @param array $data
+     */
+    public function deleteCustomListItem($data)
+    {
 
-		$sql = "DELETE FROM  " . $this->db->table_name("custom_lists") . " 
-									WHERE custom_block_id = '" . $custom_block_id . "'
-											AND id='" . $data['id'] . "'
-											AND data_type='" . $data['data_type'] . "'";
-		$this->db->query($sql);
-		$this->cache->remove('blocks.custom.' . $custom_block_id);
-	}
+        $listing_properties = $this->getListingDataSources();
+        if (!isset($data['data_type']) && isset($data['listing_datasource'])) {
+            $data['data_type'] = $listing_properties[$data['listing_datasource']]['data_type'];
+        }
+        $custom_block_id = (int)$this->custom_block_id;
 
-	// delete all custom list of custom listing block
+        $sql = "DELETE FROM  ".$this->db->table_name("custom_lists")." 
+									WHERE custom_block_id = '".$custom_block_id."'
+											AND id='".$data['id']."'
+											AND data_type='".$data['data_type']."'";
+        $this->db->query($sql);
+        $this->cache->remove('blocks.custom.'.$custom_block_id);
+    }
 
-	public function deleteCustomListing(){
-		$custom_block_id = (int)$this->custom_block_id;
-		$sql = "DELETE FROM  " . $this->db->table_name("custom_lists") . "
-				WHERE custom_block_id = '" . $custom_block_id . "'";
-		$this->db->query($sql);
-		$this->cache->remove('blocks.custom.' . $custom_block_id);
-	}
+    // delete all custom list of custom listing block
+
+    public function deleteCustomListing()
+    {
+        $custom_block_id = (int)$this->custom_block_id;
+        $sql = "DELETE FROM  ".$this->db->table_name("custom_lists")."
+				WHERE custom_block_id = '".$custom_block_id."'";
+        $this->db->query($sql);
+        $this->cache->remove('blocks.custom.'.$custom_block_id);
+    }
 }

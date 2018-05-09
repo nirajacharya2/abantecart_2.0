@@ -23,7 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -84,24 +84,28 @@ final class ACurrency
             $cache->push($cache_key, $this->currencies);
         }
 
-        $currencyCode = $this->isValidCodeFormat($this->request->get['currency']) ? $this->request->get['currency'] : '';
-        if ($currencyCode && array_key_exists($currencyCode, $this->currencies)){
+        $currencyCode =
+            $this->isValidCodeFormat($this->request->get['currency']) ? $this->request->get['currency'] : '';
+        if ($currencyCode && array_key_exists($currencyCode, $this->currencies)) {
             $this->set($currencyCode);
             // Currency is switched, set sign for external use via isSwitched method
             $this->is_switched = true;
             unset($this->request->get['currency'], $this->session->data['shipping_methods'], $this->session->data['shipping_method']);
 
-        } elseif (isset($this->session->data['currency']) && array_key_exists($this->session->data['currency'], $this->currencies)){
+        } elseif (isset($this->session->data['currency'])
+            && array_key_exists($this->session->data['currency'], $this->currencies)) {
             $this->set($this->session->data['currency']);
-        } elseif (isset($this->request->cookie['currency']) && array_key_exists($this->request->cookie['currency'], $this->currencies)){
-            if (ABC::env('IS_ADMIN') === true){
+        } elseif (isset($this->request->cookie['currency'])
+            && array_key_exists($this->request->cookie['currency'], $this->currencies)) {
+            if (ABC::env('IS_ADMIN') === true) {
                 $this->set($this->config->get('config_currency'));
-            } else{
+            } else {
                 $this->set($this->request->cookie['currency']);
             }
-        } else{
+        } else {
             // need to know about currency switch. Check if currency was set but not in list of available currencies
-            if (isset($currencyCode) || isset($this->session->data['currency']) || isset($this->request->cookie['currency'])){
+            if (isset($currencyCode) || isset($this->session->data['currency'])
+                || isset($this->request->cookie['currency'])) {
                 $this->is_switched = true;
             }
             $this->set($this->config->get('config_currency'));
@@ -122,7 +126,7 @@ final class ACurrency
     public function set($currency)
     {
         // if currency disabled - set first enabled from list
-        if ( ! $this->currencies[$currency]['status']) {
+        if (!$this->currencies[$currency]['status']) {
             foreach ($this->currencies as $curr) {
                 if ($curr['status']) {
                     $currency = $curr['code'];
@@ -133,11 +137,13 @@ final class ACurrency
 
         $this->code = $currency;
 
-        if (( ! isset($this->session->data['currency'])) || ($this->session->data['currency'] != $currency)) {
+        if ((!isset($this->session->data['currency'])) || ($this->session->data['currency'] != $currency)) {
             $this->session->data['currency'] = $currency;
         }
 
-        if ( ! headers_sent() && ( ! isset($this->request->cookie['currency']) || ($this->request->cookie['currency'] != $currency))) {
+        if (!headers_sent()
+            && (!isset($this->request->cookie['currency'])
+                || ($this->request->cookie['currency'] != $currency))) {
             //Set cookie for the currency code
             setcookie('currency',
                 $currency,
@@ -175,7 +181,7 @@ final class ACurrency
      */
     public function format_total($price, $qty, $currency = '', $crr_value = '')
     {
-        if ( ! is_numeric($price) || ! is_numeric($qty)) {
+        if (!is_numeric($price) || !is_numeric($qty)) {
             return '';
         }
 
@@ -200,7 +206,7 @@ final class ACurrency
             $currency = $this->code;
         }
 
-        if ( ! $crr_value) {
+        if (!$crr_value) {
             $crr_value = $this->currencies[$currency]['value'];
         }
 
@@ -273,13 +279,13 @@ final class ACurrency
         }
 
         $error = false;
-        if ( ! $to) {
+        if (!$to) {
             $msg = 'Error: tried to convert into inaccessible currency! Currency code is '.$code_to;
             $this->log->write('ACurrency '.$msg);
             $this->message->saveError('Currency conversion error', $msg);
             $error = true;
         }
-        if ( ! $from) {
+        if (!$from) {
             $msg = 'Error: tried to convert from inaccessible currency! Currency code is '.$code_from;
             $this->log->write('ACurrency '.$msg);
             $this->message->saveError('Currency conversion error .', $msg);
@@ -354,10 +360,12 @@ final class ACurrency
 
     /**
      * @param string $code
+     *
      * @return bool
      */
-    public function isValidCodeFormat($code){
-        if(preg_match('/^[a-zA-Z0-9]{3}$/', $code)) {
+    public function isValidCodeFormat($code)
+    {
+        if (preg_match('/^[a-zA-Z0-9]{3}$/', $code)) {
             return true;
         } else {
             return false;

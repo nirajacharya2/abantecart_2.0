@@ -17,21 +17,21 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
+
 use abc\core\ABC;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-
-require_once(ABC::env('DIR_LIB') . 'exceptions/aexception.php');
-require_once(ABC::env('DIR_LIB') . 'exceptions/exception.php');
-require_once(ABC::env('DIR_LIB') . 'exceptions/handler.php');
-require_once(ABC::env('DIR_LIB') . 'exceptions/exception_codes.php');
-
+require_once(ABC::env('DIR_LIB').'exceptions/aexception.php');
+require_once(ABC::env('DIR_LIB').'exceptions/exception.php');
+require_once(ABC::env('DIR_LIB').'exceptions/handler.php');
+require_once(ABC::env('DIR_LIB').'exceptions/exception_codes.php');
 
 $config = [
-    'debug' => (ABC::env('DEBUG') ? true : false)
+    'debug' => (ABC::env('DEBUG') ? true : false),
 ];
-new AHandleExceptions($config,new AExceptionHandler($config['debug']));
+new AHandleExceptions($config, new AExceptionHandler($config['debug']));

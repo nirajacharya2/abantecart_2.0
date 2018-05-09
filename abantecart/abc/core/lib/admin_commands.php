@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
 
 use abc\core\ABC;
@@ -163,7 +164,8 @@ class AdminCommands
                             $title = $this->language->get($menu['item_text']);
                         } else {
                             $this->load->language($menu['item_url'], 'silent');
-                            $title = $this->language->get($menu['item_text'])." / ".$this->language->get('heading_title');
+                            $title =
+                                $this->language->get($menu['item_text'])." / ".$this->language->get('heading_title');
                         }
                         if (preg_match("/$request/iu", $title)) {
                             $sub_res["title"] = $title;

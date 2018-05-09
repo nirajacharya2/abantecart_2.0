@@ -22,7 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -85,7 +85,8 @@ final class AResponse
             $this->level = 0;
         } else {
             if (is_null($level)) {
-                $level = $this->registry->get('config') ? (int)$this->registry->get('config')->get('config_compression') : 0;
+                $level =
+                    $this->registry->get('config') ? (int)$this->registry->get('config')->get('config_compression') : 0;
             }
             $this->level = $level;
         }
@@ -120,11 +121,11 @@ final class AResponse
             $encoding = 'x-gzip';
         }
 
-        if ( ! isset($encoding)) {
+        if (!isset($encoding)) {
             return $data;
         }
 
-        if ( ! extension_loaded('zlib') || ini_get('zlib.output_compression')) {
+        if (!extension_loaded('zlib') || ini_get('zlib.output_compression')) {
             return $data;
         }
 
@@ -149,7 +150,7 @@ final class AResponse
             $output = $this->output;
         }
 
-        if ( ! headers_sent()) {
+        if (!headers_sent()) {
             foreach ($this->headers as $header) {
                 header($header, true);
             }

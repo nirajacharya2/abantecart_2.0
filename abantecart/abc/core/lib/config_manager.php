@@ -25,7 +25,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -40,7 +40,7 @@ if ( ! class_exists('abc\core\ABC')) {
  * @property \abc\models\admin\ModelLocalisationOrderStatus $model_localisation_order_status
  * @property \abc\models\admin\ModelSaleCustomerGroup       $model_sale_customer_group
  * @property ASession                                       $session
- * @property \abc\core\lib\ALanguageManager                      $language
+ * @property \abc\core\lib\ALanguageManager                 $language
  * @property \abc\core\engine\ALoader                       $load
  * @property AIMManager                                     $im
  * @property AConfig                                        $config
@@ -58,7 +58,7 @@ class AConfigManager
 
     public function __construct()
     {
-        if ( ! ABC::env('IS_ADMIN')) { // forbid for non admin calls
+        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AConfigManager');
         }
         $this->registry = Registry::getInstance();
@@ -119,7 +119,7 @@ class AConfigManager
     {
 
         $method_name = "_build_form_".$group;
-        if ( ! method_exists($this, $method_name)) {
+        if (!method_exists($this, $method_name)) {
             return array();
         }
 
@@ -135,7 +135,7 @@ class AConfigManager
      */
     public function validate($group, $fields = array(), $store_id = 0)
     {
-        if (empty($group) || ! is_array($fields)) {
+        if (empty($group) || !is_array($fields)) {
             return false;
         }
         $this->load->language('setting/setting');
@@ -143,10 +143,10 @@ class AConfigManager
         foreach ($fields as $field_name => $field_value) {
             switch ($group) {
                 case 'details':
-                    if ($field_name == 'store_name' && ! $field_value) {
+                    if ($field_name == 'store_name' && !$field_value) {
                         $error['name'] = $this->language->get('error_name');
                     }
-                    if ($field_name == 'config_title' && ! $field_value) {
+                    if ($field_name == 'config_title' && !$field_value) {
                         $error['title'] = $this->language->get('error_title');
                     }
                     //URLS validation
@@ -156,25 +156,30 @@ class AConfigManager
                     if ($field_name == 'config_ssl_url' && $field_value) {
                         $config_ssl_url = $field_value;
                     }
-                    if ($field_name == 'config_url' && ( ! $field_value || ! preg_match("/^(http|https):\/\//", $field_value))) {
+                    if ($field_name == 'config_url'
+                        && (!$field_value
+                            || !preg_match("/^(http|https):\/\//", $field_value))) {
                         $error['url'] = $this->language->get('error_url');
                     }
-                    if ($field_name == 'config_ssl_url' && $field_value && ! preg_match("/^(http|https):\/\//", $field_value)) {
+                    if ($field_name == 'config_ssl_url' && $field_value
+                        && !preg_match("/^(http|https):\/\//", $field_value)) {
                         $error['ssl_url'] = $this->language->get('error_ssl_url');
                     } //when quicksave only ssl_url
-                    elseif ($field_name == 'config_ssl_url' && $field_value && ! AHelperUtils::has_value($fields['config_url'])) {
+                    elseif ($field_name == 'config_ssl_url' && $field_value
+                        && !AHelperUtils::has_value($fields['config_url'])) {
                         $saved_settings = $this->model_setting_setting->getSetting($group, $store_id);
                         $config_url = $saved_settings['config_url'];
                         $config_ssl_url = $field_value;
                     } //when quicksave only url
-                    elseif ($field_name == 'config_url' && $field_value && ! AHelperUtils::has_value($fields['config_ssl_url'])) {
+                    elseif ($field_name == 'config_url' && $field_value
+                        && !AHelperUtils::has_value($fields['config_ssl_url'])) {
                         $saved_settings = $this->model_setting_setting->getSetting($group, $store_id);
                         $config_ssl_url = $saved_settings['config_ssl_url'];
                         $config_url = $field_value;
                     }
                     //When store url is secure but ssl_url not - show error
-                    if ( ! $error['url']
-                        && ! $error['ssl_url']
+                    if (!$error['url']
+                        && !$error['ssl_url']
                         && preg_match("/^(https):\/\//", $config_url)
                         && preg_match("/^(http):\/\//", $config_ssl_url)
                     ) {
@@ -190,7 +195,8 @@ class AConfigManager
                             $error['address'] = $this->language->get('error_address');
                         }
 
-                        if (mb_strlen($fields['store_main_email']) > 96 || ( ! preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $fields['store_main_email']))) {
+                        if (mb_strlen($fields['store_main_email']) > 96
+                            || (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $fields['store_main_email']))) {
                             $error['email'] = $this->language->get('error_email');
                         }
 
@@ -202,23 +208,23 @@ class AConfigManager
 
                 case 'general':
 
-                    if ($field_name == 'config_catalog_limit' && ! $field_value) {
+                    if ($field_name == 'config_catalog_limit' && !$field_value) {
                         $error['catalog_limit'] = $this->language->get('error_limit');
                     }
 
-                    if ($field_name == 'config_bestseller_limit' && ! $field_value) {
+                    if ($field_name == 'config_bestseller_limit' && !$field_value) {
                         $error['bestseller_limit'] = $this->language->get('error_limit');
                     }
 
-                    if ($field_name == 'config_featured_limit' && ! $field_value) {
+                    if ($field_name == 'config_featured_limit' && !$field_value) {
                         $error['featured_limit'] = $this->language->get('error_limit');
                     }
 
-                    if ($field_name == 'config_latest_limit' && ! $field_value) {
+                    if ($field_name == 'config_latest_limit' && !$field_value) {
                         $error['latest_limit'] = $this->language->get('error_limit');
                     }
 
-                    if ($field_name == 'config_special_limit' && ! $field_value) {
+                    if ($field_name == 'config_special_limit' && !$field_value) {
                         $error['special_limit'] = $this->language->get('error_limit');
                     }
                     break;
@@ -238,7 +244,7 @@ class AConfigManager
 
                     foreach ($item_name as $key) {
                         foreach (array('width', 'height') as $dim) {
-                            if ($field_name == 'config_image_'.$key.'_'.$dim && ! $field_value) {
+                            if ($field_name == 'config_image_'.$key.'_'.$dim && !$field_value) {
                                 $error['image_'.$key.'_'.$dim] = $this->language->get('error_image_'.$key);
                             }
                         }
@@ -247,13 +253,13 @@ class AConfigManager
                     break;
 
                 case 'checkout':
-                    if ($field_name == 'config_start_order_id' && $field_value && ! (int)$field_value) {
+                    if ($field_name == 'config_start_order_id' && $field_value && !(int)$field_value) {
                         $error['start_order_id'] = $this->language->get('error_start_order_id');
                     }
-                    if ($field_name == 'starting_invoice_id' && $field_value && ! (int)$field_value) {
+                    if ($field_name == 'starting_invoice_id' && $field_value && !(int)$field_value) {
                         $error['starting_invoice_id'] = $this->language->get('error_starting_invoice_id');
                     }
-                    if ($field_name == 'config_expire_order_days' && $field_value && ! (int)$field_value) {
+                    if ($field_name == 'config_expire_order_days' && $field_value && !(int)$field_value) {
                         $error['expire_order_days'] = $this->language->get('error_expire_order_days');
                     }
 
@@ -265,7 +271,10 @@ class AConfigManager
                 case 'mail':
 
                     if (($fields['config_mail_protocol'] == 'smtp')
-                        && (($field_name == 'config_smtp_host' && ! $field_value) || ($field_name == 'config_smtp_port' && ! $field_value) || ($field_name == 'config_smtp_timeout' && ! $field_value))
+                        && (($field_name == 'config_smtp_host' && !$field_value)
+                            || ($field_name == 'config_smtp_port'
+                                && !$field_value)
+                            || ($field_name == 'config_smtp_timeout' && !$field_value))
                     ) {
                         $error['mail'] = $this->language->get('error_mail');
                     }
@@ -516,10 +525,13 @@ class AConfigManager
         foreach ($props as $n => $properties) {
             //for multilingual settings
             if (AHelperUtils::preformatTextID($field_name) == AHelperUtils::preformatTextID($properties['name'])
-                || (is_int(strpos($field_name, 'config_description')) && is_int(strpos($properties['name'], 'config_description')))
+                || (is_int(strpos($field_name, 'config_description'))
+                    && is_int(strpos($properties['name'], 'config_description')))
                 || (is_int(strpos($field_name, 'config_title')) && is_int(strpos($properties['name'], 'config_title')))
-                || (is_int(strpos($field_name, 'config_meta_description')) && is_int(strpos($properties['name'], 'config_meta_description')))
-                || (is_int(strpos($field_name, 'config_meta_keywords')) && is_int(strpos($properties['name'], 'config_meta_keywords')))
+                || (is_int(strpos($field_name, 'config_meta_description'))
+                    && is_int(strpos($properties['name'], 'config_meta_description')))
+                || (is_int(strpos($field_name, 'config_meta_keywords'))
+                    && is_int(strpos($properties['name'], 'config_meta_keywords')))
             ) {
                 $names = array_keys($fields);
                 $name = $names[$n];
@@ -732,7 +744,7 @@ class AConfigManager
         $results = $cntmnr->getContents();
         $contents = array('' => $this->language->get('text_none'));
         foreach ($results as $item) {
-            if ( ! $item['status']) {
+            if (!$item['status']) {
                 continue;
             }
             $contents[$item['content_id']] = $item['title'];
@@ -754,7 +766,10 @@ class AConfigManager
             'type'    => 'selectbox',
             'name'    => 'config_tax_customer',
             'value'   => $data['config_tax_customer'],
-            'options' => array($this->language->get('entry_tax_customer_0'), $this->language->get('entry_tax_customer_1')),
+            'options' => array(
+                $this->language->get('entry_tax_customer_0'),
+                $this->language->get('entry_tax_customer_1'),
+            ),
         ));
         $fields['start_order_id'] = $form->getFieldHtml($props[] = array(
             'type'  => 'input',
@@ -1001,7 +1016,7 @@ class AConfigManager
             );
 
             foreach ($fieldset as $name) {
-                if ( ! AHelperUtils::has_value($data[$name]) && AHelperUtils::has_value($default_values[$name])) {
+                if (!AHelperUtils::has_value($data[$name]) && AHelperUtils::has_value($default_values[$name])) {
                     $data[$name] = $default_values[$name];
                 }
             }
@@ -1219,7 +1234,8 @@ class AConfigManager
         }
         if ($section != 'admin') {
             //get extension templates
-            $extension_templates = $this->extension_manager->getExtensionsList(array('filter' => 'template', 'status' => (int)$status));
+            $extension_templates =
+                $this->extension_manager->getExtensionsList(array('filter' => 'template', 'status' => (int)$status));
             if ($extension_templates->total > 0) {
                 foreach ($extension_templates->rows as $row) {
                     $this->templates[$section][$row['key']] = $row['key'];
@@ -1341,7 +1357,7 @@ class AConfigManager
                 'attr'    => $no_driver ? 'disabled' : '',
             ));
 
-            if ( ! $no_driver) {
+            if (!$no_driver) {
                 $fields[$protocol]['storefront_status'] = $form->getFieldHtml($props[] = array(
                     'type'       => 'checkbox',
                     'name'       => 'config_storefront_'.$protocol.'_status',
@@ -1443,7 +1459,8 @@ class AConfigManager
                 'type'  => 'input',
                 'name'  => 'config_session_ttl',
                 'value' => $data['config_session_ttl'],
-            )).sprintf($this->language->get('text_setting_php_exceed'), 'session.gc_maxlifetime', (int)ini_get('session.gc_maxlifetime') / 60);
+            )).sprintf($this->language->get('text_setting_php_exceed'), 'session.gc_maxlifetime',
+                (int)ini_get('session.gc_maxlifetime') / 60);
 
         $fields['maintenance'] = $form->getFieldHtml($props[] = array(
             'type'  => 'checkbox',
@@ -1458,7 +1475,7 @@ class AConfigManager
             'style' => 'btn_switch',
         ));
         //backwards compatibility. Can remove in the future.
-        if ( ! ABC::env('ENCRYPTION_KEY')) {
+        if (!ABC::env('ENCRYPTION_KEY')) {
             $fields['encryption'] = $form->getFieldHtml($props[] = array(
                 'type'  => 'input',
                 'name'  => 'encryption_key',
@@ -1518,7 +1535,8 @@ class AConfigManager
             $cache_drivers[$name] = $name;
         }
         sort($cache_drivers, SORT_STRING);
-        $current_cache_driver = strtoupper(ABC::env('CACHE')['CACHE_DRIVER'] ? ABC::env('CACHE')['CACHE_DRIVER'] : 'file');
+        $current_cache_driver =
+            strtoupper(ABC::env('CACHE')['CACHE_DRIVER'] ? ABC::env('CACHE')['CACHE_DRIVER'] : 'file');
         unset($cache_drivers[$current_cache_driver]);
 
         $fields['cache_enable'] = $form->getFieldHtml($props[] = array(
@@ -1526,7 +1544,8 @@ class AConfigManager
                 'name'  => 'config_cache_enable',
                 'value' => $data['config_cache_enable'],
                 'style' => 'btn_switch',
-            )).'<br/>'.sprintf($this->language->get('text_setting_cache_drivers'), $current_cache_driver, implode(', ', $cache_drivers));;
+            )).'<br/>'.sprintf($this->language->get('text_setting_cache_drivers'), $current_cache_driver,
+                implode(', ', $cache_drivers));;
 
         $fields['html_cache'] = $form->getFieldHtml($props[] = array(
             'type'  => 'checkbox',

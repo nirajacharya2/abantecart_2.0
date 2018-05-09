@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
 
 use abc\core\ABC;
@@ -31,13 +32,14 @@ if (!class_exists('abc\core\ABC')) {
 
 /**
  * Class AAssetPublisher
- * @property ADB $db
- * @property ALanguageManager $language
- * @property AConfig $config
- * @property ASession $session
+ *
+ * @property ADB                    $db
+ * @property ALanguageManager       $language
+ * @property AConfig                $config
+ * @property ASession               $session
  * @property \abc\core\cache\ACache $cache
- * @property ALoader $load
- * @property ExtensionsApi $extensions
+ * @property ALoader                $load
+ * @property ExtensionsApi          $extensions
  *
  */
 class AAssetPublisher
@@ -68,8 +70,8 @@ class AAssetPublisher
             'DIR_APP_EXTENSIONS',
             'DIR_PUBLIC',
             'DIR_VENDOR',
-            'DIR_APP_EXTENSIONS'
-            ];
+            'DIR_APP_EXTENSIONS',
+        ];
         foreach ($vars as $name) {
             if (!ABC::env($name)) {
                 $this->errors[] = __CLASS__.': Empty environment variable value: '.$name;
@@ -83,7 +85,6 @@ class AAssetPublisher
         return $this->registry->get($key);
     }
 
-
     public function publish($source = 'all', $options = [])
     {
         $source = !$source ? 'all' : (string)$source;
@@ -96,7 +97,7 @@ class AAssetPublisher
         //try to get driver class name from config
         $driver = null;
         if (ABC::env('asset_publisher_driver')
-            && strtolower(ABC::env('asset_publisher_driver')) != 'assetpublishercopy' ) {
+            && strtolower(ABC::env('asset_publisher_driver')) != 'assetpublishercopy') {
             $this->load->library(strtolower(ABC::env('asset_publisher_driver')));
             if (class_exists(ABC::env('asset_publisher_driver'))) {
                 $namespace = "\abc\core\lib\\";
@@ -127,7 +128,8 @@ class AAssetPublisher
      *                         - 'vendors' - only assets from vendor directory,
      *                         '{extension_text_id}' - to publish only extension assets,
      *                         and 'all' to publish all
-     * @param array $filter
+     * @param array  $filter
+     *
      * @return array
      */
     public function getSourceAssetsFiles($source = 'all', $filter = [])
@@ -180,8 +182,10 @@ class AAssetPublisher
             if (isset($filter['package']) && $filter['package']) {
                 list($vendor_name, $package_name) = explode(':', $filter['package']);
                 //only one vendors package
-                $dirs = [ ABC::env('DIR_VENDOR').'assets'.DS
-                    .$vendor_name.DS.$package_name ];
+                $dirs = [
+                    ABC::env('DIR_VENDOR').'assets'.DS
+                    .$vendor_name.DS.$package_name,
+                ];
             } else {
                 //all vendors packages
                 $dirs = glob(ABC::env('DIR_VENDOR').'assets'.DS.'*', GLOB_ONLYDIR);
@@ -201,9 +205,9 @@ class AAssetPublisher
         }
 
         $output = [
-            'core' => $core_assets,
+            'core'       => $core_assets,
             'extensions' => $extensions_assets,
-            'vendors' => $vendors_assets
+            'vendors'    => $vendors_assets,
         ];
 
         return $output;
@@ -226,12 +230,12 @@ class AAssetPublisher
             if ($template === '') {
                 continue;
             }
-            $dir_pattern = ABC::env('DIR_APP_EXTENSIONS').$extension_name . '/templates/'.$template.'/*/assets';
+            $dir_pattern = ABC::env('DIR_APP_EXTENSIONS').$extension_name.'/templates/'.$template.'/*/assets';
             $dirs = glob($dir_pattern, GLOB_ONLYDIR);
             foreach ($dirs as $dir) {
                 $files = AHelperUtils::getFilesInDir($dir);
                 foreach ($files as $file) {
-                    $extensions_assets[$template][]= AHelperUtils::getRelativePath(
+                    $extensions_assets[$template][] = AHelperUtils::getRelativePath(
                         ABC::env('DIR_APP_EXTENSIONS')
                         .$extension_name.DS
                         .ABC::env('DIRNAME_TEMPLATES').$template.'/',
@@ -245,8 +249,10 @@ class AAssetPublisher
 
 }
 
-class AssetPublisherCopy{
+class AssetPublisherCopy
+{
     public $errors = array();
+
     public function publishFiles($files = array())
     {
 
@@ -294,9 +300,9 @@ class AssetPublisherCopy{
             $src_dir = ABC::env('DIR_APP_EXTENSIONS').$extension
                 .DS.ABC::env('DIRNAME_TEMPLATES');
             $dst_dir = ABC::env('DIR_PUBLIC')
-                            .ABC::env('DIRNAME_EXTENSIONS')
-                            .$extension.DS
-                            .ABC::env('DIRNAME_TEMPLATES');
+                .ABC::env('DIRNAME_EXTENSIONS')
+                .$extension.DS
+                .ABC::env('DIRNAME_TEMPLATES');
 
             $result = $this->processTemplateAssets($file_list, $src_dir, $dst_dir);
 
@@ -364,7 +370,7 @@ class AssetPublisherCopy{
                         }
                     }
                     //try to move to production
-                    if (! @rename($new_temp_dir, $live_dir)) {
+                    if (!@rename($new_temp_dir, $live_dir)) {
                         $this->errors[] = __CLASS__.': Cannot rename temporary directory '
                             .$new_temp_dir.' to live '.$live_dir;
                         //revert old assets
@@ -376,7 +382,7 @@ class AssetPublisherCopy{
                     }
                     //if all fine - remove old live directory
                 } else {
-                    $this->errors[] = __CLASS__.': Cannot rename live directory ' .$live_dir.' to '.$old_temp_dir;
+                    $this->errors[] = __CLASS__.': Cannot rename live directory '.$live_dir.' to '.$old_temp_dir;
                     return false;
                 }
             }

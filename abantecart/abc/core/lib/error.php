@@ -23,8 +23,8 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
+if (!class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class AError
@@ -66,26 +66,26 @@ class AError
      * @param  $msg  - error message
      * @param  $code - error code
      */
-    public function __construct( $msg, $code = AC_ERR_USER_ERROR )
+    public function __construct($msg, $code = AC_ERR_USER_ERROR)
     {
         $backtrace = debug_backtrace();
         $this->code = $code;
         $this->msg = $msg;
         $trace_limit = 6;
         $this->msg .= "\nTrace:\n";
-        foreach ( $backtrace as $k => $b ) {
-            if ( $k >= $trace_limit ) {
+        foreach ($backtrace as $k => $b) {
+            if ($k >= $trace_limit) {
                 break;
             }
             $this->msg .= "\t#".$k." ".$b['file'].' on line '.$b['line']."\n";
         }
 
-        if ( class_exists( '\abc\core\engine\Registry' ) ) {
+        if (class_exists('\abc\core\engine\Registry')) {
             $this->registry = Registry::getInstance();
         }
         //TODO: use registry object instead?? what if registry not accessible?
         $this->error_descriptions = $GLOBALS['error_descriptions'];
-        $this->version = 'AbanteCart core v.'.ABC::env( 'VERSION' );
+        $this->version = 'AbanteCart core v.'.ABC::env('VERSION');
     }
 
     /**
@@ -95,7 +95,7 @@ class AError
      */
     public function toDebug()
     {
-        ADebug::error( $this->error_descriptions[$this->code], $this->code, $this->msg );
+        ADebug::error($this->error_descriptions[$this->code], $this->code, $this->msg);
 
         return $this;
     }
@@ -108,9 +108,9 @@ class AError
      */
     public function toLog()
     {
-        if ( ! is_object( $this->registry ) || ! $this->registry->has( 'log' ) ) {
-            $log_obj = ABC::getObjectByAlias( 'ALog' );
-            if ( $log_obj ) {
+        if (!is_object($this->registry) || !$this->registry->has('log')) {
+            $log_obj = ABC::getObjectByAlias('ALog');
+            if ($log_obj) {
                 $log = $log_obj;
             } else {
                 //we have error way a head of system start
@@ -119,9 +119,9 @@ class AError
                 return $this;
             }
         } else {
-            $log = $this->registry->get( 'log' );
+            $log = $this->registry->get('log');
         }
-        $log->write( $this->error_descriptions[$this->code].':  '.$this->version.' '.$this->msg );
+        $log->write($this->error_descriptions[$this->code].':  '.$this->version.' '.$this->msg);
 
         return $this;
     }
@@ -133,15 +133,15 @@ class AError
      *
      * @return AError
      */
-    public function toMessages( $subject = '' )
+    public function toMessages($subject = '')
     {
-        if ( is_object( $this->registry ) && $this->registry->has( 'messages' ) ) {
+        if (is_object($this->registry) && $this->registry->has('messages')) {
             /**
              * @var $messages AMessage
              */
-            $messages = $this->registry->get( 'messages' );
+            $messages = $this->registry->get('messages');
             $title = $subject ? $subject : $this->error_descriptions[$this->code];
-            $messages->saveError( $title, $this->msg );
+            $messages->saveError($title, $this->msg);
         }
 
         return $this;
@@ -162,65 +162,65 @@ class AError
      * add error message to JSON output
      *
      * @param string $status_text_and_code - any human readable
-     *                                    text string with 3 digit at the end to represent HTTP response code
-     *                                    For ex. VALIDATION_ERROR_406
+     *                                     text string with 3 digit at the end to represent HTTP response code
+     *                                     For ex. VALIDATION_ERROR_406
      *
-     * @param array  $err_data  - array with error text and params to control ajax
-     *                           error_code -> HTTP error code if missing in $status_text_and_code
-     *                           error_title -> Title for error dialog and
-     *                           header (error constant used be default)
-     *                           error_text -> Error message ( Class construct used by default )
-     *                           show_dialog -> true to show dialog with error
-     *                           reset_value -> true to reset values in a field (if applicable)
-     *                           reload_page -> true to reload page after dialog close
-     *                          TODO: Add redirect_url on dialog close
+     * @param array  $err_data             - array with error text and params to control ajax
+     *                                     error_code -> HTTP error code if missing in $status_text_and_code
+     *                                     error_title -> Title for error dialog and
+     *                                     header (error constant used be default)
+     *                                     error_text -> Error message ( Class construct used by default )
+     *                                     show_dialog -> true to show dialog with error
+     *                                     reset_value -> true to reset values in a field (if applicable)
+     *                                     reload_page -> true to reload page after dialog close
+     *                                     TODO: Add redirect_url on dialog close
      *
      * @return null|mixed
      * @throws AException
      */
-    public function toJSONResponse( $status_text_and_code, $err_data = array() )
+    public function toJSONResponse($status_text_and_code, $err_data = array())
     {
         //detect HTTP response status code based on readable text status
-        preg_match( '/(\d+)$/', $status_text_and_code, $match );
-        if ( ! $match[0] ) {
-            if ( empty( $err_data['error_code'] ) ) {
+        preg_match('/(\d+)$/', $status_text_and_code, $match);
+        if (!$match[0]) {
+            if (empty($err_data['error_code'])) {
                 $err_data['error_code'] = 400;
             }
         } else {
             $err_data['error_code'] = (int)$match[0];
         }
 
-        if ( empty( $err_data['error_title'] ) ) {
+        if (empty($err_data['error_title'])) {
             $err_data['error_title'] = $this->error_descriptions[$this->code];
         }
-        if ( empty( $err_data['error_text'] ) ) {
+        if (empty($err_data['error_text'])) {
             $err_data['error_text'] = $this->msg;
         }
         $http_header_txt = 'HTTP/1.1 '.(int)$err_data['error_code'].' '.$err_data['error_title'];
 
-        if ( is_object( $this->registry ) && $this->registry->has( 'response' ) ) {
+        if (is_object($this->registry) && $this->registry->has('response')) {
             /**
              * @var $response AResponse
              */
-            $response = $this->registry->get( 'response' );
+            $response = $this->registry->get('response');
             /**
              * @var \abc\core\engine\ALoader $load
              */
-            $load = $this->registry->get( 'load' );
-            $response->addHeader( $http_header_txt );
+            $load = $this->registry->get('load');
+            $response->addHeader($http_header_txt);
             $response->addJSONHeader();
-            $load->library( 'json' );
-            $response->setOutput( AJson::encode( $err_data ) );
+            $load->library('json');
+            $response->setOutput(AJson::encode($err_data));
 
             return null;
         } else {
             //for some reason we do not have registry. do direct output and exit
-            if ( ! headers_sent() ) {
-                header( $http_header_txt );
-                header( 'Content-Type: application/json' );
+            if (!headers_sent()) {
+                header($http_header_txt);
+                header('Content-Type: application/json');
             }
-            include_once( ABC::env( 'DIR_LIB' ).'json.php' );
-            echo AJson::encode( $err_data );
+            include_once(ABC::env('DIR_LIB').'json.php');
+            echo AJson::encode($err_data);
             exit;
         }
     }

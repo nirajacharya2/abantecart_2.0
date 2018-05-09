@@ -11,18 +11,18 @@ use abc\core\lib\ABackup as ABackup;
 
 return [
     'AViewRender' => \abc\core\view\AViewDefaultRender::class,
-    'ALog'                 => [
+    'ALog'        => [
         ALog::class,
         [
 
-        'app' => 'application.log',
-        'security' => 'security.log',
-        'warn' => 'application.log',
-        'debug' => 'debug.log'
+            'app'      => 'application.log',
+            'security' => 'security.log',
+            'warn'     => 'application.log',
+            'debug'    => 'debug.log'
         ]
     ],
-    'ABackup'              => ABackup::class,
-    'AJobManager'          => AJobManager::class,
-    'AJson'                => AJson::class,
-    'ACustomer'            => ACustomer::class,
+    'ABackup'     => ABackup::class,
+    'AJobManager' => AJobManager::class,
+    'AJson'       => AJson::class,
+    'ACustomer'   => ACustomer::class,
 ];

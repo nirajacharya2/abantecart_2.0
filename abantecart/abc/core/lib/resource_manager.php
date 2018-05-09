@@ -25,17 +25,17 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class AResourceManager
  *
- * @property ADB                       $db
- * @property \abc\core\engine\AHtml    $html
- * @property \abc\core\cache\ACache                    $cache
- * @property AConfig                   $config
+ * @property ADB                            $db
+ * @property \abc\core\engine\AHtml         $html
+ * @property \abc\core\cache\ACache         $cache
+ * @property AConfig                        $config
  * @property \abc\core\lib\ALanguageManager $language
  */
 class AResourceManager extends AResource
@@ -45,7 +45,7 @@ class AResourceManager extends AResource
 
     public function __construct()
     {
-        if ( ! ABC::env('IS_ADMIN')) { // forbid for non admin calls
+        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to change resources');
         }
         $this->registry = Registry::getInstance();
@@ -71,7 +71,7 @@ class AResourceManager extends AResource
             //get type details
             $this->_loadType();
 
-            if ( ! $this->type_id) {
+            if (!$this->type_id) {
                 $message = "Error: Incorrect or missing resource type ".$type;
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
@@ -98,7 +98,7 @@ class AResourceManager extends AResource
 
     public function updateResourceType($data)
     {
-        if (empty($data) || ! AHelperUtils::has_value($data['type_id'])) {
+        if (empty($data) || !AHelperUtils::has_value($data['type_id'])) {
             return null;
         }
         $sql = "UPDATE ".$this->db->table_name('resource_types')."
@@ -130,18 +130,18 @@ class AResourceManager extends AResource
 
     public function buildResourcePath($resource_id, $file_path)
     {
-        if ( ! (int)$resource_id || empty($file_path)) {
+        if (!(int)$resource_id || empty($file_path)) {
             return false;
         }
         $resource_path = $this->getHexPath($resource_id).strtolower(substr(strrchr($file_path, '.'), 0));
         $resource_dir = dirname($resource_path);
-        if ( ! is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_dir)) {
+        if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_dir)) {
             $path = '';
             $directories = explode('/', $resource_dir);
             foreach ($directories as $directory) {
                 $path = $path.'/'.$directory;
-                if ( ! is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$path)) {
-                    if ( ! is_dir(ABC::env('DIR_RESOURCES').$this->type_dir)) {
+                if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$path)) {
+                    if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir)) {
                         @mkdir(ABC::env('DIR_RESOURCES').$this->type_dir, 0777);
                     }
                     @mkdir(ABC::env('DIR_RESOURCES').$this->type_dir.$path, 0777);
@@ -166,7 +166,7 @@ class AResourceManager extends AResource
     public function addResource($resource)
     {
 
-        if ( ! $this->type_id) {
+        if (!$this->type_id) {
             $message = "Error: Incorrect or missing resource type. Please set type using setType() method ";
             $error = new AError ($message);
             $error->toLog()->toDebug();
@@ -180,10 +180,11 @@ class AResourceManager extends AResource
         $this->db->query($sql);
         $resource_id = $this->db->getLastId();
 
-        if ( ! empty($resource['resource_path'])) {
+        if (!empty($resource['resource_path'])) {
             $resource_path = $this->buildResourcePath($resource_id, $resource['resource_path']);
             if ($resource_path === false) {
-                $message = "Error: Incorrect or missing resource path. Please set correct path to build internal path of resource. ";
+                $message =
+                    "Error: Incorrect or missing resource path. Please set correct path to build internal path of resource. ";
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
                 //remove resource on fail
@@ -193,9 +194,10 @@ class AResourceManager extends AResource
             }
             //move file
             $result = @rename(ABC::env('DIR_RESOURCES').$this->type_dir.$resource['resource_path'],
-                              ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
-            if ( ! $result) {
-                $message = "Error: Cannot move resource to resources directory. Please check permissions of ".dirname(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path).' directory!';
+                ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
+            if (!$result) {
+                $message = "Error: Cannot move resource to resources directory. Please check permissions of "
+                    .dirname(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path).' directory!';
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
                 //remove resource on fail
@@ -239,7 +241,7 @@ class AResourceManager extends AResource
     public function updateResource($resource_id, $data)
     {
         $resource_id = (int)$resource_id;
-        if ( ! $resource_id) {
+        if (!$resource_id) {
             return false;
         }
         $_update = array();
@@ -281,20 +283,22 @@ class AResourceManager extends AResource
     public function deleteThumbnail($resource_id = '')
     {
         $resource_id = (int)$resource_id;
-        if ( ! $resource_id) {
+        if (!$resource_id) {
             return false;
         }
 
         //get $resource with all translations
         $resource = $this->getResource($resource_id);
         //skip when resource is html-code or does not exists
-        if ( ! $resource['resource_path'] || ! $resource) {
+        if (!$resource['resource_path'] || !$resource) {
             return false;
         }
 
         foreach ($resource['name'] as $lang_id => $name) {
             $name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
-            $filemask = ABC::env('DIR_IMAGES').'thumbnails/'.dirname($resource['resource_path']).'/'.$name.'-'.$resource_id.'-*';
+            $filemask =
+                ABC::env('DIR_IMAGES').'thumbnails/'.dirname($resource['resource_path']).'/'.$name.'-'.$resource_id
+                .'-*';
             $file_list = glob($filemask, GLOB_NOSORT);
             if ($file_list) {
                 foreach ($file_list as $thumb) {
@@ -319,22 +323,26 @@ class AResourceManager extends AResource
     public function deleteResource($resource_id)
     {
         $resource = $this->getResource($resource_id);
-        if ( ! $resource) {
+        if (!$resource) {
             return false;
         }
         if ($this->isMapped($resource_id)) {
             return false;
         }
 
-        if ($resource['resource_path'] && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path'])) {
+        if ($resource['resource_path']
+            && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path'])) {
             unlink(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path']);
         }
         //remove thumbnail before removing
         $this->deleteThumbnail($resource_id);
 
-        $this->db->query("DELETE FROM ".$this->db->table_name("resource_map")." WHERE resource_id = '".(int)$resource_id."' ");
-        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id = '".(int)$resource_id."' ");
-        $this->db->query("DELETE FROM ".$this->db->table_name("resource_library")." WHERE resource_id = '".(int)$resource_id."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_map")." WHERE resource_id = '".(int)$resource_id
+            ."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id = '"
+            .(int)$resource_id."' ");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_library")." WHERE resource_id = '"
+            .(int)$resource_id."' ");
 
         $this->cache->remove('resources');
 
@@ -350,7 +358,7 @@ class AResourceManager extends AResource
      */
     public function unmapAndDeleteResources($object_name, $object_id, $type = '')
     {
-        if ( ! $object_name || ! $object_id) {
+        if (!$object_name || !$object_id) {
             return null;
         }
         if ($type) {
@@ -374,7 +382,7 @@ class AResourceManager extends AResource
      */
     public function deleteResources($resource_ids, $object_name = '', $object_id = 0)
     {
-        if ( ! $resource_ids || ! is_array($resource_ids)) {
+        if (!$resource_ids || !is_array($resource_ids)) {
             return null;
         }
         $result = true;
@@ -382,19 +390,21 @@ class AResourceManager extends AResource
         foreach ($resource_ids as $resource_id) {
             $resource_id = (int)$resource_id;
             $resource = $this->getResource($resource_id);
-            if ( ! $resource) {
+            if (!$resource) {
                 continue;
             }
             $mapped_cnt = $this->isMapped($resource_id);
             if ($mapped_cnt == 1 && $this->isMapped($resource_id, $object_name, $object_id)) {
                 $res = $this->unmapResource($object_name, $object_id, $resource_id);
-                if ( ! $res) {
-                    $this->error[] = $resource['name'][$this->language->getContentLanguageID()].' cannot be deleted. Unlink it first.';
+                if (!$res) {
+                    $this->error[] = $resource['name'][$this->language->getContentLanguageID()]
+                        .' cannot be deleted. Unlink it first.';
                     $result = false;
                     continue;
                 }
             } elseif ($mapped_cnt) {
-                $this->error[] = $resource['name'][$this->language->getContentLanguageID()].' cannot be deleted. Unlink it first.';
+                $this->error[] =
+                    $resource['name'][$this->language->getContentLanguageID()].' cannot be deleted. Unlink it first.';
                 $result = false;
                 continue;
             }
@@ -402,18 +412,20 @@ class AResourceManager extends AResource
             $ids[] = $resource_id;
             $this->cache->remove('resources');
 
-            if ($resource['resource_path'] && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path'])) {
+            if ($resource['resource_path']
+                && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path'])) {
                 unlink(ABC::env('DIR_RESOURCES').$resource['type_name'].'/'.$resource['resource_path']);
             }
         }
 
-        if ( ! $ids) {
+        if (!$ids) {
             return $result;
         }
 
         $ids = implode(', ', $ids);
         $this->db->query("DELETE FROM ".$this->db->table_name("resource_map")." WHERE resource_id IN (".$ids.")");
-        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id IN (".$ids.")");
+        $this->db->query("DELETE FROM ".$this->db->table_name("resource_descriptions")." WHERE resource_id IN (".$ids
+            .")");
         $this->db->query("DELETE FROM ".$this->db->table_name("resource_library")." WHERE resource_id IN (".$ids.")");
 
         $this->cache->remove('resources');
@@ -478,10 +490,10 @@ class AResourceManager extends AResource
      */
     public function mapResources($resource_ids, $object_name, $object_id)
     {
-        if ( ! $object_name && ! (int)$object_id) {
+        if (!$object_name && !(int)$object_id) {
             return null;
         }
-        if ( ! $resource_ids || ! is_array($resource_ids)) {
+        if (!$resource_ids || !is_array($resource_ids)) {
             return null;
         }
         $ids = array();
@@ -562,10 +574,10 @@ class AResourceManager extends AResource
      */
     public function unmapResources($resource_ids, $object_name, $object_id)
     {
-        if ( ! $object_name && ! (int)$object_id) {
+        if (!$object_name && !(int)$object_id) {
             return null;
         }
-        if ( ! $resource_ids || ! is_array($resource_ids)) {
+        if (!$resource_ids || !is_array($resource_ids)) {
             return null;
         }
         $ids = array();
@@ -596,7 +608,7 @@ class AResourceManager extends AResource
      */
     public function updateSortOrder($data, $object_name, $object_id)
     {
-        if ( ! $data || ! is_array($data)) {
+        if (!$data || !is_array($data)) {
             return false;
         }
 
@@ -626,7 +638,7 @@ class AResourceManager extends AResource
      */
     public function getResource($resource_id, $language_id = 0)
     {
-        if ( ! $resource_id) {
+        if (!$resource_id) {
             return null;
         }
         if ($language_id) {
@@ -687,7 +699,7 @@ class AResourceManager extends AResource
                           rd.resource_code as resource_code
                 ";
             } else {
-                $top_sql  .= "
+                $top_sql .= "
                           COALESCE(rd.resource_path,rdd.resource_path) as resource_path,
                           COALESCE(rd.resource_code,rdd.resource_code) as resource_code
                 ";
@@ -700,37 +712,39 @@ class AResourceManager extends AResource
         if ($language_id != (int)$this->language->getDefaultLanguageID()) {
             //add default language
             $join .= " LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd 
-                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '".$this->language->getDefaultLanguageID()."') ";
+                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '"
+                .$this->language->getDefaultLanguageID()."') ";
         }
 
-        if ($data['sort'] == 'sort_order' || ! empty($data['object_name']) || ! empty($data['object_id'])) {
+        if ($data['sort'] == 'sort_order' || !empty($data['object_name']) || !empty($data['object_id'])) {
             if ($mode != 'total_only') {
                 $top_sql .= ", rm.sort_order";
             }
             $sub_join = '';
-            if ( ! empty($data['object_name'])) {
+            if (!empty($data['object_name'])) {
                 $sub_join .= " AND rm.object_name = '".$this->db->escape($data['object_name'])."'";
             }
-            if ( ! empty($data['object_id'])) {
+            if (!empty($data['object_id'])) {
                 $sub_join .= " AND rm.object_id = '".(int)$data['object_id']."'";
             }
-            $join .= " INNER JOIN ".$this->db->table_name("resource_map")." rm ON (rl.resource_id = rm.resource_id ".$sub_join.") ";
+            $join .= " INNER JOIN ".$this->db->table_name("resource_map")." rm ON (rl.resource_id = rm.resource_id "
+                .$sub_join.") ";
         }
 
-        if ( ! empty($data['keyword'])) {
+        if (!empty($data['keyword'])) {
             $where .= ($where ? " AND" : ' WHERE ');
             $where .= " ( LCASE(rd.name) LIKE '%".$this->db->escape(strtolower($data['keyword']), true)."%'";
             $where .= " OR LCASE(rd.title) LIKE '%".$this->db->escape(strtolower($data['keyword']), true)."%' )";
         }
 
-        if ( ! empty($data['type_id'])) {
+        if (!empty($data['type_id'])) {
             $where .= ($where ? " AND " : ' WHERE ');
             $where .= " rl.type_id = '".(int)$data['type_id']."'";
         }
 
         $sql = "SELECT ".$top_sql." FROM ".$this->db->table_name("resource_library")." rl".$join.$where;
 
-        if ( ! empty($data['subsql_filter'])) {
+        if (!empty($data['subsql_filter'])) {
             $sql .= ($where ? " AND " : 'WHERE ').$data['subsql_filter'];
         }
 
@@ -784,7 +798,7 @@ class AResourceManager extends AResource
     public function getResourceObjects($resource_id, $language_id = 0)
     {
         $resource_objects = array();
-        if ( ! $language_id) {
+        if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
         $objects = $this->getAllObjects();
@@ -794,7 +808,7 @@ class AResourceManager extends AResource
                     array($resource_id, $language_id));
                 if ($result) {
                     $key = $this->language->get('text_'.$object);
-                    $key = ! $key ? $object : $key;
+                    $key = !$key ? $object : $key;
                     $resource_objects[$key] = $result;
                 }
             }
@@ -812,10 +826,10 @@ class AResourceManager extends AResource
      */
     public function isMapped($resource_id, $object_name = '', $object_id = 0)
     {
-        if ( ! AHelperUtils::has_value($resource_id)) {
+        if (!AHelperUtils::has_value($resource_id)) {
             return null;
         }
-        if (($object_name && ! (int)$object_id) || ( ! $object_name && (int)$object_id)) {
+        if (($object_name && !(int)$object_id) || (!$object_name && (int)$object_id)) {
             return null;
         }
         $sql = "SELECT count(*) AS total
@@ -841,7 +855,7 @@ class AResourceManager extends AResource
      */
     protected function getResourceProducts($resource_id, $language_id = 0)
     {
-        if ( ! $language_id) {
+        if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
@@ -883,7 +897,7 @@ class AResourceManager extends AResource
     protected function getResourceProduct_Option_Value($resource_id, $language_id = 0)
     {
 
-        if ( ! $language_id) {
+        if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
@@ -930,7 +944,7 @@ class AResourceManager extends AResource
     protected function getResourceCategories($resource_id, $language_id = 0)
     {
 
-        if ( ! $language_id) {
+        if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
@@ -973,7 +987,7 @@ class AResourceManager extends AResource
     protected function getResourceManufacturers($resource_id, $language_id = 0)
     {
 
-        if ( ! $language_id) {
+        if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
@@ -998,7 +1012,8 @@ class AResourceManager extends AResource
                 'object_id'   => $row['object_id'],
                 'object_name' => $row['object_name'],
                 'name'        => $row['name'],
-                'url'         => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id='.$row['object_id']),
+                'url'         => $this->html->getSecureURL('catalog/manufacturer/update',
+                    '&manufacturer_id='.$row['object_id']),
             );
         }
 

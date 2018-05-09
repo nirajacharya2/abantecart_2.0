@@ -24,8 +24,8 @@ use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
+if (!class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -40,27 +40,27 @@ final class ASession
     /**
      * @param string $ses_name
      */
-    public function __construct( $ses_name )
+    public function __construct($ses_name)
     {
 
-        if ( class_exists( '\abc\core\engine\Registry' ) ) {
+        if (class_exists('\abc\core\engine\Registry')) {
             $this->registry = Registry::getInstance();
         }
 
-        if ( ! session_id() ) {
+        if (!session_id()) {
             $this->ses_name = $ses_name;
-            $this->init( $this->ses_name );
+            $this->init($this->ses_name);
         }
 
-        if ( $this->registry && $this->registry->get( 'config' ) ) {
-            $session_ttl = $this->registry->get( 'config' )->get( 'config_session_ttl' );
-            if ( ( isset( $_SESSION['user_id'] ) || isset( $_SESSION['customer_id'] ) )
-                && isset( $_SESSION['LAST_ACTIVITY'] )
-                && ( ( time() - $_SESSION['LAST_ACTIVITY'] ) / 60 > $session_ttl )
+        if ($this->registry && $this->registry->get('config')) {
+            $session_ttl = $this->registry->get('config')->get('config_session_ttl');
+            if ((isset($_SESSION['user_id']) || isset($_SESSION['customer_id']))
+                && isset($_SESSION['LAST_ACTIVITY'])
+                && ((time() - $_SESSION['LAST_ACTIVITY']) / 60 > $session_ttl)
             ) {
                 // last request was more than 30 minutes ago
                 $this->clear();
-                abc_redirect( $this->registry->get( 'html' )->currentURL( array( 'token' ) ) );
+                abc_redirect($this->registry->get('html')->currentURL(array('token')));
             }
         }
         // update last activity time stamp
@@ -71,50 +71,51 @@ final class ASession
     /**
      * @param string $session_name
      */
-    public function init( $session_name )
+    public function init($session_name)
     {
         $session_mode = '';
         $path = '';
-        if ( ABC::env( 'IS_API' ) ) {
+        if (ABC::env('IS_API')) {
             //set up session specific for API based on the token or create new
             $token = '';
-            if ( $_GET['token'] ) {
+            if ($_GET['token']) {
                 $token = $_GET['token'];
             } else {
-                if ( $_POST['token'] ) {
+                if ($_POST['token']) {
                     $token = $_POST['token'];
                 }
             }
-            $final_session_id = $this->_prepare_session_id( $token );
-            session_id( $final_session_id );
+            $final_session_id = $this->_prepare_session_id($token);
+            session_id($final_session_id);
         } else {
-            $path = dirname( $_SERVER['PHP_SELF'] );
-            if ( php_sapi_name() != 'cli' ) {
+            $path = dirname($_SERVER['PHP_SELF']);
+            if (php_sapi_name() != 'cli') {
                 session_set_cookie_params(
                     0,
                     $path,
                     null,
                     false,
-                    true );
+                    true);
             }
-            if( !headers_sent() ) {
-                session_name( $session_name );
+            if (!headers_sent()) {
+                session_name($session_name);
             }
-            if( php_sapi_name() != 'cli') {
+            if (php_sapi_name() != 'cli') {
                 // for shared ssl domain set session id of non-secure domain
-                if ( $this->registry && $this->registry->get( 'config' ) ) {
-                    if ( $this->registry->get( 'config' )->get( 'config_shared_session' ) && isset( $_GET['session_id'] ) ) {
-                        header( 'P3P: CP="CAO COR CURa ADMa DEVa OUR IND ONL COM DEM PRE"' );
-                        session_id( $_GET['session_id'] );
-                        setcookie( $session_name, $_GET['session_id'], 0, $path, null, false, true );
+                if ($this->registry && $this->registry->get('config')) {
+                    if ($this->registry->get('config')->get('config_shared_session') && isset($_GET['session_id'])) {
+                        header('P3P: CP="CAO COR CURa ADMa DEVa OUR IND ONL COM DEM PRE"');
+                        session_id($_GET['session_id']);
+                        setcookie($session_name, $_GET['session_id'], 0, $path, null, false, true);
                     }
                 }
 
-                if ( ABC::env( 'EMBED_TOKEN_NAME' ) && isset( $_GET[ABC::env( 'EMBED_TOKEN_NAME' )] ) && ! isset( $_COOKIE[$session_name] ) ) {
+                if (ABC::env('EMBED_TOKEN_NAME') && isset($_GET[ABC::env('EMBED_TOKEN_NAME')])
+                    && !isset($_COOKIE[$session_name])) {
                     //check and reset session if it is not valid
-                    $final_session_id = $this->_prepare_session_id( $_GET[ABC::env( 'EMBED_TOKEN_NAME' )] );
-                    session_id( $final_session_id );
-                    setcookie( $session_name, $final_session_id, 0, $path, null, false );
+                    $final_session_id = $this->_prepare_session_id($_GET[ABC::env('EMBED_TOKEN_NAME')]);
+                    session_id($final_session_id);
+                    setcookie($session_name, $final_session_id, 0, $path, null, false);
                     $session_mode = 'embed_token';
                 }
             }
@@ -122,14 +123,14 @@ final class ASession
 
         //check if session can not be started. Try one more time with new generated session ID
         $is_session_ok = false;
-        if ( ! headers_sent() ) {
+        if (!headers_sent()) {
             $is_session_ok = session_start();
-            if ( ! $is_session_ok ) {
+            if (!$is_session_ok) {
                 //auto generating session id and try to start session again
                 $final_session_id = $this->_prepare_session_id();
-                session_id( $final_session_id );
-                if ( php_sapi_name() != 'cli' ) {
-                    setcookie( $session_name, $final_session_id, 0, $path, null, false );
+                session_id($final_session_id);
+                if (php_sapi_name() != 'cli') {
+                    setcookie($session_name, $final_session_id, 0, $path, null, false);
                 }
                 session_start();
             }
@@ -151,13 +152,13 @@ final class ASession
      *
      * @return string
      */
-    private function _prepare_session_id( $session_id = '' )
+    private function _prepare_session_id($session_id = '')
     {
-        if ( ! $session_id || ! $this->_is_session_id_valid( $session_id ) ) {
+        if (!$session_id || !$this->_is_session_id_valid($session_id)) {
             //if session ID is invalid, generate new one
-            $session_id = uniqid( substr( ABC::env( 'UNIQUE_ID' ), 0, 4 ), true );
+            $session_id = uniqid(substr(ABC::env('UNIQUE_ID'), 0, 4), true);
 
-            return preg_replace( "/[^-,a-zA-Z0-9]/", '', $session_id );
+            return preg_replace("/[^-,a-zA-Z0-9]/", '', $session_id);
         } else {
             return $session_id;
         }
@@ -170,12 +171,12 @@ final class ASession
      *
      * @return bool
      */
-    private function _is_session_id_valid( $session_id )
+    private function _is_session_id_valid($session_id)
     {
-        if ( empty( $session_id ) ) {
+        if (empty($session_id)) {
             return false;
         } else {
-            return preg_match( '/^[-,a-zA-Z0-9]{1,128}$/', $session_id ) > 0;
+            return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $session_id) > 0;
         }
     }
 }

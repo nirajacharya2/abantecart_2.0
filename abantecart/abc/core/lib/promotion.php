@@ -19,10 +19,11 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\lib;
+
 use abc\core\cache\ACache;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -64,7 +65,7 @@ class APromotion
         if ($customer_group_id) {
             $this->customer_group_id = $customer_group_id;
         } else {
-            if ( ! is_null($this->customer)) {
+            if (!is_null($this->customer)) {
                 //set customer group
                 if ($this->customer->isLogged()) {
                     $this->customer_group_id = $this->customer->getCustomerGroupId();
@@ -142,7 +143,7 @@ class APromotion
         $discount_quantity = (int)$discount_quantity;
         $customer_group_id = (int)$this->customer_group_id;
 
-        if ( ! $product_id && ! $discount_quantity) {
+        if (!$product_id && !$discount_quantity) {
             return 0.00;
         }
 
@@ -364,10 +365,10 @@ class APromotion
     public function getSpecialProducts($data = array())
     {
 
-        $data['sort'] = ! isset($data['sort']) ? 'p.sort_order' : $data['sort'];
-        $data['order'] = ! isset($data['order']) ? 'ASC' : $data['order'];
-        $data['start'] = ! isset($data['start']) ? 0 : $data['start'];
-        $data['limit'] = ! isset($data['limit']) ? 20 : $data['limit'];
+        $data['sort'] = !isset($data['sort']) ? 'p.sort_order' : $data['sort'];
+        $data['order'] = !isset($data['order']) ? 'ASC' : $data['order'];
+        $data['start'] = !isset($data['start']) ? 0 : $data['start'];
+        $data['limit'] = !isset($data['limit']) ? 20 : $data['limit'];
 
         $language_id = (int)$this->config->get('storefront_language_id');
         $store_id = (int)$this->config->get('config_store_id');
@@ -504,7 +505,8 @@ class APromotion
         $coupon_query = $this->db->query("SELECT *
                                           FROM ".$this->db->table_name("coupons")." c
                                           LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
-                                                ON (c.coupon_id = cd.coupon_id AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
+                                                ON (c.coupon_id = cd.coupon_id AND cd.language_id = '"
+            .(int)$this->config->get('storefront_language_id')."' )
                                           WHERE c.code = '".$this->db->escape($coupon_code)."'
                                                 AND ((date_start = '0000-00-00' OR date_start < NOW())
                                                 AND (date_end = '0000-00-00' OR date_end > NOW()))
@@ -516,23 +518,26 @@ class APromotion
             }
             $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
                                                      FROM `".$this->db->table_name("orders")."`
-                                                     WHERE order_status_id > '0' AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
+                                                     WHERE order_status_id > '0' AND coupon_id = '"
+                .(int)$coupon_query->row['coupon_id']."'");
 
-            if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total'] && $coupon_query->row['uses_total'] > 0) {
+            if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total']
+                && $coupon_query->row['uses_total'] > 0) {
                 $status = false;
             }
-            if ($coupon_query->row['logged'] && ! is_null($this->customer) && ! $this->customer->getId()) {
+            if ($coupon_query->row['logged'] && !is_null($this->customer) && !$this->customer->getId()) {
                 $status = false;
             }
 
-            if ( ! is_null($this->customer) && $this->customer->getId()) {
+            if (!is_null($this->customer) && $this->customer->getId()) {
                 $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
                                                          FROM `".$this->db->table_name("orders")."`
                                                          WHERE order_status_id > '0'
                                                                 AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'
                                                                 AND customer_id = '".(int)$this->customer->getId()."'");
 
-                if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer'] && $coupon_query->row['uses_customer'] > 0) {
+                if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer']
+                    && $coupon_query->row['uses_customer'] > 0) {
                     $status = false;
                 }
             }
@@ -556,7 +561,7 @@ class APromotion
                     }
                 }
 
-                if ( ! $coupon_product) {
+                if (!$coupon_product) {
                     $status = false;
                 }
             }

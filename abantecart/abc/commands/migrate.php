@@ -51,10 +51,16 @@ class Migrate extends BaseCommand
         if (!in_array($action, ['help'])
             && !is_file(ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'bin'.DS.'phinx')
         ) {
-            return ['Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'bin'.DS.'phinx required to run migrations!'];
+            return [
+                'Error: File '.ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'bin'.DS
+                .'phinx required to run migrations!',
+            ];
         }
         if (isset($options['init'])) {
-            return ['You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '.ABC::env('DIR_CONFIG').' automatically.'];
+            return [
+                'You don\'t need to initiate phinx. File of phinx configuration will be created inside directory '
+                .ABC::env('DIR_CONFIG').' automatically.',
+            ];
         }
         if ($action == 'phinx' && !isset($options['stage']) && !isset($options['help'])) {
             return ["Please provide stage name! For example: --stage='default'"];
@@ -99,13 +105,14 @@ class Migrate extends BaseCommand
         return [
             'phinx' =>
                 [
-                    'description' => 'Run phinx command. See more details http://docs.phinx.org/en/latest/commands.html'.
+                    'description' => 'Run phinx command. See more details http://docs.phinx.org/en/latest/commands.html'
+                        .
                         "\n Note: Every time file abc/config/migration.config.php will be recreated.",
                     'arguments'   => [
                         '--stage' => [
-                            'description'   => 'stage name',
+                            'description' => 'stage name',
                             'default_value' => 'default',
-                            'required'      => true,
+                            'required' => true,
                         ],
                     ],
                     'example'     => "php abcexec migrate:phinx help\n".

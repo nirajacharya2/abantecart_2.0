@@ -93,7 +93,7 @@ class AData
 
     public function initLogger($filename)
     {
-        $this->imp_log = ABC::getObjectByAlias('ALog', ['app' => $filename]);
+        $this->imp_log = ABC::getObjectByAlias('ALog', [['app' => $filename]]);
     }
 
     protected function toLog($text)

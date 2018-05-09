@@ -33,7 +33,7 @@ class ALibBase
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return mixed
      */

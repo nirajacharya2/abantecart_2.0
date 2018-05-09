@@ -17,50 +17,58 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
+
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class AWarning extends AError{
+class AWarning extends AError
+{
 
-	/**
-	 * warning constructor.
-	 *
-	 * @param  $msg - warning message
-	 * @param  $code - warning code
-	 */
-	public function __construct($msg, $code = AC_ERR_USER_WARNING){
-		parent::__construct($msg, $code);
-		$backtrace = debug_backtrace();
-		$this->msg = $msg . ' in ' . $backtrace[0]['file'] . ' on line ' . $backtrace[0]['line'];
-	}
+    /**
+     * warning constructor.
+     *
+     * @param  $msg  - warning message
+     * @param  $code - warning code
+     */
+    public function __construct($msg, $code = AC_ERR_USER_WARNING)
+    {
+        parent::__construct($msg, $code);
+        $backtrace = debug_backtrace();
+        $this->msg = $msg.' in '.$backtrace[0]['file'].' on line '.$backtrace[0]['line'];
+    }
 
-	/**
-	 * add warning message to debug log
-	 *
-	 * @return AWarning
-	 */
-	public function toDebug(){
-		ADebug::warning($this->error_descriptions[$this->code], $this->code, $this->msg);
-		return $this;
-	}
+    /**
+     * add warning message to debug log
+     *
+     * @return AWarning
+     */
+    public function toDebug()
+    {
+        ADebug::warning($this->error_descriptions[$this->code], $this->code, $this->msg);
+        return $this;
+    }
 
-	/**
-	 * add warning message to messages
-	 * @param string $subject
-	 * @return AWarning
-	 */
-	public function toMessages($subject=''){
-		if (is_object($this->registry) && $this->registry->has('messages')){
-			/**
-			 * @var $messages AMessage
-			 */
-			$messages = $this->registry->get('messages');
-			$title = $subject ? $subject : $this->error_descriptions[$this->code];
-			$messages->saveWarning($title, $this->msg, false);
-		}
-		return $this;
-	}
+    /**
+     * add warning message to messages
+     *
+     * @param string $subject
+     *
+     * @return AWarning
+     */
+    public function toMessages($subject = '')
+    {
+        if (is_object($this->registry) && $this->registry->has('messages')) {
+            /**
+             * @var $messages AMessage
+             */
+            $messages = $this->registry->get('messages');
+            $title = $subject ? $subject : $this->error_descriptions[$this->code];
+            $messages->saveWarning($title, $this->msg, false);
+        }
+        return $this;
+    }
 
 }

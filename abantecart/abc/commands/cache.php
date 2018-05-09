@@ -28,6 +28,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
+
 include_once('base/BaseCommand.php');
 
 class Cache extends BaseCommand
@@ -43,10 +44,10 @@ class Cache extends BaseCommand
 
     public function validate(string $action, array $options)
     {
-        $action = ! $action ? 'create' : $action;
+        $action = !$action ? 'create' : $action;
         //if now options - check action
-        if ( ! $options) {
-            if ( ! in_array($action, array('help', 'create', 'clear'))) {
+        if (!$options) {
+            if (!in_array($action, array('help', 'create', 'clear'))) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
@@ -78,7 +79,7 @@ class Cache extends BaseCommand
 
         foreach (array_keys($options) as $cache_section) {
             $alias = $opt_list[$action]['arguments']['--'.$cache_section]['alias'];
-            if ( ! $alias) {
+            if (!$alias) {
                 continue;
             }
             $cache_groups = explode(',', $alias);
@@ -167,8 +168,8 @@ class Cache extends BaseCommand
             $categories = $model->getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
-                                                        'product/category',
-                                                        '&category_id='.$category['category_id']
+                    'product/category',
+                    '&category_id='.$category['category_id']
                 );
                 //loop for all variants
                 $this->touchUrl($seo_url);
@@ -192,8 +193,8 @@ class Cache extends BaseCommand
                     ));
                 foreach ($products as $product) {
                     $seo_url = $registry->get('html')->getSEOURL(
-                                                            'product/product',
-                                                            '&product_id='.$product['product_id']
+                        'product/product',
+                        '&product_id='.$product['product_id']
                     );
                     //loop for all variants
                     $this->touchUrl($seo_url);

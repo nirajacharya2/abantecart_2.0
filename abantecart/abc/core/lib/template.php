@@ -17,46 +17,51 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
+
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-final class ATemplate{
-	public $data = array ();
-	private $config;
+final class ATemplate
+{
+    public $data = array();
+    private $config;
 
-	public function fetch($filename){
+    public function fetch($filename)
+    {
 
-		$registry = Registry::getInstance();
-		$this->config = $registry->get('config');
+        $registry = Registry::getInstance();
+        $this->config = $registry->get('config');
 
-		//#PR Build the path to the template file
-		if (file_exists(ABC::env('DIR_TEMPLATES') . $this->config->get('config_storefront_template') . '/storefront/' . $filename)){
-			$filename = $this->config->get('config_storefront_template') . '/' . $filename;
-		} else{
-			$filename = 'default/' . $filename;
-		}
+        //#PR Build the path to the template file
+        if (file_exists(ABC::env('DIR_TEMPLATES').$this->config->get('config_storefront_template').'/storefront/'
+            .$filename)) {
+            $filename = $this->config->get('config_storefront_template').'/'.$filename;
+        } else {
+            $filename = 'default/'.$filename;
+        }
 
-		$file = ABC::env('DIR_TEMPLATES') . $filename;
+        $file = ABC::env('DIR_TEMPLATES').$filename;
 
-		if (file_exists($file)){
-			extract($this->data);
+        if (file_exists($file)) {
+            extract($this->data);
 
-			ob_start();
+            ob_start();
 
-			include($file);
+            include($file);
 
-			$content = ob_get_contents();
+            $content = ob_get_contents();
 
-			ob_end_clean();
+            ob_end_clean();
 
-			return $content;
-		} else{
-			throw new AException(AC_ERR_LOAD, 'Error: Could not load template ' . $file . '!');
-		}
-	}
+            return $content;
+        } else {
+            throw new AException(AC_ERR_LOAD, 'Error: Could not load template '.$file.'!');
+        }
+    }
 }

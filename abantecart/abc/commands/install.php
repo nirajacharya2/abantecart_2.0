@@ -196,8 +196,10 @@ class Install extends BaseCommand
             } //do pause and ask user in non-forced mode
             elseif (!isset($options['force'])) {
                 //for extensions show command prompt
-                echo "\t\e[93mCurrent copy of this package is not verified for your version of AbanteCart (v".ABC::env('VERSION').").\n"
-                    ."\tPackage build is specified for AbanteCart version(s) ".implode(', ', $pm->package_info['supported_cart_versions'])."\n"
+                echo "\t\e[93mCurrent copy of this package is not verified for your version of AbanteCart (v"
+                    .ABC::env('VERSION').").\n"
+                    ."\tPackage build is specified for AbanteCart version(s) ".implode(', ',
+                        $pm->package_info['supported_cart_versions'])."\n"
                     ."\tThis is not a problem, but if you notice issues or incompatibility, please contact extension developer.\n\n"
                     ."Continue? (Y/N) : ";
                 $stdin = fopen('php://stdin', 'r');
@@ -217,7 +219,12 @@ class Install extends BaseCommand
 
         //ok. let's show license text
         if (!isset($options['force'])) {
-            foreach ([$package_info['package_dir']."release_notes.txt", $package_info['package_dir']."license.txt"] as $file) {
+            foreach (
+                [
+                    $package_info['package_dir']."release_notes.txt",
+                    $package_info['package_dir']."license.txt",
+                ] as $file
+            ) {
                 $this->_show_confirmation($file);
                 echo "\n\n";
             }
@@ -285,7 +292,8 @@ class Install extends BaseCommand
         if (!in_array($options['extension_text_id'], $all_installed)) {
             exit('Error: '.$options['extension_text_id'].' is not installed!'."\n");
         }
-        $result = $em->uninstall($options['extension_text_id'], AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
+        $result = $em->uninstall($options['extension_text_id'],
+            AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
         if (!$result) {
             echo implode("\n", $em->errors)."\n";
         }
@@ -314,7 +322,8 @@ class Install extends BaseCommand
             exit('Error: '.$options['extension_text_id'].' already installed!');
         }
 
-        $result = $em->install($options['extension_text_id'], AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
+        $result = $em->install($options['extension_text_id'],
+            AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
         if (!$result) {
             echo implode("\n", $em->errors)."\n";
         }
@@ -442,7 +451,8 @@ class Install extends BaseCommand
     {
         $errors = [];
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
-            $errors['warning'] = 'Warning: You need to use PHP '.ABC::env('MIN_PHP_VERSION').' or above for AbanteCart to work!';
+            $errors['warning'] =
+                'Warning: You need to use PHP '.ABC::env('MIN_PHP_VERSION').' or above for AbanteCart to work!';
         }
 
         if (!ini_get('file_uploads')) {
@@ -474,28 +484,34 @@ class Install extends BaseCommand
         }
 
         if (!is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['warning'] = 'Warning: '.ABC::env('DIR_CONFIG').' folder and files needs to be writable for AbanteCart to be installed!';
+            $errors['warning'] = 'Warning: '.ABC::env('DIR_CONFIG')
+                .' folder and files needs to be writable for AbanteCart to be installed!';
         }
 
         if (!is_writable(ABC::env('DIR_SYSTEM'))) {
-            $errors['warning'] = 'Warning: System directory '.ABC::env('DIR_SYSTEM').' and all its children files/directories need to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: System directory '.ABC::env('DIR_SYSTEM')
+                .' and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_CACHE'))) {
-            $errors['warning'] = 'Warning: Cache directory '.ABC::env('DIR_CACHE').' needs to be writable for AbanteCart to work!';
+            $errors['warning'] =
+                'Warning: Cache directory '.ABC::env('DIR_CACHE').' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_LOGS'))) {
-            $errors['warning'] = 'Warning: Logs directory '.ABC::env('DIR_LOGS').' needs to be writable for AbanteCart to work!';
+            $errors['warning'] =
+                'Warning: Logs directory '.ABC::env('DIR_LOGS').' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_PUBLIC').'images')) {
-            $errors['warning'] = 'Warning: Image directory '.ABC::env('DIR_PUBLIC').'images and all its children files/directories need to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Image directory '.ABC::env('DIR_PUBLIC')
+                .'images and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_PUBLIC').'images/thumbnails')) {
             if (is_dir(ABC::env('DIR_PUBLIC').'images/thumbnails')) {
-                $errors['warning'] = 'Warning: '.ABC::env('DIR_PUBLIC').'images/thumbnails directory needs to be writable for AbanteCart to work!';
+                $errors['warning'] = 'Warning: '.ABC::env('DIR_PUBLIC')
+                    .'images/thumbnails directory needs to be writable for AbanteCart to work!';
             } else {
                 $result = mkdir(ABC::env('DIR_PUBLIC').'images/thumbnails', 0777, true);
                 if ($result) {
@@ -512,15 +528,18 @@ class Install extends BaseCommand
         }
 
         if (!is_writable(ABC::env('DIR_APP').'downloads')) {
-            $errors['warning'] = 'Warning: Download directory '.ABC::env('DIR_APP').'downloads'.' needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Download directory '.ABC::env('DIR_APP').'downloads'
+                .' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_APP_EXTENSIONS'))) {
-            $errors['warning'] = 'Warning: Extensions directory '.ABC::env('DIR_APP_EXTENSIONS').' needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Extensions directory '.ABC::env('DIR_APP_EXTENSIONS')
+                .' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_PUBLIC').'resources')) {
-            $errors['warning'] = 'Warning: Resources directory '.ABC::env('DIR_PUBLIC').'resources needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Resources directory '.ABC::env('DIR_PUBLIC')
+                .'resources needs to be writable for AbanteCart to work!';
         }
 
         return $errors;
@@ -759,7 +778,8 @@ EOD;
             if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
                 $query .= $line;
                 if (preg_match('/;\s*$/', $line)) {
-                    $query = str_replace("DROP TABLE IF EXISTS `ac_", "DROP TABLE IF EXISTS `".$options['db_prefix'], $query);
+                    $query = str_replace("DROP TABLE IF EXISTS `ac_", "DROP TABLE IF EXISTS `".$options['db_prefix'],
+                        $query);
                     $query = str_replace("CREATE TABLE `ac_", "CREATE TABLE `".$options['db_prefix'], $query);
                     $query = str_replace("INSERT INTO `ac_", "INSERT INTO `".$options['db_prefix'], $query);
                     $result = $db->query($query);
@@ -939,7 +959,8 @@ EOD;
                             'required'      => false,
                         ],
                     ],
-                    'example'     => "php ".$_SERVER['PHP_SELF']." install:package --file=/full/path/to/your/package.zip\n\tor\n".
+                    'example'     => "php ".$_SERVER['PHP_SELF']
+                        ." install:package --file=/full/path/to/your/package.zip\n\tor\n".
                         "\t\tphp ".$_SERVER['PHP_SELF']." install:package --url=http://your_url_to_package\n\tor\n".
                         "\t\tphp ".$_SERVER['PHP_SELF']." install:package --installation_key=****************\n",
                 ],
@@ -973,8 +994,10 @@ EOD;
                             'required'      => false,
                         ],
                     ],
-                    'example'     => "php ".$_SERVER['PHP_SELF']." install:extension --install --extension_text_id=default_cod\n\tor\n".
-                        "\t\tphp ".$_SERVER['PHP_SELF']." install:extension --uninstall --extension_text_id=default_cod\n\tor\n".
+                    'example'     => "php ".$_SERVER['PHP_SELF']
+                        ." install:extension --install --extension_text_id=default_cod\n\tor\n".
+                        "\t\tphp ".$_SERVER['PHP_SELF']
+                        ." install:extension --uninstall --extension_text_id=default_cod\n\tor\n".
                         "\t\tphp ".$_SERVER['PHP_SELF']." install:extension --remove --extension_text_id=default_cod\n",
                 ],
         ];
@@ -1031,7 +1054,8 @@ EOD;
             $errors['password'] = 'Password required!';
         }
 
-        $pattern = '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
+        $pattern =
+            '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
 
         if (!preg_match($pattern, $options['email'])) {
             $errors['email'] = 'Invalid E-Mail!';
@@ -1066,7 +1090,8 @@ EOD;
         }
 
         if (!is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG')."!\n";
+            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '
+                .ABC::env('DIR_CONFIG')."!\n";
         }
 
         if (!is_file(__DIR__.DS.'deploy.php')) {

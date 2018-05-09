@@ -24,18 +24,18 @@ use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class AContentManager
  *
- * @property ADB              $db
- * @property ALanguageManager $language
- * @property AConfig          $config
- * @property ASession         $session
- * @property \abc\core\cache\ACache           $cache
+ * @property ADB                    $db
+ * @property ALanguageManager       $language
+ * @property AConfig                $config
+ * @property ASession               $session
+ * @property \abc\core\cache\ACache $cache
  *
  */
 class AContentManager
@@ -48,7 +48,7 @@ class AContentManager
 
     public function __construct()
     {
-        if ( ! ABC::env('IS_ADMIN')) { // forbid for non admin calls
+        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to change custom content');
         }
         $this->registry = Registry::getInstance();
@@ -71,7 +71,7 @@ class AContentManager
      */
     public function addContent($data)
     {
-        if ( ! is_array($data) || ! $data) {
+        if (!is_array($data) || !$data) {
             return false;
         }
         $sql = "INSERT INTO ".$this->db->table_name("contents")." 
@@ -145,7 +145,7 @@ class AContentManager
      */
     public function editContent($content_id, $data)
     {
-        if ( ! $content_id) {
+        if (!$content_id) {
             return false;
         }
         $language_id = (int)$this->language->getContentLanguageID();
@@ -217,7 +217,7 @@ class AContentManager
     {
         $content_id = (int)$content_id;
         $language_id = (int)$this->language->getContentLanguageID();
-        if ( ! $language_id) {
+        if (!$language_id) {
             return false;
         }
 
@@ -291,7 +291,7 @@ class AContentManager
                 $query = "DELETE FROM ".$this->db->table_name("contents")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
 
-                $value = ! $value ? array(0) : $value;
+                $value = !$value ? array(0) : $value;
                 foreach ($value as $parent_content_id) {
                     $parent_content_id = (int)$parent_content_id;
                     if ($parent_content_id == $content_id) {
@@ -306,7 +306,8 @@ class AContentManager
                 }
                 break;
             case 'store_id':
-                $query = "DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id='".$content_id."'";
+                $query =
+                    "DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
                 foreach ($value as $store_id) {
                     if (AHelperUtils::has_value($store_id)) {
@@ -331,10 +332,14 @@ class AContentManager
         $lm = new ALayoutManager();
         $lm->deletePageLayout('pages/content/content', 'content_id', ( int )$content_id);
 
-        $this->db->query("DELETE FROM ".$this->db->table_name("contents")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table_name("content_descriptions")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id = '".( int )$content_id."'");
-        $this->db->query("DELETE FROM ".$this->db->table_name("url_aliases")." WHERE `query` = 'content_id=".( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("contents")." WHERE content_id = '".( int )$content_id
+            ."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("content_descriptions")." WHERE content_id = '"
+            .( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id = '"
+            .( int )$content_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("url_aliases")." WHERE `query` = 'content_id="
+            .( int )$content_id."'");
 
         $this->cache->remove('content');
     }
@@ -349,11 +354,11 @@ class AContentManager
     {
         $output = array();
         $content_id = (int)$content_id;
-        if ( ! AHelperUtils::has_value($language_id)) {
+        if (!AHelperUtils::has_value($language_id)) {
             $language_id = ( int )$this->language->getContentLanguageID();
         }
 
-        if ( ! $content_id) {
+        if (!$content_id) {
             return false;
         }
         $sql
@@ -446,17 +451,17 @@ class AContentManager
 
         $sql .= "WHERE COALESCE(cs.store_id, 0) = '".$store_id."' ";
 
-        if ( ! empty ($data ['subsql_filter'])) {
+        if (!empty ($data ['subsql_filter'])) {
             $sql .= " AND ".str_replace('`name`', 'id.name', $data ['subsql_filter']);
         }
 
-        if (isset($filter['id.title']) && ! is_null($filter['id.title'])) {
+        if (isset($filter['id.title']) && !is_null($filter['id.title'])) {
             $sql .= " AND id.title LIKE '%".(float)$filter['pfrom']."%' ";
         }
-        if (isset($filter['status']) && ! is_null($filter['status'])) {
+        if (isset($filter['status']) && !is_null($filter['status'])) {
             $sql .= " AND i.status = '".(int)$filter['status']."'";
         }
-        if (isset($filter['parent_id']) && ! is_null($filter['parent_id'])) {
+        if (isset($filter['parent_id']) && !is_null($filter['parent_id'])) {
             $sql .= " AND i.parent_content_id = '".(int)$filter['parent_id']."'";
         }
 
@@ -502,7 +507,7 @@ class AContentManager
 
         $output = array();
 
-        if ( ! $parent_only) {
+        if (!$parent_only) {
             if ($query->num_rows) {
                 foreach ($query->rows as $row) {
                     $parent = (int)$row['parent_content_id'];
@@ -575,8 +580,9 @@ class AContentManager
         $all = $parent_only
             ? $this->getParentContents(array(), $store_id)
             : $this->getContents(array(), '', $store_id, false);
-        if ( ! $without_top) {
-            return array_merge(array('0_0' => $this->language->get('text_top_level')), $this->buildContentTree($all, 0, 1));
+        if (!$without_top) {
+            return array_merge(array('0_0' => $this->language->get('text_top_level')),
+                $this->buildContentTree($all, 0, 1));
         } else {
             return $this->buildContentTree($all);
         }
@@ -600,8 +606,10 @@ class AContentManager
             foreach ($content['parent_content_id'] as $par_id) {
                 //look for leave content (leave cannot be of 0 ID)
                 if ($par_id == $parent_id && $content['content_id']) {
-                    $output[$parent_id.'_'.$content['content_id']] = str_repeat('&nbsp;&nbsp;', $level).$content['title'];
-                    $output = array_merge($output, $this->buildContentTree($all_contents, $content['content_id'], $level + 1));
+                    $output[$parent_id.'_'.$content['content_id']] =
+                        str_repeat('&nbsp;&nbsp;', $level).$content['title'];
+                    $output = array_merge($output,
+                        $this->buildContentTree($all_contents, $content['content_id'], $level + 1));
                 }
             }
         }

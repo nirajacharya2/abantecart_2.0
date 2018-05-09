@@ -77,7 +77,8 @@ class ModelInstall extends Model
             $this->error['password_confirm'] = 'Password does not match the confirm password!';
         }
 
-        $pattern = '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
+        $pattern =
+            '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
 
         if (!preg_match($pattern, $data['email'])) {
             $this->error['email'] = 'Invalid E-Mail!';
@@ -101,7 +102,9 @@ class ModelInstall extends Model
         }
 
         if (!is_writable(ABC::env('DIR_CONFIG'))) {
-            $this->error['warning'] = 'Error: Could not write to config.php please check you have set the correct permissions on: '.ABC::env('DIR_CONFIG').' !';
+            $this->error['warning'] =
+                'Error: Could not write to config.php please check you have set the correct permissions on: '
+                .ABC::env('DIR_CONFIG').' !';
         }
 
         if (!$this->error) {
@@ -117,7 +120,8 @@ class ModelInstall extends Model
     public function validateRequirements()
     {
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
-            $this->error['warning'] = 'Warning: You need to use PHP '.ABC::env('MIN_PHP_VERSION').' or above for AbanteCart to work!';
+            $this->error['warning'] =
+                'Warning: You need to use PHP '.ABC::env('MIN_PHP_VERSION').' or above for AbanteCart to work!';
         }
 
         if (!ini_get('file_uploads')) {
@@ -158,7 +162,8 @@ class ModelInstall extends Model
         }
 
         if (!is_writable(ABC::env('DIR_SYSTEM'))) {
-            $this->error['warning'] = 'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $this->error['warning'] =
+                'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_CACHE'))) {
@@ -170,12 +175,14 @@ class ModelInstall extends Model
         }
 
         if (!is_writable(ABC::env('DIR_IMAGES'))) {
-            $this->error['warning'] = 'Warning: Images directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $this->error['warning'] =
+                'Warning: Images directory and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_IMAGES').'thumbnails')) {
             if (file_exists(ABC::env('DIR_IMAGES').'thumbnails') && is_dir(ABC::env('DIR_IMAGES').'thumbnails')) {
-                $this->error['warning'] = 'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
+                $this->error['warning'] =
+                    'Warning: images/thumbnails directory needs to be writable for AbanteCart to work!';
             } else {
                 @chmod(ABC::env('DIR_IMAGES'), 0775);
                 $result = mkdir(ABC::env('DIR_IMAGES').'thumbnails', 0775, true);

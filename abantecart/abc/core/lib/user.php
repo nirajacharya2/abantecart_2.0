@@ -23,8 +23,8 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
+if (!class_exists('abc\core\ABC')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
@@ -68,17 +68,17 @@ final class AUser
     /**
      * @param $registry \abc\core\engine\Registry
      */
-    public function __construct( $registry )
+    public function __construct($registry)
     {
-        $this->db = $registry->get( 'db' );
-        $this->request = $registry->get( 'request' );
-        $this->session = $registry->get( 'session' );
+        $this->db = $registry->get('db');
+        $this->request = $registry->get('request');
+        $this->session = $registry->get('session');
 
-        if ( isset( $this->session->data['user_id'] ) ) {
-            $user_query = $this->db->query( "SELECT * 
-                                            FROM ".$this->db->table_name( "users" )." 
-                                            WHERE user_id = '".(int)$this->session->data['user_id']."'" );
-            if ( $user_query->num_rows ) {
+        if (isset($this->session->data['user_id'])) {
+            $user_query = $this->db->query("SELECT * 
+                                            FROM ".$this->db->table_name("users")." 
+                                            WHERE user_id = '".(int)$this->session->data['user_id']."'");
+            if ($user_query->num_rows) {
                 $this->user_id = (int)$user_query->row['user_id'];
                 $this->user_group_id = (int)$user_query->row['user_group_id'];
                 $this->email = $user_query->row['email'];
@@ -91,7 +91,7 @@ final class AUser
                 $this->logout();
             }
         } else {
-            unset( $this->session->data['token'] );
+            unset($this->session->data['token']);
         }
     }
 
@@ -101,24 +101,24 @@ final class AUser
      *
      * @return bool
      */
-    public function login( $username, $password )
+    public function login($username, $password)
     {
 
-        $sql = "SELECT *, SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape( $password )."')))))
-                FROM ".$this->db->table_name( "users" )."
-                WHERE username = '".$this->db->escape( $username )."'
-                AND password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape( $password )."')))))
+        $sql = "SELECT *, SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))))
+                FROM ".$this->db->table_name("users")."
+                WHERE username = '".$this->db->escape($username)."'
+                AND password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))))
                 AND status = 1";
 
-        $user_query = $this->db->query( $sql );
+        $user_query = $this->db->query($sql);
 
-        if ( $user_query->num_rows ) {
+        if ($user_query->num_rows) {
             $this->user_id = $this->session->data['user_id'] = (int)$user_query->row['user_id'];
             $this->user_group_id = (int)$user_query->row['user_group_id'];
             $this->username = $user_query->row['username'];
 
             $this->last_login = $this->session->data['user_last_login'] = $user_query->row['last_login'];
-            if ( ! $this->last_login || $this->last_login == 'null' || $this->last_login == '0000-00-00 00:00:00' ) {
+            if (!$this->last_login || $this->last_login == 'null' || $this->last_login == '0000-00-00 00:00:00') {
                 $this->session->data['user_last_login'] = $this->last_login = '';
             }
 
@@ -140,15 +140,15 @@ final class AUser
      */
     private function _user_init()
     {
-        $this->db->query( "UPDATE ".$this->db->table_name( "users" )." 
-                            SET ip = '".$this->db->escape( $this->request->getRemoteIP() )."'
-                            WHERE user_id = '".$this->user_id."';" );
+        $this->db->query("UPDATE ".$this->db->table_name("users")." 
+                            SET ip = '".$this->db->escape($this->request->getRemoteIP())."'
+                            WHERE user_id = '".$this->user_id."';");
 
-        $user_group_query = $this->db->query( "SELECT `permission`
-                                              FROM ".$this->db->table_name( "user_groups" )."
-                                              WHERE `user_group_id` = '".$this->user_group_id."'" );
-        if ( unserialize( $user_group_query->row['permission'] ) ) {
-            foreach ( unserialize( $user_group_query->row['permission'] ) as $key => $value ) {
+        $user_group_query = $this->db->query("SELECT `permission`
+                                              FROM ".$this->db->table_name("user_groups")."
+                                              WHERE `user_group_id` = '".$this->user_group_id."'");
+        if (unserialize($user_group_query->row['permission'])) {
+            foreach (unserialize($user_group_query->row['permission']) as $key => $value) {
                 $this->permission[$key] = $value;
             }
         }
@@ -156,14 +156,14 @@ final class AUser
 
     private function _update_last_login()
     {
-        $this->db->query( "UPDATE ".$this->db->table_name( "users" )." 
+        $this->db->query("UPDATE ".$this->db->table_name("users")." 
                         SET last_login = NOW()
-                        WHERE user_id = '".$this->user_id."';" );
+                        WHERE user_id = '".$this->user_id."';");
     }
 
     public function logout()
     {
-        unset( $this->session->data['user_id'] );
+        unset($this->session->data['user_id']);
         $this->user_id = '';
         $this->username = '';
     }
@@ -174,13 +174,13 @@ final class AUser
      *
      * @return bool
      */
-    public function hasPermission( $key, $value )
+    public function hasPermission($key, $value)
     {
         //If top_admin allow all permission. Make sure Top Admin Group is set to ID 1
-        if ( $this->user_group_id == 1 ) {
+        if ($this->user_group_id == 1) {
             return true;
         } else {
-            if ( isset( $this->permission[$key] ) ) {
+            if (isset($this->permission[$key])) {
                 return $this->permission[$key][$value] == 1 ? true : false;
             } else {
                 return false;
@@ -193,9 +193,9 @@ final class AUser
      *
      * @return bool
      */
-    public function canAccess( $value )
+    public function canAccess($value)
     {
-        return $this->hasPermission( 'access', $value );
+        return $this->hasPermission('access', $value);
     }
 
     /**
@@ -203,9 +203,9 @@ final class AUser
      *
      * @return bool
      */
-    public function canModify( $value )
+    public function canModify($value)
     {
-        return $this->hasPermission( 'modify', $value );
+        return $this->hasPermission('modify', $value);
     }
 
     /**
@@ -213,10 +213,10 @@ final class AUser
      *
      * @return bool|int
      */
-    public function isLoggedWithToken( $token )
+    public function isLoggedWithToken($token)
     {
-        if ( ( isset( $this->session->data['token'] ) && ! isset( $token ) )
-            || ( ( isset( $token ) && ( isset( $this->session->data['token'] ) && ( $token != $this->session->data['token'] ) ) ) )
+        if ((isset($this->session->data['token']) && !isset($token))
+            || ((isset($token) && (isset($this->session->data['token']) && ($token != $this->session->data['token']))))
         ) {
             return false;
         } else {
@@ -229,7 +229,7 @@ final class AUser
      */
     public function isLogged()
     {
-        if ( ABC::env( 'IS_ADMIN' ) && $this->request->get['token'] != $this->session->data['token'] ) {
+        if (ABC::env('IS_ADMIN') && $this->request->get['token'] != $this->session->data['token']) {
             return false;
         }
 
@@ -274,14 +274,14 @@ final class AUser
      *
      * @return bool
      */
-    public function validate( $username, $email )
+    public function validate($username, $email)
     {
         $user_query = $this->db->query(
-                "SELECT * 
-                FROM ".$this->db->table_name( "users" )."
-                WHERE  username = '".$this->db->escape( $username )."'
-                        AND email = '".$this->db->escape( $email )."'" );
-        if ( $user_query->num_rows ) {
+            "SELECT * 
+                FROM ".$this->db->table_name("users")."
+                WHERE  username = '".$this->db->escape($username)."'
+                        AND email = '".$this->db->escape($email)."'");
+        if ($user_query->num_rows) {
             return true;
         } else {
             return false;
@@ -293,13 +293,13 @@ final class AUser
      *
      * @return string
      */
-    static function generatePassword( $length = 8 )
+    static function generatePassword($length = 8)
     {
         $chars = "1234567890abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         $i = 0;
         $password = "";
-        while ( $i <= $length ) {
-            $password .= $chars{mt_rand( 0, strlen( $chars ) )};
+        while ($i <= $length) {
+            $password .= $chars{mt_rand(0, strlen($chars))};
             $i++;
         }
 
@@ -311,7 +311,7 @@ final class AUser
      */
     public function getAvatar()
     {
-        return AHelperUtils::getGravatar( $this->email );
+        return AHelperUtils::getGravatar($this->email);
     }
 
     /**

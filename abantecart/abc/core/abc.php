@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\core;
 
 use abc\core\engine\Registry;
@@ -86,7 +87,7 @@ class ABC extends ABCBase
 
         foreach ($ext_dirs as $cfg_dir) {
             $cfg_file = $cfg_dir.DS
-                        .$stage_name.'.config.php';
+                .$stage_name.'.config.php';
 
             if (is_file($cfg_file)) {
                 $ext_config = @include_once($cfg_file);
@@ -96,7 +97,7 @@ class ABC extends ABCBase
             } //load default stage values
             elseif ($stage_name != 'default') {
                 $cfg_file = $cfg_dir.DS
-                            .$stage_name.'.config.php';
+                    .$stage_name.'.config.php';
                 if (is_file($cfg_file)) {
                     $ext_config = @include_once($cfg_file);
                     if (is_array($ext_config)) {

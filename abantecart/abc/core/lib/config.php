@@ -24,7 +24,7 @@ use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -42,13 +42,13 @@ final class AConfig
      * AConfig constructor.
      *
      * @param Registry $registry
-     * @param string $store_url
+     * @param string   $store_url
      */
     public function __construct($registry, $store_url = '')
     {
         $this->registry = $registry;
         //skip during installation
-        if(is_object($registry->get('db'))) {
+        if (is_object($registry->get('db'))) {
             $this->_load_settings($store_url);
         }
     }
@@ -68,7 +68,7 @@ final class AConfig
     /**
      * add data to config.
      *
-     * @param $key   - access key
+     * @param $key - access key
      * @param $value - data to store in config
      *
      * @return void
@@ -145,7 +145,7 @@ final class AConfig
             $cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
         }
 
-        if ( ! $cache->setCacheStorageDriver($cache_driver)) {
+        if (!$cache->setCacheStorageDriver($cache_driver)) {
             $error = new AError ('Cache storage driver "'.$cache_driver.'" can not be loaded!');
             $error->toLog()->toDebug()->toMessages();
         }
@@ -180,7 +180,7 @@ final class AConfig
             unset($setting); //unset temp reference
 
             //fix for rare issue on a database and creation of empty cache
-            if ( ! empty($settings) && $this->cnfg['config_cache_enable']) {
+            if (!empty($settings) && $this->cnfg['config_cache_enable']) {
                 $cache->push('settings', $settings);
             }
 
@@ -199,9 +199,8 @@ final class AConfig
         */
         $config_url = preg_replace("(^https?://)", "", $this->cnfg['config_url']);
         $config_url = preg_replace("(^://)", "", $config_url);
-        if ( ! (is_int(strpos($config_url, $url)))
-            &&
-            ! (is_int(strpos($url, $config_url)))) {
+        if (!(is_int(strpos($config_url, $url)))
+            && !(is_int(strpos($url, $config_url)))) {
             // if requested url not a default store URL - do check other stores.
             $cache_key = 'settings.store.'.md5('http://'.$url);
             $store_settings = $cache->pull($cache_key);
@@ -241,15 +240,19 @@ final class AConfig
                 $this->cnfg['current_store_id'] = $this->cnfg['config_store_id'];
             } else {
                 if (php_sapi_name() != 'cli') {
-                    $warning = new AWarning('Warning: Accessing store with non-configured or unknown domain ( '.$url.' ).'."\n".' Check setting of your store domain URL in System Settings . Loading default store configuration for now.');
+                    $warning =
+                        new AWarning('Warning: Accessing store with non-configured or unknown domain ( '.$url.' ).'."\n"
+                            .' Check setting of your store domain URL in System Settings . Loading default store configuration for now.');
                     $warning->toLog();
                 }
                 //set config url to current domain
-                $this->cnfg['config_url'] = 'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+                $this->cnfg['config_url'] =
+                    'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
             }
 
-            if ( ! $this->cnfg['config_url']) {
-                $this->cnfg['config_url'] = 'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+            if (!$this->cnfg['config_url']) {
+                $this->cnfg['config_url'] =
+                    'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
             }
         }
 
@@ -279,7 +282,7 @@ final class AConfig
         $tmpl_id = $this->cnfg['config_storefront_template'];
 
         //disable cache when it disabled in settings
-        if ( ! $this->cnfg['config_cache_enable']) {
+        if (!$this->cnfg['config_cache_enable']) {
             $cache->disableCache();
         }
 
@@ -296,13 +299,14 @@ final class AConfig
             $query = $db->query($sql);
             foreach ($query->rows as $row) {
                 //skip settings for non-active template except status (needed for extensions list in admin)
-                if ($row['extension_type'] == 'template' && $tmpl_id != $row['group'] && $row['key'] != $row['extension_txt_id'].'_status') {
+                if ($row['extension_type'] == 'template' && $tmpl_id != $row['group']
+                    && $row['key'] != $row['extension_txt_id'].'_status') {
                     continue;
                 }
                 $settings[] = $row;
             }
             //fix for rare issue on a database and creation of empty cache
-            if ( ! empty($settings)) {
+            if (!empty($settings)) {
                 $cache->push('settings.extension.'.$cache_suffix, $settings);
             }
         }

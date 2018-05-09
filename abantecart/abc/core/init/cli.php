@@ -175,7 +175,7 @@ registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core
 registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
 
 // Log
-$registry->set('log', ABC::getObjectByAlias('ALog', ['app' => 'cli.log']));
+$registry->set('log', ABC::getObjectByAlias('ALog', [['app' => 'cli.log']]));
 
 //session
 $session_id = 'CLI';

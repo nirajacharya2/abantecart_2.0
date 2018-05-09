@@ -34,11 +34,11 @@ class QueConsumer extends BaseCommand
      */
     protected $queTimeout = QUE_TIMEOUT;
 
-    
     /**
      * Start action method
-     * @param string $className
-     * @param int $queLimit
+     *
+     * @param string    $className
+     * @param int       $queLimit
      * @param null|bool $durable
      */
     public function start($className, $queLimit = 1, $durable = null)
@@ -52,8 +52,8 @@ class QueConsumer extends BaseCommand
     /**
      * Starts an instance of consumer for the class and method
      *
-     * @param string $className
-     * @param int $queLimit
+     * @param string    $className
+     * @param int       $queLimit
      * @param null|bool $durable
      *
      * @return int
@@ -81,13 +81,13 @@ class QueConsumer extends BaseCommand
 
                 if (!is_null($durable)) {
                     // Durable (the queue will survive a broker restart)
-                    $rabbitParams['durable'] = (bool) $durable;
+                    $rabbitParams['durable'] = (bool)$durable;
                 }
 
                 foreach ($methods as $queWorkMethod) {
                     if (!method_exists($workerClass, $queWorkMethod)) {
                         throw new QueConsumerException(
-                            'Class ' . $className . ' does not have method ' . $queWorkMethod
+                            'Class '.$className.' does not have method '.$queWorkMethod
                         );
                     }
 
@@ -112,7 +112,7 @@ class QueConsumer extends BaseCommand
                         $workerClass->runWorkerJob($queWorkMethod, $msg);
                     };
 
-                    echoCLI($workerClass::getTime() . ' QUE: ' . $queWorkMethod . ' started.');
+                    echoCLI($workerClass::getTime().' QUE: '.$queWorkMethod.' started.');
 
                     /*
                         queue: Queue from where to get the messages
@@ -140,16 +140,16 @@ class QueConsumer extends BaseCommand
                 $connection->close();
 
             } catch (PhpAmqpLib\Exception\AMQPTimeoutException $e) {
-                echoCLI('Timeout ' . ($this->queTimeout / 60) . ' minutes. Finished.');
+                echoCLI('Timeout '.($this->queTimeout / 60).' minutes. Finished.');
             } catch (WorkerException $e) {
                 throw ($e->getPrevious() ? $e->getPrevious() : $e);
             } catch (Exception $e) {
                 // Cannot start worker or connect to rabbitmq
-                echoCLI('RabbitMQ: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                echoCLI('RabbitMQ: '.$e->getMessage().PHP_EOL.$e->getTraceAsString());
                 return 1;
             }
         } else {
-            echoCLI('Worker class ' . $className . ' does not exist.');
+            echoCLI('Worker class '.$className.' does not exist.');
         }
     }
 }

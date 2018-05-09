@@ -24,7 +24,7 @@ use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -58,7 +58,8 @@ final class AFilter
         $this->data['page'] = $this->request->{$this->method}['page']; // get the requested page
         $this->data['page'] = $this->data['page'] ? $this->data['page'] : 1;
 
-        $this->data['rows'] = $this->request->{$this->method}['limit']; // get how many rows we want to have into the grid
+        $this->data['rows'] =
+            $this->request->{$this->method}['limit']; // get how many rows we want to have into the grid
         $this->data['rows'] = $this->data['rows'] ? $this->data['rows'] : $this->request->{$this->method}['rows'];
         $this->data['rows'] = $this->data['rows'] ? $this->data['rows'] : 10;
 
@@ -98,12 +99,13 @@ final class AFilter
             }
             $fl_str = array();
             foreach ($keys_arr as $kk => $filter) {
-                $value = isset($this->request->{$this->method}[$filter]) ? $this->request->{$this->method}[$filter] : false;
+                $value =
+                    isset($this->request->{$this->method}[$filter]) ? $this->request->{$this->method}[$filter] : false;
                 //set null as non-set value. 0 - is value!!!
                 if ($value === '' || $value === false || $value === array()) {
                     $value = null;
                 }
-                if (isset($value) && ! is_null($value)) {
+                if (isset($value) && !is_null($value)) {
                     $this->data['filter_data']['filter'][$filter] = $value;
 
                     if (AHelperUtils::is_assoc($filter_conf['filter_params'])) {
@@ -125,7 +127,7 @@ final class AFilter
         }
 
         $allowedSortDirection = array('ASC', 'DESC');
-        if ( ! in_array($this->data['sord'], $allowedSortDirection)) {
+        if (!in_array($this->data['sord'], $allowedSortDirection)) {
             $this->data['sord'] = 'DESC';
         }
 
@@ -281,7 +283,7 @@ final class AGrid
             $searchData = AJson::decode(htmlspecialchars_decode($this->filters), true);
             $op = $searchData['groupOp'];
 
-            if ( ! in_array($op, $allowedOperations)) {
+            if (!in_array($op, $allowedOperations)) {
                 $op = $allowedOperations[0];
             }
 
@@ -290,12 +292,12 @@ final class AGrid
 
                     // $allowedFields can be simple or key based array
                     if (AHelperUtils::is_assoc($allowedFields)) {
-                        if ( ! array_key_exists($rule['field'], $allowedFields)) {
+                        if (!array_key_exists($rule['field'], $allowedFields)) {
                             continue;
                         }
                         $field_name = $allowedFields[$rule['field']];
                     } else {
-                        if ( ! in_array($rule['field'], $allowedFields)) {
+                        if (!in_array($rule['field'], $allowedFields)) {
                             continue;
                         }
                         $field_name = $rule['field'];
@@ -335,8 +337,8 @@ final class AGrid
             }
         }
 
-        if ( ! empty($search_param)) {
-            $adv_filter_str .= (! empty($adv_filter_str) ? ' AND ' : '').implode(" $op ", $search_param);
+        if (!empty($search_param)) {
+            $adv_filter_str .= (!empty($adv_filter_str) ? ' AND ' : '').implode(" $op ", $search_param);
         }
 
         return $adv_filter_str;

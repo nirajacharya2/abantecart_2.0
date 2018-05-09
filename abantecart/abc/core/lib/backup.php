@@ -87,15 +87,14 @@ class ABackup
         $this->db = $this->registry->get('db');
         $this->extensions = $this->registry->get('extensions');
         $this->slash = DS;
-        if($name){
-           $result = $this->setBackupName($name);
-           if(!$result){
-               return false;
-           }
+        if ($name) {
+            $result = $this->setBackupName($name);
+            if (!$result) {
+                return false;
+            }
         }
         return true;
     }
-
 
     /**
      * @return string
@@ -442,9 +441,9 @@ class ABackup
 
         if (!$result) {
             $error_text = "Error: Can't move directory \""
-                            .$dir_path
-                            ." to backup folder \"".$this->backup_dir
-                            ."files".$this->slash.$path."\" during backup\n";
+                .$dir_path
+                ." to backup folder \"".$this->backup_dir
+                ."files".$this->slash.$path."\" during backup\n";
             if (!is_writable($dir_path)) {
                 $error_text .= "Check write permission for directory \"".$dir_path."";
             }
@@ -485,14 +484,14 @@ class ABackup
             }
             if (!$result) {
                 $error_text = "Error: Can't create directory "
-                                .$this->backup_dir.'files'.$this->slash.$path." during backup";
+                    .$this->backup_dir.'files'.$this->slash.$path." during backup";
                 $this->log->error($error_text);
                 $this->error[] = $error_text;
                 return false;
             }
             if (!is_writable($this->backup_dir.'files'.$this->slash.$path)) {
                 $error_text = "Error: Directory "
-                                .$this->backup_dir.'files'.$this->slash.$path.' is not writable for backup.';
+                    .$this->backup_dir.'files'.$this->slash.$path.' is not writable for backup.';
                 $this->log->error($error_text);
                 $this->error[] = $error_text;
                 return false;
@@ -509,8 +508,8 @@ class ABackup
         }
         if (!$result) {
             $error_text = "Error: Can't move file "
-                            .$file_path.' into '
-                            .$this->backup_dir.'files'.$this->slash.$path.'during backup.';
+                .$file_path.' into '
+                .$this->backup_dir.'files'.$this->slash.$path.'during backup.';
             $this->log->error($error_text);
             $this->error[] = $error_text;
             return false;
@@ -670,7 +669,7 @@ class ABackup
         //1. check is backup directory is writable
         if (!is_writable(ABC::env('DIR_BACKUP'))) {
             $this->error[] = 'Directory '.ABC::env('DIR_BACKUP')
-                                .' is non-writable. It is recommended to set write mode for it.';
+                .' is non-writable. It is recommended to set write mode for it.';
         }
 
         //2. check mysql driver
@@ -687,12 +686,12 @@ class ABackup
         $arr = [
             $this->backup_dir,
             $this->backup_dir."files".$this->slash,
-            $this->backup_dir."data".$this->slash
+            $this->backup_dir."data".$this->slash,
         ];
         foreach ($arr as $dir) {
             if (is_dir($dir) && !is_writable($dir)) {
                 $this->error[] = 'Directory '.$dir.' already exists and it is non-writable.'
-                                .' It is recommended to set write mode for it.';
+                    .' It is recommended to set write mode for it.';
             }
         }
 
