@@ -29,14 +29,24 @@ abstract class ABaseWorker implements AWorkerInterface
     protected $reRunIfFailed = false;
     protected $outputType = 'cli';
     protected $EOF = "\n";
+    protected $pid = -1;
 
     public function __construct()
     {
         $this->outputType = BaseCommand::$outputType;
         $this->EOF = BaseCommand::$EOF;
+        $this->pid = getmypid();
     }
 
     abstract public function getModuleMethods();
+
+    /**
+     * @return int
+     */
+    public function getPid()
+    {
+        return $this->pid;
+    }
 
     /**
      * Starting worker`s method for processing incoming jobs
@@ -46,6 +56,7 @@ abstract class ABaseWorker implements AWorkerInterface
      *
      * @return bool
      */
+
     public function runJob($method, $job_params)
     {
         $result = false;

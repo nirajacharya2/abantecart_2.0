@@ -62,7 +62,7 @@ class Job extends BaseCommand
             } elseif (isset($options['worker'])) {
                 $result = $this->runWorker($options);
             } else {
-                $this->errors[] = 'Incorect options to run the job!';
+                $this->errors[] = 'Incorrect options to run the job!';
                 $result = false;
             }
         } elseif ($action == 'consumer') {

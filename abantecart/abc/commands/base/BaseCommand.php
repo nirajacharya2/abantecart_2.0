@@ -53,13 +53,30 @@ class BaseCommand implements ABCExecInterface
 
     public static $EOF = "\n";
     public static $outputType = "cli";
+    /**
+     * @var int system process ID
+     */
+    protected static $pid= -1;
 
 
     public function __construct()
     {
         $this->output = [];
+        self::$pid = getmypid();
     }
 
+    /**
+     * @return int
+     */
+    public function getPid()
+    {
+        return self::$pid;
+    }
+
+    /**
+     * @param string $action
+     * @param array  $options
+     */
     public function run(string $action, array $options)
     {
         if ($this->printStartTime) {
