@@ -630,12 +630,12 @@ class ModelSaleOrder extends Model
             }
         }
 
-        $this->db->query("DELETE FROM `".$this->db->table_name("orders")."` WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_history")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_products")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_options")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_downloads")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_totals")." WHERE order_id = '".(int)$order_id."'");
+        $this->db->query("DELETE FROM `".$this->db->table_name("orders")."` WHERE order_id = '".(int)$order_id."'");
     }
 
     /**
