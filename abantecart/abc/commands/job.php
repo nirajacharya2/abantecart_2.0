@@ -224,8 +224,10 @@ class Job extends BaseCommand
             if (!in_array($run_method, $methods)) {
                 throw new AException('Cannot to find method '.$run_method.' of worker class'.$worker_class_name.'!');
             }
-            $result = call_user_func([$worker, $run_method], $options);
-            //pass workers output to command
+            $result = $worker->runJob(
+                $run_method,
+                $options
+            );
             if ($worker->output) {
                 $this->write($worker->output);
             }
