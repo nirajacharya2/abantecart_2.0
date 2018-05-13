@@ -96,6 +96,19 @@ abstract class ABaseWorker implements AWorkerInterface
         return date("Y-m-d H:i:s", time());
     }
 
+    /**
+     * @param string
+     * @return none
+     */
+    public function error($errorText)
+    {
+        $this->errors[] = $errorText;
+    }
+
+    /**
+     * @param string
+     * @return none
+     */
     public function echoCli($text)
     {
         if ($this->outputType == 'cli') {
@@ -105,6 +118,10 @@ abstract class ABaseWorker implements AWorkerInterface
         }
     }
 
+    /**
+     * @param none
+     * @return boolean
+     */
     public function isReRunAllowed()
     {
         return $this->reRunIfFailed;
