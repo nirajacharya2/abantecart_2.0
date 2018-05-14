@@ -1,48 +1,43 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcBlockTemplate
- * 
- * @property int $block_id
- * @property int $parent_block_id
- * @property string $template
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \App\Models\AcBlock $ac_block
  *
- * @package App\Models
+ * @property int                 $block_id
+ * @property int                 $parent_block_id
+ * @property string              $template
+ * @property \Carbon\Carbon      $date_added
+ * @property \Carbon\Carbon      $date_modified
+ *
+ * @property \abc\models\AcBlock $block
+ *
+ * @package abc\models
  */
-class AcBlockTemplate extends Eloquent
+class BlockTemplate extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'parent_block_id' => 'int'
-	];
+    protected $casts = [
+        'parent_block_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'template',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'template',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_block()
-	{
-		return $this->belongsTo(\App\Models\AcBlock::class, 'block_id');
-	}
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
 }

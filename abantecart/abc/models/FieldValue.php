@@ -1,44 +1,39 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcFieldValue
- * 
- * @property int $value_id
- * @property int $field_id
- * @property string $value
- * @property int $language_id
- * 
- * @property \App\Models\AcField $ac_field
  *
- * @package App\Models
+ * @property int                 $value_id
+ * @property int                 $field_id
+ * @property string              $value
+ * @property int                 $language_id
+ *
+ * @property \abc\models\AcField $field
+ *
+ * @package abc\models
  */
-class AcFieldValue extends Eloquent
+class FieldValue extends AModelBase
 {
-	protected $primaryKey = 'value_id';
-	public $timestamps = false;
+    protected $primaryKey = 'value_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'field_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'field_id'    => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'field_id',
-		'value',
-		'language_id'
-	];
+    protected $fillable = [
+        'field_id',
+        'value',
+        'language_id',
+    ];
 
-	public function ac_field()
-	{
-		return $this->belongsTo(\App\Models\AcField::class, 'field_id');
-	}
+    public function field()
+    {
+        return $this->belongsTo(Field::class, 'field_id');
+    }
 }

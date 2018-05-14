@@ -1,41 +1,36 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcManufacturer
- * 
- * @property int $manufacturer_id
- * @property string $name
- * @property int $sort_order
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_manufacturers_to_stores
+ * Class Manufacturer
  *
- * @package App\Models
+ * @property int                                      $manufacturer_id
+ * @property string                                   $name
+ * @property int                                      $sort_order
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
+ *
+ * @package abc\models
  */
-class AcManufacturer extends Eloquent
+class Manufacturer extends AModelBase
 {
-	protected $primaryKey = 'manufacturer_id';
-	public $timestamps = false;
+    protected $primaryKey = 'manufacturer_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'sort_order' => 'int'
-	];
+    protected $casts = [
+        'sort_order' => 'int',
+    ];
 
-	protected $fillable = [
-		'name',
-		'sort_order'
-	];
+    protected $fillable = [
+        'name',
+        'sort_order',
+    ];
 
-	public function ac_manufacturers_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcManufacturersToStore::class, 'manufacturer_id');
-	}
+    public function manufacturers_to_stores()
+    {
+        return $this->hasMany(ManufacturersToStore::class, 'manufacturer_id');
+    }
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcProductsToDownload
- * 
- * @property int $product_id
- * @property int $download_id
- * 
- * @property \App\Models\AcProduct $ac_product
- * @property \App\Models\AcDownload $ac_download
  *
- * @package App\Models
+ * @property int                    $product_id
+ * @property int                    $download_id
+ *
+ * @property \abc\models\Product    $product
+ * @property \abc\models\AcDownload $download
+ *
+ * @package abc\models
  */
-class AcProductsToDownload extends Eloquent
+class ProductsToDownload extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_id' => 'int',
-		'download_id' => 'int'
-	];
+    protected $casts = [
+        'product_id'  => 'int',
+        'download_id' => 'int',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 
-	public function ac_download()
-	{
-		return $this->belongsTo(\App\Models\AcDownload::class, 'download_id');
-	}
+    public function download()
+    {
+        return $this->belongsTo(Download::class, 'download_id');
+    }
 }

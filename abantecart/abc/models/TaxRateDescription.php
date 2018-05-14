@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcTaxRateDescription
- * 
- * @property int $tax_rate_id
- * @property int $language_id
- * @property string $description
- * 
- * @property \App\Models\AcTaxRate $ac_tax_rate
- * @property \App\Models\AcLanguage $ac_language
+ * Class TaxRateDescription
  *
- * @package App\Models
+ * @property int                  $tax_rate_id
+ * @property int                  $language_id
+ * @property string               $description
+ *
+ * @property \abc\models\TaxRate  $tax_rate
+ * @property \abc\models\Language $language
+ *
+ * @package abc\models
  */
-class AcTaxRateDescription extends Eloquent
+class TaxRateDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'tax_rate_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'tax_rate_id' => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'description'
-	];
+    protected $fillable = [
+        'description',
+    ];
 
-	public function ac_tax_rate()
-	{
-		return $this->belongsTo(\App\Models\AcTaxRate::class, 'tax_rate_id');
-	}
+    public function tax_rate()
+    {
+        return $this->belongsTo(TaxRate::class, 'tax_rate_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

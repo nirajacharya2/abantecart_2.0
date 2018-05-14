@@ -1,49 +1,44 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcCouponDescription
- * 
- * @property int $coupon_id
- * @property int $language_id
- * @property string $name
- * @property string $description
- * 
- * @property \App\Models\AcCoupon $ac_coupon
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $coupon_id
+ * @property int                    $language_id
+ * @property string                 $name
+ * @property string                 $description
+ *
+ * @property \abc\models\AcCoupon   $coupon
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcCouponDescription extends Eloquent
+class CouponDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'coupon_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'coupon_id'   => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'name',
-		'description'
-	];
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
-	public function ac_coupon()
-	{
-		return $this->belongsTo(\App\Models\AcCoupon::class, 'coupon_id');
-	}
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class, 'coupon_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

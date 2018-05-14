@@ -1,75 +1,70 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcField
- * 
- * @property int $field_id
- * @property int $form_id
- * @property string $field_name
- * @property string $element_type
- * @property int $sort_order
- * @property string $attributes
- * @property string $settings
- * @property string $required
- * @property int $status
- * @property string $regexp_pattern
- * 
- * @property \App\Models\AcForm $ac_form
- * @property \Illuminate\Database\Eloquent\Collection $ac_field_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_field_values
- * @property \App\Models\AcFieldsGroup $ac_fields_group
  *
- * @package App\Models
+ * @property int                                      $field_id
+ * @property int                                      $form_id
+ * @property string                                   $field_name
+ * @property string                                   $element_type
+ * @property int                                      $sort_order
+ * @property string                                   $attributes
+ * @property string                                   $settings
+ * @property string                                   $required
+ * @property int                                      $status
+ * @property string                                   $regexp_pattern
+ *
+ * @property \abc\models\AcForm                       $form
+ * @property \Illuminate\Database\Eloquent\Collection $field_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $field_values
+ * @property \abc\models\AcFieldsGroup                $fields_group
+ *
+ * @package abc\models
  */
-class AcField extends Eloquent
+class Field extends AModelBase
 {
-	protected $primaryKey = 'field_id';
-	public $timestamps = false;
+    protected $primaryKey = 'field_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'form_id' => 'int',
-		'sort_order' => 'int',
-		'status' => 'int'
-	];
+    protected $casts = [
+        'form_id'    => 'int',
+        'sort_order' => 'int',
+        'status'     => 'int',
+    ];
 
-	protected $fillable = [
-		'form_id',
-		'field_name',
-		'element_type',
-		'sort_order',
-		'attributes',
-		'settings',
-		'required',
-		'status',
-		'regexp_pattern'
-	];
+    protected $fillable = [
+        'form_id',
+        'field_name',
+        'element_type',
+        'sort_order',
+        'attributes',
+        'settings',
+        'required',
+        'status',
+        'regexp_pattern',
+    ];
 
-	public function ac_form()
-	{
-		return $this->belongsTo(\App\Models\AcForm::class, 'form_id');
-	}
+    public function form()
+    {
+        return $this->belongsTo(Form::class, 'form_id');
+    }
 
-	public function ac_field_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcFieldDescription::class, 'field_id');
-	}
+    public function field_descriptions()
+    {
+        return $this->hasMany(FieldDescription::class, 'field_id');
+    }
 
-	public function ac_field_values()
-	{
-		return $this->hasMany(\App\Models\AcFieldValue::class, 'field_id');
-	}
+    public function field_values()
+    {
+        return $this->hasMany(FieldValue::class, 'field_id');
+    }
 
-	public function ac_fields_group()
-	{
-		return $this->hasOne(\App\Models\AcFieldsGroup::class, 'field_id');
-	}
+    public function fields_group()
+    {
+        return $this->hasOne(FieldsGroup::class, 'field_id');
+    }
 }

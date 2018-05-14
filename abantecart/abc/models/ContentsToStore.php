@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcContentsToStore
- * 
- * @property int $content_id
- * @property int $store_id
- * 
- * @property \App\Models\AcContent $ac_content
- * @property \App\Models\AcStore $ac_store
  *
- * @package App\Models
+ * @property int                   $content_id
+ * @property int                   $store_id
+ *
+ * @property \abc\models\AcContent $content
+ * @property \abc\models\AcStore   $store
+ *
+ * @package abc\models
  */
-class AcContentsToStore extends Eloquent
+class ContentsToStore extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'content_id' => 'int',
-		'store_id' => 'int'
-	];
+    protected $casts = [
+        'content_id' => 'int',
+        'store_id'   => 'int',
+    ];
 
-	public function ac_content()
-	{
-		return $this->belongsTo(\App\Models\AcContent::class, 'content_id');
-	}
+    public function content()
+    {
+        return $this->belongsTo(Content::class, 'content_id');
+    }
 
-	public function ac_store()
-	{
-		return $this->belongsTo(\App\Models\AcStore::class, 'store_id');
-	}
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
 }

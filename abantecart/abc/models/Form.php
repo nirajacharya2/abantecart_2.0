@@ -1,63 +1,58 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcForm
- * 
- * @property int $form_id
- * @property string $form_name
- * @property string $controller
- * @property string $success_page
- * @property int $status
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_fields
- * @property \Illuminate\Database\Eloquent\Collection $ac_form_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_form_groups
- * @property \Illuminate\Database\Eloquent\Collection $ac_pages_forms
  *
- * @package App\Models
+ * @property int                                      $form_id
+ * @property string                                   $form_name
+ * @property string                                   $controller
+ * @property string                                   $success_page
+ * @property int                                      $status
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $fields
+ * @property \Illuminate\Database\Eloquent\Collection $form_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $form_groups
+ * @property \Illuminate\Database\Eloquent\Collection $pages_forms
+ *
+ * @package abc\models
  */
-class AcForm extends Eloquent
+class Form extends AModelBase
 {
-	protected $primaryKey = 'form_id';
-	public $timestamps = false;
+    protected $primaryKey = 'form_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'status' => 'int'
-	];
+    protected $casts = [
+        'status' => 'int',
+    ];
 
-	protected $fillable = [
-		'form_name',
-		'controller',
-		'success_page',
-		'status'
-	];
+    protected $fillable = [
+        'form_name',
+        'controller',
+        'success_page',
+        'status',
+    ];
 
-	public function ac_fields()
-	{
-		return $this->hasMany(\App\Models\AcField::class, 'form_id');
-	}
+    public function fields()
+    {
+        return $this->hasMany(Field::class, 'form_id');
+    }
 
-	public function ac_form_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcFormDescription::class, 'form_id');
-	}
+    public function form_descriptions()
+    {
+        return $this->hasMany(FormDescription::class, 'form_id');
+    }
 
-	public function ac_form_groups()
-	{
-		return $this->hasMany(\App\Models\AcFormGroup::class, 'form_id');
-	}
+    public function form_groups()
+    {
+        return $this->hasMany(FormGroup::class, 'form_id');
+    }
 
-	public function ac_pages_forms()
-	{
-		return $this->hasMany(\App\Models\AcPagesForm::class, 'form_id');
-	}
+    public function pages_forms()
+    {
+        return $this->hasMany(PagesForm::class, 'form_id');
+    }
 }

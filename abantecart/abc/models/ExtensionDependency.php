@@ -1,29 +1,24 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcExtensionDependency
- * 
+ *
  * @property int $extension_id
  * @property int $extension_parent_id
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcExtensionDependency extends Eloquent
+class ExtensionDependency extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'extension_id' => 'int',
-		'extension_parent_id' => 'int'
-	];
+    protected $casts = [
+        'extension_id'        => 'int',
+        'extension_parent_id' => 'int',
+    ];
 }

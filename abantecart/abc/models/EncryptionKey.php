@@ -1,36 +1,31 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcEncryptionKey
- * 
- * @property int $key_id
+ * Class EncryptionKey
+ *
+ * @property int    $key_id
  * @property string $key_name
- * @property int $status
+ * @property int    $status
  * @property string $comment
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcEncryptionKey extends Eloquent
+class EncryptionKey extends AModelBase
 {
-	protected $primaryKey = 'key_id';
-	public $timestamps = false;
+    protected $primaryKey = 'key_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'status' => 'int'
-	];
+    protected $casts = [
+        'status' => 'int',
+    ];
 
-	protected $fillable = [
-		'key_name',
-		'status',
-		'comment'
-	];
+    protected $fillable = [
+        'key_name',
+        'status',
+        'comment',
+    ];
 }

@@ -1,39 +1,34 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcGlobalAttributesType
- * 
- * @property int $attribute_type_id
+ *
+ * @property int    $attribute_type_id
  * @property string $type_key
  * @property string $controller
- * @property int $sort_order
- * @property int $status
+ * @property int    $sort_order
+ * @property int    $status
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcGlobalAttributesType extends Eloquent
+class GlobalAttributesType extends AModelBase
 {
-	protected $primaryKey = 'attribute_type_id';
-	public $timestamps = false;
+    protected $primaryKey = 'attribute_type_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'sort_order' => 'int',
-		'status' => 'int'
-	];
+    protected $casts = [
+        'sort_order' => 'int',
+        'status'     => 'int',
+    ];
 
-	protected $fillable = [
-		'type_key',
-		'controller',
-		'sort_order',
-		'status'
-	];
+    protected $fillable = [
+        'type_key',
+        'controller',
+        'sort_order',
+        'status',
+    ];
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcManufacturersToStore
- * 
- * @property int $manufacturer_id
- * @property int $store_id
- * 
- * @property \App\Models\AcManufacturer $ac_manufacturer
- * @property \App\Models\AcStore $ac_store
+ * Class ManufacturersToStore
  *
- * @package App\Models
+ * @property int                      $manufacturer_id
+ * @property int                      $store_id
+ *
+ * @property \abc\models\Manufacturer $manufacturer
+ * @property \abc\models\Store        $store
+ *
+ * @package abc\models
  */
-class AcManufacturersToStore extends Eloquent
+class ManufacturersToStore extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'manufacturer_id' => 'int',
-		'store_id' => 'int'
-	];
+    protected $casts = [
+        'manufacturer_id' => 'int',
+        'store_id'        => 'int',
+    ];
 
-	public function ac_manufacturer()
-	{
-		return $this->belongsTo(\App\Models\AcManufacturer::class, 'manufacturer_id');
-	}
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
+    }
 
-	public function ac_store()
-	{
-		return $this->belongsTo(\App\Models\AcStore::class, 'store_id');
-	}
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
 }

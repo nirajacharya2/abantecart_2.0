@@ -1,34 +1,29 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcProductFilterRangesDescription
- * 
- * @property int $range_id
- * @property string $name
- * @property int $language_id
  *
- * @package App\Models
+ * @property int    $range_id
+ * @property string $name
+ * @property int    $language_id
+ *
+ * @package abc\models
  */
-class AcProductFilterRangesDescription extends Eloquent
+class ProductFilterRangesDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'range_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'range_id'    => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 }

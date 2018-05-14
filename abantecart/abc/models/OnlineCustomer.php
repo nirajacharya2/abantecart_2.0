@@ -1,43 +1,38 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcOnlineCustomer
- * 
- * @property int $customer_id
- * @property string $ip
- * @property string $url
- * @property string $referer
+ * Class OnlineCustomer
+ *
+ * @property int            $customer_id
+ * @property string         $ip
+ * @property string         $url
+ * @property string         $referer
  * @property \Carbon\Carbon $date_added
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcOnlineCustomer extends Eloquent
+class OnlineCustomer extends AModelBase
 {
-	protected $primaryKey = 'ip';
-	public $incrementing = false;
-	public $timestamps = false;
+    protected $primaryKey = 'ip';
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'customer_id' => 'int'
-	];
+    protected $casts = [
+        'customer_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added'
-	];
+    protected $dates = [
+        'date_added',
+    ];
 
-	protected $fillable = [
-		'customer_id',
-		'url',
-		'referer',
-		'date_added'
-	];
+    protected $fillable = [
+        'customer_id',
+        'url',
+        'referer',
+        'date_added',
+    ];
 }

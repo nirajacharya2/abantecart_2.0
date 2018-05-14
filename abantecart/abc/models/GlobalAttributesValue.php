@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcGlobalAttributesValue
- * 
- * @property int $attribute_value_id
- * @property int $attribute_id
- * @property int $sort_order
- * 
- * @property \App\Models\AcGlobalAttribute $ac_global_attribute
+ * Class GlobalAttributesValue
  *
- * @package App\Models
+ * @property int                         $attribute_value_id
+ * @property int                         $attribute_id
+ * @property int                         $sort_order
+ *
+ * @property \abc\models\GlobalAttribute $global_attribute
+ *
+ * @package abc\models
  */
-class AcGlobalAttributesValue extends Eloquent
+class GlobalAttributesValue extends AModelBase
 {
-	protected $primaryKey = 'attribute_value_id';
-	public $timestamps = false;
+    protected $primaryKey = 'attribute_value_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'attribute_id' => 'int',
-		'sort_order' => 'int'
-	];
+    protected $casts = [
+        'attribute_id' => 'int',
+        'sort_order'   => 'int',
+    ];
 
-	protected $fillable = [
-		'attribute_id',
-		'sort_order'
-	];
+    protected $fillable = [
+        'attribute_id',
+        'sort_order',
+    ];
 
-	public function ac_global_attribute()
-	{
-		return $this->belongsTo(\App\Models\AcGlobalAttribute::class, 'attribute_id');
-	}
+    public function global_attribute()
+    {
+        return $this->belongsTo(GlobalAttribute::class, 'attribute_id');
+    }
 }

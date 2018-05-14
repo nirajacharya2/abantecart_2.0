@@ -1,66 +1,61 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcPageDescription
- * 
- * @property int $page_id
- * @property int $language_id
- * @property string $name
- * @property string $title
- * @property string $seo_url
- * @property string $keywords
- * @property string $description
- * @property string $content
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \App\Models\AcPage $ac_page
- * @property \App\Models\AcLanguage $ac_language
+ * Class PageDescription
  *
- * @package App\Models
+ * @property int                  $page_id
+ * @property int                  $language_id
+ * @property string               $name
+ * @property string               $title
+ * @property string               $seo_url
+ * @property string               $keywords
+ * @property string               $description
+ * @property string               $content
+ * @property \Carbon\Carbon       $date_added
+ * @property \Carbon\Carbon       $date_modified
+ *
+ * @property \abc\models\Page     $page
+ * @property \abc\models\Language $language
+ *
+ * @package abc\models
  */
-class AcPageDescription extends Eloquent
+class PageDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'page_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'page_id'     => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'name',
-		'title',
-		'seo_url',
-		'keywords',
-		'description',
-		'content',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'name',
+        'title',
+        'seo_url',
+        'keywords',
+        'description',
+        'content',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_page()
-	{
-		return $this->belongsTo(\App\Models\AcPage::class, 'page_id');
-	}
+    public function page()
+    {
+        return $this->belongsTo(Page::class, 'page_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcPagesLayout
- * 
- * @property int $layout_id
- * @property int $page_id
- * 
- * @property \App\Models\AcLayout $ac_layout
- * @property \App\Models\AcPage $ac_page
+ * Class PagesLayout
  *
- * @package App\Models
+ * @property int                $layout_id
+ * @property int                $page_id
+ *
+ * @property \abc\models\Layout $layout
+ * @property \abc\models\Page   $page
+ *
+ * @package abc\models
  */
-class AcPagesLayout extends Eloquent
+class PagesLayout extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'layout_id' => 'int',
-		'page_id' => 'int'
-	];
+    protected $casts = [
+        'layout_id' => 'int',
+        'page_id'   => 'int',
+    ];
 
-	public function ac_layout()
-	{
-		return $this->belongsTo(\App\Models\AcLayout::class, 'layout_id');
-	}
+    public function layout()
+    {
+        return $this->belongsTo(Layout::class, 'layout_id');
+    }
 
-	public function ac_page()
-	{
-		return $this->belongsTo(\App\Models\AcPage::class, 'page_id');
-	}
+    public function page()
+    {
+        return $this->belongsTo(Page::class, 'page_id');
+    }
 }

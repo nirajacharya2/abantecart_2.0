@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcResourceType
- * 
- * @property int $type_id
- * @property string $type_name
- * @property string $default_directory
- * @property string $default_icon
- * @property string $file_types
- * @property bool $access_type
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_resource_libraries
  *
- * @package App\Models
+ * @property int                                      $type_id
+ * @property string                                   $type_name
+ * @property string                                   $default_directory
+ * @property string                                   $default_icon
+ * @property string                                   $file_types
+ * @property bool                                     $access_type
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $resource_libraries
+ *
+ * @package abc\models
  */
-class AcResourceType extends Eloquent
+class ResourceType extends AModelBase
 {
-	protected $primaryKey = 'type_id';
-	public $timestamps = false;
+    protected $primaryKey = 'type_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'access_type' => 'bool'
-	];
+    protected $casts = [
+        'access_type' => 'bool',
+    ];
 
-	protected $fillable = [
-		'type_name',
-		'default_directory',
-		'default_icon',
-		'file_types',
-		'access_type'
-	];
+    protected $fillable = [
+        'type_name',
+        'default_directory',
+        'default_icon',
+        'file_types',
+        'access_type',
+    ];
 
-	public function ac_resource_libraries()
-	{
-		return $this->hasMany(\App\Models\AcResourceLibrary::class, 'type_id');
-	}
+    public function resource_libraries()
+    {
+        return $this->hasMany(ResourceLibrary::class, 'type_id');
+    }
 }

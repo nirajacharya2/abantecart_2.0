@@ -1,53 +1,48 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcOrderTotal
- * 
- * @property int $order_total_id
- * @property int $order_id
- * @property string $title
- * @property string $text
- * @property float $value
- * @property int $sort_order
- * @property string $type
- * @property string $key
- * 
- * @property \App\Models\AcOrder $ac_order
+ * Class OrderTotal
  *
- * @package App\Models
+ * @property int               $order_total_id
+ * @property int               $order_id
+ * @property string            $title
+ * @property string            $text
+ * @property float             $value
+ * @property int               $sort_order
+ * @property string            $type
+ * @property string            $key
+ *
+ * @property \abc\models\Order $order
+ *
+ * @package abc\models
  */
-class AcOrderTotal extends Eloquent
+class OrderTotal extends AModelBase
 {
-	protected $primaryKey = 'order_total_id';
-	public $timestamps = false;
+    protected $primaryKey = 'order_total_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'order_id' => 'int',
-		'value' => 'float',
-		'sort_order' => 'int'
-	];
+    protected $casts = [
+        'order_id'   => 'int',
+        'value'      => 'float',
+        'sort_order' => 'int',
+    ];
 
-	protected $fillable = [
-		'order_id',
-		'title',
-		'text',
-		'value',
-		'sort_order',
-		'type',
-		'key'
-	];
+    protected $fillable = [
+        'order_id',
+        'title',
+        'text',
+        'value',
+        'sort_order',
+        'type',
+        'key',
+    ];
 
-	public function ac_order()
-	{
-		return $this->belongsTo(\App\Models\AcOrder::class, 'order_id');
-	}
+    public function order()
+    {
+        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+    }
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcCategoriesToStore
- * 
- * @property int $category_id
- * @property int $store_id
- * 
- * @property \App\Models\AcCategory $ac_category
- * @property \App\Models\AcStore $ac_store
+ * Class CategoriesToStore
  *
- * @package App\Models
+ * @property int                  $category_id
+ * @property int                  $store_id
+ *
+ * @property \abc\models\Category $category
+ * @property \abc\models\Store    $store
+ *
+ * @package abc\models
  */
-class AcCategoriesToStore extends Eloquent
+class CategoriesToStore extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'category_id' => 'int',
-		'store_id' => 'int'
-	];
+    protected $casts = [
+        'category_id' => 'int',
+        'store_id'    => 'int',
+    ];
 
-	public function ac_category()
-	{
-		return $this->belongsTo(\App\Models\AcCategory::class, 'category_id');
-	}
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 
-	public function ac_store()
-	{
-		return $this->belongsTo(\App\Models\AcStore::class, 'store_id');
-	}
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
 }

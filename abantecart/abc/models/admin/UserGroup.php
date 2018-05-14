@@ -1,46 +1,41 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcUserGroup
- * 
- * @property int $user_group_id
- * @property string $name
- * @property string $permission
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_users
  *
- * @package App\Models
+ * @property int                                      $user_group_id
+ * @property string                                   $name
+ * @property string                                   $permission
+ * @property \Carbon\Carbon                           $date_added
+ * @property \Carbon\Carbon                           $date_modified
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $users
+ *
+ * @package abc\models
  */
-class AcUserGroup extends Eloquent
+class UserGroup extends AModelBase
 {
-	protected $primaryKey = 'user_group_id';
-	public $timestamps = false;
+    protected $primaryKey = 'user_group_id';
+    public $timestamps = false;
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'name',
-		'permission',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'name',
+        'permission',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_users()
-	{
-		return $this->hasMany(\App\Models\AcUser::class, 'user_group_id');
-	}
+    public function users()
+    {
+        return $this->hasMany(User::class, 'user_group_id');
+    }
 }

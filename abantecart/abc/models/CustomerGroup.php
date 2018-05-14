@@ -1,34 +1,29 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcCustomerGroup
- * 
- * @property int $customer_group_id
- * @property string $name
- * @property bool $tax_exempt
+ * Class CustomerGroup
  *
- * @package App\Models
+ * @property int    $customer_group_id
+ * @property string $name
+ * @property bool   $tax_exempt
+ *
+ * @package abc\models
  */
-class AcCustomerGroup extends Eloquent
+class CustomerGroup extends AModelBase
 {
-	protected $primaryKey = 'customer_group_id';
-	public $timestamps = false;
+    protected $primaryKey = 'customer_group_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'tax_exempt' => 'bool'
-	];
+    protected $casts = [
+        'tax_exempt' => 'bool',
+    ];
 
-	protected $fillable = [
-		'name',
-		'tax_exempt'
-	];
+    protected $fillable = [
+        'name',
+        'tax_exempt',
+    ];
 }

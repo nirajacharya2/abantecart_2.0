@@ -1,43 +1,38 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcProductTag
- * 
- * @property int $product_id
- * @property string $tag
- * @property int $language_id
- * 
- * @property \App\Models\AcProduct $ac_product
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $product_id
+ * @property string                 $tag
+ * @property int                    $language_id
+ *
+ * @property \abc\models\Product    $product
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcProductTag extends Eloquent
+class ProductTag extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'product_id'  => 'int',
+        'language_id' => 'int',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

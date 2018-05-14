@@ -1,66 +1,61 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcCategory
- * 
- * @property int $category_id
- * @property int $parent_id
- * @property int $sort_order
- * @property int $status
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_categories_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $ac_category_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_products_to_categories
  *
- * @package App\Models
+ * @property int                                      $category_id
+ * @property int                                      $parent_id
+ * @property int                                      $sort_order
+ * @property int                                      $status
+ * @property \Carbon\Carbon                           $date_added
+ * @property \Carbon\Carbon                           $date_modified
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $categories_to_stores
+ * @property \Illuminate\Database\Eloquent\Collection $category_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
+ *
+ * @package abc\models
  */
-class AcCategory extends Eloquent
+class Category extends AModelBase
 {
-	protected $primaryKey = 'category_id';
-	public $timestamps = false;
+    protected $primaryKey = 'category_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'parent_id' => 'int',
-		'sort_order' => 'int',
-		'status' => 'int'
-	];
+    protected $casts = [
+        'parent_id'  => 'int',
+        'sort_order' => 'int',
+        'status'     => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'parent_id',
-		'sort_order',
-		'status',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'parent_id',
+        'sort_order',
+        'status',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_categories_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcCategoriesToStore::class, 'category_id');
-	}
+    public function categories_to_stores()
+    {
+        return $this->hasMany(CategoriesToStore::class, 'category_id');
+    }
 
-	public function ac_category_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcCategoryDescription::class, 'category_id');
-	}
+    public function category_descriptions()
+    {
+        return $this->hasMany(CategoryDescription::class, 'category_id');
+    }
 
-	public function ac_products_to_categories()
-	{
-		return $this->hasMany(\App\Models\AcProductsToCategory::class, 'category_id');
-	}
+    public function products_to_categories()
+    {
+        return $this->hasMany(ProductsToCategory::class, 'category_id');
+    }
 }

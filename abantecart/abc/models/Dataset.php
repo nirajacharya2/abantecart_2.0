@@ -1,43 +1,38 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcDataset
- * 
- * @property int $dataset_id
- * @property string $dataset_name
- * @property string $dataset_key
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_dataset_definitions
- * @property \Illuminate\Database\Eloquent\Collection $ac_dataset_properties
  *
- * @package App\Models
+ * @property int                                      $dataset_id
+ * @property string                                   $dataset_name
+ * @property string                                   $dataset_key
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $dataset_definitions
+ * @property \Illuminate\Database\Eloquent\Collection $dataset_properties
+ *
+ * @package abc\models
  */
-class AcDataset extends Eloquent
+class Dataset extends AModelBase
 {
-	protected $primaryKey = 'dataset_id';
-	public $timestamps = false;
+    protected $primaryKey = 'dataset_id';
+    public $timestamps = false;
 
-	protected $fillable = [
-		'dataset_name',
-		'dataset_key'
-	];
+    protected $fillable = [
+        'dataset_name',
+        'dataset_key',
+    ];
 
-	public function ac_dataset_definitions()
-	{
-		return $this->hasMany(\App\Models\AcDatasetDefinition::class, 'dataset_id');
-	}
+    public function dataset_definitions()
+    {
+        return $this->hasMany(DatasetDefinition::class, 'dataset_id');
+    }
 
-	public function ac_dataset_properties()
-	{
-		return $this->hasMany(\App\Models\AcDatasetProperty::class, 'dataset_id');
-	}
+    public function dataset_properties()
+    {
+        return $this->hasMany(DatasetProperty::class, 'dataset_id');
+    }
 }

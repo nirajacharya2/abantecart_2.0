@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcOrderStatusDescription
- * 
- * @property int $order_status_id
- * @property int $language_id
- * @property string $name
- * 
- * @property \App\Models\AcOrderStatus $ac_order_status
- * @property \App\Models\AcLanguage $ac_language
+ * Class OrderStatusDescription
  *
- * @package App\Models
+ * @property int                     $order_status_id
+ * @property int                     $language_id
+ * @property string                  $name
+ *
+ * @property \abc\models\OrderStatus $order_status
+ * @property \abc\models\Language    $language
+ *
+ * @package abc\models
  */
-class AcOrderStatusDescription extends Eloquent
+class OrderStatusDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'order_status_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'order_status_id' => 'int',
+        'language_id'     => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 
-	public function ac_order_status()
-	{
-		return $this->belongsTo(\App\Models\AcOrderStatus::class, 'order_status_id');
-	}
+    public function order_status()
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_status_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

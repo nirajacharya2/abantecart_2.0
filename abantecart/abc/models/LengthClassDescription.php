@@ -1,43 +1,38 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcLengthClassDescription
- * 
- * @property int $length_class_id
- * @property int $language_id
- * @property string $title
- * @property string $unit
- * 
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $length_class_id
+ * @property int                    $language_id
+ * @property string                 $title
+ * @property string                 $unit
+ *
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcLengthClassDescription extends Eloquent
+class LengthClassDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'length_class_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'length_class_id' => 'int',
+        'language_id'     => 'int',
+    ];
 
-	protected $fillable = [
-		'title',
-		'unit'
-	];
+    protected $fillable = [
+        'title',
+        'unit',
+    ];
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

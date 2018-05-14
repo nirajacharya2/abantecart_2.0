@@ -158,6 +158,61 @@ final class ALoader
     }
 
     /**
+     * @param        $file_basename
+     * @param string $mode
+     *
+     * @return bool
+     * @throws AException
+     */
+    public function includeModel( $file_basename, $mode = '' )
+    {
+
+        //force mode allows to load models for ALL extensions to bypass extension enabled only status
+        //This might be helpful in storefront. In admin all installed extensions are available
+        $force = '';
+        if ( $mode == 'force' ) {
+            $force = 'all';
+        }
+        $extModelRt = '';
+        //mode to force load storefront model
+        if ( ABC::env( 'INSTALL' ) && $file_basename == 'install' ) {
+            $section = ABC::env( 'DIR_INSTALL' ).'models/';
+        } elseif ( $mode == 'storefront' || ABC::env( 'IS_ADMIN' ) !== true ) {
+            $section = ABC::env( 'DIR_MODELS' );
+            $extModelRt = $file_basename;
+        } else {
+            $section = ABC::env( 'DIR_MODELS' ).ABC::env( 'DIRNAME_ADMIN' );
+            $extModelRt = 'admin/'.$file_basename;
+        }
+
+        $file = $section.$file_basename.'.php';
+
+        if ( $this->registry->has( 'extensions' ) && $result = $this->extensions->isExtensionResource( 'M', $extModelRt, $force, $mode )
+        ) {
+            if ( is_file( $file ) ) {
+                $warning = new AWarning( "Extension <b>{$result['extension']}</b> override model <b>$file_basename</b>" );
+                $warning->toDebug();
+            }
+            $file = $result['file'];
+        }
+
+
+
+        if ( file_exists( $file ) ) {
+            include_once( $file );
+        } else {
+            if ( $mode != 'silent' ) {
+                $backtrace = debug_backtrace();
+                $file_info = $backtrace[0]['file'].' on line '.$backtrace[0]['line'];
+                throw new AException( AC_ERR_LOAD, 'Error: Could not load model '.$file_basename.' (file '.$file.')  from '.$file_info );
+            } else {
+                return false;
+            }
+        }
+
+    }
+
+    /**
      * @param string $helper
      *
      * @throws AException

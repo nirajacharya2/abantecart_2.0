@@ -1,34 +1,29 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcGlobalAttributesGroupsDescription
- * 
- * @property int $attribute_group_id
- * @property int $language_id
+ *
+ * @property int    $attribute_group_id
+ * @property int    $language_id
  * @property string $name
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcGlobalAttributesGroupsDescription extends Eloquent
+class GlobalAttributesGroupsDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'attribute_group_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'attribute_group_id' => 'int',
+        'language_id'        => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 }

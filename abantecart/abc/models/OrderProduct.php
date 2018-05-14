@@ -1,81 +1,76 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcOrderProduct
- * 
- * @property int $order_product_id
- * @property int $order_id
- * @property int $product_id
- * @property string $name
- * @property string $model
- * @property string $sku
- * @property float $price
- * @property float $total
- * @property float $tax
- * @property int $quantity
- * @property int $subtract
- * 
- * @property \App\Models\AcOrder $ac_order
- * @property \App\Models\AcProduct $ac_product
- * @property \Illuminate\Database\Eloquent\Collection $ac_order_downloads
- * @property \Illuminate\Database\Eloquent\Collection $ac_order_downloads_histories
+ * Class OrderProduct
  *
- * @package App\Models
+ * @property int                                      $order_product_id
+ * @property int                                      $order_id
+ * @property int                                      $product_id
+ * @property string                                   $name
+ * @property string                                   $model
+ * @property string                                   $sku
+ * @property float                                    $price
+ * @property float                                    $total
+ * @property float                                    $tax
+ * @property int                                      $quantity
+ * @property int                                      $subtract
+ *
+ * @property \abc\models\Order                        $order
+ * @property \abc\models\Product                      $product
+ * @property \Illuminate\Database\Eloquent\Collection $order_downloads
+ * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
+ *
+ * @package abc\models
  */
-class AcOrderProduct extends Eloquent
+class OrderProduct extends AModelBase
 {
-	protected $primaryKey = 'order_product_id';
-	public $timestamps = false;
+    protected $primaryKey = 'order_product_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'order_id' => 'int',
-		'product_id' => 'int',
-		'price' => 'float',
-		'total' => 'float',
-		'tax' => 'float',
-		'quantity' => 'int',
-		'subtract' => 'int'
-	];
+    protected $casts = [
+        'order_id'   => 'int',
+        'product_id' => 'int',
+        'price'      => 'float',
+        'total'      => 'float',
+        'tax'        => 'float',
+        'quantity'   => 'int',
+        'subtract'   => 'int',
+    ];
 
-	protected $fillable = [
-		'order_id',
-		'product_id',
-		'name',
-		'model',
-		'sku',
-		'price',
-		'total',
-		'tax',
-		'quantity',
-		'subtract'
-	];
+    protected $fillable = [
+        'order_id',
+        'product_id',
+        'name',
+        'model',
+        'sku',
+        'price',
+        'total',
+        'tax',
+        'quantity',
+        'subtract',
+    ];
 
-	public function ac_order()
-	{
-		return $this->belongsTo(\App\Models\AcOrder::class, 'order_id');
-	}
+    public function order()
+    {
+        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+    }
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 
-	public function ac_order_downloads()
-	{
-		return $this->hasMany(\App\Models\AcOrderDownload::class, 'order_product_id');
-	}
+    public function order_downloads()
+    {
+        return $this->hasMany(OrderDownload::class, 'order_product_id');
+    }
 
-	public function ac_order_downloads_histories()
-	{
-		return $this->hasMany(\App\Models\AcOrderDownloadsHistory::class, 'order_product_id');
-	}
+    public function order_downloads_histories()
+    {
+        return $this->hasMany(OrderDownloadsHistory::class, 'order_product_id');
+    }
 }

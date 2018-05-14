@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcDownloadDescription
- * 
- * @property int $download_id
- * @property int $language_id
- * @property string $name
- * 
- * @property \App\Models\AcDownload $ac_download
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $download_id
+ * @property int                    $language_id
+ * @property string                 $name
+ *
+ * @property \abc\models\AcDownload $download
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcDownloadDescription extends Eloquent
+class DownloadDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'download_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'download_id' => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 
-	public function ac_download()
-	{
-		return $this->belongsTo(\App\Models\AcDownload::class, 'download_id');
-	}
+    public function download()
+    {
+        return $this->belongsTo(Download::class, 'download_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

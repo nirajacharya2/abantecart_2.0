@@ -1,49 +1,44 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcContent
- * 
- * @property int $content_id
- * @property int $parent_content_id
- * @property int $sort_order
- * @property int $status
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_content_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_contents_to_stores
  *
- * @package App\Models
+ * @property int                                      $content_id
+ * @property int                                      $parent_content_id
+ * @property int                                      $sort_order
+ * @property int                                      $status
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $content_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $contents_to_stores
+ *
+ * @package abc\models
  */
-class AcContent extends Eloquent
+class Content extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'parent_content_id' => 'int',
-		'sort_order' => 'int',
-		'status' => 'int'
-	];
+    protected $casts = [
+        'parent_content_id' => 'int',
+        'sort_order'        => 'int',
+        'status'            => 'int',
+    ];
 
-	protected $fillable = [
-		'sort_order',
-		'status'
-	];
+    protected $fillable = [
+        'sort_order',
+        'status',
+    ];
 
-	public function ac_content_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcContentDescription::class, 'content_id');
-	}
+    public function content_descriptions()
+    {
+        return $this->hasMany(ContentDescription::class, 'content_id');
+    }
 
-	public function ac_contents_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcContentsToStore::class, 'content_id');
-	}
+    public function contents_to_stores()
+    {
+        return $this->hasMany(ContentsToStore::class, 'content_id');
+    }
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcOrderStatus
- * 
- * @property int $order_status_id
- * @property string $status_text_id
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_order_histories
- * @property \Illuminate\Database\Eloquent\Collection $ac_order_status_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_orders
  *
- * @package App\Models
+ * @property int                                      $order_status_id
+ * @property string                                   $status_text_id
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $order_histories
+ * @property \Illuminate\Database\Eloquent\Collection $order_status_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $orders
+ *
+ * @package abc\models
  */
-class AcOrderStatus extends Eloquent
+class OrderStatus extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	public function ac_order_histories()
-	{
-		return $this->hasMany(\App\Models\AcOrderHistory::class, 'order_status_id');
-	}
+    public function order_histories()
+    {
+        return $this->hasMany(OrderHistory::class, 'order_status_id');
+    }
 
-	public function ac_order_status_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcOrderStatusDescription::class, 'order_status_id');
-	}
+    public function order_status_descriptions()
+    {
+        return $this->hasMany(OrderStatusDescription::class, 'order_status_id');
+    }
 
-	public function ac_orders()
-	{
-		return $this->hasMany(\App\Models\AcOrder::class, 'order_status_id');
-	}
+    public function orders()
+    {
+        return $this->hasMany(\abc\models\Order::class, 'order_status_id');
+    }
 }

@@ -78,6 +78,7 @@ ABC::env(
         'DIR_SYSTEM'         => $dir_app.'system'.DS,
         'DIR_CORE'           => $dir_app.'core'.DS,
         'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
+        'DIR_MODELS'         => $dir_app.'models'.DS,
         'DIR_MODULES'        => $dir_app.'modules'.DS,
         'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
         'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,

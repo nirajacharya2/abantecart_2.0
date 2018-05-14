@@ -3,6 +3,7 @@
 use abc\core\ABC;
 
 $class_list = [
+    'models' => [ 'ModelBase' ],
     'core/engine' => [
         'router',
         'page',

@@ -1,69 +1,64 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcZone
- * 
- * @property int $zone_id
- * @property int $country_id
- * @property string $code
- * @property int $status
- * @property int $sort_order
- * 
- * @property \App\Models\AcCountry $ac_country
- * @property \Illuminate\Database\Eloquent\Collection $ac_addresses
- * @property \Illuminate\Database\Eloquent\Collection $ac_tax_rates
- * @property \Illuminate\Database\Eloquent\Collection $ac_zone_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_zones_to_locations
+ * Class Zone
  *
- * @package App\Models
+ * @property int                                      $zone_id
+ * @property int                                      $country_id
+ * @property string                                   $code
+ * @property int                                      $status
+ * @property int                                      $sort_order
+ *
+ * @property \abc\models\Country                      $country
+ * @property \Illuminate\Database\Eloquent\Collection $addresses
+ * @property \Illuminate\Database\Eloquent\Collection $tax_rates
+ * @property \Illuminate\Database\Eloquent\Collection $zone_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $zones_to_locations
+ *
+ * @package abc\models
  */
-class AcZone extends Eloquent
+class Zone extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'country_id' => 'int',
-		'status' => 'int',
-		'sort_order' => 'int'
-	];
+    protected $casts = [
+        'country_id' => 'int',
+        'status'     => 'int',
+        'sort_order' => 'int',
+    ];
 
-	protected $fillable = [
-		'code',
-		'status',
-		'sort_order'
-	];
+    protected $fillable = [
+        'code',
+        'status',
+        'sort_order',
+    ];
 
-	public function ac_country()
-	{
-		return $this->belongsTo(\App\Models\AcCountry::class, 'country_id');
-	}
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
 
-	public function ac_addresses()
-	{
-		return $this->hasMany(\App\Models\AcAddress::class, 'zone_id');
-	}
+    public function addresses()
+    {
+        return $this->hasMany(Address::class, 'zone_id');
+    }
 
-	public function ac_tax_rates()
-	{
-		return $this->hasMany(\App\Models\AcTaxRate::class, 'zone_id');
-	}
+    public function tax_rates()
+    {
+        return $this->hasMany(TaxRate::class, 'zone_id');
+    }
 
-	public function ac_zone_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcZoneDescription::class, 'zone_id');
-	}
+    public function zone_descriptions()
+    {
+        return $this->hasMany(ZoneDescription::class, 'zone_id');
+    }
 
-	public function ac_zones_to_locations()
-	{
-		return $this->hasMany(\App\Models\AcZonesToLocation::class, 'zone_id');
-	}
+    public function zones_to_locations()
+    {
+        return $this->hasMany(ZonesToLocation::class, 'zone_id');
+    }
 }

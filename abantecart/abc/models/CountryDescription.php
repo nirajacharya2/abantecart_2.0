@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcCountryDescription
- * 
- * @property int $country_id
- * @property int $language_id
- * @property string $name
- * 
- * @property \App\Models\AcCountry $ac_country
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $country_id
+ * @property int                    $language_id
+ * @property string                 $name
+ *
+ * @property \abc\models\AcCountry  $country
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcCountryDescription extends Eloquent
+class CountryDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'country_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'country_id'  => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 
-	public function ac_country()
-	{
-		return $this->belongsTo(\App\Models\AcCountry::class, 'country_id');
-	}
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

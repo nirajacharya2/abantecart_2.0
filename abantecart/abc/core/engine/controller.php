@@ -319,6 +319,10 @@ abstract class AController
 
         return $this->load->model( $rt, $mode );
     }
+    public function includeModel( $file_basename, $mode = '' )
+    {
+        return $this->load->includeModel( $file_basename, $mode );
+    }
 
     // Dispatch new controller to be ran
     protected function dispatch( $dispatch_rt, $args = array( '' ) )

@@ -1,58 +1,53 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcCustomBlock
- * 
- * @property int $custom_block_id
- * @property int $block_id
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \App\Models\AcBlock $ac_block
- * @property \Illuminate\Database\Eloquent\Collection $ac_block_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_custom_lists
  *
- * @package App\Models
+ * @property int                                      $custom_block_id
+ * @property int                                      $block_id
+ * @property \Carbon\Carbon                           $date_added
+ * @property \Carbon\Carbon                           $date_modified
+ *
+ * @property \abc\models\AcBlock                      $block
+ * @property \Illuminate\Database\Eloquent\Collection $block_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $custom_lists
+ *
+ * @package abc\models
  */
-class AcCustomBlock extends Eloquent
+class CustomBlock extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'block_id' => 'int'
-	];
+    protected $casts = [
+        'block_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_block()
-	{
-		return $this->belongsTo(\App\Models\AcBlock::class, 'block_id');
-	}
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
 
-	public function ac_block_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcBlockDescription::class, 'custom_block_id');
-	}
+    public function block_descriptions()
+    {
+        return $this->hasMany(BlockDescription::class, 'custom_block_id');
+    }
 
-	public function ac_custom_lists()
-	{
-		return $this->hasMany(\App\Models\AcCustomList::class, 'custom_block_id');
-	}
+    public function custom_lists()
+    {
+        return $this->hasMany(CustomList::class, 'custom_block_id');
+    }
 }

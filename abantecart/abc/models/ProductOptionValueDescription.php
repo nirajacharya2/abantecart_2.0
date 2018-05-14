@@ -1,52 +1,47 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcProductOptionValueDescription
- * 
- * @property int $product_option_value_id
- * @property int $language_id
- * @property int $product_id
- * @property string $name
- * @property string $grouped_attribute_names
- * 
- * @property \App\Models\AcProduct $ac_product
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $product_option_value_id
+ * @property int                    $language_id
+ * @property int                    $product_id
+ * @property string                 $name
+ * @property string                 $grouped_attribute_names
+ *
+ * @property \abc\models\Product    $product
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcProductOptionValueDescription extends Eloquent
+class ProductOptionValueDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_option_value_id' => 'int',
-		'language_id' => 'int',
-		'product_id' => 'int'
-	];
+    protected $casts = [
+        'product_option_value_id' => 'int',
+        'language_id'             => 'int',
+        'product_id'              => 'int',
+    ];
 
-	protected $fillable = [
-		'product_id',
-		'name',
-		'grouped_attribute_names'
-	];
+    protected $fillable = [
+        'product_id',
+        'name',
+        'grouped_attribute_names',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

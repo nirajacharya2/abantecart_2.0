@@ -1,37 +1,32 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcProductsRelated
- * 
- * @property int $product_id
- * @property int $related_id
- * 
- * @property \App\Models\AcProduct $ac_product
+ * Class ProductsRelated
  *
- * @package App\Models
+ * @property int                 $product_id
+ * @property int                 $related_id
+ *
+ * @property \abc\models\Product $product
+ *
+ * @package abc\models
  */
-class AcProductsRelated extends Eloquent
+class ProductsRelated extends AModelBase
 {
-	protected $table = 'ac_products_related';
-	public $incrementing = false;
-	public $timestamps = false;
+    protected $table = 'products_related';
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_id' => 'int',
-		'related_id' => 'int'
-	];
+    protected $casts = [
+        'product_id' => 'int',
+        'related_id' => 'int',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

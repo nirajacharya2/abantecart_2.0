@@ -1,49 +1,44 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcTaxClassDescription
- * 
- * @property int $tax_class_id
- * @property int $language_id
- * @property string $title
- * @property string $description
- * 
- * @property \App\Models\AcTaxClass $ac_tax_class
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $tax_class_id
+ * @property int                    $language_id
+ * @property string                 $title
+ * @property string                 $description
+ *
+ * @property \abc\models\AcTaxClass $tax_class
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcTaxClassDescription extends Eloquent
+class TaxClassDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'tax_class_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'tax_class_id' => 'int',
+        'language_id'  => 'int',
+    ];
 
-	protected $fillable = [
-		'title',
-		'description'
-	];
+    protected $fillable = [
+        'title',
+        'description',
+    ];
 
-	public function ac_tax_class()
-	{
-		return $this->belongsTo(\App\Models\AcTaxClass::class, 'tax_class_id');
-	}
+    public function tax_class()
+    {
+        return $this->belongsTo(TaxClass::class, 'tax_class_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

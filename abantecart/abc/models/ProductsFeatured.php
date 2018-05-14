@@ -1,36 +1,31 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcProductsFeatured
- * 
- * @property int $product_id
- * 
- * @property \App\Models\AcProduct $ac_product
+ * Class ProductsFeatured
  *
- * @package App\Models
+ * @property int                 $product_id
+ *
+ * @property \abc\models\Product $product
+ *
+ * @package abc\models
  */
-class AcProductsFeatured extends Eloquent
+class ProductsFeatured extends AModelBase
 {
-	protected $table = 'ac_products_featured';
-	protected $primaryKey = 'product_id';
-	public $incrementing = false;
-	public $timestamps = false;
+    protected $table = 'products_featured';
+    protected $primaryKey = 'product_id';
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_id' => 'int'
-	];
+    protected $casts = [
+        'product_id' => 'int',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 }

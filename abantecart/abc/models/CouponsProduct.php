@@ -1,48 +1,43 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcCouponsProduct
- * 
- * @property int $coupon_product_id
- * @property int $coupon_id
- * @property int $product_id
- * 
- * @property \App\Models\AcCoupon $ac_coupon
- * @property \App\Models\AcProduct $ac_product
  *
- * @package App\Models
+ * @property int                  $coupon_product_id
+ * @property int                  $coupon_id
+ * @property int                  $product_id
+ *
+ * @property \abc\models\AcCoupon $coupon
+ * @property \abc\models\Product  $product
+ *
+ * @package abc\models
  */
-class AcCouponsProduct extends Eloquent
+class CouponsProduct extends AModelBase
 {
-	protected $primaryKey = 'coupon_product_id';
-	public $timestamps = false;
+    protected $primaryKey = 'coupon_product_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'coupon_id' => 'int',
-		'product_id' => 'int'
-	];
+    protected $casts = [
+        'coupon_id'  => 'int',
+        'product_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'coupon_id',
-		'product_id'
-	];
+    protected $fillable = [
+        'coupon_id',
+        'product_id',
+    ];
 
-	public function ac_coupon()
-	{
-		return $this->belongsTo(\App\Models\AcCoupon::class, 'coupon_id');
-	}
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class, 'coupon_id');
+    }
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 }

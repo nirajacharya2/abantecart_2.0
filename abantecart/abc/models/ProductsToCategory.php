@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcProductsToCategory
- * 
- * @property int $product_id
- * @property int $category_id
- * 
- * @property \App\Models\AcProduct $ac_product
- * @property \App\Models\AcCategory $ac_category
  *
- * @package App\Models
+ * @property int                    $product_id
+ * @property int                    $category_id
+ *
+ * @property \abc\models\Product    $product
+ * @property \abc\models\AcCategory $category
+ *
+ * @package abc\models
  */
-class AcProductsToCategory extends Eloquent
+class ProductsToCategory extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'product_id' => 'int',
-		'category_id' => 'int'
-	];
+    protected $casts = [
+        'product_id'  => 'int',
+        'category_id' => 'int',
+    ];
 
-	public function ac_product()
-	{
-		return $this->belongsTo(\App\Models\AcProduct::class, 'product_id');
-	}
+    public function product()
+    {
+        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+    }
 
-	public function ac_category()
-	{
-		return $this->belongsTo(\App\Models\AcCategory::class, 'category_id');
-	}
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

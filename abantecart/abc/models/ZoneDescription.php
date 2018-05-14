@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcZoneDescription
- * 
- * @property int $zone_id
- * @property int $language_id
- * @property string $name
- * 
- * @property \App\Models\AcZone $ac_zone
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $zone_id
+ * @property int                    $language_id
+ * @property string                 $name
+ *
+ * @property \abc\models\AcZone     $zone
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcZoneDescription extends Eloquent
+class ZoneDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'zone_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'zone_id'     => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'name'
-	];
+    protected $fillable = [
+        'name',
+    ];
 
-	public function ac_zone()
-	{
-		return $this->belongsTo(\App\Models\AcZone::class, 'zone_id');
-	}
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class, 'zone_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

@@ -1,60 +1,55 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcJob
- * 
- * @property int $job_id
- * @property string $job_name
- * @property int $status
- * @property string $configuration
+ *
+ * @property int            $job_id
+ * @property string         $job_name
+ * @property int            $status
+ * @property string         $configuration
  * @property \Carbon\Carbon $start_time
  * @property \Carbon\Carbon $last_time_run
- * @property int $last_result
- * @property int $actor_type
- * @property int $actor_id
- * @property string $actor_name
+ * @property int            $last_result
+ * @property int            $actor_type
+ * @property int            $actor_id
+ * @property string         $actor_name
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcJob extends Eloquent
+class Job extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'status' => 'int',
-		'last_result' => 'int',
-		'actor_type' => 'int',
-		'actor_id' => 'int'
-	];
+    protected $casts = [
+        'status'      => 'int',
+        'last_result' => 'int',
+        'actor_type'  => 'int',
+        'actor_id'    => 'int',
+    ];
 
-	protected $dates = [
-		'start_time',
-		'last_time_run',
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'start_time',
+        'last_time_run',
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'status',
-		'configuration',
-		'start_time',
-		'last_time_run',
-		'last_result',
-		'actor_type',
-		'actor_id',
-		'actor_name',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'status',
+        'configuration',
+        'start_time',
+        'last_time_run',
+        'last_result',
+        'actor_type',
+        'actor_id',
+        'actor_name',
+        'date_added',
+        'date_modified',
+    ];
 }

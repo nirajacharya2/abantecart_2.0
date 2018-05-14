@@ -1,47 +1,42 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcFormDescription
- * 
- * @property int $form_id
- * @property int $language_id
- * @property string $description
- * 
- * @property \App\Models\AcForm $ac_form
- * @property \App\Models\AcLanguage $ac_language
+ * Class FormDescription
  *
- * @package App\Models
+ * @property int                  $form_id
+ * @property int                  $language_id
+ * @property string               $description
+ *
+ * @property \abc\models\Form     $form
+ * @property \abc\models\Language $language
+ *
+ * @package abc\models
  */
-class AcFormDescription extends Eloquent
+class FormDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'form_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'form_id'     => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'description'
-	];
+    protected $fillable = [
+        'description',
+    ];
 
-	public function ac_form()
-	{
-		return $this->belongsTo(\App\Models\AcForm::class, 'form_id');
-	}
+    public function form()
+    {
+        return $this->belongsTo(Form::class, 'form_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

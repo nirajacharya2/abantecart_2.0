@@ -1,91 +1,86 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcStore
- * 
- * @property int $store_id
- * @property string $name
- * @property string $alias
- * @property int $status
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_categories_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $ac_contents_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $ac_customers
- * @property \Illuminate\Database\Eloquent\Collection $ac_manufacturers_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $ac_orders
- * @property \Illuminate\Database\Eloquent\Collection $ac_products_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $ac_settings
- * @property \Illuminate\Database\Eloquent\Collection $ac_store_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_user_notifications
  *
- * @package App\Models
+ * @property int                                      $store_id
+ * @property string                                   $name
+ * @property string                                   $alias
+ * @property int                                      $status
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $categories_to_stores
+ * @property \Illuminate\Database\Eloquent\Collection $contents_to_stores
+ * @property \Illuminate\Database\Eloquent\Collection $customers
+ * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
+ * @property \Illuminate\Database\Eloquent\Collection $orders
+ * @property \Illuminate\Database\Eloquent\Collection $products_to_stores
+ * @property \Illuminate\Database\Eloquent\Collection $settings
+ * @property \Illuminate\Database\Eloquent\Collection $store_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $user_notifications
+ *
+ * @package abc\models
  */
-class AcStore extends Eloquent
+class Store extends AModelBase
 {
-	protected $primaryKey = 'store_id';
-	public $timestamps = false;
+    protected $primaryKey = 'store_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'status' => 'int'
-	];
+    protected $casts = [
+        'status' => 'int',
+    ];
 
-	protected $fillable = [
-		'name',
-		'alias',
-		'status'
-	];
+    protected $fillable = [
+        'name',
+        'alias',
+        'status',
+    ];
 
-	public function ac_categories_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcCategoriesToStore::class, 'store_id');
-	}
+    public function categories_to_stores()
+    {
+        return $this->hasMany(CategoriesToStore::class, 'store_id');
+    }
 
-	public function ac_contents_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcContentsToStore::class, 'store_id');
-	}
+    public function contents_to_stores()
+    {
+        return $this->hasMany(ContentsToStore::class, 'store_id');
+    }
 
-	public function ac_customers()
-	{
-		return $this->hasMany(\App\Models\AcCustomer::class, 'store_id');
-	}
+    public function customers()
+    {
+        return $this->hasMany(Customer::class, 'store_id');
+    }
 
-	public function ac_manufacturers_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcManufacturersToStore::class, 'store_id');
-	}
+    public function manufacturers_to_stores()
+    {
+        return $this->hasMany(ManufacturersToStore::class, 'store_id');
+    }
 
-	public function ac_orders()
-	{
-		return $this->hasMany(\App\Models\AcOrder::class, 'store_id');
-	}
+    public function orders()
+    {
+        return $this->hasMany(\abc\models\Order::class, 'store_id');
+    }
 
-	public function ac_products_to_stores()
-	{
-		return $this->hasMany(\App\Models\AcProductsToStore::class, 'store_id');
-	}
+    public function products_to_stores()
+    {
+        return $this->hasMany(ProductsToStore::class, 'store_id');
+    }
 
-	public function ac_settings()
-	{
-		return $this->hasMany(\App\Models\AcSetting::class, 'store_id');
-	}
+    public function settings()
+    {
+        return $this->hasMany(Setting::class, 'store_id');
+    }
 
-	public function ac_store_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcStoreDescription::class, 'store_id');
-	}
+    public function store_descriptions()
+    {
+        return $this->hasMany(StoreDescription::class, 'store_id');
+    }
 
-	public function ac_user_notifications()
-	{
-		return $this->hasMany(\App\Models\AcUserNotification::class, 'store_id');
-	}
+    public function user_notifications()
+    {
+        return $this->hasMany(UserNotification::class, 'store_id');
+    }
 }

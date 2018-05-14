@@ -1,43 +1,38 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcUrlAlias
- * 
- * @property int $url_alias_id
- * @property string $query
- * @property string $keyword
- * @property int $language_id
- * 
- * @property \App\Models\AcLanguage $ac_language
  *
- * @package App\Models
+ * @property int                    $url_alias_id
+ * @property string                 $query
+ * @property string                 $keyword
+ * @property int                    $language_id
+ *
+ * @property \abc\models\AcLanguage $language
+ *
+ * @package abc\models
  */
-class AcUrlAlias extends Eloquent
+class UrlAlias extends AModelBase
 {
-	protected $primaryKey = 'url_alias_id';
-	public $timestamps = false;
+    protected $primaryKey = 'url_alias_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'language_id' => 'int',
+    ];
 
-	protected $fillable = [
-		'query',
-		'keyword',
-		'language_id'
-	];
+    protected $fillable = [
+        'query',
+        'keyword',
+        'language_id',
+    ];
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

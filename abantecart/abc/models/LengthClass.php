@@ -1,41 +1,36 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcLengthClass
- * 
- * @property int $length_class_id
- * @property float $value
- * @property string $iso_code
+ *
+ * @property int            $length_class_id
+ * @property float          $value
+ * @property string         $iso_code
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcLengthClass extends Eloquent
+class LengthClass extends AModelBase
 {
-	public $timestamps = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'value' => 'float'
-	];
+    protected $casts = [
+        'value' => 'float',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'value',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'value',
+        'date_added',
+        'date_modified',
+    ];
 }

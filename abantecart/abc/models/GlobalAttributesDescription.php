@@ -1,51 +1,46 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcGlobalAttributesDescription
- * 
- * @property int $attribute_id
- * @property int $language_id
- * @property string $name
- * @property string $placeholder
- * @property string $error_text
- * 
- * @property \App\Models\AcGlobalAttribute $ac_global_attribute
- * @property \App\Models\AcLanguage $ac_language
+ * Class GlobalAttributesDescription
  *
- * @package App\Models
+ * @property int                         $attribute_id
+ * @property int                         $language_id
+ * @property string                      $name
+ * @property string                      $placeholder
+ * @property string                      $error_text
+ *
+ * @property \abc\models\GlobalAttribute $global_attribute
+ * @property \abc\models\Language        $language
+ *
+ * @package abc\models
  */
-class AcGlobalAttributesDescription extends Eloquent
+class GlobalAttributesDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'attribute_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'attribute_id' => 'int',
+        'language_id'  => 'int',
+    ];
 
-	protected $fillable = [
-		'name',
-		'placeholder',
-		'error_text'
-	];
+    protected $fillable = [
+        'name',
+        'placeholder',
+        'error_text',
+    ];
 
-	public function ac_global_attribute()
-	{
-		return $this->belongsTo(\App\Models\AcGlobalAttribute::class, 'attribute_id');
-	}
+    public function global_attribute()
+    {
+        return $this->belongsTo(GlobalAttribute::class, 'attribute_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

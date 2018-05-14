@@ -1,64 +1,59 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcResourceDescription
- * 
- * @property int $resource_id
- * @property int $language_id
- * @property string $name
- * @property string $title
- * @property string $description
- * @property string $resource_path
- * @property string $resource_code
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \App\Models\AcResourceLibrary $ac_resource_library
- * @property \App\Models\AcLanguage $ac_language
+ * Class ResourceDescription
  *
- * @package App\Models
+ * @property int                         $resource_id
+ * @property int                         $language_id
+ * @property string                      $name
+ * @property string                      $title
+ * @property string                      $description
+ * @property string                      $resource_path
+ * @property string                      $resource_code
+ * @property \Carbon\Carbon              $date_added
+ * @property \Carbon\Carbon              $date_modified
+ *
+ * @property \abc\models\ResourceLibrary $resource_library
+ * @property \abc\models\Language        $language
+ *
+ * @package abc\models
  */
-class AcResourceDescription extends Eloquent
+class ResourceDescription extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'resource_id' => 'int',
-		'language_id' => 'int'
-	];
+    protected $casts = [
+        'resource_id' => 'int',
+        'language_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'name',
-		'title',
-		'description',
-		'resource_path',
-		'resource_code',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'name',
+        'title',
+        'description',
+        'resource_path',
+        'resource_code',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_resource_library()
-	{
-		return $this->belongsTo(\App\Models\AcResourceLibrary::class, 'resource_id');
-	}
+    public function resource_library()
+    {
+        return $this->belongsTo(ResourceLibrary::class, 'resource_id');
+    }
 
-	public function ac_language()
-	{
-		return $this->belongsTo(\App\Models\AcLanguage::class, 'language_id');
-	}
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

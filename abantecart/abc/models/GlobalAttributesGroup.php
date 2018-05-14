@@ -1,35 +1,30 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcGlobalAttributesGroup
- * 
+ *
  * @property int $attribute_group_id
  * @property int $sort_order
  * @property int $status
  *
- * @package App\Models
+ * @package abc\models
  */
-class AcGlobalAttributesGroup extends Eloquent
+class GlobalAttributesGroup extends AModelBase
 {
-	protected $primaryKey = 'attribute_group_id';
-	public $timestamps = false;
+    protected $primaryKey = 'attribute_group_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'sort_order' => 'int',
-		'status' => 'int'
-	];
+    protected $casts = [
+        'sort_order' => 'int',
+        'status'     => 'int',
+    ];
 
-	protected $fillable = [
-		'sort_order',
-		'status'
-	];
+    protected $fillable = [
+        'sort_order',
+        'status',
+    ];
 }

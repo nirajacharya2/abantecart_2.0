@@ -1,66 +1,61 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcPage
- * 
- * @property int $page_id
- * @property int $parent_page_id
- * @property string $controller
- * @property string $key_param
- * @property string $key_value
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * 
- * @property \Illuminate\Database\Eloquent\Collection $ac_page_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $ac_pages_forms
- * @property \Illuminate\Database\Eloquent\Collection $ac_pages_layouts
+ * Class Page
  *
- * @package App\Models
+ * @property int                                      $page_id
+ * @property int                                      $parent_page_id
+ * @property string                                   $controller
+ * @property string                                   $key_param
+ * @property string                                   $key_value
+ * @property \Carbon\Carbon                           $date_added
+ * @property \Carbon\Carbon                           $date_modified
+ *
+ * @property \Illuminate\Database\Eloquent\Collection $page_descriptions
+ * @property \Illuminate\Database\Eloquent\Collection $pages_forms
+ * @property \Illuminate\Database\Eloquent\Collection $pages_layouts
+ *
+ * @package abc\models
  */
-class AcPage extends Eloquent
+class Page extends AModelBase
 {
-	protected $primaryKey = 'page_id';
-	public $timestamps = false;
+    protected $primaryKey = 'page_id';
+    public $timestamps = false;
 
-	protected $casts = [
-		'parent_page_id' => 'int'
-	];
+    protected $casts = [
+        'parent_page_id' => 'int',
+    ];
 
-	protected $dates = [
-		'date_added',
-		'date_modified'
-	];
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
-	protected $fillable = [
-		'parent_page_id',
-		'controller',
-		'key_param',
-		'key_value',
-		'date_added',
-		'date_modified'
-	];
+    protected $fillable = [
+        'parent_page_id',
+        'controller',
+        'key_param',
+        'key_value',
+        'date_added',
+        'date_modified',
+    ];
 
-	public function ac_page_descriptions()
-	{
-		return $this->hasMany(\App\Models\AcPageDescription::class, 'page_id');
-	}
+    public function page_descriptions()
+    {
+        return $this->hasMany(PageDescription::class, 'page_id');
+    }
 
-	public function ac_pages_forms()
-	{
-		return $this->hasMany(\App\Models\AcPagesForm::class, 'page_id');
-	}
+    public function pages_forms()
+    {
+        return $this->hasMany(PagesForm::class, 'page_id');
+    }
 
-	public function ac_pages_layouts()
-	{
-		return $this->hasMany(\App\Models\AcPagesLayout::class, 'page_id');
-	}
+    public function pages_layouts()
+    {
+        return $this->hasMany(PagesLayout::class, 'page_id');
+    }
 }

@@ -1,42 +1,37 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
- * Class AcPagesForm
- * 
- * @property int $page_id
- * @property int $form_id
- * 
- * @property \App\Models\AcForm $ac_form
- * @property \App\Models\AcPage $ac_page
+ * Class PagesForm
  *
- * @package App\Models
+ * @property int              $page_id
+ * @property int              $form_id
+ *
+ * @property \abc\models\Form $form
+ * @property \abc\models\Page $page
+ *
+ * @package abc\models
  */
-class AcPagesForm extends Eloquent
+class PagesForm extends AModelBase
 {
-	public $incrementing = false;
-	public $timestamps = false;
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'page_id' => 'int',
-		'form_id' => 'int'
-	];
+    protected $casts = [
+        'page_id' => 'int',
+        'form_id' => 'int',
+    ];
 
-	public function ac_form()
-	{
-		return $this->belongsTo(\App\Models\AcForm::class, 'form_id');
-	}
+    public function form()
+    {
+        return $this->belongsTo(Form::class, 'form_id');
+    }
 
-	public function ac_page()
-	{
-		return $this->belongsTo(\App\Models\AcPage::class, 'page_id');
-	}
+    public function page()
+    {
+        return $this->belongsTo(Page::class, 'page_id');
+    }
 }

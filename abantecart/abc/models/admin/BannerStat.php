@@ -1,54 +1,49 @@
 <?php
 
-/**
- * Created by Reliese Model.
- * Date: Sun, 13 May 2018 01:25:45 +0000.
- */
+namespace abc\models;
 
-namespace App\Models;
-
-use Reliese\Database\Eloquent\Model as Eloquent;
+use abc\models\AModelBase;
 
 /**
  * Class AcBannerStat
- * 
- * @property int $rowid
- * @property int $banner_id
- * @property int $type
- * @property \Carbon\Carbon $time
- * @property int $store_id
- * @property string $user_info
- * 
- * @property \App\Models\AcBanner $ac_banner
  *
- * @package App\Models
+ * @property int                  $rowid
+ * @property int                  $banner_id
+ * @property int                  $type
+ * @property \Carbon\Carbon       $time
+ * @property int                  $store_id
+ * @property string               $user_info
+ *
+ * @property \abc\models\AcBanner $banner
+ *
+ * @package abc\models
  */
-class AcBannerStat extends Eloquent
+class BannerStat extends AModelBase
 {
-	protected $table = 'ac_banner_stat';
-	protected $primaryKey = 'rowid';
-	public $timestamps = false;
+    protected $table = 'banner_stat';
+    protected $primaryKey = 'rowid';
+    public $timestamps = false;
 
-	protected $casts = [
-		'banner_id' => 'int',
-		'type' => 'int',
-		'store_id' => 'int'
-	];
+    protected $casts = [
+        'banner_id' => 'int',
+        'type'      => 'int',
+        'store_id'  => 'int',
+    ];
 
-	protected $dates = [
-		'time'
-	];
+    protected $dates = [
+        'time',
+    ];
 
-	protected $fillable = [
-		'banner_id',
-		'type',
-		'time',
-		'store_id',
-		'user_info'
-	];
+    protected $fillable = [
+        'banner_id',
+        'type',
+        'time',
+        'store_id',
+        'user_info',
+    ];
 
-	public function ac_banner()
-	{
-		return $this->belongsTo(\App\Models\AcBanner::class, 'banner_id');
-	}
+    public function banner()
+    {
+        return $this->belongsTo(Banner::class, 'banner_id');
+    }
 }
