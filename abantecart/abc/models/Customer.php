@@ -2,7 +2,7 @@
 
 namespace abc\models;
 
-use abc\models\AModelBase;
+use abc\core\ABC;
 
 /**
  * Class Customer
@@ -90,26 +90,31 @@ class Customer extends AModelBase
 
     public function store()
     {
+        require_once ABC::env('DIR_MODELS').'Store.php';
         return $this->belongsTo(Store::class, 'store_id');
     }
 
     public function addresses()
     {
+        require_once ABC::env('DIR_MODELS').'Address.php';
         return $this->hasMany(Address::class, 'customer_id');
     }
 
     public function customer_notifications()
     {
+        require_once ABC::env('DIR_MODELS').'CustomerNotification.php';
         return $this->hasMany(CustomerNotification::class, 'customer_id');
     }
 
     public function customer_transactions()
     {
+        require_once ABC::env('DIR_MODELS').'CustomerTransaction.php';
         return $this->hasMany(CustomerTransaction::class, 'customer_id');
     }
 
     public function orders()
     {
+        require_once ABC::env('DIR_MODELS').'Order.php';
         return $this->hasMany(Order::class, 'customer_id');
     }
 }
