@@ -19,31 +19,18 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\engine\Registry;
 use abc\core\lib\AException;
-use abc\core\lib\AExtensionManager;
-use Illuminate\Database\DatabaseManager;
-use Illuminate\Database\Migrations\DatabaseMigrationRepository;
-use Illuminate\Database\Migrations\Migrator;
+
 
 include_once('base/BaseCommand.php');
 
 class Migrate extends BaseCommand
 {
     /**
-     * @var Cache
-     */
-    protected $cache;
-    /**
      * @var Publish
      */
     protected $publish;
     public $results = [];
-
-    public function __construct()
-    {
-        //$this->cache = new Cache();
-    }
 
     public function validate(string $action, array $options)
     {
@@ -79,7 +66,7 @@ class Migrate extends BaseCommand
         parent::run($action, $options);
         $action = !$action ? 'help' : $action;
         if ($action == 'phinx') {
-            $this->_call_phinx($action, $options);
+            $this->callPhinx($action, $options);
         } else {
             $this->help();
         }
@@ -89,6 +76,7 @@ class Migrate extends BaseCommand
      * @param array $options
      *
      * @return bool
+     * @throws AException
      */
     public function help($options = [])
     {
@@ -97,7 +85,7 @@ class Migrate extends BaseCommand
             return $this->getOptionList();
         }
         //show phinx help
-        return $this->_call_phinx('help', $options);
+        return $this->callPhinx('help', $options);
     }
 
     protected function getOptionList()
@@ -116,30 +104,34 @@ class Migrate extends BaseCommand
                         ],
                     ],
                     'example'     => "php abcexec migrate:phinx help\n".
-                        "\t  To create new migration:\n\n\t\t   php abcexec migrate::phinx create YourMigrationClassName\n\n"
-                        ."\t  To run all new migrations:\n\n\t\t   php abcexec migrate::phinx migrate --stage=default\n\n"
-                        ."\t  To rollback last migration:\n\n\t\t   php abcexec migrate::phinx rollback --stage=default\n\n"
-                        ."\t  To rollback all migrations (reset):\n\n\t\t   php abcexec migrate::phinx rollback --target=0 --stage=default\n\n",
+                        "\t  To create new migration:\n\n\t\t   "
+                            ."php abcexec migrate::phinx create YourMigrationClassName\n\n"
+                        ."\t  To run all new migrations:\n\n\t\t   "
+                            ."php abcexec migrate::phinx migrate --stage=default\n\n"
+                        ."\t  To rollback last migration:\n\n\t\t   "
+                            ."php abcexec migrate::phinx rollback --stage=default\n\n"
+                        ."\t  To rollback all migrations (reset):\n\n\t\t   "
+                        ."php abcexec migrate::phinx rollback --target=0 --stage=default\n\n",
 
                 ],
         ];
     }
 
-    protected function _call_phinx($action, $options)
+    protected function callPhinx($action, $options)
     {
         $stage_name = $options['stage'] ? $options['stage'] : 'default';
         $result = $this->createMigrationConfig(['stage' => $stage_name]);
         if (!$result) {
             throw new AException(AC_ERR_LOAD, implode("\n", $this->results)."\n");
         }
-        $this->_adapt_argv($action);
+        $this->adaptArgv($action);
 
         //phinx status -e development
         $app = require ABC::env('DIR_VENDOR').'robmorgan'.DS.'phinx'.DS.'app'.DS.'phinx.php';
         $app->run();
     }
 
-    protected function _adapt_argv($action)
+    protected function adaptArgv($action)
     {
         //do the trick for help output
         $_SERVER['PHP_SELF'] = 'abcexec migrate:phinx';

@@ -297,6 +297,10 @@ class ModelSaleCustomer extends Model
             }
         }
 
+        if(!$upd){
+            return false;
+        }
+
         //get all columns
         //TODO: replace this query with DB-
         $sql = "SELECT COLUMN_NAME
