@@ -40,7 +40,31 @@ class ABC extends ABCBase
 
         //load config and classmap from abc/config and extensions/*/config directories
         self::loadConfig($stage_name);
+        //register autoloader
+        spl_autoload_register([$this, 'loadClass'], false);
 
+    }
+
+    /**
+     * Autoloader for classes from abc namespace
+     *
+     * @param string $className - full class name
+     *
+     * @return bool
+     */
+    function loadClass($className)
+    {
+        if (substr($className, 0, 3) != 'abc') {
+            return false;
+        }
+
+        $path = str_replace('\\', DS, $className);
+        $fileName = ABC::env('DIR_ROOT').$path.'.php';
+        if (is_file($fileName)) {
+            require $fileName;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -159,8 +183,8 @@ class ABC extends ABCBase
      * Static method for saving environment values into static property
      *
      * @param string | array $name
-     * @param mixed|null     $value
-     * @param bool           $override - force set
+     * @param mixed|null $value
+     * @param bool $override - force set
      *
      * @return null
      */
@@ -230,7 +254,7 @@ class ABC extends ABCBase
      *
      * @param string $class_alias
      *
-     * @param array  $args
+     * @param array $args
      *
      * @return bool|string
      * @throws \ReflectionException
