@@ -29,7 +29,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
-use abc\models\Product;
+use abc\models\base\Product;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -59,8 +59,6 @@ class ControllerPagesProductProduct extends AController
         } else {
             $this->routes['cart_rt'] = 'checkout/cart';
         }
-
-        $this->includeModel('Product');
     }
 
     /**
