@@ -218,26 +218,15 @@ class Product extends AModelBase
     {
         $track_status = 0;
         //check product option values
-        $option_values = $this->query()->from('product_options')
-            ->where('product_options.product_id', $this->product_id)
-            ->where('status', 1)
-            ->join(
-                'product_option_values',
-                'product_option_values.product_option_id',
-                '=',
-                'product_options.product_option_id'
-            )->select('product_option_values.product_option_value_id', 'product_option_values.subtract')
-            ->get()->toArray();
-
-        foreach ($option_values as $row) {
-            $track_status += (int)$row['subtract'];
+        foreach ($this->product_option_values as $opv) {
+            $track_status += $opv->subtract;
         }
+
         //if no options - check whole product subtract
-        if (!$track_status && !$option_values) {
+        if (!$track_status && !$this->product_option_values) {
             //check main product
-            $track_status = (int)$this::find($this->product_id)->first()->subtract;
+            $track_status = (int)$this->first()->subtract;
         }
-
         return $track_status;
     }
 
