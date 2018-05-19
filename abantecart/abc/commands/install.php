@@ -625,7 +625,8 @@ return [
          * Level 5 - #4 + intermediate variable
          *
          * */
-        'DEBUG_LEVEL' => 5
+        'DEBUG_LEVEL' => 5,
+        'ENCRYPTION_KEY' => '12345'
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG').'default.config.php', 'w');
