@@ -179,7 +179,7 @@ class ADB
             $output = new \stdClass();
             $output->row = isset($data[0]) ? $data[0] : array();
             //get total rows count for pagination
-            if ($data && is_int(strpos($this->raw_sql_row_count(), $sql))) {
+            if ($data && is_int(strpos($sql,$this->raw_sql_row_count()))) {
                 $output->total_num_rows = $this->sql_get_row_count();
                 $data[0]['total_num_rows'] = $output->total_num_rows;
             }
@@ -272,7 +272,7 @@ class ADB
     {
         if ($this->db_config['driver'] == 'mysql') {
             // turn on total row calculation
-            return $this->orm::raw('SQL_CALC_FOUND_ROWS');
+            return (string)$this->orm::raw('SQL_CALC_FOUND_ROWS');
         }
 
         return false;
