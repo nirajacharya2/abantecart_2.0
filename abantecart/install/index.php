@@ -30,6 +30,7 @@ use abc\core\lib\AException;
 use abc\core\lib\ARequest;
 use abc\core\lib\AResponse;
 
+define('DS', DIRECTORY_SEPARATOR);
 if (version_compare(phpversion(), '7.0.0', '<') == true) {
     exit("Oops... php v7.0.0+  Required for AbanteCart to work properly!\n");
 }
