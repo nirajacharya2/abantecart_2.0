@@ -68,6 +68,12 @@ NOTE: You can run installation for the URL as well. You will need to point your 
 
 
 ## Command line tools:
+Comand line tool is called abcexec and it is located in abc folder. 
+To get a list of possible commands run:
+php abcexec --help
+
+To publish assests to public directory, run
+php abcexec publish:all --stage='default'
 
 
 ## License
