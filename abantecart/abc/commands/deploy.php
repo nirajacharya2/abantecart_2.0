@@ -91,10 +91,15 @@ class Deploy extends BaseCommand
                 if ($action == 'config') {
                     $result = $this->_switch_config($options['stage']);
                 } else {
+                    $this->publish->printStartTime = $this->printStartTime;
+                    $this->publish->printEndTime = $this->printEndTime;
+
                     $this->publish->run($action, $options);
                     $this->results[] = $this->publish->finish($action, $options);
 
                     if (!isset($options['skip-caching'])) {
+                        $this->cache->printStartTime = $this->printStartTime;
+                        $this->cache->printEndTime = $this->printEndTime;
                         echo "Building all cache...\n";
                         $this->cache->run('create', ['build' => 1]);
                         $this->results[] = $this->cache->finish('create', ['build' => 1]);
