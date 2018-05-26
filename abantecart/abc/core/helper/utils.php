@@ -290,10 +290,10 @@ class AHelperUtils extends AHelper
         if (!is_dir($dir)) {
             return array();
         }
-        $dir = rtrim($dir, '\\/');
+        $dir = rtrim($dir, DS);
         $result = array();
 
-        foreach (glob("$dir/*") as $f) {
+        foreach (glob($dir.DS."*") as $f) {
             if (is_dir($f)) { // if is directory
                 $result = array_merge($result, self::getFilesInDir($f, $file_ext));
             } else {
@@ -315,8 +315,8 @@ class AHelperUtils extends AHelper
      */
     public static function getRelativePath($from, $to)
     {
-        $from = explode('/', $from);
-        $to = explode('/', $to);
+        $from = explode(DS, $from);
+        $to = explode(DS, $to);
         foreach ($from as $depth => $dir) {
             if (isset($to[$depth])) {
                 if ($dir === $to[$depth]) {
@@ -326,7 +326,7 @@ class AHelperUtils extends AHelper
                 }
             }
         }
-        $result = implode('/', $to);
+        $result = implode(DS, $to);
 
         return $result;
     }
@@ -384,11 +384,11 @@ class AHelperUtils extends AHelper
      */
     public static function MakeNestedDirs($dir_full_path, $perms = 0755)
     {
-        $dirs = explode('/', $dir_full_path);
+        $dirs = explode(DS, $dir_full_path);
         $dir = '';
         $output = ['result' => true];
         foreach ($dirs as $part) {
-            $dir .= $part.'/';
+            $dir .= $part.DS;
             if (!is_dir($dir) && strlen($dir)) {
                 $result = @mkdir($dir, $perms);
                 if (!$result) {
@@ -406,7 +406,7 @@ class AHelperUtils extends AHelper
     public static function RemoveDirRecursively($dir = '')
     {
         //block calls from storefront
-        if (!ABC::env('IS_ADMIN') || $dir == '../' || $dir == '/' || $dir == './') {
+        if (!ABC::env('IS_ADMIN') || $dir == '..'.DS || $dir == DS || $dir == '.'.DS) {
             return false;
         }
 
@@ -414,10 +414,10 @@ class AHelperUtils extends AHelper
             $objects = scandir($dir);
             foreach ($objects as $obj) {
                 if ($obj != "." && $obj != "..") {
-                    @chmod($dir."/".$obj, 0777);
-                    $err = is_dir($dir."/".$obj) ? self::RemoveDirRecursively($dir."/".$obj) : @unlink($dir."/".$obj);
+                    @chmod($dir.DS.$obj, 0777);
+                    $err = is_dir($dir.DS.$obj) ? self::RemoveDirRecursively($dir.DS.$obj) : @unlink($dir.DS.$obj);
                     if (!$err) {
-                        $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir."/".$obj."'.";
+                        $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir.DS.$obj."'.";
 
                         return [
                             'result'  => false,
@@ -1690,11 +1690,11 @@ class AHelperUtils extends AHelper
     {
 
         if (php_sapi_name() == 'cli') {
-            $user_id = posix_geteuid();
+            $user_id = function_exists('posix_geteuid') ? posix_geteuid() : '1000';
             $output = [
                 'user_type' => 0,
                 'user_id'   => $user_id,
-                'user_name' => posix_getpwuid($user_id)['name'],
+                'user_name' => (function_exists('posix_getpwuid') ? posix_getpwuid($user_id)['name'] : 'system user'),
             ];
         } elseif (ABC::env('IS_ADMIN')) {
             if (!class_exists(Registry::class) || !Registry::getInstance()->get('user')) {
