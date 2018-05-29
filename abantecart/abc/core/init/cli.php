@@ -171,7 +171,9 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
 }
 
 registerClass($registry, 'im', 'AIMManager', [], "\abc\core\lib\AIMManager", []);
-registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+if($registry->has('db')){
+   registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+}
 registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
 
 // Log
