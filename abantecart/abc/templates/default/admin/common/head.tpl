@@ -25,14 +25,13 @@ use abc\core\ABC; ?>
 <link rel="stylesheet" type="text/css" href="vendor/css/bootstrap4c-chosen/dist/css/component-chosen.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/intl-tel-input/build/css/intlTelInput.css" />
 
-<?php
-//TODO: check what is it!
-//	@import url('chosen.bootstrap.css');
-?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/bootstrap.custom.css'); ?>" />
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/abantecart.jquery.ui.css'); ?>" />
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/form.css'); ?>" />
+
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/chosen.bootstrap.css'); ?>" />
+
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 <?php foreach ($styles as $style) { ?>
