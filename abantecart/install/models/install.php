@@ -220,6 +220,8 @@ class ModelInstall extends Model
         }
 
         $install = new Install();
+        $install->printStartTime = false;
+        $install->printEndTime = false;
         $options = $data;
         $options['root_dir'] = ABC::env('DIR_ROOT');
         $options['app_dir'] = ABC::env('DIR_APP');
@@ -232,6 +234,8 @@ class ModelInstall extends Model
 
         //ok. let's publish assets
         $deploy = new Deploy();
+        $deploy->printStartTime = false;
+        $deploy->printEndTime = false;
         $ops = ['all' => 1, 'skip-caching' => 1];
         $errors = $deploy->run('all', $ops);
         if ($errors) {
@@ -244,6 +248,8 @@ class ModelInstall extends Model
     public function RunSQL($data)
     {
         $install = new Install();
+        $install->printStartTime = false;
+        $install->printEndTime = false;
         $options = $data;
         $this->setADB($options);
         $errors = $install->runSQL($options);
@@ -260,6 +266,8 @@ class ModelInstall extends Model
     public function loadDemoData($data)
     {
         $install = new Install();
+        $install->printStartTime = false;
+        $install->printEndTime = false;
         $options = $data;
         $this->setADB($options);
         $errors = $install->loadDemoData($options);

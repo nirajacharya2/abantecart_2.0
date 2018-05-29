@@ -143,15 +143,16 @@ class AAssetPublisher
             $template_dirs = array_map('basename', (array)glob(ABC::env('DIR_TEMPLATES').'*', GLOB_ONLYDIR));
             foreach ($template_dirs as $template) {
                 $dirs = glob(
-                    ABC::env('DIR_TEMPLATES').$template.'/*/assets',
+                    ABC::env('DIR_TEMPLATES').$template.DS.'*'.DS.'assets',
                     GLOB_ONLYDIR
                 );
                 foreach ($dirs as $dir) {
                     $files = AHelperUtils::getFilesInDir($dir);
                     foreach ($files as $file) {
-                        $core_assets[$template][]
-                            = AHelperUtils::getRelativePath(ABC::env('DIR_TEMPLATES')
-                            .$template.'/', $file);
+                        $core_assets[$template][] = AHelperUtils::getRelativePath(
+                            ABC::env('DIR_TEMPLATES').$template.DS,
+                            $file
+                        );
                     }
                 }
             }
@@ -193,12 +194,16 @@ class AAssetPublisher
             foreach ($dirs as $dir) {
                 $files = AHelperUtils::getFilesInDir($dir);
                 foreach ($files as $file) {
-                    $rel_file = AHelperUtils::getRelativePath(ABC::env('DIR_VENDOR')
-                        .'assets'.DS, $file);
+                    $rel_file = AHelperUtils::getRelativePath(
+                        ABC::env('DIR_VENDOR').'assets'.DS,
+                        $file
+                    );
                     $vendor_name = explode(DS, $rel_file);
                     $vendor_name = $vendor_name[0];
-                    $rel_file = AHelperUtils::getRelativePath(ABC::env('DIR_VENDOR')
-                        .'assets'.DS.$vendor_name.DS, $file);
+                    $rel_file = AHelperUtils::getRelativePath(
+                        ABC::env('DIR_VENDOR').'assets'.DS.$vendor_name.DS,
+                        $file
+                    );
                     $vendors_assets[$vendor_name][] = $rel_file;
                 }
             }

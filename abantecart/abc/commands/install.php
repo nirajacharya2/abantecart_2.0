@@ -566,14 +566,21 @@ class Install extends BaseCommand
 
         $result = [];
         //write application config
+
+        $dirs = [
+            'root' => (DS == '\\' ? $options['root_dir'].'\\' : $options['root_dir']),
+            'app' => (DS == '\\' ? $options['app_dir'].'\\' : $options['app_dir']),
+            'public' => (DS == '\\' ? $options['public_dir'].'\\' : $options['public_dir']),
+
+        ];
         $content = <<<EOD
 <?php
 return [
         'APP_NAME' => 'AbanteCart',
         'MIN_PHP_VERSION' => '7.0.0',
-        'DIR_ROOT' => '{$options['root_dir']}',
-        'DIR_APP' => '{$options['app_dir']}',
-        'DIR_PUBLIC' => '{$options['public_dir']}',
+        'DIR_ROOT' => '{$dirs['root']}',
+        'DIR_APP' => '{$dirs['app']}',
+        'DIR_PUBLIC' => '{$dirs['public']}',
         'SERVER_NAME' => '{$server_name}',
         'ADMIN_SECRET' => '{$options['admin_secret']}',
         'UNIQUE_ID' => '{$unique_id}',
