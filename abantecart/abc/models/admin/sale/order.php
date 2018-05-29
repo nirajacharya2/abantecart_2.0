@@ -1236,9 +1236,9 @@ class ModelSaleOrder extends Model
                                         oh.comment,
                                         oh.notify
                                     FROM ".$this->db->table_name("order_history")." oh
-                                    LEFT JOIN ".$this->db->table_name("order_statuses")." os1 ON oh.order_status_id = os1.order_status_id  
+                                    LEFT JOIN ".$this->db->table_name("order_status_descriptions")." os1 ON oh.order_status_id = os1.order_status_id  
                                          AND os1.language_id = '".(int)$language_id."'
-                                    LEFT JOIN ".$this->db->table_name("order_statuses")." os2 ON oh.order_status_id = os2.order_status_id
+                                    LEFT JOIN ".$this->db->table_name("order_status_descriptions")." os2 ON oh.order_status_id = os2.order_status_id
                                          AND os2.language_id = '".(int)$default_language_id."'
                                     WHERE oh.order_id = '".(int)$order_id."' 
                                     ORDER BY oh.date_added");

@@ -53,8 +53,7 @@ if ($logged){ ?>
     <div class="mainpanel">
     <div class="headerbar">
         <a class="menutoggle"><i class="fa fa-bars"></i></a>
-        <select id="global_search" name="search" data-placeholder="<?php echo $search_everywhere; ?>"
-                class="chosen-select form-control aselect ">
+        <select id="global_search" name="search" data-placeholder="<?php echo $search_everywhere; ?>" class="chosen-select form-control aselect ">
             <option></option>
         </select>
         <div id="suggest_popup_dialog"></div>
