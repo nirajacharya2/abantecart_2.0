@@ -12233,7 +12233,7 @@ INSERT INTO `ac_resource_descriptions`
 (`resource_id`, `language_id`, `name`, `title`, `description`, `resource_path`, `resource_code`, `date_added`)
 VALUES
   ( 200,1,'Icon Catalog', '', '', '', '<i class="fa fa-folder-open"></i>&nbsp;', NOW() ),
-  ( 201,1,'Icon Sale', '', '', '', '<i class="fa fa-hand-holding-usd"></i>&nbsp;', NOW() ),
+  ( 201,1,'Icon Sale', '', '', '', '<i class="fa fa-dollar-sign"></i>&nbsp;', NOW() ),
   ( 202,1,'Icon Design', '', '', '', '<i class="fa fa-pencil-alt"></i>&nbsp;', NOW() ),
   ( 203,1,'Icon Extension', '', '', '', '<i class="fa fa-puzzle-piece"></i>&nbsp;', NOW() ),
   ( 204,1,'Icon System', '', '', '', '<i class="fa fa-wrench"></i>&nbsp;', NOW() ),
