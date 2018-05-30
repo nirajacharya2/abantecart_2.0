@@ -20,11 +20,13 @@
 
 namespace abc\core\lib;
 
+use abc\core\ABC;
 use abc\core\engine\AAttribute;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
+use ALibBase;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -42,7 +44,7 @@ if (!class_exists('abc\core\ABC')) {
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property ADownload                                     $download
  */
-class ACart
+class ACart  extends ALibBase
 {
     /**
      * @var Registry
@@ -98,11 +100,12 @@ class ACart
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
      *
+     * @throws \ReflectionException
      */
     public function __construct($registry, &$c_data = null)
     {
         $this->registry = $registry;
-        $this->attribute = new AAttribute('product_option');
+        $this->attribute = ABC::getObjectByAlias('AAttribute',['product_option']);
         $this->customer = $registry->get('customer');
         $this->session = $registry->get('session');
         $this->language = $registry->get('language');
@@ -114,7 +117,7 @@ class ACart
             $this->cust_data =& $c_data;
         }
         //can load promotion if customer_group_id is provided
-        $this->promotion = new APromotion($this->cust_data['customer_group_id']);
+        $this->promotion = ABC::getObjectByAlias('APromotion',[$this->cust_data['customer_group_id']]);
 
         if (!isset($this->cust_data['cart']) || !is_array($this->cust_data['cart'])) {
             $this->cust_data['cart'] = array();
@@ -217,11 +220,12 @@ class ACart
      * Function can be used to get totals and other product information
      * (based on user selection) as it is before getting into cart or after
      *
-     * @param int   $product_id
-     * @param int   $quantity
+     * @param int $product_id
+     * @param int $quantity
      * @param array $options
      *
      * @return array
+     * @throws AException
      */
     public function buildProductDetails($product_id, $quantity = 0, $options = array())
     {
@@ -302,7 +306,9 @@ class ACart
                     'prefix'                  => $option_value_query['prefix'],
                     'price'                   => $option_value_query['price'],
                     'sku'                     => $option_value_query['sku'],
-                    'inventory_quantity'      => ($option_value_query['subtract'] ? (int)$option_value_query['quantity'] : 1000000),
+                    'inventory_quantity'      => (
+                        $option_value_query['subtract'] ? (int)$option_value_query['quantity'] : 1000000
+                    ),
                     'weight'                  => $option_value_query['weight'],
                     'weight_type'             => $option_value_query['weight_type'],
                 );

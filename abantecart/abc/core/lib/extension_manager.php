@@ -409,12 +409,27 @@ class AExtensionManager
                         WHERE  `key` = '".$this->db->escape($extension_txt_id)."'";
                 $this->db->query($sql);
             }
+
+            if($setting_name == 'status') {
+                //update enabled.config.php if presents
+                $enabled_filename = ABC::env('DIR_APP_EXTENSIONS')
+                                    .$extension_txt_id.DS
+                                    .'config'.DS
+                                    .'enabled.config.php';
+                if (is_file($enabled_filename)) {
+                    $stage_name = $value == 1 ? ABC::$stage_name : '';
+                    $content = '<?php return \''.$stage_name.'\';';
+                    file_put_contents($enabled_filename, $content);
+                }
+            }
         }
         // update date of changes in extension list
         $sql = "UPDATE ".$this->db->table_name("extensions")." 
-                        SET `date_modified` = NOW()
-                        WHERE  `key` = '".$this->db->escape($extension_txt_id)."'";
+                SET `date_modified` = NOW()
+                WHERE  `key` = '".$this->db->escape($extension_txt_id)."'";
         $this->db->query($sql);
+
+
         $this->cache->remove('admin_menu');
         $this->cache->remove('settings');
         $this->cache->remove('extensions');
@@ -664,6 +679,15 @@ class AExtensionManager
         $result = $this->validateDependencies($extension_txt_id, $config);
         if (!$result) {
             return false;
+        }
+        $enabled_filename = ABC::env('DIR_APP_EXTENSIONS')
+                                            .$extension_txt_id.DS
+                                            .'config'.DS
+                                            .'enabled.config.php';
+        if (is_file($enabled_filename) && !is_writable($enabled_filename)) {
+            $this->errors[] = 'File '
+                .$enabled_filename
+                .' is not writable for php. Please change permissions ang try again.';
         }
 
         return true;

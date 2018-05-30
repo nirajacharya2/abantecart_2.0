@@ -202,7 +202,7 @@ class AOrderManager extends AOrder
         );
 
         //add cart to registry before working with shipments and payments
-        $this->registry->set('cart', new ACart($this->registry, $customer_data));
+        $this->registry->set('cart', ABC::getObjectByAlias('ACart', [$this->registry, $customer_data]));
         // Tax
         $this->registry->set('tax', new ATax($this->registry, $customer_data));
         $this->tax->setZone($order_info['shipping_country_id'], $order_info['shipping_zone_id']);

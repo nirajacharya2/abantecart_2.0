@@ -20,6 +20,7 @@
 
 namespace abc\core\lib;
 
+use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 
 if (!class_exists('abc\core\ABC')) {
@@ -44,7 +45,7 @@ if (!class_exists('abc\core\ABC')) {
  * @property AIM                                           $im
  *
  */
-class AOrder
+class AOrder extends \ALibBase
 {
     /**
      * @var \abc\core\engine\Registry
@@ -58,6 +59,9 @@ class AOrder
      * @var int
      */
     protected $order_id;
+    /**
+     * @var ACustomer
+     */
     protected $customer;
     protected $order_data;
     /**
@@ -70,6 +74,9 @@ class AOrder
      *
      * @param \abc\core\engine\Registry
      * @param string $order_id
+     *
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function __construct($registry, $order_id = '')
     {
@@ -89,7 +96,7 @@ class AOrder
             $this->customer = $this->registry->get('customer');
             $this->customer_id = $this->customer->getId();
         } else {
-            $this->customer = new ACustomer($registry);
+            $this->customer = ABC::getObjectByAlias('ACustomer',[$registry]);
         }
     }
 
@@ -120,6 +127,8 @@ class AOrder
      *
      * @return array
      * NOTE: method to create an order based on provided data array.
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function buildOrderData($indata)
     {
@@ -306,8 +315,8 @@ class AOrder
 
         if (isset($indata['shipping_method']['title'])) {
             $order_info['shipping_method'] = $indata['shipping_method']['title'];
-            $order_info['shipping_method_key'] =
-                $indata['shipping_method']['id']; // note - id by mask method_txt_id.method_option_id. for ex. default_weight.default_weight_1
+            // note - id by mask method_txt_id.method_option_id. for ex. default_weight.default_weight_1
+            $order_info['shipping_method_key'] = $indata['shipping_method']['id'];
         } else {
             $order_info['shipping_method'] = '';
             $order_info['shipping_method_key'] = '';
@@ -351,7 +360,10 @@ class AOrder
         $order_info['value'] = $this->currency->getValue($this->currency->getCode());
 
         if (isset($indata['coupon'])) {
-            $promotion = new APromotion();
+            /**
+             * @var APromotion $promotion
+             */
+            $promotion = ABC::getObjectByAlias('APromotion');
             $coupon = $promotion->getCouponData($indata['coupon']);
             if ($coupon) {
                 $order_info['coupon_id'] = $coupon['coupon_id'];
