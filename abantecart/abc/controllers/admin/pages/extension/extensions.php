@@ -545,6 +545,7 @@ class ControllerPagesExtensionExtensions extends AController
         //check if we save settings with the post
         if ( $this->request->is_POST() && $this->_validateSettings( $extension, $store_id ) ) {
             $save_data = $this->request->post;
+            $save_data = array_map('trim', $save_data);
             foreach ( $settings as $item ) {
                 if ( ! isset( $this->request->post[$item['name']] ) ) {
                     $save_data[$item['name']] = 0;
