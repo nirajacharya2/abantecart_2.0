@@ -233,7 +233,7 @@ class ModelToolImportProcess extends Model
         $product_id = 0;
         if ($settings['update_col']) {
             $unique_field_index = key($settings['update_col']);
-            if ($unique_field_index) {
+            if (is_numeric($unique_field_index)) {
                 $unique_field = $settings['products_fields'][$unique_field_index];
                 $lookup_value = $this->getValueFromDataMap($unique_field, $record, $settings['products_fields'],
                     $settings['import_col']);
@@ -303,12 +303,13 @@ class ModelToolImportProcess extends Model
             $status = true;
         }
 
+        $product_links = array(
+            'product_store'    => array($store_id)
+        );
         if (count($categories)) {
-            $this->model_catalog_product->updateProductLinks($product_id, array(
-                'product_store'    => array($store_id),
-                'product_category' => array_column($categories, 'category_id'),
-            ));
+            $product_links['product_category'] = array_column($categories, 'category_id');
         }
+        $this->model_catalog_product->updateProductLinks($product_id, $product_links);
 
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
@@ -537,8 +538,8 @@ class ModelToolImportProcess extends Model
         );
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
-            $this->toLog("Error: Missing images data array for {$object_txt_id}.");
-            return false;
+            $this->toLog("Warning: Missing images for {$object_txt_id}.");
+            return true;
         }
 
         $language_list = $this->language->getAvailableLanguages();
