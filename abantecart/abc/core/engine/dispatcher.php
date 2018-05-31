@@ -71,7 +71,9 @@ final class ADispatcher
 
     /**
      * @param string $rt
-     * @param array  $args
+     * @param array $args
+     *
+     * @throws \ReflectionException
      */
     public function __construct($rt, $args = array())
     {
@@ -84,8 +86,10 @@ final class ADispatcher
 
         ADebug::checkpoint('ADispatch: '.$rt.' construct start');
         // We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
-        if ( ! $this->_process_path($rt)) {
-            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. Missing or incorrect controller route path. Possibly, layout block is enabled for disabled or missing extension! '.AHelperUtils::genExecTrace('full');
+        if ( ! $this->processPath($rt)) {
+            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. Missing or incorrect controller route path. '
+                .'Possibly, layout block is enabled for disabled or missing extension! '
+                .AHelperUtils::genExecTrace('full');
             $warning = new AWarning($warning_txt);
             $warning->toLog()->toDebug();
         }
@@ -112,30 +116,30 @@ final class ADispatcher
      *
      * @return bool
      */
-    private function _process_path($rt)
+    private function processPath($rt)
     {
         // Build the path based on the route, example, rt=information/contact/success
         $path_nodes = explode('/', $rt);
 
         //looking for controller in admin/storefront section
         if (ABC::env('INSTALL') === true) {
-            $dir_app = ABC::env('DIR_INSTALL').'controllers/';
+            $dir_app = ABC::env('DIR_INSTALL').'controllers'.DS;
             $namespace = '\install\controllers\\';
-            $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+            $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
             if ( ! $pathfound) {
-                $dir_app = ABC::env('DIR_APP').'controllers/admin/';
+                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'admin'.DS;
                 $namespace = '\abc\controllers\admin\\';
-                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
             }
         } else {
             if (ABC::env('IS_ADMIN') === true) {
-                $dir_app = ABC::env('DIR_APP').'controllers/admin/';
+                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'admin'.DS;
                 $namespace = '\abc\controllers\admin\\';
-                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
             } else {
-                $dir_app = ABC::env('DIR_APP').'controllers/storefront/';
+                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'storefront'.DS;
                 $namespace = '\abc\controllers\storefront\\';
-                $pathfound = $this->_detect_path($dir_app, $namespace, $path_nodes);
+                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
             }
         }
 
@@ -148,7 +152,8 @@ final class ADispatcher
             $this->method = 'main';
         }
 
-        //already found the path, so return. This will optimize performance, and will not allow override core controllers.
+        //already found the path, so return. This will optimize performance,
+        // and will not allow override core controllers.
         if ($pathfound == true) {
             return $pathfound;
         }
@@ -171,14 +176,14 @@ final class ADispatcher
         return $pathfound;
     }
 
-    private function _detect_path($dir_app, $namespace, &$path_nodes)
+    private function detectPath($dir_app, $namespace, &$path_nodes)
     {
         $path_build = '';
         $pathfound = false;
         foreach ($path_nodes as $path_node) {
             $path_build .= $path_node;
             if (is_dir($dir_app.$path_build)) {
-                $path_build .= '/';
+                $path_build .= DS;
                 array_shift($path_nodes);
                 continue;
             }
@@ -269,22 +274,21 @@ final class ADispatcher
             if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1) {
                 $function_stack = 'Parent Controller: '.$parent_controller->rt().' | ';
             }
-
             for ($i = 1; $i < count($backtrace); $i++) {
                 $function_stack .= ' < '.$backtrace[$i]['function'];
             }
             $url = $this->request->server['REQUEST_URI'];
-            $error = new AError('Error: URL: '.$url.' Could not load controller '.$this->controller.'! Call stack: '.$function_stack.'',
-                                AC_ERR_CLASS_CLASS_NOT_EXIST);
+            $error = new AError(
+                'Error: URL: '.$url.' Could not load controller '
+                    .$this->controller.'! Call stack: '.$function_stack.'',
+                AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
-
             return null;
         } else {
             if (empty($this->file) && empty($this->class) || empty($this->method)) {
                 $warning_txt = 'ADispatch: skipping unavailable controller …';
                 $warning = new AWarning($warning_txt);
                 $warning->toDebug();
-
                 return null;
             }
         }

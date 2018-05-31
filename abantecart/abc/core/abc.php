@@ -303,7 +303,7 @@ class ABC extends ABCBase
             exit;
         }
 
-        require __DIR__.DS.'init'.DS.'app.php';
+        $this->init();
         $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 
@@ -335,6 +335,11 @@ class ABC extends ABCBase
         if ($router->getRequestType() == 'page') {
             ADebug::display();
         }
+    }
+
+    public function init()
+    {
+        require __DIR__.DS.'init'.DS.'app.php';
     }
 
     protected function validateApp()

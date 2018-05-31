@@ -26,202 +26,210 @@ use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 /**
  * Class ControllerTaskToolImportProcess
+ *
  * @property \abc\models\admin\ModelToolImportProcess $model_tool_import_process
  */
-class ControllerTaskToolImportProcess extends AController{
-	public $data = array();
-	protected $success_count = 0;
-	protected $failed_count = 0;
+class ControllerTaskToolImportProcess extends AController
+{
+    public $data = array();
+    protected $success_count = 0;
+    protected $failed_count = 0;
 
-	public function processRows(){
-		list($task_id, $step_id, ) = func_get_args();
-		$this->load->library('json');
-		//for aborting process
-		ignore_user_abort(false);
-		session_write_close();
+    public function processRows()
+    {
+        list($task_id, $step_id,) = func_get_args();
+        $this->load->library('json');
+        //for aborting process
+        ignore_user_abort(false);
+        session_write_close();
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->success_count = 0;
-		$this->failed_count = 0;
-		$result = $this->_process($task_id, $step_id);
-		if(!$this->success_count){
-			$result = false;
-		}
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->success_count = 0;
+        $this->failed_count = 0;
+        $result = $this->process($task_id, $step_id);
+        if (!$this->success_count) {
+            $result = false;
+        }
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$output = array('result'  => $result);
-		if($result){
-			$output['message'] = $this->success_count . ' rows processed.';
-			if($this->failed_count){
-				$output['message'] .= $this->failed_count . ' rows processed with error.';
-			}
-		}else{
-			$output['error_text'] = $this->failed_count . ' rows processed with error.';
-		}
-		$this->response->setOutput(AJson::encode( $output ));
-	}
+        $output = array('result' => $result);
+        if ($result) {
+            $output['message'] = $this->success_count.' rows processed.';
+            if ($this->failed_count) {
+                $output['message'] .= $this->failed_count.' rows processed with error.';
+            }
+        } else {
+            $output['error_text'] = $this->failed_count.' rows processed with error.';
+        }
+        $this->response->setOutput(AJson::encode($output));
+    }
 
-	private function _process($task_id, $step_id){
+    private function process($task_id, $step_id)
+    {
 
-		if (!$task_id || !$step_id){
-			$error_text = 'Cannot run task step. Task_id (or step_id) has not been set.';
-			$this->_return_error($error_text);
-		}
+        if (!$task_id || !$step_id) {
+            $error_text = 'Cannot run task step. Task_id (or step_id) has not been set.';
+            $this->_return_error($error_text);
+        }
 
-		$tm = new ATaskManager();
-		$task_info = $tm->getTaskById($task_id);
-		//get setting with import details
-		$import_details = $task_info['settings']['import_data'];
-		$file_format = $import_details['format'];
-		$step_info = $tm->getTaskStep($task_id, $step_id);
-		if(!$step_info['settings'] ){
-			$error_text = "Cannot run task #".$task_id." step #".$step_id.". Can not locate settings for the step.";
-			$this->_return_error($error_text);
-		}
-		//record the start
-		$tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
+        $tm = new ATaskManager();
+        $task_info = $tm->getTaskById($task_id);
+        //get setting with import details
+        $import_details = $task_info['settings']['import_data'];
+        $file_format = $import_details['format'];
+        $step_info = $tm->getTaskStep($task_id, $step_id);
+        if (!$step_info['settings']) {
+            $error_text = "Cannot run task #".$task_id." step #".$step_id.". Can not locate settings for the step.";
+            $this->_return_error($error_text);
+        }
+        //record the start
+        $tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
 
-		$return = array();
-		$start = $step_info['settings']['start'];
-		$stop = $step_info['settings']['stop'];
-		$filename = $import_details['file'];
-		$type = $import_details['table'];
-		$delimiter = $import_details['delimiter'];
+        $return = array();
+        $start = $step_info['settings']['start'];
+        $stop = $step_info['settings']['stop'];
+        $filename = $import_details['file'];
+        $type = $import_details['table'];
+        $delimiter = $import_details['delimiter'];
 
-		$step_result = false;
-		$step_failed_count = 0;
+        $step_result = false;
+        $step_failed_count = 0;
 
-		//read records from source file
-		if($file_format == 'internal'){
-			$a_data = new AData();
-			$a_data->initLogger("import_".$task_id.".txt");
-			//import each row separately
-			for ($i = $start; $i <= $stop; $i++) {
-				$csv_array = $a_data->CSV2ArrayFromFile($filename, array_search($delimiter, $a_data->csvDelimiters),$i,1);
-				if ($csv_array) {
-					$results = $a_data->importData($csv_array);
-				} else {
-					$results = array ('error' => true);
-				}
+        //read records from source file
+        if ($file_format == 'internal') {
+            $a_data = new AData();
+            $a_data->initLogger("import_".$task_id.".txt");
+            //import each row separately
+            for ($i = $start; $i <= $stop; $i++) {
+                $csv_array =
+                    $a_data->CSV2ArrayFromFile($filename, array_search($delimiter, $a_data->csvDelimiters), $i, 1);
+                if ($csv_array) {
+                    $results = $a_data->importData($csv_array);
+                } else {
+                    $results = array('error' => true);
+                }
 
-				if (isset($results['error'])) {
-					$step_failed_count++;
-				} else {
-					$this->success_count++;
-				}
-			}
-		} else {
-			// new import process
-			$records = $this->readFileSeek($filename, $delimiter, '"', $start, ($stop - $start));
-			if (count($records)) {
-				//process column names
-				$columns = $records[0];
+                if (isset($results['error'])) {
+                    $step_failed_count++;
+                } else {
+                    $this->success_count++;
+                }
+            }
+        } else {
+            // new import process
+            $records = $this->readFileSeek($filename, $delimiter, '"', $start, ($stop - $start));
+            if (count($records)) {
+                //process column names
+                $columns = $records[0];
 
-				//skip header and process each record
-				array_shift($records);
-				$this->loadModel('tool/import_process');
-				$step_failed_count = 0;
+                //skip header and process each record
+                array_shift($records);
+                $this->loadModel('tool/import_process');
+                $step_failed_count = 0;
 
-				foreach ($records as $index => $rowData) {
-					$vals = array ();
-					//check if we match row data count to header
+                foreach ($records as $index => $rowData) {
+                    $vals = array();
+                    //check if we match row data count to header
 
-					if (count($rowData) != count($columns)) {
-						//incomplete row. Exit
-						$return[] = "Error: incomplete data in row number: ".$index." with: ".$rowData[0];
-						$step_failed_count++;
-						continue;
-					}
+                    if (count($rowData) != count($columns)) {
+                        //incomplete row. Exit
+                        $return[] = "Error: incomplete data in row number: ".$index." with: ".$rowData[0];
+                        $step_failed_count++;
+                        continue;
+                    }
 
-					for ($i = 0; $i <= count($columns); $i++) {
-						$vals[$columns[$i]] = $rowData[$i];
-					}
+                    for ($i = 0; $i <= count($columns); $i++) {
+                        $vals[$columns[$i]] = $rowData[$i];
+                    }
 
-					//main driver to process data and import
-					$method = "process_" . $type . "_record";
-					try{
-						$result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
-					} catch (AException $e){
-						$result = false;
-					}
+                    //main driver to process data and import
+                    $method = "process_".$type."_record";
+                    try {
+                        $result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
+                    } catch (AException $e) {
+                        $result = false;
+                    }
 
-					if ($result) {
-						$this->success_count++;
-					} else {
-						$step_failed_count++;
-					}
-				}
-			} else {
-				//if nothing to todo
-				return false;
-			}
-		}
+                    if ($result) {
+                        $this->success_count++;
+                    } else {
+                        $step_failed_count++;
+                    }
+                }
+            } else {
+                //if nothing to todo
+                return false;
+            }
+        }
 
-		//update task details
-		$this->failed_count = $this->failed_count + $step_failed_count;
-		$task_settings = $task_info['settings'];
-		if($file_format == 'internal'){
-			$task_settings['logfile'] = "import_".$task_id.".txt";
-		}else {
-			$task_settings['logfile'] = $type . '_import_' . $task_id . '.txt';
-		}
-		$task_settings['success_count'] = (int)$task_info['settings']['success_count'] + $this->success_count;
-		$task_settings['failed_count'] = (int)$task_info['settings']['failed_count'] + $this->failed_count;
+        //update task details
+        $this->failed_count = $this->failed_count + $step_failed_count;
+        $task_settings = $task_info['settings'];
+        if ($file_format == 'internal') {
+            $task_settings['logfile'] = "import_".$task_id.".txt";
+        } else {
+            $task_settings['logfile'] = $type.'_import_'.$task_id.'.txt';
+        }
+        $task_settings['success_count'] = (int)$task_info['settings']['success_count'] + $this->success_count;
+        $task_settings['failed_count'] = (int)$task_info['settings']['failed_count'] + $this->failed_count;
 
-		$tm->updateTaskDetails( $task_id, array('settings' => $task_settings ));
-		//sends always true as result
-		$tm->updateStep($step_id, array ('last_result' => $this->failed_count ? false : true));
-		//all done, clear cache
-		$this->cache->remove('*');
-		//return always true fo import process only. we think one failed row cannot block task
-		return true;
-	}
+        $tm->updateTaskDetails($task_id, array('settings' => $task_settings));
+        //sends always true as result
+        $tm->updateStep($step_id, array('last_result' => $this->failed_count ? false : true));
+        //all done, clear cache
+        $this->cache->remove('*');
+        //return always true fo import process only. we think one failed row cannot block task
+        return true;
+    }
 
-	protected function readFileSeek($source, $delimiter, $enclosure = '"', $line_num = 1, $range = 1){
-		if(!$source){
-			return array();
-		}
+    protected function readFileSeek($source, $delimiter, $enclosure = '"', $line_num = 1, $range = 1)
+    {
+        if (!$source) {
+            return array();
+        }
 
         ini_set('auto_detect_line_endings', true);
-		$fh = fopen($source, 'r');
-		if(!$fh || !is_resource($fh)){
-			return array();
-		}
+        $fh = fopen($source, 'r');
+        if (!$fh || !is_resource($fh)) {
+            return array();
+        }
 
-		$lineNo = 0;
-		$startLine = $line_num;
-		$endLine = $line_num + $range;
-		//always return first line with header
-		$buffer = array(0 => fgetcsv($fh, 0, $delimiter, $enclosure));
-		while (($data = fgetcsv($fh, 0, $delimiter, $enclosure)) !== FALSE) {
-			if ($lineNo >= $startLine) {
-				$buffer[] = $data;
-			}
-			if ($lineNo == $endLine) {
-				break;
-			}
-			$lineNo++;
-		}
-		fclose($fh);
-		return $buffer;
-	}
+        $lineNo = 0;
+        $startLine = $line_num;
+        $endLine = $line_num + $range;
+        //always return first line with header
+        $buffer = array(0 => fgetcsv($fh, 0, $delimiter, $enclosure));
+        while (($data = fgetcsv($fh, 0, $delimiter, $enclosure)) !== false) {
+            if ($lineNo >= $startLine) {
+                $buffer[] = $data;
+            }
+            if ($lineNo == $endLine) {
+                break;
+            }
+            $lineNo++;
+        }
+        fclose($fh);
+        return $buffer;
+    }
 
-	protected function _return_error($error_text){
-		$error = new AError($error_text);
-		$error->toLog()->toDebug();
-		return $error->toJSONResponse('APP_ERROR_402',
-				array ('error_text'  => $error_text,
-					   'reset_value' => true
-				));
-	}
+    protected function _return_error($error_text)
+    {
+        $error = new AError($error_text);
+        $error->toLog()->toDebug();
+        return $error->toJSONResponse('APP_ERROR_402',
+            array(
+                'error_text'  => $error_text,
+                'reset_value' => true,
+            ));
+    }
 
 }

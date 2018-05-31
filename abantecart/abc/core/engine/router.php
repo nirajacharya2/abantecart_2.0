@@ -17,11 +17,13 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\engine;
+
 use abc\core\ABC;
 use abc\core\lib\AException;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -166,7 +168,7 @@ final class ARouter
         if ($this->request_type == 'page') {
             $page_controller = new APage($this->registry);
 
-            if ( ! ABC::env('IS_ADMIN')) {
+            if (!ABC::env('IS_ADMIN')) {
                 //Load required controller for storefront
                 $page_controller->addPreDispatch('common/maintenance');
                 $page_controller->addPreDispatch('common/seo_url');
@@ -187,7 +189,7 @@ final class ARouter
         } else {
             if ($this->request_type == 'response') {
                 $resp_controller = new ATypeResponse($this->registry);
-                if ( ! ABC::env('IS_ADMIN')) {
+                if (!ABC::env('IS_ADMIN')) {
                     //Load required controller for storefront
                     $resp_controller->addPreDispatch('common/maintenance/response');
                 } else {
@@ -200,13 +202,13 @@ final class ARouter
                     // Build the response
                     $resp_controller->build($this->rt);
                 } else {
-				$resp_controller->build('error/ajaxerror/not_found');
+                    $resp_controller->build('error/ajaxerror/not_found');
                 }
 
             } else {
                 if ($this->request_type == 'api') {
                     $api_controller = new AAPI($this->registry);
-                    if ( ! ABC::env('IS_ADMIN')) {
+                    if (!ABC::env('IS_ADMIN')) {
                         //CORS pre-flight request
                         $api_controller->addPreDispatch('api/common/preflight');
                         //validate access
@@ -229,9 +231,9 @@ final class ARouter
                 } else {
                     if ($this->request_type == 'task') {
                         $task_controller = new ATypeTask($this->registry);
-                        if ( ! ABC::env('IS_ADMIN')) { // do not allow to call task controllers from SF-side
+                        if (!ABC::env('IS_ADMIN')) { // do not allow to call task controllers from SF-side
                             $resp_controller = new ATypeResponse($this->registry);
-				            $resp_controller->build('error/ajaxerror/not_found');
+                            $resp_controller->build('error/ajaxerror/not_found');
                         } else {
                             //Load required controller for admin and check authorization
                             $resp_controller = new ATypeResponse($this->registry);
@@ -268,7 +270,8 @@ final class ARouter
     private function _detect_controller($type)
     {
         //looking for controller in admin/storefront section
-        $dir_app = ABC::env('DIR_APP').'controllers/'.(ABC::env('IS_ADMIN') === true ? 'admin/' : 'storefront/').$type.'/';
+        $dir_app =
+            ABC::env('DIR_APP').'controllers/'.(ABC::env('IS_ADMIN') === true ? 'admin/' : 'storefront/').$type.'/';
         $path_nodes = explode('/', $this->rt);
         $path_build = '';
 
