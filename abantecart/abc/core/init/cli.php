@@ -343,9 +343,10 @@ function showHelpPage($script_name = '', $options = [])
  */
 function getExecutor($name, $silent_mode = false)
 {
+
     $run_file = ABC::env('DIR_APP').'commands'.DS.$name.'.php';
     if (!is_file($run_file)) {
-        $error_text = "Error: Script ".$run_file."   not found!";
+        $error_text = "Error: Script ".$run_file." not found!";
         if (!$silent_mode) {
             showError($error_text);
             exit(1);

@@ -77,7 +77,10 @@ class AExceptionHandler
              * @var ALog $log
              */
             try {
-                $log = ABC::getObjectByAlias('ALog');
+                $log = ABC::getObjectByAlias('ALog', [[
+                            'app'      => 'application.log'
+                        ]]);
+
                 $log->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
             } catch (Exception $ex) {
                 throw $e; // throw the original exception

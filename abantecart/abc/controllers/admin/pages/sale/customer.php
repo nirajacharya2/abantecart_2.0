@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
+use abc\models\base\Customer;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -33,6 +34,7 @@ class ControllerPagesSaleCustomer extends AController
 {
     public $data = array();
     public $error = array();
+    protected $model;
 
     /*
      * @var array - key -s field name mask, value - requirement
@@ -391,6 +393,8 @@ class ControllerPagesSaleCustomer extends AController
         $this->data['addresses'] = array();
         $customer_info = array();
         if (AHelperUtils::has_value($customer_id)) {
+            //$this->model = Customer::find($customer_id);
+            //$customer_info = $this->model->toArray();
             $customer_info = $this->model_sale_customer->getCustomer($customer_id);
             $this->data['button_orders_count'] = $this->html->buildElement(
                 array(

@@ -2,6 +2,8 @@
 
 namespace abc\models\base;
 
+use abc\models\AModelBase;
+
 /**
  * Class Customer
  *
@@ -42,6 +44,12 @@ class Customer extends AModelBase
     protected $primaryKey = 'customer_id';
     public $timestamps = false;
 
+    protected $permisions = [
+        self::CLI => ['udpate', 'delete'],
+        self::ADMIN => ['update', 'delete'],
+        self::CUSTOMER => ['save']
+    ];
+
     protected $casts = [
         'store_id'          => 'int',
         'newsletter'        => 'int',
@@ -61,30 +69,30 @@ class Customer extends AModelBase
         'password',
     ];
 
-    protected $fillable = [
-        'store_id',
-        'firstname',
-        'lastname',
-        'loginname',
-        'email',
-        'telephone',
-        'fax',
-        'sms',
-        'salt',
-        'password',
-        'cart',
-        'wishlist',
-        'newsletter',
-        'address_id',
-        'status',
-        'approved',
-        'customer_group_id',
-        'ip',
-        'data',
-        'date_added',
-        'date_modified',
-        'last_login',
-    ];
+//    protected $fillable = [
+//        'store_id',
+//        'firstname',
+//        'lastname',
+//        'loginname',
+//        'email',
+//        'telephone',
+//        'fax',
+//        'sms',
+//        'salt',
+//        'password',
+//        'cart',
+//        'wishlist',
+//        'newsletter',
+//        'address_id',
+//        'status',
+//        'approved',
+//        'customer_group_id',
+//        'ip',
+//        'data',
+//        'date_added',
+//        'date_modified',
+//        'last_login',
+//    ];
 
     public function store()
     {
