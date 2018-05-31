@@ -25,54 +25,33 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+define('DS', DIRECTORY_SEPARATOR);
+require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'abc.php';
+
+
 
 ABC::env('MIN_PHP_VERSION', '7.0.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
     die(ABC::env('MIN_PHP_VERSION')
         .'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
 }
-
-ob_start();
-
-// Load Configuration
-// Real path (operating system web root) to the directory where abantecart is installed
-$root_path = dirname(__FILE__);
-
-// Windows IIS Compatibility  
-if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-    ABC::env('IS_WINDOWS', true);
-    $root_path = str_replace('\\', '/', $root_path);
-}
-
-ABC::env('DIR_ROOT', $root_path);
-ABC::env('DIR_CORE', ABC::env('DIR_ROOT').'/core/');
-
-require_once(ABC::env('DIR_ROOT').'/config/enabled.php');
-
-//set server name for correct email sending
-if (ABC::env('SERVER_NAME')) {
-    putenv("SERVER_NAME=".ABC::env('SERVER_NAME'));
-}
-
-// New Installation
-if (!ABC::env('DATABASES')) {
-    header('Location: install/index.php');
-    exit;
-}
-
 // sign of admin side for controllers run from dispatcher
 $_GET['s'] = ABC::env('ADMIN_SECRET');
-// Load all initial set up
-require_once(ABC::env('DIR_ROOT').'/core/init.php');
-// not needed anymore
-unset($_GET['s']);
+ABC::env('IS_ADMIN',true);
+$app = new ABC();
+$app->init();
+ob_start();
+$registry = \abc\core\engine\Registry::getInstance();
 
 $step_result = null;
 // add to settings API et task_api_key
-$task_api_key = $config->get('task_api_key');
+$settings = $registry->get('config');
+$task_api_key = $settings->get('task_api_key');
 if (!$task_api_key || $task_api_key != (string)$_GET['task_api_key']) {
     exit('Authorize to access.');
 }
+
+
 $mode = (string)$_GET['mode'];
 $task_id = (int)$_GET['task_id'];
 $step_id = (int)$_GET['step_id'];
