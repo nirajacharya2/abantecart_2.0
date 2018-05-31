@@ -57,25 +57,25 @@ class Install extends BaseCommand
         parent::run($action, $options);
         $action = !$action ? 'app' : $action;
         if ($action == 'app') {
-            return $this->_install_app($options);
+            return $this->installApp($options);
         } elseif ($action == 'package') {
-            return $this->_install_package($options);
+            return $this->installPackage($options);
         } elseif ($action == 'extension') {
             if (isset($options['install'])) {
-                return $this->_install_extension($options);
+                return $this->installExtension($options);
             } elseif (isset($options['uninstall'])) {
-                return $this->_uninstall_extension($options);
+                return $this->uninstallExtension($options);
             } elseif (isset($options['remove'])) {
-                return $this->_remove_extension($options);
+                return $this->removeExtension($options);
             }
         }
 
         return ['Error: unknown command called!'];
     }
 
-    protected function _install_app($options)
+    protected function installApp($options)
     {
-        $this->_fill_defaults($options);
+        $this->fillDefaults($options);
 
         //make config-files
         $errors = $this->configure($options);
@@ -90,7 +90,7 @@ class Install extends BaseCommand
             $config = new AConfig($registry, (string)$options['http_server']);
             $registry->set('config', $config);
             $registry->set('language', new ALanguageManager($registry));
-            require_once ABC::env('DIR_CORE').'commands'.DS.'deploy.php';
+            require_once ABC::env('DIR_APP').'commands'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['stage' => 'default'];
             if (isset($options['skip-caching'])) {
@@ -104,7 +104,7 @@ class Install extends BaseCommand
         }
         // deploy assets and generate cache
         if (!$errors) {
-            require_once ABC::env('DIR_CORE').'commands'.DS.'deploy.php';
+            require_once ABC::env('DIR_APP').'commands'.DS.'deploy.php';
             $deploy = new Deploy();
             $ops = ['all' => 1];
             if (isset($options['skip-caching'])) {
@@ -118,7 +118,7 @@ class Install extends BaseCommand
         return $errors;
     }
 
-    protected function _install_package($options)
+    protected function installPackage($options)
     {
         if (!$options) {
             exit('Error: empty options for package installation');
@@ -131,10 +131,12 @@ class Install extends BaseCommand
             $stdin = fopen('php://stdin', 'r');
             $user_response = fgetc($stdin);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                $this->_stop_run(new APackageManager([]), 'Aborted.');
+                $this->stopRun(new APackageManager([]), 'Aborted.');
             }
             @fclose($stdin);
         }
+
+        $temp_dir = $archive_filename = '';
 
         if (isset($options['file'])) {
             $basename = basename($options['file']);
@@ -143,18 +145,18 @@ class Install extends BaseCommand
             if (is_dir($temp_dir)) {
                 $result = $pm->removeDir($temp_dir);
                 if (!$result) {
-                    $this->_stop_run($pm);
+                    $this->stopRun($pm);
                 }
             }
             @mkdir($temp_dir);
             if (!is_dir($temp_dir)) {
-                $this->_stop_run($pm, 'Cannot to create temporary directory '.$temp_dir.'. Please check permissions!');
+                $this->stopRun($pm, 'Cannot to create temporary directory '.$temp_dir.'. Please check permissions!');
             }
             $archive_filename = $options['file'];
         } elseif (isset($options['url'])) {
             $result = $pm->downloadPackageByURL($options['url']);
             if (!$result) {
-                $this->_stop_run($pm);
+                $this->stopRun($pm);
             }
             $temp_dir = $pm->getTempDir();
             $archive_filename = $temp_dir.$pm->package_info['package_name'];
@@ -169,7 +171,7 @@ class Install extends BaseCommand
 
         //1. try to unpack archive
         if (!$pm->unpack($archive_filename, $package_info['tmp_dir'])) {
-            $this->_stop_run($pm);
+            $this->stopRun($pm);
         }
 
         $package_info = $pm->package_info;
@@ -177,13 +179,13 @@ class Install extends BaseCommand
         //get package info from package.xml
         $result = $pm->extractPackageInfo();
         if (!$result) {
-            $this->_stop_run($pm);
+            $this->stopRun($pm);
         }
 
         if (!$package_info['package_content']
             || ($package_info['package_content']['core'] && $package_info['package_content']['extensions'])
         ) {
-            $this->_stop_run($pm, 'Wrong package structure! Cannot find code-file list inside package.xml.');
+            $this->stopRun($pm, 'Wrong package structure! Cannot find code-file list inside package.xml.');
         }
 
         $error_text = '';
@@ -192,7 +194,7 @@ class Install extends BaseCommand
             if ($pm->isCorePackage()) {
                 $error_text = "Error: Can't install package. Your cart version is ".ABC::env('VERSION').". ";
                 $error_text .= "Version(s) ".implode(', ', $pm->package_info['supported_cart_versions'])."  required.";
-                $this->_stop_run($pm, $error_text);
+                $this->stopRun($pm, $error_text);
             } //do pause and ask user in non-forced mode
             elseif (!isset($options['force'])) {
                 //for extensions show command prompt
@@ -200,12 +202,13 @@ class Install extends BaseCommand
                     .ABC::env('VERSION').").\n"
                     ."\tPackage build is specified for AbanteCart version(s) ".implode(', ',
                         $pm->package_info['supported_cart_versions'])."\n"
-                    ."\tThis is not a problem, but if you notice issues or incompatibility, please contact extension developer.\n\n"
+                    ."\tThis is not a problem, but if you notice issues"
+                    ." or incompatibility, please contact extension developer.\n\n"
                     ."Continue? (Y/N) : ";
                 $stdin = fopen('php://stdin', 'r');
                 $user_response = fgetc($stdin);
                 if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                    $this->_stop_run($pm, 'Aborted.');
+                    $this->stopRun($pm, 'Aborted.');
                 }
                 @fclose($stdin);
             }
@@ -214,7 +217,7 @@ class Install extends BaseCommand
         //need to validate destination dirs and files before start
         $result = $pm->validateDestination();
         if (!$result) {
-            $this->_stop_run($pm, "Permission denied for files:\n".implode("\n", $pm->errors));
+            $this->stopRun($pm, "Permission denied for files:\n".implode("\n", $pm->errors));
         }
 
         //ok. let's show license text
@@ -225,7 +228,7 @@ class Install extends BaseCommand
                     $package_info['package_dir']."license.txt",
                 ] as $file
             ) {
-                $this->_show_confirmation($file);
+                $this->showConfirmation($file);
                 echo "\n\n";
             }
         }
@@ -247,7 +250,7 @@ class Install extends BaseCommand
         }
     }
 
-    protected function _show_confirmation($file_path)
+    protected function showConfirmation($file_path)
     {
         if (file_exists($file_path)) {
             $agreement_text = file_get_contents($file_path);
@@ -264,14 +267,14 @@ class Install extends BaseCommand
                 $stdin = fopen('php://stdin', 'r');
                 $user_response = fgetc($stdin);
                 if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                    $this->_stop_run(new APackageManager([]), 'Aborted.');
+                    $this->stopRun(new APackageManager([]), 'Aborted.');
                 }
                 @fclose($stdin);
             }
         }
     }
 
-    protected function _uninstall_extension($options)
+    protected function uninstallExtension($options)
     {
         if (!$options) {
             exit('Error: empty options for uninstall!');
@@ -283,7 +286,7 @@ class Install extends BaseCommand
             $stdin = fopen('php://stdin', 'r');
             $user_response = fgetc($stdin);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                $this->_stop_run($pm, 'Aborted');
+                $this->stopRun($pm, 'Aborted');
             }
             @fclose($stdin);
         }
@@ -300,7 +303,7 @@ class Install extends BaseCommand
         return $result;
     }
 
-    protected function _install_extension($options)
+    protected function installExtension($options)
     {
         if (!$options) {
             exit('Error: empty options for extension install!');
@@ -312,7 +315,7 @@ class Install extends BaseCommand
             $stdin = fopen('php://stdin', 'r');
             $user_response = fgetc($stdin);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                $this->_stop_run($pm, 'Aborted');
+                $this->stopRun($pm, 'Aborted');
             }
             @fclose($stdin);
         }
@@ -330,7 +333,7 @@ class Install extends BaseCommand
         return $result;
     }
 
-    protected function _remove_extension($options)
+    protected function removeExtension($options)
     {
         if (!$options) {
             exit('Error: empty options for extension uninstall!');
@@ -342,7 +345,7 @@ class Install extends BaseCommand
             $stdin = fopen('php://stdin', 'r');
             $user_response = fgetc($stdin);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
-                $this->_stop_run($pm, 'Aborted');
+                $this->stopRun($pm, 'Aborted');
             }
             @fclose($stdin);
         }
@@ -353,7 +356,7 @@ class Install extends BaseCommand
         $opts['force'] = true;
         $all_installed = $em->getInstalled('exts');
         if (in_array($options['extension_text_id'], $all_installed)) {
-            $result = $this->_uninstall_extension($opts);
+            $result = $this->uninstallExtension($opts);
             if (!$result) {
                 return false;
             }
@@ -372,14 +375,14 @@ class Install extends BaseCommand
      *
      * @throws AException
      */
-    protected function _stop_run(APackageManager $pm, $error_text = '')
+    protected function stopRun(APackageManager $pm, $error_text = '')
     {
         $pm->removeDir($pm->package_info['tmp_dir']);
         $error_text = $error_text ? $error_text : implode("\n", $pm->errors);
         throw new AException(AC_ERR_USER_ERROR, $error_text);
     }
 
-    protected function _fill_defaults(array &$options)
+    protected function fillDefaults(array &$options)
     {
         if (!$options) {
             return false;
@@ -415,16 +418,21 @@ class Install extends BaseCommand
     public function finish(string $action, array $options)
     {
         if ($action == 'app') {
-            $this->write("Process complete.");
+            $this->finalMessageAppInstall($options);
         } elseif ($action == 'package') {
             $this->write("Package installation process complete.");
         } elseif ($action == 'extension') {
-            $this->_final_message_extension_install($options);
+            $this->finalMessageExtensionInstall($options);
         }
         parent::finish($action, $options);
     }
 
-    protected function _final_message_app_install($options)
+    protected function finalMessageExtensionInstall()
+    {
+        $this->write("AbanteCart extension installation process complete\n");
+    }
+
+    protected function finalMessageAppInstall($options)
     {
         $this->write("AbanteCart installation process complete\n");
         $this->write("\t"."Store link: ".$options['http_server']."\n");
@@ -447,7 +455,7 @@ class Install extends BaseCommand
         }
     }
 
-    protected function _validate_app_requirements(string $action, array $options)
+    protected function validateAppRequirements()
     {
         $errors = [];
         if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
@@ -957,7 +965,8 @@ EOD;
                             'required'      => 'conditional',
                         ],
                         '--installation_key' => [
-                            'description'   => 'Secret installation Key for remote install from official Abantecart servers',
+                            'description'   => "Secret installation Key for remote install "
+                                                ."from official Abantecart servers",
                             'default_value' => '',
                             'required'      => 'conditional',
                         ],
@@ -992,7 +1001,8 @@ EOD;
                             'required'      => 'conditional',
                         ],
                         '--extension_text_id' => [
-                            'description'   => 'Extension Text ID. Required parameter for uninstall and remove process.',
+                            'description'   => 'Extension Text ID. Required parameter'
+                                                .' for uninstall and remove process.',
                             'default_value' => '',
                             'required'      => true,
                         ],
@@ -1020,16 +1030,18 @@ EOD;
         }
 
         if (!isset($options['package']) && isset($file_config['default']['ADMIN_SECRET'])) {
-            return ["AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"];
+            return [
+                "AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"
+            ];
         }
 
         //check requirements first
-        $errors = $this->_validate_app_requirements('app', $options);
+        $errors = $this->validateAppRequirements();
         if ($errors) {
             return $errors;
         }
 
-        $this->_fill_defaults($options);
+        $this->fillDefaults($options);
         //then check options
         if (!$options['admin_secret']) {
             $errors['admin_secret'] = 'Admin unique name is required!';
@@ -1062,8 +1074,7 @@ EOD;
             $errors['password'] = 'Password required!';
         }
 
-        $pattern =
-            '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
+        $pattern = '/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i';
 
         if (!preg_match($pattern, $options['email'])) {
             $errors['email'] = 'Invalid E-Mail!';
@@ -1098,7 +1109,8 @@ EOD;
         }
 
         if (!is_writable(ABC::env('DIR_CONFIG'))) {
-            $errors['error'] .= 'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '
+            $errors['error'] .=
+                'Error: Could not write to abc/config folder. Please check you have set the correct permissions on: '
                 .ABC::env('DIR_CONFIG')."!\n";
         }
 
@@ -1133,7 +1145,10 @@ EOD;
             && !isset($options['uninstall'])
             && !isset($options['remove'])
         ) {
-            return ['Oops. Have no idea what should i do. Please give me extension_text_id and action (--install, --uninstall or --remove).'];
+            return [
+                'Oops. Have no idea what should i do. '
+                .'Please give me extension_text_id and action (--install, --uninstall or --remove).'
+            ];
         }
 
         $deleting = isset($options['uninstall']) || isset($options['remove']) ? true : false;
@@ -1166,7 +1181,10 @@ EOD;
             && !isset($options['installation_key'])
             && !isset($options['url'])
         ) {
-            return ['Oops. Have no idea what should i do. Please give me file path, url or installation key of package! See help for syntax.'];
+            return [
+                'Oops. Have no idea what should i do. Please give me file path, '
+                .'url or installation key of package! See help for syntax.'
+            ];
         }
 
         //check for file install
