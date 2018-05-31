@@ -83,7 +83,7 @@ try {
 
 // Document
     $document = new ADocument();
-    $document->setBase(ABC::env('HTTP_SERVER'));
+    $document->setBase(ABC::env('HTTPS_SERVER'));
     $registry->set('document', $document);
 
 // Page Controller 
