@@ -37,7 +37,7 @@ if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
 }
 // sign of admin side for controllers run from dispatcher
 $_GET['s'] = ABC::env('ADMIN_SECRET');
-
+ABC::env('IS_ADMIN',true);
 $app = new ABC();
 $app->init();
 ob_start();
@@ -51,7 +51,7 @@ if (!$task_api_key || $task_api_key != (string)$_GET['task_api_key']) {
     exit('Authorize to access.');
 }
 
-ABC::env('IS_ADMIN',true);
+
 $mode = (string)$_GET['mode'];
 $task_id = (int)$_GET['task_id'];
 $step_id = (int)$_GET['step_id'];
