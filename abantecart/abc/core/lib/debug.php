@@ -344,70 +344,71 @@ class ADebug
         $logger->debug(strip_tags(str_replace('<br />', "\r\n", $message)));
     }
 }
-
-class PHPDebugBarEloquentCollector extends \DebugBar\DataCollector\PDO\PDOCollector
-{
-    /**
-     * @var \Illuminate\Database\Capsule\Manager
-     */
-    protected $orm;
-
-    /**
-     * PHPDebugBarEloquentCollector constructor.
-     *
-     * @param \Illuminate\Database\Capsule\Manager $orm
-     */
-    public function __construct(\Illuminate\Database\Capsule\Manager $orm)
+if(class_exists('\DebugBar\DataCollector\PDO\PDOCollector')) {
+    class PHPDebugBarEloquentCollector extends \DebugBar\DataCollector\PDO\PDOCollector
     {
-        $this->orm = $orm;
-        parent::__construct();
-        $this->addConnection($this->getTraceablePdo(), 'Eloquent PDO');
-    }
+        /**
+         * @var \Illuminate\Database\Capsule\Manager
+         */
+        protected $orm;
 
-    /**
-     * @return \Illuminate\Database\Capsule\Manager;
-     */
-    protected function getEloquentCapsule()
-    {
-        return $this->orm;
-    }
+        /**
+         * PHPDebugBarEloquentCollector constructor.
+         *
+         * @param \Illuminate\Database\Capsule\Manager $orm
+         */
+        public function __construct(\Illuminate\Database\Capsule\Manager $orm)
+        {
+            $this->orm = $orm;
+            parent::__construct();
+            $this->addConnection($this->getTraceablePdo(), 'Eloquent PDO');
+        }
 
-    /**
-     * @return \PDO
-     */
-    protected function getEloquentPdo()
-    {
-        return $this->orm::connection()->getPdo();
-    }
+        /**
+         * @return \Illuminate\Database\Capsule\Manager;
+         */
+        protected function getEloquentCapsule()
+        {
+            return $this->orm;
+        }
 
-    /**
-     * @return \DebugBar\DataCollector\PDO\TraceablePDO
-     */
-    protected function getTraceablePdo()
-    {
-        return new \DebugBar\DataCollector\PDO\TraceablePDO($this->getEloquentPdo());
-    }
+        /**
+         * @return \PDO
+         */
+        protected function getEloquentPdo()
+        {
+            return $this->orm::connection()->getPdo();
+        }
 
-    // Override
-    public function getName()
-    {
-        return "eloquent_pdo";
-    }
+        /**
+         * @return \DebugBar\DataCollector\PDO\TraceablePDO
+         */
+        protected function getTraceablePdo()
+        {
+            return new \DebugBar\DataCollector\PDO\TraceablePDO($this->getEloquentPdo());
+        }
 
-    // Override
-    public function getWidgets()
-    {
-        return array(
-            "eloquent"       => array(
-                "icon"    => "inbox",
-                "widget"  => "PhpDebugBar.Widgets.SQLQueriesWidget",
-                "map"     => "eloquent_pdo",
-                "default" => "[]",
-            ),
-            "eloquent:badge" => array(
-                "map"     => "eloquent_pdo.nb_statements",
-                "default" => 0,
-            ),
-        );
+        // Override
+        public function getName()
+        {
+            return "eloquent_pdo";
+        }
+
+        // Override
+        public function getWidgets()
+        {
+            return array(
+                "eloquent"       => array(
+                    "icon"    => "inbox",
+                    "widget"  => "PhpDebugBar.Widgets.SQLQueriesWidget",
+                    "map"     => "eloquent_pdo",
+                    "default" => "[]",
+                ),
+                "eloquent:badge" => array(
+                    "map"     => "eloquent_pdo.nb_statements",
+                    "default" => 0,
+                ),
+            );
+        }
     }
 }

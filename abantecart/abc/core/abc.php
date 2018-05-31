@@ -110,23 +110,16 @@ class ABC extends ABCBase
         );
 
         foreach ($ext_dirs as $cfg_dir) {
-            $cfg_file = $cfg_dir.DS
-                .$stage_name.'.config.php';
+            $file = $cfg_dir.DS.'enabled.config.php';
+            $config = @include($file);
+            //if stage name of extension environment is empty - skip configs
+            if(!$config){ continue; }
+            $cfg_file = $cfg_dir.DS.$config.'.config.php';
 
             if (is_file($cfg_file)) {
                 $ext_config = @include_once($cfg_file);
                 if (is_array($ext_config)) {
                     self::$env += $ext_config;
-                }
-            } //load default stage values
-            elseif ($stage_name != 'default') {
-                $cfg_file = $cfg_dir.DS
-                    .$stage_name.'.config.php';
-                if (is_file($cfg_file)) {
-                    $ext_config = @include_once($cfg_file);
-                    if (is_array($ext_config)) {
-                        self::$env += $ext_config;
-                    }
                 }
             }
         }
@@ -158,20 +151,18 @@ class ABC extends ABCBase
             .'config'.DS
         );
         foreach ($ext_dirs as $cfg_dir) {
+            $file = $cfg_dir.DS.'enabled.config.php';
+            $config = @include($file);
+            //if stage name of extension environment is empty - skip configs
+            if(!$config){ continue; }
+            if ($config) {
+                $stage_name = $config;
+            }
             $classmap_file = $cfg_dir.DS.$stage_name.'.classmap.php';
             if (is_file($classmap_file)) {
                 $ext_classmap = @include_once($classmap_file);
                 if (is_array($ext_classmap)) {
-                    self::$class_map += $ext_classmap;
-                }
-            } //load default stage values
-            elseif ($stage_name != 'default') {
-                $classmap_file = $cfg_dir.DS.$stage_name.'.classmap.php';
-                if (is_file($classmap_file)) {
-                    $ext_classmap = @include_once($classmap_file);
-                    if (is_array($ext_classmap)) {
-                        self::$class_map += $ext_classmap;
-                    }
+                    self::$class_map = array_merge(self::$class_map,$ext_classmap);
                 }
             }
         }
