@@ -34,6 +34,9 @@ class ControllerCommonMenu extends AController
 
     public $data = [];
     protected $permissions = [];
+    protected $groupID;
+    const ROOT = 0;
+    const TOP_ADMIN_GROUP = 1;
 
     public function main()
     {
@@ -42,14 +45,16 @@ class ControllerCommonMenu extends AController
         $menu_items = $menu->getRows();
 
         $this->loadModel('user/user_group');
-        $user_group_id = (int)$this->user->getUserGroupId();
-        $user_group = $this->model_user_user_group->getUserGroup($user_group_id);
-        $permissions = $this->permissions = $user_group['permission'];
+        $this->groupID = (int)$this->user->getUserGroupId();
+        if ($this->groupID !== self::TOP_ADMIN_GROUP) {
+            $user_group = $this->model_user_user_group->getUserGroup($this->groupID);
+            $this->permissions = $user_group['permission'];
+        }
 
         foreach ($menu_items as $item) {
             $rt = $item['item_url'];
-            if ($user_group_id !== 1 && $permissions !== false
-                && (!isset($permissions['access'][$rt]) || !$permissions['access'][$rt])
+            if ($this->groupID !== self::TOP_ADMIN_GROUP && $this->permissions !== false
+                && (!isset($this->permissions['access'][$rt]) || !$this->permissions['access'][$rt])
                 && !empty($item['parent_id'])
             ) {
                 continue;
@@ -80,8 +85,8 @@ class ControllerCommonMenu extends AController
                     if (strpos($item ['item_url'], 'http') === false) {
                         //hide item without access perms
                         $rt = $item['item_url'];
-                        if ($user_group_id !== 1 && $permissions !== false
-                            && (!in_array($rt, $permissions['access'][$rt]) || !$permissions['access'][$rt])
+                        if ($this->groupID !== 1 && $this->permissions !== false
+                            && (!in_array($rt, $this->permissions['access'][$rt]) || !$this->permissions['access'][$rt])
                             && !empty($item['parent_id'])
                         ) {
                             continue;
@@ -106,7 +111,7 @@ class ControllerCommonMenu extends AController
             'menu_html',
             AHelperHtml::renderAdminMenu(
                 $this->buildMenuArray($this->data['menu_items']),
-                0,
+                self::ROOT,
                 $this->request->get_or_post('rt')
             )
         );
@@ -140,6 +145,7 @@ class ControllerCommonMenu extends AController
                 'text' => $this->language->get('text_dashboard'),
             ),
         );
+
         return array_merge($dashboard, $this->getChildItems('', $menu_items));
     }
 
@@ -184,8 +190,9 @@ class ControllerCommonMenu extends AController
 
                 if ($children) {
                     $temp['children'] = $children;
-                } //skip items with no access
-                elseif (!$this->permissions['access'][$rt]) {
+                }
+                elseif ($this->groupID !== self::TOP_ADMIN_GROUP && !$this->permissions['access'][$rt]) {
+                    //skip menu with no permission to access
                     continue;
                 }
 
