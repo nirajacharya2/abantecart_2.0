@@ -52,13 +52,6 @@ class ControllerCommonMenu extends AController
         }
 
         foreach ($menu_items as $item) {
-            $rt = $item['item_url'];
-            if ($this->groupID !== self::TOP_ADMIN_GROUP && $this->permissions !== false
-                && (!isset($this->permissions['access'][$rt]) || !$this->permissions['access'][$rt])
-                && !empty($item['parent_id'])
-            ) {
-                continue;
-            }
             $this->data['menu_items'][] = $item;
         }
 
@@ -83,15 +76,6 @@ class ControllerCommonMenu extends AController
                     continue;
                 } else { // if all fine - loads language of extension for menu item text show
                     if (strpos($item ['item_url'], 'http') === false) {
-                        //hide item without access perms
-                        $rt = $item['item_url'];
-                        if ($this->groupID !== 1 && $this->permissions !== false
-                            && (!in_array($rt, $this->permissions['access'][$rt]) || !$this->permissions['access'][$rt])
-                            && !empty($item['parent_id'])
-                        ) {
-                            continue;
-                        }
-
                         $this->loadLanguage($item ['item_id'].'/'.$item ['item_id'], 'silent');
                         $item['language'] = $item ['item_id'].'/'.$item ['item_id'];
                     }
@@ -100,6 +84,7 @@ class ControllerCommonMenu extends AController
 
             $tmp [$item ['parent_id']] [$item ['sort_order'] + $offset] = $item;
         }
+
         $this->data['menu_items'] = array();
         foreach ($tmp as $item) {
             ksort($item);
@@ -192,7 +177,7 @@ class ControllerCommonMenu extends AController
                     $temp['children'] = $children;
                 }
                 elseif ($this->groupID !== self::TOP_ADMIN_GROUP && !$this->permissions['access'][$rt]) {
-                    //skip menu with no permission to access
+                    //skip top menus with no access permission
                     continue;
                 }
 
