@@ -24,7 +24,7 @@ use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -37,11 +37,11 @@ class ModelCatalogProduct extends Model
      */
     public function getProduct($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
         $query = $this->db->query(
-                "SELECT DISTINCT *,
+            "SELECT DISTINCT *,
                         pd.name AS name,
                         m.name AS manufacturer,
                         ss.name AS stock_status,
@@ -67,28 +67,28 @@ class ModelCatalogProduct extends Model
      *
      * @return int
      */
-    public function isStockTrackable( $product_id )
+    public function isStockTrackable($product_id)
     {
-        if ( ! (int)$product_id ) {
+        if (!(int)$product_id) {
             return 0;
         }
         $track_status = 0;
         //check product option values
-        $query = $this->db->query( "SELECT pov.product_option_value_id, pov.subtract AS subtract
-                                    FROM ".$this->db->table_name( "product_options" )." po
-                                    LEFT JOIN ".$this->db->table_name( "product_option_values" )." pov
+        $query = $this->db->query("SELECT pov.product_option_value_id, pov.subtract AS subtract
+                                    FROM ".$this->db->table_name("product_options")." po
+                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
                                         ON (po.product_option_id = pov.product_option_id)
-                                    WHERE po.product_id = '".(int)$product_id."'  AND po.status = 1" );
+                                    WHERE po.product_id = '".(int)$product_id."'  AND po.status = 1");
 
-        foreach ( $query->rows as $row ) {
+        foreach ($query->rows as $row) {
             $track_status += (int)$row['subtract'];
         }
         //if no options - check whole product subtract
-        if ( ! $track_status && ! $query->num_rows ) {
+        if (!$track_status && !$query->num_rows) {
             //check main product
-            $query = $this->db->query( "SELECT subtract
-                                       FROM ".$this->db->table_name( "products" )." p
-                                       WHERE p.product_id = '".(int)$product_id."'" );
+            $query = $this->db->query("SELECT subtract
+                                       FROM ".$this->db->table_name("products")." p
+                                       WHERE p.product_id = '".(int)$product_id."'");
 
             $track_status = (int)$query->row['subtract'];
         }
@@ -107,20 +107,20 @@ class ModelCatalogProduct extends Model
      */
     public function getProductsStockInfo($product_ids = array())
     {
-        if ( ! $product_ids || ! is_array($product_ids)) {
+        if (!$product_ids || !is_array($product_ids)) {
             return array();
         }
 
         $ids = array();
         foreach ($product_ids as $id) {
             $id = (int)$id;
-            if ( ! $id) {
+            if (!$id) {
                 continue;
             }
             $ids[] = $id;
         }
 
-        if ( ! $ids) {
+        if (!$ids) {
             return array();
         }
 
@@ -164,7 +164,7 @@ class ModelCatalogProduct extends Model
      */
     public function hasAnyStock($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return 0;
         }
         $total_quantity = 0;
@@ -178,7 +178,7 @@ class ModelCatalogProduct extends Model
             $notrack_qnt = 0;
             foreach ($query->rows as $row) {
                 //if tracking of stock disabled - set quantity as big
-                if ( ! $row['subtract']) {
+                if (!$row['subtract']) {
                     $notrack_qnt += 10000000;
                     continue;
                 }
@@ -201,7 +201,7 @@ class ModelCatalogProduct extends Model
 
     public function getProductDataForCart($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
         $query = $this->db->query(
@@ -276,7 +276,7 @@ class ModelCatalogProduct extends Model
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
 
-            $sql  = "SELECT *,
+            $sql = "SELECT *,
                             p.product_id,
                             ".$this->_sql_final_price_string().",
                             pd.name AS name, 
@@ -371,7 +371,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductsByManufacturerId($manufacturer_id, $sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 20)
     {
-        if ( ! (int)$manufacturer_id) {
+        if (!(int)$manufacturer_id) {
             return array();
         }
         $sql = "SELECT *, p.product_id,
@@ -566,7 +566,7 @@ class ModelCatalogProduct extends Model
                 $tags_str[] = " LCASE(pt.tag) = '".$this->db->escape(mb_strtolower($tag))."' ";
             }
 
-            if ( ! $description) {
+            if (!$description) {
                 $sql .= " AND (LCASE(pd.name) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%' OR ".implode(' OR ', $tags_str);
             } else {
                 $sql .= " AND (LCASE(pd.name) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%'
@@ -574,7 +574,7 @@ class ModelCatalogProduct extends Model
                                 OR LCASE(pd.description) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%'";
             }
 
-            if ( ! $model) {
+            if (!$model) {
                 $sql .= ")";
             } else {
                 $sql .= " OR LCASE(p.model) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%')";
@@ -671,13 +671,13 @@ class ModelCatalogProduct extends Model
                 $tags_str[] = " LCASE(pt.tag) = '".$this->db->escape(mb_strtolower($tag))."' ";
             }
 
-            if ( ! $description) {
+            if (!$description) {
                 $sql .= " AND (LCASE(pd.name) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%' OR ".implode(' OR ', $tags_str);
             } else {
                 $sql .= " AND (LCASE(pd.name) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%' OR ".implode(' OR ', $tags_str)." OR LCASE(pd.description) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%'";
             }
 
-            if ( ! $model) {
+            if (!$model) {
                 $sql .= ")";
             } else {
                 $sql .= " OR LCASE(p.model) LIKE '%".$this->db->escape(mb_strtolower($keyword), true)."%')";
@@ -804,6 +804,7 @@ class ModelCatalogProduct extends Model
                     m.name AS manufacturer,
                     ss.name AS stock,
                     pd.blurb,
+                    ".$this->_sql_final_price_string().",
                     ".$this->_sql_avg_rating_string().",
                     ".$this->_sql_review_count_string()."
                     ".$this->_sql_join_string()."
@@ -1025,7 +1026,7 @@ class ModelCatalogProduct extends Model
                 FROM ".$this->db->table_name("product_options")."
                 WHERE status=1 AND product_id = '".(int)$product_id."'
                     AND product_option_id = '".(int)$option_id."' ");
-        if ( ! $product_option->row['group_id']) {
+        if (!$product_option->row['group_id']) {
             return array();
         }
         //get all option values of group
@@ -1083,7 +1084,7 @@ class ModelCatalogProduct extends Model
      */
     public function hasAnyOptions($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return null;
         }
         $query = $this->db->query(
@@ -1105,7 +1106,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductOptions($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
         $language_id = (int)$this->config->get('storefront_language_id');
@@ -1151,8 +1152,8 @@ class ModelCatalogProduct extends Model
                             );
 
                             // ignore option value with 0 quantity and disabled subtract
-                            if (( ! $product_option_value['subtract'])
-                                || ( ! $this->config->get('config_nostock_autodisable'))
+                            if ((!$product_option_value['subtract'])
+                                || (!$this->config->get('config_nostock_autodisable'))
                                 || ($product_option_value['quantity'] && $product_option_value['subtract'])
                             ) {
                                 $product_option_value_data[$product_option_value['product_option_value_id']] = array(
@@ -1217,7 +1218,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductOption($product_id, $product_option_id)
     {
-        if ( ! (int)$product_id || ! (int)$product_option_id) {
+        if (!(int)$product_id || !(int)$product_option_id) {
             return array();
         }
 
@@ -1241,7 +1242,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductOptionValues($product_id, $product_option_id)
     {
-        if ( ! (int)$product_id || ! (int)$product_option_id) {
+        if (!(int)$product_id || !(int)$product_option_id) {
             return array();
         }
         $query = $this->db->query(
@@ -1262,7 +1263,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductOptionValue($product_id, $product_option_value_id)
     {
-        if ( ! (int)$product_id || ! (int)$product_option_value_id) {
+        if (!(int)$product_id || !(int)$product_option_value_id) {
             return array();
         }
 
@@ -1312,7 +1313,7 @@ class ModelCatalogProduct extends Model
                     }
                 }
 
-                if ($option['regexp_pattern'] && ! preg_match($option['regexp_pattern'], (string)$input_options[$option['product_option_id']])) {
+                if ($option['regexp_pattern'] && !preg_match($option['regexp_pattern'], (string)$input_options[$option['product_option_id']])) {
                     $errors[] = $option['name'].': '.$option['error_text'];
                 }
 
@@ -1329,7 +1330,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductTags($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
         $query = $this->db->query("SELECT *
@@ -1347,7 +1348,7 @@ class ModelCatalogProduct extends Model
      */
     public function getProductDownloads($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
 
@@ -1371,7 +1372,7 @@ class ModelCatalogProduct extends Model
     public function getProductRelated($product_id)
     {
         $product_data = array();
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
 
@@ -1408,7 +1409,7 @@ class ModelCatalogProduct extends Model
      */
     public function getCategories($product_id)
     {
-        if ( ! (int)$product_id) {
+        if (!(int)$product_id) {
             return array();
         }
         $query = $this->db->query("SELECT *
@@ -1481,7 +1482,7 @@ class ModelCatalogProduct extends Model
 
     public function getProductsAllInfo($products = array())
     {
-        if ( ! $products) {
+        if (!$products) {
             return false;
         }
         foreach ($products as &$id) {
@@ -1622,7 +1623,7 @@ class ModelCatalogProduct extends Model
     public function getProducts($data = array(), $mode = 'default')
     {
 
-        if ( ! empty($data['content_language_id'])) {
+        if (!empty($data['content_language_id'])) {
             $language_id = ( int )$data['content_language_id'];
         } else {
             $language_id = (int)$this->config->get('storefront_language_id');
@@ -1651,22 +1652,22 @@ class ModelCatalogProduct extends Model
                                 ".$this->_sql_join_string();
             }
 
-            if (isset($filter['category_id']) && ! is_null($filter['category_id'])) {
+            if (isset($filter['category_id']) && !is_null($filter['category_id'])) {
                 $sql .= " LEFT JOIN ".$this->db->table_name("products_to_categories")." p2c ON (p.product_id = p2c.product_id)";
             }
             $sql .= " WHERE pd.language_id = '".$language_id."' AND p.date_available <= NOW() AND p.status = '1' ";
 
-            if ( ! empty($data['subsql_filter'])) {
+            if (!empty($data['subsql_filter'])) {
                 $sql .= " AND ".$data['subsql_filter'];
             }
 
-            if (isset($filter['match']) && ! is_null($filter['match'])) {
+            if (isset($filter['match']) && !is_null($filter['match'])) {
                 $match = $filter['match'];
             } else {
                 $match = 'exact';
             }
 
-            if (isset($filter['keyword']) && ! is_null($filter['keyword'])) {
+            if (isset($filter['keyword']) && !is_null($filter['keyword'])) {
                 $keywords = explode(' ', $filter['keyword']);
 
                 if ($match == 'any') {
@@ -1701,20 +1702,20 @@ class ModelCatalogProduct extends Model
                 }
             }
 
-            if (isset($filter['pfrom']) && ! is_null($filter['pfrom'])) {
+            if (isset($filter['pfrom']) && !is_null($filter['pfrom'])) {
                 $sql .= " AND p.price >= '".(float)$filter['pfrom']."'";
             }
-            if (isset($filter['pto']) && ! is_null($filter['pto'])) {
+            if (isset($filter['pto']) && !is_null($filter['pto'])) {
                 $sql .= " AND p.price <= '".(float)$filter['pto']."'";
             }
-            if (isset($filter['category_id']) && ! is_null($filter['category_id'])) {
+            if (isset($filter['category_id']) && !is_null($filter['category_id'])) {
                 $sql .= " AND p2c.category_id = '".(int)$filter['category_id']."'";
             }
-            if (isset($filter['manufacturer_id']) && ! is_null($filter['manufacturer_id'])) {
+            if (isset($filter['manufacturer_id']) && !is_null($filter['manufacturer_id'])) {
                 $sql .= " AND p.manufacturer_id = '".(int)$filter['manufacturer_id']."'";
             }
 
-            if (isset($filter['status']) && ! is_null($filter['status'])) {
+            if (isset($filter['status']) && !is_null($filter['status'])) {
                 $sql .= " AND p.status = '".(int)$filter['status']."'";
             }
 
