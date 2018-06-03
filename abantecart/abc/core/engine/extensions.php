@@ -857,7 +857,7 @@ class ExtensionsApi
                 $class = '\abc\core\extension\Extension'.$class_alias;
                 if (class_exists($class)) {
                     $hook_extensions[] = $class;
-                }elseif(class_exists('\\Extension'.$class_alias)){
+                } elseif (class_exists('\\Extension'.$class_alias)) {
 
                     $warning = new AWarning(
                         'Class '.$class.' not found but class '
@@ -976,7 +976,6 @@ class ExtensionsApi
         }
 
         $section = trim($ext_section, '/');
-
         //list only enabled extensions or all depending on status flag
         $extensions_lookup_list = array();
         if ($ext_status == 'enabled') {
@@ -1002,8 +1001,7 @@ class ExtensionsApi
 
             if ($ext_status == 'all'
                 || (is_array($source[$ext][$section])
-                    && in_array($route,
-                        $source[$ext][$section]))
+                    && in_array($route, $source[$ext][$section]))
             ) {
                 if (is_file($f)) {
                     return array(
@@ -1576,7 +1574,7 @@ class ExtensionUtils
                         'result' => false,
                         'errors' => array(
                             'pattern' => 'Error: Cannot to validate data by validate.php file. '
-                                        .'Function returns incorrect formatted data.'
+                                .'Function returns incorrect formatted data.',
                         ),
                     );
                 }

@@ -131,6 +131,7 @@ final class ALoader
                 return $this->registry->get($obj_name);
             } else {
                 if ($mode != 'silent') {
+                    exit;
                     $backtrace = debug_backtrace();
                     $file_info = $backtrace[0]['file'].' on line '.$backtrace[0]['line'];
                     throw new AException(
