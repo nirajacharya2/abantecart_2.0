@@ -133,8 +133,10 @@ final class ALoader
                 if ($mode != 'silent') {
                     $backtrace = debug_backtrace();
                     $file_info = $backtrace[0]['file'].' on line '.$backtrace[0]['line'];
-                    throw new AException(AC_ERR_LOAD,
-                        'Error: Could not load model '.$model.' (file '.$file.')  from '.$file_info);
+                    throw new AException(
+                        'Error: Could not load model '.$model.' (file '.$file.')  from '.$file_info,
+                        AC_ERR_LOAD
+                    );
                 } else {
                     return false;
                 }
