@@ -52,23 +52,23 @@ echo $tabs;
 	
 	<label class="h4 heading"><?php echo ${'tab_' . $section}; ?></label>
 	<?php foreach ($settings as $name => $field) {
-	if (is_integer($field['note']) || $field['value']->type=='hidden') {
-		echo $field['value'];
-		continue;
-	}
+		if (is_integer($field['note']) || $field['value']->type=='hidden') {
+			echo $field['value'];
+			continue;
+		}
 
-	//Logic to calculate fields width
-	$widthcasses = "col-sm-7";
-	if (is_int(stripos($field['value']->style, 'large-field'))) {
+		//Logic to calculate fields width
 		$widthcasses = "col-sm-7";
-	} else if (is_int(stripos($field['value']->style, 'medium-field')) || is_int(stripos($field['value']->style, 'date'))) {
-		$widthcasses = "col-sm-5";
-	} else if (is_int(stripos($field['value']->style, 'small-field')) || is_int(stripos($field['value']->style, 'btn_switch'))) {
-		$widthcasses = "col-sm-3";
-	} else if (is_int(stripos($field['value']->style, 'tiny-field'))) {
-		$widthcasses = "col-sm-2";
-	}
-	$widthcasses .= " col-xs-12";
+		if (is_int(stripos($field['value']->style, 'large-field'))) {
+			$widthcasses = "col-sm-7";
+		} else if (is_int(stripos($field['value']->style, 'medium-field')) || is_int(stripos($field['value']->style, 'date'))) {
+			$widthcasses = "col-sm-5";
+		} else if (is_int(stripos($field['value']->style, 'small-field')) || is_int(stripos($field['value']->style, 'btn_switch'))) {
+			$widthcasses = "col-sm-3";
+		} else if (is_int(stripos($field['value']->style, 'tiny-field'))) {
+			$widthcasses = "col-sm-2";
+		}
+		$widthcasses .= " col-xs-12";
 	?>
 	<div class="form-group <?php if (!empty($error[$name])) {
 		echo "has-error";

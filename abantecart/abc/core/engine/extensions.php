@@ -1465,6 +1465,8 @@ class ExtensionUtils
                     'resource_type' => (string)$item->resource_type,
                     //to use few datasources inside the same form-element such as html_template
                     'data_source'   => (array)$item->variants->data_source,
+                    'model_rt'      => (string)$item->variants->data_source->model_rt,
+                    'method'        => (string)$item->variants->data_source->method,
                     'field1'        => (string)$item->variants->fields->field[0],
                     'field2'        => (string)$item->variants->fields->field[1],
                     'template'      => (string)$item->template,
