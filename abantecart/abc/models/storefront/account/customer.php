@@ -525,7 +525,7 @@ class ModelAccountCustomer extends Model
     {
         //assuming that data is not encrypted. Can not call these otherwise
         $query = $this->db->query( "SELECT *
-                                    FROM ".$this->db->table( "customers" )."
+                                    FROM ".$this->db->table_name( "customers" )."
                                     WHERE LOWER(`email`) = LOWER('".$this->db->escape( $email )."')" );
         $output = $this->dcrypt->decrypt_data( $query->row, 'customers' );
         if ( $output['data'] ) {

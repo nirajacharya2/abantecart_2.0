@@ -201,13 +201,13 @@ class ModelToolMigration extends Model {
 
 		/* for future
 		 * if ($this->session->data['migration']['migrate_orders']) {
-			$sql .= "DELETE FROM `" . $this->db->table("orders")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_downloads")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_history")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_options")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_products")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_statuses")."`;\n";
-			$sql .= "DELETE FROM `" . $this->db->table("order_totals")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("orders")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_downloads")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_history")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_options")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_products")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_statuses")."`;\n";
+			$sql .= "DELETE FROM `" . $this->db->table_name("order_totals")."`;\n";
 		}*/
 
 		$this->import($sql);

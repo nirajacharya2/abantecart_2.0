@@ -25,13 +25,13 @@ if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ModelExtensionDefaultCOD extends Model
+class ModelExtensionCODPayment extends Model
 {
     public function getMethod($address)
     {
         $this->load->language('cod_payment/cod_payment');
         if ($this->config->get('cod_payment_status')) {
-            $query = $this->db->query("SELECT * FROM ".$this->db->table("zones_to_locations")." WHERE location_id = '".(int)$this->config->get('cod_payment_location_id')."' AND country_id = '".(int)$address['country_id']."' AND (zone_id = '".(int)$address['zone_id']
+            $query = $this->db->query("SELECT * FROM ".$this->db->table_name("zones_to_locations")." WHERE location_id = '".(int)$this->config->get('cod_payment_location_id')."' AND country_id = '".(int)$address['country_id']."' AND (zone_id = '".(int)$address['zone_id']
                 ."' OR zone_id = '0')");
 
             if (!$this->config->get('cod_payment_location_id')) {

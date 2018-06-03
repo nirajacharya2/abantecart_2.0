@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\extensions\free_shipping\models\storefront\extension;
+namespace abc\extensions\per_item_shipping\models\storefront\extension;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
@@ -26,7 +26,7 @@ if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ModelExtensionDefaultPerItemShipping extends Model
+class ModelExtensionPerItemShipping extends Model
 {
     public function getQuote($address)
     {
