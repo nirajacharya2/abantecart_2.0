@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\models\storefront;
+namespace abc\extensions\forms_manager\models\storefront\tools;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;

@@ -96,24 +96,27 @@ final class ALoader
         //mode to force load storefront model
         if (ABC::env('INSTALL') && $model == 'install') {
             $section = ABC::env('DIR_INSTALL').'models/';
-            $namespace = "\install\models";
+            $namespace = "\\install\\models";
         } elseif ($mode == 'storefront' || ABC::env('IS_ADMIN') !== true) {
             $section = ABC::env('DIR_APP').'models/storefront/';
-            $namespace = "\abc\models\storefront";
+            $namespace = "\\abc\\models\\storefront";
         } else {
             $section = ABC::env('DIR_APP').'models/admin/';
-            $namespace = "\abc\models\admin";
+            $namespace = "\\abc\\models\\admin";
         }
 
         $file = $section.$model.'.php';
         if ($this->registry->has('extensions')
             && $result = $this->extensions->isExtensionResource('M', $model, $force, $mode)
         ) {
+
             if (is_file($file)) {
                 $warning = new AWarning("Extension <b>{$result['extension']}</b> override model <b>$model</b>");
                 $warning->toDebug();
             }
             $file = $result['file'];
+            $extNamespacePath = str_replace('/', '\\', dirname($result['base_path']));
+            $namespace = "\abc\\extensions\\".$result['extension'].$extNamespacePath;
         }
 
         $class = $namespace.'\Model'.preg_replace('/[^a-zA-Z0-9]/', '',
@@ -131,7 +134,6 @@ final class ALoader
                 return $this->registry->get($obj_name);
             } else {
                 if ($mode != 'silent') {
-                    exit;
                     $backtrace = debug_backtrace();
                     $file_info = $backtrace[0]['file'].' on line '.$backtrace[0]['line'];
                     throw new AException(

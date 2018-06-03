@@ -105,10 +105,10 @@ $menu->insertMenuItem( array(
         "sort_order"      => "4",
     )
 );
-$exists = $this->db->table('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
+$exists = $this->db->table_name('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
 if ( ! $exists ) {
     $now = $this->db->getORM()::raw('NOW()');
-    $block_id = $this->db->table('block_templates')->insertGetId(
+    $block_id = $this->db->table_name('block_templates')->insertGetId(
         [ "block_txt_id" => 'banner_block', "controller" => 'blocks/banner_block', "date_added" => $now]
     );
 
