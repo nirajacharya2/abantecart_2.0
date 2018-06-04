@@ -68,6 +68,7 @@ class ControllerResponsesListingGridTotal extends AController
                     // looking for config controller into parent extension.
                     //That Controller must to have filename equal child extension text id
                     $parents = $this->extension_manager->getParentsExtensionTextId($row['key']);
+
                     if ($parents) {
                         foreach ($parents as $parent) {
                             if (!$parent['status']) {
@@ -75,8 +76,8 @@ class ControllerResponsesListingGridTotal extends AController
                             }
                             $filename = ABC::env('DIR_APP_EXTENSIONS')
                                 .$parent['key'].DS
-                                .'admin'.DS
                                 .'controllers'.DS
+                                .'admin'.DS
                                 .'pages'.DS
                                 .'total'.DS
                                 .$row['key'].'.php';

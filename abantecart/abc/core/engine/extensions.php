@@ -1118,7 +1118,7 @@ class ExtensionsApi
     public function isExtensionController($route)
     {
 
-        $section = trim((ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE')), '/');
+        $section = trim((ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE')), DS);
         $path_build = '';
         $path_nodes = explode('/', $route);
 
@@ -1127,8 +1127,8 @@ class ExtensionsApi
 
             foreach ($this->enabled_extensions as $ext) {
                 $file = ABC::env('DIR_APP_EXTENSIONS')
-                    .$ext
-                    .'/'.ABC::env('DIRNAME_CONTROLLERS')
+                    .$ext.DS
+                    .ABC::env('DIRNAME_CONTROLLERS')
                     .(ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                     .$path_build.'.php';
 
