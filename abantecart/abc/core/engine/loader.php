@@ -131,7 +131,7 @@ final class ALoader
                 $warning->toDebug();
             }
             $file = $result['file'];
-            $extNamespacePath = str_replace('/', '\\', dirname($result['base_path']));
+            $extNamespacePath = str_replace(DS, '\\', dirname($result['base_path']));
             $namespace = "\abc\\extensions\\".$result['extension'].$extNamespacePath;
         }
 
@@ -145,6 +145,16 @@ final class ALoader
         } else {
             if (file_exists($file)) {
                 include_once($file);
+                if (!class_exists($class)) {
+                    if ($mode != 'silent') {
+                        throw new AException(
+                            'Error: Class '.$class.' not found in file '.$file,
+                            AC_ERR_LOAD
+                        );
+                    } else {
+                        return false;
+                    }
+                }
                 $this->registry->set($obj_name, new $class($this->registry));
 
                 return $this->registry->get($obj_name);
@@ -153,7 +163,8 @@ final class ALoader
                     $backtrace = debug_backtrace();
                     $file_info = $backtrace[0]['file'].' on line '.$backtrace[0]['line'];
                     throw new AException(
-                        'Error: Could not load model '.$model.' (file '.$file.')  from '.$file_info,
+                        'Error: Could not load model '
+                        .$model.' (file '.$file.', namespace '.$namespace.')  from '.$file_info,
                         AC_ERR_LOAD
                     );
                 } else {

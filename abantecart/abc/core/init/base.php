@@ -32,11 +32,11 @@ $class_list = [
         'view',
     ],
     'core/helper' => [
-        'global',
         'helper',
         'html',
         'utils',
         'system_check',
+        'global',
     ],
     'core/lib'    => [
         'config',

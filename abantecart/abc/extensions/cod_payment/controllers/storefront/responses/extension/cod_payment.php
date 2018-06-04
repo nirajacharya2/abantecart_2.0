@@ -16,7 +16,12 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-class ControllerResponsesExtensionDefaultCod extends AController
+namespace abc\controllers\storefront;
+
+use abc\core\engine\AController;
+use abc\core\lib\AJson;
+
+class ControllerResponsesExtensionCodPayment extends AController
 {
     public function main()
     {
@@ -74,6 +79,9 @@ class ControllerResponsesExtensionDefaultCod extends AController
     public function confirm()
     {
         $this->load->model('checkout/order');
-        $this->model_checkout_order->confirm($this->session->data['order_id'], $this->config->get('cod_payment_order_status_id'));
+        $this->model_checkout_order->confirm(
+            $this->session->data['order_id'],
+            $this->config->get('cod_payment_order_status_id')
+        );
     }
 }

@@ -24,7 +24,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -49,13 +49,20 @@ class ControllerResponsesListingGridTotal extends AController
         $sord = $this->request->post['sord']; // get the direction
 
         $this->loadModel('setting/extension');
-        $ext = $this->extensions->getExtensionsList(array('filter' => 'total'));
+        $ext = $this->extensions->getExtensionsList(
+            ['filter' => 'total']
+        );
         $extensions = array();
         if ($ext->rows) {
             foreach ($ext->rows as $row) {
                 $language_rt = $config_controller = '';
                 // for total-extensions inside engine
-                if (is_file(ABC::env('DIR_APP').'controllers/pages/total/'.$row['key'].'.php')) {
+                $filename = ABC::env('DIR_APP')
+                    .'controllers'.DS
+                    .'pages'.DS
+                    .'total'.DS
+                    .$row['key'].'.php';
+                if (is_file($filename)) {
                     $config_controller = $language_rt = 'total/'.$row['key'];
                 } else {
                     // looking for config controller into parent extension.
@@ -66,7 +73,14 @@ class ControllerResponsesListingGridTotal extends AController
                             if (!$parent['status']) {
                                 continue;
                             }
-                            if (is_file(ABC::env('DIR_APP_EXTENSIONS').$parent['key'].'/admin/controllers/pages/total/'.$row['key'].'.php')) {
+                            $filename = ABC::env('DIR_APP_EXTENSIONS')
+                                .$parent['key'].DS
+                                .'admin'.DS
+                                .'controllers'.DS
+                                .'pages'.DS
+                                .'total'.DS
+                                .$row['key'].'.php';
+                            if (is_file($filename)) {
                                 $config_controller = 'total/'.$row['key'];
                                 $language_rt = $parent['key'].'/'.$parent['key'];
                                 break;
@@ -75,17 +89,21 @@ class ControllerResponsesListingGridTotal extends AController
                     }
                 }
                 if ($config_controller) {
-                    $extensions[$row['key']] = array(
+                    $extensions[$row['key']] = [
                         'extension_txt_id'  => $row['key'],
                         'config_controller' => $config_controller,
                         'language_rt'       => $language_rt,
-                    );
+                    ];
                 }
             }
         }
 
         //looking for uninstalled engine's total-extensions
-        $files = glob(ABC::env('DIR_APP').'controllers/admin/pages/total/*.php');
+        $files = glob(ABC::env('DIR_APP')
+            .'controllers'.DS
+            .'admin'.DS
+            .'pages'.DS
+            .'total'.DS.'*.php');
         if ($files) {
             foreach ($files as $file) {
                 $id = basename($file, '.php');
@@ -189,7 +207,8 @@ class ControllerResponsesListingGridTotal extends AController
     /**
      * update only one field
      *
-     * @return void
+     * @return null
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -239,6 +258,7 @@ class ControllerResponsesListingGridTotal extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        return null;
     }
 
 }

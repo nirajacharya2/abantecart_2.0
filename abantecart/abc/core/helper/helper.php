@@ -20,4 +20,29 @@ namespace abc\core\helper;
 
 class AHelper
 {
+    private static $overload = [];
+
+    /**
+     * function extends libraries
+     *
+     * @param string $new_method_name
+     * @param string | array $callback (function name or array($object, $method_name))
+     */
+    static function addMethod($new_method_name, $callback)
+    {
+        self::$overload[$new_method_name] = $callback;
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     *
+     * @return mixed
+     */
+    static function __callStatic($name, $arguments)
+    {
+        if (isset(self::$overload[$name])) {
+            return call_user_func_array(self::$overload[$name], $arguments);
+        }
+    }
 }

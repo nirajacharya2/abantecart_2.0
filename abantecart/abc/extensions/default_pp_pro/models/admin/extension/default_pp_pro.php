@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\models\admin;
+namespace abc\extensions\default_pp_pro\models\admin\extension;
 
 use abc\core\engine\Model;
 

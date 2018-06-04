@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\models\admin;
+namespace abc\extensions\forms_manager\models\admin\tool;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;

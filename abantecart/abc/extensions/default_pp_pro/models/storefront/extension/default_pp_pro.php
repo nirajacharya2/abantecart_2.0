@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\models\storefront;
+namespace abc\extensions\default_pp_pro\models\storefront\extension;
 use abc\core\engine\Model;
 use abc\core\helper\AHelperUtils;
 

@@ -175,7 +175,7 @@ class AError
      *                                     reload_page -> true to reload page after dialog close
      *                                     TODO: Add redirect_url on dialog close
      *
-     * @return null|mixed
+     * @return null
      * @throws AException
      */
     public function toJSONResponse($status_text_and_code, $err_data = array())
