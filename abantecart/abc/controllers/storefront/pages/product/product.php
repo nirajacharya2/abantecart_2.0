@@ -165,17 +165,15 @@ class ControllerPagesProductProduct extends AController
         $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
-        $this->model = Product::find($product_id);
-        $product_info = $this->model->toArray();
-
+        $product_info = $this->model_catalog_product->getProduct($product_id);
         //can not locate product? get out
         if (!$product_info) {
-            $this->productNotFound($product_id);
+            $this->_product_not_found($product_id);
 
             return null;
         }
 
-        $url = $this->buildUrlParams();
+        $url = $this->_build_url_params();
 
         $this->view->assign('error', '');
         if (isset($this->session->data['error'])) {
@@ -219,14 +217,11 @@ class ControllerPagesProductProduct extends AController
             '&product_id='.$product_id
         );
 
-        $this->data['tab_review'] = sprintf(
-            $this->language->get('tab_review'),
-            $this->model->reviews->count()
-        );
+        $this->loadModel('catalog/review');
+        $this->data['tab_review'] = sprintf($this->language->get('tab_review'), $this->model_catalog_review->getTotalReviewsByProductId($product_id));
 
         if ($this->config->get('enable_reviews')) {
-            $average = $this->model->reviews->where('status', 1)->avg('rating');
-            //$this->model_catalog_review->getAverageRating($product_id);
+            $average = $this->model_catalog_review->getAverageRating($product_id);
             $this->data['rating_element'] = HtmlElementFactory::create(
                 array(
                     'type'    => 'rating',
@@ -427,7 +422,7 @@ class ControllerPagesProductProduct extends AController
         // Prepare options and values for display
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
         $options = array();
-        $product_options = $this->model->product_options->toArray();
+        $product_options = $this->model_catalog_product->getProductOptions($product_id);
 
         //get info from cart if key presents
         $cart_product_info = array();
@@ -586,7 +581,7 @@ class ControllerPagesProductProduct extends AController
 
         //handle stock messages
         // if track stock is off. no messages needed.
-        if ($this->model->isStockTrackable()) {
+        if ($this->model_catalog_product->isStockTrackable($product_id)) {
             //NOTE: total quantity can be integer and true(in case stock-track is off)
             $total_quantity = $this->model_catalog_product->hasAnyStock($product_id);
             $this->data['track_stock'] = true;
@@ -627,7 +622,7 @@ class ControllerPagesProductProduct extends AController
                 //record to message box
                 $msg = new AMessage();
                 $msg->saveNotice($message_ttl, $message_txt);
-                $this->model->save(['status', 0]);
+                $this->model_catalog_product->updateStatus($product_id, 0);
                 abc_redirect($this->html->getSEOURL('product/product', '&product_id='.$product_info['product_id'],
                     '&encode'));
             }
@@ -672,10 +667,8 @@ class ControllerPagesProductProduct extends AController
         $this->data['images'] = $resource->getResourceAllObjects('products', $product_id, $sizes, 0, false);
 
         $products = array();
-        $results = $this->model->products_related->toArray();
+        $results = $this->model_catalog_product->getProductRelated($product_id);
         foreach ($results as $result) {
-
-            $rel_model = Product::find($result['product_id']);
             // related product image
             $sizes = array(
                 'main'  => array(
@@ -690,7 +683,7 @@ class ControllerPagesProductProduct extends AController
             $image = $resource->getResourceAllObjects('products', $result['product_id'], $sizes, 1);
 
             if ($this->config->get('enable_reviews')) {
-                $rating = $rel_model->reviews->where('status', 1)->avg('rating');
+                $rating = $this->model_catalog_review->getAverageRating($result['product_id']);
             } else {
                 $rating = false;
             }
@@ -710,7 +703,7 @@ class ControllerPagesProductProduct extends AController
                 }
             }
 
-            $options = $rel_model->product_options->toArray();
+            $options = $this->model_catalog_product->getProductOptions($result['product_id']);
             if ($options) {
                 $add = $this->html->getSEOURL('product/product', '&product_id='.$result['product_id'], '&encode');
             } else {
@@ -754,7 +747,7 @@ class ControllerPagesProductProduct extends AController
         $this->data['display_price'] = $display_price;
 
         $tags = array();
-        $results = $this->model->product_tags->toArray();
+        $results = $this->model_catalog_product->getProductTags($product_id);
         foreach ($results as $result) {
             if ($result['tag']) {
                 $tags[] = array(
@@ -813,10 +806,10 @@ class ControllerPagesProductProduct extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    protected function productNotFound($product_id)
+    protected function _product_not_found($product_id)
     {
         $this->_init();
-        $url = $this->buildUrlParams();
+        $url = $this->_build_url_params();
         $this->document->addBreadcrumb(
             array(
                 'href'      => $this->html->getSEOURL(
@@ -849,21 +842,28 @@ class ControllerPagesProductProduct extends AController
         $this->processTemplate();
     }
 
-    protected function buildUrlParams()
+    protected function _build_url_params()
     {
         $request = $this->request->get;
         $url = '';
-        $params = [
-            'path',
-            'manufacturer_id',
-            'keyword',
-            'category_id',
-            'description',
-        ];
-        foreach ($params as $key) {
-            if (isset($request[$key])) {
-                $url .= '&path='.$request[$key];
+        if (isset($request['path'])) {
+            $url .= '&path='.$request['path'];
+        }
+
+        if (isset($request['manufacturer_id'])) {
+            $url .= '&manufacturer_id='.$request['manufacturer_id'];
+        }
+
+        if (isset($request['keyword'])) {
+            $url .= '&keyword='.$request['keyword'];
             }
+
+        if (isset($request['category_id'])) {
+            $url .= '&category_id='.$request['category_id'];
+        }
+
+        if (isset($request['description'])) {
+            $url .= '&description='.$request['description'];
         }
 
         return $url;
