@@ -237,7 +237,7 @@
     "components/flot": "0.8.3",
     "tinymce/tinymce": "4.7.11",
     "tinymce/languages": "4.7.11",
-    "illuminate/database": "*",
+    "illuminate/database": "5.5.*",
     "robmorgan/phinx": "*",
     "twig/twig": "1.6.5",
     "wapmorgan/unified-archive": "~0.1.0",
@@ -245,7 +245,8 @@
     "symfony/var-dumper": "~3.2",
     "maximebf/debugbar": "1.13.1",
     "filp/whoops": "2.1.14",
-    "monolog/monolog": "1.23.0"
+    "monolog/monolog": "1.23.0",
+    "illuminate/events": "5.5.*"
   },
   "extra": {
     "installer-paths": {
