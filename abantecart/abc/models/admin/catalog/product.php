@@ -644,11 +644,11 @@ class ModelCatalogProduct extends Model
         }
 
         $this->db->query(
-            "DELETE FROM ".$this->db->table_name("product_options")."
+            "DELETE FROM ".$this->db->table_name("product_option_descriptions")."
                 WHERE product_id = '".(int)$product_id."'
                     AND product_option_id = '".(int)$product_option_id."'");
         $this->db->query(
-            "DELETE FROM ".$this->db->table_name("product_option_descriptions")."
+            "DELETE FROM ".$this->db->table_name("product_options")."
                 WHERE product_id = '".(int)$product_id."'
                     AND product_option_id = '".(int)$product_option_id."'");
     }
@@ -1310,7 +1310,6 @@ class ModelCatalogProduct extends Model
             return false;
         }
         $rm = new AResourceManager();
-        $this->db->query("DELETE FROM ".$this->db->table_name("products")." WHERE product_id = '".(int)$product_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("product_descriptions")." WHERE product_id = '".(int)$product_id."'");
         $resources = $rm->getResourcesList(
             array(
@@ -1356,6 +1355,8 @@ class ModelCatalogProduct extends Model
 
         $lm = new ALayoutManager();
         $lm->deletePageLayout('pages/product/product', 'product_id', (int)$product_id);
+
+        $this->db->query("DELETE FROM ".$this->db->table_name("products")." WHERE product_id = '".(int)$product_id."'");
 
         $this->cache->remove('product');
 
