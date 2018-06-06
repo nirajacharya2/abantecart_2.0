@@ -107,40 +107,60 @@ class ABC extends ABCBase
      */
     public static function loadConfig($stage_name = 'default')
     {
-        $file_name = $stage_name.'.config.php';
-        $file = dirname(__DIR__).DS.'config'.DS.$file_name;
-        $config = @include($file);
-        if ($config) {
-            self::env($config);
-            self::$stage_name = $stage_name;
-        } else {
-            //interrupt when stage config not found
-            return false;
-        }
-
-        $ext_dirs = glob(
-            dirname(__DIR__).DS
-            .'extensions'.DS
-            .'*'.DS
-            .'config'.DS
-        );
-
-        foreach ($ext_dirs as $cfg_dir) {
-            $file = $cfg_dir.DS.'enabled.config.php';
+        $config_sections = ['config', 'events'];
+        foreach ($config_sections as $config_section) {
+            $file_name = $stage_name.'.'.$config_section.'.php';
+            $file = dirname(__DIR__).DS.'config'.DS.$file_name;
             $config = @include($file);
-            //if stage name of extension environment is empty - skip configs
-            if(!$config){ continue; }
-            $cfg_file = $cfg_dir.DS.$config.'.config.php';
 
-            if (is_file($cfg_file)) {
-                $ext_config = @include_once($cfg_file);
-                if (is_array($ext_config)) {
-                    self::$env += $ext_config;
+            if ($config) {
+                //if we load additions configs - place it as key of env array
+                if ($config_section != 'config') {
+                    $config = [strtoupper($config_section) => $config];
+                }
+                self::env($config);
+                self::$stage_name = $stage_name;
+            } else {
+                //interrupt when stage config not found
+                if ($config_section == 'config') {
+                    return false;
+                }
+            }
+
+            $ext_dirs = glob(
+                dirname(__DIR__).DS
+                .'extensions'.DS
+                .'*'.DS
+                .'config'.DS
+            );
+
+            foreach ($ext_dirs as $cfg_dir) {
+                $file = $cfg_dir.DS.'enabled.config.php';
+                $config = @include($file);
+                //if stage name of extension environment is empty - skip configs
+                if (!$config) {
+                    continue;
+                }
+                $cfg_file = $cfg_dir.DS.$config.'.'.$config_section.'.php';
+
+                if (is_file($cfg_file)) {
+                    $ext_config = @include_once($cfg_file);
+                    if (is_array($ext_config)) {
+                        //if we load additions configs - place it as key of env array
+                        if ($config_section = 'config') {
+                            self::$env += $ext_config;
+                        } else {
+                            self::$env[strtoupper($config_section)] = array_merge(
+                                self::$env[strtoupper($config_section)],
+                                $ext_config
+                            );
+                        }
+                    }
                 }
             }
         }
-
         self::loadClassMap($stage_name);
+
         return true;
     }
 

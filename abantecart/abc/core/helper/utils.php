@@ -31,6 +31,7 @@ use DateTime;
 use DOMDocument;
 use DOMXPath;
 use Exception;
+use Illuminate\Events\Dispatcher;
 use PharData;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -1765,4 +1766,24 @@ class AHelperUtils extends AHelper
         return false;
     }
 
+    /**
+     * @param string $event_alias
+     * @param array $args
+     *
+     * @return array|null
+     * @throws AException
+     */
+    public static function event(string $event_alias, $args = [])
+    {
+        $registry = Registry::getInstance();
+        /**
+         * @var Dispatcher $event_dispatcher
+         */
+        $event_dispatcher = $registry->get('events');
+        if (is_object($event_dispatcher)) {
+            return $event_dispatcher->fire($event_alias, $args);
+        } else {
+            throw new AException('Event Dispatcher not found in Registry!', AC_ERR_CLASS_CLASS_NOT_EXIST);
+        }
+    }
 }
