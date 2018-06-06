@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\events;
+namespace abc\modules\events;
 
 class ATestEvent
 {

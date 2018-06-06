@@ -1,9 +1,8 @@
 <?php
 
-namespace abc\listeners;
+namespace abc\modules\listeners;
 
 use abc\core\engine\Registry;
-use abc\events\ATestEvent;
 
 class ATestListener
 {

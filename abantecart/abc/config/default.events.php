@@ -7,7 +7,7 @@ return [
 
     'ATestEvent' =>
         [
-            \abc\listeners\ATestListener::class,
+            \abc\modules\listeners\ATestListener::class,
         ],
 ];
 
