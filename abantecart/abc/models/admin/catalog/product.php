@@ -20,7 +20,6 @@
 
 namespace abc\models\admin;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ALanguageManager;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
@@ -28,6 +27,8 @@ use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\ADB;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
+use abc\modules\events\ABaseEvent;
+use H;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -42,19 +43,20 @@ class ModelCatalogProduct extends Model
 {
     /** @param array $data
      * @return int
+     * @throws \Exception
      */
     public function addProduct($data)
     {
-
+        $affected_tables = [];
         $language_id = (int)$this->language->getContentLanguageID();
 
         $this->db->query("INSERT INTO ".$this->db->table_name("products")." 
                             SET model = '".$this->db->escape($data['model'])."',
                                 sku = '".$this->db->escape($data['sku'])."',
                                 location = '".$this->db->escape($data['location'])."',
-                                quantity = '".AHelperUtils::preformatInteger($data['quantity'])."',
-                                minimum = '".AHelperUtils::preformatInteger($data['minimum'])."',
-                                maximum = '".AHelperUtils::preformatInteger($data['maximum'])."',
+                                quantity = '".H::preformatInteger($data['quantity'])."',
+                                minimum = '".H::preformatInteger($data['minimum'])."',
+                                maximum = '".H::preformatInteger($data['maximum'])."',
                                 subtract = '".(int)$data['subtract']."',
                                 stock_checkout = '".$this->db->escape($data['stock_checkout'])."',
                                 stock_status_id = '".(int)$data['stock_status_id']."',
@@ -63,14 +65,29 @@ class ModelCatalogProduct extends Model
                                 shipping = '".(int)$data['shipping']."',
                                 ship_individually = '".(int)$data['ship_individually']."',
                                 free_shipping = '".(int)$data['free_shipping']."',
-                                shipping_price = '".AHelperUtils::preformatFloat($data['shipping_price'], $this->language->get('decimal_point'))."',
-                                price = '".AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
-                                cost = '".AHelperUtils::preformatFloat($data['cost'], $this->language->get('decimal_point'))."',
-                                weight = '".AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point'))."',
+                                shipping_price = '".H::preformatFloat(
+                                    $data['shipping_price'],
+                                    $this->language->get('decimal_point')
+                                )."',
+                                price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
+                                cost = '".H::preformatFloat($data['cost'], $this->language->get('decimal_point'))."',
+                                weight = '".H::preformatFloat(
+                                    $data['weight'],
+                                    $this->language->get('decimal_point')
+                                )."',
                                 weight_class_id = '".(int)$data['weight_class_id']."',
-                                length = '".AHelperUtils::preformatFloat($data['length'], $this->language->get('decimal_point'))."',
-                                width = '".AHelperUtils::preformatFloat($data['width'], $this->language->get('decimal_point'))."',
-                                height = '".AHelperUtils::preformatFloat($data['height'], $this->language->get('decimal_point'))."',
+                                length = '".H::preformatFloat(
+                                    $data['length'],
+                                    $this->language->get('decimal_point')
+                                )."',
+                                width = '".H::preformatFloat(
+                                    $data['width'],
+                                    $this->language->get('decimal_point')
+                                )."',
+                                height = '".H::preformatFloat(
+                                    $data['height'],
+                                    $this->language->get('decimal_point')
+                                )."',
                                 length_class_id = '".(int)$data['length_class_id']."',
                                 STATUS = '".(int)$data['status']."',
                                 tax_class_id = '".(int)$data['tax_class_id']."',
@@ -78,6 +95,7 @@ class ModelCatalogProduct extends Model
                                 date_added = NOW()");
 
         $product_id = $this->db->getLastId();
+        $affected_tables[] = 'products';
         // if new product
         if ( ! is_int(key($data['product_description']))) {
             $update = array();
@@ -87,6 +105,7 @@ class ModelCatalogProduct extends Model
             $this->language->replaceDescriptions('product_descriptions',
                 array('product_id' => (int)$product_id),
                 $update);
+            $affected_tables[] = 'product_descriptions';
         } else { // if cloning
             foreach ($data['product_description'] as $language_id => $value) {
                 $this->db->query("INSERT INTO ".$this->db->table_name("product_descriptions")." 
@@ -103,6 +122,7 @@ class ModelCatalogProduct extends Model
 
         if ($data['featured']) {
             $this->setFeatured($product_id, true);
+            $affected_tables[] = 'product_featured';
         }
 
         $seo_keys = array();
@@ -110,7 +130,7 @@ class ModelCatalogProduct extends Model
             if (is_string($data['keyword'])) {
                 $seo_keys = array(
                     $language_id => array(
-                        'keyword' => AHelperUtils::SEOEncode($data['keyword'], 'product_id', $product_id),
+                        'keyword' => H::SEOEncode($data['keyword'], 'product_id', $product_id),
                     ),
                 );
             } //when cloning
@@ -126,7 +146,7 @@ class ModelCatalogProduct extends Model
                             continue;
                         }
                         $seo_keys[(int)$lang_id] = array(
-                            'keyword' => AHelperUtils::SEOEncode($seo_key, 'product_id', $product_id),
+                            'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
                         );
                     }
                 }
@@ -137,7 +157,7 @@ class ModelCatalogProduct extends Model
             if ( ! is_int(key($data['product_description']))) {
                 $seo_keys = array(
                     $language_id => array(
-                        'keyword' => AHelperUtils::SEOEncode($data['product_description']['name'], 'product_id', $product_id),
+                        'keyword' => H::SEOEncode($data['product_description']['name'], 'product_id', $product_id),
                     ),
                 );
             } else { // when clones
@@ -153,7 +173,7 @@ class ModelCatalogProduct extends Model
                         continue;
                     }
                     $seo_keys[(int)$lang_id] = array(
-                        'keyword' => AHelperUtils::SEOEncode($seo_key, 'product_id', $product_id),
+                        'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
                     );
                 }
             }
@@ -174,7 +194,7 @@ class ModelCatalogProduct extends Model
                             WHERE query = 'product_id=".(int)$product_id."'
                                 AND language_id = '".(int)$language_id."'");
         }
-
+        $affected_tables[] = 'url_aliases';
         if ($data['product_tags']) {
             if (is_string($data['product_tags'])) {
                 $tags = (array)explode(',', $data['product_tags']);
@@ -206,56 +226,67 @@ class ModelCatalogProduct extends Model
                     $this->db->query($sql);
                 }
             }
+            $affected_tables[] = 'product_tags';
         }
         $this->cache->remove('product');
-
+        $data['operation_type'] = 'insert';
+        $this->updateEvent($product_id, $data, $affected_tables);
         return $product_id;
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
     public function addProductDiscount($product_id, $data)
     {
         $data['price'] = str_replace(" ", "", $data['price']);
         if ( ! empty($data['date_start']) && ! $data['iso_date']) {
-            $data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
         }
         if ( ! empty($data['date_end']) && ! $data['iso_date']) {
-            $data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
         }
         $this->db->query(
             "INSERT INTO ".$this->db->table_name("product_discounts")."
                 SET product_id = '".(int)$product_id."',
                     customer_group_id = '".(int)$data['customer_group_id']."',
-                    quantity = '".AHelperUtils::preformatInteger($data['quantity'])."',
+                    quantity = '".H::preformatInteger($data['quantity'])."',
                     priority = '".(int)$data['priority']."',
-                    price = '".AHelperUtils::preformatFloat($data['price'])."',
+                    price = '".H::preformatFloat($data['price'])."',
                     date_start = '".$this->db->escape($data['date_start'])."',
                     date_end = '".$this->db->escape($data['date_end'])."'");
         $id = $this->db->getLastId();
         $this->_touch_product($product_id);
+        $this->updateEvent($product_id, $data, ['product_discounts']);
 
         return $id;
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
     public function addProductSpecial($product_id, $data)
     {
         $data['price'] = str_replace(" ", "", $data['price']);
         if ( ! empty($data['date_start']) && ! $data['iso_date']) {
-            $data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+            $data['date_start'] = H::dateDisplay2ISO(
+                $data['date_start'], 
+                $this->language->get('date_format_short')
+            );
         }
         if ( ! empty($data['date_end']) && ! $data['iso_date']) {
-            $data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+            $data['date_end'] = H::dateDisplay2ISO(
+                $data['date_end'], 
+                $this->language->get('date_format_short')
+            );
         }
 
         $this->db->query(
@@ -263,18 +294,21 @@ class ModelCatalogProduct extends Model
             SET product_id = '".(int)$product_id."',
                 customer_group_id = '".(int)$data['customer_group_id']."',
                 priority = '".(int)$data['priority']."',
-                price = '".AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
+                price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
                 date_start = '".$this->db->escape($data['date_start'])."',
                 date_end = '".$this->db->escape($data['date_end'])."'");
         $id = $this->db->getLastId();
         $this->_touch_product($product_id);
+        $this->updateEvent($product_id, $data, ['product_specials']);
 
         return $id;
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function updateProduct($product_id, $data)
     {
@@ -325,13 +359,18 @@ class ModelCatalogProduct extends Model
         foreach ($fields as $f) {
             if (isset($data[$f])) {
                 if (in_array($f, $preformat_fields)) {
-                    $data[$f] = AHelperUtils::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                    $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
                 }
                 $update[] = $f." = '".$this->db->escape($data[$f])."'";
             }
         }
         if ( ! empty($update)) {
-            $this->db->query("UPDATE `".$this->db->table_name("products`")." SET ".implode(',', $update)." WHERE product_id = '".(int)$product_id."'");
+            $this->db->query(
+                "UPDATE `".$this->db->table_name("products`")." 
+                SET ".implode(',', $update)." 
+                WHERE product_id = '".(int)$product_id."'"
+            );
+            $affected_tables[] = 'products';
         }
 
         if ( ! empty($data['product_description'])) {
@@ -352,13 +391,15 @@ class ModelCatalogProduct extends Model
                         array($language_id => $update));
                 }
             }
+            $affected_tables[] = 'product_descriptions';
         }
         if (isset($data['featured'])) {
             $this->setFeatured($product_id, ($data['featured'] ? true : false));
+            $affected_tables[] = 'product_featured';
         }
 
         if (isset($data['keyword'])) {
-            $data['keyword'] = AHelperUtils::SEOEncode($data['keyword'], 'product_id', $product_id);
+            $data['keyword'] = H::SEOEncode($data['keyword'], 'product_id', $product_id);
             if ($data['keyword']) {
                 $this->language->replaceDescriptions('url_aliases',
                     array('query' => "product_id=".(int)$product_id),
@@ -369,6 +410,7 @@ class ModelCatalogProduct extends Model
                                 WHERE query = 'product_id=".(int)$product_id."'
                                     AND language_id = '".$language_id."'");
             }
+            $affected_tables[] = 'url_aliases';
         }
 
         if (isset($data['product_tags'])) {
@@ -381,26 +423,31 @@ class ModelCatalogProduct extends Model
             $this->language->replaceMultipleDescriptions('product_tags',
                 array('product_id' => (int)$product_id),
                 array($language_id => array('tag' => array_unique($tags))));
+            $affected_tables[] = 'product_tags';
         }
 
         $this->_touch_product($product_id);
+        $data['operation_type'] = 'update';
+        $this->updateEvent($product_id, $data, $affected_tables);
     }
 
     /**
-     * @param int   $product_discount_id
+     * @param int $product_discount_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function updateProductDiscount($product_discount_id, $data)
     {
         $fields = array("customer_group_id", "quantity", "priority", "price", "date_start", "date_end",);
         if (isset($data['price'])) {
-            $data['price'] = AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'));
+            $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
         }
         if ( ! empty($data['date_start'])) {
-            $data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
         }
         if ( ! empty($data['date_end'])) {
-            $data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
         }
         $update = array();
         foreach ($fields as $f) {
@@ -417,20 +464,22 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int   $product_special_id
+     * @param int $product_special_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function updateProductSpecial($product_special_id, $data)
     {
         $fields = array("customer_group_id", "priority", "price", "date_start", "date_end",);
         if (isset($data['price'])) {
-            $data['price'] = AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'));
+            $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
         }
         if ( ! empty($data['date_start'])) {
-            $data['date_start'] = AHelperUtils::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
         }
         if ( ! empty($data['date_end'])) {
-            $data['date_end'] = AHelperUtils::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
         }
 
         $update = array();
@@ -440,59 +489,99 @@ class ModelCatalogProduct extends Model
             }
         }
         if ( ! empty($update)) {
-            $this->db->query("UPDATE `".$this->db->table_name("product_specials`")." SET ".implode(',', $update)." WHERE product_special_id = '".(int)$product_special_id."'");
+            $this->db->query(
+                "UPDATE `".$this->db->table_name("product_specials`")." 
+                SET ".implode(',', $update)." 
+                WHERE product_special_id = '".(int)$product_special_id."'"
+            );
         }
         $this->cache->remove('product');
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
      *
      * @return bool
+     * @throws \Exception
      */
     public function updateProductLinks($product_id, $data)
     {
         if ( ! (int)$product_id || ! $data) {
             return false;
         }
-
+        $affected_tables = [];
         if (isset($data['product_store'])) {
-            $this->db->query("DELETE FROM ".$this->db->table_name("products_to_stores")." WHERE product_id = '".(int)$product_id."'");
+            $this->db->query(
+                "DELETE FROM ".$this->db->table_name("products_to_stores")." 
+                WHERE product_id = '".(int)$product_id."'"
+            );
             foreach ($data['product_store'] as $store_id) {
-                $this->db->query("INSERT INTO ".$this->db->table_name("products_to_stores")." SET product_id = '".(int)$product_id."', store_id = '".(int)$store_id."'");
+                $this->db->query(
+                    "INSERT INTO ".$this->db->table_name("products_to_stores")." 
+                    SET product_id = '".(int)$product_id."', store_id = '".(int)$store_id."'"
+                );
             }
+            $affected_tables[] = 'products_to_stores';
         }
 
         if (isset($data['product_download'])) {
-            $this->db->query("DELETE FROM ".$this->db->table_name("products_to_downloads")." WHERE product_id = '".(int)$product_id."'");
+            $this->db->query(
+                "DELETE FROM ".$this->db->table_name("products_to_downloads")." 
+                WHERE product_id = '".(int)$product_id."'"
+            );
             foreach ($data['product_download'] as $download_id) {
                 if ((int)$download_id) {
-                    $this->db->query("INSERT INTO ".$this->db->table_name("products_to_downloads")." SET product_id = '".(int)$product_id."', download_id = '".(int)$download_id."'");
+                    $this->db->query(
+                        "INSERT INTO ".$this->db->table_name("products_to_downloads")." 
+                        SET product_id = '".(int)$product_id."', download_id = '".(int)$download_id."'"
+                    );
                 }
             }
+            $affected_tables[] = 'products_to_downloads';
         }
 
         if (isset($data['product_category'])) {
-            $this->db->query("DELETE FROM ".$this->db->table_name("products_to_categories")." WHERE product_id = '".(int)$product_id."'");
+            $this->db->query(
+                "DELETE FROM ".$this->db->table_name("products_to_categories")." 
+                WHERE product_id = '".(int)$product_id."'"
+            );
             foreach ($data['product_category'] as $category_id) {
                 if ((int)$category_id) {
-                    $this->db->query("INSERT INTO ".$this->db->table_name("products_to_categories")." SET product_id = '".(int)$product_id."', category_id = '".(int)$category_id."'");
+                    $this->db->query(
+                        "INSERT INTO ".$this->db->table_name("products_to_categories")." 
+                        SET product_id = '".(int)$product_id."', category_id = '".(int)$category_id."'"
+                    );
                 }
             }
+            $affected_tables[] = 'products_to_categories';
         }
 
         if (isset($data['product_related'])) {
-            $this->db->query("DELETE FROM ".$this->db->table_name("products_related")." WHERE product_id = '".(int)$product_id."'");
+            $this->db->query(
+                "DELETE FROM ".$this->db->table_name("products_related")." 
+                WHERE product_id = '".(int)$product_id."'"
+            );
             foreach ($data['product_related'] as $related_id) {
                 if ((int)$related_id) {
-                    $this->db->query("INSERT INTO ".$this->db->table_name("products_related")." SET product_id = '".(int)$product_id."', related_id = '".(int)$related_id."'");
-                    $this->db->query("DELETE FROM ".$this->db->table_name("products_related")." WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'");
-                    $this->db->query("INSERT INTO ".$this->db->table_name("products_related")." SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'");
+                    $this->db->query(
+                        "INSERT INTO ".$this->db->table_name("products_related")." 
+                        SET product_id = '".(int)$product_id."', related_id = '".(int)$related_id."'"
+                    );
+                    $this->db->query(
+                        "DELETE FROM ".$this->db->table_name("products_related")." 
+                        WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'"
+                    );
+                    $this->db->query(
+                        "INSERT INTO ".$this->db->table_name("products_related")." 
+                        SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'"
+                    );
                 }
             }
+            $affected_tables[] = 'products_related';
         }
         $this->_touch_product($product_id);
+        $this->updateEvent($product_id, $data, $affected_tables);
 
         return true;
     }
@@ -501,6 +590,7 @@ class ModelCatalogProduct extends Model
      * @param array $product_ids
      *
      * @return bool
+     * @throws \Exception
      */
     public function relateProducts($product_ids = array())
     {
@@ -511,9 +601,15 @@ class ModelCatalogProduct extends Model
             if ((int)$product_id) {
                 foreach ($product_ids as $related_id) {
                     if ((int)$related_id && $related_id != $product_id) {
-                        $this->db->query("DELETE FROM ".$this->db->table_name("products_related")." WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'");
-                        $this->db->query("INSERT INTO ".$this->db->table_name("products_related")." SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'");
+                        $this->db->query(
+                            "DELETE FROM ".$this->db->table_name("products_related")." 
+                            WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'");
+                        $this->db->query(
+                            "INSERT INTO ".$this->db->table_name("products_related")." 
+                            SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'"
+                        );
                     }
+                    $this->updateEvent($product_id, ['related_id'=>$related_id], ['products_related']);
                 }
             }
         }
@@ -522,10 +618,11 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
      *
      * @return int
+     * @throws \abc\core\lib\AException
      */
     public function addProductOption($product_id, $data)
     {
@@ -608,6 +705,8 @@ class ModelCatalogProduct extends Model
     /**
      * @param int $product_id
      * @param int $product_option_id
+     *
+     * @throws \abc\core\lib\AException
      */
     public function deleteProductOption($product_id, $product_option_id)
     {
@@ -635,6 +734,8 @@ class ModelCatalogProduct extends Model
     /**
      * @param int $product_id
      * @param int $product_option_id
+     *
+     * @throws \Exception
      */
     protected function _deleteProductOption($product_id, $product_option_id)
     {
@@ -656,11 +757,12 @@ class ModelCatalogProduct extends Model
     //Add new product option value and value descriptions for all global attributes languages or current language
 
     /**
-     * @param int   $product_id
-     * @param int   $option_id
+     * @param int $product_id
+     * @param int $option_id
      * @param array $data
      *
      * @return int|null
+     * @throws \abc\core\lib\AException
      */
     public function addProductOptionValueAndDescription($product_id, $option_id, $data)
     {
@@ -733,6 +835,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return null|\stdClass
+     * @throws \Exception
      */
     public function getProductOptionValueDescriptions($product_id, $pd_opt_val_id, $language_id)
     {
@@ -813,6 +916,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return null
+     * @throws \Exception
      */
     public function deleteProductOptionValueDescriptions($product_id, $pd_opt_val_id, $language_id = 0)
     {
@@ -831,13 +935,14 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int   $product_id
-     * @param int   $option_id
-     * @param int   $attribute_value_id
-     * @param int   $pd_opt_val_id
+     * @param int $product_id
+     * @param int $option_id
+     * @param int $attribute_value_id
+     * @param int $pd_opt_val_id
      * @param array $data
      *
      * @return int|false
+     * @throws \Exception
      */
     public function insertProductOptionValue($product_id, $option_id, $attribute_value_id, $pd_opt_val_id, $data)
     {
@@ -852,9 +957,9 @@ class ModelCatalogProduct extends Model
                 sku = '".$this->db->escape($data['sku'])."',
                 quantity = '".$this->db->escape($data['quantity'])."',
                 subtract = '".$this->db->escape($data['subtract'])."',
-                price = '".AHelperUtils::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
+                price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
                 prefix = '".$this->db->escape($data['prefix'])."',
-                weight = '".AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point'))."',
+                weight = '".H::preformatFloat($data['weight'], $this->language->get('decimal_point'))."',
                 weight_type = '".$this->db->escape($data['weight_type'])."',
                 attribute_value_id = '".$this->db->escape($attribute_value_id)."',
                 grouped_attribute_data = '".$this->db->escape($data['grouped_attribute_data'])."',
@@ -867,11 +972,12 @@ class ModelCatalogProduct extends Model
     /**
      *  Update singe product option value
      *
-     * @param int   $pd_opt_val_id
-     * @param int   $attribute_value_id
+     * @param int $pd_opt_val_id
+     * @param int $attribute_value_id
      * @param array $data
      *
      * @return null|int
+     * @throws \Exception
      */
     public function updateProductOptionValue($pd_opt_val_id, $attribute_value_id, $data)
     {
@@ -890,7 +996,7 @@ class ModelCatalogProduct extends Model
                 subtract = '".$this->db->escape($data['subtract'])."',
                 price = '".$this->db->escape($data['price'])."',
                 prefix = '".$this->db->escape($data['prefix'])."',
-                weight = '".AHelperUtils::preformatFloat($data['weight'], $this->language->get('decimal_point'))."',
+                weight = '".H::preformatFloat($data['weight'], $this->language->get('decimal_point'))."',
                 weight_type = '".$this->db->escape($data['weight_type'])."',
                 attribute_value_id = '".$this->db->escape($attribute_value_id)."',
                 grouped_attribute_data = '".$this->db->escape($data['grouped_attribute_data'])."',
@@ -904,10 +1010,12 @@ class ModelCatalogProduct extends Model
     /**
      *    Update product option value and value descriptions for set language
      *
-     * @param int   $product_id
-     * @param int   $pd_opt_val_id
+     * @param int $product_id
+     * @param int $pd_opt_val_id
      * @param array $data
-     * @param int   $language_id
+     * @param int $language_id
+     *
+     * @throws \abc\core\lib\AException
      */
     public function updateProductOptionValueAndDescription($product_id, $pd_opt_val_id, $data, $language_id)
     {
@@ -978,6 +1086,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return null
+     * @throws \Exception
      */
     public function deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id = 0)
     {
@@ -1007,6 +1116,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     public function _deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id)
     {
@@ -1054,6 +1164,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return bool|array
+     * @throws \abc\core\lib\AException
      */
     public function copyProduct($product_id)
     {
@@ -1138,8 +1249,10 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $data
+     *
+     * @throws \abc\core\lib\AException
      */
     protected function _clone_product_options($product_id, $data)
     {
@@ -1200,7 +1313,7 @@ class ModelCatalogProduct extends Model
                                                 sku = '".$this->db->escape($pd_opt_vals['sku'])."',
                                                 quantity = '".(int)$pd_opt_vals['quantity']."',
                                                 subtract = '".(int)$pd_opt_vals['subtract']."',
-                                                price = '".AHelperUtils::preformatFloat($pd_opt_vals['price'], $this->language->get('decimal_point'))."',
+                                                price = '".H::preformatFloat($pd_opt_vals['price'], $this->language->get('decimal_point'))."',
                                                 weight = '".(float)$pd_opt_vals['weight']."',
                                                 weight_type = '".$this->db->escape($pd_opt_vals['weight_type'])."',
                                                 prefix = '".$this->db->escape($pd_opt_vals['prefix'])."',
@@ -1253,17 +1366,18 @@ class ModelCatalogProduct extends Model
      * @param int $new_product_id
      *
      * @return null
+     * @throws \abc\core\lib\AException
      */
     protected function _clone_product_layout($product_id, $new_product_id)
     {
-        if ( ! AHelperUtils::has_value($product_id) && ! AHelperUtils::has_value($new_product_id)) {
+        if ( ! H::has_value($product_id) && ! H::has_value($new_product_id)) {
             return false;
         }
 
         //clone layout for the product if present
         $lm = new ALayoutManager();
         $pages = $lm->getPages('pages/product/product', 'product_id', (int)$product_id);
-        if (count($pages) && AHelperUtils::has_value($pages[0]['page_id'])) {
+        if (count($pages) && H::has_value($pages[0]['page_id'])) {
             $tmpl_id = $this->config->get('config_storefront_template');
             $src_layout_id = $pages[0]['layout_id'];
             $src_page_id = $pages[0]['page_id'];
@@ -1279,7 +1393,7 @@ class ModelCatalogProduct extends Model
             $product_info = $this->getProductDescriptions($new_product_id);
             if ($product_info) {
                 foreach ($product_info as $language_id => $description) {
-                    if ( ! AHelperUtils::has_value($language_id)) {
+                    if ( ! H::has_value($language_id)) {
                         continue;
                     }
                     $page_info['page_descriptions'][$language_id] = $description;
@@ -1303,6 +1417,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     public function deleteProduct($product_id)
     {
@@ -1365,6 +1480,8 @@ class ModelCatalogProduct extends Model
 
     /**
      * @param int $product_discount_id
+     *
+     * @throws \Exception
      */
     public function deleteProductDiscount($product_discount_id)
     {
@@ -1374,6 +1491,8 @@ class ModelCatalogProduct extends Model
 
     /**
      * @param int $product_special_id
+     *
+     * @throws \Exception
      */
     public function deleteProductSpecial($product_special_id)
     {
@@ -1386,6 +1505,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProduct($product_id)
     {
@@ -1408,6 +1528,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_discount_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductDiscount($product_discount_id)
     {
@@ -1422,6 +1543,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_special_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductSpecial($product_special_id)
     {
@@ -1433,8 +1555,10 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int  $product_id
+     * @param int $product_id
      * @param bool $act
+     *
+     * @throws \Exception
      */
     public function setFeatured($product_id, $act = true)
     {
@@ -1446,6 +1570,8 @@ class ModelCatalogProduct extends Model
 
     /**
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function addFeatured($data)
     {
@@ -1460,6 +1586,7 @@ class ModelCatalogProduct extends Model
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getFeaturedProducts()
     {
@@ -1476,6 +1603,7 @@ class ModelCatalogProduct extends Model
      * @param string $keyword
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductsByKeyword($keyword)
     {
@@ -1500,6 +1628,7 @@ class ModelCatalogProduct extends Model
      * @param string $mode
      *
      * @return array|int
+     * @throws \Exception
      */
     public function getProductsByCategoryId($category_id, $mode = 'default')
     {
@@ -1525,6 +1654,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductDescriptions($product_id, $language_id = 0)
     {
@@ -1556,6 +1686,7 @@ class ModelCatalogProduct extends Model
      * @param $attribute_id
      *
      * @return int
+     * @throws \Exception
      */
     public function isProductGroupOption($product_id, $attribute_id)
     {
@@ -1575,6 +1706,7 @@ class ModelCatalogProduct extends Model
      * @param int $group_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getProductOptionByAttributeId($attribute_id, $group_id)
     {
@@ -1595,6 +1727,7 @@ class ModelCatalogProduct extends Model
      * @param int $option_id
      *
      * @return array|null
+     * @throws \Exception
      */
     public function getProductOption($product_id, $option_id = 0)
     {
@@ -1629,8 +1762,10 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param int   $product_option_id
+     * @param int $product_option_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function updateProductOption($product_option_id, $data)
     {
@@ -1681,6 +1816,7 @@ class ModelCatalogProduct extends Model
      * @param int $group_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductOptions($product_id, $group_id = 0)
     {
@@ -1706,11 +1842,12 @@ class ModelCatalogProduct extends Model
     /**
      *    Main function to be called to update option values.
      *
-     * @param int   $product_id
-     * @param int   $option_id
+     * @param int $product_id
+     * @param int $option_id
      * @param array $data
      *
      * @return null
+     * @throws \abc\core\lib\AException
      */
     public function updateProductOptionValues($product_id, $option_id, $data)
     {
@@ -1727,7 +1864,7 @@ class ModelCatalogProduct extends Model
                 'sku'                    => $data['sku'][$opt_val_id],
                 'quantity'               => $data['quantity'][$opt_val_id],
                 'subtract'               => $data['subtract'][$opt_val_id],
-                'price'                  => AHelperUtils::preformatFloat($data['price'][$opt_val_id], $this->language->get('decimal_point')),
+                'price'                  => H::preformatFloat($data['price'][$opt_val_id], $this->language->get('decimal_point')),
                 'prefix'                 => $data['prefix'][$opt_val_id],
                 'sort_order'             => $data['sort_order'][$opt_val_id],
                 'weight'                 => $data['weight'][$opt_val_id],
@@ -1759,6 +1896,7 @@ class ModelCatalogProduct extends Model
      * @param int $option_value_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductOptionValue($product_id, $option_value_id)
     {
@@ -1820,6 +1958,7 @@ class ModelCatalogProduct extends Model
      * @param int $option_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductOptionValues($product_id, $option_id)
     {
@@ -1843,6 +1982,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductDiscounts($product_id)
     {
@@ -1858,6 +1998,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return int mixed
+     * @throws \Exception
      */
     public function getProductSpecials($product_id)
     {
@@ -1873,6 +2014,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductDownloads($product_id)
     {
@@ -1893,6 +2035,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductStores($product_id)
     {
@@ -1910,6 +2053,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductStoresInfo($product_id)
     {
@@ -1933,6 +2077,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductCategories($product_id)
     {
@@ -1953,6 +2098,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductRelated($product_id)
     {
@@ -1974,6 +2120,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductTags($product_id, $language_id = 0)
     {
@@ -2006,6 +2153,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductSEOKeywords($product_id, $language_id = 0)
     {
@@ -2028,9 +2176,10 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      *
      * @return array|int
+     * @throws \Exception
      */
     public function getProducts($data = array())
     {
@@ -2208,6 +2357,7 @@ class ModelCatalogProduct extends Model
      * @param int $stock_status_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByStockStatusId($stock_status_id)
     {
@@ -2215,13 +2365,14 @@ class ModelCatalogProduct extends Model
                                     FROM ".$this->db->table_name("products")."
                                     WHERE stock_status_id = '".(int)$stock_status_id."'");
 
-        return $query->row['total'];
+        return (int)$query->row['total'];
     }
 
     /**
      * @param int $tax_class_id
      *
-     * @return int mixed
+     * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByTaxClassId($tax_class_id)
     {
@@ -2229,13 +2380,14 @@ class ModelCatalogProduct extends Model
                                     FROM ".$this->db->table_name("products")."
                                     WHERE tax_class_id = '".(int)$tax_class_id."'");
 
-        return $query->row['total'];
+        return (int)$query->row['total'];
     }
 
     /**
      * @param int $weight_class_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByWeightClassId($weight_class_id)
     {
@@ -2250,6 +2402,7 @@ class ModelCatalogProduct extends Model
      * @param int $length_class_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByLengthClassId($length_class_id)
     {
@@ -2264,6 +2417,7 @@ class ModelCatalogProduct extends Model
      * @param int $option_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByOptionId($option_id)
     {
@@ -2278,6 +2432,7 @@ class ModelCatalogProduct extends Model
      * @param int $download_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductsByDownloadId($download_id)
     {
@@ -2292,6 +2447,7 @@ class ModelCatalogProduct extends Model
      * @param int $manufacturer_id
      *
      * @return int mixed
+     * @throws \Exception
      */
     public function getTotalProductsByManufacturerId($manufacturer_id)
     {
@@ -2308,6 +2464,7 @@ class ModelCatalogProduct extends Model
      * @param $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductCondition($product_id)
     {
@@ -2342,7 +2499,7 @@ class ModelCatalogProduct extends Model
 
         $output = array();
         // check is product available
-        if (AHelperUtils::dateISO2Int($result->row['date_available']) > time()) {
+        if (H::dateISO2Int($result->row['date_available']) > time()) {
             $output[] = $this->language->get('text_product_unavailable');
         }
 
@@ -2482,13 +2639,26 @@ class ModelCatalogProduct extends Model
 
     /**
      * @param int $product_id
+     * @param array $product_data
+     * @param array $tables
+     *
+     * @throws \abc\core\lib\AException
+     */
+    protected function updateEvent(int $product_id, array $product_data, array $tables)
+    {
+        $product_info = ['product_id'=> $product_id ] + $product_data;
+        H::event('abc\models\admin\product\update', [new ABaseEvent($product_info,$tables)]);
+    }
+
+    /**
+     * @param int $product_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function hasTrackOptions($product_id)
     {
-        $sql
-            = "SELECT *
+        $sql = "SELECT *
                 FROM ".$this->db->table_name('product_option_values')." pov
                 INNER JOIN ".$this->db->table_name('product_options')." po
                     ON (pov.product_option_id = po.product_option_id AND po.status = 1) 

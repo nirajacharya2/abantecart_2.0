@@ -109,6 +109,7 @@ class ABC extends ABCBase
     {
         $config_sections = ['config', 'events'];
         foreach ($config_sections as $config_section) {
+            $KEY = strtoupper($config_section);
             $file_name = $stage_name.'.'.$config_section.'.php';
             $file = dirname(__DIR__).DS.'config'.DS.$file_name;
             $config = @include($file);
@@ -116,7 +117,7 @@ class ABC extends ABCBase
             if ($config) {
                 //if we load additions configs - place it as key of env array
                 if ($config_section != 'config') {
-                    $config = [strtoupper($config_section) => $config];
+                    $config = [$KEY => $config];
                 }
                 self::env($config);
                 self::$stage_name = $stage_name;
@@ -147,11 +148,11 @@ class ABC extends ABCBase
                     $ext_config = @include_once($cfg_file);
                     if (is_array($ext_config)) {
                         //if we load additions configs - place it as key of env array
-                        if ($config_section = 'config') {
+                        if ($config_section == 'config') {
                             self::$env += $ext_config;
                         } else {
-                            self::$env[strtoupper($config_section)] = array_merge(
-                                self::$env[strtoupper($config_section)],
+                            self::$env[$KEY] = array_merge_recursive(
+                                (array)self::$env[$KEY],
                                 $ext_config
                             );
                         }

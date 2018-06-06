@@ -30,6 +30,7 @@ use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
+use abc\extensions\tims\modules\events\AdminProductUpdateEvent;
 use H;
 use Illuminate\Events\Dispatcher;
 
@@ -445,16 +446,18 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
 registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\ACurrency', [$registry]);
 
 //register event listeners
-
+/**
+ * @var Dispatcher $evd
+ */
 $evd = ABC::getObjectByAlias('EventDispatcher');
-foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
-    foreach ($listeners as $listener) {
-        $evd->listen($event_alias, $listener);
+if(is_object($evd)) {
+    foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
+        foreach ($listeners as $listener) {
+            $evd->listen($event_alias, $listener);
+        }
     }
+    $registry->set('events', $evd);
 }
-$registry->set('events', $evd);
-//H::event('ATestEvent',[$registry]);
-
 
 
 /**

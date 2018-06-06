@@ -5,9 +5,6 @@
  */
 return [
 
-    'ATestEvent' =>
-        [
-            \abc\modules\listeners\ATestListener::class,
-        ],
+    'abc\models\admin\product\update' => [],
 ];
 
