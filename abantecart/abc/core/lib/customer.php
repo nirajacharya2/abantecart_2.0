@@ -93,7 +93,7 @@ class ACustomer extends ALibBase
      */
     protected $db;
     /**
-     * @var \abc\core\cache\ALoader
+     * @var \abc\core\engine\ALoader
      */
     protected $load;
     /**
@@ -203,6 +203,7 @@ class ACustomer extends ALibBase
      * @param string $password
      *
      * @return bool
+     * @throws AException
      */
     public function login($loginname, $password)
     {
@@ -271,6 +272,7 @@ class ACustomer extends ALibBase
      * @param $data array
      *
      * @return void
+     * @throws AException
      */
     private function customerInit($data)
     {
@@ -495,9 +497,9 @@ class ACustomer extends ALibBase
     /**
      * @since 1.2.7
      *
-     * @param array  $data_array
+     * @param array $data_array
      * @param string $format
-     * @param array  $locate
+     * @param array $locate
      *
      * @return string
      */
@@ -537,6 +539,7 @@ class ACustomer extends ALibBase
      * Return customer account balance in customer currency based on debit/credit calculation
      *
      * @return float|bool
+     * @throws \Exception
      */
     public function getBalance()
     {
@@ -558,10 +561,11 @@ class ACustomer extends ALibBase
      * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
+     * @throws \Exception
      */
     public function debitTransaction($tr_details)
     {
-        return $this->_record_transaction('debit', $tr_details);
+        return $this->recordTransaction('debit', $tr_details);
     }
 
     /**
@@ -570,10 +574,11 @@ class ACustomer extends ALibBase
      * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
+     * @throws \Exception
      */
     public function creditTransaction($tr_details)
     {
-        return $this->_record_transaction('credit', $tr_details);
+        return $this->recordTransaction('credit', $tr_details);
     }
 
     /**
@@ -613,6 +618,7 @@ class ACustomer extends ALibBase
      * Confirm that current customer is valid
      *
      * @return bool
+     * @throws \Exception
      */
     public function isValidEnabledCustomer()
     {
@@ -734,6 +740,7 @@ class ACustomer extends ALibBase
      * Clear cart from database content
      *
      * @return bool
+     * @throws \Exception
      */
     public function clearCustomerCart()
     {
@@ -784,6 +791,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
+     * @throws \Exception
      */
     public function addToWishList($product_id)
     {
@@ -803,6 +811,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
+     * @throws \Exception
      */
     public function removeFromWishList($product_id)
     {
@@ -872,7 +881,7 @@ class ACustomer extends ALibBase
 
     /**
      * @param string $type
-     * @param array  $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
      * @throws \Exception
