@@ -13,10 +13,11 @@ use abc\core\lib\ABackup as ABackup;
 use abc\core\lib\AOrder;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\APromotion;
+use Illuminate\Events\Dispatcher as EventDispatcher;
 
 return [
-    'AViewRender'   => \abc\core\view\AViewDefaultRender::class,
-    'ALog'          => [
+    'AViewRender'     => \abc\core\view\AViewDefaultRender::class,
+    'ALog'            => [
         ALog::class,
         [
 
@@ -26,13 +27,14 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
-    'ABackup'       => ABackup::class,
-    'AJobManager'   => AJobManager::class,
-    'AJson'         => AJson::class,
-    'ACustomer'     => ACustomer::class,
-    'AAttribute'    => AAttribute::class,
-    'APromotion'    => APromotion::class,
-    'ACart'         => ACart::class,
-    'AOrder'        => AOrder::class,
-    'AOrderManager' => AOrderManager::class,
+    'ABackup'         => ABackup::class,
+    'AJobManager'     => AJobManager::class,
+    'AJson'           => AJson::class,
+    'ACustomer'       => ACustomer::class,
+    'AAttribute'      => AAttribute::class,
+    'APromotion'      => APromotion::class,
+    'ACart'           => ACart::class,
+    'AOrder'          => AOrder::class,
+    'AOrderManager'   => AOrderManager::class,
+    'EventDispatcher' => [EventDispatcher::class, null],
 ];

@@ -30,6 +30,8 @@ use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
+use H;
+use Illuminate\Events\Dispatcher;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
@@ -441,6 +443,20 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
 
 // Currency
 registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\ACurrency', [$registry]);
+
+//register event listeners
+
+$evd = ABC::getObjectByAlias('EventDispatcher');
+foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
+    foreach ($listeners as $listener) {
+        $evd->listen($event_alias, $listener);
+    }
+}
+$registry->set('events', $evd);
+//H::event('ATestEvent',[$registry]);
+
+
+
 /**
  * @param Registry $registry
  * @param string   $item_name
