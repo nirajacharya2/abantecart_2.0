@@ -105,7 +105,7 @@ class Migrate extends BaseCommand
                     ],
                     'example'     => "php abcexec migrate:phinx help\n".
                         "\t  To create new migration:\n\n\t\t   "
-                            ."php abcexec migrate::phinx create YourMigrationClassName\n\n"
+                            ."php abcexec migrate::phinx create YourMigrationClassName --stage=default\n\n"
                         ."\t  To run all new migrations:\n\n\t\t   "
                             ."php abcexec migrate::phinx migrate --stage=default\n\n"
                         ."\t  To rollback last migration:\n\n\t\t   "
