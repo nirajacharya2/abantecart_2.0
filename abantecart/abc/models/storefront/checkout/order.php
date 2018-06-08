@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,6 +29,8 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\core\lib\AMessage;
 use abc\core\view\AView;
+use abc\modules\events\ABaseEvent;
+use H;
 use stdClass;
 
 if (!class_exists('abc\core\ABC')) {
@@ -49,6 +51,7 @@ class ModelCheckoutOrder extends Model
      * @param $order_id
      *
      * @return array|bool
+     * @throws \abc\core\lib\AException
      */
     public function getOrder($order_id)
     {
@@ -129,6 +132,7 @@ class ModelCheckoutOrder extends Model
      * @param int|string $set_order_id
      *
      * @return bool|int
+     * @throws \abc\core\lib\AException
      */
     public function _create($data, $set_order_id = '')
     {
@@ -148,7 +152,7 @@ class ModelCheckoutOrder extends Model
                 }
                 //remove
             } else {
-                $this->_remove_order($query->row['order_id']);
+                $this->removeOrder($query->row['order_id']);
             }
         }
 
@@ -161,7 +165,7 @@ class ModelCheckoutOrder extends Model
                     strtotime('-'.(int)$this->config->get('config_expire_order_days').' days'))."'
                         AND order_status_id = '0'");
             foreach ($query->rows as $result) {
-                $this->_remove_order($result['order_id']);
+                $this->removeOrder($result['order_id']);
             }
         }
 
@@ -298,6 +302,8 @@ class ModelCheckoutOrder extends Model
 
         //save IM URI of order
         $this->saveIMOrderData($order_id, $data);
+        //call event
+        H::event('abc\models\storefront\order@create', [new ABaseEvent($order_id, $data)]);
         return $order_id;
     }
 
@@ -345,10 +351,14 @@ class ModelCheckoutOrder extends Model
      * @param int $order_id
      * @param int $order_status_id
      * @param string $comment
+     *
+     * @throws \abc\core\lib\AException
      */
     public function confirm($order_id, $order_status_id, $comment = '')
     {
         $this->extensions->hk_confirm($this, $order_id, $order_status_id, $comment);
+        //call event
+        H::event('abc\models\storefront\order@confirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);
     }
 
     /**
@@ -357,6 +367,7 @@ class ModelCheckoutOrder extends Model
      * @param string $comment
      *
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     public function _confirm($order_id, $order_status_id, $comment = '')
     {
@@ -779,10 +790,14 @@ class ModelCheckoutOrder extends Model
      * @param int $order_status_id
      * @param string $comment
      * @param bool|false $notify
+     *
+     * @throws \abc\core\lib\AException
      */
     public function update($order_id, $order_status_id, $comment = '', $notify = false)
     {
         $this->extensions->hk_update($this, $order_id, $order_status_id, $comment, $notify);
+        //call event
+        H::event('abc\models\storefront\order@update', [new ABaseEvent($order_id, $order_status_id, $comment, $notify)]);
     }
 
     /**
@@ -790,12 +805,15 @@ class ModelCheckoutOrder extends Model
      * @param int $order_status_id
      * @param string $comment
      * @param bool $notify
+     *
+     * @throws \abc\core\lib\AException
      */
     public function _update($order_id, $order_status_id, $comment = '', $notify = false)
     {
         $order_query = $this->db->query("SELECT *
                                          FROM `".$this->db->table_name("orders")."` o
-                                         LEFT JOIN ".$this->db->table_name("languages")." l ON (o.language_id = l.language_id)
+                                         LEFT JOIN ".$this->db->table_name("languages")." l 
+                                            ON (o.language_id = l.language_id)
                                          WHERE o.order_id = '".(int)$order_id."' AND o.order_status_id > '0'");
 
         if ($order_query->num_rows) {
@@ -946,12 +964,14 @@ class ModelCheckoutOrder extends Model
      * @return bool
      * @throws \Exception
      */
-    private function _remove_order($order_id)
+    protected function removeOrder($order_id)
     {
         $order_id = (int)$order_id;
         if (!$order_id) {
             return false;
         }
+
+        H::event('abc\models\storefront\order@remove', [new ABaseEvent($order_id)]);
 
         $this->db->query("DELETE FROM `".$this->db->table_name("order_history")."` WHERE order_id = '".$order_id."'");
         $this->db->query("DELETE FROM `".$this->db->table_name("order_products")."` WHERE order_id = '".$order_id."'");
