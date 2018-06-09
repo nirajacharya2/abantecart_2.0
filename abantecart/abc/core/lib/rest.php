@@ -29,7 +29,6 @@ if (!class_exists('abc\core\ABC')) {
 
 class ARest
 {
-
     private $request = array();
     private $response = array();
     private $responseStatus;
@@ -124,13 +123,7 @@ class ARest
                 break;
         }
         $this->request['content-type'] = $this->_getResponseFormat($this->request['format']);
-        if (!function_exists('trim_value')) {
-            function trim_value(&$value)
-            {
-                $value = trim($value);
-            }
-        }
-        array_walk_recursive($this->request, 'trim_value');
+        array_walk_recursive($this->request, 'trim');
     }
 
     /*
