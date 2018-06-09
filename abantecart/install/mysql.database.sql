@@ -173,7 +173,7 @@ CREATE TABLE `ac_language_definitions` (
   `block` varchar(160) NOT NULL,
   `language_key` varchar(170) NOT NULL,
   `language_value` text NOT NULL COMMENT 'translatable',
-  `date_added` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`language_definition_id`, `language_id`, `section`, `block`, `language_key`),
 	FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC)
@@ -206,9 +206,9 @@ CREATE TABLE `ac_customers` (
   `customer_group_id` int(11) NOT NULL,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '0',
   `data` text DEFAULT null,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `last_login` timestamp DEFAULT '0000-00-00 00:00:00',
+  `last_login` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
   UNIQUE KEY `customers_loginname` (`loginname`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -223,7 +223,7 @@ CREATE TABLE `ac_locations` (
   `location_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`location_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -8655,7 +8655,7 @@ CREATE TABLE `ac_zones_to_locations` (
   `country_id` int(11) NOT NULL,
   `zone_id` int(11) NOT NULL DEFAULT '0',
   `location_id` int(11) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`zone_to_location_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -8763,7 +8763,7 @@ CREATE TABLE `ac_categories` (
   `parent_id` int(11) NOT NULL DEFAULT '0',
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`category_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -8809,7 +8809,7 @@ CREATE TABLE `ac_coupons` (
   `uses_total` int(11) NOT NULL,
   `uses_customer` varchar(11) COLLATE utf8_general_ci NOT NULL,
   `status` int(1) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`coupon_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -8877,7 +8877,7 @@ CREATE TABLE `ac_online_customers` (
   `ip` varchar(50) NOT NULL,
   `url` text NOT NULL,
   `referer` text NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ip`),
   KEY `ac_online_customers_idx` (`date_added`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -8896,7 +8896,7 @@ CREATE TABLE `ac_downloads` (
   `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
   `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
   `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY (`download_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -8936,8 +8936,8 @@ CREATE TABLE `ac_extensions` (
   `priority` smallint(1) NOT NULL DEFAULT 0,
   `version` varchar(32),
   `license_key` varchar(32),
-  `date_installed` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `date_added` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `date_installed` timestamp NULL default NULL,
+  `date_added` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`extension_id`),
   UNIQUE KEY `extension_key` (`key`)
@@ -8987,7 +8987,7 @@ CREATE TABLE `ac_banners` (
 	`blank` tinyint(1) NOT NULL DEFAULT '0',
 	`target_url` text COLLATE utf8_general_ci DEFAULT '',
 	`sort_order` int(11) NOT NULL,
-	`date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`banner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -8999,7 +8999,7 @@ CREATE TABLE `ac_banner_descriptions` (
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `description` LONGTEXT COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `meta` text(1500) DEFAULT '' COMMENT 'translatable',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`banner_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -9023,7 +9023,7 @@ CREATE TABLE `ac_length_classes` (
   `length_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `value` decimal(15,8) NOT NULL,
   `iso_code` VARCHAR(5) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`length_class_id`,`iso_code`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9189,7 +9189,7 @@ CREATE TABLE `ac_orders` (
   `currency` varchar(3) COLLATE utf8_general_ci NOT NULL,
   `value` decimal(15,8) NOT NULL,
   `coupon_id` int(11) NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `payment_method_data` text COLLATE utf8_general_ci NOT NULL,
@@ -9220,12 +9220,12 @@ CREATE TABLE `ac_customer_transactions` (
   `order_id` int(11) NOT NULL DEFAULT '0',
   `created_by` int(11) NOT NULL  COMMENT 'user_id for admin, customer_id for storefront section',
   `section` smallint(1) NOT NULL DEFAULT '0' COMMENT '1 - admin, 0 - customer',
-  `credit` DECIMAL(14,4) DEFAULT '0',
-  `debit` DECIMAL(14,4) DEFAULT '0',
+  `credit` DECIMAL(15,4) DEFAULT '0',
+  `debit` DECIMAL(15,4) DEFAULT '0',
   `transaction_type` varchar(255) NOT NULL DEFAULT '' COMMENT 'text type of transaction',
   `comment` text COMMENT 'comment for internal use',
   `description` text COMMENT 'text for customer',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`customer_transaction_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9237,7 +9237,7 @@ CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `cus
 
 CREATE TABLE `ac_tax_classes` (
   `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`tax_class_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9276,7 +9276,7 @@ CREATE TABLE `ac_tax_rates` (
   `threshold_condition` char(2) COLLATE utf8_general_ci NOT NULL, -- '<=', '>=', '==' or '<'
   `threshold` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `tax_exempt_groups` text DEFAULT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`tax_rate_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9407,7 +9407,7 @@ CREATE TABLE `ac_products` (
   `cost` DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `call_to_order` smallint NOT NULL default '0',
   `settings` LONGTEXT COLLATE utf8_general_ci,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9454,7 +9454,7 @@ CREATE TABLE `ac_order_downloads` (
   `activate` VARCHAR(64) NOT NULL,
   `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
   `attributes_data` longtext COLLATE utf8_general_ci  DEFAULT NULL,  -- serialized values
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_download_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9485,7 +9485,7 @@ CREATE TABLE `ac_order_data_types` (
   `type_id` int(11) NOT NULL AUTO_INCREMENT,
   `language_id` int(11) NOT NULL,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY (`type_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9499,7 +9499,7 @@ CREATE TABLE `ac_order_data` (
   `order_id` int(11) NOT NULL,
   `type_id` int(11) NOT NULL,
   `data` text COLLATE utf8_general_ci DEFAULT NULL,  -- serialized values
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_id`, `type_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -9512,7 +9512,7 @@ CREATE TABLE `ac_order_history` (
   `order_status_id` int(5) NOT NULL,
   `notify` int(1) NOT NULL DEFAULT '0',
   `comment` text COLLATE utf8_general_ci NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_history_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9588,7 +9588,7 @@ CREATE TABLE `ac_product_discounts` (
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `date_start` date NOT NULL DEFAULT '0000-00-00',
   `date_end` date NOT NULL DEFAULT '0000-00-00',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_discount_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9623,7 +9623,7 @@ CREATE TABLE `ac_product_specials` (
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `date_start` date NOT NULL DEFAULT '0000-00-00',
   `date_end` date NOT NULL DEFAULT '0000-00-00',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_special_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9690,7 +9690,7 @@ CREATE TABLE `ac_reviews` (
   `text` longtext COLLATE utf8_general_ci NOT NULL,
   `rating` int(1) NOT NULL,
   `status` int(1) NOT NULL DEFAULT '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`review_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -9706,7 +9706,7 @@ CREATE TABLE `ac_settings` (
   `group` varchar(32) COLLATE utf8_general_ci NOT NULL,
   `key` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `value` text COLLATE utf8_general_ci NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  PRIMARY KEY (`setting_id`, `store_id`, `group`, `key`),
  FULLTEXT INDEX `ac_settings_idx` (`value` ASC)
@@ -9978,7 +9978,7 @@ CREATE TABLE `ac_user_groups` (
   `user_group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL,
   `permission` longtext COLLATE utf8_general_ci NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_group_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -10005,8 +10005,8 @@ CREATE TABLE `ac_users` (
   `email` varchar(96) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `status` int(1) NOT NULL,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `last_login` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `last_login` datetime NULL DEFAULT NULL,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=2;
@@ -10021,7 +10021,7 @@ CREATE TABLE `ac_user_notifications` (
   `sendpoint` varchar(255) NOT NULL,
   `protocol` varchar(30) NOT NULL,
   `uri` text NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`,`store_id`,`section`,`sendpoint`,`protocol`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -10032,7 +10032,7 @@ CREATE TABLE `ac_customer_notifications` (
   `sendpoint` varchar(255) NOT NULL,
   `protocol` varchar(30) NOT NULL,
   `status` int(1) NOT NULL DEFAULT '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`customer_id`,`sendpoint`,`protocol`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -10045,7 +10045,7 @@ CREATE TABLE `ac_weight_classes` (
   `weight_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `value` decimal(15,8) NOT NULL DEFAULT '0.00000000',
   `iso_code` VARCHAR(5) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`weight_class_id`,`iso_code`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -10093,7 +10093,7 @@ CREATE TABLE `ac_pages` (
   `controller` varchar(100) NOT NULL,
   `key_param` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
   `key_value` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`page_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10127,7 +10127,7 @@ CREATE TABLE `ac_page_descriptions` (
   `keywords` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `content` text DEFAULT NULL COMMENT 'translatable', -- Contain the page details if custom content
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`page_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10174,7 +10174,7 @@ CREATE TABLE `ac_content_descriptions` (
   `title` varchar(255) NOT NULL COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `content` longtext NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`content_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10204,7 +10204,7 @@ CREATE TABLE `ac_blocks` (
   `block_id` int(10) NOT NULL auto_increment,
   `block_txt_id` varchar(255) NOT NULL,
   `controller` varchar(255) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`block_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10249,7 +10249,7 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 CREATE TABLE `ac_custom_blocks` (
   `custom_block_id` int(10) NOT NULL auto_increment,
   `block_id` int(10) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`custom_block_id`, `block_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10263,7 +10263,7 @@ CREATE TABLE `ac_custom_lists` (
   `data_type` varchar(70) NOT NULL,
   `id` int(10) NOT NULL,
   `sort_order` int(10) NOT NULL DEFAULT 0,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`rowid`),
   INDEX `ac_custom_block_id_list_idx` (`custom_block_id` )
@@ -10282,7 +10282,7 @@ CREATE TABLE `ac_block_descriptions` (
   `title` varchar(255) NOT NULL COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `content` longtext NOT NULL DEFAULT '', -- Contain the block details if custom content
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`block_description_id`, `custom_block_id`, `language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10294,7 +10294,7 @@ CREATE TABLE `ac_block_templates` (
   `block_id` int(10) NOT NULL auto_increment,
   `parent_block_id` int(10) NOT NULL DEFAULT 0, -- Placeholder where this block can be placed. 0 - any location
   `template` varchar(255) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`block_id`, `parent_block_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10394,7 +10394,7 @@ CREATE TABLE `ac_layouts` (
   `template_id` varchar(100) NOT NULL,
   `layout_name` varchar(255) NOT NULL default '',
   `layout_type` smallint(1) NOT NULL default '0', -- 0 Default, 1 Active layout, 2 draft layout, 3 template layout
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`layout_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10441,7 +10441,7 @@ CREATE TABLE `ac_block_layouts` (
   `parent_instance_id` int(10) NOT NULL default '0', -- 0 for main level block
   `position` smallint(5) NOT NULL default '0',
   `status` smallint(1) NOT NULL default '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`instance_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -10795,7 +10795,7 @@ CREATE TABLE `ac_messages` (
   `status` char(1) NOT NULL default '',
   `viewed` int(11) NOT NULL default '0',
   `repeated` int(11) NOT NULL default '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`msg_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -10807,8 +10807,8 @@ CREATE TABLE `ac_messages` (
 CREATE TABLE `ac_ant_messages` (
   `id` varchar(60) NOT NULL,
   `priority` int(11) NOT NULL DEFAULT 0,
-  `start_date` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `end_date` timestamp,
+  `start_date` timestamp NULL default NULL,
+  `end_date` timestamp NULL default NULL,
   `viewed_date` timestamp,
   `viewed` int(11) NOT NULL default '0',
   `title` varchar(255) DEFAULT NULL,
@@ -12100,7 +12100,7 @@ INSERT INTO `ac_resource_types` (`type_id`, `type_name`, `default_icon`, `defaul
 CREATE TABLE `ac_resource_library` (
   `resource_id` int(11) NOT NULL auto_increment,
   `type_id` int(11) NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`resource_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=100000;
@@ -12119,7 +12119,7 @@ CREATE TABLE `ac_resource_descriptions` (
   `description` text DEFAULT NULL NULL COMMENT 'translatable',
   `resource_path` varchar(255) DEFAULT NULL,
   `resource_code` text DEFAULT NULL,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`resource_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci ;
@@ -12322,7 +12322,7 @@ CREATE TABLE `ac_resource_map` (
   `object_id` int(11) NOT NULL,
   `default`tinyint(1) NOT NULL DEFAULT '0' COMMENT '0-no, 1-Yes',
   `sort_order` int(3) NOT NULL DEFAULT '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY ( `resource_id`, `object_name`, `object_id` )
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -12421,7 +12421,7 @@ CREATE TABLE `ac_global_attributes_type_descriptions` (
   `attribute_type_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `type_name` varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`attribute_type_id`,`language_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='utf8_general_ci';
@@ -12501,12 +12501,12 @@ CREATE TABLE `ac_tasks` (
   `starter` int(11) DEFAULT NULL COMMENT '0 - storefront, 1 - admin side, 2 - any',
   `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
   `start_time` datetime DEFAULT NULL,
-  `last_time_run` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `last_time_run` timestamp NULL default NULL,
   `progress` int(11) NOT NULL DEFAULT '0' COMMENT 'percentage of progress',
   `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
   `run_interval` INT(11) NOT NULL DEFAULT '0' COMMENT 'interval in seconds since last run, 0 - without interval',
   `max_execution_time` int(11) DEFAULT '0',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_name_idx` (`name`)
@@ -12517,7 +12517,7 @@ CREATE TABLE `ac_task_details` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
   `created_by` varchar(255) DEFAULT '',
   `settings` LONGTEXT DEFAULT '',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`task_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -12528,12 +12528,12 @@ CREATE TABLE `ac_task_steps` (
   `task_id` int(11) NOT NULL,
   `sort_order` int(11) DEFAULT '0',
   `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
-  `last_time_run` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `last_time_run` timestamp NULL default NULL,
   `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
   `max_execution_time` int(11) DEFAULT '0',
   `controller` varchar(255) DEFAULT '',
   `settings` LONGTEXT DEFAULT '',
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`step_id`),
   KEY `task_steps_idx` (`task_id`)
@@ -12864,12 +12864,12 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
       `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
       `configuration` longtext COMMENT 'configuration for job-class',
       `start_time` datetime DEFAULT NULL,
-      `last_time_run` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+      `last_time_run` timestamp NULL DEFAULT NULL,
       `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
       `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
       `actor_id` int(11) DEFAULT 0,
       `actor_name` varchar(128) DEFAULT '',
-      `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+      `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
       `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (`job_id`, `job_name`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

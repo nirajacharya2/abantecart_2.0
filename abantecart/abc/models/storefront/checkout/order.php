@@ -41,7 +41,7 @@ if (!class_exists('abc\core\ABC')) {
  * Class ModelCheckoutOrder
  *
  * @property  ModelLocalisationCountry $model_localisation_country
- * @property  ModelLocalisationZone $model_localisation_zone
+ * @property  ModelLocalisationZone    $model_localisation_zone
  */
 class ModelCheckoutOrder extends Model
 {
@@ -113,7 +113,7 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param array $data
+     * @param array    $data
      * @param null|int $set_order_id
      *
      * @return null|mixed
@@ -128,7 +128,7 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param array $data
+     * @param array      $data
      * @param int|string $set_order_id
      *
      * @return bool|int
@@ -348,8 +348,8 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param int $order_id
-     * @param int $order_status_id
+     * @param int    $order_id
+     * @param int    $order_status_id
      * @param string $comment
      *
      * @throws \abc\core\lib\AException
@@ -357,13 +357,13 @@ class ModelCheckoutOrder extends Model
     public function confirm($order_id, $order_status_id, $comment = '')
     {
         $this->extensions->hk_confirm($this, $order_id, $order_status_id, $comment);
-        //call event
+        //trigger an event
         H::event('abc\models\storefront\order@confirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);
     }
 
     /**
-     * @param int $order_id
-     * @param int $order_status_id
+     * @param int    $order_id
+     * @param int    $order_status_id
      * @param string $comment
      *
      * @return bool
@@ -786,9 +786,9 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param int $order_id
-     * @param int $order_status_id
-     * @param string $comment
+     * @param int        $order_id
+     * @param int        $order_status_id
+     * @param string     $comment
      * @param bool|false $notify
      *
      * @throws \abc\core\lib\AException
@@ -801,10 +801,10 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param int $order_id
-     * @param int $order_status_id
+     * @param int    $order_id
+     * @param int    $order_status_id
      * @param string $comment
-     * @param bool $notify
+     * @param bool   $notify
      *
      * @throws \abc\core\lib\AException
      */
@@ -918,8 +918,8 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param int $order_id
-     * @param int $order_status_id
+     * @param int    $order_id
+     * @param int    $order_status_id
      * @param string $comment
      *
      * @return null
@@ -938,7 +938,7 @@ class ModelCheckoutOrder extends Model
     }
 
     /**
-     * @param int $order_id
+     * @param int          $order_id
      * @param string|array $data
      *
      * @return stdClass
