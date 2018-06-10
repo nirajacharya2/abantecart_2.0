@@ -64,7 +64,7 @@ class ProductOptionValue extends AModelBase
         'default',
     ];
 
-    public function product_option()
+    public function option()
     {
         return $this->belongsTo(ProductOption::class, 'product_option_id');
     }
@@ -74,8 +74,19 @@ class ProductOptionValue extends AModelBase
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function order_options()
+    public function option_value_descriptions()
     {
-        return $this->hasMany(OrderOption::class, 'product_option_value_id');
+        return $this->hasMany(ProductOptionValueDescription::class, 'product_option_value_id');
     }
+
+//    public function order_options()
+//    {
+//        return $this->hasMany(OrderOption::class, 'product_option_value_id');
+//    }
+
+    public function getAllData() {
+        $this->load('option_value_descriptions');
+        return $this->toArray();
+    }
+
 }

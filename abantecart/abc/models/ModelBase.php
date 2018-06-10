@@ -18,19 +18,58 @@
 
 namespace abc\models;
 
+use abc\core\engine\Registry;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use abc\core\helper\AHelperUtils;
 use Exception;
 
+/**
+ * Class AModelBase
+ *
+ * @package abc\models
+ */
 class AModelBase extends OrmModel
 {
+    /**
+     *
+     */
     const CREATED_AT = 'date_added';
+    /**
+     *
+     */
     const UPDATED_AT = 'date_modified';
+    /**
+     *
+     */
     const CLI = 0;
+    /**
+     *
+     */
     const ADMIN = 1;
+    /**
+     *
+     */
     const CUSTOMER = 2;
 
+    /**
+     * @var array
+     */
     protected $actor;
+    /**
+     * @var Registry
+     */
+    protected $registry;
+    /**
+     * @var \abc\core\lib\AConfig
+     */
+    protected $config;
+    /**
+     * @var \abc\core\cache\ACache
+     */
+    protected $cache;
+    /**
+     * @var array
+     */
     protected $permisions = [
         self::CLI => ['update', 'delete'],
         self::ADMIN => ['update', 'delete'],
@@ -43,6 +82,9 @@ class AModelBase extends OrmModel
     public function __construct()
     {
         $this->actor = AHelperUtils::recognizeUser();
+        $this->registry = Registry::getInstance();
+        $this->config = $this->registry->get('config');
+        $this->cache = $this->registry->get('cache');
     }
 
     /**
