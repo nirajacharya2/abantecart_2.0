@@ -6,6 +6,7 @@ use abc\core\ABC;
 use abc\core\lib\AResourceManager;
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
+use abc\models\base\ProductsToCategory;
 
 /**
  * Class Product
@@ -248,7 +249,7 @@ class Product extends AModelBase
     /**
      * @return mixed
      */
-    public function products_to_categories()
+    public function to_categories()
     {
         return $this->hasMany(ProductsToCategory::class, 'product_id');
     }
@@ -256,7 +257,7 @@ class Product extends AModelBase
     /**
      * @return mixed
      */
-    public function products_to_downloads()
+    public function to_downloads()
     {
         return $this->hasMany(ProductsToDownload::class, 'product_id');
     }
@@ -264,7 +265,7 @@ class Product extends AModelBase
     /**
      * @return mixed
      */
-    public function products_to_stores()
+    public function to_stores()
     {
         return $this->hasMany(ProductsToStore::class, 'product_id');
     }
@@ -306,6 +307,40 @@ class Product extends AModelBase
             $this->cache->push($cache_key, $data);
         }
         return $data;
+    }
+
+    /**
+     * @param mixed $categoryIDs
+     */
+    public function updateCategories($categoryIDs)
+    {
+        if (!is_array($categoryIDs)) {
+            $categoryIDs = explode(',', $categoryIDs);
+        }
+        ProductsToCategory::where($this->primaryKey, $this->getKey())->delete();
+        foreach ($categoryIDs as $cid) {
+            if (is_numeric($cid)) {
+                $this->db->table('products_to_categories')->insert([$this->primaryKey => $this->getKey(), 'category_id' => trim($cid)]);
+             //   $pc = ProductsToCategory::create([$this->primaryKey => $this->getKey(), 'category_id' => trim($cid)]);
+            }
+        }
+    }
+
+    /**
+     * @param mixed $storeIDs
+     */
+    public function updateStores($storeIDs)
+    {
+        if (!is_array($storeIDs)) {
+            $storeIDs = explode(',', $storeIDs);
+        }
+        ProductsToStore::where($this->primaryKey, $this->getKey())->delete();
+        foreach ($storeIDs as $sid) {
+            if (is_numeric($sid)) {
+                $this->db->table('products_to_stores')->insert([$this->primaryKey => $this->getKey(), 'store_id' => trim($sid)]);
+                //   $pc = ProductsToStore::create([$this->primaryKey => $this->getKey(), 'store_id' => trim($sid)]);
+            }
+        }
     }
 
     /**

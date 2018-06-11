@@ -73,6 +73,10 @@ class AModelBase extends OrmModel
      */
     protected $cache;
     /**
+     * @var \abc\core\lib\db
+     */
+    protected $db;
+    /**
      * @var array
      */
     protected $errors;
@@ -92,6 +96,7 @@ class AModelBase extends OrmModel
         $this->registry = Registry::getInstance();
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
+        $this->db = $this->registry->get('db');
     }
 
     /**

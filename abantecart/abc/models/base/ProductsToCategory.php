@@ -17,8 +17,14 @@ use abc\models\AModelBase;
  */
 class ProductsToCategory extends AModelBase
 {
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
+
+    protected $primaryKeySet = [
+        'product_id',
+        'category_id'
+    ];
 
     protected $casts = [
         'product_id'  => 'int',
