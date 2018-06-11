@@ -67,7 +67,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     }
 
     /**
-     * @return null
+     * @throws \Exception
      */
     public function post()
     {
@@ -81,22 +81,30 @@ class ControllerApiCatalogProduct extends AControllerAPI
         if (isset($request['update_by']) && $request['update_by']) {
             $updateBy = $request['update_by'];
         }
-        $product = null;
+
         if ($updateBy) {
             $product = Product::where([$updateBy => $request[$updateBy]])->first();
             if ($product === null) {
-                $this->rest->setResponseData(array('Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"));
+                $this->rest->setResponseData(
+                    ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
+                );
                 $this->rest->sendResponse(200);
                 return null;
             }
-            $product = $this->udpateProduct($product, $request);
+            $product = $this->updateProduct($product, $request);
         } else {
             $product = $this->createProduct($request);
         }
 
+        if ($product === false) {
+            $this->rest->setResponseData("Product was not created. Please fill required fields.");
+            $this->rest->sendResponse(200);
+            return null;
+        }
         if ($product->errors()) {
             $this->rest->setResponseData($product->errors());
             $this->rest->sendResponse(200);
+            return null;
         }
         if (!$product_id = $product->getKey()) {
             $this->rest->setResponseData("Product was not created");
@@ -105,8 +113,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $result = [
-            'status' => $updateBy ? 'updated' : 'created',
-            'product_id'  => $product_id
+            'status'     => $updateBy ? 'updated' : 'created',
+            'product_id' => $product_id,
         ];
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
@@ -118,8 +126,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param $data
      *
      * @return Product
+     * @throws \Exception
      */
-    private function createProduct($data) {
+    private function createProduct($data)
+    {
+        if (!$data['descriptions'] || !current($data['descriptions'])['name']) {
+            return false;
+        }
         $product = new Product();
         $product->fill($data)->save();
         //create defined relationships
@@ -132,16 +145,19 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
         $product->updateRelationships($rels);
 
+        $product->updateImages($data);
+
         return $product;
     }
 
     /**
-     * @param $product
+     * @param Product $product
      * @param $data
      *
      * @return mixed
      */
-    private function udpateProduct($product, $data) {
+    private function updateProduct($product, $data)
+    {
         $product->update($data);
         $expected_relations = ['descriptions', 'tags', 'options'];
         $rels = [];
@@ -151,7 +167,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         $product->updateRelationships($rels);
+        $product->updateImages($data);
 
         return $product;
     }
+
 }

@@ -13,6 +13,7 @@ use abc\core\lib\ABackup as ABackup;
 use abc\core\lib\AOrder;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\APromotion;
+use abc\core\lib\AResourceManager;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 
 return [
@@ -27,6 +28,7 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
+    'AResourceManager'=> AResourceManager::class,
     'ABackup'         => ABackup::class,
     'AJobManager'     => AJobManager::class,
     'AJson'           => AJson::class,

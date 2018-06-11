@@ -2,44 +2,46 @@
 
 namespace abc\models\base;
 
+use abc\core\ABC;
+use abc\core\lib\AResourceManager;
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
 
 /**
  * Class Product
  *
- * @property int                                      $product_id
- * @property string                                   $model
- * @property string                                   $sku
- * @property string                                   $location
- * @property int                                      $quantity
- * @property string                                   $stock_checkout
- * @property int                                      $stock_status_id
- * @property int                                      $manufacturer_id
- * @property int                                      $shipping
- * @property int                                      $ship_individually
- * @property int                                      $free_shipping
- * @property float                                    $shipping_price
- * @property float                                    $price
- * @property int                                      $tax_class_id
- * @property \Carbon\Carbon                           $date_available
- * @property float                                    $weight
- * @property int                                      $weight_class_id
- * @property float                                    $length
- * @property float                                    $width
- * @property float                                    $height
- * @property int                                      $length_class_id
- * @property int                                      $status
- * @property int                                      $viewed
- * @property int                                      $sort_order
- * @property int                                      $subtract
- * @property int                                      $minimum
- * @property int                                      $maximum
- * @property float                                    $cost
- * @property int                                      $call_to_order
- * @property string                                   $settings
- * @property \Carbon\Carbon                           $date_added
- * @property \Carbon\Carbon                           $date_modified
+ * @property int $product_id
+ * @property string $model
+ * @property string $sku
+ * @property string $location
+ * @property int $quantity
+ * @property string $stock_checkout
+ * @property int $stock_status_id
+ * @property int $manufacturer_id
+ * @property int $shipping
+ * @property int $ship_individually
+ * @property int $free_shipping
+ * @property float $shipping_price
+ * @property float $price
+ * @property int $tax_class_id
+ * @property \Carbon\Carbon $date_available
+ * @property float $weight
+ * @property int $weight_class_id
+ * @property float $length
+ * @property float $width
+ * @property float $height
+ * @property int $length_class_id
+ * @property int $status
+ * @property int $viewed
+ * @property int $sort_order
+ * @property int $subtract
+ * @property int $minimum
+ * @property int $maximum
+ * @property float $cost
+ * @property int $call_to_order
+ * @property string $settings
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property \Illuminate\Database\Eloquent\Collection $coupons_products
  * @property \Illuminate\Database\Eloquent\Collection $order_products
@@ -51,7 +53,7 @@ use abc\core\engine\AResource;
  * @property \Illuminate\Database\Eloquent\Collection $product_options
  * @property \Illuminate\Database\Eloquent\Collection $product_specials
  * @property \Illuminate\Database\Eloquent\Collection $product_tags
- * @property \abc\models\base\ProductsFeatured        $products_featured
+ * @property \abc\models\base\ProductsFeatured $products_featured
  * @property \Illuminate\Database\Eloquent\Collection $products_related
  * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
  * @property \Illuminate\Database\Eloquent\Collection $products_to_downloads
@@ -280,10 +282,10 @@ class Product extends AModelBase
      */
     public function rules()
     {
-        //todo Complete validation implementaion
+        //todo Complete validation implementation
         return [
             'model' => 'required|alpha|min:3',
-            'sku'  => 'required',
+            'sku'   => 'required',
         ];
     }
 
@@ -427,5 +429,31 @@ class Product extends AModelBase
         }
 
         return $total_quantity;
+    }
+
+    public function updateImages($data = [], $language_id = null)
+    {
+
+        if (!$data['images'] || !is_array($data['images'])) {
+            return false;
+        }
+        if (!$language_id && $data['language_id']) {
+            $language_id = (int)$data['language_id'];
+        }
+
+        $resource_mdl = new ResourceLibrary();
+        $desc = $this->descriptions()->get()->toArray();
+
+        if (!$language_id) {
+            $title = current($desc)['name'];
+        } else {
+            $title = $desc[$language_id]['name'];
+        }
+
+        $result = $resource_mdl->updateImageResourcesByUrls($data, 'products', $this->product_id, $title, $language_id);
+        if (!$result) {
+            $this->errors = array_merge($this->errors, $resource_mdl->errors());
+        }
+        return $result;
     }
 }
