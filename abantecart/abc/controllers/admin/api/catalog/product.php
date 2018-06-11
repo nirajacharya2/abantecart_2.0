@@ -25,8 +25,16 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
+/**
+ * Class ControllerApiCatalogProduct
+ *
+ * @package abc\controllers\admin
+ */
 class ControllerApiCatalogProduct extends AControllerAPI
 {
+    /**
+     *
+     */
     const DEFAULT_STATUS = 1;
 
     /**
@@ -43,14 +51,14 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        $procuct = Product::find($request['product_id']);
-        if ($procuct === null) {
+        $product = Product::find($request['product_id']);
+        if ($product === null) {
             $this->rest->setResponseData(array('Error' => "Product with ID {$request['product_id']} does not exist"));
             $this->rest->sendResponse(200);
             return null;
         }
 
-        $data = $procuct->getAllData();
+        $data = $product->getAllData();
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
@@ -58,27 +66,92 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->rest->sendResponse(200);
     }
 
+    /**
+     * @return null
+     */
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $request = $this->rest->getRequestParams();
+        //are we updating or creating
+        $updateBy = null;
+        if (isset($request['product_id']) && $request['product_id']) {
+            $updateBy = 'product_id';
+        }
+        if (isset($request['update_by']) && $request['update_by']) {
+            $updateBy = $request['update_by'];
+        }
+        $product = null;
+        if ($updateBy) {
+            $product = Product::where([$updateBy => $request[$updateBy]])->first();
+            if ($product === null) {
+                $this->rest->setResponseData(array('Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"));
+                $this->rest->sendResponse(200);
+                return null;
+            }
+            $product = $this->udpateProduct($product, $request);
+        } else {
+            $product = $this->createProduct($request);
+        }
 
+        if ($product->errors()) {
+            $this->rest->setResponseData($product->errors());
+            $this->rest->sendResponse(200);
+        }
+        if (!$product_id = $product->getKey()) {
+            $this->rest->setResponseData("Product was not created");
+            $this->rest->sendResponse(200);
+            return null;
+        }
 
-
-
+        $result = [
+            'status' => $updateBy ? 'updated' : 'created',
+            'product_id'  => $product_id
+        ];
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->rest->setResponseData($customer_details);
+        $this->rest->setResponseData($result);
         $this->rest->sendResponse(200);
     }
 
-    private function createProduct() {
+    /**
+     * @param $data
+     *
+     * @return Product
+     */
+    private function createProduct($data) {
+        $product = new Product();
+        $product->fill($data)->save();
+        //create defined relationships
+        $expected_relations = ['descriptions', 'tags', 'options'];
+        $rels = [];
+        foreach ($expected_relations as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $rels[$key] = $data[$key];
+            }
+        }
+        $product->updateRelationships($rels);
 
+        return $product;
     }
 
-    private function udpateProduct() {
+    /**
+     * @param $product
+     * @param $data
+     *
+     * @return mixed
+     */
+    private function udpateProduct($product, $data) {
+        $product->update($data);
+        $expected_relations = ['descriptions', 'tags', 'options'];
+        $rels = [];
+        foreach ($expected_relations as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $rels[$key] = $data[$key];
+            }
+        }
+        $product->updateRelationships($rels);
 
+        return $product;
     }
-
 }

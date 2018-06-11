@@ -256,7 +256,7 @@ class Product extends AModelBase
      */
     public function products_to_downloads()
     {
-        return $this->hasMany(ProductsToDownloads::class, 'product_id');
+        return $this->hasMany(ProductsToDownload::class, 'product_id');
     }
 
     /**
@@ -273,6 +273,18 @@ class Product extends AModelBase
     public function reviews()
     {
         return $this->hasMany(Review::class, 'product_id');
+    }
+
+    /**
+     * @return array
+     */
+    public function rules()
+    {
+        //todo Complete validation implementaion
+        return [
+            'model' => 'required|alpha|min:3',
+            'sku'  => 'required',
+        ];
     }
 
     /**
@@ -364,8 +376,10 @@ class Product extends AModelBase
     {
         $track_status = 0;
         //check product option values
-        foreach ($this->product_option_values as $opv) {
-            $track_status += $opv->subtract;
+        if (is_array($this->product_option_values)) {
+            foreach ($this->product_option_values as $opv) {
+                $track_status += $opv->subtract;
+            }
         }
 
         //if no options - check whole product subtract

@@ -22,15 +22,22 @@ use abc\models\AModelBase;
  */
 class ProductDescription extends AModelBase
 {
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
 
+    protected $primaryKeySet = [
+        'product_id',
+        'language_id'
+    ];
     protected $casts = [
         'product_id'  => 'int',
         'language_id' => 'int',
     ];
 
     protected $fillable = [
+        'product_id',
+        'language_id',
         'name',
         'meta_keywords',
         'meta_description',
@@ -47,4 +54,5 @@ class ProductDescription extends AModelBase
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
+
 }

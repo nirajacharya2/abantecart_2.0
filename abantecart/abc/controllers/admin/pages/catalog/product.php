@@ -35,13 +35,6 @@ class ControllerPagesCatalogProduct extends AController
 
     public function main()
     {
-        $procuct = Product::find(123);
-        \h::echoArray($procuct->getAllData());
-        exit;
-
-
-
-        //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->setTitle($this->language->get('heading_title'));
