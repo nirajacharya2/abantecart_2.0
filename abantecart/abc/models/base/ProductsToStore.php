@@ -17,8 +17,14 @@ use abc\models\AModelBase;
  */
 class ProductsToStore extends AModelBase
 {
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
+
+    protected $primaryKeySet = [
+        'product_id',
+        'store_id'
+    ];
 
     protected $casts = [
         'product_id' => 'int',

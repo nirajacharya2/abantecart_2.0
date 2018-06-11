@@ -132,6 +132,14 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
         $product->updateRelationships($rels);
 
+        if (isset($data['categories'])) {
+            $product->updateCategories($data['categories']);
+        }
+
+        if (isset($data['stores'])) {
+            $product->updateStores($data['stores']);
+        }
+
         return $product;
     }
 
@@ -151,7 +159,12 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         $product->updateRelationships($rels);
-
+        if (isset($data['categories'])) {
+            $product->updateCategories($data['categories']);
+        }
+        if (isset($data['stores'])) {
+            $product->updateStores($data['stores']);
+        }
         return $product;
     }
 }
