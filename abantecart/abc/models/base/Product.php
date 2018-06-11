@@ -2,11 +2,8 @@
 
 namespace abc\models\base;
 
-use abc\core\ABC;
-use abc\core\lib\AResourceManager;
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
-use abc\models\base\ProductsToCategory;
 
 /**
  * Class Product

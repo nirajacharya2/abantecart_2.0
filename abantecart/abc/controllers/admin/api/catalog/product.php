@@ -45,20 +45,39 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
-        if (!\H::has_value($request['product_id']) || !is_numeric($request['product_id'])) {
-            $this->rest->setResponseData(array('Error' => 'Product ID is missing'));
+
+        $getBy = null;
+        if (isset($request['product_id']) && $request['product_id']) {
+            $getBy = 'product_id';
+        }
+        if (isset($request['get_by']) && $request['get_by']) {
+            $getBy = $request['get_by'];
+        }
+
+        if (!\H::has_value($getBy) || !isset($request[$getBy])) {
+            $this->rest->setResponseData(array('Error' => $getBy.' is missing'));
             $this->rest->sendResponse(200);
             return null;
         }
 
-        $product = Product::find($request['product_id']);
+        $product = Product::where([$getBy=>$request[$getBy]]);
         if ($product === null) {
-            $this->rest->setResponseData(array('Error' => "Product with ID {$request['product_id']} does not exist"));
+            $this->rest->setResponseData(
+                array(
+                    'Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist")
+            );
             $this->rest->sendResponse(200);
             return null;
         }
 
-        $data = $product->getAllData();
+        $data = [];
+        $item = $product->first();
+        if($item) {
+            $data = $item->getAllData();
+        }
+        if(!$data){
+            $data = ['Error' => 'Requested Product Not Found'];
+        }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
