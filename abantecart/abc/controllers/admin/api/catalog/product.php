@@ -111,6 +111,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 $this->rest->sendResponse(200);
                 return null;
             }
+            //expand fillable columns for extensions
+            if ($this->data['fillable']) {
+                $product->addFillable($this->data['fillable']);
+            }
             $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
         } else {
             $product = $this->createProduct($request);
@@ -212,6 +216,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
 
         $fillables = $product->getFillable();
+        $this->log->write(var_export($fillables, true));
         $update_arr = [];
         foreach ($fillables as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
