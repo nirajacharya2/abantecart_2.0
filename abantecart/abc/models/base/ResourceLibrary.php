@@ -89,6 +89,7 @@ class ResourceLibrary extends AModelBase
         //IMAGE PROCESSING
         $data['images'] = (array)$data['images'];
         foreach ($data['images'] as $source) {
+
             if (empty($source)) {
                 continue;
             } else {
@@ -107,7 +108,7 @@ class ResourceLibrary extends AModelBase
             //check if image is absolute path or remote URL
             $host = parse_url($source, PHP_URL_HOST);
             $image_basename = basename($source);
-            $target = ABC::env('DIR_RESOURCES').$rm->getTypeDir().DS.$image_basename;
+            $target = ABC::env('DIR_RESOURCES').$rm->getTypeDir().$image_basename;
             if (!is_dir(ABC::env('DIR_RESOURCES').$rm->getTypeDir())) {
                 @mkdir(ABC::env('DIR_RESOURCES').$rm->getTypeDir(), 0777);
             }
@@ -125,6 +126,7 @@ class ResourceLibrary extends AModelBase
                     $this->errors[] = "Error: Unable to download file from {$source} ";
                     continue;
                 }
+
                 if (!$fl->writeDownloadToFile($file, $target)) {
                     $this->errors[] = "Error: Unable to save downloaded file to ".$target;
                     continue;

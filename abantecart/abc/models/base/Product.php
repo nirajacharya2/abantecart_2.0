@@ -145,6 +145,7 @@ class Product extends AModelBase
         'date_modified',
     ];
 
+
     /**
      * @var array
      */
@@ -155,6 +156,14 @@ class Product extends AModelBase
      */
     protected $thumbURL;
 
+    public function addFillable($input)
+    {
+        if (is_string($input)) {
+            $this->fillable[] = $input;
+        } elseif (is_array($input)) {
+            $this->fillable = array_merge($this->fillable, $input);
+        }
+    }
     /**
      * @return mixed
      */

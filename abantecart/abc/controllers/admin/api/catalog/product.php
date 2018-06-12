@@ -20,6 +20,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
 use abc\models\base\Product;
+use abc\models\base\Store;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -91,6 +92,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
+
         //are we updating or creating
         $updateBy = null;
         if (isset($request['product_id']) && $request['product_id']) {
@@ -101,7 +103,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         if ($updateBy) {
-            $product = Product::where([$updateBy => $request[$updateBy]])->first();
+            $product = Product::where($updateBy, $request[$updateBy])->first();
             if ($product === null) {
                 $this->rest->setResponseData(
                     ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
@@ -109,7 +111,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 $this->rest->sendResponse(200);
                 return null;
             }
-            $product = $this->updateProduct($product, $request);
+            $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
         } else {
             $product = $this->createProduct($request);
         }
@@ -151,6 +153,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         if (!$data['descriptions'] || !current($data['descriptions'])['name']) {
             return false;
         }
+
         $expected_relations = ['descriptions', 'tags', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -160,7 +163,20 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         //create product
-        $product = Product::create($data);
+        $product = new Product();
+        //expand fillable columns for extensions
+        if ($this->data['fillable']) {
+            $product->addFillable($this->data['fillable']);
+        }
+
+        $fillables = $product->getFillable();
+        foreach ($fillables as $fillable) {
+            $product->{$fillable} = $data[$fillable];
+        }
+        //TODO: NEED TO CHECK WHY WE CANNOT USE create STATIC METHOD HERE!!!!
+        $product->save();
+        //Product::create($data);
+
         if (!$product || !$product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product cannot be created"]);
             $this->rest->sendResponse(200);
@@ -175,9 +191,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $product->updateCategories($data['categories']);
         }
 
-        if (isset($data['stores'])) {
-            $product->updateStores($data['stores']);
+        if (!isset($data['stores'])) {
+            $all_stores = Store::all()->toArray();
+            foreach ($all_stores as $s) {
+                $data['stores'][] = $s['store_id'];
+            }
         }
+        $product->updateStores($data['stores']);
 
         return $product;
     }
@@ -188,8 +208,15 @@ class ControllerApiCatalogProduct extends AControllerAPI
      *
      * @return mixed
      */
-    private function updateProduct($product, $data)
+    private function updateProduct($product, $updateBy, $value, $data)
     {
+
+        $fillables = $product->getFillable();
+        $update_arr = [];
+        foreach ($fillables as $fillable) {
+            $update_arr[$fillable] = $data[$fillable];
+        }
+
         $expected_relations = ['descriptions', 'tags', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -198,7 +225,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 unset($data[$key]);
             }
         }
-        $product->update($data);
+        Product::where($updateBy, $value)->update($update_arr);
         $product->updateRelationships($rels);
         $product->updateImages($data);
 
