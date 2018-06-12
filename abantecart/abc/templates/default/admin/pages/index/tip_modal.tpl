@@ -7,7 +7,7 @@ echo $this->html->buildElement(
 				'title' => $text_tip,
 				'content' => $tip_content, //html from common/tips.xml
 				'footer' => '<button type="button" class="btn btn-default" data-dismiss="modal">
-							    			 <i class="fa fa-times"></i> '.$text_close.'</button>'
+					<i class="fa fa-times"></i> '.$text_close.'</button>'
 		));
 ?>
 <script type="application/javascript">

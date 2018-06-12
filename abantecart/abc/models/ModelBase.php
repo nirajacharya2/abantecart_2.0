@@ -230,7 +230,7 @@ class AModelBase extends OrmModel
             foreach ($data as $related) {
                 $conditions = [];
                 foreach ($relObj->primaryKeySet as $key) {
-                    if (!isset($related[$key]) && $key == $this->primaryKey) {
+                    if ($key == $this->primaryKey) {
                         $related[$key] = $this->$key;
                     }
                     $conditions[$key] = isset($related[$key]) ? $related[$key] : null;

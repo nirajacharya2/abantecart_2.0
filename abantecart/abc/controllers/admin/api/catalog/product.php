@@ -60,11 +60,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        $product = Product::where([$getBy=>$request[$getBy]]);
+        $product = Product::where([$getBy => $request[$getBy]]);
         if ($product === null) {
             $this->rest->setResponseData(
-                array(
-                    'Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist")
+                array('Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist")
             );
             $this->rest->sendResponse(200);
             return null;
@@ -116,7 +115,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         if ($product === false) {
-            $this->rest->setResponseData("Product was not created. Please fill required fields.");
+            $this->rest->setResponseData(['Error' => "Product was not created. Please fill required fields."]);
             $this->rest->sendResponse(200);
             return null;
         }
@@ -126,7 +125,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
         if (!$product_id = $product->getKey()) {
-            $this->rest->setResponseData("Product was not created");
+            $this->rest->setResponseData(['Error' => "Product was not created"]);
             $this->rest->sendResponse(200);
             return null;
         }
@@ -152,16 +151,22 @@ class ControllerApiCatalogProduct extends AControllerAPI
         if (!$data['descriptions'] || !current($data['descriptions'])['name']) {
             return false;
         }
-        $product = new Product();
-        $product->fill($data)->save();
-        //create defined relationships
         $expected_relations = ['descriptions', 'tags', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
                 $rels[$key] = $data[$key];
+                unset($data[$key]);
             }
         }
+        //create product
+        $product = Product::create($data);
+        if (!$product || !$product->getKey()) {
+            $this->rest->setResponseData(['Error' => "Product cannot be created"]);
+            $this->rest->sendResponse(200);
+            return null;
+        }
+        //create defined relationships
         $product->updateRelationships($rels);
 
         $product->updateImages($data);
@@ -185,14 +190,15 @@ class ControllerApiCatalogProduct extends AControllerAPI
      */
     private function updateProduct($product, $data)
     {
-        $product->update($data);
         $expected_relations = ['descriptions', 'tags', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
                 $rels[$key] = $data[$key];
+                unset($data[$key]);
             }
         }
+        $product->update($data);
         $product->updateRelationships($rels);
         $product->updateImages($data);
 
