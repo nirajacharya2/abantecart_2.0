@@ -19,8 +19,10 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\Registry;
 use abc\models\base\Product;
 use abc\models\base\Store;
+use abc\modules\events\ABaseEvent;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -116,8 +118,16 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 $product->addFillable($this->data['fillable']);
             }
             $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
+            \H::event(
+                'abc\controllers\admin\api\catalog\product@update',
+                new ABaseEvent($product->toArray(), ['products'])
+            );
         } else {
             $product = $this->createProduct($request);
+            \H::event(
+                'abc\controllers\admin\api\catalog\product@create',
+                new ABaseEvent($product->toArray(), ['products'])
+            );
         }
 
         if ($product === false) {
@@ -214,7 +224,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
      */
     private function updateProduct($product, $updateBy, $value, $data)
     {
+
         $fillables = $product->getFillable();
+
         $update_arr = [];
         foreach ($fillables as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
@@ -230,6 +242,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
         Product::where($updateBy, $value)->update($update_arr);
         $product->updateRelationships($rels);
+
         $product->updateImages($data);
 
         if (isset($data['categories'])) {
