@@ -214,9 +214,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      */
     private function updateProduct($product, $updateBy, $value, $data)
     {
-
         $fillables = $product->getFillable();
-        $this->log->write(var_export($fillables, true));
         $update_arr = [];
         foreach ($fillables as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
