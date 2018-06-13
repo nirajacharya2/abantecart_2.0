@@ -63,16 +63,15 @@ class AJobManager implements AJobManagerInterface
      * AJobManager constructor.
      *
      * @param Registry $registry
+     *
+     * @throws \ReflectionException
      */
     public function __construct(Registry $registry)
     {
         $this->registry = $registry;
         // who is initiator of process, admin or storefront
         $this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
-        $log_classname = ABC::getFullClassName('ALog');
-        if ($log_classname) {
-            $this->job_log = new $log_classname('job_log.txt');
-        }
+        $this->job_log = ABC::getObjectByAlias('ALog', [['job_log.txt']]);
         $this->db = $registry->get('db');
     }
 

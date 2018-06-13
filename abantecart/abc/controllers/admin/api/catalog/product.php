@@ -19,9 +19,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
-use abc\core\engine\Registry;
 use abc\models\base\Product;
-use abc\models\base\Store;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 
@@ -175,13 +173,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return false;
         }
 
-        $ignoreFields = [
-            'date_added', 'date_modified'
-        ];
-        foreach ($ignoreFields as $key) {
-            unset($data[$key]);
-        }
-
         $expected_relations = ['descriptions', 'tags', 'categories', 'stores', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -200,7 +191,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $fillables = $product->getFillable();
         foreach ($fillables as $fillable) {
             $product->{$fillable} = $data[$fillable];
+            $update_arr[$fillable] = $data[$fillable];
         }
+        $this->log->write(var_export($update_arr, true));
         //TODO: NEED TO CHECK WHY WE CANNOT USE create STATIC METHOD HERE!!!!
         $product->save();
         //Product::create($data);
@@ -229,13 +222,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $fillables = $product->getFillable();
 
-        $ignoreFields = [
-            'date_added', 'date_modified'
-        ];
-        foreach ($ignoreFields as $key) {
-            unset($data[$key]);
-        }
-
         $update_arr = [];
         foreach ($fillables as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
@@ -249,6 +235,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 unset($data[$key]);
             }
         }
+        $this->log->write(var_export($update_arr, true));
         Product::where($updateBy, $value)->update($update_arr);
 
         $product->updateRelationships($rels);

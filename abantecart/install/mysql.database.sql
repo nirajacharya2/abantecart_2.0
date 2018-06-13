@@ -9391,7 +9391,7 @@ CREATE TABLE `ac_products` (
   `shipping_price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `tax_class_id` int(11) NOT NULL,
-  `date_available` date NOT NULL,
+  `date_available` date NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `weight` decimal(5,2) NOT NULL DEFAULT '0.00',
   `weight_class_id` int(11) NOT NULL DEFAULT '0',
   `length` decimal(5,2) NOT NULL DEFAULT '0.00',
@@ -9407,7 +9407,7 @@ CREATE TABLE `ac_products` (
   `cost` DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `call_to_order` smallint NOT NULL default '0',
   `settings` LONGTEXT COLLATE utf8_general_ci,
-  `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;

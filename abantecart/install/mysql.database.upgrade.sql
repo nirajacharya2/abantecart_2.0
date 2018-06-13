@@ -614,3 +614,5 @@ ALTER TABLE `ac_locations`
 
 ALTER TABLE `ac_language_definitions`
   CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE `ac_products` CHANGE COLUMN `date_available` `date_available` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;

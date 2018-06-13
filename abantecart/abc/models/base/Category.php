@@ -55,8 +55,6 @@ class Category extends AModelBase
         'parent_id',
         'sort_order',
         'status',
-        'date_added',
-        'date_modified',
     ];
 
     /**

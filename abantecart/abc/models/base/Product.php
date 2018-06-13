@@ -141,8 +141,6 @@ class Product extends AModelBase
         'cost',
         'call_to_order',
         'settings',
-        'date_added',
-        'date_modified',
     ];
 
 
