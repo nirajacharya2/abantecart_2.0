@@ -23,6 +23,7 @@ use abc\core\engine\Registry;
 use abc\models\base\Product;
 use abc\models\base\Store;
 use abc\modules\events\ABaseEvent;
+use abc\core\lib\AException;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -104,30 +105,36 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $updateBy = $request['update_by'];
         }
 
-        if ($updateBy) {
-            $product = Product::where($updateBy, $request[$updateBy])->first();
-            if ($product === null) {
-                $this->rest->setResponseData(
-                    ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
+        try {
+            if ($updateBy) {
+                $product = Product::where($updateBy, $request[$updateBy])->first();
+                if ($product === null) {
+                    $this->rest->setResponseData(
+                        ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
+                    );
+                    $this->rest->sendResponse(200);
+                    return null;
+                }
+                //expand fillable columns for extensions
+                if ($this->data['fillable']) {
+                    $product->addFillable($this->data['fillable']);
+                }
+                $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
+                \H::event(
+                    'abc\controllers\admin\api\catalog\product@update',
+                    new ABaseEvent($product->toArray(), ['products'])
                 );
-                $this->rest->sendResponse(200);
-                return null;
+            } else {
+                $product = $this->createProduct($request);
+                \H::event(
+                    'abc\controllers\admin\api\catalog\product@create',
+                    new ABaseEvent($product->toArray(), ['products'])
+                );
             }
-            //expand fillable columns for extensions
-            if ($this->data['fillable']) {
-                $product->addFillable($this->data['fillable']);
-            }
-            $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
-            \H::event(
-                'abc\controllers\admin\api\catalog\product@update',
-                new ABaseEvent($product->toArray(), ['products'])
-            );
-        } else {
-            $product = $this->createProduct($request);
-            \H::event(
-                'abc\controllers\admin\api\catalog\product@create',
-                new ABaseEvent($product->toArray(), ['products'])
-            );
+        } catch (AException $e) {
+            $this->rest->setResponseData(['Error' => $e->getMessage()]);
+            $this->rest->sendResponse(200);
+            return null;
         }
 
         if ($product === false) {
@@ -168,7 +175,14 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return false;
         }
 
-        $expected_relations = ['descriptions', 'tags', 'options'];
+        $ignoreFields = [
+            'date_added', 'date_modified'
+        ];
+        foreach ($ignoreFields as $key) {
+            unset($data[$key]);
+        }
+
+        $expected_relations = ['descriptions', 'tags', 'categories', 'stores', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
@@ -201,18 +215,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $product->updateImages($data);
 
-        if (isset($data['categories'])) {
-            $product->updateCategories($data['categories']);
-        }
-
-        if (!isset($data['stores'])) {
-            $all_stores = Store::all()->toArray();
-            foreach ($all_stores as $s) {
-                $data['stores'][] = $s['store_id'];
-            }
-        }
-        $product->updateStores($data['stores']);
-
         return $product;
     }
 
@@ -227,12 +229,19 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $fillables = $product->getFillable();
 
+        $ignoreFields = [
+            'date_added', 'date_modified'
+        ];
+        foreach ($ignoreFields as $key) {
+            unset($data[$key]);
+        }
+
         $update_arr = [];
         foreach ($fillables as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
         }
 
-        $expected_relations = ['descriptions', 'tags', 'options'];
+        $expected_relations = ['descriptions', 'tags', 'categories', 'stores', 'options'];
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
@@ -241,16 +250,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         Product::where($updateBy, $value)->update($update_arr);
+
         $product->updateRelationships($rels);
 
         $product->updateImages($data);
 
-        if (isset($data['categories'])) {
-            $product->updateCategories($data['categories']);
-        }
-        if (isset($data['stores'])) {
-            $product->updateStores($data['stores']);
-        }
         return $product;
     }
 }

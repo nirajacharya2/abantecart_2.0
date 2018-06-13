@@ -255,34 +255,35 @@ class Product extends AModelBase
     /**
      * @return mixed
      */
-    public function to_categories()
-    {
-        return $this->hasMany(ProductsToCategory::class, 'product_id');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function to_downloads()
-    {
-        return $this->hasMany(ProductsToDownload::class, 'product_id');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function to_stores()
-    {
-        return $this->hasMany(ProductsToStore::class, 'product_id');
-    }
-
-    /**
-     * @return mixed
-     */
     public function reviews()
     {
         return $this->hasMany(Review::class, 'product_id');
     }
+
+    /**
+     * @return mixed
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'products_to_categories', 'product_id', 'category_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function downloads()
+    {
+        return $this->belongsToMany(Download::class, 'products_to_downloads', 'product_id', 'download_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class, 'products_to_stores', 'product_id', 'store_id');
+    }
+
 
     /**
      * @return array
@@ -304,7 +305,7 @@ class Product extends AModelBase
         $cache_key = 'product.alldata.'.$this->getKey();
         $data = $this->cache->pull($cache_key);
         if ($data === false) {
-            $this->load('descriptions', 'discounts', 'tags');
+            $this->load('descriptions', 'discounts', 'tags', 'stores', 'categories');
             $data = $this->toArray();
             foreach ($this->options as $option) {
                 $data['options'][] = $option->getAllData();
@@ -313,40 +314,6 @@ class Product extends AModelBase
             $this->cache->push($cache_key, $data);
         }
         return $data;
-    }
-
-    /**
-     * @param mixed $categoryIDs
-     */
-    public function updateCategories($categoryIDs)
-    {
-        if (!is_array($categoryIDs)) {
-            $categoryIDs = explode(',', $categoryIDs);
-        }
-        ProductsToCategory::where($this->primaryKey, $this->getKey())->delete();
-        foreach ($categoryIDs as $cid) {
-            if (is_numeric($cid)) {
-                $this->db->table('products_to_categories')->insert([$this->primaryKey => $this->getKey(), 'category_id' => trim($cid)]);
-             //   $pc = ProductsToCategory::create([$this->primaryKey => $this->getKey(), 'category_id' => trim($cid)]);
-            }
-        }
-    }
-
-    /**
-     * @param mixed $storeIDs
-     */
-    public function updateStores($storeIDs)
-    {
-        if (!is_array($storeIDs)) {
-            $storeIDs = explode(',', $storeIDs);
-        }
-        ProductsToStore::where($this->primaryKey, $this->getKey())->delete();
-        foreach ($storeIDs as $sid) {
-            if (is_numeric($sid)) {
-                $this->db->table('products_to_stores')->insert([$this->primaryKey => $this->getKey(), 'store_id' => trim($sid)]);
-                //   $pc = ProductsToStore::create([$this->primaryKey => $this->getKey(), 'store_id' => trim($sid)]);
-            }
-        }
     }
 
     /**

@@ -22,20 +22,35 @@ use abc\models\AModelBase;
  */
 class Category extends AModelBase
 {
+    /**
+     * @var string
+     */
     protected $primaryKey = 'category_id';
+    /**
+     * @var bool
+     */
     public $timestamps = false;
 
+    /**
+     * @var array
+     */
     protected $casts = [
         'parent_id'  => 'int',
         'sort_order' => 'int',
         'status'     => 'int',
     ];
 
+    /**
+     * @var array
+     */
     protected $dates = [
         'date_added',
         'date_modified',
     ];
 
+    /**
+     * @var array
+     */
     protected $fillable = [
         'parent_id',
         'sort_order',
@@ -44,18 +59,27 @@ class Category extends AModelBase
         'date_modified',
     ];
 
-    public function categories_to_stores()
-    {
-        return $this->hasMany(CategoriesToStore::class, 'category_id');
-    }
-
-    public function category_descriptions()
+    /**
+     * @return mixed
+     */
+    public function descriptions()
     {
         return $this->hasMany(CategoryDescription::class, 'category_id');
     }
 
-    public function products_to_categories()
+    /**
+     * @return mixed
+     */
+    public function products()
     {
-        return $this->hasMany(ProductsToCategory::class, 'category_id');
+        return $this->belongsToMany(Product::class, 'products_to_categories', 'product_id', 'category_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class, 'categories_to_stores', 'category_id', 'store_id');
     }
 }
