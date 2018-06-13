@@ -9391,7 +9391,7 @@ CREATE TABLE `ac_products` (
   `shipping_price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `tax_class_id` int(11) NOT NULL,
-  `date_available` date NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_available` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `weight` decimal(5,2) NOT NULL DEFAULT '0.00',
   `weight_class_id` int(11) NOT NULL DEFAULT '0',
   `length` decimal(5,2) NOT NULL DEFAULT '0.00',
