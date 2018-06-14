@@ -1786,4 +1786,41 @@ class AHelperUtils extends AHelper
             throw new AException('Event Dispatcher not found in Registry!', AC_ERR_CLASS_CLASS_NOT_EXIST);
         }
     }
+
+    /**
+     * Function changes and cleans data base on entity codes, such as language_code, sku etc
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+   /*
+   NOT TESTED YET!!!
+   public static function prepareDataForImport(array $data)
+    {
+        $registry = Registry::getInstance();
+        $available_languages = $registry->get('language')->getAvailableLanguages();
+
+        $language_list = [];
+        foreach($available_languages as $lang){
+            $language_list[$lang['code']] = $lang['language_id'];
+        }
+
+        if(isset($data['language_code']) && isset($language_list[$data['language_code']])){
+            $output = $data;
+            $output['language_id'] = $language_list[$data['language_code']];
+            unset($output['language_code']);
+        }elseif( isset($data['language_code']) && !isset($language_list[$data['language_code']]) ){
+            $output = [];
+        }else{
+            $output = $data;
+        }
+
+        //go deep
+        foreach($output as $k => &$item){
+            if(!is_array($item)){ continue; }
+            $item = self::prepareDataForImport($item);
+        }
+        return $output;
+    }*/
 }
