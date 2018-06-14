@@ -20,6 +20,10 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
 use abc\models\base\Product;
+use abc\models\base\ProductOption;
+use abc\models\base\ProductOptionDescription;
+use abc\models\base\ProductOptionValue;
+use abc\models\base\ProductOptionValueDescription;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 
@@ -61,7 +65,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $this->rest->sendResponse(200);
             return null;
         }
-
+        /**
+         * @var Product $product
+         */
         $product = Product::where([$getBy => $request[$getBy]]);
         if ($product === null) {
             $this->rest->setResponseData(
@@ -73,10 +79,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $data = [];
         $item = $product->first();
-        if($item) {
+        if ($item) {
             $data = $item->getAllData();
         }
-        if(!$data){
+        if (!$data) {
             $data = ['Error' => 'Requested Product Not Found'];
         }
 
@@ -94,6 +100,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
 
+        //assign product to default store
+        $request['stores'] = ['0'];
+
         //are we updating or creating
         $updateBy = null;
         if (isset($request['product_id']) && $request['product_id']) {
@@ -105,6 +114,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         try {
             if ($updateBy) {
+                /**
+                 * @var Product $product
+                 */
                 $product = Product::where($updateBy, $request[$updateBy])->first();
                 if ($product === null) {
                     $this->rest->setResponseData(
@@ -117,17 +129,21 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 if ($this->data['fillable']) {
                     $product->addFillable($this->data['fillable']);
                 }
-                $product = $this->updateProduct($product, $updateBy, $request[$updateBy], $request);
-                \H::event(
-                    'abc\controllers\admin\api\catalog\product@update',
-                    new ABaseEvent($product->toArray(), ['products'])
-                );
+                $product = $this->updateProduct($product, $request);
+                if (is_object($product)) {
+                    \H::event(
+                        'abc\controllers\admin\api\catalog\product@update',
+                        new ABaseEvent($product->toArray(), ['products'])
+                    );
+                }
             } else {
                 $product = $this->createProduct($request);
-                \H::event(
-                    'abc\controllers\admin\api\catalog\product@create',
-                    new ABaseEvent($product->toArray(), ['products'])
-                );
+                if (is_object($product)) {
+                    \H::event(
+                        'abc\controllers\admin\api\catalog\product@create',
+                        new ABaseEvent($product->toArray(), ['products'])
+                    );
+                }
             }
         } catch (AException $e) {
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
@@ -164,7 +180,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     /**
      * @param $data
      *
-     * @return Product
+     * @return Product | false
      * @throws \Exception
      */
     private function createProduct($data)
@@ -173,7 +189,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return false;
         }
 
-        $expected_relations = ['descriptions', 'tags', 'categories', 'stores', 'options'];
+        $expected_relations = ['descriptions', 'categories', 'stores'];//'tags',
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
@@ -188,21 +204,21 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $product->addFillable($this->data['fillable']);
         }
 
-        $fillables = $product->getFillable();
-        foreach ($fillables as $fillable) {
+        $fills = $product->getFillable();
+        foreach ($fills as $fillable) {
             $product->{$fillable} = $data[$fillable];
             $update_arr[$fillable] = $data[$fillable];
         }
-        $this->log->write(var_export($update_arr, true));
-        //TODO: NEED TO CHECK WHY WE CANNOT USE create STATIC METHOD HERE!!!!
+
         $product->save();
-        //Product::create($data);
 
         if (!$product || !$product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product cannot be created"]);
             $this->rest->sendResponse(200);
             return null;
         }
+
+        $this->replaceOptions($product, $data);
         //create defined relationships
         $product->updateRelationships($rels);
 
@@ -216,18 +232,19 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param $data
      *
      * @return mixed
+     * @throws \Exception
      */
-    private function updateProduct($product, $updateBy, $value, $data)
+    private function updateProduct($product, $data)
     {
 
-        $fillables = $product->getFillable();
+        $fills = $product->getFillable();
 
         $update_arr = [];
-        foreach ($fillables as $fillable) {
+        foreach ($fills as $fillable) {
             $update_arr[$fillable] = $data[$fillable];
         }
 
-        $expected_relations = ['descriptions', 'tags', 'categories', 'stores', 'options'];
+        $expected_relations = ['descriptions', 'categories', 'stores']; //'tags',
         $rels = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
@@ -235,13 +252,86 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 unset($data[$key]);
             }
         }
-        $this->log->write(var_export($update_arr, true));
-        Product::where($updateBy, $value)->update($update_arr);
+
+        $product->update($update_arr);
+
+        $this->replaceOptions($product, $data);
 
         $product->updateRelationships($rels);
 
         $product->updateImages($data);
 
         return $product;
+    }
+
+    /**
+     * @param Product $product
+     * @param array $data
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    protected function replaceOptions($product, $data)
+    {
+        $productId = $product->product_id;
+        if (!$productId) {
+            return false;
+        }
+        $product->options()->delete();
+
+        foreach ($data['options'] as $option) {
+            $option['product_id'] = $productId;
+            $option['attribute_id'] = 0;
+            unset($option['product_option_id']);
+
+            $optionData = $this->removeSubArrays($option);
+
+            $optionObj = new ProductOption();
+            $optionObj->fill($optionData)->save();
+            $productOptionId = $optionObj->getKey();
+            unset($optionObj);
+
+            foreach ($option['option_descriptions'] as $option_description) {
+                $option_description['product_id'] = $productId;
+                $option_description['product_option_id'] = $productOptionId;
+                $optionDescData = $this->removeSubArrays($option_description);
+
+                $optionDescObj = new ProductOptionDescription();
+                $optionDescObj->fill($optionDescData)->save();
+                unset($optionDescObj);
+            }
+
+            foreach ($option['option_values'] as $option_value) {
+                $option_value['product_id'] = $productId;
+                $option_value['product_option_id'] = $productOptionId;
+                $option_value['attribute_value_id'] = 0;
+
+                $optionValueData = $this->removeSubArrays($option_value);
+                $optionValueObj = new ProductOptionValue();
+                $optionValueObj->fill($optionValueData)->save();
+                $productOptionValueId = $optionValueObj->getKey();
+                unset($optionValueObj);
+
+                foreach ($option_value['option_value_descriptions'] as $option_value_description) {
+                    $option_value_description['product_id'] = $productId;
+                    $option_value_description['product_option_value_id'] = $productOptionValueId;
+                    $optionValueDescData = $this->removeSubArrays($option_value_description);
+                    $optionValueDescObj = new ProductOptionValueDescription();
+                    $optionValueDescObj->fill($optionValueDescData)->save();
+                    unset($optionValueDescObj);
+                }
+            }
+        }
+        return true;
+    }
+
+    protected function removeSubArrays(array $array)
+    {
+        foreach ($array as $k => &$v) {
+            if (is_array($v)) {
+                unset($array[$k]);
+            }
+        }
+        return $array;
     }
 }
