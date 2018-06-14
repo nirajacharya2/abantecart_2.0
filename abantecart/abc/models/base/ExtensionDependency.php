@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcExtensionDependency
+ * Class ExtensionDependency
  *
  * @property int $extension_id
  * @property int $extension_parent_id

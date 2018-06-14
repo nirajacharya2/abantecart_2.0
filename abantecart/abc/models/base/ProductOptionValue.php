@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductOptionValue
+ * Class ProductOptionValue
  *
  * @property int $product_option_value_id
  * @property int $product_option_id
@@ -23,8 +23,8 @@ use abc\models\AModelBase;
  * @property int $sort_order
  * @property int $default
  *
- * @property \abc\models\base\ProductOption $product_option
- * @property \abc\models\base\Product $product
+ * @property ProductOption $product_option
+ * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $order_options
  *
  * @package abc\models

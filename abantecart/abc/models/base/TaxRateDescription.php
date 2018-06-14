@@ -11,8 +11,8 @@ use abc\models\AModelBase;
  * @property int $language_id
  * @property string $description
  *
- * @property \abc\models\base\TaxRate $tax_rate
- * @property \abc\models\base\Language $language
+ * @property TaxRate $tax_rate
+ * @property Language $language
  *
  * @package abc\models
  */

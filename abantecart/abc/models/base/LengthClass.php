@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcLengthClass
+ * Class LengthClass
  *
  * @property int $length_class_id
  * @property float $value

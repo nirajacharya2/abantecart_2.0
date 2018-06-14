@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrderDownloadsHistory
+ * Class OrderDownloadsHistory
  *
  * @property int $order_download_history_id
  * @property int $order_download_id
@@ -17,10 +17,10 @@ use abc\models\AModelBase;
  * @property int $download_percent
  * @property \Carbon\Carbon $time
  *
- * @property \abc\models\AcOrderDownload $order_download
- * @property \abc\models\AcDownload $download
- * @property \abc\models\Order $order
- * @property \abc\models\AcOrderProduct $order_product
+ * @property OrderDownload $order_download
+ * @property Download $download
+ * @property Order $order
+ * @property OrderProduct $order_product
  *
  * @package abc\models
  */
@@ -61,7 +61,7 @@ class OrderDownloadsHistory extends AModelBase
 
     public function order()
     {
-        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function order_product()

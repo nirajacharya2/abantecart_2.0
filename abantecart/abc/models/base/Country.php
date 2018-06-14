@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCountry
+ * Class Country
  *
  * @property int $country_id
  * @property string $iso_code_2

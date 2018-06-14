@@ -40,23 +40,23 @@ use abc\core\engine\AResource;
  * @property string $settings
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
- *
- * @property \Illuminate\Database\Eloquent\Collection $coupons_products
- * @property \Illuminate\Database\Eloquent\Collection $order_products
- * @property \Illuminate\Database\Eloquent\Collection $product_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_discounts
- * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_value_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_values
- * @property \Illuminate\Database\Eloquent\Collection $product_options
- * @property \Illuminate\Database\Eloquent\Collection $product_specials
- * @property \Illuminate\Database\Eloquent\Collection $product_tags
- * @property \abc\models\base\ProductsFeatured $products_featured
- * @property \Illuminate\Database\Eloquent\Collection $products_related
- * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
- * @property \Illuminate\Database\Eloquent\Collection $products_to_downloads
- * @property \Illuminate\Database\Eloquent\Collection $products_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $reviews
+ * @property ProductOption $options
+ * @property CouponsProduct $coupons_products
+ * @property OrderProduct $order_products
+ * @property ProductDescription $product_descriptions
+ * @property ProductDiscount $product_discounts
+ * @property ProductOptionDescription $product_option_descriptions
+ * @property ProductOptionValueDescription $product_option_value_descriptions
+ * @property ProductOptionValue $product_option_values
+ * @property ProductOption $product_options
+ * @property ProductSpecial $product_specials
+ * @property ProductTag $product_tags
+ * @property ProductsFeatured $products_featured
+ * @property ProductsRelated $products_related
+ * @property ProductsToCategory $products_to_categories
+ * @property ProductsToDownload $products_to_downloads
+ * @property ProductsToStore $products_to_stores
+ * @property Review $reviews
  *
  * @package abc\models
  */

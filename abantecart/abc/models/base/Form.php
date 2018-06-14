@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcForm
+ * Class Form
  *
  * @property int $form_id
  * @property string $form_name

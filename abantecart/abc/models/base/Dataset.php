@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcDataset
+ * Class Dataset
  *
  * @property int $dataset_id
  * @property string $dataset_name

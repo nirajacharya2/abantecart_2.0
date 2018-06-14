@@ -14,8 +14,8 @@ use abc\models\AModelBase;
  * @property string $meta_description
  * @property string $meta_keywords
  *
- * @property \abc\models\base\Store $store
- * @property \abc\models\base\Language $language
+ * @property Store $store
+ * @property Language $language
  *
  * @package abc\models
  */

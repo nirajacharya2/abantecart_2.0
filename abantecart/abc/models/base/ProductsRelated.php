@@ -10,7 +10,7 @@ use abc\models\AModelBase;
  * @property int $product_id
  * @property int $related_id
  *
- * @property \abc\models\base\Product $product
+ * @property Product $product
  *
  * @package abc\models
  */

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcFieldDescription
+ * Class FieldDescription
  *
  * @property int $field_id
  * @property string $name
@@ -13,8 +13,8 @@ use abc\models\AModelBase;
  * @property int $language_id
  * @property string $error_text
  *
- * @property \abc\models\AcField $field
- * @property \abc\models\AcLanguage $language
+ * @property Field $field
+ * @property Language $language
  *
  * @package abc\models
  */

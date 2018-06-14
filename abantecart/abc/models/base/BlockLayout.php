@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcBlockLayout
+ * Class BlockLayout
  *
  * @property int $instance_id
  * @property int $layout_id

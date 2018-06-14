@@ -15,8 +15,8 @@ use abc\models\AModelBase;
  * @property string $description
  * @property string $blurb
  *
- * @property \abc\models\base\Product $product
- * @property \abc\models\base\Language $language
+ * @property Product $product
+ * @property Language $language
  *
  * @package abc\models
  */

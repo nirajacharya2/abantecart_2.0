@@ -11,8 +11,8 @@ use abc\models\AModelBase;
  * @property int $language_id
  * @property string $description
  *
- * @property \abc\models\Form $form
- * @property \abc\models\Language $language
+ * @property Form $form
+ * @property Language $language
  *
  * @package abc\models
  */

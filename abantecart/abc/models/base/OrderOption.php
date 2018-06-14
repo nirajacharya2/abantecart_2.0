@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  * @property string $prefix
  * @property string $settings
  *
- * @property \abc\models\ProductOptionValue $product_option_value
+ * @property ProductOptionValue $product_option_value
  *
  * @package abc\models
  */

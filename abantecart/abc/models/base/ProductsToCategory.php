@@ -5,13 +5,13 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductsToCategory
+ * Class ProductsToCategory
  *
  * @property int $product_id
  * @property int $category_id
  *
- * @property \abc\models\base\Product $product
- * @property \abc\models\base\Category $category
+ * @property Product $product
+ * @property Category $category
  *
  * @package abc\models
  */

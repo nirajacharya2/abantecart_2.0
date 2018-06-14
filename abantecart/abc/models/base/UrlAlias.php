@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcUrlAlias
+ * Class UrlAlias
  *
  * @property int $url_alias_id
  * @property string $query
  * @property string $keyword
  * @property int $language_id
  *
- * @property \abc\models\base\Language $language
+ * @property Language $language
  *
  * @package abc\models
  */

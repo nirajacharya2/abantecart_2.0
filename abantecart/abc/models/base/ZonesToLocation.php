@@ -14,9 +14,9 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\Zone $zone
- * @property \abc\models\base\Country $country
- * @property \abc\models\base\Location $location
+ * @property Zone $zone
+ * @property Country $country
+ * @property Location $location
  *
  * @package abc\models
  */

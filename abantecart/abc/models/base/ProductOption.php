@@ -34,8 +34,9 @@ use abc\models\AModelBase;
  * @property int $required
  * @property string $regexp_pattern
  * @property string $settings
+ * @property ProductOptionValue $option_values
  *
- * @property \abc\models\base\Product $product
+ * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $product_option_values
  *
@@ -84,7 +85,7 @@ class ProductOption extends AModelBase
      */
     public function product()
     {
-        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**

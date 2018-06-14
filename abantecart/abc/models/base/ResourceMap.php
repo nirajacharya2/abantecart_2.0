@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\ResourceLibrary $resource_library
+ * @property ResourceLibrary $resource_library
  *
  * @package abc\models
  */

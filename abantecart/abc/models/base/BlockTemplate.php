@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcBlockTemplate
+ * Class BlockTemplate
  *
  * @property int $block_id
  * @property int $parent_block_id
@@ -13,7 +13,6 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\AcBlock $block
  *
  * @package abc\models
  */

@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcDatasetColumnProperty
+ * Class DatasetColumnProperty
  *
  * @property int $rowid
  * @property int $dataset_column_id
  * @property string $dataset_column_property_name
  * @property string $dataset_column_property_value
  *
- * @property \abc\models\AcDatasetDefinition $dataset_definition
+ * @property DatasetDefinition $dataset_definition
  *
  * @package abc\models
  */

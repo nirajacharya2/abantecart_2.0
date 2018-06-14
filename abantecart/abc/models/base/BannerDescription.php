@@ -15,8 +15,8 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\Banner $banner
- * @property \abc\models\Language $language
+ * @property Banner $banner
+ * @property Language $language
  *
  * @package abc\models
  */

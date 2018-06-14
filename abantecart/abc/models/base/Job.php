@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcJob
+ * Class Job
  *
  * @property int $job_id
  * @property string $job_name

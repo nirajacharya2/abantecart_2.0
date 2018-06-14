@@ -5,15 +5,15 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcTaxClassDescription
+ * Class TaxClassDescription
  *
  * @property int $tax_class_id
  * @property int $language_id
  * @property string $title
  * @property string $description
  *
- * @property \abc\models\AcTaxClass $tax_class
- * @property \abc\models\AcLanguage $language
+ * @property TaxClass $tax_class
+ * @property Language $language
  *
  * @package abc\models
  */

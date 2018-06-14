@@ -11,8 +11,8 @@ use abc\models\AModelBase;
  * @property int $language_id
  * @property string $name
  *
- * @property \abc\models\OrderStatus $order_status
- * @property \abc\models\Language $language
+ * @property OrderStatus $order_status
+ * @property Language $language
  *
  * @package abc\models
  */

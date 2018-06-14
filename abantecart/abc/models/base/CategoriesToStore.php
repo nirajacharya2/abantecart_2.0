@@ -10,8 +10,8 @@ use abc\models\AModelBase;
  * @property int $category_id
  * @property int $store_id
  *
- * @property \abc\models\Category $category
- * @property \abc\models\Store $store
+ * @property Category $category
+ * @property Store $store
  *
  * @package abc\models
  */

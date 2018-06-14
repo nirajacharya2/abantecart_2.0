@@ -13,15 +13,6 @@ use abc\models\UserNotification;
  * @property string $alias
  * @property int $status
  *
- * @property \Illuminate\Database\Eloquent\Collection $categories_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $contents_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $customers
- * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $orders
- * @property \Illuminate\Database\Eloquent\Collection $products_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $settings
- * @property \Illuminate\Database\Eloquent\Collection $store_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $user_notifications
  *
  * @package abc\models
  */

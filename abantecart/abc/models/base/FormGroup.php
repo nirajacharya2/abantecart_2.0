@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  * @property int $sort_order
  * @property int $status
  *
- * @property \abc\models\Form $form
+ * @property Form $form
  * @property \Illuminate\Database\Eloquent\Collection $fields_group_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $fields_groups
  *

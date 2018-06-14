@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcDatasetDefinition
+ * Class DatasetDefinition
  *
  * @property int $dataset_column_id
  * @property int $dataset_id
@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  * @property string $dataset_column_type
  * @property int $dataset_column_sort_order
  *
- * @property \abc\models\AcDataset $dataset
+ * @property Dataset $dataset
  * @property \Illuminate\Database\Eloquent\Collection $dataset_column_properties
  * @property \Illuminate\Database\Eloquent\Collection $dataset_values
  *

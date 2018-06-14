@@ -5,13 +5,13 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcStockStatus
+ * Class StockStatus
  *
  * @property int $stock_status_id
  * @property int $language_id
  * @property string $name
  *
- * @property \abc\models\base\Language $language
+ * @property Language $language
  *
  * @package abc\models
  */

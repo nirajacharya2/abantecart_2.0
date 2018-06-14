@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcLengthClassDescription
+ * Class LengthClassDescription
  *
  * @property int $length_class_id
  * @property int $language_id
  * @property string $title
  * @property string $unit
  *
- * @property \abc\models\AcLanguage $language
+ * @property Language $language
  *
  * @package abc\models
  */

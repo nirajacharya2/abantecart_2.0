@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  * @property int $value_sort_order
  * @property int $row_id
  *
- * @property \abc\models\DatasetDefinition $dataset_definition
+ * @property DatasetDefinition $dataset_definition
  *
  * @package abc\models
  */

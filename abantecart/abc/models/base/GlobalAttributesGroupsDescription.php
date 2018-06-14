@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcGlobalAttributesGroupsDescription
+ * Class GlobalAttributesGroupsDescription
  *
  * @property int $attribute_group_id
  * @property int $language_id

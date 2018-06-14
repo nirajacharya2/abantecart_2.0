@@ -19,8 +19,8 @@ use abc\models\AModelBase;
  * @property int $quantity
  * @property int $subtract
  *
- * @property \abc\models\Order $order
- * @property \abc\models\Product $product
+ * @property Order $order
+ * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
@@ -56,12 +56,12 @@ class OrderProduct extends AModelBase
 
     public function order()
     {
-        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function product()
     {
-        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function order_downloads()

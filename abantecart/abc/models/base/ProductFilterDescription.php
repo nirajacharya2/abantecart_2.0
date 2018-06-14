@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductFilterDescription
+ * Class ProductFilterDescription
  *
  * @property int $filter_id
  * @property string $value

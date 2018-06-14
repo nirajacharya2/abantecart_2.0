@@ -5,13 +5,13 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcContentsToStore
+ * Class ContentsToStore
  *
  * @property int $content_id
  * @property int $store_id
  *
- * @property \abc\models\AcContent $content
- * @property \abc\models\AcStore $store
+ * @property Content $content
+ * @property Store $store
  *
  * @package abc\models
  */

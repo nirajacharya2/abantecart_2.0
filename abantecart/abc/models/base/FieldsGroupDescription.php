@@ -5,15 +5,15 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcFieldsGroupDescription
+ * Class FieldsGroupDescription
  *
  * @property int $group_id
  * @property string $name
  * @property string $description
  * @property int $language_id
  *
- * @property \abc\models\AcFormGroup $form_group
- * @property \abc\models\AcLanguage $language
+ * @property FormGroup $form_group
+ * @property Language $language
  *
  * @package abc\models
  */

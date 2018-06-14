@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrderDownload
+ * Class OrderDownload
  *
  * @property int $order_download_id
  * @property int $order_id
@@ -25,9 +25,9 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\AcDownload $download
- * @property \abc\models\Order $order
- * @property \abc\models\AcOrderProduct $order_product
+ * @property Download $download
+ * @property Order $order
+ * @property OrderProduct $order_product
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
  * @package abc\models
@@ -80,7 +80,7 @@ class OrderDownload extends AModelBase
 
     public function order()
     {
-        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function order_product()

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrderHistory
+ * Class OrderHistory
  *
  * @property int $order_history_id
  * @property int $order_id
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\AcOrderStatus $order_status
+ * @property OrderStatus $order_status
  *
  * @package abc\models
  */

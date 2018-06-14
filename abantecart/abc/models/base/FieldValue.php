@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcFieldValue
+ * Class FieldValue
  *
  * @property int $value_id
  * @property int $field_id
  * @property string $value
  * @property int $language_id
  *
- * @property \abc\models\AcField $field
+ * @property Field $field
  *
  * @package abc\models
  */

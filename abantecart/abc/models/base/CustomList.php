@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\CustomBlock $custom_block
+ * @property CustomBlock $custom_block
  *
  * @package abc\models
  */

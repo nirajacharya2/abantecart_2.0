@@ -31,7 +31,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_modified
  * @property \Carbon\Carbon $last_login
  *
- * @property \abc\models\Store $store
+ * @property Store $store
  * @property \Illuminate\Database\Eloquent\Collection $addresses
  * @property \Illuminate\Database\Eloquent\Collection $customer_notifications
  * @property \Illuminate\Database\Eloquent\Collection $customer_transactions
@@ -44,8 +44,8 @@ class Customer extends AModelBase
     protected $primaryKey = 'customer_id';
     public $timestamps = false;
 
-    protected $permisions = [
-        self::CLI => ['udpate', 'delete'],
+    protected $permissions = [
+        self::CLI => ['update', 'delete'],
         self::ADMIN => ['update', 'delete'],
         self::CUSTOMER => ['save']
     ];

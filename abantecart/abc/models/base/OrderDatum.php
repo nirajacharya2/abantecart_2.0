@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrderDatum
+ * Class OrderDatum
  *
  * @property int $order_id
  * @property int $type_id
@@ -13,8 +13,8 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\Order $order
- * @property \abc\models\AcOrderDataType $order_data_type
+ * @property Order $order
+ * @property OrderDataType $order_data_type
  *
  * @package abc\models
  */
@@ -41,7 +41,7 @@ class OrderDatum extends AModelBase
 
     public function order()
     {
-        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function order_data_type()

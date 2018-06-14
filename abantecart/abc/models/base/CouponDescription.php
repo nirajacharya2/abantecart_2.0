@@ -5,15 +5,15 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCouponDescription
+ * Class CouponDescription
  *
  * @property int $coupon_id
  * @property int $language_id
  * @property string $name
  * @property string $description
  *
- * @property \abc\models\AcCoupon $coupon
- * @property \abc\models\AcLanguage $language
+ * @property Coupon $coupon
+ * @property Language $language
  *
  * @package abc\models
  */

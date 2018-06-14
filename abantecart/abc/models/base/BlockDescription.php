@@ -19,8 +19,8 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\CustomBlock $custom_block
- * @property \abc\models\Language $language
+ * @property CustomBlock $custom_block
+ * @property Language $language
  *
  * @package abc\models
  */

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcField
+ * Class Field
  *
  * @property int $field_id
  * @property int $form_id
@@ -18,10 +18,10 @@ use abc\models\AModelBase;
  * @property int $status
  * @property string $regexp_pattern
  *
- * @property \abc\models\AcForm $form
+ * @property Form $form
  * @property \Illuminate\Database\Eloquent\Collection $field_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $field_values
- * @property \abc\models\AcFieldsGroup $fields_group
+ * @property FieldsGroup $fields_group
  *
  * @package abc\models
  */

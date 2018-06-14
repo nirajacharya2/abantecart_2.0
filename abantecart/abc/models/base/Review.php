@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\Product $product
+ * @property Product $product
  *
  * @package abc\models
  */

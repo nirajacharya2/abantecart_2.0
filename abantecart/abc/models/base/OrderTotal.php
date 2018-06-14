@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  * @property string $type
  * @property string $key
  *
- * @property \abc\models\Order $order
+ * @property Order $order
  *
  * @package abc\models
  */
@@ -43,6 +43,6 @@ class OrderTotal extends AModelBase
 
     public function order()
     {
-        return $this->belongsTo(\abc\models\Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductSpecial
+ * Class ProductSpecial
  *
  * @property int $product_special_id
  * @property int $product_id
@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\Product $product
+ * @property Product $product
  *
  * @package abc\models
  */

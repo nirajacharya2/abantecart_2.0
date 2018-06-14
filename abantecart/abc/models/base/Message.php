@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcMessage
+ * Class Message
  *
  * @property int $msg_id
  * @property string $title

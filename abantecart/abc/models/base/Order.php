@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrder
+ * Class Order
  *
  * @property int $order_id
  * @property int $invoice_id
@@ -60,12 +60,12 @@ use abc\models\AModelBase;
  * @property string $ip
  * @property string $payment_method_data
  *
- * @property \abc\models\base\Store $store
- * @property \abc\models\base\Language $language
- * @property \abc\models\base\Currency $currency
- * @property \abc\models\base\Customer $customer
- * @property \abc\models\base\Coupon $coupon
- * @property \abc\models\base\OrderStatus $order_status
+ * @property Store $store
+ * @property Language $language
+ * @property Currency $currency
+ * @property Customer $customer
+ * @property Coupon $coupon
+ * @property OrderStatus $order_status
  * @property \Illuminate\Database\Eloquent\Collection $order_data
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories

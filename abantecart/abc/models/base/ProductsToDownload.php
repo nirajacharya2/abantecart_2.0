@@ -5,13 +5,13 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductsToDownload
+ * Class ProductsToDownload
  *
  * @property int $product_id
  * @property int $download_id
  *
- * @property \abc\models\base\Product $product
- * @property \abc\models\base\Download $download
+ * @property Product $product
+ * @property Download $download
  *
  * @package abc\models
  */

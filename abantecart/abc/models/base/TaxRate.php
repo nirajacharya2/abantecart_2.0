@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcTaxRate
+ * Class TaxRate
  *
  * @property int $tax_rate_id
  * @property int $location_id
@@ -20,9 +20,9 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\TaxClass $tax_class
- * @property \abc\models\base\Location $location
- * @property \abc\models\base\Zone $zone
+ * @property TaxClass $tax_class
+ * @property Location $location
+ * @property Zone $zone
  * @property \Illuminate\Database\Eloquent\Collection $tax_rate_descriptions
  *
  * @package abc\models

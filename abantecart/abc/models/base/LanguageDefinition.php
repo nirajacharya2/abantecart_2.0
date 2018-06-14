@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcLanguageDefinition
+ * Class LanguageDefinition
  *
  * @property int $language_definition_id
  * @property int $language_id
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\AcLanguage $language
+ * @property Language $language
  *
  * @package abc\models
  */

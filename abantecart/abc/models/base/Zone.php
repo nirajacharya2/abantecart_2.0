@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  * @property int $status
  * @property int $sort_order
  *
- * @property \abc\models\base\Country $country
+ * @property Country $country
  * @property \Illuminate\Database\Eloquent\Collection $addresses
  * @property \Illuminate\Database\Eloquent\Collection $tax_rates
  * @property \Illuminate\Database\Eloquent\Collection $zone_descriptions

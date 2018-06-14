@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCouponsProduct
+ * Class CouponsProduct
  *
  * @property int $coupon_product_id
  * @property int $coupon_id
  * @property int $product_id
  *
- * @property \abc\models\AcCoupon $coupon
- * @property \abc\models\Product $product
+ * @property Coupon $coupon
+ * @property Product $product
  *
  * @package abc\models
  */
@@ -38,6 +38,6 @@ class CouponsProduct extends AModelBase
 
     public function product()
     {
-        return $this->belongsTo(\abc\models\Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

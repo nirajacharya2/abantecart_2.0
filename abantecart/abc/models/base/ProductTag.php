@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcProductTag
+ * Class ProductTag
  *
  * @property int $product_id
  * @property string $tag
  * @property int $language_id
  *
- * @property \abc\models\Product $product
- * @property \abc\models\Language $language
+ * @property Product $product
+ * @property Language $language
  *
  * @package abc\models
  */

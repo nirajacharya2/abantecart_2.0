@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCoupon
+ * Class Coupon
  *
  * @property int $coupon_id
  * @property string $code
@@ -77,6 +77,6 @@ class Coupon extends AModelBase
 
     public function orders()
     {
-        return $this->hasMany(\abc\models\Order::class, 'coupon_id');
+        return $this->hasMany(Order::class, 'coupon_id');
     }
 }

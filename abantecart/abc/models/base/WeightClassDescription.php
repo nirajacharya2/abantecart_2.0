@@ -12,8 +12,8 @@ use abc\models\AModelBase;
  * @property string $title
  * @property string $unit
  *
- * @property \abc\models\base\WeightClass $weight_class
- * @property \abc\models\base\Language $language
+ * @property WeightClass $weight_class
+ * @property Language $language
  *
  * @package abc\models
  */

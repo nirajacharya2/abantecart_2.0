@@ -12,8 +12,8 @@ use abc\models\AModelBase;
  * @property int $language_id
  * @property string $value
  *
- * @property \abc\models\GlobalAttribute $global_attribute
- * @property \abc\models\Language $language
+ * @property GlobalAttribute $global_attribute
+ * @property Language $language
  *
  * @package abc\models
  */

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCurrency
+ * Class Currency
  *
  * @property int $currency_id
  * @property string $title
@@ -48,6 +48,6 @@ class Currency extends AModelBase
 
     public function orders()
     {
-        return $this->hasMany(\abc\models\Order::class, 'currency_id');
+        return $this->hasMany(Order::class, 'currency_id');
     }
 }

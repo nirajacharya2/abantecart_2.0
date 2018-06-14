@@ -11,7 +11,7 @@ use abc\models\AModelBase;
  * @property int $attribute_id
  * @property int $sort_order
  *
- * @property \abc\models\GlobalAttribute $global_attribute
+ * @property GlobalAttribute $global_attribute
  *
  * @package abc\models
  */

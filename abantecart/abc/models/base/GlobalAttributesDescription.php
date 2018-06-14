@@ -13,8 +13,8 @@ use abc\models\AModelBase;
  * @property string $placeholder
  * @property string $error_text
  *
- * @property \abc\models\GlobalAttribute $global_attribute
- * @property \abc\models\Language $language
+ * @property GlobalAttribute $global_attribute
+ * @property Language $language
  *
  * @package abc\models
  */

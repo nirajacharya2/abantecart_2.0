@@ -18,8 +18,8 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\Page $page
- * @property \abc\models\Language $language
+ * @property Page $page
+ * @property Language $language
  *
  * @package abc\models
  */

@@ -10,8 +10,8 @@ use abc\models\AModelBase;
  * @property int $page_id
  * @property int $form_id
  *
- * @property \abc\models\Form $form
- * @property \abc\models\Page $page
+ * @property Form $form
+ * @property Page $page
  *
  * @package abc\models
  */

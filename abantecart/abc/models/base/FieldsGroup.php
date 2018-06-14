@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcFieldsGroup
+ * Class FieldsGroup
  *
  * @property int $field_id
  * @property int $group_id
  * @property int $sort_order
  *
- * @property \abc\models\AcField $field
- * @property \abc\models\AcFormGroup $form_group
+ * @property Field $field
+ * @property FormGroup $form_group
  *
  * @package abc\models
  */

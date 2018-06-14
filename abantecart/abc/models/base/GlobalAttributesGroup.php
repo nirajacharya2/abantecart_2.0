@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcGlobalAttributesGroup
+ * Class GlobalAttributesGroup
  *
  * @property int $attribute_group_id
  * @property int $sort_order

@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcDownloadAttributeValue
+ * Class DownloadAttributeValue
  *
  * @property int $download_attribute_id
  * @property int $attribute_id
  * @property int $download_id
  * @property string $attribute_value_ids
  *
- * @property \abc\models\AcDownload $download
+ * @property Download $download
  *
  * @package abc\models
  */

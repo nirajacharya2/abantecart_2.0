@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,12 +29,12 @@ if (!class_exists('abc\core\ABC')) {
 }
 
 /**
- * @property \abc\core\cache\ACache         $cache
- * @property ASession                       $session
- * @property ADB                            $db
- * @property AConfig                        $config
- * @property ALog                           $log
- * @property AMessage                       $message
+ * @property \abc\core\cache\ACache $cache
+ * @property ASession $session
+ * @property ADB $db
+ * @property AConfig $config
+ * @property ALog $log
+ * @property AMessage $message
  * @property \abc\core\lib\ALanguageManager $language
  * @property \abc\core\engine\ExtensionsApi $extensions
  */
@@ -59,7 +59,7 @@ class ALayoutManager
     ];
     protected $tmpl_id;
     protected $layout_id;
-    protected $active_layout;
+    protected $active_layout = [];
     protected $page_id;
     protected $custom_blocks = array();
     public $errors = 0;
@@ -187,7 +187,7 @@ class ALayoutManager
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set($key, $value)
     {
@@ -204,6 +204,7 @@ class ALayoutManager
      * @param string $template_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getPages($controller = '', $key_param = '', $key_value = '', $template_id = '')
     {
@@ -264,6 +265,7 @@ class ALayoutManager
      * @param string $layout_type
      *
      * @return array
+     * @throws \Exception
      */
     public function getLayouts($layout_type = '')
     {
@@ -325,6 +327,7 @@ class ALayoutManager
      * @param string $key_value
      *
      * @return array
+     * @throws \Exception
      */
     public function getPageLayoutIDs($controller = '', $key_param = '', $key_value = '')
     {
@@ -356,6 +359,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return array
+     * @throws \Exception
      */
     protected function _getLayoutBlocks($layout_id = 0)
     {
@@ -394,6 +398,7 @@ class ALayoutManager
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getAllBlocks()
     {
@@ -436,10 +441,11 @@ class ALayoutManager
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return array|int
+     * @throws \Exception
      */
     public function getBlocksList($data = array(), $mode = '')
     {
@@ -654,7 +660,7 @@ class ALayoutManager
 
     /**
      * @param array $blocks
-     * @param int   $total_blocks
+     * @param int $total_blocks
      *
      * @return array
      */
@@ -679,7 +685,7 @@ class ALayoutManager
 
     /**
      * @param array $blocks_arr
-     * @param int   $position
+     * @param int $position
      *
      * @return int
      */
@@ -778,6 +784,7 @@ class ALayoutManager
      * @param $data array
      *
      * @return bool
+     * @throws AException
      */
     public function savePageLayout($data)
     {
@@ -841,6 +848,7 @@ class ALayoutManager
      * @param $data array
      *
      * @return bool
+     * @throws \Exception
      */
     public function savePageLayoutAsDraft($data)
     {
@@ -895,6 +903,7 @@ class ALayoutManager
      * @param string $layout_name
      *
      * @return bool
+     * @throws AException
      */
     public function clonePageLayout($src_layout_id, $dest_layout_id = '', $layout_name = '')
     {
@@ -935,6 +944,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
+     * @throws AException
      */
     public function deletePageLayoutByID($page_id, $layout_id)
     {
@@ -963,6 +973,7 @@ class ALayoutManager
      * @param $key_value
      *
      * @return bool
+     * @throws \Exception
      */
     public function deletePageLayout($controller, $key_param, $key_value)
     {
@@ -984,6 +995,7 @@ class ALayoutManager
      * @param int $instance_id
      *
      * @return int
+     * @throws \Exception
      */
     public function saveLayoutBlocks($data, $instance_id = 0)
     {
@@ -1070,6 +1082,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return int
+     * @throws \Exception
      */
     public function saveLayout($data, $layout_id = 0)
     {
@@ -1100,6 +1113,7 @@ class ALayoutManager
      * @param $block_id int
      *
      * @return array
+     * @throws \Exception
      */
     public function getBlockInfo($block_id)
     {
@@ -1139,6 +1153,7 @@ class ALayoutManager
      * @param $block_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getBlockTemplates($block_id)
     {
@@ -1159,6 +1174,7 @@ class ALayoutManager
      * @param int $parent_block_id
      *
      * @return string
+     * @throws \Exception
      */
     public function getBlockTemplate($block_id, $parent_block_id = 0)
     {
@@ -1182,6 +1198,7 @@ class ALayoutManager
      * @param int $page_id
      *
      * @return int
+     * @throws \Exception
      */
     public function savePage($data, $page_id = 0)
     {
@@ -1246,9 +1263,10 @@ class ALayoutManager
 
     /**
      * @param array $data
-     * @param int   $block_id
+     * @param int $block_id
      *
      * @return int
+     * @throws AException
      */
     public function saveBlock($data, $block_id = 0)
     {
@@ -1348,6 +1366,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function editBlockStatus($status, $block_id = 0, $custom_block_id = 0, $layout_id = 0)
     {
@@ -1389,11 +1408,12 @@ class ALayoutManager
     }
 
     /**
-     * @param int   $block_id
-     * @param int   $custom_block_id
+     * @param int $block_id
+     * @param int $custom_block_id
      * @param array $description
      *
      * @return bool|int
+     * @throws \Exception
      */
     public function saveBlockDescription($block_id = 0, $custom_block_id = 0, $description = array())
     {
@@ -1470,6 +1490,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getBlockDescriptions($custom_block_id = 0)
     {
@@ -1525,6 +1546,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getBlocksLayouts($block_id, $custom_block_id = 0)
     {
@@ -1551,6 +1573,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function deleteCustomBlock($custom_block_id)
     {
@@ -1602,9 +1625,10 @@ class ALayoutManager
 
     /**
      * @param string $block_txt_id
-     * @param int    $block_id
+     * @param int $block_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function deleteBlock($block_txt_id = '', $block_id = 0)
     {
@@ -1639,6 +1663,7 @@ class ALayoutManager
      * @param $new_template
      *
      * @return bool
+     * @throws \Exception
      */
     public function cloneTemplateLayouts($new_template)
     {
@@ -1685,6 +1710,7 @@ class ALayoutManager
      * @param $new_layout_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function cloneLayoutBlocks($source_layout_id, $new_layout_id)
     {
@@ -1716,6 +1742,7 @@ class ALayoutManager
 
     /**
      * @return bool
+     * @throws \Exception
      */
     public function deleteTemplateLayouts()
     {
@@ -1742,6 +1769,7 @@ class ALayoutManager
      * @param array $data
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function loadXML($data)
     {
@@ -1781,6 +1809,8 @@ class ALayoutManager
     /**
      * @param int|string $page_id
      * @param int|string $layout_id
+     *
+     * @throws \Exception
      */
     protected function _set_current_page($page_id = '', $layout_id = '')
     {
@@ -1830,6 +1860,7 @@ class ALayoutManager
      * @param object $xml_obj
      *
      * @return bool
+     * @throws \ReflectionException
      */
     protected function _processXML($xml_obj)
     {
@@ -1978,10 +2009,11 @@ class ALayoutManager
     }
 
     /**
-     * @param int    $layout_id
+     * @param int $layout_id
      * @param object $page
      *
      * @return bool
+     * @throws \Exception
      */
     protected function _processPage($layout_id, $page)
     {
@@ -2049,9 +2081,10 @@ class ALayoutManager
     /**
      * @param object $layout
      * @param object $block
-     * @param int    $parent_instance_id
+     * @param int $parent_instance_id
      *
      * @return bool
+     * @throws \ReflectionException
      */
     protected function _processBlock($layout, $block, $parent_instance_id = 0)
     {
@@ -2350,11 +2383,12 @@ class ALayoutManager
     }
 
     /**
-     * @param int    $layout_id
+     * @param int $layout_id
      * @param object $block
-     * @param int    $parent_instance_id
+     * @param int $parent_instance_id
      *
      * @return bool
+     * @throws \ReflectionException
      */
     protected function _processCustomBlock($layout_id, $block, $parent_instance_id = 0)
     {
@@ -2492,9 +2526,10 @@ class ALayoutManager
 
     /**
      * @param object $block
-     * @param int    $layout_id
+     * @param int $layout_id
      *
      * @return bool
+     * @throws \Exception
      */
     protected function _deleteBlock($block, $layout_id)
     {
@@ -2540,9 +2575,10 @@ class ALayoutManager
 
     /**
      * @param object $block
-     * @param int    $layout_id
+     * @param int $layout_id
      *
      * @return bool
+     * @throws \Exception
      */
     protected function _deleteCustomBlock($block, $layout_id)
     {
@@ -2596,6 +2632,7 @@ class ALayoutManager
      * @param string $language_name
      *
      * @return int
+     * @throws \Exception
      */
     protected function _getLanguageIdByName($language_name = '')
     {
@@ -2612,6 +2649,7 @@ class ALayoutManager
      * @param $block_txt_id
      *
      * @return bool
+     * @throws \Exception
      */
     protected function _getInstanceIdByTxtId($layout_id, $block_txt_id)
     {

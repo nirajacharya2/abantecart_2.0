@@ -5,14 +5,14 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcCustomBlock
+ * Class CustomBlock
  *
  * @property int $custom_block_id
  * @property int $block_id
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\AcBlock $block
+ * @property Block $block
  * @property \Illuminate\Database\Eloquent\Collection $block_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $custom_lists
  *

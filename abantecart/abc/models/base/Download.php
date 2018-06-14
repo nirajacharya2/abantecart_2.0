@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcDownload
+ * Class Download
  *
  * @property int $download_id
  * @property string $filename

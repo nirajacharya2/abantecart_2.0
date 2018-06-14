@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcSetting
+ * Class Setting
  *
  * @property int $setting_id
  * @property int $store_id
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\Store $store
+ * @property Store $store
  *
  * @package abc\models
  */

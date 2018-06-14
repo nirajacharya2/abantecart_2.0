@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcContent
+ * Class Content
  *
  * @property int $content_id
  * @property int $parent_content_id

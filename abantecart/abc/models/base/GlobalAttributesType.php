@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcGlobalAttributesType
+ * Class GlobalAttributesType
  *
  * @property int $attribute_type_id
  * @property string $type_key

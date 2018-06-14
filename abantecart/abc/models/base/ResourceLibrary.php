@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\base\ResourceType $resource_type
+ * @property ResourceType $resource_type
  * @property \Illuminate\Database\Eloquent\Collection $resource_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $resource_maps
  *

@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcOrderStatus
+ * Class OrderStatus
  *
  * @property int $order_status_id
  * @property string $status_text_id
@@ -32,6 +32,6 @@ class OrderStatus extends AModelBase
 
     public function orders()
     {
-        return $this->hasMany(\abc\models\Order::class, 'order_status_id');
+        return $this->hasMany(Order::class, 'order_status_id');
     }
 }

@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property \abc\models\Language $language
+ * @property Language $language
  * @property \Illuminate\Database\Eloquent\Collection $order_data
  *
  * @package abc\models

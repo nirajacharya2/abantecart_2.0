@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\models\AModelBase;
 
 /**
- * Class AcLanguage
+ * Class Language
  *
  * @property int $language_id
  * @property string $name
@@ -153,7 +153,7 @@ class Language extends AModelBase
 
     public function orders()
     {
-        return $this->hasMany(\abc\models\Order::class, 'language_id');
+        return $this->hasMany(Order::class, 'language_id');
     }
 
     public function page_descriptions()

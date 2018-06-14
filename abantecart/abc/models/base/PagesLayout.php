@@ -10,8 +10,8 @@ use abc\models\AModelBase;
  * @property int $layout_id
  * @property int $page_id
  *
- * @property \abc\models\Layout $layout
- * @property \abc\models\Page $page
+ * @property Layout $layout
+ * @property Page $page
  *
  * @package abc\models
  */
