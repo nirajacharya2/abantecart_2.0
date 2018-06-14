@@ -73,7 +73,7 @@ class AModelBase extends OrmModel
      */
     protected $cache;
     /**
-     * @var \abc\core\lib\db
+     * @var \abc\core\lib\ADB
      */
     protected $db;
     /**
@@ -81,7 +81,7 @@ class AModelBase extends OrmModel
      */
     protected $errors;
 
-    protected $permisions = [
+    protected $permissions = [
         self::CLI      => ['update', 'delete'],
         self::ADMIN    => ['update', 'delete'],
         self::CUSTOMER => [],
@@ -100,13 +100,11 @@ class AModelBase extends OrmModel
     }
 
     /**
-     * @param none
-     *
      * @return array
      */
-    public function getPermisions(): array
+    public function getPermissions(): array
     {
-        return $this->permisions[$this->actor['user_type']];
+        return $this->permissions[$this->actor['user_type']];
     }
 
     /**
@@ -114,9 +112,9 @@ class AModelBase extends OrmModel
      *
      * @return bool
      */
-    public function hasPermision($operation): bool
+    public function hasPermission($operation): bool
     {
-        return in_array($operation, $this->getPermisions());
+        return in_array($operation, $this->getPermissions());
     }
 
     /**
@@ -130,7 +128,7 @@ class AModelBase extends OrmModel
      */
     public function save(array $options = [])
     {
-        if ($this->hasPermision('update')) {
+        if ($this->hasPermission('update')) {
 //            if ($this->validate($this->all())) {
 //                throw new Exception('Validation failed');
 //            }
@@ -145,7 +143,7 @@ class AModelBase extends OrmModel
      */
     public function delete()
     {
-        if ($this->hasPermision('delete')) {
+        if ($this->hasPermission('delete')) {
             parent::delete();
         } else {
             throw new Exception('No permission for object to delete the model.');
@@ -179,6 +177,8 @@ class AModelBase extends OrmModel
 
     /**
      * @param array $data
+     *
+     * @throws \ReflectionException
      */
     public function updateRelationships(array $data)
     {
@@ -186,11 +186,17 @@ class AModelBase extends OrmModel
             if (isset($data[$relationship_name])) {
                 switch ($relationship_details['type']) {
                     case 'BelongsToMany':
-                        $this->syncBelongsToManyRelationship($relationship_name, $data[$relationship_name]);
+                        $this->syncBelongsToManyRelationship(
+                            $relationship_name,
+                            $data[$relationship_name]
+                        );
                         break;
                     case 'MorphMany':
                     case 'HasMany':
-                        $this->syncHasManyRelationship($relationship_name, $relationship_details['model'], $data[$relationship_name]);
+                        $this->syncHasManyRelationship(
+                            $relationship_details['model'],
+                            $data[$relationship_name]
+                        );
                         break;
                     case 'HasOne':
                         $this->syncHasOneRelationship($relationship_name, $data[$relationship_name]);
@@ -218,10 +224,10 @@ class AModelBase extends OrmModel
     }
 
     /**
-     * @param string $relationship_name
+     * @param $model
      * @param array $data
      */
-    private function syncHasManyRelationship($relationship_name, $model, array $data)
+    private function syncHasManyRelationship($model, array $data)
     {
         $presentIds = [];
         $relObj = new $model;
@@ -242,7 +248,7 @@ class AModelBase extends OrmModel
                 }
                 $presentIds[] = $keys;
             }
-            //TODO implment deletion of relations that were not updated
+            //TODO implement deletion of relations that were not updated
         } else {
             foreach ($data as $related) {
                 $id = $relObj->primaryKey;
@@ -268,6 +274,7 @@ class AModelBase extends OrmModel
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
     public function getRelationships()
     {
@@ -290,8 +297,7 @@ class AModelBase extends OrmModel
                         'model' => (new ReflectionClass($return->getRelated()))->getName(),
                     ];
                 }
-            } catch (Exception $e) {
-            }
+            } catch (Exception $e) {}
         }
         return $relationships;
     }
