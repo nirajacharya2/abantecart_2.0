@@ -53,9 +53,6 @@ use abc\core\engine\AResource;
  * @property ProductTag $product_tags
  * @property ProductsFeatured $products_featured
  * @property ProductsRelated $products_related
- * @property ProductsToCategory $products_to_categories
- * @property ProductsToDownload $products_to_downloads
- * @property ProductsToStore $products_to_stores
  * @property Review $reviews
  *
  * @package abc\models

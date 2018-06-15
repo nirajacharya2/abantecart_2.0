@@ -56,11 +56,6 @@ class Store extends AModelBase
         return $this->hasMany(Order::class, 'store_id');
     }
 
-    public function products_to_stores()
-    {
-        return $this->hasMany(ProductsToStore::class, 'store_id');
-    }
-
     public function settings()
     {
         return $this->hasMany(Setting::class, 'store_id');

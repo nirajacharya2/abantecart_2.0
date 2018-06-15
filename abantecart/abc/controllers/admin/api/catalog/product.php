@@ -289,7 +289,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $productOptionId = $optionObj->getKey();
             unset($optionObj);
 
-            foreach ($option['option_descriptions'] as $option_description) {
+            foreach ((array)$option['option_descriptions'] as $option_description) {
                 $option_description['product_id'] = $productId;
                 $option_description['product_option_id'] = $productOptionId;
                 $optionDescData = $this->removeSubArrays($option_description);
@@ -299,7 +299,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 unset($optionDescObj);
             }
 
-            foreach ($option['option_values'] as $option_value) {
+            foreach ((array)$option['option_values'] as $option_value) {
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
@@ -310,7 +310,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 $productOptionValueId = $optionValueObj->getKey();
                 unset($optionValueObj);
 
-                foreach ($option_value['option_value_descriptions'] as $option_value_description) {
+                foreach ((array)$option_value['option_value_descriptions'] as $option_value_description) {
                     $option_value_description['product_id'] = $productId;
                     $option_value_description['product_option_value_id'] = $productOptionValueId;
                     $optionValueDescData = $this->removeSubArrays($option_value_description);

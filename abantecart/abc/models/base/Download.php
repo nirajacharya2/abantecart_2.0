@@ -81,8 +81,4 @@ class Download extends AModelBase
         return $this->hasMany(OrderDownloadsHistory::class, 'download_id');
     }
 
-    public function products_to_downloads()
-    {
-        return $this->hasMany(ProductsToDownload::class, 'download_id');
-    }
 }
