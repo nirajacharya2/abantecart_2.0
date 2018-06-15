@@ -4,6 +4,7 @@ namespace abc\models\base;
 
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
+use H;
 
 /**
  * Class Product
@@ -145,6 +146,12 @@ class Product extends AModelBase
      * @var array
      */
     protected $images = [];
+
+    /**
+     * seo-keywords
+     * @var array
+     */
+    protected $keywords = [];
 
     /**
      * @var
@@ -306,6 +313,7 @@ class Product extends AModelBase
                 $data['options'][] = $option->getAllData();
             }
             $data['images'] = $this->images();
+            $data['keywords'] = $this->keywords();
             $this->cache->push($cache_key, $data);
         }
         return $data;
@@ -458,5 +466,108 @@ class Product extends AModelBase
             $this->errors = array_merge($this->errors, $resource_mdl->errors());
         }
         return $result;
+    }
+
+    /**
+
+     * @param array $data - nested array of options with descriptions, values and value descriptions
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function replaceOptions($data)
+    {
+        $productId = $this->product_id;
+        if (!$productId) {
+            return false;
+        }
+        $this->options()->delete();
+
+        foreach ($data as $option) {
+            $option['product_id'] = $productId;
+            $option['attribute_id'] = 0;
+            unset($option['product_option_id']);
+
+            $optionData = $this->removeSubArrays($option);
+
+            $optionObj = new ProductOption();
+            $optionObj->fill($optionData)->save();
+            $productOptionId = $optionObj->getKey();
+            unset($optionObj);
+
+            foreach ((array)$option['option_descriptions'] as $option_description) {
+                $option_description['product_id'] = $productId;
+                $option_description['product_option_id'] = $productOptionId;
+                $optionDescData = $this->removeSubArrays($option_description);
+
+                $optionDescObj = new ProductOptionDescription();
+                $optionDescObj->fill($optionDescData)->save();
+                unset($optionDescObj);
+            }
+
+            foreach ((array)$option['option_values'] as $option_value) {
+                $option_value['product_id'] = $productId;
+                $option_value['product_option_id'] = $productOptionId;
+                $option_value['attribute_value_id'] = 0;
+
+                $optionValueData = $this->removeSubArrays($option_value);
+                $optionValueObj = new ProductOptionValue();
+                $optionValueObj->fill($optionValueData)->save();
+                $productOptionValueId = $optionValueObj->getKey();
+                unset($optionValueObj);
+
+                foreach ((array)$option_value['option_value_descriptions'] as $option_value_description) {
+                    $option_value_description['product_id'] = $productId;
+                    $option_value_description['product_option_value_id'] = $productOptionValueId;
+                    $optionValueDescData = $this->removeSubArrays($option_value_description);
+                    $optionValueDescObj = new ProductOptionValueDescription();
+                    $optionValueDescObj->fill($optionValueDescData)->save();
+                    unset($optionValueDescObj);
+                }
+            }
+        }
+        return true;
+    }
+
+
+    protected function removeSubArrays(array $array)
+    {
+        foreach ($array as $k => &$v) {
+            if (is_array($v)) {
+                unset($array[$k]);
+            }
+        }
+        return $array;
+    }
+
+
+    public function keywords()
+    {
+        if ($this->keywords) {
+            return $this->keywords;
+        }
+
+        $urlAliases = UrlAlias::where('query', '=', 'product_id='.$this->product_id)->get();
+        if($urlAliases){
+            foreach($urlAliases as $urlAlias)
+            $this->keywords[] = [
+                'keyword' => H::SEOEncode($urlAlias->keyword,'product_id',$this->product_id),
+                'language_id'=> $urlAlias->language_id
+            ];
+        }
+        return $this->keywords;
+    }
+
+    public function replaceKeywords($data)
+    {
+        $query = 'product_id='.$this->product_id;
+        UrlAlias::where('query','=',$query)->delete();
+        foreach((array)$data as $keyword){
+            $urlAlias = new UrlAlias();
+            $urlAlias->query = $query;
+            $urlAlias->language_id = (int)$keyword['language_id'];
+            $urlAlias->keyword = $keyword['keyword'];
+            $urlAlias->save();
+        }
     }
 }
