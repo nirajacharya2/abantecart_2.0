@@ -18,9 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\cache;
-
-use abc\core\cache\ACacheDriverInterface;
+namespace abc\core\cache;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -67,7 +65,8 @@ class ACacheDriverXCache extends ACacheDriver implements ACacheDriverInterface
                 return true;
             }
 
-            // We require a string with contents 0, not a null value because it is not set since that then defaults to On/True
+            // We require a string with contents 0, not a null value
+            // because it is not set since that then defaults to On/True
             if ($xcache_admin_enable_auth === '0') {
                 return true;
             }
@@ -94,7 +93,7 @@ class ACacheDriverXCache extends ACacheDriver implements ACacheDriverInterface
      */
     public function get($key, $group, $check_expire = true)
     {
-        $cache_id = $this->_getCacheId($key, $group);
+        $cache_id = $this->getCacheId($key, $group);
         $data = xcache_get($cache_id);
         if ($data === null) {
             return false;
@@ -116,7 +115,7 @@ class ACacheDriverXCache extends ACacheDriver implements ACacheDriverInterface
      */
     public function put($key, $group, $data)
     {
-        $cache_id = $this->_getCacheId($key, $group);
+        $cache_id = $this->getCacheId($key, $group);
 
         return xcache_set($cache_id, $data, $this->expire);
     }
@@ -133,7 +132,7 @@ class ACacheDriverXCache extends ACacheDriver implements ACacheDriverInterface
     public function remove($key, $group)
     {
 
-        $cache_id = $this->_getCacheId($key, $group);
+        $cache_id = $this->getCacheId($key, $group);
         if ( ! xcache_isset($cache_id)) {
             return true;
         }
@@ -210,8 +209,8 @@ class ACacheDriverXCache extends ACacheDriver implements ACacheDriverInterface
         return null;
     }
 
-    protected function _getCacheId($key, $group)
+    protected function getCacheId($key, $group)
     {
-        return $this->secret.'-cache-'.$group.'.'.$this->_hashCacheKey($key, $group);
+        return $this->secret.'-cache-'.$group.'.'.$this->hashCacheKey($key, $group);
     }
 }

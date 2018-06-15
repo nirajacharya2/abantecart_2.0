@@ -18,11 +18,9 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\cache;
+namespace abc\core\cache;
 
-use abc\core\cache\ACacheDriverInterface;
-
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -40,15 +38,15 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
      * Constructor
      *
      * @param array $config
-     * @param int   $expiration
-     * @param int   $lock_time
+     * @param int $expiration
+     * @param int $lock_time
      *
      * @since   1.2.7
      */
     public function __construct(array $config, $expiration, $lock_time = 0)
     {
         $this->secret = $config['CACHE_SECRET'];
-        if ( ! $lock_time) {
+        if (!$lock_time) {
             $lock_time = 10;
         }
 
@@ -73,16 +71,16 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
         return (bool)$supported;
     }
 
-    protected function _getCacheId($key, $group)
+    protected function getCacheId($key, $group)
     {
-        return $this->secret.'-cache-'.$group.'.'.$this->_hashCacheKey($key, $group);
+        return $this->secret.'-cache-'.$group.'.'.$this->hashCacheKey($key, $group);
     }
 
     /**
      * Get cached data from a file by key and group
      *
-     * @param   string  $key          The cache data key
-     * @param   string  $group        The cache data group
+     * @param   string $key The cache data key
+     * @param   string $group The cache data group
      * @param   boolean $check_expire True to verify cache time expiration
      *
      * @return  mixed  Boolean false on failure or a cached data string
@@ -91,7 +89,7 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
      */
     public function get($key, $group, $check_expire = true)
     {
-        $cache_key = $this->_getCacheId($key, $group);
+        $cache_key = $this->getCacheId($key, $group);
 
         return apc_fetch($cache_key);
     }
@@ -99,9 +97,9 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
     /**
      * Save data to a file by key and group
      *
-     * @param   string $key   The cache data key
+     * @param   string $key The cache data key
      * @param   string $group The cache data group
-     * @param   string $data  The data to store in cache
+     * @param   string $data The data to store in cache
      *
      * @return  boolean
      *
@@ -109,7 +107,7 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
      */
     public function put($key, $group, $data)
     {
-        $cache_key = $this->_getCacheId($key, $group);
+        $cache_key = $this->getCacheId($key, $group);
 
         return apc_store($cache_key, $data, $this->expire);
     }
@@ -117,7 +115,7 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
     /**
      * Remove a cached data file by key and group
      *
-     * @param   string $key   The cache data key
+     * @param   string $key The cache data key
      * @param   string $group The cache data group
      *
      * @return  boolean
@@ -126,7 +124,7 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
      */
     public function remove($key, $group)
     {
-        $cache_key = $this->_getCacheId($key, $group);
+        $cache_key = $this->getCacheId($key, $group);
 
         return apc_delete($cache_key);
     }
@@ -182,8 +180,8 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
     /**
      * Lock cached item
      *
-     * @param   string  $key      The cache data key
-     * @param   string  $group    The cache data group
+     * @param   string $key The cache data key
+     * @param   string $group The cache data group
      * @param   integer $locktime Cached item max lock time
      *
      * @return  array
@@ -198,13 +196,14 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
 
         $looptime = $locktime * 10;
 
-        $cache_key = $this->_getCacheId($key, $group).'_lock';
+        $cache_key = $this->getCacheId($key, $group).'_lock';
 
         $data_lock = apc_add($cache_key, 1, $locktime);
 
         if ($data_lock === false) {
             $lock_counter = 0;
-            // Loop until you find that the lock has been released. That implies that data get from other thread has finished
+            // Loop until you find that the lock has been released.
+            // That implies that data get from other thread has finished
             while ($data_lock === false) {
                 if ($lock_counter > $looptime) {
                     $output['locked'] = false;
@@ -226,7 +225,7 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
     /**
      * Unlock cached item
      *
-     * @param   string $key   The cache data key
+     * @param   string $key The cache data key
      * @param   string $group The cache data group
      *
      * @return  boolean
@@ -235,6 +234,6 @@ class ACacheDriverAPC extends ACacheDriver implements ACacheDriverInterface
      */
     public function unlock($key, $group = null)
     {
-        return apc_delete($this->_getCacheId($key, $group).'_lock');
+        return apc_delete($this->getCacheId($key, $group).'_lock');
     }
 }

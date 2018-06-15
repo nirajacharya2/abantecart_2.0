@@ -102,7 +102,6 @@ $defaults = [
     'DIR_DOWNLOADS'       => $dir_app.'downloads'.DS,
     'DIR_MIGRATIONS'      => $dir_app.'migrations'.DS,
     'DIR_CONFIG'          => $dir_app.'config'.DS,
-    'DIR_CACHE'           => $dir_app.'system'.DS.'cache'.DS,
     'DIR_LOGS'            => $dir_app.'system'.DS.'logs'.DS,
     'DIR_PUBLIC'          => $dir_public,
     'DIR_RESOURCES'       => $dir_public.DS.'resources'.DS,

@@ -30,8 +30,6 @@ use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
-use abc\extensions\tims\modules\events\AdminProductUpdateEvent;
-use H;
 use Illuminate\Events\Dispatcher;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
@@ -86,7 +84,6 @@ ABC::env(
         'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
         'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
         'DIR_CONFIG'         => $dir_app.'config'.DS,
-        'DIR_CACHE'          => $dir_app.'system'.DS.'cache'.DS,
         'DIR_LOGS'           => $dir_app.'system'.DS.'logs'.DS,
         'DIR_TEMPLATES'      => $dir_app.'templates'.DS,
         'DIR_IMAGES'         => $dir_public.'images'.DS,
@@ -232,7 +229,7 @@ ABC::env(
 );
 
 //load base libraries
-require_once 'base.php';
+require_once __DIR__.DS.'base.php';
 
 // Registry
 $registry = Registry::getInstance();
@@ -270,6 +267,9 @@ if (php_sapi_name() == 'cli') {
 
 // Cache
 registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
+$cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
+$cache_driver = !$cache_driver ? 'file' : $cache_driver;
+$registry->get('cache')->setCacheStorageDriver($cache_driver);
 
 // Config
 registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);

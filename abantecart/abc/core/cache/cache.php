@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,16 +21,15 @@
 namespace abc\core\cache;
 
 use abc\core\ABC;
-use abc\cache\ACacheDriverFile;
 use DirectoryIterator;
 
-if ( ! class_exists('abc\core\ABC')) {
+if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 //include abstract cache storage driver class
-include_once('driver.php');
-include_once('interface.php');
+include_once __DIR__.DS.'driver.php';
+include_once __DIR__.DS.'interface.php';
 
 /**
  * Class ACache API
@@ -78,7 +77,7 @@ class ACache
     /**
      * Holds cache storage driver object
      *
-     * @var ACacheDriverFile |
+     * @var ACacheDriverFile
      */
     private $cache_driver;
 
@@ -210,22 +209,24 @@ class ACache
         $drv = $this->getCacheStorageDriver($driver);
         if (isset($drv) && is_file($drv['file'])) {
             //try to load driver class
-            include_once($drv['file']);
+            include_once $drv['file'];
 
             // If the class doesn't exist we have nothing else to do here.
-            if ( ! class_exists($drv['class'])) {
+            if (!class_exists($drv['class'])) {
                 return false;
             }
 
             //instantiate storage driver class
+            /**
+             * @var ACacheDriverFile $drv_class
+             */
             $drv_class = $drv['class'];
             $cache_config = ABC::env('CACHE');
-            //var_dump($cache_config); exit;
+
             if (!$cache_config || !is_array($cache_config)) {
                 return false;
             }
             $this->cache_driver = new $drv_class($cache_config, $this->expire, $this->locktime);
-
             return true;
         }
 
@@ -237,23 +238,23 @@ class ACache
      *
      * @param string $key
      *
-     * @param mixed  $data
+     * @param mixed $data
      *
      * @return bool
      */
     public function push($key, $data)
     {
         $ret = false;
-        if ( ! $key) {
+        if (!$key) {
             return $ret;
         }
 
         //get group name from the key Example: key=[group].text
-        $group = $this->_get_group($key);
+        $group = $this->getGroup($key);
         $this->cache[$group][$key] = $data;
         $this->cache_saves[$group][$key] += 1;
 
-        if ( ! is_null($data) && $this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
+        if (!is_null($data) && $this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
             $data = serialize($data);
 
             $lock = $this->lock($key, $group);
@@ -287,12 +288,12 @@ class ACache
      */
     public function pull($key)
     {
-        if ( ! $key) {
+        if (!$key) {
             return false;
         }
 
-        $group = $this->_get_group($key);
-        if ($this->_exists($key, $group)) {
+        $group = $this->getGroup($key);
+        if ($this->exists($key, $group)) {
             $this->cache_hits[$group][$key] += 1;
 
             return $this->cache[$group][$key];
@@ -320,7 +321,7 @@ class ACache
             }
         }
 
-        if ( ! isset($this->cache_misses[$group][$key])) {
+        if (!isset($this->cache_misses[$group][$key])) {
             $this->cache_misses[$group][$key] = 0;
         }
         $this->cache_misses[$group][$key] += 1;
@@ -340,12 +341,12 @@ class ACache
     public function remove($key)
     {
 
-        $group = $this->_get_group($key);
+        $group = $this->getGroup($key);
         if (trim($key) == '*') {
             // clean all
             $this->flush();
             if ($this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
-                if ( ! $this->cache_driver->clean('*')) {
+                if (!$this->cache_driver->clean('*')) {
                     return false;
                 }
             }
@@ -354,16 +355,16 @@ class ACache
                 //if group and key match, assume we remove whole group
                 unset($this->cache[$group]);
                 if ($this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
-                    if ( ! $this->cache_driver->clean($group)) {
+                    if (!$this->cache_driver->clean($group)) {
                         return false;
                     }
                 }
             } else {
                 unset($this->cache[$group][$key]);
                 if ($this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
-                    if ( ! $this->cache_driver->remove($key, $group)) {
+                    if (!$this->cache_driver->remove($key, $group)) {
                         //can not delete this key, delete entire group (backwards compatibility)
-                        if ( ! $this->cache_driver->clean($group)) {
+                        if (!$this->cache_driver->clean($group)) {
                             return false;
                         }
                     }
@@ -374,8 +375,8 @@ class ACache
         if (trim($key) != '*' && $group != 'html_cache') {
             //remove HTML cache on any other cache clean up as data changed or expired
             unset($this->cache['html_cache']);
-            if(is_object($this->cache_driver)) {
-                $this->cache_driver->clean( 'html_cache' );
+            if (is_object($this->cache_driver)) {
+                $this->cache_driver->clean('html_cache');
             }
         }
 
@@ -385,12 +386,12 @@ class ACache
     /**
      * Serves as a utility function to determine whether a key exists in the memory cache.
      *
-     * @param string $key   Cache key to check for existence.
+     * @param string $key Cache key to check for existence.
      * @param string $group Cache group.
      *
      * @return bool, Whether the key exists in the cache for given group.
      */
-    protected function _exists($key, $group)
+    protected function exists($key, $group)
     {
         return isset($this->cache[$group])
             && (isset($this->cache[$group][$key])
@@ -413,8 +414,8 @@ class ACache
     /**
      * Set lock on cached item to prevent data clash
      *
-     * @param   string $key      The cache data key
-     * @param   string $group    The cache data group
+     * @param   string $key The cache data key
+     * @param   string $group The cache data group
      * @param   string $locktime The default locktime for locking the cache.
      *
      * @return  array  Properties are lock and locklooped
@@ -476,7 +477,7 @@ class ACache
     /**
      * Unset lock cached item
      *
-     * @param   string $key   The cache data key
+     * @param   string $key The cache data key
      * @param   string $group The cache data group
      *
      * @return  boolean
@@ -517,7 +518,8 @@ class ACache
         $stats .= "<strong>Cache usage report:</strong>";
         $stats .= "</p>";
         $stats .= '<table>';
-        $stats .= '<tr><td></td><td width="9%"></td><td width="9%"></td><td width="9%"></td><td width="9%"></td><td width="9%"></td></tr>';
+        $stats .= '<tr><td></td><td width="9%"></td><td width="9%"></td>'
+            .'<td width="9%"></td><td width="9%"></td><td width="9%"></td></tr>';
         foreach ($this->cache as $group => $cache) {
             $stats .= "<tr><td colspan=6>";
             $stats .= "<strong>Cache group: $group</strong>";
@@ -559,10 +561,8 @@ class ACache
                     }
                 }
 
-                $stats
-                    .= '<tr>
-						<td style="text-align:left; padding-left: 20px;">'.$key.'</td><td>'.number_format($size_in_bytes / $kb_in_bytes, 2).'k</td> '.$text.'
-					</tr>';
+                $stats .= '<tr><td style="text-align:left; padding-left: 20px;">'.$key.'</td><td>'
+                    .number_format($size_in_bytes / $kb_in_bytes, 2).'k</td> '.$text.'</tr>';
             }
         }
         $stats .= "</table>";
@@ -585,10 +585,14 @@ class ACache
     public function getCacheStorageDriver($driver_name)
     {
         $driver = array();
-        $file_path = ABC::env('DIR_CORE').'cache/'.$driver_name.'.php';
+        $file_path = ABC::env('DIR_CORE').'cache'.DS.$driver_name.'.php';
         if (file_exists($file_path)) {
-            $class = '\abc\cache\ACacheDriver'.ucfirst($driver_name);
-            $driver = array('class' => $class, 'file' => $file_path, 'driver_name' => $driver_name);
+            $class = '\\'.__NAMESPACE__.'\\'.'ACacheDriver'.ucfirst($driver_name);
+            $driver = [
+                'class'       => $class,
+                'file'        => $file_path,
+                'driver_name' => $driver_name,
+            ];
         }
 
         return $driver;
@@ -610,21 +614,23 @@ class ACache
         foreach ($files as $file) {
             //we need only php files.
             $file_name = $file->getFilename();
-            if ( ! $file->isFile() || $file->getExtension() != 'php' || $file_name == 'index.php' || $file_name == 'driver.php') {
+            if (!$file->isFile() || $file->getExtension() != 'php' || $file_name == 'index.php'
+                || $file_name == 'driver.php') {
                 continue;
             }
             //Build class name from the file name.
             $driver_name = substr($file_name, 0, (strrpos($file_name, ".")));
             $class = 'ACacheDriver'.ucfirst($driver_name);
-            $drivers[$driver_name] = array('class' => $class, 'file' => $file->getPathname(), 'driver_name' => $driver_name);
+            $drivers[$driver_name] =
+                array('class' => $class, 'file' => $file->getPathname(), 'driver_name' => $driver_name);
         }
 
         return $drivers;
     }
 
-    private function _get_group($key)
+    private function getGroup($key)
     {
-        if ( ! $key) {
+        if (!$key) {
             return false;
         }
         //match first word before dot
@@ -649,10 +655,10 @@ class ACache
      */
     public function get_html_cache($key)
     {
-        if ( ! $key) {
+        if (!$key) {
             return '';
         }
-        $group = $this->_get_group($key);
+        $group = $this->getGroup($key);
         if ($this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
             //load cache from storage
             $data = $this->cache_driver->get($key, $group);
@@ -689,12 +695,12 @@ class ACache
     public function save_html_cache($key, $data)
     {
         $ret = false;
-        if ( ! $key) {
+        if (!$key) {
             return false;
         }
 
-        $group = $this->_get_group($key);
-        if ( ! is_null($data) && $this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
+        $group = $this->getGroup($key);
+        if (!is_null($data) && $this->enabled && $this->cache_driver && $this->cache_driver->isSupported()) {
 
             $lock = $this->lock($key, $group);
             if ($lock['locked'] == false && $lock['waited'] == true) {

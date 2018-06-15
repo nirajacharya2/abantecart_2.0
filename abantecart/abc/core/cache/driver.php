@@ -18,7 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\cache;
+namespace abc\core\cache;
 
 if ( ! class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -113,7 +113,7 @@ class ACacheDriver
      *
      * @since   1.2.7
      */
-    protected function _hashCacheKey($key, $group)
+    protected function hashCacheKey($key, $group)
     {
         return md5($group.'-'.$key);
     }

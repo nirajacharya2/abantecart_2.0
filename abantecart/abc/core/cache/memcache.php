@@ -18,9 +18,8 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc\cache;
+namespace abc\core\cache;
 
-use abc\core\cache\ACacheDriverInterface;
 use abc\core\lib\AException;
 use Memcache;
 use stdClass;
@@ -114,7 +113,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
     public function get($key, $group, $check_expire = true)
     {
 
-        $cache_id = $this->_getCacheId($key, $group);
+        $cache_id = $this->getCacheId($key, $group);
         $data = $this->connect->get($cache_id);
 
         return $data;
@@ -134,8 +133,8 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
     public function put($key, $group, $data)
     {
 
-        $cache_id = $this->_getCacheId($key, $group);
-        if ( ! $this->_lock_index()) {
+        $cache_id = $this->getCacheId($key, $group);
+        if (!$this->lockIndex()) {
             return false;
         }
 
@@ -151,7 +150,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
 
         $index[] = $temp_array;
         $this->connect->replace($this->secret.'-index', $index, 0, 0);
-        $this->_unlock_index();
+        $this->unlockIndex();
 
         // Prevent double writes, write only if it doesn't exist else replace
         if ( ! $this->connect->replace($cache_id, $data, $this->compress_level, $this->expire)) {
@@ -173,8 +172,8 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
     public function remove($key, $group)
     {
 
-        $cache_id = $this->_getCacheId($key, $group);
-        if ( ! $this->_lock_index()) {
+        $cache_id = $this->getCacheId($key, $group);
+        if (!$this->lockIndex()) {
             return false;
         }
 
@@ -192,7 +191,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
         }
 
         $this->connect->replace($this->secret.'-index', $index, 0, 0);
-        $this->_unlock_index();
+        $this->unlockIndex();
 
         return $this->connect->delete($cache_id);
     }
@@ -214,7 +213,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
             return false;
         }
 
-        if ( ! $this->_lock_index()) {
+        if (!$this->lockIndex()) {
             return false;
         }
 
@@ -232,7 +231,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
         }
 
         $this->connect->replace($this->secret.'-index', $index, 0, 0);
-        $this->_unlock_index();
+        $this->unlockIndex();
 
         return true;
     }
@@ -262,14 +261,14 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
     public function lock($key, $group, $locktime)
     {
 
-        $cache_id = $this->_getCacheId($key, $group);
+        $cache_id = $this->getCacheId($key, $group);
 
         $output = array();
         $output['waited'] = false;
 
         $loops = $locktime * 10;
 
-        if ( ! $this->_lock_index()) {
+        if (!$this->lockIndex()) {
             return false;
         }
 
@@ -284,7 +283,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
         $temp_array->size = 1;
         $index[] = $temp_array;
         $this->connect->replace($this->secret.'-index', $index, 0, 0);
-        $this->_unlock_index();
+        $this->unlockIndex();
 
         $data_lock = $this->connect->add($cache_id.'_lock', 1, false, $locktime);
 
@@ -323,8 +322,8 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
     public function unlock($key, $group = null)
     {
 
-        $cache_id = $this->_getCacheId($key, $group).'_lock';
-        if ( ! $this->_lock_index()) {
+        $cache_id = $this->getCacheId($key, $group).'_lock';
+        if (!$this->lockIndex()) {
             return false;
         }
 
@@ -342,14 +341,14 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
         }
 
         $this->connect->replace($this->secret.'-index', $index, 0, 0);
-        $this->_unlock_index();
+        $this->unlockIndex();
 
         return $this->connect->delete($cache_id);
     }
 
-    protected function _getCacheId($key, $group)
+    protected function getCacheId($key, $group)
     {
-        return $group.'.'.$this->_hashCacheKey($key, $group);
+        return $group.'.'.$this->hashCacheKey($key, $group);
     }
 
     /**
@@ -359,7 +358,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
      *
      * @since   1.2.7
      */
-    protected function _lock_index()
+    protected function lockIndex()
     {
 
         $loops = 300;
@@ -368,7 +367,8 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
         if ($data_lock === false) {
             $lock_counter = 0;
 
-            // Loop until you find that the lock has been released.  that implies that data get from other thread has finished
+            // Loop until you find that the lock has been released
+            // that implies that data get from other thread has finished
             while ($data_lock === false) {
                 if ($lock_counter > $loops) {
                     return false;
@@ -390,7 +390,7 @@ class ACacheDriverMemcache extends ACacheDriver implements ACacheDriverInterface
      * @return  boolean  True on success, false otherwise.
      * @since 1.2.7
      */
-    protected function _unlock_index()
+    protected function unlockIndex()
     {
         $result = $this->connect->delete($this->secret.'-index_lock');
 
