@@ -207,7 +207,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
             $product->{$fillable} = $data[$fillable];
-            $update_arr[$fillable] = $data[$fillable];
         }
 
         $product->save();
@@ -237,13 +236,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
     private function updateProduct($product, $data)
     {
 
-        $fills = $product->getFillable();
-
-        $update_arr = [];
-        foreach ($fills as $fillable) {
-            $update_arr[$fillable] = $data[$fillable];
-        }
-
         $expected_relations = ['descriptions', 'categories', 'stores']; //'tags',
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -253,7 +245,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
 
-        $product->update($update_arr);
+        $fills = $product->getFillable();
+        $update_arr = [];
+        foreach ($fills as $fillable) {
+            $product->{$fillable} = $data[$fillable];
+        }
+
+        $product->save();
 
         $this->replaceOptions($product, $data);
 
