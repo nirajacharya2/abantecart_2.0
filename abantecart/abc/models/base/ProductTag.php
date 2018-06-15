@@ -18,12 +18,24 @@ use abc\models\AModelBase;
  */
 class ProductTag extends AModelBase
 {
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
+    protected $primaryKeySet = [
+        'product_id',
+        'language_id',
+        'tag'
+    ];
 
     protected $casts = [
         'product_id'  => 'int',
         'language_id' => 'int',
+        'tag' => 'string',
+    ];
+    protected $fillable = [
+            'product_id',
+            'language_id',
+            'tag'
     ];
 
     public function product()
