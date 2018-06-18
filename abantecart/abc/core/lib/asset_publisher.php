@@ -88,8 +88,6 @@ class AAssetPublisher
     public function publish($source = 'all', $options = [])
     {
         $source = !$source ? 'all' : (string)$source;
-        $filter = '';
-
         $files_list = $this->getSourceAssetsFiles($source, $options);
         if (!$files_list) {
             return true;
@@ -102,12 +100,13 @@ class AAssetPublisher
             if (class_exists(ABC::env('asset_publisher_driver'))) {
                 $namespace = "\abc\core\lib\\";
                 $driver = new $namespace.${ABC::env('asset_publisher_driver')}();
+            } else {
+                throw new AException(
+                    'Missing Library Class'
+                    ." Asset publisher driver class ".ABC::env('asset_publisher_driver')." not found!",
+                    AC_ERR_CLASS_CLASS_NOT_EXIST
+                );
             }
-            ADebug::error(
-                'Missing Library Class',
-                AC_ERR_CLASS_CLASS_NOT_EXIST,
-                "Asset publisher driver class ".ABC::env('asset_publisher_driver')." not found!"
-            );
         }
         //use default
         if (!is_object($driver)) {
@@ -302,8 +301,10 @@ class AssetPublisherCopy
             return false;
         }
         foreach ($extensions_files_list as $extension => $file_list) {
-            $src_dir = ABC::env('DIR_APP_EXTENSIONS').$extension
-                .DS.ABC::env('DIRNAME_TEMPLATES');
+            $src_dir = ABC::env('DIR_APP_EXTENSIONS')
+                .$extension.DS
+                .ABC::env('DIRNAME_TEMPLATES');
+
             $dst_dir = ABC::env('DIR_PUBLIC')
                 .ABC::env('DIRNAME_EXTENSIONS')
                 .$extension.DS
@@ -330,6 +331,7 @@ class AssetPublisherCopy
 
     protected function processTemplateAssets($file_list, $src_dir, $dest_dir)
     {
+        $commonResult = true;
         if (!$file_list || !is_array($file_list)) {
             return false;
         }
@@ -341,8 +343,20 @@ class AssetPublisherCopy
             //unique old directory name
             $uid_old = uniqid('apo_');
             //use abc/system/temp directory during copying
-            $new_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DS.$uid_new;
-            $old_temp_dir = ABC::env('DIR_SYSTEM').'temp'.DS.$uid_old;
+            $tmpDir = ABC::env('DIR_SYSTEM').'temp'.DS;
+            if (!is_dir($tmpDir)) {
+                @mkdir($tmpDir, 0775);
+            }
+
+            if (!is_writable($tmpDir)) {
+                $this->errors[] = __CLASS__
+                    .': Temporary directory '
+                    .$tmpDir.' is not writable for php!';
+                return false;
+            }
+
+            $new_temp_dir = $tmpDir.$uid_new;
+            $old_temp_dir = $tmpDir.$uid_old;
 
             //then copy all asset files of template to temporary directory
             foreach ($list as $rel_file) {
@@ -351,7 +365,9 @@ class AssetPublisherCopy
                     $src_dir.$template.DS,
                     $new_temp_dir.DS
                 );
+
                 if (!$res['result']) {
+                    $commonResult = false;
                     $this->errors[] = __CLASS__.': '.$res['message'];
                 }
             }
@@ -387,11 +403,11 @@ class AssetPublisherCopy
                     }
                     //if all fine - remove old live directory
                 } else {
+                    $commonResult = false;
                     $this->errors[] = __CLASS__.': Cannot rename live directory '.$live_dir.' to '.$old_temp_dir;
-                    return false;
                 }
             }
         }
-        return true;
+        return $commonResult;
     }
 }
