@@ -158,11 +158,13 @@ class ABackup
     }
 
     /**
-     * @param array  $tables    - tables list
+     * @param array $tables - tables list
      * @param string $dump_file - path of file with sql dump
      *
      * @return bool|string - path of dump file or false
      * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     public function dumpTables($tables = array(), $dump_file = '')
     {
@@ -330,6 +332,8 @@ class ABackup
     /**
      * @return bool
      * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     public function dumpDatabase()
     {
@@ -363,6 +367,8 @@ class ABackup
      *
      * @return bool
      * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     public function dumpTable($table_name)
     {
@@ -429,7 +435,9 @@ class ABackup
             return true;
         }
         // also skip cache & logs dir
-        if (is_int(strpos($dir_path, ABC::env('DIR_CACHE'))) || is_int(strpos($dir_path, ABC::env('DIR_LOGS')))) {
+        if (is_int(strpos($dir_path, ABC::env('CACHE')['DIR_CACHE']))
+            || is_int(strpos($dir_path, ABC::env('DIR_LOGS')))
+        ) {
             return true;
         }
 

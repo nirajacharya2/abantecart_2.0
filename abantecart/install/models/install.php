@@ -162,11 +162,11 @@ class ModelInstall extends Model
         }
 
         if (!is_writable(ABC::env('DIR_SYSTEM'))) {
-            $this->error['warning'] =
-                'Warning: System directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $this->error['warning'] = 'Warning: System directory and all its '
+                .'children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_CACHE'))) {
+        if (!is_writable(ABC::env('CACHE')['DIR_CACHE'])) {
             $this->error['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
         }
 
@@ -175,8 +175,8 @@ class ModelInstall extends Model
         }
 
         if (!is_writable(ABC::env('DIR_IMAGES'))) {
-            $this->error['warning'] =
-                'Warning: Images directory and all its children files/directories need to be writable for AbanteCart to work!';
+            $this->error['warning'] = 'Warning: Images directory and all its children files/directories '
+                .'need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_IMAGES').'thumbnails')) {

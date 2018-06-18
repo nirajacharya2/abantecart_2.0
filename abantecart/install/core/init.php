@@ -44,7 +44,10 @@ ABC::env(
         'DIR_LIB'            => $dir_app.'core'.$dir_sep.'lib'.$dir_sep,
         'DIR_DOWNLOADS'      => $dir_app.'downloads'.$dir_sep,
         'DIR_CONFIG'         => $dir_app.'config'.$dir_sep,
-        'DIR_CACHE'          => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+        'CACHE'              => [
+            'CACHE_DRIVER' => 'file',
+            'DIR_CACHE'    => $dir_app.'system'.$dir_sep.'cache'.$dir_sep,
+        ],
         'DIR_LOGS'           => $dir_app.'system'.$dir_sep.'logs'.$dir_sep,
         'DIR_TEMPLATES'      => $dir_app.'templates'.$dir_sep,
         'DIR_ASSETS_EXT'     => $dir_public.'extensions'.$dir_sep,

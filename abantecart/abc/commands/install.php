@@ -441,7 +441,7 @@ class Install extends BaseCommand
         $dirs = [
             ABC::env('DIR_CONFIG'),
             ABC::env('DIR_SYSTEM'),
-            ABC::env('DIR_CACHE'),
+            ABC::env('CACHE')['DIR_CACHE'],
             ABC::env('DIR_LOGS'),
             ABC::env('DIR_PUBLIC').'images',
             ABC::env('DIR_PUBLIC').'images/thumbnails',
@@ -501,9 +501,10 @@ class Install extends BaseCommand
                 .' and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('DIR_CACHE'))) {
+        if (!is_writable(ABC::env('CACHE')['DIR_CACHE'])) {
             $errors['warning'] =
-                'Warning: Cache directory '.ABC::env('DIR_CACHE').' needs to be writable for AbanteCart to work!';
+                'Warning: Cache directory '.ABC::env('CACHE')['DIR_CACHE']
+                .' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_LOGS'))) {
@@ -576,9 +577,10 @@ class Install extends BaseCommand
         //write application config
 
         $dirs = [
-            'root' => (DS == '\\' ? $options['root_dir'].'\\' : $options['root_dir']),
-            'app' => (DS == '\\' ? $options['app_dir'].'\\' : $options['app_dir']),
+            'root'   => (DS == '\\' ? $options['root_dir'].'\\' : $options['root_dir']),
+            'app'    => (DS == '\\' ? $options['app_dir'].'\\' : $options['app_dir']),
             'public' => (DS == '\\' ? $options['public_dir'].'\\' : $options['public_dir']),
+            'cache'  => $options['app_dir'].DS.'system'.DS.'cache'.DS,
 
         ];
         $content = <<<EOD
@@ -620,6 +622,7 @@ return [
         'CACHE' => 
                     [
                         'CACHE_DRIVER' => '{$options['cache_driver']}',                        
+                        'DIR_CACHE'    => '{$dirs['cache']}',                        
                         //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
                         //'CACHE_SECRET' => 'your_cache_secret',                        
                         //for "memcache" and "memcached" cache-drivers

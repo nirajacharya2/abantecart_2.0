@@ -103,7 +103,7 @@ class ControllerPagesSettings extends AController
         $template_data['directories'] = [
             ABC::env('DIR_CONFIG'),
             ABC::env('DIR_SYSTEM'),
-            ABC::env('DIR_CACHE'),
+            ABC::env('CACHE')['DIR_CACHE'],
             ABC::env('DIR_LOGS'),
             ABC::env('DIR_DOWNLOADS'),
             ABC::env('DIR_APP_EXTENSIONS'),
