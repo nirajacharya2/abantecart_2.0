@@ -251,7 +251,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
-            $product->{$fillable} = $data[$fillable];
+            if (isset($data[$fillable])) {
+                $product->{$fillable} = $data[$fillable];
+            }
         }
 
         $product->save();
@@ -259,7 +261,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->updateRelationships($rels);
         $product->updateImages($data);
         $product->replaceKeywords($data['keywords']);
-
         return $product;
     }
 

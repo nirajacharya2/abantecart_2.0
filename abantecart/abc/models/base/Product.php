@@ -4,6 +4,7 @@ namespace abc\models\base;
 
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
+use Exception;
 use H;
 
 /**
@@ -166,6 +167,23 @@ class Product extends AModelBase
             $this->fillable = array_merge($this->fillable, $input);
         }
     }
+
+    /**
+     * @param array $options
+     *
+     * @return bool|void
+     * @throws \Exception
+     */
+    public function save(array $options = [])
+    {
+        if ($this->hasPermission('update')) {
+            parent::save();
+            $this->registry->get('cache')->remove('product');
+        } else {
+            throw new Exception('No permission for object to save the model.');
+        }
+    }
+
     /**
      * @return mixed
      */
@@ -465,6 +483,7 @@ class Product extends AModelBase
         if (!$result) {
             $this->errors = array_merge($this->errors, $resource_mdl->errors());
         }
+        $this->cache->remove('product');
         return $result;
     }
 
@@ -526,6 +545,7 @@ class Product extends AModelBase
                 }
             }
         }
+        $this->cache->remove('product');
         return true;
     }
 
@@ -555,6 +575,7 @@ class Product extends AModelBase
                 'language_id'=> $urlAlias->language_id
             ];
         }
+        $this->cache->remove('product');
         return $this->keywords;
     }
 
@@ -569,5 +590,6 @@ class Product extends AModelBase
             $urlAlias->keyword = $keyword['keyword'];
             $urlAlias->save();
         }
+        $this->cache->remove('product');
     }
 }
