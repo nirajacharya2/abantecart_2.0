@@ -12625,11 +12625,7 @@ ALTER TABLE `ac_customer_transactions`
 
 ALTER TABLE `ac_order_products`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
-ALTER TABLE `ac_order_products`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`);
 
-ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
 ALTER TABLE `ac_order_downloads`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
 ALTER TABLE `ac_order_downloads`
@@ -12637,8 +12633,6 @@ ALTER TABLE `ac_order_downloads`
 
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`);
-ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
 ALTER TABLE `ac_order_downloads_history`

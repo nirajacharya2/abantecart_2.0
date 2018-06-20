@@ -6,6 +6,9 @@ use abc\models\AModelBase;
 use abc\core\engine\AResource;
 use Exception;
 use H;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Validator;
 
 /**
  * Class Product
@@ -142,6 +145,10 @@ class Product extends AModelBase
         'settings',
     ];
 
+    protected $rules = [
+        'model' => '|alpha|min:3',
+        'sku'   => 'required',
+    ];
 
     /**
      * @var array
@@ -158,15 +165,6 @@ class Product extends AModelBase
      * @var
      */
     protected $thumbURL;
-
-    public function addFillable($input)
-    {
-        if (is_string($input)) {
-            $this->fillable[] = $input;
-        } elseif (is_array($input)) {
-            $this->fillable = array_merge($this->fillable, $input);
-        }
-    }
 
     /**
      * @param array $options
@@ -302,19 +300,6 @@ class Product extends AModelBase
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'products_to_stores', 'product_id', 'store_id');
-    }
-
-
-    /**
-     * @return array
-     */
-    public function rules()
-    {
-        //todo Complete validation implementation
-        return [
-            'model' => 'required|alpha|min:3',
-            'sku'   => 'required',
-        ];
     }
 
     /**

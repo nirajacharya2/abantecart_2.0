@@ -129,7 +129,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                         'abc\controllers\admin\api\catalog\product@update',
                         new ABaseEvent($product->toArray(), ['products'])
                     );
-                }else{
+                } else {
                     $product = false;
                 }
             } else {
@@ -139,7 +139,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                         'abc\controllers\admin\api\catalog\product@create',
                         new ABaseEvent($product->toArray(), ['products'])
                     );
-                }else{
+                } else {
                     $product = false;
                 }
             }
@@ -210,7 +210,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
-            $product->{$fillable} = $data[$fillable];
+            if ($fillable == 'date_available') {
+                continue;
+            }
+            $product->{$fillable} = urldecode($data[$fillable]);
         }
 
         $product->save();
@@ -232,7 +235,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
     /**
      * @param Product $product
-     * @param $data
+     * @param         $data
      *
      * @return mixed
      * @throws \Exception
@@ -252,7 +255,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
             if (isset($data[$fillable])) {
-                $product->{$fillable} = $data[$fillable];
+                if ($fillable == 'date_available') {
+                    continue;
+                }
+                $product->{$fillable} = urldecode($data[$fillable]);
             }
         }
 

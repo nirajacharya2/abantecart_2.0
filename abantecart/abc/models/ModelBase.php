@@ -21,10 +21,11 @@ namespace abc\models;
 use abc\core\engine\Registry;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\validation\Validator;
 use abc\core\helper\AHelperUtils;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -81,6 +82,8 @@ class AModelBase extends OrmModel
      */
     protected $errors;
 
+    protected $rules = [];
+
     protected $permissions = [
         self::CLI      => ['update', 'delete'],
         self::ADMIN    => ['update', 'delete'],
@@ -89,14 +92,27 @@ class AModelBase extends OrmModel
 
     /**
      * AModelBase constructor.
+     *
+     * @param array $attributes
      */
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
         $this->actor = AHelperUtils::recognizeUser();
         $this->registry = Registry::getInstance();
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
+        parent::__construct($attributes);
+    }
+
+
+
+    /**
+     * @return array
+     */
+    public function rules()
+    {
+        return $this->rules;
     }
 
     /**
@@ -122,19 +138,22 @@ class AModelBase extends OrmModel
      *
      * @param  array $options
      *
-     * @return bool
      *
      * @throws Exception
      */
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-//            if ($this->validate($this->all())) {
-//                throw new Exception('Validation failed');
-//            }
+            if (!$this->validate($this->all())) {
+                throw new Exception(
+                    'Class '. __CLASS__
+                    .' Validation before save failed: '
+                    . implode("\n",$this->errors)
+                );
+            }
             parent::save();
         } else {
-            throw new Exception('No permission for object to save the model.');
+            throw new Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
     }
 
@@ -153,18 +172,71 @@ class AModelBase extends OrmModel
     /**
      * @param $data
      *
-     * @return mixed
+     * @return bool
      */
     public function validate($data)
     {
+        return true;
         if ($rules = $this->rules()) {
-            $v = Validator::make($data, $rules);
+            $v = new Validator(new ValidationTranslator(), $data, $rules);
+            try {
+                $v->validate();
+            } catch (ValidationException $e) {
+            }
             if ($v->fails()) {
-                $this->errors = $v->errors;
+                $this->errors = $v->errors()->toArray();
                 return false;
             }
-            return true;
         }
+        return true;
+    }
+
+    /**
+     * @param string|array $input
+     */
+    public function addFillable($input)
+    {
+        if (is_string($input)) {
+            $this->fillable[] = $input;
+        } elseif (is_array($input)) {
+            $this->fillable = array_merge($this->fillable, $input);
+        }
+    }
+
+    /**
+     * @param string $name
+     */
+    public function removeFillable($name)
+    {
+        $key = array_search($name, $this->fillable);
+        if ($key !== false) {
+            unset($this->fillable[$key]);
+        }
+    }
+
+    /**
+     * @param array $rules
+     */
+    public function appendRules(array $rules)
+    {
+       $this->rules = array_merge($this->rules, $rules);
+    }
+
+    /**
+     * @param string $key
+     */
+    public function removeRule(string $key)
+    {
+       unset($this->rules[$key]);
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     */
+    public function updateRule(string $key, string $value)
+    {
+       $this->rules[$key] = $value;
     }
 
     /**
@@ -215,6 +287,9 @@ class AModelBase extends OrmModel
      */
     private function syncHasOneRelationship($relationship_name, array $data)
     {
+        /**
+         * @var OrmModel|\Illuminate\Database\Query\Builder|Builder $relObj
+         */
         $relObj = $this->$relationship_name();
         if ($relObj) {
             $relObj->fill($data)->save();
@@ -230,6 +305,9 @@ class AModelBase extends OrmModel
     private function syncHasManyRelationship($model, array $data)
     {
         $presentIds = [];
+        /**
+         * @var OrmModel|\Illuminate\Database\Query\Builder|Builder $relObj
+         */
         $relObj = new $model;
         if (isset($relObj->primaryKeySet)) {
             //process composite primary keys relationship
@@ -250,8 +328,8 @@ class AModelBase extends OrmModel
             }
             //TODO implement deletion of relations that were not updated
         } else {
+            $id = $relObj->primaryKey;
             foreach ($data as $related) {
-                $id = $relObj->primaryKey;
                 $conditions = [
                     $id => isset($this->$id) ? $this->$id : null,
                 ];
@@ -263,7 +341,7 @@ class AModelBase extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array  $data
+     * @param array $data
      *
      * @return mixed
      */
@@ -297,7 +375,8 @@ class AModelBase extends OrmModel
                         'model' => (new ReflectionClass($return->getRelated()))->getName(),
                     ];
                 }
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
         return $relationships;
     }
@@ -305,7 +384,8 @@ class AModelBase extends OrmModel
     /**
      * Set the keys for a save update query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function setKeysForSaveQuery(Builder $query)
