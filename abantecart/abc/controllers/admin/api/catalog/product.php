@@ -119,10 +119,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $this->rest->sendResponse(200);
                     return null;
                 }
-                //expand fillable columns for extensions
-                if ($this->data['fillable']) {
-                    $product->addFillable($this->data['fillable']);
-                }
+
                 $product = $this->updateProduct($product, $request);
                 if (is_object($product)) {
                     \H::event(
@@ -252,17 +249,25 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
 
+        //expand fillable columns for extensions
+        if ($this->data['fillable']) {
+            $product->addFillable($this->data['fillable']);
+        }
+
         $fills = $product->getFillable();
+$upd_array = [];
         foreach ($fills as $fillable) {
             if (isset($data[$fillable])) {
-                if ($fillable == 'date_available') {
-                    continue;
-                }
                 $product->{$fillable} = urldecode($data[$fillable]);
+$upd_array[$fillable] = urldecode($data[$fillable]);
             }
         }
 
-        $product->save();
+if($upd_array) {
+    $this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
+}
+
+        //$product->save();
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
