@@ -2,6 +2,7 @@
 
 namespace abc\models\base;
 
+use abc\core\lib\AException;
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
 use Exception;
@@ -567,12 +568,15 @@ class Product extends AModelBase
     public function replaceKeywords($data)
     {
         $query = 'product_id='.$this->product_id;
-        UrlAlias::where('query','=',$query)->delete();
-        foreach((array)$data as $keyword){
+        $urlAlias = new UrlAlias();
+        $urlAlias->where('query', '=', $query)->delete();
+        unset($urlAlias);
+
+        foreach ((array)$data as $keyword) {
             $urlAlias = new UrlAlias();
             $urlAlias->query = $query;
             $urlAlias->language_id = (int)$keyword['language_id'];
-            $urlAlias->keyword = $keyword['keyword'];
+            $urlAlias->keyword = H::SEOEncode($keyword['keyword'],'product_id',$this->product_id);
             $urlAlias->save();
         }
         $this->cache->remove('product');
