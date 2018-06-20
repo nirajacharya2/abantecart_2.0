@@ -176,6 +176,7 @@ class AModelBase extends OrmModel
      */
     public function validate($data)
     {
+        return true;
         if ($rules = $this->rules()) {
             $v = new Validator(new ValidationTranslator(), $data, $rules);
             try {
