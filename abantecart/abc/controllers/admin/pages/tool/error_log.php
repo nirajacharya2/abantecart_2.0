@@ -83,7 +83,6 @@ class ControllerPagesToolErrorLog extends AController
             // check filesize
             $filesize = filesize( $file );
             if ( $filesize > 500000 ) {
-
                 $this->data['log'] = "\n\n\n\n###############################################################################################\n\n".
                     strtoupper( $this->language->get( 'text_file_tail' ) ).ABC::env( 'DIR_LOGS' )
                     ."###############################################################################################\n\n\n\n";
@@ -99,7 +98,8 @@ class ControllerPagesToolErrorLog extends AController
             $log = '';
         }
 
-        $log = htmlentities( str_replace( array( '<br/>', '<br />' ), "\n", $log ), ENT_QUOTES, ABC::env( 'APP_CHARSET' ) );
+        $log = htmlentities(str_replace(array('<br/>', '<br />'), "\n", $log), ENT_QUOTES | ENT_IGNORE,
+            ABC::env('APP_CHARSET'), true);
         //filter empty string
         $lines = array_filter( explode( "\n", $log ), 'strlen' );
         unset( $log );
