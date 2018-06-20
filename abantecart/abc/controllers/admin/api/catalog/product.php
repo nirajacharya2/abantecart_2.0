@@ -210,7 +210,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
-            $product->{$fillable} = $data[$fillable];
+            if ($fillable == 'date_available') {
+                continue;
+            }
+            $product->{$fillable} = urldecode($data[$fillable]);
         }
 
         $product->save();
@@ -252,6 +255,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $fills = $product->getFillable();
         foreach ($fills as $fillable) {
             if (isset($data[$fillable])) {
+                if ($fillable == 'date_available') {
+                    continue;
+                }
                 $product->{$fillable} = urldecode($data[$fillable]);
             }
         }
