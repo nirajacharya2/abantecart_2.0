@@ -12517,7 +12517,7 @@ CREATE TABLE `ac_task_details` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
   `created_by` varchar(255) DEFAULT '',
   `settings` LONGTEXT DEFAULT '',
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`task_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -12658,12 +12658,6 @@ ALTER TABLE `ac_order_status_descriptions`
 ALTER TABLE `ac_order_history`
   ADD FOREIGN KEY (`order_status_id`)
   REFERENCES `ac_order_statuses`(`order_status_id`);
-
-ALTER TABLE `ac_order_options`
-  ADD FOREIGN KEY (`product_option_value_id`)
-  REFERENCES `ac_product_option_values`(`product_option_value_id`)
-  ON DELETE SET NULL
-  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_totals`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);

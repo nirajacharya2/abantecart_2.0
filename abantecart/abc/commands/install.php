@@ -580,7 +580,7 @@ class Install extends BaseCommand
             'root'   => (DS == '\\' ? $options['root_dir'].'\\' : $options['root_dir']),
             'app'    => (DS == '\\' ? $options['app_dir'].'\\' : $options['app_dir']),
             'public' => (DS == '\\' ? $options['public_dir'].'\\' : $options['public_dir']),
-            'cache'  => $options['app_dir'].DS.'system'.DS.'cache'.DS,
+            'cache'  => $options['app_dir'].'system'.DS.'cache'.DS,
 
         ];
         $content = <<<EOD
@@ -621,13 +621,13 @@ return [
 
         'CACHE' => 
                     [
-                        'CACHE_DRIVER' => '{$options['cache_driver']}',                        
-                        'DIR_CACHE'    => '{$dirs['cache']}',                        
+                        'CACHE_DRIVER' => '{$options['cache_driver']}',
+                        'DIR_CACHE'    => '{$dirs['cache']}',
                         //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
-                        //'CACHE_SECRET' => 'your_cache_secret',                        
+                        //'CACHE_SECRET' => 'your_cache_secret',
                         //for "memcache" and "memcached" cache-drivers
                         //'CACHE_HOST' => 'your_cache_host',
-                        //'CACHE_PORT' => 'your_cache_port',                        
+                        //'CACHE_PORT' => 'your_cache_port',
                         //'CACHE_PERSISTENT' => false, //boolean
                         //'CACHE_COMPRESS_LEVEL' => false, //boolean
                     ],
@@ -1027,14 +1027,10 @@ EOD;
     public function validateAppInstall($options)
     {
         //Check if cart is already installed
-        $file_config = [];
-        if (file_exists(ABC::env('DIR_CONFIG').'app.php')) {
-            $file_config = include ABC::env('DIR_CONFIG').'app.php';
-        }
-
-        if (!isset($options['package']) && isset($file_config['default']['ADMIN_SECRET'])) {
+        if (file_exists(ABC::env('DIR_CONFIG').'enabled.config.php')) {
             return [
-                "AbanteCart is already installed!\n Note: to reinstall application just delete file abc/config/app.php"
+                "AbanteCart is already installed!\n "
+                ."Suggestion: to reinstall application just delete files ".ABC::env('DIR_CONFIG')."enabled.config.php"
             ];
         }
 

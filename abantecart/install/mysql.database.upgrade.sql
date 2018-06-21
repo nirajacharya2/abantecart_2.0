@@ -250,11 +250,6 @@ ALTER TABLE `ac_order_statuses`
 ALTER TABLE `ac_order_history`
   ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`);
 
-ALTER TABLE `ac_order_options`
-  ADD FOREIGN KEY (`product_option_value_id`)
-    REFERENCES `ac_product_option_values`(`product_option_value_id`)
-    ON DELETE SET NULL ON UPDATE CASCADE;
-
 ALTER TABLE `ac_order_totals`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
 

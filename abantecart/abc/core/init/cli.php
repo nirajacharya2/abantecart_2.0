@@ -24,42 +24,38 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADB;
 use Exception;
 
-/**
- * @var string $command
- * @see abc/abcexec file
- */
-if ($command != 'help:help') {
-    if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
-        echo "Initialisation...\n";
-        $composer_phar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar';
-        if (!is_file($composer_phar)) {
-            $temp_dir = dirname(dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar');
-            if (!is_dir($temp_dir)) {
-                @mkdir($temp_dir, 0775, true);
-            }
-            if (!is_dir($temp_dir) || !is_writable($temp_dir)) {
-                echo "Temporary directory ".$temp_dir." does not exists or not writable!\n\n";
-                exit;
-            }
-
-            echo "Composer phar-package not found.\n"
-                ."Trying to download Latest Composer into abc/system/temp directory. Please wait..\n";
-            if (!copy(
-                'https://getcomposer.org/composer.phar',
-                dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar')
-            ) {
-                exit("Error: Tried to download latest composer.phar file"
-                    ." from https://getcomposer.org/composer.phar but failed.\n".
-                    " Please download it manually into "
-                    .dirname(__DIR__).DS."system".DS."temp directory\n"
-                    ." OR run composer manually (see composer.json file)");
-            }
+// do check for vendor autoload file first
+if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
+    echo "Initialisation...\n";
+    $composer_phar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar';
+    if (!is_file($composer_phar)) {
+        $temp_dir = dirname(dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar');
+        if (!is_dir($temp_dir)) {
+            @mkdir($temp_dir, 0775, true);
+        }
+        if (!is_dir($temp_dir) || !is_writable($temp_dir)) {
+            echo "Temporary directory ".$temp_dir." does not exists or not writable!\n\n";
+            exit;
         }
 
-        exit("\n\e[0;31mError: /abc/vendor/autoload.php file not found. Please run command \e[0m\n\n
-        php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
+        echo "Composer phar-package not found.\n"
+            ."Trying to download Latest Composer into abc/system/temp directory. Please wait..\n";
+        if (!copy(
+            'https://getcomposer.org/composer.phar',
+            dirname(__DIR__).DS.'system'.DS.'temp'.DS.'composer.phar')
+        ) {
+            exit("Error: Tried to download latest composer.phar file"
+                ." from https://getcomposer.org/composer.phar but failed.\n".
+                " Please download it manually into "
+                .dirname(__DIR__).DS."system".DS."temp directory\n"
+                ." OR run composer manually (see composer.json file)");
+        }
     }
+
+    exit("\n\e[0;31mError: /abc/vendor/autoload.php file not found. Please run command \e[0m\n\n
+    php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
 }
+
 
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
@@ -93,6 +89,7 @@ $defaults = [
     'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
     'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,
     'DIR_SYSTEM'          => $dir_app.'system'.DS,
+    'CACHE'               => ['DIR_CACHE' => $dir_app.'system'.DS.'cache'.DS],
     'DIR_BACKUP'          => $dir_app.'system'.DS.'backup'.DS,
     'DIR_CORE'            => $dir_app.'core'.DS,
     'DIR_LIB'             => $dir_app.'core'.DS.'lib'.DS,
@@ -125,7 +122,9 @@ foreach ($defaults as $name => $value) {
     }
 }
 //load vendors classes
+
 require ABC::env('DIR_VENDOR').'autoload.php';
+
 // App Version
 include('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
