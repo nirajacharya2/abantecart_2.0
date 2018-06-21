@@ -50,7 +50,7 @@ class Migrate extends BaseCommand
             ];
         }
         if ($action == 'phinx' && !isset($options['stage']) && !isset($options['help'])) {
-            return ["Please provide stage name! For example: --stage='default'"];
+            return ["Please provide stage name! For example: --stage=default"];
         }
         return $errors;
     }
