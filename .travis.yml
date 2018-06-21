@@ -1,0 +1,51 @@
+
+language: php
+
+# list any PHP version you want to test against
+php:
+  # using major version aliases
+
+  # aliased to 5.3.29
+  #- 5.3
+  # aliased to a recent 5.4.x version
+  #- 5.4
+  # aliased to a recent 5.5.x version
+  #- 5.5
+  # aliased to a recent 5.6.x version
+  #- 5.6
+  # aliased to a recent 7.x version
+  - 7.2
+  # aliased to a recent hhvm version
+  #- hhvm
+
+# optionally specify a list of environments, for example to test different RDBMS
+env:
+  - DB=mysql
+
+# optionally set up exclutions and allowed failures in the matrix
+matrix:
+  exclude:
+    - php: hhvm
+      env: DB=pgsql  # PDO driver for pgsql is unsupported by HHVM (3rd party install for support)
+
+before_script:
+#  - mkdir -p reports
+#create database
+  - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
+  - cd ./abantecart/abc/
+#initiate project with composer
+  - php ./core/system/temp/composer.phar install
+#run cli-installer
+  - php abcexec install:app --db_host=localhost  --db_user=root  --db_password=  --db_name=abc_test_build  --db_driver=mysql  --db_prefix=abc_  --cache-driver=file  --admin_secret=admin  --username=admin  --password=admin  --email=dsuprunenko@abantecart.com  --http_server=http://abantecart-src.travis-ci.org/public/  --with-sample-data  --skip-caching
+
+script:
+#  - phpunit --version
+#  - phpunit -v -c tests/phpunit/phpunit_$DB.xml
+
+
+
+notifications:
+  email:
+    recipients:
+      - dsuprunenko@abantecart.com
+      #- projkov@abantecart.com
