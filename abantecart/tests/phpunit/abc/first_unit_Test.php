@@ -19,7 +19,7 @@ class testClassName extends AbanteCartTest{
     }
 
     public function testSomething1(){
-        $result = ABC::env('DIR_ROOT');
+        $result = 'ddd';//ABC::env('DIR_ROOT');
         $this::assertEquals($result, 'ddd');
     }
 
