@@ -49,4 +49,4 @@ notifications:
   email:
     recipients:
       - dsuprunenko@abantecart.com
-      #- projkov@abantecart.com
+      - projkov@abantecart.com

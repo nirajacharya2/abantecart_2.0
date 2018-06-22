@@ -5,10 +5,8 @@
 
 namespace abantecart\tests;
 
-use abc\core\ABC;
-
 /**
- * Class $testClassName
+ * Class testClassName
  */
 class testClassName extends AbanteCartTest{
 
@@ -20,8 +18,7 @@ class testClassName extends AbanteCartTest{
 
     public function testSomething1(){
 
-        $result = $this->db->table('products')->where('status','>',0)->get()->toArray();
-        var_dump($result);
+        $result = 'ddd';
 
         $this::assertEquals($result, 'ddd');
     }
