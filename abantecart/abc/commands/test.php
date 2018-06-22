@@ -20,6 +20,7 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\lib\AException;
+use Cake\Database\Exception;
 
 include_once('base/BaseCommand.php');
 
@@ -30,6 +31,7 @@ class Test extends BaseCommand
     protected $phpUnitPhar;
     protected $phpUnitConfigFile;
     protected $phpUnitTestTemplate;
+    protected $phpUnitTestsResult;
 
     public function __construct()
     {
@@ -63,6 +65,7 @@ class Test extends BaseCommand
      * @param string $action
      * @param array $options
      *
+     * @return bool
      * @throws AException
      */
     public function run(string $action, array $options)
@@ -74,6 +77,16 @@ class Test extends BaseCommand
         } else {
             $this->help();
         }
+    }
+
+    /**
+     * @param string $action
+     * @param array $options
+     */
+    public function finish(string $action, array $options){
+        parent::finish($action, $options);
+        //do exit at the end to let shell know about test-batch results
+       exit($this->phpUnitTestsResult);
     }
 
     /**
@@ -89,7 +102,7 @@ class Test extends BaseCommand
             return $this->getOptionList();
         }
         //show phpunit help
-        return $this->callPhpUnit('help', $options);
+        $this->callPhpUnit('help', $options);
     }
 
     protected function getOptionList()
@@ -153,7 +166,7 @@ class Test extends BaseCommand
             }
 
             $output_arr = [];
-            exec('php '.$this->phpUnitPhar.' --configuration '.$this->phpUnitConfigFile, $output_arr, $result);
+            exec('php '.$this->phpUnitPhar.' --configuration '.$this->phpUnitConfigFile, $output_arr, $this->phpUnitTestsResult);
             echo implode("\n", $output_arr)."\n";
         }
     }
