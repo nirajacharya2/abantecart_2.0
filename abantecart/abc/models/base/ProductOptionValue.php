@@ -2,6 +2,7 @@
 
 namespace abc\models\base;
 
+use abc\core\engine\AResource;
 use abc\models\AModelBase;
 
 /**
@@ -33,6 +34,11 @@ class ProductOptionValue extends AModelBase
 {
     protected $primaryKey = 'product_option_value_id';
     public $timestamps = false;
+
+    /**
+     * @var array
+     */
+    protected $images = [];
 
     protected $casts = [
         'product_option_id'  => 'int',
@@ -79,14 +85,36 @@ class ProductOptionValue extends AModelBase
         return $this->hasMany(ProductOptionValueDescription::class, 'product_option_value_id');
     }
 
-//    public function order_options()
-//    {
-//        return $this->hasMany(OrderOption::class, 'product_option_value_id');
-//    }
+    public function images()
+    {
+        if ($this->images) {
+            return $this->images;
+        }
+        $resource = new AResource('image');
+        $sizes = array(
+            'main'  => array(
+                'width'  => $this->config->get('config_image_popup_width'),
+                'height' => $this->config->get('config_image_popup_height'),
+            ),
+            'thumb' => array(
+                'width'  => $this->config->get('config_image_thumb_width'),
+                'height' => $this->config->get('config_image_thumb_height'),
+            ),
+        );
+        $this->images['images'] = $resource->getResourceAllObjects(
+            'product_option_value',
+            $this->getKey(),
+            $sizes,
+            0,
+            false);
+        return $this->images;
+    }
 
     public function getAllData() {
         $this->load('option_value_descriptions');
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['images'] = $this->images();
+        return $data;
     }
 
 }
