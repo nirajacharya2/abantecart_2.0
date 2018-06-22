@@ -266,7 +266,7 @@ $upd_array[$fillable] = urldecode($data[$fillable]);
 if($upd_array) {
     $this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
 }
-
+//$this->log->write('Product_ID'. $product->product_id);
         //$product->save();
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);

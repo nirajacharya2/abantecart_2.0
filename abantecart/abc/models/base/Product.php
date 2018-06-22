@@ -487,7 +487,7 @@ class Product extends AModelBase
             return false;
         }
         $this->options()->delete();
-
+        $resource_mdl = new ResourceLibrary();
         foreach ($data as $option) {
             $option['product_id'] = $productId;
             $option['attribute_id'] = 0;
@@ -519,15 +519,35 @@ class Product extends AModelBase
                 $optionValueObj = new ProductOptionValue();
                 $optionValueObj->fill($optionValueData)->save();
                 $productOptionValueId = $optionValueObj->getKey();
+
                 unset($optionValueObj);
 
+                $optionValueDescData = [];
                 foreach ((array)$option_value['option_value_descriptions'] as $option_value_description) {
                     $option_value_description['product_id'] = $productId;
                     $option_value_description['product_option_value_id'] = $productOptionValueId;
+
                     $optionValueDescData = $this->removeSubArrays($option_value_description);
                     $optionValueDescObj = new ProductOptionValueDescription();
                     $optionValueDescObj->fill($optionValueDescData)->save();
                     unset($optionValueDescObj);
+                }
+                if($option_value['images']){
+
+                    $title = current($optionValueDescData['name']);
+                    $language_id = current($optionValueDescData['language_id']);
+
+                    $result = $resource_mdl->updateImageResourcesByUrls(
+                        $option_value,
+                        'product_option_value',
+                        $productOptionValueId,
+                        $title,
+                        $language_id
+                    );
+
+                    if (!$result) {
+                       $this->errors = array_merge($this->errors, $resource_mdl->errors());
+                    }
                 }
             }
         }

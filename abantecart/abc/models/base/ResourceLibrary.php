@@ -67,6 +67,7 @@ class ResourceLibrary extends AModelBase
     ) {
         $objects = array(
             'products'      => 'Product',
+            'product_option_value' => 'ProductOptionValue',
             'categories'    => 'Category',
             'manufacturers' => 'Brand',
         );

@@ -19,6 +19,7 @@
 
 namespace abc\models\base;
 
+use abc\core\ABC;
 use abc\models\AModelBase;
 
 /**
@@ -119,5 +120,19 @@ class ProductOption extends AModelBase
             $this->cache->push($cache_key, $data);
         }
         return $data;
+    }
+
+    public function delete(){
+        /**
+         * @var AResourceManager $rm
+         */
+        $rm = ABC::getObjectByAlias('AResourceManager');
+        $rm->setType('image');
+        foreach($this->option_values as $option_value){
+            $this->registry->get('log')->write($option_value->product_option_value_id);
+            //Remove previous resources of object
+            $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
+        }
+        parent::delete();
     }
 }
