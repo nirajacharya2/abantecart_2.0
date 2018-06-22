@@ -19,7 +19,9 @@ class testClassName extends AbanteCartTest{
     }
 
     public function testSomething1(){
-        $result = 'ddd';//ABC::env('DIR_ROOT');
+
+        $result = $this->db->table('products')->where('status','>',0)->get()->toArray();
+
         $this::assertEquals($result, 'ddd');
     }
 
