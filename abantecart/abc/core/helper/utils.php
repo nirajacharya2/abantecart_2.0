@@ -383,7 +383,7 @@ class AHelperUtils extends AHelper
      *
      * @return array
      */
-    public static function MakeNestedDirs($dir_full_path, $perms = 0755)
+    public static function MakeNestedDirs($dir_full_path, $perms = 0775)
     {
         $dirs = explode(DS, $dir_full_path);
         $dir = '';

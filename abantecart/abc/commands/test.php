@@ -20,7 +20,6 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\lib\AException;
-use Cake\Database\Exception;
 
 include_once('base/BaseCommand.php');
 
@@ -37,6 +36,7 @@ class Test extends BaseCommand
     {
         $this->phpUnitTestTemplate = ABC::env('DIR_APP').'commands'.DS.'base'.DS.'phpunit.test.template.txt';
         $this->phpUnitPhar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'phpunit-7.2.5.phar';
+        parent::__construct();
     }
 
     public function validate(string $action, array $options)
@@ -55,7 +55,18 @@ class Test extends BaseCommand
                 return ["Please provide file name! For example: --file=path/to/your/file"];
             }
             if (!is_dir(dirname($options['file']))) {
-                return ["Please create directory ".dirname($options['file'])." for file first."];
+                //try to create directory
+                $mkdir_result = \H::MakeNestedDirs(dirname($options['file']),0775);
+                if($mkdir_result['result'] === false) {
+                    return [
+                        "Cannot to create directory ".dirname($options['file'])."."
+                        ."Please create it manually or check permissions.\n"
+                        .$mkdir_result['message']
+                    ];
+                }
+            }
+            if (is_file($options['file'])) {
+                return ["File ".$options['file']." is already exists!"];
             }
         }
         return $errors;
@@ -65,7 +76,6 @@ class Test extends BaseCommand
      * @param string $action
      * @param array $options
      *
-     * @return bool
      * @throws AException
      */
     public function run(string $action, array $options)
@@ -103,6 +113,7 @@ class Test extends BaseCommand
         }
         //show phpunit help
         $this->callPhpUnit('help', $options);
+        return true;
     }
 
     protected function getOptionList()
