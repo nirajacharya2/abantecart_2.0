@@ -1126,7 +1126,7 @@ EOD;
         if (!isset($errors['http_server']) && !isset($options['skip-caching'])) {
             $connect = new AConnect();
             $connect->connect_method = extension_loaded('curl') ? 'curl' : 'socket';
-            $data = $connect->getData($options['http_server'].'robots.txt');
+            $data = $connect->getData($options['http_server']);
 
             if (!$data) {
                 $errors['http_server'] = 'Cannot to connect to '.$options['http_server'].'!';
