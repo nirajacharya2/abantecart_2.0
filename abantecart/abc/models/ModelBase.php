@@ -394,6 +394,8 @@ class AModelBase extends OrmModel
             foreach ($this->primaryKeySet as $key) {
                 $query->where($key, '=', $this->getAttribute($key));
             }
+        } else {
+            parent::setKeysForSaveQuery($query);
         }
         return $query;
     }
