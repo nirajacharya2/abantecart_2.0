@@ -77,7 +77,7 @@ class ABC extends ABCBase
         $path = str_replace('\\', DS, $className);
         $fileName = ABC::env('DIR_ROOT').$path.'.php';
         if (is_file($fileName)) {
-            require $fileName;
+            require_once $fileName;
             return true;
         }
         return false;
@@ -223,9 +223,11 @@ class ABC extends ABCBase
             //check environment values
             if (!sizeof(self::$env)) {
                 // DO NOT ALLOW RUN APP WITH EMPTY ENVIRONMENT
-                exit('Fatal Error: empty environment!');
+                exit('Fatal Error: empty environment! Please check abc/config directory for data consistency.');
             }
-            return isset(self::$env[$name]) ? self::$env[$name] : null;
+            if( isset(self::$env[$name])){
+                return self::$env[$name];
+            }
         } // if need to set batch of values
         else {
             if (is_array($name)) {
@@ -239,12 +241,20 @@ class ABC extends ABCBase
                 } else {
                     if (class_exists('\abc\core\lib\ADebug')) {
                         ADebug::warning(
-                            'Environment variable override',
+                            'Environment option override',
                             AC_ERR_USER_WARNING,
                             'Try to put var '.$name.' into abc-environment, but it already exists!');
                     }
+                    return false;
                 }
             }
+        }
+        if (class_exists('\abc\core\lib\ADebug')) {
+            $dbg = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 5);
+            ADebug::warning(
+                'Environment option "'.$name.'" not found',
+                AC_ERR_USER_WARNING,
+                'ABC Environment Issue: key '.$name.' not found. ('.$dbg[0]['file'].':'.$dbg[0]['line'].')');
         }
         return null;
     }
@@ -285,23 +295,25 @@ class ABC extends ABCBase
      * @param array $args
      *
      * @return bool|string
-     * @throws \ReflectionException
      */
     static function getObjectByAlias(string $class_alias, $args = [])
     {
         if (isset(self::$class_map[$class_alias])) {
-            if (is_array(self::$class_map[$class_alias])) {
-                $class_name = self::$class_map[$class_alias][0];
-            } else {
-                $class_name = self::$class_map[$class_alias];
-            }
-            $args = $args ? $args : self::getClassDefaultArgs($class_alias);
+            try {
+                if (is_array(self::$class_map[$class_alias])) {
+                    $class_name = self::$class_map[$class_alias][0];
+                } else {
+                    $class_name = self::$class_map[$class_alias];
+                }
 
-            $reflector = new ReflectionClass($class_name);
-            return $reflector->newInstanceArgs($args);
-        } else {
-            return false;
+                $args = $args ? $args : self::getClassDefaultArgs($class_alias);
+
+                $reflector = new ReflectionClass($class_name);
+                return $reflector->newInstanceArgs($args);
+            }catch(\ReflectionException $e){}
         }
+
+        return false;
     }
 
     /**
