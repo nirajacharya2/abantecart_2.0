@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,109 +17,120 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AControllerAPI;
 use abc\core\helper\AHelperUtils;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
-class ControllerApiCommonAccess extends AControllerAPI {
 
-	public function main() {
-		//check if any restriction on caller IP
-		if ( !$this->_validate_ip() ) {
-			return $this->dispatch('api/error/no_access');
-		}
-		//validate if API enabled and KEY matches. 
-		if ( $this->config->get('config_admin_api_status')	) {
-			if ($this->config->get('config_admin_api_key') && 
-					( $this->config->get('config_admin_api_key') == $this->request->post['api_key'] ||
-					  $this->config->get('config_admin_api_key') == $this->request->get['api_key'] )
-				) {
-				return null;
-			} else if ( !$this->config->get('config_admin_api_key') ) {
-				return null;
-			}
-		}
-		return $this->dispatch('api/error/no_access');
-	}
+class ControllerApiCommonAccess extends AControllerAPI
+{
 
-	private function _validate_ip () {
-		if (!AHelperUtils::has_value($this->config->get('config_admin_access_ip_list'))) {
-			return true;
-		}
-		
-		$ips = array_map('trim', explode(",", $this->config->get('config_admin_access_ip_list')));
-		if ( in_array($this->request->getRemoteIP(), $ips) ){
-			return true;
-		}
-		return false;
-	}
+    public function main()
+    {
+        //check if any restriction on caller IP
+        if (!$this->validateIP()) {
+            return $this->dispatch('api/error/no_access');
+        }
+        //validate if API enabled and KEY matches.
+        if ($this->config->get('config_admin_api_status')) {
+            if ($this->config->get('config_admin_api_key')
+                && $this->config->get('config_admin_api_key') == $this->request->post_or_get('api_key')
+            ) {
+                return null;
+            } else {
+                if (!$this->config->get('config_admin_api_key')) {
+                    return null;
+                }
+            }
+        }
+        return $this->dispatch('api/error/no_access');
+    }
 
-	public function login() {
-		$request = $this->rest->getRequestParams();
-		//allow access to listed controllers with no login
-		if (isset($request['rt']) && !isset($request['token'])) {
-			$route = '';
-			$part = explode('/', $request['rt']);
+    private function validateIP()
+    {
+        if (!AHelperUtils::has_value($this->config->get('config_admin_access_ip_list'))) {
+            return true;
+        }
 
-			if (isset($part[ 0 ])) {
-				$route .= $part[ 0 ];
-			}
-			if (isset($part[ 1 ])) {
-				$route .= '/' . $part[ 1 ];
-			}
-			$ignore = array(
-				'api/index/login',
-				'api/common/access',
-				'api/error/not_found',
-				'api/error/no_access',
-				'api/error/no_permission',
-			);
+        $ips = array_map('trim', explode(",", $this->config->get('config_admin_access_ip_list')));
+        if (in_array($this->request->getRemoteIP(), $ips)) {
+            return true;
+        }
+        return false;
+    }
 
-			if (!in_array($route, $ignore)) {
-				return $this->dispatch('api/index/login');
-			}
-		} else {
-			if ( !$this->user->isLoggedWithToken( $request['token'] )) {
-				return $this->dispatch('api/index/login');
-			}
-		}
-		return false;
-	}
+    public function login()
+    {
+        $request = $this->rest->getRequestParams();
+        //allow access to listed controllers with no login
+        if (isset($request['rt']) && !isset($request['token'])) {
+            $route = '';
+            $part = explode('/', $request['rt']);
 
-	public function permission() {
-		$request = $this->rest->getRequestParams();
-		
-		if ( $this->extensions->isExtensionController($request['rt']) ) return null;
+            if (isset($part[0])) {
+                $route .= $part[0];
+            }
+            if (isset($part[1])) {
+                $route .= '/'.$part[1];
+            }
+            $ignore = array(
+                'api/index/login',
+                'api/common/access',
+                'api/error/not_found',
+                'api/error/no_access',
+                'api/error/no_permission',
+            );
 
-		if ( isset($request['rt']) ) {
-			$route = '';
-			$part = explode('/', $request['rt']);
+            if (!in_array($route, $ignore)) {
+                return $this->dispatch('api/index/login');
+            }
+        } else {
+            if (!$this->user->isLoggedWithToken($request['token'])) {
+                return $this->dispatch('api/index/login');
+            }
+        }
+        return false;
+    }
 
-			if (isset($part[ 0 ])) {
-				$route .= $part[ 0 ];
-			}
-			if (isset($part[ 1 ])) {
-				$route .= '/' . $part[ 1 ];
-			}
-			$ignore = array(
-				'api/index/login',
-				'api/common/access',
-				'api/error/not_found',
-				'api/error/no_access',
-				'api/error/no_permission',
-			);
+    public function permission()
+    {
+        $request = $this->rest->getRequestParams();
 
-			if (!in_array($route, $ignore)) {
-				if (!$this->user->canAccess($route)) {
-					return $this->dispatch('api/error/no_permission');
-				}
-			}
-		}
-		return false;
-	}
+        if ($this->extensions->isExtensionController($request['rt'])) {
+            return null;
+        }
+
+        if (isset($request['rt'])) {
+            $route = '';
+            $part = explode('/', $request['rt']);
+
+            if (isset($part[0])) {
+                $route .= $part[0];
+            }
+            if (isset($part[1])) {
+                $route .= '/'.$part[1];
+            }
+            $ignore = array(
+                'api/index/login',
+                'api/common/access',
+                'api/error/not_found',
+                'api/error/no_access',
+                'api/error/no_permission',
+            );
+
+            if (!in_array($route, $ignore)) {
+                if (!$this->user->canAccess($route)) {
+                    return $this->dispatch('api/error/no_permission');
+                }
+            }
+        }
+        return false;
+    }
 }
 
 
