@@ -230,6 +230,9 @@ abstract class AController
             //in case with shared ssl-domain
             'https'         => (ABC::env('HTTPS') ? 1 : 0),
         );
+        if (is_object($this->customer)) {
+            $cache_state_vars['customer_group_id'] = $this->customer->getCustomerGroupId();
+        }
         if (!$controller) {
             $controller = $this->controller;
         }
