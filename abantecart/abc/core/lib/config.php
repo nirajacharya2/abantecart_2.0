@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -49,7 +49,7 @@ final class AConfig
         $this->registry = $registry;
         //skip during installation
         if (is_object($registry->get('db'))) {
-            $this->_load_settings($store_url);
+            $this->loadSettings($store_url);
         }
     }
 
@@ -115,7 +115,7 @@ final class AConfig
         }
     }
 
-    private function _load_settings($store_url = '')
+    private function loadSettings($store_url = '')
     {
         /**
          * @var \abc\core\cache\ACache $cache
@@ -239,10 +239,16 @@ final class AConfig
                 $this->cnfg['config_store_id'] = $store_settings[0]['store_id'];
                 $this->cnfg['current_store_id'] = $this->cnfg['config_store_id'];
             } else {
-                if (php_sapi_name() != 'cli') {
-                    $warning =
-                        new AWarning('Warning: Accessing store with non-configured or unknown domain ( '.$url.' ).'."\n"
-                            .' Check setting of your store domain URL in System Settings . Loading default store configuration for now.');
+                if (php_sapi_name() != 'cli'
+                    && ($this->cnfg['config_system_check'] == 0
+                        || ($this->cnfg['config_system_check'] == 1 && ABC::env('IS_ADMIN') === true)
+                        || ($this->cnfg['config_system_check'] == 2 && ABC::env('IS_ADMIN') !== true))
+                ) {
+                    $warning = new AWarning(
+                        'Warning: Accessing store with non-configured or unknown domain ( '.$url.' ).'."\n"
+                        .' Check setting of your store domain URL in System Settings.'
+                        .' Loading default store configuration for now.'
+                    );
                     $warning->toLog();
                 }
                 //set config url to current domain
@@ -273,7 +279,7 @@ final class AConfig
             }
             //reload store settings if not what is loaded now
             if ($this->cnfg['current_store_id'] != $this->cnfg['config_store_id']) {
-                $this->_reload_settings($this->cnfg['current_store_id']);
+                $this->reloadSettings($this->cnfg['current_store_id']);
                 $this->cnfg['config_store_id'] = $this->cnfg['current_store_id'];
             }
         }
@@ -321,7 +327,7 @@ final class AConfig
         }
     }
 
-    private function _reload_settings($store_id = 0)
+    private function reloadSettings($store_id = 0)
     {
         //we don't use cache here cause domain may be different and we cannot change cache from control panel
         $db = $this->registry->get('db');
