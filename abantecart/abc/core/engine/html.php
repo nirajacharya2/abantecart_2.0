@@ -203,10 +203,14 @@ class AHtml extends AController
     {
         //detect if request is using HTTPS
         if ($non_secure === false && ABC::env('HTTPS')) {
-            $server = ABC::env('HTTPS_SERVER');
+            $server = ABC::env('HTTPS_SERVER')
+                    ? ABC::env('HTTPS_SERVER')
+                    : 'https://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
         } else {
             //to prevent garbage session need to check constant ABC::env('HTTP_SERVER')
-            $server = ABC::env('HTTP_SERVER') ? ABC::env('HTTP_SERVER') : 'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+            $server = ABC::env('HTTP_SERVER')
+                    ? ABC::env('HTTP_SERVER')
+                    : 'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
         }
 
         if ($this->registry->get('config')->get('storefront_template_debug')

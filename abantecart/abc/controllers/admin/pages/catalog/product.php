@@ -24,6 +24,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
+use abc\models\admin\ModelCatalogProduct;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -33,6 +34,7 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
  * Class ControllerPagesCatalogProduct
  *
  * @package abc\controllers\admin
+ * @property ModelCatalogProduct $model_catalog_product
  * @property ModelCatalogCategory $model_catalog_category
  * @property ModelCatalogManufacturer $model_catalog_manufacturer
  */
@@ -404,6 +406,9 @@ class ControllerPagesCatalogProduct extends AController
             $product_info = $this->model_catalog_product->getProduct($product_id);
             $product_info['featured'] = $product_info['featured'] ? 1 : 0;
             $product_info['has_track_options'] = $this->model_catalog_product->hasTrackOptions($product_id);
+            if ($product_info['has_track_options']) {
+                $product_info['quantity'] = $this->model_catalog_product->hasAnyStock($product_id);
+            }
         }
 
         $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($product_id);
