@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -131,6 +131,8 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         $data = $this->security_code.$data;
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path));
+            //change permissions by separate call. can be problems with it on some systems
+            chmod(dirname($path), 0775);
         }
         $fileopen = @fopen($path, "wb");
         if ($fileopen) {
@@ -141,6 +143,7 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
                 touch($path);
             }
             @fclose($fileopen);
+            chmod($path,0664);
         }
 
         if ($saved) {
@@ -168,7 +171,7 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     public function remove($key, $group)
     {
         $path = $this->buildFilePath($key, $group);
-        if ($path && is_file($path) && !unlink($path)) {
+        if ($path && is_file($path) && !@unlink($path)) {
             return false;
         }
 
@@ -183,6 +186,7 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      * @return  boolean
      *
      * @since   1.2.7
+     * @throws \ReflectionException
      */
     public function clean($group)
     {
@@ -329,13 +333,10 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
             $time = @filemtime($path);
             if (($time + $this->expire) < $this->now || empty($time)) {
                 @unlink($path);
-
                 return false;
             }
-
             return true;
         }
-
         return false;
     }
 
@@ -358,7 +359,12 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         if (!is_dir($dir)) {
             // Make sure the index file is there
             $indexFile = $dir.'/index.php';
-            @mkdir($dir) && file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
+
+            if(mkdir($dir)) {
+                file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
+                //change permissions by separate call. can be problems with it on some systems
+                chmod($dir, 0775);
+            }
         }
 
         // Double check that folder now exists

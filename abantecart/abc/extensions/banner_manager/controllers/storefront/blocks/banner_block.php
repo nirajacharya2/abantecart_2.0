@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\extensions\banner_manager\models\storefront\extension\ModelExtensionBannerManager;
 
 if ( ! class_exists( 'abc\core\ABC' ) ) {
     header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
@@ -30,7 +31,7 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
 /**
  * Class ControllerBlocksBannerBlock
  *
- * @property \abc\models\storefront\ModelExtensionBannerManager $model_extension_banner_manager
+ * @property ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerBlocksBannerBlock extends AController
 {
