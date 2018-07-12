@@ -1122,17 +1122,6 @@ EOD;
             $errors['http_server'] = 'Wrong value of http_server parameter!';
         }
 
-        //check self-connection via http
-        if (!isset($errors['http_server']) && !isset($options['skip-caching'])) {
-            $connect = new AConnect();
-            $connect->connect_method = extension_loaded('curl') ? 'curl' : 'socket';
-            $data = $connect->getData($options['http_server'].'robots.txt');
-
-            if (!$data) {
-                $errors['http_server'] = 'Cannot to connect to '.$options['http_server'].'!';
-            }
-        }
-
         return $errors;
     }
 

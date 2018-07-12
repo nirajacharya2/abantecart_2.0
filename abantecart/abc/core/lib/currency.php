@@ -90,7 +90,11 @@ final class ACurrency
             $this->set($currencyCode);
             // Currency is switched, set sign for external use via isSwitched method
             $this->is_switched = true;
-            unset($this->request->get['currency'], $this->session->data['shipping_methods'], $this->session->data['shipping_method']);
+            unset(
+                $this->request->get['currency'],
+                $this->session->data['shipping_methods'],
+                $this->session->data['shipping_method']
+            );
 
         } elseif (isset($this->session->data['currency'])
             && array_key_exists($this->session->data['currency'], $this->currencies)) {
@@ -268,7 +272,9 @@ final class ACurrency
     {
         $from = isset($this->currencies[$code_from]['value']) ? $this->currencies[$code_from]['value'] : 0;
         $to = isset($this->currencies[$code_to]['value']) ? $this->currencies[$code_to]['value'] : 0;
-        $to_decimal = isset($this->currencies[$code_to]['decimal_place']) ? $this->currencies[$code_to]['decimal_place'] : 2;
+        $to_decimal = isset($this->currencies[$code_to]['decimal_place'])
+                    ? (int)$this->currencies[$code_to]['decimal_place']
+                    : 2;
 
         $error = false;
         if (!$to) {

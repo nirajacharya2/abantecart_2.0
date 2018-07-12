@@ -27,6 +27,7 @@
 						<td class="center"><?php echo $entry_file_max_downloads; ?></td>
 						<td class="center"><?php echo $entry_file_sort_order; ?></td>
 						<td class="center"><?php echo $entry_file_status; ?></td>
+						<td class="center"><?php echo $entry_also_mapped_to; ?></td>
 						<td class="center"><?php echo $column_action; ?></td>
 					</tr>
 				</thead>
@@ -40,6 +41,34 @@
 							<td class="center"><?php echo $file['max_downloads']; ?></td>
 							<td class="center"><?php echo $file['sort_order']; ?></td>
 							<td class="center"><?php echo $file['status']; ?></td>
+							<td class="center">
+								<?php if($file['map_list']){?>
+								<div class="btn-group maped_resources">
+                                       <?php
+                                       if (is_array($file['map_list'])) { ?>
+										<div class="dropdown-menu dropdown-menu-sm pull-left">
+											<ul class="dropdown-list dropdown-list-sm">
+                                                   <?php
+                                                   foreach ($file['map_list'] as $item) { ?>
+													<li>
+														<a title="<?php abc_js_echo($item['name']) ?>"
+														   href="<?php echo $item['url']; ?>"
+														   target="_new"
+														   class="ellipsis"
+														><?php echo $item['name']; ?></a>
+													</li>
+                                                   <?php } ?>
+											</ul>
+										</div>
+                                       <?php } ?>
+									<button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle">
+										<i class="fa fa-external-link fa-lg"></i>&nbsp;
+										<span class="caret"></span>&nbsp;
+										<span class="badge"><?php echo count($file['map_list']); ?></span>&nbsp;
+									</button>
+								</div>
+							<?php } ?>
+							</td>
 							<td class="center">
 								<a title="<?php echo $file['button_edit']->text; ?>"
 								   href="<?php echo $file['button_edit']->href; ?>"

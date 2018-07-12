@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,7 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
@@ -26,165 +28,194 @@ use abc\core\lib\AJson;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
-class ControllerResponsesListingGridMessageGrid extends AController {
-	public $error = array();
-	public $data = array();
 
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+class ControllerResponsesListingGridMessageGrid extends AController
+{
+    public $error = array();
+    public $data = array();
 
-		$this->loadLanguage('tool/message_manager');
-		if (!$this->user->canAccess('tool/message_manager')) {
-			$response = new stdClass ();
-			$response->userdata->error = sprintf($this->language->get('error_permission_access'), 'tool/message_manager');
-			$this->load->library('json');
-			$this->response->setOutput(AJson::encode($response));
-			return null;
-		}
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadModel('tool/message_manager');
+        $this->loadLanguage('tool/message_manager');
+        if (!$this->user->canAccess('tool/message_manager')) {
+            $response = new stdClass ();
+            $response->userdata->error = sprintf(
+                                                $this->language->get('error_permission_access'),
+                                                'tool/message_manager'
+            );
+            $this->load->library('json');
+            $this->response->setOutput(AJson::encode($response));
+            return null;
+        }
 
-		//Prepare filter config
-		$grid_filter_params = array_merge(array ('title', 'date_added', 'status'), (array)$this->data['grid_filter_params']);
-		$filter = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
+        $this->loadModel('tool/message_manager');
 
-		$total = $this->model_tool_message_manager->getTotalMessages();
-		$response = new stdClass();
-		$response->page = $filter->getParam('page');
-		$response->total = $filter->calcTotalPages($total);
-		$response->records = $total;
-		$response->userdata = new stdClass();
+        //Prepare filter config
+        $grid_filter_params = array_merge(
+                                ['title', 'date_added', 'status'],
+                                (array)$this->data['grid_filter_params']
+        );
+        $filter = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
 
-		$sort_array = $filter->getFilterData();
-		if ($sort_array['sort'] == 'sort_order') {
-			$sort_array['sort'] = 'viewed';
-		}
-		$results = $this->model_tool_message_manager->getMessages($sort_array);
+        $total = $this->model_tool_message_manager->getTotalMessages();
+        $response = new stdClass();
+        $response->page = $filter->getParam('page');
+        $response->total = $filter->calcTotalPages($total);
+        $response->records = $total;
+        $response->userdata = new stdClass();
 
-		$i = 0;
-		foreach ($results as $result) {
-			$response->rows [$i] ['id'] = $result ['msg_id'];
-			switch ($result['status']) {
-				case 'E':
-					$status = $this->language->get('entry_error');
-					$response->userdata->classes[$result ['msg_id']] = 'warning';
-					break;
-				case 'W':
-					$status = $this->language->get('entry_warning');
-					$response->userdata->classes[$result ['msg_id']] = 'attention';
-					break;
-				case 'N':
-				default:
-					$status = $this->language->get('entry_notice');
-					$response->userdata->classes[$result ['msg_id']] = 'success';
-					break;
-			}
+        $sort_array = $filter->getFilterData();
+        if ($sort_array['sort'] == 'sort_order') {
+            $sort_array['sort'] = 'viewed';
+        }
+        $results = $this->model_tool_message_manager->getMessages($sort_array);
 
-			$response->userdata->classes[$result ['msg_id']] .= !$result['viewed'] ? ' new_message' : '';
+        $i = 0;
+        foreach ($results as $result) {
+            $response->rows [$i] ['id'] = $result ['msg_id'];
+            switch ($result['status']) {
+                case 'E':
+                    $status = $this->language->get('entry_error');
+                    $response->userdata->classes[$result ['msg_id']] = 'warning';
+                    break;
+                case 'W':
+                    $status = $this->language->get('entry_warning');
+                    $response->userdata->classes[$result ['msg_id']] = 'attention';
+                    break;
+                case 'N':
+                default:
+                    $status = $this->language->get('entry_notice');
+                    $response->userdata->classes[$result ['msg_id']] = 'success';
+                    break;
+            }
 
-			$response->rows [$i] ['cell'] = array($status,
-					$result ['title'],
-					AHelperUtils::dateISO2Display($result ['date_added'], $this->language->get('date_format_short') . ' H:s'),
-			);
+            $response->userdata->classes[$result ['msg_id']] .= !$result['viewed'] ? ' new_message' : '';
 
-			$i++;
-		}
-		$this->data['response'] = $response;
+            $response->rows [$i] ['cell'] = array(
+                $status,
+                $result ['title'],
+                AHelperUtils::dateISO2Display($result ['date_added'], $this->language->get('date_format_short').' H:s'),
+            );
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $i++;
+        }
+        $this->data['response'] = $response;
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-	}
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['response']));
 
-	/**
-	 * @return mixed
-	 */
-	public function update() {
+    }
 
-		if (!$this->user->canModify('listing_grid/message_grid')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-					array('error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/message_grid'),
-						  'reset_value' => true
-					));
-		}
+    /**
+     * @return mixed
+     * @throws \abc\core\lib\AException
+     */
+    public function update()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        if (!$this->user->canModify('listing_grid/message_grid')) {
+            $error = new AError('');
+            return $error->toJSONResponse(
+                'NO_PERMISSIONS_402',
+                array(
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
+                        'listing_grid/message_grid'),
+                    'reset_value' => true,
+                ));
+        }
 
-		$this->loadModel('tool/message_manager');
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if ($this->request->post ['oper'] == 'del') {
-			$ids = explode(',', $this->request->post ['id']);
-			if ($ids) {
-				foreach ($ids as $msg_id) {
-					$this->model_tool_message_manager->deleteMessage($msg_id);
-				}
-			}
-		} elseif ($this->request->get ['oper'] == 'show') {
-			$msg_id = $this->request->get ['id'];
-			if ($msg_id) {
-				$this->data['message'] = $this->model_tool_message_manager->getMessage($msg_id);
-				if ($this->data['message']) {
-					$this->loadLanguage('tool/message_manager');
-					$this->data['message']["message"] = str_replace("#link-text#", $this->language->get('text_linktext'), $this->data['message'] ["message"]);
-					switch ($this->data['message'] ['status']) {
-						case 'W' :
-							$this->data['message'] ['status'] = $this->language->get('text_warning');
-							break;
-						case 'E' :
-							$this->data['message'] ['status'] = $this->language->get('text_error');
-							break;
-						default :
-							$this->data['message'] ['status'] = $this->language->get('text_notice');
-							break;
-					}
-					$this->data['message'] ['date_formatted'] = AHelperUtils::dateISO2Display($this->data['message'] ['date_added'], $this->language->get('date_format_short').' '.$this->language->get('time_format'));
-				} else {
-					$this->data['message'] ["message"] = $this->language->get('text_not_found');
-				}
-				$this->messages->markAsRead($msg_id);
-			}
+        $this->loadModel('tool/message_manager');
 
-			$this->view->assign('delete_url', $this->html->getSecureURL('listing_grid/message_grid/update'));
-			$this->view->assign('msg_id', $msg_id);
-			$this->view->assign('readonly', $this->request->get['readonly']);
-			$this->view->batchAssign($this->language->getASet('tool/message_manager'));
-			$this->view->batchAssign($this->data);
-			//update controller data
-			$this->extensions->hk_UpdateData($this, __FUNCTION__);
-			$this->processTemplate('responses/tool/message_info.tpl');
-		}
-	}
+        if ($this->request->post ['oper'] == 'del') {
+            $ids = explode(',', $this->request->post ['id']);
+            if ($ids) {
+                foreach ($ids as $msg_id) {
+                    $this->model_tool_message_manager->deleteMessage($msg_id);
+                }
+            }
+        } elseif ($this->request->get ['oper'] == 'show') {
+            $msg_id = $this->request->get ['id'];
+            if ($msg_id) {
+                $this->data['message'] = $this->model_tool_message_manager->getMessage($msg_id);
+                if ($this->data['message']) {
+                    $this->loadLanguage('tool/message_manager');
+                    $this->data['message']["message"] = str_replace(
+                                                                    "#link-text#",
+                                                                    $this->language->get('text_linktext'),
+                                                                    $this->data['message'] ["message"]
+                    );
+                    switch ($this->data['message'] ['status']) {
+                        case 'W' :
+                            $this->data['message'] ['status'] = $this->language->get('text_warning');
+                            break;
+                        case 'E' :
+                            $this->data['message'] ['status'] = $this->language->get('text_error');
+                            break;
+                        default :
+                            $this->data['message'] ['status'] = $this->language->get('text_notice');
+                            break;
+                    }
+                    $this->data['message'] ['date_formatted'] = \H::dateISO2Display(
+                                                                    $this->data['message'] ['date_added'],
+                                                                    $this->language->get('date_format_short')
+                                                                        .' '.$this->language->get('time_format')
+                    );
+                } else {
+                    $this->data['message'] ["message"] = $this->language->get('text_not_found');
+                }
+                $this->messages->markAsRead($msg_id);
+            }
 
-	public function getNotifies() {
+            $this->view->assign('delete_url', $this->html->getSecureURL('listing_grid/message_grid/update'));
+            $this->view->assign('msg_id', $msg_id);
+            $this->view->assign('readonly', $this->request->get['readonly']);
+            $this->view->batchAssign($this->language->getASet('tool/message_manager'));
+            $this->view->batchAssign($this->data);
+            //update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->processTemplate('responses/tool/message_info.tpl');
+        }
+    }
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
-		$ret = array();
+    public function getNotifies()
+    {
 
-		$this->loadLanguage('tool/message_manager');
-		$this->data['shortlist'] = $this->messages->getShortList();
-		if($this->data['shortlist']['total']) {
-			$ret = $this->data['shortlist'];
-			$ret['total_title'] = sprintf($this->language->get('text_notifier_title'),$ret['total']);
-			foreach($ret['shortlist'] as &$m){
-				$m['message'] = mb_substr($m['message'],0, 30).'...';
-				$m['href']	= $this->html->getSecureURL ( 'listing_grid/message_grid/update','&oper=show&readonly=1&id='.$m['msg_id']);
-			}
-		}
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $ret = [
+                'total' => '',
+                'total_title' => '',
+                'shortlist'   => []
+        ];
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->loadLanguage('tool/message_manager');
+        $this->data['shortlist'] = $this->messages->getShortList();
+        if ($this->data['shortlist']['total']) {
+            $ret = $this->data['shortlist'];
+            $ret['total_title'] = sprintf($this->language->get('text_notifier_title'), $ret['total']);
+            foreach ($ret['shortlist'] as &$m) {
+                $m['message'] = mb_substr($m['message'], 0, 30).'...';
+                $m['href'] = $this->html->getSecureURL('listing_grid/message_grid/update',
+                    '&oper=show&readonly=1&id='.$m['msg_id']);
+            }
+        }
 
-		$this->load->library('json');
-		$this->response->addJSONHeader();
-		$this->response->setOutput(AJson::encode($ret));
-	}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->addJSONHeader();
+        $this->response->setOutput(AJson::encode($ret));
+    }
 }

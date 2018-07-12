@@ -1122,7 +1122,8 @@ class ALayoutManager
             return array();
         }
 
-        //Note: Cannot restrict select block based on page_id and layout_id. Some pages, might use default layout and have no pages_layouts entry
+        //Note: Cannot restrict select block based on page_id and layout_id.
+        // Some pages, might use default layout and have no pages_layouts entry
         // Use OR to select all options and order by layout_id
         $where = '';
         $sql = "SELECT b.block_id AS block_id,
@@ -1560,7 +1561,8 @@ class ALayoutManager
                 FROM  ".$this->db->table_name('layouts')." l
                 INNER JOIN ".$this->db->table_name('block_layouts')." bl
                     ON (bl.layout_id = l.layout_id 
-                        AND ".($custom_block_id ? "bl.custom_block_id = ".$custom_block_id : "bl.block_id=".$block_id).")
+                        AND "
+            .($custom_block_id ? "bl.custom_block_id = ".$custom_block_id : "bl.block_id=".$block_id).")
                 LEFT JOIN ".$this->db->table_name('pages_layouts')." pl
                     ON l.layout_id = pl.layout_id ";
 
