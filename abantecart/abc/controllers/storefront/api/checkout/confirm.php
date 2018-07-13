@@ -26,10 +26,6 @@ use abc\core\engine\AResource;
 use abc\core\lib\AJson;
 use abc\core\lib\AOrder;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ControllerApiCheckoutConfirm
  *
@@ -105,8 +101,11 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
         $this->loadModel('account/address');
         $shipping_address = $this->model_account_address->getAddress($this->session->data['shipping_address_id']);
         if ($this->cart->hasShipping()) {
-            $this->data['shipping_address'] =
-                $this->customer->getFormattedAddress($shipping_address, $shipping_address['address_format']);
+            $this->data['shipping_address'] = $this->customer
+                ->getFormattedAddress(
+                    $shipping_address,
+                    $shipping_address['address_format']
+                );
         } else {
             $this->data['shipping_address'] = '';
         }
@@ -115,8 +114,11 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
 
         $payment_address = $this->model_account_address->getAddress($this->session->data['payment_address_id']);
         if ($payment_address) {
-            $this->data['payment_address'] =
-                $this->customer->getFormattedAddress($payment_address, $payment_address['address_format']);
+            $this->data['payment_address'] = $this->customer
+                ->getFormattedAddress(
+                    $payment_address,
+                    $payment_address['address_format']
+                );
         } else {
             $this->data['payment_address'] = '';
         }
@@ -148,18 +150,21 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
             $product_id = $this->data['products'][$i]['product_id'];
             $thumbnail = $thumbnails[$product_id];
 
-            $tax = $this->tax->calcTotalTaxAmount($this->data['products'][$i]['total'],
-                $this->data['products'][$i]['tax_class_id']);
+            $tax = $this->tax->calcTotalTaxAmount(
+                $this->data['products'][$i]['total'],
+                $this->data['products'][$i]['tax_class_id']
+            );
+
             $price = $this->data['products'][$i]['price'];
             $quantity = $this->data['products'][$i]['quantity'];
             $this->data['products'][$i] = array_merge(
                 $this->data['products'][$i],
-                array(
+                [
                     'thumb' => $thumbnail['thumb_url'],
                     'tax'   => $this->currency->format($tax),
                     'price' => $this->currency->format($price),
                     'total' => $this->currency->format_total($price, $quantity),
-                ));
+                ]);
         }
 
         if ($this->config->get('config_checkout_id')) {
@@ -175,10 +180,11 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
             $this->data['text_accept_agree'] = '';
         }
 
-        // Load selected paymnet required data from payment extension
+        // Load selected payment required data from payment extension
         if ($this->session->data['payment_method']['id'] != 'no_payment_required') {
-            $payment_controller =
-                $this->dispatch('responses/extension/'.$this->session->data['payment_method']['id'].'/api');
+            $payment_controller = $this->dispatch(
+                'responses/extension/'.$this->session->data['payment_method']['id'].'/api'
+            );
         } else {
             $payment_controller = $this->dispatch('responses/checkout/no_payment/api');
         }

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,10 +23,6 @@ use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerApiProductProduct
@@ -82,8 +78,11 @@ class ControllerApiProductProduct extends AControllerAPI
                 $product_info['price'] = $this->currency->format($this->tax->calculate($product_info['price'],
                     $product_info['tax_class_id'],
                     $this->config->get('config_tax')));
-                //TODO: need to check in 2.0
-                $special = $this->model_catalog_product->getProductSpecial($product_id);
+                /**
+                 * @var APromotion $promotion
+                 */
+                $promotion = ABC::getObjectByAlias('APromotion');
+                $special = $promotion->getProductSpecial($product_id);
 
                 if ($special) {
                     $product_price = $special;
@@ -100,7 +99,13 @@ class ControllerApiProductProduct extends AControllerAPI
                 foreach ($product_discounts as $discount) {
                     $discounts[] = array(
                         'quantity' => $discount['quantity'],
-                        'price'    => $this->currency->format($this->tax->calculate($discount['price'], $product_info['tax_class_id'], $this->config->get('config_tax'))),
+                        'price'    => $this->currency->format(
+                            $this->tax->calculate(
+                                $discount['price'],
+                                $product_info['tax_class_id'],
+                                $this->config->get('config_tax')
+                            )
+                        ),
                     );
                 }
             }
@@ -128,7 +133,11 @@ class ControllerApiProductProduct extends AControllerAPI
             $product_info['minimum'] = 1;
         }
 
-        $product_info['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+        $product_info['description'] = html_entity_decode(
+            $product_info['description'],
+            ENT_QUOTES,
+            ABC::env('APP_CHARSET')
+        );
 
         $product_info['options'] = $this->model_catalog_product->getProductOptions($product_id);
 
@@ -137,7 +146,7 @@ class ControllerApiProductProduct extends AControllerAPI
             $average = $this->model_catalog_review->getAverageRating($product_id);
             $product_info['text_stars'] = sprintf($this->language->get('text_stars'), $average);
 
-            $product_info['stars'] = sprintf($this->language->get('text_stars'), $rating); //???? TODO: check!
+            $product_info['stars'] = sprintf($this->language->get('text_stars'), $average);
             $product_info['average'] = $average;
         }
 

@@ -25,10 +25,6 @@ use abc\core\engine\AControllerAPI;
 use abc\core\lib\AJson;
 use abc\core\lib\AOrder;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ControllerApiCheckoutProcess extends AControllerAPI
 {
     public $error = array();
@@ -40,21 +36,31 @@ class ControllerApiCheckoutProcess extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401, array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->sendResponse(401,
+                [
+                    'error' => 'Not logged in or Login attempt failed!',
+                ]
+            );
             return null;
         }
 
         //Check if confirmation details were reviewed.
         if (!$this->session->data['confirmed']) {
             $this->rest->sendResponse(400,
-                array('status' => 0, 'error' => 'Need to review confirmation details first!'));
+                [
+                    'status' => 0,
+                    'error'  => 'Need to review confirmation details first!',
+                ]
+            );
             return null;
         }
         $this->session->data['confirmed'] = false;
 
         //Check if order is created and process payment
         if (!isset($this->session->data['order_id'])) {
-            $this->rest->sendResponse(500, array('status' => 2, 'error' => 'Not order data available!'));
+            $this->rest->sendResponse(500,
+                ['status' => 2, 'error' => 'Not order data available!']
+            );
             return null;
         }
 
@@ -66,7 +72,11 @@ class ControllerApiCheckoutProcess extends AControllerAPI
         //Check if order is present and not processed yet
         if (!isset($order_data)) {
             $this->rest->sendResponse(500,
-                array('status' => 3, 'error' => 'No order available. Something went wrong!'));
+                [
+                    'status' => 3,
+                    'error'  => 'No order available. Something went wrong!',
+                ]
+            );
             return null;
         }
         if ($order_data['order_status_id'] > 0) {
@@ -77,12 +87,18 @@ class ControllerApiCheckoutProcess extends AControllerAPI
         //Dispatch the payment send controller process and capture the result
         if (!$this->session->data['process_rt']) {
             $this->rest->sendResponse(500,
-                array('status' => 5, 'error' => 'Something went wrong. Incomplete request!'));
+                [
+                    'status' => 5,
+                    'error'  => 'Something went wrong. Incomplete request!',
+                ]
+            );
             return null;
         }
         //we process only response type payment extensions
-        $payment_controller =
-            $this->dispatch('responses/extension/'.$this->session->data['process_rt'], array($request));
+        $payment_controller = $this->dispatch(
+            'responses/extension/'.$this->session->data['process_rt'],
+            array($request)
+        );
         $this->load->library('json');
         $this->data = AJson::decode($payment_controller->dispatchGetOutput(), true);
 
@@ -106,7 +122,6 @@ class ControllerApiCheckoutProcess extends AControllerAPI
                     unset($this->session->data['order_id']);
                     unset($this->session->data['coupon']);
                 }
-
                 $this->rest->setResponseData($this->data);
                 $this->rest->sendResponse(200);
             } else {
@@ -115,7 +130,5 @@ class ControllerApiCheckoutProcess extends AControllerAPI
                 $this->rest->sendResponse(500, $this->data);
             }
         }
-
     }
-
-}    	
+}

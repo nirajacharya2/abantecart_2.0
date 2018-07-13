@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,9 +24,6 @@ use abc\core\engine\AResource;
 use abc\core\lib\AFilter;
 use stdClass;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerApiProductLatest extends AControllerAPI
 {
@@ -70,14 +67,23 @@ class ControllerApiProductLatest extends AControllerAPI
             );
             foreach ($results as $result) {
                 $thumbnail = $thumbnails[$result['product_id']];
-                $response->rows[$i]['id'] = $result['product_id'];
-                $response->rows[$i]['cell']['thumb'] = $thumbnail['thumb_url'];
-                $response->rows[$i]['cell']['name'] = $result['name'];
-                $response->rows[$i]['cell']['description'] = $result['description'];
-                $response->rows[$i]['cell']['model'] = $result['model'];
-                $response->rows[$i]['cell']['price'] = $this->currency->convert($result['final_price'], $this->config->get('config_currency'), $this->currency->getCode());
-                $response->rows[$i]['cell']['currency_code'] = $this->currency->getCode();
-                $response->rows[$i]['cell']['rating'] = $result['rating'];
+                $response->rows[$i] = [
+                    'id'   => $result['product_id'],
+                    'cell' => [
+                        'thumb'         => $thumbnail['thumb_url'],
+                        'name'          => $result['name'],
+                        'description'   => $result['description'],
+                        'model'         => $result['model'],
+                        'price'         => $this->currency->convert(
+                            $result['final_price'],
+                            $this->config->get('config_currency'),
+                            $this->currency->getCode()
+                        ),
+                        'currency_code' => $this->currency->getCode(),
+                        'rating'        => $result['rating'],
+                    ],
+                ];
+
                 $i++;
             }
         }
