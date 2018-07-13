@@ -398,12 +398,33 @@ class AHelperUtils extends AHelper
                         'message' => __METHOD__.': Cannot to create directory '.$dir,
                     ];
                 }
+                //because umask. test on aws-hosts
+                chmod($dir, $perms);
             }
         }
-
         return $output;
     }
 
+    /**
+     * Wrapper of native mkdir() function.
+     * Written because some host have issues with newly created directory permissions related to umask
+     *
+     * @param $dir_full_path
+     * @param int $perms
+     *
+     * @return bool
+     */
+    public static function mkDir($dir_full_path, $perms = 0775)
+    {
+        $result = self::MakeNestedDirs($dir_full_path, $perms);
+        return $result['result'];
+    }
+
+    /**
+     * @param string $dir
+     *
+     * @return array|bool
+     */
     public static function RemoveDirRecursively($dir = '')
     {
         //block calls from storefront
