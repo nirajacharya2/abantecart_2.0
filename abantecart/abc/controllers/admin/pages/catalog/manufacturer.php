@@ -37,7 +37,7 @@ class ControllerPagesCatalogManufacturer extends AController
 {
     public $error = [];
     public $data = [];
-    private $fields = [
+    public $fields = [
         'name',
         'manufacturer_store',
         'keyword',
@@ -170,6 +170,7 @@ class ControllerPagesCatalogManufacturer extends AController
         if (($this->request->is_POST()) && $this->validateForm()) {
             $manufacturer_id = $this->model_catalog_manufacturer->addManufacturer($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
+            $this->extensions->hk_ProcessData($this, __FUNCTION__, ['manufacturer_id' => $manufacturer_id]);
             abc_redirect($this->html->getSecureURL(
                 'catalog/manufacturer/update',
                 '&manufacturer_id='.$manufacturer_id)
@@ -203,6 +204,7 @@ class ControllerPagesCatalogManufacturer extends AController
         if (($this->request->is_POST()) && $this->validateForm()) {
             $this->model_catalog_manufacturer->editManufacturer($manufacturer_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             abc_redirect($this->html->getSecureURL(
                 'catalog/manufacturer/update',
                 '&manufacturer_id='.$manufacturer_id
@@ -221,7 +223,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function getForm($args = array())
+    protected function getForm($args = array())
     {
 
         $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
