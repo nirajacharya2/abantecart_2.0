@@ -1,11 +1,11 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,29 +17,37 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AControllerAPI;
+use abc\models\storefront\ModelCatalogManufacturer;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerApiProductManufacturer extends AControllerAPI {
-	
-	public function get() {
-        $this->extensions->hk_InitData($this,__FUNCTION__);
-		$manufacturer_id = $this->request->get['manufacturer_id'];
-		$this->loadModel('catalog/manufacturer');
+/**
+ * Class ControllerApiProductManufacturer
+ *
+ * @package abc\controllers\storefront
+ * @property ModelCatalogManufacturer $model_catalog_manufacturer
+ */
+class ControllerApiProductManufacturer extends AControllerAPI
+{
 
-		if ($manufacturer_id) {
-			$data = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
-		} else {
-			$data = $this->model_catalog_manufacturer->getManufacturers();
-		}
+    public function get()
+    {
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $manufacturer_id = $this->request->get['manufacturer_id'];
+        $this->loadModel('catalog/manufacturer');
 
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+        if ($manufacturer_id) {
+            $data = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+        } else {
+            $data = $this->model_catalog_manufacturer->getManufacturers();
+        }
 
-		$this->rest->setResponseData( $data );
-		$this->rest->sendResponse( 200 );
-	}
-	
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->rest->setResponseData($data);
+        $this->rest->sendResponse(200);
+    }
+
 }

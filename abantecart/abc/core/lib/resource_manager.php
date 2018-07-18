@@ -71,7 +71,7 @@ class AResourceManager extends AResource
         if ($type) {
             $this->type = $type;
             //get type details
-            $this->_loadType();
+            $this->loadType();
 
             if (!$this->type_id) {
                 $message = "Error: Incorrect or missing resource type ".$type;
@@ -83,6 +83,7 @@ class AResourceManager extends AResource
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getResourceTypes()
     {
