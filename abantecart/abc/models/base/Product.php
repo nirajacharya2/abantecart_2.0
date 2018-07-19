@@ -2,13 +2,10 @@
 
 namespace abc\models\base;
 
-use abc\core\lib\AException;
 use abc\models\AModelBase;
 use abc\core\engine\AResource;
 use Exception;
 use H;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Validator;
 
 /**
@@ -290,6 +287,14 @@ class Product extends AModelBase
     /**
      * @return mixed
      */
+    public function manufacturer()
+    {
+        return $this->hasOne(Manufacturer::class, 'manufacturer_id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function downloads()
     {
         return $this->belongsToMany(Download::class, 'products_to_downloads', 'product_id', 'download_id');
@@ -318,6 +323,11 @@ class Product extends AModelBase
             }
             $data['images'] = $this->images();
             $data['keywords'] = $this->keywords();
+
+            //TODO: need to rewrite into relations
+            if ($this->manufacturer_id) {
+                $data['manufacturer'] = Manufacturer::find($this->manufacturer_id)->toArray();
+            }
             $this->cache->push($cache_key, $data);
         }
         return $data;

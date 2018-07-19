@@ -33,4 +33,9 @@ class Manufacturer extends AModelBase
     {
         return $this->hasMany(ManufacturersToStore::class, 'manufacturer_id');
     }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'manufacturer_id');
+    }
 }
