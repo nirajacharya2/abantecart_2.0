@@ -1,6 +1,6 @@
 <?php
 /**
-* AbanteCart auto-generated migrationfile
+* AbanteCart auto-generated migration file
 */
 $namespaceDefinition
 

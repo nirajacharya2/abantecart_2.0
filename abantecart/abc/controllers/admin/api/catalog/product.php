@@ -23,10 +23,6 @@ use abc\models\base\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ControllerApiCatalogProduct
  *
@@ -47,6 +43,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
+        $this->data['request'] = $request;
 
         $getBy = null;
         if (isset($request['product_id']) && $request['product_id']) {
@@ -73,18 +70,18 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        $data = [];
+        $this->data['result'] = [];
         $item = $product->first();
         if ($item) {
-            $data = $item->getAllData();
+            $this->data['result'] = $item->getAllData();
         }
-        if (!$data) {
-            $data = ['Error' => 'Requested Product Not Found'];
+        if (!$this->data['result']) {
+            $this->data['result'] = ['Error' => 'Requested Product Not Found'];
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->rest->setResponseData($data);
+        $this->rest->setResponseData($this->data['result']);
         $this->rest->sendResponse(200);
     }
 
@@ -95,6 +92,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
+        $this->data['request'] = $request;
         $request = $this->prepareData($request);
 
         //are we updating or creating
@@ -142,8 +140,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         } catch (\PDOException $e) {
             $trace = $e->getTraceAsString();
+            $this->log->error($e->getMessage());
             $this->log->error($trace);
-            $this->rest->setResponseData(['Error' => $trace]);
+            $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return null;
         } catch (AException $e) {
@@ -168,13 +167,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        $result = [
+        $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',
             'product_id' => $product_id,
         ];
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->rest->setResponseData($result);
+        $this->rest->setResponseData($this->data['result']);
         $this->rest->sendResponse(200);
     }
 
@@ -210,7 +209,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             if ($fillable == 'date_available') {
                 continue;
             }
-            $product->{$fillable} = urldecode($data[$fillable]);
+            $product->{$fillable} = $data[$fillable];
         }
 
         $product->save();
@@ -266,7 +265,7 @@ $upd_array[$fillable] = urldecode($data[$fillable]);
 if($upd_array) {
     $this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
 }
-//$this->log->write('Product_ID'. $product->product_id);
+
         //$product->save();
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);

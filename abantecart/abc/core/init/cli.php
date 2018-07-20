@@ -193,6 +193,20 @@ $extensions = new ExtensionsApi();
 $extensions->loadAvailableExtensions();
 $registry->set('extensions', $extensions);
 
+//register event listeners
+/**
+ * @var Dispatcher $evd
+ */
+$evd = ABC::getObjectByAlias('EventDispatcher');
+if(is_object($evd)) {
+    foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
+        foreach ($listeners as $listener) {
+            $evd->listen($event_alias, $listener);
+        }
+    }
+    $registry->set('events', $evd);
+}
+
 // functions
 
 /**

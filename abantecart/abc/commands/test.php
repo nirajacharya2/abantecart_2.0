@@ -165,15 +165,16 @@ class Test extends BaseCommand
             if (!is_file($this->phpUnitPhar)) {
                 echo "phpunit phar-package not found.\n"
                     ."Trying to download phpunit package into abc/system/temp directory. Please wait..\n";
-            }
-            if (!copy(
-                'https://phar.phpunit.de/'.basename($this->phpUnitPhar),
-                $this->phpUnitPhar
-            )) {
-                exit("Error: Tried to download phpunit phar-file"
-                    ." from ".'https://phar.phpunit.de/'.basename($this->phpUnitPhar)." but failed.\n".
-                    " Please download it manually into "
-                    .dirname($this->phpUnitPhar).DS." directory\n");
+
+                if (!copy(
+                    'https://phar.phpunit.de/'.basename($this->phpUnitPhar),
+                    $this->phpUnitPhar
+                )) {
+                    exit("Error: Tried to download phpunit phar-file"
+                        ." from ".'https://phar.phpunit.de/'.basename($this->phpUnitPhar)." but failed.\n".
+                        " Please download it manually into "
+                        .dirname($this->phpUnitPhar).DS." directory\n");
+                }
             }
 
             $output_arr = [];

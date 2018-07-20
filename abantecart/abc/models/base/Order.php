@@ -77,6 +77,7 @@ use abc\models\AModelBase;
 class Order extends AModelBase
 {
     public $timestamps = false;
+    protected $primaryKey = 'order_id';
 
     protected $casts = [
         'invoice_id'          => 'int',
