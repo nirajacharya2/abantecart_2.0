@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,10 +25,6 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 require_once __DIR__.DS.'ViewRenderBase.php';
 
@@ -80,7 +76,7 @@ class AView
      */
     public $data = array();
     /**
-     * @var false | AViewRender |\abc\core\view\AViewDefaultRender
+     * @var false | AViewRender | \abc\core\view\AViewDefaultRender
      */
     protected $render;
     /**
@@ -116,10 +112,10 @@ class AView
          * @var AViewRenderInterface $render_instance
          */
         $render_instance = AHelperUtils::getInstance(
-            $view_render_class,
-            [$this, $instance_id],
-            '\abc\core\view\AViewDefaultRender',
-            [$this, $instance_id]
+                                                    $view_render_class,
+                                                    [$this, $instance_id],
+                                                    '\abc\core\view\AViewDefaultRender',
+                                                    [$this, $instance_id]
         );
         //Note: this call will cause fatal error if class is not implements AViewRender interface!
         $this->setRender($render_instance);
@@ -275,9 +271,9 @@ class AView
             return false;
         }
         if (!is_null($value)) {
-            $this->data[$template_variable] = $this->data[$template_variable].$value;
+            $this->data[$template_variable] .= $value;
         } else {
-            $this->data[$template_variable] = $this->data[$template_variable].$default_value;
+            $this->data[$template_variable] .= $default_value;
         }
         return true;
     }
@@ -297,15 +293,15 @@ class AView
             //when key already defined and type of old and new values are different send warning in debug-mode
             if (isset($this->data[$key]) && is_object($this->data[$key])) {
                 $warning_text = 'Warning! Variable "'.$key.'" in template "'
-                    .$this->template.'" overriding value and data type "object." ';
+                                .$this->template.'" overriding value and data type "object." ';
                 $warning_text .= 'Possibly need to review your code! (also check that '
-                    .'extensions do not load language definitions in UpdateData hook).';
+                                .'extensions do not load language definitions in UpdateData hook).';
                 $warning = new AWarning($warning_text);
                 $warning->toDebug();
                 continue; // prevent overriding.
             } elseif (isset($this->data[$key]) && gettype($this->data[$key]) != gettype($value)) {
                 $warning_text = 'Warning! Variable "'.$key.'" in template "'.$this->template
-                    .'" overriding value and data type "'.gettype($this->data[$key]).'" ';
+                               .'" overriding value and data type "'.gettype($this->data[$key]).'" ';
                 $warning_text .= 'Forcing new data type '.gettype($value).'. Possibly need to review your code!';
                 $warning = new AWarning($warning_text);
                 $warning->toDebug();
@@ -488,7 +484,13 @@ class AView
             } else {
                 //no extension found, use resource from core templates
                 $mode2 = $mode == 'file' ? '' : 'relative';
-                $src_path = !$mode2 ? ABC::env('DIR_TEMPLATES') : ABC::env('DIR_PUBLIC').'templates/';
+                if( pathinfo($filename,PATHINFO_EXTENSION) == 'tpl'){
+                    $src_path = ABC::env('DIR_TEMPLATES');
+                }else {
+                    $src_path = !$mode2
+                        ? ABC::env('DIR_TEMPLATES')
+                        : ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_TEMPLATES');
+                }
                 $output = $this->getTemplateResourcePath($src_path, $filename, $mode2);
             }
         }
@@ -567,7 +569,8 @@ class AView
     }
 
     /**
-     * Beta!
+     * @deprecated
+     * TODO: move this functionality into publisher
      * Build or load minified CSS and return an output.
      *
      * @param string $css_file css file with relative name
@@ -770,7 +773,8 @@ class AView
             $ret_path = $this->getPath(
                 $path,
                 $public_dir_pre,
-                'default'.$slash.$section_dirname.$filename, $mode
+                'default'.$slash.$section_dirname.$filename,
+                $mode
             );
             if ($ret_path) {
                 $match = 'default';
@@ -778,7 +782,8 @@ class AView
                 $ret_path = $this->getPath(
                     $dir_public.$dirname_templates,
                     $dirname_templates,
-                    'default'.$slash.$section_dirname.$filename, $mode
+                    'default'.$slash.$section_dirname.$filename,
+                    $mode
                 );
             }
         }
