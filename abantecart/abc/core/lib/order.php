@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,10 +22,6 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class AOrder
@@ -76,7 +72,6 @@ class AOrder extends \ALibBase
      * @param string $order_id
      *
      * @throws AException
-     * @throws \ReflectionException
      */
     public function __construct($registry, $order_id = '')
     {
@@ -110,6 +105,13 @@ class AOrder extends \ALibBase
         $this->registry->set($key, $value);
     }
 
+    /**
+     * @param int $order_id
+     * @param int|string $order_status_id
+     *
+     * @return array
+     * @throws AException
+     */
     public function loadOrderData($order_id, $order_status_id = '')
     {
         if ($order_id) {
@@ -128,7 +130,6 @@ class AOrder extends \ALibBase
      * @return array
      * NOTE: method to create an order based on provided data array.
      * @throws AException
-     * @throws \ReflectionException
      */
     public function buildOrderData($indata)
     {
@@ -333,7 +334,6 @@ class AOrder extends \ALibBase
         $product_data = array();
 
         foreach ($this->cart->getProducts() as $key => $product) {
-
             $product_data[] = array(
                 'key'        => $key,
                 'product_id' => $product['product_id'],
@@ -385,6 +385,9 @@ class AOrder extends \ALibBase
         return $output;
     }
 
+    /**
+     * @return array
+     */
     public function getOrderData()
     {
         $this->extensions->hk_ProcessData($this, 'get_order_data');
@@ -392,6 +395,9 @@ class AOrder extends \ALibBase
         return $output;
     }
 
+    /**
+     * @return int|null
+     */
     public function saveOrder()
     {
         if (empty($this->order_data)) {
@@ -400,14 +406,20 @@ class AOrder extends \ALibBase
         $this->extensions->hk_ProcessData($this, 'save_order');
         $output = $this->data + $this->order_data;
         $this->order_id = $this->model_checkout_order->create($output, $this->order_id);
-        return $this->order_id;
+        return (int)$this->order_id;
     }
 
+    /**
+     * @return int
+     */
     public function getOrderId()
     {
         return $this->order_id;
     }
 
+    /**
+     * @return int
+     */
     public function getCustomerId()
     {
         return $this->customer_id;
