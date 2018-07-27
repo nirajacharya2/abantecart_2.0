@@ -354,6 +354,7 @@ class ModelCatalogProduct extends Model
             "width",
             "height",
         );
+        $affected_tables = [];
 
         $update = array('date_modified = NOW()');
         foreach ($fields as $f) {
@@ -2646,7 +2647,8 @@ class ModelCatalogProduct extends Model
      */
     protected function updateEvent(int $product_id, array $product_data, array $tables)
     {
-        $product_info = ['product_id'=> $product_id ] + $product_data;
+        $product_info = $this->getProduct($product_id);
+
         H::event('abc\models\admin\product\update', [new ABaseEvent($product_info,$tables)]);
     }
 
