@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,10 +25,6 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
-
-if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerTaskToolImportProcess
@@ -78,7 +74,7 @@ class ControllerTaskToolImportProcess extends AController
 
         if (!$task_id || !$step_id) {
             $error_text = 'Cannot run task step. Task_id (or step_id) has not been set.';
-            $this->_return_error($error_text);
+            $this->returnError($error_text);
         }
 
         $tm = new ATaskManager();
@@ -89,7 +85,7 @@ class ControllerTaskToolImportProcess extends AController
         $step_info = $tm->getTaskStep($task_id, $step_id);
         if (!$step_info['settings']) {
             $error_text = "Cannot run task #".$task_id." step #".$step_id.". Can not locate settings for the step.";
-            $this->_return_error($error_text);
+            $this->returnError($error_text);
         }
         //record the start
         $tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
@@ -101,7 +97,6 @@ class ControllerTaskToolImportProcess extends AController
         $type = $import_details['table'];
         $delimiter = $import_details['delimiter'];
 
-        $step_result = false;
         $step_failed_count = 0;
 
         //read records from source file
@@ -155,7 +150,11 @@ class ControllerTaskToolImportProcess extends AController
                     $method = "process_".$type."_record";
                     try {
                         $result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
+                    } catch (\PDOException $e) {
+                        $this->log->write($e->getMessage());
+                        $result = false;
                     } catch (AException $e) {
+                        $this->log->write($e->getMessage());
                         $result = false;
                     }
 
@@ -167,6 +166,7 @@ class ControllerTaskToolImportProcess extends AController
                 }
             } else {
                 //if nothing to todo
+                $this->log->write('No rows to import');
                 return false;
             }
         }
@@ -221,7 +221,7 @@ class ControllerTaskToolImportProcess extends AController
         return $buffer;
     }
 
-    protected function _return_error($error_text)
+    protected function returnError($error_text)
     {
         $error = new AError($error_text);
         $error->toLog()->toDebug();
