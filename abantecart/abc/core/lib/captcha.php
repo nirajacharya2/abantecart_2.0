@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -19,10 +19,6 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\core\lib;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class Captcha
 {
@@ -64,13 +60,17 @@ class Captcha
         imagefilledrectangle($image, 0, 0, 0, $height - 1, $black);
         imagefilledrectangle($image, 0, $height - 1, $width, $height - 1, $black);
 
-        imagestring($image, 10, intval(($width - (strlen($this->code) * 9)) / 2), intval(($height - 15) / 2),
-            $this->code, $black);
+        imagestring(
+            $image,
+            10,
+            intval(($width - (strlen($this->code) * 9)) / 2),
+            intval(($height - 15) / 2),
+            $this->code,
+            $black
+        );
 
-        header('Content-type: image/jpeg');
-
-        imagejpeg($image);
-        imagedestroy($image);
+        header('Content-Type: image/jpeg');
+        imagejpeg($image, null, 80);
         exit;
     }
 }
