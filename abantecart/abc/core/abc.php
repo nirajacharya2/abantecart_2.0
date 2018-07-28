@@ -24,6 +24,8 @@ use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
 use ReflectionClass;
 
+ob_start();
+
 require __DIR__.DS.'abc_base.php';
 
 /**
@@ -58,7 +60,7 @@ class ABC extends ABCBase
         self::loadConfig($stage_name);
         //register autoloader
         spl_autoload_register([$this, 'loadClass'], false);
-        ob_clean();
+
     }
 
     /**
@@ -161,7 +163,7 @@ class ABC extends ABCBase
             }
         }
         self::loadClassMap($stage_name);
-        ob_clean();
+
         return true;
     }
 
@@ -339,6 +341,7 @@ class ABC extends ABCBase
 
     public function run()
     {
+
         $this->validateApp();
 
         // New Installation
@@ -353,6 +356,8 @@ class ABC extends ABCBase
         }
 
         $this->init();
+        ob_clean();
+
         $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 
@@ -389,7 +394,6 @@ class ABC extends ABCBase
     public function init()
     {
         require __DIR__.DS.'init'.DS.'app.php';
-        ob_clean();
     }
 
     protected function validateApp()
