@@ -363,7 +363,7 @@ if (!$is_valid) {
         $dir = 'templates'.DS.$template.DS.ABC::env('DIRNAME_STORE');
     }
 
-    if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$dir)) {
+    if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$template.DS.$dir)) {
         $is_valid = true;
     } else {
         $is_valid = false;
