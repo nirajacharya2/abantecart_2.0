@@ -770,15 +770,14 @@ class AView
         );
         //try to find file in default template of extension or core
         if (!$ret_path) {
+            $match = 'default';
             $ret_path = $this->getPath(
                 $path,
                 $public_dir_pre,
                 'default'.$slash.$section_dirname.$filename,
                 $mode
             );
-            if ($ret_path) {
-                $match = 'default';
-            } else {
+            if (!$ret_path) {
                 $ret_path = $this->getPath(
                     $dir_public.$dirname_templates,
                     $dirname_templates,
