@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -30,9 +30,6 @@ use abc\core\lib\AResourceManager;
 use abc\modules\events\ABaseEvent;
 use H;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
@@ -52,7 +49,7 @@ class ModelCatalogProduct extends Model
 
         $this->db->query("INSERT INTO ".$this->db->table_name("products")." 
                             SET model = '".$this->db->escape($data['model'])."',
-                                sku = '".$this->db->escape($data['sku'])."',
+                                sku = ".($data['sku'] ? "'".$this->db->escape($data['sku'])."'": "NULL").",
                                 location = '".$this->db->escape($data['location'])."',
                                 quantity = '".H::preformatInteger($data['quantity'])."',
                                 minimum = '".H::preformatInteger($data['minimum'])."',
@@ -354,6 +351,8 @@ class ModelCatalogProduct extends Model
             "width",
             "height",
         );
+
+        $nullable = ['sku'];
         $affected_tables = [];
 
         $update = array('date_modified = NOW()');
@@ -362,7 +361,11 @@ class ModelCatalogProduct extends Model
                 if (in_array($f, $preformat_fields)) {
                     $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
                 }
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                if (in_array($f, $nullable)) {
+                    $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'": "NULL");
+                }else {
+                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                }
             }
         }
         if ( ! empty($update)) {
@@ -955,7 +958,7 @@ class ModelCatalogProduct extends Model
             SET product_option_id = '".(int)$option_id."',
                 product_id = '".(int)$product_id."',
                 group_id = '".(int)$pd_opt_val_id."',
-                sku = '".$this->db->escape($data['sku'])."',
+                sku = ".($data['sku'] ? "'".$this->db->escape($data['sku'])."'": "NULL").",
                 quantity = '".$this->db->escape($data['quantity'])."',
                 subtract = '".$this->db->escape($data['subtract'])."',
                 price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
@@ -992,7 +995,7 @@ class ModelCatalogProduct extends Model
 
         $this->db->query(
             "UPDATE ".$this->db->table_name("product_option_values")."
-            SET sku = '".$this->db->escape($data['sku'])."',
+            SET sku = ".($data['sku'] ? "'".$this->db->escape($data['sku'])."'": "NULL").",
                 quantity = '".$this->db->escape($data['quantity'])."',
                 subtract = '".$this->db->escape($data['subtract'])."',
                 price = '".$this->db->escape($data['price'])."',
@@ -1117,7 +1120,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function _deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id)
     {
@@ -1166,6 +1169,7 @@ class ModelCatalogProduct extends Model
      *
      * @return bool|array
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function copyProduct($product_id)
     {
@@ -1253,7 +1257,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      * @param array $data
      *
-     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     protected function _clone_product_options($product_id, $data)
     {
@@ -1311,7 +1315,7 @@ class ModelCatalogProduct extends Model
                         $this->db->query("INSERT INTO ".$this->db->table_name("product_option_values")." 
                                             SET product_option_id = '".(int)$product_option_id."',
                                                 product_id = '".(int)$product_id."',
-                                                sku = '".$this->db->escape($pd_opt_vals['sku'])."',
+                                                sku = ".($pd_opt_vals['sku'] ? "'".$this->db->escape($pd_opt_vals['sku'])."'": "NULL").",
                                                 quantity = '".(int)$pd_opt_vals['quantity']."',
                                                 subtract = '".(int)$pd_opt_vals['subtract']."',
                                                 price = '".H::preformatFloat($pd_opt_vals['price'], $this->language->get('decimal_point'))."',
@@ -1419,6 +1423,7 @@ class ModelCatalogProduct extends Model
      *
      * @return bool
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function deleteProduct($product_id)
     {
