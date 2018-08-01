@@ -21,14 +21,10 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
-
-if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class ControllerPagesCatalogProduct
@@ -583,7 +579,7 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['preview'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
         }
 
-        if (!AHelperUtils::has_value($this->data['stock_status_id'])) {
+        if (!H::has_value($this->data['stock_status_id'])) {
             $this->data['stock_status_id'] = $this->config->get('config_stock_status_id');
         }
         if (isset($this->request->post['date_available'])) {
@@ -591,7 +587,7 @@ class ControllerPagesCatalogProduct extends AController
         } elseif (isset($product_info)) {
             $this->data['date_available'] = $product_info['date_available'];
         } else {
-            $this->data['date_available'] = AHelperUtils::dateInt2ISO(time() - 86400);
+            $this->data['date_available'] = H::dateInt2ISO(time() - 86400);
         }
 
         $weight_info = $this->model_localisation_weight_class->getWeightClassDescriptionByUnit(
@@ -783,13 +779,13 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['price'] = $form->getFieldHtml(array(
             'type'  => 'input',
             'name'  => 'price',
-            'value' => AHelperUtils::moneyDisplayFormat($this->data['price']),
+            'value' => $this->data['price'],
             'style' => 'small-field',
         ));
         $this->data['form']['fields']['data']['cost'] = $form->getFieldHtml(array(
             'type'  => 'input',
             'name'  => 'cost',
-            'value' => AHelperUtils::moneyDisplayFormat($this->data['cost']),
+            'value' => round($this->data['cost'],3),
             'style' => 'small-field',
         ));
         $this->data['form']['fields']['data']['tax_class'] = $form->getFieldHtml(array(
@@ -839,7 +835,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['stock_checkout'] = $form->getFieldHtml(array(
             'type'    => 'selectbox',
             'name'    => 'stock_checkout',
-            'value'   => (AHelperUtils::has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : ''),
+            'value'   => (H::has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : ''),
             'options' => array(
                 '' => $this->language->get('text_default'),
                 0  => $this->language->get('text_no'),
@@ -852,7 +848,7 @@ class ControllerPagesCatalogProduct extends AController
             'type'     => 'selectbox',
             'name'     => 'stock_status_id',
             'value'    => (
-                AHelperUtils::has_value($this->data['stock_status_id'])
+                    H::has_value($this->data['stock_status_id'])
                     ? (int)$this->data['stock_status_id']
                     : $this->config->get('config_stock_status_id')
             ),
@@ -891,15 +887,15 @@ class ControllerPagesCatalogProduct extends AController
             'name'         => 'keyword',
             'value'        => $this->data['keyword'],
             'help_url'     => $this->gen_help_url('seo_keyword'),
-            'attr'         => ' gen-value="'.AHelperUtils::SEOEncode($this->data['product_description']['name']).'" ',
+            'attr'         => ' gen-value="'.H::SEOEncode($this->data['product_description']['name']).'" ',
             'multilingual' => true,
         ));
         $this->data['form']['fields']['data']['date_available'] = $form->getFieldHtml(array(
             'type'       => 'date',
             'name'       => 'date_available',
-            'value'      => AHelperUtils::dateISO2Display($this->data['date_available']),
-            'default'    => AHelperUtils::dateNowDisplay(),
-            'dateformat' => AHelperUtils::format4Datepicker($this->language->get('date_format_short')),
+            'value'      => H::dateISO2Display($this->data['date_available']),
+            'default'    => H::dateNowDisplay(),
+            'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
             'highlight'  => 'future',
             'style'      => 'small-field',
         ));
@@ -935,7 +931,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml(array(
             'type'  => 'input',
             'name'  => 'shipping_price',
-            'value' => AHelperUtils::moneyDisplayFormat($this->data['shipping_price']),
+            'value' => round($this->data['shipping_price'],3),
             'style' => 'tiny-field',
         ));
 
@@ -1076,7 +1072,7 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         foreach (array('length', 'width', 'height', 'weight') as $name) {
-            $v = abs(AHelperUtils::preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
+            $v = abs(H::preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
             if ($v >= 1000) {
                 $this->error[$name] = $this->language->get('error_measure_value');
             }
@@ -1112,7 +1108,7 @@ class ControllerPagesCatalogProduct extends AController
     protected function prepareData($data = array())
     {
         if (isset($data['date_available'])) {
-            $data['date_available'] = AHelperUtils::dateDisplay2ISO($data['date_available']);
+            $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
         }
         return $data;
     }
