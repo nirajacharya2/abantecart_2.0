@@ -389,6 +389,7 @@ class ControllerPagesCatalogProduct extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        abc_redirect($this->html->getSecureURL('catalog/product'));
     }
 
     private function buildForm($args = array())
