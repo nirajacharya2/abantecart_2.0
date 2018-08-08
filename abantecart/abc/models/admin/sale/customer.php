@@ -1101,9 +1101,7 @@ class ModelSaleCustomer extends Model
                                     FROM `".$this->db->table_name("customer_groups")."`
                                     WHERE `name` = 'Newsletter Subscribers'
                                     LIMIT 0,1");
-        $result = !$query->row['customer_group_id']
-            ? (int)$this->config->get('config_customer_group_id')
-            : (int)$query->row['customer_group_id'];
+        $result = (int)$query->row['customer_group_id'];
         return $result;
     }
 
