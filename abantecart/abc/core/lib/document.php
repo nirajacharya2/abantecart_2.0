@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,27 +20,44 @@
 
 namespace abc\core\lib;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ADocument
  */
 final class ADocument
 {
-    private $title;
-    private $description;
-    private $keywords;
-    private $base;
+    private $title ='';
+    private $description = '';
+    private $keywords = '';
+    private $base = '';
     private $charset = 'utf-8';
     private $language = 'en-gb';
     private $direction = 'ltr';
-    private $links = array();
-    private $styles = array();
-    private $scripts = array();
-    private $scripts_bottom = array();
-    private $breadcrumbs = array();
+    private $links = [];
+    private $styles = [];
+    private $scripts = [];
+    private $scripts_bottom = [];
+    private $breadcrumbs = [];
+
+    /**
+     * ADocument constructor.
+     *
+     * @param string $charset
+     * @param string $language
+     * @param string $direction
+     */
+    public function __construct($charset = 'utf-8', $language = 'en-gb', $direction = 'ltr')
+    {
+        if($charset){
+            $this->charset = strtolower($charset);
+        }
+        if($language){
+            $this->language = strtolower($language);
+        }
+        if($direction && in_array(strtolower($direction), ['ltr','rtl','auto'])){
+            $this->direction = strtolower($direction);
+        }
+
+    }
 
     /**
      * @param string $title
@@ -161,7 +178,15 @@ final class ADocument
      */
     public function resetLinks()
     {
-        $this->links = array();
+        $this->links = [];
+    }
+
+    /**
+     * @param string $href
+     */
+    public function removeLink($href)
+    {
+        unset($this->links[$href]);
     }
 
     /**
@@ -172,10 +197,10 @@ final class ADocument
      *
      * @void
      */
-    public function addLink($link_item = array())
+    public function addLink($link_item = [])
     {
         if ($link_item["href"]) {
-            $this->links[] = $link_item;
+            $this->links[$link_item["href"]] = $link_item;
         }
     }
 
@@ -192,7 +217,15 @@ final class ADocument
      */
     public function resetStyles()
     {
-        $this->styles = array();
+        $this->styles = [];
+    }
+
+    /**
+     * @param string $href
+     */
+    public function removeStyle($href)
+    {
+        unset($this->styles[$href]);
     }
 
     /**
@@ -203,10 +236,10 @@ final class ADocument
      *
      * @void
      */
-    public function addStyle($style_item = array())
+    public function addStyle($style_item = [])
     {
         if ($style_item["href"]) {
-            $this->styles[] = $style_item;
+            $this->styles[$style_item["href"]] = $style_item;
         }
     }
 
@@ -223,7 +256,7 @@ final class ADocument
      */
     public function resetScripts()
     {
-        $this->scripts = array();
+        $this->scripts = [];
     }
 
     /**
@@ -237,7 +270,7 @@ final class ADocument
     public function addScript($script)
     {
         if ($script) {
-            $this->scripts[] = $script;
+            $this->scripts[$script] = $script;
         }
     }
 
@@ -260,7 +293,9 @@ final class ADocument
      */
     public function addScriptBottom($script)
     {
-        $this->scripts_bottom[] = $script;
+        if($script) {
+            $this->scripts_bottom[$script] = $script;
+        }
     }
 
     /**
@@ -274,7 +309,15 @@ final class ADocument
 
     public function resetScriptsBottom()
     {
-        $this->scripts_bottom = array();
+        $this->scripts_bottom = [];
+    }
+
+    /**
+     * @param string $href
+     */
+    public function removeScriptsBottom($href)
+    {
+        unset($this->scripts_bottom[$href]);
     }
 
     /**
@@ -284,7 +327,16 @@ final class ADocument
      */
     public function resetBreadcrumbs()
     {
-        $this->breadcrumbs = array();
+        $this->breadcrumbs = [];
+    }
+    /**
+     * method to remove breadcrumb
+     *
+     * @void
+     */
+    public function removeBreadcrumb($href)
+    {
+        unset($this->breadcrumbs[$href]);
     }
 
     /**
@@ -294,7 +346,7 @@ final class ADocument
      *
      * @void
      */
-    public function initBreadcrumb($breadcrumb_item = array())
+    public function initBreadcrumb($breadcrumb_item = [])
     {
         $this->resetBreadcrumbs();
 
@@ -308,10 +360,11 @@ final class ADocument
      *
      * @void
      */
-    public function addBreadcrumb($breadcrumb_item = array())
+    public function addBreadcrumb($breadcrumb_item = [])
     {
         if ($breadcrumb_item["href"]) {
-            $this->breadcrumbs[] = $breadcrumb_item;
+            //NOTE: key must be url for overrides from hooks
+            $this->breadcrumbs[$breadcrumb_item["href"]] = $breadcrumb_item;
         }
     }
 

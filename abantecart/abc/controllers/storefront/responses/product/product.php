@@ -21,31 +21,27 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
-use abc\core\lib\AException;
 use abc\core\lib\AJson;
-
+use H;
 
 class ControllerResponsesProductProduct extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $html_out = '';
+        $this->data['output'] = '';
         try {
             $this->config->set('embed_mode', true);
             $cntr = $this->dispatch('pages/product/product');
-            $html_out = $cntr->dispatchGetOutput();
-		}catch(AException $e){	}
+            $this->data['output'] = $cntr->dispatchGetOutput();
+        }catch(\Exception $e){}
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->response->setOutput($html_out);
-
+        $this->response->setOutput($this->data['output']);
     }
 
     public function is_group_option()
@@ -89,7 +85,7 @@ class ControllerResponsesProductProduct extends AController
             $resource = new AResource('image');
 
             // main product image
-            $msizes = array(
+            $mSizes = array(
                 'main'  =>
                     array(
                         'width'  => $this->config->get('config_image_popup_width'),
@@ -102,13 +98,13 @@ class ControllerResponsesProductProduct extends AController
             );
 
             $output['main'] =
-                $resource->getResourceAllObjects('product_option_value', $attribute_value_id, $msizes, 1, false);
+                $resource->getResourceAllObjects('product_option_value', $attribute_value_id, $mSizes, 1, false);
             if (!$output['main']) {
                 unset($output['main']);
             }
 
             // additional images
-            $osizes = array(
+            $oSizes = array(
                 'main'   =>
                     array(
                         'width'  => $this->config->get('config_image_popup_width'),
@@ -128,30 +124,31 @@ class ControllerResponsesProductProduct extends AController
             );
 
             $output['images'] =
-                $resource->getResourceAllObjects('product_option_value', $attribute_value_id, $osizes, 0, false);
+                $resource->getResourceAllObjects('product_option_value', $attribute_value_id, $oSizes, 0, false);
             if (!$output['images']) {
                 unset($output['images']);
             }
 
             //no image? return main product images
             if (!count($output) && $product_id) {
-                $output['main'] = $resource->getResourceAllObjects('products', $product_id, $msizes, 1, false);
+                $output['main'] = $resource->getResourceAllObjects('products', $product_id, $mSizes, 1, false);
                 if (!$output['main']) {
                     unset($output['main']);
                 }
-                $output['images'] = $resource->getResourceAllObjects('products', $product_id, $osizes, 0, false);
+                $output['images'] = $resource->getResourceAllObjects('products', $product_id, $oSizes, 0, false);
                 if (!$output['images']) {
                     unset($output['images']);
                 }
             }
 
         }
+        $this->data['output'] = $output;
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($output));
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     public function addToCart()
@@ -250,17 +247,22 @@ class ControllerResponsesProductProduct extends AController
                 'option'   => $option_data,
                 'quantity' => $result['quantity'],
                 'stock'    => $result['stock'],
-                'price'    => $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'],
-                    $this->config->get('config_tax'))),
+                'price'    => $this->currency->format(
+                                    $this->tax->calculate($result['price'],
+                                    $result['tax_class_id'],
+                                    $this->config->get('config_tax'))
+                ),
                 'href'     => $this->html->getSEOURL('product/product', '&product_id='.$result['product_id']),
                 'thumb'    => $thumbnail,
             );
         }
 
         $this->data['totals'] = $totals['total_data'];
-        $this->data['subtotal'] =
-            $this->currency->format($this->tax->calculate($totals['total'], $result['tax_class_id'],
-                $this->config->get('config_tax')));
+        $this->data['subtotal'] = $this->currency->format(
+                                    $this->tax->calculate($totals['total'],
+                                    $result['tax_class_id'],
+                                    $this->config->get('config_tax'))
+        );
         $this->data['taxes'] = $totals['taxes'];
         $this->data['view'] = $this->html->getURL('checkout/cart');
 
@@ -285,7 +287,7 @@ class ControllerResponsesProductProduct extends AController
             return $output;
         }
 
-        if (AHelperUtils::has_value($this->request->post['product_id'])
+        if (H::has_value($this->request->post['product_id'])
             && is_numeric($this->request->post['product_id'])) {
             $product_id = $this->request->post['product_id'];
             if (isset($this->request->post['option'])) {
@@ -300,6 +302,7 @@ class ControllerResponsesProductProduct extends AController
                 $quantity = 1;
             }
             $result = $this->cart->buildProductDetails($product_id, $quantity, $option);
+
             $output['total'] = $this->tax->calculate(
                 $result['total'],
                 $result['tax_class_id'],
@@ -314,11 +317,12 @@ class ControllerResponsesProductProduct extends AController
             $output['price'] = $this->currency->format($output['price']);
         }
 
+        $this->data['output'] = $output;
         //init controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->load->library('json');
-        $this->response->setOutput(AJson::encode($output));
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     public function editCartProduct()
@@ -332,10 +336,12 @@ class ControllerResponsesProductProduct extends AController
             foreach ($this->request->post['quantity'] as $key => $value) {
                 $this->cart->update($key, $value);
             }
-            unset($this->session->data['shipping_method']);
-            unset($this->session->data['shipping_methods']);
-            unset($this->session->data['payment_method']);
-            unset($this->session->data['payment_methods']);
+            unset(
+                $this->session->data['shipping_method'],
+                $this->session->data['shipping_methods'],
+                $this->session->data['payment_method'],
+                $this->session->data['payment_methods']
+            );
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
         return $this->getCartContent();
@@ -351,10 +357,12 @@ class ControllerResponsesProductProduct extends AController
         if ($this->request->post_or_get('key')) {
             $this->cart->remove($this->request->post_or_get('key'));
             $this->session->data['success'] = $this->language->get('text_remove');
-            unset($this->session->data['shipping_method']);
-            unset($this->session->data['shipping_methods']);
-            unset($this->session->data['payment_method']);
-            unset($this->session->data['payment_methods']);
+            unset(
+                $this->session->data['shipping_method'],
+                $this->session->data['shipping_methods'],
+                $this->session->data['payment_method'],
+                $this->session->data['payment_methods']
+            );
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
         return $this->getCartContent();

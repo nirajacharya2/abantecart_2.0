@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,20 +26,16 @@ use abc\core\engine\ExtensionsApi;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class AAssetPublisher
  *
- * @property ADB                    $db
- * @property ALanguageManager       $language
- * @property AConfig                $config
- * @property ASession               $session
+ * @property ADB $db
+ * @property ALanguageManager $language
+ * @property AConfig $config
+ * @property ASession $session
  * @property \abc\core\cache\ACache $cache
- * @property ALoader                $load
- * @property ExtensionsApi          $extensions
+ * @property ALoader $load
+ * @property ExtensionsApi $extensions
  *
  */
 class AAssetPublisher
@@ -121,13 +117,13 @@ class AAssetPublisher
     }
 
     /**
-     * @param string $source   - can be 'core':
+     * @param string $source - can be 'core':
      *                         - to publish only assets from abc/templates directory,
      *                         - 'extensions' - only assets from abc/extensions directory,
      *                         - 'vendors' - only assets from vendor directory,
      *                         '{extension_text_id}' - to publish only extension assets,
      *                         and 'all' to publish all
-     * @param array  $filter
+     * @param array $filter
      *
      * @return array
      */
@@ -213,7 +209,6 @@ class AAssetPublisher
             'extensions' => $extensions_assets,
             'vendors'    => $vendors_assets,
         ];
-
         return $output;
     }
 
@@ -270,6 +265,7 @@ class AssetPublisherCopy
         //extensions files
         if ($files['extensions']) {
             $result = $this->publishExtensionsAssets($files['extensions']);
+
             if (!$result) {
                 return false;
             }
@@ -301,6 +297,10 @@ class AssetPublisherCopy
             return false;
         }
         foreach ($extensions_files_list as $extension => $file_list) {
+            if (!$file_list) {
+                continue;
+            }
+
             $src_dir = ABC::env('DIR_APP_EXTENSIONS')
                 .$extension.DS
                 .ABC::env('DIRNAME_TEMPLATES');
@@ -309,10 +309,9 @@ class AssetPublisherCopy
                 .ABC::env('DIRNAME_EXTENSIONS')
                 .$extension.DS
                 .ABC::env('DIRNAME_TEMPLATES');
-
             $result = $this->processTemplateAssets($file_list, $src_dir, $dst_dir);
 
-            if (!$result) {
+            if ($result === false) {
                 return false;
             }
         }

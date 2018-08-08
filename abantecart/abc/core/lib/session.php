@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,12 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ASession
@@ -47,7 +43,7 @@ final class ASession
             $this->registry = Registry::getInstance();
         }
 
-        if (!session_id()) {
+        if (!session_id() || $ses_name) {
             $this->ses_name = $ses_name;
             $this->init($this->ses_name);
         }
@@ -85,7 +81,7 @@ final class ASession
                     $token = $_POST['token'];
                 }
             }
-            $final_session_id = $this->_prepare_session_id($token);
+            $final_session_id = $this->prepareSessionId($token);
             session_id($final_session_id);
         } else {
             $path = dirname($_SERVER['PHP_SELF']);
@@ -113,7 +109,7 @@ final class ASession
                 if (ABC::env('EMBED_TOKEN_NAME') && isset($_GET[ABC::env('EMBED_TOKEN_NAME')])
                     && !isset($_COOKIE[$session_name])) {
                     //check and reset session if it is not valid
-                    $final_session_id = $this->_prepare_session_id($_GET[ABC::env('EMBED_TOKEN_NAME')]);
+                    $final_session_id = $this->prepareSessionId($_GET[ABC::env('EMBED_TOKEN_NAME')]);
                     session_id($final_session_id);
                     setcookie($session_name, $final_session_id, 0, $path, null, false);
                     $session_mode = 'embed_token';
@@ -122,12 +118,11 @@ final class ASession
         }
 
         //check if session can not be started. Try one more time with new generated session ID
-        $is_session_ok = false;
         if (!headers_sent()) {
             $is_session_ok = session_start();
             if (!$is_session_ok) {
                 //auto generating session id and try to start session again
-                $final_session_id = $this->_prepare_session_id();
+                $final_session_id = $this->prepareSessionId();
                 session_id($final_session_id);
                 if (php_sapi_name() != 'cli') {
                     setcookie($session_name, $final_session_id, 0, $path, null, false);
@@ -152,9 +147,9 @@ final class ASession
      *
      * @return string
      */
-    private function _prepare_session_id($session_id = '')
+    protected function prepareSessionId($session_id = '')
     {
-        if (!$session_id || !$this->_is_session_id_valid($session_id)) {
+        if (!$session_id || !$this->isSessionIdValid($session_id)) {
             //if session ID is invalid, generate new one
             $session_id = uniqid(substr(ABC::env('UNIQUE_ID'), 0, 4), true);
 
@@ -171,7 +166,7 @@ final class ASession
      *
      * @return bool
      */
-    private function _is_session_id_valid($session_id)
+    protected function isSessionIdValid($session_id)
     {
         if (empty($session_id)) {
             return false;

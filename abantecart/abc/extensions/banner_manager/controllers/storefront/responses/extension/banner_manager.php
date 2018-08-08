@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
+use abc\extensions\banner_manager\models\storefront\extension\ModelExtensionBannerManager;
 
 if ( ! class_exists( 'abc\core\ABC' ) ) {
     header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
@@ -31,7 +32,7 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
 /**
  * Class ControllerResponsesExtensionBannerManager
  *
- * @property \abc\models\storefront\ModelExtensionBannerManager $model_extension_banner_manager
+ * @property ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerResponsesExtensionBannerManager extends AController
 {
@@ -82,7 +83,7 @@ class ControllerResponsesExtensionBannerManager extends AController
             $this->model_extension_banner_manager->writeBannerStat( $banner_id, 2 );
         }
         //go to URL
-        $this->redirect( $url );
+        abc_redirect( $url );
 
         //update controller data
         $this->extensions->hk_UpdateData( $this, __FUNCTION__ );

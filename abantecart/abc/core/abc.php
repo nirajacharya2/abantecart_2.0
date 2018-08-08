@@ -24,6 +24,8 @@ use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
 use ReflectionClass;
 
+ob_start();
+
 require __DIR__.DS.'abc_base.php';
 
 /**
@@ -242,7 +244,7 @@ class ABC extends ABCBase
                     if (class_exists('\abc\core\lib\ADebug')) {
                         ADebug::warning(
                             'Environment option override',
-                            AC_ERR_USER_WARNING,
+                            9101,
                             'Try to put var '.$name.' into abc-environment, but it already exists!');
                     }
                     return false;
@@ -253,7 +255,7 @@ class ABC extends ABCBase
             $dbg = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 5);
             ADebug::warning(
                 'Environment option "'.$name.'" not found',
-                AC_ERR_USER_WARNING,
+                9101,
                 'ABC Environment Issue: key '.$name.' not found. ('.$dbg[0]['file'].':'.$dbg[0]['line'].')');
         }
         return null;
@@ -339,6 +341,7 @@ class ABC extends ABCBase
 
     public function run()
     {
+
         $this->validateApp();
 
         // New Installation
@@ -353,6 +356,8 @@ class ABC extends ABCBase
         }
 
         $this->init();
+        ob_clean();
+
         $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 
