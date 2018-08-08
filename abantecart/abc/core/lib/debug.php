@@ -336,12 +336,17 @@ class ADebug
 
     static function toLog($message)
     {
+        $message = strip_tags(str_replace('<br />', "\r\n", $message));
+        if (!$message) {
+            return false;
+        }
         if (class_exists('\abc\core\engine\Registry')) {
             $logger = Registry::getInstance()->get('log');
         } else {
             $logger = ABC::getObjectByAlias('ALog', [['debug.log']]);
         }
-        $logger->debug(strip_tags(str_replace('<br />', "\r\n", $message)));
+
+        return $logger->debug($message);
     }
 }
 if(class_exists('\DebugBar\DataCollector\PDO\PDOCollector')) {
