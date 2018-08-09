@@ -470,7 +470,7 @@ class ModelToolImportProcess extends Model
             $option_vals = $data[$i]['product_option_values'];
 
             //find largest key by count
-            $counts = array_map('count', $option_vals);
+            $counts = @array_map('count', $option_vals);
             if (max($counts) == 1) {
                 //single option value case
                 $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
