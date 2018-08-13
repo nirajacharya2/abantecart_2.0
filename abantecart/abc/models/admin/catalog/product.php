@@ -1196,7 +1196,18 @@ class ModelCatalogProduct extends Model
             $data['product_description'][$lang]['name'] .= ' ( Copy )';
         }
         $data = array_merge($data, array('product_option' => $this->getProductOptions($product_id)));
+        foreach ($data['product_option'] as &$option) {
+            foreach ($option['product_option_value'] as &$val) {
+                if ($val['sku']) {
+                    $val['sku'] .= '(copy)';
+                }
+            }
+        }
+
         $data['keyword'] = '';
+        if ($data['sku']) {
+            $data['sku'] .= '(copy)';
+        }
 
         $data = array_merge($data, array('product_discount' => $this->getProductDiscounts($product_id)));
         $data = array_merge($data, array('product_special' => $this->getProductSpecials($product_id)));
