@@ -1,5 +1,15 @@
 <?php
 use abc\core\ABC;
+if (!file_exists(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js')) {
+	$locale = 'en';
+}
+
+$this->document->addScript('vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js');
+$jss = glob(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/minified/*.js');
+foreach($jss as $js){
+	$this->document->addScript('vendor/components/jqGrid/js/minified/'.basename($js));
+}
+
 ?>
 <div class="ui-jqgrid-wrapper" id="<?php echo $data['table_id'] ?>_wrapper">
 	<form class="form-inline" id="<?php echo $data['table_id'] ?>_form" action="<?php echo $data["editurl"] ?>" method="POST" role="form">

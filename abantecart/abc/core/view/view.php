@@ -26,7 +26,7 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
 
-require_once __DIR__.DS.'ViewRenderBase.php';
+
 
 /**
  * Class AView
@@ -96,12 +96,16 @@ class AView
      */
     public function __construct($registry, $instance_id)
     {
+        require_once __DIR__.DS.'ViewRenderBase.php';
         $this->registry = $registry;
         $this->has_extensions = $this->registry->has('extensions');
         if ($this->config) {
-            $this->default_template = ABC::env('IS_ADMIN')
-                ? $this->config->get('admin_template')
-                : $this->config->get('config_storefront_template');
+            if(ABC::env('IS_ADMIN')){
+                $this->template = $this->config->get('admin_template');
+                $this->default_template = $this->config->get('admin_template');
+            }else {
+                $this->default_template = $this->config->get('config_storefront_template');
+            }
         }
         $this->data['template_dir'] = ABC::env('RDIR_TEMPLATE');
         $this->data['tpl_common_dir'] = ABC::env('DIR_APP').ABC::env('RDIR_TEMPLATE').'common'.DS;
@@ -474,7 +478,6 @@ class AView
         }
         $http_path = '';
         $res_arr = $this->extensionsResourceMap($filename, $mode);
-
         //get first exact template extension resource or default template resource otherwise.
         if (isset($res_arr['original'][0])) {
             $output = $res_arr['original'][0];
@@ -491,6 +494,7 @@ class AView
                         ? ABC::env('DIR_TEMPLATES')
                         : ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_TEMPLATES');
                 }
+
                 $output = $this->getTemplateResourcePath($src_path, $filename, $mode2);
             }
         }
@@ -703,7 +707,9 @@ class AView
                 $source_dir = $this->extensionTemplatesDir($ext);
             }
             $res_arr = $this->testTemplateResourcePaths($source_dir, $filename, $test_resource_mode, $ext);
+
             if ($res_arr) {
+
                 $output[$res_arr['match']][] = $res_arr['path'];
             }
         }
@@ -731,6 +737,7 @@ class AView
                 return $res_arr['default'][0];
             }
         }
+
         $template_path_arr = $this->testTemplateResourcePaths($path, $filename, $mode);
         return $template_path_arr['path'];
     }
@@ -768,9 +775,13 @@ class AView
             $public_dir_pre,
             $template.$slash.$section_dirname.$filename, $mode
         );
+
+
+
         //try to find file in default template of extension or core
-        if (!$ret_path) {
+        if (!$ret_path && !$extension_txt_id) {
             $match = 'default';
+
             $ret_path = $this->getPath(
                 $path,
                 $public_dir_pre,
