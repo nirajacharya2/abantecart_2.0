@@ -356,7 +356,7 @@ if (ABC::env('IS_ADMIN') !== true && !empty($request->get['sf'])) {
 if (!$is_valid) {
     //check template defined in settings
     if (ABC::env('IS_ADMIN') === true) {
-        $template = ABC::env('adminTemplate') ? ABC::env('adminTemplate') : $this->config->get('admin_template');
+        $template = ABC::env('adminTemplate') ? ABC::env('adminTemplate') : $config->get('admin_template');
         $dir = 'templates'.DS.$template.DS.ABC::env('DIRNAME_ADMIN');
     } else {
         $template = $config->get('config_storefront_template');
