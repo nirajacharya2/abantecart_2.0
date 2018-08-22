@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+namespace abc\core\lib;
 
 class ALibBase
 {

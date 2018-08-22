@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,10 +27,6 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use Exception;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * ExtensionsApi
@@ -98,7 +94,7 @@ abstract class Extension
     {
         if ((strpos($method, 'hk') === 0) && ($this->ExtensionsApi !== null)) {
             array_unshift($args, $this);
-            $return = call_user_func_array(array($this->ExtensionsApi, $method), $args);
+            $return = call_user_func_array([$this->ExtensionsApi, $method], $args);
 
             return $return;
         }
@@ -117,7 +113,7 @@ abstract class Extension
 class ExtensionCollection
 {
 
-    protected $extensions = array();
+    protected $extensions = [];
 
     /**
      * @param array $extensions
@@ -173,7 +169,7 @@ class ExtensionCollection
                 $extension->loadExtensionsApi($baseObject->ExtensionsApi);
             }
 
-            $tmp_return = call_user_func_array(array($extension, $method), $args);
+            $tmp_return = call_user_func_array([$extension, $method], $args);
             //when around method hook - returns ONLY first result
             if (strpos($method, 'around') === 0 && method_exists($extension, $method)) {
                 $return = $tmp_return;
@@ -233,7 +229,7 @@ class ExtensionCollection
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
  * @method hk_ProcessData(object $baseObject, string $point_name = '', mixed $array = null)
- * @method hk_ValidateData(object $baseObject, array $args = array())
+ * @method hk_ValidateData(object $baseObject, array $args = [])
  * @method hk_confirm(object $baseObject, int $order_id, int $order_status_id, string $comment)
  * @method hk_query(object $baseObject, string $sql, bool $noexcept)
  * @method hk_load(object $baseObject, string $block, string $mode)
@@ -298,25 +294,28 @@ class ExtensionsApi
      */
     protected $extension_libraries;
     /**
+     * @var array $extension_modules - array of extensions modules such as handlers, listeners etc
+     */
+    protected $extension_modules;
+    /**
      * @var array
      */
-    protected $extension_types
-        = array(
+    protected $extension_types = [
             'extensions',
             'payment',
             'shipping',
             'template',
             'language',
-        );
+        ];
 
     public function __construct()
     {
 
         $this->registry = Registry::getInstance();
         $this->cache = $this->registry->get('cache');
-        $this->extensions_dir = array();
-        $this->db_extensions = array();
-        $this->missing_extensions = array();
+        $this->extensions_dir = [];
+        $this->db_extensions = [];
+        $this->missing_extensions = [];
 
         $extensions = glob(ABC::env('DIR_APP_EXTENSIONS').'*', GLOB_ONLYDIR);
         if ($extensions) {
@@ -396,7 +395,7 @@ class ExtensionsApi
         }
 
         $type = (string)$type;
-        $extension_data = array();
+        $extension_data = [];
         if (in_array($type, $this->extension_types)) {
             $sql = "SELECT DISTINCT e.key
                     FROM ".$this->db->table_name("extensions")." e
@@ -451,12 +450,11 @@ class ExtensionsApi
             }
         }
 
-        $sql
-            = "SELECT * 
+        $sql = "SELECT * 
                 FROM ".$this->db->table_name("extensions")."
                 ".($key ? " WHERE `key` = '".$this->db->escape($key)."'" : '');
         $query = $this->db->query($sql);
-        $extension_data = array();
+        $extension_data = [];
         if ($query->num_rows == 1) {
             $extension_data = $query->row;
         } else {
@@ -487,7 +485,7 @@ class ExtensionsApi
      * @return bool|\stdClass object array of extensions
      * @throws Exception
      */
-    public function getExtensionsList($data = array(), $mode = '')
+    public function getExtensionsList($data = [], $mode = '')
     {
         $cache_key = '';
         if ($mode == '' && $this->cache && $this->cache->isCacheEnabled()) {
@@ -531,8 +529,8 @@ class ExtensionsApi
 
         if (AHelperUtils::has_value($data['search'])) {
 
-            $keys = array();
-            $ext_list = $this->getExtensionsList(array('filter' => $data['filter']));
+            $keys = [];
+            $ext_list = $this->getExtensionsList(['filter' => $data['filter']]);
             if ($ext_list->total) {
                 foreach ($ext_list->rows as $extension) {
                     // searching ext by name
@@ -749,6 +747,22 @@ class ExtensionsApi
     /**
      * @return array
      */
+    public function getExtensionModules()
+    {
+        return $this->extension_modules;
+    }
+
+    /**
+     * @param array $value
+     */
+    public function setExtensionModules($value)
+    {
+        $this->extension_modules = $value;
+    }
+
+    /**
+     * @return array
+     */
     public function getExtensionLanguages()
     {
         return $this->extension_languages;
@@ -813,13 +827,14 @@ class ExtensionsApi
      * @param bool $force_enabled_off
      *
      * @void
+     * @throws \ReflectionException
      */
     public function loadEnabledExtensions($force_enabled_off = false)
     {
         /**
          * @var Registry
          */
-        $ext_controllers = $ext_models = $ext_languages = $ext_templates = $ext_libraries = [];
+        $ext_controllers = $ext_models = $ext_languages = $ext_templates = $ext_libraries = $ext_modules = [];
         $enabled_extensions = $hook_extensions = [];
 
         foreach ($this->db_extensions as $ext) {
@@ -837,10 +852,11 @@ class ExtensionsApi
                 //order for priority is already set here
                 $enabled_extensions[] = $ext;
                 $libraries = [];
-                $controllers = $languages = $models = $templates = array(
-                    'storefront' => array(),
-                    'admin'      => array(),
-                );
+                $modules = [];
+                $controllers = $languages = $models = $templates = [
+                    'storefront' => [],
+                    'admin'      => [],
+                ];
                 if (is_file(ABC::env('DIR_APP_EXTENSIONS').$ext.'/main.php')) {
                     /** @noinspection PhpIncludeInspection */
                     include(ABC::env('DIR_APP_EXTENSIONS').$ext.'/main.php');
@@ -850,6 +866,7 @@ class ExtensionsApi
                 $ext_languages[$ext] = $languages;
                 $ext_templates[$ext] = $templates;
                 $ext_libraries[$ext] = $libraries;
+                $ext_modules[$ext]   = $modules;
 
                 $class_alias = preg_replace('/[^a-zA-Z0-9]/', ' ', $ext);
                 $class_alias = ucwords($class_alias);
@@ -887,7 +904,10 @@ class ExtensionsApi
         ADebug::variable('List of templates used by extensions', $ext_templates);
 
         $this->setExtensionLibraries($ext_libraries);
-        ADebug::variable('List of templates used by extensions', $ext_templates);
+        ADebug::variable('List of libraries used by extensions', $ext_templates);
+
+        $this->setExtensionModules($ext_modules);
+        ADebug::variable('List of modules used by extensions', $ext_modules);
     }
 
     /**
@@ -914,10 +934,10 @@ class ExtensionsApi
         foreach ($this->extensions_dir as $ext) {
             $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
             if (is_file($f)) {
-                return array(
+                return [
                     'file'      => $f,
                     'extension' => $ext,
-                );
+                ];
             }
         }
 
@@ -977,7 +997,7 @@ class ExtensionsApi
 
         $section = trim($ext_section, '/');
         //list only enabled extensions or all depending on status flag
-        $extensions_lookup_list = array();
+        $extensions_lookup_list = [];
         if ($ext_status == 'enabled') {
             $extensions_lookup_list = $this->enabled_extensions;
         } else {
@@ -1004,11 +1024,11 @@ class ExtensionsApi
                     && in_array($route, $source[$ext][$section]))
             ) {
                 if (is_file($f)) {
-                    return array(
+                    return [
                         'file'      => $f,
                         'extension' => $ext,
                         'base_path' => $file,
-                    );
+                    ];
                 }
                 if ($resource_type == 'T') {
                     //check default template
@@ -1020,11 +1040,11 @@ class ExtensionsApi
                         .$route;
 
                     if (is_file($f)) {
-                        return array(
+                        return [
                             'file'      => $f,
                             'extension' => $ext,
                             'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route,
-                        );
+                        ];
                     }
                 }
             }
@@ -1035,10 +1055,10 @@ class ExtensionsApi
             foreach ($this->extensions_dir as $ext) {
                 $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
                 if (is_file($f)) {
-                    return array(
+                    return [
                         'file'      => $f,
                         'extension' => $ext,
-                    );
+                    ];
                 }
             }
         }
@@ -1062,7 +1082,8 @@ class ExtensionsApi
 
         $ext_section = (ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'));
 
-        $tmpl_id = ABC::env('IS_ADMIN') ? $this->registry->get('config')->get('admin_template')
+        $tmpl_id = ABC::env('IS_ADMIN')
+            ? $this->registry->get('config')->get('admin_template')
             : $this->registry->get('config')->get('config_storefront_template');
         $file = $ext_section.ABC::env('DIRNAME_TEMPLATES').$tmpl_id.'/'.$route;
         $source = $this->extension_templates;
@@ -1071,18 +1092,18 @@ class ExtensionsApi
 
         //list only enabled extensions
         $extensions_lookup_list = $this->enabled_extensions;
-        $output = array();
+        $output = [];
         foreach ($extensions_lookup_list as $ext) {
             //looking for active template tpl
             $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
-            $ext_tpls = is_array($source[$ext][$section]) ? $source[$ext][$section] : array();
+            $ext_tpls = is_array($source[$ext][$section]) ? $source[$ext][$section] : [];
             if (in_array($route, $ext_tpls)) {
                 if (is_file($f)) {
-                    $output[$ext] = array(
+                    $output[$ext] = [
                         'file'      => $f,
                         'extension' => $ext,
                         'base_path' => $file,
-                    );
+                    ];
                 }
                 //if active template tpl not found - looking for default
                 if (!isset($output[$ext])) {
@@ -1095,11 +1116,11 @@ class ExtensionsApi
                         .$route;
 
                     if (is_file($f)) {
-                        $output[] = array(
+                        $output[] = [
                             'file'      => $f,
                             'extension' => $ext,
                             'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route,
-                        );
+                        ];
                     }
                 }
             }
@@ -1148,13 +1169,13 @@ class ExtensionsApi
                         $method = 'main';
                     }
 
-                    return array(
+                    return [
                         'route'     => $path_build,
                         'extension' => $ext,
                         'file'      => $file,
                         'class'     => 'Controller'.preg_replace('/[^a-zA-Z0-9]/', '', $path_build),
                         'method'    => $method,
-                    );
+                    ];
                 }
             }
 
@@ -1250,7 +1271,7 @@ class ExtensionsApi
         array_shift($before_args);
         $args[] =& $before_args;
 
-        call_user_func_array(array($this->extensions, 'before'.$extension_method), $args);
+        call_user_func_array([$this->extensions, 'before'.$extension_method], $args);
         $args = $before_args;
         array_unshift($args, $baseObject);
 
@@ -1258,13 +1279,13 @@ class ExtensionsApi
         if (method_exists($baseObject, $method) || method_exists($baseObject, '__call')) {
 
             // callback surrounds the method execution
-            $can_run = call_user_func_array(array($this->extensions, 'around'.$extension_method), $args);
+            $can_run = call_user_func_array([$this->extensions, 'around'.$extension_method], $args);
 
             // method is allowed to run
             if ($can_run === true) {
                 $object_args = $args;
                 array_shift($object_args);
-                $return = call_user_func_array(array($baseObject, $method), $object_args);
+                $return = call_user_func_array([$baseObject, $method], $object_args);
 
                 // have replaced the method
             } elseif ($can_run !== false) {
@@ -1276,10 +1297,10 @@ class ExtensionsApi
             $on_args = $args;
             $on_args[] =& $return;
 
-            call_user_func_array(array($this->extensions, 'on'.$extension_method), $on_args);
+            call_user_func_array([$this->extensions, 'on'.$extension_method], $on_args);
         }
 
-        call_user_func_array(array($this->extensions, 'after'.$extension_method), $args);
+        call_user_func_array([$this->extensions, 'after'.$extension_method], $args);
 
         return $return;
     }
@@ -1310,15 +1331,17 @@ class ExtensionUtils
     /**
      * @var array
      */
-    protected $error = array();
+    protected $error = [];
     /**
      * @var array
      */
-    protected $tags = array();
+    protected $tags = [];
 
     /**
      * @param string $ext
-     * @param int    $store_id
+     * @param int $store_id
+     *
+     * @throws \ReflectionException
      */
     public function __construct($ext, $store_id = 0)
     {
@@ -1365,30 +1388,32 @@ class ExtensionUtils
 
         //load extensions resources
         $libraries = [];
-        $controllers = $languages = $models = $templates = array(
-            'storefront' => array(),
-            'admin'      => array(),
-        );
-        /** @noinspection PhpIncludeInspection */
-        include($filename);
-        $validate_resources = array(
+        $controllers = $languages = $models = $templates = [
+            'storefront' => [],
+            'admin'      => [],
+        ];
+
+        include_once $filename;
+        $validate_resources = [
             'controllers' => $controllers,
             'languages'   => $languages,
             'models'      => $models,
             'templates'   => $templates,
             'libraries'   => $libraries,
-        );
+        ];
 
         //extensions resources
-        $ext_resources = array(
-            'controllers' => $this->registry->get('extensions')->getExtensionControllers(),
-            'languages'   => $this->registry->get('extensions')->getExtensionLanguages(),
-            'models'      => $this->registry->get('extensions')->getExtensionModels(),
-            'templates'   => $this->registry->get('extensions')->getExtensionTemplates(),
-            'libraries'   => $this->registry->get('extensions')->getExtensionLibraries(),
-        );
+        $extObj = $this->registry->get('extensions');
+        $ext_resources = [
+            'controllers' => $extObj->getExtensionControllers(),
+            'languages'   => $extObj->getExtensionLanguages(),
+            'models'      => $extObj->getExtensionModels(),
+            'templates'   => $extObj->getExtensionTemplates(),
+            'libraries'   => $extObj->getExtensionLibraries(),
+            'modules'     => $extObj->getExtensionModules(),
+        ];
 
-        $conflict_resources = array();
+        $conflict_resources = [];
 
         foreach ($validate_resources as $resource_type => $resources) {
             if (empty($resources)) {
@@ -1439,8 +1464,8 @@ class ExtensionUtils
     {
         $this->registry->get('load')->model('setting/setting');
         $settings = $this->registry->get('model_setting_setting')->getSetting($this->name, $this->store_id);
-        $result = array();
-        $this->registry->get('session')->data['extension_required_fields'] = array();
+        $result = [];
+        $this->registry->get('session')->data['extension_required_fields'] = [];
         //add other settings items
         if (isset($this->config->settings->item)) {
             $i = 0;
@@ -1456,7 +1481,7 @@ class ExtensionUtils
                 if (AHelperUtils::is_serialized($value)) {
                     $value = unserialize($value);
                 }
-                $result[$i] = array(
+                $result[$i] = [
                     'name'          => (string)$true_item_id,
                     'value'         => $value,
                     'type'          => (string)$item->type,
@@ -1468,7 +1493,7 @@ class ExtensionUtils
                     'field1'        => (string)$item->variants->fields->field[0],
                     'field2'        => (string)$item->variants->fields->field[1],
                     'template'      => (string)$item->template,
-                );
+                ];
                 // if just static option values are used
                 if ($item->variants->item) {
                     foreach ($item->variants->item as $k) {
@@ -1506,7 +1531,7 @@ class ExtensionUtils
      * @return array - array of 2 elements: result and array - item_ids list that not valid
      * @throws AException
      */
-    public function validateSettings($data = array())
+    public function validateSettings($data = [])
     {
         // if values not set or we change only status of extension
         if (!$data
@@ -1521,7 +1546,7 @@ class ExtensionUtils
         //1. check is all required fields are set
         $result = $this->checkRequiredSettings($data);
         if (!$result) {
-            return array('result' => false);
+            return ['result' => false];
         }
 
         //2. is data valid?
@@ -1540,20 +1565,20 @@ class ExtensionUtils
                     }
                 }
                 if ((string)$item->pattern_validate) {
-                    $matches = array();
+                    $matches = [];
                     $pattern = trim(trim((string)$item->pattern_validate), '/');
                     $pattern = '/'.$pattern.'/';
                     //is pattern valid?
                     if (preg_match($pattern, $value, $matches) === false) {
-                        return array(
+                        return [
                             'result' => false,
-                            'errors' => array(
+                            'errors' => [
                                 'pattern' => 'Regex pattern for field "'.(string)$item['id'].'" is not valid.',
-                            ),
-                        );
+                            ],
+                        ];
                     } else {
                         if (!$matches) {
-                            return array('result' => false, 'errors' => array((string)$item['id'] => ''));
+                            return ['result' => false, 'errors' => [(string)$item['id'] => '']];
                         }
                     }
                 }
@@ -1570,20 +1595,20 @@ class ExtensionUtils
             if (function_exists('settingsValidation')) {
                 $result = call_user_func('settingsValidation', $data);
                 if (!isset($result['result']) || !isset($result['errors']) || !is_array($result['errors'])) {
-                    return array(
+                    return [
                         'result' => false,
-                        'errors' => array(
+                        'errors' => [
                             'pattern' => 'Error: Cannot to validate data by validate.php file. '
                                 .'Function returns incorrect formatted data.',
-                        ),
-                    );
+                        ],
+                    ];
                 }
 
                 return $result;
             }
         }
 
-        return array('result' => true);
+        return ['result' => true];
     }
 
     /**
@@ -1591,7 +1616,7 @@ class ExtensionUtils
      *
      * @return bool
      */
-    public function checkRequiredSettings($data = array())
+    public function checkRequiredSettings($data = [])
     {
 
         if (isset($this->config->settings->item)) {
@@ -1627,18 +1652,19 @@ class ExtensionUtils
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
     public function getDefaultSettings()
     {
 
-        $result = array();
+        $result = [];
         if (isset($this->config->settings->item)) {
             foreach ($this->config->settings->item as $item) {
                 if ((string)$item['id'] == $this->name.'_status') {
                     continue;
                 }
 
-                if (in_array((string)$item->type, array('checkboxgroup', 'multiselectbox'))) {
+                if (in_array((string)$item->type, ['checkboxgroup', 'multiselectbox'])) {
                     $value = (string)$item->default_value;
                 } else {
                     $value = $this->registry->get('html')->convertLinks(htmlentities((string)$item->default_value,

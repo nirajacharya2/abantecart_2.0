@@ -21,12 +21,15 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
+use abc\core\lib\CheckOut;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
+/**
+ * Class ControllerPagesCheckoutShipping
+ *
+ * @package abc\controllers\storefront
+ *
+ * @property Checkout $checkout
+ */
 class ControllerPagesCheckoutShipping extends AController
 {
     public $error = array();
@@ -56,6 +59,7 @@ class ControllerPagesCheckoutShipping extends AController
 
             $shipping = explode('.', $this->request->post['shipping_method']);
             $this->session->data['shipping_method'] = $this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]];
+            $this->checkout->setShippingMethod($this->session->data['shipping_method']);
             $this->session->data['comment'] = strip_tags($this->request->post['comment']);
 
             //process data
@@ -87,13 +91,14 @@ class ControllerPagesCheckoutShipping extends AController
         //If no shipping address is set yet, use default
         if (!isset($this->session->data['shipping_address_id'])) {
             $this->session->data['shipping_address_id'] = $this->customer->getAddressId();
+
         }
 
         //still missing address, go to address selection page
         if (!$this->session->data['shipping_address_id']) {
             abc_redirect($this->html->getSecureURL($address_rt));
         }
-
+        $this->checkout->setShippingAddress($this->session->data['shipping_address_id']);
         $this->loadModel('account/address');
         $shipping_address = $this->model_account_address->getAddress($this->session->data['shipping_address_id']);
 
@@ -110,57 +115,22 @@ class ControllerPagesCheckoutShipping extends AController
             $this->tax->setZone($address['country_id'], $address['zone_id']);
         }
 
-        $this->loadModel('checkout/extension');
 
         if (!isset($this->session->data['shipping_methods']) || !$this->config->get('config_shipping_session')) {
-            $quote_data = array();
-
-            $results = $this->model_checkout_extension->getExtensions('shipping');
-            foreach ($results as $result) {
-                $this->loadModel('extension/'.$result['key']);
-
-                /** @noinspection PhpUndefinedMethodInspection */
-                $quote = $this->{'model_extension_'.$result['key']}->getQuote($shipping_address);
-
-                if ($quote) {
-                    $quote_data[$result['key']] = array(
-                        'title'      => $quote['title'],
-                        'quote'      => $quote['quote'],
-                        'sort_order' => $quote['sort_order'],
-                        'error'      => $quote['error'],
-                    );
-                    //# Add storefront icon if available
-                    $ext_setgs = $this->model_checkout_extension->getSettings($result['key']);
-                    $icon = $ext_setgs[$result['key']."_shipping_storefront_icon"];
-                    if (AHelperUtils::has_value($icon)) {
-                        $icon_data = $this->model_checkout_extension->getSettingImage($icon);
-                        $icon_data['image'] = $icon;
-                        $quote_data[$result['key']]['icon'] = $icon_data;
-                    }
-                }
-            }
-
-            $sort_order = array();
-            foreach ($quote_data as $key => $value) {
-                $sort_order[$key] = $value['sort_order'];
-            }
-
-            array_multisort($sort_order, SORT_ASC, $quote_data);
-            $this->session->data['shipping_methods'] = $quote_data;
+            $shipping_methods = $this->checkout->getShippingList();
+            $this->session->data['shipping_methods'] = $shipping_methods;
         }
 
-        //# If only 1 shipping and it is set to be defaulted, select and skip and redirect to paymnet
-        if (count($this->session->data['shipping_methods']) == 1 && $this->request->get['mode'] != 'edit') {
+        //# If only 1 shipping and it is set to be defaulted, select and skip and redirect to payment
+        if (count((array)$this->session->data['shipping_methods']) == 1 && $this->request->get['mode'] != 'edit') {
             //set only method
-            $only_method = $this->session->data['shipping_methods'];
+            $only_method = (array)$this->session->data['shipping_methods'];
             foreach ($only_method as $key => $value) {
-                $method_name = $key;
                 #Check config if we allowed to set this shipping and skip the step
-                $ext_config = $this->model_checkout_extension->getSettings($method_name);
-                $autoselect = $ext_config[$method_name."_autoselect"];
+                $autoselect = $only_method[$key]['settings'][$key."_autoselect"];
                 if ($autoselect) {
-                    if (sizeof($only_method[$method_name]['quote']) == 1) {
-                        $this->session->data['shipping_method'] = current($only_method[$method_name]['quote']);
+                    if (sizeof($only_method[$key]['quote']) == 1) {
+                        $this->session->data['shipping_method'] = current($only_method[$key]['quote']);
                         abc_redirect($this->html->getSecureURL($payment_rt, "&back=cart"));
                     }
                 }
@@ -168,7 +138,6 @@ class ControllerPagesCheckoutShipping extends AController
         }
 
         $this->document->setTitle($this->language->get('heading_title'));
-
         $this->document->resetBreadcrumbs();
 
         $this->document->addBreadcrumb(
@@ -198,7 +167,10 @@ class ControllerPagesCheckoutShipping extends AController
             $this->data['error_warning'] = $this->language->get('error_no_shipping');
         }
 
-        $this->data['address'] = $this->customer->getFormattedAddress($shipping_address, $shipping_address['address_format']);
+        $this->data['address'] = $this->customer->getFormattedAddress(
+                                                                    $shipping_address,
+                                                                    $shipping_address['address_format']
+        );
 
         $item = $this->html->buildElement(
             array(
@@ -221,7 +193,10 @@ class ControllerPagesCheckoutShipping extends AController
             )
         );
 
-        $this->data['shipping_methods'] = $this->session->data['shipping_methods'] ? $this->session->data['shipping_methods'] : array();
+        $this->data['shipping_methods'] = $this->session->data['shipping_methods']
+                                          ? $this->session->data['shipping_methods']
+                                          : [];
+
         $shipping = $this->session->data['shipping_method']['id'];
         if ($this->data['shipping_methods']) {
             foreach ($this->data['shipping_methods'] as $k => $v) {
@@ -252,7 +227,9 @@ class ControllerPagesCheckoutShipping extends AController
             $this->data['shipping_methods'] = array();
         }
 
-        $this->data['comment'] = isset($this->request->post['comment']) ? $this->request->post['comment'] : $this->session->data['comment'];
+        $this->data['comment'] = isset($this->request->post['comment'])
+                                ? $this->request->post['comment']
+                                : $this->session->data['comment'];
         $this->data['form']['comment'] = $form->getFieldHtml(
             array(
                 'type'  => 'textarea',

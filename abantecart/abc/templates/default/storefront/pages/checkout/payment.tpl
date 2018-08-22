@@ -74,7 +74,7 @@
 	<?php echo $form['form_open']; ?>
 
 	<?php
-	//nopayment needed if full balance is used
+	//no payment needed if full balance is used
 	if (!$used_balance_full){
 		?>
 		<?php if ($payment_methods){ ?>
@@ -89,7 +89,7 @@
 							<td><label for="payment_payment_method<?php echo $payment_method['id']; ?>"
 							           style="cursor: pointer;">
 									<?php $icon = $payment_method['icon'];
-									if (count($icon)){ ?>
+									if ($icon){ ?>
 										<?php if (is_file(ABC::env('DIR_RESOURCES') . $icon['image'])){ ?>
 											<span class="payment_icon mr10"><img
 														src="resources/<?php echo $icon['image']; ?>"

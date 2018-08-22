@@ -41,7 +41,7 @@ use abc\core\helper\AHelperUtils;
  * @property AIM                                           $im
  *
  */
-class AOrder extends \ALibBase
+class AOrder extends ALibBase
 {
     /**
      * @var \abc\core\engine\Registry
@@ -63,7 +63,7 @@ class AOrder extends \ALibBase
     /**
      * @var array public property. needs to use inside hooks
      */
-    public $data = array();
+    public $data = [];
 
     /**
      * AOrder constructor.
@@ -133,18 +133,18 @@ class AOrder extends \ALibBase
      */
     public function buildOrderData($indata)
     {
-        $order_info = array();
+        $order_info = [];
         if (empty($indata)) {
-            return array();
+            return [];
         }
 
-        $total_data = array();
+        $total_data = [];
         $total = 0;
         $taxes = $this->cart->getTaxes();
 
         $this->load->model('checkout/extension');
 
-        $sort_order = array();
+        $sort_order = [];
 
         $results = $this->model_checkout_extension->getExtensions('total');
 
@@ -159,7 +159,7 @@ class AOrder extends \ALibBase
             $this->{'model_total_'.$result['key']}->getTotal($total_data, $total, $taxes, $indata);
         }
 
-        $sort_order = array();
+        $sort_order = [];
 
         foreach ($total_data as $key => $value) {
             $sort_order[$key] = $value['sort_order'];
@@ -310,7 +310,7 @@ class AOrder extends \ALibBase
                 $order_info['payment_address_format'] = $indata['guest']['address_format'];
 
             } else {
-                return array();
+                return [];
             }
         }
 
@@ -331,10 +331,10 @@ class AOrder extends \ALibBase
             $order_info['payment_method'] = '';
         }
 
-        $product_data = array();
+        $product_data = [];
 
         foreach ($this->cart->getProducts() as $key => $product) {
-            $product_data[] = array(
+            $product_data[] = [
                 'key'        => $key,
                 'product_id' => $product['product_id'],
                 'name'       => $product['name'],
@@ -347,7 +347,7 @@ class AOrder extends \ALibBase
                 'total'      => $product['total'],
                 'tax'        => $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']),
                 'stock'      => $product['stock'],
-            );
+            ];
         }
 
         $order_info['products'] = $product_data;

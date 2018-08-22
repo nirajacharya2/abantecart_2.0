@@ -26,11 +26,6 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
-use ALibBase;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ACart
@@ -58,11 +53,11 @@ class ACart  extends ALibBase
      * @var ALanguage
      */
     protected $language;
-    protected $cart_data = array();
+    protected $cart_data = [];
     /**
      * @var array
      */
-    protected $cust_data = array();
+    protected $cust_data = [];
     /**
      * @var float
      */
@@ -70,7 +65,7 @@ class ACart  extends ALibBase
     /**
      * @var array
      */
-    protected $taxes = array();
+    protected $taxes = [];
     /**
      * @var float
      */
@@ -100,7 +95,6 @@ class ACart  extends ALibBase
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
      *
-     * @throws \ReflectionException
      */
     public function __construct($registry, &$c_data = null)
     {
@@ -120,7 +114,7 @@ class ACart  extends ALibBase
         $this->promotion = ABC::getObjectByAlias('APromotion',[$this->cust_data['customer_group_id']]);
 
         if (!isset($this->cust_data['cart']) || !is_array($this->cust_data['cart'])) {
-            $this->cust_data['cart'] = array();
+            $this->cust_data['cart'] = [];
         }
     }
 
@@ -150,6 +144,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return array
+     * @throws AException
      */
     public function getProducts($recalculate = false)
     {
@@ -158,7 +153,7 @@ class ACart  extends ALibBase
             return $this->cart_data;
         }
 
-        $product_data = array();
+        $product_data = [];
         //process data in the cart session per each product in the cart
         foreach ($this->cust_data['cart'] as $key => $data) {
             if ($key == 'virtual') {
@@ -171,7 +166,7 @@ class ACart  extends ALibBase
             if (isset($data['options'])) {
                 $options = (array)$data['options'];
             } else {
-                $options = array();
+                $options = [];
             }
 
             $product_result = $this->buildProductDetails($product_id, $quantity, $options);
@@ -203,16 +198,17 @@ class ACart  extends ALibBase
 
     /**
      * @param string $key
-     * @param bool   $recalculate
+     * @param bool $recalculate
      *
      * @return array
+     * @throws AException
      */
     public function getProduct($key, $recalculate = false)
     {
         if ($recalculate) {
             $this->getProducts(true);
         }
-        return AHelperUtils::has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : array();
+        return AHelperUtils::has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : [];
     }
 
     /**
@@ -227,14 +223,14 @@ class ACart  extends ALibBase
      * @return array
      * @throws AException
      */
-    public function buildProductDetails($product_id, $quantity = 0, $options = array())
+    public function buildProductDetails($product_id, $quantity = 0, $options = [])
     {
 
         if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
-            return array();
+            return [];
         }
 
-        $options = !is_array($options) ? array() : $options;
+        $options = !is_array($options) ? [] : $options;
 
         $stock = true;
         /**
@@ -245,7 +241,7 @@ class ACart  extends ALibBase
 
         $product_query = $sf_product_mdl->getProductDataForCart($product_id);
         if (count($product_query) <= 0 || $product_query['call_to_order']) {
-            return array();
+            return [];
         }
 
         $stock_checkout = $product_query['stock_checkout'];
@@ -254,8 +250,8 @@ class ACart  extends ALibBase
         }
 
         $option_price = 0;
-        $option_data = array();
-        $groups = array();
+        $option_data = [];
+        $groups = [];
         $op_stock_trackable = 0;
         //Process each option and value
         foreach ($options as $product_option_id => $product_option_value_id) {
@@ -266,8 +262,8 @@ class ACart  extends ALibBase
 
             $option_query = $sf_product_mdl->getProductOption($product_id, $product_option_id);
             $element_type = $option_query['element_type'];
-            $option_value_query = array();
-            $option_value_queries = array();
+            $option_value_query = [];
+            $option_value_queries = [];
 
             if (!in_array($element_type, $elements_with_options)) {
                 //This is single value element, get all values and expect only one
@@ -296,7 +292,7 @@ class ACart  extends ALibBase
                     $option_value_query['price'] = $group_value_query['price'];
                     $groups[] = $option_value_query['group_id'];
                 }
-                $option_data[] = array(
+                $option_data[] = [
                     'product_option_value_id' => $option_value_query['product_option_value_id'],
                     'product_option_id'       => $product_option_id,
                     'name'                    => $option_query['name'],
@@ -311,7 +307,7 @@ class ACart  extends ALibBase
                     ),
                     'weight'                  => $option_value_query['weight'],
                     'weight_type'             => $option_value_query['weight_type'],
-                );
+                ];
 
                 //check if need to track stock and we have it
                 if ($option_value_query['subtract']
@@ -325,7 +321,7 @@ class ACart  extends ALibBase
             } else {
                 if ($option_value_queries) {
                     foreach ($option_value_queries as $item) {
-                        $option_data[] = array(
+                        $option_data[] = [
                             'product_option_value_id' => $item['product_option_value_id'],
                             'name'                    => $option_query['name'],
                             'value'                   => $item['name'],
@@ -335,7 +331,7 @@ class ACart  extends ALibBase
                             'inventory_quantity'      => ($item['subtract'] ? (int)$item['quantity'] : 1000000),
                             'weight'                  => $item['weight'],
                             'weight_type'             => $item['weight_type'],
-                        );
+                        ];
                         //check if need to track stock and we have it
                         if ($item['subtract'] && $item['quantity'] < $quantity) {
                             $stock = false;
@@ -397,7 +393,7 @@ class ACart  extends ALibBase
             $stock = false;
         }
 
-        $result = array(
+        $result = [
             'product_id'         => $product_query['product_id'],
             'name'               => $product_query['name'],
             'model'              => $product_query['model'],
@@ -422,16 +418,18 @@ class ACart  extends ALibBase
             'shipping_price'     => $product_query['shipping_price'],
             'free_shipping'      => $product_query['free_shipping'],
             'sku'                => $product_query['sku'],
-        );
+        ];
         return $result;
     }
 
     /**
-     * @param int   $product_id
-     * @param int   $qty
+     * @param int $product_id
+     * @param int $qty
      * @param array $options
+     *
+     * @throws AException
      */
-    public function add($product_id, $qty = 1, $options = array())
+    public function add($product_id, $qty = 1, $options = [])
     {
         $product_id = (int)$product_id;
         if (!$options) {
@@ -473,7 +471,7 @@ class ACart  extends ALibBase
         }
 
         if (!isset($this->cust_data['cart']['virtual']) || !is_array($this->cust_data['cart']['virtual'])) {
-            $this->cust_data['cart']['virtual'] = array();
+            $this->cust_data['cart']['virtual'] = [];
         }
 
         $this->cust_data['cart']['virtual'][$key] = $data;
@@ -503,7 +501,9 @@ class ACart  extends ALibBase
 
     /**
      * @param string $key
-     * @param int    $qty
+     * @param int $qty
+     *
+     * @throws AException
      */
     public function update($key, $qty)
     {
@@ -541,7 +541,7 @@ class ACart  extends ALibBase
 
     public function clear()
     {
-        $this->cust_data['cart'] = array();
+        $this->cust_data['cart'] = [];
     }
 
     /**
@@ -550,8 +550,9 @@ class ACart  extends ALibBase
      * @param array $product_ids
      *
      * @return int
+     * @throws AException
      */
-    public function getWeight($product_ids = array())
+    public function getWeight($product_ids = [])
     {
         $weight = 0;
         $products = $this->getProducts();
@@ -598,10 +599,11 @@ class ACart  extends ALibBase
      * Products with no special settings for shipping
      *
      * @return array
+     * @throws AException
      */
     public function basicShippingProducts()
     {
-        $basic_ship_products = array();
+        $basic_ship_products = [];
         $products = $this->getProducts();
         foreach ($products as $product) {
             if ($product['shipping'] && !$product['ship_individually'] && !$product['free_shipping']
@@ -616,10 +618,11 @@ class ACart  extends ALibBase
      * Products with special settings for shipping
      *
      * @return array
+     * @throws AException
      */
     public function specialShippingProducts()
     {
-        $special_ship_products = array();
+        $special_ship_products = [];
         $products = $this->getProducts();
         foreach ($products as $product) {
             if ($product['shipping']
@@ -635,6 +638,7 @@ class ACart  extends ALibBase
      * Check if all products are free shipping
      *
      * @return bool
+     * @throws AException
      */
     public function areAllFreeShipping()
     {
@@ -691,6 +695,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return float
+     * @throws AException
      */
     public function getSubTotal($recalculate = false)
     {
@@ -724,6 +729,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return array
+     * @throws AException
      */
     public function getAppliedTaxes($recalculate = false)
     {
@@ -735,7 +741,7 @@ class ACart  extends ALibBase
         //round base currency price calculation to 2 decimal place
         $decimal_place = 2;
 
-        $this->taxes = array();
+        $this->taxes = [];
         // taxes for products
         $products = $this->getProducts();
         foreach ($products as $product) {
@@ -777,6 +783,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return float
+     * @throws AException
      */
     public function getTotal($recalculate = false)
     {
@@ -787,8 +794,8 @@ class ACart  extends ALibBase
         $this->total_value = 0.0;
         $products = $this->getProducts();
         foreach ($products as $product) {
-            $this->total_value += $product['total'] + $this->tax->calcTotalTaxAmount($product['total'],
-                    $product['tax_class_id']);
+            $this->total_value +=
+                $product['total'] + $this->tax->calcTotalTaxAmount( $product['total'], $product['tax_class_id'] );
         }
         return $this->total_value;
     }
@@ -800,6 +807,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return float
+     * @throws AException
      */
     public function getFinalTotal($recalculate = false)
     {
@@ -809,10 +817,10 @@ class ACart  extends ALibBase
             return $this->final_total;
         }
         $this->final_total = 0.0;
-        $this->total_data = array();
+        $this->total_data = [];
 
-        $total_data = array();
-        $calc_order = array();
+        $total_data = [];
+        $calc_order = [];
         $total = 0.0;
 
         //if cart is empty, nothing to do.
@@ -859,6 +867,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return mixed
+     * @throws AException
      */
     public function getFinalTotalData($recalculate = false)
     {
@@ -880,6 +889,7 @@ class ACart  extends ALibBase
      * @param bool $recalculate
      *
      * @return array
+     * @throws AException
      */
     public function buildTotalDisplay($recalculate = false)
     {
@@ -888,19 +898,35 @@ class ACart  extends ALibBase
         $total = $this->getFinalTotal($recalculate);
         $total_data = $this->getFinalTotalData();
         //sort data for view
-        $sort_order = array();
+        $sort_order = [];
         foreach ($total_data as $key => $value) {
             $sort_order[$key] = $value['sort_order'];
         }
         array_multisort($sort_order, SORT_ASC, $total_data);
         //return result in array
-        return array('total' => $total, 'total_data' => $total_data, 'taxes' => $taxes);
+        return [
+            'total' => $total,
+            'total_data' => $total_data,
+            'taxes' => $taxes
+        ];
+    }
+
+    /**
+     * @param bool $recalc
+     *
+     * @return float
+     * @throws AException
+     */
+    public function getTotalAmount($recalc = false)
+    {
+        return $this->buildTotalDisplay($recalc)['total'];
     }
 
     /**
      * Check if order/cart total has minimum amount setting met if it was set
      *
      * @return bool
+     * @throws AException
      */
     public function hasMinRequirement()
     {
@@ -915,6 +941,7 @@ class ACart  extends ALibBase
      * Check if order/cart total has maximum amount setting met if it was set
      *
      * @return bool
+     * @throws AException
      */
     public function hasMaxRequirement()
     {
@@ -953,6 +980,7 @@ class ACart  extends ALibBase
      * Return TRUE if all products have stock
      *
      * @return bool
+     * @throws AException
      */
     public function hasStock()
     {
@@ -970,6 +998,7 @@ class ACart  extends ALibBase
      * Return FALSE if all products do NOT require shipping
      *
      * @return bool
+     * @throws AException
      */
     public function hasShipping()
     {
@@ -988,6 +1017,7 @@ class ACart  extends ALibBase
      * Return FALSE if all products do NOT have download type
      *
      * @return bool
+     * @throws AException
      */
     public function hasDownload()
     {

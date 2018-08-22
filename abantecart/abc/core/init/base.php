@@ -57,6 +57,8 @@ $class_list = [
         'file',
         'download',
         'customer',
+        'checkoutBase',
+        'checkout',
         'order',
         'order_status',
         'currency',

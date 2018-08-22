@@ -25,63 +25,37 @@ class ControllerResponsesExtensionCodPayment extends AController
 {
     public function main()
     {
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $back_rt = $this->request->get['rt'] == 'checkout/guest_step_3' ? 'checkout/guest_step_2' : 'checkout/payment';
         $item = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'back',
                 'style' => 'button',
+                'href'  => $this->html->getSecureURL($back_rt, '&mode=edit', true),
                 'text'  => $this->language->get('button_back'),
-            ));
+            ]
+        );
         $this->view->assign('button_back', $item);
 
         $item = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'checkout',
                 'style' => 'button btn-primary',
                 'text'  => $this->language->get('button_confirm'),
-            ));
+            ]
+        );
         $this->view->assign('button_confirm', $item);
-
-        $this->view->assign('continue', $this->html->getSecureURL('checkout/success'));
-
-        if ($this->request->get['rt'] == 'checkout/guest_step_3') {
-            $this->view->assign('back', $this->html->getSecureURL('checkout/guest_step_2', '&mode=edit', true));
-        } else {
-            $this->view->assign('back', $this->html->getSecureURL('checkout/payment', '&mode=edit', true));
-        }
+        $this->view->assign('continue_url', $this->html->getSecureURL('checkout/success'));
+        $this->view->assign(
+            'confirm_url',
+            $this->html->getSecureURL('checkout/process/confirm', '&extension=default_cod&action=confirm')
+        );
 
         $this->processTemplate('responses/cod_payment.tpl');
-    }
 
-    public function api()
-    {
-        $data = array();
-
-        $data['text_note'] = $this->language->get('text_note');
-        $data['process_rt'] = 'cod_payment/api_confirm';
-
-        $this->load->library('json');
-        $this->response->setOutput(AJson::encode($data));
-    }
-
-    public function api_confirm()
-    {
-        $data = array();
-
-        $this->confirm();
-        $data['success'] = 'completed';
-
-        $this->load->library('json');
-        $this->response->setOutput(AJson::encode($data));
-    }
-
-    public function confirm()
-    {
-        $this->load->model('checkout/order');
-        $this->model_checkout_order->confirm(
-            $this->session->data['order_id'],
-            $this->config->get('cod_payment_order_status_id')
-        );
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 }

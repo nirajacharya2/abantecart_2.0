@@ -16,32 +16,38 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\extensions\cod_payment\modules\PaymentHandler;
 
-$controllers = array(
-    'storefront' => array('responses/extension/cod_payment'),
-    'admin'      => array(),
-);
+require_once __DIR__.DS.'modules'.DS.'handler.php';
 
-$models = array(
-    'storefront' => array('extension/cod_payment'),
-    'admin'      => array(),
-);
 
-$languages = array(
-    'storefront' => array(
+$controllers = [
+    'storefront' => ['responses/extension/cod_payment'],
+    'admin'      => [],
+];
+
+$models = [
+    'storefront' => ['extension/cod_payment'],
+    'admin'      => [],
+];
+
+$languages = [
+    'storefront' => [
         'cod_payment/cod_payment',
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'cod_payment/cod_payment',
-    ),
-);
+    ],
+];
 
-$templates = array(
-    'storefront' => array(
+$templates = [
+    'storefront' => [
         'responses/cod_payment.tpl',
-    ),
-    'admin'      => array(),
-);
+    ],
+    'admin'      => [],
+];
+$modules = [
+    'handlers' => [
+            'payment' => PaymentHandler::class
+    ]
+];

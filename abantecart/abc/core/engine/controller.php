@@ -27,10 +27,6 @@ use abc\core\lib\{
     AConfig, AWarning
 };
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
@@ -112,6 +108,7 @@ if (!class_exists('abc\core\ABC')) {
  * @property \abc\core\lib\AOrderStatus $order_status
  * @property \abc\core\lib\AIMManager $im
  * @property \abc\core\lib\CSRFToken $csrftoken
+ * @property \abc\core\lib\Checkout | \abc\core\lib\CheckoutBase $checkout
  */
 abstract class AController
 {
@@ -180,7 +177,7 @@ abstract class AController
     {
         if (isset($this->language)) {
             //clean up the scope
-            $this->language->set_language_scope(array());
+            $this->language->set_language_scope([]);
         }
         $this->clear();
     }
@@ -206,11 +203,11 @@ abstract class AController
     }
 
     //function to get html cache key
-    public function buildHTMLCacheKey($allowed_params = array(), $values = array(), $controller = '')
+    public function buildHTMLCacheKey($allowed_params = [], $values = [], $controller = '')
     {
         //build HTML cache key
         //build cache string based on allowed params
-        $cache_params = array();
+        $cache_params = [];
         if (is_array($allowed_params) && $allowed_params) {
             sort($allowed_params);
             foreach ($allowed_params as $key) {
@@ -222,14 +219,14 @@ abstract class AController
         //build unique key based on params
         $param_string = md5($this->cache->paramsToString($cache_params));
         //build HTML cache path
-        $cache_state_vars = array(
+        $cache_state_vars = [
             'template'      => $this->config->get('config_storefront_template'),
             'store_id'      => $this->config->get('config_store_id'),
             'language_id'   => $this->language->getLanguageID(),
             'currency_code' => $this->currency->getCode(),
             //in case with shared ssl-domain
             'https'         => (ABC::env('HTTPS') ? 1 : 0),
-        );
+        ];
         if (is_object($this->customer)) {
             $cache_state_vars['customer_group_id'] = $this->customer->getCustomerGroupId();
         }
@@ -260,7 +257,7 @@ abstract class AController
     {
         //check if requested controller allows HTML caching
         //use dispatcher to get class and details
-        $ds = new ADispatcher($controller, array("instance_id" => "0"));
+        $ds = new ADispatcher($controller, ["instance_id" => "0"]);
         $rt_class = $ds->getClass();
         $rt_file = $ds->getFile();
         $rt_method = $ds->getMethod();
@@ -329,7 +326,7 @@ abstract class AController
     }
 
     // Dispatch new controller to be ran
-    protected function dispatch($dispatch_rt, $args = array(''))
+    protected function dispatch($dispatch_rt, $args = [''])
     {
         return new ADispatcher($dispatch_rt, $args);
     }
@@ -358,7 +355,7 @@ abstract class AController
 
     public function getChildrenBlocks()
     {
-        $blocks = array();
+        $blocks = [];
         // Look into all blocks that are loaded from layout database or have position set for them
         // Hardcoded children with blocks require manual inclusion to the templates.
         foreach ($this->children as $block) {
@@ -385,7 +382,7 @@ abstract class AController
     public function addChild($new_controller, $block_text_id, $new_template = '', $template_position = '')
     {
         // append child to the controller children list
-        $new_block = array();
+        $new_block = [];
         $new_block['parent_instance_id'] = $this->instance_id;
         $new_block['instance_id'] = $block_text_id.$this->instance_id;
         $new_block['block_id'] = $block_text_id;
@@ -446,7 +443,7 @@ abstract class AController
                 ) {
 
                     $block_details = $this->layout->getBlockDetails($this->instance_id);
-                    $excluded_blocks = array('common/head');
+                    $excluded_blocks = ['common/head'];
 
                     if (!empty($this->instance_id) && (string)$this->instance_id != '0'
                         && !in_array($block_details['controller'],
@@ -458,16 +455,16 @@ abstract class AController
                             $tmp_dir = $this->parent_controller->view->data['template_dir']."/";
                             $block_tpl_file = $tmp_dir.$this->view->getTemplate();
                             $prt_block_tpl_file = $tmp_dir.$this->parent_controller->view->getTemplate();
-                            $args = array(
+                            $args = [
                                 'block_id'          => $this->instance_id,
                                 'block_controller'  => $this->dispatcher->getFile(),
                                 'block_tpl'         => $block_tpl_file,
                                 'parent_id'         => $this->parent_controller->instance_id,
                                 'parent_controller' => $this->parent_controller->dispatcher->getFile(),
                                 'parent_tpl'        => $prt_block_tpl_file,
-                            );
+                            ];
                             $debug_wrapper = $this->dispatch('common/template_debug',
-                                array('instance_id' => $this->instance_id, 'details' => $args));
+                                ['instance_id' => $this->instance_id, 'details' => $args]);
                             $debug_output = $debug_wrapper->dispatchGetOutput();
                             $output = trim($this->view->getOutput());
                             if (!empty($output)) {

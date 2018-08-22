@@ -4,7 +4,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\AConfig;
 use abc\core\lib\AExtensionManager;
 
-$lib_list = array(
+$lib_list = [
     'order_manager',
     'layout_manager',
     'content_manager',
@@ -21,7 +21,8 @@ $lib_list = array(
     'admin_commands',
     'im_manager',
     'asset_publisher',
-);
+    'checkoutAdmin',
+];
 //load admin libraries
 $dir_lib = ABC::env('DIR_LIB');
 foreach ($lib_list as $lib_name) {

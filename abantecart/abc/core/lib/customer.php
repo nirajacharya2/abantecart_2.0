@@ -21,11 +21,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
-use ALibBase;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ACustomer
@@ -116,7 +111,7 @@ class ACustomer extends ALibBase
     /**
      * @var array (unauthenticated customer details)
      */
-    protected $unauth_customer = array();
+    protected $unauth_customer = [];
 
     /**
      * @param  \abc\core\engine\Registry $registry
@@ -158,7 +153,7 @@ class ACustomer extends ALibBase
                 || !$this->isValidEnabledCustomer()
             ) {
                 //clean up
-                $this->unauth_customer = array();
+                $this->unauth_customer = [];
                 //expire unauth cookie
                 unset($_COOKIE['customer']);
                 setcookie('customer', '', time() - 3600, dirname($this->request->server['PHP_SELF']));
@@ -240,11 +235,11 @@ class ACustomer extends ALibBase
 
             //set cookie for unauthenticated user (expire in 1 year)
             $encryption = new AEncryption($this->config->get('encryption_key'));
-            $customer_data = $encryption->encrypt(serialize(array(
+            $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
                 'customer_id' => $this->customer_id,
                 'script_name' => $this->request->server['SCRIPT_NAME'],
-            )));
+            ]));
             //Set cookie for this customer to track unauthenticated activity, expire in 1 year
             setcookie('customer',
                 $customer_data,
@@ -503,7 +498,7 @@ class ACustomer extends ALibBase
      *
      * @return string
      */
-    public function getFormattedAddress($data_array, $format = '', $locate = array())
+    public function getFormattedAddress($data_array, $format = '', $locate = [])
     {
         $data_array = (array)$data_array;
         // Set default format
@@ -518,16 +513,16 @@ class ACustomer extends ALibBase
         }
         //Set default variable to be set for address based on the data
         if (count($locate) <= 0) {
-            $locate = array();
+            $locate = [];
             foreach ($data_array as $key => $value) {
                 $locate[] = "{".$key."}";
             }
         }
 
         return str_replace(
-            array("\r\n", "\r", "\n"),
+            ["\r\n", "\r", "\n"],
             '<br />',
-            preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"),
+            preg_replace(["/\s\s+/", "/\r\r+/", "/\n\n+/"],
                 '<br />',
                 trim(str_replace($locate, $data_array, $format)))
         );
@@ -604,7 +599,7 @@ class ACustomer extends ALibBase
         $new = $this->isNewCartFormat($cart);
 
         if (!$new) {
-            $cart = array(); //clean cart from old format
+            $cart = []; //clean cart from old format
         }
         $cart['store_'.$store_id] = $this->session->data['cart'];
         $this->db->query("UPDATE ".$this->db->table_name("customers")."
@@ -655,10 +650,10 @@ class ACustomer extends ALibBase
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return array();
+            return [];
         }
 
-        $cart = array();
+        $cart = [];
         $sql = "SELECT cart
                 FROM ".$this->db->table_name("customers")."
                 WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
@@ -673,11 +668,11 @@ class ACustomer extends ALibBase
                 if (isset($cart['store_'.$store_id])) {
                     $cart = $cart['store_'.$store_id];
                 } elseif ($new) {
-                    $cart = array();
+                    $cart = [];
                 }
                 //clean products
                 if ($cart) {
-                    $cart_products = array();
+                    $cart_products = [];
                     foreach ($cart as $key => $val) {
                         $k = explode(':', $key);
                         $cart_products[] = (int)$k[0]; // <-product_id
@@ -687,7 +682,7 @@ class ACustomer extends ALibBase
                             WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
 
                     $result = $this->db->query($sql);
-                    $products = array();
+                    $products = [];
                     foreach ($result->rows as $row) {
                         $products[] = $row['product_id'];
                     }
@@ -713,7 +708,7 @@ class ACustomer extends ALibBase
     public function mergeCustomerCart($cart)
     {
         $store_id = (int)$this->config->get('config_store_id');
-        $cart = !is_array($cart) ? array() : $cart;
+        $cart = !is_array($cart) ? [] : $cart;
         //check is format of cart old or new
         $new = $this->isNewCartFormat($cart);
 
@@ -722,11 +717,11 @@ class ACustomer extends ALibBase
         }
         // for case when data format is new but cart for store does not yet created
         $cart = !is_array($cart)
-            ? array()
+            ? []
             : $cart;
 
         if ($cart && !is_array($this->session->data['cart'])) {
-            $this->session->data['cart'] = array();
+            $this->session->data['cart'] = [];
         }
         foreach ($cart as $key => $value) {
             if (!array_key_exists($key, $this->session->data['cart'])) {
@@ -745,7 +740,7 @@ class ACustomer extends ALibBase
     public function clearCustomerCart()
     {
 
-        $cart = array();
+        $cart = [];
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -768,7 +763,7 @@ class ACustomer extends ALibBase
      *
      * @return bool
      */
-    protected function isNewCartFormat($cart_data = array())
+    protected function isNewCartFormat($cart_data = [])
     {
         if (empty($cart_data)) {
             return false;
@@ -833,7 +828,7 @@ class ACustomer extends ALibBase
      * @return null
      * @throws \Exception
      */
-    public function saveWishList($whishlist = array())
+    public function saveWishList($whishlist = [])
     {
         $customer_id = $this->customer_id;
         if (!$customer_id) {
@@ -864,7 +859,7 @@ class ACustomer extends ALibBase
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return array();
+            return [];
         }
         $customer_data = $this->db->query("SELECT wishlist
                                             FROM ".$this->db->table_name("customers")."
@@ -876,7 +871,7 @@ class ACustomer extends ALibBase
             }
         }
 
-        return array();
+        return [];
     }
 
     /**

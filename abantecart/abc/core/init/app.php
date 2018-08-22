@@ -73,7 +73,7 @@ $dir_app = ABC::env('DIR_APP');
 $dir_public = ABC::env('DIR_PUBLIC');
 
 ABC::env(
-    array(
+    [
         'DIR_VENDOR'         => $dir_app.'vendor'.DS,
         'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
         'DIR_SYSTEM'         => $dir_app.'system'.DS,
@@ -89,7 +89,7 @@ ABC::env(
         'DIR_IMAGES'         => $dir_public.'images'.DS,
         'DIR_RESOURCES'      => $dir_public.'resources'.DS,
         'DIR_MIGRATIONS'     => $dir_app.'migrations'.DS,
-    )
+    ]
 );
 
 //load vendors classes
@@ -98,13 +98,13 @@ require ABC::env('DIR_VENDOR').'autoload.php';
 // Error Reporting
 error_reporting(E_ALL);
 $dir_lib = $dir_app.'core'.DS.'lib'.DS;
-require_once($dir_lib.'debug.php');
+require_once $dir_lib.'debug.php';
 ADebug::register();
-require_once($dir_lib.'error.php');
-require_once($dir_lib.'log.php');
-require_once($dir_lib.'exceptions.php');
-require_once($dir_lib.'error.php');
-require_once($dir_lib.'warning.php');
+require_once $dir_lib.'error.php';
+require_once $dir_lib.'log.php';
+require_once $dir_lib.'exceptions.php';
+require_once $dir_lib.'error.php';
+require_once $dir_lib.'warning.php';
 
 //define rt - route for application controller
 if (isset($_GET['rt']) && $_GET['rt']) {
@@ -128,12 +128,12 @@ if (ABC::env('ADMIN_SECRET') !== null
     && ($_GET['s'] == ABC::env('ADMIN_SECRET') || $_POST['s'] == ABC::env('ADMIN_SECRET'))
 ) {
     ABC::env(
-        array(
+        [
             'IS_ADMIN'      => true,
             'DIR_LANGUAGES' => $dir_app.'languages'.DS.'admin'.DS,
             'DIR_BACKUP'    => $dir_app.'system'.DS.'backup'.DS,
             'DIR_DATA'      => $dir_app.'system'.DS.'data'.DS,
-        )
+        ]
     );
 
     //generate unique session name.
@@ -209,7 +209,7 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 
 //paths for extensions
 ABC::env(
-    array(
+    [
         'DIRNAME_APP'         => 'abc'.DS,
         'DIRNAME_ASSETS'      => 'assets'.DS,
         'DIRNAME_EXTENSIONS'  => 'extensions'.DS,
@@ -225,7 +225,7 @@ ABC::env(
 
         'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
         'DIR_ASSETS_EXT'     => $dir_public.'extensions'.DS,
-    )
+    ]
 );
 
 //load base libraries
@@ -436,10 +436,31 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
     registerClass($registry, 'length', 'ALength', [$registry], '\abc\core\lib\ALength', [$registry]);
     // Cart
     registerClass($registry, 'cart', 'ACart', [$registry], '\abc\core\lib\ACart', [$registry]);
+    $checkout_data = [
+        'cart' => $registry->get('cart'),
+        'customer' => $registry->get('customer'),
+        'guest' => $registry->get('session')->data['guest'],
+        'order_id' => $registry->get('session')->data['order_id'],
+        'shipping_address_id' => $registry->get('session')->data['shipping_address_id'],
+        'shipping_method' => $registry->get('session')->data['shipping_method'],
+        'payment_address_id' => $registry->get('session')->data['payment_address_id'],
+        'payment_method' => $registry->get('session')->data['payment_method']
+    ];
+    // checkout
+    registerClass(
+        $registry,
+        'checkout',
+        'Checkout',
+        [$registry, $checkout_data],
+        '\abc\core\lib\Checkout',
+        [$registry, $checkout_data]
+    );
 } else {
     // User
     registerClass($registry, 'user', 'AUser', [$registry], '\abc\core\lib\AUser', [$registry]);
     AHelperUtils::setDBUserVars();
+    // checkout
+    registerClass($registry, 'checkout', 'CheckoutAdmin', [$registry,[]], '\abc\core\lib\Checkout', [$registry,[]]);
 }// end admin load
 
 // Currency

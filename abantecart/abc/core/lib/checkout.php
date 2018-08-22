@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,15 +20,19 @@
 
 namespace abc\core\lib;
 
-use abc\core\ABC;
+use abc\core\engine\Registry;
 
-require_once(ABC::env('DIR_LIB').'exceptions/aexception.php');
-require_once(ABC::env('DIR_LIB').'exceptions/exception.php');
-require_once(ABC::env('DIR_LIB').'exceptions/libException.php');
-require_once(ABC::env('DIR_LIB').'exceptions/handler.php');
-require_once(ABC::env('DIR_LIB').'exceptions/exception_codes.php');
+/**
+ * Class CheckOut
+ *
+ * @package abc\core\lib
+ */
+class CheckOut extends CheckoutBase
+{
 
-$config = [
-    'debug' => (ABC::env('DEBUG') ? true : false),
-];
-new AHandleExceptions($config, new AExceptionHandler($config['debug']));
+    public function __construct(Registry $registry, array $data)
+    {
+        parent::__construct($registry, $data);
+    }
+
+}

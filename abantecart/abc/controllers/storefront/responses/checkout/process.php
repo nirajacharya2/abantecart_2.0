@@ -21,39 +21,40 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
-use abc\core\lib\AException;
+use abc\core\lib\AError;
+use abc\core\lib\AJson;
+use abc\core\lib\LibException;
 
-class ControllerResponsesCheckoutAddress extends AController
+class ControllerResponsesCheckoutProcess extends AController
 {
-    public $data = array();
+    public $data = [];
 
-    public function shipping()
+    public function confirm()
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $html_out = '';
+        $this->data['output'] = '';
         try {
-            $this->config->set('embed_mode', true);
-            $cntr = $this->dispatch('pages/checkout/address/shipping');
-            $html_out = $cntr->dispatchGetOutput();
-        } catch (AException $e) {
+            $this->checkout->confirmOrder(array_merge($this->request->get, $this->request->post));
+        }catch(LibException $e){
+            $error = new AError($e->getMessages());
+            $error->toLog()->toMessages('Checkout Process Error');
+            return $error->toJSONResponse(
+                AC_ERR_USER_ERROR,
+                [
+                    'error' => true,
+                    'error_text' => 'System Error'
+                ]
+            );
         }
+
+        $this->load->library('json');
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        $this->response->setOutput($html_out);
+        $this->response->setOutput($this->data['output'] ? AJson::encode($this->data['output']) : null);
     }
 
-    public function payment()
+    public function callback()
     {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-        $html_out = '';
-        try {
-            $this->config->set('embed_mode', true);
-            $cntr = $this->dispatch('pages/checkout/address/payment');
-            $html_out = $cntr->dispatchGetOutput();
-        } catch (AException $e) {
-        }
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        $this->response->setOutput($html_out);
+
     }
 }
