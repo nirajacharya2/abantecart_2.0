@@ -61,7 +61,7 @@ class CheckoutBase extends ALibBase
     /**
      * @var array public property. needs to use inside hooks
      */
-    public $data = [];
+    protected $data = [];
 
     /**
      * public property for external validation from hooks
@@ -105,6 +105,20 @@ class CheckoutBase extends ALibBase
 
     }
 
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+    /**
+     * @return int
+     */
+    public function getOrderId()
+    {
+        return (int)$this->data['order_id'];
+    }
     /**
      * @param string $rt
      * @param string $mode
@@ -409,6 +423,14 @@ class CheckoutBase extends ALibBase
     }
 
     /**
+     * @return ACart
+     */
+    public function getCart()
+    {
+        return $this->cart;
+    }
+
+    /**
      * @param ACustomer $customer
      */
     public function setCustomer(ACustomer $customer)
@@ -417,13 +439,21 @@ class CheckoutBase extends ALibBase
     }
 
     /**
+     * @return ACustomer
+     */
+    public function getCustomer()
+    {
+        return $this->customer;
+    }
+
+    /**
      * @param array $data
      *
      * @throws LibException
      * @throws AException
+     * @throws \ReflectionException
      */
     public function confirmOrder($data = []){
-
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
@@ -445,10 +475,6 @@ class CheckoutBase extends ALibBase
             $this->data['order_id'],
             $order_status_id
         );
-
-
-
-
     }
 
     /**
@@ -526,6 +552,7 @@ class CheckoutBase extends ALibBase
             );
         }
 
-        return new $all_modules[$payment_method]['handlers']['payment']();
+        //note: call constructor with checkout class as parameter!
+        return new $all_modules[$payment_method]['handlers']['payment']($this->registry, $this);
     }
 }
