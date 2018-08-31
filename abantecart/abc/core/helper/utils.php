@@ -409,7 +409,7 @@ class AHelperUtils extends AHelper
      * Wrapper of native mkdir() function.
      * Written because some host have issues with newly created directory permissions related to umask
      *
-     * @param     $dir_full_path
+     * @param $dir_full_path
      * @param int $perms
      *
      * @return bool
@@ -1385,27 +1385,6 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Check if direcotry is empty
-     * (a directory with just '.svn' or '.git' is considered to be empty)
-     *
-     * @param string $dir
-     *
-     * @return bool
-     */
-    public static function dir_is_empty($dir)
-    {
-        if (!is_dir($dir)) {
-            return false;
-        }
-        foreach (scandir($dir) as $file) {
-            if (!in_array($file, array('.', '..', '.svn', '.git'))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Validate if directory exists and writable
      *
      * @param string $dir
@@ -1810,7 +1789,7 @@ class AHelperUtils extends AHelper
 
     /**
      * @param string $event_alias
-     * @param array  $args
+     * @param array $args
      *
      * @return array|null
      * @throws AException
@@ -1829,6 +1808,30 @@ class AHelperUtils extends AHelper
         }
     }
 
+
+    public static function df($var) {
+        $filename = 'debug.txt';
+        $backtrace = debug_backtrace();
+        $backtracePath = array();
+        foreach($backtrace as $k => $bt)
+        {
+            if($k > 1)
+                break;
+            $backtracePath[] = substr($bt['file'], strlen($_SERVER['DOCUMENT_ROOT'])) . ':' . $bt['line'];
+        }
+
+        $data = func_get_args();
+        if(count($data) == 0)
+            return;
+        elseif(count($data) == 1)
+            $data = current($data);
+
+        if(!is_string($data) && !is_numeric($data))
+            $data = var_export($data, 1);
+
+        file_put_contents($filename, "\n--------------------------" . date('Y-m-d H:i:s ') . microtime() . "-----------------------\n Backtrace: " . implode(' → ', $backtracePath) . "\n" . $data, FILE_APPEND);
+    }
+
     /**
      * Function changes and cleans data base on entity codes, such as language_code, sku etc
      *
@@ -1836,33 +1839,33 @@ class AHelperUtils extends AHelper
      *
      * @return array
      */
-    /*
-    NOT TESTED YET!!!
-    public static function prepareDataForImport(array $data)
-     {
-         $registry = Registry::getInstance();
-         $available_languages = $registry->get('language')->getAvailableLanguages();
+   /*
+   NOT TESTED YET!!!
+   public static function prepareDataForImport(array $data)
+    {
+        $registry = Registry::getInstance();
+        $available_languages = $registry->get('language')->getAvailableLanguages();
 
-         $language_list = [];
-         foreach($available_languages as $lang){
-             $language_list[$lang['code']] = $lang['language_id'];
-         }
+        $language_list = [];
+        foreach($available_languages as $lang){
+            $language_list[$lang['code']] = $lang['language_id'];
+        }
 
-         if(isset($data['language_code']) && isset($language_list[$data['language_code']])){
-             $output = $data;
-             $output['language_id'] = $language_list[$data['language_code']];
-             unset($output['language_code']);
-         }elseif( isset($data['language_code']) && !isset($language_list[$data['language_code']]) ){
-             $output = [];
-         }else{
-             $output = $data;
-         }
+        if(isset($data['language_code']) && isset($language_list[$data['language_code']])){
+            $output = $data;
+            $output['language_id'] = $language_list[$data['language_code']];
+            unset($output['language_code']);
+        }elseif( isset($data['language_code']) && !isset($language_list[$data['language_code']]) ){
+            $output = [];
+        }else{
+            $output = $data;
+        }
 
-         //go deep
-         foreach($output as $k => &$item){
-             if(!is_array($item)){ continue; }
-             $item = self::prepareDataForImport($item);
-         }
-         return $output;
-     }*/
+        //go deep
+        foreach($output as $k => &$item){
+            if(!is_array($item)){ continue; }
+            $item = self::prepareDataForImport($item);
+        }
+        return $output;
+    }*/
 }
