@@ -19,8 +19,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\models\storefront\ModelToolOnlineNow;
+use H;
 
 /**
  * Class ACustomer
@@ -76,6 +76,10 @@ class ACustomer extends ALibBase
      */
     protected $address_id;
     /**
+     * @var int
+     */
+    protected $store_id;
+    /**
      * @var AConfig
      */
     protected $config;
@@ -116,9 +120,11 @@ class ACustomer extends ALibBase
     /**
      * @param  \abc\core\engine\Registry $registry
      *
+     * @param int $customer_id
+     *
      * @throws AException
      */
-    public function __construct($registry)
+    public function __construct($registry, $customer_id = 0)
     {
         $this->cache = $registry->get('cache');
         $this->config = $registry->get('config');
@@ -129,15 +135,21 @@ class ACustomer extends ALibBase
         $this->load = $registry->get('load');
         $this->extensions = $registry->get('extensions');
 
-        if (isset($this->session->data['customer_id'])) {
-            $customer_data = $this->db->query(
-                "SELECT c.*, cg.* FROM ".$this->db->table_name("customers")." c
-                    LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
-                    ON c.customer_group_id = cg.customer_group_id
-                    WHERE customer_id = '".(int)$this->session->data['customer_id']."' 
-                    AND STATUS = '1'"
-            );
+        $customer_id = (int)$customer_id;
+        $customer_id = (!$customer_id && isset($this->session->data['customer_id']))
+                        ? (int)$this->session->data['customer_id']
+                        : $customer_id;
+        if ($customer_id) {
+            $sql = "SELECT c.*, cg.* 
+                     FROM ".$this->db->table_name("customers")." c
+                     LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
+                        ON c.customer_group_id = cg.customer_group_id
+                     WHERE customer_id = '".(int)$customer_id."'";
+            if (!ABC::env('IS_ADMIN')) {
+                $sql .= " AND STATUS = '1'";
+            }
 
+            $customer_data = $this->db->query($sql);
             if ($customer_data->num_rows) {
                 $this->customerInit($customer_data->row);
             } else {
@@ -145,7 +157,10 @@ class ACustomer extends ALibBase
             }
         } elseif (isset($this->request->cookie['customer'])) {
             //we have unauthenticated customer
-            $encryption = new AEncryption($this->config->get('encryption_key'));
+            /**
+             * @var AEncryption $encryption
+             */
+            $encryption = ABC::getObjectByAlias('AEncryption',[$this->config->get('encryption_key')]);
             $this->unauth_customer = unserialize($encryption->decrypt($this->request->cookie['customer']));
             //customer is not valid or not from the same store (under the same domain)
             if (
@@ -178,13 +193,10 @@ class ACustomer extends ALibBase
         $customer_id = '';
         if ($this->isLogged()) {
             $customer_id = $this->getId();
-        } else {
-            if ($this->isUnauthCustomer()) {
-                $customer_id = $this->isUnauthCustomer();
-            }
+        } elseif ($this->isUnauthCustomer()) {
+            $customer_id = $this->isUnauthCustomer();
         }
-        $this->load->model('tool/online_now');
-        $model = $registry->get('model_tool_online_now');
+        $model = $this->load->model('tool/online_now', 'storefront');
         /**
          * @var ModelToolOnlineNow $model ;
          */
@@ -273,6 +285,7 @@ class ACustomer extends ALibBase
     {
 
         $this->customer_id = (int)$data['customer_id'];
+        $this->store_id = (int)$data['store_id'];
         $this->loginname = $data['loginname'];
         $this->firstname = $data['firstname'];
         $this->lastname = $data['lastname'];
@@ -323,6 +336,7 @@ class ACustomer extends ALibBase
     {
         unset($this->session->data['customer_id']);
         unset($this->session->data['customer_group_id']);
+        unset($this->session->data['customer_tax_exempt']);
 
         $this->customer_id = '';
         $this->loginname = '';
@@ -393,6 +407,14 @@ class ACustomer extends ALibBase
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getStoreId()
+    {
+        return $this->store_id;
     }
 
     /**
@@ -790,7 +812,7 @@ class ACustomer extends ALibBase
      */
     public function addToWishList($product_id)
     {
-        if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)) {
+        if (!H::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
         $whishlist = $this->getWishList();
@@ -810,7 +832,7 @@ class ACustomer extends ALibBase
      */
     public function removeFromWishList($product_id)
     {
-        if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id)) {
+        if (!H::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
         $whishlist = $this->getWishList();
@@ -887,8 +909,8 @@ class ACustomer extends ALibBase
         if (!$this->isLogged()) {
             return false;
         }
-        if (!AHelperUtils::has_value($tr_details['transaction_type'])
-            || !AHelperUtils::has_value($tr_details['created_by'])
+        if (!H::has_value($tr_details['transaction_type'])
+            || !H::has_value($tr_details['created_by'])
         ) {
             return false;
         }
@@ -904,14 +926,14 @@ class ACustomer extends ALibBase
         }
 
         $this->db->query("INSERT INTO ".$this->db->table_name("customer_transactions")."
-                        SET customer_id 		= '".(int)$this->getId()."',
-                            order_id 			= '".(int)$tr_details['order_id']."',
-                            transaction_type 	= '".$this->db->escape($tr_details['transaction_type'])."',
-                            description 		= '".$this->db->escape($tr_details['description'])."',
-                            COMMENT 			= '".$this->db->escape($tr_details['comment'])."',
+                        SET customer_id = '".(int)$this->getId()."',
+                            order_id = '".(int)$tr_details['order_id']."',
+                            transaction_type = '".$this->db->escape($tr_details['transaction_type'])."',
+                            description = '".$this->db->escape($tr_details['description'])."',
+                            COMMENT = '".$this->db->escape($tr_details['comment'])."',
                             ".$amount.",
-                            section				= '".((int)$tr_details['section'] ? (int)$tr_details['section'] : 0)."',
-                            created_by 			= '".(int)$tr_details['created_by']."',
+                            section = '".((int)$tr_details['section'] ? (int)$tr_details['section'] : 0)."',
+                            created_by = '".(int)$tr_details['created_by']."',
                             date_added = NOW()");
 
         if ($this->db->getLastId()) {

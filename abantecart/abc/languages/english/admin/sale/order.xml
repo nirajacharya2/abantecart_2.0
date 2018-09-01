@@ -372,4 +372,64 @@
 		<key>entry_im</key>
 		<value><![CDATA[IM:]]></value>
 	</definition>
+	<definition>
+		<key>text_create_order</key>
+		<value><![CDATA[Create New Order]]></value>
+	</definition>
+	<definition>
+		<key>text_common_order_details</key>
+		<value><![CDATA[Common Order Details]]></value>
+	</definition>
+	<definition>
+		<key>entry_order_language</key>
+		<value><![CDATA[Order Language]]></value>
+	</definition>
+	<definition>
+		<key>entry_order_currency</key>
+		<value><![CDATA[Order Currency]]></value>
+	</definition>
+	<definition>
+		<key>text_order_products</key>
+		<value><![CDATA[Order Products]]></value>
+	</definition>
+	<definition>
+		<key>entry_payment_address</key>
+		<value><![CDATA[Order Currency]]></value>
+	</definition>
+	<definition>
+		<key>text_payment_details</key>
+		<value><![CDATA[Payment Details]]></value>
+	</definition>
+	<definition>
+		<key>text_shipping_details</key>
+		<value><![CDATA[Shipping Details]]></value>
+	</definition>
+	<definition>
+		<key>entry_coupon_code</key>
+		<value><![CDATA[Coupon Code]]></value>
+	</definition>
+	<definition>
+		<key>text_apply_coupon</key>
+		<value><![CDATA[Apply]]></value>
+	</definition>
+	<definition>
+		<key>error_coupon</key>
+		<value><![CDATA[Invalid Coupon Code]]></value>
+	</definition>
+	<definition>
+		<key>button_create_order</key>
+		<value><![CDATA[Create Order]]></value>
+	</definition>
+	<definition>
+		<key>error_no_address</key>
+		<value><![CDATA[No addresses of customer found. <a href="%s">Please add at least one and try again.</a>]]></value>
+	</definition>
+	<definition>
+		<key>error_no_shipping_methods</key>
+		<value><![CDATA[Some products requires shipping, but no shipping methods found. <a href="%s">Please enable at least one and try again.</a>]]></value>
+	</definition>
+	<definition>
+		<key>error_no_payments</key>
+		<value><![CDATA[No payment methods available.<a href="%s">Please enable at least one and try again.</a>]]></value>
+	</definition>
 </definitions>
