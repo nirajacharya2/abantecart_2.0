@@ -3,6 +3,7 @@
 namespace abc\extensions\cod_payment\modules;
 
 use abc\core\engine\Registry;
+use abc\core\lib\CheckoutBase;
 use abc\core\lib\PaymentHandlerInterface;
 
 class PaymentHandler implements PaymentHandlerInterface
@@ -12,7 +13,7 @@ class PaymentHandler implements PaymentHandlerInterface
      */
     protected $errors = [];
 
-    public function __construct()
+    public function __construct(Registry $registry, CheckoutBase $checkout)
     {
     }
 

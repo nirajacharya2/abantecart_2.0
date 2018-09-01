@@ -92,12 +92,6 @@ class CheckoutBase extends ALibBase
         if($data['customer']) {
             $this->customer = $data['customer'];
             $this->customer_id = $this->customer->getId();
-            $c_data = [
-                        'customer_group_id' => $this->customer->getCustomerGroupId(),
-                        'country_id' => ($this->data['shipping_country_id'] ?: $this->data['payment_country_id']),
-                        'zone_id' => ($this->data['shipping_zone_id'] ?: $this->data['payment_zone_id']),
-            ];
-            $this->tax = new ATax( $registry, $c_data );
         }
 
         if(is_object($data['order'])){
@@ -115,6 +109,20 @@ class CheckoutBase extends ALibBase
 
     }
 
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+    /**
+     * @return int
+     */
+    public function getOrderId()
+    {
+        return (int)$this->data['order_id'];
+    }
     /**
      * @param string $rt
      * @param string $mode

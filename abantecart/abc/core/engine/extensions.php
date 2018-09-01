@@ -611,19 +611,19 @@ class ExtensionsApi
         $name = '';
         $lang_dir = $this->registry->get('language')->language_details['directory'];
         $filename = ABC::env('DIR_APP_EXTENSIONS')
-            .$extension
-            .'/admin/languages/'
-            .$lang_dir
-            .'/'
-            .$extension
-            .'/'
+            .$extension.DS
+            .'admin'.DS
+            .'languages'.DS
+            .$lang_dir.DS
+            .$extension.DS
             .$extension.'.xml';
         if (!file_exists($filename)) {
             $filename = ABC::env('DIR_APP_EXTENSIONS')
-                .$extension
-                .'/admin/languages/english/'
-                .$extension
-                .'/'
+                .$extension.DS
+                .'admin'.DS
+                .'languages'.DS
+                .'english'.DS
+                .$extension.DS
                 .$extension.'.xml';
         }
 
@@ -973,7 +973,7 @@ class ExtensionsApi
 
         switch ($resource_type) {
             case 'M' :
-                $file = '/models/'.$ext_section.$route.'.php';
+                $file = DS.'models'.DS.$ext_section.$route.'.php';
                 $source = $this->extension_models;
                 break;
             case 'L' :
@@ -981,14 +981,14 @@ class ExtensionsApi
                     "SELECT directory 
                         FROM ".$this->db->table_name("languages")." 
                         WHERE code='".$this->registry->get('session')->data['language']."'");
-                $file = $ext_section.'languages/'.$query->row['directory'].'/'.$route.'.xml';
+                $file = $ext_section.'languages'.DS.$query->row['directory'].DS.$route.'.xml';
                 $source = $this->extension_languages;
                 break;
             case 'T' :
                 $tmpl_id = ABC::env('IS_ADMIN')
                     ? $this->registry->get('config')->get('admin_template')
                     : $this->registry->get('config')->get('config_storefront_template');
-                $file = '/'.$tmpl_id.$ext_section.'/'.$route;
+                $file = DS.$tmpl_id.$ext_section.DS.$route;
                 $source = $this->extension_templates;
                 break;
             default:
@@ -1014,7 +1014,7 @@ class ExtensionsApi
 
         foreach ($extensions_lookup_list as $ext) {
             if ($resource_type == 'T') {
-                $f = ABC::env('DIR_ASSETS_EXT').$ext.'/templates'.$file;
+                $f = ABC::env('DIR_ASSETS_EXT').$ext.DS.'templates'.$file;
             } else {
                 $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
             }
@@ -1033,17 +1033,17 @@ class ExtensionsApi
                 if ($resource_type == 'T') {
                     //check default template
                     $f = ABC::env('DIR_APP_EXTENSIONS')
-                        .$ext
-                        .$ext_section
+                        .$ext.DS
                         .ABC::env('DIRNAME_TEMPLATES')
-                        .'default/'
+                        .'default'.DS
+                        .$ext_section
                         .$route;
 
                     if (is_file($f)) {
                         return [
                             'file'      => $f,
                             'extension' => $ext,
-                            'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route,
+                            'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default'.DS.$route,
                         ];
                     }
                 }
@@ -1119,7 +1119,7 @@ class ExtensionsApi
                         $output[] = [
                             'file'      => $f,
                             'extension' => $ext,
-                            'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default/'.$route,
+                            'base_path' => $ext_section.ABC::env('DIRNAME_TEMPLATES').'default'.DS.$route,
                         ];
                     }
                 }
@@ -1179,7 +1179,7 @@ class ExtensionsApi
                 }
             }
 
-            $path_build .= '/';
+            $path_build .= DS;
             array_shift($path_nodes);
         }
 
@@ -1351,7 +1351,7 @@ class ExtensionUtils
         $this->config = AHelperUtils::getExtensionConfigXml($ext);
 
         if (!$this->config) {
-            $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).'/config.xml';
+            $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).DS.'config.xml';
             $err = sprintf('Error: Could not load config for <b>%s</b> ( '.$filename.')!', $this->name);
             foreach (libxml_get_errors() as $error) {
                 $err .= "  ".$error->message;
@@ -1381,7 +1381,7 @@ class ExtensionUtils
      */
     public function validateResources()
     {
-        $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).'/main.php';
+        $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).DS.'main.php';
         if (!is_file($filename)) {
             return null;
         }
@@ -1585,11 +1585,10 @@ class ExtensionUtils
             }
         }
         //2.2 check data by given function from file validate.php
-        $validate_file = ABC::env('DIR_APP_EXTENSIONS').$this->name.'/validate.php';
+        $validate_file = ABC::env('DIR_APP_EXTENSIONS').$this->name.DS.'validate.php';
 
         if (file_exists($validate_file)) {
-            /** @noinspection PhpIncludeInspection */
-            include_once($validate_file);
+            include_once $validate_file;
             //function settingsValidation in validate.php must to return formatted
             // array as in caller (see phpdoc-comment: @return)
             if (function_exists('settingsValidation')) {
@@ -1599,15 +1598,13 @@ class ExtensionUtils
                         'result' => false,
                         'errors' => [
                             'pattern' => 'Error: Cannot to validate data by validate.php file. '
-                                .'Function returns incorrect formatted data.',
+                                        .'Function returns incorrect formatted data.',
                         ],
                     ];
                 }
-
                 return $result;
             }
         }
-
         return ['result' => true];
     }
 

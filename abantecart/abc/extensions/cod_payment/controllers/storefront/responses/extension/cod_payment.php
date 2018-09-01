@@ -51,7 +51,7 @@ class ControllerResponsesExtensionCodPayment extends AController
         $this->view->assign('continue_url', $this->html->getSecureURL('checkout/success'));
         $this->view->assign(
             'confirm_url',
-            $this->html->getSecureURL('checkout/process/confirm', '&extension=default_cod&action=confirm')
+            $this->html->getSecureURL('checkout/process/confirm', '&extension=cod_payment&action=confirm')
         );
 
         $this->processTemplate('responses/cod_payment.tpl');
