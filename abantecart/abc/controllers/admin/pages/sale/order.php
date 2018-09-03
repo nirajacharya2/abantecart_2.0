@@ -1761,24 +1761,30 @@ class ControllerPagesSaleOrder extends AController
 
         $this->preValidateOrder($customer_id);
 
-        if ($this->request->is_POST()) {
+        if ($this->request->is_POST() && $checkout->getCart()->hasProducts()) {
             try {
                 $shippings = $checkout->getShippingList();
                 if ($shippings && $this->request->post['shipping_method']) {
                     list($shp_name, $shp_quote) = explode('.', $this->request->post['shipping_method']);
                     $checkout->setShippingMethod($shippings[$shp_name]['quote'][$shp_quote]);
+                    $this->session->data['admin_order']['shipping_method'] = $shippings[$shp_name]['quote'][$shp_quote];
+                    $this->session->data['admin_order']['shipping_address_id'] = $this->request->post['shipping_address_id'];
                 }
                 $payments = $checkout->getPaymentList();
                 $checkout->setPaymentMethod($payments[$this->request->post['payment_method']]);
+                $this->session->data['admin_order']['payment_method'] = $payments[$this->request->post['payment_method']];
+                $this->session->data['admin_order']['payment_address_id'] = $this->request->post['payment_address_id'];
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);
                 $order_id = $checkout->getOrder()->saveOrder();
+
                 if(!$order_id){
                     throw new LibException(['cannot to save newly created order']);
                 }
                 $checkout->setOrderId((int)$order_id);
                 $checkout->confirmOrder(['order_id' => $order_id]);
                 $this->extensions->hk_ProcessData($this, 'create_order');
+                unset($this->session->data['admin_order']);
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
                 $this->data['error_warning'] = $e->getMessages();
@@ -2029,7 +2035,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->language->get('error_no_shipping_methods'),
                 $this->html->getSecureURL('extension/extensions/shipping')
             );
-        } elseif (!$this->data['checkout']->getPaymentList()) {
+        } elseif ($this->data['checkout']->getCart()->getProducts() && !$this->data['checkout']->getPaymentList()) {
             $this->data['error_warning'] = sprintf(
                 $this->language->get('error_no_payments'),
                 $this->html->getSecureURL('extension/extensions/payment')
