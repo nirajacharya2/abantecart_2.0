@@ -1773,12 +1773,15 @@ class ControllerPagesSaleOrder extends AController
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);
                 $order_id = $checkout->getOrder()->saveOrder();
-
+                if(!$order_id){
+                    throw new LibException(['cannot to save newly created order']);
+                }
+                $checkout->setOrderId((int)$order_id);
                 $checkout->confirmOrder(['order_id' => $order_id]);
                 $this->extensions->hk_ProcessData($this, 'create_order');
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
-                $this->session->data['error'] = $e->getMessages();
+                $this->data['error_warning'] = $e->getMessages();
             }
         }
 
