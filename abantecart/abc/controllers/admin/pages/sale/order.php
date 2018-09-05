@@ -1787,7 +1787,12 @@ class ControllerPagesSaleOrder extends AController
                 unset($this->session->data['admin_order']);
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
-                $this->data['error_warning'] = $e->getMessages();
+                $error_text = $e->getMessages();
+                if(!$error_text) {
+                   $error_text = 'App Error. See error log for details';
+                   $this->log->write($e->getTraceAsString());
+                }
+                $this->data['error_warning'] = $error_text;
             }
         }
 
