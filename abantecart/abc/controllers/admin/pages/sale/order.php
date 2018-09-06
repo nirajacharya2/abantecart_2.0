@@ -1730,7 +1730,7 @@ class ControllerPagesSaleOrder extends AController
 
         if (!$this->session->data['admin_order']
             //check customer id in the session data too! What if switched to another customer?
-            || $this->session->data['admin_order']['customer_id'] != $customer_id)
+            || ($customer_id && $this->session->data['admin_order']['customer_id'] != $customer_id))
         {
             $this->session->data['admin_order'] = [];
             $this->session->data['admin_order']['cart'] = [];
