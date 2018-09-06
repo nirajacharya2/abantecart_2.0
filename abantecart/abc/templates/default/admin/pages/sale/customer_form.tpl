@@ -68,6 +68,17 @@
 				   title="<?php echo $button_orders_count->title; ?>"
 				   data-original-title="<?php echo $button_orders_count->title; ?>"><?php echo $button_orders_count->text; ?>
 				</a>
+				<?php if($reset_password){ ?>
+				<a target="_blank"
+				   class="btn btn-white tooltips"
+				   href="<?php echo $reset_password->href; ?>"
+				   data-toggle="tooltip"
+				   data-confirmation="delete"
+				   data-confirmation-text="<?php echo $warning_resend_password;?>"
+				   title="<?php echo $reset_password->title; ?>"
+				   data-original-title="<?php echo $reset_password->title; ?>"><i class="fa fa-key "></i>
+				</a>
+				<?php } ?>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
 				   href="<?php echo $message->href; ?>"

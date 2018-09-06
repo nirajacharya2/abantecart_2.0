@@ -377,4 +377,36 @@
 		<key>text_register_date</key>
 		<value><![CDATA[Register Date:]]></value>
 	</definition>
+	<definition>
+		<key>error_unknown_customer</key>
+		<value><![CDATA[Unknown Customer ID!]]></value>
+	</definition>
+	<definition>
+		<key>error_disabled_customer</key>
+		<value><![CDATA[The Customer is disabled for login!]]></value>
+	</definition>
+	<definition>
+		<key>error_no_email</key>
+		<value><![CDATA[Email address is empty!]]></value>
+	</definition>
+	<definition>
+		<key>error_reset_link_not_sent</key>
+		<value><![CDATA[Email not sent. Check error log for details]]></value>
+	</definition>
+	<definition>
+		<key>text_password_was_reset</key>
+		<value><![CDATA[The administrator of %s reset your login password! ]]></value>
+	</definition>
+	<definition>
+		<key>text_password_reset_success</key>
+		<value><![CDATA[ Link for password reset has been sent successfully. ]]></value>
+	</definition>
+	<definition>
+		<key>text_resend_password</key>
+		<value><![CDATA[Send Password Reset ]]></value>
+	</definition>
+	<definition>
+		<key>warning_resend_password</key>
+		<value><![CDATA[Email with url for password change will be send to customer. Continue?]]></value>
+	</definition>
 </definitions>

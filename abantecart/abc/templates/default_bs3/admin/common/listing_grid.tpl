@@ -330,7 +330,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 				//for dropdown
 				if($action['children']){
 					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,ABC::env('APP_CHARSET')).'</h5><ul class="dropdown-list grid-dropdown">';
-					foreach($action['children'] as $child){
+					foreach($action['children'] as $id => $child){
 						$li_class = '';
 						$href = \abc\core\helper\AHelperUtils::has_value($child['href']) ? $child['href'] : '#';
 						//for viewport mode
@@ -339,7 +339,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 						} else {
 							$href = 'href="'.$href.'"';
 						}
-						$html_children .= '<li class="'.$li_class.'"><a '.$href.' rel="%ID%">'.htmlentities($child['text'],ENT_QUOTES,ABC::env('APP_CHARSET')).'</a></li>';
+						$html_children .= '<li class="'.$li_class.' '.$id.'"><a '.$href.' rel="'.$id.'">'.htmlentities($child['text'],ENT_QUOTES,ABC::env('APP_CHARSET')).'</a></li>';
 					}
 					$html_children .= '</ul></div>';
 					$html_btn = '<div class="btn-group">'.$html_btn.''.$html_children.'</div>';

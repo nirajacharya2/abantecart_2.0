@@ -130,7 +130,7 @@ class AHtml extends AController
     {
         $suburl = '';
         //#PR Add admin path if we are in admin
-        if (ABC::env('IS_ADMIN')) {
+        if (ABC::env('IS_ADMIN') && $mode != 'storefront') {
             $suburl .= '&s='.ABC::env('ADMIN_SECRET');
         }
         //add template if present
@@ -239,9 +239,11 @@ class AHtml extends AController
      * @param string $params
      * @param string $encode
      *
+     * @param string $mode - can be empty for auto-mode or 'storefront'
+     *
      * @return string
      */
-    public function getSecureURL($rt, $params = '', $encode = '')
+    public function getSecureURL($rt, $params = '', $encode = '', $mode = '')
     {
         $session = $this->registry->get('session');
         $config = $this->registry->get('config');
@@ -250,9 +252,9 @@ class AHtml extends AController
             $params .= '&session_id='.session_id();
         }
 
-        $suburl = $this->buildURL($rt, $params);
+        $suburl = $this->buildURL($rt, $params, $mode);
 
-        if (ABC::env('IS_ADMIN') || ABC::env('IS_API')) {
+        if ($mode != 'storefront' && (ABC::env('IS_ADMIN') || ABC::env('IS_API'))) {
             //Add session token for admin and API
             if (isset($session->data['token']) && $session->data['token']) {
                 $suburl .= '&token='.$this->registry->get('session')->data['token'];

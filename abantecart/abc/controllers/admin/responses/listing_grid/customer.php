@@ -27,14 +27,10 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ControllerResponsesListingGridCustomer extends AController
 {
     public $error = '';
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -46,22 +42,22 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->loadModel('sale/customer');
         $this->load->library('json');
 
-        $approved = array(
+        $approved = [
             1 => $this->language->get('text_yes'),
             0 => $this->language->get('text_no'),
-        );
+        ];
 
         $page = $this->request->post['page'];  // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
         $sidx = $this->request->post['sidx'];  // get index row - i.e. user click to sort
         $sord = $this->request->post['sord'];  // get the direction
 
-        $data = array(
+        $data = [
             'sort'  => $sidx,
             'order' => $sord,
             'start' => ($page - 1) * $limit,
             'limit' => $limit,
-        );
+        ];
         if (AHelperUtils::has_value($this->request->get['customer_group'])) {
             $data['filter']['customer_group_id'] = $this->request->get['customer_group'];
         }
@@ -72,7 +68,7 @@ class ControllerResponsesListingGridCustomer extends AController
             $data['filter']['approved'] = $this->request->get['approved'];
         }
 
-        $allowedFields = array_merge(array('name', 'email'), (array)$this->data['allowed_fields']);
+        $allowedFields = array_merge(['name', 'email'], (array)$this->data['allowed_fields']);
 
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
@@ -112,7 +108,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $results = $this->model_sale_customer->getCustomers($data, $mode);
         if ($mode) {
             //get orders count for customers list by separate request to prevent slow sql issue
-            $customers_ids = array();
+            $customers_ids = [];
             foreach ($results as $result) {
                 $customers_ids[] = $result['customer_id'];
             }
@@ -127,32 +123,32 @@ class ControllerResponsesListingGridCustomer extends AController
                 $order_cnt = (int)$result['orders_count'];
             }
             $response->rows[$i]['id'] = $result['customer_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['name'],
                 '<a href="'.$this->html->getSecureURL('sale/contact', '&email[]='.$result['email']).'">'
                 .$result['email'].'</a>',
                 $result['customer_group'],
-                $this->html->buildCheckbox(array(
+                $this->html->buildCheckbox([
                     'name'  => 'status['.$result['customer_id'].']',
                     'value' => $result['status'],
                     'style' => 'btn_switch',
-                )),
-                $this->html->buildSelectBox(array(
+                ]),
+                $this->html->buildSelectBox([
                     'name'    => 'approved['.$result['customer_id'].']',
                     'value'   => $result['approved'],
                     'options' => $approved,
-                )),
+                ]),
                 ($order_cnt > 0 ?
-                    $this->html->buildButton(array(
+                    $this->html->buildButton([
                         'name'   => 'view orders',
                         'text'   => $order_cnt,
                         'style'  => 'btn btn-default btn-xs',
                         'href'   => $this->html->getSecureURL('sale/order', '&customer_id='.$result['customer_id']),
                         'title'  => $this->language->get('text_view').' '.$this->language->get('tab_history'),
                         'target' => '_blank',
-                    ))
+                    ])
                     : 0),
-            );
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -175,10 +171,10 @@ class ControllerResponsesListingGridCustomer extends AController
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/customer'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         switch ($this->request->post['oper']) {
@@ -201,10 +197,10 @@ class ControllerResponsesListingGridCustomer extends AController
                         } else {
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406',
-                                array(
+                                [
                                     'error_text'  => $err,
                                     'reset_value' => false,
-                                ));
+                                ]);
                         }
                         $do_approve = $this->request->post['approved'][$id];
                         $err = $this->validateForm('approved', $do_approve, $id);
@@ -219,10 +215,10 @@ class ControllerResponsesListingGridCustomer extends AController
                         } else {
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406',
-                                array(
+                                [
                                     'error_text'  => $err,
                                     'reset_value' => false,
-                                ));
+                                ]);
                         }
                     }
                 }
@@ -254,10 +250,10 @@ class ControllerResponsesListingGridCustomer extends AController
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/customer'),
                     'reset_value' => true,
-                ));
+                ]);
 
         }
         $customer_id = $this->request->get['id'];
@@ -268,17 +264,17 @@ class ControllerResponsesListingGridCustomer extends AController
                 $error = new AError('');
                 if (mb_strlen($post_data['password']) < 4) {
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
-                        array(
+                        [
                             'error_text'  => $this->language->get('error_password'),
                             'reset_value' => true,
-                        ));
+                        ]);
                 }
                 if ($post_data['password'] != $post_data['password_confirm']) {
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
-                        array(
+                        [
                             'error_text'  => $this->language->get('error_confirm'),
                             'reset_value' => true,
-                        ));
+                        ]);
                 }
                 //passwords do match, save
                 $this->model_sale_customer->editCustomerField($customer_id, 'password', $post_data['password']);
@@ -305,10 +301,10 @@ class ControllerResponsesListingGridCustomer extends AController
                     } else {
                         $error = new AError('');
                         return $error->toJSONResponse('VALIDATION_ERROR_406',
-                            array(
+                            [
                                 'error_text'  => $err,
                                 'reset_value' => false,
-                            ));
+                            ]);
 
                     }
                 }
@@ -333,10 +329,10 @@ class ControllerResponsesListingGridCustomer extends AController
                 } else {
                     $error = new AError('');
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
-                        array(
+                        [
                             'error_text'  => $err,
                             'reset_value' => false,
-                        ));
+                        ]);
                 }
             }
         }
@@ -410,26 +406,26 @@ class ControllerResponsesListingGridCustomer extends AController
 
     public function customers()
     {
-        $customers_data = array();
+        $customers_data = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadModel('sale/customer');
         if (isset($this->request->post['term'])) {
-            $filter = array(
+            $filter = [
                 'limit'               => 20,
                 'content_language_id' => $this->language->getContentLanguageID(),
-                'filter'              => array(
+                'filter'              => [
                     'name_email'     => $this->request->post['term'],
                     'match'          => 'any',
                     'only_customers' => 1,
-                ),
-            );
+                ],
+            ];
             $customers = $this->model_sale_customer->getCustomers($filter);
             foreach ($customers as $cdata) {
-                $customers_data[] = array(
+                $customers_data[] = [
                     'id'   => $cdata['customer_id'],
                     'name' => $cdata['firstname'].' '.$cdata['lastname'],
-                );
+                ];
             }
         }
 
