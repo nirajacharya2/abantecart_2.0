@@ -667,11 +667,11 @@ h1 a:hover, h2 a:hover, h3  a:hover {
     -moz-box-shadow: 0 3px 0 rgba(0,0,0,0.2);
     -webkit-box-shadow: 0 3px 0 rgba(0,0,0,0.2);
     box-shadow: 0 3px 0 rgba(0,0,0,0.2);
-    background: white url(../image/minus.png) no-repeat 96% center;
+    background: white url(../images/minus.png) no-repeat 96% center;
 }
 
 .nav-bracket > li.nav-active > a:hover {
-    background: white url(../image/minus.png) no-repeat 96% center;
+    background: white url(../images/minus.png) no-repeat 96% center;
 }
 
 .nav-bracket > li.nav-active > a:focus {
