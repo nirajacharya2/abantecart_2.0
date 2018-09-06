@@ -20,6 +20,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\models\storefront\ModelToolOnlineNow;
+use abc\modules\events\ABaseEvent;
 use H;
 
 /**
@@ -326,6 +327,11 @@ class ACustomer extends ALibBase
                         SET `last_login` = NOW()
                         WHERE customer_id = ".$customer_id);
 
+        //call event
+        H::event(
+            'abc\core\lib\customer@login',
+            [new ABaseEvent($customer_id)]);
+
         return true;
     }
 
@@ -334,6 +340,7 @@ class ACustomer extends ALibBase
      */
     public function logout()
     {
+        $customer_id = $this->customer_id;
         unset($this->session->data['customer_id']);
         unset($this->session->data['customer_group_id']);
         unset($this->session->data['customer_tax_exempt']);
@@ -355,6 +362,10 @@ class ACustomer extends ALibBase
         unset($_COOKIE['customer']);
         setcookie('customer', '', time() - 3600, dirname($this->request->server['PHP_SELF']));
         $this->extensions->hk_ProcessData($this, 'logout');
+        //call event
+        H::event(
+            'abc\core\lib\customer@logout',
+            [new ABaseEvent($customer_id)]);
     }
 
     /**
@@ -935,6 +946,12 @@ class ACustomer extends ALibBase
                             section = '".((int)$tr_details['section'] ? (int)$tr_details['section'] : 0)."',
                             created_by = '".(int)$tr_details['created_by']."',
                             date_added = NOW()");
+        $transaction_id = $this->db->getLastId();
+
+        //call event
+        H::event(
+            'abc\core\lib\customer@transaction',
+            [new ABaseEvent((int)$this->getId(), $transaction_id)]);
 
         if ($this->db->getLastId()) {
             return true;

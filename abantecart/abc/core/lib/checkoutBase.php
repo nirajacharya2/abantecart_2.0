@@ -91,7 +91,9 @@ class CheckoutBase extends ALibBase
         }
         if($data['customer']) {
             $this->customer = $data['customer'];
+            $this->setCustomer($this->customer);
             $this->customer_id = $this->customer->getId();
+
         }
 
         if(is_object($data['order'])){
@@ -122,6 +124,16 @@ class CheckoutBase extends ALibBase
     public function getOrderId()
     {
         return (int)$this->data['order_id'];
+    }
+
+    /**
+     * @param int $order_id
+     *
+     * @return void
+     */
+    public function setOrderId(int $order_id)
+    {
+        $this->data['order_id'] = $order_id;
     }
     /**
      * @param string $rt
@@ -476,7 +488,7 @@ class CheckoutBase extends ALibBase
      */
     public function confirmOrder($data = []){
 
-        $order_id = $data['order_id'] ?: $this->data['order_id'];
+        $order_id = (int)$data['order_id'] ?: $this->data['order_id'];
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
@@ -576,6 +588,6 @@ class CheckoutBase extends ALibBase
             );
         }
 
-        return new $all_modules[$payment_method]['handlers']['payment']();
+        return new $all_modules[$payment_method]['handlers']['payment']($this->registry, $this);
     }
 }

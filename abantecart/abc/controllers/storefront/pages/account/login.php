@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,17 +23,13 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AEncryption;
-
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
+use H;
 
 class ControllerPagesAccountLogin extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -67,7 +63,9 @@ class ControllerPagesAccountLogin extends AController
                     }
                 }
                 //support old email based login
-                $loginname = ( isset( $this->request->post['loginname'] ) ) ? $this->request->post['loginname'] : $this->request->post['email'];
+                $loginname = ( isset( $this->request->post['loginname'] ) )
+                                ? $this->request->post['loginname']
+                                : $this->request->post['email'];
                 $password = $this->request->post['password'];
                 if ( isset( $loginname ) && isset( $password ) && $this->_validate( $loginname, $password ) ) {
                     unset( $this->session->data['guest'] );
@@ -88,7 +86,7 @@ class ControllerPagesAccountLogin extends AController
                     abc_redirect( $redirect_url );
                 }
             }
-        } elseif ( AHelperUtils::has_value( $this->request->get['ac'] ) ) {
+        } elseif ( H::has_value( $this->request->get['ac'] ) ) {
             //activation of account via email-code.
             $enc = new AEncryption( $this->config->get( 'encryption_key' ) );
             list( $customer_id, $activation_code ) = explode( "::", $enc->decrypt( $this->request->get['ac'] ) );
@@ -123,25 +121,25 @@ class ControllerPagesAccountLogin extends AController
         $this->document->resetBreadcrumbs();
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get( 'text_home' ),
                 'separator' => false,
-            ) );
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL( 'account/account' ),
                 'text'      => $this->language->get( 'text_account' ),
                 'separator' => $this->language->get( 'text_separator' ),
-            ) );
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL( 'account/login' ),
                 'text'      => $this->language->get( 'text_login', 'account/login' ),
                 'separator' => $this->language->get( 'text_separator' ),
-            ) );
+            ]);
 
         $this->view->assign( 'error', '' );
         if ( isset( $this->error['message'] ) ) {
@@ -149,55 +147,55 @@ class ControllerPagesAccountLogin extends AController
         }
 
         $form = new AForm();
-        $form->setForm( array( 'form_name' => 'accountFrm' ) );
+        $form->setForm( ['form_name' => 'accountFrm']);
         $this->data['form1']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'accountFrm',
                 'action' => $this->html->getSecureURL( 'account/login' ),
                 'csrf'   => true,
-            )
+            ]
         );
 
         $this->data['form1']['register'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'radio',
                 'id'      => 'account',
                 'name'    => 'account',
-                'options' => array(
+                'options' => [
                     'register' => $this->language->get( 'text_account' ),
-                ),
+                ],
                 'value'   => ( isset( $this->session->data['account'] ) ? $this->session->data['account'] : 'register' ),
-            )
+            ]
         );
         $this->data['form1']['guest'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'radio',
                 'id'      => 'account',
                 'name'    => 'account',
-                'options' => array(
+                'options' => [
                     'guest' => $this->language->get( 'text_guest' ),
-                ),
+                ],
                 'value'   => ( $this->session->data['account'] == 'guest' ? 'guest' : '' ),
-            )
+            ]
         );
         $this->data['form1']['continue'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'submit',
                 'name' => $this->language->get( 'button_continue' ),
                 'icon' => 'fa fa-check',
-            ) );
+            ]);
 
         //second form
         $form = new AForm();
-        $form->setForm( array( 'form_name' => 'loginFrm' ) );
+        $form->setForm( ['form_name' => 'loginFrm']);
         $this->data['form2']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'loginFrm',
                 'action' => $this->html->getSecureURL( 'account/login' ),
                 'csrf'   => true,
-            )
+            ]
         );
 
         if ( $this->config->get( 'prevent_email_as_login' ) ) {
@@ -205,29 +203,29 @@ class ControllerPagesAccountLogin extends AController
         }
 
         $this->data['form2']['loginname'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'loginname',
                 'value' => $loginname,
-            ) );
+            ]);
         //support old email based logging. Remove in the future
         $this->data['form2']['email'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'email',
                 'value' => $loginname,
-            ) );
+            ]);
         $this->data['form2']['password'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'password',
                 'name' => 'password',
-            ) );
+            ]);
         $this->data['form2']['login_submit'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'submit',
                 'name' => $this->language->get( 'button_login' ),
                 'icon' => 'fa fa-lock',
-            ) );
+            ]);
 
         $this->view->assign( 'success', '' );
         if ( isset( $this->session->data['success'] ) ) {
@@ -251,6 +249,7 @@ class ControllerPagesAccountLogin extends AController
      * @param string $password
      *
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     private function _validate( $loginname, $password )
     {
