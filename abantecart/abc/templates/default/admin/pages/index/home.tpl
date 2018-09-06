@@ -246,6 +246,10 @@ if ($quick_start_url){
 			$('#quick_start').modal('show');
 		}
 	});
+		$('#quick_start').on('show.bs.modal', function (e) {
+			var modal = $(this);
+			modal.find('.modal-content').load('<?php echo $quick_start_url; ?>');
+		});
 	<?php
 	}
 	?>
