@@ -1809,8 +1809,7 @@ class AHelperUtils extends AHelper
     }
 
 
-    public static function df($var) {
-        $filename = 'debug.txt';
+    public static function df($var, $filename = 'debug.txt') {
         $backtrace = debug_backtrace();
         $backtracePath = array();
         foreach($backtrace as $k => $bt)
