@@ -47,6 +47,7 @@ trait SaleOrderTrait
         $customer_data['cart'] =& $order_info['cart'];
         $customer_data['cart'] = (array)$customer_data['cart'];
 
+        $checkoutData['customer_id'] = $customer_id;
         $checkoutData['customer'] = $aCustomer;
         $customer_data['coupon'] = $order_info['coupon'];
 

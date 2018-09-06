@@ -1726,13 +1726,18 @@ class ControllerPagesSaleOrder extends AController
         $this->loadLanguage('sale/order');
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        if (!$this->session->data['admin_order']) {
+        $customer_id = (int)$this->request->get['customer_id'];
+
+        if (!$this->session->data['admin_order']
+            //check customer id in the session data too! What if switched to another customer?
+            || $this->session->data['admin_order']['customer_id'] != $customer_id)
+        {
             $this->session->data['admin_order'] = [];
             $this->session->data['admin_order']['cart'] = [];
         }
 
         $order_info =& $this->session->data['admin_order'];
-        $customer_id = (int)$this->request->get['customer_id'];
+
 
         if (!$customer_id) {
             if ($order_info['customer_id']) {
