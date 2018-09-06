@@ -22,6 +22,8 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
+use abc\models\storefront\ModelAccountOrder;
+use abc\models\storefront\ModelCheckoutOrder;
 
 /**
  * Class AOrder
@@ -34,10 +36,8 @@ use abc\core\helper\AHelperUtils;
  * @property \abc\core\engine\ALoader                      $load
  * @property ASession                                      $session
  * @property \abc\core\engine\ExtensionsAPI                $extensions
- * @property \abc\models\storefront\ModelAccountOrder      $model_account_order
  * @property \abc\models\storefront\ModelAccountAddress    $model_account_address
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
- * @property \abc\models\storefront\ModelCheckoutOrder     $model_checkout_order
  * @property AIM                                           $im
  *
  */
@@ -61,6 +61,14 @@ class AOrder extends ALibBase
     protected $customer;
     protected $order_data;
     /**
+     * @var ModelCheckoutOrder $model_checkout_order
+     */
+    protected $model_checkout_order;
+    /**
+     * @var ModelAccountOrder $model_account_order
+     */
+    protected $model_account_order;
+    /**
      * @var array public property. needs to use inside hooks
      */
     public $data = [];
@@ -77,8 +85,8 @@ class AOrder extends ALibBase
     {
         $this->registry = $registry;
 
-        $this->load->model('checkout/order', 'storefront');
-        $this->load->model('account/order', 'storefront');
+        $this->model_checkout_order = $this->load->model('checkout/order', 'storefront');
+        $this->model_account_order = $this->load->model('account/order', 'storefront');
 
         //if nothing is passed use session array. Customer session, can function on storefront only
         if (!AHelperUtils::has_value($order_id)) {
@@ -142,7 +150,7 @@ class AOrder extends ALibBase
         $total = 0;
         $taxes = $this->cart->getTaxes();
 
-        $this->load->model('checkout/extension');
+        $this->load->model('checkout/extension','storefront');
 
         $sort_order = [];
 
@@ -155,7 +163,7 @@ class AOrder extends ALibBase
         array_multisort($sort_order, SORT_ASC, $results);
 
         foreach ($results as $result) {
-            $this->load->model('total/'.$result['key']);
+            $this->load->model('total/'.$result['key'],'storefront');
             $this->{'model_total_'.$result['key']}->getTotal($total_data, $total, $taxes, $indata);
         }
 
@@ -180,7 +188,7 @@ class AOrder extends ALibBase
             $order_info['telephone'] = $this->customer->getTelephone();
             $order_info['fax'] = $this->customer->getFax();
 
-            $this->load->model('account/address');
+            $this->load->model('account/address','storefront');
 
             if ($this->cart->hasShipping()) {
                 $ship_address_id = $indata['shipping_address_id'];

@@ -22,10 +22,10 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\AAttribute;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
+use H;
 
 /**
  * Class ACart
@@ -100,9 +100,9 @@ class ACart  extends ALibBase
     {
         $this->registry = $registry;
         $this->attribute = ABC::getObjectByAlias('AAttribute',['product_option']);
-        $this->customer = $registry->get('customer');
+        $this->customer = $registry->get('customer') ?: $c_data['customer'];
         $this->session = $registry->get('session');
-        $this->language = $registry->get('language');
+        $this->language = $registry->get('language') ?: $c_data['language'];
 
         //if nothing is passed (default) use session array. Customer session, can function on storefront only
         if ($c_data == null) {
@@ -138,6 +138,14 @@ class ACart  extends ALibBase
     }
 
     /**
+     * @return array
+     */
+    public function getCartData()
+    {
+        return $this->cust_data['cart'];
+    }
+
+    /**
      * Returns all products in the cart
      * To force recalculate pass argument as TRUE
      *
@@ -148,6 +156,7 @@ class ACart  extends ALibBase
      */
     public function getProducts($recalculate = false)
     {
+
         //check if cart data was built before
         if (count($this->cart_data) && !$recalculate) {
             return $this->cart_data;
@@ -155,6 +164,7 @@ class ACart  extends ALibBase
 
         $product_data = [];
         //process data in the cart session per each product in the cart
+
         foreach ($this->cust_data['cart'] as $key => $data) {
             if ($key == 'virtual') {
                 continue;
@@ -170,6 +180,7 @@ class ACart  extends ALibBase
             }
 
             $product_result = $this->buildProductDetails($product_id, $quantity, $options);
+            //var_Dump($data,$product_id, $quantity, $options);
             if (count($product_result)) {
                 $product_data[$key] = $product_result;
                 $product_data[$key]['key'] = $key;
@@ -208,7 +219,7 @@ class ACart  extends ALibBase
         if ($recalculate) {
             $this->getProducts(true);
         }
-        return AHelperUtils::has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : [];
+        return H::has_value($this->cust_data['cart'][$key]) ? $this->cust_data['cart'][$key] : [];
     }
 
     /**
@@ -226,7 +237,7 @@ class ACart  extends ALibBase
     public function buildProductDetails($product_id, $quantity = 0, $options = [])
     {
 
-        if (!AHelperUtils::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
+        if (!H::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
             return [];
         }
 
@@ -245,7 +256,7 @@ class ACart  extends ALibBase
         }
 
         $stock_checkout = $product_query['stock_checkout'];
-        if (!AHelperUtils::has_value($stock_checkout)) {
+        if (!H::has_value($stock_checkout)) {
             $stock_checkout = $this->config->get('config_stock_checkout');
         }
 
@@ -466,7 +477,7 @@ class ACart  extends ALibBase
     public function addVirtual($key, $data)
     {
 
-        if (!AHelperUtils::has_value($data)) {
+        if (!H::has_value($data)) {
             return false;
         }
 
@@ -493,7 +504,7 @@ class ACart  extends ALibBase
     {
         if (isset($this->cust_data['cart']['virtual'][$key])) {
             unset($this->cust_data['cart']['virtual'][$key]);
-            if (!AHelperUtils::has_value($this->cust_data['cart']['virtual'])) {
+            if (!H::has_value($this->cust_data['cart']['virtual'])) {
                 unset($this->cust_data['cart']['virtual']);
             }
         }
@@ -700,7 +711,7 @@ class ACart  extends ALibBase
     public function getSubTotal($recalculate = false)
     {
         //check if value already set
-        if (AHelperUtils::has_value($this->sub_total) && !$recalculate) {
+        if (H::has_value($this->sub_total) && !$recalculate) {
             return $this->sub_total;
         }
 
@@ -716,6 +727,7 @@ class ACart  extends ALibBase
      * candidate to be deprecated
      *
      * @return array
+     * @throws AException
      */
     public function getTaxes()
     {
@@ -734,7 +746,7 @@ class ACart  extends ALibBase
     public function getAppliedTaxes($recalculate = false)
     {
         //check if value already set
-        if (AHelperUtils::has_value($this->taxes) && !$recalculate) {
+        if (H::has_value($this->taxes) && !$recalculate) {
             return $this->taxes;
         }
 
@@ -788,7 +800,7 @@ class ACart  extends ALibBase
     public function getTotal($recalculate = false)
     {
         //check if value already set
-        if (AHelperUtils::has_value($this->total_value) && !$recalculate) {
+        if (H::has_value($this->total_value) && !$recalculate) {
             return $this->total_value;
         }
         $this->total_value = 0.0;
@@ -812,7 +824,7 @@ class ACart  extends ALibBase
     public function getFinalTotal($recalculate = false)
     {
         //check if value already set
-        if (AHelperUtils::has_value($this->total_data) && AHelperUtils::has_value($this->final_total)
+        if (H::has_value($this->total_data) && H::has_value($this->final_total)
             && !$recalculate) {
             return $this->final_total;
         }
@@ -872,7 +884,7 @@ class ACart  extends ALibBase
     public function getFinalTotalData($recalculate = false)
     {
         //check if value already set
-        if (AHelperUtils::has_value($this->total_data) && AHelperUtils::has_value($this->final_total)
+        if (H::has_value($this->total_data) && H::has_value($this->final_total)
             && !$recalculate) {
             return $this->total_data;
         }

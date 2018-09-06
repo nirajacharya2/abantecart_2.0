@@ -87,20 +87,27 @@ class AView
      * @var string
      */
     protected $html_cache_key;
+    /**
+     * @var boolean
+     */
+    protected $is_admin;
 
     /**
      * @param \abc\core\engine\Registry $registry
-     * @param int                       $instance_id
+     * @param int $instance_id
+     *
+     * @param null|bool $is_admin
      *
      * @throws \abc\core\lib\AException
      */
-    public function __construct($registry, $instance_id)
+    public function __construct($registry, $instance_id, $is_admin = null)
     {
         require_once __DIR__.DS.'ViewRenderBase.php';
         $this->registry = $registry;
         $this->has_extensions = $this->registry->has('extensions');
+        $this->is_admin = $is_admin === null ? ABC::env('IS_ADMIN') : $is_admin;
         if ($this->config) {
-            if(ABC::env('IS_ADMIN')){
+            if($this->is_admin){
                 $this->template = $this->config->get('admin_template');
                 $this->default_template = $this->config->get('admin_template');
             }else {
@@ -757,7 +764,7 @@ class AView
         $template = $this->default_template;
         $match = 'original';
         $dir_public = ABC::env('DIR_PUBLIC');
-        $section_dirname = ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
+        $section_dirname = $this->is_admin ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
         $dirname_templates = ABC::env('DIRNAME_TEMPLATES');
         $slash = DS;
         if ($mode == 'relative') {
@@ -767,7 +774,7 @@ class AView
                 $public_dir_pre = $dirname_templates;
             }
         } else {
-            $public_dir_pre = ABC::env('IS_ADMIN') ? $dirname_templates : $dir_public.$dirname_templates;
+            $public_dir_pre = $this->is_admin ? $dirname_templates : $dir_public.$dirname_templates;
         }
 
         $ret_path = $this->getPath(

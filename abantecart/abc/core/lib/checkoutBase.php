@@ -53,15 +53,19 @@ class CheckoutBase extends ALibBase
     /**
      * @var ACart
      */
-    protected $cart;
+    public $cart;
     /**
      * @var ACustomer
      */
-    protected $customer;
+    public $customer;
+    /**
+     * @var ATax
+     */
+    public $tax;
     /**
      * @var array public property. needs to use inside hooks
      */
-    protected $data = [];
+    public $data = [];
 
     /**
      * public property for external validation from hooks
@@ -87,7 +91,9 @@ class CheckoutBase extends ALibBase
         }
         if($data['customer']) {
             $this->customer = $data['customer'];
+            $this->setCustomer($this->customer);
             $this->customer_id = $this->customer->getId();
+
         }
 
         if(is_object($data['order'])){
@@ -118,6 +124,16 @@ class CheckoutBase extends ALibBase
     public function getOrderId()
     {
         return (int)$this->data['order_id'];
+    }
+
+    /**
+     * @param int $order_id
+     *
+     * @return void
+     */
+    public function setOrderId(int $order_id)
+    {
+        $this->data['order_id'] = $order_id;
     }
     /**
      * @param string $rt
@@ -158,7 +174,7 @@ class CheckoutBase extends ALibBase
         /**
          * @var ModelCheckoutExtension $modelCheckoutExtension
          */
-        $modelCheckoutExtension = $this->loadModel('checkout/extension');
+        $modelCheckoutExtension = $this->loadModel('checkout/extension','storefront');
         $results = $modelCheckoutExtension->getExtensions('payment');
         $acceptedPayments = [];
         //#Check config of selected shipping method and see if we have accepted payments restriction
@@ -189,7 +205,7 @@ class CheckoutBase extends ALibBase
                 continue;
             }
 
-            $extModel = $this->loadModel('extension/'.$ext_text_id);
+            $extModel = $this->loadModel('extension/'.$ext_text_id, 'storefront');
             $paymentMethod = $extModel->getMethod($payment_address);
             if ($paymentMethod) {
                 $output[$ext_text_id] = $paymentMethod;
@@ -236,11 +252,11 @@ class CheckoutBase extends ALibBase
         /**
          * @var ModelCheckoutExtension $modelCheckoutExtension
          */
-        $modelCheckoutExtension = $this->loadModel('checkout/extension');
+        $modelCheckoutExtension = $this->loadModel('checkout/extension', 'storefront');
         $results = $modelCheckoutExtension->getExtensions('shipping');
         foreach ($results as $result) {
             $ext_txt_id = $result['key'];
-            $extModel = $this->loadModel('extension/'.$ext_txt_id);
+            $extModel = $this->loadModel('extension/'.$ext_txt_id, 'storefront');
             $quote = $extModel->getQuote($shipping_address);
 
             if ($quote) {
@@ -345,9 +361,9 @@ class CheckoutBase extends ALibBase
     }
 
     /**
-     * @param string $payment_method
+     * @param array $payment_method
      */
-    public function setPaymentMethod(string $payment_method)
+    public function setPaymentMethod(array $payment_method)
     {
         if($this->data['guest']){
             $this->data['guest']['payment_method']  = $payment_method;
@@ -397,6 +413,13 @@ class CheckoutBase extends ALibBase
     {
         return (array)$this->data['shipping_method'];
     }
+    /**
+     * @return array
+     */
+    public function getShippingKey()
+    {
+        return (array)$this->data['shipping_method']['id'];
+    }
 
     /**
      * @param AOrder $order
@@ -415,6 +438,13 @@ class CheckoutBase extends ALibBase
     }
 
     /**
+     * @return ACart
+     */
+    public function getCart()
+    {
+        return $this->cart;
+    }
+    /**
      * @param ACart $cart
      */
     public function setCart(ACart $cart)
@@ -422,21 +452,6 @@ class CheckoutBase extends ALibBase
         $this->cart = $cart;
     }
 
-    /**
-     * @return ACart
-     */
-    public function getCart()
-    {
-        return $this->cart;
-    }
-
-    /**
-     * @param ACustomer $customer
-     */
-    public function setCustomer(ACustomer $customer)
-    {
-        $this->customer = $customer;
-    }
 
     /**
      * @return ACustomer
@@ -444,6 +459,24 @@ class CheckoutBase extends ALibBase
     public function getCustomer()
     {
         return $this->customer;
+    }
+    /**
+     * @param ACustomer $customer
+     */
+    public function setCustomer(ACustomer $customer)
+    {
+        $this->customer = $customer;
+        $c_data = [
+                    'customer_group_id' => $this->customer->getCustomerGroupId(),
+                    'country_id' => ($this->data['shipping_country_id'] ?: $this->data['payment_country_id']),
+                    'zone_id' => ($this->data['shipping_zone_id'] ?: $this->data['payment_zone_id']),
+        ];
+        $this->tax = new ATax( $this->registry, $c_data );
+    }
+
+    public function getTax()
+    {
+        return $this->tax;
     }
 
     /**
@@ -454,6 +487,8 @@ class CheckoutBase extends ALibBase
      * @throws \ReflectionException
      */
     public function confirmOrder($data = []){
+
+        $order_id = (int)$data['order_id'] ?: $this->data['order_id'];
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
@@ -463,7 +498,7 @@ class CheckoutBase extends ALibBase
         $model = $this->loadModel('checkout/order','storefront');
 
         if(!$model){
-            throw new LibException(['Cannot to load model checkout/order to confirm order #'.$this->data['order_id']]);
+            throw new LibException(['Cannot to load model checkout/order to confirm order #'.$order_id]);
         }
 
         $order_status_id = $this->registry->get('config')->get($this->getPaymentKey().'_order_status_id');
@@ -472,7 +507,7 @@ class CheckoutBase extends ALibBase
         }
 
         $model->confirm(
-            $this->data['order_id'],
+            $order_id,
             $order_status_id
         );
     }
@@ -484,7 +519,8 @@ class CheckoutBase extends ALibBase
      * @throws LibException
      */
     public function validatePaymentDetails(array $data = []){
-        $order_id = (int)$this->data['order_id'];
+        $order_id = (int)$this->data['order_id'] ?: $data['order_id'];
+
         if(!$order_id){
             throw new LibException([__CLASS__.'::'.__FUNCTION__.':  Unknown order id!']);
         }
@@ -552,7 +588,6 @@ class CheckoutBase extends ALibBase
             );
         }
 
-        //note: call constructor with checkout class as parameter!
         return new $all_modules[$payment_method]['handlers']['payment']($this->registry, $this);
     }
 }

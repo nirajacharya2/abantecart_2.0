@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,10 +22,6 @@ namespace abc\core\lib;
 
 use abc\core\cache\ACache;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class APromotion
@@ -49,11 +45,11 @@ class APromotion
     /**
      * @var array
      */
-    public $condition_objects = array();
+    public $condition_objects = [];
     /**
      * @var array
      */
-    public $bonus_objects = array();
+    public $bonus_objects = [];
 
     /**
      * @param null /int $customer_group_id
@@ -76,7 +72,7 @@ class APromotion
             }
         }
 
-        $this->condition_objects = array(
+        $this->condition_objects = [
             'product_price',
             'categories',
             'brands',
@@ -91,14 +87,14 @@ class APromotion
             'payment_method',
             'shipping_method',
             'coupon_code',
-        );
-        $this->bonus_objects = array(
+        ];
+        $this->bonus_objects = [
             'order_discount',
             'free_shipping',
             'discount_products',
             'free_products',
 
-        );
+        ];
     }
 
     public function __get($key)
@@ -136,6 +132,7 @@ class APromotion
      * @param int $discount_quantity
      *
      * @return float
+     * @throws \Exception
      */
     public function getProductQtyDiscount($product_id, $discount_quantity)
     {
@@ -158,7 +155,8 @@ class APromotion
                 WHERE product_id = '".(int)$product_id."'
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity <= '".(int)$discount_quantity."'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start = '0000-00-00' OR date_start < NOW()) 
+                                AND (date_end = '0000-00-00' OR date_end > NOW()))
                 ORDER BY quantity DESC, priority ASC, price ASC
                 LIMIT 1";
         $product_discount_query = $this->db->query($sql);
@@ -172,6 +170,7 @@ class APromotion
      * @param int $product_id
      *
      * @return bool|float
+     * @throws \Exception
      */
     public function getProductDiscount($product_id)
     {
@@ -208,6 +207,7 @@ class APromotion
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductDiscounts($product_id)
     {
@@ -236,6 +236,7 @@ class APromotion
      * @param int $product_id
      *
      * @return null|float
+     * @throws \Exception
      */
     public function getProductSpecial($product_id)
     {
@@ -268,10 +269,11 @@ class APromotion
      *
      * @param string $sort
      * @param string $order
-     * @param int    $start
-     * @param int    $limit
+     * @param int $start
+     * @param int $limit
      *
      * @return array
+     * @throws \Exception
      */
     public function getProductSpecials($sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 20)
     {
@@ -282,12 +284,12 @@ class APromotion
 
         $cache_key = 'product.specials.'.$customer_group_id;
         $cache_key .= $this->cache->paramsToString(
-            array(
+            [
                 'sort'  => $sort,
                 'order' => $order,
                 'start' => (int)$start,
                 'limit' => (int)$limit,
-            ));
+            ]);
         $cache_key .= '.store_'.$store_id.'.lang_'.$language_id;
 
         $cache = $this->cache->pull($cache_key);
@@ -316,13 +318,13 @@ class APromotion
                     AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
-        $sort_data = array(
+        $sort_data = [
             'pd.name',
             'p.sort_order',
             'ps.price',
             'rating',
             'date_modified',
-        );
+        ];
 
         if (in_array($sort, $sort_data)) {
             if ($sort == 'pd.name') {
@@ -361,8 +363,9 @@ class APromotion
      * @param array $data
      *
      * @return array
+     * @throws \Exception
      */
-    public function getSpecialProducts($data = array())
+    public function getSpecialProducts($data = [])
     {
 
         $data['sort'] = !isset($data['sort']) ? 'p.sort_order' : $data['sort'];
@@ -417,13 +420,13 @@ class APromotion
                     AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
-        $sort_data = array(
+        $sort_data = [
             'pd.name',
             'p.sort_order',
             'ps.price',
             'rating',
             'date_modified',
-        );
+        ];
 
         if (in_array($data['sort'], $sort_data)) {
             if ($data['sort'] == 'pd.name') {
@@ -458,6 +461,7 @@ class APromotion
 
     /**
      * @return int
+     * @throws \Exception
      */
     public function getTotalProductSpecials()
     {
@@ -494,32 +498,36 @@ class APromotion
      * @param string $coupon_code
      *
      * @return array
+     * @throws AException
      */
     public function getCouponData($coupon_code)
     {
         if (empty ($coupon_code)) {
-            return array();
+            return [];
         }
 
         $status = true;
-        $coupon_query = $this->db->query("SELECT *
-                                          FROM ".$this->db->table_name("coupons")." c
-                                          LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
-                                                ON (c.coupon_id = cd.coupon_id AND cd.language_id = '"
-            .(int)$this->config->get('storefront_language_id')."' )
-                                          WHERE c.code = '".$this->db->escape($coupon_code)."'
-                                                AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                                AND (date_end = '0000-00-00' OR date_end > NOW()))
-                                                AND c.status = '1'");
-        $coupon_product_data = array();
+        $sql = "SELECT *
+              FROM ".$this->db->table_name("coupons")." c
+              LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
+                    ON (c.coupon_id = cd.coupon_id 
+                        AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
+              WHERE c.code = '".$this->db->escape($coupon_code)."'
+                    AND ((date_start = '0000-00-00' OR date_start < NOW())
+                    AND (date_end = '0000-00-00' OR date_end > NOW()))
+                    AND c.status = '1'";
+
+        $coupon_query = $this->db->query($sql);
+        $coupon_product_data = [];
         if ($coupon_query->num_rows) {
             if ($coupon_query->row['total'] > $this->cart->getSubTotal()) {
                 $status = false;
             }
-            $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
-                                                     FROM `".$this->db->table_name("orders")."`
-                                                     WHERE order_status_id > '0' AND coupon_id = '"
-                .(int)$coupon_query->row['coupon_id']."'");
+            $coupon_redeem_query = $this->db->query(
+                "SELECT COUNT(*) AS total
+                 FROM `".$this->db->table_name("orders")."`
+                 WHERE order_status_id > '0' 
+                    AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
 
             if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total']
                 && $coupon_query->row['uses_total'] > 0) {
@@ -530,11 +538,12 @@ class APromotion
             }
 
             if (!is_null($this->customer) && $this->customer->getId()) {
-                $coupon_redeem_query = $this->db->query("SELECT COUNT(*) AS total
-                                                         FROM `".$this->db->table_name("orders")."`
-                                                         WHERE order_status_id > '0'
-                                                                AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'
-                                                                AND customer_id = '".(int)$this->customer->getId()."'");
+                $coupon_redeem_query = $this->db->query(
+                    "SELECT COUNT(*) AS total
+                     FROM `".$this->db->table_name("orders")."`
+                     WHERE order_status_id > '0'
+                            AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'
+                            AND customer_id = '".(int)$this->customer->getId()."'");
 
                 if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer']
                     && $coupon_query->row['uses_customer'] > 0) {
@@ -542,9 +551,10 @@ class APromotion
                 }
             }
 
-            $coupon_product_query = $this->db->query("SELECT *
-                                                       FROM ".$this->db->table_name("coupons_products")."
-                                                       WHERE coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
+            $coupon_product_query = $this->db->query(
+                "SELECT *
+                 FROM ".$this->db->table_name("coupons_products")."
+                 WHERE coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
 
             foreach ($coupon_product_query->rows as $result) {
                 $coupon_product_data[] = $result['product_id'];
@@ -570,7 +580,7 @@ class APromotion
         }
 
         if ($status) {
-            $coupon_data = array(
+            $coupon_data = [
                 'coupon_id'     => $coupon_query->row['coupon_id'],
                 'code'          => $coupon_query->row['code'],
                 'name'          => $coupon_query->row['name'],
@@ -585,12 +595,12 @@ class APromotion
                 'uses_customer' => $coupon_query->row['uses_customer'],
                 'status'        => $coupon_query->row['status'],
                 'date_added'    => $coupon_query->row['date_added'],
-            );
+            ];
 
             return $coupon_data;
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -621,7 +631,7 @@ class APromotion
      */
     public function _apply_promotions($total_data, $total)
     {
-        return array();
+        return [];
     }
 
 }

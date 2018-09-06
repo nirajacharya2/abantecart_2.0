@@ -217,6 +217,10 @@
 		<value><![CDATA[Customer details]]></value>
 	</definition>
 	<definition>
+		<key>text_create_order</key>
+		<value><![CDATA[Create New Order]]></value>
+	</definition>
+	<definition>
 		<key>tab_transactions</key>
 		<value><![CDATA[Transactions]]></value>
 	</definition>
