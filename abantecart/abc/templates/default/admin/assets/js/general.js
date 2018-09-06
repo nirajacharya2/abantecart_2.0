@@ -1265,3 +1265,12 @@ jQuery.fn.extend({
 		return params;
 	};
 })(jQuery);
+
+//Load modal forms from href of button
+$('.modal').on('show.bs.modal', function (e) {
+	var button = $(e.relatedTarget);
+	var modal = $(this);
+	if (button.attr('href') != undefined && button.attr('data-toggle') == 'modal' ) {
+		modal.find('.modal-content').load(button.attr('href'));
+	}
+});
