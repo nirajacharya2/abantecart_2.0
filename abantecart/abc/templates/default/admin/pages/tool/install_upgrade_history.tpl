@@ -8,7 +8,7 @@
 				   title="<?php echo $delete_button->title; ?>"
 				   href="<?php echo $delete_button->href; ?>"
 				   data-confirmation="delete"
-						><i class="fa fa-trash-o fa-fw"></i> <?php echo $delete_button->title; ?></a>
+						><i class="fa fa-trash-alt fa-fw"></i> <?php echo $delete_button->title; ?></a>
 			</div>
 		</div>
 

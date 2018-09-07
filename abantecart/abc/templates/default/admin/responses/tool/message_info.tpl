@@ -25,7 +25,7 @@
 			<div class="col-sm-12 center">
 				<?php if(!$readonly){?>
 				<a id="delete_message" data-confirmation="delete" class="btn btn-primary" onclick="delete_msg();">
-					<i class="fa fa-trash-o"></i> <?php echo $button_delete; ?>
+					<i class="fa fa-trash-alt"></i> <?php echo $button_delete; ?>
 				</a>&nbsp;
 				<?php } ?>
 				<a class="btn btn-default" data-dismiss="modal" href=""><?php echo $button_close; ?></a>

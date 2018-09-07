@@ -11,7 +11,7 @@
 		    <div class="input-group input-group-sm afield"><?php
 			    echo $form['fields']['option_value'];
 			    if($option_data['element_type'] == 'T'){?>
-				    <a class="input-group-addon btn btn-xs btn-default" data-toggle="modal" data-target="#option_value_modal"><i class="fa fa-pencil"></i></a>
+				    <a class="input-group-addon btn btn-xs btn-default" data-toggle="modal" data-target="#option_value_modal"><i class="fa fa-pencil-alt"></i></a>
 			    <?php }
 			    ?></div>
 	    </td>

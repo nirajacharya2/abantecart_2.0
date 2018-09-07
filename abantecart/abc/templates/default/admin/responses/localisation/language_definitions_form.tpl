@@ -76,7 +76,7 @@
 				</button>
 				&nbsp;
 				<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-					<i class="fa fa-close"></i> <?php echo $button_close; ?>
+					<i class="fa fa-times"></i> <?php echo $button_close; ?>
 				</a>
 			</div>
 	</div>

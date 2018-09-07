@@ -51,14 +51,14 @@
 			   data-confirmation="delete"
 			   data-confirmation-text="<?php echo $text_confirm_delete; ?>"
 			   data-original-title="<?php echo $button_delete; ?>">
-			   	<i class="fa fa-trash-o"></i>
+			   	<i class="fa fa-trash-alt"></i>
 			</a>
 		<?php
 		} else {
 		?>
 			<a class="btn btn-default disabled rl_delete tooltips" href="#" data-original-title="<?php echo $error_delete; ?>">
 				<span class="fa-stack fa-lg">
-			   		<i class="fa fa-trash-o fa-stack-1x"></i>
+			   		<i class="fa fa-trash-alt fa-stack-1x"></i>
 			   		<i class="fa fa-ban fa-stack-2x text-danger"></i>
 			   </span>
 			</a>
@@ -208,7 +208,7 @@
 		<?php } ?>
 	</div>
 	<!-- col-sm-6 -->
-	<div class="col-xs-12">
+	<div class="col-xs-12 fullwidth">
 		<?php if ($mode == 'new') { ?>
 			<div class="form-group">
 				<div class="input-group afield col-sm-12">
@@ -261,15 +261,15 @@
 			&nbsp;
 			<?php if ($mode == 'single') { ?>
 				<a class="btn btn-primary rl_save rl_select tooltips" data-rl-id="<?php echo $resource_id; ?>" data-type="<?php echo $type; ?>"  title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } elseif ($mode == 'list_all') { ?>
 				<a class="btn btn-primary rl_save rl_close tooltips" data-rl-id="<?php echo $resource_id; ?>" data-type="<?php echo $type; ?>"  title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } else { ?>
 				<a class="btn btn-primary rl_link rl_save rl_close tooltips" href="#" title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } ?>
 		</div>
