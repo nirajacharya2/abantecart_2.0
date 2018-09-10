@@ -103,7 +103,7 @@
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 				<?php if($name == 'email') { ?>
-				<span class="input-group-btn">
+				<span class="input-group-prepend">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
 					<i class="fa fa-envelope fa-fw"></i>
 					</a>

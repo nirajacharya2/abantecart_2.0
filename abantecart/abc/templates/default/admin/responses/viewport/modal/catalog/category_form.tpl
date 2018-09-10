@@ -30,7 +30,7 @@
 				<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 				<div class="input-group afield <?php echo $widthcasses; ?>">
 					<?php if($name == 'keyword') { ?>
-					<span class="input-group-btn">
+					<span class="input-group-prepend">
 						<?php echo $keyword_button; ?>
 					</span>
 					<?php }  ?>

@@ -1,14 +1,14 @@
 <input name="<?php echo $name; ?>" id="<?php echo $id; ?>" type="file" class="file <?php echo $style; ?>" multiple="false" <?php echo $attr; ?>>
 <?php if ( $required == 'Y' || !empty ($help_url) ) { ?>
-	<span class="input-group-addon">
+	<div class="input-group-append">
 	<?php if ( $required == 'Y') { ?> 
-		<span class="required">*</span>
+		<span class="input-group-text required">*</span>
 	<?php } ?>	
 
 	<?php if ( !empty ($help_url) ) { ?>
-	<span class="help_element"><a href="<?php echo $help_url; ?>" target="new"><i class="fa fa-question-circle fa-lg"></i></a></span>
+	<span class="input-group-text help_element"><a href="<?php echo $help_url; ?>" target="new"><i class="fa fa-question-circle fa-lg"></i></a></span>
 	<?php } ?>	
-	</span>
+	</div>
 <?php } ?>
 <script type="text/javascript">
 jQuery(document).ready(function() {

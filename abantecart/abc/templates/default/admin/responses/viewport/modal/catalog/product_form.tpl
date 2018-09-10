@@ -37,7 +37,7 @@
 
 					<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 						<?php if ($name == 'keyword'){ ?>
-							<span class="input-group-btn">
+							<span class="input-group-prepend">
 					<?php echo $keyword_button; ?>
 				</span>
 						<?php } ?>

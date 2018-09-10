@@ -1,15 +1,15 @@
 <input type="<?php echo $type ?>" name="<?php echo $name ?>" id="<?php echo $id ?>" value="<?php echo $value; ?>" data-orgvalue="<?php echo $value; ?>" <?php echo $attr; ?> class="form-control adate <?php echo $style; ?>" placeholder="<?php echo $placeholder ?>" />
 
 <?php if ( $required == 'Y' || !empty ($help_url) ) { ?>
-	<span class="input-group-addon">
+<div class="input-group-append">
 	<?php if ( $required == 'Y') { ?> 
-		<span class="required">*</span>
+		<span class="input-group-text required">*</span>
 	<?php } ?>	
 
 	<?php if ( !empty ($help_url) ) { ?>
-	<span class="help_element"><a href="<?php echo $help_url; ?>" target="new"><i class="fa fa-question-circle fa-lg"></i></a></span>
+	<span class="input-group-text help_element"><a href="<?php echo $help_url; ?>" target="new"><i class="fa fa-question-circle fa-lg"></i></a></span>
 	<?php } ?>	
-	</span>
+	</div>
 <?php } ?>
 
 <script type="text/javascript">

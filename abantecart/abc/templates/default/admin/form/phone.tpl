@@ -9,7 +9,9 @@
 		<?php echo $regexp_pattern ? 'pattern="'.$regexp_pattern.'"':'';?>
 		<?php echo $error_text ? 'title="'.$error_text.'"':'';?>/>
 <?php if ( $required == 'Y' ) { ?>
-<span class="input-group-addon"><span class="required">*</span></span>
+<div class="input-group-append">
+	<span class="input-group-text required">*</span>
+</div>
 <?php } ?>
 
 <script type="application/javascript">

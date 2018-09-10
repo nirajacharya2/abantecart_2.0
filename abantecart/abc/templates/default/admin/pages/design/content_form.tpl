@@ -54,7 +54,7 @@
 			<div id="field_<?php echo $name; ?>"
 			     class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'content' ? 'ml_ckeditor' : '') ?>">
 				<?php if ($name == 'keyword'){ ?>
-					<span class="input-group-btn">
+					<span class="input-group-prepend">
 					<?php echo $keyword_button; ?>
 				</span>
 				<?php } ?>
