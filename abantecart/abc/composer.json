@@ -92,7 +92,7 @@
       "type": "package",
       "package": {
         "name": "components/jquery-cookie",
-        "version": "1.4.1.2",
+        "version": "2.2.0",
         "dist": {
           "url": "https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js",
           "type": "file"
