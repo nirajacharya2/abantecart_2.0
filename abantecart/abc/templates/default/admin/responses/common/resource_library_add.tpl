@@ -1,7 +1,7 @@
 <div id="rl_add_container">
 	<ul class="nav nav-tabs nav-justified nav-profile">
-		<li class="active" id="add_resource"  data-type="<?php echo $type; ?>">
-			<a class="widthM300" href="javascript:void(0);"><strong><i class="fa fa-plus fa-fw"></i> <?php echo $button_add; ?></strong></a>
+		<li class="nav-item" id="add_resource"  data-type="<?php echo $type; ?>">
+			<a class="nav-link active widthM300" href="javascript:void(0);"><strong><i class="fa fa-plus fa-fw"></i> <?php echo $button_add; ?></strong></a>
 		</li>
 	</ul>
 
@@ -34,9 +34,10 @@
 				$active = $type==$rl_type['type_name'] || (!$type && $rl_type['type_name']=='image') ? 'active' : '';
 				?>
 	        <li class="<?php echo $active; ?>" >
-				  <a class="actionitem tooltips" data-toggle="tooltip" data-placement="bottom" title="<?php echo $text_type.': '.$rl_type['type_name']; ?>"
-					 onclick="return false;" href="#"> 
-					 <i class="fa <?php echo $icon; ?>"></i>
+			<li class="nav-item" data-type="<?php echo $rl_type['type_name']; ?>">
+				<a class="nav-link <?php echo $active; ?> actionitem tooltips" title="<?php echo $text_type.': '.$rl_type['type_name']; ?>"
+				   onclick="return false;" href="#">
+				<i class="fa <?php echo $icon; ?>"></i>
 				  </a>
 	        </li>
 	        <?php } ?>
