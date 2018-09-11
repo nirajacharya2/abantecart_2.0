@@ -2,10 +2,10 @@
 
 <?php if ($update) { ?>
 	<ul class="nav nav-tabs nav-justified nav-profile">
-		<li class="active">
-		<a href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
-		<li>
-		<a href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
+		<li class="nav-item">
+		<a class="nav-link active" href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
+		<li class="nav-item">
+		<a class="nav-link" href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
 		<?php echo $this->getHookVar('extension_tabs'); ?>
 	</ul>
 <?php } ?>
