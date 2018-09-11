@@ -102,6 +102,9 @@ h4, .h4 {
 .form-inline .checkbox {
    margin-right: 20px;
 }
+.input-group {
+   max-width: none;
+}
 .input-group input[type="checkbox"], 
 .input-group input[type="radio"] {
     float: left;
@@ -798,7 +801,7 @@ h4, .h4 {
 }
 
 .modal-header .close {
-   margin-top: 4px;
+/*   margin-top: 4px; */
 }
 .modal-header a.btn {
 	float: right;
