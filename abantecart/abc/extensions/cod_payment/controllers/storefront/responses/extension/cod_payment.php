@@ -19,7 +19,6 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
-use abc\core\lib\AJson;
 
 class ControllerResponsesExtensionCodPayment extends AController
 {

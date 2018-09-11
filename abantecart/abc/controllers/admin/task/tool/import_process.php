@@ -18,7 +18,6 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
-use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AData;
 use abc\core\lib\AError;
@@ -33,7 +32,7 @@ use abc\core\lib\ATaskManager;
  */
 class ControllerTaskToolImportProcess extends AController
 {
-    public $data = array();
+    public $data = [];
     protected $success_count = 0;
     protected $failed_count = 0;
 
@@ -57,7 +56,7 @@ class ControllerTaskToolImportProcess extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $output = array('result' => $result);
+        $output = ['result' => $result];
         if ($result) {
             $output['message'] = $this->success_count.' rows processed.';
             if ($this->failed_count) {
@@ -88,9 +87,9 @@ class ControllerTaskToolImportProcess extends AController
             $this->returnError($error_text);
         }
         //record the start
-        $tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
+        $tm->updateStep($step_id, ['last_time_run' => date('Y-m-d H:i:s')]);
 
-        $return = array();
+        $return = [];
         $start = $step_info['settings']['start'];
         $stop = $step_info['settings']['stop'];
         $filename = $import_details['file'];
@@ -110,7 +109,7 @@ class ControllerTaskToolImportProcess extends AController
                 if ($csv_array) {
                     $results = $a_data->importData($csv_array);
                 } else {
-                    $results = array('error' => true);
+                    $results = ['error' => true];
                 }
 
                 if (isset($results['error'])) {
@@ -132,7 +131,7 @@ class ControllerTaskToolImportProcess extends AController
                 $step_failed_count = 0;
 
                 foreach ($records as $index => $rowData) {
-                    $vals = array();
+                    $vals = [];
                     //check if we match row data count to header
 
                     if (count($rowData) != count($columns)) {
@@ -182,9 +181,9 @@ class ControllerTaskToolImportProcess extends AController
         $task_settings['success_count'] = (int)$task_info['settings']['success_count'] + $this->success_count;
         $task_settings['failed_count'] = (int)$task_info['settings']['failed_count'] + $this->failed_count;
 
-        $tm->updateTaskDetails($task_id, array('settings' => $task_settings));
+        $tm->updateTaskDetails($task_id, ['settings' => $task_settings]);
         //sends always true as result
-        $tm->updateStep($step_id, array('last_result' => $this->failed_count ? false : true));
+        $tm->updateStep($step_id, ['last_result' => $this->failed_count ? false : true]);
         //all done, clear cache
         $this->cache->remove('*');
         //return always true fo import process only. we think one failed row cannot block task
@@ -194,20 +193,20 @@ class ControllerTaskToolImportProcess extends AController
     protected function readFileSeek($source, $delimiter, $enclosure = '"', $line_num = 1, $range = 1)
     {
         if (!$source) {
-            return array();
+            return [];
         }
 
         ini_set('auto_detect_line_endings', true);
         $fh = fopen($source, 'r');
         if (!$fh || !is_resource($fh)) {
-            return array();
+            return [];
         }
 
         $lineNo = 0;
         $startLine = $line_num;
         $endLine = $line_num + $range;
         //always return first line with header
-        $buffer = array(0 => fgetcsv($fh, 0, $delimiter, $enclosure));
+        $buffer = [0 => fgetcsv($fh, 0, $delimiter, $enclosure)];
         while (($data = fgetcsv($fh, 0, $delimiter, $enclosure)) !== false) {
             if ($lineNo >= $startLine) {
                 $buffer[] = $data;
@@ -226,10 +225,10 @@ class ControllerTaskToolImportProcess extends AController
         $error = new AError($error_text);
         $error->toLog()->toDebug();
         return $error->toJSONResponse('APP_ERROR_402',
-            array(
+            [
                 'error_text'  => $error_text,
                 'reset_value' => true,
-            ));
+            ]);
     }
 
 }

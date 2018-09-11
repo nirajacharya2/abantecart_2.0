@@ -1,4 +1,3 @@
-<?php use abc\core\helper\AHelperUtils; ?>
 <div class="modal-header">
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i

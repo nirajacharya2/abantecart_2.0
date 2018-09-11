@@ -20,6 +20,7 @@
 namespace abc\models\base;
 
 use abc\core\ABC;
+use abc\core\lib\AResourceManager;
 use abc\models\AModelBase;
 
 /**
@@ -36,7 +37,6 @@ use abc\models\AModelBase;
  * @property string $regexp_pattern
  * @property string $settings
  * @property ProductOptionValue $option_values
- *
  * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $product_option_values

@@ -27,21 +27,19 @@ use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\extensions\forms_manager\models\admin\tool\ModelToolFormsManager;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 /**
  * Class ControllerResponsesFormsManagerFields
  *
- * @property \abc\models\admin\ModelToolFormsManager $model_tool_forms_manager
+ * @property ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerResponsesFormsManagerFields extends AController
 {
 
-    public $data = array();
-    public $error = array();
+    public $data = [];
+    public $error = [];
 
     public function get_fields_list()
     {
@@ -60,11 +58,11 @@ class ControllerResponsesFormsManagerFields extends AController
         $this->loadLanguage( 'forms_manager/forms_manager' );
         $this->loadModel( 'tool/forms_manager' );
 
-        if ( ! $this->_validateFieldForm( $this->request->post ) || ! $this->request->get['form_id'] ) {
+        if ( ! $this->validateFieldForm( $this->request->post ) || !$this->request->get['form_id'] ) {
             $error = new AError( '' );
 
             return $error->toJSONResponse( 'VALIDATION_ERROR_406',
-                array( 'error_text' => $this->error ) );
+                ['error_text' => $this->error]);
         }
 
         $this->model_tool_forms_manager->addField( $this->request->get['form_id'], $this->request->post );
@@ -76,11 +74,11 @@ class ControllerResponsesFormsManagerFields extends AController
         $this->loadLanguage( 'forms_manager/forms_manager' );
         $this->loadModel( 'tool/forms_manager' );
 
-        if ( ! $this->_validateFieldForm( $this->request->post ) || ! $this->request->get['form_id'] ) {
+        if ( ! $this->validateFieldForm( $this->request->post ) || !$this->request->get['form_id'] ) {
             $error = new AError( '' );
 
             return $error->toJSONResponse( 'VALIDATION_ERROR_406',
-                array( 'error_text' => $this->error ) );
+                ['error_text' => $this->error]);
         }
 
         $data = $this->request->post;
@@ -90,7 +88,7 @@ class ControllerResponsesFormsManagerFields extends AController
         $this->response->setOutput( '' );
     }
 
-    private function _validateFieldForm( $data )
+    protected function validateFieldForm( $data )
     {
         if ( ! $this->user->hasPermission( 'modify', 'forms_manager/fields' ) ) {
             $this->error['warning'] = $this->language->get( 'error_permission' );
@@ -172,94 +170,94 @@ class ControllerResponsesFormsManagerFields extends AController
 
         $this->data['element_types'] = HtmlElementFactory::getAvailableElements();
         $this->data['elements_with_options'] = HtmlElementFactory::getElementsWithOptions();
-        $this->data['no_set_values_elements'] = array(
+        $this->data['no_set_values_elements'] = [
             'K' => 'captcha',
             'D' => 'date',
             'A' => 'IPaddress',
             'O' => 'countries',
             'Z' => 'zones',
-        );
+        ];
 
         $this->data['selectable'] = in_array( $this->data['field_data']['element_type'], $this->data['elements_with_options'] ) ? 1 : 0;
         $this->data['field_type'] = $this->data['element_types'][$this->data['field_data']['element_type']]['type'];
 
-        $this->data['field_name'] = $this->html->buildInput( array(
+        $this->data['field_name'] = $this->html->buildInput( [
             'name'     => 'field_name',
             'value'    => $this->data['field_data']['field_name'],
             'required' => true,
-        ) );
+        ]);
 
-        $this->data['field_description'] = $this->html->buildElement( array(
+        $this->data['field_description'] = $this->html->buildElement( [
             'type'     => 'input',
             'name'     => 'field_description',
             'value'    => $this->data['field_data']['name'],
             'required' => true,
-        ) );
+        ]);
 
-        $this->data['field_note'] = $this->html->buildElement( array(
+        $this->data['field_note'] = $this->html->buildElement( [
             'type'  => 'input',
             'name'  => 'field_note',
             'value' => $this->data['field_data']['description'],
-        ) );
+        ]);
 
         $this->data['entry_status'] = $this->language->get( 'forms_manager_status' );
-        $this->data['status'] = $this->html->buildElement( array(
+        $this->data['status'] = $this->html->buildElement( [
             'type'  => 'checkbox',
             'name'  => 'status',
             'value' => $this->data['field_data']['status'],
             'style' => 'btn_switch btn-group-xs',
-        ) );
-        $this->data['field_sort_order'] = $this->html->buildElement( array(
+        ]);
+        $this->data['field_sort_order'] = $this->html->buildElement( [
             'type'  => 'input',
             'name'  => 'sort_order',
             'value' => $this->data['field_data']['sort_order'],
             'style' => 'small-field',
-        ) );
-        $this->data['required'] = $this->html->buildElement( array(
+        ]);
+        $this->data['required'] = $this->html->buildElement( [
             'type'  => 'checkbox',
             'name'  => 'required',
             'value' => ( $this->data['field_data']['required'] == 'Y' ) ? 1 : 0,
             'style' => 'btn_switch btn-group-xs',
-        ) );
+        ]);
 
-        if ( ! in_array( $this->data['field_data']['element_type'], array( 'U', 'K' ) ) ) {
-            $this->data['field_regexp_pattern'] = $this->html->buildElement( array(
+        if ( ! in_array( $this->data['field_data']['element_type'], ['U', 'K']) ) {
+            $this->data['field_regexp_pattern'] = $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'regexp_pattern',
                 'value' => $this->data['field_data']['regexp_pattern'],
                 'style' => 'large-field',
-            ) );
+            ]);
 
-            $this->data['field_error_text'] = $this->html->buildElement( array(
+            $this->data['field_error_text'] = $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'error_text',
                 'value' => $this->data['field_data']['error_text'],
                 'style' => 'large-field',
-            ) );
+            ]);
         }
         if ( $this->data['field_data']['element_type'] == 'U' ) {
             $this->data['field_settings'] = $this->_file_upload_settings_form();
         }
 
-        $this->data['hidden_element_type'] = $this->html->buildElement( array(
+        $this->data['hidden_element_type'] = $this->html->buildElement( [
             'type'  => 'hidden',
             'name'  => 'element_type',
             'value' => $this->data['field_data']['element_type'],
-        ) );
+        ]);
 
-        $this->data['button_remove_field'] = $this->html->buildElement( array(
+        $this->data['button_remove_field'] = $this->html->buildElement( [
             'type' => 'button',
             'href' => $this->html->getSecureURL( 'tool/forms_manager/removeField', '&form_id='.$this->request->get['form_id'].'&field_id='.$this->request->get['field_id'] ),
             'text' => $this->language->get( 'button_remove_field' ),
-        ) );
-        $this->data['button_save'] = $this->html->buildElement( array(
+        ]);
+        $this->data['button_save'] = $this->html->buildElement( [
             'type' => 'button',
             'text' => $this->language->get( 'button_save' ),
-        ) );
-        $this->data['button_reset'] = $this->html->buildElement( array(
+        ]);
+        $this->data['button_reset'] = $this->html->buildElement( [
             'type' => 'button',
             'text' => $this->language->get( 'button_reset' ),
-        ) );
+        ]);
 
         $this->data['update_field_values'] = $this->html->getSecureURL(
             'forms_manager/fields/update_field_values',
@@ -275,40 +273,40 @@ class ControllerResponsesFormsManagerFields extends AController
 
         // form of option values list
         $form = new AForm( 'HT' );
-        $form->setForm( array( 'form_name' => 'update_field_values' ) );
+        $form->setForm( ['form_name' => 'update_field_values']);
         $this->data['form']['id'] = 'update_field_values';
-        $this->data['update_field_values_form']['open'] = $form->getFieldHtml( array(
+        $this->data['update_field_values_form']['open'] = $form->getFieldHtml( [
             'type'   => 'form',
             'name'   => 'update_field_values',
             'action' => $this->data['update_field_values'],
-        ) );
+        ]);
 
         //form of option
         $form = new AForm( 'HT' );
-        $form->setForm( array(
+        $form->setForm( [
             'form_name' => 'field_value_form',
-        ) );
+        ]);
 
         $this->data['form']['id'] = 'field_value_form';
-        $this->data['form']['form_open'] = $form->getFieldHtml( array(
+        $this->data['form']['form_open'] = $form->getFieldHtml( [
             'type'   => 'form',
             'name'   => 'field_value_form',
             'action' => $this->data['update_field_values'],
-        ) );
+        ]);
 
         //Load option values rows
-        $this->data['field_values'] = array();
+        $this->data['field_values'] = [];
 
-        if ( ! in_array( $this->data['field_data']['element_type'], array( 'U', 'K' ) ) ) {
+        if ( ! in_array( $this->data['field_data']['element_type'], ['U', 'K']) ) {
             if ( ! empty( $this->data['field_data']['values'] ) ) {
-                usort( $this->data['field_data']['values'], array( 'self', '_sort_by_sort_order' ) );
+                usort( $this->data['field_data']['values'], ['self', '_sort_by_sort_order']);
 
                 foreach ( $this->data['field_data']['values'] as $key => $item ) {
                     $item['id'] = $key;
                     $this->data['field_values'][$key]['row'] = $this->_field_value_form( $item, $form );
                 }
             } else {
-                $this->data['field_values']['new']['row'] = $this->_field_value_form( array(), $form );
+                $this->data['field_values']['new']['row'] = $this->_field_value_form( [], $form );
             }
         }
 
@@ -318,10 +316,10 @@ class ControllerResponsesFormsManagerFields extends AController
             && ! in_array( $this->data['field_type'], $this->data['no_set_values_elements'] )
         ) {
 
-            $this->data['new_value_row'] = $this->_field_value_form( array(), $form );
+            $this->data['new_value_row'] = $this->_field_value_form( [], $form );
         }
 
-        $this->data['new_value_row'] = $this->_field_value_form( array(), $form );
+        $this->data['new_value_row'] = $this->_field_value_form( [], $form );
 
         $this->view->batchAssign( $this->data );
         $this->processTemplate( 'responses/forms_manager/field_values.tpl' );
@@ -343,15 +341,15 @@ class ControllerResponsesFormsManagerFields extends AController
      * @param AForm $form
      *
      * @return string
+     * @throws \Exception
      */
     private function _field_value_form( $item, $form )
     {
 
-        if ( in_array( $this->data['field_data']['element_type'], array( 'U', 'K' ) ) ) {
-            return array();
+        if ( in_array( $this->data['field_data']['element_type'], ['U', 'K']) ) {
+            return '';
         }
 
-        $field_value_id = '';
         if ( isset( $item['id'] ) ) {
             $field_value_id = $item['id'];
             $this->data['row_id'] = 'row'.$field_value_id;
@@ -361,26 +359,26 @@ class ControllerResponsesFormsManagerFields extends AController
             $this->data['row_id'] = 'new_row';
         }
 
-        $this->data['form']['fields']['field_value_id'] = $form->getFieldHtml( array(
+        $this->data['form']['fields']['field_value_id'] = $form->getFieldHtml( [
             'type'  => 'hidden',
             'name'  => 'field_value_id['.$field_value_id.']',
             'value' => $field_value_id,
-        ) );
+        ]);
 
-        $this->data['form']['fields']['field_value'] = $form->getFieldHtml( array(
+        $this->data['form']['fields']['field_value'] = $form->getFieldHtml( [
             'type'  => ( $this->data['field_data']['element_type'] == 'T' ) ? 'textarea' : 'input',
             'name'  => 'name['.$field_value_id.']',
             'value' => $item['name'],
             'style' => 'large-field',
-        ) );
+        ]);
 
         if ( in_array( $this->data['field_data']['element_type'], $this->data['elements_with_options'] ) ) {
-            $this->data['form']['fields']['sort_order'] = $form->getFieldHtml( array(
+            $this->data['form']['fields']['sort_order'] = $form->getFieldHtml( [
                 'type'  => 'input',
                 'name'  => 'sort_order['.$field_value_id.']',
                 'value' => (int)$item['sort_order'],
                 'style' => 'small-field',
-            ) );
+            ]);
         }
 
         $this->view->batchAssign( $this->data );
@@ -390,43 +388,44 @@ class ControllerResponsesFormsManagerFields extends AController
 
     /**
      * @return string
+     * @throws \Exception
      */
     private function _file_upload_settings_form()
     {
 
         $this->loadLanguage( 'catalog/attribute' );
-        $this->data['form']['settings_fields'] = array(
-            'extensions' => $this->html->buildElement( array(
+        $this->data['form']['settings_fields'] = [
+            'extensions' => $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'settings[extensions]',
                 'value' => $this->data['field_data']['settings']['extensions'],
                 'style' => 'no-save',
-            ) ),
-            'min_size'   => $this->html->buildElement( array(
+            ]),
+            'min_size'   => $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'settings[min_size]',
                 'value' => $this->data['field_data']['settings']['min_size'],
                 'style' => 'small-field no-save',
-            ) ),
-            'max_size'   => $this->html->buildElement( array(
+            ]),
+            'max_size'   => $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'settings[max_size]',
                 'value' => $this->data['field_data']['settings']['max_size'],
                 'style' => 'small-field no-save',
-            ) ),
-            'directory'  => $this->html->buildElement( array(
+            ]),
+            'directory'  => $this->html->buildElement( [
                 'type'  => 'input',
                 'name'  => 'settings[directory]',
                 'value' => trim( $this->data['field_data']['settings']['directory'], '/' ),
                 'style' => 'no-save',
-            ) ),
-        );
+            ]),
+        ];
 
         $this->data['entry_upload_dir'] = sprintf( $this->language->get( 'entry_upload_dir' ), 'admin/system/uploads/' );
-        $uplds_dir = ABC::env( 'DIR_APP' ).'/system/uploads';
-        $settgs_dir = $uplds_dir.'/'.trim( $this->data['attribute_data']['settings']['directory'], '/' );
+        $uploadsDir = ABC::env( 'DIR_APP' ).'/system/uploads';
+        $settingsDir = $uploadsDir.'/'.trim( $this->data['attribute_data']['settings']['directory'], '/' );
         //check or make writable dirs
-        if ( ! AHelperUtils::is_writable_dir( $uplds_dir ) || ! AHelperUtils::is_writable_dir( $settgs_dir ) ) {
+        if ( ! AHelperUtils::is_writable_dir( $uploadsDir ) || ! AHelperUtils::is_writable_dir( $settingsDir ) ) {
             $this->data['form']['settings_fields']['directory'] .= '<i class="error">'.$this->language->get( 'error_directory_not_writable' ).'</i>';
         }
 

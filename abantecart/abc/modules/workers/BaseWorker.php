@@ -30,6 +30,7 @@ abstract class ABaseWorker implements AWorkerInterface
     protected $outputType = 'cli';
     protected $EOF = "\n";
     protected $pid = -1;
+    protected $workerName;
 
     public function __construct()
     {
@@ -52,7 +53,7 @@ abstract class ABaseWorker implements AWorkerInterface
      * Starting worker`s method for processing incoming jobs
      *
      * @param string              $method
-     * @param array | AMQPMessage $job_params
+     * @param array  $job_params (or AMQPMessage object)
      *
      * @return bool
      */
@@ -97,8 +98,8 @@ abstract class ABaseWorker implements AWorkerInterface
     }
 
     /**
-     * @param string
-     * @return none
+     * @param string $errorText
+     * @void
      */
     public function error($errorText)
     {
@@ -106,8 +107,8 @@ abstract class ABaseWorker implements AWorkerInterface
     }
 
     /**
-     * @param string
-     * @return none
+     * @param string $text
+     * @void
      */
     public function echoCli($text)
     {
@@ -119,8 +120,7 @@ abstract class ABaseWorker implements AWorkerInterface
     }
 
     /**
-     * @param none
-     * @return boolean
+     * @void
      */
     public function isReRunAllowed()
     {

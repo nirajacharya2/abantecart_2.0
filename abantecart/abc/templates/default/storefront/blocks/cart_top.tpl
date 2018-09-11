@@ -1,7 +1,8 @@
 <?php
 /**
- * @var AView $this
+ * @var abc\core\view\AView $this
  */
+
 ?>
 <ul class="nav topcart pull-left">
 	<li class="dropdown hover">

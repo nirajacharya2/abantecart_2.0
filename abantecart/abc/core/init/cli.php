@@ -23,6 +23,7 @@ use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADB;
 use Exception;
+use Illuminate\Events\Dispatcher;
 
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
@@ -231,7 +232,7 @@ function showResult($result)
  */
 function parseOptions($args = [])
 {
-    $options = array();
+    $options = [];
 
     foreach ($args as $v) {
         preg_match('/^--(.*)$/', $v, $match);

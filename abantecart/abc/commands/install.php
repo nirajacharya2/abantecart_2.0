@@ -23,7 +23,7 @@ use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\core\cache\ACache;
 use abc\core\lib\{
-    AConfig, AConnect, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
+    AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
 
 include_once('base/BaseCommand.php');
@@ -35,7 +35,7 @@ class Install extends BaseCommand
         $action = !$action ? 'app' : $action;
         //if now options - check action
         if (!$options) {
-            if (!in_array($action, array('app', 'package', 'extension', 'help'))) {
+            if (!in_array($action, ['app', 'package', 'extension', 'help'])) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
@@ -1092,7 +1092,7 @@ EOD;
             && $options['db_name']
         ) {
             try {
-                new ADB(array(
+                new ADB([
                     'DB_DRIVER'    => $options['db_driver'],
                     'DB_HOST'      => $options['db_host'],
                     'DB_NAME'      => $options['db_name'],
@@ -1101,7 +1101,7 @@ EOD;
                     'DB_CHARSET'   => 'utf8',
                     'DB_COLLATION' => 'utf8_unicode_ci',
                     'DB_PREFIX'    => $options['db_prefix'],
-                ));
+                ]);
             } catch (AException $e) {
                 $errors['error'] = $e->getMessage()."\n";
             }

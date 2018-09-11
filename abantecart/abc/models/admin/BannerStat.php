@@ -2,10 +2,10 @@
 
 namespace abc\models;
 
-use abc\models\AModelBase;
+use abc\models\base\Banner;
 
 /**
- * Class AcBannerStat
+ * Class BannerStat
  *
  * @property int                  $rowid
  * @property int                  $banner_id
@@ -14,7 +14,7 @@ use abc\models\AModelBase;
  * @property int                  $store_id
  * @property string               $user_info
  *
- * @property \abc\models\AcBanner $banner
+ * @property \abc\models\base\Banner $banner
  *
  * @package abc\models
  */

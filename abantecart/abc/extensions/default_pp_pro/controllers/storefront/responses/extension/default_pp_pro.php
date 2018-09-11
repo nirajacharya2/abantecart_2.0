@@ -25,13 +25,9 @@ use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
-use abc\models\storefront\ModelExtensionDefaultPPPro;
+use abc\extensions\default_pp_pro\models\storefront\extension\ModelExtensionDefaultPPPro;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
-
-/** @noinspection PhpUndefinedClassInspection
+/**
  *
  * Class ControllerResponsesExtensionDefaultPPPro
  *
@@ -39,7 +35,7 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
  */
 class ControllerResponsesExtensionDefaultPPPro extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -52,29 +48,29 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
         //build submit form
         $form = new AForm();
-        $form->setForm( array( 'form_name' => 'paypal' ) );
+        $form->setForm( ['form_name' => 'paypal']);
         $data['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'form',
                 'name' => 'paypal',
                 'attr' => 'class = "form-horizontal validate-creditcard"',
                 'csrf' => true,
-            )
+            ]
         );
 
         $data['cc_owner'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'cc_owner',
                 'value' => $order_info['payment_firstname'].' '.$order_info['payment_lastname'],
                 'style' => 'input-medium',
-            )
+            ]
         );
 
         //load accepted card types
         $cardtypes = $this->model_extension_default_pp_pro->getCreditCardTypes();
         $cards = unserialize( $this->config->get( 'default_pp_pro_creditcard_types' ) );
-        $options = array( '' => $this->language->get( 'entry_cc_type' ) );
+        $options = ['' => $this->language->get( 'entry_cc_type' )];
         foreach ( $cards as $card ) {
             if ( $card && isset( $cardtypes[$card] ) ) {
                 $options[$card] = $cardtypes[$card];
@@ -82,94 +78,94 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
         }
         $data['accepted_cards'] = $options;
         $data['cc_type'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'selectbox',
                 'name'    => 'cc_type',
                 'value'   => '',
                 'options' => $options,
                 'style'   => 'input-medium',
-            )
+            ]
         );
 
         $data['cc_number'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'cc_number',
                 'value' => '',
                 'style' => 'input-medium',
                 'attr'  => 'autocomplete="off"',
-            )
+            ]
         );
 
-        $months = array();
+        $months = [];
         for ( $i = 1; $i <= 12; $i++ ) {
             $months[sprintf( '%02d', $i )] = strftime( '%B', mktime( 0, 0, 0, $i, 1, 2000 ) );
         }
         $data['cc_expire_date_month'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'selectbox',
                 'name'    => 'cc_expire_date_month',
                 'value'   => sprintf( '%02d', date( 'm' ) ),
                 'options' => $months,
                 'style'   => 'short input-small',
-            )
+            ]
         );
 
         $today = getdate();
-        $years = array();
+        $years = [];
         for ( $i = $today['year']; $i < $today['year'] + 11; $i++ ) {
             $years[strftime( '%Y', mktime( 0, 0, 0, 1, 1, $i ) )] = strftime( '%Y', mktime( 0, 0, 0, 1, 1, $i ) );
         }
         $data['cc_expire_date_year'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'selectbox',
                 'name'    => 'cc_expire_date_year',
                 'value'   => sprintf( '%02d', date( 'Y' ) + 1 ),
                 'options' => $years,
                 'style'   => 'short input-small',
-            )
+            ]
         );
         $data['cc_start_date_month'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'selectbox',
                 'name'    => 'cc_start_date_month',
                 'value'   => sprintf( '%02d', date( 'm' ) ),
                 'options' => $months,
                 'style'   => 'short input-small',
-            )
+            ]
         );
 
-        $years = array();
+        $years = [];
         for ( $i = $today['year'] - 10; $i < $today['year'] + 2; $i++ ) {
             $years[strftime( '%Y', mktime( 0, 0, 0, 1, 1, $i ) )] = strftime( '%Y', mktime( 0, 0, 0, 1, 1, $i ) );
         }
         $data['cc_start_date_year'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'selectbox',
                 'name'    => 'cc_start_date_year',
                 'value'   => sprintf( '%02d', date( 'Y' ) ),
                 'options' => $years,
                 'style'   => 'short input-small',
-            )
+            ]
         );
 
         $data['cc_cvv2'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'cc_cvv2',
                 'value' => '',
                 'style' => 'short',
                 'attr'  => ' size="3" maxlength="4" autocomplete="off"',
-            )
+            ]
         );
         $data['cc_issue'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'cc_issue',
                 'value' => '',
                 'style' => 'short',
                 'attr'  => ' size="1" maxlength="2" autocomplete="off"',
-            )
+            ]
         );
 
         if ( $this->request->get['rt'] == 'checkout/guest_step_3' ) {
@@ -179,22 +175,22 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
         }
 
         $data['back'] = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'back',
                 'text'  => $this->language->get( 'button_back' ),
                 'style' => 'button',
                 'href'  => $back_url,
-            )
+            ]
         );
 
         $data['submit'] = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'paypal_button',
                 'text'  => $this->language->get( 'button_confirm' ),
                 'style' => 'button btn-orange',
-            )
+            ]
         );
 
         //load creditcard input validation
@@ -206,7 +202,7 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
     public function send()
     {
-        $json = array();
+        $json = [];
 
         if ( ! $this->csrftoken->isTokenValid() ) {
             $json['error'] = $this->language->get( 'error_unknown' );
@@ -215,7 +211,7 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
             return;
         }
-
+        $skip_item_list = false;
         if ( ! $this->config->get( 'default_pp_pro_test' ) ) {
             $api_endpoint = 'https://api-3t.paypal.com/nvp';
         } else {
@@ -233,13 +229,13 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
         $order_total = $this->currency->format( $order_info['total'], $order_info['currency'], '', false );
 
-        $products_data = $this->_get_products_data( array(
+        $products_data = $this->_get_products_data( [
             'currency'    => $order_info['currency'],
             'value'       => '',
             'order_total' => $order_total,
-        ) );
+        ]);
 
-        $payment_data = array(
+        $payment_data = [
             'METHOD'         => 'DoDirectPayment',
             'VERSION'        => '51.0',
             'USER'           => html_entity_decode( $this->config->get( 'default_pp_pro_username' ), ENT_QUOTES, 'UTF-8' ),
@@ -273,26 +269,26 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
             'CURRENCYCODE'   => $order_info['currency'],
             'BUTTONSOURCE'   => 'Abante_Cart',
             'NOTIFYURL'      => $this->html->getSecureURL( 'extension/default_pp_pro/callback' ),
-        );
+        ];
 
         if ( $this->cart->hasShipping() ) {
-            $payment_data = array_merge( $payment_data, array(
+            $payment_data = array_merge( $payment_data, [
                 'SHIPTONAME'        => $order_info['shipping_firstname'].' '.$order_info['shipping_lastname'],
                 'SHIPTOSTREET'      => $order_info['shipping_address_1'],
                 'SHIPTOCITY'        => $order_info['shipping_city'],
                 'SHIPTOSTATE'       => ( $order_info['shipping_iso_code_2'] != 'US' ) ? $order_info['shipping_zone'] : $order_info['shipping_zone_code'],
                 'SHIPTOCOUNTRYCODE' => $order_info['shipping_iso_code_2'],
                 'SHIPTOZIP'         => $order_info['shipping_postcode'],
-            ) );
+            ]);
         } else {
-            $payment_data = array_merge( $payment_data, array(
+            $payment_data = array_merge( $payment_data, [
                 'SHIPTONAME'        => $order_info['payment_firstname'].' '.$order_info['payment_lastname'],
                 'SHIPTOSTREET'      => $order_info['payment_address_1'],
                 'SHIPTOCITY'        => $order_info['payment_city'],
                 'SHIPTOSTATE'       => ( $order_info['payment_iso_code_2'] != 'US' ) ? $order_info['payment_zone'] : $order_info['payment_zone_code'],
                 'SHIPTOCOUNTRYCODE' => $order_info['payment_iso_code_2'],
                 'SHIPTOZIP'         => $order_info['payment_postcode'],
-            ) );
+            ]);
         }
 
         //items list
@@ -335,7 +331,7 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
             $err->toLog()->toDebug();
         } else {
 
-            $response_data = array();
+            $response_data = [];
             parse_str( $response, $response_data );
 
             if ( ( $response_data['ACK'] == 'Success' ) || ( $response_data['ACK'] == 'SuccessWithWarning' ) ) {
@@ -383,11 +379,11 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
         $this->load->library( 'encryption' );
         $encryption = new AEncryption( $this->config->get( 'encryption_key' ) );
 
-        $this->data['products'] = array();
+        $this->data['products'] = [];
         $this->data['items_total'] = 0.0;
         $products = $this->cart->getProducts();
         foreach ( $products as $product ) {
-            $option_data = array();
+            $option_data = [];
 
             foreach ( $product['option'] as $option ) {
                 if ( $option['type'] != 'file' ) {
@@ -397,13 +393,13 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
                     $value = mb_substr( $filename, 0, mb_strrpos( $filename, '.' ) );
                 }
 
-                $option_data[] = array(
+                $option_data[] = [
                     'name'  => $option['name'],
                     'value' => ( mb_strlen( $value ) > 20 ? mb_substr( $value, 0, 20 ).'..' : $value ),
-                );
+                ];
             }
             $price = $this->currency->format( $product['price'], $order_info['currency'], $order_info['value'], false );
-            $this->data['products'][] = array(
+            $this->data['products'][] = [
                 'name'        => $product['name'],
                 'model'       => $product['model'],
                 'price'       => $price,
@@ -411,7 +407,7 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
                 'option'      => $option_data,
                 'weight'      => $product['weight'],
                 'weight_type' => $product['weight_type'],
-            );
+            ];
             $this->data['items_total'] += $price * $product['quantity'];
         }
 
@@ -420,14 +416,14 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
         if ( $virtual_products ) {
             foreach ( $virtual_products as $k => $virtual ) {
-                $this->data['products'][] = array(
+                $this->data['products'][] = [
                     'name'     => ( $virtual['name'] ? $virtual['name'] : 'Virtual Product' ),
                     'model'    => '',
                     'price'    => $this->currency->format( $virtual['amount'], $order_info['currency'], $order_info['value'], false ),
                     'quantity' => ( $virtual['quantity'] ? $virtual['quantity'] : 1 ),
-                    'option'   => array(),
+                    'option'   => [],
                     'weight'   => 0,
-                );
+                ];
                 $this->data['items_total'] += ( $virtual['quantity'] ? $virtual['quantity'] : 1 ) * $this->currency->format( $virtual['amount'], $order_info['currency'], $order_info['value'], false );
             }
         }
@@ -436,33 +432,33 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
         $totals = $this->cart->buildTotalDisplay();
 
         foreach ( $totals['total_data'] as $total ) {
-            if ( in_array( $total['id'], array( 'subtotal', 'total' ) ) ) {
+            if ( in_array( $total['id'], ['subtotal', 'total']) ) {
                 continue;
             }
-            if ( in_array( $total['id'], array( 'promotion', 'coupon' ) ) ) {
+            if ( in_array( $total['id'], ['promotion', 'coupon']) ) {
                 $total['value'] = $total['value'] < 0 ? $total['value'] * -1 : $total['value'];
                 $this->data['discount_amount_cart'] += $total['value'];
             } else {
                 $price = $this->currency->format( $total['value'], $order_info['currency'], $order_info['value'], false );
 
-                if ( in_array( $total['id'], array( 'tax' ) ) ) {
+                if ( in_array( $total['id'], ['tax']) ) {
                     $this->data['tax_total'] += $price;
-                } elseif ( in_array( $total['id'], array( 'shipping' ) ) ) {
+                } elseif ( in_array( $total['id'], ['shipping']) ) {
                     $this->data['shipping_total'] += $price;
-                } elseif ( in_array( $total['id'], array( 'handling' ) ) ) {
+                } elseif ( in_array( $total['id'], ['handling']) ) {
                     $this->data['handling_total'] += $price;
                 } else {
                     $this->data['items_total'] += $price;
                 }
 
-                $this->data['products'][$total['id']] = array(
+                $this->data['products'][$total['id']] = [
                     'name'     => $total['title'],
                     'model'    => '',
                     'price'    => $price,
                     'quantity' => 1,
-                    'option'   => array(),
+                    'option'   => [],
                     'weight'   => 0,
-                );
+                ];
 
             }
         }
@@ -472,32 +468,32 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
 
         if ( ( $calc_total - $order_info['order_total'] ) !== 0.0 ) {
             foreach ( $totals['total_data'] as $total ) {
-                if ( in_array( $total['id'], array( 'subtotal', 'total', 'promotion', 'coupon' ) ) ) {
+                if ( in_array( $total['id'], ['subtotal', 'total', 'promotion', 'coupon']) ) {
                     continue;
                 }
 
                 $price = $this->currency->format( $total['value'], $order_info['currency'], $order_info['value'], false );
-                $this->data['products'][$total['id']] = array(
+                $this->data['products'][$total['id']] = [
                     'name'     => $total['title'],
                     'model'    => '',
                     'price'    => $price,
                     'quantity' => 1,
-                    'option'   => array(),
+                    'option'   => [],
                     'weight'   => 0,
-                );
+                ];
             }
         }
 
         if ( $this->data['discount_amount_cart'] > 0 ) {
             $price = -1 * $this->currency->format( $this->data['discount_amount_cart'], $order_info['currency'], $order_info['value'], false );
-            $this->data['products'][] = array(
+            $this->data['products'][] = [
                 'name'     => $this->language->get( 'text_discount' ),
                 'model'    => '',
                 'price'    => $price,
                 'quantity' => 1,
-                'option'   => array(),
+                'option'   => [],
                 'weight'   => 0,
-            );
+            ];
             $this->data['items_total'] += $price;
         }
 

@@ -19,9 +19,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
 include_once __DIR__.DS.'job_manager_interface.php';
 
@@ -35,14 +34,14 @@ include_once __DIR__.DS.'job_manager_interface.php';
 class AJobManager implements AJobManagerInterface
 {
     protected $registry;
-    public $errors = array(); // errors during process
+    public $errors = []; // errors during process
     protected $starter;
     /**
      * @var ALog
      */
     protected $job_log;
 
-    protected $run_log = array();
+    protected $run_log = [];
     /**
      * @var string can be 'simple' or 'detailed'
      */
@@ -64,7 +63,6 @@ class AJobManager implements AJobManagerInterface
      *
      * @param Registry $registry
      *
-     * @throws \ReflectionException
      */
     public function __construct(Registry $registry)
     {
@@ -124,10 +122,11 @@ class AJobManager implements AJobManagerInterface
        }
    */
     /**
-     * @param int   $job_id
+     * @param int $job_id
      * @param array $state
      *
      * @return bool
+     * @throws \Exception
      */
     protected function updateJobState($job_id, array $state = [])
     {
@@ -136,14 +135,14 @@ class AJobManager implements AJobManagerInterface
             return false;
         }
 
-        $upd_flds = array(
+        $upd_flds = [
             'last_result',
             'last_time_run',
             'status',
-        );
-        $data = array();
+        ];
+        $data = [];
         foreach ($upd_flds as $fld_name) {
-            if (AHelperUtils::has_value($state[$fld_name])) {
+            if (H::has_value($state[$fld_name])) {
                 $data[$fld_name] = $state[$fld_name];
             }
         }
@@ -173,18 +172,21 @@ class AJobManager implements AJobManagerInterface
     }
 
     /**
-     * @param array $data                       - array must contains key:
+     * @param array $data - array must contains key:
      *                                          'worker' with array as value.
-     *                                          for example: 'worker' => [
-     *                                          'file'       => $filename,
-     *                                          'class'      => $full_class_name,
-     *                                          'method'     => $method_name,
-     *                                          'parameters' => $mixed_value],
-     *                                          'misc' => $some_additional_values
+     *                                          for example:
+     *                                              'worker' => [
+     *                                                      'file'       => $filename,
+     *                                                      'class'      => $full_class_name,
+     *                                                      'method'     => $method_name,
+     *                                                      'parameters' => $mixed_value
+     *                                                      ],
+     *                                               'misc'  => $some_additional_values
      *
      * @return int
+     * @throws \Exception
      */
-    public function addJob(array $data = array())
+    public function addJob(array $data = [])
     {
         if (!$data) {
             $this->errors[] = 'Error: Can not to create a new background job. Empty data given.';
@@ -202,7 +204,7 @@ class AJobManager implements AJobManagerInterface
             $this->toLog('Error: Job with name "'.$data['name'].'" is already exists. Override!');
         }
 
-        $user_info = AHelperUtils::recognizeUser();
+        $user_info = H::recognizeUser();
         $user_type = $user_info['user_type'];
         $user_id = $user_info['user_id'];
         $user_name = $user_info['user_name'];
@@ -250,7 +252,7 @@ class AJobManager implements AJobManagerInterface
             return false;
         }
 
-        $upd_flds = array(
+        $upd_flds = [
             'job_name'      => 'string',
             'status'        => 'int',
             'actor_type'    => 'int',
@@ -260,22 +262,22 @@ class AJobManager implements AJobManagerInterface
             'start_time'    => 'timestamp',
             'last_time_run' => 'timestamp',
             'last_result'   => 'int',
-        );
+        ];
         if (!isset($data['actor_name'])) {
 
-            $actor = AHelperUtils::recognizeUser();
+            $actor = H::recognizeUser();
             $data['actor_type'] = $actor['user_type'];
             $data['actor_id'] = $actor['user_id'];
             $data['actor_name'] = $actor['user_name'];
         }
 
-        $update = array();
+        $update = [];
         foreach ($upd_flds as $fld_name => $fld_type) {
             if ($fld_name == 'configuration' && is_array($data[$fld_name])) {
                 $data[$fld_name] = $this->serialize($data[$fld_name]);
             }
 
-            if (AHelperUtils::has_value($data[$fld_name])) {
+            if (H::has_value($data[$fld_name])) {
                 switch ($fld_type) {
                     case 'int':
                         $value = (int)$data[$fld_name];
@@ -305,6 +307,7 @@ class AJobManager implements AJobManagerInterface
      * @param int $job_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function deleteJob($job_id)
     {
@@ -324,12 +327,13 @@ class AJobManager implements AJobManagerInterface
      * @param int $job_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getJobById($job_id)
     {
         $job_id = (int)$job_id;
         if (!$job_id) {
-            return array();
+            return [];
         }
         $sql = "SELECT *
                 FROM ".$this->db->table_name('jobs')." 
@@ -348,12 +352,13 @@ class AJobManager implements AJobManagerInterface
      * @param string $job_name
      *
      * @return array
+     * @throws \Exception
      */
     public function getJobByName($job_name)
     {
         $job_name = $this->db->escape($job_name);
         if (!$job_name) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT *
@@ -373,8 +378,9 @@ class AJobManager implements AJobManagerInterface
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
-    public function getTotalJobs($data = array())
+    public function getTotalJobs($data = [])
     {
         $sql = "SELECT COUNT(*) as total
                 FROM ".$this->db->table_name('jobs');
@@ -384,7 +390,7 @@ class AJobManager implements AJobManagerInterface
             $sql .= " AND ".$data['subsql_filter'];
         }
 
-        if (AHelperUtils::has_value($data['filter']['job_name'])) {
+        if (H::has_value($data['filter']['job_name'])) {
             $sql .= " AND (LCASE(job_name) LIKE '%".$this->db->escape(mb_strtolower($data['filter']['job_name']))."%'";
         }
 
@@ -397,6 +403,7 @@ class AJobManager implements AJobManagerInterface
      * @param array $data
      *
      * @return array
+     * @throws \Exception
      */
     public function getJobs(array $data = [])
     {
@@ -413,16 +420,16 @@ class AJobManager implements AJobManagerInterface
             $sql .= " AND ".$data['subsql_filter'];
         }
 
-        if (AHelperUtils::has_value($data['filter']['job_name'])) {
+        if (H::has_value($data['filter']['job_name'])) {
             $sql .= " AND (LCASE(job_name) LIKE '%".$this->db->escape(mb_strtolower($data['filter']['job_name']))."%')";
         }
 
-        $sort_data = array(
+        $sort_data = [
             'job_name'      => 'job_name',
             'status'        => 'status',
             'start_time'    => 'start_time',
             'date_modified' => 'date_modified',
-        );
+        ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -457,7 +464,7 @@ class AJobManager implements AJobManagerInterface
 
             //check is task stuck
             if ($row['status'] == self::STATUS_RUNNING
-                && (time() - AHelperUtils::dateISO2Int($row['last_time_run'])) > self::MAX_EXECUTION_TIME
+                && (time() - H::dateISO2Int($row['last_time_run'])) > self::MAX_EXECUTION_TIME
             ) {
                 //mark task as stuck
                 $row['status'] = -1;
@@ -470,6 +477,7 @@ class AJobManager implements AJobManagerInterface
 
     /**
      * @return array|bool
+     * @throws \Exception
      */
     public function getReadyJob()
     {
@@ -488,7 +496,7 @@ class AJobManager implements AJobManagerInterface
         /**
          * @var AJson $json_lib
          */
-        $json_lib = AHelperUtils::getInstance($class_name);
+        $json_lib = H::getInstance($class_name);
         return $json_lib->encode($value);
     }
 
@@ -498,8 +506,9 @@ class AJobManager implements AJobManagerInterface
         /**
          * @var AJson $json_lib
          */
-        $json_lib = AHelperUtils::getInstance($class_name);
+        $json_lib = H::getInstance($class_name);
         return $json_lib->decode($value, true);
+        
     }
 
 }

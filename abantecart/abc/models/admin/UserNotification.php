@@ -2,7 +2,7 @@
 
 namespace abc\models;
 
-use abc\models\AModelBase;
+use abc\models\base\Store;
 
 /**
  * Class AcUserNotification
@@ -16,8 +16,8 @@ use abc\models\AModelBase;
  * @property \Carbon\Carbon      $date_added
  * @property \Carbon\Carbon      $date_modified
  *
- * @property \abc\models\AcUser  $user
- * @property \abc\models\AcStore $store
+ * @property \abc\models\User  $user
+ * @property Store $store
  *
  * @package abc\models
  */

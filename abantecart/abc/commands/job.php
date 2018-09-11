@@ -24,7 +24,6 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\AException;
 use abc\core\lib\AJobManager;
 use abc\modules\workers\ABaseWorker;
-use Error;
 use Exception;
 
 include_once('base/BaseCommand.php');
@@ -38,7 +37,7 @@ class Job extends BaseCommand
         $action = !$action ? 'run' : $action;
         //if now options - check action
         if (!$options) {
-            if (!in_array($action, array('help', 'run', 'consumer'))) {
+            if (!in_array($action, ['help', 'run', 'consumer'])) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
@@ -50,7 +49,7 @@ class Job extends BaseCommand
     {
         parent::run($action, $options);
         $result = false;
-        if (!in_array($action, array('run', 'consumer')) || !$options) {
+        if (!in_array($action, ['run', 'consumer']) || !$options) {
             return ['Error: Unknown action.'];
         }
 
@@ -146,16 +145,6 @@ class Job extends BaseCommand
             } else {
                 $handler->updateJob($job_id, ['status' => $handler::STATUS_COMPLETED, 'last_result' => 1]);
             }
-        } catch (Error $e) {
-            $handler->updateJob(
-                $job_id,
-                [
-                    'status'      => $handler::STATUS_FAILED,
-                    'last_result' => 0,
-
-                ]
-            );
-            $this->errors[] = $e->getMessage().PHP_EOL.$e->getTraceAsString();
         } catch (Exception $e) {
             $handler->updateJob(
                 $job_id,
