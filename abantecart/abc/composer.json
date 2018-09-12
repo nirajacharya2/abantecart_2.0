@@ -190,11 +190,11 @@
     {
       "type": "package",
       "package": {
-        "name": "components/flot",
-        "version": "0.8.3",
+        "name": "components/chart",
+        "version": "2.7.2",
         "dist": {
-          "url": "http://www.flotcharts.org/downloads/flot-0.8.3.zip",
-          "type": "zip"
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js",
+          "type": "file"
         }
       }
     },
@@ -234,7 +234,7 @@
     "components/chosen": "1.8.5",
     "components/intl-tel-input": "12.1.13",
     "css/bootstrap4c-chosen": "1.0.8",
-    "components/flot": "0.8.3",
+    "components/chart": "2.7.2",
     "tinymce/tinymce": "4.7.11",
     "tinymce/languages": "4.7.11",
     "illuminate/database": "5.5.*",
@@ -287,8 +287,8 @@
       "./vendor/assets/components/bootstrap-fileinput": [
         "kartik-v/bootstrap-fileinput"
       ],
-      "./vendor/assets/components/flot": [
-        "components/flot"
+      "./vendor/assets/components/chart": [
+        "components/chart"
       ],
       "./vendor/assets/css/animate.css": [
         "drmonty/animate.css"
