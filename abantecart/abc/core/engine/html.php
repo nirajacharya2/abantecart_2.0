@@ -1490,6 +1490,8 @@ class TextEditorHtmlElement extends HtmlElement
  * @property string $ajax_url
  * @property string $search_mode
  * @property string $help_url
+ * @property array  $extra
+ *
  */
 class SelectboxHtmlElement extends HtmlElement
 {
@@ -1537,6 +1539,7 @@ class SelectboxHtmlElement extends HtmlElement
                 'search_mode'          => $this->search_mode,
                 'text_continue_typing' => $text_continue_typing,
                 'text_looking_for'     => $text_looking_for,
+                'extra'                => $this->extra,
             ]
         );
         if ( ! empty($this->help_url)) {
@@ -1576,6 +1579,7 @@ class SelectboxHtmlElement extends HtmlElement
  * @property string|array $option_attr
  * @property string       $help_url
  * @property bool         $disabled
+ * @property array        $extra
  */
 class MultiSelectboxHtmlElement extends HtmlElement
 {
@@ -1603,6 +1607,7 @@ class MultiSelectboxHtmlElement extends HtmlElement
                 'style'            => $this->style,
                 'placeholder'      => $this->placeholder,
                 'filter_params'    => $this->filter_params,
+                'extra'            => $this->extra,
             ]
         );
         if ( ! empty($this->help_url)) {
