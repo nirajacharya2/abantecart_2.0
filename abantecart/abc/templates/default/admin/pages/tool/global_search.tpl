@@ -41,7 +41,7 @@
 	$i=0;
 	foreach ($search_categories as $scat) {	?>
 	<!-- Nav tabs -->
-	  <li <?php echo $i==0 ? 'class="active"' : ''; ?>><a href="#<?php echo $scat;?>" role="tab" data-toggle="tab"><?php echo $search_categories_names[ $scat ];?></a></li>
+	  <li class="nav-item"><a class="nav-link <?php echo $i==0 ? 'active' : ''; ?>" href="#<?php echo $scat;?>" role="tab" data-toggle="tab"><?php echo $search_categories_names[ $scat ];?></a></li>
 	<?php
 		$i++;
 	} ?>

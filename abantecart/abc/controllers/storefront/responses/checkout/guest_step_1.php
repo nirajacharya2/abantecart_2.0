@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,26 +17,28 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\lib\AException;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ControllerResponsesCheckoutGuestStep1 extends AController
+{
+    public $data = [];
 
-class ControllerResponsesCheckoutGueststep1 extends AController {
-	public $data = array();
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
-		$html_out = '';
-		try{
-			$this->config->set('embed_mode', true);
-			$cntr = $this->dispatch('pages/checkout/guest_step_1');
-			$html_out = $cntr->dispatchGetOutput();
-		}catch(AException $e){	}
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-		$this->response->setOutput($html_out);
-	}
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $html_out = '';
+        try {
+            $this->config->set('embed_mode', true);
+            $cntr = $this->dispatch('pages/checkout/guest_step_1');
+            $html_out = $cntr->dispatchGetOutput();
+        } catch (AException $e) {
+        }
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->response->setOutput($html_out);
+    }
 }

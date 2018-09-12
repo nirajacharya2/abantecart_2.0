@@ -5,10 +5,10 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
-  Lincence details is bundled with this package in the file LICENSE.txt.
+  License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
 
@@ -21,10 +21,7 @@
 namespace abc\extensions\default_pp_pro\models\storefront\extension;
 use abc\core\engine\Model;
 use abc\core\helper\AHelperUtils;
-
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
+use H;
 
 class ModelExtensionDefaultPPPro extends Model
 {
@@ -51,14 +48,14 @@ class ModelExtensionDefaultPPPro extends Model
             $status = false;
         }
 
-        $method_data = array();
+        $method_data = [];
 
         if ( $status ) {
-            $method_data = array(
+            $method_data = [
                 'id'         => 'default_pp_pro',
                 'title'      => $this->language->get( 'text_title' ),
                 'sort_order' => $this->config->get( 'default_pp_pro_sort_order' ),
-            );
+            ];
         }
 
         return $method_data;
@@ -66,12 +63,12 @@ class ModelExtensionDefaultPPPro extends Model
 
     public function getCreditCardTypes()
     {
-        return array(
+        return [
             'Visa'       => 'Visa',
             'MasterCard' => 'MasterCard',
             'Discover'   => 'Discover',
             'Amex'       => 'American Express',
-        );
+        ];
     }
 
     public function addShippingAddress( $data )
@@ -96,11 +93,11 @@ class ModelExtensionDefaultPPPro extends Model
             "INSERT INTO ".$this->db->table_name( "addresses" )."
             SET
                 customer_id = '".(int)$this->customer->getId()."',
-                company = '".( has_value( $data['company'] ) ? $this->db->escape( $data['company'] ) : '' )."',
+                company = '".( H::has_value( $data['company'] ) ? $this->db->escape( $data['company'] ) : '' )."',
                 firstname = '".$this->db->escape( $data['firstname'] )."',
                 lastname = '".$this->db->escape( $data['lastname'] )."',
                 address_1 = '".$this->db->escape( $data['address_1'] )."',
-                address_2 = '".( has_value( $data['address_2'] ) ? $this->db->escape( $data['address_2'] ) : '' )."',
+                address_2 = '".( H::has_value( $data['address_2'] ) ? $this->db->escape( $data['address_2'] ) : '' )."',
                 postcode = '".$this->db->escape( $data['postcode'] )."',
                 city = '".$this->db->escape( $data['city'] )."',
                 zone_id = '".(int)$data['zone_id']."',
@@ -123,9 +120,9 @@ class ModelExtensionDefaultPPPro extends Model
     public function getCountryIdByCode2( $code )
     {
         $result = $this->db->query(
-                                    "SELECT country_id 
-                                     FROM ".$this->db->table_name( 'countries' )."
-                                     WHERE iso_code_2 = '".strtoupper( $this->db->escape( $code ) )."'"
+            "SELECT country_id 
+             FROM ".$this->db->table_name( 'countries' )."
+             WHERE iso_code_2 = '".strtoupper( $this->db->escape( $code ) )."'"
         );
         if ( $result->num_rows > 0 ) {
             return $result->row['country_id'];

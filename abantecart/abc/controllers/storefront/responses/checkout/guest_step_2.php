@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,12 +21,8 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AException;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
-class ControllerResponsesCheckoutGueststep2 extends AController {
-	public $data = array();
+class ControllerResponsesCheckoutGuestStep2 extends AController {
+	public $data = [];
 	public function main() {
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);

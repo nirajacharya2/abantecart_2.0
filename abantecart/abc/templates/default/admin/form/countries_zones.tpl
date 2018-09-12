@@ -8,13 +8,17 @@
 </select>
 
 <?php if ( $required == 'Y' ){ ?>
-	<span class="input-group-addon"><span class="required">*</span></span>
+<div class="input-group-append">
+	<span class="input-group-text required">*</span>
+</div>
 <?php } else { ?>
 	<span class="input-group-addon"></span>
 <?php } ?>
 <select name="<?php echo $zone_field_name; ?>" id="<?php echo $id ?>_zones" class="form-control aselect ml10 <?php echo $style; ?>"></select>
 <?php if ( $required == 'Y' ){ ?>
-	<span class="input-group-addon"><span class="required">*</span></span>
+<div class="input-group-append">
+	<span class="input-group-text required">*</span>
+</div>
 <?php } else { ?>
 	<span class="input-group-addon"></span>
 <?php } ?>

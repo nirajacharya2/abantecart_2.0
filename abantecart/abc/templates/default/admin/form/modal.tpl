@@ -4,8 +4,8 @@
 	<div class="modal-dialog modal-<?php echo $modal_type; ?>">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 				<h4 class="modal-title"><?php echo $title; ?></h4>
+				<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 			</div>
 			<div class="modal-body"><?php echo $content;?></div>
 			<?php if($footer){ ?>

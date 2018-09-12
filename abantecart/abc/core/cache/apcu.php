@@ -20,13 +20,6 @@
 
 namespace abc\core\cache;
 
-use abc\core\ABC;
-use abc\core\cache\ACacheDriverInterface;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ACacheDriverAPCu
  *

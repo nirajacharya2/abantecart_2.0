@@ -1071,6 +1071,7 @@ p {
 /* resource library */
 .reslibrary_block{
     width: 150px;
+    max-width: none;
 }
 .reslibrary .thumbnail {
     margin-bottom : 0px;
@@ -1091,8 +1092,11 @@ p {
     padding: 5px;
     overflow: hidden;
     overflow-y: auto;
+    display: flex;
 }
-
+.fullwidth {
+    width: 100%;
+}
 .tab-content.rl-content {
     background: none #fff !important;
 }
@@ -1204,7 +1208,8 @@ p {
 }
 .reslibrary .thmb.view_details:before {
     content: "\f00c";
-    font-family: FontAwesome;
+    font-family: 'Font Awesome\ 5 Free';
+    font-weight: 900;
     color: #F19013;
     font-size: 36px;
     position:absolute;
@@ -1267,9 +1272,10 @@ p {
 .reslibrary .thmb-icon {
     background: #eee;
     height: 100px;
+    text-align: center;
 }
 .reslibrary .thmb-icon i {
-    font-size: 7em;
+    font-size: 5em;
 }
 
 .reslibrary .thmb-prev a {
@@ -1328,6 +1334,10 @@ p {
     overflow: auto;
     white-space: nowrap;
     -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+#resource_types_tabs li {
+    flex: 1 1 auto;
+    text-align: center;
 }
 #rl_container .reslibrary {
     min-height: 380px;
@@ -1414,7 +1424,11 @@ p {
 }
 .thumbnail .rl_large_icon i {
     text-align: center;
-    font-size: 7em;
+    font-size: 5em;
+}
+
+.hide {
+    display: none!important;
 }
 
 a.resource_edit .img-responsive{

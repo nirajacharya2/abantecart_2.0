@@ -3,7 +3,7 @@
 <?php if ($tabs) { ?>
 	<ul class="nav nav-tabs nav-justified nav-profile">
 	<?php foreach ( $tabs as $tab){ ?>
-		<li class="<?php echo $tab['class']; ?>"><a href="<?php echo $tab['href']; ?>"><span><?php echo $tab['text']; ?></span></a></li>
+		<li class="nav-item"><a class="nav-link <?php echo $tab['class']; ?>" href="<?php echo $tab['href']; ?>"><span><?php echo $tab['text']; ?></span></a></li>
 	<?php }?>
 		<?php echo $this->getHookVar('extension_tabs'); ?>
 	</ul>

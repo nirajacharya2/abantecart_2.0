@@ -47,7 +47,7 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 							<a title="<?php echo $button_remove->text; ?>" data-confirmation="delete"
 							   href="<?php echo str_replace('%ID%', $product_discount['product_discount_id'], $delete_discount); ?>"
-							   class="btn"><i class="fa fa-trash-o fa-lg"></i></a>
+							   class="btn"><i class="fa fa-trash-alt fa-lg"></i></a>
 						</td>
 					</tr>
 					</tbody>
@@ -104,7 +104,7 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 							<a title="<?php echo $button_remove->text; ?>"
 							   class="btn" data-confirmation="delete"
 							   href="<?php echo str_replace('%ID%', $item['product_special_id'], $delete_special); ?>"
-									><i class="fa fa-trash-o fa-lg"></i></a>
+									><i class="fa fa-trash-alt fa-lg"></i></a>
 
 
 						</td>

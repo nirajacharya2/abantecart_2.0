@@ -20,8 +20,6 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\lib\AException;
-use Error;
 use Exception;
 
 if (version_compare(phpversion(), '7.0.0', '<') == true) {
@@ -56,10 +54,7 @@ if (!preg_match('/^--(.*)$/', $command)) {
 
 try {
     require __DIR__.DS.'core'.DS.'init'.DS.'cli.php';
-} catch (Exception $e) {
-    showException($e);
-    exit(1);
-} catch (Error $e) {
+} catch (\Exception $e) {
     showException($e);
     exit(1);
 }
@@ -100,9 +95,6 @@ try {
 } catch (Exception $e) {
     showException($e);
     exit(1);
-} catch (Error $e) {
-    showException($e);
-    exit(1);
 }
 
 //if all fine - run post-trigger
@@ -111,9 +103,6 @@ try {
     $executor->finish($action, $options);
     showResult($executor->getOutput());
 } catch (Exception $e) {
-    showException($e);
-    exit(1);
-} catch (Error $e) {
     showException($e);
     exit(1);
 }

@@ -2,8 +2,6 @@
 
 namespace abc\models;
 
-use abc\models\AModelBase;
-
 /**
  * Class AcUserGroup
  *

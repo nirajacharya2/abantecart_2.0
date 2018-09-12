@@ -18,13 +18,8 @@
 
 namespace abc\extensions\per_item_shipping\models\storefront\extension;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\core\engine\ALanguage;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ModelExtensionPerItemShipping extends Model
 {
@@ -39,11 +34,12 @@ class ModelExtensionPerItemShipping extends Model
             if (!$this->config->get('per_item_shipping_location_id')) {
                 $status = true;
             } else {
-                $query = $this->db->query("SELECT *
-                                            FROM ".$this->db->table_name('zones_to_locations')."
-                                            WHERE location_id = '".(int)$this->config->get('per_item_shipping_location_id')."'
-                                                AND country_id = '".(int)$address['country_id']."'
-                                                AND (zone_id = '".(int)$address['zone_id']."' OR zone_id = '0')");
+                $query = $this->db->query(
+                    "SELECT *
+                    FROM ".$this->db->table_name('zones_to_locations')."
+                    WHERE location_id = '".(int)$this->config->get('per_item_shipping_location_id')."'
+                        AND country_id = '".(int)$address['country_id']."'
+                        AND (zone_id = '".(int)$address['zone_id']."' OR zone_id = '0')");
                 if ($query->num_rows) {
                     $status = true;
                 } else {
@@ -54,7 +50,7 @@ class ModelExtensionPerItemShipping extends Model
             $status = false;
         }
 
-        $method_data = array();
+        $method_data = [];
         if (!$status) {
             return $method_data;
         }
@@ -83,7 +79,7 @@ class ModelExtensionPerItemShipping extends Model
             }
         }
 
-        $quote_data = array();
+        $quote_data = [];
         $cost_text = $language->get('text_free');
 
         if ($cost) {
@@ -94,20 +90,20 @@ class ModelExtensionPerItemShipping extends Model
                 )
             );
         }
-        $quote_data['per_item_shipping'] = array(
+        $quote_data['per_item_shipping'] = [
             'id'           => 'per_item_shipping.per_item_shipping',
             'title'        => $language->get('text_description'),
             'cost'         => $cost,
             'tax_class_id' => $this->config->get('per_item_shipping_tax'),
             'text'         => $cost_text,
-        );
-        $method_data = array(
+        ];
+        $method_data = [
             'id'         => 'per_item_shipping',
             'title'      => $language->get('text_title'),
             'quote'      => $quote_data,
             'sort_order' => $this->config->get('per_item_shipping_sort_order'),
             'error'      => false,
-        );
+        ];
         return $method_data;
     }
 }

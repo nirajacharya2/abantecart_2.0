@@ -23,15 +23,10 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\ADebug;
-use DebugBar\StandardDebugBar;
-
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 class ControllerCommonHead extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -52,12 +47,12 @@ class ControllerCommonHead extends AController
             $dbg_css_set = $debugbar_assets['css'];
             foreach ( $dbg_css_set as $src ) {
                 $this->document->addStyle(
-                    array(
+                    [
                         // remove forward slash
                         'href'  => substr( $src, 1 ),
                         'rel'   => 'stylesheet',
                         'media' => 'screen',
-                    )
+                    ]
                 );
             }
             foreach ( $dbg_js_set as $src ) {

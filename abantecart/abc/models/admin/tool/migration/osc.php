@@ -20,12 +20,9 @@
 
 namespace abc\models\admin;
 
-use abc\core\ABC;
 use abc\core\lib\ADB;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+
 require_once 'interface_migration.php';
 
 class Migration_Osc implements Migration

@@ -466,7 +466,7 @@ class ControllerResponsesEmbedJS extends AController
 
     private function setJsHttpHeaders()
     {
-        $this->response->addHeader('Content-Type: text/javascript; charset=UTF-8');
+        $this->response->addHeader('Content-Type: text/javascript; charset='.ABC::env('APP_CHARSET'));
         //$this->response->addHeader('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() - 10));
     }
 

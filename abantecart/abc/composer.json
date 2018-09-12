@@ -92,7 +92,7 @@
       "type": "package",
       "package": {
         "name": "components/jquery-cookie",
-        "version": "1.4.1.2",
+        "version": "2.2.0",
         "dist": {
           "url": "https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js",
           "type": "file"
@@ -193,7 +193,7 @@
         "name": "components/flot",
         "version": "0.8.3",
         "dist": {
-          "url": "https://www.flotcharts.org/downloads/flot-0.8.3.zip",
+          "url": "http://www.flotcharts.org/downloads/flot-0.8.3.zip",
           "type": "zip"
         }
       }
@@ -223,7 +223,7 @@
     "components/jqueryui": "1.12.1",
     "components/jquery-migrate": "3.0.1",
     "components/jqGrid": "5.3.1",
-    "components/jquery-cookie": "1.4.1.2",
+    "components/jquery-cookie": "2.2.0",
     "components/popper": "1.4.13",
     "components/modernizr": "3.5.0",
     "components/font-awesome": "5.0.6",

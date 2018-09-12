@@ -103,7 +103,7 @@
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 				<?php if($name == 'email') { ?>
-				<span class="input-group-btn">
+				<span class="input-group-prepend">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
 					<i class="fa fa-envelope fa-fw"></i>
 					</a>
@@ -125,7 +125,7 @@
 				<i class="fa fa-save"></i> <?php echo $button_save_and_close; ?>
 			</a>&nbsp;
 			<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-				<i class="fa fa-close"></i> <?php echo $button_close; ?>
+				<i class="fa fa-times"></i> <?php echo $button_close; ?>
 			</a>
 		</div>
 	</div>

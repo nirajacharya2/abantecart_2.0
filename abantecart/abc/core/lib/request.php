@@ -21,19 +21,14 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 final class ARequest
 {
-    public $get = array();
-    public $post = array();
-    public $cookie = array();
-    public $files = array();
-    public $server = array();
+    public $get = [];
+    public $post = [];
+    public $cookie = [];
+    public $files = [];
+    public $server = [];
 
     private $http;
     private $version;
@@ -63,7 +58,7 @@ final class ARequest
         if (isset($this->post['__e']) && $this->post['__e']) {
             $this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
         }
-        $this->_detectBrowser();
+        $this->detectBrowser();
     }
 
     //todo: Include PHP module filter to process input params. http://us3.php.net/manual/en/book.filter.php
@@ -139,7 +134,7 @@ final class ARequest
      */
     public function decodeURI($uri)
     {
-        $params = array();
+        $params = [];
         $open_uri = base64_decode($uri);
 
         $split_parameters = explode('&', $open_uri);
@@ -151,7 +146,7 @@ final class ARequest
         return $this->clean($params);
     }
 
-    private function _detectBrowser()
+    private function detectBrowser()
     {
 
         $nua = strtolower($_SERVER['HTTP_USER_AGENT']);
@@ -162,7 +157,7 @@ final class ARequest
         $agent['platform'] = 'unknown';
         $agent['device_type'] = '';
 
-        $oss = array('win', 'mac', 'linux', 'unix');
+        $oss = ['win', 'mac', 'linux', 'unix'];
         foreach ($oss as $os) {
             if (strstr($agent['http'], $os)) {
                 $agent['platform'] = $os;
@@ -170,7 +165,7 @@ final class ARequest
             }
         }
 
-        $browsers = array(
+        $browsers = [
             "mozilla",
             "msie",
             "gecko",
@@ -184,7 +179,7 @@ final class ARequest
             "lynx",
             "amaya",
             "omniweb",
-        );
+        ];
 
         for ($i = 0; $i < count($browsers); $i++) {
             if (strlen(stristr($nua, $browsers[$i])) > 0) {
@@ -194,7 +189,7 @@ final class ARequest
         }
 
         //http://en.wikipedia.org/wiki/List_of_user_agents_for_mobile_phones - list of user-agents
-        $devices = array(
+        $devices = [
             "iphone",
             "android",
             "blackberry",
@@ -206,7 +201,7 @@ final class ARequest
             "opera mini",
             "windows phone os",
             "iemobile",
-        );
+        ];
 
         for ($i = 0; $i < count($devices); $i++) {
             if (stristr($nua, $devices[$i])) {

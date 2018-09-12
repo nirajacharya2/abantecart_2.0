@@ -689,12 +689,12 @@ $(document).on('click', ".task_run", function () {
 	}
 
 	var modal =
-		'<div id="task_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
+		'<div id="task_modal" class="\'<h4 class="modal-title">\'+task_title+\'</h4>\'+modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
 		'<div class="modal-dialog">' +
 		'<div class="modal-content">' +
 		'<div class="modal-header">' +
-		'<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
 		'<h4 class="modal-title">'+task_title+'</h4>'+
+		'<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
 		'</div>' +
 		'<div class="modal-body panel-body panel-body-nopadding"></div>' +
 		'</div></div></div>';
@@ -1270,7 +1270,7 @@ jQuery.fn.extend({
 $('.modal').on('show.bs.modal', function (e) {
 	var button = $(e.relatedTarget);
 	var modal = $(this);
-	if (button.attr('href') != undefined && button.attr('data-toggle') == 'modal' ) {
+	if (button.attr('href') != undefined && button.attr('data-toggle') == 'modal'  && button.attr('href').indexOf('//') > -1 ) {
 		modal.find('.modal-content').load(button.attr('href'));
 	}
 });

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,36 +23,31 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\extensions\banner_manager\models\admin\extension\ModelExtensionBannerManager;
 use stdClass;
-
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 /**
  * Class ControllerResponsesListingGridBannerManagerStat
  *
  * @package abc\controllers\admin
- * @property \abc\models\admin\ModelExtensionBannerManager $model_extension_banner_manager
+ * @property ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerResponsesListingGridBannerManagerStat extends AController
 {
-
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'banner_manager/banner_manager' );
         $this->loadModel( 'extension/banner_manager' );
 
-        $filter_params = array( 'name', 'banner_group_name', 'type', 'cnt' );
-        $filter_grid = new AFilter( array(
+        $filter_params = ['name', 'banner_group_name', 'type', 'cnt'];
+        $filter_grid = new AFilter( [
             'method'                   => 'post',
             'grid_filter_params'       => $filter_params,
             'additional_filter_string' => '',
-        ) );
+        ]);
 
         $total = $this->model_extension_banner_manager->getBannersStat( $filter_grid->getFilterData(), 'total_only' );
         if ( $total > 0 ) {
@@ -62,7 +57,7 @@ class ControllerResponsesListingGridBannerManagerStat extends AController
         }
 
         $response = new stdClass();
-        $response->page = $page;
+        $response->page = $this->request->post['page'];
         $response->total = $total_pages;
         $response->records = $total;
 
@@ -72,13 +67,13 @@ class ControllerResponsesListingGridBannerManagerStat extends AController
         foreach ( $results as $result ) {
 
             $response->rows[$i]['id'] = $result['banner_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['name'],
                 $result['banner_group_name'],
                 $result['clicked'],
                 $result['viewed'],
                 $result['percent'],
-            );
+            ];
             $i++;
         }
 

@@ -1,8 +1,8 @@
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+	<h4 class="modal-title"><?php echo $heading_title; ?></h4>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i class="fa fa-arrow-right fa-fw"></i><?php echo $text_more_new; ?></a>
 	<a aria-hidden="true" class="btn btn-default" type="button" href=""><i class="fa fa-arrow-down fa-fw"></i><?php echo $text_more_current; ?></a>
-	<h4 class="modal-title"><?php echo $heading_title; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 	<div id="content" class="panel panel-default">
 		<?php echo $form['form_open']; ?>
@@ -30,7 +30,7 @@
 				<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 				<div class="input-group afield <?php echo $widthcasses; ?>">
 					<?php if($name == 'keyword') { ?>
-					<span class="input-group-btn">
+					<span class="input-group-prepend">
 						<?php echo $keyword_button; ?>
 					</span>
 					<?php }  ?>
@@ -52,7 +52,7 @@
 						<i class="fa fa-save"></i> <?php echo $button_save_and_close; ?>
 					</a>&nbsp;
 					<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-						<i class="fa fa-close"></i> <?php echo $button_close; ?>
+						<i class="fa fa-times"></i> <?php echo $button_close; ?>
 					</a>
 			</div>
 		</div>

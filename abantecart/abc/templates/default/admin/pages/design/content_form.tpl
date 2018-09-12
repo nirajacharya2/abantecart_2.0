@@ -5,8 +5,8 @@
 		<?php
 		foreach ($tabs as $tab){
 			?>
-			<li <?php echo($tab['active'] ? 'class="active"' : '') ?>>
-				<a href="<?php echo $tab['href'] ? $tab['href'] : 'Javascript:void(0);'; ?>"><span><?php echo $tab['text']; ?></span></a>
+			<li class="nav-item">
+				<a class="nav-link <?php echo($tab['active'] ? 'active' : '') ?>" href="<?php echo $tab['href'] ? $tab['href'] : 'Javascript:void(0);'; ?>"><span><?php echo $tab['text']; ?></span></a>
 			</li>
 		<?php } ?>
 		<?php echo $this->getHookVar('extension_tabs'); ?>
@@ -54,7 +54,7 @@
 			<div id="field_<?php echo $name; ?>"
 			     class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'content' ? 'ml_ckeditor' : '') ?>">
 				<?php if ($name == 'keyword'){ ?>
-					<span class="input-group-btn">
+					<span class="input-group-prepend">
 					<?php echo $keyword_button; ?>
 				</span>
 				<?php } ?>

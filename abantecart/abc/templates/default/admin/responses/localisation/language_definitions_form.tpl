@@ -1,8 +1,8 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php  echo $title; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 
 <div class="modal-body">
@@ -76,7 +76,7 @@
 				</button>
 				&nbsp;
 				<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-					<i class="fa fa-close"></i> <?php echo $button_close; ?>
+					<i class="fa fa-times"></i> <?php echo $button_close; ?>
 				</a>
 			</div>
 	</div>

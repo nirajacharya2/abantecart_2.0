@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\AModelBase;
+use abc\models\BannerStat;
 
 /**
  * Class Banner

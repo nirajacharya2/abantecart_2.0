@@ -9,8 +9,8 @@
 			$classname = '';
 		}
 		?>
-		<li class="<?php echo $classname; ?>">
-			<a <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
+		<li class="nav-item">
+			<a class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
 		</li>
 	<?php } ?>
 

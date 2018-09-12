@@ -18,13 +18,8 @@
 
 namespace abc\extensions\free_shipping\models\storefront\extension;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\core\engine\ALanguage;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ModelExtensionFreeShipping extends Model
 {
@@ -57,26 +52,26 @@ class ModelExtensionFreeShipping extends Model
             $status = false;
         }
 
-        $method_data = array();
+        $method_data = [];
 
         if ($status) {
-            $quote_data = array();
+            $quote_data = [];
 
-            $quote_data['free_shipping'] = array(
+            $quote_data['free_shipping'] = [
                 'id'           => 'free_shipping.free_shipping',
                 'title'        => $language->get('text_description'),
                 'cost'         => 0.00,
                 'tax_class_id' => 0,
                 'text'         => $language->get('text_free'),
-            );
+            ];
 
-            $method_data = array(
+            $method_data = [
                 'id'         => 'free_shipping',
                 'title'      => $language->get('text_title'),
                 'quote'      => $quote_data,
                 'sort_order' => $this->config->get('free_shipping_sort_order'),
                 'error'      => false,
-            );
+            ];
         }
 
         return $method_data;

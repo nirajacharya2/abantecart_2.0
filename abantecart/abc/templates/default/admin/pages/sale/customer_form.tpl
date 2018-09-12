@@ -9,8 +9,8 @@
 			$classname = '';
 		}
 		?>
-		<li class="<?php echo $classname; ?>">
-			<a <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
+		<li class="nav-item">
+			<a  class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
 		</li>
 	<?php } ?>
 
@@ -136,7 +136,7 @@
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 				<?php if($name == 'email') { ?>
-				<span class="input-group-btn">
+				<span class="input-group-prepend">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
 					<i class="fa fa-envelope fa-fw"></i>
 					</a>
@@ -163,7 +163,7 @@
 			<?php if($form['delete']){?>
 				<a class="btn btn-danger" data-confirmation="delete"
 				   href="<?php echo $form['delete']->href; ?>">
-					<i class="fa fa-trash-o"></i> <?php echo $form['delete']->text; ?>
+					<i class="fa fa-trash-alt"></i> <?php echo $form['delete']->text; ?>
 				</a>
 			<?php } ?>
 		</div>

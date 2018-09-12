@@ -1,7 +1,7 @@
 <div id="rl_add_container">
 	<ul class="nav nav-tabs nav-justified nav-profile">
-		<li class="active" id="add_resource"  data-type="<?php echo $type; ?>">
-			<a class="widthM300" href="javascript:void(0);"><strong><i class="fa fa-plus fa-fw"></i> <?php echo $button_add; ?></strong></a>
+		<li class="nav-item" id="add_resource"  data-type="<?php echo $type; ?>">
+			<a class="nav-link active widthM300" href="javascript:void(0);"><strong><i class="fa fa-plus fa-fw"></i> <?php echo $button_add; ?></strong></a>
 		</li>
 	</ul>
 
@@ -11,19 +11,19 @@
 	        <?php foreach($types as $rl_type){
 				switch($rl_type['type_name']){
 					case 'image':
-						$icon = 'fa-file-image-o';
+						$icon = 'fa-file-image';
 					break;
 					case 'audio':
-						$icon = 'fa-file-audio-o';
+						$icon = 'fa-file-audio';
 					break;
 					case 'video':
-						$icon = 'fa-file-movie-o';
+						$icon = 'fa-file-video';
 					break;
 					case 'pdf':
-						$icon = 'fa-file-pdf-o';
+						$icon = 'fa-file-pdf';
 					break;
 					case 'archive':
-						$icon = 'fa-file-archive-o';
+						$icon = 'fa-file-archive';
 					break;
 					case 'download':
 						$icon = 'fa-download';
@@ -33,10 +33,11 @@
 				}
 				$active = $type==$rl_type['type_name'] || (!$type && $rl_type['type_name']=='image') ? 'active' : '';
 				?>
-	        <li class="<?php echo $active; ?>" data-type="<?php echo $rl_type['type_name']; ?>">
-				  <a class="actionitem tooltips" data-original-title="<?php echo $text_type.': '.$rl_type['type_name']; ?>"
-					 onclick="return false;" href="#"> 
-					 <i class="fa <?php echo $icon; ?>"></i>
+	        <li class="<?php echo $active; ?>" >
+			<li class="nav-item" data-type="<?php echo $rl_type['type_name']; ?>">
+				<a class="nav-link <?php echo $active; ?> actionitem tooltips" title="<?php echo $text_type.': '.$rl_type['type_name']; ?>"
+				   onclick="return false;" href="#">
+				<i class="fa <?php echo $icon; ?>"></i>
 				  </a>
 	        </li>
 	        <?php } ?>
@@ -49,18 +50,18 @@
 				<div class="fileupload-buttonbar">
 					<div class="col-sm-12 col-xs-12 center">
 						<div class="fileupload-buttonbar">
-						    <label class="btn tooltips fileinput-button ui-button" role="button" data-original-title="<?php echo $text_upload_files.' '.$text_drag; ?>">
+						    <label class="btn tooltips fileinput-button" role="button" data-original-title="<?php echo $text_upload_files.' '.$text_drag; ?>">
 						    	<span class="ui-button-text"><span>
 						    		<i class="fa fa-upload" style="font-size: 5em;"></i>
 									<p class="ellipsis"><?php echo $text_add_file; ?></p>
 						    	</span></span>
-						    	<input type="file" name="files[]" <?php echo $mode!='single' ? 'multiple=""' : ''; ?>>
+						    	<input type="file" name="files[]" <?php echo $mode!='single' ? 'multiple=""' : ''; ?> class='hide'>
 						    </label>
 						</div>
 					</div>
 					<div class="col-sm-12 col-xs-12 center">
 						<a class="btn tooltips rl_add_code" data-original-title="<?php echo $text_add_code; ?>" <?php echo $wrapper_id ? 'data-wrapper_id="'.$wrapper_id.'"' :'' ?> <?php echo $field_id ? 'data-field="'.$field_id.'"' :'' ?>>
-							<i class="fa fa-file-code-o " style="font-size: 5em;"></i>
+							<i class="fa fa-file-code" style="font-size: 5em;"></i>
 						</a>
 						<p class="ellipsis"><?php echo $text_add_code; ?></p>
 					</div>

@@ -229,9 +229,9 @@ var wrapConfirmDelete = function(){
         
         $(this).wrap(wrapper);
         popover = '<div class="confirm_popover dropdown-menu dropdown-menu-right alert alert-danger" role="menu">'+
-                    '<h5 class="center">'+ conf_text +'</h5>'+
+                    '<h6 class="center">'+ conf_text +'</h6>'+
                     '<div class="center">'+
-                    '<a class="btn btn-danger" '+action+' ><i class="fa fa-trash-o"></i>&nbsp;<?php echo $text_yes;?></a>&nbsp;&nbsp;'+
+                    '<a class="btn btn-danger" '+action+' ><i class="fa fa-trash-alt"></i>&nbsp;<?php echo $text_yes;?></a>&nbsp;&nbsp;'+
                     '<a class="btn btn-default"><i class="fa fa-undo"></i>&nbsp;<?php echo $text_no;?></a>'+
                     '</div>'+
                     '</div>';

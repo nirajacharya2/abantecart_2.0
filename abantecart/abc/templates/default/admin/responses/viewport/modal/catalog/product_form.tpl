@@ -1,4 +1,3 @@
-<?php use abc\core\helper\AHelperUtils; ?>
 <div class="modal-header">
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i
@@ -37,7 +36,7 @@
 
 					<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 						<?php if ($name == 'keyword'){ ?>
-							<span class="input-group-btn">
+							<span class="input-group-prepend">
 					<?php echo $keyword_button; ?>
 				</span>
 						<?php } ?>
@@ -60,7 +59,7 @@
 				<i class="fa fa-save"></i> <?php echo $button_save_and_close; ?>
 			</a>&nbsp;
 			<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-				<i class="fa fa-close"></i> <?php echo $button_close; ?>
+				<i class="fa fa-times"></i> <?php echo $button_close; ?>
 			</a>
 		</div>
 	</div>

@@ -20,14 +20,15 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
+/**
+ * Class ControllerApiCustomerCreate
+ *
+ * @package abc\controllers\admin
+ */
 class ControllerApiCustomerCreate extends AControllerAPI
 {
     const DEFAULT_GROUP = 1;
-    const APROVAL = 1;
+    const APPROVAL = 1;
 
     public function post()
     {
@@ -39,28 +40,27 @@ class ControllerApiCustomerCreate extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!\H::has_value($request['firstname'])) {
-            $this->rest->setResponseData(array('Error' => 'Customer first name is missing'));
+            $this->rest->setResponseData(['Error' => 'Customer first name is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
         if (!\H::has_value($request['lastname'])) {
-            $this->rest->setResponseData(array('Error' => 'Customer last name is missing'));
+            $this->rest->setResponseData(['Error' => 'Customer last name is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
         if (!\H::has_value($request['email'])) {
-            $this->rest->setResponseData(array('Error' => 'Customer email is missing'));
+            $this->rest->setResponseData(['Error' => 'Customer email is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
         //check if customer exists.
-        $customer_id = '';
         $result = $this->model_sale_customer->getCustomersByEmails($request['email']);
-        if (sizeof($result)) {
-            $this->rest->setResponseData(array('Error' => "Customer with email {$request['email']} already exists." ));
+        if ($result) {
+            $this->rest->setResponseData(['Error' => "Customer with email {$request['email']} already exists."]);
             $this->rest->sendResponse(200);
             return;
         }
@@ -68,15 +68,18 @@ class ControllerApiCustomerCreate extends AControllerAPI
         $request['loginname'] = isset($request['loginname']) ? $request['loginname'] : $request['email'];
         if (!$this->model_sale_customer->is_unique_loginname($request['loginname'])) {
             $this->rest->setResponseData(
-                array('Error' => "Customer with loginname {$request['loginname']} already exists.")
+                ['Error' => "Customer with loginname {$request['loginname']} already exists."]
             );
             $this->rest->sendResponse(200);
             return;
         }
 
         //create customer first
-        $request['customer_group_id'] = isset($request['customer_group_id']) ? $request['customer_group_id'] : self::DEFAULT_GROUP;
-        $request['approved'] = isset($request['approved']) ? $request['approved'] : self::APROVAL;
+        $request['customer_group_id'] = isset($request['customer_group_id'])
+                                        ? $request['customer_group_id']
+                                        : self::DEFAULT_GROUP;
+
+        $request['approved'] = isset($request['approved']) ? $request['approved'] : self::APPROVAL;
 
         $customer_id = $this->model_sale_customer->addCustomer($request);
         //todo Need to add address creation

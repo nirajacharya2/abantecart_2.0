@@ -102,6 +102,9 @@ h4, .h4 {
 .form-inline .checkbox {
    margin-right: 20px;
 }
+.input-group {
+   max-width: none;
+}
 .input-group input[type="checkbox"], 
 .input-group input[type="radio"] {
     float: left;
@@ -765,11 +768,13 @@ h4, .h4 {
 @media (min-width: 992px) {
 	.modal-xlg {
     	width: 980px;
+       max-width: none;
 	}
 }
 @media (min-width: 1200px) {
   .modal-xlg {
     width: 1150px;
+     max-width: none;
   }
 }
 
@@ -796,7 +801,7 @@ h4, .h4 {
 }
 
 .modal-header .close {
-   margin-top: 4px;
+/*   margin-top: 4px; */
 }
 .modal-header a.btn {
 	float: right;

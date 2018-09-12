@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,20 +25,18 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AMail;
+use abc\extensions\forms_manager\models\storefront\tools\ModelToolFormsManager;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 /**
  * Class ControllerPagesFormsManagerDefaultEmail
  *
- * @property \abc\models\storefront\ModelToolFormsManager $model_tool_forms_manager
+ * @property ModelToolFormsManager $model_tool_forms_manager
  */
 class ControllerPagesFormsManagerDefaultEmail extends AController
 {
 
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -105,7 +103,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
 
                 foreach ( $fields as $field ) {
                     // skip files and captchas
-                    if ( in_array( $field['element_type'], array( 'K', 'J', 'U' ) ) ) {
+                    if ( in_array( $field['element_type'], ['K', 'J', 'U']) ) {
                         continue;
                     }
 
@@ -168,27 +166,27 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
 
         $this->document->resetBreadcrumbs();
 
-        $this->document->addBreadcrumb( array(
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getURL( 'index/home' ),
             'text'      => $this->language->get( 'text_home' ),
             'separator' => false,
-        ) );
+        ]);
 
-        $this->document->addBreadcrumb( array(
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getURL( 'forms_manager/default_email' ),
             'text'      => $this->language->get( 'text_default_email_title' ),
             'separator' => $this->language->get( 'text_separator' ),
-        ) );
+        ]);
 
         $this->data['continue'] = $_SERVER['HTTP_REFERER'];
         $continue = HtmlElementFactory::create(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'continue_button',
                 'text'  => $this->language->get( 'button_continue' ),
                 'style' => 'button',
                 'icon'  => 'icon-arrow-right',
-            )
+            ]
         );
         $this->data['continue_button'] = $continue;
 
@@ -199,6 +197,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
     private function _prepareValue( $val )
     {
         if ( is_array( $val ) ) {
+            $str = '';
             if ( sizeof( $val ) > 1 ) {
                 $str = "\r\n";
             }
@@ -225,27 +224,27 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
 
         $this->document->resetBreadcrumbs();
 
-        $this->document->addBreadcrumb( array(
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getURL( 'index/home' ),
             'text'      => $this->language->get( 'text_home' ),
             'separator' => false,
-        ) );
+        ]);
 
-        $this->document->addBreadcrumb( array(
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getURL( 'forms_manager/default_email/success' ),
             'text'      => $this->language->get( 'text_default_email_title' ),
             'separator' => $this->language->get( 'text_separator' ),
-        ) );
+        ]);
 
         $this->data['continue'] = $this->html->getURL( 'index/home' );
         $continue = HtmlElementFactory::create(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'continue_button',
                 'text'  => $this->language->get( 'button_continue' ),
                 'style' => 'button',
                 'icon'  => 'icon-arrow-right',
-            )
+            ]
         );
         $this->data['continue_button'] = $continue;
 

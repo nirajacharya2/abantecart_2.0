@@ -1,6 +1,6 @@
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php echo $message['title']; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 <div class="tab-content">
 	<div class="panel-body panel-body-nopadding">
@@ -25,7 +25,7 @@
 			<div class="col-sm-12 center">
 				<?php if(!$readonly){?>
 				<a id="delete_message" data-confirmation="delete" class="btn btn-primary" onclick="delete_msg();">
-					<i class="fa fa-trash-o"></i> <?php echo $button_delete; ?>
+					<i class="fa fa-trash-alt"></i> <?php echo $button_delete; ?>
 				</a>&nbsp;
 				<?php } ?>
 				<a class="btn btn-default" data-dismiss="modal" href=""><?php echo $button_close; ?></a>

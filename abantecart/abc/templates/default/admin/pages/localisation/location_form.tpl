@@ -1,6 +1,6 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php if($location_id){?>
+<?php if($location_id){ ?>
 	<ul class="nav nav-tabs nav-justified nav-profile">
 		<?php
 			foreach ($tabs as $tab) {
@@ -9,7 +9,7 @@
 				}else{
 					$classname = '';
 				}
-		?>		<li class="<?php echo $classname; ?>"><a <?php echo ($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a></li>
+		?>		<li class="nav-item"><a class="nav-link <?php echo $classname; ?>" <?php echo ($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a></li>
 		<?php } ?>
 
 		<?php echo $this->getHookVar('extension_tabs'); ?>

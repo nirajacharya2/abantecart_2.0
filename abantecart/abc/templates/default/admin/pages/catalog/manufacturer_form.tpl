@@ -2,10 +2,10 @@
 
 <?php if ($update) { ?>
 	<ul class="nav nav-tabs nav-justified nav-profile">
-		<li class="active">
-		<a href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
-		<li>
-		<a href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
+		<li class="nav-item">
+		<a class="nav-link active" href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
+		<li class="nav-item">
+		<a class="nav-link" href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
 		<?php echo $this->getHookVar('extension_tabs'); ?>
 	</ul>
 <?php } ?>
@@ -60,7 +60,7 @@
 			<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 				<?php if($name == 'keyword') { ?>
-				<span class="input-group-btn">
+				<span class="input-group-prepend">
 					<?php echo $keyword_button; ?>
 				</span>
 				<?php } ?>

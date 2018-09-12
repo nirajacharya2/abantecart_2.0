@@ -1,8 +1,8 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php  echo $title; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 
 <div id="setting_form" class="tab-content">
@@ -77,7 +77,7 @@
 		    <?php } ?>
 		    <?php if ($competed) { ?>
 		    <button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
-		    	<i class="fa fa-close fa-fw"></i> <?php echo $button_close; ?>
+		    	<i class="fa fa-times fa-fw"></i> <?php echo $button_close; ?>
 		    </button>
 		    <?php } else { ?>
 			<button class="btn btn-default" type="reset">
