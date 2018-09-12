@@ -14,11 +14,11 @@
 				<?php foreach ($fields as $name => $field) { ?>
 				<?php
 					//Logic to calculate fields width
-					$widthcasses = "col-sm-9";
+					$widthcasses = "col-sm-7";
 					if ( is_int(stripos($field->style, 'large-field')) ) {
-						$widthcasses = "col-sm-9";
+						$widthcasses = "col-sm-7";
 					} else if ( is_int(stripos($field->style, 'medium-field')) || is_int(stripos($field->style, 'date')) ) {
-						$widthcasses = "col-sm-9";
+						$widthcasses = "col-sm-7";
 					} else if ( is_int(stripos($field->style, 'small-field')) || is_int(stripos($field->style, 'btn_switch')) ) {
 						$widthcasses = "col-sm-3";
 					} else if ( is_int(stripos($field->style, 'tiny-field')) ) {
@@ -26,8 +26,8 @@
 					}
 					$widthcasses .= " col-xs-12";
 				?>
-			<div class="form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-				<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 				<div class="input-group afield <?php echo $widthcasses; ?>">
 					<?php if($name == 'keyword') { ?>
 					<span class="input-group-prepend">
