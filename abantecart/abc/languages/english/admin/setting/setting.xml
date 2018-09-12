@@ -231,6 +231,11 @@
 			<![CDATA[Login Display Prices:<br /><span class="help">Show prices even if customer is not logged in.</span>]]></value>
 	</definition>
 	<definition>
+		<key>entry_require_customer_login</key>
+		<value>
+			<![CDATA[Require Login to Display Products:<br /><span class="help">Require customer login to view products</span>]]></value>
+	</definition>
+	<definition>
 		<key>entry_customer_approval</key>
 		<value>
 			<![CDATA[Approve New Customers:<br /><span class="help">Don't allow new customer to login until their account has been approved.</span>]]></value>

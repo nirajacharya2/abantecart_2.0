@@ -795,6 +795,12 @@ class AConfigManager
             'value'   => $data['config_customer_group_id'],
             'options' => $customer_groups,
         ));
+        $fields['require_customer_login'] = $form->getFieldHtml($props[] = array(
+            'type'  => 'checkbox',
+            'name'  => 'config_require_customer_login',
+            'value' => $data['config_require_customer_login'],
+            'style' => 'btn_switch',
+        ));
         $fields['customer_price'] = $form->getFieldHtml($props[] = array(
             'type'  => 'checkbox',
             'name'  => 'config_customer_price',

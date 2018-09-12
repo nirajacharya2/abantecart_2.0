@@ -54,6 +54,10 @@ class ControllerPagesProductManufacturer extends AController {
 
 		$this->loadLanguage('product/manufacturer');
 
+        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
+            abc_redirect($this->html->getSecureURL('account/login'));
+        }
+
 		$this->loadModel('catalog/manufacturer');
 		$this->loadModel('catalog/product');
 		$this->loadModel('tool/seo_url'); 
@@ -205,6 +209,7 @@ class ControllerPagesProductManufacturer extends AController {
 					);
 				}
 				$this->data['products'] = $products;
+
 
 				if ($this->config->get('config_customer_price')) {
 					$display_price = TRUE;

@@ -66,6 +66,11 @@ class ControllerPagesProductSpecial extends AController
             'separator' => false,
         ));
 
+
+        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
+            abc_redirect($this->html->getSecureURL('account/login'));
+        }
+
         $url = '';
         if (isset($request['page'])) {
             $url .= '&page='.$request['page'];
