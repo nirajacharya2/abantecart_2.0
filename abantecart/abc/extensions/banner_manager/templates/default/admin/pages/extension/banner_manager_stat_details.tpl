@@ -28,10 +28,8 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<!--[if IE]>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/excanvas.js'); ?>"></script>
-<![endif]-->
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/jquery.flot.js'); ?>"></script>
+<!--<script type="text/javascript" src="<?php echo $this->templateResource('vendor/components/chart/Chart.min.js'); ?>"></script> -->
+<script type="text/javascript" src="vendor/components/chart/Chart.min.js"></script>
 <script type="text/javascript">
 function getSalesChart(range) {
 	$.ajax({
@@ -40,27 +38,69 @@ function getSalesChart(range) {
 		dataType: 'json',
 		async: false,
 		success: function(json) {
-			var option = {
-				shadowSize: 0,
-				lines: {
-					show: true,
-					fill: true,
-					lineWidth: 1
-				},
-				grid: {
-					backgroundColor: '#FFFFFF'
-				},
-				xaxis: {
-            		ticks: json.xaxis,
-					axisLabel: json.xaxisLabel
-				},
-				yaxis: {
-            		axisLabel: <?php abc_js_echo($text_count); ?>
+			const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+				"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+			];
+			const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri",
+				"Sat"
+			];
+			$("#report").html('<canvas id="statisticsChart"></canvas>');
+
+			var viewed = json.viewed;
+			var viewed_labels = [];
+			var viewed_values = [];
+
+			for (var k in viewed.data) {
+				if (viewed.data.length == 12) {
+					viewed_labels.push(monthNames[k]);
+				} else if (viewed.data.length == 7) {
+					viewed_labels.push(weekdayNames[k]);
+				} else {
+					viewed_labels.push(viewed.data[k][0]);
 				}
+				viewed_values.push(viewed.data[k][1]);
 			}
 
-			$.plot($('#report'), [json.viewed, json.clicked], option);
+			var clicked = json.clicked;
+			var clicked_labels = [];
+			var clicked_values = [];
 
+			for (var k in clicked.data) {
+				if (clicked.data.length == 12) {
+					clicked_labels.push(monthNames[k]);
+				} else if (clicked.data.length == 7) {
+					clicked_labels.push(weekdayNames[k]);
+				} else {
+					clicked_labels.push(clicked.data[k][0]);
+				}
+				clicked_labels.push(clicked.data[k][0]);
+				clicked_values.push(clicked.data[k][1]);
+			}
+
+			var ctx = document.getElementById('statisticsChart').getContext('2d');
+			var chart = new Chart(ctx, {
+				// The type of chart we want to create
+				type: 'line',
+
+				// The data for our dataset
+				data: {
+					labels: viewed_labels,
+					datasets: [{
+						label: viewed.label,
+						backgroundColor: '#1CAF9A',
+						borderColor: '#1CAF9A',
+						data: viewed_values,
+					},
+						{
+							label: clicked.label,
+							backgroundColor: '#428BCA',
+							borderColor: '#428BCA',
+							data: clicked_values,
+						},
+					]
+				},
+
+			});
 		}
 	});
 }
