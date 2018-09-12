@@ -193,7 +193,7 @@
         "name": "components/flot",
         "version": "0.8.3",
         "dist": {
-          "url": "https://www.flotcharts.org/downloads/flot-0.8.3.zip",
+          "url": "http://www.flotcharts.org/downloads/flot-0.8.3.zip",
           "type": "zip"
         }
       }
