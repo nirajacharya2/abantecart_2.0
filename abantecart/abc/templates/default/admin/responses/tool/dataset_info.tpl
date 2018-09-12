@@ -1,8 +1,8 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php  echo $this->language->get('text_popup_title'); ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 <div class="tab-content">
 	<div class="panel-body panel-body-nopadding">
