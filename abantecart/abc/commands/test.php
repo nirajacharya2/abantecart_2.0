@@ -56,12 +56,12 @@ class Test extends BaseCommand
             }
             if (!is_dir(dirname($options['file']))) {
                 //try to create directory
-                $mkdir_result = \H::MakeNestedDirs(dirname($options['file']),0775);
-                if($mkdir_result['result'] === false) {
+                $makeDirResult = \H::MakeNestedDirs(dirname($options['file']),0775);
+                if($makeDirResult['result'] === false) {
                     return [
                         "Cannot to create directory ".dirname($options['file'])."."
                         ."Please create it manually or check permissions.\n"
-                        .$mkdir_result['message']
+                        .$makeDirResult['message']
                     ];
                 }
             }
@@ -135,9 +135,11 @@ class Test extends BaseCommand
                         ."\t  To run test by filename:\n\n\t\t   "
                         ."php abcexec test:phpunit --run --file=/full/Path/Of/YourTestFileName.php --stage=default\n\n"
                         ."\t  To run all tests from directory:\n\n\t\t   "
-                        ."php abcexec test:phpunit --run --dir=/full/Path/Of/Your/Directory/With/Tests/ --stage=default\n\n"
-                        ."\t  To reate new phpunit test file:\n\n\t\t   "
-                        ."php abcexec test:phpunit --create --file=/full/Path/Of/YourTestFileName.php --stage=default\n\n",
+                        ."php abcexec test:phpunit --run "
+                            ."--dir=/full/Path/Of/Your/Directory/With/Tests/ --stage=default\n\n"
+                        ."\t  To create new phpunit test file:\n\n\t\t   "
+                        ."php abcexec test:phpunit --create "
+                            ."--file=/full/Path/Of/YourTestFileName.php --stage=default\n\n",
                 ],
         ];
     }
@@ -178,7 +180,11 @@ class Test extends BaseCommand
             }
 
             $output_arr = [];
-            exec('php '.$this->phpUnitPhar.' --configuration '.$this->phpUnitConfigFile, $output_arr, $this->phpUnitTestsResult);
+            exec(
+                'php '.$this->phpUnitPhar.' --configuration '.$this->phpUnitConfigFile,
+                $output_arr,
+                $this->phpUnitTestsResult
+            );
             echo implode("\n", $output_arr)."\n";
         }
     }
@@ -230,7 +236,7 @@ class Test extends BaseCommand
         $stage_name = $data['stage'];
         $phpunit_config_file = $this->phpUnitConfigFile;
 
-        $app_config_file = ABC::env('DIR_CONFIG').$stage_name.'.config.php';
+        $app_config_file = ABC::env('DIR_CONFIG').$stage_name.DS.'config.php';
         @unlink($phpunit_config_file);
         if (!$stage_name || !is_file($app_config_file)) {
             $this->results[] = 'Cannot to create phpunit configuration. Unknown stage name!';
