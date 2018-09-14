@@ -427,7 +427,7 @@ class Install extends BaseCommand
         parent::finish($action, $options);
     }
 
-    protected function finalMessageExtensionInstall()
+    protected function finalMessageExtensionInstall($options = [])
     {
         $this->write("AbanteCart extension installation process complete\n");
     }
@@ -647,7 +647,7 @@ return [
         'ENCRYPTION_KEY' => '12345'
 ];
 EOD;
-        $file = fopen(ABC::env('DIR_CONFIG').'default.config.php', 'w');
+        $file = fopen(ABC::env('DIR_CONFIG').'default'.DS.'config.php', 'w');
         if (!fwrite($file, $content)) {
             $result[] = 'Cannot to write file '.$file;
         }

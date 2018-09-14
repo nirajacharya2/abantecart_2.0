@@ -15,10 +15,8 @@
 /abantecart/abc/system/logs/*
 
 
-/abantecart/abc/config/default.config.php
+/abantecart/abc/config/default/config.php
 /abantecart/abc/config/enabled.config.php
-/abantecart/abc/config/enabled.config.php.bkp
-/abantecart/abc/config/migration.config.php
 /abantecart/public/images/thumbnails/*
 /abantecart/public/templates/default/admin/*
 /abantecart/public/templates/default/storefront/*

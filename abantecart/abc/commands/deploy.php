@@ -89,7 +89,7 @@ class Deploy extends BaseCommand
                 $errors = $clr_result;
             } else {
                 if ($action == 'config') {
-                    $result = $this->_switch_config($options['stage']);
+                    $result = $this->switchConfig($options['stage']);
                 } else {
                     $this->publish->printStartTime = $this->printStartTime;
                     $this->publish->printEndTime = $this->printEndTime;
@@ -119,18 +119,16 @@ class Deploy extends BaseCommand
      * @return bool
      * @throws AException
      */
-    protected function _switch_config($stage_name)
+    protected function switchConfig($stage_name)
     {
         if (!trim($stage_name)) {
             throw new AException(AC_ERR_USER_ERROR, "Error: Wrong stage name!");
         }
-        $stage_config = ABC::env('DIR_CONFIG').$stage_name.'.config.php';
-        if (!is_file($stage_config)
-            && !is_file(ABC::env('DIR_CONFIG').$stage_name.'.php')
-        ) {
-            throw new AException(AC_ERR_USER_ERROR,
-                "Error: Cannot find config file of stage (looking for ".ABC::env('DIR_CONFIG').$stage_name.'.config.php'
-                .")!");
+        $stage_config = ABC::env('DIR_CONFIG').$stage_name.DS.'config.php';
+        if ( !is_file($stage_config) ){
+            throw new AException(
+                AC_ERR_USER_ERROR,
+                "Error: Cannot find config file of stage (looking for ".$stage_config." )!");
         }
 
         $tmp_file = ABC::env('DIR_CONFIG').'tmp.php';

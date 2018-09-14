@@ -19,9 +19,9 @@
 namespace abc\core;
 
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
+use H;
 use ReflectionClass;
 
 ob_start();
@@ -112,12 +112,15 @@ class ABC extends ABCBase
         $config_sections = ['config', 'events'];
         foreach ($config_sections as $config_section) {
             $KEY = strtoupper($config_section);
-            $file_name = $stage_name.'.'.$config_section.'.php';
-            $file = dirname(__DIR__).DS.'config'.DS.$file_name;
+            $file_name = $config_section.'.php';
+            $file = dirname(__DIR__).DS
+                    .'config'.DS
+                    .$stage_name.DS
+                    .$file_name;
             $config = @include($file);
 
             if ($config) {
-                //if we load additions configs - place it as key of env array
+                //if we load additional configs - place it as key of env array
                 if ($config_section != 'config') {
                     $config = [$KEY => $config];
                 }
@@ -135,16 +138,11 @@ class ABC extends ABCBase
                 .'extensions'.DS
                 .'*'.DS
                 .'config'.DS
+                .$stage_name.DS
             );
 
             foreach ($ext_dirs as $cfg_dir) {
-                $file = $cfg_dir.DS.'enabled.config.php';
-                $config = @include($file);
-                //if stage name of extension environment is empty - skip configs
-                if (!$config) {
-                    continue;
-                }
-                $cfg_file = $cfg_dir.DS.$config.'.'.$config_section.'.php';
+                $cfg_file = $cfg_dir.DS.$config_section.'.php';
 
                 if (is_file($cfg_file)) {
                     $ext_config = @include_once($cfg_file);
@@ -174,7 +172,7 @@ class ABC extends ABCBase
      */
     public static function loadClassMap($stage_name = 'default')
     {
-        $classmap_file = dirname(__DIR__).DS.'config'.DS.$stage_name.'.classmap.php';
+        $classmap_file = dirname(__DIR__).DS.'config'.DS.$stage_name.DS.'classmap.php';
         if (is_file($classmap_file)) {
             self::$class_map = @include_once($classmap_file);
         }
@@ -188,16 +186,10 @@ class ABC extends ABCBase
             .'extensions'.DS
             .'*'.DS
             .'config'.DS
+            .$stage_name.DS
         );
         foreach ($ext_dirs as $cfg_dir) {
-            $file = $cfg_dir.DS.'enabled.config.php';
-            $config = @include($file);
-            //if stage name of extension environment is empty - skip configs
-            if(!$config){ continue; }
-            if ($config) {
-                $stage_name = $config;
-            }
-            $classmap_file = $cfg_dir.DS.$stage_name.'.classmap.php';
+            $classmap_file = $cfg_dir.DS.'classmap.php';
             if (is_file($classmap_file)) {
                 $ext_classmap = @include_once($classmap_file);
                 if (is_array($ext_classmap)) {
@@ -374,7 +366,7 @@ class ABC extends ABCBase
             && $registry->get('user')->isLogged()
         ) {
             $user_id = $registry->get('user')->getId();
-            AHelperUtils::startStorefrontSession($user_id);
+            H::startStorefrontSession($user_id);
         }
 
         //Show cache stats if debugging
