@@ -28,8 +28,8 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<!--<script type="text/javascript" src="<?php echo $this->templateResource('vendor/components/chart/Chart.min.js'); ?>"></script> -->
-<script type="text/javascript" src="vendor/components/chart/Chart.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('vendor/components/chart/Chart.min.js'); ?>"></script>
+
 <script type="text/javascript">
 function getSalesChart(range) {
 	$.ajax({

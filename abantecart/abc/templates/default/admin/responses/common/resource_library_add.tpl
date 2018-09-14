@@ -76,7 +76,7 @@
 			<?php // resource_code form ?>
 				<div>
 					<div class="col-sm-12 col-xs-12">
-						<div class="form-group <?php echo(!empty($error['resource_code']) ? "has-error" : ""); ?>">
+						<div class="form-group row align-items-start <?php echo(!empty($error['resource_code']) ? "has-error" : ""); ?>">
 							<label class="control-label" for="<?php echo $form['field_resource_code']->element_id; ?>"><?php echo $text_resource_code; ?></label>
 							<div class="input-group afield col-sm-12">
 								<?php echo $form['field_resource_code']; ?>
@@ -90,7 +90,7 @@
 							<div class="input-group afield col-sm-12"><?php echo $rl_types; ?></div>
 						</div>
 
-						<div class="form-group <?php echo(!empty($error['name']) ? "has-error" : ""); ?>">
+						<div class="form-group row align-items-start <?php echo(!empty($error['name']) ? "has-error" : ""); ?>">
 							<label class="control-label"
 								   for="<?php echo $form['field_name']->element_id; ?>"><?php echo $text_name; ?></label>
 
@@ -99,7 +99,7 @@
 							</div>
 						</div>
 
-						<div class="form-group <?php echo(!empty($error['title']) ? "has-error" : ""); ?>">
+						<div class="form-group row align-items-start <?php echo(!empty($error['title']) ? "has-error" : ""); ?>">
 							<label class="control-label"
 								   for="<?php echo $form['field_title']->element_id; ?>"><?php echo $text_title; ?></label>
 
@@ -108,7 +108,7 @@
 							</div>
 						</div>
 
-						<div class="form-group <?php echo(!empty($error['description']) ? "has-error" : ""); ?>">
+						<div class="form-group row align-items-start <?php echo(!empty($error['description']) ? "has-error" : ""); ?>">
 							<label class="control-label"  for="<?php echo $form['field_description']->element_id; ?>"><?php echo $text_description; ?></label>
 
 							<div class="input-group afield col-sm-12">

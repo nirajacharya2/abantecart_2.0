@@ -12,8 +12,8 @@
 	}
 	$widthcasses .= " col-xs-12";
 	?>
-	<div class="form-group <?php echo !empty($error[$name]) ? "has-error" :''; ?>">
-		<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+	<div class="form-group row align-items-start <?php echo !empty($error[$name]) ? "has-error" :''; ?>">
+		<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 		<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>"><?php echo $field; ?></div>
 		<?php if (!empty($error[$name])) { ?>
 			<span class="help-block field_err"><?php echo $error[$name]; ?></span>
@@ -24,7 +24,7 @@
 	<?php
 		if ($child_count == 0) { ?>
 			<div id="values" style="display: none;">
-				<label class="control-label col-sm-3 col-xs-12"></label>
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12"></label>
 				<div class="input-group afield col-sm-7">
 				<table class="table table-narrow">
 					<thead>
@@ -58,7 +58,7 @@
 			</div>
 		<?php } else { ?>
 			<div id="values">
-				<label class="control-label col-sm-3 col-xs-12"><?php echo $entry_children_attributes; ?></label>
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12"><?php echo $entry_children_attributes; ?></label>
 				<div class="input-group afield col-sm-7">
 					<ul class="list-group">
 						<?php foreach ($children as $child) { ?>
@@ -71,7 +71,7 @@
 
 		<div id="file_settings" class="form-group" style="display: none;">
 			<div class="form-group">
-				<label class="control-label col-sm-3 col-xs-12"></label>
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12"></label>
 				<div class="input-group afield col-sm-7">
 					<ul class="list-group">
 					<?php if (is_array($children)) { ?>
@@ -93,7 +93,7 @@
 				$fld = $form['settings_fields'][$name];
 				?>
 			<div class="form-group ">
-				<label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->name;?>"><?php echo $$entry; ?></label>
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $fld->name;?>"><?php echo $$entry; ?></label>
 				<div class="input-group afield col-sm-7"><?php echo $form['settings_fields'][$name]; ?></div>
 			</div>
 			<?php }?>

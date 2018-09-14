@@ -1,7 +1,7 @@
 <div class="modal-header">
+	<h4 class="modal-title"><?php echo $form_title; ?></h4>
 	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
 				class="sr-only">Close</span></button>
-	<h4 class="modal-title"><?php echo $form_title; ?></h4>
 </div>
 <div class="modal-body">
 <?php echo $resources_scripts;?>
@@ -23,8 +23,8 @@
 						<?php
 						$name = 'shared';
 						?>
-					<div class="form-inline form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-						<label class="control-label col-sm-3 col-xs-12" for="<?php echo $form0['shared']->element_id; ?>"><?php echo $text_select_shared_downloads; ?></label>
+					<div class="form-inline form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+						<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $form0['shared']->element_id; ?>"><?php echo $text_select_shared_downloads; ?></label>
 						<div class="input-group afield col-sm-7 col-xs-12">
 							<?php echo $form0['shared']; ?>
 						</div>
@@ -71,8 +71,8 @@
 								}
 								$widthcasses .= " col-xs-12";
 							?>
-						<div class="form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-							<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+						<div class="form-group  row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+							<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 							<?php if($name=='shared' && $map_list){ ?>
 							<div class="btn-group toolbar">
 							<button data-toggle="dropdown" type="button" class="btn btn-default dropdown-toggle">
@@ -96,7 +96,7 @@
 							<span class="help-block field_err"><?php echo $error[$name]; ?></span>
 							<?php }
 						if($name=='resource' && $preview['path']){ ?>
-								<label class="control-label col-sm-3 col-xs-12" for=""></label>
+								<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for=""></label>
 								<dl class="col-sm-12 dl-horizontal clearfix">
 									<dt class="date_added"><?php echo $entry_date_added; ?></dt>
 									<dd class="date_added"><?php echo $date_added; ?></dd>

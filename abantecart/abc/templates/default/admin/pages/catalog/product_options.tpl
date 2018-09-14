@@ -45,33 +45,33 @@ $modal_content = '<div class="add-option-modal" >
 			    	<div class="panel-body panel-body-nopadding">
 			    		'.$attributes.'
 			    		<div class="mt10 options_buttons" id="option_name_block">
-			    			<div class="form-group '. (!empty($error['status']) ? "has-error" : "") .'">
-			    				<label class="control-label col-sm-3 col-xs-12" for="'.$status->element_id.'">'. $entry_status.'</label>
-			    				<div class="input-group afield ">
+			    			<div class="form-group row'. (!empty($error['status']) ? "has-error" : "") .'">
+			    				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="'.$status->element_id.'">'. $entry_status.'</label>
+			    				<div class="input-group afield col-sm-7 col-xs-12">
 			    					'.$status.'
 			    				</div>
 			    			</div>
-			    			<div class="form-group '.(!empty($error['option']) ? "has-error" :"").'">
-			    				<label class="control-label col-sm-3 col-xs-12" for="'.$option_name->element_id.'">'.$entry_option.'</label>
-			    				<div class="input-group afield ">
+			    			<div class="form-group row'.(!empty($error['option']) ? "has-error" :"").'">
+			    				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="'.$option_name->element_id.'">'.$entry_option.'</label>
+			    				<div class="input-group afield col-sm-7 col-xs-12">
 			    					'.$option_name.'
 			    				</div>
 			    			</div>
-			    			<div class="form-group '.(!empty($error['element_type']) ? "has-error" : "").'">
-			    				<label class="control-label col-sm-3 col-xs-12" for="'.$element_type->element_id.'">'.$entry_element_type.'</label>
-			    				<div class="input-group afield ">
+			    			<div class="form-group row'.(!empty($error['element_type']) ? "has-error" : "").'">
+			    				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="'.$element_type->element_id.'">'.$entry_element_type.'</label>
+			    				<div class="input-group afield col-sm-7 col-xs-12">
 			    					'.$element_type.'
 			    				</div>
 			    			</div>
-			    			<div class="form-group '.(!empty($error['sort_order']) ? "has-error" : "") .'">
-			    				<label class="control-label col-sm-3 col-xs-12" for="'.$sort_order->element_id.'">'.$entry_sort_order.'</label>
-			    				<div class="input-group afield ">
+			    			<div class="form-group row'.(!empty($error['sort_order']) ? "has-error" : "") .'">
+			    				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="'.$sort_order->element_id.'">'.$entry_sort_order.'</label>
+			    				<div class="input-group afield col-sm-7 col-xs-12">
 			    					'.$sort_order.'
 			    				</div>
 			    			</div>
-			    			<div class="form-group '.(!empty($error['required']) ? "has-error" : "").'">
-			    				<label class="control-label col-sm-3 col-xs-12" for="'.$required->element_id.'">'.$entry_required.'</label>
-			    				<div class="input-group afield ">
+			    			<div class="form-group row'.(!empty($error['required']) ? "has-error" : "").'">
+			    				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="'.$required->element_id.'">'.$entry_required.'</label>
+			    				<div class="input-group afield col-sm-7 col-xs-12">
 			    					'.$required.'
 			    				</div>
 			    			</div>

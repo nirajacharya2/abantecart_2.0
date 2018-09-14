@@ -1,6 +1,6 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php echo $text_get_category_embed_code; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 <div class="tab-content do_embed">
 	<div class="panel-body panel-body-nopadding">

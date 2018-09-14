@@ -41,13 +41,13 @@
 		$widthcasses .= " col-xs-12";
 
 		if($upload && $name=='upload_url'){ ?>
-			<div class="form-group <?php if (!empty($error[$name])) {	echo "has-error";	} ?>">
-				<label class="control-label col-sm-3 col-xs-12"><?php echo $text_or; ?></label>
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) {	echo "has-error";	} ?>">
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12"><?php echo $text_or; ?></label>
 			</div>
 		<?php } ?>
 
-		<div class="form-group <?php if (!empty($error[$name])) {	echo "has-error";	} ?>">
-			<label class="control-label col-sm-3 col-xs-12"
+		<div class="form-group row align-items-start <?php if (!empty($error[$name])) {	echo "has-error";	} ?>">
+			<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
 				   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">

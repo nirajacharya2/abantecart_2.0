@@ -1,6 +1,6 @@
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php echo $text_title ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 
 <div id="ct_form" class="tab-content">
@@ -20,7 +20,7 @@
 				$widthclasses = "col-sm-2";
 			}
 			$widthclasses .= " col-xs-12"; ?>
-		<div class="form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>" <?php echo ($name=='other_type' ? 'style="display: none;"' : '')?>>
+		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>" <?php echo ($name=='other_type' ? 'style="display: none;"' : '')?>>
 			<label class="control-label col-sm-4 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthclasses; ?>"><?php echo $field; ?></div>
 			<?php if (is_array($error[$name]) && !empty($error[$name])) { ?>

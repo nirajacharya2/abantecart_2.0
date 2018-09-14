@@ -1,8 +1,8 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<h4 class="modal-title"><?php  echo $form_title; ?></h4>
+	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 <div class="tab-content">
 	<?php echo $form['form_open']; ?>
@@ -23,8 +23,8 @@
 				}
 				$widthclasses .= " col-xs-12";
 			?>
-			<div class="form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-				<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 				<div class="input-group afield <?php echo $widthclasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 					<?php echo $field; ?>
 				</div>

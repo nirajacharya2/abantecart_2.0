@@ -70,7 +70,7 @@ echo $tabs;
 		}
 		$widthcasses .= " col-xs-12";
 	?>
-	<div class="form-group <?php if (!empty($error[$name])) {
+	<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
 		echo "has-error";
 	} ?>">
 		<label class="control-label col-sm-4 col-xs-12"

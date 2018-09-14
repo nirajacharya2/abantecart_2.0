@@ -13,10 +13,10 @@
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $tab_backup; ?></label>
         <?php foreach ($form['fields'] as $name => $field) { ?>
-			<div class="form-group <?php if (!empty($error[$name])) {
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
                 echo "has-error";
             } ?>">
-				<label class="control-label col-sm-3 col-xs-12"
+				<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
 					   for="<?php echo $field->element_id; ?>">
                     <?php
                     echo ${'entry_'.$name};
@@ -63,7 +63,7 @@
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $tab_restore; ?></label>
 
-		<div class="form-group <?php if (!empty($error['file'])) {
+		<div class="form-group row align-items-start <?php if (!empty($error['file'])) {
             echo "has-error";
         } ?>">
 			<label class="control-label col-sm-4 col-xs-12"
@@ -90,7 +90,7 @@
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $tab_loadxml; ?></label>
 
-		<div class="form-group <?php if (!empty($error['file'])) {
+		<div class="form-group row align-items-start <?php if (!empty($error['file'])) {
             echo "has-error";
         } ?>">
 			<label class="control-label col-sm-4 col-xs-12"

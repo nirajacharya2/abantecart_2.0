@@ -267,7 +267,7 @@ if ($quick_start_url){
 	}
 
 	function showChart(orders, customers, xaxis) {
-		
+
 		var orders_labels = [];
 		var orders_values = [];
 		const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
