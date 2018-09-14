@@ -54,7 +54,7 @@
 					}
 					$widthcasses .= " col-xs-12";
 				?>
-			<div class="form-group <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
 				<label class="control-label col-md-6" for="<?php echo $field->element_id; ?>"><?php echo $entry; ?></label>
 				<div class="input-group input-group-sm afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 					<?php echo $field;?>
@@ -80,7 +80,7 @@
 </div>
 
 <?php echo $update_option_values_form['open']; ?>
-<div class="col-md-8"> 
+<div class="col-md-12">
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h3 class="panel-title"><?php echo $text_option_values; ?></h3>

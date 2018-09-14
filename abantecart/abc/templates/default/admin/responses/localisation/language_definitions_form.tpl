@@ -25,10 +25,10 @@
 			if (is_array($field) && $name == 'language_value') {
 				foreach ($field as $lang_id => $f) {
 					?>
-					<div class="form-group <?php if (!empty($error[$name])) {
+					<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
 						echo "has-error";
 					} ?>">
-					<label class="control-label col-sm-3 col-xs-12" for="<?php echo $f->element_id; ?>">
+					<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $f->element_id; ?>">
 						<img src="<?php echo $languages[$lang_id]['image']; ?>"
 							 alt="<?php echo $languages[$lang_id]['name']; ?>"/>
 						<?php echo ${'entry_' . $name}; ?>
@@ -47,10 +47,10 @@
 			<?php
 			} else {
 				?>
-				<div class="form-group <?php if (!empty($error[$name])) {
+				<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
 					echo "has-error";
 				} ?>">
-					<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>">
+					<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>">
 						<?php echo ${'entry_' . $name}; ?></label>
 
 					<div class="input-group afield <?php echo $widthclasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">

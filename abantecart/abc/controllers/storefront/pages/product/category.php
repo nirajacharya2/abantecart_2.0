@@ -57,6 +57,10 @@ class ControllerPagesProductCategory extends AController {
 			'separator' => FALSE
 		 ));
 
+        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
+            abc_redirect($this->html->getSecureURL('account/login'));
+        }
+
 		$this->loadModel('catalog/category');
 		$this->loadModel('tool/seo_url');  
 

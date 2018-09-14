@@ -511,7 +511,10 @@ class AView
             $http_path = $this->data['http_dir'];
         }
 
-        if ($mode == 'http') {
+        if (strpos($filename, ABC::env('DIRNAME_VENDOR')) > -1) {
+            return  $http_path.$filename;
+        }
+        else if ($mode == 'http') {
             return $http_path.$output;
         } else {
             if ($mode == 'file') {

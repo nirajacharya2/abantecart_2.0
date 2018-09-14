@@ -23,7 +23,7 @@
  		
 		<?php foreach ($form['fields'] as $name => $field) { ?>
 		<?php if( $field->type == 'input') { ?>
-			<div class="form-group <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
 				<?php if (!empty($error[$name])) { ?>
 				<div class="help-block with-errors"><?php echo $error[$name]; ?></div>
 				<?php } ?>
@@ -32,7 +32,7 @@
 				</div>
 			</div>	
 		<?php } else if( $field->type == 'captcha' || $field->type == 'recaptcha')  { ?>
-			<div class="form-group <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
 				<?php if (!empty($error[$name])) { ?>
 				<div class="help-block with-errors"><?php echo $error[$name]; ?></div>
 				<?php } ?>
@@ -41,7 +41,7 @@
 		<?php } else if ($field->type == 'passwordset') { ?>	
 			<p><?php echo $text_enter_new_password; ?></p>
 	 		
-			<div class="form-group <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
+			<div class="form-group row align-items-start <?php if (!empty($error[$name])) { ?>has-error<?php } ?>">
 				<?php if (!empty($error[$name])) { ?>
 				<div class="help-block with-errors"><?php echo $error[$name]; ?></div>
 				<?php } ?>

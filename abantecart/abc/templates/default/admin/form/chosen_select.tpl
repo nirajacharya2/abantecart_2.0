@@ -30,21 +30,27 @@ if(is_array($options)){
 <?php if ( strpos($style,'chosen') !== false ) {  //for chosen we populate HTML into options  ?>
 <script type="text/javascript">
 $(document).ready(function () {
-<?php 
-if(is_array($options)){
-	foreach ( $options as $v => $text ) { 	
-		if (is_array($text)) {
-		$check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v);
-?>
-		$('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
-		$('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
-<?php 
+	<?php
+	if(is_array($options)){
+		foreach ( $options as $v => $text ) {
+			if (is_array($text)) {
+			$check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v);
+	?>
+			$('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
+			$('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
+	<?php
+			}
 		}
 	}
-}
-?>
+	?>
 
-$("#<?php echo $id ?>").chosen({'width':'100%','white-space':'nowrap'});
+	$("#<?php echo $id ?>").chosen(
+		{
+			'width':'100%',
+			'white-space':'nowrap',
+			'max_selected_options': <?php echo  $extra['max_selected_options']?:'null'; ?>
+		}
+	);
 
 });
 </script>

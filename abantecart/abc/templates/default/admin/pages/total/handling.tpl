@@ -29,10 +29,10 @@
 			//special case for payment specific fee
 			if ("payment_fee" != substr($name, 0, 11)){
 				?>
-				<div class="form-group <?php if (!empty($error[$name])){
+				<div class="form-group row align-items-start <?php if (!empty($error[$name])){
 					echo "has-error";
 				} ?>">
-					<label class="control-label col-sm-3 col-xs-12"
+					<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
 					       for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 					<div id="<?php echo $name ?>_wrp"
 					     class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '') . ' ' . (is_array($field) ? "form-inline" : "") ?>">
@@ -56,7 +56,7 @@
 				<div class="form-group form-group-sm <?php if (!empty($error[$name])){
 					echo "has-error";
 				} ?>">
-					<label class="control-label col-sm-3 col-xs-12"><?php echo $field[0]; ?></label>
+					<label class="control-label offset-sm-1 col-sm-3 col-xs-12"><?php echo $field[0]; ?></label>
 					<div id="<?php echo $name ?>_wrp" class="input-group afield form-inline col-sm-9">
 						<div class="input-group input-group-sm afield col-sm-2"><?php echo $field[1]; ?></div>
 						<div class="input-group input-group-sm col-sm-3 text-right">
@@ -100,7 +100,7 @@
 <script language="javascript" type="text/javascript">
 	$(document).ready(function () {
 		var btn = '<a class="add btn btn-success" title="<?php echo $text_add?>" href="#"><i class="fa fa-plus-circle fa-lg"></i></a>';
-		$('div[id*="payment_fee"]').last().parents('.form-group').after('<div class="form-group"><label class="control-label col-sm-3 col-xs-12"></label><div class="input-group afield">' + btn + '</div></div>');
+		$('div[id*="payment_fee"]').last().parents('.form-group').after('<div class="form-group"><label class="control-label offset-sm-1 col-sm-3 col-xs-12"></label><div class="input-group afield">' + btn + '</div></div>');
 
 		$('.panel-body').on('click', 'a.add', function () {
 			var new_row = $('div[id*="payment_fee"]').last().parents('.form-group').clone();
