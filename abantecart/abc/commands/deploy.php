@@ -18,10 +18,9 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\lib\AException;
-
-include_once('base/BaseCommand.php');
 
 class Deploy extends BaseCommand
 {
@@ -47,7 +46,7 @@ class Deploy extends BaseCommand
     {
         $action = !$action ? 'all' : $action;
 
-        if (!in_array($action, array('all', 'help', 'core', 'config', 'extensions', 'vendors'))) {
+        if (!in_array($action, ['all', 'help', 'core', 'config', 'extensions', 'vendors'])) {
             return ['Error: Unknown Action Parameter!'];
         }
 
@@ -81,7 +80,7 @@ class Deploy extends BaseCommand
         $result = false;
         $errors = [];
         $clr_result = [];
-        if (in_array($action, array('all', 'core', 'config', 'extensions', 'vendors'))) {
+        if (in_array($action, ['all', 'core', 'config', 'extensions', 'vendors'])) {
             if (!isset($options['skip-caching'])) {
                 $clr_result = $this->cache->run('clear', ['all' => 1]);
             }

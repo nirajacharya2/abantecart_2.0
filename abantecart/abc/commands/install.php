@@ -18,6 +18,7 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
@@ -26,8 +27,11 @@ use abc\core\lib\{
     AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
 
-include_once('base/BaseCommand.php');
-
+/**
+ * Class Install
+ *
+ * @package abc\commands
+ */
 class Install extends BaseCommand
 {
     public function validate(string $action, array $options)
@@ -52,6 +56,15 @@ class Install extends BaseCommand
         }
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return array|bool|null|void
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
+     */
     public function run(string $action, array $options)
     {
         parent::run($action, $options);
@@ -73,6 +86,13 @@ class Install extends BaseCommand
         return ['Error: unknown command called!'];
     }
 
+    /**
+     * @param $options
+     *
+     * @return array|bool
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     */
     protected function installApp($options)
     {
         $this->fillDefaults($options);
@@ -118,6 +138,12 @@ class Install extends BaseCommand
         return $errors;
     }
 
+    /**
+     * @param $options
+     *
+     * @throws AException
+     * @throws \ReflectionException
+     */
     protected function installPackage($options)
     {
         if (!$options) {
@@ -250,6 +276,12 @@ class Install extends BaseCommand
         }
     }
 
+    /**
+     * @param $file_path
+     *
+     * @throws AException
+     * @throws \ReflectionException
+     */
     protected function showConfirmation($file_path)
     {
         if (file_exists($file_path)) {
@@ -274,6 +306,12 @@ class Install extends BaseCommand
         }
     }
 
+    /**
+     * @param $options
+     *
+     * @return bool|null
+     * @throws AException
+     */
     protected function uninstallExtension($options)
     {
         if (!$options) {
@@ -303,6 +341,13 @@ class Install extends BaseCommand
         return $result;
     }
 
+    /**
+     * @param $options
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
     protected function installExtension($options)
     {
         if (!$options) {
@@ -333,6 +378,12 @@ class Install extends BaseCommand
         return $result;
     }
 
+    /**
+     * @param $options
+     *
+     * @return bool|null
+     * @throws AException
+     */
     protected function removeExtension($options)
     {
         if (!$options) {
@@ -382,6 +433,11 @@ class Install extends BaseCommand
         throw new AException(AC_ERR_USER_ERROR, $error_text);
     }
 
+    /**
+     * @param array $options
+     *
+     * @return bool
+     */
     protected function fillDefaults(array &$options)
     {
         if (!$options) {
@@ -415,6 +471,12 @@ class Install extends BaseCommand
         return true;
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return bool|void
+     */
     public function finish(string $action, array $options)
     {
         if ($action == 'app') {
@@ -427,11 +489,17 @@ class Install extends BaseCommand
         parent::finish($action, $options);
     }
 
+    /**
+     * @param array $options
+     */
     protected function finalMessageExtensionInstall($options = [])
     {
         $this->write("AbanteCart extension installation process complete\n");
     }
 
+    /**
+     * @param $options
+     */
     protected function finalMessageAppInstall($options)
     {
         $this->write("AbanteCart installation process complete\n");
@@ -455,6 +523,9 @@ class Install extends BaseCommand
         }
     }
 
+    /**
+     * @return array
+     */
     protected function validateAppRequirements()
     {
         $errors = [];
@@ -554,6 +625,13 @@ class Install extends BaseCommand
         return $errors;
     }
 
+    /**
+     * @param array $options
+     *
+     * @return array
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     */
     public function configure(array $options)
     {
         if (!$options) {
@@ -687,6 +765,13 @@ EOD;
         return $result;
     }
 
+    /**
+     * @param array $options
+     *
+     * @return array
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     */
     public function runSQL(array $options)
     {
         $errors = [];
@@ -773,6 +858,13 @@ EOD;
         return $errors;
     }
 
+    /**
+     * @param $options
+     *
+     * @return array
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     */
     public function loadDemoData($options)
     {
         $errors = [];
@@ -855,6 +947,9 @@ EOD;
         return $options;
     }
 
+    /**
+     * @return array
+     */
     protected function getOptionList()
     {
         return [
@@ -1024,6 +1119,12 @@ EOD;
         ];
     }
 
+    /**
+     * @param $options
+     *
+     * @return array
+     * @throws \DebugBar\DebugBarException
+     */
     public function validateAppInstall($options)
     {
         //Check if cart is already installed
@@ -1125,6 +1226,12 @@ EOD;
         return $errors;
     }
 
+    /**
+     * @param $options
+     *
+     * @return array
+     * @throws AException
+     */
     public function validateExtensionOptions($options)
     {
         $errors = [];

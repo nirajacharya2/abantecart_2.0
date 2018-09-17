@@ -18,11 +18,10 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\lib\AException;
 
-
-include_once('base/BaseCommand.php');
 
 class Migrate extends BaseCommand
 {
@@ -122,7 +121,7 @@ class Migrate extends BaseCommand
         $stage_name = $options['stage'] ? $options['stage'] : 'default';
         $result = $this->createMigrationConfig(['stage' => $stage_name]);
         if (!$result) {
-            throw new AException(AC_ERR_LOAD, implode("\n", $this->results)."\n");
+            throw new AException( implode("\n", $this->results)."\n", AC_ERR_LOAD );
         }
         $this->adaptArgv($action);
 
@@ -182,10 +181,11 @@ class Migrate extends BaseCommand
     {
         $migration_config_file = ABC::env('DIR_CONFIG').'migration.config.php';
         $stage_name = $data['stage'];
-        $app_config_file = ABC::env('DIR_CONFIG').$stage_name.'.config.php';
+        $app_config_file = ABC::env('DIR_CONFIG').$stage_name.DS.'config.php';
         @unlink($migration_config_file);
         if (!$stage_name || !is_file($app_config_file)) {
-            $this->results[] = 'Cannot to create migration configuration. Unknown stage name!';
+            $this->results[] = 'Cannot to create migration configuration. '
+                                .'Unknown stage name or file '.$app_config_file.'.';
             return false;
         }
         $app_config = @include $app_config_file;

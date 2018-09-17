@@ -18,6 +18,7 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
@@ -29,8 +30,11 @@ use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
 
-include_once('base/BaseCommand.php');
-
+/**
+ * Class Cache
+ *
+ * @package abc\commands
+ */
 class Cache extends BaseCommand
 {
     public $errors = [];
@@ -47,7 +51,7 @@ class Cache extends BaseCommand
         $action = !$action ? 'create' : $action;
         //if now options - check action
         if (!$options) {
-            if (!in_array($action, array('help', 'create', 'clear'))) {
+            if (!in_array($action, ['help', 'create', 'clear'])) {
                 return ['Error: Unknown Action Parameter!'];
             }
         }
@@ -59,7 +63,7 @@ class Cache extends BaseCommand
     {
         parent::run($action, $options);
         $result = false;
-        if (!in_array($action, array('create', 'clear')) || !$options) {
+        if (!in_array($action, ['create', 'clear']) || !$options) {
             return ['Error: Unknown action or missing option.'];
         }
         //looking for "ALL" parameter in option set. If presents - skip other.
@@ -151,7 +155,7 @@ class Cache extends BaseCommand
 
             //loop by all content pages
             $cm = new AContentManager();
-            $contents = $cm->getContents(array(), 'default', $store['store_id']);
+            $contents = $cm->getContents([], 'default', $store['store_id']);
             foreach ($contents as $content) {
                 $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id='.$content['content_id']);
                 //loop for all variants
@@ -177,20 +181,20 @@ class Cache extends BaseCommand
             }
 
             //loop by all products of store
-            $registry->get('load')->model('catalog/product');
+            $registry->get('load')->model('catalog/product', 'storefront');
             /**
-             * @var \abc\models\admin\ModelCatalogProduct $model
+             * @var \abc\models\storefront\ModelCatalogProduct $model
              */
             $model = $registry->get('model_catalog_product');
-            $total_products = $model->getTotalProducts(array('store_id' => $store['store_id']));
+            $total_products = $model->getTotalProducts(['store_id' => $store['store_id']]);
             $i = 0;
             while ($i <= $total_products) {
                 $products = $model->getProducts(
-                    array(
+                    [
                         'store_id' => $store['store_id'],
                         'start'    => $i,
                         'limit'    => 20,
-                    ));
+                    ]);
                 foreach ($products as $product) {
                     $seo_url = $registry->get('html')->getSEOURL(
                         'product/product',
@@ -213,9 +217,9 @@ class Cache extends BaseCommand
         foreach ($this->languages as $lang) {
             foreach ($this->currencies as $curr) {
                 $this->connect->setCurlOptions(
-                    array(
+                    [
                         CURLOPT_COOKIE => 'language='.$lang['code'].'; currency='.$curr['code'],
-                    ), false);
+                    ], false);
                 $this->connect->getDataHeaders($url);
                 sleep(1);
             }
@@ -287,6 +291,7 @@ class Cache extends BaseCommand
     public function finish(string $action, array $options)
     {
         parent::finish($action, $options);
+        return true;
     }
 
     protected function getOptionList()

@@ -16,9 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
 */
 
-namespace abc\commands;
-
-include_once ("ABCExecInterface.php");
+namespace abc\commands\base;
 
 /**
  * BaseCommand abstract class for the console commands for AbanteCart.
@@ -51,14 +49,24 @@ class BaseCommand implements ABCExecInterface
      */
     protected $output = [];
 
+    /**
+     * @var string
+     */
     public static $EOF = "\n";
+
+    /**
+     * @var string
+     */
     public static $outputType = "cli";
+
     /**
      * @var int system process ID
      */
     protected static $pid= -1;
 
-
+    /**
+     * BaseCommand constructor.
+     */
     public function __construct()
     {
         $this->output = [];
@@ -89,28 +97,51 @@ class BaseCommand implements ABCExecInterface
         }
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return bool
+     */
     public function finish(string $action, array $options)
     {
         if ($this->printEndTime) {
             $this->write('End Time: ' . date('m/d/Y h:i:s a', time()));
             $this->write('******************');
+            return true;
         }
+        return false;
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     */
     public function validate(string $action, array $options)
     {
     }
 
+    /**
+     * @param array $options
+     *
+     * @return array
+     */
     public function help($options = [])
     {
         return $this->getOptionList();
     }
 
+    /**
+     * @return array
+     */
     protected function getOptionList()
     {
         return [];
     }
 
+    /**
+     * @param mixed $output
+     */
     protected function write($output)
     {
         if ($this::$outputType == 'cli') {
@@ -124,6 +155,9 @@ class BaseCommand implements ABCExecInterface
         }
     }
 
+    /**
+     * @return string
+     */
     public function getOutput()
     {
         return implode($this::$EOF, $this->output);

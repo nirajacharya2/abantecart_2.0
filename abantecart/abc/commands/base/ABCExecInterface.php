@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\commands;
+namespace abc\commands\base;
 
 interface ABCExecInterface
 {

@@ -18,11 +18,15 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\lib\AAssetPublisher;
 
-include_once('base/BaseCommand.php');
-
+/**
+ * Class Publish
+ *
+ * @package abc\commands
+ */
 class Publish extends BaseCommand
 {
     public function validate(string $action, array $options)
@@ -30,7 +34,7 @@ class Publish extends BaseCommand
         $action = !$action ? 'all' : $action;
         //if now options - check action
         if (!$options) {
-            if (!in_array($action, array('all', 'help', 'core', 'extensions', 'vendors'))) {
+            if (!in_array($action, ['all', 'help', 'core', 'extensions', 'vendors'])) {
                 return ['Error: Unknown Action Parameter!'];
             }
         } elseif ($options && $action == 'extensions') {
@@ -57,12 +61,19 @@ class Publish extends BaseCommand
         return [];
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return array|true
+     * @throws \abc\core\lib\AException
+     */
     public function run(string $action, array $options)
     {
         parent::run($action, $options);
         $action = !$action ? 'all' : $action;
         $result = false;
-        if (in_array($action, array('all', 'core', 'extensions', 'vendors'))) {
+        if (in_array($action, ['all', 'core', 'extensions', 'vendors'])) {
             $ap = new AAssetPublisher();
             $result = $ap->publish($action, $options);
             $errors = $ap->errors;
@@ -73,12 +84,21 @@ class Publish extends BaseCommand
         return $result ? true : $errors;
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return bool|void
+     */
     public function finish(string $action, array $options)
     {
         $this->write('Success: Assets have been published.');
         parent::finish($action, $options);
     }
 
+    /**
+     * @return array
+     */
     protected function getOptionList()
     {
         return [

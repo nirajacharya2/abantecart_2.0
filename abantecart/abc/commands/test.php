@@ -18,11 +18,15 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\lib\AException;
 
-include_once('base/BaseCommand.php');
-
+/**
+ * Class Test
+ *
+ * @package abc\commands
+ */
 class Test extends BaseCommand
 {
     public $results = [];
@@ -39,6 +43,12 @@ class Test extends BaseCommand
         parent::__construct();
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return array
+     */
     public function validate(string $action, array $options)
     {
         $errors = [];
@@ -102,7 +112,7 @@ class Test extends BaseCommand
     /**
      * @param array $options
      *
-     * @return bool
+     * @return array|true
      * @throws AException
      */
     public function help($options = [])

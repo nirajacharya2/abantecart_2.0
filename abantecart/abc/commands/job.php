@@ -18,6 +18,7 @@
 
 namespace abc\commands;
 
+use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
@@ -26,8 +27,11 @@ use abc\core\lib\AJobManager;
 use abc\modules\workers\ABaseWorker;
 use Exception;
 
-include_once('base/BaseCommand.php');
-
+/**
+ * Class Job
+ *
+ * @package abc\commands
+ */
 class Job extends BaseCommand
 {
     public $errors = [];
@@ -160,6 +164,10 @@ class Job extends BaseCommand
         return $result ? true : false;
     }
 
+    /**
+     * @return bool
+     * @throws AException
+     */
     protected function runNextJob()
     {
         //get job from queue
@@ -177,10 +185,18 @@ class Job extends BaseCommand
         }
     }
 
+    /**
+     *
+     */
     protected function queueConsume()
     {
     }
 
+    /**
+     * @param $options
+     *
+     * @return bool
+     */
     protected function runWorker($options)
     {
         if (!$options['worker']) {
@@ -230,12 +246,21 @@ class Job extends BaseCommand
         return $result;
     }
 
+    /**
+     * @param string $action
+     * @param array $options
+     *
+     * @return bool|void
+     */
     public function finish(string $action, array $options)
     {
         $this->write("Finished processing job.");
         parent::finish($action, $options);
     }
 
+    /**
+     * @return array
+     */
     protected function getOptionList()
     {
         return [
