@@ -97,19 +97,20 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        $this->data['request'] = $request;
-        $request = $this->prepareData($request);
-
-        //are we updating or creating
-        $updateBy = null;
-        if (isset($request['product_id']) && $request['product_id']) {
-            $updateBy = 'product_id';
-        }
-        if (isset($request['update_by']) && $request['update_by']) {
-            $updateBy = $request['update_by'];
-        }
-
         try {
+
+            $this->data['request'] = $request;
+            $request = $this->prepareData($request);
+
+            //are we updating or creating
+            $updateBy = null;
+            if (isset($request['product_id']) && $request['product_id']) {
+                $updateBy = 'product_id';
+            }
+            if (isset($request['update_by']) && $request['update_by']) {
+                $updateBy = $request['update_by'];
+            }
+
             if ($updateBy) {
                 /**
                  * @var Product $product
