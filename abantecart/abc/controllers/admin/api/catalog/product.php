@@ -54,7 +54,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         if (!\H::has_value($getBy) || !isset($request[$getBy])) {
-            $this->rest->setResponseData(array('Error' => $getBy.' is missing'));
+            $this->rest->setResponseData(['Error' => $getBy.' is missing']);
             $this->rest->sendResponse(200);
             return null;
         }
@@ -64,7 +64,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product = Product::where([$getBy => $request[$getBy]]);
         if ($product === null) {
             $this->rest->setResponseData(
-                array('Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist")
+                ['Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist"]
             );
             $this->rest->sendResponse(200);
             return null;
@@ -92,6 +92,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
+
+        if(!$request){
+            return null;
+        }
+
         $this->data['request'] = $request;
         $request = $this->prepareData($request);
 
@@ -278,11 +283,28 @@ if($upd_array) {
      * @param array $data
      *
      * @return mixed
+     * @throws AException
      */
     protected function prepareData($data)
     {
         //assign product to store we requests
         $data['stores'] = [$this->config->get('config_store_id')];
+
+        if($data['categories']) {
+            $new_category_ids = [];
+
+            foreach ($data['categories'] as $category) {
+                foreach ($category['category_descriptions'] as $lang_code => $desc) {
+                    $exists = $this->db->table('category_descriptions')
+                        ->whereRaw("LOWER(name) = '".mb_strtolower($desc['name'])."'")->first();
+                    if (!$exists) {
+                        throw new AException('Category '.$desc['name'].' Not Found on Destination Host');
+                    }
+                    $new_category_ids[] = $exists->category_id;
+                }
+            }
+            $data['categories'] = $new_category_ids;
+        }
 
         return $data;
     }

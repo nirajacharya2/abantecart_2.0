@@ -22,13 +22,10 @@ namespace abc\core\engine;
 
 use abc\core\lib\ARest;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 class AControllerAPI extends AController
 {
-    protected $rest;
+    public $rest;
     public $error = [];
     public $data = [];
 

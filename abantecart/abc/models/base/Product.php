@@ -6,7 +6,6 @@ use abc\models\AModelBase;
 use abc\core\engine\AResource;
 use Exception;
 use H;
-use Illuminate\Validation\Validator;
 
 /**
  * Class Product
@@ -310,6 +309,8 @@ class Product extends AModelBase
 
     /**
      * @return mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function getAllData()
     {
@@ -326,7 +327,10 @@ class Product extends AModelBase
 
             //TODO: need to rewrite into relations
             if ($this->manufacturer_id) {
-                $data['manufacturer'] = Manufacturer::find($this->manufacturer_id)->toArray();
+                $manufacturer = Manufacturer::find($this->manufacturer_id);
+                if($manufacturer) {
+                    $data['manufacturer'] = $manufacturer->toArray();
+                }
             }
             $this->cache->push($cache_key, $data);
         }
@@ -335,6 +339,8 @@ class Product extends AModelBase
 
     /**
      * @return mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function thumbnail()
     {
@@ -354,6 +360,8 @@ class Product extends AModelBase
 
     /**
      * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function images()
     {
@@ -362,36 +370,36 @@ class Product extends AModelBase
         }
         $resource = new AResource('image');
         // main product image
-        $sizes = array(
-            'main'  => array(
+        $sizes = [
+            'main'  => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb' => array(
+            ],
+            'thumb' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->images['image_main'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 1, false);
         if ($this->images['image_main']) {
             $this->images['image_main']['sizes'] = $sizes;
         }
 
         // additional images
-        $sizes = array(
-            'main'   => array(
+        $sizes = [
+            'main'   => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb'  => array(
+            ],
+            'thumb'  => [
                 'width'  => $this->config->get('config_image_additional_width'),
                 'height' => $this->config->get('config_image_additional_height'),
-            ),
-            'thumb2' => array(
+            ],
+            'thumb2' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->images['images'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 0, false);
         return $this->images;
     }
