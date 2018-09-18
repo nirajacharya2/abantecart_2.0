@@ -12918,3 +12918,8 @@ CREATE TABLE `ac_customer_notes` (
   `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`note_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `ac_customer_notes`
+  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`);
+ALTER TABLE `ac_customer_notes`
+  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;

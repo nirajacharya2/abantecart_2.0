@@ -613,8 +613,3 @@ ALTER TABLE `ac_language_definitions`
   CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_products` CHANGE COLUMN `date_available` `date_available` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_customer_notes`
-  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`);
-ALTER TABLE `ac_customer_notes`
-  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
