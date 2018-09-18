@@ -48,7 +48,6 @@ class ModelSaleCustomerNote extends Model
             ->get()
             ->where('customer_id', '=', $customer_id)
             ->sortBy('date_added');
-        AHelperUtils::df($collection->all());
         return $collection->all();
     }
 
