@@ -33,6 +33,10 @@
 		<value><![CDATA[Add]]></value>
 	</definition>
 	<definition>
+		<key>button_add_note</key>
+		<value><![CDATA[Add Note]]></value>
+	</definition>
+	<definition>
 		<key>column_name</key>
 		<value><![CDATA[Customer Name]]></value>
 	</definition>
@@ -103,6 +107,10 @@
 	<definition>
 		<key>entry_approved</key>
 		<value><![CDATA[Approved:]]></value>
+	</definition>
+	<definition>
+		<key>entry_note</key>
+		<value><![CDATA[Note:]]></value>
 	</definition>
 	<definition>
 		<key>entry_password</key>
@@ -225,6 +233,10 @@
 		<value><![CDATA[Transactions]]></value>
 	</definition>
 	<definition>
+		<key>tab_customer_notes</key>
+		<value><![CDATA[Notes]]></value>
+	</definition>
+	<definition>
 		<key>heading_title_transactions</key>
 		<value><![CDATA[Customer's transactions]]></value>
 	</definition>
@@ -235,6 +247,10 @@
 	<definition>
 		<key>column_created_by</key>
 		<value><![CDATA[Created By]]></value>
+	</definition>
+	<definition>
+		<key>column_note</key>
+		<value><![CDATA[Note]]></value>
 	</definition>
 	<definition>
 		<key>column_debit</key>

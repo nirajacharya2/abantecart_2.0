@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\ALanguage;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use H;
@@ -32,6 +33,8 @@ use H;
  * Class ControllerPagesSaleCustomer
  *
  * @package abc\controllers\admin
+ *
+ * @property
  */
 class ControllerPagesSaleCustomer extends AController
 {
@@ -157,6 +160,10 @@ class ControllerPagesSaleCustomer extends AController
                         'transaction' => [
                             'text' => $this->language->get('tab_transactions'),
                             'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=%ID%'),
+                        ],
+                        'note' => [
+                            'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id=%ID%'),
+                            'text' => $this->language->get('tab_customer_notes'),
                         ],
                         'create_order' => [
                             'text' => $this->language->get('text_create_order'),
@@ -522,6 +529,10 @@ class ControllerPagesSaleCustomer extends AController
             $this->data['tabs'][] = [
                 'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
                 'text' => $this->language->get('tab_transactions'),
+            ];
+            $this->data['tabs'][] = [
+                'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
+                'text' => $this->language->get('tab_customer_notes'),
             ];
         }
 
@@ -1232,5 +1243,119 @@ class ControllerPagesSaleCustomer extends AController
             return $this->language->get('error_disabled_customer');
         }
         return '';
+    }
+
+    public function notes() {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->data = [];
+        $this->document->setTitle($this->language->get('heading_title'));
+
+        $this->loadModel('sale/customer_note');
+
+        if ($this->request->is_POST()) {
+            $data = [
+                'user_id'=> $this->user->getId(),
+                'customer_id' => $this->request->get['customer_id'],
+            ];
+            $data = array_merge($data, $this->request->post);
+           if ($this->model_sale_customer_note->addNote($data))
+            $this->session->data['success'] = $this->language->get('text_success');
+            abc_redirect($this->html->getSecureURL('sale/customer/notes',
+                '&customer_id='.$this->request->get['customer_id']));
+        }
+
+        if (isset($this->request->get['customer_id'])) {
+            $customer_id = (int)$this->request->get['customer_id'];
+        } else {
+            $customer_id = 0;
+        }
+
+        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+
+        if (empty($customer_info)) {
+            $this->session->data['error'] = $this->language->get('error_customer_load');
+            abc_redirect($this->html->getSecureURL('sale/customer'));
+        }
+
+        $this->document->initBreadcrumb([
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
+
+        $this->document->addBreadcrumb([
+            'href'      => $this->html->getSecureURL('sale/customer'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+        ]);
+
+        $this->data['tabs']['general'] = array(
+            'href' => $this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$customer_id ),
+            'text' => $this->language->get( 'tab_customer_details' ),
+        );
+        $this->data['tabs'][] = array(
+            'href'   => $this->html->getSecureURL( 'sale/customer_transaction', '&customer_id='.$customer_id ),
+            'text'   => $this->language->get( 'tab_transactions' ),
+        );
+        $this->data['tabs'][] = [
+            'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
+            'text' => $this->language->get('tab_customer_notes'),
+            'active' => true,
+        ];
+
+        if (isset($this->session->data['success'])) {
+            $this->data['success'] = $this->session->data['success'];
+            unset($this->session->data['success']);
+        } else {
+            $this->data['success'] = '';
+        }
+
+        $this->data['notes'] = $this->model_sale_customer_note->getNotes($customer_id);
+
+
+        $this->data['action'] = $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id);
+        $this->data['form_title'] = $this->language->get('text_edit').' '.$this->language->get('tab_note');
+        $form = new AForm('ST');
+
+        $form->setForm([
+            'form_name' => 'noteFrm',
+            'update'    => $this->data['update'],
+        ]);
+
+        $this->data['form']['id'] = 'orderFrm';
+        $this->data['form']['form_open'] = $form->getFieldHtml([
+            'type'   => 'form',
+            'name'   => 'noteFrm',
+            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+            'action' => $this->data['action'],
+        ]);
+        $this->data['form']['submit'] = $form->getFieldHtml([
+            'type'  => 'button',
+            'name'  => 'submit',
+            'text'  => $this->language->get('button_add_note'),
+            'style' => 'button1',
+        ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml([
+            'type'  => 'button',
+            'name'  => 'cancel',
+            'text'  => $this->language->get('button_cancel'),
+            'style' => 'button2',
+        ]);
+        $this->data['form']['fields']['note'] = $form->getFieldHtml([
+            'type'  => 'textarea',
+            'name'  => 'note',
+            'style' => 'large-field',
+        ]);
+
+
+
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('pages/sale/customer_note.tpl');
+
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
     }
 }

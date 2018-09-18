@@ -82,6 +82,10 @@ class ControllerPagesSaleCustomerTransaction extends AController
             'text'   => $this->language->get( 'tab_transactions' ),
             'active' => true,
         );
+        $this->data['tabs'][] = [
+            'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
+            'text' => $this->language->get('tab_customer_notes'),
+        ];
 
         if ( isset( $this->session->data['error'] ) ) {
             $this->data['error_warning'] = $this->session->data['error'];
