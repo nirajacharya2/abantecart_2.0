@@ -363,7 +363,7 @@ class CheckoutBase extends ALibBase
     /**
      * @param array $payment_method
      */
-    public function setPaymentMethod(array $payment_method)
+    public function setPaymentMethod( $payment_method)
     {
         if($this->data['guest']){
             $this->data['guest']['payment_method']  = $payment_method;
@@ -398,7 +398,7 @@ class CheckoutBase extends ALibBase
     /**
      * @param array $shipping_method
      */
-    public function setShippingMethod(array $shipping_method)
+    public function setShippingMethod( $shipping_method)
     {
         if($this->data['guest']){
             $this->data['guest']['shipping_method']  = $shipping_method;
