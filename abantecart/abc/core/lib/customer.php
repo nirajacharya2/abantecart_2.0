@@ -951,9 +951,9 @@ class ACustomer extends ALibBase
         $transaction_id = $this->db->getLastId();
 
         //call event
-       /* H::event(
+        H::event(
             'abc\core\lib\customer@transaction',
-            [new ABaseEvent((int)$this->getId(), $transaction_id)]);*/
+            [new ABaseEvent((int)$this->getId(), $transaction_id)]);
 
         if ($this->db->getLastId()) {
             return true;
