@@ -1828,7 +1828,22 @@ class AHelperUtils extends AHelper
         if(!is_string($data) && !is_numeric($data))
             $data = var_export($data, 1);
 
-        file_put_contents($filename, "\n--------------------------" . date('Y-m-d H:i:s ') . microtime() . "-----------------------\n Backtrace: " . implode(' → ', $backtracePath) . "\n" . $data, FILE_APPEND);
+        file_put_contents(
+            $filename,
+            "\n--------------------------" . date('Y-m-d H:i:s ') . microtime()
+            . "-----------------------\n Backtrace: " . implode(' → ', $backtracePath) . "\n"
+            . $data, FILE_APPEND
+        );
+    }
+
+    public static function dirIsEmpty($directory)
+    {
+        if(!is_dir($directory) || !is_readable($directory)){
+            return false;
+        }
+        $content = glob(rtrim($directory,DS).DS.'*',GLOB_NOSORT);
+
+        return ($content ? false : true);
     }
 
     /**
