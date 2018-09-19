@@ -363,9 +363,11 @@ class ACustomer extends ALibBase
         setcookie('customer', '', time() - 3600, dirname($this->request->server['PHP_SELF']));
         $this->extensions->hk_ProcessData($this, 'logout');
         //call event
-        H::event(
-            'abc\core\lib\customer@logout',
-            [new ABaseEvent($customer_id)]);
+        try {
+            H::event(
+                'abc\core\lib\customer@logout',
+                [new ABaseEvent($customer_id)]);
+        }catch(AException $e){}
     }
 
     /**
@@ -949,9 +951,9 @@ class ACustomer extends ALibBase
         $transaction_id = $this->db->getLastId();
 
         //call event
-        H::event(
+       /* H::event(
             'abc\core\lib\customer@transaction',
-            [new ABaseEvent((int)$this->getId(), $transaction_id)]);
+            [new ABaseEvent((int)$this->getId(), $transaction_id)]);*/
 
         if ($this->db->getLastId()) {
             return true;
