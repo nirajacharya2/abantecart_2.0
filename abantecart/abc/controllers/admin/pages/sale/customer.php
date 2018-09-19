@@ -1290,6 +1290,17 @@ class ControllerPagesSaleCustomer extends AController
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
         ]);
+        $this->document->addBreadcrumb( array(
+            'href'      => $this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$customer_id ),
+            'text'      => $this->language->get( 'text_edit' ).' '.$this->language->get( 'text_customer' ).' - '.$customer_info['firstname'].' '.$customer_info['lastname'],
+            'separator' => ' :: ',
+        ) );
+        $this->document->addBreadcrumb( array(
+            'href'      => $this->html->getSecureURL( 'sale/customer_notes', '&customer_id='.$customer_id ),
+            'text'      => $this->language->get( 'heading_title_notes' ),
+            'separator' => ' :: ',
+            'current'   => true,
+        ) );
 
         $this->data['tabs']['general'] = array(
             'href' => $this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$customer_id ),

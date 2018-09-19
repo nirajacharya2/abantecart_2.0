@@ -941,8 +941,13 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 
 .pageheader .breadcrumb {
     background: none;
-    display: inline-block;
     padding: 0;
+}
+
+.breadcrumb>li+li:before {
+    padding: 0 5px;
+    color: #ccc;
+    content: "/\00a0";
 }
 
 .pageheader .breadcrumb li {
