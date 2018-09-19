@@ -363,7 +363,7 @@ class CheckoutBase extends ALibBase
     /**
      * @param array $payment_method
      */
-    public function setPaymentMethod( $payment_method)
+    public function setPaymentMethod($payment_method)
     {
         if($this->data['guest']){
             $this->data['guest']['payment_method']  = $payment_method;
