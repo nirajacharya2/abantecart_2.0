@@ -512,7 +512,7 @@ class ModelToolImportProcess extends Model
         if($status){
              //call event
              H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer)]);
-         }
+        }
         return $status;
     }
 
@@ -638,8 +638,11 @@ class ModelToolImportProcess extends Model
             $opt_val_data['weight_type'] = $prd_weight_info['unit'];
         }
 
-        return $this->model_catalog_product->addProductOptionValueAndDescription($product_id, $p_option_id,
-            $opt_val_data);
+        return $this->model_catalog_product->addProductOptionValueAndDescription(
+            $product_id,
+            $p_option_id,
+            $opt_val_data
+        );
     }
 
     /**
