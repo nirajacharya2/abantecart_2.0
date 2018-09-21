@@ -8,7 +8,7 @@ use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\ACart;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AEncryption;
-use abc\core\lib\AJobManager;
+use abc\core\lib\JobManager;
 use abc\core\lib\AJson;
 use abc\core\lib\ALog as ALog;
 use abc\core\lib\ABackup as ABackup;
@@ -36,7 +36,7 @@ return [
     'CheckoutAdmin'      => CheckOutAdmin::class,
     'AResourceManager'   => AResourceManager::class,
     'ABackup'            => ABackup::class,
-    'AJobManager'        => AJobManager::class,
+    'JobManager'         => JobManager::class,
     'AJson'              => AJson::class,
     'ACustomer'          => ACustomer::class,
     'AAttribute'         => AAttribute::class,

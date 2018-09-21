@@ -21,11 +21,11 @@ namespace abc\commands;
 use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AException;
-use abc\core\lib\AJobManager;
+use abc\core\lib\JobManager;
 use abc\modules\workers\ABaseWorker;
 use Exception;
+use H;
 
 /**
  * Class Job
@@ -83,12 +83,12 @@ class Job extends BaseCommand
      */
     protected function runJobById($job_id)
     {
-        $class_name = ABC::getFullClassName('AJobManager');
+        $class_name = ABC::getFullClassName('JobManager');
 
         /**
-         * @var AJobManager $handler
+         * @var JobManager $handler
          */
-        $handler = AHelperUtils::getInstance($class_name, ['registry' => Registry::getInstance()]);
+        $handler = H::getInstance($class_name, ['registry' => Registry::getInstance()]);
         $job_info = $handler->getJobById($job_id);
         if (!$job_info
             || !$job_info['configuration']
@@ -105,8 +105,8 @@ class Job extends BaseCommand
 
         $result = false;
         try {
-            require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
-            require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
+            //require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
+            //require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
             require_once $job_info['configuration']['worker']['file'];
             //run worker
             $worker_class = $job_info['configuration']['worker']['class'];
@@ -171,11 +171,11 @@ class Job extends BaseCommand
     protected function runNextJob()
     {
         //get job from queue
-        $class_name = ABC::getFullClassName('AJobManager');
+        $class_name = ABC::getFullClassName('JobManager');
         /**
-         * @var AJobManager $handler
+         * @var JobManager $handler
          */
-        $handler = AHelperUtils::getInstance($class_name, ['registry' => Registry::getInstance()]);
+        $handler = H::getInstance($class_name, ['registry' => Registry::getInstance()]);
         $job_info = $handler->getReadyJob();
         if ($job_info) {
             return $this->runJobById($job_info['job_id']);
@@ -217,7 +217,7 @@ class Job extends BaseCommand
             /**
              * @var ABaseWorker $worker
              */
-            $worker = AHelperUtils::getInstance($worker_class_name, $options);
+            $worker = H::getInstance($worker_class_name, $options);
 
             if (!$worker instanceof ABaseWorker) {
                 throw new AException('Class  "'.$worker_class_name.'" is not a worker class!');

@@ -23,7 +23,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AImage;
-use abc\core\lib\AJobManager;
+use abc\core\lib\JobManager;
 use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
@@ -1681,7 +1681,7 @@ class AHelperUtils extends AHelper
      * @return array
      * @throws AException
      */
-    public static function createJob(array $data, $handler_alias = 'AJobManager')
+    public static function createJob(array $data, $handler_alias = 'JobManager')
     {
 
         $class_name = ABC::getFullClassName($handler_alias);
@@ -1694,7 +1694,7 @@ class AHelperUtils extends AHelper
             ];
         } else {
             /**
-             * @var $handler AJobManager
+             * @var $handler JobManager
              */
             $handler = self::getInstance($class_name, ['registry' => Registry::getInstance()]);
             $result = $handler->addJob($data);

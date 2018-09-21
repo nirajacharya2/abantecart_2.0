@@ -22,16 +22,15 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use H;
 
-include_once __DIR__.DS.'job_manager_interface.php';
 
 /**
- * Class AJobManager
+ * Class JobManager
  *
  * @link http://docs.abantecart.com/pages/developer/jobs_processing.html
  * @property ADB  $db
  * @property ALog $log
  */
-class AJobManager implements AJobManagerInterface
+class JobManager implements JobManagerInterface
 {
     protected $registry;
     public $errors = []; // errors during process
@@ -59,7 +58,7 @@ class AJobManager implements AJobManagerInterface
     const MAX_EXECUTION_TIME = 86400;
 
     /**
-     * AJobManager constructor.
+     * JobManager constructor.
      *
      * @param Registry $registry
      *

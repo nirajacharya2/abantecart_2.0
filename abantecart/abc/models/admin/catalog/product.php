@@ -57,7 +57,9 @@ class ModelCatalogProduct extends Model
                 subtract = '".(int)$data['subtract']."',
                 stock_checkout = '".$this->db->escape($data['stock_checkout'])."',
                 stock_status_id = '".(int)$data['stock_status_id']."',
-                date_available = '".$this->db->escape($data['date_available'])."',
+                date_available = ".($data['date_available']
+                                    ? "'".$this->db->escape($data['date_available'])."'"
+                                    : "NOW()").",
                 manufacturer_id = '".(int)$data['manufacturer_id']."',
                 shipping = '".(int)$data['shipping']."',
                 ship_individually = '".(int)$data['ship_individually']."',
@@ -351,6 +353,7 @@ class ModelCatalogProduct extends Model
             "width",
             "height",
         ];
+        $timestamps = ['date_available'];
 
         $nullable = ['sku'];
         $affected_tables = [];
@@ -360,9 +363,10 @@ class ModelCatalogProduct extends Model
             if (isset($data[$f])) {
                 if (in_array($f, $preformat_fields)) {
                     $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
-                }
-                if (in_array($f, $nullable)) {
+                }elseif (in_array($f, $nullable)) {
                     $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
+                }elseif (in_array($f, $timestamps)) {
+                    $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
                 } else {
                     $update[] = $f." = '".$this->db->escape($data[$f])."'";
                 }
