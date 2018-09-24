@@ -12898,12 +12898,12 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
       `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
       `configuration` longtext COMMENT 'configuration for job-class',
       `start_time` datetime DEFAULT NULL,
-      `last_time_run` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+      `last_time_run` timestamp NULL,
       `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
       `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
       `actor_id` int(11) DEFAULT 0,
       `actor_name` varchar(128) DEFAULT '',
-      `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+      `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
       `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (`job_id`, `job_name`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

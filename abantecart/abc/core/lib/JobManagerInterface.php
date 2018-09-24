@@ -18,7 +18,7 @@
 
 namespace abc\core\lib;
 
-interface AJobManagerInterface
+interface JobManagerInterface
 {
     public function addJob( array $data );
     public function getJobs( array $data );

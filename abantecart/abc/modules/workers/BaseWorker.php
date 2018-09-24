@@ -18,7 +18,6 @@
 
 namespace abc\modules\workers;
 
-use abc\commands\BaseCommand;
 use Exception;
 
 abstract class ABaseWorker implements AWorkerInterface
@@ -34,8 +33,8 @@ abstract class ABaseWorker implements AWorkerInterface
 
     public function __construct()
     {
-        $this->outputType = BaseCommand::$outputType;
-        $this->EOF = BaseCommand::$EOF;
+        //$this->outputType = BaseCommand::$outputType;
+        //$this->EOF = BaseCommand::$EOF;
         $this->pid = getmypid();
     }
 
