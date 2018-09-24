@@ -9778,6 +9778,7 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('checkout','config_tax_customer',0),
 ('checkout','config_customer_price',1),
 ('checkout','config_require_customer_login',0),
+('checkout','config_save_customer_communication',0),
 ('checkout','config_customer_group_id',1),
 ('checkout','config_customer_approval',0),
 ('checkout','config_customer_email_activation',0),
