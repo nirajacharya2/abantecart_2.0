@@ -231,6 +231,11 @@
 			<![CDATA[Login Display Prices:<br /><span class="help">Show prices even if customer is not logged in.</span>]]></value>
 	</definition>
 	<definition>
+		<key>entry_save_customer_communication</key>
+		<value>
+			<![CDATA[Save customer communication:<br /><span class="help">Save all messages sent to customer</span>]]></value>
+	</definition>
+	<definition>
 		<key>entry_require_customer_login</key>
 		<value>
 			<![CDATA[Require Login to Display Products:<br /><span class="help">Require customer login to view products</span>]]></value>

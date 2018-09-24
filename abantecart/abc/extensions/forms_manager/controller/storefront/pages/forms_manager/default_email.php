@@ -135,7 +135,9 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
                 }
 
                 $mail->setText( strip_tags( html_entity_decode( $msg, ENT_QUOTES, ABC::env( 'APP_CHARSET' ) ) ) );
-
+                $arUser =  H::recognizeUser();
+                $user = User::find($arUser['user_id']);
+                $mail->setUser($user);
                 $mail->send();
 
                 if ( empty( $mail->error ) ) {

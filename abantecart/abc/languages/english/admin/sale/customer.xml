@@ -110,7 +110,7 @@
 	</definition>
 	<definition>
 		<key>entry_note</key>
-		<value><![CDATA[Note:]]></value>
+		<value><![CDATA[Note]]></value>
 	</definition>
 	<definition>
 		<key>entry_password</key>
@@ -237,12 +237,20 @@
 		<value><![CDATA[Notes]]></value>
 	</definition>
 	<definition>
+		<key>tab_customer_communications</key>
+		<value><![CDATA[Communications]]></value>
+	</definition>
+	<definition>
 		<key>heading_title_transactions</key>
 		<value><![CDATA[Customer's transactions]]></value>
 	</definition>
 	<definition>
 		<key>heading_title_notes</key>
 		<value><![CDATA[Customer's notes]]></value>
+	</definition>
+	<definition>
+		<key>heading_title_communications</key>
+		<value><![CDATA[Customer's communications]]></value>
 	</definition>
 	<definition>
 		<key>column_create_date</key>
@@ -428,5 +436,33 @@
 	<definition>
 		<key>warning_resend_password</key>
 		<value><![CDATA[Email with url for password change will be send to customer. Continue?]]></value>
+	</definition>
+	<definition>
+		<key>communication_title</key>
+		<value><![CDATA[Communication:]]></value>
+	</definition>
+	<definition>
+		<key>communication_subject_title</key>
+		<value><![CDATA[Subject:]]></value>
+	</definition>
+	<definition>
+		<key>communication_date_title</key>
+		<value><![CDATA[Created at:]]></value>
+	</definition>
+	<definition>
+		<key>communication_body_title</key>
+		<value><![CDATA[Body:]]></value>
+	</definition>
+	<definition>
+		<key>column_subject</key>
+		<value><![CDATA[Subject:]]></value>
+	</definition>
+	<definition>
+		<key>column_type</key>
+		<value><![CDATA[Type:]]></value>
+	</definition>
+	<definition>
+		<key>column_user</key>
+		<value><![CDATA[Author:]]></value>
 	</definition>
 </definitions>

@@ -1184,6 +1184,9 @@ class ModelAccountCustomer extends Model
                 .'.'.pathinfo( $data['config_mail_logo'], PATHINFO_EXTENSION ) );
         }
         $mail->setHtml( $data['html_body'] );
+        $arUser =  H::recognizeUser();
+        $user = User::find($arUser['user_id']);
+        $mail->setUser($user);
         $mail->send();
     }
 

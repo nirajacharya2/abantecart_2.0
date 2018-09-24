@@ -26,6 +26,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AMail;
+use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -261,6 +262,9 @@ class ModelSaleCustomerTransaction extends Model{
 				$mail->setSender($store_info['store_name']);
 				$mail->setSubject($subject);
 				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
+                $arUser =  H::recognizeUser();
+                $user = User::find($arUser['user_id']);
+                $mail->setUser($user);
 				$mail->send();
 
 				//notify customer

@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use abc\models\base\CustomerCommunication;
 use Exception;
 
 if (!class_exists('abc\core\ABC')) {
@@ -390,6 +391,7 @@ class AIM
                             //use safe call
                             try {
                                 $driver->send($to, $store_name.$message);
+                                CustomerCommunication::createCustomerCommunicationIm($this->customer->getId(), $store_name.$message);
                             } catch (Exception $e) {
                             }
                         }

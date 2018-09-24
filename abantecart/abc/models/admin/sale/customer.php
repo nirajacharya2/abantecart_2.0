@@ -1266,6 +1266,9 @@ class ModelSaleCustomer extends Model
                     md5(pathinfo($store_info['config_mail_logo'], PATHINFO_FILENAME))
                     .'.'.pathinfo($store_info['config_mail_logo'], PATHINFO_EXTENSION));
             }
+            $arUser =  H::recognizeUser();
+            $user = User::find($arUser['user_id']);
+            $mail->setUser($user);
             $mail->send();
         }
     }

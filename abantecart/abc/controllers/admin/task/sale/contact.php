@@ -20,12 +20,16 @@
 namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\core\lib\ATaskManager;
+use abc\core\lib\AUser;
 use abc\core\view\AView;
+use abc\core\engine\Registry;
+use abc\models\admin\User;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -35,6 +39,8 @@ class ControllerTaskSaleContact extends AController{
 	public $data = array();
 	private $protocol;
 	private $sent_count = 0;
+	private $user_id = 0;
+
 	public function sendSms(){
 		list($task_id,$step_id,) = func_get_args();
 		$this->load->library('json');
@@ -123,6 +129,8 @@ class ControllerTaskSaleContact extends AController{
 			$error_text = 'Cannot run task step. Looks like task #'.$task_id.' does not contain step #'.$step_id;
 			$this->_return_error($error_text);
 		}
+
+		$this->user_id = $task_info['created_by'];
 
 		$tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
 
@@ -249,12 +257,17 @@ class ControllerTaskSaleContact extends AController{
 		$view->batchAssign($this->data['mail_template_data']);
 		$html_body = $view->fetch($this->data['mail_template']);
 
+        $this->loadModel('user/user');
+
 		$mail = new AMail($this->config);
 		$mail->setTo($email);
 		$mail->setFrom($data['from']);
 		$mail->setSender($data['sender']);
 		$mail->setSubject($this->data['mail_template_data']['subject']);
 		$mail->setHtml($html_body);
+        $user = User::find($this->user_id);
+		$mail->setUser($user);
+
 		$mail->send();
 
 		if ($mail->error) {

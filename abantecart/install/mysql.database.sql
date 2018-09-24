@@ -12924,3 +12924,19 @@ ALTER TABLE `ac_customer_notes`
   ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`);
 ALTER TABLE `ac_customer_notes`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE `ac_customer_communications` (
+  `communication_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL DEFAULT '0',
+  `type` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `body` text COLLATE utf8_unicode_ci NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`communication_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `ac_customer_communications_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `ac_customers` (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

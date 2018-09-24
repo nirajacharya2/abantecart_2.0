@@ -27,32 +27,25 @@
 		<label class="h4 heading"><?php echo $tab_customer_notes; ?></label>
 
 		<?php foreach ($notes as $note) { ?>
-			<table class="table">
-				<thead>
-				<tr>
-					<td class="left"><b><?php echo $column_date_added; ?></b></td>
-					<td class="left"><b><?php echo $column_created_by; ?></b></td>
-				</tr>
-				</thead>
-				<tbody>
-				<tr>
-					<td class="left"><?php echo date('m/d/Y h:i:s A', strtotime($note->note_added)); ?></td>
-					<td class="left"><?php echo (!empty($note->firstname) || !empty($note->lastname)) ? $note->firstname.' '.$note->lastname.' ('.$note->username.')' : $note->username; ?></td>
-				</tr>
-				</tbody>
-				<?php if ($note->note) { ?>
-					<thead>
-					<tr>
-						<td class="left" colspan="3"><b><?php echo $column_note; ?></b></td>
-					</tr>
-					</thead>
-					<tbody>
-					<tr>
-						<td class="left" colspan="3"><?php echo $note->note; ?></td>
-					</tr>
-					</tbody>
-				<?php } ?>
-			</table>
+		<div class="card" style="margin-top: 10px;">
+			<div class="card-body">
+				<div class="row">
+			<div class="col-md-3">
+				<div class="row">
+					<b><?php echo (!empty($note->firstname) || !empty($note->lastname)) ? $note->firstname.' '.$note->lastname.' ('.$note->username.')' : $note->username; ?></b>
+				</div>
+				<div class="row">
+					<?php echo $note->note_added; ?>
+				</div>
+
+			</div>
+			<div class="col-md-9">
+				<?php echo $note->note; ?>
+			</div>
+			</div>
+			</div>
+		</div>
+
 		<?php } ?>
 
 		<?php foreach ($form['fields'] as $name => $field) {
@@ -70,13 +63,10 @@
 		}
 		$widthcasses .= " col-xs-12";
 		?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
+		<div style="margin-top: 20px;" class="form-group row align-items-start <?php if (!empty($error[$name])) {
 			echo "has-error";
 		} ?>">
-			<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-				   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
-
-			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
+			<div class="input-group afield  <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 				<?php echo $field; ?>
 			</div>
 			<?php if (!empty($error[$name])) { ?>
@@ -104,3 +94,9 @@
 
 	</form>
 </div><!-- <div class="tab-content"> -->
+
+<script>
+	$(document).ready(function () {
+		$("#noteFrm_note").attr("placeholder", "<?php echo ${'entry_' . $name}; ?>");
+	});
+</script>

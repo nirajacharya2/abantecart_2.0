@@ -1223,6 +1223,7 @@ small.media-desc {
 dl {
     margin-bottom: 0;
     margin-top: 0;
+   word-wrap: break-word;
 }
 
 .modal-body div.alert-success, .modal-body div.alert-danger {
