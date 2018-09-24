@@ -67,27 +67,29 @@ class CustomerCommunication extends AModelBase
     }
 
     public function createCustomerCommunication(AMail $mail) {
-        $communication = new CustomerCommunication();
-        $communication->subject = $mail->getSubject();
-        $communication->body = $mail->getText() ? $mail->getText() : $mail->getHtml();
-        $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
-        foreach ($customers as $customer) {
-            $customer_id = $customer->customer_id;
-        }
-        $communication->customer_id = $customer_id;
-        $communication->user_id = $mail->getUser()->user_id ? $mail->getUser()->user_id : 0;
-        $communication->type = 'email';
-        $communication->save();
+            $communication = new CustomerCommunication();
+            $communication->subject = $mail->getSubject();
+            $communication->body = $mail->getText() ? $mail->getText() : $mail->getHtml();
+            $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
+            foreach ($customers as $customer) {
+                $customer_id = $customer->customer_id;
+            }
+            $communication->customer_id = $customer_id;
+            $communication->user_id = $mail->getUser()->user_id ? $mail->getUser()->user_id : 0;
+            $communication->type = 'email';
+            $communication->save();
     }
 
     public function createCustomerCommunicationIm($customer_id, $message, $user_id=0){
-        $communication = new CustomerCommunication();
-        $communication->subject = 'IM message';
-        $communication->body = $message;
-        $communication->customer_id = $customer_id;
-        $communication->user_id = $user_id;
-        $communication->type = 'sms';
-        $communication->save();
+        if ($this->config->get('config_save_customer_communication')) {
+            $communication = new CustomerCommunication();
+            $communication->subject = 'IM message';
+            $communication->body = $message;
+            $communication->customer_id = $customer_id;
+            $communication->user_id = $user_id;
+            $communication->type = 'sms';
+            $communication->save();
+        }
     }
 
 }

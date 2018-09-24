@@ -391,6 +391,7 @@ class AIM
                             //use safe call
                             try {
                                 $driver->send($to, $store_name.$message);
+                                if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
                                 CustomerCommunication::createCustomerCommunicationIm($this->customer->getId(), $store_name.$message);
                             } catch (Exception $e) {
                             }

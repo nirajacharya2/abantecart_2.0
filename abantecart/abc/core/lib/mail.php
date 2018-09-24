@@ -620,6 +620,8 @@ class AMail
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
+
+        if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
         CustomerCommunication::createCustomerCommunication($this);
 
         return true;
