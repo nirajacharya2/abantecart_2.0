@@ -81,7 +81,6 @@ class CustomerCommunication extends AModelBase
     }
 
     public function createCustomerCommunicationIm($customer_id, $message, $user_id=0){
-        if ($this->config->get('config_save_customer_communication')) {
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';
             $communication->body = $message;
@@ -89,7 +88,6 @@ class CustomerCommunication extends AModelBase
             $communication->user_id = $user_id;
             $communication->type = 'sms';
             $communication->save();
-        }
     }
 
 }

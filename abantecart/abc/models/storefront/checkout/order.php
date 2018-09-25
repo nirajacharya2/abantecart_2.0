@@ -722,9 +722,6 @@ class ModelCheckoutOrder extends Model
                 md5(pathinfo($config_mail_logo, PATHINFO_FILENAME))
                 .'.'.pathinfo($config_mail_logo, PATHINFO_EXTENSION));
         }
-        $arUser =  H::recognizeUser();
-        $user = User::find($arUser['user_id']);
-        $mail->setUser($user);
         $mail->send();
 
         //send alert email for merchant
@@ -773,9 +770,6 @@ class ModelCheckoutOrder extends Model
             $mail->setTo($this->config->get('store_main_email'));
             $mail->setHtml($html_body);
             $mail->setText($this->data['mail_plain_text']);
-            $arUser =  H::recognizeUser();
-            $user = User::find($arUser['user_id']);
-            $mail->setUser($user);
             $mail->send();
 
             // Send to additional alert emails
@@ -783,9 +777,6 @@ class ModelCheckoutOrder extends Model
             foreach ($emails as $email) {
                 if (trim($email)) {
                     $mail->setTo($email);
-                    $arUser =  H::recognizeUser();
-                    $user = User::find($arUser['user_id']);
-                    $mail->setUser($user);
                     $mail->send();
                 }
             }
@@ -937,9 +928,6 @@ class ModelCheckoutOrder extends Model
                 $mail->setSender($order_row['store_name']);
                 $mail->setSubject($subject);
                 $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-                $arUser =  H::recognizeUser();
-                $user = User::find($arUser['user_id']);
-                $mail->setUser($user);
                 $mail->send();
             }
         }
