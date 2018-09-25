@@ -227,7 +227,7 @@ class Job extends BaseCommand
             $run_method = !$run_method ? 'main' : $run_method;
             $methods = $worker->getModuleMethods();
             if (!in_array($run_method, $methods)) {
-                throw new AException('Cannot to find method '.$run_method.' of worker class'.$worker_class_name.'!');
+                throw new AException('Cannot to find method '.$run_method.' of worker class '.$worker_class_name.'!');
             }
             $result = $worker->runJob(
                 $run_method,
