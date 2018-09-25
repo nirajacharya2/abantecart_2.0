@@ -28,6 +28,7 @@ use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use H;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -665,7 +666,7 @@ class ModelSaleOrder extends Model
         if ($data['notify']) {
             $order_query = $this->db->query("SELECT *, os.name AS status
                                             FROM `".$this->db->table_name("orders")."` o
-                                            LEFT JOIN ".$this->db->table_name("order_statuses")." os ON (o.order_status_id = os.order_status_id AND os.language_id = o.language_id)
+                                            LEFT JOIN ".$this->db->table_name("order_status_descriptions")." os ON (o.order_status_id = os.order_status_id AND os.language_id = o.language_id)
                                             LEFT JOIN ".$this->db->table_name("languages")." l ON (o.language_id = l.language_id)
                                             WHERE o.order_id = '".(int)$order_id."'");
 
@@ -717,6 +718,9 @@ class ModelSaleOrder extends Model
                 $mail->setSender($order_query->row['store_name']);
                 $mail->setSubject($subject);
                 $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
+                $arUser =  H::recognizeUser();
+                $user = User::find($arUser['user_id']);
+                $mail->setUser($user);
                 $mail->send();
 
                 //send IMs except emails.

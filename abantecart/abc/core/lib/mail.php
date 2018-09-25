@@ -22,6 +22,9 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\helper\AHelperUtils;
+use abc\models\base\Customer;
+use abc\models\base\CustomerCommunication;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -69,6 +72,8 @@ class AMail
     public $verp = false;
     public $parameter = '';
     public $error = array();
+
+    protected $user;
 
     /**
      * @param null | AConfig $config
@@ -152,6 +157,62 @@ class AMail
     public function setHtml($html)
     {
         $this->html = $html;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTo()
+    {
+        return $this->to;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSubject()
+    {
+        return $this->subject;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getText()
+    {
+        return $this->text;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHtml()
+    {
+        return $this->html;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttachments()
+    {
+        return $this->attachments;
+    }
+
+    /**
+     * @return AUser
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param AUser $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 
     /**
@@ -559,6 +620,9 @@ class AMail
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
+
+        if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
+        CustomerCommunication::createCustomerCommunication($this);
 
         return true;
     }

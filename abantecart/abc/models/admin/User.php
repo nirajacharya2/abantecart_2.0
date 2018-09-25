@@ -1,6 +1,8 @@
 <?php
 
-namespace abc\models;
+namespace abc\models\admin;
+
+use abc\models\AModelBase;
 
 /**
  * Class AcUser
