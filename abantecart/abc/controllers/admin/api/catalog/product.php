@@ -19,6 +19,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\admin\ModelCatalogCategory;
 use abc\models\base\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -27,6 +28,8 @@ use abc\core\lib\AException;
  * Class ControllerApiCatalogProduct
  *
  * @package abc\controllers\admin
+ *
+ * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerApiCatalogProduct extends AControllerAPI
 {
@@ -292,21 +295,75 @@ if($upd_array) {
         $data['stores'] = [$this->config->get('config_store_id')];
 
         if($data['categories']) {
-            $new_category_ids = [];
-
-            foreach ($data['categories'] as $category) {
-                foreach ($category['category_descriptions'] as $lang_code => $desc) {
-                    $exists = $this->db->table('category_descriptions')
-                        ->whereRaw("LOWER(name) = '".mb_strtolower($desc['name'])."'")->first();
-                    if (!$exists) {
-                        throw new AException('Category '.$desc['name'].' Not Found on Destination Host');
-                    }
-                    $new_category_ids[] = $exists->category_id;
-                }
-            }
-            $data['categories'] = $new_category_ids;
+            $data['categories'] = [$this->processCategoryTree((array)$data['categories'])];
         }
 
         return $data;
+    }
+
+    protected function processCategoryTree(array $category_tree){
+        $this->loadModel('catalog/category');
+        foreach($category_tree as $lang_code => $category){
+            $language_id = $this->language->getLanguageIdByCode($lang_code);
+            //Note: start from parent category!
+            if($category_tree['parent_id']!=0){
+                throw new AException(
+                    'Data integrity check error: Category Tree must start from root category. Parent_id must be 0!'
+                );
+            }
+            //note: only one language yet
+            return $this->replaceCategories($category, $language_id);
+        }
+    }
+
+    protected function replaceCategories($category, $language_id){
+        $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
+        if (!$exists) {
+            $new_category_id = $this->model_catalog_category->addCategory(
+                [
+                    'parent_id' => $category['parent_id'],
+                    'status'    => $category['status'],
+                    'sort_order' => $category['sort_order'],
+                    'category_description' => [
+                        $language_id => [
+                            'name' => html_entity_decode($category['name']),
+                            'meta_keywords'    => html_entity_decode($category['meta_keywords']),
+                            'meta_description' => html_entity_decode($category['meta_description']),
+                            'description'      => html_entity_decode($category['description']),
+                        ]
+                    ],
+                    'category_store' => [$this->config->get('config_store_id')],
+                    'keyword' => $category['keyword']
+
+                ]
+            );
+            if($category['children']){
+                $category['children']['parent_id'] = $new_category_id;
+                return $this->replaceCategories($category['children'], $language_id);
+            }else{
+                return $new_category_id;
+            }
+        }else{
+            if($category['children']){
+                $category['children']['parent_id'] = $exists['category_id'];
+                return $this->replaceCategories($category['children'], $language_id);
+            }else{
+                return $exists['category_id'];
+            }
+        }
+    }
+
+    public function getCategoryByName($name, $parent_id)
+    {
+        $parent_id = (int)$parent_id;
+        $result = $this->db->query(
+            "SELECT cd.*, c.*
+            FROM ".$this->db->table_name("category_descriptions")." cd
+            LEFT JOIN ".$this->db->table_name("categories")." c
+                 ON (c.category_id = cd.category_id)
+            WHERE c.parent_id = '".$parent_id."' AND LOWER(name) = '".mb_strtolower($name)."'"
+        );
+
+        return $result->row;
     }
 }
