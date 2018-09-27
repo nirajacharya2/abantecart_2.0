@@ -160,14 +160,14 @@ class Test extends BaseCommand
         $this->phpUnitConfigFile = ABC::env('DIR_CONFIG').'phpunit_'.$stage_name.'.xml';
         $result = $this->createPhpUnitConfigurationFile($options);
         if (!$result) {
-            throw new AException(AC_ERR_LOAD, implode("\n", $this->results)."\n");
+            throw new AException(implode("\n", $this->results)."\n", AC_ERR_LOAD);
         }
 
         if ($options['create']) {
             if (!@copy($this->phpUnitTestTemplate, $options['file'])) {
                 throw new AException(
-                    AC_ERR_LOAD,
-                    'Cannot copy '.$this->phpUnitTestTemplate.' to '.$options['file']."\n"
+                    'Cannot copy '.$this->phpUnitTestTemplate.' to '.$options['file']."\n",
+                    AC_ERR_LOAD
                 );
             }
         } else {

@@ -57,6 +57,9 @@ class Job extends BaseCommand
             return ['Error: Unknown action.'];
         }
 
+        require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
+        require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
+
         if ($action == 'run') {
             if (isset($options['job-id'])) {
                 $result = $this->runJobById($options['job-id']);
@@ -105,8 +108,6 @@ class Job extends BaseCommand
 
         $result = false;
         try {
-            //require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
-            //require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
             require_once $job_info['configuration']['worker']['file'];
             //run worker
             $worker_class = $job_info['configuration']['worker']['class'];
@@ -122,6 +123,9 @@ class Job extends BaseCommand
                         'status'        => $handler::STATUS_RUNNING,
                         'last_time_run' => date("Y-m-d H:i:s", time()),
                     ]
+                );
+                $this->write(
+                    "Worker Configuration:\n".var_export($job_info['configuration']['worker'], true)
                 );
                 $result = $worker_module->runJob(
                     $job_info['configuration']['worker']['method'],
@@ -178,6 +182,11 @@ class Job extends BaseCommand
         $handler = H::getInstance($class_name, ['registry' => Registry::getInstance()]);
         $job_info = $handler->getReadyJob();
         if ($job_info) {
+            $this->write('Job found. Start processing job #'.$job_info['job_id'].'!');
+            $this->runJobById($job_info['job_id']);
+            if (!$this->errors) {
+                $this->write(implode("\n", $this->errors));
+            }
             return $this->runJobById($job_info['job_id']);
         } else {
             $this->write('No job found for processing!');
@@ -212,8 +221,7 @@ class Job extends BaseCommand
 
         $result = false;
         try {
-            require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
-            require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
+
             /**
              * @var ABaseWorker $worker
              */
