@@ -644,8 +644,11 @@ class AMail
             }
         } elseif ($this->protocol == 'mailapi') {
         $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
-        if (!$mailDriver->send($this))
-            $this->error[] = "Error send via Mail Api";
+        if (!is_bool($mailDriver)) {
+            if (!$mailDriver->send($this)) {
+                $this->error[] = "Error send via Mail Api";
+            }
+        }
         }
         if ($this->error) {
             $this->messages->saveError('Mailer error!',

@@ -140,14 +140,7 @@ class CampaignMonitor
         if (!$result) {
             return false;
         }
-        if ($result->http_status_code === 201) {
-            return true;
-        } else {
-            $registry = Registry::getInstance();
-            $log = $registry->get('log');
-            $log->write($result->response->Message);
-            return false;
-        }
+        return true;
     }
 
 }

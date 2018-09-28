@@ -19,10 +19,6 @@ class MailApiManager
     //NOTE: This class is loaded in INIT for admin only
     public function __construct()
     {
-        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AIMManager');
-        }
-        $this->extensions = new AExtensionManager();
         $this->registry = Registry::getInstance();
         $this->config = $this->registry->get('config');
     }
@@ -37,6 +33,7 @@ class MailApiManager
         $filter = [
             'category' => 'MailApi',
         ];
+        $this->extensions = new AExtensionManager();
         $extensions = $this->extensions->getExtensionsList($filter);
         $driver_list = [];
         foreach ($extensions->rows as $ext) {
@@ -72,10 +69,14 @@ class MailApiManager
         try {
             /** @noinspection PhpIncludeInspection */
             include_once(ABC::env('DIR_APP_EXTENSIONS').$driver.'/core/lib/'.$driver.'.php');
+            AHelperUtils::df(ABC::env('DIR_APP_EXTENSIONS').$driver.'/core/lib/'.$driver.'.php');
         } catch (AException $e) {
         }
+
+        AHelperUtils::df($driver);
         $className = preg_replace('/[^a-zA-Z]/', '', $driver);
 
+        AHelperUtils::df($className);
         if (!class_exists($className)) {
             return false;
         }
