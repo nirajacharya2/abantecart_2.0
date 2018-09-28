@@ -105,7 +105,7 @@
 										if($cname == $map[$table_name."_fields"][$i]) {
 											$selected = 'selected';
 										}
-										//see if we can match colums based on the name
+                                        //see if we can match columns based on the name
 										$col_name = trim(preg_replace('/[0-9]+/', '', $col));
 										if(	strtolower($col_name) == $cname
 											|| strtolower(preg_replace('/\s+/', '.', $col_name)) == $cname
@@ -135,7 +135,10 @@
 				<td class="col-md-2 update-field">
 					<div class="form-group field_updater hidden">
 						<div class="input-group">
-							<input type="checkbox" name="update_col[<?php echo $i ?>]" <?php if($map['update_col'][$i]) { echo 'checked="checked"'; } ?>>
+							<input type="checkbox" name="update_col[<?php echo $i ?>]" <?php if ($map['update_col'][$i]
+                                || in_array($col, (array)$prechecked)) {
+                                echo 'checked="checked"';
+                            } ?>>
 						</div>
 					</div>
 				</td>
