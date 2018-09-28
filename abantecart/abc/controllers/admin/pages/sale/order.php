@@ -2001,7 +2001,8 @@ class ControllerPagesSaleOrder extends AController
                 ),
                 'placeholder'   => $this->language->get('text_select_from_lookup'),
                 'option_attr'   => ['price'],
-                'filter_params' => 'enabled_only',
+                //TODO: need to add config for this
+                'filter_params' => ''//'enabled_only',
             ]
         );
 
