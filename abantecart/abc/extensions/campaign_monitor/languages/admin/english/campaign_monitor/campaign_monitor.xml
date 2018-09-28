@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<definitions>
+	<definition>
+		<key>campaign_monitor_name</key>
+		<value><![CDATA[Campaign monitor integration]]></value>
+	</definition>
+	<definition>
+		<key>campaign_monitor_note</key>
+		<value><![CDATA[ ]]></value>
+	</definition>
+	<definition>
+		<key>default_campaign_monitor_usernid</key>
+		<value><![CDATA[User ID]]></value>
+	</definition>
+	<definition>
+		<key>default_campaign_monitor_apikey</key>
+		<value><![CDATA[API Key]]></value>
+	</definition>
+</definitions>
