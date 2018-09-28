@@ -61,6 +61,14 @@
 		<value><![CDATA[SMTP]]></value>
 	</definition>
 	<definition>
+		<key>text_mail_api</key>
+		<value><![CDATA[Mail Api extension]]></value>
+	</definition>
+	<definition>
+		<key>text_mail_select</key>
+		<value><![CDATA[-- Please select --]]></value>
+	</definition>
+	<definition>
 		<key>tab_all</key>
 		<value><![CDATA[All]]></value>
 	</definition>
@@ -93,6 +101,10 @@
 	<definition>
 		<key>entry_telephone</key>
 		<value><![CDATA[Telephone:]]></value>
+	</definition>
+	<definition>
+		<key>entry_mail_extension</key>
+		<value><![CDATA[Mail driver extension:]]></value>
 	</definition>
 	<definition>
 		<key>entry_fax</key>

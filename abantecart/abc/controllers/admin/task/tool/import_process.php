@@ -35,6 +35,7 @@ class ControllerTaskToolImportProcess extends AController
     public $data = [];
     protected $success_count = 0;
     protected $failed_count = 0;
+    public $errors = [];
 
     public function processRows()
     {
@@ -60,10 +61,10 @@ class ControllerTaskToolImportProcess extends AController
         if ($result) {
             $output['message'] = $this->success_count.' rows processed.';
             if ($this->failed_count) {
-                $output['message'] .= $this->failed_count.' rows processed with error.';
+                $output['message'] .= $this->failed_count.' rows processed with error. '.implode("\n", $this->errors);
             }
         } else {
-            $output['error_text'] = $this->failed_count.' rows processed with error.';
+            $output['error_text'] = $this->failed_count.' rows processed with errors. '.implode("\n", $this->errors);
         }
         $this->response->setOutput(AJson::encode($output));
     }
@@ -150,16 +151,21 @@ class ControllerTaskToolImportProcess extends AController
                     try {
                         $result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
                     } catch (\PDOException $e) {
-                        $this->log->write($e->getMessage());
+                        $error_text = $e->getMessage();
+                        $this->errors[] = $error_text;
+                        $this->log->write($error_text);
                         $result = false;
                     } catch (AException $e) {
-                        $this->log->write($e->getMessage());
+                        $error_text = $e->getMessage();
+                        $this->errors[] = $error_text;
+                        $this->log->write($error_text);
                         $result = false;
                     }
 
                     if ($result) {
                         $this->success_count++;
                     } else {
+                        $this->errors = array_merge($this->errors, $this->model_tool_import_process->errors);
                         $step_failed_count++;
                     }
                 }

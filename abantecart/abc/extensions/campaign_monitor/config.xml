@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<extension>
+	<id>campaign_monitor</id>
+	<version>1.0.0</version>
+	<type>extensions</type>
+	<category>MailApi</category>
+	<cartversions>
+		<item>2.0</item>
+	</cartversions>
+	<layout></layout>
+	<priority>10</priority>
+	<settings>
+		<item id="default_campaign_monitor_userid">
+			<type required="true">input</type>
+			<default_value></default_value>
+		</item>
+		<item id="default_campaign_monitor_apikey">
+			<type required="true">input</type>
+			<default_value></default_value>
+		</item>
+		<item id="default_campaign_monitor_site_subscribers_listid">
+			<type required="true">input</type>
+			<default_value></default_value>
+		</item>
+	</settings>
+	<preview>
+		<item>preview.png</item>
+	</preview>
+	<help_file><![CDATA[help.txt]]></help_file>
+	<additional_settings><![CDATA[extension/campaign_monitor]]></additional_settings>
+	<note>true</note>
+	<install>
+		<trigger>install.php</trigger>
+	</install>
+	<uninstall>
+		<trigger>uninstall.php</trigger>
+	</uninstall>
+</extension>

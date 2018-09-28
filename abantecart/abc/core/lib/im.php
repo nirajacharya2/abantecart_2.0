@@ -191,8 +191,10 @@ class AIM
             $filter['status'] = (int)$filter_arr['status'];
         }
 
+
         $extensions = $this->extensions->getExtensionsList($filter);
         $driver_list = array('email' => new AMailIM());
+
 
         $active_drivers = array();
 
@@ -220,17 +222,18 @@ class AIM
                 continue;
             }
 
+
             //NOTE! all IM drivers MUST have class by these path
             try {
                 /** @noinspection PhpIncludeInspection */
                 include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.'/core/lib/'.$driver_txt_id.'.php');
             } catch (AException $e) {
             }
-            $classname = "\abc\core\lib\\".preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
-
+            $classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
             if (!class_exists($classname)) {
                 continue;
             }
+
             /**
              * @var $driver AMailIM
              */
@@ -392,7 +395,9 @@ class AIM
                             try {
                                 $driver->send($to, $store_name.$message);
                                 if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
-                                CustomerCommunication::createCustomerCommunicationIm($this->customer->getId(), $store_name.$message);
+                                    if ($protocol != 'email') {
+                                        CustomerCommunication::createCustomerCommunicationIm($this->customer->getId(), $store_name.$message, $protocol);
+                                    }
                             } catch (Exception $e) {
                             }
                         }

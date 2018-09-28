@@ -262,8 +262,7 @@ class ModelSaleCustomerTransaction extends Model{
 				$mail->setSender($store_info['store_name']);
 				$mail->setSubject($subject);
 				$mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-                $arUser =  H::recognizeUser();
-                $user = User::find($arUser['user_id']);
+                $user = User::find($this->user->getId());
                 $mail->setUser($user);
 				$mail->send();
 
