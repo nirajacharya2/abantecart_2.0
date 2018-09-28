@@ -1277,6 +1277,7 @@ class AConfigManager
             'options' => array(
                 'mail' => $this->language->get('text_mail'),
                 'smtp' => $this->language->get('text_smtp'),
+                'mailapi' => $this->language->get('text_mail_api'),
             ),
             'style'   => "no-save",
         ));
@@ -1325,6 +1326,16 @@ class AConfigManager
             'name'  => 'config_alert_emails',
             'value' => $data['config_alert_emails'],
             'style' => 'large-field',
+        ));
+        $mailExtensions = MailApiManager::getInstance()->getMailDriversList();
+        //array_unshift($mailExtensions['mail_api'],  ['' => $this->language->get('text_mail_select'))
+        $mailExtensions = array_merge(['' => $this->language->get('text_mail_select')], $mailExtensions['mail_api']);
+
+        $fields['mail_extension'] = $form->getFieldHtml($props[] = array(
+            'type'  => 'selectbox',
+            'name'  => 'config_mail_extension',
+            'value' => $data['config_mail_extension'],
+            'options' => $mailExtensions,
         ));
         if (isset($data['one_field'])) {
             $fields = $this->_filterField($fields, $props, $data['one_field']);
