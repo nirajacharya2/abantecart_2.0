@@ -8,13 +8,13 @@
 
 namespace abc\extensions\campaign_monitor\core\lib;
 
-require_once (__DIR__.DS."vendor/createsendphp/csrest_subscribers.php");
-require_once (__DIR__.DS."vendor/createsendphp/csrest_transactional_classicemail.php");
+require_once (__DIR__.DS."createsendphp/csrest_subscribers.php");
+require_once (__DIR__.DS."createsendphp/csrest_transactional_classicemail.php");
 
 use abc\core\lib\AMail;
 use abc\core\engine\Registry;
-use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Subscribers;
-use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Transactional_ClassicEmail;
+use abc\extensions\campaign_monitor\core\lib\createsendphp\CS_REST_Subscribers;
+use abc\extensions\campaign_monitor\core\lib\createsendphp\CS_REST_Transactional_ClassicEmail;
 
 
 class CampaignMonitor

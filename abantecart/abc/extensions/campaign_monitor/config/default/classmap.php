@@ -4,9 +4,9 @@
  */
 
 use abc\extensions\campaign_monitor\core\lib\CampaignMonitor;
-use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Subscribers;
-use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\base\CS_REST_Wrapper_Base;
-use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Transactional_ClassicEmail;
+use abc\extensions\campaign_monitor\core\lib\createsendphp\CS_REST_Subscribers;
+use abc\extensions\campaign_monitor\core\lib\createsendphp\base\CS_REST_Wrapper_Base;
+use abc\extensions\campaign_monitor\core\lib\createsendphp\CS_REST_Transactional_ClassicEmail;
 
 return [
     'campaignmonitor'        => CampaignMonitor::class,
