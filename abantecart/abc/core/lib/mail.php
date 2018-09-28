@@ -216,6 +216,32 @@ class AMail
     }
 
     /**
+     * @return string
+     */
+    public function getFrom()
+    {
+        return $this->from;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSender()
+    {
+        return $this->sender;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReplyTo()
+    {
+        return $this->reply_to;
+    }
+
+
+
+    /**
      * @param string $file - full path to file
      * @param string $filename
      */
@@ -296,7 +322,9 @@ class AMail
         $boundary = '----=_NextPart_'.md5(rand());
 
         $header = '';
-        if ($this->protocol != 'mail') {
+
+
+        if ($this->protocol == 'smtp') {
             $header .= 'To: '.$to.$this->newline;
             $header .= 'Subject: '.'=?UTF-8?B?'.base64_encode($this->subject).'?='.$this->newline;
         }
@@ -614,6 +642,10 @@ class AMail
 
                 fclose($handle);
             }
+        } elseif ($this->protocol == 'mailapi') {
+        $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
+        if (!$mailDriver->send($this))
+            $this->error[] = "Error send via Mail Api";
         }
         if ($this->error) {
             $this->messages->saveError('Mailer error!',
@@ -626,4 +658,10 @@ class AMail
 
         return true;
     }
+}
+
+
+abstract class AMailDriver {
+    abstract function send(AMail $mail);
+
 }
