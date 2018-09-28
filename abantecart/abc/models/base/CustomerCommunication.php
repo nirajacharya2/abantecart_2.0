@@ -37,6 +37,7 @@ class CustomerCommunication extends AModelBase
         'type',
         'subject',
         'body',
+        'customer_contact',
         'date_added',
         'date_modified',
     ];
@@ -62,14 +63,17 @@ class CustomerCommunication extends AModelBase
     }
 
     public function getCustomerCommunicationById(int $communication_id) {
-        $communication = CustomerCommunication::find($communication_id);
-        return $communication->toArray();
+        if ($communication_id > 0) {
+            $communication = CustomerCommunication::find($communication_id);
+            if ($communication)
+            return $communication->toArray(); else return [];
+        } else return [];
     }
 
     public function createCustomerCommunication(AMail $mail) {
             $communication = new CustomerCommunication();
             $communication->subject = $mail->getSubject();
-            $communication->body = $mail->getText() ? $mail->getText() : $mail->getHtml();
+            $communication->body = $mail->getHtml() ? $mail->getHtml() : $mail->getText();
             $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
             foreach ($customers as $customer) {
                 $customer_id = $customer->customer_id;
@@ -80,13 +84,13 @@ class CustomerCommunication extends AModelBase
             $communication->save();
     }
 
-    public function createCustomerCommunicationIm($customer_id, $message, $user_id=0){
+    public function createCustomerCommunicationIm($customer_id, $message, $user_id=0, $protocol='sms'){
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';
             $communication->body = $message;
             $communication->customer_id = $customer_id;
             $communication->user_id = $user_id;
-            $communication->type = 'sms';
+            $communication->type = $protocol;
             $communication->save();
     }
 
