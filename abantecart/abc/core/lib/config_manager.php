@@ -1329,7 +1329,10 @@ class AConfigManager
         ));
         $mailExtensions = MailApiManager::getInstance()->getMailDriversList();
         //array_unshift($mailExtensions['mail_api'],  ['' => $this->language->get('text_mail_select'))
+        if (is_array($mailExtensions['mail_api']))
         $mailExtensions = array_merge(['' => $this->language->get('text_mail_select')], $mailExtensions['mail_api']);
+        else
+            $mailExtensions = ['' => $this->language->get('text_mail_select')];
 
         $fields['mail_extension'] = $form->getFieldHtml($props[] = array(
             'type'  => 'selectbox',

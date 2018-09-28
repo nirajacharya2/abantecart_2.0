@@ -6,12 +6,16 @@
  * Time: 09:08
  */
 
-namespace abc\core\extension;
+namespace abc\extensions\campaign_monitor\core\lib;
+
+require_once (__DIR__.DS."vendor/createsendphp/csrest_subscribers.php");
+require_once (__DIR__.DS."vendor/createsendphp/csrest_transactional_classicemail.php");
 
 use abc\core\lib\AMail;
 use abc\core\engine\Registry;
-use abc\models\base\Customer;
-use H;
+use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Subscribers;
+use abc\extensions\campaign_monitor\core\lib\vendor\createsendphp\CS_REST_Transactional_ClassicEmail;
+
 
 class CampaignMonitor
 {
@@ -35,8 +39,6 @@ class CampaignMonitor
 
     public function send(AMail $mail)
     {
-        include_once("vendor/createsend-php/csrest_transactional_classicemail.php");
-
         $userId = $this->config->get('default_campaign_monitor_userid');
         $apiToken = $this->config->get('default_campaign_monitor_apikey');
 
@@ -94,7 +96,6 @@ class CampaignMonitor
 
     public static function changeSubscriber(string $listId, array $auth, array $oldCustomer, array $customer)
     {
-        include_once(__DIR__.DS."vendor/createsend-php/csrest_subscribers.php");
         $wrap = new CS_REST_Subscribers($listId, $auth);
 
         $customerData = [

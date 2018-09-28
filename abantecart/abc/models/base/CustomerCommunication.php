@@ -51,7 +51,7 @@ class CustomerCommunication extends AModelBase
         return $this->hasOne(Customer::class, 'customer_id', 'customer_id');
     }
 
-    public function getCustomerCommunications(int $customer_id, $data = []) {
+    public static function getCustomerCommunications(int $customer_id, $data = []) {
         if (is_array($data) && !empty($data)) {
             return CustomerCommunication::where('customer_id', '=', $customer_id)
                 ->offset($data['start'])->take($data['limit'])
@@ -62,7 +62,7 @@ class CustomerCommunication extends AModelBase
         }
     }
 
-    public function getCustomerCommunicationById(int $communication_id) {
+    public static function getCustomerCommunicationById(int $communication_id) {
         if ($communication_id > 0) {
             $communication = CustomerCommunication::find($communication_id);
             if ($communication)
@@ -70,7 +70,7 @@ class CustomerCommunication extends AModelBase
         } else return [];
     }
 
-    public function createCustomerCommunication(AMail $mail) {
+    public static function createCustomerCommunication(AMail $mail) {
             $communication = new CustomerCommunication();
             $communication->subject = $mail->getSubject();
             $communication->body = $mail->getHtml() ? $mail->getHtml() : $mail->getText();
@@ -84,7 +84,7 @@ class CustomerCommunication extends AModelBase
             $communication->save();
     }
 
-    public function createCustomerCommunicationIm($customer_id, $message, $user_id=0, $protocol='sms'){
+    public static function createCustomerCommunicationIm($customer_id, $message, $user_id=0, $protocol='sms'){
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';
             $communication->body = $message;

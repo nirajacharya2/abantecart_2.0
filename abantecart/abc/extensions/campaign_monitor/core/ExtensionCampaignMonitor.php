@@ -12,6 +12,7 @@ use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\helper\AHelperUtils;
 use abc\models\base\Customer;
+use abc\extensions\campaign_monitor\core\lib\CampaignMonitor;
 
 class ExtensionCampaignMonitor extends Extension
 {
@@ -50,7 +51,6 @@ class ExtensionCampaignMonitor extends Extension
         if (!$currentCustomer) {
             return;
         }
-        require_once(__DIR__.DS."lib/campaign_monitor.php");
 
         CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
     }
@@ -76,8 +76,22 @@ class ExtensionCampaignMonitor extends Extension
         $newCustomerData = $tempArr;
         unset($tempArr);
 
-        require_once(__DIR__.DS."lib/campaign_monitor.php");
+
         CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
+    }
+
+    public function onControllerPagesAccountUnsubscribe_InitData()
+    {
+        $that = $this->baseObject;
+        if (!AHelperUtils::has_value($that->request->get['email'])) {
+            return;
+        }
+        $that->loadModel('account/customer');
+        $customer = $that->model_account_customer->getCustomerByEmail($that->request->get['email']);
+        if ($customer && $customer['email'] == $that->request->get['email']) {
+            $this->model_account_customer->editNewsletter(0, (int)$customer['customer_id']);
+        }
+
     }
 
 }
