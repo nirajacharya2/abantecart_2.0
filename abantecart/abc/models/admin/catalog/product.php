@@ -363,6 +363,7 @@ class ModelCatalogProduct extends Model
             if (isset($data[$f])) {
                 if (in_array($f, $preformat_fields)) {
                     $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
                 }elseif (in_array($f, $nullable)) {
                     $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
                 }elseif (in_array($f, $timestamps)) {
@@ -370,8 +371,10 @@ class ModelCatalogProduct extends Model
                 } else {
                     $update[] = $f." = '".$this->db->escape($data[$f])."'";
                 }
+
             }
         }
+
         if (!empty($update)) {
             $this->db->query(
                 "UPDATE `".$this->db->table_name("products`")." 
