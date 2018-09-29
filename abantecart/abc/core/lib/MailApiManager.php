@@ -19,10 +19,6 @@ class MailApiManager
     //NOTE: This class is loaded in INIT for admin only
     public function __construct()
     {
-        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AIMManager');
-        }
-        $this->extensions = new AExtensionManager();
         $this->registry = Registry::getInstance();
         $this->config = $this->registry->get('config');
     }
@@ -37,6 +33,7 @@ class MailApiManager
         $filter = [
             'category' => 'MailApi',
         ];
+        $this->extensions = new AExtensionManager();
         $extensions = $this->extensions->getExtensionsList($filter);
         $driver_list = [];
         foreach ($extensions->rows as $ext) {
@@ -46,40 +43,23 @@ class MailApiManager
                 continue;
             }
 
-            //NOTE! all Mail drivers MUST have class by these path
-            try {
-                /** @noinspection PhpIncludeInspection */
-                include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.'/core/lib/'.$driver_txt_id.'.php');
-            } catch (AException $e) {
-            }
             $classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 
-            if (!class_exists($classname)) {
-                continue;
-            }
-            /**
-             * @var AMailIM $driver
-             */
-            $driver = new $classname();
-            $driver_list[$driver->getProtocol()][$driver_txt_id] = $driver->getName();
+            try {
+                $driver = ABC::getObjectByAlias($classname);
+                $driver_list[$driver->getProtocol()][$driver_txt_id] = $driver->getName();
+            } catch (\Cake\Database\Exception $e){}
+
         }
         return $driver_list;
     }
 
     public function getCurrentMailApiDriver() {
        $driver = $this->config->get('config_mail_extension');
-        //NOTE! all Mail drivers MUST have class by these path
+       $className = preg_replace('/[^a-zA-Z]/', '', $driver);
         try {
-            /** @noinspection PhpIncludeInspection */
-            include_once(ABC::env('DIR_APP_EXTENSIONS').$driver.'/core/lib/'.$driver.'.php');
-        } catch (AException $e) {
-        }
-        $className = preg_replace('/[^a-zA-Z]/', '', $driver);
-
-        if (!class_exists($className)) {
-            return false;
-        }
-        $driver = new $className();
+            $driver = ABC::getObjectByAlias($className);
+        } catch (\Cake\Database\Exception $e){}
         return $driver;
     }
 }

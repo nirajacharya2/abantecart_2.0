@@ -46,7 +46,6 @@ class ControllerPagesSaleOrder extends AController
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -1721,6 +1720,7 @@ class ControllerPagesSaleOrder extends AController
 
     public function createOrder()
     {
+        $this->loadLanguage('sale/customer');
         $this->loadLanguage('sale/order');
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -1728,14 +1728,12 @@ class ControllerPagesSaleOrder extends AController
 
         if (!$this->session->data['admin_order']
             //check customer id in the session data too! What if switched to another customer?
-            || ($customer_id && $this->session->data['admin_order']['customer_id'] != $customer_id))
-        {
+            || ($customer_id && $this->session->data['admin_order']['customer_id'] != $customer_id)) {
             $this->session->data['admin_order'] = [];
             $this->session->data['admin_order']['cart'] = [];
         }
 
         $order_info =& $this->session->data['admin_order'];
-
 
         if (!$customer_id) {
             if ($order_info['customer_id']) {
@@ -1771,17 +1769,19 @@ class ControllerPagesSaleOrder extends AController
                     list($shp_name, $shp_quote) = explode('.', $this->request->post['shipping_method']);
                     $checkout->setShippingMethod($shippings[$shp_name]['quote'][$shp_quote]);
                     $this->session->data['admin_order']['shipping_method'] = $shippings[$shp_name]['quote'][$shp_quote];
-                    $this->session->data['admin_order']['shipping_address_id'] = $this->request->post['shipping_address_id'];
+                    $this->session->data['admin_order']['shipping_address_id'] =
+                        $this->request->post['shipping_address_id'];
                 }
                 $payments = $checkout->getPaymentList();
                 $checkout->setPaymentMethod($payments[$this->request->post['payment_method']]);
-                $this->session->data['admin_order']['payment_method'] = $payments[$this->request->post['payment_method']];
+                $this->session->data['admin_order']['payment_method'] =
+                    $payments[$this->request->post['payment_method']];
                 $this->session->data['admin_order']['payment_address_id'] = $this->request->post['payment_address_id'];
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);
                 $order_id = $checkout->getOrder()->saveOrder();
 
-                if(!$order_id){
+                if (!$order_id) {
                     throw new LibException(['cannot to save newly created order']);
                 }
                 $checkout->setOrderId((int)$order_id);
@@ -1791,9 +1791,9 @@ class ControllerPagesSaleOrder extends AController
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
                 $error_text = $e->getMessages();
-                if(!$error_text) {
-                   $error_text = 'App Error. See error log for details';
-                   $this->log->write($e->getTraceAsString());
+                if (!$error_text) {
+                    $error_text = 'App Error. See error log for details';
+                    $this->log->write($e->getTraceAsString());
                 }
                 $this->data['error_warning'] = $error_text;
             }
@@ -1826,6 +1826,52 @@ class ControllerPagesSaleOrder extends AController
                 'action' => $this->html->getSecureURL('sale/order/createOrder'),
             ]
         );
+
+        $this->data['list_url'] = $this->html->getSecureURL('sale/customer');
+        $this->loadModel('sale/customer');
+        $this->loadModel('sale/customer_transaction');
+        $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
+        $curr = $this->currency->getCurrency($this->config->get('config_currency'));
+
+        $this->data['balance'] = $this->language->get('text_balance')
+            .' '.$curr['symbol_left']
+            .round($balance, 2)
+            .$curr['symbol_right'];
+
+        $this->data['actas'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'   => $this->language->get('button_actas'),
+            'href'   => $this->html->getSecureURL('sale/customer/actonbehalf', '&customer_id='.$customer_id),
+            'target' => 'new',
+        ]);
+
+        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+        $this->data['button_orders_count'] = $this->html->buildElement(
+            [
+                'type'  => 'button',
+                'name'  => 'view orders',
+                'text'  => $this->language->get('text_total_order').' '.$customer_info['orders_count'],
+                'style' => 'button2',
+                'href'  => $this->html->getSecureURL('sale/order', '&customer_id='.$customer_id),
+                'title' => $this->language->get('text_view').' '.$this->language->get('tab_history'),
+            ]
+        );
+
+        if ($customer_info['last_login']
+            && !in_array($customer_info['last_login'], ['0000-00-00 00:00:00', '1970-01-01 00:00:00', ''])) {
+            $date = H::dateISO2Display($customer_info['last_login'],
+                $this->language->get('date_format_short').' '.$this->language->get('time_format'));
+        } else {
+            $date = $this->language->get('text_never');
+        }
+        $this->data['last_login'] = $this->language->get('text_last_login').' '.$date;
+
+        $this->data['message'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'   => $this->language->get('button_message'),
+            'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
+            'target' => 'new',
+        ]);
 
         //get languages
         if (isset($this->request->get['language_id'])) {
@@ -1913,9 +1959,9 @@ class ControllerPagesSaleOrder extends AController
             }
 
             $price_with_tax = $checkout->getTax()->calculate(
-                                                        $result['price'],
-                                                        $result['tax_class_id'],
-                                                        $this->config->get('config_tax')
+                $result['price'],
+                $result['tax_class_id'],
+                $this->config->get('config_tax')
             );
 
             $products[] = [
@@ -1930,13 +1976,13 @@ class ControllerPagesSaleOrder extends AController
                 'price'          => $currency->format($price_with_tax),
                 'total'          => $currency->format_total($price_with_tax, $result['quantity']),
                 'href'           => $this->html->getSecureURL(
-                                            'catalog/product/update',
-                                            '&product_id='.$result['product_id']
+                    'catalog/product/update',
+                    '&product_id='.$result['product_id']
                 ),
                 'remove_url'     => $this->html->getSecureURL(
-                                            'sale/order/removeProduct',
-                                            '&product_key='.$result['key']
-                )
+                    'sale/order/removeProduct',
+                    '&product_key='.$result['key']
+                ),
             ];
 
         }
@@ -1950,12 +1996,13 @@ class ControllerPagesSaleOrder extends AController
                 'options'       => [],
                 'style'         => 'aform_noaction chosen',
                 'ajax_url'      => $this->html->getSecureURL(
-                                                'r/product/product/products',
-                                                '&currency_code='.$currency->getCode()
+                    'r/product/product/products',
+                    '&currency_code='.$currency->getCode()
                 ),
                 'placeholder'   => $this->language->get('text_select_from_lookup'),
                 'option_attr'   => ['price'],
-                'filter_params' => 'enabled_only'
+                //TODO: need to add config for this
+                'filter_params' => ''//'enabled_only',
             ]
         );
 
@@ -2049,7 +2096,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->html->getSecureURL('extension/extensions/payment')
             );
         }
-        $this->extensions->hk_ValidateData($this, [ __FUNCTION__ ]);
+        $this->extensions->hk_ValidateData($this, [__FUNCTION__]);
     }
 
     public function addProduct()
