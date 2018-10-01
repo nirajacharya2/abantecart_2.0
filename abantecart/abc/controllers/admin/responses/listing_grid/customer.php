@@ -418,6 +418,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     'name_email'     => $this->request->post['term'],
                     'match'          => 'any',
                     'only_customers' => 1,
+                    'exclude'        => (array)$this->request->post['exclude']
                 ],
             ];
             $customers = $this->model_sale_customer->getCustomers($filter);
