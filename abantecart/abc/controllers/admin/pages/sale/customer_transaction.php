@@ -252,6 +252,12 @@ class ControllerPagesSaleCustomerTransaction extends AController
             'href'   => $this->html->getSecureURL( 'sale/customer/actonbehalf', '&customer_id='.$customer_id ),
             'target' => 'new',
         ) );
+        $this->data['new_order'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'   => $this->language->get('text_create_order'),
+            'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id='.$customer_id),
+            'target' => 'new',
+        ]);
 
         if ( AHelperUtils::has_value( $customer_info['orders_count'] ) && $customer_id ) {
             $this->data['button_orders_count'] = $form->getFieldHtml(

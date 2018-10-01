@@ -31,6 +31,13 @@
 			       title="<?php echo $button_orders_count->title; ?>"
 			       data-original-title="<?php echo $button_orders_count->title; ?>"><?php echo $button_orders_count->text; ?></a>
 			    <?php } ?>
+				<a target="_blank"
+				   class="btn btn-white tooltips"
+				   href="<?php echo $new_order->href; ?>"
+				   data-toggle="tooltip"
+				   title="<?php echo $new_order->text; ?>"
+				   data-original-title="<?php echo $new_order->text; ?>"><i class="fa fa-flag "></i>
+				</a>
 			    <a target="_blank"
 			       class="btn btn-white tooltips"
 			       href="<?php echo $actas->href; ?>"

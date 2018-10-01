@@ -88,6 +88,13 @@
 				</a>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
+				   href="<?php echo $new_order->href; ?>"
+				   data-toggle="tooltip"
+				   title="<?php echo $new_order->text; ?>"
+				   data-original-title="<?php echo $new_order->text; ?>"><i class="fa fa-flag-o "></i>
+				</a>
+				<a target="_blank"
+				   class="btn btn-white tooltips"
 				   href="<?php echo $actas->href; ?>"
 				   data-toggle="tooltip"
 				   title="<?php echo $actas->text; ?>"

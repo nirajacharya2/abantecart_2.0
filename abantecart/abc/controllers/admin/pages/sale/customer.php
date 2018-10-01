@@ -24,17 +24,17 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\ALanguage;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use abc\models\admin\ModelSaleCustomerNote;
+use abc\models\admin\User;
 use H;
 
 /**
  * Class ControllerPagesSaleCustomer
  *
  * @package abc\controllers\admin
- *
- * @property
+ * @property ModelSaleCustomerNote $model_sale_customer_note
  */
 class ControllerPagesSaleCustomer extends AController
 {
@@ -146,18 +146,18 @@ class ControllerPagesSaleCustomer extends AController
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('sale/customer/update', '&customer_id=%ID%'),
                     'children' => array_merge([
-                        'quickview'    => [
+                        'quickview'   => [
                             'text'  => $this->language->get('text_quick_view'),
                             'href'  => $this->html->getSecureURL('sale/customer/update', '&customer_id=%ID%'),
                             //quick view port URL
                             'vhref' => $this->html->getSecureURL('r/common/viewport/modal',
                                 '&viewport_rt=sale/customer/update&customer_id=%ID%'),
                         ],
-                        'details'      => [
+                        'details'     => [
                             'text' => $this->language->get('tab_customer_details'),
                             'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id=%ID%'),
                         ],
-                        'transaction'  => [
+                        'transaction' => [
                             'text' => $this->language->get('tab_transactions'),
                             'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=%ID%'),
                         ],
@@ -509,13 +509,13 @@ class ControllerPagesSaleCustomer extends AController
 
             $this->data['reset_password'] = $this->html->buildElement(
                 [
-                    'type'  => 'button',
-                    'name'  => 'reset_password_button',
-                    'href'  => $this->html->getSecureURL(
-                        'sale/customer/resetPassword',
-                        '&customer_id='.$customer_id
+                    'type' => 'button',
+                    'name' => 'reset_password_button',
+                    'href' => $this->html->getSecureURL(
+                                'sale/customer/resetPassword',
+                                '&customer_id='.$customer_id
                     ),
-                    'title' => $this->language->get('text_resend_password'),
+                    'title' => $this->language->get('text_resend_password')
                 ]
             );
         }
@@ -566,6 +566,12 @@ class ControllerPagesSaleCustomer extends AController
             'type'   => 'button',
             'text'   => $this->language->get('button_message'),
             'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
+            'target' => 'new',
+        ]);
+        $this->data['new_order'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'   => $this->language->get('text_create_order'),
+            'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id='.$customer_id),
             'target' => 'new',
         ]);
 
@@ -1202,44 +1208,44 @@ class ControllerPagesSaleCustomer extends AController
 
         if (!$this->user->canModify('sale/customer')) {
             $this->session->data['warning'] = sprintf(
-                $this->language->get('error_permission_modify'),
-                'sale/customer'
+                                        $this->language->get('error_permission_modify'),
+                                        'sale/customer'
             );
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/customer/update',
                     '&customer_id='.$customer_id
-                ));
+            ));
         }
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadModel('sale/customer');
         $customer_info = $this->model_sale_customer->getCustomer($customer_id);
 
-        $error_text = $this->validateBeforePasswordReset($customer_info);
-        if ($error_text) {
+        $error_text  = $this->validateBeforePasswordReset($customer_info);
+        if($error_text){
             $this->session->data['warning'] = $error_text;
-            abc_redirect($this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id));
+            abc_redirect($this->html->getSecureURL('sale/customer/update','&customer_id='.$customer_id));
         }
 
         $code = H::genToken(32);
         //save password reset code
-        $this->loadModel('account/customer', 'storefront')->updateOtherData($customer_id, ['password_reset' => $code]);
+        $this->loadModel('account/customer','storefront')->updateOtherData($customer_id, ['password_reset' => $code]);
         //build reset link
         $enc = new AEncryption($this->config->get('encryption_key'));
         $rtoken = $enc->encrypt($customer_id.'::'.$code);
 
-        $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken='.$rtoken, null, 'storefront');
+        $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken=' . $rtoken, null, 'storefront');
 
-        $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
+        $language = new ALanguage($this->registry, $this->language->getLanguageCode(),0);
         $language->load('mail/account_forgotten');
 
         $subject = sprintf($language->get('text_subject'), $this->config->get('store_name'));
-        $message = sprintf($this->language->get('text_password_was_reset'), $this->config->get('store_name'))."\n\n";
-        $message .= $language->get('text_password')."\n\n";
+        $message = sprintf($this->language->get('text_password_was_reset'), $this->config->get('store_name')) . "\n\n";
+        $message .= $language->get('text_password') . "\n\n";
         $message .= $link;
 
-        $mail = new AMail($this->config);
+        $mail = new AMail( $this->config );
         $mail->setTo($customer_info['email']);
         $mail->setFrom($this->config->get('store_main_email'));
         $mail->setSender($this->config->get('store_name'));
@@ -1249,22 +1255,22 @@ class ControllerPagesSaleCustomer extends AController
         $user = User::find($arUser['user_id']);
         $mail->setUser($user);
         $result = $mail->send();
-        if (!$result) {
+        if(!$result) {
             $this->session->data['warning'] = $this->language->get('error_reset_link_not_sent');
-        } else {
+        }else {
             $this->session->data['success'] = $this->language->get('text_password_reset_success');
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
-        abc_redirect($this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id));
+        abc_redirect($this->html->getSecureURL('sale/customer/update','&customer_id='.$customer_id));
     }
 
     protected function validateBeforePasswordReset($customer_info)
     {
-        if (!$customer_info) {
+        if(!$customer_info){
             return $this->language->get('error_unknown_customer');
-        } elseif (!$customer_info['email']) {
+        }elseif(!$customer_info['email']){
             return $this->language->get('error_no_email');
-        } elseif (!$customer_info['status'] || !$customer_info['approved']) {
+        }elseif(!$customer_info['status'] || !$customer_info['approved']){
             return $this->language->get('error_disabled_customer');
         }
         return '';
@@ -1317,26 +1323,26 @@ class ControllerPagesSaleCustomer extends AController
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
         ]);
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text'      => $this->language->get('text_edit').' '.$this->language->get('text_customer').' - '.$customer_info['firstname'].' '.$customer_info['lastname'],
             'separator' => ' :: ',
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer_notes', '&customer_id='.$customer_id),
             'text'      => $this->language->get('heading_title_notes'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
-        $this->data['tabs']['general'] = array(
+        $this->data['tabs']['general'] = [
             'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_customer_details'),
-        );
-        $this->data['tabs'][] = array(
+        ];
+        $this->data['tabs'][] = [
             'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_transactions'),
-        );
+        ];
         $this->data['tabs'][] = [
             'href'   => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
             'text'   => $this->language->get('tab_customer_notes'),
@@ -1443,26 +1449,26 @@ class ControllerPagesSaleCustomer extends AController
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
         ]);
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text'      => $this->language->get('text_edit').' '.$this->language->get('text_customer').' - '.$customer_info['firstname'].' '.$customer_info['lastname'],
             'separator' => ' :: ',
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer/communications', '&customer_id='.$customer_id),
             'text'      => $this->language->get('heading_title_communications'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
-        $this->data['tabs']['general'] = array(
+        $this->data['tabs']['general'] = [
             'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_customer_details'),
-        );
-        $this->data['tabs'][] = array(
+        ];
+        $this->data['tabs'][] = [
             'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_transactions'),
-        );
+        ];
         $this->data['tabs'][] = [
             'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_customer_notes'),
@@ -1482,7 +1488,7 @@ class ControllerPagesSaleCustomer extends AController
             $this->data['success'] = '';
         }
 
-        $grid_settings = array(
+        $grid_settings = [
             //id of grid
             'table_id'       => 'report_purchased_grid',
             // url to load data from
@@ -1499,51 +1505,51 @@ class ControllerPagesSaleCustomer extends AController
                 ],
             ],
             'grid_ready'     => 'grid_ready();',
-        );
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             $this->language->get('column_subject'),
             $this->language->get('column_type'),
             $this->language->get('column_date_added'),
             $this->language->get('column_user'),
-        );
+        ];
 
-        $grid_settings['colModel'] = array(
-            array(
+        $grid_settings['colModel'] = [
+            [
                 'name'     => 'subject',
                 'index'    => 'subject',
                 'width'    => 200,
                 'align'    => 'left',
                 'sortable' => true,
                 'search'   => false,
-            ),
-            array(
+            ],
+            [
                 'name'     => 'type',
                 'index'    => 'type',
                 'width'    => 50,
                 'align'    => 'center',
                 'sortable' => true,
                 'search'   => false,
-            ),
-            array(
+            ],
+            [
                 'name'     => 'date_added',
                 'index'    => 'date_added',
                 'width'    => 80,
                 'align'    => 'left',
                 'sortable' => true,
                 'search'   => false,
-            ),
-            array(
+            ],
+            [
                 'name'     => 'user',
                 'index'    => 'user',
                 'width'    => 90,
                 'align'    => 'center',
                 'sortable' => false,
                 'search'   => false,
-            ),
-        );
+            ],
+        ];
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
         $this->view->batchAssign($this->data);
