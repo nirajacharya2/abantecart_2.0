@@ -41,18 +41,14 @@ class ControllerResponsesSaleOrder extends AController
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $json = [];
-
+        $output = [];
         if (!$this->user->canModify('sale/order')) {
-
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'sale/order'),
                     'reset_value' => true,
                 ]);
-
         }
 
         $this->loadLanguage('sale/order');
@@ -62,17 +58,17 @@ class ControllerResponsesSaleOrder extends AController
 
         switch($this->request->get['action']){
             case 'get_shippings':
-                $json = $this->getShippings();
+                $output = $this->getShippings();
                 break;
             case 'get_payments':
-                $json = $this->getPayments();
+                $output = $this->getPayments();
                 break;
             case 'recalc_totals':
-                $json = $this->getTotals();
+                $output = $this->getTotals();
                 break;
             case 'apply_coupon':
-                $json = $this->applyCoupon();
-                if($json === false){
+                $output = $this->applyCoupon();
+                if($output === false){
                     $error = new AError('');
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
                         [
@@ -83,12 +79,12 @@ class ControllerResponsesSaleOrder extends AController
                 break;
 
         }
-
+        $this->data['output'] = $output;
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->load->library('json');
-        $this->response->setOutput(AJson::encode($json));
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     protected function getTotals()

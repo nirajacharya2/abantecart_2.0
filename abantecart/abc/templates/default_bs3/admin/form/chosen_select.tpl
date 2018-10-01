@@ -71,7 +71,7 @@
 				dataType: 'json',
 				jsonTermKey: "term",
 				data: {
-					'exclude': <?php echo (int)$extra['exclude'] ?: '$("#'.$id.'").chosen().val()"' ?>,
+					'exclude': <?php echo (int)$extra['exclude'] ?: '$("#'.$id.'").chosen().val()' ?>,
 					'filter': '<?php echo $filter_params; ?>'
 				},
 				keepTypingMsg: "<?php echo $text_continue_typing; ?>",

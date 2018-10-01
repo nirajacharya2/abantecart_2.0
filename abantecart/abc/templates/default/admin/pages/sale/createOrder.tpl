@@ -23,7 +23,7 @@
 				<?php if($last_login){?>
 				<a class="btn btn-white disabled"><?php echo $last_login; ?></a>
 				<?php } ?>
-				<a class="btn btn-white disabled"><?php echo $balance; ?></a>
+				<a class="btn btn-white" href="<?php echo $transactions_url;?>" target="_new"><?php echo $balance; ?></a>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
 				   href="<?php echo $button_orders_count->href; ?>"
@@ -300,10 +300,6 @@ if(!$error_warning){
 		}
 	}
 
-
-
-	///////////////////
-
 	$('#content #language_id').on('change', function () {
 		location = '<?php echo $this->html->getSecureUrl('sale/order/createOrder');?>&language_id=' + $(this).val();
 	});
@@ -375,6 +371,12 @@ if(!$error_warning){
 				if (data) {
 					$('#shipping_method_container>label').html(data.title);
 					$('#shipping_method_container .afield').html(data.html);
+
+					if(data.title.length>0 ) {
+						$('#shipping_method_container').show();
+					}else{
+						$('#shipping_method_container').hide();
+					}
 				}
 			}
 		});
@@ -401,6 +403,11 @@ if(!$error_warning){
 				if (!data.error) {
 					$('#payment_method_container>label').html(data.title);
 					$('#payment_method_container .afield').html(data.html);
+					if(data.title.length>0) {
+						$('#payment_method_container').show();
+					}else{
+						$('#payment_method_container').hide();
+					}
 					$('.panel-footer').show();
 				}else{
 					$('.panel-footer').hide();

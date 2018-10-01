@@ -1889,6 +1889,8 @@ class ControllerPagesSaleOrder extends AController
                 'value'   => $order_info['language_id'],
             ]
         );
+
+        $this->data['transactions_url'] = $this->html->getSecureURL('sale/customer_transaction','&customer_id='.$customer_id);
         //get currencies
 
         if (isset($this->request->get['order_currency'])) {
