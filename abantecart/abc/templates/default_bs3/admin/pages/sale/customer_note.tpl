@@ -11,8 +11,8 @@
 			$classname = '';
 		}
 		?>
-	<li class="nav-item">
-		<a class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
+	<li class="<?php echo $classname; ?>">
+		<a <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
 	</li>
 	<?php } ?>
 
@@ -20,7 +20,7 @@
 </ul>
 
 <div id="content" class="panel panel-default">
-	
+
 	<?php echo $form['form_open']; ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 
@@ -84,7 +84,7 @@
 			<?php } ?>
 		</div>
 		<?php
-		 
+
 		} // end of foreach $form['fields']
 
 		echo $this->getHookVar('hk_order_comment_pre');
