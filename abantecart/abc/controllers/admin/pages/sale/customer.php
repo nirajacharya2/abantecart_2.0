@@ -1339,20 +1339,22 @@ class ControllerPagesSaleCustomer extends AController
             'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_customer_details'),
         ];
-        $this->data['tabs'][] = [
-            'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
-            'text' => $this->language->get('tab_transactions'),
-        ];
-        $this->data['tabs'][] = [
-            'href'   => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
-            'text'   => $this->language->get('tab_customer_notes'),
-            'active' => true,
-        ];
-        if ($this->config->get('config_save_customer_communication')) {
+        if (H::has_value($customer_id)) {
             $this->data['tabs'][] = [
-                'href' => $this->html->getSecureURL('sale/customer/communications', '&customer_id='.$customer_id),
-                'text' => $this->language->get('tab_customer_communications'),
+                'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
+                'text' => $this->language->get('tab_transactions'),
             ];
+            $this->data['tabs'][] = [
+                'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
+                'text' => $this->language->get('tab_customer_notes'),
+                'active' => true,
+            ];
+            if ($this->config->get('config_save_customer_communication')) {
+                $this->data['tabs'][] = [
+                    'href' => $this->html->getSecureURL('sale/customer/communications', '&customer_id='.$customer_id),
+                    'text' => $this->language->get('tab_customer_communications'),
+                ];
+            }
         }
 
         if (isset($this->session->data['success'])) {
@@ -1465,20 +1467,22 @@ class ControllerPagesSaleCustomer extends AController
             'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
             'text' => $this->language->get('tab_customer_details'),
         ];
-        $this->data['tabs'][] = [
-            'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
-            'text' => $this->language->get('tab_transactions'),
-        ];
-        $this->data['tabs'][] = [
-            'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
-            'text' => $this->language->get('tab_customer_notes'),
-        ];
-        if ($this->config->get('config_save_customer_communication')) {
+        if (H::has_value($customer_id)) {
             $this->data['tabs'][] = [
-                'href'   => $this->html->getSecureURL('sale/customer/communications', '&customer_id='.$customer_id),
-                'text'   => $this->language->get('tab_customer_communications'),
-                'active' => true,
+                'href' => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
+                'text' => $this->language->get('tab_transactions'),
             ];
+            $this->data['tabs'][] = [
+                'href' => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
+                'text' => $this->language->get('tab_customer_notes'),
+            ];
+            if ($this->config->get('config_save_customer_communication')) {
+                $this->data['tabs'][] = [
+                    'href' => $this->html->getSecureURL('sale/customer/communications', '&customer_id='.$customer_id),
+                    'text' => $this->language->get('tab_customer_communications'),
+                    'active' => true,
+                ];
+            }
         }
 
         if (isset($this->session->data['success'])) {
