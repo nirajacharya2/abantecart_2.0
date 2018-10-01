@@ -671,6 +671,13 @@ class ModelSaleCustomer extends Model
         if (H::has_value($filter['only_with_mobile_phones'])) {
             $implode[] = " TRIM(COALESCE(c.sms,''))  <> '' ";
         }
+        if (H::has_value($filter['exclude'])) {
+            $filter['exclude'] = (array)$filter['exclude'];
+            foreach($filter['exclude'] as &$id){
+                $id = (int)$id;
+            }
+            $implode[] = " c.customer_id NOT IN (".implode(',',$filter['exclude']).") ";
+        }
 
         if (H::has_value($filter['status'])) {
             $implode[] = "c.status = '".(int)$filter['status']."'";
