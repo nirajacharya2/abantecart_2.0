@@ -12932,6 +12932,7 @@ CREATE TABLE `ac_customer_communications` (
   `type` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `body` text COLLATE utf8_unicode_ci NOT NULL,
+  `sent_to_address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`communication_id`),
