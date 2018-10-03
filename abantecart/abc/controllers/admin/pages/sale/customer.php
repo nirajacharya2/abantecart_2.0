@@ -182,10 +182,13 @@ class ControllerPagesSaleCustomer extends AController
         ];
 
         if ($this->config->get('config_save_customer_communication')) {
-            $grid_settings['actions']['edit']['children']['communication'] = [
-                        'href' => $this->html->getSecureURL('sale/customer/communications', '&customer_id=%ID%'),
-                        'text' => $this->language->get('tab_customer_communications'),
+            $grid_settings_part1 = array_slice( $grid_settings['actions']['edit']['children'], 0,4);
+            $grid_settings_part2 = array_slice( $grid_settings['actions']['edit']['children'], 4,1);
+            $grid_settings_part1['communication'] = [
+                'href' => $this->html->getSecureURL('sale/customer/communications', '&customer_id=%ID%'),
+                'text' => $this->language->get('tab_customer_communications'),
             ];
+            $grid_settings['actions']['edit']['children'] = array_merge($grid_settings_part1, $grid_settings_part2);
         }
 
         $this->load->model('setting/store');
