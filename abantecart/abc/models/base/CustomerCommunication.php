@@ -37,7 +37,7 @@ class CustomerCommunication extends AModelBase
         'type',
         'subject',
         'body',
-        'customer_contact',
+        'sent_to_address',
         'date_added',
         'date_modified',
     ];
@@ -81,15 +81,17 @@ class CustomerCommunication extends AModelBase
             $communication->customer_id = $customer_id;
             $communication->user_id = $mail->getUser()->user_id ? $mail->getUser()->user_id : 0;
             $communication->type = 'email';
+            $communication->sent_to_address = $mail->getTo();
             $communication->save();
     }
 
-    public static function createCustomerCommunicationIm($customer_id, $message, $user_id=0, $protocol='sms'){
+    public static function createCustomerCommunicationIm($customer_id, $to, $message, $user_id=0, $protocol='sms'){
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';
             $communication->body = $message;
             $communication->customer_id = $customer_id;
             $communication->user_id = $user_id;
+            $communication->sent_to_address = $to;
             $communication->type = $protocol;
             $communication->save();
     }

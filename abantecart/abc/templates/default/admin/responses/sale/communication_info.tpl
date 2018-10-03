@@ -9,9 +9,13 @@
 				<dt><?php echo $message['subject_title']; ?></dt>
 				<dd><?php echo $message['subject'] ?></dd>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-3">
 				<dt><?php echo $message['date_title']; ?></dt>
 				<dd><?php echo $message['date_added'] ?></dd>
+			</div>
+			<div class="col-md-3">
+				<dt><?php echo $message['sent_to_title']; ?></dt>
+				<dd><?php echo $message['sent_to_address'] ?></dd>
 			</div>
 		</div>
 		<dl class="dl-horizontal">

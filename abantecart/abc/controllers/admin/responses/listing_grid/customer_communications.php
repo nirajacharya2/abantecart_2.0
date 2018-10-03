@@ -111,6 +111,7 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
                 $this->data['message']['body_title'] = $this->language->get('communication_body_title');
                 $this->data['message']['date_title'] = $this->language->get('communication_date_title');
                 $this->data['message']['title'] = $this->language->get('communication_title');
+                $this->data['message']['sent_to_title'] = $this->language->get('communication_sent_to');
             } else {
                 $this->data['message']["message"] = $this->language->get('text_not_found');
             }

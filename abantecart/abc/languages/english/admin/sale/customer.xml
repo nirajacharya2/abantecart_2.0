@@ -442,6 +442,10 @@
 		<value><![CDATA[Communication:]]></value>
 	</definition>
 	<definition>
+		<key>communication_sent_to</key>
+		<value><![CDATA[Sent to address:]]></value>
+	</definition>
+	<definition>
 		<key>communication_subject_title</key>
 		<value><![CDATA[Subject:]]></value>
 	</definition>
