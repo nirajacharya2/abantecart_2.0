@@ -295,7 +295,11 @@ if($upd_array) {
         $data['stores'] = [$this->config->get('config_store_id')];
 
         if($data['categories']) {
-            $data['categories'] = [$this->processCategoryTree((array)$data['categories'])];
+            $categories = [];
+            foreach($data['categories'] as $category_branch) {
+                $categories[] = $this->processCategoryTree($category_branch);
+            }
+            $data['categories'] = $categories;
         }
 
         return $data;
