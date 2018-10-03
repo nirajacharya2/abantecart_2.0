@@ -12925,6 +12925,7 @@ ALTER TABLE `ac_customer_notes`
 ALTER TABLE `ac_customer_notes`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+DROP TABLE IF EXISTS `ac_customer_communications`;
 CREATE TABLE `ac_customer_communications` (
   `communication_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
