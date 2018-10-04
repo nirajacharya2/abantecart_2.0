@@ -27,7 +27,6 @@
 		<item>preview.png</item>
 	</preview>
 	<help_file><![CDATA[help.txt]]></help_file>
-	<additional_settings><![CDATA[extension/campaign_monitor]]></additional_settings>
 	<note>true</note>
 	<install>
 		<trigger>install.php</trigger>

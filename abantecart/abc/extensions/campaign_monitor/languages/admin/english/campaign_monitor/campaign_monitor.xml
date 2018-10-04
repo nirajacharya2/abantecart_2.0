@@ -9,11 +9,15 @@
 		<value><![CDATA[ ]]></value>
 	</definition>
 	<definition>
-		<key>default_campaign_monitor_usernid</key>
-		<value><![CDATA[User ID]]></value>
+		<key>default_campaign_monitor_userid</key>
+		<value><![CDATA[Client ID]]></value>
 	</definition>
 	<definition>
 		<key>default_campaign_monitor_apikey</key>
 		<value><![CDATA[API Key]]></value>
+	</definition>
+	<definition>
+		<key>default_campaign_monitor_site_subscribers_listid</key>
+		<value><![CDATA[Subscribers List ID]]></value>
 	</definition>
 </definitions>

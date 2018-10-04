@@ -11,6 +11,7 @@ namespace abc\extensions\campaign_monitor\core\lib;
 require_once (__DIR__.DS."createsendphp/csrest_subscribers.php");
 require_once (__DIR__.DS."createsendphp/csrest_transactional_classicemail.php");
 
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\AMail;
 use abc\core\engine\Registry;
 use abc\extensions\campaign_monitor\core\lib\createsendphp\CS_REST_Subscribers;
@@ -55,7 +56,7 @@ class CampaignMonitor
                 fclose($handle);
                 $attachments[] = [
                     "Name"    => $attachment['file'],
-                    //"Type" => "image/gif",
+                    "Type" => mime_content_type($attachment['file']),
                     "Content" => chunk_split(base64_encode($content)),
                 ];
             }
@@ -86,6 +87,7 @@ class CampaignMonitor
             "InlineCSS"   => true,
         );
         $result = $wrap->send($complex_message, $group_name, $add_recipients_to_subscriber_list_ID, $options);
+
         if ($result->http_status_code === 202) {
             return true;
         } else {

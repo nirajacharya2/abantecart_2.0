@@ -58,11 +58,27 @@ class ExtensionCampaignMonitor extends Extension
     public function onControllerResponsesListingGridCustomer_InitData()
     {
         $that = $this->baseObject;
+
         if (!$this->baseObject_method == "update_field" || !$that->request->is_POST()) {
             return;
         }
-        $customer_id = $that->request->get['id'];
-        $newCustomerData = $that->request->post;
+        $customer_id = 0;
+        $newCustomerData = [];
+
+        if (isset($that->request->post['status']) && is_array($that->request->post['status'])) {
+            $status = $that->request->post['status'];
+            foreach ($status as $key => $value) {
+                $customer_id = $key;
+                $newCustomerData = ['status' => $value];
+            }
+        } else {
+            $customer_id = $that->request->get['id'];
+            $newCustomerData = $that->request->post;
+        }
+
+        if (!(int)$customer_id) {
+            return;
+        }
         $currentCustomer = Customer::find($customer_id);
         if (!$currentCustomer) {
             return;
@@ -75,7 +91,6 @@ class ExtensionCampaignMonitor extends Extension
         }
         $newCustomerData = $tempArr;
         unset($tempArr);
-
 
         CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
     }
@@ -92,6 +107,90 @@ class ExtensionCampaignMonitor extends Extension
             $this->model_account_customer->editNewsletter(0, (int)$customer['customer_id']);
         }
 
+    }
+
+    public function onControllerPagesAccountCreate_UpdateData()
+    { //ЛОвим регистрацию
+        $that = $this->baseObject;
+        $customer_id = $that->data['customer_id'];
+        if (!(int)$customer_id) {
+            return;
+        }
+        $currentCustomer = Customer::find($customer_id);
+        if (!$currentCustomer) {
+            return;
+        }
+        $newCustomerData = $currentCustomer->toArray();
+
+        $tempArr = $newCustomerData;
+        foreach ($tempArr as $key => $value) {
+            $tempArr[$key] = 0;
+        }
+        $currentCustomer = $tempArr;
+        unset($tempArr);
+
+        CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
+
+    }
+
+    public function onControllerPagesAccountSubscriber_UpdateData()
+    {
+        $that = $this->baseObject;
+
+        if ($that->request->is_POST()) {
+
+            $customer_id = $that->data['customer_id'];
+            if (!(int)$customer_id) {
+                return;
+            }
+            $currentCustomer = Customer::find($customer_id);
+            if (!$currentCustomer) {
+                return;
+            }
+            $newCustomerData = $currentCustomer->toArray();
+
+            $newCustomerData['status'] = 1;
+
+            $tempArr = $newCustomerData;
+            foreach ($tempArr as $key => $value) {
+                $tempArr[$key] = 0;
+            }
+            $currentCustomer = $tempArr;
+            unset($tempArr);
+
+            CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
+
+        }
+    }
+
+    public function onControllerPagesAccountNotification_InitData()
+    {
+        $that = $this->baseObject;
+
+        if (!$that->request->is_POST()) {
+            return;
+        }
+        $settings = $that->request->post['settings'];
+        $customer_id = (int)$that->customer->getId();
+
+        if (!$customer_id) {
+            return;
+        }
+
+        $currentCustomer = Customer::find($customer_id);
+        if (!$currentCustomer) {
+            return;
+        }
+        $currentCustomer = $currentCustomer->toArray();
+        $newCustomerData = $currentCustomer;
+
+        if (is_array($settings) && $settings['newsletter']['email'] == 1) {
+            $newCustomerData['newsletter'] = 1;
+        } else {
+            $newCustomerData['newsletter'] = 0;
+        }
+
+        CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
     }
 
 }

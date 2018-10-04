@@ -67,7 +67,7 @@ class ControllerPagesAccountSubscriber extends AController {
 				$request_data['ip'] = $this->request->getRemoteIP();
 			    //mark customer as subscriber for model
 			    $request_data['subscriber'] = true;
-				$this->model_account_customer->addCustomer($request_data, true);
+                $this->data['customer_id'] = $this->model_account_customer->addCustomer($request_data, true);
 				$this->extensions->hk_UpdateData($this,__FUNCTION__);
 		  		abc_redirect($this->html->getSecureURL('account/subscriber','&success=1'));
 	  		}
