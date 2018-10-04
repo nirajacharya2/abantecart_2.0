@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,9 +23,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ACurrency
@@ -33,7 +30,7 @@ if (!class_exists('abc\core\ABC')) {
 final class ACurrency
 {
     private $code;
-    private $currencies = array();
+    private $currencies = [];
     private $config;
     private $db;
     private $language;
@@ -48,6 +45,8 @@ final class ACurrency
 
     /**
      * @param $registry Registry
+     *
+     * @throws \Exception
      */
     public function __construct($registry)
     {
@@ -70,7 +69,7 @@ final class ACurrency
         } else {
             $query = $this->db->query("SELECT * FROM ".$this->db->table_name("currencies"));
             foreach ($query->rows as $result) {
-                $this->currencies[$result['code']] = array(
+                $this->currencies[$result['code']] = [
                     'code'          => $result['code'],
                     'currency_id'   => $result['currency_id'],
                     'title'         => $result['title'],
@@ -79,7 +78,7 @@ final class ACurrency
                     'decimal_place' => $result['decimal_place'],
                     'value'         => $result['value'],
                     'status'        => $result['status'],
-                );
+                ];
             }
             $cache->push($cache_key, $this->currencies);
         }
@@ -97,10 +96,12 @@ final class ACurrency
             );
 
         } elseif (isset($this->session->data['currency'])
-            && array_key_exists($this->session->data['currency'], $this->currencies)) {
+            && array_key_exists($this->session->data['currency'], $this->currencies)
+        ) {
             $this->set($this->session->data['currency']);
         } elseif (isset($this->request->cookie['currency'])
-            && array_key_exists($this->request->cookie['currency'], $this->currencies)) {
+            && array_key_exists($this->request->cookie['currency'], $this->currencies)
+        ) {
             if (ABC::env('IS_ADMIN') === true) {
                 $this->set($this->config->get('config_currency'));
             } else {
@@ -109,7 +110,8 @@ final class ACurrency
         } else {
             // need to know about currency switch. Check if currency was set but not in list of available currencies
             if (isset($currencyCode) || isset($this->session->data['currency'])
-                || isset($this->request->cookie['currency'])) {
+                || isset($this->request->cookie['currency'])
+            ) {
                 $this->is_switched = true;
             }
             $this->set($this->config->get('config_currency'));
@@ -278,14 +280,16 @@ final class ACurrency
 
         $error = false;
         if (!$to) {
-            $msg = 'Error: tried to convert into inaccessible currency! Currency code is '.$code_to;
-            $this->log->write('ACurrency '.$msg);
+            $msg = 'Error: tried to convert into inaccessible currency! Currency code is "'.$code_to.'"';
+            $dbg = debug_backtrace();
+            $this->log->write("ACurrency ".$msg."\nCalled from ".$dbg[0]['file'].":".$dbg[0]['line']);
             $this->message->saveError('Currency conversion error', $msg);
             $error = true;
         }
         if (!$from) {
+            $dbg = debug_backtrace();
             $msg = 'Error: tried to convert from inaccessible currency! Currency code is '.$code_from;
-            $this->log->write('ACurrency '.$msg);
+            $this->log->write("ACurrency ".$msg."\nCalled from ".$dbg[0]['file'].":".$dbg[0]['line']);
             $this->message->saveError('Currency conversion error .', $msg);
             $error = true;
         }
