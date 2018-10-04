@@ -1368,6 +1368,7 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         $notes = $this->model_sale_customer_note->getNotes($customer_id);
+        $this->data['notes'] = [];
         foreach ($notes as &$note) {
             $note->note_added = H::dateISO2Display(
                 $note->note_added,
