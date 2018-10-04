@@ -50,7 +50,7 @@ class ModelAccountCustomer extends Model
      * @return int
      * @throws \abc\core\lib\AException
      */
-    public function addCustomer( $data )
+    public function addCustomer( $data , $subscribe_only = false)
     {
         $key_sql = '';
         if ( $this->dcrypt->active ) {
@@ -118,25 +118,27 @@ class ModelAccountCustomer extends Model
             $data = $this->dcrypt->encrypt_data( $data, 'addresses' );
             $key_sql = ", key_id = '".(int)$data['key_id']."'";
         }
-        $this->db->query(
-            "INSERT INTO ".$this->db->table_name( "addresses" )." 
+        if (!$subscribe_only) {
+            $this->db->query(
+                "INSERT INTO ".$this->db->table_name("addresses")." 
              SET customer_id = '".(int)$customer_id."', 
-                firstname = '".$this->db->escape( $data['firstname'] )."', 
-                lastname = '".$this->db->escape( $data['lastname'] )."', 
-                company = '".$this->db->escape( $data['company'] )."', 
-                address_1 = '".$this->db->escape( $data['address_1'] )."', 
-                address_2 = '".$this->db->escape( $data['address_2'] )."', 
-                city = '".$this->db->escape( $data['city'] )."', 
-                postcode = '".$this->db->escape( $data['postcode'] )."', 
+                firstname = '".$this->db->escape($data['firstname'])."', 
+                lastname = '".$this->db->escape($data['lastname'])."', 
+                company = '".$this->db->escape($data['company'])."', 
+                address_1 = '".$this->db->escape($data['address_1'])."', 
+                address_2 = '".$this->db->escape($data['address_2'])."', 
+                city = '".$this->db->escape($data['city'])."', 
+                postcode = '".$this->db->escape($data['postcode'])."', 
                 country_id = '".(int)$data['country_id']."'".
-            $key_sql.",
+                $key_sql.",
                 zone_id = '".(int)$data['zone_id']."'"
-        );
+            );
 
-        $address_id = $this->db->getLastId();
-        $this->db->query( "UPDATE ".$this->db->table_name( "customers" )."
+            $address_id = $this->db->getLastId();
+            $this->db->query("UPDATE ".$this->db->table_name("customers")."
                             SET address_id = '".(int)$address_id."'
-                            WHERE customer_id = '".(int)$customer_id."'" );
+                            WHERE customer_id = '".(int)$customer_id."'");
+        }
 
         if ( ! $data['approved'] ) {
             $language = new ALanguage( $this->registry );
