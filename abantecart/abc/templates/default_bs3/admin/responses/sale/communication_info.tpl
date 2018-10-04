@@ -4,7 +4,7 @@
 </div>
 <div class="tab-content">
 	<div class="panel-body panel-body-nopadding">
-		<div class="row">
+		<div class="row" style="padding-left: 10px; padding-right: 10px; overflow: auto;>
 			<div class="col-md-6">
 				<dt><?php echo $message['subject_title']; ?></dt>
 				<dd><?php echo $message['subject'] ?></dd>
@@ -20,7 +20,7 @@
 		</div>
 		<div class="row" style="margin-top: 20px;">
 			<div class="col-md-12"><b><?php echo $message['body_title']; ?></b></div>
-			<div class="col-md-12"><?php echo $message['body'] ?></div>
+			<div class="col-md-12"><?php echo $message['body']; ?></div>
 		</div>
 
 		<div><?php echo $message['message']; ?></div>

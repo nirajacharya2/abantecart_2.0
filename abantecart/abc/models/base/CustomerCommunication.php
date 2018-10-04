@@ -73,7 +73,7 @@ class CustomerCommunication extends AModelBase
     public static function createCustomerCommunication(AMail $mail) {
             $communication = new CustomerCommunication();
             $communication->subject = $mail->getSubject();
-            $communication->body = $mail->getHtml() ? $mail->getHtml() : $mail->getText();
+            $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
             $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
             foreach ($customers as $customer) {
                 $customer_id = $customer->customer_id;
