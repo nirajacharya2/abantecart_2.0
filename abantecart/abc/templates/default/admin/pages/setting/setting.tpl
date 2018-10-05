@@ -156,7 +156,7 @@ jQuery(function () {
     $('#settingFrm_config_mail_protocol').change(mail_toggle);
 
     function mail_toggle() {
-        var field_list = {'mail':[], 'smtp':[] };
+        var field_list = {'mail':[], 'smtp':[], 'mailapi':[] };
         field_list.mail[0] = 'mail_parameter';
 
         field_list.smtp[0] = 'smtp_host';
@@ -165,12 +165,23 @@ jQuery(function () {
         field_list.smtp[3] = 'smtp_port';
         field_list.smtp[4] = 'smtp_timeout';
 
-        var show = $('#settingFrm_config_mail_protocol').val();
-        var hide = show == 'mail' ? 'smtp' : 'mail';
+        field_list.mailapi[0] = 'mail_extension';
 
-        for (f in field_list[hide]) {
-            $('#settingFrm_config_' + field_list[hide][f]+'_fld').fadeOut();
-        }
+        var show = $('#settingFrm_config_mail_protocol').val();
+        var hide =[];
+
+        switch (show) {
+	        case 'mail': hide = ['smtp', 'mailapi']; break;
+	        case 'smtp': hide = ['mail', 'mailapi']; break;
+	        case 'mailapi': hide = ['mail', 'smtp']; break;
+		}
+
+		hide.forEach(function(item, index, array) {
+			for (f in field_list[item]) {
+				$('#settingFrm_config_' + field_list[item][f]+'_fld').fadeOut();
+			}
+		});
+
         for (f in field_list[show]) {
             $('#settingFrm_config_' + field_list[show][f]+'_fld').fadeIn();
         }
