@@ -193,4 +193,41 @@ class ExtensionCampaignMonitor extends Extension
         CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
     }
 
+    public function onControllerPagesAccountEdit_InitData() {
+        $that = $this->baseObject;
+
+        if (!$that->request->is_POST()) {
+            return;
+        }
+        $request = $that->request->post;
+        $customer_id = (int)$that->customer->getId();
+        if (!$customer_id) {
+            return;
+        }
+        $currentCustomer = Customer::find($customer_id);
+        if (!$currentCustomer) {
+            return;
+        }
+        $currentCustomer = $currentCustomer->toArray();
+        $newCustomerData = $currentCustomer;
+
+        if (!empty(trim($request['firstname']))) {
+            $newCustomerData['firstname'] = $request['firstname'];
+        }
+        if (!empty(trim($request['lastname']))) {
+            $newCustomerData['lastname'] = $request['lastname'];
+        }
+        if (!empty(trim($request['email']))) {
+            $newCustomerData['email'] = $request['email'];
+        }
+        if (!empty(trim($request['telephone']))) {
+            $newCustomerData['telephone'] = $request['telephone'];
+        }
+        if (!empty(trim($request['fax']))) {
+            $newCustomerData['fax'] = $request['fax'];
+        }
+
+        CampaignMonitor::changeSubscriber($this->listId, $this->auth, $currentCustomer, $newCustomerData);
+    }
+
 }

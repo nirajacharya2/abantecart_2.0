@@ -140,6 +140,7 @@ class CampaignMonitor
             //Update only enabled newsletter
             $result = $wrap->update($oldCustomer['email'], $customerData);
         }
+
         if (!$result) {
             return false;
         }
