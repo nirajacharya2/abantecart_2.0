@@ -91,6 +91,8 @@ class ACart  extends ALibBase
      */
     protected $promotion;
 
+    public $conciergeMode = false;
+
     /**
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
@@ -180,7 +182,6 @@ class ACart  extends ALibBase
             }
 
             $product_result = $this->buildProductDetails($product_id, $quantity, $options);
-            //var_Dump($data,$product_id, $quantity, $options);
             if (count($product_result)) {
                 $product_data[$key] = $product_result;
                 $product_data[$key]['key'] = $key;
@@ -248,6 +249,11 @@ class ACart  extends ALibBase
          * @var  \abc\models\storefront\ModelCatalogProduct $sf_product_mdl
          */
         $sf_product_mdl = $this->load->model('catalog/product', 'storefront');
+        //remove restrictions of model in concierge mode
+        if($this->conciergeMode) {
+            $sf_product_mdl->filter = [];
+        }
+
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
         $product_query = $sf_product_mdl->getProductDataForCart($product_id);

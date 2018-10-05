@@ -35,6 +35,8 @@ class CheckOutAdmin extends CheckoutBase
     public function __construct(Registry $registry, array $data)
     {
         parent::__construct($registry, $data);
+        //allow to add disabled products and
+        $this->conciergeMode = true;
     }
 
 }
