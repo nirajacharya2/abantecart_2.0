@@ -18,7 +18,7 @@
 				<dd><?php echo $message['sent_to_address'] ?></dd>
 			</div>
 		</div>
-		<div class="row" style="margin-top: 20px">
+		<div class="row" style="margin-top: 20px; margin-left: 0px; margin-right: 0px; overflow: auto;">
 			<div class="col-md-12"><b><?php echo $message['body_title']; ?></b></div>
 			<div class="col-md-12"><?php echo $message['body']; ?></div>
 		</div>
