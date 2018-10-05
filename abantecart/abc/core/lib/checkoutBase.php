@@ -72,6 +72,10 @@ class CheckoutBase extends ALibBase
      * @var array
      */
     public $errors = [];
+    /**
+     * @var bool mode that allows to adds and checkout disabled products
+     */
+    protected $conciergeMode = false;
 
     /**
      * OrderProcessing constructor.
@@ -111,6 +115,13 @@ class CheckoutBase extends ALibBase
 
     }
 
+    /**
+     * @return bool
+     */
+    public function getConciergeMode()
+    {
+        return $this->conciergeMode;
+    }
     /**
      * @return array
      */

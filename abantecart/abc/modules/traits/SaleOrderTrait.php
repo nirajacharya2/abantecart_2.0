@@ -52,8 +52,8 @@ trait SaleOrderTrait
         $customer_data['coupon'] = $order_info['coupon'];
 
         $checkoutData['cart'] = ABC::getObjectByAlias('ACart', [$this->registry, $customer_data]);
-
         $checkout =  new CheckOutAdmin($this->registry,$checkoutData);
+        $checkoutData['cart']->conciergeMode = $checkout->getConciergeMode();
 
         //put them into registry for access from extensions models
         $this->registry->set('cart', $checkout->getCart());
