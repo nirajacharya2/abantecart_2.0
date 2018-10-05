@@ -24,12 +24,12 @@ namespace abc;
 use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\ALanguage;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
+use H;
 use Illuminate\Events\Dispatcher;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
@@ -262,7 +262,7 @@ registerClass(
 );
 
 if (php_sapi_name() == 'cli') {
-    AHelperUtils::setDBUserVars();
+    H::setDBUserVars();
 }
 
 // Cache
@@ -389,13 +389,13 @@ if (ABC::env('IS_ADMIN') === true) {
     $config->set('admin_template', $template);
     // Load language
     $class_name = ABC::getFullClassName('ALanguageManager');
-    $lang_obj = AHelperUtils::getInstance($class_name, [$registry], "\abc\core\lib\ALanguageManager", [$registry]);
+    $lang_obj = H::getInstance($class_name, [$registry], "\abc\core\lib\ALanguageManager", [$registry]);
 } else {
     $config->set('original_config_storefront_template', $config->get('config_storefront_template'));
     $config->set('config_storefront_template', $template);
     // Load language
     $class_name = ABC::getFullClassName('ALanguage');
-    $lang_obj = AHelperUtils::getInstance($class_name, [$registry], "\abc\core\\engine\ALanguage", [$registry]);
+    $lang_obj = H::getInstance($class_name, [$registry], "\abc\core\\engine\ALanguage", [$registry]);
 }
 
 // Create Global Layout Instance
@@ -424,16 +424,17 @@ registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core
 $im_alias = ABC::env('IS_ADMIN') === true ? 'AIMManager' : 'AIM';
 registerClass($registry, 'im', $im_alias, [], "\abc\core\lib\\".$im_alias, []);
 
+// Weight
+registerClass($registry, 'weight', 'AWeight', [$registry], '\abc\core\lib\AWeight', [$registry]);
+// Length
+registerClass($registry, 'length', 'ALength', [$registry], '\abc\core\lib\ALength', [$registry]);
+
 if (!ABC::env('IS_ADMIN')) { // storefront load
     // Customer
     registerClass($registry, 'customer', 'ACustomer', [$registry], '\abc\core\lib\ACustomer', [$registry]);
-    AHelperUtils::setDBUserVars();
+    H::setDBUserVars();
     // Tax
     registerClass($registry, 'tax', 'ATax', [$registry], '\abc\core\lib\ATax', [$registry]);
-    // Weight
-    registerClass($registry, 'weight', 'AWeight', [$registry], '\abc\core\lib\AWeight', [$registry]);
-    // Length
-    registerClass($registry, 'length', 'ALength', [$registry], '\abc\core\lib\ALength', [$registry]);
     // Cart
     registerClass($registry, 'cart', 'ACart', [$registry], '\abc\core\lib\ACart', [$registry]);
     $checkout_data = [
@@ -458,7 +459,7 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
 } else {
     // User
     registerClass($registry, 'user', 'AUser', [$registry], '\abc\core\lib\AUser', [$registry]);
-    AHelperUtils::setDBUserVars();
+    H::setDBUserVars();
     // checkout
     registerClass($registry, 'checkout', 'CheckoutAdmin', [$registry,[]], '\abc\core\lib\Checkout', [$registry,[]]);
 }// end admin load
@@ -494,6 +495,6 @@ if(is_object($evd)) {
 function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
 {
     $class_name = ABC::getFullClassName($alias);
-    $instance = AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments);
+    $instance = H::getInstance($class_name, $arguments, $default_class, $default_arguments);
     $registry->set($item_name, $instance);
 }

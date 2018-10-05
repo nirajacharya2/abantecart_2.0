@@ -358,6 +358,8 @@ class ModelCheckoutOrder extends Model
      */
     public function confirm($order_id, $order_status_id, $comment = '')
     {
+        //trigger an event
+        H::event('abc\models\storefront\order@beforeConfirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);
         $this->extensions->hk_confirm($this, $order_id, $order_status_id, $comment);
         //trigger an event
         H::event('abc\models\storefront\order@confirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);

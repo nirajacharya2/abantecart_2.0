@@ -236,6 +236,8 @@ class ACart  extends ALibBase
      * @param int $quantity
      * @param array $options
      *
+     * @param null $custom_price
+     *
      * @return array
      * @throws AException
      */

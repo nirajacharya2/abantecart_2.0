@@ -1780,13 +1780,19 @@ class ControllerPagesSaleOrder extends AController
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);
                 $order_id = $checkout->getOrder()->saveOrder();
+                $this->data['order_id'] = $order_id;
 
                 if (!$order_id) {
                     throw new LibException(['cannot to save newly created order']);
                 }
                 $checkout->setOrderId((int)$order_id);
+
+                $this->extensions->hk_ProcessData($this, 'before_confirm_order');
+
                 $checkout->confirmOrder(['order_id' => $order_id]);
-                $this->extensions->hk_ProcessData($this, 'create_order');
+
+                $this->extensions->hk_ProcessData($this, 'after_confirm_order');
+
                 unset($this->session->data['admin_order']);
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
@@ -2002,9 +2008,7 @@ class ControllerPagesSaleOrder extends AController
                     '&currency_code='.$currency->getCode()
                 ),
                 'placeholder'   => $this->language->get('text_select_from_lookup'),
-                'option_attr'   => ['price'],
-                //TODO: need to add config for this
-                'filter_params' => ''//'enabled_only',
+                'option_attr'   => ['price']
             ]
         );
 
