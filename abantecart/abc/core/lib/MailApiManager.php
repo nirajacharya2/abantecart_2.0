@@ -47,7 +47,9 @@ class MailApiManager
 
             try {
                 $driver = ABC::getObjectByAlias($classname);
-                $driver_list[$driver->getProtocol()][$driver_txt_id] = $driver->getName();
+                if ($driver) {
+                    $driver_list[$driver->getProtocol()][$driver_txt_id] = $driver->getName();
+                }
             } catch (\Cake\Database\Exception $e){}
 
         }
