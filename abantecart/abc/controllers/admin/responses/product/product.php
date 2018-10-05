@@ -1538,6 +1538,7 @@ class ControllerResponsesProductProduct extends AController
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
         $order_product_id = (int)$this->request->get['order_product_id'];
+        $editable_price = (int)$this->request->get['editable_price'];
         $order_id = (int)$this->request->get['order_id'];
         $order_info = $this->model_sale_order->getOrder($order_id);
 
@@ -1805,8 +1806,9 @@ class ControllerResponsesProductProduct extends AController
             'type'  => 'input',
             'name'  => 'product[0][price]',
             'value' => $preset_values['price'],
-            'attr'  => ' readonly',
+            'attr'  => ($editable_price ? '' : 'readonly')
         ]);
+
         if (!$options && $product_info['subtract']) {
             if ($product_info['quantity']) {
                 $this->data['column_quantity'] = $this->language->get('column_quantity')
@@ -1824,6 +1826,7 @@ class ControllerResponsesProductProduct extends AController
             'value' => $preset_values['quantity'],
             'attr'  => ' size="4"',
         ]);
+
         $this->data['form']['fields']['total'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'product[0][total]',
@@ -1836,6 +1839,7 @@ class ControllerResponsesProductProduct extends AController
             'name'  => 'product_id',
             'value' => $product_id,
         ]);
+
         $this->data['form']['fields']['order_product_id'] = $form->getFieldHtml([
             'type'  => 'hidden',
             'name'  => 'order_product_id',
@@ -1853,12 +1857,17 @@ class ControllerResponsesProductProduct extends AController
                                         'http://',
                                         'https://',
                                         $store_info['config_url']
-                ).'index.php?rt=r/product/product/calculateTotal';
+                                        )
+                                        .'index.php?rt=r/product/product/calculateTotal';
         } else {
             $total_calc_url = $store_info['config_url'].'index.php?rt=r/product/product/calculateTotal';
         }
 
         $this->data['total_calc_url'] = $total_calc_url;
+
+        $this->data['currency'] = $this->currency->getCurrency();
+        $this->data['decimal_point'] = $this->language->get('decimal_point');
+        $this->data['editable_price'] = $editable_price;
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

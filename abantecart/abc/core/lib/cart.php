@@ -181,7 +181,11 @@ class ACart  extends ALibBase
                 $options = [];
             }
 
-            $product_result = $this->buildProductDetails($product_id, $quantity, $options);
+            $custom_price = ($this->conciergeMode && isset($data['custom_price']))
+                            ? $data['custom_price']
+                            : null;
+
+            $product_result = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
             if (count($product_result)) {
                 $product_data[$key] = $product_result;
                 $product_data[$key]['key'] = $key;
@@ -235,7 +239,7 @@ class ACart  extends ALibBase
      * @return array
      * @throws AException
      */
-    public function buildProductDetails($product_id, $quantity = 0, $options = [])
+    public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price=null)
     {
 
         if (!H::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
@@ -250,8 +254,13 @@ class ACart  extends ALibBase
          */
         $sf_product_mdl = $this->load->model('catalog/product', 'storefront');
         //remove restrictions of model in concierge mode
-        if($this->conciergeMode) {
+        if ($this->conciergeMode) {
             $sf_product_mdl->filter = [];
+            if ($custom_price !== null) {
+                $custom_price = (float)$custom_price;
+            }
+        } else {
+            $custom_price = null;
         }
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
@@ -295,16 +304,20 @@ class ACart  extends ALibBase
                         $option_value_queries[$val_id] = $sf_product_mdl->getProductOptionValue($product_id, $val_id);
                     }
                 } else {
-                    $option_value_query =
-                        $sf_product_mdl->getProductOptionValue($product_id, (int)$product_option_value_id);
+                    $option_value_query = $sf_product_mdl->getProductOptionValue(
+                                                                            $product_id,
+                                                                            (int)$product_option_value_id
+                    );
                 }
             }
 
             if ($option_value_query) {
                 //if group option load price from parent value
                 if ($option_value_query['group_id'] && !in_array($option_value_query['group_id'], $groups)) {
-                    $group_value_query =
-                        $sf_product_mdl->getProductOptionValue($product_id, $option_value_query['group_id']);
+                    $group_value_query = $sf_product_mdl->getProductOptionValue(
+                                                                            $product_id,
+                                                                            $option_value_query['group_id']
+                    );
                     $option_value_query['prefix'] = $group_value_query['prefix'];
                     $option_value_query['price'] = $group_value_query['price'];
                     $groups[] = $option_value_query['group_id'];
@@ -317,10 +330,16 @@ class ACart  extends ALibBase
                     'settings'                => $option_query['settings'],
                     'value'                   => $option_value_query['name'],
                     'prefix'                  => $option_value_query['prefix'],
-                    'price'                   => $option_value_query['price'],
+                    'price'                   => (
+                    $custom_price !== null
+                        ? $custom_price
+                        : $option_value_query['price']
+                    ),
                     'sku'                     => $option_value_query['sku'],
                     'inventory_quantity'      => (
-                        $option_value_query['subtract'] ? (int)$option_value_query['quantity'] : 1000000
+                    $option_value_query['subtract']
+                        ? (int)$option_value_query['quantity']
+                        : 1000000
                     ),
                     'weight'                  => $option_value_query['weight'],
                     'weight_type'             => $option_value_query['weight_type'],
@@ -343,7 +362,11 @@ class ACart  extends ALibBase
                             'name'                    => $option_query['name'],
                             'value'                   => $item['name'],
                             'prefix'                  => $item['prefix'],
-                            'price'                   => $item['price'],
+                            'price'                   => (
+                            $custom_price !== null
+                                ? $custom_price
+                                : $item['price']
+                            ),
                             'sku'                     => $item['sku'],
                             'inventory_quantity'      => ($item['subtract'] ? (int)$item['quantity'] : 1000000),
                             'weight'                  => $item['weight'],
@@ -360,44 +383,49 @@ class ACart  extends ALibBase
             }
         } // end of options build
 
-        //needed for promotion
-        $discount_quantity = 0; // this is used to calculate total QTY of 1 product in the cart
+        if($custom_price === null){
+            //needed for promotion
+            $discount_quantity = 0; // this is used to calculate total QTY of 1 product in the cart
 
-        // check is product is in cart and calculate quantity to define item price with product discount
-        foreach ($this->cust_data['cart'] as $k => $v) {
-            $array2 = explode(':', $k);
-            if ($array2[0] == $product_id) {
-                $discount_quantity += $v['qty'];
+            // check is product is in cart and calculate quantity to define item price with product discount
+            foreach ($this->cust_data['cart'] as $k => $v) {
+                $array2 = explode(':', $k);
+                if ($array2[0] == $product_id) {
+                    $discount_quantity += $v['qty'];
+                }
             }
-        }
-        if (!$discount_quantity) {
-            $discount_quantity = $quantity;
-        }
-
-        //Apply group and quantity discount first and if non, reply product discount
-        $price = $this->promotion->getProductQtyDiscount($product_id, $discount_quantity);
-        if (!$price) {
-            $price = $this->promotion->getProductSpecial($product_id);
-        }
-        //Still no special price, use regular price
-        if (!$price) {
-            $price = $product_query['price'];
-        }
-
-        //Need to round price after discounts and specials
-        //round base currency price to 2 decimal place
-        $decimal_place = 2;
-        $price = round($price, $decimal_place);
-
-        foreach ($option_data as $item) {
-            if ($item['prefix'] == '%') {
-                $option_price += $price * $item['price'] / 100;
-            } else {
-                $option_price += $item['price'];
+            if (!$discount_quantity) {
+                $discount_quantity = $quantity;
             }
+
+            //Apply group and quantity discount first and if non, reply product discount
+            $price = $this->promotion->getProductQtyDiscount($product_id, $discount_quantity);
+            if (!$price) {
+                $price = $this->promotion->getProductSpecial($product_id);
+            }
+            //Still no special price, use regular price
+            if (!$price) {
+                $price = $product_query['price'];
+            }
+
+            //Need to round price after discounts and specials
+            //round base currency price to 2 decimal place
+            $decimal_place = 2;
+            $price = round($price, $decimal_place);
+
+            foreach ($option_data as $item) {
+                if ($item['prefix'] == '%') {
+                    $option_price += $price * $item['price'] / 100;
+                } else {
+                    $option_price += $item['price'];
+                }
+            }
+            //round option price to currency decimal_place setting (most common 2, but still...)
+            $option_price = round($option_price, $decimal_place);
+            $final_price = $price + $option_price;
+        }else{
+            $final_price = $custom_price;
         }
-        //round option price to currency decimal_place setting (most common 2, but still...)
-        $option_price = round($option_price, $decimal_place);
 
         // product downloads
         $download_data = $this->download->getProductOrderDownloads($product_id);
@@ -422,8 +450,8 @@ class ACart  extends ALibBase
             'minimum'            => $product_query['minimum'],
             'maximum'            => $product_query['maximum'],
             'stock'              => $stock,
-            'price'              => ($price + $option_price),
-            'total'              => ($price + $option_price) * $quantity,
+            'price'              => $final_price,
+            'total'              => $final_price * $quantity,
             'tax_class_id'       => $product_query['tax_class_id'],
             'weight'             => $product_query['weight'],
             'weight_class'       => $product_query['weight_class'],
@@ -444,9 +472,11 @@ class ACart  extends ALibBase
      * @param int $qty
      * @param array $options
      *
+     * @param null $custom_price
+     *
      * @throws AException
      */
-    public function add($product_id, $qty = 1, $options = [])
+    public function add($product_id, $qty = 1, $options = [], $custom_price = null)
     {
         $product_id = (int)$product_id;
         if (!$options) {
@@ -463,6 +493,10 @@ class ACart  extends ALibBase
             }
             //TODO Add validation for correct options for the product and add error return or more stable behaviour
             $this->cust_data['cart'][$key]['options'] = $options;
+            //allow custom price in conciergeMode
+            if($this->conciergeMode && $custom_price !== null) {
+                $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+            }
         }
 
         //if logged in customer, save cart content

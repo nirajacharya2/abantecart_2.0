@@ -2011,6 +2011,7 @@ class ControllerPagesSaleOrder extends AController
         $this->data['add_product_url'] = $this->html->getSecureURL(
             'r/product/product/orderProductForm',
             '&callback_rt=sale/order/addProduct'
+            .'&editable_price=1'
         );
 
         //payment address
@@ -2109,7 +2110,8 @@ class ControllerPagesSaleOrder extends AController
         $checkout->getCart()->add(
             $post['product_id'],
             $post['product'][0]['quantity'],
-            $post['product'][0]['option']
+            $post['product'][0]['option'],
+            $post['product'][0]['price']
         );
         $this->session->data['admin_order']['cart'] = $checkout->getCart()->getCartData();
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

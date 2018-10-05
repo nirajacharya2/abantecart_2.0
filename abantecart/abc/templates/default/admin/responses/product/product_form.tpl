@@ -64,10 +64,29 @@
 </div>
 
 <script type="application/javascript">
+	var decimal_point = '<?php echo $decimal_point; ?>';
+	var decimal_place = '<?php echo $currency['decimal_place']; ?>';
+	var thousand_point = '<?php echo $thousand_point; ?>';
+
+	var currency_symbol = '<?php echo $currency['symbol_left'] ?? $currency['symbol_right']; ?>';
+	var currency_location = '<?php echo $currency['symbol_left'] ? 'left':'right'; ?>';
+
 	$('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea').on('change', display_total_price);
 	$('#orderProductFrm_product0quantity').on('keyup', display_total_price);
 
+	function formatMoney(num, c, d, t) {
+		c = isNaN(c = Math.abs(c)) ? 2 : c,
+				d = d == undefined ? "." : d,
+				t = t == undefined ? "," : t,
+				s = num < 0 ? "-" : "",
+				i = parseInt(num = Math.abs(+num || 0).toFixed(c)) + "",
+				j = (j = i.length) > 3 ? j % 3 : 0;
+		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(num - i).toFixed(c).slice(2) : "");
+	}
+
 	function display_total_price() {
+		<?php echo $editable_price ? 'return recalculate();':'' ?>
+
 		var data = $("#orderProductFrm").serialize();
 		data = data.replace(new RegExp("product%5B0%5D%5Boption%5D",'g'),'option'); <?php // data format for storefront response-controller ?>
 		data = data.replace(new RegExp("product%5B0%5D%5Bquantity%5D",'g'),'quantity'); <?php // data format for storefront response-controller ?>
@@ -85,6 +104,39 @@
 		});
 
 	}
-	display_total_price();
 
+	function get_currency_str(num) {
+		var str;
+		if (currency_location == 'left') {
+			str = currency_symbol + formatMoney(num, decimal_place, decimal_point, thousand_point);
+		} else {
+			str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
+		}
+		return str;
+	}
+
+	function get_currency_num(str) {
+		str = str == undefined || str.length == 0 ? '0' : str;
+		var final_number = str.replace(thousand_point, '');
+		final_number = final_number.replace(currency_symbol, '');
+		final_number = final_number.replace(decimal_point, '.');
+		final_number = parseFloat(final_number.replace(/[^0-9\-\.]/g, ''));
+
+		return final_number;
+	}
+
+<?php if($editable_price){ ?>
+	function recalculate() {
+		var qty, price, total;
+		//update products
+		qty = $('#orderProductFrm_product0quantity').val();
+		price = get_currency_num($('#orderProductFrm_product0price').val());
+		total = qty * price;
+		//update last - total
+		$('#orderProductFrm_product0total').val(get_currency_str(total));
+	}
+	$(document).on('keyup',$('#orderProductFrm_product0price'), recalculate );
+<?php } ?>
+
+	display_total_price();
 </script>
