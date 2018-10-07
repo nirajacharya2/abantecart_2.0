@@ -381,7 +381,7 @@ class ModelToolImportProcess extends Model
 
         if($status){
             //call event
-            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data)]);
+            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
         }
 
         return $status;
@@ -466,7 +466,7 @@ class ModelToolImportProcess extends Model
 
         if($status){
             //call event
-            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $category_id, $category_data)]);
+            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $category_id, $category_data, $record)]);
         }
 
         return $status;
@@ -511,7 +511,7 @@ class ModelToolImportProcess extends Model
 
         if($status){
              //call event
-             H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer)]);
+             H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]);
         }
         return $status;
     }
