@@ -168,6 +168,32 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
         [$registry],
         '\abc\core\lib\ALanguageManager',
         [$registry]);
+
+    //override urls
+    $url = $registry->get('config')->get('config_url');
+    $parse_url = parse_url($url);
+
+    ABC::env('HTTP_DIR_NAME', rtrim(dirname($parse_url['path']), '/.\\'), true);
+    // Admin HTTP
+    ABC::env('AUTO_SERVER', '//'.$parse_url['host'].$parse_url['path'], true);
+    ABC::env('HTTP_SERVER', 'http:'.ABC::env('AUTO_SERVER'), true);
+    ABC::env('HTTP_CATALOG', ABC::env('HTTP_SERVER'), true);
+    ABC::env('HTTP_EXT', ABC::env('HTTP_SERVER').'extensions/', true);
+    ABC::env('HTTP_IMAGE', ABC::env('HTTP_SERVER').'images/', true);
+    ABC::env('HTTP_DIR_RESOURCES', ABC::env('HTTP_SERVER').'resources/', true);
+    //we use Protocol-relative URLs here
+    ABC::env('HTTPS_IMAGE', ABC::env('AUTO_SERVER').'images/', true);
+    ABC::env('HTTPS_DIR_RESOURCES', ABC::env('AUTO_SERVER').'resources/', true);
+    //Admin HTTPS
+    if ($parse_url['scheme'] == 'https') {
+        ABC::env('HTTPS_SERVER', 'https:'.ABC::env('AUTO_SERVER'), true);
+        ABC::env('HTTPS_CATALOG', ABC::env('HTTPS_SERVER'), true);
+        ABC::env('HTTPS_EXT', ABC::env('HTTPS_SERVER').'extensions/', true);
+    } else {
+        ABC::env('HTTPS_SERVER', ABC::env('HTTP_SERVER'), true);
+        ABC::env('HTTPS_CATALOG', ABC::env('HTTP_CATALOG'), true);
+        ABC::env('HTTPS_EXT', ABC::env('HTTP_EXT'), true);
+    }
 }
 
 registerClass($registry, 'im', 'AIMManager', [], "\abc\core\lib\AIMManager", []);
