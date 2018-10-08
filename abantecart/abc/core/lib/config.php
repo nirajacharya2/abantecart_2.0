@@ -208,8 +208,10 @@ final class AConfig
         */
         $config_url = preg_replace("(^https?://)", "", $this->cnfg['config_url']);
         $config_url = preg_replace("(^://)", "", $config_url);
-        if (!(is_int(strpos($config_url, $url)))
-            && !(is_int(strpos($url, $config_url)))) {
+        if ($url
+            && !(is_int(strpos($config_url, $url)))
+            && !(is_int(strpos($url, $config_url)))
+        ) {
             // if requested url not a default store URL - do check other stores.
             $cache_key = 'settings.store.'.md5('http://'.$url);
             $store_settings = $cache->pull($cache_key);
