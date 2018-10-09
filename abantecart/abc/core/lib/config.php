@@ -21,22 +21,28 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 final class AConfig
 {
     public $data;
-    private $cnfg = array();
+    public $cnfg = [];
     /**
      * @var Registry
      */
     private $registry;
-    public $groups = array('details', 'general', 'checkout', 'appearance', 'mail', 'im', 'api', 'system');
+    public $groups = [
+        'details',
+        'general',
+        'checkout',
+        'appearance',
+        'mail',
+        'im',
+        'api',
+        'system',
+    ];
 
     /**
      * AConfig constructor.
@@ -104,7 +110,7 @@ final class AConfig
         $file = ABC::env('DIR_CONFIG').$filename.'.php';
 
         if (file_exists($file)) {
-            $cfg = array();
+            $cfg = [];
 
             /** @noinspection PhpIncludeInspection */
             require($file);
@@ -129,11 +135,14 @@ final class AConfig
         //detect URL for the store
         if ($store_url) {
             $url = $store_url;
-        } else {
-            $url = str_replace('www.', '', $_SERVER['HTTP_HOST']).AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+        } elseif ($_SERVER['HTTP_HOST']) {
+            $url = str_replace('www.', '', $_SERVER['HTTP_HOST']).H::get_url_path($_SERVER['PHP_SELF']);
             if (ABC::env('INSTALL')) {
                 $url = str_replace('install/', '', $url);
             }
+        } else {
+            //if cli-mode
+            $url = '';
         }
 
         //enable cache storage based on configuration
@@ -199,8 +208,10 @@ final class AConfig
         */
         $config_url = preg_replace("(^https?://)", "", $this->cnfg['config_url']);
         $config_url = preg_replace("(^://)", "", $config_url);
-        if (!(is_int(strpos($config_url, $url)))
-            && !(is_int(strpos($url, $config_url)))) {
+        if ($url
+            && !(is_int(strpos($config_url, $url)))
+            && !(is_int(strpos($url, $config_url)))
+        ) {
             // if requested url not a default store URL - do check other stores.
             $cache_key = 'settings.store.'.md5('http://'.$url);
             $store_settings = $cache->pull($cache_key);
@@ -238,11 +249,10 @@ final class AConfig
 
                 $this->cnfg['config_store_id'] = $store_settings[0]['store_id'];
                 $this->cnfg['current_store_id'] = $this->cnfg['config_store_id'];
-            } else {
-                if (php_sapi_name() != 'cli'
-                    && ($this->cnfg['config_system_check'] == 0
+            } elseif (php_sapi_name() != 'cli') {
+                if ($this->cnfg['config_system_check'] == 0
                         || ($this->cnfg['config_system_check'] == 1 && ABC::env('IS_ADMIN') === true)
-                        || ($this->cnfg['config_system_check'] == 2 && ABC::env('IS_ADMIN') !== true))
+                    || ($this->cnfg['config_system_check'] == 2 && ABC::env('IS_ADMIN') !== true)
                 ) {
                     $warning = new AWarning(
                         'Warning: Accessing store with non-configured or unknown domain ( '.$url.' ).'."\n"
@@ -252,13 +262,12 @@ final class AConfig
                     $warning->toLog();
                 }
                 //set config url to current domain
-                $this->cnfg['config_url'] =
-                    'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+                $this->cnfg['config_url'] = 'http://'.ABC::env('REAL_HOST')
+                    .H::get_url_path($_SERVER['PHP_SELF']);
             }
 
             if (!$this->cnfg['config_url']) {
-                $this->cnfg['config_url'] =
-                    'http://'.ABC::env('REAL_HOST').AHelperUtils::get_url_path($_SERVER['PHP_SELF']);
+                $this->cnfg['config_url'] = 'http://'.ABC::env('REAL_HOST').H::get_url_path($_SERVER['PHP_SELF']);
             }
         }
 
@@ -267,10 +276,10 @@ final class AConfig
             //Check if admin has specific store in session or selected
             $session = $this->registry->get('session');
             $store_id = $this->registry->get('request')->get['store_id'];
-            if (AHelperUtils::has_value($store_id)) {
+            if (H::has_value($store_id)) {
                 $this->cnfg['current_store_id'] = (int)$store_id;
             } else {
-                if (AHelperUtils::has_value($session->data['current_store_id'])) {
+                if (H::has_value($session->data['current_store_id'])) {
                     $this->cnfg['current_store_id'] = $session->data['current_store_id'];
                 } elseif (isset($session->data['config_store_id'])) {
                     //nothing to do
@@ -299,14 +308,17 @@ final class AConfig
             // all extensions settings of store
             $sql = "SELECT se.*, e.type AS extension_type, e.key AS extension_txt_id
                     FROM ".$db->table_name('settings')." se
-                    LEFT JOIN ".$db->table_name('extensions')." e ON se.`group` = e.`key`
+                    LEFT JOIN ".$db->table_name('extensions')." e 
+                        ON se.`group` = e.`key`
                     WHERE se.store_id='".(int)$this->cnfg['config_store_id']."' AND e.extension_id IS NOT NULL
                     ORDER BY se.store_id ASC, se.group ASC";
             $query = $db->query($sql);
             foreach ($query->rows as $row) {
                 //skip settings for non-active template except status (needed for extensions list in admin)
-                if ($row['extension_type'] == 'template' && $tmpl_id != $row['group']
-                    && $row['key'] != $row['extension_txt_id'].'_status') {
+                if ($row['extension_type'] == 'template'
+                    && $tmpl_id != $row['group']
+                    && $row['key'] != $row['extension_txt_id'].'_status'
+                ) {
                     continue;
                 }
                 $settings[] = $row;
