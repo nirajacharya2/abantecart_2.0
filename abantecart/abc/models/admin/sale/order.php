@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,6 @@
 namespace abc\models\admin;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
@@ -29,10 +28,6 @@ use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use H;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ModelSaleOrder
@@ -47,6 +42,7 @@ class ModelSaleOrder extends Model
      * @param array $data
      *
      * @return int
+     * @throws \abc\core\lib\AException
      */
     public function addOrder($data)
     {
@@ -93,7 +89,7 @@ class ModelSaleOrder extends Model
                                 language_id = '".(int)$data['language_id']."',
                                 order_status_id = '".(int)$data['order_status_id']."',
                                 ip = '".$this->db->escape('0.0.0.0')."',
-                                total = '".$this->db->escape(AHelperUtils::preformatFloat($data['total'],
+                                total = '".$this->db->escape(H::preformatFloat($data['total'],
                 $this->language->get('decimal_point')))."'".$key_sql.",
                                 date_added = NOW(),
                                 date_modified = NOW()"
@@ -104,22 +100,26 @@ class ModelSaleOrder extends Model
         if (isset($data['product'])) {
             foreach ($data['product'] as $product) {
                 if ($product['product_id']) {
-                    $product_query = $this->db->query("SELECT *, p.product_id
-                                                        FROM ".$this->db->table_name("products")." p
-                                                        LEFT JOIN ".$this->db->table_name("product_descriptions")." pd ON (p.product_id = pd.product_id)
-                                                        WHERE p.product_id='".(int)$product['product_id']."'");
+                    $product_query = $this->db->query(
+                        "SELECT *, p.product_id
+                        FROM ".$this->db->table_name("products")." p
+                        LEFT JOIN ".$this->db->table_name("product_descriptions")." pd 
+                            ON (p.product_id = pd.product_id)
+                        WHERE p.product_id='".(int)$product['product_id']."'"
+                    );
 
-                    $this->db->query("INSERT INTO ".$this->db->table_name("order_products")."
-                                    SET order_id = '".(int)$order_id."',
-                                        product_id = '".(int)$product['product_id']."',
-                                        NAME = '".$this->db->escape($product_query->row['name'])."',
-                                        model = '".$this->db->escape($product_query->row['model'])."',
-                                        sku = '".$this->db->escape($product_query->row['sku'])."',
-                                        price = '".$this->db->escape(AHelperUtils::preformatFloat($product['price'],
-                            $this->language->get('decimal_point')))."',
-                                        total = '".$this->db->escape(AHelperUtils::preformatFloat($product['total'],
-                            $this->language->get('decimal_point')))."',
-                                        quantity = '".$this->db->escape($product['quantity'])."'");
+                    $this->db->query(
+                        "INSERT INTO ".$this->db->table_name("order_products")."
+                        SET order_id = '".(int)$order_id."',
+                            product_id = '".(int)$product['product_id']."',
+                            NAME = '".$this->db->escape($product_query->row['name'])."',
+                            model = '".$this->db->escape($product_query->row['model'])."',
+                            sku = '".$this->db->escape($product_query->row['sku'])."',
+                            price = '".$this->db->escape(
+                                H::preformatFloat($product['price'], $this->language->get('decimal_point')))."',
+                            total = '".$this->db->escape(
+                                H::preformatFloat($product['total'],$this->language->get('decimal_point')))."',
+                            quantity = '".$this->db->escape($product['quantity'])."'");
                 }
             }
         }
@@ -128,17 +128,18 @@ class ModelSaleOrder extends Model
     }
 
     /**
-     * @param int   $order_id
+     * @param int $order_id
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
     public function addOrderTotal($order_id, $data)
     {
-        if ( ! AHelperUtils::has_value($order_id)) {
+        if ( ! H::has_value($order_id)) {
             return null;
         }
-        $value = AHelperUtils::preformatFloat($data['text'], $this->language->get('decimal_point'));
+        $value = H::preformatFloat($data['text'], $this->language->get('decimal_point'));
 
         $this->db->query("INSERT INTO ".$this->db->table_name("order_totals")."
                         SET `order_id` = '".(int)$order_id."',
@@ -158,26 +159,31 @@ class ModelSaleOrder extends Model
      * @param int $order_total_id
      *
      * @return int|null
+     * @throws \Exception
      */
     public function deleteOrderTotal($order_id, $order_total_id)
     {
-        if ( ! AHelperUtils::has_value($order_id) && ! AHelperUtils::has_value($order_total_id)) {
+        if ( ! H::has_value($order_id) && ! H::has_value($order_total_id)) {
             return null;
         }
 
-        $this->db->query("DELETE FROM ".$this->db->table_name("order_totals")."
-                              WHERE order_id = '".(int)$order_id."' AND order_total_id = '".(int)$order_total_id."'");
-
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("order_totals")."
+            WHERE order_id = '".(int)$order_id."' 
+                AND order_total_id = '".(int)$order_total_id."'"
+        );
         return true;
     }
 
     /**
-     * @param int   $order_id
+     * @param int $order_id
      * @param array $data
+     *
+     * @throws \abc\core\lib\AException
      */
     public function editOrder($order_id, $data)
     {
-        $fields = array(
+        $fields = [
             'telephone',
             'email',
             'fax',
@@ -207,14 +213,17 @@ class ModelSaleOrder extends Model
             'payment_method',
             'order_status_id',
             'key_id',
-        );
-        $update = array('date_modified = NOW()');
+        ];
+        $update = ['date_modified = NOW()'];
 
         if ($this->dcrypt->active) {
             //encrypt order data
             //check key_id to use from existing record
-            $query_key = $this->db->query("SELECT key_id FROM ".$this->db->table_name("orders")."
-                                            WHERE order_id = '".(int)$order_id."'");
+            $query_key = $this->db->query(
+                "SELECT key_id 
+                FROM ".$this->db->table_name("orders")."
+                WHERE order_id = '".(int)$order_id."'"
+            );
             $data['key_id'] = $query_key->rows[0]['key_id'];
             $data = $this->dcrypt->encrypt_data($data, 'orders');
             $fields[] = 'key_id';
@@ -226,14 +235,16 @@ class ModelSaleOrder extends Model
             }
         }
 
-        $this->db->query("UPDATE `".$this->db->table_name("orders")."`
-                          SET ".implode(',', $update)."
-                          WHERE order_id = '".(int)$order_id."'");
+        $this->db->query(
+            "UPDATE `".$this->db->table_name("orders")."`
+              SET ".implode(',', $update)."
+              WHERE order_id = '".(int)$order_id."'"
+        );
 
         $order = $this->getOrder($order_id);
         if (isset($data['product'])) {
             // first of all delete removed products
-            $order_product_ids = array();
+            $order_product_ids = [];
             foreach ($data['product'] as $item) {
                 if ($item['order_product_id']) {
                     $order_product_ids[] = $item['order_product_id'];
@@ -245,27 +256,42 @@ class ModelSaleOrder extends Model
 
             foreach ($data['product'] as $product) {
                 if ($product['product_id']) {
-                    $exists = $this->db->query("SELECT product_id
-                                                 FROM ".$this->db->table_name("order_products")."
-                                                 WHERE order_id = '".(int)$order_id."'
-                                                    AND product_id='".(int)$product['product_id']."'
-                                                    AND order_product_id = '".(int)$product['order_product_id']."'");
+                    $exists = $this->db->query(
+                        "SELECT product_id
+                         FROM ".$this->db->table_name("order_products")."
+                         WHERE order_id = '".(int)$order_id."'
+                            AND product_id='".(int)$product['product_id']."'
+                            AND order_product_id = '".(int)$product['order_product_id']."'"
+                    );
                     $exists = $exists->num_rows;
                     if ($exists) {
-                        $this->db->query("UPDATE ".$this->db->table_name("order_products")."
-                                          SET price = '".$this->db->escape((AHelperUtils::preformatFloat($product['price'],
-                                    $this->language->get('decimal_point')) / $order['value']))."',
-                                              total = '".$this->db->escape((AHelperUtils::preformatFloat($product['total'],
-                                    $this->language->get('decimal_point')) / $order['value']))."',
-                                              quantity = '".$this->db->escape($product['quantity'])."'
-                                          WHERE order_id = '".(int)$order_id."' AND order_product_id = '".(int)$product['order_product_id']."'");
+                        $this->db->query(
+                            "UPDATE ".$this->db->table_name("order_products")."
+                            SET price = '".
+                            $this->db->escape(
+                                (H::preformatFloat($product['price'],$this->language->get('decimal_point'))
+                                    /
+                                    $order['value'])
+                            )."',
+                                  total = '".
+                            $this->db->escape(
+                                (H::preformatFloat($product['total'],$this->language->get('decimal_point'))
+                                    /
+                                    $order['value'])
+                            )."',
+                            quantity = '".$this->db->escape($product['quantity'])."'
+                            WHERE order_id = '".(int)$order_id."' 
+                                AND order_product_id = '".(int)$product['order_product_id']."'"
+                        );
                     } else {
                         // new products
                         $product_query = $this->db->query(
                             "SELECT *, p.product_id
                              FROM ".$this->db->table_name("products")." p
-                             LEFT JOIN ".$this->db->table_name("product_descriptions")." pd ON (p.product_id = pd.product_id)
-                             WHERE p.product_id='".(int)$product['product_id']."'");
+                             LEFT JOIN ".$this->db->table_name("product_descriptions")." pd 
+                                ON (p.product_id = pd.product_id)
+                             WHERE p.product_id='".(int)$product['product_id']."'"
+                        );
 
                         $this->db->query(
                             "INSERT INTO ".$this->db->table_name("order_products")."
@@ -274,11 +300,16 @@ class ModelSaleOrder extends Model
                                 NAME = '".$this->db->escape($product_query->row['name'])."',
                                 model = '".$this->db->escape($product_query->row['model'])."',
                                 sku = '".$this->db->escape($product_query->row['sku'])."',
-                                price = '".$this->db->escape((AHelperUtils::preformatFloat($product['price'],
-                                    $this->language->get('decimal_point')) / $order['value']))."',
-                                total = '".$this->db->escape((AHelperUtils::preformatFloat($product['total'],
-                                    $this->language->get('decimal_point')) / $order['value']))."',
-                                quantity = '".$this->db->escape($product['quantity'])."'");
+                                price = '".$this->db->escape(
+                                    (H::preformatFloat($product['price'],$this->language->get('decimal_point'))
+                                        / $order['value'])
+                                )."',
+                                total = '".$this->db->escape(
+                                    (H::preformatFloat($product['total'],$this->language->get('decimal_point'))
+                                        / $order['value'])
+                                )."',
+                                quantity = '".$this->db->escape($product['quantity'])."'"
+                        );
                     }
                 }
             }
@@ -288,7 +319,7 @@ class ModelSaleOrder extends Model
             //TODO: Improve, not to rely on text value. Add 2 parameters for total, text_val and number.
             foreach ($data['totals'] as $total_id => $text_value) {
                 //get number portion together with the sign
-                $number = AHelperUtils::preformatFloat($text_value, $this->language->get('decimal_point'));
+                $number = H::preformatFloat($text_value, $this->language->get('decimal_point'));
                 $this->db->query("UPDATE ".$this->db->table_name("order_totals")."
                                   SET `text` = '".$this->db->escape($text_value)."',
                                       `value` = '".$number."'
@@ -310,10 +341,11 @@ class ModelSaleOrder extends Model
     }
 
     /**
-     * @param int   $order_id
+     * @param int $order_id
      * @param array $data
      *
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     public function editOrderProduct($order_id, $data)
     {
@@ -340,19 +372,23 @@ class ModelSaleOrder extends Model
                     return false;
                 }
                 //check is product exists
-                $exists = $this->db->query("SELECT op.product_id, op.quantity
-                                                 FROM ".$this->db->table_name("order_products")." op
-                                                 WHERE op.order_id = '".(int)$order_id."'
-                                                        AND op.product_id='".(int)$product_id."'
-                                                        AND op.order_product_id = '".(int)$order_product_id."'");
+                $exists = $this->db->query(
+                    "SELECT op.product_id, op.quantity
+                     FROM ".$this->db->table_name("order_products")." op
+                     WHERE op.order_id = '".(int)$order_id."'
+                            AND op.product_id='".(int)$product_id."'
+                            AND op.order_product_id = '".(int)$order_product_id."'");
 
                 if ($exists->num_rows) {
                     //update order quantity
                     $sql = "UPDATE ".$this->db->table_name("order_products")."
-                            SET price = '".$this->db->escape((AHelperUtils::preformatFloat($product['price'],
-                                $this->language->get('decimal_point')) / $order_info['value']))."',
-                                total = '".$this->db->escape((AHelperUtils::preformatFloat($product['total'],
-                                $this->language->get('decimal_point')) / $order_info['value']))."',
+                            SET price = '".$this->db->escape(
+                                        (H::preformatFloat($product['price'],$this->language->get('decimal_point'))
+                                            / $order_info['value']))."',
+                                total = '".$this->db->escape(
+                                    (H::preformatFloat($product['total'],$this->language->get('decimal_point'))
+                                            / $order_info['value'])
+                                )."',
                                 quantity = '".$this->db->escape($product['quantity'])."'
                             WHERE order_id = '".(int)$order_id."' AND order_product_id = '".(int)$order_product_id."'";
                     $this->db->query($sql);
@@ -381,7 +417,10 @@ class ModelSaleOrder extends Model
                     $sql = "SELECT *, p.product_id
                             FROM ".$this->db->table_name("products")." p
                             LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                                ON (p.product_id = pd.product_id AND pd.language_id=".$this->language->getContentLanguageID().")
+                                ON 
+                                (p.product_id = pd.product_id 
+                                    AND pd.language_id=".$this->language->getContentLanguageID()
+                                .")
                             WHERE p.product_id='".(int)$product_id."'";
                     $product_query = $this->db->query($sql);
 
@@ -391,9 +430,9 @@ class ModelSaleOrder extends Model
                                 name = '".$this->db->escape($product_query->row['name'])."',
                                 model = '".$this->db->escape($product_query->row['model'])."',
                                 sku = '".$this->db->escape($product_query->row['sku'])."',
-                                price = '".$this->db->escape((AHelperUtils::preformatFloat($product['price'],
+                                price = '".$this->db->escape((H::preformatFloat($product['price'],
                                 $this->language->get('decimal_point')) / $order_info['value']))."',
-                                total = '".$this->db->escape((AHelperUtils::preformatFloat($product['total'],
+                                total = '".$this->db->escape((H::preformatFloat($product['total'],
                                 $this->language->get('decimal_point')) / $order_info['value']))."',
                                 quantity = '".(int)$product['quantity']."'";
                     $this->db->query($sql);
@@ -416,7 +455,7 @@ class ModelSaleOrder extends Model
                     // if empty result - order products just added
                     $order_product_options = $this->getOrderOptions($order_id, $order_product_id);
 
-                    $prev_subtract_options = array(); //array with previous option values with enabled stock tracking
+                    $prev_subtract_options = []; //array with previous option values with enabled stock tracking
                     foreach ($order_product_options as $old_value) {
                         if ( ! $old_value['subtract']) {
                             continue;
@@ -424,29 +463,31 @@ class ModelSaleOrder extends Model
                         $prev_subtract_options[(int)$old_value['product_option_id']][] = (int)$old_value['product_option_value_id'];
                     }
 
-                    $option_types = $po_ids = array();
+                    $option_types = $po_ids = [];
                     foreach ($product['option'] as $k => $option) {
                         $po_ids[] = (int)$k;
                     }
                     //get all data of given product options from db
                     $sql = "SELECT *, pov.product_option_value_id, povd.name AS option_value_name, pod.name AS option_name
-                                FROM ".$this->db->table_name('product_options')." po
-                                LEFT JOIN ".$this->db->table_name('product_option_descriptions')." pod
-                                    ON (pod.product_option_id = po.product_option_id AND pod.language_id=".$this->language->getContentLanguageID().")
-                                LEFT JOIN ".$this->db->table_name('product_option_values')." pov
-                                    ON po.product_option_id = pov.product_option_id
-                                LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." povd
-                                    ON (povd.product_option_value_id = pov.product_option_value_id AND povd.language_id=".$this->language->getContentLanguageID().")
-                                WHERE po.product_option_id IN (".implode(',', $po_ids).")
-                                ORDER BY po.product_option_id";
+                            FROM ".$this->db->table_name('product_options')." po
+                            LEFT JOIN ".$this->db->table_name('product_option_descriptions')." pod
+                                ON (pod.product_option_id = po.product_option_id 
+                                    AND pod.language_id=".$this->language->getContentLanguageID().")
+                            LEFT JOIN ".$this->db->table_name('product_option_values')." pov
+                                ON po.product_option_id = pov.product_option_id
+                            LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." povd
+                                ON (povd.product_option_value_id = pov.product_option_value_id 
+                                    AND povd.language_id=".$this->language->getContentLanguageID().")
+                            WHERE po.product_option_id IN (".implode(',', $po_ids).")
+                            ORDER BY po.product_option_id";
                     $result = $this->db->query($sql);
 
                     //list of option value that we do not re-save
-                    $exclude_list = array();
-                    $option_value_info = array();
+                    $exclude_list = [];
+                    $option_value_info = [];
                     foreach ($result->rows as $row) {
                         //skip files
-                        if (in_array($row['element_type'], array('U'))) {
+                        if (in_array($row['element_type'], ['U'])) {
                             $exclude_list[] = (int)$row['product_option_value_id'];
                         }
                         //compound key for cases when val_id is null
@@ -456,7 +497,7 @@ class ModelSaleOrder extends Model
 
                     //delete old options and then insert new
                     $sql = "DELETE FROM ".$this->db->table_name('order_options')."
-                                WHERE order_id = ".$order_id." AND order_product_id=".(int)$order_product_id;
+                            WHERE order_id = ".$order_id." AND order_product_id=".(int)$order_product_id;
                     if ($exclude_list) {
                         $sql .= " AND product_option_value_id NOT IN (".implode(', ', $exclude_list).")";
                     }
@@ -467,43 +508,43 @@ class ModelSaleOrder extends Model
 
                         if ( ! is_array($values)) { // for non-multioptional elements
                             //do not save empty input and textarea
-                            if (in_array($option_types[$opt_id], array('I', 'T')) && $values == '') {
+                            if (in_array($option_types[$opt_id], ['I', 'T']) && $values == '') {
                                 continue;
                             } elseif ($option_types[$opt_id] == 'S') {
-                                $values = array($values);
+                                $values = [$values];
                             } else {
                                 foreach ($option_value_info as $o) {
                                     if ($o['product_option_id'] == $opt_id) {
                                         if ( ! in_array($option_types[$opt_id], $elements_with_options)) {
                                             $option_value_info[$o['product_option_id'].'_'.$o['product_option_value_id']]['option_value_name'] = $values;
                                         }
-                                        $values = array($o['product_option_value_id']);
+                                        $values = [$o['product_option_value_id']];
                                         break;
                                     }
                                 }
                             }
                         }
 
-                        $curr_subtract_options = array();
+                        $curr_subtract_options = [];
                         foreach ($values as $value) {
                             $arr_key = $opt_id.'_'.$value;
                             $sql = "INSERT INTO ".$this->db->table_name('order_options')."
-                                            (`order_id`,
-                                            `order_product_id`,
-                                            `product_option_value_id`,
-                                            `name`,
-                                            `sku`,
-                                            `value`,
-                                            `price`,
-                                            `prefix`)
-                                        VALUES	('".$order_id."',
-                                                '".(int)$order_product_id."',
-                                                '".(int)$value."',
-                                                '".$this->db->escape($option_value_info[$arr_key]['option_name'])."',
-                                                '".$this->db->escape($option_value_info[$arr_key]['sku'])."',
-                                                '".$this->db->escape($option_value_info[$arr_key]['option_value_name'])."',
-                                                '".$this->db->escape($option_value_info[$arr_key]['price'])."',
-                                                '".$this->db->escape($option_value_info[$arr_key]['prefix'])."')";
+                                    (`order_id`,
+                                    `order_product_id`,
+                                    `product_option_value_id`,
+                                    `name`,
+                                    `sku`,
+                                    `value`,
+                                    `price`,
+                                    `prefix`)
+                                VALUES ('".$order_id."',
+                                        '".(int)$order_product_id."',
+                                        '".(int)$value."',
+                                        '".$this->db->escape($option_value_info[$arr_key]['option_name'])."',
+                                        '".$this->db->escape($option_value_info[$arr_key]['sku'])."',
+                                        '".$this->db->escape($option_value_info[$arr_key]['option_value_name'])."',
+                                        '".$this->db->escape($option_value_info[$arr_key]['price'])."',
+                                        '".$this->db->escape($option_value_info[$arr_key]['prefix'])."')";
 
                             $this->db->query($sql);
 
@@ -513,8 +554,12 @@ class ModelSaleOrder extends Model
                         }
 
                         //reduce product quantity for option value that not assigned to product anymore
-                        $prev_arr = AHelperUtils::has_value($prev_subtract_options[$opt_id]) ? $prev_subtract_options[$opt_id] : array();
-                        $curr_arr = AHelperUtils::has_value($curr_subtract_options[$opt_id]) ? $curr_subtract_options[$opt_id] : array();
+                        $prev_arr = H::has_value($prev_subtract_options[$opt_id])
+                                    ? $prev_subtract_options[$opt_id]
+                                    : [];
+                        $curr_arr = H::has_value($curr_subtract_options[$opt_id])
+                                    ? $curr_subtract_options[$opt_id]
+                                    : [];
 
                         if ($prev_arr || $curr_arr) {
 
@@ -568,8 +613,7 @@ class ModelSaleOrder extends Model
 
         //fix order total and subtotal
 
-        $sql
-            = "SELECT SUM(total) AS subtotal
+        $sql = "SELECT SUM(total) AS subtotal
                 FROM ".$this->db->table_name('order_products')."
                 WHERE order_id=".$order_id;
         $result = $this->db->query($sql);
@@ -600,6 +644,8 @@ class ModelSaleOrder extends Model
 
     /**
      * @param int $order_id
+     *
+     * @throws \Exception
      */
     public function deleteOrder($order_id)
     {
@@ -636,12 +682,15 @@ class ModelSaleOrder extends Model
         $this->db->query("DELETE FROM ".$this->db->table_name("order_options")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_downloads")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("order_totals")." WHERE order_id = '".(int)$order_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("order_data")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM `".$this->db->table_name("orders")."` WHERE order_id = '".(int)$order_id."'");
     }
 
     /**
-     * @param int   $order_id
+     * @param int $order_id
      * @param array $data
+     *
+     * @throws \abc\core\lib\AException
      */
     public function addOrderHistory($order_id, $data)
     {
@@ -666,8 +715,10 @@ class ModelSaleOrder extends Model
         if ($data['notify']) {
             $order_query = $this->db->query("SELECT *, os.name AS status
                                             FROM `".$this->db->table_name("orders")."` o
-                                            LEFT JOIN ".$this->db->table_name("order_status_descriptions")." os ON (o.order_status_id = os.order_status_id AND os.language_id = o.language_id)
-                                            LEFT JOIN ".$this->db->table_name("languages")." l ON (o.language_id = l.language_id)
+                                            LEFT JOIN ".$this->db->table_name("order_status_descriptions")." os 
+                                                ON (o.order_status_id = os.order_status_id AND os.language_id = o.language_id)
+                                            LEFT JOIN ".$this->db->table_name("languages")." l 
+                                                ON (o.language_id = l.language_id)
                                             WHERE o.order_id = '".(int)$order_id."'");
 
             if ($order_query->num_rows) {
@@ -681,21 +732,27 @@ class ModelSaleOrder extends Model
                 $subject = sprintf($language->get('text_subject'), $order_query->row['store_name'], $order_id);
 
                 $message = $language->get('text_order').' '.$order_id."\n";
-                $message .= $language->get('text_date_added').' '.AHelperUtils::dateISO2Display($order_query->row['date_added'], $language->get('date_format_short'))."\n\n";
+                $message .= $language->get('text_date_added').' '.H::dateISO2Display($order_query->row['date_added'], $language->get('date_format_short'))."\n\n";
                 $message .= $language->get('text_order_status')."\n\n";
                 $message .= $order_query->row['status']."\n\n";
                 //send link to order only for registered customers
                 if ($order_query->row['customer_id']) {
                     $message .= $language->get('text_invoice')."\n";
-                    $message .= html_entity_decode($order_query->row['store_url'].'index.php?rt=account/invoice&order_id='.$order_id,
-                            ENT_QUOTES, ABC::env('APP_CHARSET'))."\n\n";
+                    $message .= html_entity_decode(
+                                            $order_query->row['store_url'].'index.php?rt=account/invoice&order_id='.$order_id,
+                                            ENT_QUOTES,
+                                            ABC::env('APP_CHARSET')
+                    )."\n\n";
                 } //give link on order page for quest
                 elseif ($this->config->get('config_guest_checkout') && $order_query->row['email']) {
                     $enc = new AEncryption($this->config->get('encryption_key'));
                     $order_token = $enc->encrypt($order_id.'::'.$order_query->row['email']);
                     $message .= $language->get('text_invoice')."\n";
-                    $message .= html_entity_decode($order_query->row['store_url'].'index.php?rt=account/invoice&ot='.$order_token,
-                            ENT_QUOTES, ABC::env('APP_CHARSET'))."\n\n";
+                    $message .= html_entity_decode(
+                                            $order_query->row['store_url'].'index.php?rt=account/invoice&ot='.$order_token,
+                                            ENT_QUOTES,
+                                            ABC::env('APP_CHARSET')
+                    )."\n\n";
                 }
 
                 if ($data['comment']) {
@@ -706,8 +763,10 @@ class ModelSaleOrder extends Model
                 $message .= $language->get('text_footer');
 
                 if ($this->dcrypt->active) {
-                    $customer_email = $this->dcrypt->decrypt_field($order_query->row['email'],
-                        $order_query->row['key_id']);
+                    $customer_email = $this->dcrypt->decrypt_field(
+                                                        $order_query->row['email'],
+                                                        $order_query->row['key_id']
+                    );
                 } else {
                     $customer_email = $order_query->row['email'];
                 }
@@ -731,24 +790,24 @@ class ModelSaleOrder extends Model
                 $this->im->removeProtocol('email');
 
                 if ($order_query->row['customer_id']) {
-                    $message_arr = array(
-                        0 => array(
+                    $message_arr = [
+                        0 => [
                             'message' => sprintf($language->get('im_order_update_text_to_customer'),
-                                $invoice_url,
-                                $order_id,
-                                html_entity_decode($order_query->row['store_url'].'index.php?rt=account/account')),
-                        ),
-                    );
+                                                $invoice_url,
+                                                $order_id,
+                                                html_entity_decode($order_query->row['store_url'].'index.php?rt=account/account')),
+                        ],
+                    ];
                     $this->im->sendToCustomer($order_query->row['customer_id'], 'order_update', $message_arr);
                 } else {
-                    $message_arr = array(
-                        0 => array(
+                    $message_arr = [
+                        0 => [
                             'message' => sprintf($language->get('im_order_update_text_to_guest'),
-                                $invoice_url,
-                                $order_id,
-                                html_entity_decode($invoice_url)),
-                        ),
-                    );
+                                                $invoice_url,
+                                                $order_id,
+                                                html_entity_decode($invoice_url)),
+                        ],
+                    ];
                     $this->im->sendToGuest($order_id, $message_arr);
                 }
                 //turn email-protocol back
@@ -762,6 +821,7 @@ class ModelSaleOrder extends Model
      * @param $order_id
      *
      * @return array|bool
+     * @throws \abc\core\lib\AException
      */
     public function getOrder($order_id)
     {
@@ -807,7 +867,7 @@ class ModelSaleOrder extends Model
                 $payment_zone_code = '';
             }
 
-            $order_data = array(
+            $order_data = [
                 'order_id'                => $order_row['order_id'],
                 'invoice_id'              => $order_row['invoice_id'],
                 'invoice_prefix'          => $order_row['invoice_prefix'],
@@ -866,9 +926,9 @@ class ModelSaleOrder extends Model
                 'date_modified'           => $order_row['date_modified'],
                 'date_added'              => $order_row['date_added'],
                 'ip'                      => $order_row['ip'],
-            );
+            ];
 
-            if (AHelperUtils::has_value($order_row['payment_method_data'])) {
+            if (H::has_value($order_row['payment_method_data'])) {
                 $order_data['payment_method_data'] = $order_row['payment_method_data'];
             }
 
@@ -885,23 +945,23 @@ class ModelSaleOrder extends Model
      * @param int $customer_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getImFromOrderData($order_id, $customer_id)
     {
         $order_id = (int)$order_id;
         if ( ! $order_id) {
-            return array();
+            return [];
         }
         $protocols = $this->im->getProtocols();
         if ( ! $protocols) {
-            return array();
+            return [];
         }
-        $output = $p = array();
+        $output = $p = [];
         foreach ($protocols as $protocol) {
             $p[] = $this->db->escape($protocol);
         }
-        $sql
-            = "SELECT od.*, odt.name AS type_name
+        $sql = "SELECT od.*, odt.name AS type_name
                 FROM ".$this->db->table_name('order_data')." od
                 LEFT JOIN ".$this->db->table_name('order_data_types')." odt ON odt.type_id = od.type_id
                 WHERE od.order_id = ".(int)$order_id."
@@ -923,7 +983,7 @@ class ModelSaleOrder extends Model
                     continue;
                 }
                 $uri = $this->im->getCustomerURI($protocol, $customer_id, $order_id);
-                $output[$protocol] = array('uri' => $uri);
+                $output[$protocol] = ['uri' => $uri];
             }
         }
 
@@ -931,12 +991,13 @@ class ModelSaleOrder extends Model
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return array
+     * @throws \abc\core\lib\AException
      */
-    public function getOrders($data = array(), $mode = 'default')
+    public function getOrders($data = [], $mode = 'default')
     {
         $language_id = $this->language->getLanguageID();
 
@@ -965,57 +1026,57 @@ class ModelSaleOrder extends Model
         $sql = "SELECT ".$total_sql."
                 FROM `".$this->db->table_name("orders")."` o";
 
-        if (AHelperUtils::has_value($data['filter_product_id'])) {
+        if (H::has_value($data['filter_product_id'])) {
             $sql .= " LEFT JOIN  `".$this->db->table_name("order_products")."` op ON o.order_id = op.order_id ";
         }
 
         if ($data['filter_order_status_id'] == 'all') {
             $sql .= " WHERE o.order_status_id >= 0";
         } else {
-            if (AHelperUtils::has_value($data['filter_order_status_id'])) {
+            if (H::has_value($data['filter_order_status_id'])) {
                 $sql .= " WHERE o.order_status_id = '".(int)$data['filter_order_status_id']."'";
             } else {
                 $sql .= " WHERE o.order_status_id > '0'";
             }
         }
 
-        if (AHelperUtils::has_value($data['filter_product_id'])) {
+        if (H::has_value($data['filter_product_id'])) {
             $sql .= " AND op.product_id = '".(int)$data['filter_product_id']."'";
         }
-        if (AHelperUtils::has_value($data['filter_coupon_id'])) {
+        if (H::has_value($data['filter_coupon_id'])) {
             $sql .= " AND o.coupon_id = '".(int)$data['filter_coupon_id']."'";
         }
 
-        if (AHelperUtils::has_value($data['filter_customer_id'])) {
+        if (H::has_value($data['filter_customer_id'])) {
             $sql .= " AND o.customer_id = '".(int)$data['filter_customer_id']."'";
         }
 
-        if (AHelperUtils::has_value($data['filter_order_id'])) {
+        if (H::has_value($data['filter_order_id'])) {
             $sql .= " AND o.order_id = '".(int)$data['filter_order_id']."'";
         }
 
-        if (AHelperUtils::has_value($data['filter_name'])) {
+        if (H::has_value($data['filter_name'])) {
             $sql .= " AND CONCAT(o.firstname, ' ', o.lastname) LIKE '%".$this->db->escape($data['filter_name'], true)."%' collate utf8_general_ci";
         }
 
-        if (AHelperUtils::has_value($data['filter_date_added'])) {
+        if (H::has_value($data['filter_date_added'])) {
             $sql .= " AND DATE(o.date_added) = DATE('".$this->db->escape($data['filter_date_added'])."')";
         }
 
-        if (AHelperUtils::has_value($store_id)) {
+        if (H::has_value($store_id)) {
             $sql .= " AND o.store_id = '".$store_id."'";
         }
 
-        if (AHelperUtils::has_value($data['filter_total'])) {
+        if (H::has_value($data['filter_total'])) {
             $data['filter_total'] = trim($data['filter_total']);
             //check if compare signs are used in the request
             $compare = '';
-            if (in_array(substr($data['filter_total'], 0, 2), array('>=', '<='))) {
+            if (in_array(substr($data['filter_total'], 0, 2), ['>=', '<='])) {
                 $compare = substr($data['filter_total'], 0, 2);
                 $data['filter_total'] = substr($data['filter_total'], 2, strlen($data['filter_total']));
                 $data['filter_total'] = trim($data['filter_total']);
             } else {
-                if (in_array(substr($data['filter_total'], 0, 1), array('>', '<', '='))) {
+                if (in_array(substr($data['filter_total'], 0, 1), ['>', '<', '='])) {
                     $compare = substr($data['filter_total'], 0, 1);
                     $data['filter_total'] = substr($data['filter_total'], 1, strlen($data['filter_total']));
                     $data['filter_total'] = trim($data['filter_total']);
@@ -1028,11 +1089,11 @@ class ModelSaleOrder extends Model
                 $sql .= " AND FLOOR(CAST(o.total as DECIMAL(15,4))) ".$compare."  FLOOR(CAST(".$data['filter_total']." as DECIMAL(15,4)))";
             } else {
                 $currencies = $this->currency->getCurrencies();
-                $temp = $temp2 = array(
+                $temp = $temp2 = [
                     $data['filter_total'],
                     ceil($data['filter_total']),
                     floor($data['filter_total']),
-                );
+                ];
                 foreach ($currencies as $currency1) {
                     foreach ($currencies as $currency2) {
                         if ($currency1['code'] != $currency2['code']) {
@@ -1055,17 +1116,16 @@ class ModelSaleOrder extends Model
         //If for total, we done building the query
         if ($mode == 'total_only') {
             $query = $this->db->query($sql);
-
             return $query->row['total'];
         }
 
-        $sort_data = array(
+        $sort_data = [
             'o.order_id',
             'name',
             'status',
             'o.date_added',
             'o.total',
-        );
+        ];
 
         if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$data['sort'];
@@ -1092,7 +1152,7 @@ class ModelSaleOrder extends Model
         }
 
         $query = $this->db->query($sql);
-        $result_rows = array();
+        $result_rows = [];
         foreach ($query->rows as $row) {
             $result_rows[] = $this->dcrypt->decrypt_data($row, 'orders');
         }
@@ -1104,8 +1164,9 @@ class ModelSaleOrder extends Model
      * @param array $data
      *
      * @return array
+     * @throws \abc\core\lib\AException
      */
-    public function getTotalOrders($data = array())
+    public function getTotalOrders($data = [])
     {
         return $this->getOrders($data, 'total_only');
     }
@@ -1114,6 +1175,7 @@ class ModelSaleOrder extends Model
      * @param int $product_id
      *
      * @return int|false
+     * @throws \Exception
      */
     public function getOrderTotalWithProduct($product_id)
     {
@@ -1134,6 +1196,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @return string
+     * @throws \Exception
      */
     public function generateInvoiceId($order_id)
     {
@@ -1147,11 +1210,13 @@ class ModelSaleOrder extends Model
             $invoice_id = 1;
         }
 
-        $this->db->query("UPDATE `".$this->db->table_name("orders")."`
-                            SET invoice_id = '".(int)$invoice_id."',
-                                invoice_prefix = '".$this->db->escape($this->config->get('invoice_prefix'))."',
-                                date_modified = NOW()
-                            WHERE order_id = '".(int)$order_id."'");
+        $this->db->query(
+            "UPDATE `".$this->db->table_name("orders")."`
+            SET invoice_id = '".(int)$invoice_id."',
+                invoice_prefix = '".$this->db->escape($this->config->get('invoice_prefix'))."',
+                date_modified = NOW()
+            WHERE order_id = '".(int)$order_id."'"
+        );
 
         return $this->config->get('invoice_prefix').$invoice_id;
     }
@@ -1161,14 +1226,16 @@ class ModelSaleOrder extends Model
      * @param int $order_product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderProducts($order_id, $order_product_id = 0)
     {
-        $query = $this->db->query("SELECT *
-                                    FROM ".$this->db->table_name("order_products")."
-                                    WHERE order_id = '".(int)$order_id."'
-                                    ".((int)$order_product_id ? " AND order_product_id='".(int)$order_product_id."'" : ''));
-
+        $query = $this->db->query(
+            "SELECT *
+            FROM ".$this->db->table_name("order_products")."
+            WHERE order_id = '".(int)$order_id."'
+            ".((int)$order_product_id ? " AND order_product_id='".(int)$order_product_id."'" : '')
+        );
         return $query->rows;
     }
 
@@ -1177,18 +1244,20 @@ class ModelSaleOrder extends Model
      * @param int $order_product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderOptions($order_id, $order_product_id)
     {
-        $query = $this->db->query("SELECT op.*, po.element_type, po.attribute_id, po.product_option_id, pov.subtract
-                                    FROM ".$this->db->table_name("order_options")." op
-                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
-                                        ON op.product_option_value_id = pov.product_option_value_id
-                                    LEFT JOIN ".$this->db->table_name("product_options")." po
-                                        ON pov.product_option_id = po.product_option_id
-                                    WHERE op.order_id = '".(int)$order_id."'
-                                        AND op.order_product_id = '".(int)$order_product_id."'");
-
+        $query = $this->db->query(
+            "SELECT op.*, po.element_type, po.attribute_id, po.product_option_id, pov.subtract
+            FROM ".$this->db->table_name("order_options")." op
+            LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+                ON op.product_option_value_id = pov.product_option_value_id
+            LEFT JOIN ".$this->db->table_name("product_options")." po
+                ON pov.product_option_id = po.product_option_id
+            WHERE op.order_id = '".(int)$order_id."'
+                AND op.order_product_id = '".(int)$order_product_id."'"
+        );
         return $query->rows;
     }
 
@@ -1196,6 +1265,7 @@ class ModelSaleOrder extends Model
      * @param int $order_option_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderOption($order_option_id)
     {
@@ -1214,6 +1284,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderTotals($order_id)
     {
@@ -1221,7 +1292,6 @@ class ModelSaleOrder extends Model
                                     FROM ".$this->db->table_name("order_totals")."
                                     WHERE order_id = '".(int)$order_id."'
                                     ORDER BY sort_order");
-
         return $query->rows;
     }
 
@@ -1229,6 +1299,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderHistory($order_id)
     {
@@ -1254,6 +1325,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getOrderDownloads($order_id)
     {
@@ -1263,7 +1335,7 @@ class ModelSaleOrder extends Model
                                         ON op.order_product_id = od.order_product_id
                                    WHERE od.order_id = '".(int)$order_id."'
                                    ORDER BY op.order_product_id, od.sort_order, od.name");
-        $output = array();
+        $output = [];
         foreach ($query->rows as $row) {
             $output[$row['product_id']]['product_name'] = $row['product_name'];
             // get download_history
@@ -1283,6 +1355,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalOrderDownloads($order_id)
     {
@@ -1297,6 +1370,7 @@ class ModelSaleOrder extends Model
      * @param int $store_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalOrdersByStoreId($store_id)
     {
@@ -1311,12 +1385,14 @@ class ModelSaleOrder extends Model
      * @param int $order_status_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getOrderHistoryTotalByOrderStatusId($order_status_id)
     {
         $query = $this->db->query("SELECT oh.order_id
                                     FROM ".$this->db->table_name("order_history")." oh
-                                    LEFT JOIN `".$this->db->table_name("orders")."` o ON (oh.order_id = o.order_id)
+                                    LEFT JOIN `".$this->db->table_name("orders")."` o 
+                                        ON (oh.order_id = o.order_id)
                                     WHERE oh.order_status_id = '".(int)$order_status_id."' AND o.order_status_id > '0'
                                     GROUP BY order_id");
 
@@ -1327,6 +1403,7 @@ class ModelSaleOrder extends Model
      * @param int $order_status_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalOrdersByOrderStatusId($order_status_id)
     {
@@ -1341,6 +1418,7 @@ class ModelSaleOrder extends Model
      * @param int $language_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalOrdersByLanguageId($language_id)
     {
@@ -1355,6 +1433,7 @@ class ModelSaleOrder extends Model
      * @param int $currency_id
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalOrdersByCurrencyId($currency_id)
     {
@@ -1367,6 +1446,7 @@ class ModelSaleOrder extends Model
 
     /**
      * @return int
+     * @throws \Exception
      */
     public function getTotalSales()
     {
@@ -1381,6 +1461,7 @@ class ModelSaleOrder extends Model
      * @param int $year
      *
      * @return int
+     * @throws \Exception
      */
     public function getTotalSalesByYear($year)
     {
@@ -1395,12 +1476,13 @@ class ModelSaleOrder extends Model
      * @param int $product_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getGuestOrdersWithProduct($product_id)
     {
         $product_id = (int)$product_id;
         if ( ! $product_id) {
-            return array();
+            return [];
         }
         $query = $this->db->query("SELECT DISTINCT o.*
                                     FROM ".$this->db->table_name("order_products")." op
@@ -1415,11 +1497,12 @@ class ModelSaleOrder extends Model
      * @param array $customers_ids
      *
      * @return array
+     * @throws \Exception
      */
     public function getCountOrdersByCustomerIds($customers_ids)
     {
         $customers_ids = (array)$customers_ids;
-        $ids = array();
+        $ids = [];
         foreach ($customers_ids as $cid) {
             $cid = (int)$cid;
             if ($cid) {
@@ -1428,13 +1511,13 @@ class ModelSaleOrder extends Model
         }
 
         if ( ! $ids) {
-            return array();
+            return [];
         }
         $query = $this->db->query("SELECT customer_id, COUNT(*) AS total
                                     FROM `".$this->db->table_name("orders")."`
                                     WHERE customer_id IN (".implode(",", $ids).") AND order_status_id > '0'
                                     GROUP BY customer_id");
-        $output = array();
+        $output = [];
         foreach ($query->rows as $row) {
             $output[$row['customer_id']] = (int)$row['total'];
         }
