@@ -12623,7 +12623,7 @@ ALTER TABLE `ac_orders`
   ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_statuses`(`order_status_id`);
 
 ALTER TABLE `ac_customer_transactions`
-  ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
+  ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_products`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
@@ -12940,5 +12940,6 @@ CREATE TABLE `ac_customer_communications` (
   KEY `customer_id` (`customer_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `ac_customer_communications_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `ac_customers` (`customer_id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
