@@ -538,12 +538,22 @@ class ModelSaleCustomer extends Model
      */
     public function deleteCustomer($customer_id)
     {
-        $this->db->query("DELETE FROM ".$this->db->table_name("customers")." WHERE customer_id = '".(int)$customer_id
-            ."'");
-        $this->db->query("DELETE FROM ".$this->db->table_name("addresses")." WHERE customer_id = '".(int)$customer_id
-            ."'");
-        $this->db->query("DELETE FROM ".$this->db->table_name("customer_notifications")." WHERE customer_id = '"
-            .(int)$customer_id."'");
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("addresses")." 
+            WHERE customer_id = '".(int)$customer_id."'"
+        );
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("customer_notifications")." 
+            WHERE customer_id = '".(int)$customer_id."'"
+        );
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("customer_transactions")." 
+            WHERE customer_id = '".(int)$customer_id."'"
+        );
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("customers")." 
+            WHERE customer_id = '".(int)$customer_id."'"
+        );
     }
 
     /**
@@ -646,8 +656,7 @@ class ModelSaleCustomer extends Model
                 $implode[] = "c.email LIKE '%".$this->db->escape($filter['email'], true)."%'";
             }
             if (H::has_value($filter['telephone'])) {
-                $implode[] =
-                    "c.telephone LIKE '%".$this->db->escape($filter['telephone'], true)."%'";
+                $implode[] = "c.telephone LIKE '%".$this->db->escape($filter['telephone'], true)."%'";
             }
             if (H::has_value($filter['sms'])) {
                 $implode[] = "c.sms LIKE '%".$this->db->escape($filter['sms'], true)."%'";
