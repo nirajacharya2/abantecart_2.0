@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions>
+  <definition>
+    <key>gdpr_name</key>
+    <value><![CDATA[General Data Protection Regulation]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_notice_text</key>
+    <value><![CDATA[This website is using Cookies to improve your browsing experience]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_deny</key>
+    <value><![CDATA[Deny]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_allow</key>
+    <value><![CDATA[ACCEPT]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_privacy_policy_text</key>
+    <value><![CDATA[The title of the cookie policy link]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_message_title</key>
+    <value><![CDATA[Customer %s Data Erasure request]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_message_text</key>
+    <value><![CDATA[Customer had requested personal data erasure. You should to react during 30days.
+See %s for customer details.]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_already_requested</key>
+    <value><![CDATA[Erasure of Personal Data Already Requested at  %s]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_request_button_text</key>
+    <value><![CDATA[Request Erasure of Personal Data]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_view_button_text</key>
+    <value><![CDATA[View Stored Personal Data]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_erase_confirm_text</key>
+    <value><![CDATA[Do you really want to ask to erase your personal data?]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_success_requested</key>
+    <value><![CDATA[Your request has been successfully sent to administration.]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_change_data</key>
+    <value><![CDATA[Ask Partial Personal Data Changes]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_download</key>
+    <value><![CDATA[Download CSV]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_modal_title</key>
+    <value><![CDATA[Your Current Personal Data]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_privacy_policy_title</key>
+    <value><![CDATA[Privacy Policy]]></value>
+  </definition>
+</definitions>

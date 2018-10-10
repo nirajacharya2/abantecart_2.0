@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions>
+  <definition>
+    <key>gdpr_name</key>
+    <value><![CDATA[General Data Protection Regulation]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_note</key>
+    <value><![CDATA[]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_expiration_days</key>
+    <value><![CDATA[Erasure request expiration days number]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_text_erase_personal_data</key>
+    <value><![CDATA[Erase Personal Data]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_text_erase_confirm</key>
+    <value><![CDATA[Do you really want to erase all personal data of this customer?]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_entry_erase</key>
+    <value><![CDATA[GDPR]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_languages</key>
+    <value><![CDATA[Language Definitions]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_history_title</key>
+    <value><![CDATA[GDPR Request History]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_column_date_added</key>
+    <value><![CDATA[Date Added]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_column_type</key>
+    <value><![CDATA[Type]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_column_name</key>
+    <value><![CDATA[Customer Name]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_column_user_agent</key>
+    <value><![CDATA[User-Agent]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_column_user_ip</key>
+    <value><![CDATA[IP-Address]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_type_viewed</key>
+    <value><![CDATA[Viewed]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_type_data_downloaded</key>
+    <value><![CDATA[Personal Data Downloaded]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_type_requested</key>
+    <value><![CDATA[Erasure Requested]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_type_erased</key>
+    <value><![CDATA[Data Erased]]></value>
+  </definition>
+  <definition>
+    <key>gdpr_privacy_policy_title</key>
+    <value><![CDATA[Privacy Policy]]></value>
+  </definition>
+</definitions>

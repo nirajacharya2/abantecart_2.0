@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension>
+	<id>gdpr</id>
+	<version>2.0.0</version>
+	<type>extension</type>
+	<category>Tools</category>
+	<cartversions>
+		<item>2.0.0</item>
+	</cartversions>
+	<priority>10</priority>
+	<dependencies></dependencies>
+	<settings>
+		<item id="gdpr_status">
+			<type>checkbox</type>
+			<default_value>0</default_value>
+		</item>
+		<item id="gdpr_expiration_days">
+			<type>input</type>
+			<default_value>30</default_value>
+		</item>
+		<item id="gdpr_languages">
+			<type>html_template</type>
+			<default_value/>
+			<template>responses/extension/gdpr_languages.tpl</template>
+		</item>
+	</settings>
+	<install>
+		<trigger>install.php</trigger>
+	</install>
+	<uninstall>
+		<trigger>uninstall.php</trigger>
+	</uninstall>
+</extension>

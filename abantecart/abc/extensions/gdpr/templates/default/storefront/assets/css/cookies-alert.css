@@ -1,0 +1,17 @@
+
+.noat-cookie__consent{}
+
+.noat-cookie-consent__banner{}
+.noat-cookie-consent-banner__text{
+}
+
+.noat-cookie-consent-banner__other-actions{
+	text-decoration: underline;
+}
+.noat-cookie-consent-banner-other-actions__privacy-policy{
+	font-size: 14px;
+}
+.noat-cookie-consent-banner-other-actions__deny{
+	font-size: 14px;
+}
+.noat-cookie-consent-banner__allow{}
