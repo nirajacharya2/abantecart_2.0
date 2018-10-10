@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -28,6 +28,8 @@ use abc\core\lib\{
 };
 
 /**
+ * @property array $data
+ * @property array $error
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
  * @property \abc\models\admin\ModelCatalogCategory
@@ -77,7 +79,7 @@ use abc\core\lib\{
  * @property \abc\models\storefront\ModelCheckoutOrder $model_checkout_order
  * @property \abc\models\admin\ModelToolBackup $model_tools_backup
  * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
- * @property \abc\models\admin\ModelCatalogContent $model_catalog_content
+ * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ADB $db

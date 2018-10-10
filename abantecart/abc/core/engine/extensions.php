@@ -52,7 +52,7 @@ abstract class Extension
     public $ExtensionsApi = null;
 
     /**
-     * @var $baseObject AController The current object being plugged into.
+     * @var $baseObject AController|Model The current object being plugged into.
      */
     protected $baseObject = null;
 
