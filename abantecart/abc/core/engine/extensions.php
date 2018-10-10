@@ -21,12 +21,12 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use Exception;
+use H;
 
 /**
  * ExtensionsApi
@@ -90,6 +90,12 @@ abstract class Extension
         $this->ExtensionsApi = $ExtensionsApi;
     }
 
+    /**
+     * @param string $method
+     * @param array $args
+     *
+     * @return mixed|null
+     */
     public function __call($method, $args)
     {
         if ((strpos($method, 'hk') === 0) && ($this->ExtensionsApi !== null)) {
@@ -521,13 +527,13 @@ class ExtensionsApi
                 LEFT JOIN ".$this->db->table_name("stores")." st ON st.store_id = s.store_id
                 WHERE e.key<>'' AND  e.`type` ";
 
-        if (AHelperUtils::has_value($data['filter']) && $data['filter'] != 'extensions') {
+        if (H::has_value($data['filter']) && $data['filter'] != 'extensions') {
             $sql .= " = '".$this->db->escape($data['filter'])."'";
         } else {
             $sql .= " IN ('".implode("', '", $this->extension_types)."') ";
         }
 
-        if (AHelperUtils::has_value($data['search'])) {
+        if (H::has_value($data['search'])) {
 
             $keys = [];
             $ext_list = $this->getExtensionsList(['filter' => $data['filter']]);
@@ -547,21 +553,21 @@ class ExtensionsApi
                 $sql .= " AND e.`key` LIKE '%".$this->db->escape($data['search'], true)."%' ";
             }
         }
-        if (AHelperUtils::has_value($data['category'])) {
+        if (H::has_value($data['category'])) {
             $sql .= " AND e.`category` = '".$this->db->escape($data['category'])."' ";
         }
-        if (AHelperUtils::has_value($data['status'])) {
+        if (H::has_value($data['status'])) {
             $sql .= " AND s.value = '".(int)$data['status']."' ";
         }
 
-        if (AHelperUtils::has_value($data['store_id'])) {
+        if (H::has_value($data['store_id'])) {
             $sql .= " AND COALESCE(s.`store_id`,0) = '".(int)$data['store_id']."' ";
         } else {
             $sql .= " AND COALESCE(s.`store_id`,0) = '".
                 (int)$this->registry->get('config')->get('config_store_id')."' ";
         }
 
-        if (AHelperUtils::has_value($data['sort_order']) && $data['sort_order'][0] != 'name') {
+        if (H::has_value($data['sort_order']) && $data['sort_order'][0] != 'name') {
             if ($data['sort_order'][0] == 'key') {
                 $data['sort_order'][0] = '`key`';
             }
@@ -571,14 +577,14 @@ class ExtensionsApi
             $sql .= "\n ORDER BY e.priority desc";
         }
         $total = null;
-        if (AHelperUtils::has_value($data['page']) && AHelperUtils::has_value($data['limit'])) {
+        if (H::has_value($data['page']) && H::has_value($data['limit'])) {
             $total = $this->db->query($sql);
             $sql .= " LIMIT ".(int)(($data['page'] - 1) * $data['limit']).", ".(int)($data['limit'])." ";
         }
 
         $result = $this->db->query($sql);
 
-        if (AHelperUtils::has_value($data['sort_order']) && $data['sort_order'][0] == 'name') {
+        if (H::has_value($data['sort_order']) && $data['sort_order'][0] == 'name') {
             if ($result->rows) {
                 foreach ($result->rows as &$row) {
                     $names[] = mb_strtolower(trim($this->getExtensionName($row['key'])));
@@ -629,7 +635,7 @@ class ExtensionsApi
 
         if (file_exists($filename)) {
             /**
-             * @var \SimpleXMLElement $xml
+             * @var \DOMDocument $xml
              */
             $xml = simplexml_load_file($filename);
             if ($xml && $xml->definition) {
@@ -841,11 +847,11 @@ class ExtensionsApi
             //check if extension is enabled and not already in the picked list
             if (
                 //check if we need only available extensions with status 0
-                (($force_enabled_off && AHelperUtils::has_value($this->registry->get('config')->get($ext.'_status')))
+                (($force_enabled_off && H::has_value($this->registry->get('config')->get($ext.'_status')))
                     || $this->registry->get('config')->get($ext.'_status')
                 )
                 && !in_array($ext, $enabled_extensions)
-                && AHelperUtils::has_value($ext)
+                && H::has_value($ext)
             ) {
 
                 //priority for extension execution is set in the <priority> tag of extension configuration
@@ -857,9 +863,9 @@ class ExtensionsApi
                     'storefront' => [],
                     'admin'      => [],
                 ];
-                if (is_file(ABC::env('DIR_APP_EXTENSIONS').$ext.'/main.php')) {
+                if (is_file(ABC::env('DIR_APP_EXTENSIONS').$ext.DS.'main.php')) {
                     /** @noinspection PhpIncludeInspection */
-                    include(ABC::env('DIR_APP_EXTENSIONS').$ext.'/main.php');
+                    include(ABC::env('DIR_APP_EXTENSIONS').$ext.DS.'main.php');
                 }
                 $ext_controllers[$ext] = $controllers;
                 $ext_models[$ext] = $models;
@@ -925,10 +931,11 @@ class ExtensionsApi
             return false;
         }
 
-        $file = '/languages/'
-            .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
-            .$language_name
-            .'/'.$route.'.xml';
+        $file = DS.'languages'.DS
+                .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
+                .$language_name.DS
+                .$route.'.xml';
+
 
         //include language file from first matching extension
         foreach ($this->extensions_dir as $ext) {
@@ -1321,7 +1328,7 @@ class ExtensionUtils
      */
     protected $name;
     /**
-     * @var \SimpleXmlElement | \DOMNode | false
+     * @var \SimpleXmlElement|\DOMDocument|false $config
      */
     protected $config;
     /**
@@ -1348,7 +1355,7 @@ class ExtensionUtils
         $this->registry = Registry::getInstance();
         $this->name = (string)$ext;
         $this->store_id = (int)$store_id;
-        $this->config = AHelperUtils::getExtensionConfigXml($ext);
+        $this->config = H::getExtensionConfigXml($ext);
 
         if (!$this->config) {
             $filename = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $this->name).DS.'config.xml';
@@ -1478,7 +1485,7 @@ class ExtensionUtils
                     strlen($true_item_id) - 2) : $true_item_id;
 
                 $value = $settings[(string)$item['id']];
-                if (AHelperUtils::is_serialized($value)) {
+                if (H::is_serialized($value)) {
                     $value = unserialize($value);
                 }
                 $result[$i] = [
@@ -1557,7 +1564,7 @@ class ExtensionUtils
                     continue;//if data for check not given - do nothing
                 }
                 $value = $data[(string)$item['id']];
-                if (!AHelperUtils::is_multi($value)) {
+                if (!H::is_multi($value)) {
                     if (is_array($value)) {
                         $value = array_map('trim', $value);
                     } else {
@@ -1627,7 +1634,7 @@ class ExtensionUtils
                     continue;
                 }
                 $value = $data[(string)$item['id']];
-                if (!AHelperUtils::is_multi($value)) {
+                if (!H::is_multi($value)) {
                     if (is_array($value)) {
                         $value = array_map('trim', $value);
                     } else {
