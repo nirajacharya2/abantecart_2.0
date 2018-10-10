@@ -56,7 +56,7 @@ class ModelExtensionGdpr extends Model
         }
 
         $output = [];
-        foreach ($data_map['GDPR_DATAMAP'] as $table_name => $columns) {
+        foreach ($data_map as $table_name => $columns) {
             try {
                 $sql = "SELECT ".implode(", ", array_intersect($columns, $tables[$this->db->table_name($table_name)]))."
                         FROM ".$this->db->table_name($table_name)."
