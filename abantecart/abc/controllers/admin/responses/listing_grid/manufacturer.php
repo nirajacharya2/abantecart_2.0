@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,20 +21,24 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\admin\ModelCatalogManufacturer;
+use H;
 use stdClass;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+/**
+ * Class ControllerResponsesListingGridManufacturer
+ *
+ * @package abc\controllers\admin
+ * @property ModelCatalogManufacturer $model_catalog_manufacturer
+ */
 
 class ControllerResponsesListingGridManufacturer extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -47,8 +51,8 @@ class ControllerResponsesListingGridManufacturer extends AController
         $this->loadModel('tool/image');
 
         //Prepare filter config
-        $grid_filter_params = array_merge(array('name'), (array)$this->data['grid_filter_params']);
-        $filter = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
+        $grid_filter_params = array_merge(['name'], (array)$this->data['grid_filter_params']);
+        $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
         $filter_data = $filter->getFilterData();
 
         $total = $this->model_catalog_manufacturer->getTotalManufacturers($filter_data);
@@ -59,7 +63,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         $results = $this->model_catalog_manufacturer->getManufacturers($filter_data);
 
         //build thumbnails list
-        $ids = array();
+        $ids = [];
         foreach ($results as $result) {
             $ids[] = $result['manufacturer_id'];
         }
@@ -75,17 +79,17 @@ class ControllerResponsesListingGridManufacturer extends AController
         foreach ($results as $result) {
             $thumbnail = $thumbnails[$result['manufacturer_id']];
             $response->rows[$i]['id'] = $result['manufacturer_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $thumbnail['thumb_html'],
-                $this->html->buildInput(array(
+                $this->html->buildInput([
                     'name'  => 'name['.$result['manufacturer_id'].']',
                     'value' => $result['name'],
-                )),
-                $this->html->buildInput(array(
+                ]),
+                $this->html->buildInput([
                     'name'  => 'sort_order['.$result['manufacturer_id'].']',
                     'value' => $result['sort_order'],
-                )),
-            );
+                ]),
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -107,10 +111,13 @@ class ControllerResponsesListingGridManufacturer extends AController
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
-                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/manufacturer'),
+                [
+                    'error_text'  => sprintf(
+                        $this->language->get('error_permission_modify'),
+                        'listing_grid/manufacturer'
+                    ),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         $this->loadModel('catalog/product');
@@ -126,7 +133,6 @@ class ControllerResponsesListingGridManufacturer extends AController
                         $product_total = $this->model_catalog_product->getTotalProductsByManufacturerId($id);
                         if ($product_total) {
                             $this->response->setOutput(sprintf($this->language->get('error_product'), $product_total));
-
                             return null;
                         }
 
@@ -135,9 +141,9 @@ class ControllerResponsesListingGridManufacturer extends AController
                 }
                 break;
             case 'save':
-                $allowedFields = array_merge(array('sort_order', 'name'), (array)$this->data['allowed_fields']);
+                $allowedFields = array_merge(['sort_order', 'name'], (array)$this->data['allowed_fields']);
                 $ids = explode(',', $this->request->post['id']);
-                $array = array();
+                $array = [];
                 if ( ! empty($ids)) //resort required.
                 {
                     if ($this->request->post['resort'] == 'yes') {
@@ -145,13 +151,21 @@ class ControllerResponsesListingGridManufacturer extends AController
                         foreach ($ids as $id) {
                             $array[$id] = $this->request->post['sort_order'][$id];
                         }
-                        $new_sort = AHelperUtils::build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
+                        $new_sort = H::build_sort_order(
+                            $ids,
+                            min($array),
+                            max($array),
+                            $this->request->post['sort_direction']
+                        );
                         $this->request->post['sort_order'] = $new_sort;
                     }
                 }
                 foreach ($ids as $id) {
                     foreach ($allowedFields as $field) {
-                        $this->model_catalog_manufacturer->editManufacturer($id, array($field => $this->request->post[$field][$id]));
+                        $this->model_catalog_manufacturer->editManufacturer(
+                            $id,
+                            [$field => $this->request->post[$field][$id]]
+                        );
                     }
                 }
                 break;
@@ -166,6 +180,7 @@ class ControllerResponsesListingGridManufacturer extends AController
      * update only one field
      *
      * @return void
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -177,10 +192,10 @@ class ControllerResponsesListingGridManufacturer extends AController
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/manufacturer'),
                     'reset_value' => true,
-                ));
+                ]);
         }
         $this->loadLanguage('catalog/manufacturer');
         $this->loadModel('catalog/manufacturer');
@@ -192,11 +207,11 @@ class ControllerResponsesListingGridManufacturer extends AController
                     if ($err = $this->html->isSEOkeywordExists('manufacturer_id='.$this->request->get['id'], $value)) {
                         $error = new AError('');
 
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
                 }
 
-                $this->model_catalog_manufacturer->editManufacturer($this->request->get['id'], array($field => $value));
+                $this->model_catalog_manufacturer->editManufacturer($this->request->get['id'], [$field => $value]);
             }
 
             return null;
@@ -205,7 +220,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         //request sent from jGrid. ID is key of array
         foreach ($this->request->post as $field => $value) {
             foreach ($value as $k => $v) {
-                $this->model_catalog_manufacturer->editManufacturer($k, array($field => $v));
+                $this->model_catalog_manufacturer->editManufacturer($k, [$field => $v]);
             }
         }
 
@@ -216,20 +231,20 @@ class ControllerResponsesListingGridManufacturer extends AController
     public function manufacturers()
     {
 
-        $response = array();
+        $response = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadModel('catalog/manufacturer');
         if (isset($this->request->post['term'])) {
-            $filter = array(
+            $filter = [
                 'limit'         => 20,
                 'language_id'   => $this->language->getContentLanguageID(),
                 'subsql_filter' => "m.name LIKE '%".$this->db->escape($this->request->post['term'], true)."%'",
-            );
+            ];
             $results = $this->model_catalog_manufacturer->getManufacturers($filter);
 
             //build thumbnails list
-            $ids = array();
+            $ids = [];
             foreach ($results as $result) {
                 $ids[] = $result['manufacturer_id'];
             }
@@ -243,13 +258,15 @@ class ControllerResponsesListingGridManufacturer extends AController
             foreach ($results as $item) {
                 $thumbnail = $thumbnails[$item['manufacturer_id']];
 
-                $response[] = array(
-                    'image'      => $icon = $thumbnail['thumb_html'] ? $thumbnail['thumb_html'] : '<i class="fa fa-code fa-4x"></i>&nbsp;',
+                $response[] = [
+                    'image'      => $icon = $thumbnail['thumb_html']
+                        ? $thumbnail['thumb_html']
+                        : '<i class="fa fa-code fa-4x"></i>&nbsp;',
                     'id'         => $item['manufacturer_id'],
                     'name'       => $item['name'],
                     'meta'       => '',
                     'sort_order' => (int)$item['sort_order'],
-                );
+                ];
             }
         }
         $this->data['response'] = $response;
