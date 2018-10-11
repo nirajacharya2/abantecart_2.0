@@ -18,6 +18,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\base\Product;
@@ -365,7 +366,8 @@ if($upd_array) {
             FROM ".$this->db->table_name("category_descriptions")." cd
             LEFT JOIN ".$this->db->table_name("categories")." c
                  ON (c.category_id = cd.category_id)
-            WHERE c.parent_id = '".$parent_id."' AND LOWER(name) = '".mb_strtolower($name)."'"
+            WHERE c.parent_id = '".$parent_id."' 
+                AND LOWER(name) = '".mb_strtolower(html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET')))."'"
         );
 
         return $result->row;
