@@ -75,8 +75,12 @@ class CustomerCommunication extends AModelBase
             $communication->subject = $mail->getSubject();
             $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
             $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
+            $customer_id = null;
             foreach ($customers as $customer) {
                 $customer_id = $customer->customer_id;
+            }
+            if (!$customer_id) {
+                return;
             }
             $communication->customer_id = $customer_id;
             $communication->user_id = $mail->getUser()->user_id ? $mail->getUser()->user_id : 0;
@@ -89,6 +93,9 @@ class CustomerCommunication extends AModelBase
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';
             $communication->body = $message;
+            if (!$customer_id) {
+                return;
+            }
             $communication->customer_id = $customer_id;
             $communication->user_id = $user_id;
             $communication->sent_to_address = $to;
