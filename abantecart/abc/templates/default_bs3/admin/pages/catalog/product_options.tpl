@@ -376,7 +376,7 @@ jQuery(function ($) {
 	$(document).on('click','#option_values button[type="submit"]', function () {
 		//Mark rows to be deleted
 		$('#option_values_tbl .toDelete input[name^=product_option_value_id]').val('delete');
-		$(this).attr('disabled', 'disabled');
+
 
 		editOption('#update_option');
 
