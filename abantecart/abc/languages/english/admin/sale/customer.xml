@@ -177,6 +177,10 @@
 		<value><![CDATA[E-Mail Address does not appear to be valid!]]></value>
 	</definition>
 	<definition>
+		<key>error_email_exists</key>
+		<value><![CDATA[E-Mail Address already registered!]]></value>
+	</definition>
+	<definition>
 		<key>error_telephone</key>
 		<value><![CDATA[Telephone must be between 3 and 32 characters!]]></value>
 	</definition>

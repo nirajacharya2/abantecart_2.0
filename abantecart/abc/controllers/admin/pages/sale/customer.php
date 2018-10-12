@@ -1111,6 +1111,12 @@ class ControllerPagesSaleCustomer extends AController
         if (mb_strlen($data['email']) > 96 || !preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])) {
             $this->error['email'] = $this->language->get('error_email');
         }
+        //check unique email for new customers
+        elseif($customer_id === null){
+            if ($this->model_sale_customer->getCustomersByEmails([$data['email']])) {
+                $this->error['email'] = $this->language->get('error_email_exists');
+            }
+        }
 
         if (mb_strlen($data['telephone']) > 32) {
             $this->error['telephone'] = $this->language->get('error_telephone');
