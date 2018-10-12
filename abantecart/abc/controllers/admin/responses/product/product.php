@@ -930,6 +930,7 @@ class ControllerResponsesProductProduct extends AController
         $resources_html = $this->dispatch('responses/common/resource_library/get_resources_html');
         $this->data['resources_html'] = $resources_html->dispatchGetOutput();
 
+        $this->extensions->hk_ProcessData($this, 'option_value_row');
         $this->view->batchAssign($this->data);
         return $this->view->fetch('responses/product/option_value_row.tpl');
     }
@@ -1143,6 +1144,7 @@ class ControllerResponsesProductProduct extends AController
      * @param int $product_id
      *
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _buildGeneralSubform($form, $download_id, $product_id)
     {
