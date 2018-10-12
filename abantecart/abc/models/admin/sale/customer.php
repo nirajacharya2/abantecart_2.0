@@ -917,7 +917,7 @@ class ModelSaleCustomer extends Model
                 $where[] = "LCASE(email) LIKE '%".$this->db->escape(strtolower($email), true)."%'";
             }
             $sql .= implode(' OR ', $where).$store_based;
-            $sql .= "ORDER BY firstname, lastname, email";
+            $sql .= " ORDER BY firstname, lastname, email";
 
             $query = $this->db->query($sql);
             $result_rows = [];
