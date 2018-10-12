@@ -52,8 +52,9 @@
 				<a class="actionitem btn btn-primary tooltips" href="<?php echo $add_address_url; ?>" title="<?php echo $text_add_address; ?>">
 				<i class="fa fa-plus fa-fw"></i>
 				</a>
-			</div>			
+			</div>
 			<div class="btn-group mr10 toolbar">
+				<?php echo $this->getHookVar('toolbar_pre'); ?>
 				<?php if($register_date){?>
 				<a class="btn btn-white disabled"><?php echo $register_date; ?></a>
 				<?php } ?>
@@ -106,6 +107,7 @@
 					<?php } ?>
 				   data-original-title="<?php echo $actas->text; ?>"><i class="fa fa-male"></i>
 				</a>
+				<?php echo  $this->getHookVar('toolbar_post'); ?>
 			</div>
 		</div>
 		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	

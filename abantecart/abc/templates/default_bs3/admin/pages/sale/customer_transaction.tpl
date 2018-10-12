@@ -22,6 +22,7 @@
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
+				<?php echo  $this->getHookVar('toolbar_pre'); ?>
 			    <a class="btn btn-white disabled"><?php echo $balance; ?></a>
 			    <?php if($button_orders_count){ ?>
 			    <a target="_blank"
@@ -50,6 +51,7 @@
                     data-confirmation-text="<?php echo $warning_actonbehalf;?>"
                 <?php } ?>
 			       data-original-title="<?php echo $actas->text; ?>"><i class="fa fa-male"></i></a>
+				<?php echo  $this->getHookVar('toolbar_post'); ?>
 			</div>
 
 			<div class="btn-group mr10 toolbar">
