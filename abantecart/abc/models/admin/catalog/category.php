@@ -110,9 +110,10 @@ class ModelCatalogCategory extends Model
             }
         }
         if (!empty($update)) {
-            $this->db->query("UPDATE ".$this->db->table_name("categories")." 
-                               SET ".implode(',', $update)." 
-                               WHERE category_id = '".(int)$category_id."'");
+            $sql = "UPDATE ".$this->db->table_name("categories")." 
+                   SET ".implode(', ', $update)." 
+                   WHERE category_id = '".(int)$category_id."'";
+            $this->db->query($sql);
         }
 
         if (!empty($data['category_description'])) {
