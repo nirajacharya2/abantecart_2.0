@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
 
 class ControllerResponsesListingGridCustomer extends AController
@@ -58,13 +59,13 @@ class ControllerResponsesListingGridCustomer extends AController
             'start' => ($page - 1) * $limit,
             'limit' => $limit,
         ];
-        if (AHelperUtils::has_value($this->request->get['customer_group'])) {
+        if (H::has_value($this->request->get['customer_group'])) {
             $data['filter']['customer_group_id'] = $this->request->get['customer_group'];
         }
-        if (AHelperUtils::has_value($this->request->get['status'])) {
+        if (H::has_value($this->request->get['status'])) {
             $data['filter']['status'] = $this->request->get['status'];
         }
-        if (AHelperUtils::has_value($this->request->get['approved'])) {
+        if (H::has_value($this->request->get['approved'])) {
             $data['filter']['approved'] = $this->request->get['approved'];
         }
 
@@ -237,6 +238,7 @@ class ControllerResponsesListingGridCustomer extends AController
      *
      * @return null
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function update_field()
     {
@@ -291,13 +293,12 @@ class ControllerResponsesListingGridCustomer extends AController
                         if ($field == 'default' && $address_id) {
                             $this->model_sale_customer->setDefaultAddress($customer_id, $address_id);
                         } else {
-                            if (AHelperUtils::has_value($address_id)) {
+                            if (H::has_value($address_id)) {
                                 $this->model_sale_customer->editAddressField($address_id, $field, $value);
                             } else {
                                 $this->model_sale_customer->editCustomerField($customer_id, $field, $value);
                             }
                         }
-
                     } else {
                         $error = new AError('');
                         return $error->toJSONResponse('VALIDATION_ERROR_406',
@@ -305,7 +306,6 @@ class ControllerResponsesListingGridCustomer extends AController
                                 'error_text'  => $err,
                                 'reset_value' => false,
                             ]);
-
                     }
                 }
             }
@@ -370,6 +370,18 @@ class ControllerResponsesListingGridCustomer extends AController
             case 'email':
                 if (mb_strlen($value) > 96 || !preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $value)) {
                     $this->error = $this->language->get('error_email');
+                }//check unique email
+                else {
+                    $exists = $this->model_sale_customer->getCustomersByEmails([$value]);
+
+                    if ($exists){
+                        foreach($exists as $details) {
+                            if ($details['customer_id'] != $customer_id) {
+                                $this->error = $this->language->get('error_email_exists');
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
             case 'telephone':
@@ -418,7 +430,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     'name_email'     => $this->request->post['term'],
                     'match'          => 'any',
                     'only_customers' => 1,
-                    'exclude'        => (array)$this->request->post['exclude']
+                    'exclude'        => (array)$this->request->post['exclude'],
                 ],
             ];
             $customers = $this->model_sale_customer->getCustomers($filter);
