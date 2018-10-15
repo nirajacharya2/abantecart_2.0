@@ -1005,4 +1005,8 @@
 		<key>entry_duplicate_contact_us</key>
 		<value><![CDATA[Duplicate Contact Enquiries to Messages]]></value>
 	</definition>
+	<definition>
+		<key>entry_allow_order_recalc</key>
+		<value><![CDATA[Allow Order Recalculation on Admin Side]]></value>
+	</definition>
 </definitions>

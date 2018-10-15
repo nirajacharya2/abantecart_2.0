@@ -271,7 +271,7 @@
 					    	<i class="fa fa-refresh"></i>
 						</a>
 						<?php } ?>
-						<?php if ($total_key_count[$total_row['key']] == 1 ) { // do not alloe delete of duplicate keys?>
+						<?php if ($total_key_count[$total_row['key']] == 1 ) { // do not allow delete of duplicate keys?>
 						<a class="remove btn btn-xs btn-danger-alt tooltips"
 						   data-original-title="<?php echo $button_delete; ?>"
 						   data-confirmation="delete" onclick="deleteTotal('<?php echo $total_row['order_total_id']; ?>');">
@@ -361,13 +361,12 @@
 			<a class="btn btn-default save_and_recalc" href="#">
 			<i class="fa fa-save fa-fw"></i><i class="fa fa-refresh fa-fw"></i> <?php echo $button_save.' & '.$text_recalc.' '.$text_all; ?>
 			</a>
-			<?php } ?>			
+			<?php } ?>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
 		</div>
 	</div>
-
 </form>
 
 </div><!-- <div class="tab-content"> -->
@@ -390,10 +389,8 @@
 
 				<div class="mb20">' . $new_total . '
 				</div>
-								
 				<div class="content container-fluid mb20">
 				</div>
-								
 				<div class="text-center mb20">
 					<button class="btn btn-primary lock-on-click">
 					<i class="fa fa-save fa-fw"></i>'. $button_save . '
