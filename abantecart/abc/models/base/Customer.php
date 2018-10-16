@@ -47,7 +47,7 @@ class Customer extends AModelBase
     protected $permissions = [
         self::CLI => ['update', 'delete'],
         self::ADMIN => ['update', 'delete'],
-        self::CUSTOMER => ['save']
+        self::CUSTOMER => ['update', 'save']
     ];
 
     protected $casts = [
