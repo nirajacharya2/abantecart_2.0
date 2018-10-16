@@ -197,14 +197,14 @@ class ModelExtensionGdpr extends Model
             'customer_id' => 'customer_id',
             'name'        => "CONCAT(firstname, ' ', lastname )",
             'type'        => 'request_type',
-            'date_added'  => 'date_added',
+            'date_modified'  => 'date_modified',
         ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
         } else {
             //for faster SQL default to ID based order
-            $sql .= " ORDER BY date_added";
+            $sql .= " ORDER BY date_modified";
         }
 
         if (isset($data['order']) && ($data['order'] == 'DESC')) {
