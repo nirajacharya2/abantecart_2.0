@@ -690,6 +690,18 @@ class ModelToolImportProcess extends Model
             //check if image is absolute path or remote URL
             $host = parse_url($source, PHP_URL_HOST);
             $image_basename = basename($source);
+            //if url does not contains file extension - try to get mime type from url directly
+            if ($host !== null && !pathinfo($image_basename, PATHINFO_EXTENSION)) {
+                $mime = $this->getRemoteImageMime($source);
+                if (strpos($mime, 'image') !== false) {
+                    $ext = strtolower(substr($mime, 6));
+                    $image_basename .= '.'.$ext;
+                } else {
+                    $this->toLog("Error: Unable to recognize file ".$source." as image. Response mime type: ".$mime);
+                    continue;
+                }
+            }
+
             $target = ABC::env('DIR_RESOURCES').$rm->getTypeDir().'/'.$image_basename;
             if (!is_dir(ABC::env('DIR_RESOURCES').$rm->getTypeDir())) {
                 @mkdir(ABC::env('DIR_RESOURCES').$rm->getTypeDir(), 0777);
@@ -738,6 +750,12 @@ class ModelToolImportProcess extends Model
         }
 
         return true;
+    }
+
+    protected function getRemoteImageMime($url)
+    {
+        $size = @getimagesize($url);
+        return $size['mime'];
     }
 
     /**
