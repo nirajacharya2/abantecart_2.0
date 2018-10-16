@@ -56,6 +56,7 @@ class ABC extends ABCBase
             );
         }
 
+        @include __DIR__.DS.'init'.DS.'version.php';
         //load config and classmap from abc/config and extensions/*/config directories
         self::loadConfig($stage_name);
         //register autoloader
