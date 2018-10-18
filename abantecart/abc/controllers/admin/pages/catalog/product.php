@@ -620,13 +620,13 @@ class ControllerPagesCatalogProduct extends AController
         if ($this->data['status'] === null) {
             $this->data['status'] = 1;
         }
-        if ($this->data['quantity'] == null) {
+        if ($this->data['quantity'] === null) {
             $this->data['quantity'] = 1;
         }
         if ($this->data['minimum'] == null) {
             $this->data['minimum'] = 1;
         }
-        if ($this->data['sort_order'] == null) {
+        if ($this->data['sort_order'] === null) {
             $this->data['sort_order'] = 1;
         }
 
