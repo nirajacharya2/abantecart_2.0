@@ -2166,6 +2166,8 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
+        $this->data['cancel'] =  $this->html->getSecureURL('sale/customer');
+
         $this->data['recalc_totals_url'] = $this->html->getSecureURL('r/sale/order', '&action=recalc_totals');
         $this->data['get_shippings_url'] = $this->html->getSecureURL('r/sale/order', '&action=get_shippings');
         $this->data['get_payments_url'] = $this->html->getSecureURL('r/sale/order', '&action=get_payments');
