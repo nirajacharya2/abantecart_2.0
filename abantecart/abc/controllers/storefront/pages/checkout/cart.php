@@ -84,6 +84,8 @@ class ControllerPagesCheckoutCart extends AController
 
                 //remove product with button click.
                 $this->cart->remove($this->request->get['remove']);
+                //remove coupon
+                unset($this->session->data['coupon']);
                 $this->extensions->hk_ProcessData($this, 'remove_product');
                 abc_redirect($this->html->getSecureURL($cart_rt));
 
