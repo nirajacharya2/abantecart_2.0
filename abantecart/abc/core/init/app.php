@@ -36,7 +36,6 @@ mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
 
 // AbanteCart Version
-include('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
 // Detect if localhost is used.
 if (!isset($_SERVER['HTTP_HOST'])) {

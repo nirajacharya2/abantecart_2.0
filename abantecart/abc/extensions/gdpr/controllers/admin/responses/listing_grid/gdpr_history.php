@@ -106,7 +106,7 @@ class ControllerResponsesListingGridGdprHistory extends AController
 
             $response->rows [$i] ['cell'] = [
                 $result['id'],
-                $result ['date_added'],
+                $result ['date_modified'],
                 $type,
                 $result ['name'],
                 $result ['user_agent'],
