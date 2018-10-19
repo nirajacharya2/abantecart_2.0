@@ -22,8 +22,8 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\models\admin\ModelCatalogManufacturer;
+use H;
 
 /**
  * Class ControllerPagesCatalogManufacturer
@@ -52,17 +52,17 @@ class ControllerPagesCatalogManufacturer extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/manufacturer'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('success', $this->session->data['success']);
@@ -70,7 +70,7 @@ class ControllerPagesCatalogManufacturer extends AController
             unset($this->session->data['success']);
         }
 
-        $grid_settings = array(
+        $grid_settings = [
             'table_id'         => 'manufacturer_grid',
             'url'              => $this->html->getSecureURL('listing_grid/manufacturer'),
             'editurl'          => $this->html->getSecureURL('listing_grid/manufacturer/update'),
@@ -78,69 +78,69 @@ class ControllerPagesCatalogManufacturer extends AController
             'sortname'         => 'sort_order',
             'sortorder'        => 'asc',
             'drag_sort_column' => 'sort_order',
-            'actions'          => array(
-                'edit'   => array(
+            'actions'          => [
+                'edit'   => [
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=%ID%'),
-                    'children' => array_merge(array(
-                        'quickview' => array(
+                    'children' => array_merge([
+                        'quickview' => [
                             'text'  => $this->language->get('text_quick_view'),
                             'href'  => $this->html->getSecureURL('catalog/manufacturer/update',
                                 '&manufacturer_id=%ID%'),
                             //quick view port URL
                             'vhref' => $this->html->getSecureURL('r/common/viewport/modal',
                                 '&viewport_rt=catalog/manufacturer/update&manufacturer_id=%ID%'),
-                        ),
-                        'general'   => array(
+                        ],
+                        'general'   => [
                             'text' => $this->language->get('entry_edit'),
                             'href' => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=%ID%'),
-                        ),
-                        'layout'    => array(
+                        ],
+                        'layout'    => [
                             'text' => $this->language->get('entry_layout'),
                             'href' => $this->html->getSecureURL('catalog/manufacturer_layout', '&manufacturer_id=%ID%'),
-                        ),
-                    ), (array)$this->data['grid_edit_expand']),
-                ),
-                'save'   => array(
+                        ],
+                    ], (array)$this->data['grid_edit_expand']),
+                ],
+                'save'   => [
                     'text' => $this->language->get('button_save'),
-                ),
-                'delete' => array(
+                ],
+                'delete' => [
                     'text' => $this->language->get('button_delete'),
-                ),
-            ),
+                ],
+            ],
             'grid_ready'       => 'grid_ready(data);',
-        );
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             '',
             $this->language->get('column_name'),
             $this->language->get('column_sort_order'),
-        );
-        $grid_settings['colModel'] = array(
-            array(
+        ];
+        $grid_settings['colModel'] = [
+            [
                 'name'     => 'image',
                 'index'    => 'image',
                 'align'    => 'center',
                 'width'    => 50,
                 'sortable' => false,
                 'search'   => false,
-            ),
-            array(
+            ],
+            [
                 'name'  => 'name',
                 'index' => 'name',
                 'width' => 600,
                 'align' => 'center',
-            ),
-            array(
+            ],
+            [
                 'name'   => 'sort_order',
                 'index'  => 'sort_order',
                 'width'  => 100,
                 'align'  => 'center',
                 'search' => false,
-            ),
-        );
+            ],
+        ];
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
         if ($this->config->get('config_embed_status')) {
@@ -223,7 +223,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    protected function getForm($args = array())
+    protected function getForm($args = [])
     {
 
         $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
@@ -232,20 +232,21 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('error_name', $this->error['name']);
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/manufacturer'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
-        ));
+        ]);
 
         $this->view->assign('cancel', $this->html->getSecureURL('catalog/manufacturer'));
 
         $manufacturer_id = (int)$this->request->get['manufacturer_id'];
+        $this->data['manufacturer_id'] = $manufacturer_id;
 
         if ($manufacturer_id && $this->request->is_GET()) {
             $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
@@ -269,10 +270,10 @@ class ControllerPagesCatalogManufacturer extends AController
             $this->data['manufacturer_store'] =
                 $this->model_catalog_manufacturer->getManufacturerStores($manufacturer_id);
         } else {
-            $this->data['manufacturer_store'] = array(0);
+            $this->data['manufacturer_store'] = [0];
         }
 
-        $stores = array(0 => $this->language->get('text_default'));
+        $stores = [0 => $this->language->get('text_default')];
         foreach ($this->data['stores'] as $s) {
             $stores[$s['store_id']] = $s['name'];
         }
@@ -301,68 +302,70 @@ class ControllerPagesCatalogManufacturer extends AController
                 'catalog/manufacturer/update',
                 '&manufacturer_id='.$manufacturer_id
             );
-            $this->data['tab_edit'] = $this->language->get('entry_edit');
-            $this->data['tab_layout'] = $this->language->get('entry_layout');
-            $this->data['manufacturer_layout'] = $this->html->getSecureURL(
-                'catalog/manufacturer_layout',
-                '&manufacturer_id='.$manufacturer_id
-            );
+
+            if($manufacturer_id) {
+                $this->data['active'] = 'general';
+                //load tabs controller
+                $tabs_obj = $this->dispatch('pages/catalog/manufacturer_tabs', [$this->data]);
+                $this->data['tabs'] = $tabs_obj->dispatchGetOutput();
+                unset($tabs_obj);
+            }
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->data['action'],
             'text'      => $this->data['heading_title'],
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'editFrm',
             'update'    => $this->data['update'],
-        ));
+        ]);
 
         $this->data['form']['id'] = 'editFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['form']['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'editFrm',
             'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
             'action' => $this->data['action'],
-        ));
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_save'),
             'style' => 'button1',
-        ));
-        $this->data['form']['cancel'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'cancel',
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['name'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'name',
             'value'    => $this->data['name'],
             'required' => true,
             'style'    => 'large-field',
-        ));
-        $this->data['form']['fields']['general']['manufacturer_store'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['general']['manufacturer_store'] = $form->getFieldHtml([
             'type'    => 'checkboxgroup',
             'name'    => 'manufacturer_store[]',
             'value'   => $this->data['manufacturer_store'],
             'options' => $stores,
             'style'   => 'chosen',
-        ));
+        ]);
 
-        $this->data['keyword_button'] = $form->getFieldHtml(array(
+        $this->data['keyword_button'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'generate_seo_keyword',
             'text'  => $this->language->get('button_generate'),
             'attr'  => 'type="button"',
             'style' => 'btn btn-info',
-        ));
+        ]);
         $this->data['generate_seo_url'] = $this->html->getSecureURL('common/common/getseokeyword',
             '&object_key_name=manufacturer_id&id='.$manufacturer_id);
 
@@ -370,16 +373,16 @@ class ControllerPagesCatalogManufacturer extends AController
             'type'     => 'input',
             'name'     => 'keyword',
             'value'    => $this->data['keyword'],
-            'attr'     => ' gen-value="'.AHelperUtils::SEOEncode($this->data['category_description']['name']).'" ',
+            'attr'     => ' gen-value="'.H::SEOEncode($this->data['category_description']['name']).'" ',
             'help_url' => $this->gen_help_url('seo_keyword'),
         ]);
 
-        $this->data['form']['fields']['general']['sort_order'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['sort_order'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'sort_order',
             'value' => $this->data['sort_order'],
             'style' => 'small-field',
-        ));
+        ]);
 
         $this->view->assign('help_url', $this->gen_help_url('manufacturer_edit'));
 
@@ -396,11 +399,11 @@ class ControllerPagesCatalogManufacturer extends AController
                 'responses/common/resource_library_scripts.tpl');
             $resources_scripts = $this->dispatch(
                 'responses/common/resource_library/get_resources_scripts',
-                array(
+                [
                     'object_name' => 'manufacturers',
                     'object_id'   => $manufacturer_id,
-                    'types'       => array('image', 'audio', 'video', 'pdf'),
-                )
+                    'types'       => ['image', 'audio', 'video', 'pdf'],
+                ]
             );
             $this->view->assign('resources_scripts', $resources_scripts->dispatchGetOutput());
             $tpl = 'pages/catalog/manufacturer_form.tpl';

@@ -23,7 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AException;
 
-class ControllerPagesCatalogCategoryTabs extends AController
+class ControllerPagesCatalogManufacturerTabs extends AController
 {
 
     public $data = [];
@@ -39,20 +39,20 @@ class ControllerPagesCatalogCategoryTabs extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadLanguage('catalog/category');
-        $category_id = $this->data['category_id'];
+        $this->loadLanguage('catalog/manufacturer');
+        $manufacturer_id = $this->data['manufacturer_id'];
 
         $groups = [
-            'general'    => 'catalog/category/update',
-            'data'       => 'catalog/category/update',
-            'layout'     => 'catalog/category/edit_layout',
+            'general'    => 'catalog/manufacturer/update',
+            'layout'     => 'catalog/manufacturer_layout',
         ];
 
         foreach($groups as $group => $group_rt){
             $text_key = 'tab_'.$group;
+            $text_key = $group == 'layout' ? 'entry_layout' : $text_key;
             $this->data['groups'][$group] = [
-                                'text' => $this->language->get($text_key),
-                                'href' => $this->html->getSecureURL($group_rt, '&category_id='.$category_id).'#'.$group
+                        'text' => $this->language->get($text_key),
+                        'href' => $this->html->getSecureURL($group_rt, '&manufacturer_id='.$manufacturer_id).'#'.$group
             ];
         }
 

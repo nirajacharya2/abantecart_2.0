@@ -23,7 +23,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ALayoutManager;
 use abc\models\admin\ModelCatalogCategory;
 use H;
@@ -565,11 +564,13 @@ class ControllerPagesCatalogCategory extends AController
                 'style' => 'small-field',
             ]);
 
-        $this->data['active'] = 'general';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/category_tabs', [$this->data]);
-        $this->data['category_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        if($category_id) {
+            $this->data['active'] = 'general';
+            //load tabs controller
+            $tabs_obj = $this->dispatch('pages/catalog/category_tabs', [$this->data]);
+            $this->data['category_tabs'] = $tabs_obj->dispatchGetOutput();
+            unset($tabs_obj);
+        }
 
         if ($category_id && $this->config->get('config_embed_status')) {
             $this->data['embed_url'] =
