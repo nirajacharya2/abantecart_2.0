@@ -88,6 +88,26 @@
 								<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
 							<?php } ?>
 						</div>
+						<?php
+								if ($product['in_wishlist']) {
+											$whislist = ' style="display: none;" ';
+											$nowhislist = '';
+										} else {
+											$nowhislist = ' style="display: none;" ';
+											$whislist = '';
+										}
+							?>
+						<?php
+							if ($is_customer) { ?>
+						<div class="wishlist-in-category">
+							<a class="wishlist_remove btn btn-large" id="wishlist_remove<?php echo $product['product_id']; ?>" href="#" onclick="wishlist_remove('<?php echo $product['product_wishlist_remove_url']; ?>', <?php echo $product['product_id']; ?>); return false;" <?php echo $nowhislist; ?>>
+							<i class="fa fa-heart fa-fw"></i>
+							</a>
+							<a class="wishlist_add btn btn-large" id="wishlist_add<?php echo $product['product_id']; ?>" href="#" onclick="wishlist_add('<?php echo $product['product_wishlist_add_url']; ?>', <?php echo $product['product_id']; ?>); return false;" <?php echo $whislist; ?>>
+							<i class="fa fa-heart-o fa-fw"></i>
+							</a>
+						</div>
+						<?php } ?>
 						<?php echo $this->getHookvar('product_listing_details1_'.$product['product_id']);?>
 					</div>
 				<?php } ?>

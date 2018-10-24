@@ -62,4 +62,71 @@ function Resort() {
 	url += '&limit=' + $('#limit').val();
 	location = url;
 }
+
+function wishlist_add(product_wishlist_add_url, product_id) {
+	var dismiss = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+	$.ajax({
+		type: 'POST',
+		url: product_wishlist_add_url,
+		dataType: 'json',
+		beforeSend: function () {
+			$('.success, .warning').remove();
+			$('#wishlist_add'+product_id).hide();
+			$('.wishlist').after('<div class="wait"><i class="fa fa-spinner fa-spin"></i> <?php echo $text_wait; ?></div>');
+		},
+		complete: function () {
+			$('.wait').remove();
+		},
+		error: function (jqXHR, exception) {
+			var text = jqXHR.statusText + ": " + jqXHR.responseText;
+			$('.wishlist .alert').remove();
+			$('.wishlist').after('<div class="alert alert-error alert-danger">' + dismiss + text + '</div>');
+			$('#wishlist_add'+product_id).show();
+		},
+		success: function (data) {
+			if (data.error) {
+				$('.wishlist .alert').remove();
+				$('.wishlist').after('<div class="alert alert-error alert-danger">' + dismiss + data.error + '</div>');
+				$('#wishlist_add'+product_id).show();
+			} else {
+				$('.wishlist .alert').remove();
+				$('#wishlist_remove'+product_id).show();
+			}
+		}
+	});
+}
+
+function wishlist_remove(product_wishlist_remove_url, product_id) {
+	var dismiss = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+	$.ajax({
+		type: 'POST',
+		url: product_wishlist_remove_url,
+		dataType: 'json',
+		beforeSend: function () {
+			$('.success, .warning').remove();
+			$('#wishlist_remove'+product_id).hide();
+			$('.wishlist').after('<div class="wait"><i class="fa fa-spinner fa-spin"></i> <?php echo $text_wait; ?></div>');
+		},
+		complete: function () {
+			$('.wait').remove();
+		},
+		error: function (jqXHR, exception) {
+			var text = jqXHR.statusText + ": " + jqXHR.responseText;
+			$('.wishlist .alert').remove();
+			$('.wishlist').after('<div class="alert alert-error alert-danger">' + dismiss + text + '</div>');
+			$('#wishlist_remove'+product_id).show();
+		},
+		success: function (data) {
+			if (data.error) {
+				$('.wishlist .alert').remove();
+				$('.wishlist').after('<div class="alert alert-error alert-danger">' + dismiss + data.error + '</div>');
+				$('#wishlist_remove'+product_id).show();
+			} else {
+				$('.wishlist .alert').remove();
+				//$('.wishlist').after('<div class="alert alert-success">' + dismiss + data.success + '</div>');
+				$('#wishlist_add'+product_id).show();
+			}
+		}
+	});
+}
 </script>
