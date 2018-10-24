@@ -88,23 +88,16 @@
 								<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
 							<?php } ?>
 						</div>
-						<?php
-								if ($product['in_wishlist']) {
-											$whislist = ' style="display: none;" ';
-											$nowhislist = '';
-										} else {
-											$nowhislist = ' style="display: none;" ';
-											$whislist = '';
-										}
-							?>
-						<?php
-							if ($is_customer) { ?>
+						<?php if ($is_customer) { ?>
 						<div class="wishlist-in-category">
-							<a class="wishlist_remove btn btn-large" id="wishlist_remove<?php echo $product['product_id']; ?>" href="#" onclick="wishlist_remove('<?php echo $product['product_wishlist_remove_url']; ?>', <?php echo $product['product_id']; ?>); return false;" <?php echo $nowhislist; ?>>
+							<a class="wishlist_change btn btn-large" data-product-id="<?php echo $product['product_id']; ?>" data-remove-url="<?php echo $product['product_wishlist_remove_url'];?>"
+							   data-add-url="<?php echo $product['product_wishlist_add_url']; ?>" data-in-wishlist="<?php if ($product['in_wishlist']) { echo $product['in_wishlist']; } else { echo 'false';}?>"
+							   href="#" <?php echo $nowhislist; ?>>
+							<?php if ($product['in_wishlist']) { ?>
 							<i class="fa fa-heart fa-fw"></i>
-							</a>
-							<a class="wishlist_add btn btn-large" id="wishlist_add<?php echo $product['product_id']; ?>" href="#" onclick="wishlist_add('<?php echo $product['product_wishlist_add_url']; ?>', <?php echo $product['product_id']; ?>); return false;" <?php echo $whislist; ?>>
+							<?php } else { ?>
 							<i class="fa fa-heart-o fa-fw"></i>
+							<?php }  ?>
 							</a>
 						</div>
 						<?php } ?>
@@ -201,6 +194,21 @@
 									<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
 								<?php } ?>
 							</div>
+
+							<?php
+							if ($is_customer) { ?>
+							<div class="wishlist-in-category">
+								<a class="wishlist_change btn btn-large" data-product-id="<?php echo $product['product_id']; ?>" data-remove-url="<?php echo $product['product_wishlist_remove_url'];?>"
+								   data-add-url="<?php echo $product['product_wishlist_add_url']; ?>" data-in-wishlist="<?php if ($product['in_wishlist']) { echo $product['in_wishlist']; } else { echo 'false';}?>"
+								   href="#" <?php echo $nowhislist; ?>>
+								<?php if ($product['in_wishlist']) { ?>
+								<i class="fa fa-heart fa-fw"></i>
+								<?php } else { ?>
+								<i class="fa fa-heart-o fa-fw"></i>
+								<?php }  ?>
+								</a>
+							</div>
+							<?php } ?>
 						</div>
 						<?php } ?>
 						<?php echo $this->getHookvar('product_listing_details11_'.$product['product_id']);?>
