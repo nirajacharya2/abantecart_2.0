@@ -61,11 +61,10 @@ class ControllerPagesCatalogProductTabs extends AController
                                 'href' => $this->html->getSecureURL($group_rt, '&product_id='.$product_id)
             ];
         }
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->view->batchAssign($this->data);
         $this->processTemplate('common/tabs.tpl');
-
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 }
 
