@@ -89,6 +89,19 @@
 									<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
 								<?php } ?>
 							</div>
+							<?php if ($is_customer) { ?>
+							<div class="wishlist-in-category">
+								<a class="wishlist_change btn btn-large" data-product-id="<?php echo $product['product_id']; ?>" data-remove-url="<?php echo $product['product_wishlist_remove_url'];?>"
+								   data-add-url="<?php echo $product['product_wishlist_add_url']; ?>" data-in-wishlist="<?php if ($product['in_wishlist']) { echo $product['in_wishlist']; } else { echo 'false';}?>"
+								   href="#" <?php echo $nowhislist; ?>>
+								<?php if ($product['in_wishlist']) { ?>
+								<i class="fa fa-heart fa-fw"></i>
+								<?php } else { ?>
+								<i class="fa fa-heart-o fa-fw"></i>
+								<?php }  ?>
+								</a>
+							</div>
+							<?php } ?>
 						</div>
 					<?php
 					}

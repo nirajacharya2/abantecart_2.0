@@ -72,6 +72,13 @@ class ControllerBlocksSpecial extends AController {
 				$this->config->get('config_image_product_height')
 		);
 		$stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
+
+        $this->data['is_customer'] = false;
+        if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
+            $this->data['is_customer'] = true;
+            $whishlist = $this->customer->getWishList();
+        }
+
 		foreach ($results as $result) {
 			$thumbnail = $thumbnails[ $result['product_id'] ];
 			$special = FALSE;
@@ -112,6 +119,11 @@ class ControllerBlocksSpecial extends AController {
 				}
 			}
 
+            $in_wishlist = false;
+            if ($whishlist && $whishlist[$result['product_id']]) {
+                $in_wishlist = true;
+            }
+
 			$this->data['products'][] = array(
 							'product_id'    => $result['product_id'],
 							'name'    		=> $result['name'],
@@ -131,7 +143,16 @@ class ControllerBlocksSpecial extends AController {
 							'no_stock_text' => $no_stock_text,
 							'total_quantity'=> $total_quantity,
 							'date_added'    => $result['date_added'],
-							'tax_class_id'  => $result['tax_class_id']
+							'tax_class_id'  => $result['tax_class_id'],
+                            'in_wishlist'   => $in_wishlist,
+                            'product_wishlist_add_url' => $this->html->getURL(
+                                'product/wishlist/add',
+                                '&product_id='.$result['product_id']
+                            ),
+                            'product_wishlist_remove_url' => $this->html->getURL(
+                                'product/wishlist/remove',
+                                '&product_id='.$result['product_id']
+                            ),
 			);
 		}
 
