@@ -56,10 +56,10 @@ class ControllerPagesCatalogCategoryTabs extends AController
             ];
         }
 
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
         $this->view->batchAssign($this->data);
         $this->processTemplate('common/tabs.tpl');
-
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 }
 
