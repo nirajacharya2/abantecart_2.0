@@ -67,8 +67,13 @@ class ControllerCommonHead extends AController
         $this->data['links'] = $this->document->getLinks();
         $this->data['styles'] = $this->document->getStyles();
         $this->data['scripts'] = $this->document->getScripts();
-        $this->data['notifier_updater_url'] = $this->html->getSecureURL( 'listing_grid/message_grid/getnotifies' );
-        $this->data['system_checker_url'] = $this->html->getSecureURL( 'common/common/checksystem' );
+        if ($this->user->getUserGroupId() == 1) {
+            $this->data['notifier_updater_url'] = $this->html->getSecureURL( 'listing_grid/message_grid/getnotifies' );
+            $this->data['system_checker_url'] = $this->html->getSecureURL('common/common/checksystem');
+            if ( $this->session->data['checkupdates'] ) {
+                $this->data['check_updates_url'] = $this->html->getSecureURL( 'r/common/common/checkUpdates' );
+            }
+        }
         $this->data['language_code'] = $this->session->data['language'];
         $this->data['language_details'] = $this->language->getCurrentLanguage();
         $locale = explode( '.', $this->data['language_details']['locale'] );
@@ -82,10 +87,6 @@ class ControllerCommonHead extends AController
         }
 
         $this->data['message_manager_url'] = $message_link;
-
-        if ( $this->session->data['checkupdates'] ) {
-            $this->data['check_updates_url'] = $this->html->getSecureURL( 'r/common/common/checkUpdates' );
-        }
 
         $this->data['icon'] = $this->config->get( 'config_icon' );
 
