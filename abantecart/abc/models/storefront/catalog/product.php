@@ -313,7 +313,10 @@ class ModelCatalogProduct extends Model
         $cache_key .= '_start_'.$start.'_limit_'.$limit.'_lang_'.$language_id;
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
-
+            //get all children categories
+            $this->load->model('catalog/category');
+            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT *,
                             p.product_id,
                             ".$this->sqlFinalPriceString().",
@@ -328,7 +331,7 @@ class ModelCatalogProduct extends Model
                 ON (p.product_id = p2c.product_id)
             WHERE ".$this->getProductFilters()."
                     AND p2s.store_id = '".$store_id."'
-                    AND p2c.category_id = '".(int)$category_id."'";
+                    AND p2c.category_id in (".$categList.")";
 
             $sort_data = [
                 'pd.name'       => 'LCASE(pd.name)',
@@ -379,6 +382,10 @@ class ModelCatalogProduct extends Model
         $cache_key = 'product.listing.products_by_category.'.(int)$category_id.'.store_'.$store_id;
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
+            //get all children category ids
+            $this->load->model('catalog/category');
+            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $query = $this->db->query("SELECT COUNT(*) AS total
                                     FROM ".$this->db->table_name("products_to_categories")." p2c
                                     LEFT JOIN ".$this->db->table_name("products")." p 
@@ -386,7 +393,7 @@ class ModelCatalogProduct extends Model
                                     LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s 
                                         ON (p.product_id = p2s.product_id)
                                     WHERE 
-                                        p2c.category_id = '".(int)$category_id."'
+                                        p2c.category_id in (".$categList.")
                                         AND ".$this->getProductFilters()."
                                         AND p2s.store_id = '".$store_id."'"
             );
