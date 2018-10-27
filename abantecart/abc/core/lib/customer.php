@@ -938,6 +938,19 @@ class ACustomer extends ALibBase
             }
         }
 
+        //check if this is not a duplicate transaction
+        $sql = "SELECT customer_transaction_id
+                     FROM ".$this->db->table_name("customer_transactions")." c
+                     WHERE customer_id = '".(int)$this->getId()."'
+                        AND order_id = '".(int)$tr_details['order_id']."'
+                        AND transaction_type = '".$this->db->escape($tr_details['transaction_type'])."'
+                        AND '". $amount ."'
+                ";
+        $trnData = $this->db->query($sql);
+        if ($trnData->num_rows) {
+            return true;
+        }
+
         $this->db->query("INSERT INTO ".$this->db->table_name("customer_transactions")."
                         SET customer_id = '".(int)$this->getId()."',
                             order_id = '".(int)$tr_details['order_id']."',
