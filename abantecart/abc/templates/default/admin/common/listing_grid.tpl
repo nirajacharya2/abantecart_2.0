@@ -223,6 +223,11 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 				$(table_id + '_wrapper .no_results').hide();
 			}
 
+			//Hide Pager on treeGreed
+			if($(table_id).find(".tree-wrap").length){
+				$(table_id + '_pager .ui-paging-info').hide();
+			}
+
 			//add wrappers to the fields
 			$(table_id).find("input:not( input.cbox ), textarea, select").each(function () {
 				$.aform.styleGridForm(this);
