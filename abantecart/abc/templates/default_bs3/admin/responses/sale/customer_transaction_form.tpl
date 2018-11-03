@@ -96,6 +96,7 @@
 					<?php }else{ ?>
 						success_alert(data.result_text, true, "#transaction_modal");
 					<?php } ?>
+					location = window.location;
 				}
 			},
 			error: function (jqXHR, textStatus, errorThrown) {
