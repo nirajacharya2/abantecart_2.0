@@ -231,6 +231,7 @@ class ControllerPagesDesignMenu extends AController{
 
 		if(($this->request->is_POST()) && $this->_validateForm($this->request->post)){
 			$post = $this->request->post;
+			AHelperUtils::df($post);
 			if(isset ($post['item_icon'])){
 				$post['item_icon'] = html_entity_decode($post['item_icon'], ENT_COMPAT, ABC::env('APP_CHARSET'));
 			}
@@ -263,6 +264,8 @@ class ControllerPagesDesignMenu extends AController{
 				unset($update_item['item_icon_resource_id']);
 
 				// set condition for updating row
+                AHelperUtils::df($item_id);
+                AHelperUtils::df($update_item);
 				$this->menu->updateMenuItem($item_id, $update_item);
 			}
 
@@ -510,9 +513,10 @@ class ControllerPagesDesignMenu extends AController{
 
 		if(!empty($post['item_id'])){
 			$ids = $this->menu->getItemIds();
-			if(!ctype_alnum($post['item_id'])){
+		/*	if(!ctype_alnum($post['item_id'])){
 				$this->error['item_id'] = $this->language->get('error_non_ascii');
-			} else if(in_array($post['item_id'], $ids)){
+			} else */
+		if(in_array($post['item_id'], $ids)){
 				$this->error['item_id'] = $this->language->get('error_non_unique');
 			}
 		}

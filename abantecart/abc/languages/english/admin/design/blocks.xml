@@ -233,6 +233,10 @@
 		<value><![CDATA[ Block Creation Date ]]></value>
 	</definition>
 	<definition>
+		<key>text_menu_nav</key>
+		<value><![CDATA[ Nav menu ]]></value>
+	</definition>
+	<definition>
 		<key>text_layouts</key>
 		<value><![CDATA[ Used in layouts ]]></value>
 	</definition>

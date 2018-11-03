@@ -21,16 +21,20 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
+use abc\core\lib\AMenu_Storefront;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
 class ControllerPagesDesignBlocks extends AController {
-	public $data = array('custom_block_types' => array('html_block', 'listing_block'));
-	public $error = array();
+	public $data = ['custom_block_types' =>
+                        ['html_block', 'listing_block', 'menu_nav']
+                    ];
+	public $error = [];
 
 	public function main() {
 
@@ -217,6 +221,9 @@ class ControllerPagesDesignBlocks extends AController {
 
 					$content = serialize($content);
 					break;
+                case 'menu_nav':
+                    $content = $this->request->post['menu_items'];
+                    break;
 				case 'html_block':
 					$content = $this->request->post['block_content'];
 					break;
@@ -282,6 +289,9 @@ class ControllerPagesDesignBlocks extends AController {
 			case 'listing_block':
 				$this->_getListingForm();
 				break;
+            case 'menu_nav':
+                $this->_getMenuNavForm();
+                break;
 			case 'html_block':
 			default:
 				$this->_getHTMLForm();
@@ -303,6 +313,7 @@ class ControllerPagesDesignBlocks extends AController {
 		} else {
 			$custom_block_id = (int)$this->request->get['custom_block_id'];
 		}
+
 
 		// now need to know what custom block is this
 		$lm = new ALayoutManager();
@@ -356,6 +367,9 @@ class ControllerPagesDesignBlocks extends AController {
 					}
 					$content = serialize($content);
 					break;
+                case 'menu_nav':
+                    $content = $this->request->post['menu_items'];
+                    break;
 				case 'html_block':
 					$content = $this->request->post['block_content'];
 					break;
@@ -411,6 +425,9 @@ class ControllerPagesDesignBlocks extends AController {
 		switch ($block_txt_id) {
 			case 'listing_block':
 				$this->_getListingForm();
+				break;
+			case 'menu_nav':
+				$this->_getMenuNavForm();
 				break;
 			case 'html_block':
 			default:
@@ -677,8 +694,216 @@ class ControllerPagesDesignBlocks extends AController {
 		$this->processTemplate('pages/design/blocks_form.tpl');
 	}
 
+    private function _getMenuNavForm() {
 
-	private function _getListingForm() {
+        if (isset ($this->session->data['warning'])) {
+            $this->data ['error_warning'] = $this->session->data['warning'];
+            $this->session->data['warning'] = '';
+        } else {
+            $this->data ['error_warning'] = '';
+        }
+
+
+        $this->view->assign('success', $this->session->data['success']);
+        if (isset($this->session->data['success'])) {
+            unset($this->session->data['success']);
+        }
+
+        $this->document->initBreadcrumb(array('href' => $this->html->getSecureURL('index/home'),
+                                              'text' => $this->language->get('text_home'),
+                                              'separator' => FALSE));
+        $this->document->addBreadcrumb(array('href' => $this->html->getSecureURL('design/blocks'),
+                                             'text' => $this->language->get('heading_title'),
+                                             'separator' => ' :: '));
+
+        $this->data ['cancel'] = $this->html->getSecureURL('design/blocks');
+
+        if (!isset ($this->request->get ['custom_block_id'])) {
+            $this->data ['action'] = $this->html->getSecureURL('design/blocks/insert');
+            $this->data ['heading_title'] = $this->language->get('text_create','design/blocks');
+            $this->data ['update'] = '';
+            $form = new AForm ('ST');
+        } else {
+            $this->data ['action'] = $this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $this->request->get ['custom_block_id']);
+            $this->data ['heading_title'] = $this->language->get('text_edit') . ' ' . $this->data['name'];
+            $this->data ['update'] = $this->html->getSecureURL('listing_grid/blocks_grid/update_field', '&custom_block_id=' . $this->request->get ['custom_block_id']);
+            $form = new AForm ('HS');
+        }
+
+        $this->document->addBreadcrumb(array('href' => $this->data['action'],
+                                             'text' => $this->data['heading_title'],
+                                             'separator' => ' :: ',
+                                             'current' => true
+        ));
+
+        $form->setForm(array('form_name' => 'BlockFrm', 'update' => $this->data ['update']));
+
+        $this->data['form']['form_open'] = $form->getFieldHtml(array('type' => 'form',
+                                                                     'name' => 'BlockFrm',
+                                                                     'attr' => 'data-confirm-exit="true"',
+                                                                     'action' => $this->data ['action']));
+        $this->data['form']['submit'] = $form->getFieldHtml(array('type' => 'button',
+                                                                  'name' => 'submit',
+                                                                  'text' => $this->language->get('button_save'), 'style' => 'button1'));
+        $this->data['form']['cancel'] = $form->getFieldHtml(array('type' => 'button',
+                                                                  'name' => 'cancel',
+                                                                  'text' => $this->language->get('button_cancel'), 'style' => 'button2'));
+
+
+        if (isset($this->request->get['custom_block_id'])) {
+            $this->data['form']['fields']['block_status'] = $form->getFieldHtml(array('type' => 'checkbox',
+                                                                                      'name' => 'block_status',
+                                                                                      'value' => $this->data['status'],
+                                                                                      'style' => 'btn_switch status_switch'));
+            $this->data['entry_block_status'] = $this->html->convertLinks($this->language->get('entry_block_status'));
+            $this->data['form']['fields']['block_status_note'] = '';
+            $this->data['entry_block_status_note'] = $this->html->convertLinks($this->language->get('entry_block_status_note'));
+        }
+
+        $default_block_type = '';
+        $lm = new ALayoutManager();
+        foreach ($this->data['custom_block_types'] as $txt_id) {
+            $block = $lm->getBlockByTxtId($txt_id);
+            if ($block['block_id']) {
+                $blocks[$block['block_id']] = $this->language->get('text_' . $txt_id);
+                if ($txt_id == 'menu_nav') {
+                    $default_block_type = $block['block_id'];
+                }
+            }
+        }
+
+        $this->data['form']['fields']['block_name'] = $form->getFieldHtml(array('type' => 'hidden',
+                                                                                'name' => 'block_id',
+                                                                                'value' => $default_block_type));
+        $this->data['form']['fields']['block_name'] .= $form->getFieldHtml(array(
+            'type' => 'input',
+            'name' => 'block_name',
+            'value' => $this->data['name'],
+            'required' => true,
+            'multilingual' => true,
+        ));
+        $this->data['form']['text']['block_name'] = $this->language->get('entry_block_name');
+
+        $this->data['form']['fields']['block_title'] = $form->getFieldHtml(array('type' => 'input',
+                                                                                 'name' => 'block_title',
+                                                                                 'required' => true,
+                                                                                 'value' => $this->data ['title'],
+                                                                                 'multilingual' => true,
+        ));
+        $this->data['form']['text']['block_title'] = $this->language->get('entry_block_title');
+
+        // list of templates for block
+        $tmpl_ids = $this->extensions->getInstalled('template');
+        $tmpl_ids[] = 'default';
+
+        $this->data['block_wrappers'] = array();
+        foreach ($tmpl_ids as $tmpl_id) {
+            // for tpls of block that stores in db
+            $layout_manager = new ALayoutManager($tmpl_id);
+            $block = $layout_manager->getBlockByTxtId('menu_nav');
+            $block_templates = (array)$layout_manager->getBlockTemplates($block['block_id']);
+            foreach ($block_templates as $item) {
+                if ($item['template']) {
+                    $this->data['block_wrappers'][$item['template']] = $item['template'];
+                }
+            }
+        }
+
+        //Automatic block template selection mode based on parent is limited to 1 template per location
+        //To extend, allow custom block's template to be selected to suppress automatic selection
+
+        //for tpls that stores in main.php (other extensions templates)
+        $ext_tpls = $this->extensions->getExtensionTemplates();
+        foreach ($ext_tpls as $section) {
+            foreach ($section as $s => $tpls) {
+                if ($s != 'storefront') {
+                    continue;
+                }
+                foreach ($tpls as $tpl) {
+                    if (isset($this->data['block_wrappers'][$tpl]) || strpos($tpl, 'blocks/html__block/') === false) {
+                        continue;
+                    }
+                    $this->data['block_wrappers'][$tpl] = $tpl;
+                }
+            }
+        }
+
+        $tpls = glob(ABC::env('DIR_TEMPLATES') . '*/storefront/blocks/menu_nav/*.tpl');
+        foreach ($tpls as $tpl) {
+            $pos = strpos($tpl, 'blocks/menu_nav/');
+            $tpl = substr($tpl, $pos);
+            if (!isset($this->data['block_wrappers'][$tpl])) {
+                $this->data['block_wrappers'][$tpl] = $tpl;
+            }
+        }
+
+        ksort($this->data['block_wrappers']);
+        array_unshift($this->data['block_wrappers'], $this->language->get('text_automatic'));
+
+        $this->data['form']['fields']['block_wrapper'] = $form->getFieldHtml(
+            array(
+                'type' => 'selectbox',
+                'name' => 'block_wrapper',
+                'options' => $this->data['block_wrappers'],
+                'value' => $this->data['block_wrapper'],
+            ));
+        $this->data['form']['text']['block_wrapper'] = $this->language->get('entry_block_wrapper');
+
+        $this->data['form']['fields']['block_description'] = $form->getFieldHtml(
+            array(
+                'type' => 'textarea',
+                'name' => 'block_description',
+                'value' => $this->data ['description'],
+                'attr' => ' style="height: 50px;"',
+                'multilingual' => true,
+            ));
+        $this->data['form']['text']['block_description'] = $this->language->get('entry_block_description');
+
+        $menu = new AMenu_Storefront();
+        $menuTopItems = $menu->getMenuItems();
+        $menuOptions = [];
+        foreach ($menuTopItems as $menuTopItem) {
+              foreach ($menuTopItem as $item) {
+                  if (!$item['parent_id']) {
+                      $menuOptions[$item['item_id']] = $item['item_text'][$this->language->getContentLanguageID()];
+                  }
+              }
+        }
+
+
+        $this->data['form']['fields']['menu_items'] = $form->getFieldHtml(
+            array(
+                'type' => 'selectbox',
+                'name' => 'menu_items',
+                'value' => $this->data ['content'],
+                'options' => $menuOptions,
+            ));
+
+        $this->data['form']['text']['menu_items'] = $this->language->get('entry_menu_items');
+
+
+        $this->view->batchAssign($this->language->getASet());
+        $this->view->batchAssign($this->data);
+        $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
+        $this->view->assign('language_code', $this->session->data['language']);
+        $this->view->assign('help_url', $this->gen_help_url('block_edit'));
+
+        $this->addChild('responses/common/resource_library/get_resources_html', 'resources_html', 'responses/common/resource_library_scripts.tpl');
+        $resources_scripts = $this->dispatch(
+            'responses/common/resource_library/get_resources_scripts',
+            array(
+                'object_name' => '',
+                'object_id' => '',
+                'types' => array('image'),
+            )
+        );
+        $this->view->assign('resources_scripts', $resources_scripts->dispatchGetOutput());
+        $this->view->assign('rl', $this->html->getSecureURL('common/resource_library', '&action=list_library&object_name=&object_id&type=image&mode=single'));
+
+        $this->processTemplate('pages/design/blocks_form.tpl');
+    }
+
+    private function _getListingForm() {
 
 		if (isset ($this->session->data['warning'])) {
 			$this->data ['error_warning'] = $this->session->data['warning'];

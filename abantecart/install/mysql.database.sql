@@ -10244,7 +10244,8 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 (28, 'breadcrumbs', 'blocks/breadcrumbs', now() ),
 (29, 'account', 'blocks/account', now()),
 (30, 'custom_form_block', 'blocks/custom_form_block', now() ),
-(31, 'customer', 'blocks/customer', now() );
+(31, 'customer', 'blocks/customer', now() ),
+(32, 'menu_nav', 'blocks/menu_nav', now() );
 
 --
 -- DDL for table `ac_custom_blocks`
@@ -10388,7 +10389,12 @@ INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `da
 (30, 6, 'blocks/custom_form_block.tpl', NOW() ),
 (30, 7, 'blocks/custom_form_block_content.tpl', NOW() ),
 (30, 8, 'blocks/custom_form_block_header.tpl', NOW() ),
-(31, 1, 'blocks/customer.tpl', now() );
+(31, 1, 'blocks/customer.tpl', now() ),
+(32, 1, 'blocks/menu_nav.tpl', now() ),
+(32, 2, 'blocks/menu_nav.tpl', now() ),
+(32, 3, 'blocks/menu_nav.tpl', now() ),
+(32, 4, 'blocks/menu_nav.tpl', now() ),
+(32, 5, 'blocks/menu_nav.tpl', now() );
 
 --
 -- DDL for table `layouts`
