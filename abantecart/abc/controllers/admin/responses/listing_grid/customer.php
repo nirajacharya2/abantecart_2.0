@@ -357,6 +357,11 @@ class ControllerResponsesListingGridCustomer extends AController
                     }
                 }
                 break;
+            case 'company' :
+                if (mb_strlen($value) > 32) {
+                    $this->error = $this->language->get('error_company');
+                }
+                break;
             case 'firstname' :
                 if (mb_strlen($value) < 1 || mb_strlen($value) > 32) {
                     $this->error = $this->language->get('error_firstname');

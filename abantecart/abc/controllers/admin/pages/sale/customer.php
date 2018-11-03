@@ -1198,6 +1198,10 @@ class ControllerPagesSaleCustomer extends AController
             $this->error['zone_id'] = $this->language->get('error_zone');
         }
 
+        if ( mb_strlen($this->request->post['company']) > 32 ) {
+            $this->error['company'] = $this->language->get('error_company');
+        }
+
         if (mb_strlen($this->request->post['firstname']) < 1 || mb_strlen($this->request->post['firstname']) > 32) {
             $this->error['firstname'] = $this->language->get('error_firstname');
         }
