@@ -21,10 +21,10 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AUser;
+use H;
 
 
 /**
@@ -58,6 +58,9 @@ class ALayout
      * @var int
      */
     public $page_id;
+
+    const DEFAULT_PAGE_LAYOUT_TYPE = 0;
+    const OTHER_PAGE_LAYOUT_TYPE = 1;
 
     /**
      * @param $registry Registry
@@ -149,12 +152,17 @@ class ALayout
         $this->page = !empty($unique_page) ? $unique_page : $pages[0];
         $this->page_id = $this->page['page_id'];
         //if no page found set default page id 1
+        $layoutType = self::OTHER_PAGE_LAYOUT_TYPE;
         if (empty($this->page_id)) {
             $this->page_id = 1;
         }
+        if ($this->page_id == 1) {
+            //for generic page need to load default layout type
+            $layoutType = self::DEFAULT_PAGE_LAYOUT_TYPE;
+        }
 
         //Get the page layout
-        $layouts = $this->getLayouts(1);
+        $layouts = $this->getLayouts($layoutType);
         if (sizeof($layouts) == 0) {
             //No page specific layout found, load default layout
             $layouts = $this->getDefaultLayout();
@@ -162,7 +170,7 @@ class ALayout
                 // ????? How to terminate ????
                 throw new AException(AC_ERR_LOAD_LAYOUT,
                     'No layout found for page_id/controller '.$this->page_id.'::'.$this->page['controller'].'! '
-                    .AHelperUtils::genExecTrace('full'));
+                    .H::genExecTrace('full'));
             }
         }
 
@@ -300,7 +308,7 @@ class ALayout
      * @return array|null
      * @throws \Exception
      */
-    public function getLayouts($layout_type = '')
+    public function getLayouts($layout_type = null)
     {
         //No page id, not need to be here
         if (empty($this->page_id)) {
@@ -312,13 +320,12 @@ class ALayout
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
         $layouts = $this->cache->pull($cache_key);
         if ($layouts === false) {
-
-            $where = 'WHERE template_id = "'.$this->db->escape($this->tmpl_id).'" ';
+            $where = 'WHERE l.template_id = "'.$this->db->escape($this->tmpl_id).'" ';
             $join = ", ".$this->db->table_name("pages_layouts")." as pl ";
             $where .= " AND pl.page_id = '".(int)$this->page_id."' AND l.layout_id = pl.layout_id ";
 
-            if (!empty($layout_type)) {
-                $where .= empty($layout_type) ? "" : "AND layout_type = '".(int)$layout_type."' ";
+            if (!is_null($layout_type)) {
+                $where .= empty($layout_type) ? "" : "AND l.layout_type = '".(int)$layout_type."' ";
             }
 
             $sql = "SELECT "
@@ -338,7 +345,6 @@ class ALayout
             $layouts = $query->rows;
             $this->cache->push($cache_key, $layouts);
         }
-
         return $layouts;
     }
 
