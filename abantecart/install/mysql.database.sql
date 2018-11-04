@@ -10394,7 +10394,10 @@ INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `da
 (32, 2, 'blocks/menu_nav.tpl', now() ),
 (32, 3, 'blocks/menu_nav.tpl', now() ),
 (32, 4, 'blocks/menu_nav.tpl', now() ),
-(32, 5, 'blocks/menu_nav.tpl', now() );
+(32, 5, 'blocks/menu_nav.tpl', now() ),
+(32, 6, 'blocks/menu_nav.tpl', now() ),
+(32, 7, 'blocks/menu_nav.tpl', now() ),
+(32, 8, 'blocks/menu_nav.tpl', now() );
 
 --
 -- DDL for table `layouts`
