@@ -21,6 +21,7 @@
 namespace abc\models\storefront;
 
 use abc\core\ABC;
+use abc\core\helper\AHelperUtils;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
@@ -970,17 +971,22 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param $limit
+     * @param $options
      *
      * @return array
      * @throws \Exception
      */
-    public function getBestSellerProducts($limit)
+    public function getBestSellerProducts($options)
     {
-        $limit = (int)$limit;
+        $limit = (int)$options['limit'];
+        $order = $options['order'];
+        $start = (int)$options['start'];
+        $sort = $options['sort'];
+        $total = $options['total'];
+
         $language_id = (int)$this->config->get('storefront_language_id');
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'product.bestseller.'.$limit.'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'product.bestseller.'.$limit.'.store_'.$store_id.'_lang_'.$language_id.'_order_'.$order.'_start_'.$start.'_sort_'.$sort.'_total_'.$total;
 
         $product_data = $this->cache->pull($cache_key);
         if ($product_data === false) {
@@ -996,9 +1002,6 @@ class ModelCatalogProduct extends Model
                     WHERE o.order_status_id > '0' AND ".$this->getProductFilters()."
                     GROUP BY op.product_id
                     ORDER BY total DESC";
-            if ((int)$limit) {
-                $sql .= " LIMIT ".(int)$limit;
-            }
             $query = $this->db->query($sql);
 
             if ($query->num_rows) {
@@ -1019,18 +1022,47 @@ class ModelCatalogProduct extends Model
                             WHERE p.product_id IN (".implode(', ', $products).")
                                 AND ".$this->getProductFilters()."
                                 AND p2s.store_id = '".$store_id."'";
+
+
+
+
+                    $sort_data = [
+                        'pd.name',
+                        'p.sort_order',
+                        'p.price',
+                        'rating',
+                        'date_modified',
+                    ];
+
+                    if (in_array($sort, $sort_data)) {
+                        if ($sort == 'pd.name') {
+                            $sql .= " ORDER BY LCASE(".$sort.")";
+                        } else {
+                            $sql .= " ORDER BY ".$this->db->escape($sort);
+                        }
+                    } else {
+                        $sql .= " ORDER BY p.sort_order";
+                    }
+
+                    if ($order == 'DESC') {
+                        $sql .= " DESC";
+                    } else {
+                        $sql .= " ASC";
+                    }
+
+                    if ($start < 0) {
+                        $start = 0;
+                    }
+                    if ((int)$limit) {
+                        $sql .= " LIMIT ".(int)$start.",".(int)$limit;
+                    }
+
                     $product_query = $this->db->query($sql);
 
                     if ($product_query->num_rows) {
-                        $data = [];
+                        $product_data=[];
                         foreach ($product_query->rows as $result) {
-                            $data[$result['product_id']] = $result;
-                        }
-                        // resort by totals
-                        foreach ($products as $id) {
-                            if (isset($data[$id])) {
-                                $product_data[] = $data[$id];
-                            }
+                            $product_data[$result['product_id']] = $result;
                         }
                     }
                 }
