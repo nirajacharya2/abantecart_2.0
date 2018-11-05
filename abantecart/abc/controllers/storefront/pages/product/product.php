@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -30,22 +30,22 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
 use abc\models\base\Product;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\storefront\ModelCatalogCategory;
+use abc\models\storefront\ModelCatalogManufacturer;
 
 /**
  * Class ControllerPagesProductProduct
  *
  * @package abc\controllers\storefront
  * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
+ * @property ModelCatalogManufacturer $model_catalog_manufacturer
+ * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductProduct extends AController
 {
 
-    public $data = array();
-    protected $routes = array();
+    public $data = [];
+    protected $routes = [];
     /**
      * @var Product
      */
@@ -74,7 +74,7 @@ class ControllerPagesProductProduct extends AController
             return null;
         }
 
-        return array('product_id', 'path', 'key', 'manufacturer_id', 'category_id', 'description', 'keyword');
+        return ['product_id', 'path', 'key', 'manufacturer_id', 'category_id', 'description', 'keyword'];
     }
 
     public function main()
@@ -86,11 +86,11 @@ class ControllerPagesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getHomeURL(),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
+        ]);
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
@@ -109,11 +109,11 @@ class ControllerPagesProductProduct extends AController
                     $path .= '_'.$path_id;
                 }
                 if ($category_info) {
-                    $this->document->addBreadcrumb(array(
+                    $this->document->addBreadcrumb([
                         'href'      => $this->html->getSEOURL('product/category', '&path='.$path, '&encode'),
                         'text'      => $category_info['name'],
                         'separator' => $this->language->get('text_separator'),
-                    ));
+                    ]);
                 }
             }
         }
@@ -122,12 +122,12 @@ class ControllerPagesProductProduct extends AController
         if (isset($request['manufacturer_id'])) {
             $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($request['manufacturer_id']);
             if ($manufacturer_info) {
-                $this->document->addBreadcrumb(array(
+                $this->document->addBreadcrumb([
                     'href'      => $this->html->getSEOURL('product/manufacturer',
                         '&manufacturer_id='.$request['manufacturer_id'], '&encode'),
                     'text'      => $manufacturer_info['name'],
                     'separator' => $this->language->get('text_separator'),
-                ));
+                ]);
             }
         }
 
@@ -139,15 +139,15 @@ class ControllerPagesProductProduct extends AController
             if (isset($request['description'])) {
                 $url .= '&description='.$request['description'];
             }
-            $this->document->addBreadcrumb(array(
+            $this->document->addBreadcrumb([
                 'href'      => $this->html->getURL('product/search', '&keyword='.$request['keyword'].$url, '&encode'),
                 'text'      => $this->language->get('text_search'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
         }
 
         //key of product from cart
-        $key = array();
+        $key = [];
         if (AHelperUtils::has_value($request['key'])) {
             $key = explode(':', $request['key']);
             $product_id = (int)$key[0];
@@ -157,13 +157,13 @@ class ControllerPagesProductProduct extends AController
             $product_id = 0;
         }
 
-        $urls = array(
+        $urls = [
             'is_group_option' => $this->html->getURL(
                 'r/product/product/is_group_option',
                 '&product_id='.$product_id,
                 '&encode'
             ),
-        );
+        ];
         $this->view->assign('urls', $urls);
 
         $this->loadModel('catalog/product');
@@ -185,11 +185,11 @@ class ControllerPagesProductProduct extends AController
             unset($this->session->data['error']);
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSEOURL('product/product', $url.'&product_id='.$product_id, '&encode'),
             'text'      => $product_info['name'],
             'separator' => $this->language->get('text_separator'),
-        ));
+        ]);
 
         $this->document->setTitle($product_info['name']);
         $this->document->setKeywords($product_info['meta_keywords']);
@@ -222,18 +222,21 @@ class ControllerPagesProductProduct extends AController
         );
 
         $this->loadModel('catalog/review');
-        $this->data['tab_review'] = sprintf($this->language->get('tab_review'), $this->model_catalog_review->getTotalReviewsByProductId($product_id));
+        $this->data['tab_review'] = sprintf(
+            $this->language->get('tab_review'),
+            $this->model_catalog_review->getTotalReviewsByProductId($product_id)
+        );
 
         if ($this->config->get('enable_reviews')) {
             $average = $this->model_catalog_review->getAverageRating($product_id);
             $this->data['rating_element'] = HtmlElementFactory::create(
-                array(
+                [
                     'type'    => 'rating',
                     'name'    => 'rating',
                     'value'   => '',
-                    'options' => array(1 => 1, 2, 3, 4, 5),
+                    'options' => [1 => 1, 2, 3, 4, 5],
                     'pack'    => true,
-                ));
+                ]);
         } else {
             $average = false;
         }
@@ -242,54 +245,54 @@ class ControllerPagesProductProduct extends AController
         $this->data['text_stars'] = sprintf($this->language->get('text_stars'), $average);
 
         $this->data['review_name'] = HtmlElementFactory::create(
-            array(
+            [
                 'type' => 'input',
                 'name' => 'name',
-            ));
+            ]);
         $this->data['review_text'] = HtmlElementFactory::create(
-            array(
+            [
                 'type' => 'textarea',
                 'name' => 'text',
                 'attr' => ' rows="8" cols="50" ',
-            ));
+            ]);
 
         if ($this->config->get('config_recaptcha_site_key')) {
             $this->data['recaptcha_site_key'] = $this->config->get('config_recaptcha_site_key');
             $this->data['review_recaptcha'] = HtmlElementFactory::create(
-                array(
+                [
                     'type'               => 'recaptcha',
                     'name'               => 'recaptcha',
                     'recaptcha_site_key' => $this->data['recaptcha_site_key'],
                     'language_code'      => $this->language->getLanguageCode(),
-                ));
+                ]);
 
         } else {
             $this->data['review_captcha'] = HtmlElementFactory::create(
-                array(
+                [
                     'type' => 'input',
                     'name' => 'captcha',
                     'attr' => '',
-                ));
+                ]);
         }
         $this->data['review_button'] = HtmlElementFactory::create(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'review_submit',
                 'text'  => $this->language->get('button_submit'),
                 'style' => 'btn-primary lock-on-click',
                 'icon'  => 'fa fa-comment',
-            ));
+            ]);
 
         $this->data['product_info'] = $product_info;
 
         $form = new AForm();
-        $form->setForm(array('form_name' => 'product'));
+        $form->setForm(['form_name' => 'product']);
         $this->data['form']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'product',
                 'action' => $this->html->getSecureURL($this->routes['cart_rt']),
-            ));
+            ]);
 
         $discount = $promotion->getProductDiscount($product_id);
 
@@ -335,13 +338,13 @@ class ControllerPagesProductProduct extends AController
         }
 
         $product_discounts = $promotion->getProductDiscounts($product_id);
-        $discounts = array();
+        $discounts = [];
         foreach ($product_discounts as $discount) {
-            $discounts[] = array(
+            $discounts[] = [
                 'quantity' => $discount['quantity'],
                 'price'    => $this->currency->format($this->tax->calculate($discount['price'],
                     $product_info['tax_class_id'], (bool)$this->config->get('config_tax'))),
-            );
+            ];
         }
         $this->data['discounts'] = $discounts;
         $this->data['product_price'] = $product_price;
@@ -361,36 +364,36 @@ class ControllerPagesProductProduct extends AController
                 : $qnt;
 
             $this->data['form']['minimum'] = $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'input',
                     'name'  => 'quantity',
                     'value' => $qnt,
                     'style' => 'short',
                     'attr'  => ' size="3" ',
-                ));
+                ]);
 
             $this->data['form']['add_to_cart'] = $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'add_to_cart',
                     'text'  => $this->language->get('button_add_to_cart'),
                     'style' => 'button1',
-                ));
+                ]);
         }
 
         $this->data['form']['product_id'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'hidden',
                 'name'  => 'product_id',
                 'value' => $product_id,
-            )
+            ]
         );
         $this->data['form']['redirect'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'hidden',
                 'name'  => 'redirect',
                 'value' => $this->html->getURL('product/product', $url.'&product_id='.$product_id, '&encode'),
-            )
+            ]
         );
 
         $this->data['model'] = $product_info['model'];
@@ -425,17 +428,17 @@ class ControllerPagesProductProduct extends AController
 
         // Prepare options and values for display
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-        $options = array();
+        $options = [];
         $product_options = $this->model_catalog_product->getProductOptions($product_id);
 
         //get info from cart if key presents
-        $cart_product_info = array();
+        $cart_product_info = [];
         if ($key) {
             $cart_product_info = $this->cart->getProduct($request['key']);
         }
         foreach ($product_options as $option) {
-            $values = array();
-            $disabled_values = array();
+            $values = [];
+            $disabled_values = [];
             $name = $price = '';
             $default_value = $cart_product_info['options'][$option['product_option_id']];
             if ($option['element_type'] == 'R') {
@@ -552,7 +555,7 @@ class ControllerPagesProductProduct extends AController
                     $value = 1;
                 }
 
-                $option_data = array(
+                $option_data = [
                     'type'             => $option['html_type'],
                     'name'             => !in_array($option['element_type'],
                         HtmlElementFactory::getMultivalueElements())
@@ -565,19 +568,19 @@ class ControllerPagesProductProduct extends AController
                     'placeholder'      => $option['option_placeholder'],
                     'regexp_pattern'   => $option['regexp_pattern'],
                     'error_text'       => $option['error_text'],
-                );
+                ];
 
                 if ($option['element_type'] == 'C') {
-                    if (!in_array($value, array('0', '1'))) {
+                    if (!in_array($value, ['0', '1'])) {
                         $option_data['label_text'] = $value;
                     }
                     $option_data['checked'] = $preset_value ? true : false;
                 }
 
-                $options[] = array(
+                $options[] = [
                     'name' => $option['name'],
                     'html' => $this->html->buildElement($option_data),  // not a string!!! it's object!
-                );
+                ];
             }
         }
 
@@ -638,52 +641,52 @@ class ControllerPagesProductProduct extends AController
         }
 
         // main product image
-        $sizes = array(
-            'main'  => array(
+        $sizes = [
+            'main'  => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb' => array(
+            ],
+            'thumb' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->data['image_main'] = $resource->getResourceAllObjects('products', $product_id, $sizes, 1, false);
         if ($this->data['image_main']) {
             $this->data['image_main']['sizes'] = $sizes;
         }
 
         // additional images
-        $sizes = array(
-            'main'   => array(
+        $sizes = [
+            'main'   => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb'  => array(
+            ],
+            'thumb'  => [
                 'width'  => $this->config->get('config_image_additional_width'),
                 'height' => $this->config->get('config_image_additional_height'),
-            ),
-            'thumb2' => array(
+            ],
+            'thumb2' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->data['images'] = $resource->getResourceAllObjects('products', $product_id, $sizes, 0, false);
 
-        $products = array();
+        $products = [];
         $results = $this->model_catalog_product->getProductRelated($product_id);
         foreach ($results as $result) {
             // related product image
-            $sizes = array(
-                'main'  => array(
+            $sizes = [
+                'main'  => [
                     'width'  => $this->config->get('config_image_related_width'),
                     'height' => $this->config->get('config_image_related_height'),
-                ),
-                'thumb' => array(
+                ],
+                'thumb' => [
                     'width'  => $this->config->get('config_image_related_width'),
                     'height' => $this->config->get('config_image_related_height'),
-                ),
-            );
+                ],
+            ];
             $image = $resource->getResourceAllObjects('products', $result['product_id'], $sizes, 1);
 
             if ($this->config->get('enable_reviews')) {
@@ -719,7 +722,7 @@ class ControllerPagesProductProduct extends AController
                 }
             }
 
-            $products[] = array(
+            $products[] = [
                 'product_id'    => $result['product_id'],
                 'name'          => $result['name'],
                 'model'         => $result['model'],
@@ -737,7 +740,7 @@ class ControllerPagesProductProduct extends AController
                 ),
                 'add'           => $add,
                 'tax_class_id'  => $result['tax_class_id'],
-            );
+            ];
         }
 
         $this->data['related_products'] = $products;
@@ -750,14 +753,14 @@ class ControllerPagesProductProduct extends AController
         }
         $this->data['display_price'] = $display_price;
 
-        $tags = array();
+        $tags = [];
         $results = $this->model_catalog_product->getProductTags($product_id);
         foreach ($results as $result) {
             if ($result['tag']) {
-                $tags[] = array(
+                $tags[] = [
                     'tag'  => $result['tag'],
                     'href' => $this->html->getURL('product/search', '&keyword='.$result['tag'], '&encode'),
-                );
+                ];
             }
         }
         $this->data['tags'] = $tags;
@@ -766,7 +769,7 @@ class ControllerPagesProductProduct extends AController
         if ($this->config->get('config_download')) {
             $download_list = $this->download->getDownloadsBeforeOrder($product_id);
             if ($download_list) {
-                $downloads = array();
+                $downloads = [];
 
                 foreach ($download_list as $download) {
                     $href = $this->html->getURL(
@@ -777,13 +780,13 @@ class ControllerPagesProductProduct extends AController
                         $this->download->getDownloadAttributesValuesForCustomer($download['download_id']);
 
                     $download['button'] = $form->getFieldHtml(
-                        array(
+                        [
                             'type'  => 'button',
                             'id'    => 'download_'.$download['download_id'],
                             'href'  => $href,
                             'title' => $this->language->get('text_start_download'),
                             'text'  => $this->language->get('text_start_download'),
-                        ));
+                        ]);
 
                     $downloads[] = $download;
                 }
@@ -815,7 +818,7 @@ class ControllerPagesProductProduct extends AController
         $this->_init();
         $url = $this->_build_url_params();
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSEOURL(
                     'product/product',
                     $url.'&product_id='.$product_id,
@@ -823,19 +826,19 @@ class ControllerPagesProductProduct extends AController
                 ),
                 'text'      => $this->language->get('text_error'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         $this->document->setTitle($this->language->get('text_error'));
 
         $this->data['heading_title'] = $this->language->get('text_error');
         $this->data['text_error'] = $this->language->get('text_error');
         $continue = HtmlElementFactory::create(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'continue_button',
                 'text'  => $this->language->get('button_continue'),
                 'style' => 'button',
-            ));
+            ]);
 
         $this->view->assign('button_continue', $continue);
         $this->data['continue'] = $this->html->getHomeURL();

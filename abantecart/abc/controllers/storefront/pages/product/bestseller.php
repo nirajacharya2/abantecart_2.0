@@ -1,22 +1,30 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: denis
- * Date: 05/11/2018
- * Time: 12:05
- */
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2017 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 
 namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerPagesProductSpecial
@@ -27,7 +35,7 @@ if (!class_exists('abc\core\ABC')) {
 class ControllerPagesProductBestSeller extends AController
 {
 
-    public $data = array();
+    public $data = [];
 
     /**
      * Check if HTML Cache is enabled for the method
@@ -36,7 +44,7 @@ class ControllerPagesProductBestSeller extends AController
      */
     public static function main_cache_keys()
     {
-        return array('page', 'limit', 'sort', 'order');
+        return ['page', 'limit', 'sort', 'order'];
     }
 
     public function main()
@@ -50,11 +58,11 @@ class ControllerPagesProductBestSeller extends AController
         $this->loadLanguage('product/bestseller');
         $this->document->setTitle($this->language->get('heading_title'));
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getHomeURL(),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
+        ]);
 
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
@@ -66,11 +74,11 @@ class ControllerPagesProductBestSeller extends AController
             $url .= '&page='.$request['page'];
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getNonSecureURL('product/bestseller', $url),
             'text'      => $this->language->get('heading_title'),
             'separator' => $this->language->get('text_separator'),
-        ));
+        ]);
 
         if (isset($request['page'])) {
             $page = $request['page'];
@@ -121,7 +129,7 @@ class ControllerPagesProductBestSeller extends AController
                 ]
             );
 
-            $product_ids = array();
+            $product_ids = [];
             foreach ($results as $result) {
                 $product_ids[] = (int)$result['product_id'];
             }
@@ -137,6 +145,7 @@ class ControllerPagesProductBestSeller extends AController
             $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
 
             $this->data['is_customer'] = false;
+            $whishlist = [];
             if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
                 $this->data['is_customer'] = true;
                 $whishlist = $this->customer->getWishList();
@@ -213,7 +222,7 @@ class ControllerPagesProductBestSeller extends AController
                     $in_wishlist = true;
                 }
 
-                $this->data['products'][] = array(
+                $this->data['products'][] = [
                     'product_id'     => $result['product_id'],
                     'name'           => $result['name'],
                     'model'          => $result['model'],
@@ -247,7 +256,7 @@ class ControllerPagesProductBestSeller extends AController
                         'product/wishlist/remove',
                         '&product_id='.$result['product_id']
                     ),
-                );
+                ];
             }
 
             if ($this->config->get('config_customer_price')) {
@@ -259,48 +268,48 @@ class ControllerPagesProductBestSeller extends AController
             }
             $this->data['display_price'] = $display_price;
 
-            $sorts = array();
-            $sorts[] = array(
+            $sorts = [];
+            $sorts[] = [
                 'text'  => $this->language->get('text_default'),
                 'value' => 'p.sort_order-ASC',
                 'href'  => $this->html->getURL('product/bestseller', $url.'&sort=p.sort_order&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_name_asc'),
                 'value' => 'pd.name-ASC',
                 'href'  => $this->html->getURL('product/bestseller', $url.'&sort=pd.name&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_name_desc'),
                 'value' => 'pd.name-DESC',
                 'href'  => $this->html->getURL('product/bestseller', $url.'&sort=pd.name&order=DESC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_price_asc'),
                 'value' => 'p.price-ASC',
                 'href'  => $this->html->getURL('product/bestseller', $url.'&sort=price&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_price_desc'),
                 'value' => 'p.price-DESC',
                 'href'  => $this->html->getURL('product/bestseller', $url.'&sort=price&order=DESC', '&encode'),
-            );
+            ];
 
-            $sort_options = array();
+            $sort_options = [];
             foreach ($sorts as $item) {
                 $sort_options[$item['value']] = $item['text'];
             }
             $sorting = $this->html->buildElement(
-                array(
+                [
                     'type'    => 'selectbox',
                     'name'    => 'sort',
                     'options' => $sort_options,
                     'value'   => $sort.'-'.$order,
-                )
+                ]
             );
 
             $this->view->assign('sorting', $sorting);
@@ -314,7 +323,7 @@ class ControllerPagesProductBestSeller extends AController
             );
 
             $this->data['pagination_bootstrap'] = $this->html->buildElement(
-                array(
+                [
                     'type'       => 'Pagination',
                     'name'       => 'pagination',
                     'text'       => $this->language->get('text_pagination'),
@@ -324,7 +333,7 @@ class ControllerPagesProductBestSeller extends AController
                     'limit'      => $limit,
                     'url'        => $pagination_url,
                     'style'      => 'pagination',
-                ));
+                ]);
 
             $this->data['sort'] = $sort;
             $this->data['order'] = $order;
@@ -334,12 +343,12 @@ class ControllerPagesProductBestSeller extends AController
         } else {
             $this->view->assign('text_error', $this->language->get('text_empty'));
             $continue = $this->html->buildElement(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'continue_button',
                     'text'  => $this->language->get('button_continue'),
                     'style' => 'button',
-                ));
+                ]);
             $this->view->assign('button_continue', $continue);
             $this->view->assign('continue', $this->html->getHomeURL());
             $this->view->setTemplate('pages/error/not_found.tpl');

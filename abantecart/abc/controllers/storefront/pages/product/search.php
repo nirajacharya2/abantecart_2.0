@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,20 +22,18 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\storefront\ModelCatalogCategory;
 
 /**
  * Class ControllerPagesProductSearch
  * @package abc\controllers\storefront
  * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
+ * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductSearch extends AController {
 	protected $category;
 	protected $path;
-	public $data = array();
+	public $data = [];
 	public function main() {
 		$request = $this->request->get;
 		$this->path = explode(',',$request['category_id']);
@@ -52,11 +50,11 @@ class ControllerPagesProductSearch extends AController {
 
 		$this->document->setTitle( $this->language->get('heading_title') );
 		$this->document->resetBreadcrumbs();
-		$this->document->addBreadcrumb( array (
+		$this->document->addBreadcrumb( [
 			'href'      => $this->html->getHomeURL(),
 			'text'      => $this->language->get('text_home'),
 			'separator' => FALSE
-		));
+        ]);
 
 		$url = '';
 
@@ -91,11 +89,11 @@ class ControllerPagesProductSearch extends AController {
 			$url .= '&limit=' . $request['limit'];
 		}
 
-		$this->document->addBreadcrumb( array (
+		$this->document->addBreadcrumb( [
 			'href'      => $this->html->getNonSecureURL('product/search',  $url),
 			'text'      => $this->language->get('heading_title'),
 			'separator' => $this->language->get('text_separator')
-		));
+        ]);
 
 		if (isset($request['page'])) {
 			$page = $request['page'];
@@ -112,55 +110,60 @@ class ControllerPagesProductSearch extends AController {
 		list($sort,$order) = explode("-",$sorting_href);
 		if($sort=='name'){
 			$sort = 'pd.'.$sort;
-		}elseif(in_array($sort,array('sort_order','price'))){
+		}elseif(in_array($sort, ['sort_order', 'price'])){
 			$sort = 'p.'.$sort;
 		}
 
 		$this->data['keyword'] = $this->html->buildElement(
-				array ( 'type' => 'input',
-						'name'=>'keyword',
-						'value'=> $request['keyword'],
-				)
+				[
+                    'type'  => 'input',
+                    'name'  =>'keyword',
+                    'value' => $request['keyword'],
+                ]
 		);
 
 		$this->loadModel('catalog/category');
 		$categories = $this->_getCategories(0);
-		$options = array( 0 =>$this->language->get('text_category'));
+		$options = [0 =>$this->language->get('text_category')];
 		if($categories){
 			foreach( $categories as $item){
 				$options[$item['category_id']] = $item['name'];
 			}
 		}
 		$this->data['category'] = $this->html->buildElement(
-														array (
+														[
 																'type' => 'selectbox',
 																'name' => 'category_id',
 																'options'=> $options,
 																'value'=> $request['category_id'],
-														));
+                                                        ]);
 
-		$this->data['description'] = $this->html->buildElement( array('type' => 'checkbox',
-																		'id' => 'description',
-																		'name' => 'description',
-																		'checked' => (int)$request['description'],
-																		'value' => 1,
-																		'label_text' => $this->language->get('entry_description')));
+		$this->data['description'] = $this->html->buildElement( [
+            'type'       => 'checkbox',
+            'id'         => 'description',
+            'name'       => 'description',
+            'checked'    => (int)$request['description'],
+            'value'      => 1,
+            'label_text' => $this->language->get('entry_description')
+        ]);
 
 		$this->data['model'] = $this->html->buildElement(
-											array(
+											[
 													'type' => 'checkbox',
 													'id' => 'model',
 													'name' => 'model',
 													'checked' => (bool)$request['model'],
 													'value' => 1,
-													'label_text' => $this->language->get('entry_model')));
+													'label_text' => $this->language->get('entry_model')
+                                            ]);
 
-		$this->data['submit'] = $this->html->buildElement( array (
+		$this->data['submit'] = $this->html->buildElement( [
 																'type' => 'button',
 																'name' => 'search_button',
 																'text'=> $this->language->get('button_search'),
 																'icon' => 'fa fa-search',
-																'style' => 'btn-default'));
+																'style' => 'btn-default'
+        ]);
 
 		if (isset($request['keyword'])) {
 			$this->loadModel('catalog/product');
@@ -201,7 +204,7 @@ class ControllerPagesProductSearch extends AController {
 
 				$this->loadModel('catalog/review');
 				$this->loadModel('tool/seo_url');
-				$products = array();
+				$products = [];
 				$products_result = $this->model_catalog_product->getProductsByKeyword(  $request['keyword'],
 																				$category_id,
 																				isset($request['description']) ? $request['description'] : '',
@@ -218,7 +221,7 @@ class ControllerPagesProductSearch extends AController {
 				}
 
 				if (is_array($products_result) && $products_result) {
-					$product_ids = array();
+					$product_ids = [];
 					foreach($products_result as $result){
 						$product_ids[] = (int)$result['product_id'];
 					}
@@ -281,7 +284,7 @@ class ControllerPagesProductSearch extends AController {
 							}
 						}
 
-						$products[] = array(
+						$products[] = [
 							'product_id' => $result['product_id'],
 							'name'    => $result['name'],
 							'blurb' => $result['blurb'],
@@ -302,7 +305,7 @@ class ControllerPagesProductSearch extends AController {
 							'no_stock_text' => $no_stock_text,
 							'total_quantity'=> $total_quantity,
 							'tax_class_id'  => $result['tax_class_id']
-						);
+                        ];
 					}
 				}
 
@@ -341,73 +344,73 @@ class ControllerPagesProductSearch extends AController {
 					$url .= '&limit=' . $request['limit'];
 				}
 
-				$sorts = array();
-				$sorts[] = array(
+				$sorts = [];
+				$sorts[] = [
 					'text'  => $this->language->get('text_default'),
 					'value' => 'p.sort_order-ASC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=p.sort_order&order=ASC', '&encode')
-				);
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_name_asc'),
 					'value' => 'pd.name-ASC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=pd.name&order=ASC', '&encode')
-				); 
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_name_desc'),
 					'value' => 'pd.name-DESC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=pd.name&order=DESC', '&encode')
-				);  
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_price_asc'),
 					'value' => 'p.price-ASC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=p.price&order=ASC', '&encode')
-				); 
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_price_desc'),
 					'value' => 'p.price-DESC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=p.price&order=DESC', '&encode')
-				); 
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_rating_desc'),
 					'value' => 'rating-DESC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=rating&order=DESC', '&encode')
-				); 
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_rating_asc'),
 					'value' => 'rating-ASC',
 					'href'  => $this->html->getURL('product/search', $url . '&sort=rating&order=ASC', '&encode')
-				);
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_date_desc'),
 					'value' => 'date_modified-DESC',
 					'href'  => $this->html->getSEOURL('product/search', $url . '&sort=date_modified&order=DESC', '&encode')
-				);
+                ];
 
-				$sorts[] = array(
+				$sorts[] = [
 					'text'  => $this->language->get('text_sorting_date_asc'),
 					'value' => 'date_modified-ASC',
 					'href'  => $this->html->getSEOURL('product/search', $url . '&sort=date_modified&order=ASC', '&encode')
-				);
+                ];
 
 				$this->data['sorts'] = $sorts;
-				$sort_options = array();
+				$sort_options = [];
 				foreach($sorts as $item){
 					$sort_options[$item['value']] = $item['text'];
 				}
 
-				$sorting = $this->html->buildElement( array (
+				$sorting = $this->html->buildElement( [
 												 'type' => 'selectbox',
 												 'name' => 'sort',
 												 'options'=> $sort_options,
 												 'value'=> $sort.'-'.$order
-												 ) );
+                ]);
 
 				$this->data['sorting'] = $sorting;
 				$url = '';
@@ -437,7 +440,7 @@ class ControllerPagesProductSearch extends AController {
 					$url .= '&limit=' . $request['limit'];
 				}
 
-				$this->data['pagination_bootstrap'] = $this->html->buildElement( array (
+				$this->data['pagination_bootstrap'] = $this->html->buildElement( [
 											'type' => 'Pagination',
 											'name' => 'pagination',
 											'text'=> $this->language->get('text_pagination'),
@@ -446,7 +449,8 @@ class ControllerPagesProductSearch extends AController {
 											'page'	=> $page,
 											'limit'	=> $limit,
 											'url' => $this->html->getURL('product/search',  $url . '&page={page}', '&encode'),
-											'style' => 'pagination'));
+											'style' => 'pagination'
+                ]);
 				$this->data['sort'] = $sort;
 				$this->data['order'] = $order;
 				$this->data['limit'] = $limit;
@@ -462,7 +466,7 @@ class ControllerPagesProductSearch extends AController {
 
 	protected function _getCategories($parent_id, $level = 0) {
 		$level++;
-		$data = array();
+		$data = [];
 		$cat_id = explode(',',$parent_id);
 		end($cat_id); 
 		$results = $this->model_catalog_category->getCategories(current($cat_id));
@@ -474,11 +478,11 @@ class ControllerPagesProductSearch extends AController {
 				$this->category = 0;
 			}
 
-			$data[] = array(
+			$data[] = [
 				'category_id' => $parent_id.','.$result['category_id'],
 				'name'        => str_repeat('&nbsp;&nbsp;&nbsp;', $level) . $result['name']
-			);
-			$children = array();
+            ];
+			$children = [];
 			if($this->category){
 				$children = $this->_getCategories($parent_id.','.$result['category_id'], $level);
 			}
