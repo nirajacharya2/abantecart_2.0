@@ -44,7 +44,7 @@ class ControllerBlocksFeatured extends AController {
 		$this->loadModel('tool/image');
 		$this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
 		$this->data['products'] = array();
-		$results = $this->model_catalog_product->getfeaturedProducts($this->config->get('config_featured_limit'));
+		$results = $this->model_catalog_product->getfeaturedProducts(['limit' => $this->config->get('config_featured_limit')]);
 		$product_ids = array();
 		foreach($results as $result){
 			$product_ids[] = (int)$result['product_id'];
