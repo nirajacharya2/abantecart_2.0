@@ -695,7 +695,7 @@ class ModelToolImportProcess extends Model
                 $mime = $this->getRemoteImageMime($source);
                 if (strpos($mime, 'image') !== false) {
                     $ext = strtolower(substr($mime, 6));
-                    $image_basename .= '.'.$ext;
+                    $image_basename = microtime(true).'.'.$ext;
                 } else {
                     $this->toLog("Error: Unable to recognize file ".$source." as image. Response mime type: ".$mime);
                     continue;
