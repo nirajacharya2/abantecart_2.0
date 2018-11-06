@@ -23,7 +23,6 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
@@ -32,6 +31,7 @@ use abc\core\lib\AMessage;
 use abc\models\base\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
+use H;
 
 /**
  * Class ControllerPagesProductProduct
@@ -51,7 +51,7 @@ class ControllerPagesProductProduct extends AController
      */
     protected $model;
 
-    protected function _init()
+    protected function init()
     {
         //is this an embed mode
         if ($this->config->get('embed_mode') == true) {
@@ -80,7 +80,7 @@ class ControllerPagesProductProduct extends AController
     public function main()
     {
         $request = $this->request->get;
-        $this->_init();
+        $this->init();
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -148,10 +148,10 @@ class ControllerPagesProductProduct extends AController
 
         //key of product from cart
         $key = [];
-        if (AHelperUtils::has_value($request['key'])) {
+        if (H::has_value($request['key'])) {
             $key = explode(':', $request['key']);
             $product_id = (int)$key[0];
-        } elseif (AHelperUtils::has_value($request['product_id'])) {
+        } elseif (H::has_value($request['product_id'])) {
             $product_id = (int)$request['product_id'];
         } else {
             $product_id = 0;
@@ -176,6 +176,9 @@ class ControllerPagesProductProduct extends AController
 
             return null;
         }
+
+        //add this id into session for recently viewed block
+        $this->session->data['recently_viewed'][] = $product_id;
 
         $url = $this->_build_url_params();
 
@@ -411,7 +414,7 @@ class ControllerPagesProductProduct extends AController
         $this->data['product_id'] = $product_id;
         $this->data['average'] = $average;
 
-        if (!AHelperUtils::has_value($product_info['stock_checkout'])) {
+        if (!H::has_value($product_info['stock_checkout'])) {
             $product_info['stock_checkout'] = $this->config->get('config_stock_checkout');
         }
 
@@ -451,7 +454,7 @@ class ControllerPagesProductProduct extends AController
                 $default_value = $option_value['default']
                 && !$default_value ? $option_value['product_option_value_id'] : $default_value;
                 // for case when trying to add to cart without required options. we get option-array back inside _GET
-                if (AHelperUtils::has_value($request['option'][$option['product_option_id']])) {
+                if (H::has_value($request['option'][$option['product_option_id']])) {
                     $default_value = $request['option'][$option['product_option_id']];
                 }
 
@@ -546,7 +549,7 @@ class ControllerPagesProductProduct extends AController
                 }
 
                 //set default selection is nothing selected
-                if (!AHelperUtils::has_value($value) && AHelperUtils::has_value($default_value)) {
+                if (!H::has_value($value) && H::has_value($default_value)) {
                     $value = $default_value;
                 }
 
@@ -815,7 +818,7 @@ class ControllerPagesProductProduct extends AController
 
     protected function _product_not_found($product_id)
     {
-        $this->_init();
+        $this->init();
         $url = $this->_build_url_params();
         $this->document->addBreadcrumb(
             [

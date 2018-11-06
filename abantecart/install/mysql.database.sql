@@ -8965,6 +8965,7 @@ INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `v
 ('block', 'bestseller', '', 1, 1, '', null, now(), now(), now() ),
 ('block', 'latest', '', 1, 1, '', null, now(), now(), now() ),
 ('block', 'featured', '', 1, 1, '', null, now(), now(), now() ),
+('block', 'recently_viewed', '', 1, 1, '', null, now(), now(), now() ),
 
 ('extensions', 'banner_manager', 'extensions', 1, 1, '1.0.1', null, now(), now(), now() ),
 ('extensions', 'forms_manager', 'extensions', 1, 1, '1.0.2', null, now(), now(), now() )
@@ -10245,7 +10246,8 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 (29, 'account', 'blocks/account', now()),
 (30, 'custom_form_block', 'blocks/custom_form_block', now() ),
 (31, 'customer', 'blocks/customer', now() ),
-(32, 'menu_nav', 'blocks/menu_nav', now() );
+(32, 'menu_nav', 'blocks/menu_nav', now() ),
+(33, 'recently_viewed', 'blocks/recently_viewed', now() ),;
 
 --
 -- DDL for table `ac_custom_blocks`
@@ -10397,7 +10399,15 @@ INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `da
 (32, 5, 'blocks/menu_nav.tpl', now() ),
 (32, 6, 'blocks/menu_nav.tpl', now() ),
 (32, 7, 'blocks/menu_nav.tpl', now() ),
-(32, 8, 'blocks/menu_nav.tpl', now() );
+(32, 8, 'blocks/menu_nav.tpl', now() ),
+(33, 1, 'blocks/recently_viewed.tpl', now() ),
+(33, 2, 'blocks/recently_viewed.tpl', now() ),
+(33, 3, 'blocks/recently_viewed.tpl', now() ),
+(33, 4, 'blocks/recently_viewed.tpl', now() ),
+(33, 5, 'blocks/recently_viewed.tpl', now() ),
+(33, 6, 'blocks/recently_viewed.tpl', now() ),
+(33, 7, 'blocks/recently_viewed.tpl', now() ),
+(33, 8, 'blocks/recently_viewed.tpl', now() );
 
 --
 -- DDL for table `layouts`

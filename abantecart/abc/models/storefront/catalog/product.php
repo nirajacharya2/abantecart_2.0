@@ -935,7 +935,7 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * @param $limit
+     * @param $options
      *
      * @return array
      * @throws \Exception
@@ -950,7 +950,9 @@ class ModelCatalogProduct extends Model
 
         $language_id = (int)$this->config->get('storefront_language_id');
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'product.featured.'.$limit.'.store_'.$store_id.'_lang_'.$language_id.'_order_'.$order.'_start_'.$start.'_sort_'.$sort.'_total_'.$total;
+        $cache_key = 'product.featured.store_'.$store_id
+                    .'_lang_'.$language_id
+                    .md5($limit.$order.$start.$sort.$total);
         $product_data = $this->cache->pull($cache_key);
         if ($product_data === false) {
             $sql = "SELECT f.*, pd.*, ss.name AS stock, p.*
@@ -1049,10 +1051,7 @@ class ModelCatalogProduct extends Model
             $query = $this->db->query($sql);
 
             if ($query->num_rows) {
-                $products = [];
-                foreach ($query->rows as $result) {
-                    $products[] = (int)$result['product_id'];
-                }
+                $products = array_column($query->rows, 'product_id');
 
                 if ($products) {
                     $sql = "SELECT pd.*, ss.name AS stock, p.*
@@ -1133,7 +1132,6 @@ class ModelCatalogProduct extends Model
                             SET viewed = viewed + 1,
                                 date_modified = date_modified 
                             WHERE product_id = '".(int)$product_id."'");
-
         return true;
     }
 
@@ -1789,6 +1787,27 @@ class ModelCatalogProduct extends Model
         }
 
         return $output;
+    }
+
+    /**
+     * @param array $ids
+     *
+     * @return array
+     */
+    public function getProductsByIds($ids = []){
+        $ids = (array)$ids;
+        $product_ids = [];
+        foreach($ids as $id){
+            $id = (int)$id;
+            if($id){
+                $product_ids[] = $id;
+            }
+        }
+        if(!$product_ids){
+            return [];
+        }
+
+        return $this->getProducts(['subsql_filter' => " p.product_id IN ('".implode("', '",$product_ids)."') "]);
     }
 
     public function getProducts($data = [], $mode = 'default')

@@ -17,13 +17,20 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\models\storefront\ModelCatalogProduct;
 
-class ControllerBlocksFeatured extends AController
+/**
+ * Class ControllerBlocksRecentlyViewed
+ *
+ * @package abc\controllers\storefront
+ * @property ModelCatalogProduct $model_catalog_product
+ */
+
+class ControllerBlocksRecentlyViewed extends AController
 {
     public $data;
 
@@ -39,22 +46,16 @@ class ControllerBlocksFeatured extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/featured');
+        $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/recently_viewed');
 
         $this->loadModel('catalog/product');
         $this->loadModel('catalog/review');
         $this->loadModel('tool/image');
         $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
         $this->data['products'] = [];
-        $results = $this->model_catalog_product->getFeaturedProducts(
-            [
-                'limit' => $this->config->get('config_featured_limit'),
-            ]
-        );
-        $product_ids = [];
-        foreach ($results as $result) {
-            $product_ids[] = (int)$result['product_id'];
-        }
+
+        $results = $this->model_catalog_product->getProductsByIds( $this->session->data['recently_viewed'] );
+        $product_ids = array_column($results, 'product_id');
 
         $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
         //get thumbnails by one pass
@@ -80,8 +81,13 @@ class ControllerBlocksFeatured extends AController
             $special = false;
             $discount = $products_info[$result['product_id']]['discount'];
             if ($discount) {
-                $price = $this->currency->format($this->tax->calculate($discount, $result['tax_class_id'],
-                    $this->config->get('config_tax')));
+                $price = $this->currency->format(
+                    $this->tax->calculate(
+                        $discount,
+                        $result['tax_class_id'],
+                        $this->config->get('config_tax')
+                    )
+                );
             } else {
                 $price = $this->currency->format(
                         $this->tax->calculate(
@@ -92,8 +98,13 @@ class ControllerBlocksFeatured extends AController
                 );
                 $special = $products_info[$result['product_id']]['special'];
                 if ($special) {
-                    $special = $this->currency->format($this->tax->calculate($special, $result['tax_class_id'],
-                        $this->config->get('config_tax')));
+                    $special = $this->currency->format(
+                        $this->tax->calculate(
+                            $special,
+                            $result['tax_class_id'],
+                            $this->config->get('config_tax')
+                        )
+                    );
                 }
             }
 
@@ -179,7 +190,7 @@ class ControllerBlocksFeatured extends AController
         //If tpl used by listing block framed was set by listing block settings
         $this->data['block_framed'] = true;
         $this->view->batchAssign($this->data);
-
+//var_dump($this->data); exit;
         $this->processTemplate();
 
         //init controller data
