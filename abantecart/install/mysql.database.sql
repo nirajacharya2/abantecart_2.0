@@ -10247,7 +10247,7 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 (30, 'custom_form_block', 'blocks/custom_form_block', now() ),
 (31, 'customer', 'blocks/customer', now() ),
 (32, 'menu_nav', 'blocks/menu_nav', now() ),
-(33, 'recently_viewed', 'blocks/recently_viewed', now() ),;
+(33, 'recently_viewed', 'blocks/recently_viewed', now() );
 
 --
 -- DDL for table `ac_custom_blocks`
