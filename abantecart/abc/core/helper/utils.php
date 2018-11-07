@@ -35,14 +35,12 @@ use Illuminate\Events\Dispatcher;
 use PharData;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class AHelperUtils
  *
  * @package abc\core
+ * @deprecated
  */
 class AHelperUtils extends AHelper
 {
@@ -227,9 +225,10 @@ class AHelperUtils extends AHelper
     /**
      * @param        $seo_key
      * @param string $object_key_name
-     * @param int    $object_id
+     * @param int $object_id
      *
      * @return string
+     * @throws Exception
      */
     public static function getUniqueSeoKeyword($seo_key, $object_key_name = '', $object_id = 0)
     {
@@ -246,7 +245,7 @@ class AHelperUtils extends AHelper
 
         $result = $db->query($sql);
         if ($result->num_rows) {
-            $keywords = array();
+            $keywords = [];
             foreach ($result->rows as $row) {
                 $keywords[] = $row['keyword'];
             }
@@ -289,10 +288,10 @@ class AHelperUtils extends AHelper
     public static function getFilesInDir($dir, $file_ext = '')
     {
         if (!is_dir($dir)) {
-            return array();
+            return [];
         }
         $dir = rtrim($dir, DS);
-        $result = array();
+        $result = [];
 
         foreach (glob($dir.DS."*") as $f) {
             if (is_dir($f)) { // if is directory
@@ -639,7 +638,7 @@ class AHelperUtils extends AHelper
             $registry = Registry::getInstance();
             $format = $registry->get('language')->get('date_format_short');
         }
-        $empties = array('0000-00-00', '0000-00-00 00:00:00', '1970-01-01', '1970-01-01 00:00:00');
+        $empties = ['0000-00-00', '0000-00-00 00:00:00', '1970-01-01', '1970-01-01 00:00:00'];
         if ($iso_date && !in_array($iso_date, $empties)) {
             return date($format, self::dateISO2Int($iso_date));
         } else {
@@ -729,28 +728,28 @@ class AHelperUtils extends AHelper
         }
 
         //strptime function with solution for windows
-        $masks = array(
+        $masks = [
             '%d' => '(?P<d>[0-9]{2})',
             '%m' => '(?P<m>[0-9]{2})',
             '%Y' => '(?P<Y>[0-9]{4})',
             '%H' => '(?P<H>[0-9]{2})',
             '%M' => '(?P<M>[0-9]{2})',
             '%S' => '(?P<S>[0-9]{2})',
-        );
+        ];
 
         $regexp = "#".strtr(preg_quote($format), $masks)."#";
         if (!preg_match($regexp, $date, $out)) {
             return false;
         }
 
-        $ret = array(
+        $ret = [
             "tm_sec"  => (int)$out['S'],
             "tm_min"  => (int)$out['M'],
             "tm_hour" => (int)$out['H'],
             "tm_mday" => (int)$out['d'],
             "tm_mon"  => $out['m'] ? $out['m'] - 1 : 0,
             "tm_year" => $out['Y'] > 1900 ? $out['Y'] - 1900 : 0,
-        );
+        ];
 
         return $ret;
     }
@@ -759,6 +758,7 @@ class AHelperUtils extends AHelper
      * @param string $extension_txt_id
      *
      * @return \SimpleXMLElement | false
+     * @throws \ReflectionException
      */
     public static function getExtensionConfigXml($extension_txt_id)
     {
@@ -822,16 +822,16 @@ class AHelperUtils extends AHelper
             $firstNode = $fst->getElementsByTagName('item')->item(0);
         }
 
-        $xml_files = array(
-            'top'    => array(
-                ABC::env('DIR_CORE').'extension/'.'default/config_top.xml',
-                ABC::env('DIR_CORE').'extension/'.(string)$ext_configs->type.'/config_top.xml',
-            ),
-            'bottom' => array(
-                ABC::env('DIR_CORE').'extension/'.'default/config_bottom.xml',
-                ABC::env('DIR_CORE').'extension/'.(string)$ext_configs->type.'/config_bottom.xml',
-            ),
-        );
+        $xml_files = [
+            'top'    => [
+                ABC::env('DIR_CORE').'extension'.DS.'default'.DS.'config_top.xml',
+                ABC::env('DIR_CORE').'extension'.DS.(string)$ext_configs->type.DS.'config_top.xml',
+            ],
+            'bottom' => [
+                ABC::env('DIR_CORE').'extension'.DS.'default'.DS.'config_bottom.xml',
+                ABC::env('DIR_CORE').'extension'.DS.(string)$ext_configs->type.DS.'config_bottom.xml',
+            ],
+        ];
 
         // then loop for all additional xml-config-files
         foreach ($xml_files as $place => $files) {
@@ -904,7 +904,7 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    public static function startStorefrontSession($user_id, $data = array())
+    public static function startStorefrontSession($user_id, $data = [])
     {
         //NOTE: do not allow create sf-session via POST-request.
         // Related to language-switcher and enabled maintenance mode(see usages)
@@ -942,11 +942,11 @@ class AHelperUtils extends AHelper
     public static function build_sort_order($array, $min, $max, $sort_direction = 'asc')
     {
         if (empty($array)) {
-            return array();
+            return [];
         }
 
         //if no min or max, set interval to 10
-        $return_arr = array();
+        $return_arr = [];
         if ($max > 0) {
             $divider = 1;
             if (count($array) > 1) {
@@ -1212,7 +1212,7 @@ class AHelperUtils extends AHelper
     public static function getMimeType($filename)
     {
         $filename = (string)$filename;
-        $mime_types = array(
+        $mime_types = [
             'txt'  => 'text/plain',
             'htm'  => 'text/html',
             'html' => 'text/html',
@@ -1266,7 +1266,7 @@ class AHelperUtils extends AHelper
             // open office
             'odt'  => 'application/vnd.oasis.opendocument.text',
             'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
-        );
+        ];
 
         $pieces = explode('.', $filename);
         $ext = strtolower(array_pop($pieces));
@@ -1348,7 +1348,8 @@ class AHelperUtils extends AHelper
     public static function get_url_path($url)
     {
         $url_path1 = parse_url($url, PHP_URL_PATH);
-        //do we have path with php in the string? Treat case: /abantecart120/index.php/storefront/view/resources/images/18/6c/index.php
+        //do we have path with php in the string?
+        // Treat case: /abantecart120/index.php/storefront/view/resources/images/18/6c/index.php
         $pos = stripos($url_path1, '.php');
         if ($pos) {
             //we have .php files specified.
@@ -1376,7 +1377,7 @@ class AHelperUtils extends AHelper
         } else {
             $length = $depth;
         }
-        $result = array();
+        $result = [];
         for ($i = 0; $i < $length; $i++) {
             $result[] = ' - '.substr($trace[$i], strpos($trace[$i], ' '));
         }
@@ -1485,22 +1486,25 @@ class AHelperUtils extends AHelper
      * @param $filename
      *
      * @return array|bool
+     * @throws \ReflectionException
      */
     public static function get_image_size($filename)
     {
         if (file_exists($filename) && ($info = getimagesize($filename))) {
-            return array(
+            return [
                 'width'  => $info[0],
                 'height' => $info[1],
                 'mime'   => $info['mime'],
-            );
+            ];
         }
         if ($filename) {
-            $error = new  AError('Error: Cannot get image size of file '.$filename.'. File not found or it\'s not an image!');
+            $error = new  AError(
+                'Error: Cannot get image size of file '.$filename.'. File not found or it\'s not an image!'
+            );
             $error->toLog()->toDebug();
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -1508,12 +1512,13 @@ class AHelperUtils extends AHelper
      * NOTE: Resource Library handles resize by itself
      *
      * @param string $orig_image (full path)
-     * @param string $new_image  (relative path start from env DIR_IMAGES)
-     * @param int    $width
-     * @param int    $height
-     * @param int    $quality
+     * @param string $new_image (relative path start from env DIR_IMAGES)
+     * @param int $width
+     * @param int $height
+     * @param int $quality
      *
      * @return string / path to new image
+     * @throws \ReflectionException
      */
     public static function check_resize_image($orig_image, $new_image, $width, $height, $quality)
     {
@@ -1535,21 +1540,26 @@ class AHelperUtils extends AHelper
                         && file_put_contents($indexFile,
                             "<?php die('Restricted Access!'); ?>");
                     if (!$result) {
-                        $error = new AWarning('Cannot to create directory '.ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES'));
+                        $error = new AWarning(
+                            'Cannot to create directory '
+                            .ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES')
+                        );
                         $error->toLog();
                     }
                 }
             }
         }
 
-        if (!file_exists(ABC::env('DIR_IMAGES').$new_image) || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGES').$new_image))) {
+        if (!file_exists(ABC::env('DIR_IMAGES').$new_image)
+            || (filemtime($orig_image) > filemtime(ABC::env('DIR_IMAGES').$new_image))
+        ){
             $image = new AImage($orig_image);
             $result = $image->resizeAndSave(ABC::env('DIR_IMAGES').$new_image,
                 $width,
                 $height,
-                array(
+                [
                     'quality' => $quality,
-                ));
+                ]);
             unset($image);
             if (!$result) {
                 return null;
@@ -1604,7 +1614,9 @@ class AHelperUtils extends AHelper
                     $reflection = new \ReflectionClass($class);
                     $instance = $reflection->newInstanceArgs($arguments);
                 } catch (\ReflectionException $e) {
-                    Registry::getInstance()->get('log')->write('AHelperUtils Error: '.$e->getMessage().' '.$e->getLine());
+                    Registry::getInstance()->get('log')->write(
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
+                    );
                 }
             }
 
@@ -1811,7 +1823,7 @@ class AHelperUtils extends AHelper
 
     public static function df($var, $filename = 'debug.txt') {
         $backtrace = debug_backtrace();
-        $backtracePath = array();
+        $backtracePath = [];
         foreach($backtrace as $k => $bt)
         {
             if($k > 1)

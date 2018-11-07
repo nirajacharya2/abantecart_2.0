@@ -52,7 +52,7 @@ class ModelToolImportProcess extends Model
      * @param array $data
      *
      * @return array|bool
-     * @throws \ReflectionException
+     * @throws \Exception
      */
     public function createTask($task_name, $data = [])
     {
@@ -466,7 +466,10 @@ class ModelToolImportProcess extends Model
 
         if($status){
             //call event
-            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $category_id, $category_data, $record)]);
+            H::event(
+                __CLASS__.'@'.__FUNCTION__,
+                [new ABaseEvent($this->task_id, $category_id, $category_data, $record)]
+            );
         }
 
         return $status;
@@ -511,7 +514,10 @@ class ModelToolImportProcess extends Model
 
         if($status){
              //call event
-             H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]);
+             H::event(
+                 __CLASS__.'@'.__FUNCTION__,
+                 [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]
+             );
         }
         return $status;
     }
@@ -918,6 +924,7 @@ class ModelToolImportProcess extends Model
 
             $last_parent_id = 0;
             foreach ($categories as $index => $c_name) {
+                if($c_name===''){ continue; }
                 //is parent?
                 $is_parent = ($index + 1 == count($categories)) ? false : true;
                 //check if category exists with this name
@@ -990,6 +997,7 @@ class ModelToolImportProcess extends Model
      * @param int $pid
      *
      * @return int
+     * @throws \Exception
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {

@@ -712,10 +712,10 @@ class ALanguage
                 $this->cache->push($cache_key, $load_data);
             }
         } elseif ($load_data === []) {
-            $error = new AWarning(
+           /* $error = new AWarning(
                 'Cache of "'.$filename.'" contains an empty array! Suggests to clear cache manually.'
             );
-            $error->toLog()->toDebug();
+            $error->toLog()->toDebug();*/
         }
 
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$filename.' is loaded');
