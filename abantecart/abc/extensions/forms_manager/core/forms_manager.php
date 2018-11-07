@@ -6,10 +6,6 @@ use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
-
 /**
  * Class ExtensionFormsManager
  *
@@ -20,8 +16,8 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
 class ExtensionFormsManager extends Extension
 {
 
-    public $errors = array();
-    public $data = array();
+    public $errors = [];
+    public $data = [];
     protected $registry;
 
     public function __construct()
@@ -43,21 +39,25 @@ class ExtensionFormsManager extends Extension
 
         if ( $this->baseObject->data['block_txt_id'] == 'custom_form_block' ) {
             $this->baseObject->data['block_edit_brn'] = $this->baseObject->html->buildButton(
-                array(
+                [
                     'type'   => 'button',
                     'name'   => 'btn_edit',
                     'id'     => 'btn_edit',
                     'text'   => $this->baseObject->language->get( 'text_edit' ),
-                    'href'   => $this->baseObject->html->getSecureURL( 'design/blocks/edit', '&custom_block_id='.$this->baseObject->data['custom_block_id'] ),
+                    'href'   => $this->baseObject->html->getSecureURL(
+                        'design/blocks/edit',
+                        '&custom_block_id='.$this->baseObject->data['custom_block_id']
+                    ),
                     'target' => '_new',
                     'style'  => 'button1',
-                ) );
+                ]);
             $this->data['allow_edit'] = 'true';
         }
     }
 
     public function onControllerPagesDesignBlocks_InitData()
     {
+        $block_txt_id = '';
         $this->baseObject->loadLanguage( 'forms_manager/forms_manager' );
         if ( $this->baseObject_method == 'edit' ) {
             $lm = new ALayoutManager();
@@ -71,7 +71,12 @@ class ExtensionFormsManager extends Extension
             }
 
             if ( $block_txt_id == 'custom_form_block' ) {
-                abc_redirect( $this->html->getSecureURL( 'tool/forms_manager/edit_block', '&custom_block_id='.(int)$this->request->get['custom_block_id'] ) );
+                abc_redirect(
+                    $this->html->getSecureURL(
+                        'tool/forms_manager/edit_block',
+                        '&custom_block_id='.(int)$this->request->get['custom_block_id']
+                    )
+                );
             }
         }
     }
@@ -88,16 +93,16 @@ class ExtensionFormsManager extends Extension
         $block_id = $block['block_id'];
 
         $inserts = $that->view->getData( 'inserts' );
-        $inserts[] = array(
+        $inserts[] = [
             'text' => $that->language->get( 'custom_forms_block' ),
             'href' => $that->html->getSecureURL( 'tool/forms_manager/insert_block', '&block_id='.$block_id ),
-        );
+        ];
         $that->view->assign( 'inserts', $inserts );
     }
 
     public function onControllerPagesExtensionBannerManager_UpdateData()
     {
-
+        $block_txt_id = '';
         if ( $this->baseObject_method == 'edit' ) {
             $lm = new ALayoutManager();
             $blocks = $lm->getAllBlocks();
@@ -125,13 +130,13 @@ class ExtensionFormsManager extends Extension
             $that->loadLanguage( 'design/blocks' );
             $block = $lm->getBlockByTxtId( 'custom_form_block' );
             $block_id = $block['block_id'];
-            $that->data['tabs'][] = array(
+            $that->data['tabs'][] = [
                 'name'       => $block_id,
                 'text'       => $that->language->get( 'custom_forms_block' ),
                 'href'       => $that->html->getSecureURL( 'tool/forms_manager/insert_block', '&block_id='.$block_id ),
                 'active'     => ( $block_id == $this->request->get['block_id'] ? true : false ),
                 'sort_order' => 4,
-            );
+            ];
         }
     }
 

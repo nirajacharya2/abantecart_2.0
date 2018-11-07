@@ -62,7 +62,6 @@ class ControllerPagesToolFormsManager extends AController
             abc_redirect(
                 $this->html->getSecureURL('tool/forms_manager/update', '&form_id='.$this->request->get['form_id'])
             );
-            exit;
         }
 
         $this->document->setTitle($this->language->get('forms_manager_name'));

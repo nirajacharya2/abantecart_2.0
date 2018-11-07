@@ -17,51 +17,48 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 if ( ! class_exists( '\abc\core\extension\ExtensionFormsManager' ) ) {
-    include( 'core/forms_manager.php' );
+    require_once __DIR__.DS.'core'.DS.'forms_manager.php';
 }
 
-$controllers = array(
-    'storefront' => array(
+$controllers = [
+    'storefront' => [
         'blocks/custom_form_block',
         'pages/forms_manager/default_email',
         'responses/forms_manager/validate',
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'pages/tool/forms_manager',
         'responses/grid/form',
         'responses/forms_manager/fields',
-    ),
-);
+    ],
+];
 
-$models = array(
-    'storefront' => array( 'tool/forms_manager' ),
-    'admin'      => array( 'tool/forms_manager' ),
-);
+$models = [
+    'storefront' => ['tool/forms_manager'],
+    'admin'      => ['tool/forms_manager'],
+];
 
-$languages = array(
-    'storefront' => array( '' ),
-    'admin'      => array( 'forms_manager/forms_manager' ),
-);
+$languages = [
+    'storefront' => [''],
+    'admin'      => ['forms_manager/forms_manager'],
+];
 
-$templates = array(
-    'storefront' => array(
+$templates = [
+    'storefront' => [
         'blocks/custom_form_block.tpl',
         'blocks/custom_form_block_content.tpl',
         'blocks/custom_form_block_header.tpl',
         'pages/default_email.tpl',
         'pages/default_email_success.tpl',
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'pages/tool/forms_manager_list.tpl',
         'pages/tool/forms_manager_form.tpl',
         'pages/tool/forms_manager_block_form.tpl',
         'responses/forms_manager/field_values.tpl',
         'responses/forms_manager/field_value_row.tpl',
         'responses/forms_manager/file_upload_settings.tpl',
-    ),
-);
+    ],
+];
