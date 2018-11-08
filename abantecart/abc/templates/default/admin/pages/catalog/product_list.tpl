@@ -22,6 +22,11 @@
 						foreach ($search_form['fields'] as $f) {
 							?>
 							<div class="form-group">
+								<?php if($search_form['entry_'.$f->name]){?>
+										<div class="input-group input-group-sm">
+											<?php echo $search_form['entry_'.$f->name];?>
+										</div>
+								<?php } ?>
 								<div class="input-group input-group-sm">
 									<?php echo $f; ?>
 								</div>

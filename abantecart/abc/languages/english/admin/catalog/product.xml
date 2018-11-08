@@ -362,6 +362,14 @@
 		<value><![CDATA[- All Categories -]]></value>
 	</definition>
 	<definition>
+		<key>filter_price_range</key>
+		<value><![CDATA[Price range]]></value>
+	</definition>
+	<definition>
+		<key>filter_price_min</key>
+		<value><![CDATA[min]]></value>
+	</definition>
+	<definition>
 		<key>filter_price_max</key>
 		<value><![CDATA[max]]></value>
 	</definition>

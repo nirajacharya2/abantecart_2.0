@@ -37,8 +37,8 @@ use H;
 
 class ControllerPagesCatalogProduct extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -55,26 +55,26 @@ class ControllerPagesCatalogProduct extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         $this->loadModel('catalog/category');
-        $this->data['categories'] = array('' => $this->language->get('text_select_category'));
+        $this->data['categories'] = ['' => $this->language->get('text_select_category')];
         $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
 
-        $grid_settings = array(
+        $grid_settings = [
             'table_id'     => 'product_grid',
             'url'          => $this->html->getSecureURL(
                 'listing_grid/product',
@@ -85,12 +85,12 @@ class ControllerPagesCatalogProduct extends AController
             //NOTE: set default sorting by date_modified, but column not present in the grid
             'sortname'     => 'date_modified',
             'sortorder'    => 'desc',
-            'actions'      => array(
-                'edit'   => array(
+            'actions'      => [
+                'edit'   => [
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),
-                    'children' => array_merge(array(
-                        'quickview'  => array(
+                    'children' => array_merge([
+                        'quickview'  => [
                             'text'  => $this->language->get('text_quick_view'),
                             'href'  => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),
                             //quick view port URL
@@ -98,110 +98,110 @@ class ControllerPagesCatalogProduct extends AController
                                                                 'r/common/viewport/modal',
                                                                 '&viewport_rt=catalog/product/update&product_id=%ID%'
                             )
-                        ),
-                        'general'    => array(
+                        ],
+                        'general'    => [
                             'text' => $this->language->get('tab_general'),
                             'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),
-                        ),
-                        'media'      => array(
+                        ],
+                        'media'      => [
                             'text' => $this->language->get('tab_media'),
                             'href' => $this->html->getSecureURL('catalog/product_images', '&product_id=%ID%'),
-                        ),
-                        'options'    => array(
+                        ],
+                        'options'    => [
                             'text' => $this->language->get('tab_option'),
                             'href' => $this->html->getSecureURL('catalog/product_options', '&product_id=%ID%'),
-                        ),
-                        'files'      => array(
+                        ],
+                        'files'      => [
                             'text' => $this->language->get('tab_files'),
                             'href' => $this->html->getSecureURL('catalog/product_files', '&product_id=%ID%'),
-                        ),
-                        'relations'  => array(
+                        ],
+                        'relations'  => [
                             'text' => $this->language->get('tab_relations'),
                             'href' => $this->html->getSecureURL('catalog/product_relations', '&product_id=%ID%'),
-                        ),
-                        'promotions' => array(
+                        ],
+                        'promotions' => [
                             'text' => $this->language->get('tab_promotions'),
                             'href' => $this->html->getSecureURL('catalog/product_promotions', '&product_id=%ID%'),
-                        ),
-                        'layout'     => array(
+                        ],
+                        'layout'     => [
                             'text' => $this->language->get('tab_layout'),
                             'href' => $this->html->getSecureURL('catalog/product_layout', '&product_id=%ID%'),
-                        ),
+                        ],
 
-                    ), (array)$this->data['grid_edit_expand']),
-                ),
-                'save'   => array(
+                    ], (array)$this->data['grid_edit_expand']),
+                ],
+                'save'   => [
                     'text' => $this->language->get('button_save'),
-                ),
-                'delete' => array(
+                ],
+                'delete' => [
                     'text' => $this->language->get('button_delete'),
-                ),
-                'clone'  => array(
+                ],
+                'clone'  => [
                     'text' => $this->language->get('text_clone'),
                     'href' => $this->html->getSecureURL('catalog/product/copy', '&product_id=%ID%'),
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             '',
             $this->language->get('column_name'),
             $this->language->get('column_model'),
             $this->language->get('column_price'),
             $this->language->get('column_quantity'),
             $this->language->get('column_status'),
-        );
-        $grid_settings['colModel'] = array(
-            array(
+        ];
+        $grid_settings['colModel'] = [
+            [
                 'name'     => 'image',
                 'index'    => 'image',
                 'align'    => 'center',
                 'width'    => 65,
                 'sortable' => false,
                 'search'   => false,
-            ),
-            array(
+            ],
+            [
                 'name'  => 'name',
                 'index' => 'name',
                 'align' => 'center',
                 'width' => 200,
-            ),
-            array(
+            ],
+            [
                 'name'  => 'model',
                 'index' => 'model',
                 'align' => 'center',
                 'width' => 120,
-            ),
-            array(
+            ],
+            [
                 'name'   => 'price',
                 'index'  => 'price',
                 'align'  => 'center',
                 'width'  => 90,
                 'search' => false,
-            ),
-            array(
+            ],
+            [
                 'name'   => 'quantity',
                 'index'  => 'quantity',
                 'align'  => 'center',
                 'width'  => 90,
                 'search' => false,
-            ),
-            array(
+            ],
+            [
                 'name'   => 'status',
                 'index'  => 'status',
                 'align'  => 'center',
                 'width'  => 130,
                 'search' => false,
-            ),
-        );
+            ],
+        ];
 
         $form = new AForm();
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'product_grid_search',
-        ));
+        ]);
 
         //get search filter from cookie if required
-        $search_params = array();
+        $search_params = [];
         if ($this->request->get['saved_list']) {
             $grid_search_form = json_decode(html_entity_decode($this->request->cookie['grid_search_form']));
             if ($grid_search_form->table_id == $grid_settings['table_id']) {
@@ -209,80 +209,83 @@ class ControllerPagesCatalogProduct extends AController
             }
         }
 
-        $grid_search_form = array();
+        $grid_search_form = [];
         $grid_search_form['id'] = 'product_grid_search';
-        $grid_search_form['form_open'] = $form->getFieldHtml(array(
+        $grid_search_form['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'product_grid_search',
             'action' => '',
-        ));
-        $grid_search_form['submit'] = $form->getFieldHtml(array(
+        ]);
+        $grid_search_form['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_go'),
             'style' => 'button1',
-        ));
-        $grid_search_form['reset'] = $form->getFieldHtml(array(
+        ]);
+        $grid_search_form['reset'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'reset',
             'text'  => $this->language->get('button_reset'),
             'style' => 'button2',
-        ));
+        ]);
 
-        $grid_search_form['fields']['keyword'] = $form->getFieldHtml(array(
+        $grid_search_form['fields']['keyword'] = $form->getFieldHtml([
             'type'        => 'input',
             'name'        => 'keyword',
             'value'       => $search_params['keyword'],
             'placeholder' => $this->language->get('filter_product'),
-        ));
-        $grid_search_form['fields']['match'] = $form->getFieldHtml(array(
+        ]);
+        $grid_search_form['fields']['match'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'match',
             'value'   => $search_params['match'],
-            'options' => array(
+            'options' => [
                 'any'   => $this->language->get('filter_any_word'),
                 'all'   => $this->language->get('filter_all_words'),
                 'exact' => $this->language->get('filter_exact_match'),
-            ),
-        ));
-        $grid_search_form['fields']['pfrom'] = $form->getFieldHtml(array(
+            ],
+        ]);
+
+        $grid_search_form['entry_pfrom'] = $this->language->get('filter_price_range');
+
+        $grid_search_form['fields']['pfrom'] = $form->getFieldHtml([
             'type'        => 'input',
             'name'        => 'pfrom',
             'value'       => $search_params['pfrom'],
-            'placeholder' => '0',
+            'placeholder' => $this->language->get('filter_price_min'),
             'style'       => 'small-field',
-        ));
-        $grid_search_form['fields']['pto'] = $form->getFieldHtml(array(
+        ]);
+        $grid_search_form['fields']['pto'] = $form->getFieldHtml([
             'type'        => 'input',
             'name'        => 'pto',
             'value'       => $search_params['pto'],
             'placeholder' => $this->language->get('filter_price_max'),
             'style'       => 'small-field',
-        ));
+        ]);
 
         if ($this->request->get['category']) {
             $search_params['category'] = $this->request->get['category'];
         }
 
         $grid_search_form['fields']['category'] = $form->getFieldHtml(
-            array(
+            [
                 'type'        => 'selectbox',
                 'name'        => 'category',
                 'options'     => $this->data['categories'],
                 'style'       => 'chosen',
                 'value'       => $search_params['category'],
                 'placeholder' => $this->language->get('text_select_category'),
-            ));
-        $grid_search_form['fields']['status'] = $form->getFieldHtml(array(
+            ]);
+        $grid_search_form['fields']['status'] = $form->getFieldHtml([
             'type'        => 'selectbox',
             'name'        => 'status',
             'value'       => $search_params['status'],
             'placeholder' => $this->language->get('text_select_status'),
-            'options'     => array(
+            'options'     => [
                 1 => $this->language->get('text_enabled'),
                 0 => $this->language->get('text_disabled'),
-            ),
-        ));
+            ],
+        ]);
 
         $grid_settings['search_form'] = true;
 
@@ -293,7 +296,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->view->assign('relate_selected_url', $grid_settings['editurl']);
         $this->view->assign('text_success_relation_set', $this->language->get('text_success_relation_set'));
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
         $this->view->assign('search_form', $grid_search_form);
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
@@ -392,10 +395,10 @@ class ControllerPagesCatalogProduct extends AController
         abc_redirect($this->html->getSecureURL('catalog/product'));
     }
 
-    private function buildForm($args = array())
+    private function buildForm($args = [])
     {
         $product_id = null;
-        $product_info = array();
+        $product_info = [];
         $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
         $content_language_id = $this->language->getContentLanguageID();
         if (isset($this->request->get['product_id'])) {
@@ -412,17 +415,17 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product'),
             'text'      => $this->language->get('heading_title'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product'),
             'text'      =>
                 ($product_id
@@ -433,58 +436,58 @@ class ControllerPagesCatalogProduct extends AController
                 ),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         $this->loadModel('catalog/category');
-        $this->data['categories'] = array();
+        $this->data['categories'] = [];
         $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
 
         $this->loadModel('setting/store');
-        $this->data['stores'] = array(0 => $this->language->get('text_default'));
+        $this->data['stores'] = [0 => $this->language->get('text_default')];
         $results = $this->model_setting_store->getStores();
         foreach ($results as $r) {
             $this->data['stores'][$r['store_id']] = $r['name'];
         }
 
         $this->loadModel('catalog/manufacturer');
-        $this->data['manufacturers'] = array(0 => $this->language->get('text_none'));
+        $this->data['manufacturers'] = [0 => $this->language->get('text_none')];
         $results = $this->model_catalog_manufacturer->getManufacturers();
         foreach ($results as $r) {
             $this->data['manufacturers'][$r['manufacturer_id']] = $r['name'];
         }
 
         $this->loadModel('localisation/stock_status');
-        $this->data['stock_statuses'] = array('0' => $this->language->get('text_none'));
+        $this->data['stock_statuses'] = ['0' => $this->language->get('text_none')];
         $results = $this->model_localisation_stock_status->getStockStatuses();
         foreach ($results as $r) {
             $this->data['stock_statuses'][$r['stock_status_id']] = $r['name'];
         }
 
         $this->loadModel('localisation/tax_class');
-        $this->data['tax_classes'] = array(0 => $this->language->get('text_none'));
+        $this->data['tax_classes'] = [0 => $this->language->get('text_none')];
         $results = $this->model_localisation_tax_class->getTaxClasses();
         foreach ($results as $r) {
             $this->data['tax_classes'][$r['tax_class_id']] = $r['title'];
         }
 
         $this->loadModel('localisation/weight_class');
-        $this->data['weight_classes'] = array();
+        $this->data['weight_classes'] = [];
         $results = $this->model_localisation_weight_class->getWeightClasses();
         foreach ($results as $r) {
             $this->data['weight_classes'][$r['weight_class_id']] = $r['title'];
         }
 
         $this->loadModel('localisation/length_class');
-        $this->data['length_classes'] = array();
+        $this->data['length_classes'] = [];
         $results = $this->model_localisation_length_class->getLengthClasses();
         foreach ($results as $r) {
             $this->data['length_classes'][$r['length_class_id']] = $r['title'];
         }
 
-        $fields = array(
+        $fields = [
             'product_category',
             'featured',
             'product_store',
@@ -515,7 +518,7 @@ class ControllerPagesCatalogProduct extends AController
             'length',
             'width',
             'height',
-        );
+        ];
 
         foreach ($fields as $f) {
             if (isset ($this->request->post [$f])) {
@@ -530,7 +533,7 @@ class ControllerPagesCatalogProduct extends AController
         } elseif (isset($product_info)) {
             $this->data['product_category'] = $this->model_catalog_product->getProductCategories($product_id);
         } else {
-            $this->data['product_category'] = array();
+            $this->data['product_category'] = [];
         }
 
         if (isset($this->request->post['product_store'])) {
@@ -538,7 +541,7 @@ class ControllerPagesCatalogProduct extends AController
         } elseif (isset($product_info)) {
             $this->data['product_store'] = $this->model_catalog_product->getProductStores($product_id);
         } else {
-            $this->data['product_store'] = array(0);
+            $this->data['product_store'] = [0];
         }
 
         if (isset($this->request->post['product_description'])) {
@@ -549,7 +552,7 @@ class ControllerPagesCatalogProduct extends AController
                                                                                           $content_language_id
             );
         } else {
-            $this->data['product_description'] = array();
+            $this->data['product_description'] = [];
         }
 
         if (isset($this->request->post['featured'])) {
@@ -645,207 +648,207 @@ class ControllerPagesCatalogProduct extends AController
 
             $this->data['active'] = 'general';
             //load tabs controller
-            $tabs_obj = $this->dispatch('pages/catalog/product_tabs', array($this->data));
+            $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
             $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
             unset($tabs_obj);
             $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
         }
 
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'productFrm',
             'update'    => $this->data['update'],
-        ));
+        ]);
 
         $this->data['form']['id'] = 'productFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['form']['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'productFrm',
             'action' => $this->data['action'],
             'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-        ));
+        ]);
 
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
+        $this->data['form']['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_save'),
             'style' => 'button1',
-        ));
+        ]);
 
-        $this->data['form']['cancel'] = $form->getFieldHtml(array(
+        $this->data['form']['cancel'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'cancel',
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['status'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['status'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'status',
             'value' => $this->data['status'],
             'style' => 'btn_switch btn-group-sm',
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['featured'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['featured'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'featured',
             'value' => $this->data['featured'],
             'style' => 'btn_switch btn-group-sm',
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['name'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'product_description[name]',
             'value'        => $this->data['product_description']['name'],
             'required'     => true,
             'multilingual' => true,
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['blurb'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['blurb'] = $form->getFieldHtml([
             'type'         => 'textarea',
             'name'         => 'product_description[blurb]',
             'value'        => $this->data['product_description']['blurb'],
             'multilingual' => true,
-        ));
+        ]);
 
         if ($viewport_mode != 'modal') {
-            $this->data['form']['fields']['general']['description'] = $form->getFieldHtml(array(
+            $this->data['form']['fields']['general']['description'] = $form->getFieldHtml([
                 'type'         => 'texteditor',
                 'name'         => 'product_description[description]',
                 'value'        => $this->data['product_description']['description'],
                 'multilingual' => true,
-            ));
+            ]);
         }
 
-        $this->data['form']['fields']['general']['meta_keywords'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['meta_keywords'] = $form->getFieldHtml([
             'type'         => 'textarea',
             'name'         => 'product_description[meta_keywords]',
             'value'        => $this->data['product_description']['meta_keywords'],
             'multilingual' => true,
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['meta_description'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['meta_description'] = $form->getFieldHtml([
             'type'         => 'textarea',
             'name'         => 'product_description[meta_description]',
             'value'        => $this->data['product_description']['meta_description'],
             'multilingual' => true,
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['tags'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['tags'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'product_tags',
             'value' => $this->data['product_tags'],
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['category'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['category'] = $form->getFieldHtml([
             'type'        => 'checkboxgroup',
             'name'        => 'product_category[]',
             'value'       => $this->data['product_category'],
             'options'     => $this->data['categories'],
             'style'       => 'chosen',
             'placeholder' => $this->language->get('text_select_category'),
-        ));
+        ]);
 
-        $this->data['form']['fields']['general']['store'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['store'] = $form->getFieldHtml([
             'type'        => 'checkboxgroup',
             'name'        => 'product_store[]',
             'value'       => $this->data['product_store'],
             'options'     => $this->data['stores'],
             'style'       => 'chosen',
             'placeholder' => $this->language->get('entry_store'),
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['manufacturer'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['manufacturer'] = $form->getFieldHtml([
             'type'        => 'selectbox',
             'name'        => 'manufacturer_id',
             'value'       => $this->data['manufacturer_id'],
             'options'     => $this->data['manufacturers'],
             'style'       => 'chosen',
             'placeholder' => $this->language->get('entry_manufacturer'),
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['model'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['model'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'model',
             'value'    => $this->data['model'],
             'required' => false,
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['call_to_order'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['call_to_order'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'call_to_order',
             'value' => $this->data['call_to_order'],
             'style' => 'btn_switch btn-group-sm',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['price'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['price'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'price',
             'value' => $this->data['price'],
             'style' => 'small-field',
-        ));
-        $this->data['form']['fields']['data']['cost'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['cost'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'cost',
             'value' => round($this->data['cost'],3),
             'style' => 'small-field',
-        ));
-        $this->data['form']['fields']['data']['tax_class'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['tax_class'] = $form->getFieldHtml([
             'type'     => 'selectbox',
             'name'     => 'tax_class_id',
             'value'    => $this->data['tax_class_id'],
             'options'  => $this->data['tax_classes'],
             'help_url' => $this->gen_help_url('tax_class'),
             'style'    => 'medium-field',
-        ));
-        $this->data['form']['fields']['data']['subtract'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['subtract'] = $form->getFieldHtml([
             'type'     => 'selectbox',
             'name'     => 'subtract',
             'value'    => $this->data['subtract'],
-            'options'  => array(
+            'options'  => [
                 1 => $this->language->get('text_yes'),
                 0 => $this->language->get('text_no'),
-            ),
+            ],
             'help_url' => $this->gen_help_url('product_inventory'),
             'style'    => 'medium-field',
             'disabled' => ($product_info['has_track_options'] ? true : false),
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['quantity'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['quantity'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'quantity',
             'value'    => (int)$this->data['quantity'],
             'style'    => 'col-xs-1 small-field',
             'help_url' => $this->gen_help_url('product_inventory'),
             'attr'     => ($product_info['has_track_options'] ? 'disabled' : ''),
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['minimum'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['minimum'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'minimum',
             'value' => (int)$this->data['minimum'],
             'style' => 'small-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['maximum'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['maximum'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'maximum',
             'value' => (int)$this->data['maximum'],
             'style' => 'small-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['stock_checkout'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['stock_checkout'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'stock_checkout',
             'value'   => (H::has_value($this->data['stock_checkout']) ? $this->data['stock_checkout'] : ''),
-            'options' => array(
+            'options' => [
                 '' => $this->language->get('text_default'),
                 0  => $this->language->get('text_no'),
                 1  => $this->language->get('text_yes'),
-            ),
+            ],
             'style'   => 'small-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['stock_status'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['stock_status'] = $form->getFieldHtml([
             'type'     => 'selectbox',
             'name'     => 'stock_status_id',
             'value'    => (
@@ -856,42 +859,42 @@ class ControllerPagesCatalogProduct extends AController
             'options'  => $this->data['stock_statuses'],
             'help_url' => $this->gen_help_url('product_inventory'),
             'style'    => 'small-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['sku'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['sku'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'sku',
             'value' => $this->data['sku'],
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['location'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['location'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'location',
             'value' => $this->data['location'],
-        ));
+        ]);
         //prepend button to generate keyword
-        $this->data['keyword_button'] = $form->getFieldHtml(array(
+        $this->data['keyword_button'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'generate_seo_keyword',
             'text'  => $this->language->get('button_generate'),
             //set button not to submit a form
             'attr'  => 'type="button"',
             'style' => 'btn btn-info',
-        ));
+        ]);
         $this->data['generate_seo_url'] = $this->html->getSecureURL(
             'common/common/getseokeyword',
             '&object_key_name=product_id&id='.$product_id
         );
 
-        $this->data['form']['fields']['data']['keyword'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['keyword'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'keyword',
             'value'        => $this->data['keyword'],
             'help_url'     => $this->gen_help_url('seo_keyword'),
             'attr'         => ' gen-value="'.H::SEOEncode($this->data['product_description']['name']).'" ',
             'multilingual' => true,
-        ));
-        $this->data['form']['fields']['data']['date_available'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['date_available'] = $form->getFieldHtml([
             'type'       => 'date',
             'name'       => 'date_available',
             'value'      => H::dateISO2Display($this->data['date_available']),
@@ -899,75 +902,75 @@ class ControllerPagesCatalogProduct extends AController
             'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
             'highlight'  => 'future',
             'style'      => 'small-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['sort_order'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['sort_order'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'sort_order',
             'value' => $this->data['sort_order'],
             'style' => 'tiny-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['shipping'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['shipping'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'shipping',
             'style' => 'btn_switch btn-group-sm',
             'value' => isset($this->data['shipping']) ? $this->data['shipping'] : 1,
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['free_shipping'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['free_shipping'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'free_shipping',
             'style' => 'btn_switch btn-group-sm',
             'value' => isset($this->data['free_shipping']) ? $this->data['free_shipping'] : 0,
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['ship_individually'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['ship_individually'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'ship_individually',
             'style' => 'btn_switch btn-group-sm',
             'value' => isset($this->data['ship_individually']) ? $this->data['ship_individually'] : 0,
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'shipping_price',
             'value' => round($this->data['shipping_price'],3),
             'style' => 'tiny-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['length'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['length'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'length',
             'value' => $this->data['length'],
             'style' => 'tiny-field',
-        ));
-        $this->data['form']['fields']['data']['width'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['width'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'width',
             'value' => $this->data['width'],
             'attr'  => ' autocomplete="false"',
             'style' => 'tiny-field',
-        ));
-        $this->data['form']['fields']['data']['height'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['fields']['data']['height'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'height',
             'value' => $this->data['height'],
             'attr'  => ' autocomplete="false"',
             'style' => 'tiny-field',
-        ));
+        ]);
 
         if ($product_id && !$this->data['length_class_id']) {
             $this->data['length_classes'][0] = $this->language->get('text_none');
         }
 
-        $this->data['form']['fields']['data']['length_class'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['length_class'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'length_class_id',
             'value'   => $this->data['length_class_id'],
             'options' => $this->data['length_classes'],
             'style'   => 'small-field',
-        ));
+        ]);
 
         if ($product_id
             && $this->data['shipping']
@@ -986,21 +989,21 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['weight_classes'][0] = $this->language->get('text_none');
         }
 
-        $this->data['form']['fields']['data']['weight'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['weight'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'weight',
             'value' => $this->data['weight'],
             'attr'  => ' autocomplete="false"',
             'style' => 'tiny-field',
-        ));
+        ]);
 
-        $this->data['form']['fields']['data']['weight_class'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['data']['weight_class'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'weight_class_id',
             'value'   => $this->data['weight_class_id'],
             'options' => $this->data['weight_classes'],
             'style'   => 'small-field',
-        ));
+        ]);
 
         $this->data['product_id'] = $product_id;
         if ($product_id && $this->config->get('config_embed_status')) {
@@ -1031,11 +1034,11 @@ class ControllerPagesCatalogProduct extends AController
             );
             $resources_scripts = $this->dispatch(
                 'responses/common/resource_library/get_resources_scripts',
-                array(
+                [
                     'object_name' => '',
                     'object_id'   => '',
-                    'types'       => array('image'),
-                )
+                    'types'       => ['image'],
+                ]
             );
             $this->data['resources_scripts'] = $resources_scripts->dispatchGetOutput();
             $this->data['rl'] = $this->html->getSecureURL(
@@ -1072,7 +1075,7 @@ class ControllerPagesCatalogProduct extends AController
             $this->error['keyword'] = $error_text;
         }
 
-        foreach (array('length', 'width', 'height', 'weight') as $name) {
+        foreach (['length', 'width', 'height', 'weight'] as $name) {
             $v = abs(H::preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
             if ($v >= 1000) {
                 $this->error[$name] = $this->language->get('error_measure_value');
@@ -1106,7 +1109,7 @@ class ControllerPagesCatalogProduct extends AController
         }
     }
 
-    protected function prepareData($data = array())
+    protected function prepareData($data = [])
     {
         if (isset($data['date_available'])) {
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
