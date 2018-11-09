@@ -1232,6 +1232,7 @@ class MultivalueHtmlElement extends HtmlElement
 /**
  * Class SubmitHtmlElement
  *
+ * @property string $element_id
  * @property string $form,
  * @property string $name
  * @property string $value
@@ -1249,6 +1250,7 @@ class SubmitHtmlElement extends HtmlElement
     {
         $this->view->batchAssign(
             [
+                'id'    => $this->element_id,
                 'form'  => $this->form,
                 'name'  => $this->name,
                 'value' => $this->value,
