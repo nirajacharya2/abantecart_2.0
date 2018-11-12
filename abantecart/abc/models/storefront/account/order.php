@@ -310,6 +310,19 @@ class ModelAccountOrder extends Model
                                     WHERE customer_id = '".(int)$this->customer->getId()."' AND order_status_id > '0'");
         return (int)$query->row['total'];
     }
+    /**
+     * @return int
+     * @throws \Exception
+     */
+    public function getLastOrder()
+    {
+        $query = $this->db->query(
+            "SELECT *
+            FROM `".$this->db->table_name("orders")."`
+            WHERE customer_id = '".(int)$this->customer->getId()."' AND order_status_id > '0'"
+        );
+        return $query->row;
+    }
 
     /**
      * @param int $order_id
