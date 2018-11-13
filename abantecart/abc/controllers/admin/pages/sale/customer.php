@@ -23,11 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\engine\ALanguage;
-use abc\core\lib\AEncryption;
-use abc\core\lib\AMail;
 use abc\models\admin\ModelSaleCustomerNote;
-use abc\models\admin\User;
 use H;
 
 /**
@@ -506,16 +502,18 @@ class ControllerPagesSaleCustomer extends AController
                 $this->language->get('text_edit').$this->language->get('text_customer').' - '.$this->data['firstname']
                 .' '
                 .$this->data['lastname'];
-            $this->data['update'] =
-                $this->html->getSecureURL('listing_grid/customer/update_field', '&id='.$customer_id);
+            $this->data['update'] = $this->html->getSecureURL(
+                'listing_grid/customer/update_field',
+                '&id='.$customer_id
+            );
             $form = new AForm('HS');
 
             $this->data['reset_password'] = $this->html->buildElement(
                 [
-                    'type' => 'button',
-                    'name' => 'reset_password_button',
-                    'href' => $this->html->getSecureURL(
-                                'sale/customer/resetPassword',
+                    'type'  => 'button',
+                    'name'  => 'reset_password_button',
+                    'href'  => $this->html->getSecureURL(
+                                'listing_grid/customer/resetPassword',
                                 '&customer_id='.$customer_id
                     ),
                     'title' => $this->language->get('text_resend_password')
@@ -1176,6 +1174,8 @@ class ControllerPagesSaleCustomer extends AController
 
     /**
      * @return bool
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     protected function validateAddressForm()
     {
@@ -1218,81 +1218,6 @@ class ControllerPagesSaleCustomer extends AController
             $this->error['warning'] = implode('<br>', $this->error);
             return false;
         }
-    }
-
-    public function resetPassword()
-    {
-        $customer_id = (int)$this->request->get['customer_id'];
-        $this->loadLanguage('sale/customer');
-
-        if (!$this->user->canModify('sale/customer')) {
-            $this->session->data['warning'] = sprintf(
-                                        $this->language->get('error_permission_modify'),
-                                        'sale/customer'
-            );
-            abc_redirect(
-                $this->html->getSecureURL(
-                    'sale/customer/update',
-                    '&customer_id='.$customer_id
-            ));
-        }
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $this->loadModel('sale/customer');
-        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
-
-        $error_text  = $this->validateBeforePasswordReset($customer_info);
-        if($error_text){
-            $this->session->data['warning'] = $error_text;
-            abc_redirect($this->html->getSecureURL('sale/customer/update','&customer_id='.$customer_id));
-        }
-
-        $code = H::genToken(32);
-        //save password reset code
-        $this->loadModel('account/customer','storefront')->updateOtherData($customer_id, ['password_reset' => $code]);
-        //build reset link
-        $enc = new AEncryption($this->config->get('encryption_key'));
-        $rtoken = $enc->encrypt($customer_id.'::'.$code);
-
-        $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken=' . $rtoken, null, 'storefront');
-
-        $language = new ALanguage($this->registry, $this->language->getLanguageCode(),0);
-        $language->load('mail/account_forgotten');
-
-        $subject = sprintf($language->get('text_subject'), $this->config->get('store_name'));
-        $message = sprintf($this->language->get('text_password_was_reset'), $this->config->get('store_name')) . "\n\n";
-        $message .= $language->get('text_password') . "\n\n";
-        $message .= $link;
-
-        $mail = new AMail( $this->config );
-        $mail->setTo($customer_info['email']);
-        $mail->setFrom($this->config->get('store_main_email'));
-        $mail->setSender($this->config->get('store_name'));
-        $mail->setSubject($subject);
-        $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-        $arUser = H::recognizeUser();
-        $user = User::find($arUser['user_id']);
-        $mail->setUser($user);
-        $result = $mail->send();
-        if(!$result) {
-            $this->session->data['warning'] = $this->language->get('error_reset_link_not_sent');
-        }else {
-            $this->session->data['success'] = $this->language->get('text_password_reset_success');
-            $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        }
-        abc_redirect($this->html->getSecureURL('sale/customer/update','&customer_id='.$customer_id));
-    }
-
-    protected function validateBeforePasswordReset($customer_info)
-    {
-        if(!$customer_info){
-            return $this->language->get('error_unknown_customer');
-        }elseif(!$customer_info['email']){
-            return $this->language->get('error_no_email');
-        }elseif(!$customer_info['status'] || !$customer_info['approved']){
-            return $this->language->get('error_disabled_customer');
-        }
-        return '';
     }
 
     public function notes()

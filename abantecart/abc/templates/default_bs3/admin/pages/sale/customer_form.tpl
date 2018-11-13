@@ -72,10 +72,10 @@
 				<?php if($reset_password){ ?>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
-				   href="<?php echo $reset_password->href; ?>"
 				   data-toggle="tooltip"
 				   data-confirmation="delete"
 				   data-confirmation-text="<?php echo $warning_resend_password;?>"
+				   onclick = "sendPasswordReset();return false;"
 				   title="<?php echo $reset_password->title; ?>"
 				   data-original-title="<?php echo $reset_password->title; ?>"><i class="fa fa-key "></i>
 				</a>
@@ -180,3 +180,17 @@
 	</form>
 
 </div>
+
+<script type="application/javascript">
+	function sendPasswordReset(){
+		$.ajax({
+			url: '<?php echo $reset_password->href; ?>',
+			type:'POST',
+			success: function(data){
+				if(data.result === true) {
+					success_alert(data.success);
+				}
+			}
+		});
+	}
+</script>
