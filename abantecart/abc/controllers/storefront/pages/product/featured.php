@@ -57,10 +57,6 @@ class ControllerPagesProductFeatured extends AController
         ));
 
 
-        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
-            abc_redirect($this->html->getSecureURL('account/login'));
-        }
-
         $url = '';
         if (isset($request['page'])) {
             $url .= '&page='.$request['page'];
