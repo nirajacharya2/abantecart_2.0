@@ -938,11 +938,15 @@ class ModelAccountCustomer extends Model
      * @throws \Exception
      */
 
-    public function getTotalTransactions()
+    public function getTotalTransactions($transaction_id = 0)
     {
-        $query = $this->db->query( "SELECT COUNT(*) AS total
+        $sql = "SELECT COUNT(*) AS total
                                    FROM `".$this->db->table_name( "customer_transactions" )."`
-                                   WHERE customer_id = '".(int)$this->customer->getId()."'" );
+                                   WHERE customer_id = '".(int)$this->customer->getId()."'";
+        if ($transaction_id > 0) {
+            $sql .= ' AND customer_transaction_id='.$transaction_id;
+        }
+        $query = $this->db->query( $sql);
 
         return (int)$query->row['total'];
     }
@@ -954,13 +958,13 @@ class ModelAccountCustomer extends Model
      * @return mixed
      * @throws \Exception
      */
-    public function getTransactions( $start = 0, $limit = 20 )
+    public function getTransactions( $start = 0, $limit = 20, $transaction_id = 0 )
     {
         if ( $start < 0 ) {
             $start = 0;
         }
 
-        $query = $this->db->query( "SELECT 
+        $sql = "SELECT 
                                         t.customer_transaction_id,
                                         t.order_id,
                                         t.section,
@@ -970,9 +974,16 @@ class ModelAccountCustomer extends Model
                                         t.description,
                                         t.date_added
                                 FROM `".$this->db->table_name( "customer_transactions" )."` t
-                                WHERE customer_id = '".(int)$this->customer->getId()."'
-                                ORDER BY t.date_added DESC
-                                LIMIT ".(int)$start.",".(int)$limit );
+                                WHERE customer_id = '".(int)$this->customer->getId()."'";
+
+        if ($transaction_id > 0) {
+            $sql .= ' AND customer_transaction_id = '.$transaction_id;
+        }
+
+        $sql .= " ORDER BY t.date_added DESC
+                                LIMIT ".(int)$start.",".(int)$limit;
+
+        $query = $this->db->query( $sql );
 
         return $query->rows;
     }

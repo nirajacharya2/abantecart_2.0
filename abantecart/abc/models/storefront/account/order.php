@@ -167,14 +167,13 @@ class ModelAccountOrder extends Model
      * @return array
      * @throws \Exception
      */
-    public function getOrders($start = 0, $limit = 20)
+    public function getOrders($start = 0, $limit = 20, $order_id = 0)
     {
         $language_id = (int)$this->config->get('storefront_language_id');
         if ($start < 0) {
             $start = 0;
         }
-        $query = $this->db->query(
-            "SELECT	o.order_id,
+        $sql = "SELECT	o.order_id,
                         o.firstname, 
                         o.lastname, 
                         osd.name as status, 
@@ -187,9 +186,13 @@ class ModelAccountOrder extends Model
                     ON (o.order_status_id = osd.order_status_id 
                             AND osd.language_id = '".(int)$language_id."')
                 WHERE customer_id = '".(int)$this->customer->getId()."' 
-                    AND o.order_status_id > '0' 
-                ORDER BY o.order_id DESC 
-                LIMIT ".(int)$start.",".(int)$limit);
+                    AND o.order_status_id > '0'";
+        if ($order_id > 0) {
+            $sql .= 'AND o.order_id = '.(int)$order_id;
+        }
+        $sql .= " ORDER BY o.order_id DESC 
+                LIMIT ".(int)$start.",".(int)$limit;
+        $query = $this->db->query($sql);
         return $query->rows;
     }
 
@@ -303,11 +306,15 @@ class ModelAccountOrder extends Model
      * @return int
      * @throws \Exception
      */
-    public function getTotalOrders()
+    public function getTotalOrders($order_id = 0)
     {
-        $query = $this->db->query("SELECT COUNT(*) AS total
+        $sql = "SELECT COUNT(*) AS total
                                     FROM `".$this->db->table_name("orders")."`
-                                    WHERE customer_id = '".(int)$this->customer->getId()."' AND order_status_id > '0'");
+                                    WHERE customer_id = '".(int)$this->customer->getId()."' AND order_status_id > '0'";
+        if ($order_id > 0) {
+            $sql .= 'AND order_id = '.(int)$order_id;
+        }
+        $query = $this->db->query($sql);
         return (int)$query->row['total'];
     }
     /**
