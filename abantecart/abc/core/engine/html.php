@@ -321,9 +321,9 @@ class AHtml
             $params .= '&'.ABC::env('EMBED_TOKEN_NAME').'='.session_id();
         }
         //#PR Generate SEO URL based on standard URL
-        $this->registry->get('load')->model('tool/seo_url','storefront');
+        $model = $this->registry->get('load')->model('tool/seo_url','storefront');
 
-        return $this->url_encode($this->model_tool_seo_url->rewrite($this->getSecureURL($rt, $params)), $encode);
+        return $this->url_encode($model->rewrite($this->getSecureURL($rt, $params)), $encode);
     }
 
     /**This builds URL to the catalog to be used in admin
