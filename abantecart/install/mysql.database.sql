@@ -10418,7 +10418,7 @@ INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_nam
 (13, 'default', 1, 'Login Page',  now()),
 (14, 'default', 1, 'Default Product Page',  now()),
 (15, 'default', 1, 'Checkout Pages', now()),
-(16, 'default', 1, 'Product Listing Page', now()),
+(16, 'default', 1, 'Default Product Listing Page', now()),
 (17, 'default', 1, 'Maintenance Page', now()),
 (18, 'default', 1, 'Customer Account Pages', now()),
 (19, 'default', 1, 'Cart Page', now());
