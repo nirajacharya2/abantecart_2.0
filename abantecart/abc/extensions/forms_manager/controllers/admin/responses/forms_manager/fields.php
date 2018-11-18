@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,12 +23,11 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\extensions\forms_manager\models\admin\tool\ModelToolFormsManager;
-
+use H;
 
 /**
  * Class ControllerResponsesFormsManagerFields
@@ -45,9 +44,7 @@ class ControllerResponsesFormsManagerFields extends AController
     {
 
         $this->loadModel( 'tool/forms_manager' );
-
         $fields = $this->model_tool_forms_manager->getFields( $this->request->get['form_id'] );
-
         $this->load->library( 'json' );
         $this->response->addJSONHeader();
         $this->response->setOutput( AJson::encode( $fields ) );
@@ -425,7 +422,7 @@ class ControllerResponsesFormsManagerFields extends AController
         $uploadsDir = ABC::env( 'DIR_APP' ).'/system/uploads';
         $settingsDir = $uploadsDir.'/'.trim( $this->data['attribute_data']['settings']['directory'], '/' );
         //check or make writable dirs
-        if ( ! AHelperUtils::is_writable_dir( $uploadsDir ) || ! AHelperUtils::is_writable_dir( $settingsDir ) ) {
+        if ( ! H::is_writable_dir( $uploadsDir ) || ! H::is_writable_dir( $settingsDir ) ) {
             $this->data['form']['settings_fields']['directory'] .= '<i class="error">'.$this->language->get( 'error_directory_not_writable' ).'</i>';
         }
 

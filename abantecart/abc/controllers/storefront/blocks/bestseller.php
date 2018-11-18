@@ -46,7 +46,7 @@ class ControllerBlocksBestSeller extends AController {
 
 		$this->data['products'] = array();
 
-		$results = $this->model_catalog_product->getBestSellerProducts($this->config->get('config_bestseller_limit'));
+		$results = $this->model_catalog_product->getBestSellerProducts(['limit' => $this->config->get('config_bestseller_limit')]);
 		$product_ids = array();
 		foreach($results as $result){
 			$product_ids[] = (int)$result['product_id'];

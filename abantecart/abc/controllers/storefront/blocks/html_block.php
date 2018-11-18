@@ -38,6 +38,7 @@ class ControllerBlocksHTMLBlock extends AController {
 
 		$instance_id = func_get_arg(0);
 		$block_data = $this->getBlockContent($instance_id);
+        $this->data['block_data'] = $block_data;
 		$this->view->assign('block_framed',(int)$block_data['block_framed']);
 		$this->view->assign('content',$block_data['content']);
     	$this->view->assign('heading_title', $block_data['title'] );

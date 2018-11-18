@@ -294,6 +294,10 @@ if($upd_array) {
     {
         //assign product to store we requests
         $data['stores'] = [$this->config->get('config_store_id')];
+        //trick for unique sku. null is allowed  for unique index
+        if(isset($data['sku'])) {
+           $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
+        }
 
         if($data['categories']) {
             $categories = [];

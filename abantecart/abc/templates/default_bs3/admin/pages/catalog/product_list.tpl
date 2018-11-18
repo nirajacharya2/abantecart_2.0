@@ -19,18 +19,19 @@
 					<form id="<?php echo $search_form['form_open']->name; ?>"
 						  method="<?php echo $search_form['form_open']->method; ?>"
 						  name="<?php echo $search_form['form_open']->name; ?>" class="form-inline" role="form">
-
 						<?php
-						foreach ($search_form['fields'] as $f) {
-							?>
+						foreach ($search_form['fields'] as $f) { ?>
 							<div class="form-group">
+								<?php if($search_form['entry_'.$f->name]){?>
+										<div class="input-group input-group-sm">
+											<?php echo $search_form['entry_'.$f->name];?>
+										</div>
+								<?php } ?>
 								<div class="input-group input-group-sm">
 									<?php echo $f; ?>
 								</div>
 							</div>
-						<?php
-						}
-						?>
+						<?php } ?>
 						<div class="form-group">
 							<button type="submit" class="btn btn-xs btn-primary tooltips" title="<?php echo $button_filter; ?>">
 									<?php echo $search_form['submit']->text ?>

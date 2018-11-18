@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,12 +21,9 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class AOrderManager
@@ -72,27 +69,27 @@ class AOrderManager extends AOrder
      * NOTE: Admin only method to recalculate existing order totals.
      * Consideration: This section needs to be simplified with SF process call.
      */
-    public function recalcTotals($skip_totals = array(), $new_totals = array())
+    public function recalcTotals($skip_totals = [], $new_totals = [])
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to access order recalculation');
         }
-        if (!AHelperUtils::has_value($this->order_id)) {
-            return array('error' => "Missing required details");
+        if (!H::has_value($this->order_id)) {
+            return ['error' => "Missing required details"];
         }
         /**
          * @var $adm_order_mdl \abc\models\admin\ModelSaleOrder
          */
         $adm_order_mdl = $this->load->model('sale/order');
         $customer_gr_mdl = $this->load->model('sale/customer_group');
-        $customer_data = array();
-        $skip_recalc = array('handling', 'balance');
+        $customer_data = [];
+        $skip_recalc = ['handling', 'balance'];
 
         //load order details
         $order_info = $adm_order_mdl->getOrder($this->order_id);
         $original_totals = $adm_order_mdl->getOrderTotals($this->order_id);
         //identify totals with shared keys (example tax) and link to total ids
-        $total2ids = array();
+        $total2ids = [];
         foreach ($original_totals as $t_old) {
             $total2ids[$t_old['key']][] = $t_old['order_total_id'];
         }
@@ -100,7 +97,7 @@ class AOrderManager extends AOrder
         //update total with new values passed and mark to skip recalc
         if (!empty($new_totals)) {
             //build new totals
-            $upd_total = array('totals' => $new_totals);
+            $upd_total = ['totals' => $new_totals];
             foreach ($new_totals as $total_id => $value) {
                 $skip_totals[] = $total_id;
             }
@@ -154,7 +151,7 @@ class AOrderManager extends AOrder
             $customer_data['tax_exempt'] = $cust_info['tax_exempt'];
         }
         //get coupon code from coupon_id
-        if (AHelperUtils::has_value($order_info['coupon_id'])) {
+        if (H::has_value($order_info['coupon_id'])) {
             /**
              * @var $adm_coupon_mdl \abc\models\admin\ModelSaleCoupon
              */
@@ -166,24 +163,25 @@ class AOrderManager extends AOrder
         }
 
         //prepare shipping and payment address
-        $shipping_address = array(
-            'firstname'      => $order_info['shipping_firstname'],
-            'lastname'       => $order_info['shipping_lastname'],
-            'company'        => $order_info['shipping_company'],
-            'address_1'      => $order_info['shipping_address_1'],
-            'address_2'      => $order_info['shipping_address_2'],
-            'postcode'       => $order_info['shipping_postcode'],
-            'city'           => $order_info['shipping_city'],
-            'zone_id'        => $order_info['shipping_zone_id'],
-            'zone'           => $order_info['shipping_zone'],
-            'zone_code'      => $order_info['shipping_zone_code'],
-            'country_id'     => $order_info['shipping_country_id'],
-            'country'        => $order_info['shipping_country'],
-            'iso_code_2'     => $order_info['shipping_iso_code_2'],
-            'iso_code_3'     => $order_info['shipping_iso_code_3'],
-            'address_format' => $order_info['shipping_address_format'],
-        );
-        $payment_address = array(
+        $shipping_address = [
+            'firstname'         => $order_info['shipping_firstname'],
+            'lastname'          => $order_info['shipping_lastname'],
+            'company'           => $order_info['shipping_company'],
+            'address_1'         => $order_info['shipping_address_1'],
+            'address_2'         => $order_info['shipping_address_2'],
+            'postcode'          => $order_info['shipping_postcode'],
+            'city'              => $order_info['shipping_city'],
+            'zone_id'           => $order_info['shipping_zone_id'],
+            'zone'              => $order_info['shipping_zone'],
+            'zone_code'         => $order_info['shipping_zone_code'],
+            'country_id'        => $order_info['shipping_country_id'],
+            'country'           => $order_info['shipping_country'],
+            'iso_code_2'        => $order_info['shipping_iso_code_2'],
+            'iso_code_3'        => $order_info['shipping_iso_code_3'],
+            'address_format'    => $order_info['shipping_address_format'],
+            'customer_group_id' => $customer_data['customer_group_id'],
+        ];
+        $payment_address = [
             'firstname'      => $order_info['payment_firstname'],
             'lastname'       => $order_info['payment_lastname'],
             'company'        => $order_info['payment_company'],
@@ -199,7 +197,7 @@ class AOrderManager extends AOrder
             'iso_code_2'     => $order_info['payment_iso_code_2'],
             'iso_code_3'     => $order_info['payment_iso_code_3'],
             'address_format' => $order_info['payment_address_format'],
-        );
+        ];
 
         //add cart to registry before working with shipments and payments
         $this->registry->set('cart', ABC::getObjectByAlias('ACart', [$this->registry, $customer_data]));
@@ -207,10 +205,10 @@ class AOrderManager extends AOrder
         $this->registry->set('tax', new ATax($this->registry, $customer_data));
         $this->tax->setZone($order_info['shipping_country_id'], $order_info['shipping_zone_id']);
 
-        $products = array();
+        $products = [];
         $order_products = $adm_order_mdl->getOrderProducts($this->order_id);
         foreach ($order_products as $order_product) {
-            $option_data = array();
+            $option_data = [];
             $options = $adm_order_mdl->getOrderOptions($this->order_id, $order_product['order_product_id']);
             foreach ($options as $option) {
                 $option_data[$option['product_option_id']] = $option['product_option_value_id'];
@@ -220,7 +218,7 @@ class AOrderManager extends AOrder
         }
 
         //locate shipping method quote
-        $quote_data = array();
+        $quote_data = [];
         /**
          * @var $sf_ext_mdl \abc\models\storefront\ModelCheckoutExtension
          */
@@ -242,12 +240,12 @@ class AOrderManager extends AOrder
                     $this->load->model('extension/'.$result['key'], 'storefront');
                     $quote = $this->{'model_extension_'.$result['key']}->getQuote($shipping_address);
                     if ($quote) {
-                        $customer_data['shipping_method'] = array(
+                        $customer_data['shipping_method'] = [
                             'id'           => $quote['quote'][$shipping_method_option]['id'],
                             'cost'         => $quote['quote'][$shipping_method_option]['cost'],
                             'tax_class_id' => $quote['quote'][$shipping_method_option]['tax_class_id'],
                             'text'         => $quote['quote'][$shipping_method_option]['text'],
-                        );
+                        ];
                     }
                 }
             }
@@ -256,8 +254,8 @@ class AOrderManager extends AOrder
             $skip_recalc[] = 'shipping';
         }
 
-        $total_data = array();
-        $calc_order = array();
+        $total_data = [];
+        $calc_order = [];
         $total = 0;
         //get applied taxes
         $taxes = $this->cart->getAppliedTaxes(true);
@@ -285,16 +283,20 @@ class AOrderManager extends AOrder
                 //copy original totals
                 foreach ($original_totals as $or_total) {
                     if (str_replace('_', '', $or_total['key']) == str_replace('_', '', $extn['key'])) {
-                        $total_data[] = array(
+                        $total_data[] = [
                             'id'         => $or_total['key'],
                             'title'      => $or_total['title'],
-                            'text'       => $this->currency->format($or_total['value'], $order_info['currency'],
-                                $order_info['value'], true),
+                            'text'       => $this->currency->format(
+                                                                $or_total['value'],
+                                                                $order_info['currency'],
+                                                                $order_info['value'],
+                                                                true
+                            ),
                             'value'      => $or_total['value'],
                             'sort_order' => $or_total['sort_order'],
                             'total_type' => $or_total['type'],
                             'source'     => 'original',
-                        );
+                        ];
                         $total += $or_total['value'];
                         break;
                     }
@@ -316,7 +318,7 @@ class AOrderManager extends AOrder
 
         //Create new totals, based on old order.
         $is_missing_keys = false;
-        $upd_total = array('totals' => array());
+        $upd_total = ['totals' => []];
         $shift = 0;
         foreach ($original_totals as $i => $t_old) {
             $found = false;
@@ -351,8 +353,12 @@ class AOrderManager extends AOrder
                             }
                         }
                         if (!$found) {
-                            $zero_text_val =
-                                $this->currency->format(0, $order_info['currency'], $order_info['value'], true);
+                            $zero_text_val = $this->currency->format(
+                                0,
+                                $order_info['currency'],
+                                $order_info['value'],
+                                true
+                            );
                             $upd_total['totals'][$t_old['order_total_id']] = $zero_text_val;
                         }
                     }
@@ -365,10 +371,13 @@ class AOrderManager extends AOrder
         //do we have errors?
         if ($is_missing_keys) {
             //messing total keys. This is older order
-            return array('error' => "Cannot recalculate some or all of the totals. Possibly this order was built prior to upgrade and does not have required data.");
+            return [
+                'error' => "Cannot recalculate some or all of the totals. "
+                    ."Possibly this order was built prior to upgrade and does not have required data.",
+            ];
         }
 
-        return array('order_status_id' => $order_info['order_status_id']);
+        return ['order_status_id' => $order_info['order_status_id']];
     }
 
 }

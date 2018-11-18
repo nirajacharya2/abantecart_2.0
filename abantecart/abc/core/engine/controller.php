@@ -32,12 +32,10 @@ use abc\core\lib\{
  * @property array $error
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
- * @property \abc\models\admin\ModelCatalogCategory
- * | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
+ * @property \abc\models\admin\ModelCatalogCategory | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
  * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
  * @property \abc\models\admin\ModelCatalogProduct | \abc\models\storefront\ModelCatalogProduct $model_catalog_product
- * @property \abc\models\admin\ModelCatalogManufacturer
- * | \abc\models\storefront\ModelCatalogManufacturer $model_catalog_manufacturer
+ * @property \abc\models\admin\ModelCatalogManufacturer | \abc\models\storefront\ModelCatalogManufacturer $model_catalog_manufacturer
  * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
  * @property \abc\models\admin\ModelLocalisationTaxClass $model_localisation_tax_class
  * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
@@ -53,7 +51,7 @@ use abc\core\lib\{
  * @property \abc\models\admin\ModelSaleCustomer $model_sale_customer
  * @property \abc\models\admin\ModelSaleCustomerTransaction $model_sale_customer_transaction
  * @property \abc\models\admin\ModelLocalisationCurrency $model_localisation_currency
- * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
+ * @property \abc\models\admin\ModelLocalisationCountry | \abc\models\storefront\ModelLocalisationCountry $model_localisation_country
  * @property \abc\models\admin\ModelLocalisationZone $model_localisation_zone
  * @property \abc\models\admin\ModelLocalisationLocation $model_localisation_location
  * @property \abc\models\admin\ModelLocalisationLanguage $model_localisation_language

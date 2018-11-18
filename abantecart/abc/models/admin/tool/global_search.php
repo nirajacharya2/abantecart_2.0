@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,10 +23,11 @@ namespace abc\models\admin;
 use abc\core\engine\Model;
 use abc\core\lib\AdminCommands;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
+/**
+ * Class ModelToolGlobalSearch
+ *
+ * @package abc\models\admin
+ */
 class ModelToolGlobalSearch extends Model
 {
     /**
@@ -49,89 +50,89 @@ class ModelToolGlobalSearch extends Model
      * @var array
      */
     public $results_controllers
-        = array(
-            "commands"           => array(),
-            "orders"             => array(
+        = [
+            "commands"           => [],
+            "orders"             => [
                 'alias'    => 'order',
                 'id'       => 'order_id',
                 'page'     => 'sale/order/update',
                 'response' => '',
-            ),
-            "customers"          => array(
+            ],
+            "customers"          => [
                 'alias'    => 'customer',
                 'id'       => 'customer_id',
                 'page'     => 'sale/customer/update',
                 'response' => '',
-            ),
-            "product_categories" => array(
+            ],
+            "product_categories" => [
                 'alias'    => 'category',
                 'id'       => 'category_id',
                 'page'     => 'catalog/category/update',
                 'response' => '',
-            ),
-            "products"           => array(
+            ],
+            "products"           => [
                 'alias'    => 'product',
                 'id'       => 'product_id',
                 'page'     => 'catalog/product/update',
                 'response' => '',
-            ),
-            "reviews"            => array(
+            ],
+            "reviews"            => [
                 'alias'    => 'review',
                 'id'       => 'review_id',
                 'page'     => 'catalog/review/update',
                 'response' => '',
-            ),
-            "manufacturers"      => array(
+            ],
+            "manufacturers"      => [
                 'alias'    => 'brand',
                 'id'       => 'manufacturer_id',
                 'page'     => 'catalog/manufacturer/update',
                 'response' => '',
-            ),
-            "languages"          => array(
+            ],
+            "languages"          => [
                 'alias'        => 'language',
                 'id'           => 'language_definition_id',
-                'extra_fields' => array('language_id'),
+                'extra_fields' => ['language_id'],
                 'page'         => 'localisation/language_definition_form/update',
                 'response'     => 'localisation/language_definition_form/update',
-            ),
-            "pages"              => array(
+            ],
+            "pages"              => [
                 'alias'    => 'information',
-                'id'       => array('page_id', 'layout_id', 'tmpl_id'),
+                'id'       => ['page_id', 'layout_id', 'tmpl_id'],
                 'page'     => 'design/layout',
                 'response' => '',
-            ),
-            "settings"           => array(
+            ],
+            "settings"           => [
                 'alias'    => 'setting',
-                'id'       => array('setting_id', 'active', 'store_id'),
+                'id'       => ['setting_id', 'active', 'store_id'],
                 'page'     => 'setting/setting',
                 'response' => 'setting/setting_quick_form',
-            ),
-            "messages"           => array(
+            ],
+            "messages"           => [
                 'alias'    => 'information',
                 'id'       => 'msg_id',
                 'page'     => 'tool/message_manager',
                 'response' => '',
-            ),
-            "extensions"         => array(
+            ],
+            "extensions"         => [
                 'alias'    => 'extension',
                 'id'       => 'extension',
                 'page'     => 'extension/extensions/edit',
                 'page2'    => 'total/%s',
                 'response' => '',
-            ),
-            "downloads"          => array(
+            ],
+            "downloads"          => [
                 'alias'    => 'download',
                 'id'       => 'download_id',
                 'page'     => 'catalog/download/update',
                 'response' => '',
-            ),
-            "contents"           => array(
+            ],
+            "contents"           => [
                 'alias'    => 'content',
                 'id'       => 'content_id',
                 'page'     => 'design/content/update',
                 'response' => '',
-            ),
-        );
+            ],
+        ];
 
     public function __construct($registry)
     {
@@ -153,7 +154,7 @@ class ModelToolGlobalSearch extends Model
      */
     public function getSearchSources($keyword = '')
     {
-        $search_categories = array();
+        $search_categories = [];
         // limit of keyword length
         if (mb_strlen($keyword) >= 1) {
             foreach ($this->results_controllers as $k => $item) {
@@ -171,6 +172,7 @@ class ModelToolGlobalSearch extends Model
      * @param string $keyword
      *
      * @return int
+     * @throws \abc\core\lib\AException
      */
     public function getTotal($search_category, $keyword)
     {
@@ -182,17 +184,20 @@ class ModelToolGlobalSearch extends Model
         $language_id = (int)$this->config->get('storefront_language_id');
 
         $all_languages = $this->language->getActiveLanguages();
-        $current_store_id = ! isset($this->session->data['current_store_id']) ? 0 : $this->session->data['current_store_id'];
-        $search_languages = array();
+        $current_store_id =
+            !isset($this->session->data['current_store_id'])
+            ? 0
+            : $this->session->data['current_store_id'];
+        $search_languages = [];
         foreach ($all_languages as $l) {
             $search_languages[] = (int)$l['language_id'];
         }
 
-        $output = array();
+        $output = [];
 
         switch ($search_category) {
             case 'commands' :
-                $output = $this->_possibleCommands($needle, 'total');
+                $output = $this->possibleCommands($needle, 'total');
                 break;
             case 'product_categories' :
                 $sql = "SELECT count(*) AS total
@@ -220,7 +225,9 @@ class ModelToolGlobalSearch extends Model
                 $sql = "SELECT a.product_id
                         FROM ".$this->db->table_name("products")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id 
+                                AND b.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE LOWER(a.model) LIKE '%".$needle."%' OR LOWER(a.model) LIKE '%".$needle2."%'
                         UNION
                         SELECT product_id
@@ -231,14 +238,16 @@ class ModelToolGlobalSearch extends Model
                         SELECT DISTINCT a.product_id
                         FROM ".$this->db->table_name("product_option_value_descriptions")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))
+                    ."))
                         WHERE ( LOWER(a.name) LIKE '%".$needle."%' OR LOWER(a.name) LIKE '%".$needle2."%' )
                             AND a.language_id IN (".(implode(",", $search_languages)).")
                         UNION
                         SELECT DISTINCT a.product_id
                         FROM ".$this->db->table_name("product_tags")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))
+                    ."))
                         WHERE ( LOWER(a.tag) LIKE '%".$needle."%' OR LOWER(a.tag) LIKE '%".$needle2."%' )
                             AND a.language_id = ".$language_id;
 
@@ -332,7 +341,8 @@ class ModelToolGlobalSearch extends Model
                         UNION
                         SELECT COUNT(s.setting_id) AS total
                         FROM ".$this->db->table_name("language_definitions")." l
-                        LEFT JOIN ".$this->db->table_name("settings")." s ON l.language_key = CONCAT('entry_',REPLACE(s.`key`,'config_',''))
+                        LEFT JOIN ".$this->db->table_name("settings")." s 
+                            ON l.language_key = CONCAT('entry_',REPLACE(s.`key`,'config_',''))
                         WHERE (LOWER(l.language_value) LIKE '%".$needle."%'
                                 OR LOWER(l.language_value) LIKE '%".$needle."%'
                                 OR LOWER(l.language_key) LIKE '%".$needle."%' )
@@ -364,7 +374,8 @@ class ModelToolGlobalSearch extends Model
                 $sql = "SELECT COUNT( DISTINCT d.download_id) AS total
                         FROM ".$this->db->table_name("downloads")." d
                         RIGHT JOIN ".$this->db->table_name("download_descriptions")." dd
-                            ON (d.download_id = dd.download_id AND dd.language_id IN (".(implode(",", $search_languages))."))
+                            ON (d.download_id = dd.download_id AND dd.language_id IN (".(implode(",",
+                        $search_languages))."))
                         WHERE (LOWER(`name`) LIKE '%".$needle."%')";
                 $result = $this->db->query($sql);
                 $output = $result->row ['total'];
@@ -373,7 +384,9 @@ class ModelToolGlobalSearch extends Model
                 $sql = "SELECT COUNT( DISTINCT c.content_id) AS total
                         FROM ".$this->db->table_name("contents")." c
                         RIGHT JOIN ".$this->db->table_name("content_descriptions")." cd
-                            ON (c.content_id = cd.content_id AND cd.language_id IN (".(implode(",", $search_languages))."))
+                            ON (c.content_id = cd.content_id 
+                                AND cd.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE 
                             (LOWER(`name`) LIKE '%".$needle."%')
                             OR (LOWER(`title`) LIKE '%".$needle."%')
@@ -398,6 +411,7 @@ class ModelToolGlobalSearch extends Model
      * @param string $mode
      *
      * @return array
+     * @throws \Exception
      */
     public function getResult($search_category, $keyword, $mode = 'listing')
     {
@@ -412,7 +426,7 @@ class ModelToolGlobalSearch extends Model
         $rows = (int)$this->request->get_or_post('rows');
 
         if ($page) {
-            $page = ! $page ? 1 : $page;
+            $page = !$page ? 1 : $page;
             $offset = ($page - 1) * $rows;
             $rows_count = $rows;
         } else {
@@ -422,14 +436,14 @@ class ModelToolGlobalSearch extends Model
 
         $all_languages = $this->language->getActiveLanguages();
         $current_store_id = (int)$this->session->data['current_store_id'];
-        $search_languages = array();
+        $search_languages = [];
         foreach ($all_languages as $l) {
             $search_languages[] = (int)$l['language_id'];
         }
 
         switch ($search_category) {
             case 'commands' :
-                $result = array_slice($this->_possibleCommands($needle), $offset, $rows_count);
+                $result = array_slice($this->possibleCommands($needle), $offset, $rows_count);
                 break;
 
             case 'product_categories' :
@@ -450,7 +464,10 @@ class ModelToolGlobalSearch extends Model
                 break;
 
             case 'languages' :
-                $sql = "SELECT l.language_definition_id, l.language_key AS title, CONCAT_WS('  ',l.language_key,l.language_value) AS text, language_id
+                $sql = "SELECT l.language_definition_id, 
+                            l.language_key AS title, 
+                            CONCAT_WS('  ',l.language_key,l.language_value) AS text, 
+                            language_id
                         FROM ".$this->db->table_name("language_definitions")." l
                         WHERE ( LOWER(l.language_value) LIKE '%".$needle."%'
                                 OR LOWER(l.language_value) LIKE '%".$needle2."%'
@@ -467,7 +484,9 @@ class ModelToolGlobalSearch extends Model
                 $sql = "SELECT a.product_id, b.name AS title, a.model AS text
                         FROM ".$this->db->table_name("products")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id 
+                                AND b.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE LOWER(a.model) LIKE '%".$needle."%'
                         ";
                 if ($needle != $needle2) {
@@ -488,7 +507,9 @@ class ModelToolGlobalSearch extends Model
                         SELECT a.product_id, b.name as title, a.name as text
                         FROM ".$this->db->table_name("product_option_descriptions")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id 
+                                AND b.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE ( LOWER(a.name) like '%".$needle."%'
                         ";
                 if ($needle != $needle2) {
@@ -500,7 +521,9 @@ class ModelToolGlobalSearch extends Model
                         SELECT a.product_id, b.name as title, a.name as text
                         FROM ".$this->db->table_name("product_option_value_descriptions")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id 
+                                AND b.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE ( LOWER(a.name) like '%".$needle."%'
                         ";
                 if ($needle != $needle2) {
@@ -512,7 +535,9 @@ class ModelToolGlobalSearch extends Model
                         SELECT a.product_id, b.name as title, a.tag as text
                         FROM ".$this->db->table_name("product_tags")." a
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." b 
-                            ON (b.product_id = a.product_id AND b.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (b.product_id = a.product_id 
+                                AND b.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE ( a.tag like '".$needle."%'
                         ";
                 if ($needle != $needle2) {
@@ -523,22 +548,23 @@ class ModelToolGlobalSearch extends Model
                         LIMIT ".$offset.",".$rows_count;
 
                 $result = $this->db->query($sql);
-                $table = array();
+                $table = [];
                 if ($result->num_rows) {
                     foreach ($result->rows as $row) {
-                        if ( ! isset($table [$row ['product_id']])) {
+                        if (!isset($table [$row ['product_id']])) {
                             $table [$row ['product_id']] = $row;
                         }
                     }
                 }
                 $result = $table;
                 break;
-
             case "reviews" :
                 $sql = "SELECT review_id, r.`text`, pd.`name` AS title
                         FROM ".$this->db->table_name("reviews")." r
                         LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                            ON (pd.product_id = r.product_id AND pd.language_id	IN (".(implode(",", $search_languages))."))
+                            ON (pd.product_id = r.product_id 
+                                AND pd.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE ( LOWER(r.`text`) LIKE '%".$needle."%'
                                 OR LOWER(r.`author`) LIKE '%".$needle."%'
                         ";
@@ -577,15 +603,15 @@ class ModelToolGlobalSearch extends Model
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             case "customers" :
                 $customer_needle = '+"'.implode('" +"', explode(' ', $needle)).'"';
-                $sql = "SELECT customer_id, CONCAT('".($mode == 'listing' ? "customer: " : "")."', firstname,' ',lastname) as title,
+                $sql = "SELECT customer_id, 
+                            CONCAT('".($mode == 'listing' ? "customer: " : "")."', firstname,' ',lastname) as title,
                             CONCAT(firstname,' ',lastname,' ',email)  as text
                         FROM ".$this->db->table_name("customers")." 
                         WHERE (
                                 MATCH(firstname, lastname) AGAINST ('".$customer_needle."' IN BOOLEAN MODE)
-                            OR  (LOWER(email) like '%".$needle."%')
+                                OR  (LOWER(email) like '%".$needle."%')
                             )
                         LIMIT ".$offset.",".$rows_count;
                 $result = $this->db->query($sql);
@@ -603,7 +629,8 @@ class ModelToolGlobalSearch extends Model
                             ON (pl.page_id = p.page_id
                                 AND pl.layout_id IN (SELECT layout_id
                                                      FROM ".$this->db->table_name("layouts")." 
-                                                     WHERE template_id = '".$this->config->get('config_storefront_template')."'
+                                                     WHERE template_id = '"
+                    .$this->config->get('config_storefront_template')."'
                                                             AND layout_type='1'))
                         LEFT JOIN ".$this->db->table_name("layouts")." l ON  l.layout_id = pl.layout_id
                         WHERE (LOWER(b.name) LIKE '%".$needle."%')
@@ -614,9 +641,7 @@ class ModelToolGlobalSearch extends Model
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             case "settings" :
-
                 $sql = "SELECT setting_id,
                                 CONCAT(`group`,'-',s.`key`,'-',s.store_id) AS active,
                                 s.store_id,
@@ -663,14 +688,22 @@ class ModelToolGlobalSearch extends Model
                         LIMIT ".$offset.",".$rows_count;
                 $result = $this->db->query($sql);
                 $rows = $result->rows;
-                $result = array();
+                $result = [];
                 foreach ($rows as $row) {
-                    if ( ! isset($result[$row['setting_id']])) {
+                    if (!isset($result[$row['setting_id']])) {
                         //remove all text between span tags
                         $regex = '/<span(.*)span>/';
-                        $row['title'] = str_replace(array("	", "  ", "\n"), "", strip_tags(preg_replace($regex, '', $row['title'])));
-                        $row['text'] = ! $row['text'] ? $row['title'] : $row['text'];
-                        $row['text'] = str_replace(array("	", "  ", "\n"), "", strip_tags(preg_replace($regex, '', $row['text'])));
+                        $row['title'] = str_replace(
+                            ["	", "  ", "\n"],
+                            "",
+                            strip_tags(preg_replace($regex, '', $row['title']))
+                        );
+                        $row['text'] = !$row['text'] ? $row['title'] : $row['text'];
+                        $row['text'] = str_replace(
+                            ["	", "  ", "\n"],
+                            "",
+                            strip_tags(preg_replace($regex, '', $row['text']))
+                        );
                         $result[$row['setting_id']] = $row;
                     }
                 }
@@ -687,7 +720,6 @@ class ModelToolGlobalSearch extends Model
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             case "extensions" :
                 $sql = "SELECT DISTINCT `key` AS extension, `key` AS title, `key` AS text
                         FROM ".$this->db->table_name("extensions")." e
@@ -698,23 +730,24 @@ class ModelToolGlobalSearch extends Model
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             case "downloads" :
                 $sql = "SELECT d.download_id, name AS title, name  AS text
                         FROM ".$this->db->table_name("downloads")." d
                         LEFT JOIN ".$this->db->table_name("download_descriptions")." dd
-                            ON (d.download_id = dd.download_id AND dd.language_id IN (".(implode(",", $search_languages))."))
+                            ON (d.download_id = dd.download_id 
+                                AND dd.language_id IN (".(implode(",", $search_languages)).")
+                                )
                         WHERE ( LOWER(dd.name) LIKE '%".$needle."%' )
                         LIMIT ".$offset.",".$rows_count;
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             case "contents" :
                 $sql = "SELECT c.content_id, name AS title, name  AS text
                         FROM ".$this->db->table_name("contents")." c
                         RIGHT JOIN ".$this->db->table_name("content_descriptions")." cd
-                            ON (c.content_id = cd.content_id AND cd.language_id IN (".(implode(",", $search_languages))."))
+                            ON (c.content_id = cd.content_id 
+                                AND cd.language_id IN (".(implode(",", $search_languages))."))
                         WHERE 
                             (LOWER(`name`) LIKE '%".$needle."%')
                             OR (LOWER(`title`) LIKE '%".$needle."%')
@@ -724,17 +757,16 @@ class ModelToolGlobalSearch extends Model
                 $result = $this->db->query($sql);
                 $result = $result->rows;
                 break;
-
             default :
-                $result = array(0 => array("text" => "no results! "));
+                $result = [0 => ["text" => "no results! "]];
                 break;
         }
 
         if ($mode == 'listing') {
             if ($search_category == 'commands') {
-                $result = $this->_prepareCommandsResponse($result);
+                $result = $this->prepareCommandsResponse($result);
             } else {
-                $result = $this->_prepareResponse($keyword,
+                $result = $this->prepareResponse($keyword,
                     $this->results_controllers[$search_category]['page'],
                     $this->results_controllers[$search_category]['id'],
                     $result);
@@ -762,22 +794,24 @@ class ModelToolGlobalSearch extends Model
     /**
      * function prepares array with search results for json encoding
      *
-     * @param string       $keyword
-     * @param string       $rt
+     * @param string $keyword
+     * @param string $rt
      * @param string|array $key_field (s)
-     * @param array        $table
+     * @param array $table
      *
      * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    private function _prepareResponse($keyword = '', $rt = '', $key_field = '', $table = array())
+    private function prepareResponse($keyword = '', $rt = '', $key_field = '', $table = [])
     {
-        $output = array();
-        if ( ! $rt || ! $key_field || ! $keyword) {
+        $output = [];
+        if (!$rt || !$key_field || !$keyword) {
             return null;
         }
 
-        $tmp = array();
-        $text = '';
+        $tmp = [];
+
         if ($table && is_array($table)) {
 
             foreach ($table as $row) {
@@ -788,19 +822,9 @@ class ModelToolGlobalSearch extends Model
                     // if keyword found
                     $pos = mb_stripos($field_decoded, $keyword);
                     if (is_int($pos) && $key != 'title') {
-                        $row ['title'] = '<span class="search_res_title">'.strip_tags($row ['title'])."</span>";
-                        $start = $pos < 50 ? 0 : ($pos - 50);
-                        $keyword_len = mb_strlen($keyword);
-                        $field_len = mb_strlen($field_decoded);
-                        $ellipsis = ($field_len - $keyword_len > 10) ? '...' : '';
-                        // before founded word
-                        $text .= $ellipsis.mb_substr($field_decoded, $start, $pos);
-                        // founded word
-                        $len = ($field_len - ($pos + $keyword_len)) > 50 ? 50 : $field_len;
-                        // after founded word
-                        $text .= mb_substr($field_decoded, ($pos + $keyword_len), $len).$ellipsis;
-
-                        $row ['text'] = $text;
+                        $ellipsis = mb_strlen(strip_tags($row['text'])) > 100 ? '...' : '';
+                        $row ['title'] = mb_substr(strip_tags($row['text']), 0, 100).$ellipsis;
+                        $row ['text'] = strip_tags($row['text']);
                         break;
                     }
                 }
@@ -809,7 +833,7 @@ class ModelToolGlobalSearch extends Model
                 $temp_key_field = $key_field;
                 $url = $rt;
 
-                if ($rt == 'setting/setting' && ! empty($row['extension'])) {
+                if ($rt == 'setting/setting' && !empty($row['extension'])) {
                     $temp_key_field = $this->results_controllers['extensions']['id'];
                     if ($row['type'] == 'total') { //for order total extensions
                         $url = sprintf($this->results_controllers['extensions']['page2'], $row['extension']);
@@ -827,22 +851,23 @@ class ModelToolGlobalSearch extends Model
                 }
                 $tmp ['type'] = $row['type'];
                 $tmp ['href'] = $this->html->getSecureURL($url);
-                $tmp ['text'] = '<a href="'.$tmp ['href'].'" target="_blank" title="'.$row ['text'].'">'.$row ['title'].'</a>';
+                $tmp ['text'] =
+                    '<a href="'.$tmp ['href'].'" target="_blank" title="'.$row ['text'].'">'.$row ['title'].'</a>';
                 $output [] = $tmp;
             }
         } else {
             $this->load->language('tool/global_search');
-            $output [0] = array("text" => $this->language->get('no_results_message'));
+            $output [0] = ["text" => $this->language->get('no_results_message')];
         }
 
         return $output;
     }
 
-    private function _prepareCommandsResponse($table = array())
+    protected function prepareCommandsResponse($table = [])
     {
-        $output = array();
+        $output = [];
         foreach ($table as $row) {
-            $tmp = array();
+            $tmp = [];
             $tmp ['text'] = '<a href="'.$row['url'].'" target="_blank" title="'.$row['text'].'">'.$row['title'].'</a>';
             $output [] = $tmp;
         }
@@ -857,8 +882,9 @@ class ModelToolGlobalSearch extends Model
      * @param string $mode ('total')
      *
      * @return array
+     * @throws \abc\core\lib\AException
      */
-    private function _possibleCommands($keyword, $mode = '')
+    protected function possibleCommands($keyword, $mode = '')
     {
 
         $commands_obj = new AdminCommands();
@@ -869,14 +895,14 @@ class ModelToolGlobalSearch extends Model
             return count($result['found_actions']);
         }
 
-        $ret = array();
+        $ret = [];
         if ($result['found_actions']) {
             foreach ($result['found_actions'] as $command) {
-                $ret[] = array(
+                $ret[] = [
                     'text'  => $result['command']." ".$command['title']." ".$result['request'],
                     'title' => $result['command']." ".$command['title']." ".$result['request'],
                     'url'   => $command['url'],
-                );
+                ];
             }
         }
 
