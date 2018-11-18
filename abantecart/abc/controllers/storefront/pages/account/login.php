@@ -80,7 +80,8 @@ class ControllerPagesAccountLogin extends AController
                         $redirect_url = $this->session->data['redirect'];
                         unset( $this->session->data['redirect'] );
                     } else {
-                        $redirect_url = $this->html->getSecureURL( 'account/account' );
+                        //$redirect_url = $this->html->getSecureURL( 'account/account' );
+                        $redirect_url = $this->html->getSecureURL( 'index/home');
                     }
                     $this->extensions->hk_ProcessData( $this );
                     abc_redirect( $redirect_url );
