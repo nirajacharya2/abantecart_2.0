@@ -343,7 +343,7 @@ class ADebug
         if (class_exists('\abc\core\engine\Registry')) {
             $logger = Registry::getInstance()->get('log');
         } else {
-            $logger = ABC::getObjectByAlias('ALog', [['debug.log']]);
+            $logger = ABC::getObjectByAlias('ALog', [['app' => 'debug.log']]);
         }
 
         return $logger->debug($message);
