@@ -20,8 +20,9 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\lib\ATaskManager;
+use abc\core\lib\JobManager;
 
 class ControllerPagesToolJob extends AController
 {
@@ -161,8 +162,11 @@ class ControllerPagesToolJob extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $id = (int)$this->request->get_or_post('job_id');
         if ($id) {
-            $tm = new ATaskManager();
-            $tm->deleteTask($id);
+            /**
+             * @var JobManager $jm
+             */
+            $jm = ABC::getObjectByAlias('JobManager', [$this->registry]);
+            $jm->deleteJob($id);
         }
 
         //update controller data
