@@ -72,6 +72,12 @@ class ControllerPagesContentContent extends AController
         if (!$content_info) {
             abc_redirect($this->html->getURL('error/not_found'));
         }
+
+        $this->loadModel('tool/seo_url');
+        $seoKey = $this->model_tool_seo_url->getSEOKeyword('content_id', 'content_id', $content_info['content_id'], $content_info['language_id']);
+        $seoKey .= ' content-page-class-'.$content_info['content_id'];
+        $this->view->assign('page_class', $seoKey);
+
         $this->document->setTitle($content_info['title']);
         $this->document->setKeywords($content_info['meta_keywords']);
         $this->document->setDescription($content_info['meta_description']);
