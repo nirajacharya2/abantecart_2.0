@@ -18,6 +18,7 @@ use abc\core\lib\APromotion;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\CheckOut;
 use abc\core\lib\CheckOutAdmin;
+use abc\core\lib\ACurrency;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 
 return [
@@ -47,4 +48,5 @@ return [
     'AOrderManager'      => AOrderManager::class,
     'EventDispatcher'    => [EventDispatcher::class, null],
     'AEncryption'        => AEncryption::class,
+    'ACurrency'          => ACurrency::class,
 ];

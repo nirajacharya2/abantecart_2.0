@@ -27,17 +27,17 @@ use abc\core\engine\Registry;
 /**
  * Class ACurrency
  */
-final class ACurrency
+class ACurrency
 {
-    private $code;
-    private $currencies = [];
-    private $config;
-    private $db;
-    private $language;
-    private $request;
-    private $session;
-    private $log;
-    private $message;
+    protected $code;
+    protected $currencies = [];
+    protected $config;
+    protected $db;
+    protected $language;
+    protected $request;
+    protected $session;
+    protected $log;
+    protected $message;
     /**
      * @var bool - sign that currency was switched
      */
