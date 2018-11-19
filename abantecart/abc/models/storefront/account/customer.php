@@ -934,6 +934,8 @@ class ModelAccountCustomer extends Model
     }
 
     /**
+     * @param int $transaction_id
+     *
      * @return int
      * @throws \Exception
      */
