@@ -21,12 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * @property \abc\core\cache\ACache $cache
@@ -61,7 +57,7 @@ class ALayoutManager
     protected $layout_id;
     protected $active_layout = [];
     protected $page_id;
-    protected $custom_blocks = array();
+    protected $custom_blocks = [];
     public $errors = 0;
 
     const LAYOUT_TYPE_DEFAULT = 0;
@@ -113,7 +109,7 @@ class ALayoutManager
             }
 
             //check if this is template from core
-            if (!$is_valid && is_dir(ABC::env('DIR_ROOT').'/storefront/view/'.$template)) {
+            if (!$is_valid && is_dir(ABC::env('DIR_TEMPLATES').$template.DS.ABC::env('DIRNAME_STORE'))) {
                 $is_valid = true;
             }
 
@@ -129,7 +125,7 @@ class ALayoutManager
         //load all pages specific to set template. No cross template page/layouts
         $this->pages = $this->getPages();
         //set current page for this object instance
-        $this->_set_current_page($page_id, $layout_id);
+        $this->setCurrentPage($page_id, $layout_id);
         $this->page_id = $this->page['page_id'];
 
         //preload all layouts for this page and template
@@ -159,7 +155,7 @@ class ALayoutManager
                     .'!';
                 $message_text .= ' Requested data: template: '.$tmpl_id.', page_id: '.$page_id.', layout_id: '
                     .$layout_id;
-                $message_text .= '  '.AHelperUtils::genExecTrace('full');
+                $message_text .= '  '.H::genExecTrace('full');
                 throw new AException (AC_ERR_LOAD_LAYOUT, $message_text);
             }
         }
@@ -172,7 +168,7 @@ class ALayoutManager
 
         // Get blocks
         $this->all_blocks = $this->getAllBlocks();
-        $this->blocks = $this->_getLayoutBlocks();
+        $this->blocks = $this->getAllLayoutBlocks();
     }
 
     /**
@@ -252,7 +248,7 @@ class ALayoutManager
         //process pages and tag restricted layout/pages
         //restricted layouts are the once without key_param and key_value
         foreach ($pages as $count => $page) {
-            if (!AHelperUtils::has_value($page['key_param']) && !AHelperUtils::has_value($page['key_value'])) {
+            if (!H::has_value($page['key_param']) && !H::has_value($page['key_value'])) {
                 $pages[$count]['restricted'] = true;
             }
         }
@@ -331,13 +327,13 @@ class ALayoutManager
      */
     public function getPageLayoutIDs($controller = '', $key_param = '', $key_value = '')
     {
-        $ret_arr = array();
-        if (!AHelperUtils::has_value($controller)) {
+        $ret_arr = [];
+        if (!H::has_value($controller)) {
             return $ret_arr;
         }
         $pages = $this->getPages($controller, $key_param, $key_value);
         //check if we got most specific page/layout
-        if (count($pages) && AHelperUtils::has_value($pages[0]['page_id'])) {
+        if (count($pages) && H::has_value($pages[0]['page_id'])) {
             $ret_arr['page_id'] = $pages[0]['page_id'];
             $ret_arr['layout_id'] = $pages[0]['layout_id'];
         } else {
@@ -361,7 +357,7 @@ class ALayoutManager
      * @return array
      * @throws \Exception
      */
-    protected function _getLayoutBlocks($layout_id = 0)
+    protected function getAllLayoutBlocks($layout_id = 0)
     {
         $store_id = (int)$this->config->get('config_store_id');
         $layout_id = !$layout_id ? $this->layout_id : $layout_id;
@@ -447,7 +443,7 @@ class ALayoutManager
      * @return array|int
      * @throws \Exception
      */
-    public function getBlocksList($data = array(), $mode = '')
+    public function getBlocksList($data = [], $mode = '')
     {
         $language_id = !(int)$data['language_id'] ? $this->language->getContentLanguageID() : (int)$data['language_id'];
 
@@ -474,11 +470,11 @@ class ALayoutManager
                 $sql .= 'WHERE '.$data['subsql_filter'].' ';
             }
 
-            $sort_data = array(
+            $sort_data = [
                 'name'         => ' block_name',
                 'block_txt_id' => 'b.block_txt_id',
                 'status'       => 'status',
-            );
+            ];
 
             if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
                 $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -550,7 +546,7 @@ class ALayoutManager
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -574,7 +570,7 @@ class ALayoutManager
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -590,7 +586,7 @@ class ALayoutManager
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -598,10 +594,11 @@ class ALayoutManager
      * @param int $parent_block_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getBlockChildren($parent_instance_id, $parent_block_id)
     {
-        $blocks = array();
+        $blocks = [];
         foreach ($this->blocks as $block) {
             if ((string)$block['parent_instance_id'] == (string)$parent_instance_id) {
                 //locate block template assigned based on parent block ID
@@ -618,7 +615,7 @@ class ALayoutManager
      */
     public function getInstalledBlocks()
     {
-        $blocks = array();
+        $blocks = [];
 
         foreach ($this->all_blocks as $block) {
             // do not include main level blocks
@@ -632,10 +629,11 @@ class ALayoutManager
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getLayoutBlocks()
     {
-        $blocks = array();
+        $blocks = [];
 
         foreach ($this->main_placeholders as $placeholder) {
             $block = $this->getLayoutBlockByTxtId($placeholder);
@@ -648,7 +646,7 @@ class ALayoutManager
                 ) {
                     //fill in blank locations if any
                     if (count($children) < self::FIXED_POSITIONS) {
-                        $children = $this->_build_children_blocks($children, self::FIXED_POSITIONS);
+                        $children = $this->buildChildrenBlocks($children, self::FIXED_POSITIONS);
                     }
                 }
                 $blocks[$block['block_id']]['children'] = $children;
@@ -663,15 +661,17 @@ class ALayoutManager
      * @param int $total_blocks
      *
      * @return array
+     * @throws AException
+     * @throws \ReflectionException
      */
-    protected function _build_children_blocks($blocks, $total_blocks)
+    protected function buildChildrenBlocks($blocks, $total_blocks)
     {
-        $select_boxes = array();
-        $empty_block = array(
+        $select_boxes = [];
+        $empty_block = [
             'block_txt_id' => $this->language->get('text_none'),
-        );
+        ];
         for ($x = 0; $x < $total_blocks; $x++) {
-            $idx = $this->_find_block_by_position($blocks, ($x + 1) * 10);
+            $idx = $this->findBlockByPosition($blocks, ($x + 1) * 10);
             if ($idx >= 0) {
                 $select_boxes[] = $blocks[$idx];
             } else {
@@ -689,7 +689,7 @@ class ALayoutManager
      *
      * @return int
      */
-    protected function _find_block_by_position($blocks_arr, $position)
+    protected function findBlockByPosition($blocks_arr, $position)
     {
         foreach ($blocks_arr as $index => $block_s) {
             if ($block_s['position'] == $position) {
@@ -706,7 +706,7 @@ class ALayoutManager
      */
     public function getLayoutByType($layout_type)
     {
-        $layouts = array();
+        $layouts = [];
         foreach ($this->layouts as $layout) {
             if ($layout ['layout_type'] == $layout_type) {
                 $layouts [] = $layout;
@@ -752,24 +752,24 @@ class ALayoutManager
         if (empty($post)) {
             return null;
         }
-        $data = array();
+        $data = [];
         $section = $post['section'];
         $block = $post['block'];
         $parentBlock = $post['parentBlock'];
         $blockStatus = $post['blockStatus'];
 
         foreach ($section as $k => $item) {
-            $section[$k]['children'] = array();
+            $section[$k]['children'] = [];
         }
 
         foreach ($block as $k => $block_id) {
             $parent = $parentBlock[$k];
             $status = $blockStatus[$k];
 
-            $section[$parent]['children'][] = array(
+            $section[$parent]['children'][] = [
                 'block_id' => $block_id,
                 'status'   => $status,
-            );
+            ];
         }
 
         $data['layout_name'] = $post['layout_name'];
@@ -820,7 +820,7 @@ class ALayoutManager
                         $this->deleteLayoutBlocks($this->layout_id, $instance_id);
 
                         foreach ($data ['blocks'] [$block ['block_id']] ['children'] as $key => $block_data) {
-                            $child = array();
+                            $child = [];
                             if (!empty ($block_data)) {
                                 $child ['layout_id'] = $this->layout_id;
                                 list($child ['block_id'], $child ['custom_block_id']) =
@@ -874,7 +874,7 @@ class ALayoutManager
 
                     if (isset($data['blocks'][$block['block_id']]['children'])) {
                         foreach ($data['blocks'][$block['block_id']]['children'] as $key => $block_data) {
-                            $child = array();
+                            $child = [];
                             if (!empty ($block_data)) {
                                 $child['layout_id'] = $new_layout_id;
                                 list($child['block_id'], $child['custom_block_id']) =
@@ -907,7 +907,7 @@ class ALayoutManager
      */
     public function clonePageLayout($src_layout_id, $dest_layout_id = '', $layout_name = '')
     {
-        if (!AHelperUtils::has_value($src_layout_id)) {
+        if (!H::has_value($src_layout_id)) {
             return false;
         }
 
@@ -922,10 +922,12 @@ class ALayoutManager
             $this->layout_id = $this->saveLayout($layout);
             $dest_layout_id = $this->layout_id;
 
-            $this->db->query("INSERT INTO ".$this->db->table_name("pages_layouts")." (layout_id,page_id)
-                                VALUES ('".( int )$this->layout_id."','".( int )$this->page_id."')");
+            $this->db->query("INSERT INTO ".$this->db->table_name("pages_layouts")." 
+                                (layout_id,page_id)
+                              VALUES ('".( int )$this->layout_id."','".( int )$this->page_id."')");
         } else {
-            #delete existing layout data if provided cannot delete based on $this->layout_id (done on purpose for confirmation)
+            #delete existing layout data if provided cannot delete
+            # based on $this->layout_id (done on purpose for confirmation)
             $this->deleteAllLayoutBlocks($dest_layout_id);
         }
 
@@ -948,7 +950,7 @@ class ALayoutManager
      */
     public function deletePageLayoutByID($page_id, $layout_id)
     {
-        if (!AHelperUtils::has_value($page_id) || !AHelperUtils::has_value($layout_id)) {
+        if (!H::has_value($page_id) || !H::has_value($layout_id)) {
             return false;
         }
 
@@ -1001,7 +1003,14 @@ class ALayoutManager
     {
         if (!$instance_id) {
             $this->db->query("INSERT INTO ".$this->db->table_name("block_layouts")."\n 
-                                (layout_id,block_id,custom_block_id,parent_instance_id,position,status,date_added,date_modified)\n
+                                (layout_id,
+                                block_id,
+                                custom_block_id,
+                                parent_instance_id,
+                                position,
+                                status,
+                                date_added,
+                                date_modified)
                                 VALUES ('".( int )$data ['layout_id']."',
                                         '".( int )$data ['block_id']."',
                                         '".( int )$data ['custom_block_id']."',
@@ -1119,7 +1128,7 @@ class ALayoutManager
     {
         $block_id = (int)$block_id;
         if (!$block_id) {
-            return array();
+            return [];
         }
 
         //Note: Cannot restrict select block based on page_id and layout_id.
@@ -1160,7 +1169,7 @@ class ALayoutManager
     {
         $block_id = (int)$block_id;
         if (!$block_id) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT template
@@ -1238,22 +1247,22 @@ class ALayoutManager
         // page description
         if ($data ['page_descriptions']) {
             foreach ($data ['page_descriptions'] as $language_id => $description) {
-                if (!AHelperUtils::has_value($language_id)) {
+                if (!H::has_value($language_id)) {
                     continue;
                 }
 
                 $this->language->replaceDescriptions('page_descriptions',
-                    array('page_id' => (int)$page_id),
-                    array(
-                        (int)$language_id => array(
+                    ['page_id' => (int)$page_id],
+                    [
+                        (int)$language_id => [
                             'name'        => $description['name'],
                             'title'       => $description['title'],
                             'seo_url'     => $description['seo_url'],
                             'keywords'    => $description['keywords'],
                             'description' => $description['description'],
                             'content'     => $description['content'],
-                        ),
-                    ));
+                        ],
+                    ]);
             }
         }
 
@@ -1341,7 +1350,7 @@ class ALayoutManager
         }
         // save block descriptions bypass
         $data['block_descriptions'] = !isset($data['block_descriptions'])
-        && $data['block_description'] ? array($data['block_description']) : $data['block_descriptions'];
+        && $data['block_description'] ? [$data['block_description']] : $data['block_descriptions'];
         if ($data['block_descriptions']) {
             foreach ($data['block_descriptions'] as $block_description) {
                 if (!isset($block_description ['language_id']) && $block_description ['language_name']) {
@@ -1416,7 +1425,7 @@ class ALayoutManager
      * @return bool|int
      * @throws \Exception
      */
-    public function saveBlockDescription($block_id = 0, $custom_block_id = 0, $description = array())
+    public function saveBlockDescription($block_id = 0, $custom_block_id = 0, $description = [])
     {
         $block_id = (int)$block_id;
         $custom_block_id = (int)$custom_block_id;
@@ -1429,7 +1438,7 @@ class ALayoutManager
         }
         // if id is set - update only given data
         if ($custom_block_id) {
-            $update = array();
+            $update = [];
             if (isset($description ['name'])) {
                 $update["name"] = $description ['name'];
             }
@@ -1451,8 +1460,8 @@ class ALayoutManager
 
             if ($update) {
                 $this->language->replaceDescriptions('block_descriptions',
-                    array('custom_block_id' => (int)$custom_block_id),
-                    array((int)$description['language_id'] => $update));
+                    ['custom_block_id' => (int)$custom_block_id],
+                    [(int)$description['language_id'] => $update]);
             }
 
             $this->cache->remove('layout');
@@ -1468,17 +1477,17 @@ class ALayoutManager
             $custom_block_id = $this->db->getLastId();
 
             $this->language->replaceDescriptions('block_descriptions',
-                array('custom_block_id' => (int)$custom_block_id),
-                array(
-                    (int)$description['language_id'] => array(
+                ['custom_block_id' => (int)$custom_block_id],
+                [
+                    (int)$description['language_id'] => [
                         "block_wrapper" => $description ['block_wrapper'],
                         'block_framed'  => (int)$description ['block_framed'],
                         'name'          => $description ['name'],
                         'title'         => $description ['title'],
                         'description'   => $description ['description'],
                         'content'       => $description ['content'],
-                    ),
-                ));
+                    ],
+                ]);
 
             $this->cache->remove('layout');
 
@@ -1496,7 +1505,7 @@ class ALayoutManager
     public function getBlockDescriptions($custom_block_id = 0)
     {
         if (!(int)$custom_block_id) {
-            return array();
+            return [];
         }
         $cache_key = 'layout.a.block.descriptions.'.$custom_block_id;
         $output = $this->cache->pull($cache_key);
@@ -1504,7 +1513,7 @@ class ALayoutManager
             return $output;
         }
 
-        $output = array();
+        $output = [];
         $sql = "SELECT bd.*, COALESCE(bl.status,0) AS status
                 FROM ".$this->db->table_name("block_descriptions")." bd
                 LEFT JOIN ".$this->db->table_name("block_layouts")." bl 
@@ -1526,6 +1535,7 @@ class ALayoutManager
      * @param int $language_id
      *
      * @return string
+     * @throws \Exception
      */
     public function getCustomBlockName($custom_block_id, $language_id = 0)
     {
@@ -1554,7 +1564,7 @@ class ALayoutManager
         $block_id = (int)$block_id;
         $custom_block_id = (int)$custom_block_id;
         if (!$block_id && !$custom_block_id) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT DISTINCT l.*, pl.page_id
@@ -1679,11 +1689,11 @@ class ALayoutManager
         $result = $this->db->query($sql);
         foreach ($result->rows as $layout) {
             //clone layout
-            $new_layout = array(
+            $new_layout = [
                 'template_id' => $new_template,
                 'layout_name' => $layout['layout_name'],
                 'layout_type' => $layout['layout_type'],
-            );
+            ];
             $layout_id = $this->saveLayout($new_layout);
 
             $sql = "SELECT *
@@ -1716,12 +1726,12 @@ class ALayoutManager
      */
     public function cloneLayoutBlocks($source_layout_id, $new_layout_id)
     {
-        if (!AHelperUtils::has_value($source_layout_id) || !AHelperUtils::has_value($new_layout_id)) {
+        if (!H::has_value($source_layout_id) || !H::has_value($new_layout_id)) {
             return false;
         }
 
-        $blocks = $this->_getLayoutBlocks($source_layout_id);
-        $instance_map = array();
+        $blocks = $this->getAllLayoutBlocks($source_layout_id);
+        $instance_map = [];
         // insert top level block first
         foreach ($blocks as $block) {
             if ($block['parent_instance_id'] == 0) {
@@ -1787,7 +1797,7 @@ class ALayoutManager
                 $error = new AError ($err);
                 $error->toLog()->toDebug();
             } else {
-                $this->_processXML($xml_obj);
+                $this->processXML($xml_obj);
             }
         }
 
@@ -1801,7 +1811,7 @@ class ALayoutManager
                 $error = new AError ($err);
                 $error->toLog()->toDebug();
             } else {
-                $this->_processXML($xml_obj);
+                $this->processXML($xml_obj);
             }
         }
 
@@ -1814,10 +1824,10 @@ class ALayoutManager
      *
      * @throws \Exception
      */
-    protected function _set_current_page($page_id = '', $layout_id = '')
+    protected function setCurrentPage($page_id = '', $layout_id = '')
     {
         //find page used for this instance. If page_id is not specified for the instance, generic page/layout is used.
-        if (AHelperUtils::has_value($page_id) && AHelperUtils::has_value($layout_id)) {
+        if (H::has_value($page_id) && H::has_value($layout_id)) {
             foreach ($this->pages as $page) {
                 if ($page['page_id'] == $page_id && $page['layout_id'] == $layout_id) {
                     $this->page = $page;
@@ -1825,7 +1835,7 @@ class ALayoutManager
                 }
             }
         } else {
-            if (AHelperUtils::has_value($page_id)) {
+            if (H::has_value($page_id)) {
                 //we have page not related to any layout yet. need to pull differently
                 $language_id = $this->language->getContentLanguageID();
                 $sql = " SELECT p.page_id,
@@ -1864,7 +1874,7 @@ class ALayoutManager
      * @return bool
      * @throws \ReflectionException
      */
-    protected function _processXML($xml_obj)
+    protected function processXML($xml_obj)
     {
         $template_layouts = $xml_obj->xpath('/template_layouts/layout');
         if (empty($template_layouts)) {
@@ -1876,7 +1886,8 @@ class ALayoutManager
             /* Determine an action tag in all patent elements. Action can be insert, update and delete
                Default action (if not provided) is update
                ->>> action = insert
-                    Before loading the layout, determine if same layout exists with same name, template and type combination.
+                    Before loading the layout, determine if same layout exists with same name,
+                    template and type combination.
                     If does exists, return and log error
                ->>> action = update (default)
                     Before loading the layout, determine if same layout exists with same name, template and type combination.
@@ -1897,7 +1908,7 @@ class ALayoutManager
             $result = $this->db->query($sql);
             $layout_id = $result->row ['layout_id'];
 
-            if (!$layout_id && in_array($layout->action, array("", null, "update"))) {
+            if (!$layout_id && in_array($layout->action, ["", null, "update"])) {
                 $layout->action = 'insert';
             }
             if ($layout_id && $layout->action == 'insert') {
@@ -1906,7 +1917,7 @@ class ALayoutManager
             //Delete layout if requested and all it's part included
             if ($layout->action == "delete") {
                 if ($layout_id) {
-                    $sql = array();
+                    $sql = [];
                     $sql[] = "DELETE FROM ".$this->db->table_name("pages_layouts")." 
                                WHERE layout_id = '".$layout_id."'";
                     $sql[] = "DELETE FROM ".$this->db->table_name("block_layouts")." 
@@ -2062,17 +2073,17 @@ class ALayoutManager
                 if ($result->row) {
                     $language_id = $result->row['language_id'];
                     $this->language->replaceDescriptions('page_descriptions',
-                        array('page_id' => (int)$page_id),
-                        array(
-                            (int)$language_id => array(
+                        ['page_id' => (int)$page_id],
+                        [
+                            (int)$language_id => [
                                 'name'        => $page_description->name,
                                 'title'       => $page_description->title,
                                 'seo_url'     => $page_description->seo_url,
                                 'keywords'    => $page_description->keywords,
                                 'description' => $page_description->description,
                                 'content'     => $page_description->content,
-                            ),
-                        ));
+                            ],
+                        ]);
                 }
             }
         }
@@ -2122,12 +2133,12 @@ class ALayoutManager
         $block_id = (int)$result->row ['block_id'];
 
         $action = (string)$block->action;
-        if (!$block_id && in_array($action, array("", null, "update"))) {
+        if (!$block_id && in_array($action, ["", null, "update"])) {
             //if block does not exist, we need to insert new one
             $action = 'insert';
         }
 
-        if (AHelperUtils::has_value($block_id) && $action == 'delete') {
+        if (H::has_value($block_id) && $action == 'delete') {
             //try to delete the block if exists
             $this->_deleteBlock($block, $layout_id);
         } else {
@@ -2182,7 +2193,7 @@ class ALayoutManager
                     $this->db->query($sql);
                     $instance_id = $this->db->getLastId();
 
-                    $sql = array();
+                    $sql = [];
                     //insert new block details
                     if ($block->block_descriptions->block_description) {
                         foreach ($block->block_descriptions->block_description as $block_description) {
@@ -2192,18 +2203,18 @@ class ALayoutManager
                             //if loading language does not exists or installed, skip
                             if ($language_id) {
                                 $this->language->replaceDescriptions('block_descriptions',
-                                    array(
+                                    [
                                         'instance_id' => (int)$instance_id,
                                         'block_id'    => (int)$block_id,
-                                    ),
-                                    array(
-                                        (int)$language_id => array(
+                                    ],
+                                    [
+                                        (int)$language_id => [
                                             'name'        => (string)$block_description->name,
                                             'title'       => (string)$block_description->title,
                                             'description' => (string)$block_description->description,
                                             'content'     => (string)$block_description->content,
-                                        ),
-                                    ));
+                                        ],
+                                    ]);
                             }
                         }
                     }
@@ -2247,7 +2258,7 @@ class ALayoutManager
                             WHERE block_id='".$block_id."'";
                         $this->db->query($sql);
 
-                        $sql = array();
+                        $sql = [];
                         // insert block's info
                         if ($block->block_descriptions->block_description) {
                             foreach ($block->block_descriptions->block_description as $block_description) {
@@ -2267,15 +2278,15 @@ class ALayoutManager
                                     continue;
                                 }
                                 $this->language->replaceDescriptions('block_descriptions',
-                                    array('block_id' => (int)$block_id),
-                                    array(
-                                        (int)$language_id => array(
+                                    ['block_id' => (int)$block_id],
+                                    [
+                                        (int)$language_id => [
                                             'name'        => (string)$block_description->name,
                                             'title'       => (string)$block_description->title,
                                             'description' => (string)$block_description->description,
                                             'content'     => (string)$block_description->content,
-                                        ),
-                                    ));
+                                        ],
+                                    ]);
                             }
                         }
                         if ($block->templates->template) {
@@ -2415,10 +2426,10 @@ class ALayoutManager
 
         // get custom block by it's name and base block id
         $custom_block_info = $this->getBlocksList(
-            array(
+            [
                 'subsql_filter' => "bd.name = '".(string)$block->custom_block_txt_id
                     ."' AND cb.block_id='".$block_id."'",
-            ));
+            ]);
         $custom_block_id = $custom_block_info[0]['custom_block_id'];
 
         $action = (string)$block->action;
@@ -2448,7 +2459,7 @@ class ALayoutManager
                 $this->custom_blocks[(string)$block->custom_block_txt_id] = $custom_block_id;
             }
 
-            $parent_inst = array();
+            $parent_inst = [];
 
             // if parent block exists
             if ($parent_instance_id) {
@@ -2496,18 +2507,18 @@ class ALayoutManager
                     if (!$language_id) {
                         continue;
                     }
-                    $desc_array = array('language_id' => $language_id);
+                    $desc_array = ['language_id' => $language_id];
                     if ((string)$block_description->name) {
                         $desc_array['name'] = (string)$block_description->name;
                     }
                     if ((string)$block_description->title) {
                         $desc_array['title'] = (string)$block_description->title;
                     }
-                    if (AHelperUtils::has_value((string)$block_description->block_wrapper)) {
+                    if (H::has_value((string)$block_description->block_wrapper)) {
                         $desc_array['block_wrapper'] = (string)$block_description->block_wrapper;
                     }
 
-                    if (AHelperUtils::has_value((string)$block_description->block_framed)) {
+                    if (H::has_value((string)$block_description->block_framed)) {
                         $desc_array['block_framed'] = (int)$block_description->block_framed;
                     }
 
@@ -2550,7 +2561,7 @@ class ALayoutManager
             return false;
         }
 
-        $sql = array();
+        $sql = [];
         // check if block is used by another layouts
         $query = "SELECT count(*) AS total
                   FROM ".$this->db->table_name("block_layouts")." 
@@ -2595,9 +2606,9 @@ class ALayoutManager
             return false;
         }
         //get block custom
-        $custom_block_info = $this->getBlocksList(array(
+        $custom_block_info = $this->getBlocksList([
             'subsql_filter' => "bd.name = '".(string)$block->custom_block_txt_id."' AND cb.block_id='".$block_id."'",
-        ));
+        ]);
         $custom_block_id = $custom_block_info[0]['custom_block_id'];
         if (!$custom_block_id) {
             // if we do not know about this custom block - break;
@@ -2605,7 +2616,7 @@ class ALayoutManager
         }
 
         //Delete block and unlink from layout
-        $sql = array();
+        $sql = [];
         $sql[] = "DELETE FROM ".$this->db->table_name("block_layouts")." 
                    WHERE block_id='".$block_id."' 
                         AND layout_id='".$layout_id."' 

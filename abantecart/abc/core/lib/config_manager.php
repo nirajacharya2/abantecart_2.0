@@ -552,6 +552,7 @@ class AConfigManager
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildFormGeneral($form, $data)
     {
@@ -725,6 +726,7 @@ class AConfigManager
      * @return array
      *
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildFormCheckout($form, $data)
     {
@@ -1239,26 +1241,34 @@ class AConfigManager
      * @param    string $section - can be storefront or admin
      * @param    int $status - template extension status
      *
-     * @return array
+     * @return array|false
      */
     public function getTemplates($section, $status = 1)
     {
+        if(!in_array($section, ['storefront', 'admin'])){
+            return false;
+        }
 
         if (H::has_value($this->templates[$section])) {
             return $this->templates[$section];
         }
 
-        $basedir = $section == 'admin' ? ABC::env('DIR_APP') : ABC::env('DIR_STOREFRONT');
 
-        $directories = glob($basedir.'view/*', GLOB_ONLYDIR);
+        $directories = glob(ABC::env('DIR_TEMPLATES').'*'.DS.$section.DS, GLOB_ONLYDIR);
         //get core templates
         foreach ($directories as $directory) {
-            $this->templates[$section][basename($directory)] = basename($directory);
+            $tmpl = basename(dirname($directory));
+            $this->templates[$section][$tmpl] = $tmpl;
         }
         if ($section != 'admin') {
             //get extension templates
-            $extension_templates =
-                $this->extension_manager->getExtensionsList(['filter' => 'template', 'status' => (int)$status]);
+            $extension_templates = $this->extension_manager->getExtensionsList(
+                [
+                    'filter' => 'template',
+                    'status' => (int)$status
+                ]
+            );
+
             if ($extension_templates->total > 0) {
                 foreach ($extension_templates->rows as $row) {
                     $this->templates[$section][$row['key']] = $row['key'];
@@ -1276,6 +1286,7 @@ class AConfigManager
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildFormMail($form, $data)
     {
@@ -1368,6 +1379,7 @@ class AConfigManager
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildFormIm($form, $data)
     {
@@ -1491,6 +1503,7 @@ class AConfigManager
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildFormSystem($form, $data)
     {

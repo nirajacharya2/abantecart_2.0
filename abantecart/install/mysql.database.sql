@@ -176,7 +176,7 @@ CREATE TABLE `ac_language_definitions` (
   `date_added` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (`language_definition_id`, `language_id`, `section`, `block`, `language_key`),
-	FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC)
+    FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -8668,71 +8668,71 @@ CREATE INDEX `ac_zones_to_locations_idx` ON `ac_zones_to_locations` ( `country_i
 
 INSERT INTO `ac_zones_to_locations` (`zone_to_location_id`, `country_id`, `zone_id`, `location_id`, `date_added`)
 VALUES
-	(66,223,3677,1,now()),
-	(65,223,3676,1,now()),
-	(64,223,3675,1,now()),
-	(63,223,3674,1,now()),
-	(62,223,3673,1,now()),
-	(61,223,3672,1,now()),
-	(60,223,3671,1,now()),
-	(59,223,3670,1,now()),
-	(58,223,3669,1,now()),
-	(57,223,3668,1,now()),
-	(56,223,3667,1,now()),
-	(55,223,3666,1,now()),
-	(54,223,3665,1,now()),
-	(53,223,3664,1,now()),
-	(52,223,3663,1,now()),
-	(51,223,3662,1,now()),
-	(50,223,3661,1,now()),
-	(49,223,3660,1,now()),
-	(48,223,3659,1,now()),
-	(47,223,3658,1,now()),
-	(46,223,3657,1,now()),
-	(45,223,3656,1,now()),
-	(44,223,3655,1,now()),
-	(43,223,3654,1,now()),
-	(42,223,3653,1,now()),
-	(41,223,3652,1,now()),
-	(40,223,3651,1,now()),
-	(39,223,3650,1,now()),
-	(38,223,3649,1,now()),
-	(37,223,3648,1,now()),
-	(36,223,3647,1,now()),
-	(35,223,3646,1,now()),
-	(34,223,3645,1,now()),
-	(33,223,3644,1,now()),
-	(32,223,3643,1,now()),
-	(31,223,3642,1,now()),
-	(30,223,3641,1,now()),
-	(29,223,3640,1,now()),
-	(28,223,3639,1,now()),
-	(27,223,3638,1,now()),
-	(26,223,3637,1,now()),
-	(25,223,3636,1,now()),
-	(24,223,3635,1,now()),
-	(23,223,3634,1,now()),
-	(22,223,3633,1,now()),
-	(21,223,3632,1,now()),
-	(20,223,3631,1,now()),
-	(19,223,3630,1,now()),
-	(18,223,3629,1,now()),
-	(17,223,3628,1,now()),
-	(16,223,3627,1,now()),
-	(15,223,3626,1,now()),
-	(14,223,3625,1,now()),
-	(13,223,3624,1,now()),
-	(12,223,3623,1,now()),
-	(11,223,3622,1,now()),
-	(10,223,3621,1,now()),
-	(9,223,3620,1,now()),
-	(8,223,3619,1,now()),
-	(7,223,3618,1,now()),
-	(6,223,3617,1,now()),
-	(5,223,3616,1,now()),
-	(4,223,3615,1,now()),
-	(3,223,3614,1,now()),
-	(2,223,3613,1,now());
+    (66,223,3677,1,now()),
+    (65,223,3676,1,now()),
+    (64,223,3675,1,now()),
+    (63,223,3674,1,now()),
+    (62,223,3673,1,now()),
+    (61,223,3672,1,now()),
+    (60,223,3671,1,now()),
+    (59,223,3670,1,now()),
+    (58,223,3669,1,now()),
+    (57,223,3668,1,now()),
+    (56,223,3667,1,now()),
+    (55,223,3666,1,now()),
+    (54,223,3665,1,now()),
+    (53,223,3664,1,now()),
+    (52,223,3663,1,now()),
+    (51,223,3662,1,now()),
+    (50,223,3661,1,now()),
+    (49,223,3660,1,now()),
+    (48,223,3659,1,now()),
+    (47,223,3658,1,now()),
+    (46,223,3657,1,now()),
+    (45,223,3656,1,now()),
+    (44,223,3655,1,now()),
+    (43,223,3654,1,now()),
+    (42,223,3653,1,now()),
+    (41,223,3652,1,now()),
+    (40,223,3651,1,now()),
+    (39,223,3650,1,now()),
+    (38,223,3649,1,now()),
+    (37,223,3648,1,now()),
+    (36,223,3647,1,now()),
+    (35,223,3646,1,now()),
+    (34,223,3645,1,now()),
+    (33,223,3644,1,now()),
+    (32,223,3643,1,now()),
+    (31,223,3642,1,now()),
+    (30,223,3641,1,now()),
+    (29,223,3640,1,now()),
+    (28,223,3639,1,now()),
+    (27,223,3638,1,now()),
+    (26,223,3637,1,now()),
+    (25,223,3636,1,now()),
+    (24,223,3635,1,now()),
+    (23,223,3634,1,now()),
+    (22,223,3633,1,now()),
+    (21,223,3632,1,now()),
+    (20,223,3631,1,now()),
+    (19,223,3630,1,now()),
+    (18,223,3629,1,now()),
+    (17,223,3628,1,now()),
+    (16,223,3627,1,now()),
+    (15,223,3626,1,now()),
+    (14,223,3625,1,now()),
+    (13,223,3624,1,now()),
+    (12,223,3623,1,now()),
+    (11,223,3622,1,now()),
+    (10,223,3621,1,now()),
+    (9,223,3620,1,now()),
+    (8,223,3619,1,now()),
+    (7,223,3618,1,now()),
+    (6,223,3617,1,now()),
+    (5,223,3616,1,now()),
+    (4,223,3615,1,now()),
+    (3,223,3614,1,now()),
+    (2,223,3613,1,now());
 
 --
 -- DDL for table `ac_addresses`
@@ -8979,18 +8979,18 @@ INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `v
 -- DDL for tables of banner manager
 --
 CREATE TABLE `ac_banners` (
-	`banner_id` int(11) NOT NULL AUTO_INCREMENT,
-	`status` int(1) NOT NULL DEFAULT '0',
-	`banner_type` int(11) NOT NULL DEFAULT '1',
-	`banner_group_name` varchar(255) NOT NULL DEFAULT '',
-	`start_date` timestamp NULL DEFAULT NULL,
-	`end_date` timestamp NULL DEFAULT NULL,
-	`blank` tinyint(1) NOT NULL DEFAULT '0',
-	`target_url` text COLLATE utf8_general_ci DEFAULT '',
-	`sort_order` int(11) NOT NULL,
-	`date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`banner_id`)
+    `banner_id` int(11) NOT NULL AUTO_INCREMENT,
+    `status` int(1) NOT NULL DEFAULT '0',
+    `banner_type` int(11) NOT NULL DEFAULT '1',
+    `banner_group_name` varchar(255) NOT NULL DEFAULT '',
+    `start_date` timestamp NULL DEFAULT NULL,
+    `end_date` timestamp NULL DEFAULT NULL,
+    `blank` tinyint(1) NOT NULL DEFAULT '0',
+    `target_url` text COLLATE utf8_general_ci DEFAULT '',
+    `sort_order` int(11) NOT NULL,
+    `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`banner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -9007,7 +9007,7 @@ CREATE TABLE `ac_banner_descriptions` (
 
 
 CREATE TABLE `ac_banner_stat` (
-	`rowid` INT NOT NULL AUTO_INCREMENT,
+    `rowid` INT NOT NULL AUTO_INCREMENT,
   `banner_id` int(11) NOT NULL,
   `type` int(11) NOT NULL, -- 1 = view, 2 = click
   `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
@@ -9199,17 +9199,17 @@ CREATE TABLE `ac_orders` (
 
 CREATE INDEX `ac_orders_idx`
 ON `ac_orders` (
-							`invoice_id`,
-								`customer_id`,
-								`store_id`,
-								`customer_group_id`,
-								`shipping_zone_id`,
-								`shipping_country_id`,
-								`payment_zone_id`,
-								`payment_country_id`,
-								`language_id`,
-								`currency_id`,
-								`coupon_id`);
+                            `invoice_id`,
+                                `customer_id`,
+                                `store_id`,
+                                `customer_group_id`,
+                                `shipping_zone_id`,
+                                `shipping_country_id`,
+                                `payment_zone_id`,
+                                `payment_country_id`,
+                                `language_id`,
+                                `currency_id`,
+                                `coupon_id`);
 
 --
 -- DDL for table table `ac_customer_transactions`
@@ -10115,7 +10115,8 @@ INSERT INTO `ac_pages` (`page_id`, `parent_page_id`, `controller`, `key_param`, 
 (5, 0, 'pages/product/product', '', '', now()),
 (10, 0, 'pages/index/maintenance', '', '', now() ),
 (11, 0, 'pages/account', '', '', now() ),
-(12, 0, 'pages/checkout/cart', '', '', now() );
+(12, 0, 'pages/checkout/cart', '', '', now() ),
+(13, 0, 'pages/product/category', '', '', now() );
 
 --
 -- DDL for table `page_descriptions`
@@ -10143,7 +10144,8 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 (5, 1, 'Default Product Page', '', '', '', '', '', now() ),
 (10, 1, 'Maintenance Page', '', '', '', '', '', now() ),
 (11, 1, 'Customer Account Pages', '', '', '', '', '', now() ),
-(12, 1, 'Cart Page', '', '', '', '', '', now() );
+(12, 1, 'Cart Page', '', '', '', '', '', now() ),
+(13, 1, 'Product Listing Page', '', '', '', '', '', now() );
 
 --
 -- DDL for table `contents`
@@ -10265,7 +10267,7 @@ CREATE TABLE `ac_custom_blocks` (
 -- DDL for table `ac_custom_lists`
 --
 CREATE TABLE `ac_custom_lists` (
-	`rowid` INT(11) NOT NULL AUTO_INCREMENT,
+    `rowid` INT(11) NOT NULL AUTO_INCREMENT,
   `custom_block_id` int(10) NOT NULL,
   `data_type` varchar(70) NOT NULL,
   `id` int(10) NOT NULL,
@@ -10431,7 +10433,8 @@ INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_nam
 (16, 'default', 1, 'Default Product Listing Page', now()),
 (17, 'default', 1, 'Maintenance Page', now()),
 (18, 'default', 1, 'Customer Account Pages', now()),
-(19, 'default', 1, 'Cart Page', now());
+(19, 'default', 1, 'Cart Page', now()),
+(20, 'default', 1, 'Product Listing Page', now()) ;
 
 --
 -- DDL for table `pages_layouts`
@@ -10450,7 +10453,8 @@ INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
 (15, 3),
 (17, 10),
 (18, 11),
-(19, 12);
+(19, 12),
+(20, 13);
 
 --
 -- DDL for table `block_layouts`
@@ -10667,6 +10671,32 @@ VALUES
 (2019,	19,	8, 	0,	0,		80, 1, 	NOW(), 	NOW()),
 (2020,	19,	28,	0,	2013,	20,	1,	NOW(),	NOW());
 
+
+-- Product Listing Page template's layouts
+INSERT INTO `ac_block_layouts`
+(`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
+VALUES
+(2043,	20,	1,	0,	0,		10,	1,	NOW(),	NOW()),
+(2044,	20,	2,	0,	0,		20,	1,	NOW(),	NOW()),
+(2045,	20,	3,	0,	0,		30,	1,	NOW(),	NOW()),
+(2046,	20,	4,	0,	0,		40,	1,	NOW(),	NOW()),
+(2047,	20,	5,	0,	0,		50,	1,	NOW(),	NOW()),
+(2048,	20,	6,	0,	0,		60,	1,	NOW(),	NOW()),
+(2049,	20,	7,	0,	0,		70,	1,	NOW(),	NOW()),
+(2050,	20,	8,	0,	0,		80,	1,	NOW(),	NOW()),
+(2051,	20,	25,	0,	2050,	40,	1,	NOW(),	NOW()),
+(2052,	20,	11,	0,	2050,	50,	1,	NOW(),	NOW()),
+(2053,	20,	9,	0,	2044,	10,	1,	NOW(),	NOW()),
+(2054,	20,	24,	0,	2050,	70,	1,	NOW(),	NOW()),
+(2055,	20,	21,	0,	2050,	80,	1,	NOW(),	NOW()),
+(2056,	20,	31,	0,	2043,	20,	1,	NOW(),	NOW()),
+(2057,	20,	27,	0,	2043,	30,	1,	NOW(),	NOW()),
+(2058,	20,	26,	0,	2043,	40,	1,	NOW(),	NOW()),
+(2059,	20,	14,	0,	2043,	60,	1,	NOW(),	NOW()),
+(2060,	20,	13,	0,	2043,	50,	1,	NOW(),	NOW()),
+(2061,	20,	15,	0,	2043,	70,	1,	NOW(),	NOW()),
+(2062,	20,	28,	0,	2044,	20,	1,	NOW(),	NOW());
+
 --
 -- DDL for table `forms`
 --
@@ -10754,7 +10784,7 @@ VALUES
 (11,'First name:','Name must be between 3 and 32 characters!',1),
 (12,'Email:','E-Mail Address does not appear to be valid!',1),
 (13,'Enquiry:','Enquiry must be between 10 and 3000 characters!',1),
-(14,'Enter the code in the box below:','Human verification has failed! Please try agan.',1);
+(14,'Enter the code in the box below:','Human verification has failed! Please try again.',1);
 
 --
 -- DDL for table `ac_field_values`
@@ -10862,11 +10892,11 @@ CREATE TABLE `ac_datasets` (
 --
 
 CREATE TABLE `ac_dataset_properties` (
-	`rowid` int(11) NOT NULL AUTO_INCREMENT,
+    `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `dataset_id` int(11) NOT NULL,
   `dataset_property_name` varchar(255) NOT NULL,
   `dataset_property_value` varchar(255),
-	PRIMARY KEY (`rowid`),
+    PRIMARY KEY (`rowid`),
   KEY `dataset_property_idx` (`dataset_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci  AUTO_INCREMENT=1;
 
@@ -10996,9 +11026,9 @@ VALUES  (7,'2',1),
         (7,'3',3),
         (7,'4',4),
         (7,'250',5),
-       	(7,'260',6),
-       	(7,'244',7),
-       	(7,'266',8);
+        (7,'260',6),
+        (7,'244',7),
+        (7,'266',8);
 
 --
 -- ADMIN MENU SECTION
@@ -11450,8 +11480,8 @@ VALUES  (10,'template',131),
         (10,'blocks',133),
         (10,'menu',134),
         (10,'content',135),
-		    (10,'banner_manager',136),
-		    (10,'forms_manager',200);
+            (10,'banner_manager',136),
+            (10,'forms_manager',200);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (11,'text_templates',131),
@@ -11610,27 +11640,27 @@ VALUES  (40,'247',191),
 -- ITEM_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (10,'user',151),
-		    (10,'permission',152);
+            (10,'permission',152);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (11,'text_user',151),
-		    (11,'text_user_group',152);
+            (11,'text_user_group',152);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (12,'user/user',151),
-	    	(12,'user/user_permission',152);
+            (12,'user/user_permission',152);
 -- PARENT_ID	(submenu SYSTEM)
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (13,'users',151),
-		    (13,'users',152);
+            (13,'users',152);
 -- SORT_ORDER
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
 VALUES  (14,1,151),
-	    	(14,2,152);
+            (14,2,152);
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (15,'core',151),
-		    (15,'core',152);
+            (15,'core',152);
 
 -- ITEM_RL_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11789,33 +11819,33 @@ VALUES  (40,'269',183),
 -- ITEM_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (10,'installlog',186),
-		    (10,'error_log',187),
-		    (10,'task',189);
+            (10,'error_log',187),
+            (10,'task',189);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (11,'text_install_upgrade_history',186),
-		    (11,'text_error_log',187),
-		    (11,'text_tasks',189);
+            (11,'text_error_log',187),
+            (11,'text_tasks',189);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (12,'tool/install_upgrade_history',186),
-		    (12,'tool/error_log',187),
-		    (12,'tool/task',189);
+            (12,'tool/error_log',187),
+            (12,'tool/task',189);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (13,'logs',186),
-		    (13,'logs',187),
-		    (13,'logs',189);
+            (13,'logs',187),
+            (13,'logs',189);
 -- SORT_ORDER
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
 VALUES  (14,1,186),
-	    	(14,2,187),
-	    	(14,3,189);
+            (14,2,187),
+            (14,3,189);
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (15,'core',186),
-		    (15,'core',187),
-		    (15,'core',189);
+            (15,'core',187),
+            (15,'core',189);
 
 -- ITEM_RL_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
