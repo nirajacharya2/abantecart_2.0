@@ -68,7 +68,11 @@ class JobManager implements JobManagerInterface
         $this->registry = $registry;
         // who is initiator of process, admin or storefront
         $this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
-        $this->job_log = ABC::getObjectByAlias('ALog', [['job_log.txt']]);
+        $this->job_log = ABC::getObjectByAlias('ALog', [
+            [
+                'app' => 'job_log.txt',
+            ],
+        ]);
         $this->db = $registry->get('db');
     }
 
