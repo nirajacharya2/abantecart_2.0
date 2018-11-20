@@ -371,7 +371,12 @@ if($upd_array) {
             LEFT JOIN ".$this->db->table_name("categories")." c
                  ON (c.category_id = cd.category_id)
             WHERE c.parent_id = '".$parent_id."' 
-                AND LOWER(name) = '".mb_strtolower(html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET')))."'"
+                AND LOWER(name) = '"
+            .$this->db->escape(
+                mb_strtolower(
+                    html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET'))
+                )
+            )."'"
         );
 
         return $result->row;
