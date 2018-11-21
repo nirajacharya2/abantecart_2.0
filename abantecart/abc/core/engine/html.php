@@ -490,6 +490,7 @@ class AHtml
         $seo_key = H::SEOEncode($keyword);
 
         $db = $this->registry->get('db');
+
         $sql = "SELECT *
                 FROM ".$db->table_name('url_aliases')."
                 WHERE query<>'".$db->escape($query)."' AND keyword='".$db->escape($seo_key)."'";
@@ -497,7 +498,7 @@ class AHtml
         if ($result->num_rows) {
             $url = ABC::env('HTTP_CATALOG').$seo_key;
 
-            return sprintf($this->language->get('error_seo_keyword'), $url, $seo_key);
+            return sprintf($this->registry->get('language')->get('error_seo_keyword'), $url, $seo_key);
         }
 
         return '';
