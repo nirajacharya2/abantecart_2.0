@@ -20,7 +20,7 @@
 		</div>
 		<div class="col-sm-4 h5 center">
 			<a href="#admin#rt=extension/extensions/payment" target="_extension">
-			<img src="admin/view/default/images/default_extension.png"><br>More Payments</a>
+			<img src="templates/default/admin/assets/images/default_extension.png"><br>More Payments</a>
 		</div>
 	</div>]]></value>
 	</definition>

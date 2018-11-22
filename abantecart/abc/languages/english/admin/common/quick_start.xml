@@ -90,7 +90,7 @@
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/payment" target="_extension">
-	        <img src="admin/view/default/images/default_extension.png"><br>More Payments</a>
+	        <img src="templates/default/admin/assets/images/default_extension.png"><br>More Payments</a>
 	    </div>
     </div>
     ]]></value>
@@ -117,7 +117,7 @@
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions/shipping" target="_extension">
-	        <img src="admin/view/default/images/default_extension.png"><br>More Shippings</a>
+	        <img src="templates/default/admin/assets/images/default_extension.png"><br>More Shippings</a>
 	    </div>
     </div>
     ]]></value>
@@ -144,7 +144,7 @@
 	    </div>
 	    <div class="col-sm-3 h5 center">
 	        <a href="#admin#rt=extension/extensions_store&category_id=67&sidx=date_modified" target="_extension">
-	        <img src="admin/view/default/images/default_extension.png"><br>More Languages</a>
+	        <img src="templates/default/admin/assets/images/default_extension.png"><br>More Languages</a>
 	    </div>
     </div>
     ]]></value>
