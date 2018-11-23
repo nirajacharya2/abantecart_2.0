@@ -19,9 +19,11 @@
 namespace abc\models;
 
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
+use H;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
-use abc\core\helper\AHelperUtils;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
@@ -33,6 +35,8 @@ use ReflectionMethod;
  * Class AModelBase
  *
  * @package abc\models
+ * @method static Collection find(integer $id)
+ * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  */
 class AModelBase extends OrmModel
 {
@@ -97,7 +101,7 @@ class AModelBase extends OrmModel
      */
     public function __construct(array $attributes = [])
     {
-        $this->actor = AHelperUtils::recognizeUser();
+        $this->actor = H::recognizeUser();
         $this->registry = Registry::getInstance();
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
@@ -176,7 +180,6 @@ class AModelBase extends OrmModel
      */
     public function validate($data)
     {
-        return true;
         if ($rules = $this->rules()) {
             $v = new Validator(new ValidationTranslator(), $data, $rules);
             try {
@@ -399,4 +402,15 @@ class AModelBase extends OrmModel
         }
         return $query;
     }
+
+    public static function __callStatic($method, $parameters)
+    {
+        //check permissions for static methods of model
+        $abac = Registry::getInstance()->get('abac');
+        if($abac && !$abac->hasAccess(__CLASS__)){
+            throw new AException('Forbidden');
+        }
+        return parent::__callStatic($method, $parameters);
+    }
+
 }

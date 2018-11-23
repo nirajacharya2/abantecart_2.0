@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,14 +21,11 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * @property  AExtensionManager $extension_manager
@@ -87,6 +84,12 @@ class APackageManager
         return (array)$this->package_info;
     }
 
+    /**
+     * @param string $url
+     *
+     * @return bool
+     * @throws AException
+     */
     public function downloadPackageByURL($url)
     {
         if (!$url || parse_url($url) === false) {
@@ -102,7 +105,7 @@ class APackageManager
         }
 
         $package_name = str_replace("attachment; filename=", "", $headers['Content-Disposition']);
-        $package_name = str_replace(array('"', ';'), '', $package_name);
+        $package_name = str_replace(['"', ';'], '', $package_name);
         if (!$package_name) {
             $package_name = parse_url($url);
             if (pathinfo($package_name['path'], PATHINFO_EXTENSION)) {
@@ -130,11 +133,12 @@ class APackageManager
     }
 
     /**
-     * @param string  $url
+     * @param string $url
      * @param boolean $save
-     * @param string  $new_file_name
+     * @param string $new_file_name
      *
      * @return boolean|array
+     * @throws AException
      */
     public function getRemoteFile($url, $save = true, $new_file_name = '')
     {
@@ -185,6 +189,7 @@ class APackageManager
      * @param string $dest_dir
      *
      * @return boolean
+     * @throws \ReflectionException
      */
     public function unpack($archive_filename, $dest_dir)
     {
@@ -219,7 +224,7 @@ class APackageManager
         $this->removeDir($package_dir);
         unset($this->package_info['package_dir']);
 
-        $unpack_result = AHelperUtils::extractArchive($archive_filename, $package_dir);
+        $unpack_result = H::extractArchive($archive_filename, $package_dir);
         if ($unpack_result) {
             $this->chmod_R($dest_dir.$this->package_info['tmp_dir'], 0775, 0775);
             $dirs = glob($package_dir.'*', GLOB_ONLYDIR);
@@ -237,7 +242,7 @@ class APackageManager
     public function extractPackageInfo()
     {
         /**
-         * @var \SimpleXMLElement $config
+         * @var \SimpleXMLElement|\DOMDocument $config
          */
         $config = @simplexml_load_file($this->package_info['package_dir'].'package.xml');
         if (!$config) {
@@ -249,9 +254,9 @@ class APackageManager
         $this->package_info['package_type'] = (string)$config->type;
         $this->package_info['package_priority'] = (string)$config->priority;
         $this->package_info['package_version'] = (string)$config->version;
-        $this->package_info['package_content'] = array();
+        $this->package_info['package_content'] = [];
         if ((string)$config->package_content->extensions) {
-            $this->package_info['package_content']['extensions'] = array();
+            $this->package_info['package_content']['extensions'] = [];
             foreach ($config->package_content->extensions->extension as $item) {
                 if ((string)$item) {
                     $this->package_info['package_content']['extensions'][] = (string)$item;
@@ -262,7 +267,7 @@ class APackageManager
         }
 
         if ((string)$config->package_content->core) {
-            $this->package_info['package_content']['core'] = array();
+            $this->package_info['package_content']['core'] = [];
             foreach ($config->package_content->core->files->file as $item) {
                 if ((string)$item) {
                     $this->package_info['package_content']['core'][] = (string)$item;
@@ -355,6 +360,9 @@ class APackageManager
      * @param string $ext_txt_id
      *
      * @return bool
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     public function backupPreviousExtension($ext_txt_id)
     {
@@ -395,7 +403,7 @@ class APackageManager
         $info = $this->extensions->getExtensionInfo($ext_txt_id);
 
         $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-        $install_upgrade_history->addRows(array(
+        $install_upgrade_history->addRows([
             'date_added'  => date("Y-m-d H:i:s", time()),
             'name'        => $ext_txt_id,
             'version'     => $info['version'],
@@ -404,17 +412,20 @@ class APackageManager
             'type'        => 'backup',
             'user'        => (is_object($this->registry->get('user')) ? $this->registry->get('user')
                 ->getUsername() : 'php-cli'),
-        ));
+        ]);
 
         //delete previous version
         $this->removeDir($ext_dir_path);
         return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function installPackageExtensions()
     {
         if (!sizeof($this->package_info['package_content']['extensions'])) {
-            return true;
+            return;
         }
         $all_installed = $this->extensions->getInstalled('exts');
         //process for multi-package
@@ -428,8 +439,8 @@ class APackageManager
                 .DS
                 ."config.xml";
             if (!is_file($config_file)) {
-                $msg =
-                    "Extension ".$ext_txt_id." cannot be installed. Skipped. Cannot find config.xml file inside it.\n";
+                $msg = "Extension ".$ext_txt_id." cannot be installed. "
+                        ."Skipped. Cannot find config.xml file inside it.\n";
                 $this->message_log[] = $msg;
                 $this->errors[] = $msg;
                 continue;
@@ -453,7 +464,7 @@ class APackageManager
             if (in_array($ext_txt_id, $all_installed)) {
                 $installed_info = $this->extensions->getExtensionInfo($ext_txt_id);
                 $installed_version = $installed_info['version'];
-                if (AHelperUtils::versionCompare($version, $installed_version, '<=')) {
+                if (H::versionCompare($version, $installed_version, '<=')) {
                     // if installed version the same or higher - do nothing
                     $this->message_log[] =
                         "Extension ".$ext_txt_id." skipped. Same or higher version(".$installed_version
@@ -538,7 +549,7 @@ class APackageManager
 
                 $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
                 $install_upgrade_history->addRows(
-                    array(
+                    [
                         'date_added'  => date("Y-m-d H:i:s", time()),
                         'name'        => 'Upgrade core file: '.$rel_file,
                         'version'     => $this->package_info['package_version'],
@@ -547,7 +558,7 @@ class APackageManager
                         'type'        => 'upgrade',
                         'user'        => (is_object($this->registry->get('user')) ? $this->registry->get('user')
                             ->getUsername() : 'php-cli'),
-                    ));
+                    ]);
             } else {
                 $error_text = " Cannot upgrade file : '".$rel_file;
                 $run_errors[] = $error_text;
@@ -566,6 +577,7 @@ class APackageManager
      * @param string $dir
      *
      * @return boolean
+     * @throws \ReflectionException
      */
     public function removeDir($dir = '')
     {
@@ -601,8 +613,7 @@ class APackageManager
             }
             return $result;
         }
-        return true;
-    }
+     }
 
     /**
      * Method returns relative(!!!) paths of destination directories of package.
@@ -613,7 +624,7 @@ class APackageManager
     public function getDestinationDirectories()
     {
         $package_dirname = $this->package_info['package_dir'];
-        $output = array();
+        $output = [];
         if (!file_exists($package_dirname."code")) {
             return false;
         } else {
@@ -658,6 +669,8 @@ class APackageManager
      * @param string $install_mode
      *
      * @return bool
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function installExtension($ext_txt_id = '', $type = '', $version = '', $install_mode = 'install')
     {
@@ -685,14 +698,14 @@ class APackageManager
                     }
 
                     $result = $this->extension_manager->install($ext_txt_id,
-                        AHelperUtils::getExtensionConfigXml($ext_txt_id));
+                        H::getExtensionConfigXml($ext_txt_id));
                     if ($result === false) {
                         return false;
                     }
 
                 } elseif ($install_mode == 'upgrade') {
                     $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-                    $install_upgrade_history->addRows(array(
+                    $install_upgrade_history->addRows([
                         'date_added'  => date("Y-m-d H:i:s", time()),
                         'name'        => $ext_txt_id,
                         'version'     => $version,
@@ -701,7 +714,7 @@ class APackageManager
                         'type'        => 'upgrade',
                         'user'        => (is_object($this->registry->get('user')) ? $this->registry->get('user')
                             ->getUsername() : 'php-cli'),
-                    ));
+                    ]);
 
                     $config = null;
                     $ext_conf_filename = $package_dirname
@@ -713,7 +726,7 @@ class APackageManager
                     if (is_file($ext_conf_filename)) {
                         $config = simplexml_load_file($ext_conf_filename);
                     }
-                    $config = !$config ? AHelperUtils::getExtensionConfigXml($ext_txt_id) : $config;
+                    $config = !$config ? H::getExtensionConfigXml($ext_txt_id) : $config;
                     // running sql upgrade script if it exists
                     if ((string)$config->upgrade->sql) {
                         $file = $package_dirname
@@ -745,10 +758,10 @@ class APackageManager
                         }
                     }
 
-                    $this->extension_manager->editSetting($ext_txt_id, array(
+                    $this->extension_manager->editSetting($ext_txt_id, [
                         'license_key' => $this->package_info['extension_key'],
                         'version'     => $version,
-                    ));
+                    ]);
                 }
                 break;
             default:
@@ -767,6 +780,7 @@ class APackageManager
      * @param string $ext_txt_id
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function uninstallExtension($ext_txt_id)
     {
@@ -781,7 +795,7 @@ class APackageManager
             return false;
         }
 
-        $result = $this->extension_manager->uninstall($ext_txt_id, AHelperUtils::getExtensionConfigXml($ext_txt_id));
+        $result = $this->extension_manager->uninstall($ext_txt_id, H::getExtensionConfigXml($ext_txt_id));
         if ($result === false) {
             $this->errors += $this->extension_manager->errors;
             return false;
@@ -792,6 +806,7 @@ class APackageManager
 
     /**
      * @return bool
+     * @throws AException
      */
     public function upgradeCore()
     {
@@ -839,7 +854,7 @@ class APackageManager
             $this->updateCoreVersion($this->package_info['package_version']);
             // write to history
             $install_upgrade_history = new ADataset('install_upgrade_history', 'admin');
-            $install_upgrade_history->addRows(array(
+            $install_upgrade_history->addRows([
                 'date_added'  => date("Y-m-d H:i:s", time()),
                 'name'        => 'Core upgrade',
                 'version'     => $this->package_info['package_version'],
@@ -848,7 +863,7 @@ class APackageManager
                 'type'        => 'upgrade',
                 'user'        => (is_object($this->registry->get('user')) ? $this->registry->get('user')
                     ->getUsername() : 'php-cli'),
-            ));
+            ]);
 
         } else {
             return false;
@@ -964,14 +979,13 @@ class APackageManager
      */
     public function getTempDir()
     {
-        $dir = '';
         $tmp_dir = ABC::env('DIR_SYSTEM').'temp';
         $tmp_install_dir = $tmp_dir.'/install';
         if (is_dir($tmp_dir) && !is_dir($tmp_install_dir)) {
             @mkdir($tmp_install_dir, 0755, true);
         }
         //try to create tmp dir if not yet created and install.
-        if (AHelperUtils::is_writable_dir($tmp_dir) && AHelperUtils::is_writable_dir($tmp_install_dir)) {
+        if (H::is_writable_dir($tmp_dir) && H::is_writable_dir($tmp_install_dir)) {
             $dir = $tmp_install_dir."/";
         } else {
             if (!is_dir(sys_get_temp_dir().'/abantecart_install')) {
@@ -1013,24 +1027,26 @@ class APackageManager
      * @param \SimpleXMLElement|null $config_xml
      *
      * @return bool
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function checkCartVersion(\SimpleXMLElement $config_xml = null)
     {
         $config_xml = $config_xml === null ? $this->package_config : $config_xml;
         $full_check = false;
         $minor_check = false;
-        $versions = array();
+        $versions = [];
         foreach ($config_xml->cartversions->item as $item) {
             $version = (string)$item;
             $versions[] = $version;
 
             $split_versions = explode('.', preg_replace('/[^0-9\.]/', '', $version));
-            $full_check = AHelperUtils::versionCompare(
+            $full_check = H::versionCompare(
                 $version,
                 ABC::env('VERSION'),
                 '<='
             );
-            $minor_check = AHelperUtils::versionCompare(
+            $minor_check = H::versionCompare(
                 $split_versions[0].'.'.$split_versions[1],
                 ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION'),
                 '=='
@@ -1053,6 +1069,11 @@ class APackageManager
         return $full_check && $minor_check;
     }
 
+    /**
+     * @param string $extension_key
+     *
+     * @return bool
+     */
     public function isCorePackage($extension_key = '')
     {
         if ($this->package_info['package_content']['core'] && !$this->package_info['extension_key']) {

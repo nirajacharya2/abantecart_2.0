@@ -11,7 +11,7 @@ namespace abc\controllers\admin;
    Copyright © 2011-2018 Belavier Commerce LLC
 
    This source file is subject to Open Software License (OSL 3.0)
-   Lincence details is bundled with this package in the file LICENSE.txt.
+   Licence details is bundled with this package in the file LICENSE.txt.
    It is also available at this URL:
    <http://www.opensource.org/licenses/OSL-3.0>
 
@@ -20,24 +20,39 @@ namespace abc\controllers\admin;
 	versions in the future. If you wish to customize AbanteCart for your
 	needs please refer to http://www.AbanteCart.com for more information.
  ------------------------------------------------------------------------------*/
-if (!IS_ADMIN || !defined('DIR_CORE')) {
-    header('Location: static_pages/');
-}
 
+use abc\core\ABC;
+use abc\core\engine\AController;
+use abc\core\lib\AConfig;
+use abc\core\lib\AJson;
+use abc\core\lib\ARequest;
+use abc\core\lib\ASession;
+use abc\models\admin\ModelSettingSetting;
+
+/**
+ * Class ControllerResponsesExtensionDefaultTwilio
+ *
+ * @package abc\controllers\admin
+ *
+ * @property ModelSettingSetting $model_setting_setting
+ */
 class ControllerResponsesExtensionDefaultTwilio extends AController
 {
 
-    public $data = array();
+    public $data = [];
 
     public function test()
     {
         $this->registry->set('force_skip_errors', true);
         $this->loadLanguage('default_twilio/default_twilio');
         $this->loadModel('setting/setting');
-        require_once(DIR_EXT.'default_twilio/core/lib/Services/Twilio.php');
-        require_once(DIR_EXT.'default_twilio/core/lib/Twilio/autoload.php');
+        require_once (ABC::env('DIR_APP_EXTENSIONS').'default_twilio'.DS.'core'.DS.'lib'.DS.'Services'.DS.'Twilio.php');
+        require_once(ABC::env('DIR_APP_EXTENSIONS').'default_twilio'.DS.'core'.DS.'lib'.DS.'Twilio'.DS.'autoload.php');
 
-        $cfg = $this->model_setting_setting->getSetting('default_twilio', (int)$this->session->data['current_store_id']);
+        $cfg = $this->model_setting_setting->getSetting(
+            'default_twilio',
+            (int)$this->session->data['current_store_id']
+        );
         $AccountSid = $cfg['default_twilio_username'];
         $AuthToken = $cfg['default_twilio_token'];
 
@@ -55,24 +70,25 @@ class ControllerResponsesExtensionDefaultTwilio extends AController
         try {
             $sender->messages->create(
                 $to,
-                array(
+                [
                     'from' => $from,
                     'body' => 'test message',
-                )
+                ]
             );
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $error_message = $e->getMessage();
         }
 
         $this->registry->set('force_skip_errors', false);
-        $json = array();
+        $json = [];
 
         if (!$error_message) {
             $json['message'] = $this->language->get('text_connection_success');
             $json['error'] = false;
         } else {
-            $json['message'] = "Connection to Twilio server can not be established.<br>".$error_message.".<br>Check your server configuration or contact your hosting provider.";
+            $json['message'] = "Connection to Twilio server can not be established.<br>"
+                .$error_message.".<br>Check your server configuration or contact your hosting provider.";
             $json['error'] = true;
         }
 

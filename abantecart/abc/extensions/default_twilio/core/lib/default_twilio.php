@@ -1,12 +1,12 @@
 <?php
 //namespace abc\core\extension;
 
-use abc\core\engine\Extension;
+use abc\core\engine\AForm;
 use abc\core\engine\Registry;
 
 final class DefaultTwilio
 {
-    public $errors = array();
+    public $errors = [];
     private $registry;
     private $config;
     private $sender;
@@ -64,10 +64,10 @@ final class DefaultTwilio
             }
             $this->sender->messages->create(
                 $to,
-                array(
+                [
                     'from' => $from,
                     'body' => $text,
-                )
+                ]
             );
             $result = true;
         } catch (Exception $e) {
@@ -89,7 +89,7 @@ final class DefaultTwilio
 
     public function validateURI($uri)
     {
-        $this->errors = array();
+        $this->errors = [];
         $uri = trim($uri);
         $uri = trim($uri, ',');
 
@@ -118,21 +118,22 @@ final class DefaultTwilio
     /**
      * Function builds form element for storefront side (customer account page)
      *
-     * @param AForm  $form
+     * @param AForm $form
      * @param string $value
      *
      * @return object
+     * @throws \abc\core\lib\AException
      */
     public function getURIField($form, $value = '')
     {
         $this->registry->get('language')->load('default_twilio/default_twilio');
 
         return $form->getFieldHtml(
-            array(
+            [
                 'type'       => 'phone',
                 'name'       => 'sms',
                 'value'      => $value,
                 'label_text' => $this->registry->get('language')->get('entry_sms'),
-            ));
+            ]);
     }
 }

@@ -113,17 +113,26 @@ use abc\core\lib\{
 abstract class AController
 {
     /**
-     * @var Registry
+     * @var ADispatcher
      */
     public $dispatcher;
+    /**
+     * @var AView
+     */
     public $view;
     public $data = [];
+    /**
+     * @var Registry
+     */
     protected $registry;
     protected $instance_id;
     protected $controller;
     protected $parent_controller;
     protected $children = [];
     protected $block_details = [];
+    /**
+     * @var AConfig
+     */
     protected $config;
     protected $languages = [];
     protected $html_cache_key;

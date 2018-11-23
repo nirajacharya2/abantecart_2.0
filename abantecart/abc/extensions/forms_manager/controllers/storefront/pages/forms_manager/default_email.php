@@ -26,7 +26,8 @@ use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AMail;
 use abc\extensions\forms_manager\models\storefront\tools\ModelToolFormsManager;
-
+use abc\models\admin\User;
+use H;
 
 /**
  * Class ControllerPagesFormsManagerDefaultEmail

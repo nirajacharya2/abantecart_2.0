@@ -9,13 +9,25 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-use Exception;
+
 
 
 class MailApiManager
 {
+    /**
+     * @var Registry
+     */
+    protected $registry;
+    /**
+     * @var AConfig
+     */
+    protected $config;
+    /**
+     * @var AExtensionManager
+     */
+    protected $extensions;
+
     //NOTE: This class is loaded in INIT for admin only
     public function __construct()
     {
@@ -38,7 +50,6 @@ class MailApiManager
         $driver_list = [];
         foreach ($extensions->rows as $ext) {
             $driver_txt_id = $ext['key'];
-
             if ($this->config->get($driver_txt_id.'_status') === null) {
                 continue;
             }

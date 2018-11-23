@@ -1,4 +1,3 @@
-<?php use abc\core\helper\AHelperUtils; ?>
 <div class="modal-header">
 	<h4 class="modal-title"><?php echo $heading_title; ?></h4>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i

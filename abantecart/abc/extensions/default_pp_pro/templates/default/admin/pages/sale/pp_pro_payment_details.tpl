@@ -4,7 +4,7 @@
 			<td class="col-sm-3"><?php echo $text_payment_status; ?></td>
 			<td class="col-sm-6"><?php echo $payment_status; ?><?php echo  $pending_reason ? '('.$pending_reason.')':''; ?></td>
 		</tr>
-<?php if ( has_value($refunded_amount) ){ ?>
+<?php if ( \H::has_value($refunded_amount) ){ ?>
 		<tr>
 			<td class="col-sm-3"><?php echo $text_already_refunded; ?></td>
 			<td class="col-sm-6">
@@ -28,7 +28,7 @@ if ( $pp_refund_amount ){ ?>
 <?php }
 
 // CAPTURE FORM
-if ( has_value($pp_capture_amount) ){ ?>
+if ( \H::has_value($pp_capture_amount) ){ ?>
 	<tr>
 		<td class="col-sm-3"><?php echo $text_capture_funds; ?></td>
 		<td class="col-sm-6">
@@ -63,12 +63,12 @@ if ( has_value($pp_capture_amount) ){ ?>
 					if ( result ) {
 						goTo( result.href );
 					} else {
-						error_alert(<?php js_echo($error_service_unavailable); ?>);
+						error_alert(<?php \H::js_echo($error_service_unavailable); ?>);
 					}
 				}
 			});
 		} else {
-			error_alert(<?php js_echo($error_wrong_amount); ?>);
+			error_alert(<?php \H::js_echo($error_wrong_amount); ?>);
 		}
 	return false;
 	});
@@ -87,7 +87,7 @@ if ( has_value($pp_capture_amount) ){ ?>
 					if ( result ) {
 						goTo( result.href );
 					} else {
-						error_alert(<?php js_echo($error_service_unavailable); ?>);
+						error_alert(<?php \H::js_echo($error_service_unavailable); ?>);
 					}
 				}
 			});

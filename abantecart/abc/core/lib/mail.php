@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,13 +22,8 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
-use abc\models\base\Customer;
 use abc\models\base\CustomerCommunication;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class AMail
 {
@@ -51,8 +46,8 @@ class AMail
     protected $subject;
     protected $text;
     protected $html;
-    protected $attachments = array();
-    protected $headers = array();
+    protected $attachments = [];
+    protected $headers = [];
     /**
      * @var AMessage
      */
@@ -71,8 +66,10 @@ class AMail
     public $crlf = "\r\n";
     public $verp = false;
     public $parameter = '';
-    public $error = array();
-
+    public $error = [];
+    /**
+     * @var AUser
+     */
     protected $user;
 
     /**
@@ -251,10 +248,10 @@ class AMail
             $filename = md5(pathinfo($file, PATHINFO_FILENAME)).'.'.pathinfo($file, PATHINFO_EXTENSION);
         }
 
-        $this->attachments[] = array(
+        $this->attachments[] = [
             'filename' => $filename,
             'file'     => $file,
-        );
+        ];
     }
 
     /**

@@ -20,14 +20,21 @@
 
 namespace abc\core\extension;
 
+use abc\core\engine\AHtml;
+use abc\core\engine\ALanguage;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
+use abc\core\lib\ARequest;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
-
+/**
+ * Class ExtensionBannerManager
+ *
+ * @package abc\core\extension
+ * @property ALanguage $language
+ * @property ARequest $request
+ * @property AHtml $html
+ */
 class ExtensionBannerManager extends Extension
 {
     private $registry;
@@ -49,25 +56,26 @@ class ExtensionBannerManager extends Extension
             $language_id = $this->registry->get( 'language' )->getContentLanguageID();
         }
 
-        $sql
-            = "SELECT rm.object_id, 'banners' AS object_name, bd.name
-				FROM ".$this->registry->get( 'db' )->table_name( "resource_map" )." rm
-				LEFT JOIN ".$this->registry->get( 'db' )->table_name( "banner_descriptions" )." bd 
-					ON ( rm.object_id = bd.banner_id AND bd.language_id = '".(int)$language_id."')
-				WHERE rm.resource_id = '".(int)$resource_id."'
-					AND rm.object_name = 'banners'";
+        $sql = "SELECT rm.object_id, 'banners' AS object_name, bd.name
+                FROM ".$this->registry->get( 'db' )->table_name( "resource_map" )." rm
+                LEFT JOIN ".$this->registry->get( 'db' )->table_name( "banner_descriptions" )." bd 
+                    ON ( rm.object_id = bd.banner_id AND bd.language_id = '".(int)$language_id."')
+                WHERE rm.resource_id = '".(int)$resource_id."'
+                    AND rm.object_name = 'banners'";
         $query = $this->registry->get( 'db' )->query( $sql );
         $resource_objects = $query->rows;
 
-        $result = array();
+        $result = [];
         foreach ( $resource_objects as $row ) {
-            $result[] = array(
+            $result[] = [
                 'object_id'   => $row['object_id'],
                 'object_name' => $row['object_name'],
                 'name'        => $row['name'],
-                'url'         => $this->registry->get( 'html' )->getSecureURL( 'extension/banner_manager/edit',
-                    '&banner_id='.$row['object_id'] ),
-            );
+                'url'         => $this->registry->get( 'html' )->getSecureURL(
+                                                    'extension/banner_manager/edit',
+                                                    '&banner_id='.$row['object_id']
+                ),
+            ];
         }
 
         return $result;
@@ -103,10 +111,13 @@ class ExtensionBannerManager extends Extension
         $block_id = $block['block_id'];
 
         $inserts = $that->view->getData( 'inserts' );
-        $inserts[] = array(
+        $inserts[] = [
             'text' => $that->language->get( 'text_banner_block' ),
-            'href' => $that->html->getSecureURL( 'extension/banner_manager/insert_block', '&block_id='.$block_id ),
-        );
+            'href' => $that->html->getSecureURL(
+                'extension/banner_manager/insert_block',
+                '&block_id='.$block_id
+            ),
+        ];
         $that->view->assign( 'inserts', $inserts );
     }
 
@@ -127,8 +138,12 @@ class ExtensionBannerManager extends Extension
             }
 
             if ( $block_txt_id == 'banner_block' ) {
-                abc_redirect( $this->html->getSecureURL( 'extension/banner_manager/edit_block',
-                    '&custom_block_id='.(int)$this->request->get['custom_block_id'] ) );
+                abc_redirect(
+                    $this->html->getSecureURL(
+                        'extension/banner_manager/edit_block',
+                        '&custom_block_id='.(int)$this->request->get['custom_block_id']
+                    )
+                );
             }
         }
     }
@@ -142,14 +157,14 @@ class ExtensionBannerManager extends Extension
             $that->loadLanguage( 'design/blocks' );
             $block = $lm->getBlockByTxtId( 'banner_block' );
             $block_id = $block['block_id'];
-            $that->data['tabs'][] = array(
+            $that->data['tabs'][] = [
                 'name'       => $block_id,
                 'text'       => $that->language->get( 'text_banner_block' ),
                 'href'       => $that->html->getSecureURL( 'extension/banner_manager/insert_block',
                     '&block_id='.$block_id ),
                 'active'     => ( $block_id == $that->request->get['block_id'] ? true : false ),
                 'sort_order' => 3,
-            );
+            ];
         }
     }
 

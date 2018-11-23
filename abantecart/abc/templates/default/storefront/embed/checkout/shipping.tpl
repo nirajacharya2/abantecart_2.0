@@ -58,7 +58,7 @@ echo $head; ?>
 			  <tr>
 				<td style="width: 5%"><?php echo $quote['radio']; ?></td>
 				<td>
-				<label for="shipping_shipping_method<?php echo $quote['id']; ?>" title="<?php echo AHelperUtils::has_value($quote['description']) ? $quote['description'] : ''; ?>" style="cursor: pointer;">
+				<label for="shipping_shipping_method<?php echo $quote['id']; ?>" title="<?php echo \H::has_value($quote['description']) ? $quote['description'] : ''; ?>" style="cursor: pointer;">
 				<?php $icon = $shipping_method['icon'];
 				if ( count ($icon) ) {  ?>
 				<?php if ( is_file(ABC::env('DIR_RESOURCES') . $icon['image']) ) { ?>

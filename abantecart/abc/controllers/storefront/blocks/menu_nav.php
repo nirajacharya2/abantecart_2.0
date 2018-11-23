@@ -1,18 +1,25 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: denis
- * Date: 01/11/2018
- * Time: 23:17
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2018 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
  */
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AMenu_Storefront;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 class ControllerBlocksMenuNav extends AController {
 
     private $menu_items;
@@ -21,8 +28,10 @@ class ControllerBlocksMenuNav extends AController {
     public function main() {
 
         //disable cache when login display price setting is off or enabled showing of prices with taxes
-        if( ($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
-            &&	$this->html_cache()	){
+        if( ($this->config->get('config_customer_price')
+                && !$this->config->get('config_tax'))
+                && $this->html_cache()
+        ){
             return null;
         }
 
@@ -30,7 +39,9 @@ class ControllerBlocksMenuNav extends AController {
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
         $instance_id = func_get_arg(0);
-        $cache_key = 'storefront_menu.store_'.(int)$this->config->get('config_store_id').'_lang_'.$this->config->get('storefront_language_id').'_instance_'.$instance_id;
+        $cache_key = 'storefront_menu.store_'.(int)$this->config->get('config_store_id')
+            .'_lang_'.$this->config->get('storefront_language_id')
+            .'_instance_'.$instance_id;
 
         $block_data = $this->getBlockContent($instance_id);
         $this->view->assign('heading_title', $block_data['title'] );
@@ -73,12 +84,12 @@ class ControllerBlocksMenuNav extends AController {
             $key = key($descriptions);
         }
 
-        $output = array(
+        $output = [
             'title' => $descriptions[$key]['title'],
             'content' => html_entity_decode($descriptions[$key]['content'], ENT_QUOTES, 'utf-8'),
             'block_wrapper' => $descriptions[$key]['block_wrapper'],
             'block_framed' => $descriptions[$key]['block_framed'],
-        );
+        ];
 
         return $output;
     }
@@ -98,7 +109,7 @@ class ControllerBlocksMenuNav extends AController {
             }else {
                 $href = $this->html->getSecureURL( $item ['item_url'] );
             }
-            $menu[] = array(
+            $menu[] = [
                 'id' => $item['item_id'],
                 'current' => $item['current'],
                 'icon' => $item['item_icon'],
@@ -106,7 +117,7 @@ class ControllerBlocksMenuNav extends AController {
                 'href' =>  $href,
                 'text' => $item['item_text'][$lang_id],
                 'children' => $this->_buildMenu( $item['item_id'] ),
-            );
+            ];
         }
         return $menu;
     }
