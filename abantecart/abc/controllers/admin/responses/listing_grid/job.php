@@ -23,7 +23,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\Registry;
-use abc\core\lib\AConnect;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
@@ -163,7 +162,7 @@ class ControllerResponsesListingGridJob extends AController
         $this->response->addJSONHeader();
         $job_id = (int)$this->request->post_or_get('job_id');
 
-        $job = $this->jm->getTaskById($job_id);
+        $job = $this->jm->getJobById($job_id);
 
         if (!$job_id || !$job) {
             $err = new AError('Task runtime error');
