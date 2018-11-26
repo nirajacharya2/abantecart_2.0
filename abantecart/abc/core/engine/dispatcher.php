@@ -21,14 +21,10 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
-
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class ADispatcher
@@ -67,7 +63,7 @@ final class ADispatcher
     /**
      * @var array
      */
-    protected $args = array();
+    protected $args = [];
 
     /**
      * @param string $rt
@@ -75,7 +71,7 @@ final class ADispatcher
      *
      * @throws \ReflectionException
      */
-    public function __construct($rt, $args = array())
+    public function __construct($rt, $args = [])
     {
 
         $this->registry = Registry::getInstance();
@@ -87,9 +83,11 @@ final class ADispatcher
         ADebug::checkpoint('ADispatch: '.$rt.' construct start');
         // We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
         if ( ! $this->processPath($rt)) {
-            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. Missing or incorrect controller route path. '
+            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. '
+                . 'Side: '.(ABC::env('IS_ADMIN') ? 'Admin' : 'StoreFront')
+                .' Missing or incorrect controller route path. '
                 .'Possibly, layout block is enabled for disabled or missing extension! '
-                .AHelperUtils::genExecTrace('full');
+                .H::genExecTrace('full');
             $warning = new AWarning($warning_txt);
             $warning->toLog()->toDebug();
         }
@@ -217,6 +215,7 @@ final class ADispatcher
      * @param string $route
      *
      * @return string
+     * @throws \ReflectionException
      */
     protected function dispatchPrePost($route)
     {
@@ -227,7 +226,7 @@ final class ADispatcher
             //reset to save controller output
             $this->response->setOutput('');
 
-            $dispatch_pre = new ADispatcher($route, array("instance_id" => ''));
+            $dispatch_pre = new ADispatcher($route, ["instance_id" => '']);
             $dispatch_pre->dispatch();
             $result = $this->response->getOutput();
 
@@ -244,6 +243,7 @@ final class ADispatcher
      * @param string $controller
      *
      * @return string
+     * @throws \ReflectionException
      */
     public function dispatchGetOutput($controller = '')
     {
@@ -259,6 +259,7 @@ final class ADispatcher
      * @param AController|string $parent_controller
      *
      * @return null|string
+     * @throws \ReflectionException
      */
     public function dispatch($parent_controller = '')
     {
@@ -267,7 +268,7 @@ final class ADispatcher
         //Process the controller, layout and children
 
         //check if we have missing class or everything
-        if (empty($this->class) && AHelperUtils::has_value($this->file)) {
+        if (empty($this->class) && H::has_value($this->file)) {
             #Build back trace of calling functions to provide more details
             $backtrace = debug_backtrace();
             $function_stack = '';
@@ -313,11 +314,11 @@ final class ADispatcher
             $error = new AError('Error: controller class not exist '.$this->class.'!', AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
         }
-        if (is_callable(array($controller, $this->method))) {
+        if (is_callable([$controller, $this->method])) {
             /**
              * @var $dispatch ADispatcher
              */
-            $dispatch = call_user_func_array(array($controller, $this->method), $this->args);
+            $dispatch = call_user_func_array([$controller, $this->method], $this->args);
             //Check if return is a dispatch and need to call new page
             if ($dispatch && is_object($dispatch)) {
                 if ($this->args["instance_id"] == 0) {
@@ -347,9 +348,12 @@ final class ADispatcher
             //Process each child controller
             foreach ($children as $child) {
                 //Add highest Debug level here with backtrace to review this
-                ADebug::checkpoint($child['controller'].' ( child of '.$this->controller.', instance_id: '.$child['instance_id'].' ) dispatch START');
+                ADebug::checkpoint(
+                    $child['controller']
+                    .' ( child of '.$this->controller.', instance_id: '.$child['instance_id']
+                    .' ) dispatch START');
                 //Process each child and create dispatch to call recursive
-                $dispatch = new ADispatcher($child['controller'], array("instance_id" => $child['instance_id']));
+                $dispatch = new ADispatcher($child['controller'], ["instance_id" => $child['instance_id']]);
                 $dispatch->dispatch($controller);
                 // Append output of child controller to current controller
                 if ($child['position']) { // made for recognizing few custom_blocks in the same placeholder
@@ -375,7 +379,10 @@ final class ADispatcher
             unset($controller);
             unset($dispatch);
         } else {
-            $err = new AError('Error: controller method not exist '.$this->class.'::'.$this->method.'!', AC_ERR_CLASS_METHOD_NOT_EXIST);
+            $err = new AError(
+                'Error: controller method not exist '.$this->class.'::'.$this->method.'!',
+                AC_ERR_CLASS_METHOD_NOT_EXIST
+            );
             $err->toLog()->toDebug();
         }
         ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch END');
