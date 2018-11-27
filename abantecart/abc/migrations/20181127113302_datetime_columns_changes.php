@@ -35,7 +35,22 @@ class DatetimeColumnsChanges extends AbstractMigration
         }
 
         $update = "ALTER TABLE ".$prefix."ant_messages
-                   MODIFY COLUMN `viewed_date` timestamp NULL";
+                   MODIFY COLUMN `viewed_date` timestamp NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_discounts`
+                   MODIFY COLUMN `date_start` date NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_discounts`
+                   MODIFY COLUMN `date_end` date NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_specials`
+                   MODIFY COLUMN `date_start` date NULL;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."product_specials`
+                   MODIFY COLUMN `date_end` date NULL;";
         $this->execute($update);
 
     }

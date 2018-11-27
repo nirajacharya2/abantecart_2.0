@@ -957,3 +957,8 @@ ALTER TABLE `ac_zones_to_locations`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_ant_messages` MODIFY COLUMN `viewed_date` timestamp NULL;
+
+ALTER TABLE `ac_product_discounts` MODIFY COLUMN `date_start` date NULL;
+ALTER TABLE `ac_product_discounts` MODIFY COLUMN `date_end` date NULL;
+ALTER TABLE `ac_product_specials` MODIFY COLUMN `date_start` date NULL;
+ALTER TABLE `ac_product_specials` MODIFY COLUMN `date_end` date NULL;
