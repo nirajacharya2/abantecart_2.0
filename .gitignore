@@ -17,8 +17,12 @@
 
 /abantecart/abc/config/default/config.php
 /abantecart/abc/config/enabled.config.php
+/abantecart/abc/config/migration.config.php
+/abantecart/abc/config/phpunit_default.xml
 /abantecart/public/images/thumbnails/*
 /abantecart/public/templates/default/admin/*
 /abantecart/public/templates/default/storefront/*
 /abantecart/abc/vendor/*
+/abantecart/public/vendor/*
+/abantecart/public/extensions/*
 /abantecart/abc/composer.lock
