@@ -10579,7 +10579,7 @@ VALUES
 (387,	14,	3,	null,	null,	30,	1,	NOW(),	NOW()),
 (384,	14,	6,	null,	null,	60,	0,	NOW(),	NOW()),
 (383,	14,	7,	null,	null,	70,	1,	NOW(),	NOW()),
-(391,	14,	1,	null,,	null,	10,	1,	NOW(),	NOW()),
+(391,	14,	1,	null,	null,	10,	1,	NOW(),	NOW()),
 (392,	14,	8,	null,	null,	80,	1,	NOW(),	NOW()),
 (385,	14,	5,	null,	null,	50,	1,	NOW(),	NOW());
 
