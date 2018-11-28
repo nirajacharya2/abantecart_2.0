@@ -463,8 +463,8 @@ CREATE TABLE `ac_jobs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customers`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
+  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
+  CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;
 
 ALTER TABLE `ac_users`
   CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -962,3 +962,52 @@ ALTER TABLE `ac_product_discounts` MODIFY COLUMN `date_start` date NULL;
 ALTER TABLE `ac_product_discounts` MODIFY COLUMN `date_end` date NULL;
 ALTER TABLE `ac_product_specials` MODIFY COLUMN `date_start` date NULL;
 ALTER TABLE `ac_product_specials` MODIFY COLUMN `date_end` date NULL;
+
+ALTER TABLE `ac_customers`
+ADD FOREIGN KEY (`customer_group_id`) REFERENCES `ac_customer_groups`(`customer_group_id_id`)
+ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_pages`
+MODIFY COLUMN `parent_page_id` INT(10) NULL DEFAULT NULL;
+UPDATE `ac_pages` SET `parent_page_id` = NULL WHERE `parent_page_id` = '0';
+ALTER TABLE `ac_pages` ADD CONSTRAINT `ac_pages_parent_fk` FOREIGN KEY (`parent_page_id`) REFERENCES `ac_pages` (`page_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE `ac_block_layouts`
+CHANGE COLUMN `parent_instance_id` `parent_instance_id` INT(10) NULL DEFAULT NULL,
+CHANGE COLUMN `custom_block_id` `custom_block_id` INT(10) NULL DEFAULT NULL;
+
+UPDATE `ac_block_layouts` SET `parent_instance_id` = NULL WHERE `parent_instance_id` = '0';
+UPDATE `ac_block_layouts` SET `custom_block_id` = NULL WHERE `custom_block_id` = '0';
+
+#TODO: need to remove orphan block before FK creation!!!
+
+ALTER TABLE `ac_block_layouts`
+ADD CONSTRAINT `ac_block_layouts_parent_fk`
+	FOREIGN KEY (`parent_instance_id`)
+	REFERENCES `ac_block_layouts` (`instance_id`)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_block_layouts_cb_fk`
+	FOREIGN KEY (`custom_block_id`)
+	REFERENCES `ac_custom_blocks` (`custom_block_id`)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_downloads`
+CHANGE COLUMN `activate_order_status_id` `activate_order_status_id` INT(11) NULL DEFAULT NULL;
+
+ALTER TABLE `ac_downloads`
+ADD CONSTRAINT `ac_downloads_order_status_fk`
+  FOREIGN KEY (`activate_order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_option_value_descriptions`
+ADD CONSTRAINT `cba_product_option_value_descriptions_ibfk_3`
+  FOREIGN KEY (`product_option_value_id`)
+  REFERENCES `ac_product_option_values` (`product_option_value_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;

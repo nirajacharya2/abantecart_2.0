@@ -17,6 +17,7 @@
 
 /abantecart/abc/config/default/config.php
 /abantecart/abc/config/enabled.config.php
+/abantecart/abc/config/enabled.config.php.bkp
 /abantecart/abc/config/migration.config.php
 /abantecart/abc/config/phpunit_default.xml
 /abantecart/public/images/thumbnails/*

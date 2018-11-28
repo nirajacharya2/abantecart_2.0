@@ -1,6 +1,7 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET foreign_key_checks = 0;
 
+DROP TABLE IF EXISTS `abc_migration_log`;
 DROP TABLE IF EXISTS `ac_encryption_keys` CASCADE;
 DROP TABLE IF EXISTS `ac_ant_messages` CASCADE;
 DROP TABLE IF EXISTS `ac_store_descriptions` CASCADE;
@@ -203,7 +204,7 @@ CREATE TABLE `ac_customers` (
   `address_id` int(11) NOT NULL DEFAULT '0', -- default customer's address
   `status` int(1) NOT NULL,
   `approved` int(1) NOT NULL DEFAULT '0',
-  `customer_group_id` int(11) NOT NULL,
+  `customer_group_id` int(11) NULL,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '0',
   `data` text DEFAULT null,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -8893,7 +8894,7 @@ CREATE TABLE `ac_downloads` (
   `expire_days` int(11) DEFAULT NULL,  -- default to NULL -> No expiration
   `sort_order` int(11) NOT NULL,
   `activate` varchar(64) NOT NULL,
-  `activate_order_status_id` int(11) NOT NULL DEFAULT '0',
+  `activate_order_status_id` int(11) NULL DEFAULT NULL,
   `shared` int(1) NOT NULL DEFAULT '0', -- if used by other products set to 1
   `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -10091,32 +10092,33 @@ INSERT INTO `ac_weight_class_descriptions` (`weight_class_id`, `language_id`, `t
 --
 
 CREATE TABLE `ac_pages` (
-  `page_id` int(10) NOT NULL auto_increment,
-  `parent_page_id` int(10) NOT NULL DEFAULT '0',
+  `page_id` int(10) NOT NULL AUTO_INCREMENT,
+  `parent_page_id` int(10) DEFAULT NULL,
   `controller` varchar(100) NOT NULL,
-  `key_param` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
-  `key_value` varchar(40) NOT NULL default '', -- Example product_id=10 identifies uniqe product page
+  `key_param` varchar(40) NOT NULL DEFAULT '',
+  `key_value` varchar(40) NOT NULL DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`page_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE UNIQUE INDEX `ac_pages_idx`
-ON `ac_pages` ( `page_id`, `controller`, `key_param`, `key_value` );
+  PRIMARY KEY (`page_id`),
+  UNIQUE KEY `ac_pages_idx` (`page_id`,`controller`,`key_param`,`key_value`),
+  KEY `ac_pages_parent_id_idx` (`parent_page_id`),
+  CONSTRAINT `ac_pages_parent_fk` FOREIGN KEY (`parent_page_id`) REFERENCES `ac_pages` (`page_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 --
 -- Dumping data for table `pages`
 --
 
 INSERT INTO `ac_pages` (`page_id`, `parent_page_id`, `controller`, `key_param`, `key_value`, `date_added`) VALUES
-(1, 0, 'generic', '', '', now() ),
-(2, 0, 'pages/index/home', '', '', now() ),
-(3, 0, 'pages/checkout', '', '', now() ),
-(4, 0, 'pages/account/login', '', '', now() ),
-(5, 0, 'pages/product/product', '', '', now()),
-(10, 0, 'pages/index/maintenance', '', '', now() ),
-(11, 0, 'pages/account', '', '', now() ),
-(12, 0, 'pages/checkout/cart', '', '', now() ),
-(13, 0, 'pages/product/category', '', '', now() );
+(1,  NULL, 'generic', '', '', now() ),
+(2,  NULL, 'pages/index/home', '', '', now() ),
+(3,  NULL, 'pages/checkout', '', '', now() ),
+(4,  NULL, 'pages/account/login', '', '', now() ),
+(5,  NULL, 'pages/product/product', '', '', now()),
+(10, NULL, 'pages/index/maintenance', '', '', now() ),
+(11, NULL, 'pages/account', '', '', now() ),
+(12, NULL, 'pages/checkout/cart', '', '', now() ),
+(13, NULL, 'pages/product/category', '', '', now() );
 
 --
 -- DDL for table `page_descriptions`
@@ -10461,241 +10463,244 @@ INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
 --
 
 CREATE TABLE `ac_block_layouts` (
-  `instance_id` int(10) NOT NULL auto_increment,
-  `layout_id` int(10) NOT NULL default '0',
-  `block_id` int(10) NOT NULL default '0',
-  `custom_block_id` int(10) NOT NULL default '0',
-  `parent_instance_id` int(10) NOT NULL default '0', -- 0 for main level block
-  `position` smallint(5) NOT NULL default '0',
-  `status` smallint(1) NOT NULL default '0',
+  `instance_id` int(10) NOT NULL AUTO_INCREMENT,
+  `layout_id` int(10) NOT NULL DEFAULT '0',
+  `block_id` int(10) NOT NULL DEFAULT '0',
+  `custom_block_id` int(10) NULL DEFAULT NULL,
+  `parent_instance_id` int(10) DEFAULT NULL,
+  `position` smallint(5) NOT NULL DEFAULT '0',
+  `status` smallint(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`instance_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE UNIQUE INDEX `ac_block_layouts_idx`
-ON `ac_block_layouts` ( `instance_id`, `layout_id`, `block_id`, `parent_instance_id`,`custom_block_id` );
+  PRIMARY KEY (`instance_id`),
+  UNIQUE KEY `ac_block_layouts_idx` (`instance_id`,`layout_id`,`block_id`,`parent_instance_id`,`custom_block_id`),
+  KEY `ac_block_layouts_parent_fk_idx` (`parent_instance_id`),
+  CONSTRAINT `ac_block_layouts_parent_fk` FOREIGN KEY (`parent_instance_id`) REFERENCES `ac_block_layouts` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ac_block_layouts_cb_fk` FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks` (`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
 
 -- DEFAULT template's layouts
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(330,	11,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(331,	11,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(332,	11,	3,	0,	0,		30,	1,	NOW(),	NOW()),
-(333,	11,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(334,	11,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(335,	11,	6,	0,	0,		60,	1,	NOW(),	NOW()),
-(336,	11,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(337,	11,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(1839,	11,	25,	0,	337,	40,	1,	NOW(),	NOW()),
-(1840,	11,	11,	0,	337,	50,	1,	NOW(),	NOW()),
-(1835,	11,	9,	0,	331,	10,	1,	NOW(),	NOW()),
-(1842,	11,	24,	0,	337,	70,	1,	NOW(),	NOW()),
-(1843,	11,	21,	0,	337,	80,	1,	NOW(),	NOW()),
-(1844,	11,	31,	0,	330,	20,	1,	NOW(),	NOW()),
-(1829,	11,	27,	0,	330,	30,	1,	NOW(),	NOW()),
-(1830,	11,	26,	0,	330,	40,	1,	NOW(),	NOW()),
-(1831,	11,	14,	0,	330,	60,	1,	NOW(),	NOW()),
-(1832,	11,	13,	0,	330,	50,	1,	NOW(),	NOW()),
-(1833,	11,	15,	0,	330,	70,	1,	NOW(),	NOW()),
-(1950,	11,	28,	0,	331,	20,	1,	NOW(),	NOW());
+(330,	11,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(331,	11,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(332,	11,	3,	null,	null,	30,	1,	NOW(),	NOW()),
+(333,	11,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(334,	11,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(335,	11,	6,	null,	null,	60,	1,	NOW(),	NOW()),
+(336,	11,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(337,	11,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(1839,	11,	25,	null,	337,	40,	1,	NOW(),	NOW()),
+(1840,	11,	11,	null,	337,	50,	1,	NOW(),	NOW()),
+(1835,	11,	9,	null,	331,	10,	1,	NOW(),	NOW()),
+(1842,	11,	24,	null,	337,	70,	1,	NOW(),	NOW()),
+(1843,	11,	21,	null,	337,	80,	1,	NOW(),	NOW()),
+(1844,	11,	31,	null,	330,	20,	1,	NOW(),	NOW()),
+(1829,	11,	27,	null,	330,	30,	1,	NOW(),	NOW()),
+(1830,	11,	26,	null,	330,	40,	1,	NOW(),	NOW()),
+(1831,	11,	14,	null,	330,	60,	1,	NOW(),	NOW()),
+(1832,	11,	13,	null,	330,	50,	1,	NOW(),	NOW()),
+(1833,	11,	15,	null,	330,	70,	1,	NOW(),	NOW()),
+(1950,	11,	28,	null,	331,	20,	1,	NOW(),	NOW());
 
 -- Home page
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(1782,	12,	21,	0,	356,	80,	1,	NOW(),	NOW()),
-(354,	12,	6,	0,	0,		60,	0,	NOW(),	NOW()),
-(352,	12,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(351,	12,	3,	0,	0,		30,	0,	NOW(),	NOW()),
-(350,	12,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(353,	12,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(1781,	12,	24,	0,	356,	70,	1,	NOW(),	NOW()),
-(355,	12,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(356,	12,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(349,	12,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(1763,	12,	14,	0,	349,	60,	1,	NOW(),	NOW()),
-(1764,	12,	15,	0,	349,	70,	1,	NOW(),	NOW()),
-(1761,	12,	26,	0,	349,	40,	1,	NOW(),	NOW()),
-(1762,	12,	13,	0,	349,	50,	1,	NOW(),	NOW()),
-(1770,	12,	12,	0,	353,	20,	1,	NOW(),	NOW()),
-(1771,	12,	18,	0,	353,	30,	1,	NOW(),	NOW()),
-(1772,	12,	22,	0,	353,	40,	1,	NOW(),	NOW()),
-(1766,	12,	9,	0,	350,	10,	1,	NOW(),	NOW()),
-(1779,	12,	11,	0,	356,	50,	1,	NOW(),	NOW()),
-(1769,	12,	19,	0,	353,	10,	1,	NOW(),	NOW()),
-(1778,	12,	25,	0,	356,	40,	1,	NOW(),	NOW()),
-(1845,	12,	31,	0,	349,	20,	1,	NOW(),	NOW()),
-(1760,	12,	27,	0,	349,	30,	1,	NOW(),	NOW());
+(1782,	12,	21,	null,	356,	80,	1,	NOW(),	NOW()),
+(354,	12,	6,	null,	null,	60,	0,	NOW(),	NOW()),
+(352,	12,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(351,	12,	3,	null,	null,	30,	0,	NOW(),	NOW()),
+(350,	12,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(353,	12,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(1781,	12,	24,	null,	356,	70,	1,	NOW(),	NOW()),
+(355,	12,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(356,	12,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(349,	12,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(1763,	12,	14,	null,	349,	60,	1,	NOW(),	NOW()),
+(1764,	12,	15,	null,	349,	70,	1,	NOW(),	NOW()),
+(1761,	12,	26,	null,	349,	40,	1,	NOW(),	NOW()),
+(1762,	12,	13,	null,	349,	50,	1,	NOW(),	NOW()),
+(1770,	12,	12,	null,	353,	20,	1,	NOW(),	NOW()),
+(1771,	12,	18,	null,	353,	30,	1,	NOW(),	NOW()),
+(1772,	12,	22,	null,	353,	40,	1,	NOW(),	NOW()),
+(1766,	12,	9,	null,	350,	10,	1,	NOW(),	NOW()),
+(1779,	12,	11,	null,	356,	50,	1,	NOW(),	NOW()),
+(1769,	12,	19,	null,	353,	10,	1,	NOW(),	NOW()),
+(1778,	12,	25,	null,	356,	40,	1,	NOW(),	NOW()),
+(1845,	12,	31,	null,	349,	20,	1,	NOW(),	NOW()),
+(1760,	12,	27,	null,	349,	30,	1,	NOW(),	NOW());
 
 -- Login page
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(1846,	13,	31,	0,	378,	20,	1,	NOW(),	NOW()),
-(1799,	13,	27,	0,	378,	30,	1,	NOW(),	NOW()),
-(1810,	13,	11,	0,	379,	50,	1,	NOW(),	NOW()),
-(1805,	13,	9,	0,	375,	10,	1,	NOW(),	NOW()),
-(1951,	13,	28,	0,	375,	20,	1,	NOW(),	NOW()),
-(1801,	13,	13,	0,	378,	50,	1,	NOW(),	NOW()),
-(1813,	13,	21,	0,	379,	80,	1,	NOW(),	NOW()),
-(1809,	13,	25,	0,	379,	40,	1,	NOW(),	NOW()),
-(1800,	13,	26,	0,	378,	40,	1,	NOW(),	NOW()),
-(1812,	13,	24,	0,	379,	70,	1,	NOW(),	NOW()),
-(1802,	13,	14,	0,	378,	60,	1,	NOW(),	NOW()),
-(1803,	13,	15,	0,	378,	70,	1,	NOW(),	NOW()),
-(379,	13,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(378,	13,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(370,	13,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(371,	13,	6,	0,	0,		60,	0,	NOW(),	NOW()),
-(372,	13,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(373,	13,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(374,	13,	3,	0,	0,		30,	0,	NOW(),	NOW()),
-(375,	13,	2,	0,	0,		20,	1,	NOW(),	NOW());
+(1846,	13,	31,	null,	378,	20,	1,	NOW(),	NOW()),
+(1799,	13,	27,	null,	378,	30,	1,	NOW(),	NOW()),
+(1810,	13,	11,	null,	379,	50,	1,	NOW(),	NOW()),
+(1805,	13,	9,	null,	375,	10,	1,	NOW(),	NOW()),
+(1951,	13,	28,	null,	375,	20,	1,	NOW(),	NOW()),
+(1801,	13,	13,	null,	378,	50,	1,	NOW(),	NOW()),
+(1813,	13,	21,	null,	379,	80,	1,	NOW(),	NOW()),
+(1809,	13,	25,	null,	379,	40,	1,	NOW(),	NOW()),
+(1800,	13,	26,	null,	378,	40,	1,	NOW(),	NOW()),
+(1812,	13,	24,	null,	379,	70,	1,	NOW(),	NOW()),
+(1802,	13,	14,	null,	378,	60,	1,	NOW(),	NOW()),
+(1803,	13,	15,	null,	378,	70,	1,	NOW(),	NOW()),
+(379,	13,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(378,	13,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(370,	13,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(371,	13,	6,	null,	null,   60,	0,	NOW(),	NOW()),
+(372,	13,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(373,	13,	4,	null,	null,   40,	1,	NOW(),	NOW()),
+(374,	13,	3,	null,	null,	30,	0,	NOW(),	NOW()),
+(375,	13,	2,	null,	null,	20,	1,	NOW(),	NOW());
 
 -- Default Product page
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(1795,	14,	11,	0,	392,	50,	1,	NOW(),	NOW()),
-(1794,	14,	25,	0,	392,	40,	1,	NOW(),	NOW()),
-(1790,	14,	12,	0,	387,	10,	1,	NOW(),	NOW()),
-(1847,	14,	31,	0,	391,	20,	1,	NOW(),	NOW()),
-(1783,	14,	27,	0,	391,	30,	1,	NOW(),	NOW()),
-(1784,	14,	26,	0,	391,	40,	1,	NOW(),	NOW()),
-(1785,	14,	13,	0,	391,	50,	1,	NOW(),	NOW()),
-(1786,	14,	14,	0,	391,	60,	1,	NOW(),	NOW()),
-(1789,	14,	9,	0,	388,	10,	1,	NOW(),	NOW()),
-(1952,	14,	28,	0,	388,	20,	1,	NOW(),	NOW()),
-(1787,	14,	15,	0,	391,	70,	1,	NOW(),	NOW()),
-(1797,	14,	24,	0,	392,	70,	1,	NOW(),	NOW()),
-(1798,	14,	21,	0,	392,	80,	1,	NOW(),	NOW()),
-(388,	14,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(386,	14,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(387,	14,	3,	0,	0,		30,	1,	NOW(),	NOW()),
-(384,	14,	6,	0,	0,		60,	0,	NOW(),	NOW()),
-(383,	14,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(391,	14,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(392,	14,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(385,	14,	5,	0,	0,		50,	1,	NOW(),	NOW());
+(1795,	14,	11,	null,	392,	50,	1,	NOW(),	NOW()),
+(1794,	14,	25,	null,	392,	40,	1,	NOW(),	NOW()),
+(1790,	14,	12,	null,	387,	10,	1,	NOW(),	NOW()),
+(1847,	14,	31,	null,	391,	20,	1,	NOW(),	NOW()),
+(1783,	14,	27,	null,	391,	30,	1,	NOW(),	NOW()),
+(1784,	14,	26,	null,	391,	40,	1,	NOW(),	NOW()),
+(1785,	14,	13,	null,	391,	50,	1,	NOW(),	NOW()),
+(1786,	14,	14,	null,	391,	60,	1,	NOW(),	NOW()),
+(1789,	14,	9,	null,	388,	10,	1,	NOW(),	NOW()),
+(1952,	14,	28,	null,	388,	20,	1,	NOW(),	NOW()),
+(1787,	14,	15,	null,	391,	70,	1,	NOW(),	NOW()),
+(1797,	14,	24,	null,	392,	70,	1,	NOW(),	NOW()),
+(1798,	14,	21,	null,	392,	80,	1,	NOW(),	NOW()),
+(388,	14,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(386,	14,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(387,	14,	3,	null,	null,	30,	1,	NOW(),	NOW()),
+(384,	14,	6,	null,	null,	60,	0,	NOW(),	NOW()),
+(383,	14,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(391,	14,	1,	null,,	null,	10,	1,	NOW(),	NOW()),
+(392,	14,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(385,	14,	5,	null,	null,	50,	1,	NOW(),	NOW());
 
 -- Checkout pages
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(1827,	15,	24,	0,	403,	70,	1,	NOW(),	NOW()),
-(1818,	15,	15,	0,	395,	70,	1,	NOW(),	NOW()),
-(1817,	15,	14,	0,	395,	60,	1,	NOW(),	NOW()),
-(1816,	15,	13,	0,	395,	50,	1,	NOW(),	NOW()),
-(1828,	15,	21,	0,	403,	80,	1,	NOW(),	NOW()),
-(1815,	15,	26,	0,	395,	40,	1,	NOW(),	NOW()),
-(1848,	15,	31,	0,	395,	20,	1,	NOW(),	NOW()),
-(1814,	15,	27,	0,	395,	30,	1,	NOW(),	NOW()),
-(1820,	15,	9,	0,	399,	10,	1,	NOW(),	NOW()),
-(1953,	15,	28,	0,	399,	20,	1,	NOW(),	NOW()),
-(1825,	15,	11,	0,	403,	50,	1,	NOW(),	NOW()),
-(402,	15,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(401,	15,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(400,	15,	3,	0,	0,		30,	0,	NOW(),	NOW()),
-(399,	15,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(398,	15,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(397,	15,	6,	0,	0,		60,	1,	NOW(),	NOW()),
-(396,	15,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(395,	15,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(1824,	15,	25,	0,	403,	40,	1,	NOW(),	NOW()),
-(2021,	15,	16,	0,	397,	10,	1,	NOW(),	NOW()),
-(403,	15,	8,	0,	0,		80,	1,	NOW(),	NOW());
+(1827,	15,	24,	null,	403,	70,	1,	NOW(),	NOW()),
+(1818,	15,	15,	null,	395,	70,	1,	NOW(),	NOW()),
+(1817,	15,	14,	null,	395,	60,	1,	NOW(),	NOW()),
+(1816,	15,	13,	null,	395,	50,	1,	NOW(),	NOW()),
+(1828,	15,	21,	null,	403,	80,	1,	NOW(),	NOW()),
+(1815,	15,	26,	null,	395,	40,	1,	NOW(),	NOW()),
+(1848,	15,	31,	null,	395,	20,	1,	NOW(),	NOW()),
+(1814,	15,	27,	null,	395,	30,	1,	NOW(),	NOW()),
+(1820,	15,	9,	null,	399,	10,	1,	NOW(),	NOW()),
+(1953,	15,	28,	null,	399,	20,	1,	NOW(),	NOW()),
+(1825,	15,	11,	null,	403,	50,	1,	NOW(),	NOW()),
+(402,	15,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(401,	15,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(400,	15,	3,	null,	null,	30,	0,	NOW(),	NOW()),
+(399,	15,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(398,	15,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(397,	15,	6,	null,	null,	60,	1,	NOW(),	NOW()),
+(396,	15,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(395,	15,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(1824,	15,	25,	null,	403,	40,	1,	NOW(),	NOW()),
+(2021,	15,	16,	null,	397,	10,	1,	NOW(),	NOW()),
+(403,	15,	8,	null,	null,	80,	1,	NOW(),	NOW());
 
 -- Maintenance Page
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(942,	17,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(943,	17,	6,	0,	0,		60,	1,	NOW(),	NOW()),
-(944,	17,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(945,	17,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(940,	17,	3,	0,	0,		30,	1,	NOW(),	NOW()),
-(939,	17,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(938,	17,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(941,	17,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(1954,	17,	28,	0,	939,	20,	1,	NOW(),	NOW());
+(942,	17,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(943,	17,	6,	null,	null,	60,	1,	NOW(),	NOW()),
+(944,	17,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(945,	17,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(940,	17,	3,	null,	null,	30,	1,	NOW(),	NOW()),
+(939,	17,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(938,	17,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(941,	17,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(1954,	17,	28,	null,	939,	20,	1,	NOW(),	NOW());
 
 -- Customer Account Pages
 INSERT INTO `ac_block_layouts` (`instance_id`,	 `layout_id`,	 `block_id`,	 `custom_block_id`,	 `parent_instance_id`,	 `position`,	 `status`,	 `date_added`,	`date_modified`) VALUES
-(1900,	18,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(1901,	18,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(1902,	18,	3,	0,	0,		30,	0,	NOW(),	NOW()),
-(1903,	18,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(1904,	18,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(1905,	18,	6,	0,	0,		60,	1,	NOW(),	NOW()),
-(1906,	18,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(1907,	18,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(1908,	18,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(1920,	18,	24,	0,	1908,	70,	1,	NOW(),	NOW()),
-(1921,	18,	15,	0,	1907,	70,	1,	NOW(),	NOW()),
-(1922,	18,	14,	0,	1907,	60,	1,	NOW(),	NOW()),
-(1923,	18,	13,	0,	1907,	50,	1,	NOW(),	NOW()),
-(1924,	18,	21,	0,	1908,	80,	1,	NOW(),	NOW()),
-(1925,	18,	26,	0,	1907,	40,	1,	NOW(),	NOW()),
-(1849,	18,	31,	0,	1907,	20,	1,	NOW(),	NOW()),
-(1926,	18,	27,	0,	1907,	30,	1,	NOW(),	NOW()),
-(1927,	18,	9,	0,	1903,	10,	1,	NOW(),	NOW()),
-(1955,	18,	28,	0,	1903,	20,	1,	NOW(),	NOW()),
-(1930,	18,	11,	0,	1908,	50,	1,	NOW(),	NOW()),
-(1932,	18,	25,	0,	1908,	40,	1,	NOW(),	NOW()),
-(1935,	18,	29,	0,	1905,	10,	1,	NOW(),	NOW());
+(1900,	18,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(1901,	18,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(1902,	18,	3,	null,	null,	30,	0,	NOW(),	NOW()),
+(1903,	18,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(1904,	18,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(1905,	18,	6,	null,	null,	60,	1,	NOW(),	NOW()),
+(1906,	18,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(1907,	18,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(1908,	18,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(1920,	18,	24,	null,	1908,	70,	1,	NOW(),	NOW()),
+(1921,	18,	15,	null,	1907,	70,	1,	NOW(),	NOW()),
+(1922,	18,	14,	null,	1907,	60,	1,	NOW(),	NOW()),
+(1923,	18,	13,	null,	1907,	50,	1,	NOW(),	NOW()),
+(1924,	18,	21,	null,	1908,	80,	1,	NOW(),	NOW()),
+(1925,	18,	26,	null,	1907,	40,	1,	NOW(),	NOW()),
+(1849,	18,	31,	null,	1907,	20,	1,	NOW(),	NOW()),
+(1926,	18,	27,	null,	1907,	30,	1,	NOW(),	NOW()),
+(1927,	18,	9,	null,	1903,	10,	1,	NOW(),	NOW()),
+(1955,	18,	28,	null,	1903,	20,	1,	NOW(),	NOW()),
+(1930,	18,	11,	null,	1908,	50,	1,	NOW(),	NOW()),
+(1932,	18,	25,	null,	1908,	40,	1,	NOW(),	NOW()),
+(1935,	18,	29,	null,	1905,	10,	1,	NOW(),	NOW());
 
 -- Cart page
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(2000,	19,	24,	0,	2019,	70, 1, 	NOW(), 	NOW()),
-(2001,	19,	15,	0,	2017,	70, 1, 	NOW(), 	NOW()),
-(2002,	19,	14,	0,	2017,	60, 1, 	NOW(), 	NOW()),
-(2003,	19,	13,	0,	2017,	50, 1, 	NOW(), 	NOW()),
-(2004,	19,	21,	0,	2019,	80, 1, 	NOW(), 	NOW()),
-(2005,	19,	26,	0,	2017,	40, 1, 	NOW(), 	NOW()),
-(2006,	19,	31,	0,	2017,	20, 1, 	NOW(), 	NOW()),
-(2007,	19,	27,	0,	2017,	30, 1, 	NOW(), 	NOW()),
-(2008,	19,	9,	0,	2013,	10, 1, 	NOW(), 	NOW()),
-(2009,	19,	11,	0,	2019,	50, 1, 	NOW(), 	NOW()),
-(2010,	19,	5,	0,	0,		50, 1, 	NOW(), 	NOW()),
-(2011,	19,	4,	0,	0,		40, 1, 	NOW(), 	NOW()),
-(2012,	19,	3,	0,	0,		30, 0, 	NOW(), 	NOW()),
-(2013,	19,	2,	0,	0,		20, 1, 	NOW(), 	NOW()),
-(2014,	19,	5,	0,	0,		50, 1, 	NOW(), 	NOW()),
-(2015,	19,	6,	0,	0,		60, 1, 	NOW(), 	NOW()),
-(2016,	19,	7,	0,	0,		70, 1, 	NOW(), 	NOW()),
-(2017,	19,	1,	0,	0,		10, 1, 	NOW(), 	NOW()),
-(2018,	19,	25,	0,	2019,	40, 1, 	NOW(), 	NOW()),
-(2019,	19,	8, 	0,	0,		80, 1, 	NOW(), 	NOW()),
-(2020,	19,	28,	0,	2013,	20,	1,	NOW(),	NOW());
+(2000,	19,	24,	null,	2019,	70, 1, 	NOW(), 	NOW()),
+(2001,	19,	15,	null,	2017,	70, 1, 	NOW(), 	NOW()),
+(2002,	19,	14,	null,	2017,	60, 1, 	NOW(), 	NOW()),
+(2003,	19,	13,	null,	2017,	50, 1, 	NOW(), 	NOW()),
+(2004,	19,	21,	null,	2019,	80, 1, 	NOW(), 	NOW()),
+(2005,	19,	26,	null,	2017,	40, 1, 	NOW(), 	NOW()),
+(2006,	19,	31,	null,	2017,	20, 1, 	NOW(), 	NOW()),
+(2007,	19,	27,	null,	2017,	30, 1, 	NOW(), 	NOW()),
+(2008,	19,	9,	null,	2013,	10, 1, 	NOW(), 	NOW()),
+(2009,	19,	11,	null,	2019,	50, 1, 	NOW(), 	NOW()),
+(2010,	19,	5,	null,	null,	50, 1, 	NOW(), 	NOW()),
+(2011,	19,	4,	null,	null,	40, 1, 	NOW(), 	NOW()),
+(2012,	19,	3,	null,	null,	30, 0, 	NOW(), 	NOW()),
+(2013,	19,	2,	null,	null,	20, 1, 	NOW(), 	NOW()),
+(2014,	19,	5,	null,	null,	50, 1, 	NOW(), 	NOW()),
+(2015,	19,	6,	null,	null,	60, 1, 	NOW(), 	NOW()),
+(2016,	19,	7,	null,	null,	70, 1, 	NOW(), 	NOW()),
+(2017,	19,	1,	null,	null,	10, 1, 	NOW(), 	NOW()),
+(2018,	19,	25,	null,	2019,	40, 1, 	NOW(), 	NOW()),
+(2019,	19,	8, 	null,	null,	80, 1, 	NOW(), 	NOW()),
+(2020,	19,	28,	null,	2013,	20,	1,	NOW(),	NOW());
 
 
 -- Product Listing Page template's layouts
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(2043,	20,	1,	0,	0,		10,	1,	NOW(),	NOW()),
-(2044,	20,	2,	0,	0,		20,	1,	NOW(),	NOW()),
-(2045,	20,	3,	0,	0,		30,	1,	NOW(),	NOW()),
-(2046,	20,	4,	0,	0,		40,	1,	NOW(),	NOW()),
-(2047,	20,	5,	0,	0,		50,	1,	NOW(),	NOW()),
-(2048,	20,	6,	0,	0,		60,	1,	NOW(),	NOW()),
-(2049,	20,	7,	0,	0,		70,	1,	NOW(),	NOW()),
-(2050,	20,	8,	0,	0,		80,	1,	NOW(),	NOW()),
-(2051,	20,	25,	0,	2050,	40,	1,	NOW(),	NOW()),
-(2052,	20,	11,	0,	2050,	50,	1,	NOW(),	NOW()),
-(2053,	20,	9,	0,	2044,	10,	1,	NOW(),	NOW()),
-(2054,	20,	24,	0,	2050,	70,	1,	NOW(),	NOW()),
-(2055,	20,	21,	0,	2050,	80,	1,	NOW(),	NOW()),
-(2056,	20,	31,	0,	2043,	20,	1,	NOW(),	NOW()),
-(2057,	20,	27,	0,	2043,	30,	1,	NOW(),	NOW()),
-(2058,	20,	26,	0,	2043,	40,	1,	NOW(),	NOW()),
-(2059,	20,	14,	0,	2043,	60,	1,	NOW(),	NOW()),
-(2060,	20,	13,	0,	2043,	50,	1,	NOW(),	NOW()),
-(2061,	20,	15,	0,	2043,	70,	1,	NOW(),	NOW()),
-(2062,	20,	28,	0,	2044,	20,	1,	NOW(),	NOW());
+(2043,	20,	1,	null,	null,	10,	1,	NOW(),	NOW()),
+(2044,	20,	2,	null,	null,	20,	1,	NOW(),	NOW()),
+(2045,	20,	3,	null,	null,	30,	1,	NOW(),	NOW()),
+(2046,	20,	4,	null,	null,	40,	1,	NOW(),	NOW()),
+(2047,	20,	5,	null,	null,	50,	1,	NOW(),	NOW()),
+(2048,	20,	6,	null,	null,	60,	1,	NOW(),	NOW()),
+(2049,	20,	7,	null,	null,	70,	1,	NOW(),	NOW()),
+(2050,	20,	8,	null,	null,	80,	1,	NOW(),	NOW()),
+(2051,	20,	25,	null,	2050,	40,	1,	NOW(),	NOW()),
+(2052,	20,	11,	null,	2050,	50,	1,	NOW(),	NOW()),
+(2053,	20,	9,	null,	2044,	10,	1,	NOW(),	NOW()),
+(2054,	20,	24,	null,	2050,	70,	1,	NOW(),	NOW()),
+(2055,	20,	21,	null,	2050,	80,	1,	NOW(),	NOW()),
+(2056,	20,	31,	null,	2043,	20,	1,	NOW(),	NOW()),
+(2057,	20,	27,	null,	2043,	30,	1,	NOW(),	NOW()),
+(2058,	20,	26,	null,	2043,	40,	1,	NOW(),	NOW()),
+(2059,	20,	14,	null,	2043,	60,	1,	NOW(),	NOW()),
+(2060,	20,	13,	null,	2043,	50,	1,	NOW(),	NOW()),
+(2061,	20,	15,	null,	2043,	70,	1,	NOW(),	NOW()),
+(2062,	20,	28,	null,	2044,	20,	1,	NOW(),	NOW());
 
 --
 -- DDL for table `forms`
@@ -12942,6 +12947,11 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
 ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE `ac_customers`
+    ADD FOREIGN KEY (`customer_group_id`) REFERENCES `ac_customer_groups`(`customer_group_id_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+
   DROP TABLE IF EXISTS `ac_jobs`;
   CREATE TABLE `ac_jobs` (
       `job_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -12994,3 +13004,18 @@ CREATE TABLE `ac_customer_communications` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+ALTER TABLE `ac_downloads`
+ADD CONSTRAINT `ac_downloads_order_status_fk`
+  FOREIGN KEY (`activate_order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+
+  ALTER TABLE `ac_product_option_value_descriptions`
+  ADD CONSTRAINT `cba_product_option_value_descriptions_ibfk_3`
+    FOREIGN KEY (`product_option_value_id`)
+    REFERENCES `ac_product_option_values` (`product_option_value_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;

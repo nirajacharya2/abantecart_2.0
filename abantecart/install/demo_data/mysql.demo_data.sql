@@ -192,14 +192,12 @@ VALUES
 INSERT INTO `ac_block_layouts`
 (`instance_id`,`layout_id`,`block_id`,`custom_block_id`,`parent_instance_id`,`position`,`status`,`date_added`,`date_modified`)
 VALUES
-(34,    11,  17, 1,  19,     10, 1,  NOW(),  NOW()),
 (1836,	11,	17,	13,	337,	10,	1,	NOW(),	NOW()),
 (1841,	11,	17,	15,	337,	60,	1,	NOW(),	NOW()),
 (1838,	11,	17,	16,	337,	30,	1,	NOW(),	NOW()),
 (1837,	11,	17,	14,	337,	20,	1,	NOW(),	NOW()),
 (1834,	11,	17,	15,	330,	80,	1,	NOW(),	NOW()),
 (1780,	12,	17,	15,	356,	60,	1,	NOW(),	NOW()),
-(366,	12,	17,	1,	19,		10,	1,	NOW(),	NOW()),
 (1774,	12,	20,	12,	353,	60,	1,	NOW(),	NOW()),
 (1775,	12,	17,	13,	356,	10,	1,	NOW(),	NOW()),
 (1765,	12,	17,	15,	349,	80,	1,	NOW(),	NOW()),
