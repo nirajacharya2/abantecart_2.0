@@ -12947,7 +12947,7 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_customers`
-    ADD FOREIGN KEY (`customer_group_id`) REFERENCES `ac_customer_groups`(`customer_group_id_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+    ADD FOREIGN KEY (`customer_group_id`) REFERENCES `ac_customer_groups`(`customer_group_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 
 
