@@ -10475,8 +10475,7 @@ CREATE TABLE `ac_block_layouts` (
   PRIMARY KEY (`instance_id`),
   UNIQUE KEY `ac_block_layouts_idx` (`instance_id`,`layout_id`,`block_id`,`parent_instance_id`,`custom_block_id`),
   KEY `ac_block_layouts_parent_fk_idx` (`parent_instance_id`),
-  CONSTRAINT `ac_block_layouts_parent_fk` FOREIGN KEY (`parent_instance_id`) REFERENCES `ac_block_layouts` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `ac_block_layouts_cb_fk` FOREIGN KEY (`custom_block_id`) REFERENCES `ac_custom_blocks` (`custom_block_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `ac_block_layouts_parent_fk` FOREIGN KEY (`parent_instance_id`) REFERENCES `ac_block_layouts` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 
@@ -13019,3 +13018,9 @@ ADD CONSTRAINT `ac_downloads_order_status_fk`
     REFERENCES `ac_product_option_values` (`product_option_value_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE;
+
+ALTER TABLE `ac_block_layouts`
+ADD    CONSTRAINT `ac_block_layouts_cb_fk`
+FOREIGN KEY (`custom_block_id`)
+REFERENCES `ac_custom_blocks` (`custom_block_id`)
+ON DELETE CASCADE ON UPDATE CASCADE;
