@@ -29,29 +29,59 @@ class DatetimeColumnsChanges extends AbstractMigration
                 ALTER TABLE {$row['TABLE_NAME']}
                 MODIFY COLUMN `".$row['COLUMN_NAME']."` timestamp NULL DEFAULT CURRENT_TIMESTAMP ";
             if($row['COLUMN_NAME'] == 'date_modified'){
-                $update .= " ON UPDATE CURRENT_TIMESTAMP";
+                $update .= " ON UPDATE CURRENT_TIMESTAMP;";
             }
+            $this->execute($update);
+            $update = "UPDATE ".$row['TABLE_NAME']." 
+            SET `".$row['COLUMN_NAME']."` = NULL 
+            WHERE `".$row['COLUMN_NAME']."` = '0000-00-00 00:00:00';";
             $this->execute($update);
         }
 
         $update = "ALTER TABLE ".$prefix."ant_messages
                    MODIFY COLUMN `viewed_date` timestamp NULL;";
         $this->execute($update);
+        $update = "UPDATE ".$prefix."ant_messages 
+                    SET `viewed_date` = NULL 
+                    WHERE `viewed_date` = '0000-00-00 00:00:00';";
+        $this->execute($update);
 
         $update = "ALTER TABLE `".$prefix."product_discounts`
                    MODIFY COLUMN `date_start` date NULL;";
+        $this->execute($update);
+        $update = "UPDATE ".$prefix."product_discounts 
+                    SET `date_start` = NULL 
+                    WHERE `date_start` = '0000-00-00';";
         $this->execute($update);
 
         $update = "ALTER TABLE `".$prefix."product_discounts`
                    MODIFY COLUMN `date_end` date NULL;";
         $this->execute($update);
+        $update = "UPDATE ".$prefix."product_discounts 
+                    SET `date_end` = NULL 
+                    WHERE `date_end` = '0000-00-00';";
+        $this->execute($update);
 
         $update = "ALTER TABLE `".$prefix."product_specials`
                    MODIFY COLUMN `date_start` date NULL;";
         $this->execute($update);
+        $update = "UPDATE ".$prefix."product_specials 
+                    SET `date_start` = NULL 
+                    WHERE `date_start` = '0000-00-00';";
+        $this->execute($update);
         $update = "ALTER TABLE `".$prefix."product_specials`
                    MODIFY COLUMN `date_end` date NULL;";
         $this->execute($update);
+        $update = "UPDATE ".$prefix."product_specials 
+                    SET `date_end` = NULL 
+                    WHERE `date_end` = '0000-00-00';";
+        $this->execute($update);
+
+        $update = "UPDATE ".$prefix."order_downloads 
+                    SET `expire_date` = NULL 
+                    WHERE `expire_date` = '0000-00-00';";
+        $this->execute($update);
+
         // other changes
         $update = "ALTER TABLE `".$prefix."customers`
                    CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;";
@@ -127,12 +157,282 @@ class DatetimeColumnsChanges extends AbstractMigration
         $this->execute($update);
 
         $update = "ALTER TABLE `".$prefix."product_option_value_descriptions` 
-        ADD CONSTRAINT `cba_product_option_value_descriptions_ibfk_3`
+        ADD CONSTRAINT `".$prefix."product_option_value_descriptions_ibfk_3`
           FOREIGN KEY (`product_option_value_id`)
           REFERENCES `".$prefix."product_option_values` (`product_option_value_id`)
           ON DELETE CASCADE
           ON UPDATE CASCADE;";
         $this->execute($update);
+
+
+        $update = "ALTER TABLE `".$prefix."customer_transactions`
+                   ADD INDEX `".$prefix."customer_transactions_ibfk_2_idx` (`order_id` ASC);
+                   ALTER TABLE `".$prefix."customer_transactions`
+                   ADD CONSTRAINT `".$prefix."customer_transactions_ibfk_2`
+                      FOREIGN KEY (`order_id`)
+                      REFERENCES `".$prefix."orders` (`order_id`)
+                      ON DELETE NO ACTION
+                      ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_value_descriptions` 
+        ADD CONSTRAINT `".$prefix."global_attributes_value_descriptions_ibfk_3`
+          FOREIGN KEY (`attribute_value_id`)
+          REFERENCES `".$prefix."global_attributes_values` (`attribute_value_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."field_values`
+        ADD INDEX `".$prefix."field_values_ibfk_2_idx` (`language_id` ASC);
+        ALTER TABLE `".$prefix."field_values`
+        ADD CONSTRAINT `".$prefix."field_values_ibfk_2`
+          FOREIGN KEY (`language_id`)
+          REFERENCES `".$prefix."languages` (`language_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_communications` 
+        CHANGE COLUMN `user_id` `user_id` INT(11) NULL DEFAULT NULL;
+        ALTER TABLE `".$prefix."customer_communications`
+        ADD CONSTRAINT `".$prefix."customer_communications_ibfk_2`
+         FOREIGN KEY (`user_id`)
+         REFERENCES `".$prefix."users` (`user_id`)
+         ON DELETE NO ACTION
+         ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."task_details` 
+        ADD CONSTRAINT `".$prefix."task_details_ibfk_1`
+          FOREIGN KEY (`task_id`)
+          REFERENCES `".$prefix."tasks` (`task_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
+        $update = "UPDATE `".$prefix."global_attributes` 
+                    SET `attribute_group_id` = NULL 
+                    WHERE `attribute_group_id` = '0';";
+        $this->execute($update);
+
+        $update ="ALTER TABLE `".$prefix."global_attributes` 
+        ADD INDEX `".$prefix."global_attributes_ibfk_1_idx` (`attribute_group_id` ASC);
+        ALTER TABLE `".$prefix."global_attributes` 
+        ADD CONSTRAINT `".$prefix."global_attributes_ibfk_1`
+          FOREIGN KEY (`attribute_group_id`)
+          REFERENCES `".$prefix."global_attributes_groups` (`attribute_group_id`)
+          ON DELETE SET NULL
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update ="ALTER TABLE `".$prefix."online_customers`
+          ADD INDEX `".$prefix."online_customers_fk_1_idx` (`customer_id` ASC);
+          ALTER TABLE `".$prefix."online_customers`
+          ADD CONSTRAINT `".$prefix."online_customers_fk_1`
+            FOREIGN KEY (`customer_id`)
+            REFERENCES `".$prefix."customers` (`customer_id`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes` 
+        CHANGE COLUMN `attribute_parent_id` `attribute_parent_id` INT(11) NULL DEFAULT NULL;";
+        $this->execute($update);
+
+        $update = "UPDATE `".$prefix."global_attributes` SET `attribute_parent_id` = NULL 
+        WHERE `attribute_parent_id` = '0';";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes` 
+        ADD CONSTRAINT `".$prefix."global_attributes_ibfk_2`
+          FOREIGN KEY (`attribute_parent_id`)
+          REFERENCES `".$prefix."global_attributes` (`attribute_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."task_steps` 
+        ADD CONSTRAINT `".$prefix."task_steps_fk`
+          FOREIGN KEY (`task_id`)
+          REFERENCES `".$prefix."tasks` (`task_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_type_descriptions` 
+        ADD INDEX `".$prefix."global_attributes_type_descriptions_fk_2_idx` (`language_id` ASC);
+        ALTER TABLE `".$prefix."global_attributes_type_descriptions` 
+        ADD CONSTRAINT `".$prefix."global_attributes_type_descriptions_fk_1`
+          FOREIGN KEY (`attribute_type_id`)
+          REFERENCES `".$prefix."global_attributes_types` (`attribute_type_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."global_attributes_type_descriptions_fk_2`
+          FOREIGN KEY (`language_id`)
+          REFERENCES `".$prefix."languages` (`language_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
+        $update = "ALTER TABLE `".$prefix."contents`
+                CHANGE COLUMN `parent_content_id` `parent_content_id` INT(11) NULL DEFAULT NULL ,
+                DROP PRIMARY KEY,
+                ADD PRIMARY KEY (`content_id`),
+                ADD INDEX `".$prefix."contents_fk_1_idx` (`parent_content_id` ASC);";
+        $this->execute($update);
+
+        $update = "UPDATE `".$prefix."contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = '0';";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."contents`
+                ADD CONSTRAINT `".$prefix."contents_fk_1`
+                  FOREIGN KEY (`parent_content_id`)
+                  REFERENCES `".$prefix."contents` (`content_id`)
+                  ON DELETE SET NULL
+                  ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_groups_descriptions` 
+        ADD INDEX `".$prefix."global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
+        ALTER TABLE `".$prefix."global_attributes_groups_descriptions` 
+        ADD CONSTRAINT `".$prefix."global_attributes_groups_descriptions_fk_1`
+          FOREIGN KEY (`attribute_group_id`)
+          REFERENCES `".$prefix."global_attributes_groups` (`attribute_group_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."global_attributes_groups_descriptions_fk_2`
+          FOREIGN KEY (`language_id`)
+          REFERENCES `".$prefix."languages` (`language_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
+        $update = " ALTER TABLE `".$prefix."product_discounts`
+                    ADD INDEX `".$prefix."product_discounts_ibfk_2_idx` (`customer_group_id` ASC);
+                    ALTER TABLE `".$prefix."product_discounts`
+                    ADD CONSTRAINT `".$prefix."product_discounts_ibfk_2`
+                    FOREIGN KEY (`customer_group_id`)
+                    REFERENCES `".$prefix."customer_groups` (`customer_group_id`)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_specials`
+        ADD INDEX `".$prefix."product_specials_ibfk_2_idx` (`customer_group_id` ASC);
+        ALTER TABLE `".$prefix."product_specials`
+        ADD CONSTRAINT `".$prefix."product_specials_ibfk_2`
+          FOREIGN KEY (`customer_group_id`)
+          REFERENCES `".$prefix."customer_groups` (`customer_group_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_downloads` 
+        ADD INDEX `".$prefix."order_downloads_ibfk_3_idx` (`download_id` ASC);
+        ALTER TABLE `".$prefix."order_downloads` 
+        ADD CONSTRAINT `".$prefix."order_downloads_ibfk_3`
+          FOREIGN KEY (`download_id`)
+          REFERENCES `".$prefix."downloads` (`download_id`)
+          ON DELETE NO ACTION
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."categories`
+        CHANGE COLUMN `parent_id` `parent_id` INT(11) NULL DEFAULT NULL ,
+        ADD INDEX `".$prefix."categories_fk_1_idx` (`parent_id` ASC);
+        UPDATE `".$prefix."categories` SET `parent_id` = NULL WHERE `parent_id` = '0';        
+        ALTER TABLE `".$prefix."categories`
+        ADD CONSTRAINT `".$prefix."categories_fk_1`
+        FOREIGN KEY (`parent_id`)
+        REFERENCES `".$prefix."categories` (`category_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        
+        $update = "ALTER TABLE `".$prefix."order_history`
+        ADD CONSTRAINT `".$prefix."order_history_ibfk_2`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."order_products`
+                ADD INDEX `".$prefix."order_products_ibfk_2_idx` (`product_id` ASC);
+                ALTER TABLE `".$prefix."order_products`
+                ADD CONSTRAINT `".$prefix."order_products_ibfk_2`
+                  FOREIGN KEY (`product_id`)
+                  REFERENCES `".$prefix."products` (`product_id`)
+                  ON DELETE NO ACTION
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."extension_dependencies`
+        ADD CONSTRAINT `".$prefix."extension_dependencies_fk_1`
+          FOREIGN KEY (`extension_id`)
+          REFERENCES `".$prefix."extensions` (`extension_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."products_related` 
+        ADD INDEX `".$prefix."products_related_ibfk_2_idx` (`related_id` ASC);
+        ALTER TABLE `".$prefix."products_related` 
+        ADD CONSTRAINT `".$prefix."products_related_ibfk_2`
+        FOREIGN KEY (`related_id`)
+        REFERENCES `".$prefix."products` (`product_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_downloads_history`
+        ADD CONSTRAINT `".$prefix."order_downloads_history_ibfk_4`
+          FOREIGN KEY (`download_id`)
+          REFERENCES `".$prefix."downloads` (`download_id`)
+          ON DELETE NO ACTION
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."length_class_descriptions` 
+        ADD CONSTRAINT `".$prefix."length_class_descriptions_ibfk_2`
+          FOREIGN KEY (`length_class_id`)
+          REFERENCES `".$prefix."length_classes` (`length_class_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."banner_stat`
+        ADD INDEX `".$prefix."banner_stat_ibfk_2_idx` (`store_id` ASC);
+        ALTER TABLE `".$prefix."banner_stat`
+        ADD CONSTRAINT `".$prefix."banner_stat_ibfk_2`
+          FOREIGN KEY (`store_id`)
+          REFERENCES `".$prefix."stores` (`store_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_options`
+        ADD INDEX `".$prefix."order_options_fk_2_idx` (`order_product_id` ASC);
+        ALTER TABLE `".$prefix."order_options`
+        ADD CONSTRAINT `".$prefix."order_options_fk_1`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."order_options_fk_2`
+          FOREIGN KEY (`order_product_id`)
+          REFERENCES `".$prefix."order_products` (`order_product_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
 
     }
 

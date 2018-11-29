@@ -63,6 +63,16 @@ $db_schema->create( 'banner_stat', function ( Blueprint $table ) {
     $table->text( 'meta' );
     $table->timestamp( 'time' )->default( $this->db->CurrentTimeStamp() );
     $table->index( [ 'banner_id', 'store_id', 'type', 'time' ], 'banner_stat_idx' );
+    /*TODO
+    ALTER TABLE `ac_banner_stat`
+    ADD INDEX `ac_banner_stat_ibfk_2_idx` (`store_id` ASC);
+    ALTER TABLE `ac_banner_stat`
+    ADD CONSTRAINT `ac_banner_stat_ibfk_2`
+      FOREIGN KEY (`store_id`)
+      REFERENCES `ac_stores` (`store_id`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE;
+     * */
 } );
 
 // add new menu item

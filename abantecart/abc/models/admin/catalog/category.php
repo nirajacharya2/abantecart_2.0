@@ -38,8 +38,9 @@ class ModelCatalogCategory extends Model
      */
     public function addCategory($data)
     {
+        $parent_id = $data['parent_id'] ? "'".(int)$data['parent_id']."'" : "NULL";
         $this->db->query("INSERT INTO ".$this->db->table_name("categories")." 
-                          SET parent_id = '".(int)$data['parent_id']."',
+                          SET parent_id = ".$parent_id.",
                               sort_order = '".(int)$data['sort_order']."',
                               STATUS = '".(int)$data['status']."',
                               date_modified = NOW(),
@@ -263,7 +264,7 @@ class ModelCatalogCategory extends Model
                             ON (c.category_id = cs.category_id AND cs.store_id = '".(int)$store_id."')";
             }
 
-            $sql .= "WHERE c.parent_id = '".(int)$parent_id."'
+            $sql .= "WHERE COALESCE(c.parent_id,0) = '".(int)$parent_id."'
                         AND cd.language_id = '".(int)$language_id."'
                     ORDER BY c.sort_order, cd.name ASC";
             $query = $this->db->query($sql);
@@ -305,7 +306,7 @@ class ModelCatalogCategory extends Model
             $store_id = (int)$this->config->get('config_store_id');
         }
 
-        $where = (isset($data['parent_id']) ? "WHERE c.parent_id = '".(int)$data['parent_id']."'" : '');
+        $where = (isset($data['parent_id']) ? "WHERE COALESCE(c.parent_id,0) = '".(int)$data['parent_id']."'" : '');
         $sql = "SELECT ".$this->db->raw_sql_row_count()." *,
                       c.category_id,
                       (SELECT count(*) as cnt

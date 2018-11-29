@@ -9219,7 +9219,7 @@ ON `ac_orders` (
 CREATE TABLE `ac_customer_transactions` (
   `customer_transaction_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL DEFAULT '0',
-  `order_id` int(11) NOT NULL DEFAULT '0',
+  `order_id` int(11) NULL DEFAULT NULL,
   `created_by` int(11) NOT NULL  COMMENT 'user_id for admin, customer_id for storefront section',
   `section` smallint(1) NOT NULL DEFAULT '0' COMMENT '1 - admin, 0 - customer',
   `credit` DECIMAL(15,4) DEFAULT '0',
@@ -10155,10 +10155,10 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 
 CREATE TABLE `ac_contents` (
   `content_id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_content_id` int(11) NOT NULL DEFAULT 0,
+  `parent_content_id` int(11) NULL DEFAULT NULL,
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`content_id`,`parent_content_id`)
+  PRIMARY KEY (`content_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -12402,8 +12402,8 @@ VALUES
 
 CREATE TABLE `ac_global_attributes` (
   `attribute_id`  int(11) NOT NULL AUTO_INCREMENT,
-  `attribute_parent_id`	int(11) NOT NULL DEFAULT '0',
-  `attribute_group_id`  int(11),
+  `attribute_parent_id`	int(11) NULL DEFAULT NULL,
+  `attribute_group_id` int(11) NULL DEFAULT NULL,
   `attribute_type_id` int(11) NOT NULL,
   `element_type`  char(1) NOT NULL DEFAULT 'I',
   -- I - text input, T - Text area, S - Select, M - multivalue select, C - Checkbox, R - radio buttons, U - File upload, H - Hidden, G -Checkbox Group, D - Date, E - time, K - Captcha
@@ -12989,7 +12989,7 @@ DROP TABLE IF EXISTS `ac_customer_communications`;
 CREATE TABLE `ac_customer_communications` (
   `communication_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL DEFAULT '0',
+  `user_id` int(11) NULL DEFAULT NULL,
   `type` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `body` text COLLATE utf8_unicode_ci NOT NULL,
@@ -13011,7 +13011,6 @@ ADD CONSTRAINT `ac_downloads_order_status_fk`
   ON DELETE RESTRICT
   ON UPDATE CASCADE;
 
-
   ALTER TABLE `ac_product_option_value_descriptions`
   ADD CONSTRAINT `cba_product_option_value_descriptions_ibfk_3`
     FOREIGN KEY (`product_option_value_id`)
@@ -13024,3 +13023,207 @@ ADD    CONSTRAINT `ac_block_layouts_cb_fk`
 FOREIGN KEY (`custom_block_id`)
 REFERENCES `ac_custom_blocks` (`custom_block_id`)
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_customer_transactions`
+ADD INDEX `ac_customer_transactions_ibfk_2_idx` (`order_id` ASC);
+ALTER TABLE `ac_customer_transactions`
+ADD CONSTRAINT `ac_customer_transactions_ibfk_2`
+  FOREIGN KEY (`order_id`)
+  REFERENCES `ac_orders` (`order_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes_value_descriptions`
+ADD CONSTRAINT `ac_global_attributes_value_descriptions_ibfk_3`
+  FOREIGN KEY (`attribute_value_id`)
+  REFERENCES `ac_global_attributes_values` (`attribute_value_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_field_values`
+ADD INDEX `ac_field_values_ibfk_2_idx` (`language_id` ASC);
+ALTER TABLE `ac_field_values`
+ADD CONSTRAINT `ac_field_values_ibfk_2`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_customer_communications`
+ADD CONSTRAINT `ac_customer_communications_ibfk_2`
+ FOREIGN KEY (`user_id`)
+ REFERENCES `ac_users` (`user_id`)
+ ON DELETE NO ACTION
+ ON UPDATE CASCADE;
+
+ALTER TABLE `ac_task_details`
+ADD CONSTRAINT `ac_task_details_ibfk_1`
+  FOREIGN KEY (`task_id`)
+  REFERENCES `ac_tasks` (`task_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes`
+ADD INDEX `ac_global_attributes_ibfk_1_idx` (`attribute_group_id` ASC);
+ALTER TABLE `ac_global_attributes`
+ADD CONSTRAINT `ac_global_attributes_ibfk_1`
+  FOREIGN KEY (`attribute_group_id`)
+  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_global_attributes_ibfk_2`
+  FOREIGN KEY (`attribute_parent_id`)
+  REFERENCES `ac_global_attributes` (`attribute_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+  ALTER TABLE `ac_online_customers`
+  ADD INDEX `ac_online_customers_fk_1_idx` (`customer_id` ASC);
+  ALTER TABLE `ac_online_customers`
+  ADD CONSTRAINT `ac_online_customers_fk_1`
+    FOREIGN KEY (`customer_id`)
+    REFERENCES `ac_customers` (`customer_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+ALTER TABLE `ac_task_steps`
+ADD CONSTRAINT `ac_task_steps_fk`
+  FOREIGN KEY (`task_id`)
+  REFERENCES `ac_tasks` (`task_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes_type_descriptions`
+ADD INDEX `ac_global_attributes_type_descriptions_fk_2_idx` (`language_id` ASC);
+ALTER TABLE `ac_global_attributes_type_descriptions`
+ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_1`
+  FOREIGN KEY (`attribute_type_id`)
+  REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_contents`
+ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
+
+ALTER TABLE `ac_contents`
+ADD CONSTRAINT `ac_contents_fk_1`
+  FOREIGN KEY (`parent_content_id`)
+  REFERENCES `ac_contents` (`content_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes_groups_descriptions`
+ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
+ALTER TABLE `ac_global_attributes_groups_descriptions`
+ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_1`
+  FOREIGN KEY (`attribute_group_id`)
+  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_2`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_discounts`
+ADD INDEX `ac_product_discounts_ibfk_2_idx` (`customer_group_id` ASC);
+ALTER TABLE `ac_product_discounts`
+ADD CONSTRAINT `ac_product_discounts_ibfk_2`
+FOREIGN KEY (`customer_group_id`)
+REFERENCES `ac_customer_groups` (`customer_group_id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_specials`
+ADD INDEX `ac_product_specials_ibfk_2_idx` (`customer_group_id` ASC);
+ALTER TABLE `ac_product_specials`
+ADD CONSTRAINT `ac_product_specials_ibfk_2`
+  FOREIGN KEY (`customer_group_id`)
+  REFERENCES `ac_customer_groups` (`customer_group_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_downloads`
+ADD INDEX `ac_order_downloads_ibfk_3_idx` (`download_id` ASC);
+ALTER TABLE `ac_order_downloads`
+ADD CONSTRAINT `ac_order_downloads_ibfk_3`
+  FOREIGN KEY (`download_id`)
+  REFERENCES `ac_downloads` (`download_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_history`
+ADD CONSTRAINT `ac_order_history_ibfk_2`
+  FOREIGN KEY (`order_id`)
+  REFERENCES `ac_orders` (`order_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_products`
+ADD INDEX `ac_order_products_ibfk_2_idx` (`product_id` ASC);
+ALTER TABLE `ac_order_products`
+ADD CONSTRAINT `ac_order_products_ibfk_2`
+  FOREIGN KEY (`product_id`)
+  REFERENCES `ac_products` (`product_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_extension_dependencies`
+ADD CONSTRAINT `ac_extension_dependencies_fk_1`
+  FOREIGN KEY (`extension_id`)
+  REFERENCES `ac_extensions` (`extension_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_products_related`
+ADD INDEX `ac_products_related_ibfk_2_idx` (`related_id` ASC);
+ALTER TABLE `ac_products_related`
+ADD CONSTRAINT `ac_products_related_ibfk_2`
+FOREIGN KEY (`related_id`)
+REFERENCES `ac_products` (`product_id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_downloads_history`
+ADD CONSTRAINT `ac_order_downloads_history_ibfk_4`
+  FOREIGN KEY (`download_id`)
+  REFERENCES `ac_downloads` (`download_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_length_class_descriptions`
+ADD CONSTRAINT `ac_length_class_descriptions_ibfk_2`
+  FOREIGN KEY (`length_class_id`)
+  REFERENCES `ac_length_classes` (`length_class_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+  ALTER TABLE `ac_banner_stat`
+  ADD INDEX `ac_banner_stat_ibfk_2_idx` (`store_id` ASC);
+  ALTER TABLE `ac_banner_stat`
+  ADD CONSTRAINT `ac_banner_stat_ibfk_2`
+    FOREIGN KEY (`store_id`)
+    REFERENCES `ac_stores` (`store_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_options`
+ADD INDEX `ac_order_options_fk_2_idx` (`order_product_id` ASC);
+ALTER TABLE `ac_order_options`
+ADD CONSTRAINT `ac_order_options_fk_1`
+  FOREIGN KEY (`order_id`)
+  REFERENCES `ac_orders` (`order_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_order_options_fk_2`
+  FOREIGN KEY (`order_product_id`)
+  REFERENCES `ac_order_products` (`order_product_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
