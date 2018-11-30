@@ -76,7 +76,7 @@ class ADB
                 $this->orm::select($this->orm::raw("SET SQL_MODE='';"));
             }
         } catch (\PDOException $e) {
-            throw new AException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+            throw new AException($e->getCode(), $e->getTraceAsString(), $e->getFile(), $e->getLine());
         }
         $this->registry = Registry::getInstance();
     }

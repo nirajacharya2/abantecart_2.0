@@ -8874,7 +8874,7 @@ INSERT INTO `ac_customer_groups` ( `name`, `tax_exempt`) VALUES
 -- DDL for table `ac_online_customers`
 --
 CREATE TABLE `ac_online_customers` (
-  `customer_id` int(11) NOT NULL,
+  `customer_id` int(11) NULL,
   `ip` varchar(50) NOT NULL,
   `url` text NOT NULL,
   `referer` text NOT NULL,
@@ -12599,7 +12599,7 @@ CREATE TABLE `ac_task_steps` (
 ALTER TABLE `ac_language_definitions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_customers`
-  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`);
+  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_country_descriptions`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_country_descriptions`
@@ -12619,9 +12619,9 @@ ALTER TABLE `ac_zones_to_locations`
 ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`);
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_category_descriptions`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -12681,19 +12681,21 @@ ALTER TABLE `ac_customer_transactions`
   ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_products`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`);
+  ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ac_order_downloads_history`
+  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_data`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
@@ -12706,7 +12708,8 @@ ALTER TABLE `ac_order_data_types`
 
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`order_status_id`)
-  REFERENCES `ac_order_statuses`(`order_status_id`);
+  REFERENCES `ac_order_statuses`(`order_status_id`)
+   ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`language_id`)
@@ -12717,7 +12720,7 @@ ALTER TABLE `ac_order_history`
   REFERENCES `ac_order_statuses`(`order_status_id`);
 
 ALTER TABLE `ac_order_totals`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_descriptions`
   ADD FOREIGN KEY (`product_id`)
@@ -12834,7 +12837,7 @@ ALTER TABLE `ac_tax_rates`
 ALTER TABLE `ac_tax_rates`
   ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_tax_rates`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL;
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `ac_tax_rate_descriptions`
   ADD FOREIGN KEY (`tax_rate_id`) REFERENCES `ac_tax_rates`(`tax_rate_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -12845,7 +12848,7 @@ ALTER TABLE `ac_url_aliases`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_users`
-  ADD FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`);
+  ADD FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_user_notifications`
   ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -12981,7 +12984,7 @@ CREATE TABLE `ac_customer_notes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customer_notes`
-  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`);
+  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_customer_notes`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -13190,13 +13193,6 @@ FOREIGN KEY (`related_id`)
 REFERENCES `ac_products` (`product_id`)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
-
-ALTER TABLE `ac_order_downloads_history`
-ADD CONSTRAINT `ac_order_downloads_history_ibfk_4`
-  FOREIGN KEY (`download_id`)
-  REFERENCES `ac_downloads` (`download_id`)
-  ON DELETE NO ACTION
-  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_length_class_descriptions`
 ADD CONSTRAINT `ac_length_class_descriptions_ibfk_2`

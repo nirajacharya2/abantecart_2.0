@@ -43,9 +43,9 @@ class ALayout
      * @var Registry
      */
     protected $registry;
-    private $page = array();
-    private $layout = array();
-    public $blocks = array();
+    private $page = [];
+    private $layout = [];
+    public $blocks = [];
     /**
      * @var string
      */
@@ -104,7 +104,7 @@ class ALayout
         }
 
         // Locate and set page information. This needs to be called once per page
-        $unique_page = array();
+        $unique_page = [];
 
         // find page records for given controller
         $key_param = $this->getKeyParamByController($controller);
@@ -397,7 +397,7 @@ class ALayout
      */
     public function getChildren($instance_id = 0)
     {
-        $children = array();
+        $children = [];
         // Look into all blocks and locate all children
         foreach ($this->blocks as $block) {
             if ((string)$block['parent_instance_id'] == (string)$instance_id) {
@@ -420,7 +420,7 @@ class ALayout
                 return $block;
             }
         }
-        return array();
+        return [];
     }
 
     /**
@@ -431,7 +431,7 @@ class ALayout
      */
     public function addChildFirst($instance_id, $new_child, $block_txt_id, $template)
     {
-        $new_block = array();
+        $new_block = [];
         $new_block['parent_instance_id'] = $instance_id;
         $new_block['instance_id'] = $block_txt_id.$instance_id;
         $new_block['block_id'] = $block_txt_id;
@@ -449,7 +449,7 @@ class ALayout
      */
     public function addChild($instance_id, $new_child, $block_txt_id, $template)
     {
-        $new_block = array();
+        $new_block = [];
         $new_block['parent_instance_id'] = $instance_id;
         $new_block['instance_id'] = $block_txt_id.$instance_id;
         $new_block['block_id'] = $block_txt_id;
@@ -533,7 +533,7 @@ class ALayout
     public function getBlockDescriptions($custom_block_id = 0)
     {
         if (!(int)$custom_block_id) {
-            return array();
+            return [];
         }
         $cache_key = 'layout.block.descriptions.'.$custom_block_id;
         $output = $this->cache->pull($cache_key);
@@ -542,7 +542,7 @@ class ALayout
             return $output;
         }
 
-        $output = array();
+        $output = [];
         $result = $this->db->query("SELECT bd.*, COALESCE(bl.status,0) as status
                                     FROM ".$this->db->table_name("block_descriptions")." bd
                                     LEFT JOIN ".$this->db->table_name("block_layouts")." bl

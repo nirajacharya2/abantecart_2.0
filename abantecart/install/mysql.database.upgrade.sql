@@ -133,13 +133,13 @@ UPDATE `ac_tax_rates` SET `zone_id` = NULL WHERE `zone_id` = 0;
 ALTER TABLE `ac_language_definitions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_customers`
-  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`);
+  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_country_descriptions`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_country_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_zones`
-  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_zone_descriptions`
   ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_zone_descriptions`
@@ -153,9 +153,9 @@ ALTER TABLE `ac_zones_to_locations`
 ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`);
+  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`);
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_category_descriptions`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -215,30 +215,32 @@ ALTER TABLE `ac_customer_transactions`
   ADD FOREIGN KEY  (`customer_id`) REFERENCES `ac_customers`(`customer_id`);
 
 ALTER TABLE `ac_order_products`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_products`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`);
+  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`);
+  ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`);
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`);
+  ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`);
+  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
 ALTER TABLE `ac_order_data_types`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`)  ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -251,10 +253,10 @@ ALTER TABLE `ac_order_history`
   ADD FOREIGN KEY (`order_status_id`) REFERENCES `ac_order_status_ids`(`order_status_id`);
 
 ALTER TABLE `ac_order_totals`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_descriptions`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;;
+  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_product_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -332,7 +334,7 @@ ALTER TABLE `ac_tax_rates`
 ALTER TABLE `ac_tax_rates`
   ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_tax_rates`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL;
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `ac_tax_rate_descriptions`
   ADD FOREIGN KEY (`tax_rate_id`) REFERENCES `ac_tax_rates`(`tax_rate_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -343,7 +345,7 @@ ALTER TABLE `ac_url_aliases`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_users`
-  ADD FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`);
+  ADD FOREIGN KEY (`user_group_id`) REFERENCES `ac_user_groups`(`user_group_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_user_notifications`
   ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -457,160 +459,25 @@ CREATE TABLE `ac_jobs` (
     `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
     `actor_id` int(11) DEFAULT 0,
     `actor_name` varchar(128) DEFAULT '',
-    `date_added` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`job_id`, `job_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customers`
   CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
   CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;
-
 ALTER TABLE `ac_users`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
-
-ALTER TABLE `ac_banners`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_banner_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE `ac_ant_messages`
   CHANGE COLUMN `start_date` `start_date` timestamp NULL default NULL,
   CHANGE COLUMN `end_date` `end_date` timestamp NULL default NULL;
-
 ALTER TABLE `ac_extensions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHANGE COLUMN `date_installed` `date_installed` timestamp NULL default NULL;
-
 ALTER TABLE `ac_tasks`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHANGE COLUMN `last_time_run` `date_installed` timestamp NULL default NULL;
-
-ALTER TABLE `ac_task_details`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE `ac_task_steps`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHANGE COLUMN `last_time_run` `date_installed` timestamp NULL default NULL;
-
-ALTER TABLE `ac_custom_lists`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_block_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_block_templates`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_layouts`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_block_layouts`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_messages`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_resource_library`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_resource_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_resource_map`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_global_attributes_type_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_custom_blocks`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_blocks`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_content_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_page_descriptions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_pages`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_weight_classes`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_customer_notifications`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_user_notifications`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_user_groups`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_settings`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_reviews`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_product_specials`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_product_discounts`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_order_history`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_order_data`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_order_data_types`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_order_downloads`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_products`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_tax_rates`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_tax_classes`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_orders`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_length_classes`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_downloads`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_online_customers`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_coupons`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_categories`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_zones_to_locations`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_locations`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_language_definitions`
-  CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_products` CHANGE COLUMN `date_available` `date_available` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
@@ -626,7 +493,7 @@ CREATE TABLE `ac_customer_notes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customer_notes`
-  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`);
+  ADD FOREIGN KEY (`user_id`) REFERENCES `ac_users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_customer_notes`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 

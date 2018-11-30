@@ -432,7 +432,151 @@ class DatetimeColumnsChanges extends AbstractMigration
           ON UPDATE CASCADE;";
         $this->execute($update);
 
+        //update restrict FKEYS
+        $update = "ALTER TABLE `".$prefix."addresses` 
+        DROP FOREIGN KEY `".$prefix."addresses_ibfk_2`,
+        DROP FOREIGN KEY `".$prefix."addresses_ibfk_3`;
+        ALTER TABLE `".$prefix."addresses` 
+        ADD CONSTRAINT `".$prefix."addresses_ibfk_2`
+          FOREIGN KEY (`country_id`)
+          REFERENCES `".$prefix."countries` (`country_id`)
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."addresses_ibfk_3`
+          FOREIGN KEY (`zone_id`)
+          REFERENCES `".$prefix."zones` (`zone_id`)
+          ON DELETE RESTRICT
+          ON UPDATE CASCADE;";
+        $this->execute($update);
 
+        $update = "ALTER TABLE `".$prefix."customer_notes` 
+        DROP FOREIGN KEY `".$prefix."customer_notes_ibfk_1`;
+        ALTER TABLE `".$prefix."customer_notes` 
+        ADD CONSTRAINT `".$prefix."customer_notes_ibfk_1`
+          FOREIGN KEY (`user_id`)
+          REFERENCES `".$prefix."users` (`user_id`)
+          ON DELETE CASCADE ON UPDATE CASCADE; ";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."customers` 
+        DROP FOREIGN KEY `".$prefix."customers_ibfk_1`;
+        ALTER TABLE `".$prefix."customers` 
+        ADD CONSTRAINT `".$prefix."customers_ibfk_1`
+          FOREIGN KEY (`store_id`)
+          REFERENCES `".$prefix."stores` (`store_id`)
+          ON DELETE RESTRICT
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
+        
+      /*  $update = "ALTER TABLE `".$prefix."order_data`
+        DROP FOREIGN KEY `".$prefix."order_data_ibfk_1`,
+        DROP FOREIGN KEY `".$prefix."order_data_ibfk_2`;
+        ALTER TABLE `".$prefix."order_data` 
+        ADD CONSTRAINT `".$prefix."order_data_ibfk_1`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."order_data_ibfk_2`
+          FOREIGN KEY (`type_id`)
+          REFERENCES `".$prefix."order_data_types` (`type_id`)
+          ON DELETE RESTRICT
+          ON UPDATE CASCADE;";
+        $this->execute($update);*/
+
+        $update = "ALTER TABLE `".$prefix."order_downloads` 
+        DROP FOREIGN KEY `".$prefix."order_downloads_ibfk_1`,
+        DROP FOREIGN KEY `".$prefix."order_downloads_ibfk_2`;
+        ALTER TABLE `".$prefix."order_downloads` 
+        ADD CONSTRAINT `".$prefix."order_downloads_ibfk_1`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."order_downloads_ibfk_2`
+          FOREIGN KEY (`order_product_id`)
+          REFERENCES `".$prefix."order_products` (`order_product_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
+        
+        
+        $update = "ALTER TABLE `".$prefix."order_downloads_history` 
+        DROP FOREIGN KEY `".$prefix."order_downloads_history_ibfk_1`,
+        DROP FOREIGN KEY `".$prefix."order_downloads_history_ibfk_2`,
+        DROP FOREIGN KEY `".$prefix."order_downloads_history_ibfk_3`;
+        ALTER TABLE `".$prefix."order_downloads_history` 
+        ADD CONSTRAINT `".$prefix."order_downloads_history_ibfk_1`
+          FOREIGN KEY (`order_download_id`)
+          REFERENCES `".$prefix."order_downloads` (`order_download_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."order_downloads_history_ibfk_2`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        ADD CONSTRAINT `".$prefix."order_downloads_history_ibfk_3`
+          FOREIGN KEY (`order_product_id`)
+          REFERENCES `".$prefix."order_products` (`order_product_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_products` 
+        DROP FOREIGN KEY `".$prefix."order_products_ibfk_1`;
+        ALTER TABLE `".$prefix."order_products` 
+        ADD CONSTRAINT `".$prefix."order_products_ibfk_1`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."order_totals` 
+        DROP FOREIGN KEY `".$prefix."order_totals_ibfk_1`;
+        ALTER TABLE `".$prefix."order_totals` 
+        ADD CONSTRAINT `".$prefix."order_totals_ibfk_1`
+          FOREIGN KEY (`order_id`)
+          REFERENCES `".$prefix."orders` (`order_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."users` 
+        DROP FOREIGN KEY `".$prefix."users_ibfk_1`;
+        ALTER TABLE `".$prefix."users` 
+        ADD CONSTRAINT `".$prefix."users_ibfk_1`
+          FOREIGN KEY (`user_group_id`)
+          REFERENCES `".$prefix."user_groups` (`user_group_id`)
+          ON DELETE RESTRICT
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+        
+        $update = "ALTER TABLE `".$prefix."tax_rates` 
+        DROP FOREIGN KEY `".$prefix."tax_rates_ibfk_3`;
+        ALTER TABLE `".$prefix."tax_rates` 
+        ADD CONSTRAINT `".$prefix."tax_rates_ibfk_3`
+          FOREIGN KEY (`zone_id`)
+          REFERENCES `".$prefix."zones` (`zone_id`)
+          ON DELETE SET NULL
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."zones` 
+        DROP FOREIGN KEY `".$prefix."zones_ibfk_1`;
+        ALTER TABLE `".$prefix."zones` 
+        ADD CONSTRAINT `".$prefix."zones_ibfk_1`
+          FOREIGN KEY (`country_id`)
+          REFERENCES `".$prefix."countries` (`country_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;
+        ";
+        $this->execute($update);
 
     }
 
