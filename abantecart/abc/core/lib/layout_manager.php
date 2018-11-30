@@ -1011,12 +1011,12 @@ class ALayoutManager
                                 status,
                                 date_added,
                                 date_modified)
-                                VALUES ('".( int )$data ['layout_id']."',
-                                        '".( int )$data ['block_id']."',
-                                        '".( int )$data ['custom_block_id']."',
-                                        '".( int )$data ['parent_instance_id']."',
-                                        '".( int )$data ['position']."',
-                                        '".( int )$data ['status']."',
+                                VALUES ('".(int)$data ['layout_id']."',
+                                        '".(int)$data ['block_id']."',
+                                        '".(int)$data ['custom_block_id']."',
+                                        '".(int)$data ['parent_instance_id']."',
+                                        '".(int)$data ['position']."',
+                                        '".(int)$data ['status']."',
                                         NOW(),
                                         NOW())");
 
@@ -1782,6 +1782,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \ReflectionException
+     * @throws AException
      */
     public function loadXML($data)
     {
@@ -1873,6 +1874,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \ReflectionException
+     * @throws AException
      */
     protected function processXML($xml_obj)
     {
@@ -1890,10 +1892,12 @@ class ALayoutManager
                     template and type combination.
                     If does exists, return and log error
                ->>> action = update (default)
-                    Before loading the layout, determine if same layout exists with same name, template and type combination.
+                    Before loading the layout, determine if same layout exists with same name,
+                    template and type combination.
                     If does exists, write new settings over existing
                ->>> action = delete
-                    Delete the element provided from database and delete relationships to other elements linked to current one
+                    Delete the element provided from database and delete relationships to
+                    other elements linked to current one
 
                 NOTE: Parent level delete action is cascaded to all children elements
 
@@ -2098,6 +2102,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \ReflectionException
+     * @throws AException
      */
     protected function _processBlock($layout, $block, $parent_instance_id = 0)
     {

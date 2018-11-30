@@ -371,7 +371,7 @@ class ALayout
                 ."bl.instance_id as instance_id, "
                 ."b.block_id as block_id, "
                 ."bl.custom_block_id, "
-                ."bl.parent_instance_id as parent_instance_id, "
+                ."COALESCE(bl.parent_instance_id,0) as parent_instance_id, "
                 ."bl.position as position, "
                 ."b.block_txt_id as block_txt_id, "
                 ."b.controller as controller "
@@ -384,7 +384,6 @@ class ALayout
 
             $query = $this->db->query($sql);
             $blocks = $query->rows;
-
             $this->cache->push($cache_key, $blocks);
         }
         return $blocks;

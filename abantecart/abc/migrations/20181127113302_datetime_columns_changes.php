@@ -8,6 +8,17 @@ class DatetimeColumnsChanges extends AbstractMigration
      * More information on writing migrations is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
      *
+     *
+     *
+     * //Suggestion: get all foreign keys of database
+     * SELECT tb1.CONSTRAINT_NAME, tb1.TABLE_NAME, tb1.COLUMN_NAME, tb1.REFERENCED_TABLE_NAME,
+        tb1.REFERENCED_COLUMN_NAME, tb2.MATCH_OPTION, tb2.UPDATE_RULE, tb2.DELETE_RULE
+     FROM information_schema.`KEY_COLUMN_USAGE` AS tb1
+     INNER JOIN information_schema.REFERENTIAL_CONSTRAINTS AS tb2
+     	ON tb1.CONSTRAINT_NAME = tb2.CONSTRAINT_NAME
+     WHERE tb2.CONSTRAINT_SCHEMA = '******' AND table_schema =  '*****' AND referenced_column_name IS NOT NULL
+     *
+     *
      */
 
     public function up()

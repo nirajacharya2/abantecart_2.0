@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,20 +21,16 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AContentManager;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridContent extends AController
 {
-    public $data = array();
+    public $data = [];
     /**
      * @var AContentManager
      */
@@ -50,21 +46,24 @@ class ControllerResponsesListingGridContent extends AController
         $this->acm = new AContentManager();
 
         //Prepare filter config
-        $grid_filter_params = array_merge(array('sort_order', 'id.title', 'status', 'nodeid'), (array)$this->data['grid_filter_params']);
+        $grid_filter_params = array_merge(
+            ['sort_order', 'id.title', 'status', 'nodeid'], 
+            (array)$this->data['grid_filter_params']
+        );
         //Build advanced filter
-        $filter_data = array(
+        $filter_data = [
             'method'             => 'post',
             'grid_filter_params' => $grid_filter_params,
-        );
+        ];
         $filter_grid = new AFilter($filter_data);
         $filter_array = $filter_grid->getFilterData();
         if ($this->request->post['nodeid']) {
             list(, $parent_id) = explode('_', $this->request->post['nodeid']);
-            $filter_array['parent_id'] = $parent_id;
+            $filter_array['parent_id'] = (int)$parent_id ? "'".(int)$parent_id."'" : 'NULL';
             if ($filter_array['subsql_filter']) {
-                $filter_array['subsql_filter'] .= " AND i.parent_content_id='".(int)$filter_array['parent_id']."' ";
+                $filter_array['subsql_filter'] .= " AND i.parent_content_id = ".$filter_array['parent_id']." ";
             } else {
-                $filter_array['subsql_filter'] = " i.parent_content_id='".(int)$filter_array['parent_id']."' ";
+                $filter_array['subsql_filter'] = " i.parent_content_id = ".$filter_array['parent_id']." ";
             }
             $new_level = (integer)$this->request->post["n_level"] + 1;
         } else {
@@ -72,7 +71,7 @@ class ControllerResponsesListingGridContent extends AController
             $filter_array['parent_id'] = $new_level = 0;
             //sign to search by title in all levels of contents
             $need_filter = false;
-            if (AHelperUtils::has_value($this->request->post['filters'])) {
+            if (H::has_value($this->request->post['filters'])) {
                 $this->load->library('json');
                 $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
                 if ($searchData['rules']) {
@@ -82,14 +81,14 @@ class ControllerResponsesListingGridContent extends AController
 
             if ($this->config->get('config_show_tree_data') && ! $need_filter) {
                 if ($filter_array['subsql_filter']) {
-                    $filter_array['subsql_filter'] .= " AND i.parent_content_id='0' ";
+                    $filter_array['subsql_filter'] .= " AND i.parent_content_id IS NULL ";
                 } else {
-                    $filter_array['subsql_filter'] = " i.parent_content_id='0' ";
+                    $filter_array['subsql_filter'] = " i.parent_content_id IS NULL ";
                 }
             }
         }
 
-        $leaf_nodes = $this->config->get('config_show_tree_data') ? $this->acm->getLeafContents() : array();
+        $leaf_nodes = $this->config->get('config_show_tree_data') ? $this->acm->getLeafContents() : [];
 
         $total = $this->acm->getTotalContents($filter_array);
         $response = new stdClass();
@@ -98,7 +97,7 @@ class ControllerResponsesListingGridContent extends AController
         $response->records = $total;
         $response->userdata = new stdClass();
         $results = $this->acm->getContents($filter_array);
-        $results = ! $results ? array() : $results;
+        $results = ! $results ? [] : $results;
         $i = 0;
 
         foreach ($results as $result) {
@@ -110,25 +109,25 @@ class ControllerResponsesListingGridContent extends AController
             }
             $parent_content_id = current($result['parent_content_id']);
             $response->rows[$i]['id'] = $parent_content_id.'_'.$result['content_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
 
                 $title_label,
                 $result['parent_name'],
-                $this->html->buildCheckbox(array(
+                $this->html->buildCheckbox([
                     'name'  => 'status['.$parent_content_id.'_'.$result['content_id'].']',
                     'value' => $result['status'],
                     'style' => 'btn_switch',
-                )),
-                $this->html->buildInput(array(
+                ]),
+                $this->html->buildInput([
                     'name'  => 'sort_order['.$parent_content_id.'_'.$result['content_id'].']',
                     'value' => $result['sort_order'][$parent_content_id],
-                )),
+                ]),
                 'action',
                 $new_level,
                 ($this->request->post['nodeid'] ? $this->request->post['nodeid'] : null),
                 ($result['content_id'] == $leaf_nodes[$result['content_id']] ? true : false),
                 false,
-            );
+            ];
             $i++;
         }
 
@@ -150,10 +149,10 @@ class ControllerResponsesListingGridContent extends AController
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         switch ($this->request->post['oper']) {
@@ -184,17 +183,22 @@ class ControllerResponsesListingGridContent extends AController
                 }
                 break;
             case 'save':
-                $allowedFields = array_merge(array('sort_order', 'status'), (array)$this->data['allowed_fields']);
+                $allowedFields = array_merge(['sort_order', 'status'], (array)$this->data['allowed_fields']);
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) //resort required.
                 {
                     if ($this->request->post['resort'] == 'yes') {
                         //get only ids we need
-                        $array = array();
+                        $array = [];
                         foreach ($ids as $id) {
                             $array[$id] = $this->request->post['sort_order'][$id];
                         }
-                        $new_sort = AHelperUtils::build_sort_order($ids, min($array), max($array), $this->request->post['sort_direction']);
+                        $new_sort = H::build_sort_order(
+                            $ids,
+                            min($array),
+                            max($array),
+                            $this->request->post['sort_direction']
+                        );
                         $this->request->post['sort_order'] = $new_sort;
                     }
                 }
@@ -206,7 +210,12 @@ class ControllerResponsesListingGridContent extends AController
                         $content_id = $id;
                     }
                     foreach ($allowedFields as $field) {
-                        $this->acm->editContentField($content_id, $field, $this->request->post[$field][$id], $parent_content_id);
+                        $this->acm->editContentField(
+                            $content_id,
+                            $field,
+                            $this->request->post[$field][$id],
+                            $parent_content_id
+                        );
                     }
                 }
                 break;
@@ -222,6 +231,8 @@ class ControllerResponsesListingGridContent extends AController
      * update only one field
      *
      * @return void
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -233,12 +244,25 @@ class ControllerResponsesListingGridContent extends AController
         if ( ! $this->user->canModify('listing_grid/content')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,
-                ));
+                ]);
         }
-        $allowedFields = array_merge(array('title', 'description', 'keyword', 'meta_description', 'meta_keywords', 'store_id', 'sort_order', 'status', 'parent_content_id'), (array)$this->data['allowed_fields']);
+        $allowedFields = array_merge(
+            [
+                'title',
+                'description',
+                'keyword',
+                'meta_description',
+                'meta_keywords',
+                'store_id',
+                'sort_order',
+                'status',
+                'parent_content_id'
+            ],
+            (array)$this->data['allowed_fields']
+        );
 
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
@@ -250,7 +274,7 @@ class ControllerResponsesListingGridContent extends AController
                 if ($field == 'keyword') {
                     if ($err = $this->html->isSEOkeywordExists('content_id='.$this->request->get['id'], $value)) {
                         $error = new AError('');
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
                 }
                 if ($field == 'sort_order') {
