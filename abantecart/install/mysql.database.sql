@@ -8761,7 +8761,7 @@ CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`,
 --
 CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_id` int(11) NOT NULL DEFAULT '0',
+  `parent_id` int(11),
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -13015,7 +13015,7 @@ ADD CONSTRAINT `ac_downloads_order_status_fk`
   ON UPDATE CASCADE;
 
   ALTER TABLE `ac_product_option_value_descriptions`
-  ADD CONSTRAINT `cba_product_option_value_descriptions_ibfk_3`
+  ADD CONSTRAINT `ac_product_option_value_descriptions_ibfk_3`
     FOREIGN KEY (`product_option_value_id`)
     REFERENCES `ac_product_option_values` (`product_option_value_id`)
     ON DELETE CASCADE
@@ -13223,3 +13223,29 @@ ADD CONSTRAINT `ac_order_options_fk_2`
   REFERENCES `ac_order_products` (`order_product_id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+ALTER TABLE `ac_categories`
+ADD CONSTRAINT `ac_categories_fk_1`
+FOREIGN KEY (`parent_id`)
+REFERENCES `ac_categories` (`category_id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_global_attributes`
+ADD INDEX `ac_global_attributes_ibfk_3_idx` (`attribute_type_id` ASC);
+ALTER TABLE `ac_global_attributes`
+ADD CONSTRAINT `ac_global_attributes_ibfk_3`
+  FOREIGN KEY (`attribute_type_id`)
+  REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+  ALTER TABLE `ac_block_layouts`
+  ADD INDEX `ac_block_layouts_ibfk_3_idx` (`layout_id` ASC);
+  ALTER TABLE `ac_block_layouts`
+  ADD CONSTRAINT `ac_block_layouts_ibfk_3`
+    FOREIGN KEY (`layout_id`)
+    REFERENCES `ac_layouts` (`layout_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;

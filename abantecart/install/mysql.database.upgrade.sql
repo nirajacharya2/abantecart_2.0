@@ -454,7 +454,7 @@ CREATE TABLE `ac_jobs` (
     `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
     `configuration` longtext COMMENT 'configuration for job-class',
     `start_time` datetime DEFAULT NULL,
-    `last_time_run` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `last_time_run` timestamp NULL DEFAULT NULL,
     `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
     `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
     `actor_id` int(11) DEFAULT 0,
@@ -487,8 +487,8 @@ CREATE TABLE `ac_customer_notes` (
   `customer_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `note` text COLLATE utf8_unicode_ci NOT NULL,
-  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`note_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -506,8 +506,8 @@ CREATE TABLE `ac_customer_communications` (
   `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `body` text COLLATE utf8_unicode_ci NOT NULL,
   `sent_to_address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`communication_id`),
   KEY `customer_id` (`customer_id`),
   KEY `user_id` (`user_id`),
@@ -1112,5 +1112,23 @@ ADD CONSTRAINT `ac_order_options_fk_1`
 ADD CONSTRAINT `ac_order_options_fk_2`
   FOREIGN KEY (`order_product_id`)
   REFERENCES `ac_order_products` (`order_product_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_global_attributes`
+ADD INDEX `ac_global_attributes_ibfk_3_idx` (`attribute_type_id` ASC);
+ALTER TABLE `ac_global_attributes`
+ADD CONSTRAINT `ac_global_attributes_ibfk_3`
+  FOREIGN KEY (`attribute_type_id`)
+  REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_block_layouts`
+ADD INDEX `ac_block_layouts_ibfk_3_idx` (`layout_id` ASC);
+ALTER TABLE `ac_block_layouts`
+ADD CONSTRAINT `ac_block_layouts_ibfk_3`
+  FOREIGN KEY (`layout_id`)
+  REFERENCES `ac_layouts` (`layout_id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;

@@ -589,6 +589,27 @@ class DatetimeColumnsChanges extends AbstractMigration
         ";
         $this->execute($update);
 
+        $update = "ALTER TABLE `".$prefix."global_attributes` 
+        ADD INDEX `".$prefix."global_attributes_ibfk_3_idx` (`attribute_type_id` ASC);
+        ALTER TABLE `".$prefix."global_attributes` 
+        ADD CONSTRAINT `".$prefix."global_attributes_ibfk_3`
+          FOREIGN KEY (`attribute_type_id`)
+          REFERENCES `".$prefix."global_attributes_types` (`attribute_type_id`)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE;";
+        $this->execute($update);
+
+
+        $update = "  ALTER TABLE `".$prefix."block_layouts` 
+          ADD INDEX `".$prefix."block_layouts_ibfk_3_idx` (`layout_id` ASC);
+          ALTER TABLE `".$prefix."block_layouts` 
+          ADD CONSTRAINT `".$prefix."block_layouts_ibfk_3`
+            FOREIGN KEY (`layout_id`)
+            REFERENCES `".$prefix."layouts` (`layout_id`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;";
+        $this->execute($update);
+
     }
 
     public function down()

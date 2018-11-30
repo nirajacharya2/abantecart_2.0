@@ -21,11 +21,12 @@ namespace abc\commands;
 use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
+
 use abc\core\cache\ACache;
 use abc\core\lib\{
     AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
+use H;
 
 /**
  * Class Install
@@ -92,6 +93,7 @@ class Install extends BaseCommand
      * @return array|bool
      * @throws AException
      * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     protected function installApp($options)
     {
@@ -311,6 +313,7 @@ class Install extends BaseCommand
      *
      * @return bool|null
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function uninstallExtension($options)
     {
@@ -334,7 +337,7 @@ class Install extends BaseCommand
             exit('Error: '.$options['extension_text_id'].' is not installed!'."\n");
         }
         $result = $em->uninstall($options['extension_text_id'],
-            AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
+            H::getExtensionConfigXml($options['extension_text_id']));
         if (!$result) {
             echo implode("\n", $em->errors)."\n";
         }
@@ -371,7 +374,7 @@ class Install extends BaseCommand
         }
 
         $result = $em->install($options['extension_text_id'],
-            AHelperUtils::getExtensionConfigXml($options['extension_text_id']));
+            H::getExtensionConfigXml($options['extension_text_id']));
         if (!$result) {
             echo implode("\n", $em->errors)."\n";
         }
@@ -383,6 +386,7 @@ class Install extends BaseCommand
      *
      * @return bool|null
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function removeExtension($options)
     {
@@ -422,9 +426,10 @@ class Install extends BaseCommand
 
     /**
      * @param APackageManager $pm
-     * @param string          $error_text
+     * @param string $error_text
      *
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function stopRun(APackageManager $pm, $error_text = '')
     {
@@ -722,7 +727,9 @@ return [
          *
          * */
         'DEBUG_LEVEL' => 5,
-        'ENCRYPTION_KEY' => '12345'
+        'ENCRYPTION_KEY' => '12345',
+        // bootstrap 3 admin template
+        // 'adminTemplate' => 'default_bs3' 
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG').'default'.DS.'config.php', 'w');
@@ -805,7 +812,7 @@ EOD;
 
         $db->query("SET CHARACTER SET utf8;");
         $db->query("SET @@session.sql_mode = 'MYSQL40';");
-        $salt_key = AHelperUtils::genToken(8);
+        $salt_key = H::genToken(8);
         $db->query(
             "INSERT INTO `".$options['db_prefix']."users`
             SET user_id = '1',
@@ -837,7 +844,7 @@ EOD;
         }
         $db->query(
             "UPDATE `".$options['db_prefix']."settings` 
-                SET value = '".$db->escape(AHelperUtils::genToken(16))."' 
+                SET value = '".$db->escape(H::genToken(16))."' 
                 WHERE `key` = 'task_api_key'; ");
         $db->query(
             "INSERT INTO `".$options['db_prefix']."settings` 
@@ -1128,10 +1135,18 @@ EOD;
     public function validateAppInstall($options)
     {
         //Check if cart is already installed
-        if (file_exists(ABC::env('DIR_CONFIG').'enabled.config.php')) {
+        if (
+            file_exists(ABC::env('DIR_CONFIG').'enabled.config.php')
+            ||
+            file_exists(ABC::env('DIR_CONFIG').'default'.DS.'config.php')
+
+        ) {
             return [
                 "AbanteCart is already installed!\n "
-                ."Suggestion: to reinstall application just delete files ".ABC::env('DIR_CONFIG')."enabled.config.php"
+                ."Suggestion: to reinstall application just delete files:\n "
+                .ABC::env('DIR_CONFIG')."enabled.config.php"
+                ." AND\n"
+                .ABC::env('DIR_CONFIG')."default".DS."config.php"
             ];
         }
 
