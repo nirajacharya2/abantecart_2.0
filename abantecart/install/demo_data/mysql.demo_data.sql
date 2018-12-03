@@ -260,33 +260,13 @@ INSERT INTO `ac_custom_lists` VALUES (8,12,'manufacturer_id',11,0,'2015-06-12 09
 INSERT INTO `ac_custom_lists` VALUES (9,12,'manufacturer_id',17,0,'2015-06-12 09:56:24','2015-06-12 09:56:24');
 INSERT INTO `ac_custom_lists` VALUES (10,12,'manufacturer_id',16,0,'2015-06-12 09:56:24','2015-06-12 09:56:24');
 
---
--- Dumping data for table `customers`
---
-INSERT INTO `ac_customers`
-(`customer_id`, `store_id`, `firstname`, `lastname`, `loginname`, `email`,`telephone`,
-	`fax`, `sms`, `password`, `cart`, `wishlist`, `newsletter`, `address_id`, `status`, `approved`, `customer_group_id`,
-	`ip`, `date_added`, `date_modified`)
-VALUES
-(2,0,'Juliana','Davis','julidavis@abantecart.com','julidavis@abantecart.com','(602) 141-7191','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,1,1,1,1,'109.104.166.98','2013-08-31 14:25:37','2015-06-12 09:56:24'),
-(3,0,'Keely','Mccoy','keelymccoy@abantecart.com','keelymccoy@abantecart.com','(602) 916-1822','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,2,1,1,1,'109.104.166.98','2013-08-31 14:39:08','2015-06-12 09:56:24'),
-(4,0,'Zelda','Weiss','zeldaweiss@abantecart.com','zeldaweiss@abantecart.com','(539) 838-9210','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,3,1,1,1,'109.104.166.138','2013-08-31 14:42:58','2015-06-12 09:56:24'),
-(5,0,'Gloria','Macias','gloriamacias@abantecart.com','gloriamacias@abantecart.com','(573) 500-2105','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,4,1,1,1,'109.104.166.98','2013-08-31 14:46:58','2015-06-12 09:56:24'),
-(6,0,'Bernard','Horne','bernardhorne@abantecart.com','bernardhorne@abantecart.com','(573) 500-2105','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,5,1,1,1,'109.104.166.138','2013-08-31 14:50:27','2015-06-12 09:56:24'),
-(7,0,'James','Curtis','jamescurtis@abantecart.com','jamescurtis@abantecart.com','(602) 916-1822','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,6,1,1,1,'109.104.166.138','2013-08-31 15:00:03','2015-06-12 09:56:24'),
-(8,0,'Bruce','Rosarini','brucerosarini@abantecart.com','brucerosarini@abantecart.com','(539) 838-9210','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,7,1,1,1,'109.104.166.98','2013-08-31 15:08:23','2015-06-12 09:56:24'),
-(9,0,'Carlos','Compton','carloscmpton@abantecart.com','carloscmpton@abantecart.com','(928) 205-0511','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,8,1,1,1,'109.104.166.98','2013-08-31 15:13:14','2015-06-12 09:56:24'),
-(10,0,'Garrison','Baxter','garrisonbaxter@abantecart.com','garrisonbaxter@abantecart.com','(803) 189-5001','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,9,1,1,1,'109.104.166.138','2013-09-01 12:51:47','2015-06-12 09:56:24'),
-(11,0,'Anthony','Blair','anthonyblair@abantecart.com','anthonyblair@abantecart.com','(402) 456-6398','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,10,1,1,1,'171.98.12.12','2013-09-01 12:54:26','2015-06-12 09:56:24'),
-(12,0,'Allen','Waters','allenwaters@abantecart.com','allenwaters@abantecart.com','(417) 280-7406','','','6b006ba67f3c172e146991a2ad46d865','a:0:{}',NULL,0,11,1,1,1,'109.104.166.98','2013-09-01 13:12:56','2015-06-12 09:56:24'),
-(13,0,'qqqqqq','qqqqqq','1@abantecart','1@abantecart','55 555 5555 5555','','','6b006ba67f3c172e146991a2ad46d865','a:1:{s:3:\"97.\";i:1;}',NULL,0,12,1,1,1,'109.104.166.98','2013-09-08 15:28:20','2015-06-12 09:56:24');
 
 --
 -- Dumping data for table `addresses`
 --
 
-INSERT INTO `ac_addresses` 
-VALUES 
+INSERT INTO `ac_addresses`
+VALUES
 (1,2,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616),
 (2,3,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648),
 (3,4,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616),
@@ -299,6 +279,302 @@ VALUES
 (10,11,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666),
 (11,12,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616),
 (12,13,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
+
+--
+-- Dumping data for table `customers`
+--
+INSERT INTO `ac_customers`
+(
+`customer_id`,
+`store_id`,
+`firstname`,
+`lastname`,
+`loginname`,
+`email`,
+`telephone`,
+`fax`,
+`sms`,
+`password`,
+`cart`,
+`wishlist`,
+`newsletter`,
+`address_id`,
+`status`,
+`approved`,
+`customer_group_id`,
+`ip`,
+`date_added`,
+`date_modified`
+)
+VALUES
+(
+2,
+0,
+'Juliana',
+'Davis',
+'julidavis@abantecart.com',
+'julidavis@abantecart.com',
+'(602) 141-7191',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+1,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+),
+
+(
+3,
+0,
+'Keely',
+'Mccoy',
+'keelymccoy@abantecart.com',
+'keelymccoy@abantecart.com',
+'(602) 916-1822',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+2,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),NOW()
+),
+
+(
+4,
+0,
+'Zelda',
+'Weiss',
+'zeldaweiss@abantecart.com',
+'zeldaweiss@abantecart.com',
+'(539) 838-9210',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+3,
+1,
+1,
+1,
+'109.104.166.138',
+NOW(),
+NOW()
+),
+
+(
+5,
+0,
+'Gloria',
+'Macias',
+'gloriamacias@abantecart.com',
+'gloriamacias@abantecart.com',
+'(573) 500-2105',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+4,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+),
+
+(
+6,
+0,
+'Bernard',
+'Horne',
+'bernardhorne@abantecart.com',
+'bernardhorne@abantecart.com',
+'(573) 500-2105',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+5,
+1,
+1,
+1,
+'109.104.166.138',
+NOW(),
+NOW()
+),
+
+(
+7,
+0,
+'James',
+'Curtis',
+'jamescurtis@abantecart.com',
+'jamescurtis@abantecart.com',
+'(602) 916-1822',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+6,
+1,
+1,
+1,
+'109.104.166.138',
+NOW(),
+NOW()
+),
+
+(
+8,
+0,
+'Bruce',
+'Rosarini',
+'brucerosarini@abantecart.com',
+'brucerosarini@abantecart.com',
+'(539) 838-9210',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+7,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+),
+
+(
+9,
+0,
+'Carlos',
+'Compton',
+'carloscmpton@abantecart.com',
+'carloscmpton@abantecart.com',
+'(928) 205-0511',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+8,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+),
+
+(
+10,
+0,
+'Garrison',
+'Baxter',
+'garrisonbaxter@abantecart.com',
+'garrisonbaxter@abantecart.com',
+'(803) 189-5001',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+9,
+1,
+1,
+1,
+'109.104.166.138',
+NOW(),
+NOW()),
+
+(
+11,
+0,
+'Anthony',
+'Blair',
+'anthonyblair@abantecart.com',
+'anthonyblair@abantecart.com',
+'(402) 456-6398',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',NULL,0,10,1,1,1,'171.98.12.12',
+NOW(),
+NOW()
+),
+
+(
+12,
+0,
+'Allen',
+'Waters',
+'allenwaters@abantecart.com',
+'allenwaters@abantecart.com',
+'(417) 280-7406',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:0:{}',
+NULL,
+0,
+11,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+),
+
+(
+13,
+0,
+'qqqqqq',
+'qqqqqq',
+'1@abantecart',
+'1@abantecart',
+'55 555 5555 5555',
+'',
+'',
+'6b006ba67f3c172e146991a2ad46d865',
+'a:1:{s:3:\"97.\";i:1;}',
+NULL,
+0,
+12,
+1,
+1,
+1,
+'109.104.166.98',
+NOW(),
+NOW()
+);
+
+
 
 
 --
