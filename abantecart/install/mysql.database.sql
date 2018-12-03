@@ -201,7 +201,7 @@ CREATE TABLE `ac_customers` (
   `cart` LONGTEXT COLLATE utf8_general_ci,
   `wishlist` LONGTEXT COLLATE utf8_general_ci,
   `newsletter` int(1) NOT NULL DEFAULT '0',
-  `address_id` int(11) NOT NULL DEFAULT '0', -- default customer's address
+  `address_id` int(11) NULL, -- default customer's address
   `status` int(1) NOT NULL,
   `approved` int(1) NOT NULL DEFAULT '0',
   `customer_group_id` int(11) NULL,
@@ -13249,3 +13249,13 @@ ADD CONSTRAINT `ac_global_attributes_ibfk_3`
     REFERENCES `ac_layouts` (`layout_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE;
+
+ALTER TABLE `ac_customers`
+CHANGE COLUMN `address_id` `address_id` INT(11) NULL DEFAULT NULL ,
+ADD INDEX `ac_customers_ibfk_3_idx` (`address_id` ASC);
+ALTER TABLE `ac_customers`
+ADD CONSTRAINT `ac_customers_ibfk_3`
+  FOREIGN KEY (`address_id`)
+  REFERENCES `ac_addresses` (`address_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
