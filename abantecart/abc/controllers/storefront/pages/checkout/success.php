@@ -53,7 +53,7 @@ class ControllerPagesCheckoutSuccess extends AController
 
             $this->extensions->hk_ProcessData($this);
             //Redirect back to load new page with cleared shopping cart content
-            abc_redirect($this->html->getSecureURL('checkout/success'));
+            abc_redirect($this->html->getSecureURL('checkout/success', '&ver='.Date('Ymdhsi')));
         } //when validation failed
         elseif ($order_id) {
             $this->session->data['processed_order_id'] = $order_id;
