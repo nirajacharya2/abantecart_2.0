@@ -86,16 +86,10 @@
 				if (data.result == true) {
 					<?php
 					if(!$customer_transaction_id){?>
-					if ($('#transaction_modal')) {
-						$('#transaction_modal').modal('hide');
-					}
-					if ($('#transactions_grid')) {
-						$('#transactions_grid').trigger("reloadGrid");
-						success_alert(data.result_text, true);
-					}
-					<?php }else{ ?>
-						success_alert(data.result_text, true, "#transaction_modal");
-					<?php } ?>
+						if ($('#transaction_modal')) {
+							$('#transaction_modal').modal('hide');
+						} <?php
+					} ?>
 					location = window.location;
 				}
 			},
