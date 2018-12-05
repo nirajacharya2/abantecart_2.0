@@ -150,7 +150,7 @@ class ABC extends ABCBase
                     if (is_array($ext_config)) {
                         //if we load additions configs - place it as key of env array
                         if ($config_section == 'config') {
-                            self::$env += $ext_config;
+                            self::$env = array_merge(self::$env,$ext_config);
                         } else {
                             self::$env[$KEY] = array_merge_recursive(
                                 (array)self::$env[$KEY],
