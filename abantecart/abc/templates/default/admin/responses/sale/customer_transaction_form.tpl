@@ -83,14 +83,14 @@
 					$('.alert').remove();
 				},
 			success: function (data) {
-				if (data.result == true) {
+				if (data.result === true) {
 					<?php
 					if(!$customer_transaction_id){?>
 						if ($('#transaction_modal')) {
 							$('#transaction_modal').modal('hide');
 						} <?php
 					} ?>
-					location = window.location;
+					location.reload();
 				}
 			},
 			error: function (jqXHR, textStatus, errorThrown) {
