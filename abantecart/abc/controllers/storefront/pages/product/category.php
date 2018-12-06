@@ -111,7 +111,8 @@ class ControllerPagesProductCategory extends AController
         $category_info = [];
         if ($category_id) {
             $category_info = $this->model_catalog_category->getCategory($category_id);
-        } elseif ($this->config->get('embed_mode') == true) {
+        } elseif ($this->config->get('embed_mode') == true || isset($request['path'])) {
+            //Display Top category when embed mode or have PATH parameter
             $category_info['name'] = $this->language->get('text_top_category');
         }
 
