@@ -240,13 +240,8 @@
 							name="product[<?php echo $order_product_row; ?>][quantity]"
 							value="<?php echo $order_product['quantity']; ?>"
 							size="4"/></td>
-				<td><input class="no-save pull-right" type="text"
-				           readonly
-						   name="product[<?php echo $order_product_row; ?>][price]"
-						   value="<?php echo $order_product['price']; ?>"/></td>
-				<td><input readonly class="no-save pull-right" type="text"
-						   name="product[<?php echo $order_product_row; ?>][total]"
-						   value="<?php echo $order_product['total']; ?>"/></td>
+				<td><?php echo $order_product['price']; ?></td>
+				<td><?php echo $order_product['total']; ?></td>
 			</tr>
 			</tbody>
 			<?php $order_product_row++ ?>
@@ -287,9 +282,9 @@
 									   name="totals[<?php echo $total_row['order_total_id']; ?>]"
 									   value="<?php echo $total_row['text']; ?>"/>
 					<?php } else { ?>
-					<b class="<?php echo $total_row['type']; ?>" rel="totals[<?php echo $total_row['order_total_id']; ?>]"><?php echo $total_row['text']; ?>
-					</b>	
-					<input type="hidden" class="hidden_<?php echo $total_row['type']; ?>" name="totals[<?php echo $total_row['order_total_id']; ?>]" value="<?php echo $total_row['text']; ?>"/>
+					<b class="<?php echo $total_row['type']; ?>" rel="totals[<?php echo $total_row['order_total_id']; ?>]">
+						<?php echo $total_row['text']; ?>
+					</b>
 					<?php } ?>
 					
 					<?php $count++; ?>
