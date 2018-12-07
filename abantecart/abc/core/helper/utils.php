@@ -1531,15 +1531,16 @@ class AHelperUtils extends AHelper
             $path = '';
             $directories = explode('/', dirname(str_replace('../', '', $new_image)));
             foreach ($directories as $directory) {
-                $path = $path.'/'.$directory;
+                $path = $path.DS.$directory;
                 //do we have directory?
                 if (!file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
-                    $indexFile = ABC::env('DIR_IMAGES').$path.'/index.php';
-                    $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775)
-                        && file_put_contents($indexFile,
-                            "<?php die('Restricted Access!'); ?>");
-                    if (!$result) {
+                    $indexFile = ABC::env('DIR_IMAGES').$path.DS.'index.php';
+                    $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775);
+                    if ($result) {
+                        file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
+                        chmod($indexFile, 664);
+                    }else{
                         $error = new AWarning(
                             'Cannot to create directory '
                             .ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES')
@@ -1548,6 +1549,8 @@ class AHelperUtils extends AHelper
                     }
                 }
             }
+
+
         }
 
         if (!file_exists(ABC::env('DIR_IMAGES').$new_image)
