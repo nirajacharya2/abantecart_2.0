@@ -764,6 +764,7 @@ VALUES
 
 
 -- set default addresses for customers
+
 UPDATE `ac_customers` SET `address_id`= '1' WHERE `customer_id` = '2';
 UPDATE `ac_customers` SET `address_id`= '2' WHERE `customer_id` = '3';
 UPDATE `ac_customers` SET `address_id`= '3' WHERE `customer_id` = '4';

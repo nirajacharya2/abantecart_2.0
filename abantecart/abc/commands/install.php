@@ -895,12 +895,10 @@ EOD;
             $tsl = trim($line);
             if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
                 $query .= $line;
+
                 if (preg_match('/;\s*$/', $line)) {
-                    $query = str_replace("DROP TABLE IF EXISTS `ac_", "DROP TABLE IF EXISTS `".$options['db_prefix'],
-                        $query);
-                    $query = str_replace("CREATE TABLE `ac_", "CREATE TABLE `".$options['db_prefix'], $query);
-                    $query = str_replace("INSERT INTO `ac_", "INSERT INTO `".$options['db_prefix'], $query);
-                    $result = $db->query($query);
+                    $query = str_replace(" `ac_", " `".$options['db_prefix'], $query);
+                    $result = $db->query($query, true); //silence mode
                     if (!$result || $db->error) {
                         $errors[] = $db->error."\n\t\t".$query;
                         break;
