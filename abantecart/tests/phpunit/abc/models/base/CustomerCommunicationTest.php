@@ -1,19 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: denis
- * Date: 25/09/2018
- * Time: 21:47
- */
 
 namespace abantecart\tests;
 
-
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADB;
 use abc\models\base\CustomerCommunication;
-use PHPUnit\Framework\ExpectationFailedException;
-use abantecart\tests\AbanteCartTest;
 
 /**
  * Class CustomerCommunicationTest
@@ -22,7 +12,7 @@ use abantecart\tests\AbanteCartTest;
  * @property ADB $db
  */
 
-class CustomerCommunicationTest extends AbanteCartTest
+class CustomerCommunicationTest extends ABCTestCase
 {
 
     protected function tearDown()
@@ -41,10 +31,4 @@ $this->markTestSkipped('must be revisited.');
         $this->assertTrue(is_array($result));
     }
 
-    /*public function testBasicExample()
-    {
-        $arColumns = $this->db->table('customer_communications')->columns();
-        AHelperUtils::df($arColumns);
-        $this->assertTrue(true);
-    }*/
 }

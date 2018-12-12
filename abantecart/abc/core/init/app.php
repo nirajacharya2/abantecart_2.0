@@ -466,18 +466,29 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
 // Currency
 registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\ACurrency', [$registry]);
 
-//register event listeners
+//register controllers event listeners
 /**
  * @var Dispatcher $evd
  */
 $evd = ABC::getObjectByAlias('EventDispatcher');
 if(is_object($evd)) {
-    foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
+    foreach ((array)ABC::env('EVENTS') as $event_alias => $listeners) {
         foreach ($listeners as $listener) {
             $evd->listen($event_alias, $listener);
         }
     }
     $registry->set('events', $evd);
+}
+
+//register ORM-model event listeners
+$evd = ABC::getObjectByAlias('EventDispatcher');
+if(is_object($evd)) {
+    foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
+        foreach ($listeners as $listener) {
+            $evd->listen($event_alias, $listener);
+        }
+    }
+    $registry->set('model_events', $evd);
 }
 
 

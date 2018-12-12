@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,10 +24,6 @@ use abc\core\ABC;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class AImage
  */
@@ -44,7 +40,7 @@ class AImage
     /**
      * @var array
      */
-    protected $info = array();
+    protected $info = [];
 
     /**
      * @var
@@ -53,6 +49,8 @@ class AImage
 
     /**
      * @param string $filename
+     *
+     * @throws \ReflectionException
      */
     public function __construct($filename)
     {
@@ -66,13 +64,13 @@ class AImage
         try {
             $info = getimagesize($filename);
             $this->file = $filename;
-            $this->info = array(
+            $this->info = [
                 'width'    => $info[0],
                 'height'   => $info[1],
                 'bits'     => $info['bits'],
                 'mime'     => $info['mime'],
                 'channels' => $info['channels'],
-            );
+            ];
             $this->registry = Registry::getInstance();
             $this->image = $this->get_gd_resource($filename);
         } catch (AException $e) {
@@ -123,7 +121,7 @@ class AImage
         }
 
         $res_img = '';
-        if ($this->_is_memory_enough($this->info['width'], $this->info['height'])) {
+        if ($this->isMemoryEnough($this->info['width'], $this->info['height'])) {
             if ($mime == 'image/gif') {
                 $res_img = imagecreatefromgif($filename);
             } elseif ($mime == 'image/png') {
@@ -143,13 +141,14 @@ class AImage
 
     /**
      * @param string $filename
-     * @param int    $width
-     * @param int    $height
-     * @param array  $options
+     * @param int $width
+     * @param int $height
+     * @param array $options
      *
      * @return bool
+     * @throws \ReflectionException
      */
-    public function resizeAndSave($filename, $width, $height, $options = array())
+    public function resizeAndSave($filename, $width, $height, $options = [])
     {
         if (!$filename) {
             return false;
@@ -178,9 +177,10 @@ class AImage
 
     /**
      * @param string $filename - full file name
-     * @param int    $quality  - some number in range from 1 till 100
+     * @param int $quality - some number in range from 1 till 100
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function save($filename, $quality = 90)
     {
@@ -194,9 +194,10 @@ class AImage
 
     /**
      * @param string $filename - full file name
-     * @param int    $quality  - some number in range from 1 till 100
+     * @param int $quality - some number in range from 1 till 100
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function _save($filename, $quality = 90)
     {
@@ -209,7 +210,7 @@ class AImage
         $quality = $quality < 1 ? 1 : $quality;
 
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        if ($this->_is_memory_enough($this->info['width'], $this->info['height'])) {
+        if ($this->isMemoryEnough($this->info['width'], $this->info['height'])) {
             if ($extension == 'jpeg' || $extension == 'jpg') {
                 imagejpeg($this->image, $filename, $quality);
             } elseif ($extension == 'png') {
@@ -237,11 +238,12 @@ class AImage
     }
 
     /**
-     * @param int        $width
-     * @param int        $height
+     * @param int $width
+     * @param int $height
      * @param bool|false $nofill - sign for background fill
      *
      * @return bool|null
+     * @throws \ReflectionException
      */
     public function resize($width = 0, $height = 0, $nofill = false)
     {
@@ -264,7 +266,7 @@ class AImage
         $ypos = (int)(($height - $new_height) / 2);
 
         $image_old = $this->image;
-        if ($this->_is_memory_enough($this->info['width'], $this->info['height'])) {
+        if ($this->isMemoryEnough($this->info['width'], $this->info['height'])) {
             $this->image = imagecreatetruecolor($width, $height);
 
             if (isset($this->info['mime']) && $this->info['mime'] == 'image/png') {
@@ -321,6 +323,8 @@ class AImage
      * @param string $position
      *
      * @return bool
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function watermark($filename, $position = 'bottomright')
     {
@@ -353,7 +357,7 @@ class AImage
             }
             imagecopy($this->image, $watermark, $watermark_pos_x, $watermark_pos_y, 0, 0, 120, 40);
             imagedestroy($watermark);
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $warning = new AWarning('Cannot to apply watermark to the image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -368,13 +372,14 @@ class AImage
      * @param int $bottom_y
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function crop($top_x, $top_y, $bottom_x, $bottom_y)
     {
         if (!is_resource($this->image)) {
             return false;
         }
-        if ($this->_is_memory_enough($bottom_x - $top_x, $bottom_y - $top_y)) {
+        if ($this->isMemoryEnough($bottom_x - $top_x, $bottom_y - $top_y)) {
             $image_old = $this->image;
             $this->image = imagecreatetruecolor($bottom_x - $top_x, $bottom_y - $top_y);
 
@@ -392,10 +397,11 @@ class AImage
     }
 
     /**
-     * @param float  $degree
+     * @param float $degree
      * @param string $color
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function rotate($degree, $color = 'FFFFFF')
     {
@@ -409,7 +415,7 @@ class AImage
                 imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
             $this->info['width'] = imagesx($this->image);
             $this->info['height'] = imagesy($this->image);
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $warning = new AWarning('Cannot to rotate image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -421,6 +427,7 @@ class AImage
      * @param int $filter
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function filter($filter)
     {
@@ -429,7 +436,7 @@ class AImage
         }
         try {
             imagefilter($this->image, $filter);
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $warning = new AWarning('Cannot to apply filter to the image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -439,12 +446,13 @@ class AImage
 
     /**
      * @param string $text
-     * @param int    $x
-     * @param int    $y
-     * @param int    $size
+     * @param int $x
+     * @param int $y
+     * @param int $size
      * @param string $color
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function text($text, $x = 0, $y = 0, $size = 5, $color = '000000')
     {
@@ -455,7 +463,7 @@ class AImage
         try {
             imagestring($this->image, $size, $x, $y, $text,
                 imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $warning = new AWarning('Cannot to add text into image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -465,11 +473,13 @@ class AImage
 
     /**
      * @param string $filename
-     * @param int    $x
-     * @param int    $y
-     * @param int    $opacity
+     * @param int $x
+     * @param int $y
+     * @param int $opacity
      *
      * @return bool
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function merge($filename, $x = 0, $y = 0, $opacity = 100)
     {
@@ -484,7 +494,7 @@ class AImage
             $merge_width = imagesx($merge);
             $merge_height = imagesy($merge);
             imagecopymerge($this->image, $merge, $x, $y, 0, 0, $merge_width, $merge_height, $opacity);
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $warning = new AWarning('Cannot to merge image files '.$this->file.' and '.$filename.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -497,16 +507,16 @@ class AImage
      *
      * @return array|bool
      */
-    private function html2rgb($color)
+    protected function html2rgb($color)
     {
         if ($color[0] == '#') {
             $color = substr($color, 1);
         }
 
         if (strlen($color) == 6) {
-            list($r, $g, $b) = array($color[0].$color[1], $color[2].$color[3], $color[4].$color[5]);
+            list($r, $g, $b) = [$color[0].$color[1], $color[2].$color[3], $color[4].$color[5]];
         } elseif (strlen($color) == 3) {
-            list($r, $g, $b) = array($color[0].$color[0], $color[1].$color[1], $color[2].$color[2]);
+            list($r, $g, $b) = [$color[0].$color[0], $color[1].$color[1], $color[2].$color[2]];
         } else {
             return false;
         }
@@ -515,10 +525,10 @@ class AImage
         $g = hexdec($g);
         $b = hexdec($b);
 
-        return array($r, $g, $b);
+        return [$r, $g, $b];
     }
 
-    protected function _is_memory_enough($x, $y, $rgb = 4)
+    protected function isMemoryEnough($x, $y, $rgb = 4)
     {
         $memory_limit = trim(ini_get('memory_limit'));
         $last = strtolower($memory_limit[strlen($memory_limit) - 1]);

@@ -21,13 +21,12 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\cache\ACache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
-
+use H;
 
 /**
  * @property \abc\models\storefront\ModelToolImage | \abc\models\admin\ModelToolImage $model_tool_image
@@ -331,8 +330,9 @@ class AResource
             return $this->buildResourceURL($rsrc_info['resource_path'], 'full');
         }
 
-        $type_image = is_file(ABC::env('DIR_IMAGES').'icon_resource_'.$this->type.'.png') ? 'icon_resource_'.$this->type
-            .'.png' : '';
+        $type_image = is_file(ABC::env('DIR_IMAGES').'icon_resource_'.$this->type.'.png')
+                        ? 'icon_resource_'.$this->type.'.png'
+                        : '';
 
         //is this a resource with code ?
         if (!empty($rsrc_info['resource_code'])) {
@@ -381,10 +381,11 @@ class AResource
             return $this->model_tool_image->resize($rsrc_info['default_icon'], $width, $height);
         } else {
             //Build thumbnails path similar to resource library path
-            $sub_path =
-                'thumbnails/'.dirname($rsrc_info['resource_path']).'/'.$name.'-'.$resource_id.'-'.$width.'x'.$height;
+            $sub_path = 'thumbnails'.DS
+                        .dirname($rsrc_info['resource_path']).DS
+                        .$name.'-'.$resource_id.'-'.$width.'x'.$height;
             $new_image = $sub_path.'.'.$extension;
-            if (!AHelperUtils::check_resize_image($origin_path, $new_image, $width, $height,
+            if (!H::check_resize_image($origin_path, $new_image, $width, $height,
                 $this->config->get('config_image_quality'))
             ) {
                 $warning = new AWarning('Resize image error. File: '.$origin_path);
@@ -394,7 +395,7 @@ class AResource
             //do retina version
             if ($this->config->get('config_retina_enable')) {
                 $new_image2x = $sub_path.'@2x.'.$extension;
-                if (!AHelperUtils::check_resize_image($origin_path, $new_image2x, $width * 2, $height * 2,
+                if (!H::check_resize_image($origin_path, $new_image2x, $width * 2, $height * 2,
                     $this->config->get('config_image_quality'))
                 ) {
                     $warning = new AWarning('Resize image error. File: '.$origin_path);
@@ -428,7 +429,7 @@ class AResource
             }
             return $http_path.$this->type_dir.$resource_path;
         } else {
-            return "resources/".$this->type_dir.$resource_path;
+            return "resources".DS.$this->type_dir.$resource_path;
         }
     }
 
@@ -583,7 +584,7 @@ class AResource
                         // return href for image with size as-is
                         $main_url = $http_path.$this->getTypeDir().$result['resource_path'];
                         //get original image size
-                        $actual_sizes = AHelperUtils::get_image_size($res_full_path);
+                        $actual_sizes = H::get_image_size($res_full_path);
                         $sizes['main'] = $actual_sizes;
                     }
                     if ($sizes['thumb']) {
@@ -695,7 +696,7 @@ class AResource
     public function getResources($object_name, $object_id, $language_id = 0)
     {
         //Allow to load resources only for 1 object and id combination
-        if (!AHelperUtils::has_value($object_name) || !AHelperUtils::has_value($object_id)) {
+        if (!H::has_value($object_name) || !H::has_value($object_id)) {
             return [];
         }
 

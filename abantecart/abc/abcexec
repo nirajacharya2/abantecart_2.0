@@ -53,6 +53,14 @@ if (!preg_match('/^--(.*)$/', $command)) {
 }
 
 try {
+    require __DIR__.DS.'core'.DS.'abc.php';
+    //run constructor of ABC class to load environment
+
+    $ABC = new ABC();
+    if (!$ABC::getStageName()) {
+        $ABC->loadDefaultStage();
+        echo "Default stage environment loaded.\n\n";
+    }
     require __DIR__.DS.'core'.DS.'init'.DS.'cli.php';
 } catch (\Exception $e) {
     showException($e);
