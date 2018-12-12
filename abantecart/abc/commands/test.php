@@ -35,11 +35,12 @@ class Test extends BaseCommand
     protected $phpUnitConfigFile;
     protected $phpUnitTestTemplate;
     protected $phpUnitTestsResult;
+    const PHAR_PACK_NAME = 'phpunit-7.5.phar';
 
     public function __construct()
     {
         $this->phpUnitTestTemplate = ABC::env('DIR_APP').'commands'.DS.'base'.DS.'phpunit.test.template.txt';
-        $this->phpUnitPhar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'phpunit-7.2.5.phar';
+        $this->phpUnitPhar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.self::PHAR_PACK_NAME;
         parent::__construct();
     }
 
@@ -267,7 +268,7 @@ class Test extends BaseCommand
             $dirs = [ABC::env('DIR_TESTS').'phpunit'.DS.'abc'];
             $dirs = array_merge($dirs, glob(ABC::env('DIR_APP_EXTENSIONS').'*'.DS.'tests'.DS.'phpunit', GLOB_ONLYDIR));
         }
-        $phpunit_bootstrap = ABC::env('DIR_TESTS').'phpunit/AbanteCartTestBootstrap.php';
+        $phpunit_bootstrap = ABC::env('DIR_TESTS').'phpunit/ABCTestBootstrap.php';
         $content = <<<EOD
 <phpunit
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -276,6 +277,7 @@ class Test extends BaseCommand
 	<php>
 	  <ini name="display_startup_errors" value="On"/>
 	  <ini name="display_errors" value="On"/>
+	  <env name="stage" value="{$stage_name}"/>
 	</php>
 	<testsuites>
 		<testsuite name="abcexec_tests">

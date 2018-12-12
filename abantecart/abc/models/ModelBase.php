@@ -107,9 +107,14 @@ class AModelBase extends OrmModel
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
         parent::__construct($attributes);
+        static::boot();
     }
 
-
+    public static function boot()
+    {
+        parent::$dispatcher = Registry::getInstance()->get('model_events');
+        parent::boot();
+    }
 
     /**
      * @return array
@@ -180,8 +185,9 @@ class AModelBase extends OrmModel
      */
     public function validate($data)
     {
+return true;
         if ($rules = $this->rules()) {
-            $v = new Validator(new ValidationTranslator(), $data, $rules);
+            $v = new Validator(new ValidationTranslator(), (array)$data, $rules);
             try {
                 $v->validate();
             } catch (ValidationException $e) {

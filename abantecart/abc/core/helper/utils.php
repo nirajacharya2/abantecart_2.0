@@ -204,9 +204,10 @@ class AHelperUtils extends AHelper
      *
      * @param        $string_value
      * @param string $object_key_name
-     * @param int    $object_id
+     * @param int $object_id
      *
      * @return string
+     * @throws Exception
      */
     public static function SEOEncode($string_value, $object_key_name = '', $object_id = 0)
     {
@@ -1531,15 +1532,16 @@ class AHelperUtils extends AHelper
             $path = '';
             $directories = explode('/', dirname(str_replace('../', '', $new_image)));
             foreach ($directories as $directory) {
-                $path = $path.'/'.$directory;
+                $path = $path.DS.$directory;
                 //do we have directory?
                 if (!file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
-                    $indexFile = ABC::env('DIR_IMAGES').$path.'/index.php';
-                    $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775)
-                        && file_put_contents($indexFile,
-                            "<?php die('Restricted Access!'); ?>");
-                    if (!$result) {
+                    $indexFile = ABC::env('DIR_IMAGES').$path.DS.'index.php';
+                    $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775);
+                    if ($result) {
+                        file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
+                        chmod($indexFile, 664);
+                    }else{
                         $error = new AWarning(
                             'Cannot to create directory '
                             .ABC::env('DIR_IMAGES').$path.'. Please check permissions for '.ABC::env('DIR_IMAGES')

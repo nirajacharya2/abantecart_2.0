@@ -45,13 +45,13 @@ class AExceptionHandler
      * Report or log an exception.
      *
      * @param  \Exception  $e
-     * @return mixed
+     * @return null
      *
      * @throws \Exception
      */
     public function report(Exception $e)
     {
-        if ($this->shouldntReport($e)) {
+        if ($this->shouldNotReport($e)) {
             return null;
         }
 
@@ -80,12 +80,14 @@ class AExceptionHandler
                 $log = ABC::getObjectByAlias('ALog', [[
                             'app'      => 'application.log'
                         ]]);
-
-                $log->{$logger_message_type}( $e->getMessage().' in '.$e->getFile().':'.$e->getLine() );
+                if($log) {
+                    $log->{$logger_message_type}($e->getMessage().' in '.$e->getFile().':'.$e->getLine());
+                }
             } catch (Exception $ex) {
                 throw $e; // throw the original exception
             }
         }
+        return null;
     }
 
     /**
@@ -96,7 +98,7 @@ class AExceptionHandler
      */
     public function shouldReport(Exception $e)
     {
-        return ! $this->shouldntReport($e);
+        return ! $this->shouldNotReport($e);
     }
 
     /**
@@ -105,7 +107,7 @@ class AExceptionHandler
      * @param  \Exception  $e
      * @return bool
      */
-    protected function shouldntReport(Exception $e)
+    protected function shouldNotReport(Exception $e)
     {
         return false;
     }
@@ -116,7 +118,6 @@ class AExceptionHandler
      * @param  \Exception $e
      * @param  string     $to - can be http, cli, debug
      *
-     * @return mixed
      * @throws AException
      */
     public function render( Exception $e, $to = 'http')
@@ -183,7 +184,7 @@ class AExceptionHandler
         foreach ($exception->getTrace() as $frame) {
             $args = "";
             if (isset($frame['args'])) {
-                $args = array();
+                $args = [];
                 foreach ($frame['args'] as $arg) {
                     if (is_string($arg)) {
                         $args[] = "'" . $arg . "'";

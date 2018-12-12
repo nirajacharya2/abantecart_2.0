@@ -20,9 +20,9 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADB;
 use Exception;
+use H;
 use Illuminate\Events\Dispatcher;
 
 // do check for vendor autoload file first
@@ -62,14 +62,6 @@ if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
 
-require dirname(__DIR__).DS.'abc.php';
-//run constructor of ABC class to load environment
-
-$ABC = new ABC();
-if (!$ABC::getStageName()) {
-    $ABC->loadDefaultStage();
-    echo "Default stage environment loaded.\n\n";
-}
 
 ABC::env('IS_ADMIN', true);
 ABC::env('INDEX_FILE', 'index.php');
@@ -125,10 +117,10 @@ foreach ($defaults as $name => $value) {
 }
 //load vendors classes
 
-require ABC::env('DIR_VENDOR').'autoload.php';
+require_once ABC::env('DIR_VENDOR').'autoload.php';
 
 // App Version
-include('version.php');
+include_once('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
 $dir_lib = ABC::env('DIR_LIB');
 require_once($dir_lib.'debug.php');
@@ -153,7 +145,7 @@ registerClass($registry, 'html', 'AHtml', [$registry], '\abc\core\engine\AHtml',
 if (ABC::env('DB_CURRENT_DRIVER')) {
     $db_config = ABC::env('DATABASES');
     $registry->set('db', new ADB($db_config[ABC::env('DB_CURRENT_DRIVER')]));
-    AHelperUtils::setDBUserVars();
+    H::setDBUserVars();
 }
 
 // Config
@@ -232,6 +224,17 @@ if(is_object($evd)) {
         }
     }
     $registry->set('events', $evd);
+}
+
+//register ORM-model event listeners
+$evd = ABC::getObjectByAlias('EventDispatcher');
+if(is_object($evd)) {
+    foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
+        foreach ($listeners as $listener) {
+            $evd->listen($event_alias, $listener);
+        }
+    }
+    $registry->set('model_events', $evd);
 }
 
 // functions
@@ -435,7 +438,7 @@ function getExecutor($name, $silent_mode = false)
 function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
 {
     $class_name = ABC::getFullClassName($alias);
-    $instance = AHelperUtils::getInstance($class_name, $arguments, $default_class, $default_arguments);
+    $instance = H::getInstance($class_name, $arguments, $default_class, $default_arguments);
     $registry->set($item_name, $instance);
 }
 
