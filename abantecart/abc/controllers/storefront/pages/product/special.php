@@ -22,9 +22,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-
+use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductSpecial
@@ -36,6 +37,13 @@ class ControllerPagesProductSpecial extends AController
 {
 
     public $data = [];
+    use ProductListingTrait;
+
+    public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->fillSortsList();
+    }
 
     /**
      * Check if HTML Cache is enabled for the method
@@ -92,9 +100,8 @@ class ControllerPagesProductSpecial extends AController
             $limit = $this->config->get('config_catalog_limit');
         }
 
-        if (isset($request['sort'])) {
-            $sorting_href = $request['sort'];
-        } else {
+        $sorting_href = $request['sort'];
+        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
             $sorting_href = $this->config->get('config_product_default_sort_order');
         }
         list($sort, $order) = explode("-", $sorting_href);
@@ -262,59 +269,9 @@ class ControllerPagesProductSpecial extends AController
             }
             $this->data['display_price'] = $display_price;
 
-            $sorts = [];
-            $sorts[] = [
-                'text'  => $this->language->get('text_default'),
-                'value' => 'p.sort_order-ASC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=p.sort_order&order=ASC', '&encode'),
-            ];
-
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_name_asc'),
-                'value' => 'pd.name-ASC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=pd.name&order=ASC', '&encode'),
-            ];
-
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_name_desc'),
-                'value' => 'pd.name-DESC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=pd.name&order=DESC', '&encode'),
-            ];
-
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_price_asc'),
-                'value' => 'ps.price-ASC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=price&order=ASC', '&encode'),
-            ];
-
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_price_desc'),
-                'value' => 'ps.price-DESC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=price&order=DESC', '&encode'),
-            ];
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_rating_desc'),
-                'value' => 'rating-DESC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=rating&order=DESC', '&encode'),
-            ];
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_rating_asc'),
-                'value' => 'rating-ASC',
-                'href'  => $this->html->getURL('product/special', $url.'&sort=rating&order=ASC', '&encode'),
-            ];
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_date_desc'),
-                'value' => 'date_modified-DESC',
-                'href'  => $this->html->getSEOURL('product/special', $url.'&sort=date_modified&order=DESC', '&encode'),
-            ];
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_date_asc'),
-                'value' => 'date_modified-ASC',
-                'href'  => $this->html->getSEOURL('product/special', $url.'&sort=date_modified&order=ASC', '&encode'),
-            ];
             $sort_options = [];
-            foreach ($sorts as $item) {
-                $sort_options[$item['value']] = $item['text'];
+            foreach ($this->data['sorts'] as $item => $text) {
+                $sort_options[$item] = $text;
             }
             $sorting = $this->html->buildElement(
                 [
@@ -328,7 +285,6 @@ class ControllerPagesProductSpecial extends AController
             $this->view->assign('sorting', $sorting);
             $this->view->assign('url', $this->html->getURL('product/special'));
 
-            $this->data['sorts'] = $sorts;
             $pagination_url = $this->html->getURL(
                                 'product/special',
                                 '&sort='.$sorting_href.'&page={page}'.'&limit='.$limit,
