@@ -21,6 +21,7 @@ namespace abantecart\tests;
 use abc\core\engine\Registry;
 use abc\models\base\Product;
 use tests\phpunit\abc\modules\listeners\ATestListener;
+use PHPUnit\Framework\Warning;
 
 class BaseModelTest extends ABCTestCase{
 
@@ -30,15 +31,56 @@ class BaseModelTest extends ABCTestCase{
 
     }
 
-    public function testEventOnSaved(){
+    public function testValidationPassed(){
 
         try {
             $model = new Product();
-            $product = $model->find(50)->update(['model'=>'455544']);
+            $product = $model->find(50);
+            $product->fill(
+                [
+                    'model' => 'valid',
+                    'sku'   => null,
+                    'location' => 'max:128',
+                    'quantity' => 0,
+                    'stock_checkout' => '1',
+                    'stock_status_id' => 1,
+                    'manufacturer_id' => 1,
+                    'shipping' => 0,
+                    'ship_individually'=> 1,
+                    'free_shipping'    => 1,
+                    'shipping_price'   => '45.12000',
+                ]
+            );
+            $product->save();
+            $result = true;
         }catch(\PDOException $e){
-            echo $e->getTraceAsString();
+            $result = false;
+        }catch(Warning $e){
+            $result = false;
         }catch(\Exception $e){
-            echo $e->getTraceAsString();
+            $result = false;
+            $this->fail($e->getMessage());
+        }
+
+        $this->assertEquals( true, $result );
+    }
+
+    public function testEventOnSaved(){
+        $model = new Product();
+        $product = $model->find(50);
+
+        try {
+            $product->fill(
+                ['model' => 'testmodel',
+                 'sku' => '124596788']
+            );
+            $product->save();
+        }catch(\PDOException $e){
+            $this->fail($e->getMessage());
+        }catch(Warning $e){
+            $this->fail($e->getMessage());
+        }catch(\Exception $e){
+            $this->fail($e->getMessage());
         }
 
         $this->assertEquals(

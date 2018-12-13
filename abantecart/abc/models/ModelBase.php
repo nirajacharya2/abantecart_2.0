@@ -35,7 +35,7 @@ use ReflectionMethod;
  * Class AModelBase
  *
  * @package abc\models
- * @method static Collection find(integer $id)
+ * @method Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  */
 class AModelBase extends OrmModel
@@ -153,16 +153,16 @@ class AModelBase extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            if (!$this->validate($this->all())) {
-                throw new Exception(
-                    'Class '. __CLASS__
-                    .' Validation before save failed: '
-                    . implode("\n",$this->errors)
+
+            if (!$this->validate($this->toArray())) {
+                throw new \Exception(
+                    'Data Validation of model '. static::class.' before save failed: '."\n"
+                    ."Errors:\n". var_export($this->errors, true)
                 );
             }
             parent::save();
         } else {
-            throw new Exception('No permission for object (class '.__CLASS__.') to save the model.');
+            throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
     }
 
@@ -174,7 +174,7 @@ class AModelBase extends OrmModel
         if ($this->hasPermission('delete')) {
             parent::delete();
         } else {
-            throw new Exception('No permission for object to delete the model.');
+            throw new \Exception('No permission for object to delete the model.');
         }
     }
 
@@ -185,15 +185,13 @@ class AModelBase extends OrmModel
      */
     public function validate($data)
     {
-return true;
+
         if ($rules = $this->rules()) {
-            $v = new Validator(new ValidationTranslator(), (array)$data, $rules);
+            $v = new Validator(new ValidationTranslator(), $data, $rules);
             try {
                 $v->validate();
             } catch (ValidationException $e) {
-            }
-            if ($v->fails()) {
-                $this->errors = $v->errors()->toArray();
+                $this->errors['validation'] = $v->errors()->toArray();
                 return false;
             }
         }
