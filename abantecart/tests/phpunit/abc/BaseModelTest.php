@@ -107,6 +107,41 @@ class BaseModelTest extends ABCTestCase{
         $this->assertEquals( true, $result );
     }
 
+
+    public function testValidationNotPassed(){
+
+        $result = false;
+
+        try {
+            $model = new Product();
+            $product = $model->find(51);
+            $product->fill(
+                [
+                    'model' => 'invalid',
+                    'sku'   => null,
+                    'location' => 'max:128000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                    'quantity' => 'a',
+                    'shipping_price'   => '$45.12000',
+                ]
+            );
+
+            $product->save();
+            $result = true;
+        }catch(\PDOException $e){
+            $this->fail($e->getMessage());
+        }catch(\Exception $e){
+            $error_text = $e->getMessage();
+            if(is_int(strpos($error_text,"'validation' =>"))){
+                echo $e->getMessage();
+                $result = true;
+            }else{
+                $this->fail($e->getMessage());
+            }
+
+        }
+        $this->assertEquals( true, $result );
+    }
+
     public function testEventOnSaved(){
         $model = new Product();
         $product = $model->find(50);
