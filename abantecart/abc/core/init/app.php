@@ -491,6 +491,15 @@ if(is_object($evd)) {
     $registry->set('model_events', $evd);
 }
 
+//register ABAC
+/**
+ * @var AbacFactory $abac
+ */
+$abac = ABC::getFullClassName('ABAC');
+if($abac) {
+    $abac = $abac::getAbac([ABC::env('DIR_CONFIG').ABC::getStageName().DS.'abac_policy_rules.yml']);
+    $registry->set('abac', $abac);
+}
 
 /**
  * @param Registry $registry
