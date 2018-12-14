@@ -24,6 +24,7 @@ use abc\core\lib\ADB;
 use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
+use PhpAbac\AbacFactory;
 
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
@@ -235,6 +236,17 @@ if(is_object($evd)) {
         }
     }
     $registry->set('model_events', $evd);
+}
+
+
+//register ABAC
+/**
+ * @var AbacFactory $abac
+ */
+$abac = ABC::getFullClassName('ABAC');
+if($abac) {
+    $abac = $abac::getAbac([ABC::env('DIR_CONFIG').ABC::getStageName().DS.'abac_policy_rules.yml']);
+    $registry->set('abac', $abac);
 }
 
 // functions

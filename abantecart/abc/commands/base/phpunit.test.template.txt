@@ -3,11 +3,11 @@
 * AbanteCart auto-generated phpunit test file
 */
 
-namespace abantecart\tests;
+namespace tests\;
 /**
  * Class $testClassName
  */
-class testClassName extends AbanteCartTest{
+class testClassName extends ABCTestCase{
 
 
     protected function tearDown(){

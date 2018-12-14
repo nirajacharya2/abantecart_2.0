@@ -1,0 +1,23 @@
+---
+attributes:
+    admin:
+        class: abc\core\lib\AUser
+        type: user
+        fields:
+            id:
+                name: ID
+            userGroupId:
+                name: User Group
+
+rules:
+    top-admin-access:
+        attributes:
+            admin.id:
+                comparison_type: numeric
+                comparison: isGreaterThan
+                value: 0
+            admin.userGroupId:
+                comparison_type: numeric
+                comparison: isEqual
+                value: 1
+

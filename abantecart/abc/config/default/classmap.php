@@ -22,6 +22,7 @@ use abc\core\lib\ACurrency;
 use abc\models\ValidationTranslator;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use Illuminate\Validation\Validator;
+use PhpAbac\AbacFactory;
 
 return [
     'AViewRender'        => \abc\core\view\AViewDefaultRender::class,
@@ -37,6 +38,7 @@ return [
     ],
     'ValidationTranslator' => ValidationTranslator::class,
     'Validator'            => Validator::class,
+    'ABAC'               => AbacFactory::class,
 
     'Checkout'           => CheckOut::class,
     'CheckoutAdmin'      => CheckOutAdmin::class,
