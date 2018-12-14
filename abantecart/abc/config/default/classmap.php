@@ -19,7 +19,9 @@ use abc\core\lib\AResourceManager;
 use abc\core\lib\CheckOut;
 use abc\core\lib\CheckOutAdmin;
 use abc\core\lib\ACurrency;
+use abc\models\ValidationTranslator;
 use Illuminate\Events\Dispatcher as EventDispatcher;
+use Illuminate\Validation\Validator;
 
 return [
     'AViewRender'        => \abc\core\view\AViewDefaultRender::class,
@@ -33,6 +35,9 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
+    'ValidationTranslator' => ValidationTranslator::class,
+    'Validator'            => Validator::class,
+
     'Checkout'           => CheckOut::class,
     'CheckoutAdmin'      => CheckOutAdmin::class,
     'AResourceManager'   => AResourceManager::class,

@@ -18,6 +18,7 @@
 
 namespace abc\models;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use H;
@@ -187,11 +188,17 @@ class AModelBase extends OrmModel
     {
 
         if ($rules = $this->rules()) {
-            $v = new Validator(new ValidationTranslator(), $data, $rules);
+            /**
+             * @var Validator $v
+             */
+            $v = ABC::getObjectByAlias('Validator', [ABC::getObjectByAlias('ValidationTranslator'), $data, $rules]);
             try {
                 $v->validate();
-            } catch (ValidationException $e) {
+            }catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
+                return false;
+            }catch (\Exception $e) {
+                $this->errors['validator'] = $e->getMessage();
                 return false;
             }
         }
