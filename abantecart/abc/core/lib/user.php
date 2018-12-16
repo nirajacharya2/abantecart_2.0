@@ -241,7 +241,7 @@ final class AUser
      */
     public function getId()
     {
-        return $this->userId;
+        return (int)$this->userId;
     }
 
     /**
@@ -249,7 +249,7 @@ final class AUser
      */
     public function getUserGroupId()
     {
-        return $this->userGroupId;
+        return (int)$this->userGroupId;
     }
 
     /**
