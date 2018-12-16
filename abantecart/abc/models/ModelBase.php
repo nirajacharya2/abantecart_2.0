@@ -417,7 +417,7 @@ class AModelBase extends OrmModel
     public static function __callStatic($method, $parameters)
     {
         //check permissions for static methods of model
-        $abac = Registry::getInstance()->get('abac');
+        //$abac = Registry::getInstance()->get('abac');
         if($abac && !$abac->hasAccess(__CLASS__)){
             throw new AException('Forbidden');
         }
