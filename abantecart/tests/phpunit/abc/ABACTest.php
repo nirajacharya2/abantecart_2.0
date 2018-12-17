@@ -1,9 +1,9 @@
 <?php
 
-
 namespace abantecart\tests;
 
 use abc\core\engine\Registry;
+use abc\core\lib\Abac;
 use abc\core\lib\AUser;
 
 /**
@@ -17,7 +17,7 @@ class ABACTest extends ABCTestCase{
      */
     protected $registry;
     /**
-     * @var \PhpAbac\Abac
+     * @var Abac
      */
     protected $abac;
 
@@ -31,15 +31,16 @@ class ABACTest extends ABCTestCase{
     }
 
     public function testIsAbacPresents(){
-        $this->assertEquals(true, $this->abac instanceof \PhpAbac\Abac);
+        $this->assertEquals(true, $this->abac instanceof Abac);
     }
 
     public function testTopAdminAccess(){
+        $result = false;
         //login user as topAdmin
         $this->registry->get('session')->data['user_id'] = 1;
         $user = new AUser($this->registry);
         try {
-            $result = $this->abac->enforce('top-admin-access', $user);
+            $result = $this->abac->hasPermission('access', $user);
         }catch(\Error $e){
             $this->fail($e->getMessage());
         }
@@ -48,11 +49,12 @@ class ABACTest extends ABCTestCase{
     }
 
     public function testTopAdminForbid(){
+        $result = true;
         //login user as Demonstration Admin
         $this->registry->get('session')->data['user_id'] = 2;
         $user = new AUser($this->registry);
         try {
-            $result = $this->abac->enforce('top-admin-access', $user);
+            $result = $this->abac->hasPermission('access', $user);
         }catch(\Error $e){
             $this->fail($e->getMessage());
         }

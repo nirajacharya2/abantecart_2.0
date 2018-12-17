@@ -20,7 +20,9 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
+use abc\core\lib\Abac;
 use abc\core\lib\ADB;
+use abc\core\lib\CliUser;
 use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
@@ -135,6 +137,9 @@ require_once('base.php');
 $registry = Registry::getInstance();
 require_once('admin.php');
 
+//create cliUser class inside registry
+$registry->set('cli_user', new CliUser());
+
 // Loader
 registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
 $registry->set('load', new ALoader($registry));
@@ -241,13 +246,10 @@ if(is_object($evd)) {
 
 //register ABAC
 /**
- * @var AbacFactory $abac
+ * @var Abac $abac
  */
-$abac = ABC::getFullClassName('ABAC');
-if($abac) {
-    $abac = $abac::getAbac([ABC::env('DIR_CONFIG').ABC::getStageName().DS.'abac_policy_rules.yml']);
-    $registry->set('abac', $abac);
-}
+$abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
+$registry->set('abac', $abac);
 
 // functions
 

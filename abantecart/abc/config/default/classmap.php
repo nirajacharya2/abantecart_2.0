@@ -5,6 +5,7 @@
 
 use abc\core\engine\AAttribute;
 use abc\core\lib\AAttribute_Manager;
+use abc\core\lib\Abac;
 use abc\core\lib\ACart;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AEncryption;
@@ -25,8 +26,8 @@ use Illuminate\Validation\Validator;
 use PhpAbac\AbacFactory;
 
 return [
-    'AViewRender'        => \abc\core\view\AViewDefaultRender::class,
-    'ALog'               => [
+    'AViewRender'          => \abc\core\view\AViewDefaultRender::class,
+    'ALog'                 => [
         ALog::class,
         [
 
@@ -38,8 +39,8 @@ return [
     ],
     'ValidationTranslator' => ValidationTranslator::class,
     'Validator'            => Validator::class,
-    'ABAC'               => AbacFactory::class,
-
+    'ABAC'                 => Abac::class,
+    'ABACFactory'         => AbacFactory::class,
     'Checkout'           => CheckOut::class,
     'CheckoutAdmin'      => CheckOutAdmin::class,
     'AResourceManager'   => AResourceManager::class,

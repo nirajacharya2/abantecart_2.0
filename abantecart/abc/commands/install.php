@@ -663,6 +663,7 @@ class Install extends BaseCommand
             'root'   => (DS == '\\' ? $options['root_dir'].'\\' : $options['root_dir']),
             'app'    => (DS == '\\' ? $options['app_dir'].'\\' : $options['app_dir']),
             'public' => (DS == '\\' ? $options['public_dir'].'\\' : $options['public_dir']),
+            'config' => $options['app_dir'].'config'.DS,
             'cache'  => $options['app_dir'].'system'.DS.'cache'.DS,
 
         ];
@@ -729,7 +730,21 @@ return [
         'DEBUG_LEVEL' => 5,
         'ENCRYPTION_KEY' => '12345',
         // bootstrap 3 admin template
-        // 'adminTemplate' => 'default_bs3' 
+        // 'adminTemplate' => 'default_bs3',
+
+        // cache settings for abac 3d-party factory
+        
+        'ABAC' =>
+            [   
+                'POLICY_RULES' => [
+                    '{$dirs['config']}'.basename(__DIR__).DS.'abac_policy_rules.yml'
+                ],
+                'CACHE_ENABLE' => true,
+            //  'CACHE_FOLDER' => '{$dirs['cache']}abac',
+            //  'CACHE_TTL'    => '3600',
+            //  'CACHE_DRIVER' => 'text'
+            ]
+
 ];
 EOD;
         $file = fopen(ABC::env('DIR_CONFIG').'default'.DS.'config.php', 'w');
