@@ -1,6 +1,6 @@
 ---
 attributes:
-    admin:
+    root:
         class: abc\core\lib\AUser
         type: user
         fields:
@@ -10,13 +10,25 @@ attributes:
                 name: User Group
 
 rules:
-    top-admin-access:
+    cli.access:
+        #check is admin a top-administrator (root)
         attributes:
-            admin.id:
+            root.id:
                 comparison_type: numeric
                 comparison: isGreaterThan
                 value: 0
-            admin.userGroupId:
+            root.userGroupId:
+                comparison_type: numeric
+                comparison: isEqual
+                value: 1
+    admin.access:
+        #check is admin a top-administrator (root)
+        attributes:
+            root.id:
+                comparison_type: numeric
+                comparison: isGreaterThan
+                value: 0
+            root.userGroupId:
                 comparison_type: numeric
                 comparison: isEqual
                 value: 1

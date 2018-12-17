@@ -24,6 +24,7 @@ namespace abc;
 use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\ALanguage;
+use abc\core\lib\Abac;
 use abc\core\lib\ADebug;
 use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
@@ -493,13 +494,10 @@ if(is_object($evd)) {
 
 //register ABAC
 /**
- * @var AbacFactory $abac
+ * @var Abac $abac
  */
-$abac = ABC::getFullClassName('ABAC');
-if($abac) {
-    $abac = $abac::getAbac([ABC::env('DIR_CONFIG').ABC::getStageName().DS.'abac_policy_rules.yml']);
-    $registry->set('abac', $abac);
-}
+$abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
+$registry->set('abac', $abac);
 
 /**
  * @param Registry $registry
