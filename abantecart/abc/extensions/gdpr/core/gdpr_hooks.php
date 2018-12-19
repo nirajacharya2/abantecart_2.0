@@ -240,4 +240,44 @@ $("#gdpr_erase")
         return $array;
     }
 
+    public function onControllerPagesAccountEdit_InitData() {
+        if (ABC::env('IS_ADMIN')) {
+            return true;
+        }
+        $that = $this->baseObject;
+        $that->loadLanguage('account/create');
+        $that->loadLanguage('gdpr/gdpr');
+        $that->loadModel('catalog/content');
+        $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
+        if ($content_info){
+            $text_agree_href = $that->html->getURL(
+                'r/content/content/loadInfo',
+                '&content_id=' . $that->config->get('config_account_id')
+            );
+        }else{
+            $text_agree_href = '#';
+        }
+        $text_agree = $that->language->get('text_agree', 'account_create');
+        $text_agree_href_text = $that->language->get('gdpr_privacy_policy_title');
+
+        $agree_chk = $that->html->buildElement(
+            [
+                'type'    => 'checkbox',
+                'name'    => 'agree',
+                'value'   => 1,
+                'checked' => false,
+            ]
+        );
+
+        $that->view->addHookVar('customer_attributes',
+            '<div class="form-group">
+        <div class="col-md-12">
+            <label class="col-md-6 mt20 mb40 pull-left">
+                '.$text_agree.'&nbsp;<a href="'.$text_agree_href.
+            '" onclick="openModalRemote(\'#privacyPolicyModal\',\''.$text_agree_href.'\'); return false;">
+                <b>'.$text_agree_href_text.'</b></a>
+                '.$agree_chk.'
+            </label></div></div>');
+    }
+
 }
