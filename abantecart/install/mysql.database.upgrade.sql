@@ -1142,3 +1142,12 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   REFERENCES `ac_addresses` (`address_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+  ALTER TABLE `ac_block_layouts`
+  ADD INDEX `ac_block_layouts_ibfk_4_idx` (`block_id` ASC);
+  ALTER TABLE `ac_block_layouts`
+  ADD CONSTRAINT `ac_block_layouts_ibfk_4`
+    FOREIGN KEY (`block_id`)
+    REFERENCES `ac_blocks` (`block_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;

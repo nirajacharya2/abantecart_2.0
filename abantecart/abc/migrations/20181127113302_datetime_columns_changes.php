@@ -610,6 +610,16 @@ class DatetimeColumnsChanges extends AbstractMigration
             ON UPDATE CASCADE;";
         $this->execute($update);
 
+        $update = "ALTER TABLE `".$prefix."block_layouts` 
+                  ADD INDEX `".$prefix."block_layouts_ibfk_4_idx` (`block_id` ASC);
+                  ALTER TABLE `".$prefix."block_layouts` 
+                  ADD CONSTRAINT `".$prefix."block_layouts_ibfk_4`
+                    FOREIGN KEY (`block_id`)
+                    REFERENCES `".$prefix."blocks` (`block_id`)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE;";
+        $this->execute($update);
+
         $update = "ALTER TABLE `".$prefix."customers` 
         CHANGE COLUMN `address_id` `address_id` INT(11) NULL DEFAULT NULL ,
         ADD INDEX `".$prefix."customers_ibfk_3_idx` (`address_id` ASC);";

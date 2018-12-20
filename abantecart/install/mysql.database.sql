@@ -13241,14 +13241,23 @@ ADD CONSTRAINT `ac_global_attributes_ibfk_3`
   ON DELETE CASCADE
   ON UPDATE CASCADE;
 
-  ALTER TABLE `ac_block_layouts`
-  ADD INDEX `ac_block_layouts_ibfk_3_idx` (`layout_id` ASC);
-  ALTER TABLE `ac_block_layouts`
-  ADD CONSTRAINT `ac_block_layouts_ibfk_3`
-    FOREIGN KEY (`layout_id`)
-    REFERENCES `ac_layouts` (`layout_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE;
+ALTER TABLE `ac_block_layouts`
+ADD INDEX `ac_block_layouts_ibfk_3_idx` (`layout_id` ASC);
+ALTER TABLE `ac_block_layouts`
+ADD CONSTRAINT `ac_block_layouts_ibfk_3`
+FOREIGN KEY (`layout_id`)
+REFERENCES `ac_layouts` (`layout_id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE `ac_block_layouts`
+ADD INDEX `ac_block_layouts_ibfk_4_idx` (`block_id` ASC);
+ALTER TABLE `ac_block_layouts`
+ADD CONSTRAINT `ac_block_layouts_ibfk_4`
+FOREIGN KEY (`block_id`)
+REFERENCES `ac_blocks` (`block_id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
 ALTER TABLE `ac_customers`
 CHANGE COLUMN `address_id` `address_id` INT(11) NULL DEFAULT NULL ,
