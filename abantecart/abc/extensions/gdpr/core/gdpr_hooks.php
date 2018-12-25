@@ -18,6 +18,7 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\core\extension;
+use abc\core\ABC;
 use abc\core\engine\AForm;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
