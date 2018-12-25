@@ -8,6 +8,7 @@ use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\Abac;
 use abc\core\lib\ACart;
 use abc\core\lib\ACustomer;
+use abc\core\lib\AUser;
 use abc\core\lib\AEncryption;
 use abc\core\lib\JobManager;
 use abc\core\lib\AJson;
@@ -57,4 +58,5 @@ return [
     'EventDispatcher'    => [EventDispatcher::class, null],
     'AEncryption'        => AEncryption::class,
     'ACurrency'          => ACurrency::class,
+    'AUser'              => AUser::class,
 ];

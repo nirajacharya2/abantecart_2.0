@@ -20,9 +20,8 @@ namespace abc\models;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\AException;
+use abc\core\lib\Abac;
 use H;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
@@ -86,6 +85,11 @@ class AModelBase extends OrmModel
      * @var array
      */
     protected $errors;
+    /**
+     * @var string
+     */
+    protected $policyGroup, $policyObject;
+    protected $affectedColumns = [];
 
     protected $rules = [];
 
@@ -125,6 +129,10 @@ class AModelBase extends OrmModel
         return $this->rules;
     }
 
+    public function getAffectedColumns()
+    {
+        return $this->affectedColumns;
+    }
     /**
      * @return array
      */
@@ -136,11 +144,28 @@ class AModelBase extends OrmModel
     /**
      * @param $operation
      *
+     * @param array $columns
+     *
      * @return bool
      */
-    public function hasPermission($operation): bool
+    public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-        return in_array($operation, $this->getPermissions());
+
+        if( $columns[0] == '*' ){
+            $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
+        }else{
+            $this->affectedColumns = $columns;
+        }
+
+        /**
+         * @var Abac $abac
+         */
+        $abac = $this->registry->get('abac');
+        $resourceObject = new \stdClass();
+        $resourceObject->name = $this->policyObject;
+        $resourceObject->getColumns = $columns;
+
+        return $abac->hasPermission($this->policyGroup.'-'.$this->policyObject.'-'.$operation, $this);
     }
 
     /**
@@ -154,7 +179,6 @@ class AModelBase extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-
             if (!$this->validate($this->toArray())) {
                 throw new \Exception(
                     'Data Validation of model '. static::class.' before save failed: '."\n"
@@ -417,10 +441,10 @@ class AModelBase extends OrmModel
     public static function __callStatic($method, $parameters)
     {
         //check permissions for static methods of model
-        //$abac = Registry::getInstance()->get('abac');
+        /*$abac = Registry::getInstance()->get('abac');
         if($abac && !$abac->hasAccess(__CLASS__)){
             throw new AException('Forbidden');
-        }
+        }*/
         return parent::__callStatic($method, $parameters);
     }
 

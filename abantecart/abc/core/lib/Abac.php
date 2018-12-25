@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use PhpAbac\AbacFactory;
+use abc\modules\injections\phpabac\Configuration;
 
 class Abac
 {
@@ -35,13 +36,17 @@ class Abac
      */
     protected $registry;
     /**
-     * @var AUser | CliUser | ACustomer
+     * @var AUser | OSUser | ACustomer
      */
     protected $userObject;
     /**
      * @var string - can be admin, customer or cli
      */
     protected $userType;
+    /**
+     * @var int | string - userGroupId or CustomerGroupId or SystemUserGroupName
+     */
+    protected $userGroupID;
 
     /**
      * Abac constructor.
@@ -52,6 +57,7 @@ class Abac
      */
     public function __construct(Registry $registry)
     {
+        $this->registry = $registry;
         /**
          * @var AbacFactory $abac
          */
@@ -62,8 +68,8 @@ class Abac
                 .'Please check file '.ABC::env('DIR_CONFIG').'classmap.php');
         }
 
-        $rules = $cacheOptions = $attribute_options = [];
-        $config_directory = null;
+        $ruleSrc = $cacheOptions = $attribute_options = [];
+        $ruleSrcDirectory = null;
 
         $config = ABC::env('ABAC');
         if($config) {
@@ -74,65 +80,111 @@ class Abac
                     'cache_ttl'    => $config['CACHE_TTL'],
                 ];
             }
-            $config_directory = $config['CONFIG_DIRECTORY'] ?: null;
+            $ruleSrcDirectory = $config['CONFIG_DIRECTORY'] ?: null;
             $attribute_options = $config['ATTRIBUTE_OPTIONS'] ?: [];
-            $rules = $config['POLICY_RULES'];
+            $ruleSrc = $config['POLICY_RULES'] ?: [];
         }
 
-        if(!$rules){
+        //check slash at the end of path
+        $ruleSrcDirectory =
+            $ruleSrcDirectory && substr($ruleSrcDirectory,-1) != DS
+            ? $ruleSrcDirectory.DS
+            : $ruleSrcDirectory;
+
+        if(!$ruleSrc && !is_dir($ruleSrcDirectory)){
+return null;
             throw new \Exception(
-                            'Empty rules lis for ABAC class!'
+                            'Empty rules list for ABAC class!'
                             .'Please check file '.ABC::env('DIR_CONFIG').ABC::getStageName().DS.'config.php');
         }
-        $this->abac = $abac::getAbac(
-            $rules,
-            $config_directory,
-            $attribute_options,
-            $cacheOptions
-        );
-        $this->registry = $registry;
 
+        //detect user type and use it in configuration loader
         $this->userObject = $this->getUserObject();
         if(!$this->userObject){
             throw new \Exception('Unknown user type!');
         }
+
+        $abac::setConfiguration(new Configuration($ruleSrc, $ruleSrcDirectory.$this->userType));
+        $this->abac = $abac::getAbac(
+            $ruleSrc,
+            $ruleSrcDirectory,
+            $attribute_options,
+            $cacheOptions
+        );
+
         return $this->abac;
     }
 
     /**
      * @param string $rule_name
-     * @param null $object
+     *
+     * @param object|null $resource
+     *
+     * @param array $options
      *
      * @return bool
      */
-    public function hasPermission(string $rule_name, $object = null)
+    public function hasPermission(string $rule_name, $resource = null, $options = [])
     {
-        $obj = !$object ? $this->userObject : $object;
+//if no rules - allow all
+if(!$this->abac){
+    return true;
+}
+
+        $resource = !$resource ? $this->userObject : $resource;
         //prefix needed to separate rules for each user type
-        $rulePrefix = $this->userType.".";
-        return $this->abac->enforce($rulePrefix.$rule_name, $obj);
+        $rulePrefix = $this->userType."-".$this->userGroupID.".";
+
+        $result = $this->abac->enforce($rulePrefix.$rule_name, $this->userObject, $resource, $options);
+        $errors = $this->abac->getErrors();
+        if($errors){
+            $this->registry->get('log')->write('ABAC Errors:'.var_export($errors, true));
+        }
+        return $result;
     }
 
-    protected function getUserObject()
+    public function getUserType()
+    {
+        return $this->userType;
+    }
+    public function getUserGroupId()
+    {
+        return $this->userGroupID;
+    }
+
+    public function getUserObject()
     {
         $userClassName = ABC::getFullClassName('AUser');
         $customerClassName = ABC::getFullClassName('ACustomer');
 
-        if(php_sapi_name() == 'cli' && $this->registry->get('cli_user') instanceof CliUser){
-            $this->userType = 'cli';
-            return $this->registry->get('cli_user');
+        if(php_sapi_name() == 'cli' && $this->registry->get('os_user') instanceof OSUser){
+            $this->userType = 'system';
+            /**
+             * @var OSUser $user
+             */
+            $user = $this->registry->get('os_user');
+            $this->userGroupID = $user->getUserGroup();
+            echo "CLI-mode: username: ".$user->getUserName()." userGroup: ".$user->getUserGroup()."\n";
+            return $user;
         } elseif (
             ABC::env('IS_ADMIN')
             && $this->registry->get('user') instanceof $userClassName)
         {
-            $this->userType = 'admin';
+            /**
+             * @var AUser $user
+             */
+            $user = $this->registry->get('user');
+            $this->userType = $user->getUserGroupId() == 1 ? 'root'  : 'admin';
+            $this->userGroupID = $user->getUserGroupId();
             return $this->registry->get('user');
         } elseif (
             ABC::env('IS_ADMIN')
             && $this->registry->get('customer') instanceof $customerClassName)
         {
+            $customer = $this->registry->get('customer');
             $this->userType = 'customer';
-            return $this->registry->get('customer');
+            $this->userGroupID = $customer->getCustomerGroupId();
+            return $customer;
         }
 
         return false;

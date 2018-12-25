@@ -247,8 +247,8 @@
     "filp/whoops": "2.1.14",
     "monolog/monolog": "1.23.0",
     "illuminate/events": "5.5.*",
-    "illuminate/validation": "5.5.*",
-    "craftcamp/php-abac": "3.0.0"
+    "illuminate/validation": "5.5.*"
+
   },
   "extra": {
     "installer-paths": {

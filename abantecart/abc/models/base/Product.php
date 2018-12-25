@@ -62,6 +62,14 @@ use H;
 class Product extends AModelBase
 {
     /**
+     * Access policy properties
+     * Note: names must be without dashes and whitespaces
+     * policy rule will be named as {userType-userGroup}.product-product-read
+     * For example: system-www-data.product-product-read
+     */
+    protected $policyGroup  = 'product';
+    protected $policyObject = 'product';
+    /**
      * @var string
      */
     protected $primaryKey = 'product_id';
@@ -174,6 +182,11 @@ class Product extends AModelBase
      * @var
      */
     protected $thumbURL;
+
+    public function getClass()
+    {
+        return __CLASS__;
+    }
 
     /**
      * @param array $options

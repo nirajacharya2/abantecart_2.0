@@ -22,11 +22,11 @@ use abc\core\ABC;
 use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
 use abc\core\lib\Abac;
 use abc\core\lib\ADB;
-use abc\core\lib\CliUser;
+use abc\core\lib\OSUser;
 use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
-use PhpAbac\AbacFactory;
+
 
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
@@ -137,8 +137,8 @@ require_once('base.php');
 $registry = Registry::getInstance();
 require_once('admin.php');
 
-//create cliUser class inside registry
-$registry->set('cli_user', new CliUser());
+//put OSUser class inside registry
+$registry->set('os_user', new OSUser());
 
 // Loader
 registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
@@ -249,7 +249,11 @@ if(is_object($evd)) {
  * @var Abac $abac
  */
 $abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
-$registry->set('abac', $abac);
+if(is_object($abac)) {
+    $registry->set('abac', $abac);
+}else{
+    throw new \Exception('Class with alias "ABAC" not found in the classmap!');
+}
 
 // functions
 

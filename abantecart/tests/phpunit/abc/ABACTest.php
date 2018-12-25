@@ -2,22 +2,25 @@
 
 namespace abantecart\tests;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
 use abc\core\lib\AUser;
+use abc\core\lib\OSUser;
+use abc\models\base\Product;
+use PhpAbac\AbacFactory;
 
 /**
  * Class $testClassName
  */
 class ABACTest extends ABCTestCase{
 
-
     /**
      * @var Registry
      */
     protected $registry;
     /**
-     * @var Abac
+     * @var Abac | AbacFactory
      */
     protected $abac;
 
@@ -30,17 +33,66 @@ class ABACTest extends ABCTestCase{
         $this->abac = $this->registry->get('abac');
     }
 
+    protected function reInitAbacLib(){
+        /**
+         * @var Abac $abac
+         */
+        $abac = ABC::getObjectByAlias('ABAC', [ $this->registry ]);
+        if(is_object($abac)) {
+            $this->registry->set('abac', $abac);
+        }else{
+            throw new \Exception('Class with alias "ABAC" not found in the classmap!');
+        }
+    }
+
     public function testIsAbacPresents(){
         $this->assertEquals(true, $this->abac instanceof Abac);
     }
 
-    public function testTopAdminAccess(){
+    //tests for policy group
+    public function testSystemUserProductPolicyGroup()
+    {
+
+        ABC::env('ABAC',
+                [
+                    'POLICY_RULES' => [],
+                    'CONFIG_DIRECTORY' => ABC::env('DIR_TESTS').DS
+                                            .'phpunit'.DS
+                                            .'abc'.DS
+                                            .'config'.DS
+                                            .ABC::getStageName().DS
+                                            .'abac'.DS,
+                    'CACHE_ENABLE' => true,
+                ],
+                //override
+                true
+        );
+        $this->reInitAbacLib();
+
+        $result = false;
+
+        try {
+            $product = new Product();
+            $result = $product->hasPermission('read', ['model', 'sku']);
+        }catch(\Error $e){
+            echo $e->getMessage();
+            $this->fail($e->getTraceAsString());
+        }
+
+        $this->assertEquals(true, $result);
+    }
+
+    public function testAllowToTopAdmin(){
         $result = false;
         //login user as topAdmin
         $this->registry->get('session')->data['user_id'] = 1;
-        $user = new AUser($this->registry);
+        $this->registry->set('user', new AUser($this->registry));
+
+        //unset object to run test aas admin
+        $this->registry->set('os_user', null);
         try {
-            $result = $this->abac->hasPermission('access', $user);
+            $product = new Product();
+            $result = $product->hasPermission('read', ['model', 'sku']);
         }catch(\Error $e){
             $this->fail($e->getMessage());
         }
@@ -48,17 +100,27 @@ class ABACTest extends ABCTestCase{
         $this->assertEquals(true, $result);
     }
 
-    public function testTopAdminForbid(){
+    public function testDenyTopAdmin(){
         $result = true;
         //login user as Demonstration Admin
-        $this->registry->get('session')->data['user_id'] = 2;
-        $user = new AUser($this->registry);
+        $this->registry->get('session')->data['user_id'] = 1;
+        $this->registry->set('user', new AUser($this->registry));
+        $this->registry->set('os_user', null);
+        /**
+         * @var Abac $abac
+         */
+        $abac = ABC::getObjectByAlias('ABAC', [ $this->registry ]);
+        $this->registry->set('abac', $abac);
+        $this->abac = $abac;
+
         try {
-            $result = $this->abac->hasPermission('access', $user);
+            $product = new Product();
+            $result = $product->hasPermission('read', ['model', 'someNonExistColumn']);
         }catch(\Error $e){
             $this->fail($e->getMessage());
         }
 
         $this->assertEquals(false, $result);
     }
+
 }

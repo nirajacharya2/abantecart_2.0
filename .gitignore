@@ -28,3 +28,4 @@
 /abantecart/public/extensions/*
 /abantecart/abc/composer.lock
 /abantecart/abc/system/temp/*
+!/abantecart/abc/vendor/craftcamp/
