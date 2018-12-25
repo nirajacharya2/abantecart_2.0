@@ -251,8 +251,6 @@ if(is_object($evd)) {
 $abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
 if(is_object($abac)) {
     $registry->set('abac', $abac);
-}else{
-    throw new \Exception('Class with alias "ABAC" not found in the classmap!');
 }
 
 // functions
