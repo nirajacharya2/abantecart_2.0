@@ -247,6 +247,7 @@ $("#gdpr_erase")
         }
         $that = $this->baseObject;
         $that->loadLanguage('account/create');
+        $that->loadLanguage('account/edit');
         $that->loadLanguage('gdpr/gdpr');
         $that->loadModel('catalog/content');
         $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
