@@ -183,6 +183,11 @@ class Product extends AModelBase
      */
     protected $thumbURL;
 
+    public function getClass()
+    {
+        return __CLASS__;
+    }
+
     /**
      * Auditing properties
      *

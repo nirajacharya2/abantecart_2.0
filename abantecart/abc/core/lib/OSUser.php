@@ -17,36 +17,52 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\lib;
 
 /**
- * Class CliUser
+ * Class OSUser
  *
  * @package abc\core\lib
  */
-class CliUser
+class OSUser
 {
     protected $userId;
     protected $userName;
+    protected $userGroup;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->userId = function_exists('posix_geteuid') ? posix_geteuid() : '1000';
         $this->userName = function_exists('posix_getpwuid')
-                        ? posix_getpwuid($this->userId)['name']
-                        : 'system user';
+            ? posix_getpwuid($this->userId)['name']
+            : 'system user';
+        $groupId = function_exists('posix_getegid') ? posix_getegid() : 0;
+        $groupInfo = function_exists('posix_getgrgid') ? posix_getgrgid($groupId) : ['name' => 'unknown'];
+        $this->userGroup = $groupInfo['name'];
     }
 
     /**
      * @return int
      */
-    public function getId(){
+    public function getId()
+    {
         return (int)$this->userId;
     }
 
     /**
      * @return string
      */
-    public function getName(){
+    public function getUserName()
+    {
         return (string)$this->userName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserGroup()
+    {
+        return (string)$this->userGroup;
     }
 }
