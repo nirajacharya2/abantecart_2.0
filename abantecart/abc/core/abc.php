@@ -337,13 +337,12 @@ class ABC extends ABCBase
 
         $this->validateApp();
 
-        // New Installation
+        //Check if installed and configuration is present
         if (!self::env('DATABASES')) {
             if (is_file(self::env('DIR_ROOT').'install'.DS.'index.php')) {
                 header('Location: ../install/index.php');
             } else {
-                header('Location: static_pages/?file='
-                    .basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
+                echo "Error: Cannot load environment or missing configuration";
             }
             exit;
         }
