@@ -208,6 +208,17 @@
           "type": "zip"
         }
       }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "abolabo/php-abac",
+        "version": "3.0.0",
+        "dist": {
+          "url": "https://github.com/abolabo/php-abac/archive/develop.zip",
+          "type": "zip"
+        }
+      }
     }
   ],
   "require": {
@@ -247,7 +258,8 @@
     "filp/whoops": "2.1.14",
     "monolog/monolog": "1.23.0",
     "illuminate/events": "5.5.*",
-    "illuminate/validation": "5.5.*"
+    "illuminate/validation": "5.5.*",
+    "abolabo/php-abac": "3.0.0"
 
   },
   "extra": {
