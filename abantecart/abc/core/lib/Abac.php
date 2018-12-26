@@ -62,6 +62,7 @@ class Abac
          * @var AbacFactory $abac
          */
         $abac = ABC::getFullClassName('ABACFactory');
+
         if(!$abac){
             throw new \Exception(
                 'Alias "ABAC" not found in classmap config! '

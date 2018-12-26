@@ -736,8 +736,8 @@ return [
         
         'ABAC' =>
             [   
-                'POLICY_RULES' => [
-                    '{$dirs['config']}'.basename(__DIR__).DS.'abac_policy_rules.yml'
+                'CONFIG_DIRECTORY' => [
+                    '{$dirs['config']}abac'
                 ],
                 'CACHE_ENABLE' => true,
             //  'CACHE_FOLDER' => '{$dirs['cache']}abac',
