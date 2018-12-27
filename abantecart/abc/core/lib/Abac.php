@@ -36,9 +36,9 @@ class Abac
      */
     protected $registry;
     /**
-     * @var AUser | OSUser | ACustomer
+     * @var UserResolver
      */
-    protected $userObject;
+    protected $userResolver;
     /**
      * @var string - can be admin, customer or cli
      */
@@ -100,12 +100,15 @@ return null;
         }
 
         //detect user type and use it in configuration loader
-        $this->userObject = $this->getUserObject();
-        if(!$this->userObject){
-            throw new \Exception('Unknown user type!');
+        $this->userResolver = ABC::getObjectByAlias('UserResolver', [$this->registry]);
+        if(!$this->userResolver){
+            throw new \Exception(
+                __CLASS__.': Cannot recognize user type! 
+                Please check alias UserResolver in config/*/classmap.php file'
+            );
         }
 
-        $abac::setConfiguration(new Configuration($ruleSrc, $ruleSrcDirectory.$this->userType));
+        $abac::setConfiguration(new Configuration($ruleSrc, $ruleSrcDirectory.$this->userResolver->getUserType()));
         $this->abac = $abac::getAbac(
             $ruleSrc,
             $ruleSrcDirectory,
@@ -132,63 +135,21 @@ if(!$this->abac){
     return true;
 }
 
-        $resource = !$resource ? $this->userObject : $resource;
+        $resource = !$resource ? $this->userResolver->getUserObject() : $resource;
         //prefix needed to separate rules for each user type
-        $rulePrefix = $this->userType."-".$this->userGroupID.".";
+        $rulePrefix = $this->userResolver->getUserType()."-".$this->userResolver->getUserGroupId().".";
 
-        $result = $this->abac->enforce($rulePrefix.$rule_name, $this->userObject, $resource, $options);
+        $result = $this->abac->enforce(
+            $rulePrefix.$rule_name,
+            $this->userResolver->getUserObject(),
+            $resource,
+            $options
+        );
         $errors = $this->abac->getErrors();
         if($errors){
             $this->registry->get('log')->write('ABAC Errors:'.var_export($errors, true));
         }
         return $result;
-    }
-
-    public function getUserType()
-    {
-        return $this->userType;
-    }
-    public function getUserGroupId()
-    {
-        return $this->userGroupID;
-    }
-
-    public function getUserObject()
-    {
-        $userClassName = ABC::getFullClassName('AUser');
-        $customerClassName = ABC::getFullClassName('ACustomer');
-
-        if(php_sapi_name() == 'cli' && $this->registry->get('os_user') instanceof OSUser){
-            $this->userType = 'system';
-            /**
-             * @var OSUser $user
-             */
-            $user = $this->registry->get('os_user');
-            $this->userGroupID = $user->getUserGroup();
-            echo "CLI-mode: username: ".$user->getUserName()." userGroup: ".$user->getUserGroup()."\n";
-            return $user;
-        } elseif (
-            ABC::env('IS_ADMIN')
-            && $this->registry->get('user') instanceof $userClassName)
-        {
-            /**
-             * @var AUser $user
-             */
-            $user = $this->registry->get('user');
-            $this->userType = $user->getUserGroupId() == 1 ? 'root'  : 'admin';
-            $this->userGroupID = $user->getUserGroupId();
-            return $this->registry->get('user');
-        } elseif (
-            ABC::env('IS_ADMIN')
-            && $this->registry->get('customer') instanceof $customerClassName)
-        {
-            $customer = $this->registry->get('customer');
-            $this->userType = 'customer';
-            $this->userGroupID = $customer->getCustomerGroupId();
-            return $customer;
-        }
-
-        return false;
     }
 
     /**
