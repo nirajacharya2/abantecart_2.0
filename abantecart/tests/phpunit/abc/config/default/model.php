@@ -1,5 +1,6 @@
 <?php
 
+use abc\modules\listeners\ModelAuditListener;
 use tests\phpunit\abc\modules\listeners\ATestListener;
 
 return [
@@ -19,10 +20,12 @@ return [
      * @see more info https://laravel.com/docs/5.6/eloquent#events */
 
     'EVENTS' => [
-        //call listeners on model event
+        //call some listeners on model event
         'eloquent.saved: abc\models\base\Product' => [ ATestListener::class ],
         //call listeners on every model event
-        'eloquent.saved: *' => [  ],
-
+        'eloquent.*: *' => [
+            //this listener firing by base model property $auditEvents
+            ModelAuditListener::class
+        ],
     ]
 ];

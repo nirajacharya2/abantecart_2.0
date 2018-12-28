@@ -88,16 +88,54 @@ class AModelBase extends OrmModel
     /**
      * @var string
      */
+    /**
+     * @var RBAC-ABAC policy setup
+     *
+     */
     protected $policyGroup, $policyObject;
+
+    /**
+     * @var array list of requested columns (attributes) that will be checked by abac-rbac
+     */
     protected $affectedColumns = [];
 
+    /**
+     *
+     * @var array Data Validation rules
+     */
     protected $rules = [];
 
-    protected $permissions = [
-        self::CLI      => ['update', 'delete'],
-        self::ADMIN    => ['update', 'delete'],
-        self::CUSTOMER => [],
+    /**
+     * Auditing setup
+     *
+     * @var bool
+     */
+    public static $auditingEnabled = true;
+    /**
+     * @var bool if TRUE exception will be thrown if failed auditing
+     */
+    public static $auditingStrictMode = true;
+    /**
+     * Events of model that calls modelAuditListener
+     *
+     * @var array can be 'saving', 'saved', 'deleting', 'deleted'
+     * @see full list on https://laravel.com/docs/5.6/eloquent#events
+     */
+    public static $auditEvents = [
+        //after inserts! Need to know autoincrement value
+        'created',
+        //before updates
+        'updating',
+        //before deletes
+        'deleting',
+        //before restore//???
+        'restoring'
     ];
+
+    /**
+     * @var array - columns list that excluded from audit logging
+     */
+    public static $auditExcludes = ['date_added', 'date_modified'];
 
     /**
      * AModelBase constructor.
@@ -132,13 +170,6 @@ class AModelBase extends OrmModel
     public function getAffectedColumns()
     {
         return $this->affectedColumns;
-    }
-    /**
-     * @return array
-     */
-    public function getPermissions(): array
-    {
-        return $this->permissions[$this->actor['user_type']];
     }
 
     /**
@@ -441,7 +472,9 @@ class AModelBase extends OrmModel
     public static function __callStatic($method, $parameters)
     {
         //check permissions for static methods of model
-        /*$abac = Registry::getInstance()->get('abac');
+        /*
+         * ??? comment it yet. Need to resolve issues with abac-rbac class
+         * $abac = Registry::getInstance()->get('abac');
         if($abac && !$abac->hasAccess(__CLASS__)){
             throw new AException('Forbidden');
         }*/

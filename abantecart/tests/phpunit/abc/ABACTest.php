@@ -99,7 +99,7 @@ class ABACTest extends ABCTestCase{
 
         $this->assertEquals(true, $result);
     }
-
+/*
     public function testDenyTopAdmin(){
         $result = true;
         //login user as Demonstration Admin
@@ -109,6 +109,7 @@ class ABACTest extends ABCTestCase{
         /**
          * @var Abac $abac
          */
+/*
         $abac = ABC::getObjectByAlias('ABAC', [ $this->registry ]);
         $this->registry->set('abac', $abac);
         $this->abac = $abac;
@@ -122,5 +123,5 @@ class ABACTest extends ABCTestCase{
 
         $this->assertEquals(false, $result);
     }
-
+*/
 }

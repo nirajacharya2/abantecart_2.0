@@ -17,7 +17,7 @@ class $className extends $baseClassName
     public function up()
     {
         // create the table
-       /* $table = $this->table('new table');
+       /* $table = $this->table('table_name_without_prefix');
         if(!$table->exists()) {
             $table->addColumn( 'user_id', 'integer' )
                 ->addColumn( 'date_added', 'datetime' )
@@ -37,7 +37,7 @@ class $className extends $baseClassName
     public function down()
     {
         /*
-         $table = $this->table('new table');
+         $table = $this->table('table_name_with_prefix');
          if($table->exists()) {
              $table->drop();
          }

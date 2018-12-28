@@ -21,8 +21,11 @@ namespace abantecart\tests;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ACustomer;
+use abc\core\lib\ADB;
+use abc\core\lib\ALog;
 use abc\core\lib\ARequest;
 use abc\core\lib\AResponse;
+use abc\core\lib\ASession;
 use abc\core\lib\AUser;
 use Exception;
 use ReflectionClass;
@@ -201,12 +204,16 @@ class AbanteCartTestBootstrap
 }
 
 /**
- * Class ABCTestCase Base testcase class
+ * Class ABCTestCase Base test-case class
  *
  * @package abantecart\tests
  *
  * @property ACustomer $customer
+ * @property ASession $session
  * @property AResponse $response
+ * @property ARequest $request
+ * @property ALog $log
+ * @property ADB $db
  */
 class ABCTestCase extends \PHPUnit\Framework\TestCase
 {
@@ -215,7 +222,6 @@ class ABCTestCase extends \PHPUnit\Framework\TestCase
     public function __construct()
     {
         parent::__construct();
-
 
         // Registry
         $this->registry = Registry::getInstance();

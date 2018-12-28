@@ -26,21 +26,15 @@ use PHPUnit\Framework\Warning;
 class BaseModelTest extends ABCTestCase{
 
 
-    protected function tearDown(){
-        //init
-
-    }
-
     public function testValidationPassed(){
 
         try {
-            $model = new Product();
-            $product = $model->find(50);
+            $product = new Product();
             $product->fill(
                 [
-                    'model' => 'valid',
+                    'model' => 'valid model',
                     'sku'   => null,
-                    'location' => 'max:128',
+                    'location' => 'location-max:128',
                     'quantity' => 0,
                     'stock_checkout' => '1',
                     'stock_status_id' => 1,
@@ -52,6 +46,7 @@ class BaseModelTest extends ABCTestCase{
                 ]
             );
             $product->save();
+            $product_id = $product->getKey();
             $result = true;
         }catch(\PDOException $e){
             $result = false;
@@ -63,6 +58,17 @@ class BaseModelTest extends ABCTestCase{
         }
 
         $this->assertEquals( true, $result );
+
+        //check audits by requestId
+        if($result){
+            $audits = $this->db->table('audits')
+                ->select('*')
+                ->where('request_id', '=', $this->request->getUniqueId())
+                ->where('primary_key', '=', $product_id)
+                ->get();
+
+            $this->assertEquals( 11, count($audits) );
+        }
     }
 
 
@@ -77,7 +83,8 @@ class BaseModelTest extends ABCTestCase{
                 [
                     'model' => 'invalid',
                     'sku'   => null,
-                    'location' => 'max:128000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                    'location' => 'max:1280000000000000000000000000000000000000000'
+                        .'00000000000000000000000000000000000000000000000000000000000000000000000000000000000',
                     'quantity' => 'a',
                     'shipping_price'   => '$45.12000',
                 ]
