@@ -70,7 +70,7 @@ class Abac
         }
 
         $ruleSrc = $cacheOptions = $attribute_options = [];
-        $ruleSrcDirectory = null;
+        $ruleSrcDirectory = '';
 
         $config = ABC::env('ABAC');
         if($config) {
@@ -81,18 +81,19 @@ class Abac
                     'cache_ttl'    => $config['CACHE_TTL'],
                 ];
             }
-            $ruleSrcDirectory = $config['CONFIG_DIRECTORY'] ?: null;
+            $ruleSrcDirectory = $config['CONFIG_DIRECTORY'] ?: '';
             $attribute_options = $config['ATTRIBUTE_OPTIONS'] ?: [];
             $ruleSrc = $config['POLICY_RULES'] ?: [];
         }
 
         //check slash at the end of path
         $ruleSrcDirectory =
-            $ruleSrcDirectory && substr($ruleSrcDirectory,-1) != DS
+            $ruleSrcDirectory && substr((string)$ruleSrcDirectory,-1) != DS
             ? $ruleSrcDirectory.DS
             : $ruleSrcDirectory;
 
         if(!$ruleSrc && !is_dir($ruleSrcDirectory)){
+//???? what to do if no policies at all?
 return null;
             throw new \Exception(
                             'Empty rules list for ABAC class!'
@@ -130,7 +131,11 @@ return null;
      */
     public function hasPermission(string $rule_name, $resource = null, $options = [])
     {
-//if no rules - allow all
+// disable for now
+//??? return true while all policies will be presents
+return true;
+
+//if no abac-factory - allow all
 if(!$this->abac){
     return true;
 }
@@ -147,7 +152,7 @@ if(!$this->abac){
         );
         $errors = $this->abac->getErrors();
         if($errors){
-            $this->registry->get('log')->write('ABAC Errors:'.var_export($errors, true));
+            //$this->registry->get('log')->write('ABAC Errors:'.var_export($errors, true));
         }
         return $result;
     }
