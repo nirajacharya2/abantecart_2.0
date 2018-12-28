@@ -19,7 +19,7 @@ class CustomerCommunicationTest extends ABCTestCase
     {
         //init
     }
-/*
+
     public function testGetCustomerCommunicationById() {
 //disable until model fixed
 $this->markTestSkipped('must be revisited.');
@@ -29,6 +29,6 @@ $this->markTestSkipped('must be revisited.');
         $this->assertTrue(is_array($result));
         $result = $communication->getCustomerCommunicationById(0);
         $this->assertTrue(is_array($result));
-    }*/
+    }
 
 }
