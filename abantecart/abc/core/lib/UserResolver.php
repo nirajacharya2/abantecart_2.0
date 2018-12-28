@@ -38,9 +38,17 @@ class UserResolver
      */
     protected $userType;
     /**
+     * @var string - AdminName or Customer FirstName+LastName or SystemUserGroupName
+     */
+    protected $userName;
+    /**
+     * @var int - user_id
+     */
+    protected $userId;
+    /**
      * @var int | string - userGroupId or CustomerGroupId or SystemUserGroupName
      */
-    protected $userGroupID;
+    protected $userGroupId;
 
     public function __construct(Registry $registry)
     {
@@ -55,10 +63,12 @@ class UserResolver
              * @var OSUser $user
              */
             $user = $this->registry->get('os_user');
-            $this->userGroupID = $user->getUserGroup();
-            echo "CLI-mode: username: ".$user->getUserName()." userGroup: ".$user->getUserGroup()."\n";
+            $this->userGroupId = $user->getUserGroup();
             $this->userObject = $user;
-        } elseif (
+            $this->userName = $user->getUserName();
+            $this->userId = null;
+        }
+        elseif (
             ABC::env('IS_ADMIN')
             && $this->registry->get('user') instanceof $userClassName)
         {
@@ -67,16 +77,21 @@ class UserResolver
              */
             $user = $this->registry->get('user');
             $this->userType = $user->getUserGroupId() == 1 ? 'root'  : 'admin';
-            $this->userGroupID = $user->getUserGroupId();
+            $this->userGroupId = $user->getUserGroupId();
             $this->userObject = $this->registry->get('user');
-        } elseif (
-            ABC::env('IS_ADMIN')
-            && $this->registry->get('customer') instanceof $customerClassName)
+            $this->userId = $this->userObject->getId();
+            $this->userName = $this->userObject->getUserName();
+        }
+        elseif ( $this->registry->get('customer') instanceof $customerClassName)
         {
             $customer = $this->registry->get('customer');
             $this->userType = 'customer';
-            $this->userGroupID = $customer->getCustomerGroupId();
+            $this->userGroupId = $customer->getCustomerGroupId();
             $this->userObject = $customer;
+            $this->userId = $this->userObject->getId();
+            $this->userName = $this->userObject->getFirstName().' '.$this->userObject->getLastName();
+        }else{
+            //TODO: add API-user
         }
         return $this;
     }
@@ -94,7 +109,21 @@ class UserResolver
      */
     public function getUserGroupId()
     {
-        return $this->userGroupID ?? 'unknown';
+        return $this->userGroupId ?? 'unknown';
+    }
+    /**
+     * @return string
+     */
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+    /**
+     * @return string
+     */
+    public function getUserName()
+    {
+        return $this->userName ?? 'unknown';
     }
 
     /**

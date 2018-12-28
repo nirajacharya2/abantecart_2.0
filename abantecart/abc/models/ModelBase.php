@@ -18,10 +18,10 @@
 
 namespace abc\models;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\AException;
+use abc\core\lib\Abac;
 use H;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
@@ -35,7 +35,7 @@ use ReflectionMethod;
  * Class AModelBase
  *
  * @package abc\models
- * @method static Collection find(integer $id)
+ * @method Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  */
 class AModelBase extends OrmModel
@@ -85,14 +85,57 @@ class AModelBase extends OrmModel
      * @var array
      */
     protected $errors;
+    /**
+     * @var string
+     */
+    /**
+     * @var RBAC-ABAC policy setup
+     *
+     */
+    protected $policyGroup, $policyObject;
 
+    /**
+     * @var array list of requested columns (attributes) that will be checked by abac-rbac
+     */
+    protected $affectedColumns = [];
+
+    /**
+     *
+     * @var array Data Validation rules
+     */
     protected $rules = [];
 
-    protected $permissions = [
-        self::CLI      => ['update', 'delete'],
-        self::ADMIN    => ['update', 'delete'],
-        self::CUSTOMER => [],
+    /**
+     * Auditing setup
+     *
+     * @var bool
+     */
+    public static $auditingEnabled = true;
+    /**
+     * @var bool if TRUE exception will be thrown if failed auditing
+     */
+    public static $auditingStrictMode = true;
+    /**
+     * Events of model that calls modelAuditListener
+     *
+     * @var array can be 'saving', 'saved', 'deleting', 'deleted'
+     * @see full list on https://laravel.com/docs/5.6/eloquent#events
+     */
+    public static $auditEvents = [
+        //after inserts! Need to know autoincrement value
+        'created',
+        //before updates
+        'updating',
+        //before deletes
+        'deleting',
+        //before restore//???
+        'restoring'
     ];
+
+    /**
+     * @var array - columns list that excluded from audit logging
+     */
+    public static $auditExcludes = ['date_added', 'date_modified'];
 
     /**
      * AModelBase constructor.
@@ -107,9 +150,14 @@ class AModelBase extends OrmModel
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
         parent::__construct($attributes);
+        static::boot();
     }
 
-
+    public static function boot()
+    {
+        parent::$dispatcher = Registry::getInstance()->get('model_events');
+        parent::boot();
+    }
 
     /**
      * @return array
@@ -119,22 +167,36 @@ class AModelBase extends OrmModel
         return $this->rules;
     }
 
-    /**
-     * @return array
-     */
-    public function getPermissions(): array
+    public function getAffectedColumns()
     {
-        return $this->permissions[$this->actor['user_type']];
+        return $this->affectedColumns;
     }
 
     /**
      * @param $operation
      *
+     * @param array $columns
+     *
      * @return bool
      */
-    public function hasPermission($operation): bool
+    public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-        return in_array($operation, $this->getPermissions());
+
+        if( $columns[0] == '*' ){
+            $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
+        }else{
+            $this->affectedColumns = $columns;
+        }
+
+        /**
+         * @var Abac $abac
+         */
+        $abac = $this->registry->get('abac');
+        $resourceObject = new \stdClass();
+        $resourceObject->name = $this->policyObject;
+        $resourceObject->getColumns = $columns;
+
+        return $abac->hasPermission($this->policyGroup.'-'.$this->policyObject.'-'.$operation, $this);
     }
 
     /**
@@ -148,16 +210,15 @@ class AModelBase extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            if (!$this->validate($this->all())) {
-                throw new Exception(
-                    'Class '. __CLASS__
-                    .' Validation before save failed: '
-                    . implode("\n",$this->errors)
+            if (!$this->validate($this->toArray())) {
+                throw new \Exception(
+                    'Data Validation of model '. static::class.' before save failed: '."\n"
+                    ."Errors:\n". var_export($this->errors, true)
                 );
             }
             parent::save();
         } else {
-            throw new Exception('No permission for object (class '.__CLASS__.') to save the model.');
+            throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
     }
 
@@ -169,7 +230,7 @@ class AModelBase extends OrmModel
         if ($this->hasPermission('delete')) {
             parent::delete();
         } else {
-            throw new Exception('No permission for object to delete the model.');
+            throw new \Exception('No permission for object to delete the model.');
         }
     }
 
@@ -180,14 +241,19 @@ class AModelBase extends OrmModel
      */
     public function validate($data)
     {
+
         if ($rules = $this->rules()) {
-            $v = new Validator(new ValidationTranslator(), $data, $rules);
+            /**
+             * @var Validator $v
+             */
+            $v = ABC::getObjectByAlias('Validator', [ABC::getObjectByAlias('ValidationTranslator'), $data, $rules]);
             try {
                 $v->validate();
-            } catch (ValidationException $e) {
-            }
-            if ($v->fails()) {
-                $this->errors = $v->errors()->toArray();
+            }catch (ValidationException $e) {
+                $this->errors['validation'] = $v->errors()->toArray();
+                return false;
+            }catch (\Exception $e) {
+                $this->errors['validator'] = $e->getMessage();
                 return false;
             }
         }
@@ -406,10 +472,12 @@ class AModelBase extends OrmModel
     public static function __callStatic($method, $parameters)
     {
         //check permissions for static methods of model
-        $abac = Registry::getInstance()->get('abac');
+        /*
+         * ??? comment it yet. Need to resolve issues with abac-rbac class
+         * $abac = Registry::getInstance()->get('abac');
         if($abac && !$abac->hasAccess(__CLASS__)){
             throw new AException('Forbidden');
-        }
+        }*/
         return parent::__callStatic($method, $parameters);
     }
 

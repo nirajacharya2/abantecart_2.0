@@ -31,6 +31,7 @@ final class ARequest
     public $server = [];
 
     private $http;
+    private $uniqueId;
     private $version;
     private $browser;
     private $browser_version;
@@ -50,6 +51,12 @@ final class ARequest
         $this->cookie = $_COOKIE;
         $this->files = $_FILES;
         $this->server = $_SERVER;
+
+        //generate unique request
+        $this->uniqueId = sprintf(
+            "%08x",
+            abs(crc32($this->getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+        );
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
@@ -218,6 +225,10 @@ final class ARequest
 
     }
 
+    public function getUniqueId()
+    {
+        return $this->uniqueId;
+    }
     public function getBrowser()
     {
         return $this->browser;

@@ -62,6 +62,14 @@ use H;
 class Product extends AModelBase
 {
     /**
+     * Access policy properties
+     * Note: names must be without dashes and whitespaces
+     * policy rule will be named as {userType-userGroup}.product-product-read
+     * For example: system-www-data.product-product-read
+     */
+    protected $policyGroup  = 'product';
+    protected $policyObject = 'product';
+    /**
      * @var string
      */
     protected $primaryKey = 'product_id';
@@ -143,8 +151,20 @@ class Product extends AModelBase
     ];
 
     protected $rules = [
-        'model' => '|alpha|min:3',
-        'sku'   => 'required',
+        'product_id'       => 'integer',
+        'model'            => 'string|max:64',
+        //NOTE
+        //if need sku as mandatory use "present" instead "required"
+        'sku'              => 'string|max:64|nullable',
+        'location'         => 'string|max:128',
+        'quantity'         => 'integer',
+        'stock_checkout'   => 'max:1|nullable',
+        'stock_status_id'  => 'integer',
+        'manufacturer_id'  => 'integer',
+        'shipping'         => 'integer|max:1|min:0',
+        'ship_individually'=> 'integer|max:1|min:0',
+        'free_shipping'    => 'integer|max:1|min:0',
+        'shipping_price'   => 'numeric',
     ];
 
     /**
@@ -162,6 +182,20 @@ class Product extends AModelBase
      * @var
      */
     protected $thumbURL;
+
+    /**
+     * Auditing properties
+     *
+     */
+    public static $auditExcludes = ['sku' ];
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return __CLASS__;
+    }
 
     /**
      * @param array $options

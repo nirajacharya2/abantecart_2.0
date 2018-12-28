@@ -1142,3 +1142,35 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   REFERENCES `ac_addresses` (`address_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+  ALTER TABLE `ac_block_layouts`
+  ADD INDEX `ac_block_layouts_ibfk_4_idx` (`block_id` ASC);
+  ALTER TABLE `ac_block_layouts`
+  ADD CONSTRAINT `ac_block_layouts_ibfk_4`
+    FOREIGN KEY (`block_id`)
+    REFERENCES `ac_blocks` (`block_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+
+
+CREATE TABLE `ac_audits` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_type` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `event` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `request_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `session_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `auditable_name` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `primary_key` int(11) DEFAULT NULL,
+  `attribute_name` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `old_value` text COLLATE utf8_general_ci,
+  `new_value` text COLLATE utf8_general_ci,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`,`user_type`,`user_name`),
+  KEY `request_id` (`request_id`,`session_id`),
+  KEY `auditable_name` (`auditable_name`,`primary_key`),
+  KEY `attribute_name` (`attribute_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
