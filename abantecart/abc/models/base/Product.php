@@ -183,6 +183,15 @@ class Product extends AModelBase
      */
     protected $thumbURL;
 
+    /**
+     * Auditing properties
+     *
+     */
+    public static $auditExcludes = ['sku' ];
+
+    /**
+     * @return string
+     */
     public function getClass()
     {
         return __CLASS__;
