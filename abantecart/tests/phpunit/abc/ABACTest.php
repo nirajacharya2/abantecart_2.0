@@ -75,8 +75,8 @@ class ABACTest extends ABCTestCase{
             $product = new Product();
             $result = $product->hasPermission('read', ['model', 'sku']);
         }catch(\Error $e){
-            echo $e->getMessage();
-            $this->fail($e->getTraceAsString());
+            $error_msg = $e->getMessage().": file: ".$e->getFile().":".$e->getLine()."\n";
+            $this->fail($error_msg.$e->getTraceAsString());
         }
 
         $this->assertEquals(true, $result);
@@ -94,7 +94,7 @@ class ABACTest extends ABCTestCase{
             $product = new Product();
             $result = $product->hasPermission('read', ['model', 'sku']);
         }catch(\Error $e){
-            $this->fail($e->getMessage());
+            $this->fail($e->getMessage().": file: ".$e->getFile().":".$e->getLine()."\n");
         }
 
         $this->assertEquals(true, $result);
@@ -117,7 +117,7 @@ class ABACTest extends ABCTestCase{
             $product = new Product();
             $result = $product->hasPermission('read', ['model', 'someNonExistColumn']);
         }catch(\Error $e){
-            $this->fail($e->getMessage());
+            $this->fail($e->getMessage().": file: ".$e->getFile().":".$e->getLine()."\n");
         }
 
         $this->assertEquals(false, $result);
