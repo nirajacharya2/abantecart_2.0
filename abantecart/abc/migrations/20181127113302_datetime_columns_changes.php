@@ -134,7 +134,7 @@ class DatetimeColumnsChanges extends AbstractMigration
         }
 
         $update = "ALTER TABLE `".$prefix."block_layouts`
-                   CONSTRAINT `".$prefix."block_layouts_parent_fk` 
+                   ADD CONSTRAINT `".$prefix."block_layouts_parent_fk` 
                    FOREIGN KEY (`parent_instance_id`) 
                    REFERENCES `".$prefix."block_layouts` (`instance_id`) 
                        ON DELETE CASCADE ON UPDATE CASCADE;";
@@ -204,15 +204,17 @@ class DatetimeColumnsChanges extends AbstractMigration
           ON UPDATE CASCADE;";
         $this->execute($update);
 
-        $update = "ALTER TABLE `".$prefix."customer_communications` 
-        CHANGE COLUMN `user_id` `user_id` INT(11) NULL DEFAULT NULL;
-        ALTER TABLE `".$prefix."customer_communications`
-        ADD CONSTRAINT `".$prefix."customer_communications_ibfk_2`
-         FOREIGN KEY (`user_id`)
-         REFERENCES `".$prefix."users` (`user_id`)
-         ON DELETE NO ACTION
-         ON UPDATE CASCADE;";
-        $this->execute($update);
+        if ($this->hasTable('customer_communications')) {
+            $update = "ALTER TABLE `".$prefix."customer_communications` 
+            CHANGE COLUMN `user_id` `user_id` INT(11) NULL DEFAULT NULL;
+            ALTER TABLE `".$prefix."customer_communications`
+            ADD CONSTRAINT `".$prefix."customer_communications_ibfk_2`
+             FOREIGN KEY (`user_id`)
+             REFERENCES `".$prefix."users` (`user_id`)
+             ON DELETE NO ACTION
+             ON UPDATE CASCADE;";
+                $this->execute($update);
+        }
 
         $update = "ALTER TABLE `".$prefix."task_details` 
         ADD CONSTRAINT `".$prefix."task_details_ibfk_1`
