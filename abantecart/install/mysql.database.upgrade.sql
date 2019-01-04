@@ -463,6 +463,7 @@ CREATE TABLE `ac_jobs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customers`
+  ADD COLUMN `advanced_status` varchar(128) NOT NULL DEFAULT '' AFTER `status`,
   CHANGE COLUMN `date_added` `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
 
