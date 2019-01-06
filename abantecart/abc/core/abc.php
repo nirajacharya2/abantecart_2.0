@@ -61,7 +61,6 @@ class ABC extends ABCBase
         static::loadConfig($stage_name);
         //register autoloader
         spl_autoload_register([$this, 'loadClass'], false);
-
     }
 
     /**
@@ -74,7 +73,7 @@ class ABC extends ABCBase
     function loadClass($className)
     {
         $rootName = explode('\\',$className)[0];
-        if (!in_array($rootName, ['abc','tests'])) {
+        if (!in_array($rootName, ['abc'])) {
             return false;
         }
 
