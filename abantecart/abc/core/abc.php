@@ -58,7 +58,7 @@ class ABC extends ABCBase
 
         @include __DIR__.DS.'init'.DS.'version.php';
         //load config and classmap from abc/config and extensions/*/config directories
-        self::loadConfig($stage_name);
+        static::loadConfig($stage_name);
         //register autoloader
         spl_autoload_register([$this, 'loadClass'], false);
 
@@ -73,15 +73,37 @@ class ABC extends ABCBase
      */
     function loadClass($className)
     {
-        if (substr($className, 0, 3) != 'abc') {
+        $rootName = explode('\\',$className)[0];
+        if (!in_array($rootName, ['abc','tests'])) {
             return false;
         }
 
         $path = str_replace('\\', DS, $className);
+
         $fileName = ABC::env('DIR_ROOT').$path.'.php';
         if (is_file($fileName)) {
             require_once $fileName;
             return true;
+        }
+
+        //try to find by Abantecart prefix
+        if(substr(basename($fileName),0,1) == 'A') {
+            $dirname = dirname($fileName).DS;
+            $filename = substr(basename($fileName),1);
+            $filename = implode("_",preg_split(
+                '/(^[^A-Z]+|[A-Z][^A-Z]+)/',
+                $filename,
+                -1,
+                PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE
+                ));
+            if (is_file($dirname.$filename)) {
+                require_once $dirname.$filename;
+                return true;
+            }elseif(is_file($dirname.mb_strtolower($filename))) {
+                require_once $dirname.mb_strtolower($filename);
+                return true;
+            }
+
         }
         return false;
     }
@@ -91,7 +113,7 @@ class ABC extends ABCBase
      */
     static function getStageName()
     {
-        return self::$stage_name;
+        return static::$stage_name;
     }
 
     /**
@@ -100,7 +122,7 @@ class ABC extends ABCBase
     public function loadDefaultStage()
     {
         //load and put config into environment
-        self::loadConfig('default');
+        static::loadConfig('default');
     }
 
     /**
@@ -110,7 +132,7 @@ class ABC extends ABCBase
      */
     public static function loadConfig($stage_name = 'default')
     {
-        $config_sections = ['config', 'events'];
+        $config_sections = ['config', 'events', 'model'];
         foreach ($config_sections as $config_section) {
             $KEY = strtoupper($config_section);
             $file_name = $config_section.'.php';
@@ -123,10 +145,11 @@ class ABC extends ABCBase
             if ($config) {
                 //if we load additional configs - place it as key of env array
                 if ($config_section != 'config') {
-                    $config = [$KEY => $config];
+                    static::$env[$KEY] = $config;
+                }else {
+                    static::$env = array_merge(static::$env, $config);
                 }
-                self::env($config);
-                self::$stage_name = $stage_name;
+                static::$stage_name = $stage_name;
             } else {
                 //interrupt when stage config not found
                 if ($config_section == 'config') {
@@ -146,14 +169,14 @@ class ABC extends ABCBase
                 $cfg_file = $cfg_dir.DS.$config_section.'.php';
 
                 if (is_file($cfg_file)) {
-                    $ext_config = @include_once($cfg_file);
+                    $ext_config = @include($cfg_file);
                     if (is_array($ext_config)) {
                         //if we load additions configs - place it as key of env array
                         if ($config_section == 'config') {
-                            self::$env = array_merge(self::$env,$ext_config);
+                            static::$env = array_merge(static::$env,$ext_config);
                         } else {
-                            self::$env[$KEY] = array_merge_recursive(
-                                (array)self::$env[$KEY],
+                            static::$env[$KEY] = array_merge_recursive(
+                                (array)static::$env[$KEY],
                                 $ext_config
                             );
                         }
@@ -161,7 +184,8 @@ class ABC extends ABCBase
                 }
             }
         }
-        self::loadClassMap($stage_name);
+
+        static::loadClassMap($stage_name);
 
         return true;
     }
@@ -173,12 +197,15 @@ class ABC extends ABCBase
      */
     public static function loadClassMap($stage_name = 'default')
     {
-        $classmap_file = dirname(__DIR__).DS.'config'.DS.$stage_name.DS.'classmap.php';
+        $classmap_file = dirname(__DIR__).DS
+            .'config'.DS
+            .$stage_name.DS
+            .'classmap.php';
         if (is_file($classmap_file)) {
-            self::$class_map = @include_once($classmap_file);
+            static::$class_map = @include($classmap_file);
         }
 
-        if (!self::$class_map) {
+        if (!static::$class_map) {
             return false;
         }
 
@@ -192,13 +219,29 @@ class ABC extends ABCBase
         foreach ($ext_dirs as $cfg_dir) {
             $classmap_file = $cfg_dir.DS.'classmap.php';
             if (is_file($classmap_file)) {
-                $ext_classmap = @include_once($classmap_file);
+                $ext_classmap = @include($classmap_file);
                 if (is_array($ext_classmap)) {
-                    self::$class_map = array_merge(self::$class_map,$ext_classmap);
+                    static::$class_map = array_merge((array)static::$class_map,$ext_classmap);
                 }
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Function for adding class alias into classmap from outside
+     * @param $alias
+     * @param $fullClassName
+     *
+     * @return bool
+     */
+    public static function addClassToMap($alias, $fullClassName)
+    {
+        if(!$alias || !$fullClassName){
+            return false;
+        }
+        static::$class_map[$alias] = $fullClassName;
         return true;
     }
 
@@ -216,22 +259,22 @@ class ABC extends ABCBase
         //if need to get
         if ($value === null && !is_array($name)) {
             //check environment values
-            if (!sizeof(self::$env)) {
+            if (!sizeof(static::$env)) {
                 // DO NOT ALLOW RUN APP WITH EMPTY ENVIRONMENT
                 exit('Fatal Error: empty environment! Please check abc/config directory for data consistency.');
             }
-            if( isset(self::$env[$name])){
-                return self::$env[$name];
+            if( isset(static::$env[$name])){
+                return static::$env[$name];
             }
         } // if need to set batch of values
         else {
             if (is_array($name)) {
-                self::$env = array_merge(self::$env, $name);
+                static::$env = array_merge_recursive(static::$env, $name);
                 return true;
             } else {
                 //when set one value
-                if (!array_key_exists($name, self::$env) || $override) {
-                    self::$env[$name] = $value;
+                if (!array_key_exists($name, static::$env) || $override) {
+                    static::$env[$name] = $value;
                     return true;
                 } else {
                     if (class_exists('\abc\core\lib\ADebug')) {
@@ -256,7 +299,12 @@ class ABC extends ABCBase
 
     static function getEnv()
     {
-        return self::$env;
+        return static::$env;
+    }
+
+    static function getClassMap()
+    {
+        return static::$class_map;
     }
 
     /**
@@ -269,17 +317,14 @@ class ABC extends ABCBase
     static function getFullClassName(string $class_alias)
     {
 
-        if (isset(self::$class_map[$class_alias])) {
-            if (is_array(self::$class_map[$class_alias])) {
-                return self::$class_map[$class_alias][0];
-
+        if (isset(static::$class_map[$class_alias])) {
+            if (is_array(static::$class_map[$class_alias])) {
+                return static::$class_map[$class_alias][0];
             } else {
-                return self::$class_map[$class_alias];
+                return static::$class_map[$class_alias];
             }
-        } else {
-
-            return class_exists($class_alias) ? $class_alias : false;
         }
+        return false;
     }
 
     /**
@@ -293,15 +338,15 @@ class ABC extends ABCBase
      */
     static function getObjectByAlias(string $class_alias, $args = [])
     {
-        if (isset(self::$class_map[$class_alias])) {
+        if (isset(static::$class_map[$class_alias])) {
             try {
-                if (is_array(self::$class_map[$class_alias])) {
-                    $class_name = self::$class_map[$class_alias][0];
+                if (is_array(static::$class_map[$class_alias])) {
+                    $class_name = static::$class_map[$class_alias][0];
                 } else {
-                    $class_name = self::$class_map[$class_alias];
+                    $class_name = static::$class_map[$class_alias];
                 }
 
-                $args = $args ? $args : self::getClassDefaultArgs($class_alias);
+                $args = $args ? $args : static::getClassDefaultArgs($class_alias);
 
                 $reflector = new ReflectionClass($class_name);
                 return $reflector->newInstanceArgs($args);
@@ -320,10 +365,10 @@ class ABC extends ABCBase
      */
     static function getClassDefaultArgs(string $class_alias)
     {
-        if (!isset(self::$class_map[$class_alias]) || !is_array(self::$class_map[$class_alias])) {
+        if (!isset(static::$class_map[$class_alias]) || !is_array(static::$class_map[$class_alias])) {
             return [];
         }
-        $args = self::$class_map[$class_alias];
+        $args = static::$class_map[$class_alias];
         if (is_array($args)) {
             array_shift($args);
         } else {
@@ -337,12 +382,13 @@ class ABC extends ABCBase
 
         $this->validateApp();
 
-        //Check if installed and configuration is present
-        if (!self::env('DATABASES')) {
-            if (is_file(self::env('DIR_ROOT').'install'.DS.'index.php')) {
+        // New Installation
+        if (!static::env('DATABASES')) {
+            if (is_file(static::env('DIR_ROOT').'install'.DS.'index.php')) {
                 header('Location: ../install/index.php');
             } else {
-                echo "Error: Cannot load environment or missing configuration";
+                header('Location: static_pages/?file='
+                    .basename(__FILE__).'&message=Fatal+error:+Cannot+load+environment!');
             }
             exit;
         }
@@ -356,12 +402,12 @@ class ABC extends ABCBase
         //Route to request process
         $router = new ARouter($registry);
         $registry->set('router', $router);
-        $router->processRoute(self::env('ROUTE'));
+        $router->processRoute(static::env('ROUTE'));
 
         // Output
         $registry->get('response')->output();
 
-        if (self::env('IS_ADMIN') === true
+        if (static::env('IS_ADMIN') === true
             && $registry->get('config')->get('config_maintenance')
             && $registry->get('user')->isLogged()
         ) {
@@ -391,8 +437,8 @@ class ABC extends ABCBase
     protected function validateApp()
     {
         // Required PHP Version
-        if (version_compare(phpversion(), self::env('MIN_PHP_VERSION'), '<') == true) {
-            exit(self::env('MIN_PHP_VERSION')
+        if (version_compare(phpversion(), static::env('MIN_PHP_VERSION'), '<') == true) {
+            exit(static::env('MIN_PHP_VERSION')
                 .'+ Required for AbanteCart to work properly! '
                 .'Please contact your system administrator or host service provider.');
         }

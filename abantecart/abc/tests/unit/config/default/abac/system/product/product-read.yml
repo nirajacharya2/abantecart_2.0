@@ -1,0 +1,25 @@
+---
+attributes:
+    system:
+        type: resource
+        fields:
+            affectedColumns:
+                name: Affected Columns
+            class:
+                name: Class Name
+#test rule for some system user with username travis
+rules:
+    system-travis.product-product-read:
+        attributes:
+            system.class:
+                comparison_type: string
+                comparison: isEqual
+                value: abc\models\base\Product
+            system.affectedColumns:
+                comparison_type: array
+                comparison: NotContainsDiffs
+                value: [
+                        "product_id","model","sku","location","quantity","stock_checkout","stock_status_id","manufacturer_id","shipping","ship_individually",
+                        "free_shipping","shipping_price","price","tax_class_id","date_available","weight","weight_class_id","length","width","height","length_class_id",
+                        "status","viewed","sort_order","subtract","minimum","maximum","cost","call_to_order","settings","date_added","date_modified"
+                        ]
