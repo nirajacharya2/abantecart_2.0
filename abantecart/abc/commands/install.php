@@ -35,7 +35,7 @@ use H;
  */
 class Install extends BaseCommand
 {
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'app' : $action;
         //if now options - check action

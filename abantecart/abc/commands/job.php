@@ -36,7 +36,7 @@ class Job extends BaseCommand
 {
     public $errors = [];
 
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'run' : $action;
         //if now options - check action
