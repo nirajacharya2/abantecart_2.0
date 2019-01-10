@@ -65,22 +65,27 @@ class AModelBase extends OrmModel
      * @var array
      */
     protected $actor;
+
     /**
      * @var Registry
      */
     protected $registry;
+
     /**
      * @var \abc\core\lib\AConfig
      */
     protected $config;
+
     /**
      * @var \abc\core\cache\ACache
      */
     protected $cache;
+
     /**
      * @var \abc\core\lib\ADB
      */
     protected $db;
+
     /**
      * @var array
      */
@@ -111,10 +116,12 @@ class AModelBase extends OrmModel
      * @var bool
      */
     public static $auditingEnabled = true;
+
     /**
      * @var bool if TRUE exception will be thrown if failed auditing
      */
     public static $auditingStrictMode = true;
+
     /**
      * Events of model that calls modelAuditListener
      *
@@ -124,11 +131,11 @@ class AModelBase extends OrmModel
     public static $auditEvents = [
         //after inserts! Need to know autoincrement value
         'created',
-        //before updates
+        //before update
         'updating',
-        //before deletes
+        //before delete
         'deleting',
-        //before restore//???
+        //before restore
         'restoring'
     ];
 
@@ -157,6 +164,14 @@ class AModelBase extends OrmModel
     {
         parent::$dispatcher = Registry::getInstance()->get('model_events');
         parent::boot();
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return __CLASS__;
     }
 
     /**
