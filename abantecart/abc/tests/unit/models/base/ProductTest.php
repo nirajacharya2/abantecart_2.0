@@ -16,11 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abantecart\tests;
+namespace abc\tests\unit\models;
 
 use abc\core\lib\ADB;
 use abc\models\base\Product;
-
+use abc\tests\unit\ATestCase;
 
 /**
  * Class testProductModel
@@ -28,7 +28,7 @@ use abc\models\base\Product;
  * @package abantecart\tests
  * @property ADB $db
  */
-class testProductModel extends ABCTestCase
+class testProductModel extends ATestCase
 {
 
     protected function tearDown()

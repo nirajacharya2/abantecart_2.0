@@ -117,7 +117,7 @@ class BaseCommand implements ABCExecInterface
      * @param string $action
      * @param array $options
      */
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
     }
 

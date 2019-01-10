@@ -23,7 +23,6 @@ use abc\models\base\Product;
 use abc\tests\unit\modules\listeners\ATestListener;
 use PHPUnit\Framework\Warning;
 
-require dirname(__DIR__, 1).DS.'ATestCase.php'; // TODO make it autoload with use
 
 class BaseModelTest extends ATestCase
 {

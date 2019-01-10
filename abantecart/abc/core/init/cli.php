@@ -78,7 +78,7 @@ $dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.DS : ABC::env('DIR_VEN
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,
-    'DIR_TESTS'           => $dir_root.'tests'.DS,
+    'DIR_TESTS'           => $dir_app.'tests'.DS,
     'DIR_APP'             => $dir_app,
     'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
     'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,

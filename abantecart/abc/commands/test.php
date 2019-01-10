@@ -21,6 +21,8 @@ namespace abc\commands;
 use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\lib\AException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Class Test
@@ -31,15 +33,14 @@ class Test extends BaseCommand
 {
     public $results = [];
 
-    protected $phpUnitPhar;
-    protected $phpUnitConfigFile;
+    protected $phpUnitBin;
     protected $phpUnitTestTemplate;
     protected $phpUnitTestsResult;
 
     public function __construct()
     {
         $this->phpUnitTestTemplate = ABC::env('DIR_APP').'commands'.DS.'base'.DS.'phpunit.test.template.txt';
-        $this->phpUnitPhar = dirname(__DIR__).DS.'system'.DS.'temp'.DS.'phpunit-7.2.5.phar';
+        $this->phpUnitBin = ABC::env('DIR_VENDOR').'bin'.DS.'phpunit';
         parent::__construct();
     }
 
@@ -49,38 +50,124 @@ class Test extends BaseCommand
      *
      * @return array
      */
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $errors = [];
-        if ($action == 'phpunit'
-            && !isset($options['stage'])
-            && !isset($options['help'])
-        ) {
-            return ["Please provide stage name! For example: --stage=default"];
-        }
-        if ($action == 'phpunit'
-            && isset($options['create'])
-        ) {
-            if (!isset($options['file'])) {
-                return ["Please provide file name! For example: --file=path/to/your/file"];
+        if ($action == 'phpunit') {
+            if (!isset($options['stage']) && !isset($options['help'])) {
+                return ["Please provide stage name! For example: --stage=default"];
             }
-            if (!is_dir(dirname($options['file']))) {
-                //try to create directory
-                $makeDirResult = \H::MakeNestedDirs(dirname($options['file']),0775);
-                if($makeDirResult['result'] === false) {
+
+            if (!is_file($this->phpUnitBin)) {
+                return [
+                    "PhpUnit not found! (looking for '".$this->phpUnitBin."')\n"
+                    ."Please install composer packages in development and testing environments."
+                ];
+            }
+
+            if (isset($options['create'])) {
+                foreach($options as $optName=>$optValue){
+                    if(!in_array($optName,['stage', 'create'])){
+                        if(\H::isCamelCase($optName)){
+                            $options['test_class'] = $optName;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isset($options['test_class'])) {
                     return [
-                        "Cannot to create directory ".dirname($options['file'])."."
-                        ."Please create it manually or check permissions.\n"
-                        .$makeDirResult['message']
+                        "Please provide correct (CamelCase) test class name! For example:\n"
+                        ."abcexec test:phpunit --create YourClassNameTest --stage=".$options['stage']
+                    ];
+                }elseif(substr($options['test_class'],-4) != 'Test') {
+                    return [
+                        "Please provide correct (CamelCase) test class name with \"Test\" suffix! For example:\n"
+                        ."abcexec test:phpunit --create YourClassNameTest --stage=".$options['stage']
                     ];
                 }
-            }
-            if (is_file($options['file'])) {
-                return ["File ".$options['file']." is already exists!"];
+
+                //then check is file already exists
+
+                $options['file'] = $options['test_class'].".php";
+
+                //so choose directory
+
+                //otherwise include all paths (core + extensions tests)
+                $dirs = [ABC::env('DIR_TESTS').'unit'];
+                $dirs = array_merge($dirs, glob(ABC::env('DIR_APP_EXTENSIONS').'*'.DS.'tests'.DS.'unit', GLOB_ONLYDIR));
+                $message = "Which path would you like to use?:\n";
+                $i = 0;
+                $exists = [];
+                foreach($dirs as $k=>$path){
+                    $message .= '[ '.$i.' ] '.$path."\n";
+                    $dirs[$i] = $path;
+                    $i++;
+
+                    $iterator = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator(
+                            $path,
+                            RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::SELF_FIRST,
+                        RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
+                    );
+
+                    foreach($iterator as $file) {
+                        $dirPath = $file->getRealpath();
+                        if($file->isDir() && !is_int(strpos($dirPath,'config'))) {
+                            $message .= '[ '.$i.' ] '.$dirPath."\n";
+                            $dirs[$i] = $dirPath;
+                            $i++;
+                        }elseif($file->isFile()){
+                            $exists[basename($dirPath)] = $dirPath;
+                        }
+                    }
+                }
+
+                if (isset($exists[$options['file']])) {
+                    return ["File ".$options['test_class'].".php is already exists! See ".$exists[$options['file']]];
+                }
+
+                $message .= ">\n";
+                $chosen = $this->getSTDIN($message,(count($dirs)+1));
+                $options['file'] = $dirs[$chosen].DS.$options['file'];
+
+                if (!is_dir(dirname($options['file']))) {
+                    //try to create directory
+                    $makeDirResult = \H::MakeNestedDirs(dirname($options['file']), 0775);
+                    if ($makeDirResult['result'] === false) {
+                        return [
+                            "Cannot to create directory ".dirname($options['file'])."."
+                            ."Please create it manually or check permissions.\n"
+                            .$makeDirResult['message']
+                        ];
+                    }
+                }
+                if (is_file($options['file'])) {
+                    return ["File ".$options['test_class'].".php is already exists!"];
+                }
+                $_SERVER['argv'][] = 'file='.$options['file'];
             }
         }
         return $errors;
     }
+
+
+    protected function getSTDIN($message, $max){
+        ob_end_clean();
+        $resSTDIN = fopen("php://stdin","r");
+        echo($message);
+        $strChar = trim(fgets($resSTDIN));
+
+        if(!preg_match('/^([0-9])+$/',$strChar) || $strChar<0 || $strChar>$max){
+            echo "Please input correct number!\n";
+            fclose($resSTDIN);
+            return $this->getSTDIN($message,$max);
+        }
+        fclose($resSTDIN);
+        return $strChar;
+    }
+
 
     /**
      * @param string $action
@@ -142,61 +229,40 @@ class Test extends BaseCommand
                     'example'     => "php abcexec test:phpunit --help\n".
                         "\t  To run all tests:\n\n\t\t   "
                         ."php abcexec test:phpunit --run --all --stage=default\n\n"
-                        ."\t  To run test by filename:\n\n\t\t   "
-                        ."php abcexec test:phpunit --run --file=/full/Path/Of/YourTestFileName.php --stage=default\n\n"
-                        ."\t  To run all tests from directory:\n\n\t\t   "
-                        ."php abcexec test:phpunit --run "
-                            ."--dir=/full/Path/Of/Your/Directory/With/Tests/ --stage=default\n\n"
-                        ."\t  To create new phpunit test file:\n\n\t\t   "
-                        ."php abcexec test:phpunit --create "
-                            ."--file=/full/Path/Of/YourTestFileName.php --stage=default\n\n",
+                        ."\t  To create new phpunit test:\n\n\t\t   "
+                        ."php abcexec test:phpunit --create YourClassNameTest --stage=default\n\n",
                 ],
         ];
     }
 
     protected function callPhpUnit($action, $options)
     {
-        $stage_name = $options['stage'] ? $options['stage'] : 'default';
-        $this->phpUnitConfigFile = ABC::env('DIR_CONFIG').'phpunit_'.$stage_name.'.xml';
-        $result = $this->createPhpUnitConfigurationFile($options);
-        if (!$result) {
-            throw new AException(implode("\n", $this->results)."\n", AC_ERR_LOAD);
-        }
-
         if ($options['create']) {
-            if (!@copy($this->phpUnitTestTemplate, $options['file'])) {
+            $testClassContent = file_get_contents($this->phpUnitTestTemplate);
+            $testClassContent = str_replace('%s', $options['test_class'], $testClassContent);
+            if (!@file_put_contents($options['file'], $testClassContent)) {
                 throw new AException(
-                    'Cannot copy '.$this->phpUnitTestTemplate.' to '.$options['file']."\n",
+                    'Cannot create file '.$options['file']."\n",
                     AC_ERR_LOAD
                 );
             }
-        } else {
+        } /*else {
 
             $this->adaptPhpUnitArgv($action);
             //call phpunit with arguments
-            if (!is_file($this->phpUnitPhar)) {
-                echo "phpunit phar-package not found.\n"
-                    ."Trying to download phpunit package into abc/system/temp directory. Please wait..\n";
 
-                if (!copy(
-                    'https://phar.phpunit.de/'.basename($this->phpUnitPhar),
-                    $this->phpUnitPhar
-                )) {
-                    exit("Error: Tried to download phpunit phar-file"
-                        ." from ".'https://phar.phpunit.de/'.basename($this->phpUnitPhar)." but failed.\n".
-                        " Please download it manually into "
-                        .dirname($this->phpUnitPhar).DS." directory\n");
-                }
-            }
 
             $output_arr = [];
+            $command = 'php '.$this->phpUnitBin.' --color -c '.ABC::env('DIR_TESTS').'unit'.DS.'phpunit.xml';
+            $this->write("Run shell command:\n".$command);
+
             exec(
-                'php '.$this->phpUnitPhar.' --configuration '.$this->phpUnitConfigFile,
+                $command,
                 $output_arr,
                 $this->phpUnitTestsResult
             );
-            echo implode("\n", $output_arr)."\n";
-        }
+            $this->write( implode("\n", $output_arr));
+        }*/
     }
 
     protected function adaptPhpUnitArgv($action)
@@ -238,68 +304,6 @@ class Test extends BaseCommand
         //add configuration file
         $_SERVER['argv'] = $argv;
 
-        return true;
-    }
-
-    public function createPhpUnitConfigurationFile(array $data)
-    {
-        $stage_name = $data['stage'];
-        $phpunit_config_file = $this->phpUnitConfigFile;
-
-        $app_config_file = ABC::env('DIR_CONFIG').$stage_name.DS.'config.php';
-        @unlink($phpunit_config_file);
-        if (!$stage_name || !is_file($app_config_file)) {
-            $this->results[] = 'Cannot to create phpunit configuration. Unknown stage name!';
-            return false;
-        }
-        $app_config = @include $app_config_file;
-        if (!$app_config) {
-            $this->results[] = 'Cannot to create phpunit configuration. Empty stage environment!';
-            return false;
-        }
-
-        if ($data['dir']) {
-            $dirs = [$data['dir']];
-        } elseif ($data['file']) {
-            $dirs = [$data['file']];
-        } else {
-            //otherwise include all paths (core + extensions tests)
-            $dirs = [ABC::env('DIR_TESTS').'phpunit'.DS.'abc'];
-            $dirs = array_merge($dirs, glob(ABC::env('DIR_APP_EXTENSIONS').'*'.DS.'tests'.DS.'phpunit', GLOB_ONLYDIR));
-        }
-        $phpunit_bootstrap = ABC::env('DIR_TESTS').'phpunit/AbanteCartTestBootstrap.php';
-        $content = <<<EOD
-<phpunit
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
-		bootstrap="{$phpunit_bootstrap}">
-	<php>
-	  <ini name="display_startup_errors" value="On"/>
-	  <ini name="display_errors" value="On"/>
-	</php>
-	<testsuites>
-		<testsuite name="abcexec_tests">
-EOD;
-
-        foreach ($dirs as $dir) {
-            if (is_dir($dir)) {
-                $content .= "\n			<directory>".$dir."</directory>\n";
-            } elseif (is_file($dir)) {
-                $content .= "\n			<file>".$dir."</file>\n";
-            }
-        }
-        $content .= <<<EOD
-		</testsuite>
-	</testsuites>
-</phpunit>
-EOD;
-
-        $file = fopen($phpunit_config_file, 'w');
-        if (!fwrite($file, $content)) {
-            $this->results[] = 'Cannot to write file '.$file;
-            return false;
-        }
-        fclose($file);
         return true;
     }
 

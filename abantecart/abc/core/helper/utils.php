@@ -1861,6 +1861,11 @@ class AHelperUtils extends AHelper
         return ($content ? false : true);
     }
 
+    public static function isCamelCase($className)
+    {
+        return (bool)preg_match('/^([A-Z][a-z0-9]+)+$/', $className);
+    }
+
     /**
      * Function changes and cleans data base on entity codes, such as language_code, sku etc
      *

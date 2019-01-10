@@ -40,10 +40,8 @@ before_script:
 
 
 script:
-  #run phpunit via phar-package and abcexec
-  - php abcexec test:phpunit --run --all --stage=default
-
-
+  #run phpunit
+  - php ./vendor/bin/phpunit -c ./tests/unit/phpunit.xml --color
 
 notifications:
   email:
