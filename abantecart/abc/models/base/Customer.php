@@ -41,7 +41,13 @@ use abc\models\AModelBase;
  */
 class Customer extends AModelBase
 {
+    /**
+     * @var string
+     */
     protected $primaryKey = 'customer_id';
+    /**
+     * @var bool
+     */
     public $timestamps = false;
 
     protected $permissions = [
@@ -93,6 +99,7 @@ class Customer extends AModelBase
 //        'date_modified',
 //        'last_login',
 //    ];
+
 
     public function store()
     {
