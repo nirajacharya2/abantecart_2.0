@@ -29,7 +29,7 @@ use abc\core\lib\AAssetPublisher;
  */
 class Publish extends BaseCommand
 {
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'all' : $action;
         //if now options - check action
