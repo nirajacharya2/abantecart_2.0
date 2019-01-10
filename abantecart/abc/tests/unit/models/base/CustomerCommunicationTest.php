@@ -1,9 +1,10 @@
 <?php
 
-namespace abantecart\tests;
+namespace abc\tests\unit\models;
 
 use abc\core\lib\ADB;
 use abc\models\base\CustomerCommunication;
+use abc\tests\unit\ATestCase;
 
 /**
  * Class CustomerCommunicationTest
@@ -12,7 +13,7 @@ use abc\models\base\CustomerCommunication;
  * @property ADB $db
  */
 
-class CustomerCommunicationTest extends ABCTestCase
+class CustomerCommunicationTest extends ATestCase
 {
 
     protected function tearDown()

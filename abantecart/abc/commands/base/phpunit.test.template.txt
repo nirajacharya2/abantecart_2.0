@@ -1,23 +1,18 @@
 <?php
-/**
-* AbanteCart auto-generated phpunit test file
-*/
+namespace abc\tests\unit;
 
-namespace tests\;
 /**
- * Class $testClassName
+ * Class %s
  */
-class testClassName extends ABCTestCase{
+class %s extends ATestCase{
 
 
-    protected function tearDown(){
+    protected function setUp(){
         //init
-
     }
 
     public function testSomething1(){
         //$result = runsome();
         //$this::assertEquals($result, array());
     }
-
 }

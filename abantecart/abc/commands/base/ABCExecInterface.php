@@ -22,7 +22,7 @@ interface ABCExecInterface
 {
     public function help($options = []);
 
-    public function validate(string $action, array $options);
+    public function validate(string $action, array &$options);
 
     public function run(string $action, array $options);
 
