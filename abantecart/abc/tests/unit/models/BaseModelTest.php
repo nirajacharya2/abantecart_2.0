@@ -16,13 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models;
-
+namespace unit\models;
 use abc\tests\unit\ATestCase;
 use abc\models\base\Product;
 use abc\tests\unit\modules\listeners\ATestListener;
 use PHPUnit\Framework\Warning;
-
 
 class BaseModelTest extends ATestCase
 {
