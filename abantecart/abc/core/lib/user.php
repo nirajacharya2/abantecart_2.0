@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2018 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,11 +21,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AUser
@@ -35,8 +31,8 @@ final class AUser
     /**
      * @var int
      */
-    private $user_id;
-    private $user_group_id;
+    private $userId;
+    private $userGroupId;
 
     /**
      * @var string
@@ -45,7 +41,7 @@ final class AUser
     private $username;
     private $firstname;
     private $lastname;
-    private $last_login;
+    private $lastLogin;
     /**
      * @var \abc\core\lib\ARequest
      */
@@ -63,10 +59,12 @@ final class AUser
     /**
      * @var array
      */
-    private $permission = array();
+    private $permission = [];
 
     /**
      * @param $registry \abc\core\engine\Registry
+     *
+     * @throws \Exception
      */
     public function __construct($registry)
     {
@@ -79,14 +77,14 @@ final class AUser
                                             FROM ".$this->db->table_name("users")." 
                                             WHERE user_id = '".(int)$this->session->data['user_id']."'");
             if ($user_query->num_rows) {
-                $this->user_id = (int)$user_query->row['user_id'];
-                $this->user_group_id = (int)$user_query->row['user_group_id'];
+                $this->userId = (int)$user_query->row['user_id'];
+                $this->userGroupId = (int)$user_query->row['user_group_id'];
                 $this->email = $user_query->row['email'];
                 $this->username = $user_query->row['username'];
                 $this->firstname = $user_query->row['firstname'];
                 $this->lastname = $user_query->row['lastname'];
-                $this->last_login = $this->session->data['user_last_login'];
-                $this->_user_init();
+                $this->lastLogin = $this->session->data['user_last_login'];
+                $this->userInit();
             } else {
                 $this->logout();
             }
@@ -100,6 +98,7 @@ final class AUser
      * @param $password string
      *
      * @return bool
+     * @throws \Exception
      */
     public function login($username, $password)
     {
@@ -113,17 +112,17 @@ final class AUser
         $user_query = $this->db->query($sql);
 
         if ($user_query->num_rows) {
-            $this->user_id = $this->session->data['user_id'] = (int)$user_query->row['user_id'];
-            $this->user_group_id = (int)$user_query->row['user_group_id'];
+            $this->userId = $this->session->data['user_id'] = (int)$user_query->row['user_id'];
+            $this->userGroupId = (int)$user_query->row['user_group_id'];
             $this->username = $user_query->row['username'];
 
-            $this->last_login = $this->session->data['user_last_login'] = $user_query->row['last_login'];
-            if (!$this->last_login || $this->last_login == 'null' || $this->last_login == '0000-00-00 00:00:00') {
-                $this->session->data['user_last_login'] = $this->last_login = '';
+            $this->lastLogin = $this->session->data['user_last_login'] = $user_query->row['last_login'];
+            if (!$this->lastLogin || $this->lastLogin == 'null' || $this->lastLogin == '0000-00-00 00:00:00') {
+                $this->session->data['user_last_login'] = $this->lastLogin = '';
             }
 
-            $this->_user_init();
-            $this->_update_last_login();
+            $this->userInit();
+            $this->updateLastLogin();
 
             return true;
         } else {
@@ -137,16 +136,17 @@ final class AUser
      * @param void
      *
      * @return void
+     * @throws \Exception
      */
-    private function _user_init()
+    private function userInit()
     {
         $this->db->query("UPDATE ".$this->db->table_name("users")." 
                             SET ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                            WHERE user_id = '".$this->user_id."';");
+                            WHERE user_id = '".$this->userId."';");
 
         $user_group_query = $this->db->query("SELECT `permission`
                                               FROM ".$this->db->table_name("user_groups")."
-                                              WHERE `user_group_id` = '".$this->user_group_id."'");
+                                              WHERE `user_group_id` = '".$this->userGroupId."'");
         if (unserialize($user_group_query->row['permission'])) {
             foreach (unserialize($user_group_query->row['permission']) as $key => $value) {
                 $this->permission[$key] = $value;
@@ -154,17 +154,17 @@ final class AUser
         }
     }
 
-    private function _update_last_login()
+    private function updateLastLogin()
     {
         $this->db->query("UPDATE ".$this->db->table_name("users")." 
                         SET last_login = NOW()
-                        WHERE user_id = '".$this->user_id."';");
+                        WHERE user_id = '".$this->userId."';");
     }
 
     public function logout()
     {
         unset($this->session->data['user_id']);
-        $this->user_id = '';
+        $this->userId = '';
         $this->username = '';
     }
 
@@ -177,7 +177,7 @@ final class AUser
     public function hasPermission($key, $value)
     {
         //If top_admin allow all permission. Make sure Top Admin Group is set to ID 1
-        if ($this->user_group_id == 1) {
+        if ($this->userGroupId == 1) {
             return true;
         } else {
             if (isset($this->permission[$key])) {
@@ -220,7 +220,7 @@ final class AUser
         ) {
             return false;
         } else {
-            return $this->user_id;
+            return $this->userId;
         }
     }
 
@@ -233,7 +233,7 @@ final class AUser
             return false;
         }
 
-        return $this->user_id;
+        return $this->userId;
     }
 
     /**
@@ -241,7 +241,7 @@ final class AUser
      */
     public function getId()
     {
-        return $this->user_id;
+        return (int)$this->userId;
     }
 
     /**
@@ -249,7 +249,7 @@ final class AUser
      */
     public function getUserGroupId()
     {
-        return $this->user_group_id;
+        return (int)$this->userGroupId;
     }
 
     /**
@@ -265,7 +265,7 @@ final class AUser
      */
     public function getLastLogin()
     {
-        return $this->last_login;
+        return $this->lastLogin;
     }
 
     /**
@@ -273,6 +273,7 @@ final class AUser
      * @param string $email
      *
      * @return bool
+     * @throws \Exception
      */
     public function validate($username, $email)
     {
@@ -311,7 +312,7 @@ final class AUser
      */
     public function getAvatar()
     {
-        return AHelperUtils::getGravatar($this->email);
+        return H::getGravatar($this->email);
     }
 
     /**

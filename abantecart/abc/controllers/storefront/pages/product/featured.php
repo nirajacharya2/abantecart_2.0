@@ -20,9 +20,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-
+use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductSpecial
@@ -33,7 +34,15 @@ use abc\core\engine\AResource;
 class ControllerPagesProductFeatured extends AController
 {
 
-    public $data = array();
+    public $data = [];
+
+    use ProductListingTrait;
+
+    public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->fillSortsList();
+    }
 
     /**
      * Check if HTML Cache is enabled for the method
@@ -42,7 +51,7 @@ class ControllerPagesProductFeatured extends AController
      */
     public static function main_cache_keys()
     {
-        return array('page', 'limit', 'sort', 'order');
+        return ['page', 'limit', 'sort', 'order'];
     }
 
     public function main()
@@ -56,11 +65,11 @@ class ControllerPagesProductFeatured extends AController
         $this->loadLanguage('product/featured');
         $this->document->setTitle($this->language->get('heading_title'));
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getHomeURL(),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
+        ]);
 
 
         $url = '';
@@ -68,11 +77,11 @@ class ControllerPagesProductFeatured extends AController
             $url .= '&page='.$request['page'];
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getNonSecureURL('product/featured', $url),
             'text'      => $this->language->get('heading_title'),
             'separator' => $this->language->get('text_separator'),
-        ));
+        ]);
 
         if (isset($request['page'])) {
             $page = $request['page'];
@@ -123,7 +132,7 @@ class ControllerPagesProductFeatured extends AController
                 ]
             );
 
-            $product_ids = array();
+            $product_ids = [];
             foreach ($results as $result) {
                 $product_ids[] = (int)$result['product_id'];
             }
@@ -215,7 +224,7 @@ class ControllerPagesProductFeatured extends AController
                     $in_wishlist = true;
                 }
 
-                $this->data['products'][] = array(
+                $this->data['products'][] = [
                     'product_id'     => $result['product_id'],
                     'name'           => $result['name'],
                     'model'          => $result['model'],
@@ -249,7 +258,7 @@ class ControllerPagesProductFeatured extends AController
                         'product/wishlist/remove',
                         '&product_id='.$result['product_id']
                     ),
-                );
+                ];
             }
 
             if ($this->config->get('config_customer_price')) {
@@ -261,48 +270,48 @@ class ControllerPagesProductFeatured extends AController
             }
             $this->data['display_price'] = $display_price;
 
-            $sorts = array();
-            $sorts[] = array(
+            $sorts = [];
+            $sorts[] = [
                 'text'  => $this->language->get('text_default'),
                 'value' => 'p.sort_order-ASC',
                 'href'  => $this->html->getURL('product/featured', $url.'&sort=p.sort_order&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_name_asc'),
                 'value' => 'pd.name-ASC',
                 'href'  => $this->html->getURL('product/featured', $url.'&sort=pd.name&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_name_desc'),
                 'value' => 'pd.name-DESC',
                 'href'  => $this->html->getURL('product/featured', $url.'&sort=pd.name&order=DESC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_price_asc'),
                 'value' => 'p.price-ASC',
                 'href'  => $this->html->getURL('product/featured', $url.'&sort=price&order=ASC', '&encode'),
-            );
+            ];
 
-            $sorts[] = array(
+            $sorts[] = [
                 'text'  => $this->language->get('text_sorting_price_desc'),
                 'value' => 'p.price-DESC',
                 'href'  => $this->html->getURL('product/featured', $url.'&sort=price&order=DESC', '&encode'),
-            );
+            ];
 
-            $sort_options = array();
+            $sort_options = [];
             foreach ($sorts as $item) {
                 $sort_options[$item['value']] = $item['text'];
             }
             $sorting = $this->html->buildElement(
-                array(
+                [
                     'type'    => 'selectbox',
                     'name'    => 'sort',
                     'options' => $sort_options,
                     'value'   => $sort.'-'.$order,
-                )
+                ]
             );
 
             $this->view->assign('sorting', $sorting);
@@ -316,7 +325,7 @@ class ControllerPagesProductFeatured extends AController
             );
 
             $this->data['pagination_bootstrap'] = $this->html->buildElement(
-                array(
+                [
                     'type'       => 'Pagination',
                     'name'       => 'pagination',
                     'text'       => $this->language->get('text_pagination'),
@@ -326,7 +335,7 @@ class ControllerPagesProductFeatured extends AController
                     'limit'      => $limit,
                     'url'        => $pagination_url,
                     'style'      => 'pagination',
-                ));
+                ]);
 
             $this->data['sort'] = $sort;
             $this->data['order'] = $order;
@@ -336,12 +345,12 @@ class ControllerPagesProductFeatured extends AController
         } else {
             $this->view->assign('text_error', $this->language->get('text_empty'));
             $continue = $this->html->buildElement(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'continue_button',
                     'text'  => $this->language->get('button_continue'),
                     'style' => 'button',
-                ));
+                ]);
             $this->view->assign('button_continue', $continue);
             $this->view->assign('continue', $this->html->getHomeURL());
             $this->view->setTemplate('pages/error/not_found.tpl');

@@ -22,9 +22,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-
+use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductSpecial
@@ -36,6 +37,14 @@ class ControllerPagesProductBestSeller extends AController
 {
 
     public $data = [];
+
+    use ProductListingTrait;
+
+    public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->fillSortsList();
+    }
 
     /**
      * Check if HTML Cache is enabled for the method

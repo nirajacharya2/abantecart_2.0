@@ -204,9 +204,10 @@ class AHelperUtils extends AHelper
      *
      * @param        $string_value
      * @param string $object_key_name
-     * @param int    $object_id
+     * @param int $object_id
      *
      * @return string
+     * @throws Exception
      */
     public static function SEOEncode($string_value, $object_key_name = '', $object_id = 0)
     {
