@@ -203,6 +203,7 @@ CREATE TABLE `ac_customers` (
   `newsletter` int(1) NOT NULL DEFAULT '0',
   `address_id` int(11) NULL, -- default customer's address
   `status` int(1) NOT NULL,
+  `advanced_status` varchar(128) NOT NULL DEFAULT '',
   `approved` int(1) NOT NULL DEFAULT '0',
   `customer_group_id` int(11) NULL,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '0',
