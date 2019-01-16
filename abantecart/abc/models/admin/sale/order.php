@@ -27,6 +27,7 @@ use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use abc\modules\events\ABaseEvent;
 use H;
 
 /**
@@ -338,6 +339,7 @@ class ModelSaleOrder extends Model
                 }
             }
         }
+        H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
     }
 
     /**
@@ -815,6 +817,7 @@ class ModelSaleOrder extends Model
 
             }
         }
+        H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
     }
 
     /**
