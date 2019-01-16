@@ -316,11 +316,9 @@ echo $this->html->buildElement(
 				.attr('for', 'option_value_form_default_new' + row_id);
 			opt_row.find('input[name^=product_option_value_id]').val('new');
 			new_rows.find("input, textarea, select").each(function() {
-				console.log($(this).attr('name'));
 				var new_name = $(this).attr('name');
 				new_name = new_name.replace("[]", "[new" + row_id + "]");
 				$(this).attr('name', new_name);
-				console.log(new_name);
 			});
 
 			//find next sort order number
@@ -413,7 +411,6 @@ echo $this->html->buildElement(
 					bindAform($("input, textarea, select", '#option_edit_form'));
 					bindAform($("input, textarea, select", '#update_option_values'));
 					bindCustomEvents('#option_values');
-					$(this).reset();
 				}
 			});
 			return false;
