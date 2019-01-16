@@ -190,20 +190,6 @@ class Product extends AModelBase
     public static $auditExcludes = ['sku' ];
 
     /**
-     * @return string
-     */
-    public function getClass()
-    {
-        return __CLASS__;
-    }
-
-    /**
-     * Auditing properties
-     *
-     */
-    public static $auditExcludes = ['sku' ];
-
-    /**
      * @param array $options
      *
      * @return bool|void
