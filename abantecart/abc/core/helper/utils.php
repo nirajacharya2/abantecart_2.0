@@ -1550,6 +1550,8 @@ class AHelperUtils extends AHelper
                     }
                 }
             }
+
+
         }
 
         if (!file_exists(ABC::env('DIR_IMAGES').$new_image)
@@ -1901,4 +1903,26 @@ class AHelperUtils extends AHelper
         }
         return $output;
     }*/
+
+    public static function stringTruncate($string, $width = 50, $addEllipses = false) {
+        $parts = preg_split('/([\s\n\r]+)/', $string, null, PREG_SPLIT_DELIM_CAPTURE);
+        $parts_count = count($parts);
+
+        $ellipses = false;
+
+        $length = 0;
+        $last_part = 0;
+        for (; $last_part < $parts_count; ++$last_part) {
+            $length += strlen($parts[$last_part]);
+            if ($length > $width) {
+                $ellipses = true;
+                break;
+            }
+        }
+        $result = implode(array_slice($parts, 0, $last_part));
+        if ($ellipses && $addEllipses) {
+            $result .= ' ...';
+        }
+        return $result;
+    }
 }

@@ -35,6 +35,7 @@
 			</div>	
 					
 			<div class="btn-group mr10 toolbar">
+				<?php echo $this->getHookVar('toolbar_pre'); ?>
 				<?php if($register_date){?>
 				<a class="btn btn-white disabled"><?php echo $register_date; ?></a>
 				<?php } ?>

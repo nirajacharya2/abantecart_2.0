@@ -616,15 +616,17 @@ class ControllerPagesSaleOrder extends AController
                 }
                 if (!$match) {
                     $new_totals[$row['key']] = $row['key'];
-                    $this->data['totals_add'][] = [
-                        'key'        => $row['key'],
-                        'type'       => $this->config->get($row['key'].'_total_type'),
-                        'order_id'   => $order_id,
-                        'title'      => $row['key'],
-                        'text'       => '',
-                        'value'      => '',
-                        'sort_order' => $this->config->get($row['key'].'_sort_order'),
-                    ];
+                    if($this->config->get('config_allow_order_recalc')) {
+                        $this->data['totals_add'][] = [
+                            'key'        => $row['key'],
+                            'type'       => $this->config->get($row['key'].'_total_type'),
+                            'order_id'   => $order_id,
+                            'title'      => $row['key'],
+                            'text'       => '',
+                            'value'      => '',
+                            'sort_order' => $this->config->get($row['key'].'_sort_order'),
+                        ];
+                    }
                 }
             }
         }
