@@ -163,6 +163,7 @@ class AModelBase extends OrmModel
     public static function boot()
     {
         parent::$dispatcher = Registry::getInstance()->get('model_events');
+        Relation::morphMap(ABC::env('MODEL')['MORPH_MAP']);
         parent::boot();
     }
 
@@ -494,6 +495,10 @@ class AModelBase extends OrmModel
             throw new AException('Forbidden');
         }*/
         return parent::__callStatic($method, $parameters);
+    }
+
+    public function getTableColumns() {
+        return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
 }

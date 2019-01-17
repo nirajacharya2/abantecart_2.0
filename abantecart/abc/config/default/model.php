@@ -1,5 +1,8 @@
 <?php
 
+use abc\models\admin\User;
+use abc\models\base\Customer;
+use abc\models\base\Product;
 use abc\modules\listeners\ModelAuditListener;
 
 return [
@@ -28,5 +31,10 @@ return [
             //this listener firing by base model property $auditEvents
             ModelAuditListener::class
         ]
+    ],
+    'MORPH_MAP' => [
+        'User'                 => User::class,
+        'Product'              => Product::class,
+        'Customer'             => Customer::class,
     ]
 ];
