@@ -640,6 +640,772 @@ class DatetimeColumnsChanges extends AbstractMigration
           ON UPDATE CASCADE;";
         $this->execute($update);
 
+
+//date_deleted & stage_id
+        $update = "ALTER TABLE `".$prefix."banner_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."banner_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."banners` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."banners` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."block_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."block_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."block_layouts` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."block_layouts` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."block_templates` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."block_templates` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."blocks` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."blocks` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."categories` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."categories` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."content_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."content_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."coupons` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."coupons` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."currencies` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."currencies` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."custom_blocks` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."custom_blocks` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."custom_lists` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."custom_lists` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_communications` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."customer_communications` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_notes` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."customer_notes` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_notifications` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."customer_notifications` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_transactions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."customer_transactions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customers` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."customers` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."downloads` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."downloads` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."extensions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."extensions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_type_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."global_attributes_type_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."jobs` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."jobs` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."language_definitions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."language_definitions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."layouts` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."layouts` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."length_classes` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."length_classes` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."locations` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."locations` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."messages` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."messages` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_data` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."order_data` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_data_types` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."order_data_types` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_downloads` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."order_downloads` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_history` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."orders` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."page_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."page_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."pages` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."pages` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_discounts` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."product_discounts` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_specials` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."product_specials` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."products` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."products` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."resource_descriptions` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."resource_descriptions` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."resource_library` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."resource_library` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."resource_map` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."resource_map` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."reviews` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."reviews` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."settings` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."settings` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."task_details` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."task_details` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."task_steps` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."task_steps` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."tasks` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."tasks` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."tax_classes` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."tax_classes` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."tax_rates` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."tax_rates` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."user_groups` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."user_groups` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."user_notifications` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."user_notifications` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."users` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."users` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."weight_classes` 
+        ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."weight_classes` 
+        ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+
+
+
+        $update = "ALTER TABLE `".$prefix."addresses`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL;";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."category_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+        $update = "ALTER TABLE `".$prefix."contents`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."countries`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."country_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."coupon_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."customer_groups`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."download_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."encryption_keys`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."field_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."field_values`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."fields`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."fields_group_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."fields_groups`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."form_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."form_groups`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."forms`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_groups`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_groups_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_types`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."global_attributes_value_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."languages`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."length_class_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."weight_class_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."manufacturers`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_status_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_statuses`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_totals`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_downloads_history`
+        CHANGE COLUMN `time` `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_options`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."order_products`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL;";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_option_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_options`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_option_value_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_option_values`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."product_tags`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."resource_types`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."stock_statuses`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."store_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."stores`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."tax_class_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."tax_rate_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."url_aliases`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."zone_descriptions`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
+        $update = "ALTER TABLE `".$prefix."zones`
+        ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        ADD COLUMN `date_deleted` timestamp NULL,
+        ADD COLUMN `stage_id` INT(6) NULL,
+        ADD INDEX `stage_id` (`stage_id` ASC);";
+        $this->execute($update);
+
     }
 
     public function down()

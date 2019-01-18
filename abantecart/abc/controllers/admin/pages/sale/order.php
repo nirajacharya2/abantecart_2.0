@@ -1608,7 +1608,7 @@ class ControllerPagesSaleOrder extends AController
                     $is_file = $this->download->isFileAvailable($download_info['filename']);
                     foreach ($download_info['download_history'] as &$h) {
                         $h['time'] = H::dateISO2Display(
-                            $h['time'],
+                            $h['date_added'],
                             $this->language->get('date_format_short').' '.$this->language->get('time_format')
                         );
                     }

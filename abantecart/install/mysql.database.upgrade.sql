@@ -111,10 +111,10 @@ ALTER TABLE `ac_global_attributes_groups` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_groups_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_types` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_type_descriptions` ENGINE=INNODB;
-ALTER TABLE `ac_product_filters` ENGINE=INNODB;
-ALTER TABLE `ac_product_filter_descriptions` ENGINE=INNODB;
-ALTER TABLE `ac_product_filter_ranges` ENGINE=INNODB;
-ALTER TABLE `ac_product_filter_ranges_descriptions` ENGINE=INNODB;
+--ALTER TABLE `ac_product_filters` ENGINE=INNODB;
+--ALTER TABLE `ac_product_filter_descriptions` ENGINE=INNODB;
+--ALTER TABLE `ac_product_filter_ranges` ENGINE=INNODB;
+--ALTER TABLE `ac_product_filter_ranges_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_extension_dependencies` ENGINE=INNODB;
 ALTER TABLE `ac_encryption_keys` ENGINE=INNODB;
 ALTER TABLE `ac_tasks` ENGINE=INNODB;
@@ -1176,3 +1176,632 @@ CREATE TABLE `ac_audits` (
   KEY `auditable_type` (`auditable_type`,`auditable_id`),
   KEY `attribute_name` (`attribute_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+--soft delete sign
+ALTER TABLE `ac_banner_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_banner_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_banners`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_banners`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_block_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_block_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_block_layouts`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_block_layouts`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_block_templates`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_block_templates`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_blocks`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_blocks`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_categories`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_categories`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_content_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_content_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_coupons`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_coupons`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_currencies`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_currencies`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_custom_blocks`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_custom_blocks`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_custom_lists`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_custom_lists`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customer_communications`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_customer_communications`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customer_notes`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_customer_notes`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customer_notifications`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_customer_notifications`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customer_transactions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_customer_transactions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customers`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_customers`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_downloads`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_downloads`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_extensions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_extensions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_type_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_global_attributes_type_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_jobs`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_jobs`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_language_definitions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_language_definitions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_layouts`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_layouts`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_length_classes`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_length_classes`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_locations`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_locations`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_messages`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_messages`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_data`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_order_data`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_data_types`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_order_data_types`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_downloads`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_order_downloads`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_history`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+
+ALTER TABLE `ac_orders`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+
+
+ALTER TABLE `ac_page_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_page_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_pages`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_pages`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_discounts`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_product_discounts`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_specials`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_product_specials`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_products`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_products`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_resource_descriptions`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_resource_descriptions`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_resource_library`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_resource_library`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_resource_map`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_resource_map`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_reviews`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_reviews`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_settings`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_settings`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_task_details`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_task_details`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_task_steps`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_task_steps`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_tasks`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_tasks`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_tax_classes`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_tax_classes`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_tax_rates`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_tax_rates`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_user_groups`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_user_groups`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_user_notifications`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_user_notifications`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_users`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_users`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_weight_classes`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
+ALTER TABLE `ac_weight_classes`
+    ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
+    ADD INDEX `stage_id` (`stage_id` ASC);
+
+
+ALTER TABLE `ac_addresses`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL;
+
+ALTER TABLE `ac_category_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_contents`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_countries`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_country_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_coupon_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_customer_groups`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_download_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_encryption_keys`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_field_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_field_values`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_fields`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_fields_group_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_fields_groups`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_form_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_form_groups`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_forms`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_groups`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_groups_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_types`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_value_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_global_attributes_values`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_languages`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_length_class_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_weight_class_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_manufacturers`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_status_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_statuses`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_order_totals`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL;
+
+ALTER TABLE `ac_order_downloads_history`
+CHANGE COLUMN `time` `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL;
+
+ALTER TABLE `ac_order_options`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL;
+
+ALTER TABLE `ac_order_products`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL;
+
+ALTER TABLE `ac_product_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_option_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_options`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_option_value_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_option_values`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_product_tags`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_resource_types`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_stock_statuses`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_store_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_stores`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_tax_class_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_tax_rate_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_url_aliases`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_zone_descriptions`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_zones`
+ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN `date_deleted` timestamp NULL,
+ADD COLUMN `stage_id` INT(6) NULL,
+ADD INDEX `stage_id` (`stage_id` ASC);

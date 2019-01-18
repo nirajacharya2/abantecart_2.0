@@ -40,25 +40,11 @@ use ReflectionMethod;
  */
 class AModelBase extends OrmModel
 {
-    /**
-     *
-     */
     const CREATED_AT = 'date_added';
-    /**
-     *
-     */
     const UPDATED_AT = 'date_modified';
-    /**
-     *
-     */
+    const DELETED_AT = 'date_deleted';
     const CLI = 0;
-    /**
-     *
-     */
     const ADMIN = 1;
-    /**
-     *
-     */
     const CUSTOMER = 2;
 
     /**
