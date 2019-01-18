@@ -1173,6 +1173,6 @@ CREATE TABLE `ac_audits` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`user_type`,`user_name`),
   KEY `request_id` (`request_id`,`session_id`),
-  KEY `auditable_name` (`auditable_name`,`auditable_id`),
+  KEY `auditable_type` (`auditable_type`,`auditable_id`),
   KEY `attribute_name` (`attribute_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
