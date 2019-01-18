@@ -3,6 +3,7 @@
 namespace abc\models\admin;
 
 use abc\models\AModelBase;
+use abc\models\base\Audit;
 
 /**
  * Class AcUser
@@ -69,5 +70,9 @@ class User extends AModelBase
     public function user_notifications()
     {
         return $this->hasMany(UserNotification::class, 'user_id');
+    }
+
+    public function audits() {
+        return $this->morphMany(Audit::class, 'user');
     }
 }

@@ -645,4 +645,8 @@ class Product extends AModelBase
         }
         $this->cache->remove('product');
     }
+
+    public function auditables() {
+        return $this->morphMany(Audit::class, 'auditable');
+    }
 }

@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\AModelBase;
+use abc\models\base\Audit;
 
 /**
  * Class Customer
@@ -124,5 +125,9 @@ class Customer extends AModelBase
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function audits() {
+        return $this->morphMany(Audit::class, 'user');
     }
 }
