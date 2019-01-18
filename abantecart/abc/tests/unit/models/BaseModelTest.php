@@ -62,7 +62,7 @@ class BaseModelTest extends ATestCase
             $audits = $this->db->table('audits')
                 ->select('*')
                 ->where('request_id', '=', $this->request->getUniqueId())
-                ->where('primary_key', '=', $product_id)
+                ->where('auditable_id', '=', $product_id)
                 ->get();
 
             $this->assertEquals(11, count($audits));

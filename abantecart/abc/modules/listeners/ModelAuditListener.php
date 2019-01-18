@@ -98,8 +98,8 @@ class ModelAuditListener
                 'event' => $event_name,
                 'request_id' => $request_id,
                 'session_id' => $session_id,
-                'auditable_name' => $modelObject->getTable(),
-                'primary_key' => $modelObject->getKey(),
+                'auditable_type' => $modelObject->getTable(),
+                'auditable_id' => $modelObject->getKey(),
                 'attribute_name' => $colName,
                 'old_value' => $oldData[$colName],
                 'new_value' => $newValue
