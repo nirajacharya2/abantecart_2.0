@@ -22,12 +22,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 
 set_include_path(__DIR__);
-if(!defined('DS')){
-    define('DS', DIRECTORY_SEPARATOR);
-}
 
-
-new TestBootstrap();
 /**
  * Bootstrap singleton class for unit test
  */

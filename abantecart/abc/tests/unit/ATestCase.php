@@ -29,7 +29,7 @@ use abc\core\lib\AUser;
 use Exception;
 use ReflectionClass;
 
-//require __DIR__.DS.'TestBootstrap.php';
+require_once __DIR__.DS.'TestBootstrap.php';
 
 /**
  * Class ATestCase Base test-case class
