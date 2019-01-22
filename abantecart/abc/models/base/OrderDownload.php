@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderDownload
@@ -32,7 +32,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderDownload extends AModelBase
+class OrderDownload extends BaseModel
 {
     protected $primaryKey = 'order_download_id';
     public $timestamps = false;

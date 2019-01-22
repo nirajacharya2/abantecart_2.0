@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductsFeatured
@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductsFeatured extends AModelBase
+class ProductsFeatured extends BaseModel
 {
     protected $table = 'products_featured';
     protected $primaryKey = 'product_id';

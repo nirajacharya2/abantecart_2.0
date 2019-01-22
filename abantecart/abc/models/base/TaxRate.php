@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class TaxRate
@@ -27,7 +27,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class TaxRate extends AModelBase
+class TaxRate extends BaseModel
 {
     protected $primaryKey = 'tax_rate_id';
     public $timestamps = false;

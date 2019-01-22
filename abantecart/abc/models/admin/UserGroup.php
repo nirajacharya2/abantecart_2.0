@@ -15,7 +15,7 @@ namespace abc\models;
  *
  * @package abc\models
  */
-class UserGroup extends AModelBase
+class UserGroup extends BaseModel
 {
     protected $primaryKey = 'user_group_id';
     public $timestamps = false;

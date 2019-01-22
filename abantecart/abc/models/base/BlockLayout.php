@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class BlockLayout
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class BlockLayout extends AModelBase
+class BlockLayout extends BaseModel
 {
     protected $primaryKey = 'instance_id';
     public $timestamps = false;

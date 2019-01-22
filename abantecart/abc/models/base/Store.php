@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\UserNotification;
 
 /**
@@ -16,7 +16,7 @@ use abc\models\UserNotification;
  *
  * @package abc\models
  */
-class Store extends AModelBase
+class Store extends BaseModel
 {
     protected $primaryKey = 'store_id';
     public $timestamps = false;

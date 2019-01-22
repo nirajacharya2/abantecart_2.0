@@ -2,7 +2,7 @@
 
 namespace abc\models\admin;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\base\Audit;
 
 /**
@@ -27,7 +27,7 @@ use abc\models\base\Audit;
  *
  * @package abc\models
  */
-class User extends AModelBase
+class User extends BaseModel
 {
     protected $primaryKey = 'user_id';
     public $timestamps = false;

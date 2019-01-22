@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Review
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Review extends AModelBase
+class Review extends BaseModel
 {
     protected $primaryKey = 'review_id';
     public $timestamps = false;

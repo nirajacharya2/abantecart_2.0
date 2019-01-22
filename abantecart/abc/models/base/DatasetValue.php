@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class DatasetValue
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class DatasetValue extends AModelBase
+class DatasetValue extends BaseModel
 {
     protected $primaryKey = 'value_sort_order';
     public $timestamps = false;

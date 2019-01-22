@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Field
@@ -25,7 +25,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Field extends AModelBase
+class Field extends BaseModel
 {
     protected $primaryKey = 'field_id';
     public $timestamps = false;

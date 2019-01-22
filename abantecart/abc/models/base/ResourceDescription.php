@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ResourceDescription
@@ -22,7 +22,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ResourceDescription extends AModelBase
+class ResourceDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

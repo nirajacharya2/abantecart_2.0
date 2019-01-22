@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Download
@@ -28,7 +28,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Download extends AModelBase
+class Download extends BaseModel
 {
     protected $primaryKey = 'download_id';
     public $timestamps = false;

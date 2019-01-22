@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductsRelated
@@ -14,7 +14,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductsRelated extends AModelBase
+class ProductsRelated extends BaseModel
 {
     protected $table = 'products_related';
     public $incrementing = false;

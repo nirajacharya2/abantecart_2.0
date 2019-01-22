@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class GlobalAttributesType
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class GlobalAttributesType extends AModelBase
+class GlobalAttributesType extends BaseModel
 {
     protected $primaryKey = 'attribute_type_id';
     public $timestamps = false;

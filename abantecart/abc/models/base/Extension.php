@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Extension
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Extension extends AModelBase
+class Extension extends BaseModel
 {
     protected $primaryKey = 'extension_id';
     public $timestamps = false;

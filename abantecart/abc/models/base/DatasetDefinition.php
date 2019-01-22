@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class DatasetDefinition
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class DatasetDefinition extends AModelBase
+class DatasetDefinition extends BaseModel
 {
     protected $table = 'dataset_definition';
     protected $primaryKey = 'dataset_column_id';

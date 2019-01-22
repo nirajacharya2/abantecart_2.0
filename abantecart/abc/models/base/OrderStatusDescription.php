@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderStatusDescription
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderStatusDescription extends AModelBase
+class OrderStatusDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

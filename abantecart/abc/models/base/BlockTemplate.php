@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class BlockTemplate
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class BlockTemplate extends AModelBase
+class BlockTemplate extends BaseModel
 {
     public $timestamps = false;
 

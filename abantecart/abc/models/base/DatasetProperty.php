@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class DatasetProperty
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class DatasetProperty extends AModelBase
+class DatasetProperty extends BaseModel
 {
     protected $primaryKey = 'rowid';
     public $timestamps = false;

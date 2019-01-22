@@ -21,7 +21,7 @@ use abc\models\base\Store;
  *
  * @package abc\models
  */
-class UserNotification extends AModelBase
+class UserNotification extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

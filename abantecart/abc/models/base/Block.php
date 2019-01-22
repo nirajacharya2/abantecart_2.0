@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Block
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Block extends AModelBase
+class Block extends BaseModel
 {
     protected $primaryKey = 'block_id';
     public $timestamps = false;

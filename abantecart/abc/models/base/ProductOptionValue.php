@@ -3,7 +3,7 @@
 namespace abc\models\base;
 
 use abc\core\engine\AResource;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductOptionValue
@@ -30,7 +30,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductOptionValue extends AModelBase
+class ProductOptionValue extends BaseModel
 {
     protected $primaryKey = 'product_option_value_id';
     public $timestamps = false;

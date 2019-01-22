@@ -26,26 +26,34 @@ use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
 use ReflectionMethod;
 
 /**
- * Class AModelBase
+ * Class BaseModel
  *
  * @package abc\models
  * @method Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  */
-class AModelBase extends OrmModel
+class BaseModel extends OrmModel
 {
+    use SoftDeletes;
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
     const DELETED_AT = 'date_deleted';
     const CLI = 0;
     const ADMIN = 1;
     const CUSTOMER = 2;
+
+    /**
+     * @var array
+     * @see config/{stage_name}/model.php
+     */
+    protected static $env = [];
 
     /**
      * @var array
@@ -131,8 +139,6 @@ class AModelBase extends OrmModel
     public static $auditExcludes = ['date_added', 'date_modified'];
 
     /**
-     * AModelBase constructor.
-     *
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
@@ -144,12 +150,17 @@ class AModelBase extends OrmModel
         $this->db = $this->registry->get('db');
         parent::__construct($attributes);
         static::boot();
+        $called_class = $this->getClass();
+        if(static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])){
+            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
+        }
     }
 
     public static function boot()
     {
         parent::$dispatcher = Registry::getInstance()->get('model_events');
-        Relation::morphMap(ABC::env('MODEL')['MORPH_MAP']);
+        static::$env = ABC::env('MODEL');
+        Relation::morphMap(static::$env['MORPH_MAP']);
         parent::boot();
     }
 
@@ -158,7 +169,7 @@ class AModelBase extends OrmModel
      */
     public function getClass()
     {
-        return __CLASS__;
+        return get_called_class();
     }
 
     /**

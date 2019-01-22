@@ -4,7 +4,7 @@ namespace abc\models\base;
 
 use abc\models\admin\User;
 use abc\models\base\Customer;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Audit
@@ -27,7 +27,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Audit extends AModelBase
+class Audit extends BaseModel
 {
     protected $primaryKey = 'id';
     public $timestamps = false;

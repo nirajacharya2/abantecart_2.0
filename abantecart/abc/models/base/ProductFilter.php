@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductFilter
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductFilter extends AModelBase
+class ProductFilter extends BaseModel
 {
     protected $primaryKey = 'filter_id';
     public $timestamps = false;

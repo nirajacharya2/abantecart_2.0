@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class CustomerNotification
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class CustomerNotification extends AModelBase
+class CustomerNotification extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

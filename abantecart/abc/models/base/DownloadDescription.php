@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class DownloadDescription
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class DownloadDescription extends AModelBase
+class DownloadDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

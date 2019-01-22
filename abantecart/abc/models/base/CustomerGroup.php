@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class CustomerGroup
@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class CustomerGroup extends AModelBase
+class CustomerGroup extends BaseModel
 {
     protected $primaryKey = 'customer_group_id';
     public $timestamps = false;

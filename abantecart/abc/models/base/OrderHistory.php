@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderHistory
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderHistory extends AModelBase
+class OrderHistory extends BaseModel
 {
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';

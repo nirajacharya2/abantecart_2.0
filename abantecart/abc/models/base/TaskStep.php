@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class TaskStep
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class TaskStep extends AModelBase
+class TaskStep extends BaseModel
 {
     protected $primaryKey = 'step_id';
     public $timestamps = false;

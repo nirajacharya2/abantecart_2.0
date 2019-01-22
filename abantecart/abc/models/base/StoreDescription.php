@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class StoreDescription
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class StoreDescription extends AModelBase
+class StoreDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

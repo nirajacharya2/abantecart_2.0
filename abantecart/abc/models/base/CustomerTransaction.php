@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class CustomerTransaction
@@ -24,7 +24,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class CustomerTransaction extends AModelBase
+class CustomerTransaction extends BaseModel
 {
     protected $primaryKey = 'customer_transaction_id';
     public $timestamps = false;

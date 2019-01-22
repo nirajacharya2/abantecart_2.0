@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderTotal
@@ -20,7 +20,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderTotal extends AModelBase
+class OrderTotal extends BaseModel
 {
     protected $primaryKey = 'order_total_id';
     public $timestamps = false;

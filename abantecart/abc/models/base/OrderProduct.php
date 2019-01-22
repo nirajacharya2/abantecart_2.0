@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderProduct
@@ -26,7 +26,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderProduct extends AModelBase
+class OrderProduct extends BaseModel
 {
     protected $primaryKey = 'order_product_id';
     public $timestamps = false;

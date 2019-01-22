@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Layout
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Layout extends AModelBase
+class Layout extends BaseModel
 {
     protected $primaryKey = 'layout_id';
     public $timestamps = false;

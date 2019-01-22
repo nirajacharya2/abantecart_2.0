@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OnlineCustomer
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OnlineCustomer extends AModelBase
+class OnlineCustomer extends BaseModel
 {
     protected $primaryKey = 'ip';
     public $incrementing = false;

@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ExtensionDependency
@@ -12,7 +12,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ExtensionDependency extends AModelBase
+class ExtensionDependency extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

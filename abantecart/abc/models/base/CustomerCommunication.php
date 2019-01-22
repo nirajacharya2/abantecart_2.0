@@ -19,10 +19,10 @@
 namespace abc\models\base;
 
 use abc\core\lib\AMail;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\admin\User;
 
-class CustomerCommunication extends AModelBase
+class CustomerCommunication extends BaseModel
 {
     protected $table = 'customer_communications';
 

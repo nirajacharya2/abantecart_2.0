@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderDownloadsHistory
@@ -24,7 +24,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderDownloadsHistory extends AModelBase
+class OrderDownloadsHistory extends BaseModel
 {
     protected $table = 'order_downloads_history';
     public $timestamps = false;

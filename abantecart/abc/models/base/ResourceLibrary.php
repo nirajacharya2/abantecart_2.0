@@ -5,7 +5,7 @@ namespace abc\models\base;
 use abc\core\ABC;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ResourceLibrary
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ResourceLibrary extends AModelBase
+class ResourceLibrary extends BaseModel
 {
     protected $table = 'resource_library';
     protected $primaryKey = 'resource_id';

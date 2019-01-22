@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use Exception;
 use H;
@@ -59,7 +59,7 @@ use H;
  *
  * @package abc\models
  */
-class Product extends AModelBase
+class Product extends BaseModel
 {
     /**
      * Access policy properties

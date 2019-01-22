@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Language
@@ -50,7 +50,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Language extends AModelBase
+class Language extends BaseModel
 {
     protected $primaryKey = 'language_id';
     public $timestamps = false;

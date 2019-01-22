@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class UrlAlias
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class UrlAlias extends AModelBase
+class UrlAlias extends BaseModel
 {
     protected $primaryKey = 'url_alias_id';
     public $timestamps = false;

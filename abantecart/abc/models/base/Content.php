@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Content
@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Content extends AModelBase
+class Content extends BaseModel
 {
     public $timestamps = false;
 

@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Dataset
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Dataset extends AModelBase
+class Dataset extends BaseModel
 {
     protected $primaryKey = 'dataset_id';
     public $timestamps = false;

@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class FormGroup
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class FormGroup extends AModelBase
+class FormGroup extends BaseModel
 {
     protected $primaryKey = 'group_id';
     public $timestamps = false;

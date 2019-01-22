@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ResourceMap
@@ -19,7 +19,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ResourceMap extends AModelBase
+class ResourceMap extends BaseModel
 {
     protected $table = 'resource_map';
     public $incrementing = false;

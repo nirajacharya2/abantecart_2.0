@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Country
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Country extends AModelBase
+class Country extends BaseModel
 {
     protected $primaryKey = 'country_id';
     public $timestamps = false;

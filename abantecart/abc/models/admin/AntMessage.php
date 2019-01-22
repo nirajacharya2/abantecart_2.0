@@ -20,7 +20,7 @@ namespace abc\models;
  *
  * @package abc\models
  */
-class AntMessage extends AModelBase
+class AntMessage extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

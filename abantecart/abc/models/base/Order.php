@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Order
@@ -74,7 +74,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Order extends AModelBase
+class Order extends BaseModel
 {
     public $timestamps = false;
     protected $primaryKey = 'order_id';

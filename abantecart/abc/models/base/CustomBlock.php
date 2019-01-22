@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class CustomBlock
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class CustomBlock extends AModelBase
+class CustomBlock extends BaseModel
 {
     public $timestamps = false;
 

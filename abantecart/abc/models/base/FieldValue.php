@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class FieldValue
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class FieldValue extends AModelBase
+class FieldValue extends BaseModel
 {
     protected $primaryKey = 'value_id';
     public $timestamps = false;

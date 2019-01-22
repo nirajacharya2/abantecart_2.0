@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ZonesToLocation
@@ -20,7 +20,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ZonesToLocation extends AModelBase
+class ZonesToLocation extends BaseModel
 {
     protected $primaryKey = 'zone_to_location_id';
     public $timestamps = false;

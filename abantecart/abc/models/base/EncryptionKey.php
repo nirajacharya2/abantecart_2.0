@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class EncryptionKey
@@ -14,7 +14,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class EncryptionKey extends AModelBase
+class EncryptionKey extends BaseModel
 {
     protected $primaryKey = 'key_id';
     public $timestamps = false;

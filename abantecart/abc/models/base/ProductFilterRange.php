@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductFilterRange
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductFilterRange extends AModelBase
+class ProductFilterRange extends BaseModel
 {
     protected $primaryKey = 'range_id';
     public $timestamps = false;

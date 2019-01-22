@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Form
@@ -20,7 +20,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Form extends AModelBase
+class Form extends BaseModel
 {
     protected $primaryKey = 'form_id';
     public $timestamps = false;

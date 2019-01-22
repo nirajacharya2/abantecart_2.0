@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\base\Audit;
 
 /**
@@ -40,7 +40,7 @@ use abc\models\base\Audit;
  *
  * @package abc\models
  */
-class Customer extends AModelBase
+class Customer extends BaseModel
 {
     /**
      * @var string

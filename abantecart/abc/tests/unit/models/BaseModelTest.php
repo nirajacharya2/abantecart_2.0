@@ -17,6 +17,7 @@
  */
 
 namespace unit\models;
+use abc\core\ABC;
 use abc\tests\unit\ATestCase;
 use abc\models\base\Product;
 use abc\tests\unit\modules\listeners\ATestListener;
@@ -128,6 +129,38 @@ class BaseModelTest extends ATestCase
             ATestListener::class,
             $this->registry->get('handler test result')
         );
+    }
+
+    public function testSoftDelete()
+    {
+        $model = new Product(['model' => 'test-product']);
+        $model->save();
+        $product_id = $model->getKey();
+
+        $product = $model;
+        $result = false;
+        if($product) {
+            $product->delete();
+            Product::onlyTrashed()->where('product_id', $product_id)->restore();
+            try {
+                $product->get(['date_deleted']);
+                $result = true;
+            } catch (\PDOException $e) {}
+        }
+        $this->assertEquals($result, true);
+
+        if($result) {
+            //test force deleting
+            $env = ABC::env('MODEL');
+            $env['FORCE_DELETING'][Product::class] = true;
+            ABC::env('MODEL', $env, true);
+            $model = new Product();
+            $product = $model->find($product_id);
+            $product->delete();
+            $exists = Product::onlyTrashed()->where('product_id', $product_id)->exists();
+            $this->assertEquals($exists, false);
+        }
+
     }
 
 }

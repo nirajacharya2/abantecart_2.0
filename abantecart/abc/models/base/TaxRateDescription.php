@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class TaxRateDescription
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class TaxRateDescription extends AModelBase
+class TaxRateDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

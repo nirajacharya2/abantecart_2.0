@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductFilterRangesDescription
@@ -13,7 +13,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductFilterRangesDescription extends AModelBase
+class ProductFilterRangesDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

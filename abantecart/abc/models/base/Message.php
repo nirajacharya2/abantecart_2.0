@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Message
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Message extends AModelBase
+class Message extends BaseModel
 {
     protected $primaryKey = 'msg_id';
     public $timestamps = false;

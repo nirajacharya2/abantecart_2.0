@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class WeightClass
@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class WeightClass extends AModelBase
+class WeightClass extends BaseModel
 {
     public $timestamps = false;
 

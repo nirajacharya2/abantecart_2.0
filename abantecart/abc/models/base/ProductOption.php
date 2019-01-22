@@ -21,7 +21,7 @@ namespace abc\models\base;
 
 use abc\core\ABC;
 use abc\core\lib\AResourceManager;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductOption
@@ -43,7 +43,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductOption extends AModelBase
+class ProductOption extends BaseModel
 {
     /**
      * @var string

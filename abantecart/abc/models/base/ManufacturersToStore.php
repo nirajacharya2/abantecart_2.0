@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ManufacturersToStore
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ManufacturersToStore extends AModelBase
+class ManufacturersToStore extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

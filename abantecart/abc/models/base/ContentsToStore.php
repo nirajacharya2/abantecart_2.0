@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ContentsToStore
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ContentsToStore extends AModelBase
+class ContentsToStore extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

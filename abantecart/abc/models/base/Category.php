@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Category
@@ -20,7 +20,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Category extends AModelBase
+class Category extends BaseModel
 {
     /**
      * @var string

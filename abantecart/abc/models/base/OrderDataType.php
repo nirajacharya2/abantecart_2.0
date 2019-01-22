@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class OrderDataType
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class OrderDataType extends AModelBase
+class OrderDataType extends BaseModel
 {
     protected $primaryKey = 'type_id';
     public $timestamps = false;

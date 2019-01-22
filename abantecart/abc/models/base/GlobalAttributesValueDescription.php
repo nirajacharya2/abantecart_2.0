@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class GlobalAttributesValueDescription
@@ -17,7 +17,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class GlobalAttributesValueDescription extends AModelBase
+class GlobalAttributesValueDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

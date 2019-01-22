@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Location
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Location extends AModelBase
+class Location extends BaseModel
 {
     protected $primaryKey = 'location_id';
     public $timestamps = false;

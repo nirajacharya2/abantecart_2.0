@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class TaskDetail
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class TaskDetail extends AModelBase
+class TaskDetail extends BaseModel
 {
     protected $primaryKey = 'task_id';
     public $timestamps = false;

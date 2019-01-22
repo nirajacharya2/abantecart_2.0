@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class StockStatus
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class StockStatus extends AModelBase
+class StockStatus extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

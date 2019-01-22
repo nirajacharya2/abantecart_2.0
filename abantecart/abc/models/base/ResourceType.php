@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ResourceType
@@ -18,7 +18,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ResourceType extends AModelBase
+class ResourceType extends BaseModel
 {
     protected $primaryKey = 'type_id';
     public $timestamps = false;

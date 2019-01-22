@@ -18,7 +18,7 @@ use abc\models\base\Banner;
  *
  * @package abc\models
  */
-class BannerStat extends AModelBase
+class BannerStat extends BaseModel
 {
     protected $table = 'banner_stat';
     protected $primaryKey = 'rowid';

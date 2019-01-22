@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductDescription
@@ -20,7 +20,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductDescription extends AModelBase
+class ProductDescription extends BaseModel
 {
     protected $primaryKey = null;
     public $incrementing = false;

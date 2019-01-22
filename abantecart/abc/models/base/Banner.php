@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\BannerStat;
 
 /**
@@ -25,7 +25,7 @@ use abc\models\BannerStat;
  *
  * @package abc\models
  */
-class Banner extends AModelBase
+class Banner extends BaseModel
 {
     protected $primaryKey = 'banner_id';
     public $timestamps = false;

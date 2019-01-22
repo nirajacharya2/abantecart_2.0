@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class DownloadAttributeValue
@@ -16,7 +16,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class DownloadAttributeValue extends AModelBase
+class DownloadAttributeValue extends BaseModel
 {
     protected $primaryKey = 'download_attribute_id';
     public $timestamps = false;

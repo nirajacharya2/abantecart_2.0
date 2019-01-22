@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Page
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Page extends AModelBase
+class Page extends BaseModel
 {
     protected $primaryKey = 'page_id';
     public $timestamps = false;

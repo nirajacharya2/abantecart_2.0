@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class PagesLayout
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class PagesLayout extends AModelBase
+class PagesLayout extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

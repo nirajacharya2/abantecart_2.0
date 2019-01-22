@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Address
@@ -25,7 +25,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Address extends AModelBase
+class Address extends BaseModel
 {
     protected $primaryKey = 'address_id';
     public $timestamps = false;

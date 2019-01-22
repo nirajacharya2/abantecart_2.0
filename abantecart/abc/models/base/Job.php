@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Job
@@ -22,7 +22,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Job extends AModelBase
+class Job extends BaseModel
 {
     public $timestamps = false;
 

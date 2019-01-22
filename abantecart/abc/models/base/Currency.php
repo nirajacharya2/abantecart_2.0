@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Currency
@@ -21,7 +21,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Currency extends AModelBase
+class Currency extends BaseModel
 {
     protected $primaryKey = 'currency_id';
     public $timestamps = false;

@@ -18,6 +18,7 @@
 
 namespace abc\tests\unit;
 
+use abc\core\engine\Registry;
 use PHPUnit\Framework\TestCase;
 use abc\core\lib\ACustomer;
 use abc\core\lib\ADB;
@@ -45,6 +46,9 @@ require_once __DIR__.DS.'TestBootstrap.php';
  */
 class ATestCase extends TestCase
 {
+    /**
+     * @var Registry
+     */
     protected $registry;
 
     public function __construct()

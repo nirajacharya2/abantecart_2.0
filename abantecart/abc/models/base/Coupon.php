@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Coupon
@@ -28,7 +28,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Coupon extends AModelBase
+class Coupon extends BaseModel
 {
     protected $primaryKey = 'coupon_id';
     public $timestamps = false;

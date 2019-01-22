@@ -17,7 +17,7 @@
  */
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class ProductOptionValueDescription
@@ -33,7 +33,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class ProductOptionValueDescription extends AModelBase
+class ProductOptionValueDescription extends BaseModel
 {
     public $incrementing = false;
     public $timestamps = false;

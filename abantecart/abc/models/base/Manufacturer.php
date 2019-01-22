@@ -2,7 +2,7 @@
 
 namespace abc\models\base;
 
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 
 /**
  * Class Manufacturer
@@ -15,7 +15,7 @@ use abc\models\AModelBase;
  *
  * @package abc\models
  */
-class Manufacturer extends AModelBase
+class Manufacturer extends BaseModel
 {
     protected $primaryKey = 'manufacturer_id';
     public $timestamps = false;
