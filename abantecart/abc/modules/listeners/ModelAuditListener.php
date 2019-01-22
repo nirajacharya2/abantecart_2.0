@@ -4,7 +4,7 @@ namespace abc\modules\listeners;
 
 use abc\core\engine\Registry;
 use abc\core\lib\UserResolver;
-use abc\models\AModelBase;
+use abc\models\BaseModel;
 use abc\models\base\Product;
 
 class ModelAuditListener
@@ -28,15 +28,15 @@ class ModelAuditListener
     public function handle($eventAlias, $params)
     {
         /**
-         * @var AModelBase | Product $modelObject
+         * @var BaseModel | Product $modelObject
          */
         $modelObject = $params[0];
         if(!is_object($modelObject)
-            || !($modelObject instanceof AModelBase)
+            || !($modelObject instanceof BaseModel)
         ){
             return [
                 'result' => false,
-                'message' => 'ModelAuditListener: Argument 1 not instance of base model '.AModelBase::class
+                'message' => 'ModelAuditListener: Argument 1 not instance of base model '.BaseModel::class
             ];
         }
 
