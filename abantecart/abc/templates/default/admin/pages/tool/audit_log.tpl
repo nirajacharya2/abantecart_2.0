@@ -157,16 +157,48 @@
 					<v-data-table
 							:headers="table_headers"
 							:items="table_items"
+							ref="dTable"
 							:pagination.sync="pagination"
 							:total-items="table_total"
 							:loading="loading"
 							class="elevation-1"
+							expand
 							attach
 					>
+						<template slot="headers" slot-scope="props">
+							<tr>
+								<th
+										v-for="header in props.headers"
+										:key="header.text"
+										:class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+										@click="changeSort(header.value)"
+								>
+									{{ header.text }}
+									<span v-if="pagination.descending && header.value === pagination.sortBy">
+										<i class="fa fa-arrow-up"></i>
+									</span>
+									<span v-if="!pagination.descending && header.value === pagination.sortBy">
+										<i class="fa fa-arrow-down"></i>
+									</span>
+								</th>
+								<th class="column" v-if="!expandedAll" @click="expandAll()">
+									Expand all
+									<v-icon small>unfold_more</v-icon>
+								</th>
+								<th class="column" v-if="expandedAll" @click="unExpandAll()">
+									Expand all
+									<v-icon small>unfold_less</v-icon>
+								</th>
+							</tr>
+						</template>
 						<template slot="items" slot-scope="props">
 							<tr @click="expandFunction(props)" style="background-color: #E5E5E5">
 								<td v-for="table_header in table_headers">
 									{{ props.item[table_header.value] }}
+								</td>
+								<td>
+									<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="!props.expanded">expand_more</i>
+									<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="props.expanded">expand_less</i>
 								</td>
 							</tr>
 						</template>
@@ -174,7 +206,7 @@
 							<v-card flat>
 								<v-card-text>
 
-									<v-flex row>
+								<!--	<v-flex row>
 										<v-flex xs12 sm6>
 											<p><strong>Event:</strong>  {{props.item.event}} </p>
 											<p><strong>Data object:</strong>  {{props.item.auditable_type}} </p>
@@ -185,13 +217,13 @@
 											<p><strong>Alias:</strong>  {{props.item.alias_name}} </p>
 											<p><strong>Date modify:</strong>  {{props.item.date_added}} </p>
 										</v-flex>
-									</v-flex>
+									</v-flex> -->
 
 									<v-data-table
 											:headers="expand_headers"
-											:items="expand_items"
-											:pagination.sync="expand_pagination"
-											:total-items="expand_table_total"
+											:items="expand_items[props.index]"
+											:pagination.sync="expand_pagination[props.index]"
+											:total-items="expand_table_total[props.index]"
 											:pagination.sync="{ rowsPerPage: -1 }"
 											hide-actions
 									>
@@ -251,7 +283,13 @@
 				align: 'left',
 				value: 'user_name'
 			},
+			{
+				text: 'User Alias',
+				align: 'left',
+				value: 'alias_name'
+			},
 			{ text: 'Data Object', value: 'auditable_type' },
+			{ text: 'Data Object ID', value: 'auditable_id' },
 			{ text: 'Event', value: 'event' },
 			{ text: 'Date Change', value: 'date_added' },
 		],
@@ -261,10 +299,12 @@
 			{ text: 'Old Value', value: 'old_value', sortable: false, },
 			{ text: 'New Value', value: 'new_value', sortable: false, },
 		],
-		expand_pagination: { },
-		expand_table_total: 0,
+		expand_pagination: [],
+		expand_table_total: [],
 		data_object_id:'',
 		isDataObjectIdDisabled: true,
+		expandedAll: false,
+		props: [],
 	},
 
 		computed: {
@@ -399,11 +439,14 @@
 			expandFunction: function(props){
 				if (!props.expanded) {
 					this.getExpandDataFromApi(props);
+				} else {
+					props.expanded = false;
 				}
-				props.expanded = !props.expanded;
 			},
 			getExpandDataFromApi(props) {
 				this.loading = true;
+				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
+				props.expanded = true;
 				var filter = {
 					'auditable_type': props.item.auditable_type,
 					'date_added': props.item.date_added,
@@ -416,14 +459,44 @@
 				}
 				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
-						vm.expand_items = response.data.items;
-						vm.expand_table_total = response.data.total;
+						vm.expand_items[props.index] = response.data.items;
+						vm.expand_table_total[props.index] = response.data.total;
+						props.expanded = true;
+						vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
 						vm.loading = false;
 					})
 					.catch(function (error) {
 						vm.loading = false;
 						alert('Ошибка! Не могу связаться с API. ' + error);
 					});
+			},
+			expandAll: function () {
+				for (let i = 0; i < this.table_items.length; i += 1) {
+					const item = this.table_items[i];
+					var props = {
+						index: i,
+						item: item,
+					}
+					this.getExpandDataFromApi(props);
+				}
+				this.expandedAll = true;
+			},
+			unExpandAll: function () {
+				for (let i = 0; i < this.table_items.length; i += 1) {
+					const item = this.table_items[i];
+					var props = {
+						index: i,
+						item: item,
+					}
+					vm.$set(vm.$refs.dTable.expanded, props.item.id, false);
+				}
+				this.expandedAll = false;
+			},
+			changeSort: function (sortBy) {
+				this.unExpandAll();
+				this.pagination.sortBy = sortBy;
+				this.pagination.descending = !this.pagination.descending;
+				this.getDataFromApi();
 			}
 		}
 	});

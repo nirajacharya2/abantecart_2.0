@@ -84,7 +84,7 @@ class ControllerResponsesToolAuditAjax extends AController
 
         if ($sortBy) {
             $ordering = 'ASC';
-            if ($descending) {
+            if ($descending == 'true' or $descending === true) {
                 $ordering = 'DESC';
             }
             $audit = $audit->orderBy($sortBy, $ordering);
@@ -124,6 +124,15 @@ class ControllerResponsesToolAuditAjax extends AController
             $this->data['response']['items'] = $audit
                 ->get()
                 ->toArray();
+        }
+
+        foreach ($this->data['response']['items'] as &$item) {
+            if (!$item['old_value'] && $item['old_value'] !== "0" && $item['old_value'] !== 0) {
+                $item['old_value'] = 'Empty';
+            }
+            if (empty($item['new_value']) && $item['new_value'] !== "0" && $item['new_value'] !== 0) {
+                $item['new_value'] = 'Empty';
+            }
         }
 
         $this->data['response']['total'] = count($this->data['response']['items']);
