@@ -19,12 +19,13 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
+use abc\models\storefront\Currency;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerBlocksCurrency extends AController {
-	public $data = array();
+	public $data = [];
 	public function main() {
 
         //init controller data
@@ -34,7 +35,7 @@ class ControllerBlocksCurrency extends AController {
 		$this->data['currency_code'] = $this->currency->getCode();
 
 		$get_vars = $this->request->get;
-		$unset = array('currency');
+		$unset = ['currency'];
 		if(isset($get_vars['product_id'])){
 			$unset[] = 'path'; 
 		}
@@ -49,19 +50,19 @@ class ControllerBlocksCurrency extends AController {
 			$URI = $URI=='&' ? '' : $URI;
         }
 
-		$this->loadModel('localisation/currency');
-		$results = $this->model_localisation_currency->getCurrencies();
+		$currencyInstance = new Currency();
+        $results = $currencyInstance->getCurrencies();
 
-		$currencies = array();
+		$currencies = [];
 		if (is_array($results) && $results) {
 			foreach ($results as $result) {
 				if ($result['status']) {
-	   				$currencies[] = array(
+	   				$currencies[] = [
 						'title' => $result['title'],
 						'code'  => $result['code'],
 						'symbol' => ( !empty( $result['symbol_left'] ) ? $result['symbol_left'] : $result['symbol_right'] ),
 						'href'  => $this->html->getURL($rt, $URI.'&currency='.$result['code'],true)
-					);
+					];
 				}
 			}
 		}

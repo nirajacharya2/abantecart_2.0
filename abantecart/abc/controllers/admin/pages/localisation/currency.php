@@ -20,6 +20,7 @@
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\admin\Currency;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -136,7 +137,21 @@ class ControllerPagesLocalisationCurrency extends AController {
 		$this->document->setTitle( $this->language->get('heading_title') );
 
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
-			$currency_id = $this->model_localisation_currency->addCurrency($this->request->post);
+
+		    $post = $this->request->post;
+		    $currency = new Currency([
+			    'title'         => $post['title'],
+                'code'          => $post['code'],
+                'symbol_left'   => $post['symbol_left'],
+                'symbol_right'  => $post['symbol_right'],
+                'decimal_place' => $post['decimal_place'],
+                'value'         => $post['value'],
+                'status'        => (int)$post['status'],
+            ]);
+			$currency->save();
+
+			$currency_id = $currency->currency_id;
+
 			$this->session->data['success'] = $this->language->get('text_success');
 			abc_redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $currency_id ) );
 		}
@@ -159,7 +174,17 @@ class ControllerPagesLocalisationCurrency extends AController {
 		$this->document->setTitle( $this->language->get('heading_title') );
 
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
-			$this->model_localisation_currency->editCurrency($this->request->get['currency_id'], $this->request->post);
+            $post = $this->request->post;
+            Currency::find($this->request->get['currency_id'])
+                ->update([
+                'title'         => $post['title'],
+                'code'          => $post['code'],
+                'symbol_left'   => $post['symbol_left'],
+                'symbol_right'  => $post['symbol_right'],
+                'decimal_place' => $post['decimal_place'],
+                'value'         => $post['value'],
+                'status'        => (int)$post['status'],
+            ]);
 			$this->session->data['success'] = $this->language->get('text_success');
 			abc_redirect( $this->html->getSecureURL('localisation/currency/update', '&currency_id=' . $this->request->get['currency_id'] ) );
 		}
@@ -187,7 +212,7 @@ class ControllerPagesLocalisationCurrency extends AController {
 
 
 		if (isset($this->request->get['currency_id']) && $this->request->is_GET() ) {
-			$currency_info = $this->model_localisation_currency->getCurrency($this->request->get['currency_id']);
+			$currency_info = Currency::find($this->request->get['currency_id'])->toArray();
 		}
 
 		foreach ( $this->fields as $f ) {

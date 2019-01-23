@@ -151,6 +151,9 @@ class BaseModel extends OrmModel
         parent::__construct($attributes);
         static::boot();
         $called_class = $this->getClass();
+        if (strpos($called_class, 'abc\models\admin') > -1 && $this->actor['user_type'] == 2) {
+            return false;
+        }
         if(static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])){
             $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
         }
@@ -494,8 +497,44 @@ class BaseModel extends OrmModel
         return parent::__callStatic($method, $parameters);
     }
 
-    public function getTableColumns() {
+    public function getTableColumns()
+    {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function setGridRequest($data = [])
+    {
+        $query = BaseModel::newModelQuery();
+
+        $sort_data = $this->getTableColumns();
+
+        $sort_order = 'ASC';
+        if (isset($data['order']) && ($data['order'] == 'DESC')) {
+            $sort_order = 'DESC';
+        }
+
+        if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+            $query = $query->orderBy($data['sort'], $sort_order);
+        } else {
+            $query = $query->orderBy('title', $sort_order);
+        }
+
+        if (isset($data['start']) || isset($data['limit'])) {
+            if ($data['start'] < 0) {
+                $data['start'] = 0;
+            }
+
+            if ($data['limit'] < 1) {
+                $data['limit'] = 20;
+            }
+
+            $query = $query->offset((int)$data['start'])
+                ->limit((int)$data['limit']);
+        }
+
+        $query = $query->whereNull('date_deleted');
+
+        return $query;
     }
 
 }
