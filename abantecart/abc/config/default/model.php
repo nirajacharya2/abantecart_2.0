@@ -1,5 +1,6 @@
 <?php
 
+use abc\models\base\Currency;
 use abc\models\admin\User;
 use abc\models\base\Customer;
 use abc\models\base\Product;
@@ -33,9 +34,10 @@ return [
         ]
     ],
     'MORPH_MAP' => [
-        'User'                 => User::class,
-        'Product'              => Product::class,
+        'Currency'             => Currency::class,
         'Customer'             => Customer::class,
+        'Product'              => Product::class,
+        'User'                 => User::class,
     ],
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details

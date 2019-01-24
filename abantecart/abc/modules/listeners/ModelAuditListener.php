@@ -6,6 +6,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\base\Product;
+use ReflectionClass;
 
 class ModelAuditListener
 {
@@ -90,6 +91,7 @@ class ModelAuditListener
         $user_id = $user->getUserId();
         $user_name = $user->getUserName();
         $auditData = [];
+        $reflect = new ReflectionClass($modelObject);
         foreach($newData as $colName => $newValue){
             $auditData[] = [
                 'user_type' => $user_type,
@@ -98,7 +100,7 @@ class ModelAuditListener
                 'event' => $event_name,
                 'request_id' => $request_id,
                 'session_id' => $session_id,
-                'auditable_type' => $modelObject->getTable(),
+                'auditable_type' => $reflect->getShortName(),
                 'auditable_id' => $modelObject->getKey(),
                 'attribute_name' => $colName,
                 'old_value' => $oldData[$colName],

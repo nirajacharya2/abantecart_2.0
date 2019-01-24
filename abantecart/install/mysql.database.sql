@@ -144,6 +144,7 @@ CREATE TABLE `ac_audits` (
   `old_value` text COLLATE utf8_general_ci,
   `new_value` text COLLATE utf8_general_ci,
   `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`user_type`,`user_name`),
   KEY `request_id` (`request_id`,`session_id`),
