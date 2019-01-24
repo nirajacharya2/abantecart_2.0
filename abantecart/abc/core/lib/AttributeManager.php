@@ -21,8 +21,9 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\AAttribute;
+use abc\core\engine\Attribute;
 use abc\core\engine\HtmlElementFactory;
+use abc\core\lib\contracts\AttributeManagerInterface;
 use H;
 
 /**
@@ -30,7 +31,7 @@ use H;
  *
  * @property ASession $session
  */
-class AAttribute_Manager extends AAttribute
+class AttributeManager extends Attribute implements AttributeManagerInterface
 {
     public $error = [];
 
@@ -38,7 +39,7 @@ class AAttribute_Manager extends AAttribute
     {
         parent::__construct($attribute_type, $language_id);
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AAttribute_Manager');
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class '.__CLASS__);
         }
     }
 
@@ -659,7 +660,7 @@ class AAttribute_Manager extends AAttribute
     {
 
         if (!$language_id) {
-            $language_id = $this->session->data['content_language_id'];
+            $language_id = $this->language->getContentLanguageID();
         }
 
         //Prepare filter config

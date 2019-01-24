@@ -20,13 +20,14 @@
 
 namespace abc\models\admin;
 
+use abc\core\ABC;
 use abc\core\lib\ALanguageManager;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
-use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\ADB;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
+use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -642,7 +643,10 @@ class ModelCatalogProduct extends Model
     public function addProductOption($product_id, $data)
     {
 
-        $am = new AAttribute_Manager();
+        /**
+         * @var AttributeManagerInterface $am
+         */
+        $am = ABC::getObjectByAlias('AttributeManager');
         $attribute = $am->getAttribute($data['attribute_id']);
 
         if ($attribute) {
@@ -727,7 +731,10 @@ class ModelCatalogProduct extends Model
     public function deleteProductOption($product_id, $product_option_id)
     {
 
-        $am = new AAttribute_Manager();
+        /**
+         * @var AttributeManagerInterface $am
+         */
+        $am = ABC::getObjectByAlias('AttributeManager');
         $attribute = $am->getAttributeByProductOptionId($product_option_id);
         $group_attribute = $am->getAttributes(['limit' => null], 0, $attribute['attribute_id']);
         if (count($group_attribute)) {
@@ -792,7 +799,10 @@ class ModelCatalogProduct extends Model
             $attribute_value_id = '';
         }
 
-        $am = new AAttribute_Manager();
+        /**
+         * @var AttributeManagerInterface $am
+         */
+        $am = ABC::getObjectByAlias('AttributeManager');
         //build grouped attributes if this is a parent attribute
         if (is_array($data['attribute_value_id'])) {
             //add children option values from global attributes
@@ -889,6 +899,7 @@ class ModelCatalogProduct extends Model
      * @param null|string $grp_attr_names
      *
      * @return int|null
+     * @throws \abc\core\lib\AException
      */
     public function insertProductOptionValueDescriptions(
         $product_id,
@@ -924,6 +935,7 @@ class ModelCatalogProduct extends Model
      * @param null|string $grp_attr_names
      *
      * @return null|int
+     * @throws \abc\core\lib\AException
      */
     public function updateProductOptionValueDescriptions(
         $product_id,
@@ -1068,7 +1080,10 @@ class ModelCatalogProduct extends Model
             $attribute_value_id = '';
         }
 
-        $am = new AAttribute_Manager();
+        /**
+         * @var AttributeManagerInterface $am
+         */
+        $am = ABC::getObjectByAlias('AttributeManager');
         //build grouped attributes if this is a parent attribute
         if (is_array($data['attribute_value_id'])) {
             //update children option values from global attributes
@@ -1338,6 +1353,7 @@ class ModelCatalogProduct extends Model
      * @param array $data
      *
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     protected function _clone_product_options($product_id, $data)
     {

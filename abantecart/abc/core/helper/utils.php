@@ -1925,4 +1925,20 @@ class AHelperUtils extends AHelper
         }
         return $result;
     }
+
+    /**
+     * @param string $input
+     * @param string $separator
+     * @param bool $capitalizeFirstChar
+     *
+     * @return string
+     */
+    public static function camelize(string $input, $separator = '_', $capitalizeFirstChar = false)
+    {
+        $string = ucwords($input, $separator);
+        if(!$capitalizeFirstChar){
+            $string = lcfirst($string);
+        }
+        return str_replace($separator, '', $string);
+    }
 }

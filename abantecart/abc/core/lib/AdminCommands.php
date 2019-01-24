@@ -22,10 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\core\lib\contracts\AdminCommandsInterface;
 
 /**
  * Class AdminCommands
@@ -35,12 +32,12 @@ if (!class_exists('abc\core\ABC')) {
  * @property \abc\core\engine\ALoader       $load
  * @property \abc\core\engine\AHtml         $html
  */
-class AdminCommands
+class AdminCommands implements AdminCommandsInterface
 {
     protected $registry;
     public $errors = 0;
-    public $commands = array();
-    public $action_list = array(
+    public $commands = [];
+    public $action_list = [
         'category'     => 'catalog/category/insert',
         'product'      => 'catalog/product/insert',
         'brand'        => 'catalog/manufacturer/insert',
@@ -61,7 +58,7 @@ class AdminCommands
         'currency'     => 'localisation/currency/insert',
         'location'     => 'localisation/location/insert',
         'tax'          => 'localisation/tax_class/insert',
-    );
+    ];
 
     public function __construct()
     {
@@ -73,6 +70,8 @@ class AdminCommands
         $text_data = $this->language->getASet('common/action_commands');
         $keys = preg_grep("/^command.*/", array_keys($text_data));
         foreach ($keys as $key) {
+            //set CamelCase key
+            $key = \H::camelize($key,'_');
             $this->commands[$key] = $text_data[$key];
         }
         unset($text_data);
@@ -97,9 +96,9 @@ class AdminCommands
     public function getCommands($keyword)
     {
         if (!$keyword) {
-            return array();
+            return [];
         }
-        $result = array();
+        $result = [];
         //search for possible commands
         foreach ($this->commands as $key => $command) {
             $variations = explode(',', $command);
@@ -124,29 +123,29 @@ class AdminCommands
 
         if (!$result) {
             //nothing found
-            return array();
+            return [];
         } else {
             //call method to perform action on the request in the command
             $function = "_".$result['key'];
             if (method_exists($this, $function)) {
                 //filter duplicates and empty
-                $result['found_actions'] = $this->_filter_result($this->$function($result['request']));
+                $result['found_actions'] = $this->filterResult($this->$function($result['request']));
             } else {
                 //no right method to process found
-                return array();
+                return [];
             }
         }
 
         return $result;
     }
 
-    private function _command_open($request)
+    protected function commandOpen($request)
     {
         //some menu text
         $this->load->language('common/header');
 
         //return format (array): url =>, title =>, confirmation => (true, false)
-        $result = array();
+        $result = [];
         //remove junk words
         $request = preg_replace('/menu|tab|page/', '', $request);
         $request = trim($request);
@@ -155,7 +154,7 @@ class AdminCommands
         $menu_arr = $menu->getMenuItems();
         if (count($menu_arr)) {
             foreach ($menu_arr as $section_menu) {
-                $sub_res = array();
+                $sub_res = [];
                 if (is_array($section_menu)) {
                     foreach ($section_menu as $menu) {
                         //load language for prospect controller
@@ -181,10 +180,10 @@ class AdminCommands
         return $result;
     }
 
-    private function _command_find($request)
+    protected function commandFind($request)
     {
         //return format (array): url =>, title =>, confirmation => (true, false)
-        $result = array();
+        $result = [];
         $request = trim($request);
 
         //future!!! check for second level request and do specific area search
@@ -196,32 +195,32 @@ class AdminCommands
         return $result;
     }
 
-    private function _command_clear_cache()
+    protected function commandClearCache()
     {
-        $result = array();
+        $result = [];
         $result[0]["url"] = $this->html->getSecureURL('tool/cache/delete', '&clear_all=all');
         $result[0]["confirmation"] = true;
         return $result;
     }
 
-    private function _command_view_log()
+    protected function commandViewLog()
     {
-        $result = array();
+        $result = [];
         $result[0]["url"] = $this->html->getSecureURL('tool/error_log');
         return $result;
     }
 
-    private function _command_clear_log()
+    protected function commandClearLog()
     {
-        $result = array();
+        $result = [];
         $result[0]["url"] = $this->html->getSecureURL('tool/error_log/clearlog');
         $result[0]["confirmation"] = true;
         return $result;
     }
 
-    private function _command_view_product($request)
+    protected function commandViewProduct($request)
     {
-        $result = array();
+        $result = [];
         $request = trim($request);
 
         if (is_numeric($request)) {
@@ -232,9 +231,9 @@ class AdminCommands
         return $result;
     }
 
-    private function _command_view_order($request)
+    protected function commandViewOrder($request)
     {
-        $result = array();
+        $result = [];
         $request = trim($request);
 
         if (is_numeric($request)) {
@@ -245,10 +244,10 @@ class AdminCommands
         return $result;
     }
 
-    private function _command_create_new($request)
+    protected function commandCreateNew($request)
     {
         //return format (array): url =>, title =>, confirmation => (true, false)
-        $result = array();
+        $result = [];
         $request = trim($request);
         foreach ($this->action_list as $key => $rt) {
             if (preg_match("/$request/iu", $this->language->get($key))) {
@@ -261,12 +260,12 @@ class AdminCommands
         return $result;
     }
 
-    private function _filter_result($data)
+    protected function filterResult($data)
     {
         if (empty($data)) {
-            return array();
+            return [];
         }
-        $ret = array();
+        $ret = [];
 
         foreach ($data as $record) {
             if (!empty($record["url"]) && preg_match("/rt=/", $record["url"])) {

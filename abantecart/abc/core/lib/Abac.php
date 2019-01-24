@@ -22,10 +22,11 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\AbacInterface;
 use PhpAbac\AbacFactory;
 use abc\modules\injections\phpabac\Configuration;
 
-class Abac
+class Abac implements AbacInterface
 {
     /**
      * @var \PhpAbac\Abac

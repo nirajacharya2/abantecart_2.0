@@ -20,7 +20,7 @@ namespace abc\commands;
 
 use abc\commands\base\BaseCommand;
 use abc\core\ABC;
-use abc\core\lib\AAssetPublisher;
+use abc\core\lib\AssetPublisher;
 
 /**
  * Class Publish
@@ -74,7 +74,7 @@ class Publish extends BaseCommand
         $action = !$action ? 'all' : $action;
         $result = false;
         if (in_array($action, ['all', 'core', 'extensions', 'vendors'])) {
-            $ap = new AAssetPublisher();
+            $ap = new AssetPublisher();
             $result = $ap->publish($action, $options);
             $errors = $ap->errors;
         } else {

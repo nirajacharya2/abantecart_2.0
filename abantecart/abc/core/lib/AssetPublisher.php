@@ -25,6 +25,8 @@ use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\AssetPublisherDriverInterface;
+use H;
 
 /**
  * Class AAssetPublisher
@@ -38,7 +40,7 @@ use abc\core\engine\Registry;
  * @property ExtensionsApi $extensions
  *
  */
-class AAssetPublisher
+class AssetPublisher
 {
     /**
      * @var Registry
@@ -109,6 +111,10 @@ class AAssetPublisher
             $driver = new AssetPublisherCopy();
         }
 
+        if(!$driver instanceof AssetPublisherDriverInterface){
+            throw new \Exception(get_class($driver).' in not instance of '.AssetPublisherDriverInterface::class);
+        }
+
         $result = $driver->publishFiles($files_list);
         if (!$result) {
             $this->errors = (array)$this->errors + (array)$driver->errors;
@@ -130,11 +136,11 @@ class AAssetPublisher
     public function getSourceAssetsFiles($source = 'all', $filter = [])
     {
         $core_assets = $extensions_assets = $vendors_assets = [];
-        if (!in_array($source, array('all', 'core', 'extensions', 'vendors'))) {
+        if (!in_array($source, ['all', 'core', 'extensions', 'vendors'])) {
             $filter = (string)$source;
         }
 
-        if (in_array($source, array('all', 'core'))) {
+        if (in_array($source, ['all', 'core'])) {
             $template_dirs = array_map('basename', (array)glob(ABC::env('DIR_TEMPLATES').'*', GLOB_ONLYDIR));
             foreach ($template_dirs as $template) {
                 $dirs = glob(
@@ -142,9 +148,9 @@ class AAssetPublisher
                     GLOB_ONLYDIR
                 );
                 foreach ($dirs as $dir) {
-                    $files = AHelperUtils::getFilesInDir($dir);
+                    $files = H::getFilesInDir($dir);
                     foreach ($files as $file) {
-                        $core_assets[$template][] = AHelperUtils::getRelativePath(
+                        $core_assets[$template][] = H::getRelativePath(
                             ABC::env('DIR_TEMPLATES').$template.DS,
                             $file
                         );
@@ -187,15 +193,15 @@ class AAssetPublisher
                 $dirs = glob(ABC::env('DIR_VENDOR').'assets'.DS.'*', GLOB_ONLYDIR);
             }
             foreach ($dirs as $dir) {
-                $files = AHelperUtils::getFilesInDir($dir);
+                $files = H::getFilesInDir($dir);
                 foreach ($files as $file) {
-                    $rel_file = AHelperUtils::getRelativePath(
+                    $rel_file = H::getRelativePath(
                         ABC::env('DIR_VENDOR').'assets'.DS,
                         $file
                     );
                     $vendor_name = explode(DS, $rel_file);
                     $vendor_name = $vendor_name[0];
-                    $rel_file = AHelperUtils::getRelativePath(
+                    $rel_file = H::getRelativePath(
                         ABC::env('DIR_VENDOR').'assets'.DS.$vendor_name.DS,
                         $file
                     );
@@ -220,7 +226,7 @@ class AAssetPublisher
     protected function getExtensionAssets($extension_name)
     {
         if (!$extension_name) {
-            return array();
+            return [];
         }
         $extensions_assets = [];
         $template_dirs = array_map('basename', (array)glob(ABC::env('DIR_APP_EXTENSIONS')
@@ -232,9 +238,9 @@ class AAssetPublisher
             $dir_pattern = ABC::env('DIR_APP_EXTENSIONS').$extension_name.'/templates/'.$template.'/*/assets';
             $dirs = glob($dir_pattern, GLOB_ONLYDIR);
             foreach ($dirs as $dir) {
-                $files = AHelperUtils::getFilesInDir($dir);
+                $files = H::getFilesInDir($dir);
                 foreach ($files as $file) {
-                    $extensions_assets[$template][] = AHelperUtils::getRelativePath(
+                    $extensions_assets[$template][] = H::getRelativePath(
                         ABC::env('DIR_APP_EXTENSIONS')
                         .$extension_name.DS
                         .ABC::env('DIRNAME_TEMPLATES').$template.'/',
@@ -246,167 +252,4 @@ class AAssetPublisher
         return $extensions_assets;
     }
 
-}
-
-class AssetPublisherCopy
-{
-    public $errors = array();
-
-    public function publishFiles($files = array())
-    {
-
-        //core files first
-        if ($files['core']) {
-            $result = $this->publishCoreAssets($files['core']);
-            if (!$result) {
-                return false;
-            }
-        }
-        //extensions files
-        if ($files['extensions']) {
-            $result = $this->publishExtensionsAssets($files['extensions']);
-
-            if (!$result) {
-                return false;
-            }
-        }
-        //vendors files
-        if ($files['vendors']) {
-            $result = $this->publishVendorAssets($files['vendors']);
-            if (!$result) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected function publishCoreAssets($file_list)
-    {
-        if (!$file_list || !is_array($file_list)) {
-            return false;
-        }
-        $src_dir = ABC::env('DIR_TEMPLATES');
-        $dest_dir = ABC::env('DIR_PUBLIC').ABC::env('DIRNAME_TEMPLATES');
-        return $this->processTemplateAssets($file_list, $src_dir, $dest_dir);
-    }
-
-    protected function publishExtensionsAssets($extensions_files_list)
-    {
-        if (!$extensions_files_list || !is_array($extensions_files_list)) {
-            return false;
-        }
-        foreach ($extensions_files_list as $extension => $file_list) {
-            if (!$file_list) {
-                continue;
-            }
-
-            $src_dir = ABC::env('DIR_APP_EXTENSIONS')
-                .$extension.DS
-                .ABC::env('DIRNAME_TEMPLATES');
-
-            $dst_dir = ABC::env('DIR_PUBLIC')
-                .ABC::env('DIRNAME_EXTENSIONS')
-                .$extension.DS
-                .ABC::env('DIRNAME_TEMPLATES');
-            $result = $this->processTemplateAssets($file_list, $src_dir, $dst_dir);
-
-            if ($result === false) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected function publishVendorAssets($file_list)
-    {
-        if (!$file_list || !is_array($file_list)) {
-            return false;
-        }
-        $src_dir = ABC::env('DIR_VENDOR').'assets'.DS;
-        $dest_dir = ABC::env('DIR_PUBLIC').'vendor'.DS;
-        return $this->processTemplateAssets($file_list, $src_dir, $dest_dir);
-    }
-
-    protected function processTemplateAssets($file_list, $src_dir, $dest_dir)
-    {
-        $commonResult = true;
-        if (!$file_list || !is_array($file_list)) {
-            return false;
-        }
-        foreach ($file_list as $template => $list) {
-            //remove previous temp-folders before copying
-            $live_dir = $dest_dir.$template;
-            //unique temporary directory name
-            $uid_new = uniqid('apn_');
-            //unique old directory name
-            $uid_old = uniqid('apo_');
-            //use abc/system/temp directory during copying
-            $tmpDir = ABC::env('DIR_SYSTEM').'temp'.DS;
-            if (!is_dir($tmpDir)) {
-                @mkdir($tmpDir, 0775);
-            }
-
-            if (!is_writable($tmpDir)) {
-                $this->errors[] = __CLASS__
-                    .': Temporary directory '
-                    .$tmpDir.' is not writable for php!';
-                return false;
-            }
-
-            $new_temp_dir = $tmpDir.$uid_new;
-            $old_temp_dir = $tmpDir.$uid_old;
-
-            //then copy all asset files of template to temporary directory
-            foreach ($list as $rel_file) {
-                $res = AHelperUtils::CopyFileRelative(
-                    $rel_file,
-                    $src_dir.$template.DS,
-                    $new_temp_dir.DS
-                );
-
-                if (!$res['result']) {
-                    $commonResult = false;
-                    $this->errors[] = __CLASS__.': '.$res['message'];
-                }
-            }
-
-            //if all fine - do renaming of temporary directory
-            if (!$this->errors) {
-                //if live assets presents - rename it
-                if (is_dir($live_dir)) {
-                    $result = rename($live_dir, $old_temp_dir);
-                } else {
-                    $result = true;
-                }
-
-                if ($result) {
-                    //check parent directory before rename
-                    $parent_dir = dirname($live_dir);
-                    if (!is_dir($parent_dir)) {
-                        $results = AHelperUtils::MakeNestedDirs($parent_dir);
-                        if (!$results['result']) {
-                            $this->errors[] = $results['message'];
-                        }
-                    }
-                    //try to move to production
-                    if (!@rename($new_temp_dir, $live_dir)) {
-                        $this->errors[] = __CLASS__.': Cannot rename temporary directory '
-                            .$new_temp_dir.' to live '.$live_dir;
-                        //revert old assets
-                        @rename($old_temp_dir, $live_dir);
-                        return false;
-                    } else {
-                        //if all fine - clean old silently
-                        AHelperUtils::RemoveDirRecursively($old_temp_dir);
-                    }
-                    //if all fine - remove old live directory
-                } else {
-                    $commonResult = false;
-                    $this->errors[] = __CLASS__.': Cannot rename live directory '.$live_dir.' to '.$old_temp_dir;
-                }
-            }
-        }
-        return $commonResult;
-    }
 }

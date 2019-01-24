@@ -21,7 +21,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\AAttribute;
+use abc\core\engine\contracts\AttributeInterface;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use H;
@@ -316,7 +316,10 @@ final class ADownload
             return [];
         }
         $output = [];
-        $attr = new AAttribute('download_attribute');
+        /**
+         * @var AttributeInterface $attr
+         */
+        $attr = ABC::getObjectByAlias('Attribute',['download_attribute']);
         $attributes = $attr->getAttributes();
 
         $ids = [];

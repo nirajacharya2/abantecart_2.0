@@ -20,8 +20,9 @@
 
 namespace abc\core\engine;
 
-use abc\core\helper\AHelperUtils;
+use abc\core\engine\contracts\AttributeInterface;
 use abc\core\lib\AFile;
+use H;
 
 /**
  * Class to handle access to global attributes
@@ -34,7 +35,7 @@ use abc\core\lib\AFile;
  * @property \abc\core\lib\ASession $session
  * @property \abc\core\engine\ALoader $load
  */
-class AAttribute
+class Attribute implements AttributeInterface
 {
     protected $registry;
     protected $attributes = [];
@@ -43,10 +44,10 @@ class AAttribute
     /**
      * @var array of core attribute types controllers
      */
-    protected $core_attribute_types_controllers = array(
+    protected $core_attribute_types_controllers = [
         'responses/catalog/attribute/getProductOptionSubform',
         'responses/catalog/attribute/getDownloadAttributeSubform',
-    );
+    ];
 
     /**
      * @param string $attribute_type
@@ -57,7 +58,7 @@ class AAttribute
     public function __construct($attribute_type = '', $language_id = 0)
     {
         $this->registry = Registry::getInstance();
-        $this->errors = array();
+        $this->errors = [];
         $this->loadAttributeTypes();
         //Preload the data with attributes for given $attribute type
         if ($attribute_type) {
@@ -134,7 +135,7 @@ class AAttribute
     {
         //Load attributes from DB or cache. If load from DB, cache.
         // group attribute and sort by attribute_group_id (if any) and sort by attribute inside the group.
-        $this->attributes = array();
+        $this->attributes = [];
         if (!$language_id) {
             $language_id = $this->config->get('storefront_language_id');
         }
@@ -200,7 +201,7 @@ class AAttribute
         if ($query->num_rows) {
             return $query->row;
         } else {
-            return array();
+            return [];
         }
     }
 
@@ -253,7 +254,7 @@ class AAttribute
                 return $attribute_type;
             }
         }
-        return array();
+        return [];
     }
 
     /**
@@ -269,7 +270,7 @@ class AAttribute
                 return $attribute_type;
             }
         }
-        return array();
+        return [];
     }
 
     /**
@@ -306,7 +307,7 @@ class AAttribute
         if ($attribute_parent_id == 0) {
             return $this->attributes;
         } else {
-            $children = array();
+            $children = [];
             foreach ($this->attributes as $attribute) {
                 if ($attribute['attribute_parent_id'] == $attribute_parent_id) {
                     $children[] = $attribute;
@@ -345,18 +346,18 @@ class AAttribute
     public function getAttribute($attribute_id)
     {
         if (empty($this->attributes)) {
-            return array();
+            return [];
         }
 
         foreach ($this->attributes as $attribute) {
             if ($attribute['attribute_id'] == $attribute_id) {
-                if (AHelperUtils::has_value($attribute['settings'])) {
+                if (H::has_value($attribute['settings'])) {
                     $attribute['settings'] = unserialize($attribute['settings']);
                 }
                 return $attribute;
             }
         }
-        return array();
+        return [];
     }
 
     /**
@@ -399,10 +400,12 @@ class AAttribute
      * @param array $data - usually it's a $_POST
      *
      * @return array - array with error text for each of invalid field data
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function validateAttributeData($data = array())
+    public function validateAttributeData($data = [])
     {
-        $errors = array();
+        $errors = [];
         // load language for file upload text errors
         $this->language->load('catalog/attribute');
         foreach ($this->attributes as $attribute_info) {
@@ -416,7 +419,7 @@ class AAttribute
                     $this->language->get('entry_required').' '.$attribute_info['name'];
             }
             // for required string values
-            if ($attribute_info['required'] == '1' && !in_array($attribute_info['element_type'], array('K', 'U'))) {
+            if ($attribute_info['required'] == '1' && !in_array($attribute_info['element_type'], ['K', 'U'])) {
                 if (!is_array($data[$attribute_info['attribute_id']])) {
                     $data[$attribute_info['attribute_id']] = trim($data[$attribute_info['attribute_id']]);
                     if ($data[$attribute_info['attribute_id']] == '') {    //if empty string!
@@ -431,7 +434,7 @@ class AAttribute
                 }
             }
             // check by regexp
-            if (AHelperUtils::has_value($attribute_info['regexp_pattern'])) {
+            if (H::has_value($attribute_info['regexp_pattern'])) {
                 if (!is_array($data[$attribute_info['attribute_id']])) { //for string value
                     if (!preg_match($attribute_info['regexp_pattern'], $data[$attribute_info['attribute_id']])) {
                         $errors[$attribute_info['attribute_id']] .= ' '.$attribute_info['error_text'];
@@ -463,14 +466,14 @@ class AAttribute
                     $data['settings']['directory'],
                     $this->request->files[$attribute_info['attribute_id']]['name']
                 );
-                $file_data = array(
+                $file_data = [
                     'name' => $file_path_info['name'],
                     'path' => $file_path_info['path'],
                     'type' => $this->request->files[$attribute_info['attribute_id']]['type'],
                     'tmp_name' => $this->request->files[$attribute_info['attribute_id']]['tmp_name'],
                     'error' => $this->request->files[$attribute_info['attribute_id']]['error'],
                     'size' => $this->request->files[$attribute_info['attribute_id']]['size'],
-                );
+                ];
 
                 $file_errors = $fm->validateFileOption($attribute_info['settings'], $file_data);
 

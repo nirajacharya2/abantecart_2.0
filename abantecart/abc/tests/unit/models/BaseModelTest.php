@@ -76,9 +76,7 @@ class BaseModelTest extends ATestCase
         $result = false;
 
         try {
-            $model = new Product();
-            $product = $model->find(51);
-            $product->fill(
+            $product = new Product(
                 [
                     'model'          => 'invalid',
                     'sku'            => null,

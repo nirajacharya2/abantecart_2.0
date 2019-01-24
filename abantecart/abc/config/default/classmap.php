@@ -3,11 +3,12 @@
  * Class Map of default stage
  */
 
-use abc\core\engine\AAttribute;
-use abc\core\lib\AAttribute_Manager;
+use abc\core\engine\Attribute;
+use abc\core\lib\AttributeManager;
 use abc\core\lib\Abac;
 use abc\core\lib\ACart;
 use abc\core\lib\ACustomer;
+use abc\core\lib\AdminCommands;
 use abc\core\lib\AUser;
 use abc\core\lib\AEncryption;
 use abc\core\lib\JobManager;
@@ -32,7 +33,6 @@ return [
     'ALog'                 => [
         ALog::class,
         [
-
             'app'      => 'application.log',
             'security' => 'security.log',
             'warn'     => 'application.log',
@@ -50,8 +50,8 @@ return [
     'JobManager'           => JobManager::class,
     'AJson'                => AJson::class,
     'ACustomer'            => ACustomer::class,
-    'AAttribute'           => AAttribute::class,
-    'AAttribute_Manager'   => AAttribute_Manager::class,
+    'Attribute'            => Attribute::class,
+    'AttributeManager'     => AttributeManager::class,
     'APromotion'           => APromotion::class,
     'ACart'                => ACart::class,
     'AOrder'               => AOrder::class,
@@ -61,4 +61,5 @@ return [
     'ACurrency'            => ACurrency::class,
     'AUser'                => AUser::class,
     'UserResolver'         => UserResolver::class,
+    'AdminCommands'        => AdminCommands::class,
 ];

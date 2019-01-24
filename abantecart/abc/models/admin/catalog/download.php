@@ -20,14 +20,11 @@
 
 namespace abc\models\admin;
 
-use abc\core\helper\AHelperUtils;
+use abc\core\ABC;
+use abc\core\lib\contracts\AttributeManagerInterface;
+use \H;
 use abc\core\engine\Model;
-use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\AResourceManager;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ModelCatalogDownload
@@ -68,8 +65,8 @@ class ModelCatalogDownload extends Model
         $download_id = $this->db->getLastId();
 
         $this->language->replaceDescriptions('download_descriptions',
-            array('download_id' => (int)$download_id),
-            array($this->language->getContentLanguageID() => array('name' => $data['name'])));
+            ['download_id' => (int)$download_id],
+            [$this->language->getContentLanguageID() => ['name' => $data['name']]]);
 
         $this->addDownloadAttributeValues($download_id, $data['attributes'][0]);
         // assign download to product
@@ -93,7 +90,7 @@ class ModelCatalogDownload extends Model
             return false;
         }
 
-        $fields = array(
+        $fields = [
             'filename'                 => 'string',
             'mask'                     => 'string',
             'max_downloads'            => 'int',
@@ -103,7 +100,7 @@ class ModelCatalogDownload extends Model
             'activate'                 => 'string',
             'activate_order_status_id' => 'int',
             'status'                   => 'int',
-        );
+        ];
 
         if (isset($data['activate'])) {
             if ($data['activate'] != 'order_status') {
@@ -114,13 +111,13 @@ class ModelCatalogDownload extends Model
                 $data['max_downloads'] = 0;
             }
         }
-        $update = array();
+        $update = [];
         foreach ($fields as $field_name => $type) {
             if (isset($data[$field_name])) {
                 if ($type == 'string') {
                     $update[] = "`".$field_name."` = '".$this->db->escape($data[$field_name])."'";
                 } elseif ($type == 'int') {
-                    if (in_array($field_name, array('max_downloads', 'expire_days'))) {
+                    if (in_array($field_name, ['max_downloads', 'expire_days'])) {
                         $update[] =
                             "`".$field_name."` = ".((int)$data[$field_name] ? "'".(int)$data[$field_name]."'" : 'NULL');
                     } else {
@@ -137,8 +134,8 @@ class ModelCatalogDownload extends Model
 
         if (!empty($data['name'])) {
             $this->language->replaceDescriptions('download_descriptions',
-                array('download_id' => (int)$download_id),
-                array($this->language->getContentLanguageID() => array('name' => $data['name'])));
+                ['download_id' => (int)$download_id],
+                [$this->language->getContentLanguageID() => ['name' => $data['name']]]);
         }
 
         if (!empty($data['attributes'])) {
@@ -256,7 +253,6 @@ class ModelCatalogDownload extends Model
      *
      * @return null
      * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public function deleteDownload($download_id)
     {
@@ -300,7 +296,7 @@ class ModelCatalogDownload extends Model
     {
         $download_id = (int)$download_id;
         if (!$download_id) {
-            return array();
+            return [];
         }
 
         $query = $this->db->query("SELECT d.download_id,
@@ -331,10 +327,10 @@ class ModelCatalogDownload extends Model
      * @return array
      * @throws \Exception
      */
-    public function getProductDownloadsDetails($product_id, $data = array())
+    public function getProductDownloadsDetails($product_id, $data = [])
     {
         if (!(int)$product_id) {
-            return array();
+            return [];
         }
         $sql = "SELECT dd.*, d.*, p2d.*
                  FROM ".$this->db->table_name("products_to_downloads")." p2d
@@ -350,7 +346,7 @@ class ModelCatalogDownload extends Model
         $query = $this->db->query($sql);
 
         foreach($query->rows as &$row){
-            $row['map_list'] = $this->getDownloadMapList($row['download_id'],array($row['product_id']));
+            $row['map_list'] = $this->getDownloadMapList($row['download_id'], [$row['product_id']]);
         }
 
         return $query->rows;
@@ -363,7 +359,7 @@ class ModelCatalogDownload extends Model
      * @return array
      * @throws \Exception
      */
-    public function getDownloads($data = array(), $mode = 'default')
+    public function getDownloads($data = [], $mode = 'default')
     {
 
         if (!empty($data['content_language_id'])) {
@@ -394,10 +390,10 @@ class ModelCatalogDownload extends Model
             return $query->row['total'];
         }
 
-        $sort_data = array(
+        $sort_data = [
             'name'          => 'dd.name',
             'product_count' => 'product_count',
-        );
+        ];
 
         if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
             $sql .= " ORDER BY ".$data['sort'];
@@ -432,7 +428,7 @@ class ModelCatalogDownload extends Model
      */
     public function getSharedDownloads()
     {
-        return $this->getDownloads(array('subsql_filter' => ' shared=1 '));
+        return $this->getDownloads(['subsql_filter' => ' shared=1 ']);
     }
 
     /**
@@ -441,7 +437,7 @@ class ModelCatalogDownload extends Model
      * @return array
      * @throws \Exception
      */
-    public function getTotalDownloads($data = array())
+    public function getTotalDownloads($data = [])
     {
         return $this->getDownloads($data, 'total_only');
     }
@@ -455,14 +451,14 @@ class ModelCatalogDownload extends Model
     public function getDownloadDescriptions($download_id)
     {
         $download_id = (int)$download_id;
-        $download_description_data = array();
+        $download_description_data = [];
 
         $query = $this->db->query("SELECT *
                                     FROM ".$this->db->table_name("download_descriptions")." 
                                     WHERE download_id = '".(int)$download_id."'");
 
         foreach ($query->rows as $result) {
-            $download_description_data[$result['language_id']] = array('name' => $result['name']);
+            $download_description_data[$result['language_id']] = ['name' => $result['name']];
         }
 
         return $download_description_data;
@@ -472,17 +468,20 @@ class ModelCatalogDownload extends Model
      * @param int $download_id
      * @param array $data
      *
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function addDownloadAttributeValues($download_id, $data)
     {
         $download_id = (int)$download_id;
-        $attr_mngr = new AAttribute_Manager('download_attribute');
+        /**
+         * @var AttributeManagerInterface $attr_mngr
+         */
+        $attr_mngr = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
         $attribute_info = $attr_mngr->getAttributeTypeInfo('download_attribute');
-        $attributes = $attr_mngr->getAttributes(array(
+        $attributes = $attr_mngr->getAttributes([
             'attribute_type_id' => $attribute_info['attribute_type_id'],
             'limit'             => null,
-        ));
+        ]);
 
         foreach ($attributes as $attribute) {
             if (isset($data[$attribute['attribute_id']])) {
@@ -501,17 +500,20 @@ class ModelCatalogDownload extends Model
      * @param int $download_id
      * @param array $data
      *
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function editDownloadAttributes($download_id, $data)
     {
         $download_id = (int)$download_id;
-        $attr_mngr = new AAttribute_Manager('download_attribute');
+        /**
+         * @var AttributeManagerInterface $attr_mngr
+         */
+        $attr_mngr = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
         $attribute_info = $attr_mngr->getAttributeTypeInfo('download_attribute');
-        $attributes = $attr_mngr->getAttributes(array(
+        $attributes = $attr_mngr->getAttributes([
             'attribute_type_id' => $attribute_info['attribute_type_id'],
             'limit'             => null,
-        ));
+        ]);
 
         foreach ($attributes as $attribute) {
             if (isset($data[$attribute['attribute_id']])) {
@@ -535,23 +537,26 @@ class ModelCatalogDownload extends Model
      * @param int $download_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function getDownloadAttributes($download_id)
     {
         $download_id = (int)$download_id;
-        $attr_mngr = new AAttribute_Manager('download_attribute');
+        /**
+         * @var AttributeManagerInterface $attr_mngr
+         */
+        $attr_mngr = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
         $attribute_info = $attr_mngr->getAttributeTypeInfo('download_attribute');
         $attributes = $attr_mngr->getAttributes(
-            array(
+            [
                 'attribute_type_id' => $attribute_info['attribute_type_id'],
                 'sort'              => 'sort_order',
                 'order'             => 'ASC',
                 'limit'             => null,
-            )
+            ]
         );
 
-        $output = $ids = array();
+        $output = $ids = [];
         foreach ($attributes as $attribute) {
             $ids[] = (int)$attribute['attribute_id'];
             $attribute['values'] = $attr_mngr->getAttributeValues($attribute['attribute_id']);
@@ -585,7 +590,7 @@ class ModelCatalogDownload extends Model
         if (!(int)$order_download_id) {
             return false;
         }
-        $update = array();
+        $update = [];
 
         if (isset($data['expire_date'])) {
             if ($data['expire_date']) {
@@ -602,7 +607,7 @@ class ModelCatalogDownload extends Model
                 $update[] = "`remaining_count` = NULL";
             }
         }
-        if (AHelperUtils::has_value($data['status'])) {
+        if (H::has_value($data['status'])) {
             $update[] = "`status` = '".(int)$data['status']."'";
         }
         if ($update) {
@@ -624,7 +629,7 @@ class ModelCatalogDownload extends Model
     public function getOrdersWithProduct($product_id, $download_id = '')
     {
         if (!(int)$product_id) {
-            return array();
+            return [];
         }
         if ($download_id) {
             $sql = "SELECT DISTINCT op.order_id, op.order_product_id
@@ -662,13 +667,14 @@ class ModelCatalogDownload extends Model
      *
      * @return array
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function getTextStatusForOrderDownload($download_info)
     {
 
-        $text_status = array();
+        $text_status = [];
 
-        if (AHelperUtils::dateISO2Int($download_info['expire_date']) < time()) {
+        if (H::dateISO2Int($download_info['expire_date']) < time()) {
             $text_status[] = $this->language->get('text_download_expired');
         }
 
