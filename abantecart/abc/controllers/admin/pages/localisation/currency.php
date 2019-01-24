@@ -139,15 +139,7 @@ class ControllerPagesLocalisationCurrency extends AController {
 		if ( $this->request->is_POST() && $this->_validateForm() ) {
 
 		    $post = $this->request->post;
-		    $currency = new Currency([
-			    'title'         => $post['title'],
-                'code'          => $post['code'],
-                'symbol_left'   => $post['symbol_left'],
-                'symbol_right'  => $post['symbol_right'],
-                'decimal_place' => $post['decimal_place'],
-                'value'         => $post['value'],
-                'status'        => (int)$post['status'],
-            ]);
+		    $currency = new Currency($post);
 			$currency->save();
 
 			$currency_id = $currency->currency_id;

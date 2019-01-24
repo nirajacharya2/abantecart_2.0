@@ -1999,7 +1999,7 @@ class ControllerPagesSaleOrder extends AController
             $order_info['currency'] = $this->request->get['order_currency'];
         }
         $this->loadModel('localisation/currency');
-        $all_currencies = Currency::get()->toArray();
+        $all_currencies = Currency::all()->toArray();
         if (sizeof($all_currencies) == 1 || !$order_info['currency']) {
             $order_info['currency'] = $this->config->get('config_currency');
         }

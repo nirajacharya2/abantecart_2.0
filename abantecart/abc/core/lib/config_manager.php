@@ -402,7 +402,7 @@ class AConfigManager
             $language_codes[$lng_code] = $v['name'];
         }
 
-        $results = Currency::get()->toArray();
+        $results = Currency::all()->toArray();
         $currencies = [];
         foreach ($results as $v) {
             $currencies[$v['code']] = $v['title'];
