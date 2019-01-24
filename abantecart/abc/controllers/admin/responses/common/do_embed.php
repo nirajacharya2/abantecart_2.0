@@ -105,7 +105,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 		));
 
 		$this->load->model('localisation/currency');
-		$results = Currency::get()->toArray();
+		$results = Currency::all()->toArray();
 		$currencies = array();
 		foreach ($results as $v) {
 			$currencies[$v['code']] = $v['title'];
@@ -213,7 +213,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 		));
 
 		$this->load->model('localisation/currency');
-		$results = Currency::get()->toArray();
+		$results = Currency::all()->toArray();
 		$currencies = array();
 		foreach ($results as $v) {
 			$currencies[$v['code']] = $v['title'];
@@ -366,7 +366,7 @@ class ControllerResponsesCommonDoEmbed extends AController {
 		));
 
 		$this->load->model('localisation/currency');
-		$results = Currency::get()->toArray();
+		$results = Currency::all()->toArray();
 		$currencies = array();
 		foreach ($results as $v) {
 			$currencies[$v['code']] = $v['title'];

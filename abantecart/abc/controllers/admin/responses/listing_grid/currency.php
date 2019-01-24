@@ -135,6 +135,7 @@ class ControllerResponsesListingGridCurrency extends AController
 
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
+                    $ids = array_unique($ids);
                     foreach ($ids as $id) {
                         $err = '';
                         $currency_info = Currency::find($id)->toArray();
