@@ -88,7 +88,9 @@ class ControllerCommonHeader extends AController
             if ($this->user->getLastLogin()) {
                 $this->view->assign(
                     'last_login',
-                    sprintf($this->language->get('text_last_login'), $this->user->getLastLogin())
+                    sprintf($this->language->get('text_last_login'),
+                        H::dateISO2Display($this->user->getLastLogin(),
+                            $this->language->get('date_format_short')))
                 );
             } else {
                 $this->view->assign(

@@ -19,6 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
+use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -83,9 +84,11 @@ class ControllerResponsesCommonTabs extends AController {
 			'limit' => 10
 		);
 		$top_orders = $this->model_sale_order->getOrders($filter);
-		foreach( $top_orders as $indx => $order) {
+		foreach( $top_orders as $indx => &$order) {
 			$top_orders[$indx]['url'] = $this->html->getSecureURL('sale/order/details', '&order_id='.$order['order_id']);
 			$top_orders[$indx]['total'] = $this->currency->format($order['total'], $this->config->get('config_currency'));
+            $order['date_added'] = H::dateISO2Display($order['date_added'],
+                $this->language->get('date_format_long'));
 		}
 		$this->view->assign('top_orders', $top_orders);
 
