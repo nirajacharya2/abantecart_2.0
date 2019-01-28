@@ -535,4 +535,13 @@ class BaseModel extends OrmModel
         return $query;
     }
 
+    /**
+     * Method returns primary keys array of pivot tables
+     * @return array
+     */
+    public function getKeySet()
+    {
+        return $this->primaryKeySet ?? [];
+    }
+
 }
