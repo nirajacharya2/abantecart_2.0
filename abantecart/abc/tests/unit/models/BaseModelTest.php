@@ -25,6 +25,7 @@ use PHPUnit\Framework\Warning;
 
 class BaseModelTest extends ATestCase
 {
+
     public function testValidationPassed()
     {
         try {
@@ -68,6 +69,7 @@ class BaseModelTest extends ATestCase
 
             $this->assertEquals(11, count($audits));
         }
+        return $product_id;
     }
 
     public function testValidationNotPassed()
@@ -104,10 +106,13 @@ class BaseModelTest extends ATestCase
         $this->assertEquals(true, $result);
     }
 
-    public function testEventOnSaved()
+    /**
+     * @depends testValidationPassed
+     */
+    public function testEventOnSaved($productId)
     {
         $model = new Product();
-        $product = $model->find(50);
+        $product = $model->find($productId);
 
         try {
             $product->fill(
@@ -129,17 +134,18 @@ class BaseModelTest extends ATestCase
         );
     }
 
-    public function testSoftDelete()
+    /**
+     * @depends testValidationPassed
+     */
+    public function testSoftDelete($productId)
     {
-        $model = new Product(['model' => 'test-product']);
-        $model->save();
-        $product_id = $model->getKey();
-
-        $product = $model;
+        $model = new Product();
+        $product = $model->find($productId);
         $result = false;
+
         if($product) {
             $product->delete();
-            Product::onlyTrashed()->where('product_id', $product_id)->restore();
+            Product::onlyTrashed()->where('product_id', $productId)->restore();
             try {
                 $product->get(['date_deleted']);
                 $result = true;
@@ -153,9 +159,9 @@ class BaseModelTest extends ATestCase
             $env['FORCE_DELETING'][Product::class] = true;
             ABC::env('MODEL', $env, true);
             $model = new Product();
-            $product = $model->find($product_id);
+            $product = $model->find($productId);
             $product->delete();
-            $exists = Product::onlyTrashed()->where('product_id', $product_id)->exists();
+            $exists = Product::onlyTrashed()->where('product_id', $productId)->exists();
             $this->assertEquals($exists, false);
         }
 

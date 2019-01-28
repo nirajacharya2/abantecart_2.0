@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models;
+namespace unit\models\admin;
 
 use abc\models\admin\Currency;
 use abc\tests\unit\ATestCase;

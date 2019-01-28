@@ -9076,10 +9076,10 @@ INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `v
 
 ('extensions', 'banner_manager', 'extensions', 1, 1, '1.0.1', null, now(), now(), now() ),
 ('extensions', 'forms_manager', 'extensions', 1, 1, '1.0.2', null, now(), now(), now() )
---,
---('extensions', 'neowize_insights', 'extensions', 1, 1, '1.0.5', null, now(), now(), now() ),
---('payment', 'default_pp_standart', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() ),
---('payment', 'default_pp_pro', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() )
+-- ,
+-- ('extensions', 'neowize_insights', 'extensions', 1, 1, '1.0.5', null, now(), now(), now() ),
+-- ('payment', 'default_pp_standart', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() ),
+-- ('payment', 'default_pp_pro', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() )
 ;
 
 --
@@ -9282,7 +9282,7 @@ CREATE TABLE `ac_orders` (
   `store_id` int(11) NOT NULL DEFAULT '0',
   `store_name` varchar(64) COLLATE utf8_general_ci NOT NULL,
   `store_url` varchar(255) COLLATE utf8_general_ci NOT NULL,
-  --????? Need to update code to read NULL for guests.
+  -- ????? Need to update code to read NULL for guests.
   `customer_id` int(11) DEFAULT NULL,
   `customer_group_id` int(11) NOT NULL DEFAULT '0',
   `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
