@@ -99,6 +99,15 @@ class ControllerPagesCatalogProduct extends AController
                                                                 '&viewport_rt=catalog/product/update&product_id=%ID%'
                             )
                         ],
+                        'audit_log'  => [
+                            'text'  => $this->language->get('text_audit_log'),
+                            'href'  => $this->html->getSecureURL('tool/audit_log', '&auditable_type=Product&auditable_id=%ID%'),
+                            //quick view port URL
+                            'vhref' => $this->html->getSecureURL(
+                                                                'r/common/viewport/modal',
+                                                                '&viewport_rt=tool/audit_log&auditable_type=Product&auditable_id=%ID%'
+                            )
+                        ],
                         'general'    => [
                             'text' => $this->language->get('tab_general'),
                             'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),

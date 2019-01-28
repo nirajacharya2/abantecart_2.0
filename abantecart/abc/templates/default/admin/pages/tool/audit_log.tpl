@@ -1,45 +1,13 @@
-<?php
-	$this->document->addScript('https://cdn.jsdelivr.net/npm/vue/dist/vue.js');
-	$this->document->addScript('https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js');
-	$this->document->addScript('https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js');
-	$this->document->addScript('https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js');
-	$this->document->addScript('https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js');
-	$this->document->addStyle([
-		'href' => 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons',
-		'rel'  => 'stylesheet',
-	]);
-	$this->document->addStyle([
-		'href' => 'https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css',
-		'rel'  => 'stylesheet',
-	]);
-?>
-
-<style>
-	.ellipsis {
-		overflow: auto !important;
-	}
-	.v-dialog {
-		overflow: hidden;
-	}
-	.v-input {
-		margin-right: 15px;
-		margin-left: 15px;
-	}
-</style>
-
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="tab-content">
-	<div id="audit-log-container">
-	</div>
-</div>
-<div id="app">
+	<div id="app">
 	<v-app>
 		<v-content>
 			<template>
-				<v-container fluid>
+				<v-container>
 					<v-layout row wrap align-center>
-						<v-flex xs12 sm6>
+						<v-flex xs12 sm4>
 							<v-dialog
 									ref="dialog"
 									v-model="modal"
@@ -63,7 +31,7 @@
 								</v-date-picker>
 							</v-dialog>
 						</v-flex>
-						<v-flex xs12 sm6>
+						<v-flex xs12 sm4>
 							<v-dialog
 									ref="dialog2"
 									v-model="modal2"
@@ -88,9 +56,21 @@
 							</v-dialog>
 						</v-flex>
 						<v-flex xs12 sm4>
+							<v-text-field
+									name="user_name"
+									v-model="user_name"
+									label="User/Alias Name"
+									single-line
+									hint="Input User/Alias Name"
+							></v-text-field>
+						</v-flex>
+					</v-layout>
+					<v-layout row wrap align-center v-if="!isConcreteObject">
+						<v-flex xs12 sm4>
 							<v-select
 									v-model="selected_data_object"
 									:items="data_objects"
+									v-bind:disabled="isDataObjectDisabled"
 									label="Auditable Objects"
 									hint="Pick Auditable Object"
 									persistent-hint
@@ -112,7 +92,6 @@
 									hint="Input Data Object ID"
 							></v-text-field>
 						</v-flex>
-
 						<v-flex xs12 sm4>
 							<v-select
 									:items="available_fields"
@@ -149,11 +128,9 @@
 						<v-flex xs12 sm4 style="text-align: center;">
 						<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled" >Clear Filter</v-btn>
 						</v-flex>
-
-
 					</v-layout>
 				</v-container>
-				<div>
+				<v-container>
 					<v-data-table
 							:headers="table_headers"
 							:items="table_items"
@@ -175,10 +152,10 @@
 								>
 									{{ header.text }}
 									<span v-if="pagination.descending && header.value === pagination.sortBy">
-										<i class="fa fa-arrow-up"></i>
+										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
 									<span v-if="!pagination.descending && header.value === pagination.sortBy">
-										<i class="fa fa-arrow-down"></i>
+										<i class="material-icons mi-12">arrow_downward</i>
 									</span>
 								</th>
 								<th class="column" v-if="!expandedAll" @click="expandAll()">
@@ -239,13 +216,12 @@
 							</v-card>
 						</template>
 					</v-data-table>
-				</div>
+				</v-container>
 			</template>
 		</v-content>
 	</v-app>
 </div>
-
-
+</div>
 
 
 <script type="text/x-template" id="select-template">
@@ -255,10 +231,13 @@
 
 <script>
 	var data_objects =  <?php echo $data_objects; ?>;
+	var auditable_type = '<?php echo $auditable_type; ?>';
+	var auditable_id = '<?php echo $auditable_id; ?>';
 
 	var vm = new Vue({ el: '#app',
 	data: {
 		arFilter: [],
+		isConcreteObject: false,
 		objectsInArFilter: [],
 		isSelectedFieldsDisabled: true,
 		isAddDisabled: true,
@@ -303,8 +282,10 @@
 		expand_table_total: [],
 		data_object_id:'',
 		isDataObjectIdDisabled: true,
+		isDataObjectDisabled: false,
 		expandedAll: false,
 		props: [],
+		user_name: '',
 	},
 
 		computed: {
@@ -312,6 +293,7 @@
 				if (this.arFilter.length > 0
 					|| this.date_from.length > 0
 					|| this.date_to.length > 0
+					|| this.user_name.length > 0
 					) {
 					return false;
 				}
@@ -319,6 +301,9 @@
 			}
 		},
 
+		created: function () {
+			this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
+		},
 		watch: {
 			arFilter: function (newVal, oldVal) {
 				this.getDataFromApi();
@@ -337,10 +322,28 @@
 			},
 			date_to: function () {
 				this.getDataFromApi();
-			}
+			},
+			user_name: function () {
+				this.debouncedGetDataFromApi();
+			},
 		},
 		mounted () {
 		//	this.getDataFromApi();
+			if (auditable_type != '' && auditable_id != '') {
+				this.isConcreteObject = true;
+				this.selected_data_object = auditable_type;
+				this.data_object_id = auditable_id;
+				this.dataObjectChange();
+				this.isDataObjectDisabled = true;
+				this.isDataObjectIdDisabled = true;
+				this.isSelectedFieldsDisabled = false;
+				var filterItem = {
+					'auditable_type': this.selected_data_object,
+					'attribute_name': data_objects[this.selected_data_object].table_columns,
+					'auditable_id': this.data_object_id,
+				};
+				this.arFilter.push(filterItem);
+			}
 		},
 		methods: {
 			dataObjectChange: function () {
@@ -379,6 +382,7 @@
 				this.arFilter = [];
 				this.date_from = '';
 				this.date_to = '';
+				this.user_name = '';
 				for (i=0; i<this.objectsInArFilter.length; i++) {
 					var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
 					if (index == -1) {
@@ -425,6 +429,7 @@
 				param.filter = this.arFilter;
 				param.date_from = this.date_from;
 				param.date_to = this.date_to;
+				param.user_name = this.user_name;
 				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.table_items = response.data.items;

@@ -36,6 +36,8 @@ class Audit extends BaseModel
         'user_type',
         'user_id',
         'user_name',
+        'alias_id',
+        'alias_name',
         'event',
         'request_id',
         'session_id',

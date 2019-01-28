@@ -1,4 +1,4 @@
-<div id="<?php echo $id ?>_layer" class="btn-group btn-toggle <?php echo $style; ?>" <?php echo $attr ?>>
+<div id="<?php echo $id ?>_layer" class="btn-group btn-group-toggle <?php echo $style; ?>" <?php echo $attr ?> data-toggle="buttons">
 	<?php if ($checked) { ?>
     <button class="btn btn-primary active"><?php echo $text_on?></button>
     <button class="btn btn-default"><?php echo $text_off?></button>

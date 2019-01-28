@@ -31,6 +31,7 @@ class ControllerResponsesToolAuditAjax extends AController
          * @var string $filter
          * @var string $date_from
          * @var string $date_to
+         * @var string $user_name
          * @var string $page
          * @var string $rowsPerPage
          * @var string $sortBy
@@ -76,6 +77,12 @@ class ControllerResponsesToolAuditAjax extends AController
         }
         if ($date_to) {
             $audit = $audit->where('date_added', '<=', $date_to.' 23.59.59');
+        }
+        if ($user_name) {
+            $audit = $audit->where(function ($query) use ($user_name) {
+               $query->where('user_name', 'like', '%'.$user_name.'%')
+                   ->orWhere('alias_name', 'like', '%'.$user_name.'%');
+            });
         }
 
         $audit = $audit

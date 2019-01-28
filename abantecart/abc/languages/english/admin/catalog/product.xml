@@ -606,4 +606,8 @@
 		<key>text_success_relation_set</key>
 		<value><![CDATA[Relations of selected products was set successfully!]]></value>
 	</definition>
+	<definition>
+		<key>text_audit_log</key>
+		<value><![CDATA[Audit Log]]></value>
+	</definition>
 </definitions>

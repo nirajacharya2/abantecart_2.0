@@ -21,6 +21,34 @@ use abc\core\ABC; ?>
 <script>
 	FontAwesomeConfig = { searchPseudoElements: true };
 </script>
+
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+
+<style>
+	.ellipsis {
+		overflow: auto !important;
+	}
+	.v-dialog {
+		overflow: hidden;
+	}
+	.v-input {
+		margin-right: 15px;
+		margin-left: 15px;
+	}
+	.mi-12 {
+		font-size: 12px;
+	}
+</style>
+
 <link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
 <link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
