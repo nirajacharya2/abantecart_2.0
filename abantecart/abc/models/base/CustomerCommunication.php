@@ -21,9 +21,11 @@ namespace abc\models\base;
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
 use abc\models\admin\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CustomerCommunication extends BaseModel
 {
+    use SoftDeletes;
     protected $table = 'customer_communications';
 
     protected $primaryKey = 'communication_id';

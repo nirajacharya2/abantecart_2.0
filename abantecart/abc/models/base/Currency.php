@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Currency
@@ -23,6 +24,8 @@ use abc\models\BaseModel;
  */
 class Currency extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'currency_id';
     public $timestamps = false;
 

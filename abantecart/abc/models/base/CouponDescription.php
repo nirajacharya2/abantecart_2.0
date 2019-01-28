@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CouponDescription
@@ -19,6 +20,7 @@ use abc\models\BaseModel;
  */
 class CouponDescription extends BaseModel
 {
+    use SoftDeletes;
     public $incrementing = false;
     public $timestamps = false;
 

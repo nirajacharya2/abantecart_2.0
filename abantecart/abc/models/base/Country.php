@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Country
@@ -23,6 +24,7 @@ use abc\models\BaseModel;
  */
 class Country extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'country_id';
     public $timestamps = false;
 

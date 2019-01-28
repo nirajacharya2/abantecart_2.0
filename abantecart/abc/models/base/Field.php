@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Field
@@ -27,6 +28,7 @@ use abc\models\BaseModel;
  */
 class Field extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'field_id';
     public $timestamps = false;
 

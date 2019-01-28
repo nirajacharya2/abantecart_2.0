@@ -50,8 +50,10 @@ class BaseModelTest extends ATestCase
             $result = true;
         } catch (\PDOException $e) {
             $result = false;
+            $this->fail($e->getMessage());
         } catch (Warning $e) {
             $result = false;
+            $this->fail($e->getMessage());
         } catch (\Exception $e) {
             $result = false;
             $this->fail($e->getMessage());

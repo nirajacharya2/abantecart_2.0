@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Category
@@ -22,6 +23,7 @@ use abc\models\BaseModel;
  */
 class Category extends BaseModel
 {
+    use SoftDeletes;
     /**
      * @var string
      */

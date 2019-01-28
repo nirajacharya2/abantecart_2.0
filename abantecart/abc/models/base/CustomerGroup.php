@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CustomerGroup
@@ -15,6 +16,7 @@ use abc\models\BaseModel;
  */
 class CustomerGroup extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'customer_group_id';
     public $timestamps = false;
 

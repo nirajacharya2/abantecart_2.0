@@ -24,6 +24,7 @@ use abc\core\engine\AForm;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
+use abc\models\admin\Product;
 use H;
 
 /**
@@ -362,8 +363,9 @@ class ControllerPagesCatalogProduct extends AController
         if ($this->request->is_POST() && $this->validateForm()) {
             $product_data = $this->prepareData($this->request->post);
             $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
-            $this->model_catalog_product->updateProduct($product_id, $product_data);
-            $this->model_catalog_product->updateProductLinks($product_id, $product_data);
+
+            Product::updateProduct($product_id, $product_data, $this->language->getContentLanguageID());
+
             $this->extensions->hk_ProcessData($this, 'product_update');
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));

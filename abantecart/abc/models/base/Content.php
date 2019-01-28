@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Content
@@ -19,6 +20,7 @@ use abc\models\BaseModel;
  */
 class Content extends BaseModel
 {
+    use SoftDeletes;
     public $timestamps = false;
 
     protected $casts = [

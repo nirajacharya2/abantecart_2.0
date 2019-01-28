@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Address
@@ -27,6 +28,7 @@ use abc\models\BaseModel;
  */
 class Address extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'address_id';
     public $timestamps = false;
 

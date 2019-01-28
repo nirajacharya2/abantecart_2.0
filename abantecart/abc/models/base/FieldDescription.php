@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class FieldDescription
@@ -20,6 +21,7 @@ use abc\models\BaseModel;
  */
 class FieldDescription extends BaseModel
 {
+    use SoftDeletes;
     public $incrementing = false;
     public $timestamps = false;
 

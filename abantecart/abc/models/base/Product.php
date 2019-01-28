@@ -6,6 +6,7 @@ use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use Exception;
 use H;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Product
@@ -61,6 +62,8 @@ use H;
  */
 class Product extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     /**
      * Access policy properties
      * Note: names must be without dashes and whitespaces

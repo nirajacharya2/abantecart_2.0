@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CountryDescription
@@ -18,6 +19,7 @@ use abc\models\BaseModel;
  */
 class CountryDescription extends BaseModel
 {
+    use SoftDeletes;
     public $incrementing = false;
     public $timestamps = false;
 

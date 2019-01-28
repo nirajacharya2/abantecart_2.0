@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Coupon
@@ -30,6 +31,7 @@ use abc\models\BaseModel;
  */
 class Coupon extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'coupon_id';
     public $timestamps = false;
 

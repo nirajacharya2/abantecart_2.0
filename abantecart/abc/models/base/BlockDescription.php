@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class BlockDescription
@@ -26,6 +27,7 @@ use abc\models\BaseModel;
  */
 class BlockDescription extends BaseModel
 {
+    use SoftDeletes;
     public $timestamps = false;
 
     protected $casts = [

@@ -4,6 +4,7 @@ use abc\models\base\Currency;
 use abc\models\admin\User;
 use abc\models\base\Customer;
 use abc\models\base\Product;
+use abc\models\base\ProductDescription;
 use abc\modules\listeners\ModelAuditListener;
 
 return [
@@ -38,6 +39,7 @@ return [
         'Customer'             => Customer::class,
         'Product'              => Product::class,
         'User'                 => User::class,
+        'ProductDescription'   => ProductDescription::class,
     ],
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details

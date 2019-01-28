@@ -4,6 +4,7 @@ namespace abc\models\base;
 
 use abc\models\BaseModel;
 use abc\models\base\Audit;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Customer
@@ -42,6 +43,7 @@ use abc\models\base\Audit;
  */
 class Customer extends BaseModel
 {
+    use SoftDeletes;
     /**
      * @var string
      */

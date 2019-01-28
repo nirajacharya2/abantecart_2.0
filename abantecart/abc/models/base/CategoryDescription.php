@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CategoryDescription
@@ -21,6 +22,7 @@ use abc\models\BaseModel;
  */
 class CategoryDescription extends BaseModel
 {
+    use SoftDeletes;
     public $incrementing = false;
     public $timestamps = false;
 

@@ -4,6 +4,7 @@ namespace abc\models\base;
 
 use abc\models\BaseModel;
 use abc\models\BannerStat;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Banner
@@ -27,6 +28,7 @@ use abc\models\BannerStat;
  */
 class Banner extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'banner_id';
     public $timestamps = false;
 

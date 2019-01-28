@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CustomerTransaction
@@ -26,6 +27,7 @@ use abc\models\BaseModel;
  */
 class CustomerTransaction extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'customer_transaction_id';
     public $timestamps = false;
 

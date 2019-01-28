@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Download
@@ -30,6 +31,7 @@ use abc\models\BaseModel;
  */
 class Download extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'download_id';
     public $timestamps = false;
 

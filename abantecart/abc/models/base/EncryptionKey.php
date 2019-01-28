@@ -3,6 +3,7 @@
 namespace abc\models\base;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class EncryptionKey
@@ -16,6 +17,7 @@ use abc\models\BaseModel;
  */
 class EncryptionKey extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'key_id';
     public $timestamps = false;
 

@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
@@ -41,10 +40,9 @@ use ReflectionMethod;
  */
 class BaseModel extends OrmModel
 {
-    use SoftDeletes;
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
-    const DELETED_AT = 'date_deleted';
+    //const DELETED_AT = 'date_deleted';
     const CLI = 0;
     const ADMIN = 1;
     const CUSTOMER = 2;
