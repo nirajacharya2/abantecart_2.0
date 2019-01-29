@@ -47,6 +47,7 @@ class ControllerPagesCatalogAttributeGroups extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->setTitle($this->language->get('heading_title'));
+        $this->data['heading_title'] = $this->language->get('heading_title');
 
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('success', $this->session->data['success']);

@@ -9,21 +9,20 @@ use abc\models\BaseModel;
 /**
  * Class Audit
  *
- * @property int $address_id
- * @property int $customer_id
- * @property string $company
- * @property string $firstname
- * @property string $lastname
- * @property string $address_1
- * @property string $address_2
- * @property string $postcode
- * @property string $city
- * @property int $country_id
- * @property int $zone_id
+ * @property string $user_type
+ * @property int $user_id
+ * @property string $user_name
+ * @property int $alias_id
+ * @property string $alias_name
+ * @property string $event
+ * @property string $request_id
+ * @property string $session_id
+ * @property string $auditable_type
+ * @property string $auditable_name
+ * @property int $auditable_id
+ * @property string $old_value
+ * @property string $new_value
  *
- * @property Customer $customer
- * @property Country $country
- * @property Zone $zone
  *
  * @package abc\models
  */
