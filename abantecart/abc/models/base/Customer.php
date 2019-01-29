@@ -53,12 +53,6 @@ class Customer extends BaseModel
      */
     public $timestamps = false;
 
-    protected $permissions = [
-        self::CLI => ['update', 'delete'],
-        self::ADMIN => ['update', 'delete'],
-        self::CUSTOMER => ['update', 'save']
-    ];
-
     protected $casts = [
         'store_id'          => 'int',
         'newsletter'        => 'int',

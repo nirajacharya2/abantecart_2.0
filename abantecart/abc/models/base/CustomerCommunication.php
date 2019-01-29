@@ -31,13 +31,6 @@ class CustomerCommunication extends BaseModel
     protected $primaryKey = 'communication_id';
     public $timestamps = false;
 
-    protected $permissions = [
-        self::CLI => ['update', 'delete'],
-        self::ADMIN => ['update', 'delete'],
-        self::CUSTOMER => ['update', 'save']
-    ];
-
-
     protected $dates = [
         'date_added',
         'date_modified',
