@@ -64,4 +64,9 @@ class GlobalAttribute extends BaseModel
     {
         return $this->hasMany(GlobalAttributesValue::class, 'attribute_id');
     }
+
+    public function attribute_group()
+    {
+        return $this->belongsTo(GlobalAttributesGroup::class, 'attribute_group_id');
+    }
 }
