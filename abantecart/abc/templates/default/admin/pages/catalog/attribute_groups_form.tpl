@@ -1,44 +1,88 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<div class="contentBox">
-  <div class="cbox_tl"><div class="cbox_tr"><div class="cbox_tc">
-    <div class="heading icon_title_length"><?php echo $heading_title; ?></div>
-	  <div class="toolbar">
-		<?php if ( !empty ($help_url) ) : ?>
-	        <div class="help_element"><a href="<?php echo $help_url; ?>" target="new"><img src="<?php echo $this->templateResource('assets/images/icons/help.png'); ?>"/></a></div>
-	    <?php endif; ?>
-		<?php echo $form_language_switch; ?>
-    </div>
-  </div></div></div>
-  <div class="cbox_cl"><div class="cbox_cr"><div class="cbox_cc">
+<ul class="nav nav-tabs nav-justified nav-profile">
+	<?php
+		foreach ($tabs as $tab) {
+			if($tab['active'] ){
+				$classname = 'active';
+			}elseif(!$tab['active'] && $attribute_id){
+				$classname = 'inactive';
+				$tab['href'] = '';
+			}else{
+				$classname = '';
+			}
+	?>		<li class="nav-item"><a class="nav-link <?php echo $classname; ?>" <?php echo ($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a></li>
+	<?php } ?>
+
+	<?php echo $this->getHookVar('extension_tabs'); ?>
+</ul>
+<div id="content" class="panel panel-default">
+
+	<div class="panel-heading col-xs-12">
+
+		<div class="primary_content_actions pull-left">
+			<?php if (!empty ($list_url)) { ?>
+			<div class="btn-group">
+				<a class="btn btn-white tooltips" href="<?php echo $list_url; ?>" data-toggle="tooltip" data-original-title="<?php echo $text_back_to_list; ?>">
+					<i class="fa fa-arrow-left fa-lg"></i>
+				</a>
+			</div>
+			<?php } ?>
+		</div>
+
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
+	</div>
 
 	<?php echo $form['form_open']; ?>
-	<div class="fieldset">
-	  <div class="heading"><?php echo $form_title; ?></div>
-	  <div class="top_left"><div class="top_right"><div class="top_mid"></div></div></div>
-	  <div class="cont_left"><div class="cont_right"><div class="cont_mid">
-		<table class="form">
-		<?php foreach ($form['fields'] as $name => $field) { ?>
-			<tr>
-				<td><?php echo ${'entry_'.$name}; ?></td>
-				<td>
-					<?php echo $field; ?>
-					<?php if (!empty($error[$name])) { ?>
-						<div class="field_err"><?php echo $error[$name]; ?></div>
-					<?php } ?>
-				</td>
-			</tr>
-		<?php } //foreach ($form['fields'] as $name => $field)  ?>
-		</table>
-	  </div></div></div>
-      <div class="bottom_left"><div class="bottom_right"><div class="bottom_mid"></div></div></div>
-	</div><!-- <div class="fieldset"> -->
-	<div class="buttons align_center">
-	  <button type="submit" class="btn_standard"><?php echo $form['submit']; ?></button>
-	  <a class="btn_standard" href="<?php echo $cancel; ?>" ><?php echo $form['cancel']; ?></a>
-    </div>
-	</form>
+	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
+		<?php
+				foreach ($form['fields'] as $name => $field) {
 
-  </div></div></div>
-  <div class="cbox_bl"><div class="cbox_br"><div class="cbox_bc"></div></div></div>
+		//Logic to calculate fields width
+		$widthcasses = "col-sm-7";
+		if ( is_int(stripos($field->style, 'large-field')) ) {
+		$widthcasses = "col-sm-7";
+		} else if ( is_int(stripos($field->style, 'medium-field')) || is_int(stripos($field->style, 'date')) ) {
+		$widthcasses = "col-sm-5";
+		} else if ( is_int(stripos($field->style, 'small-field')) || is_int(stripos($field->style, 'btn_switch')) ) {
+		$widthcasses = "col-sm-3";
+		} else if ( is_int(stripos($field->style, 'tiny-field')) ) {
+		$widthcasses = "col-sm-2";
+		}
+		$widthcasses .= " col-xs-12";
+		?>
+		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+		<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+		<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
+			<?php echo $field; ?>
+		</div>
+		<?php if (!empty($error[$name])) { ?>
+		<span class="help-block field_err"><?php echo $error[$name]; ?></span>
+		<?php } ?>
+	</div>
+
+	<?php }  ?><!-- <div class="fieldset"> -->
+
+	<?php
+		// extension related piece of form
+		echo $subform; ?>
+
+</div>
+
+<div class="panel-footer col-xs-12">
+	<div class="text-center">
+		<button class="btn btn-primary lock-on-click">
+			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
+		</button>
+		<button class="btn btn-default" type="reset">
+			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+		</button>
+		<a class="btn btn-default" href="<?php echo $cancel; ?>">
+			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
+		</a>
+	</div>
+</div>
+
+</form>
+
 </div>

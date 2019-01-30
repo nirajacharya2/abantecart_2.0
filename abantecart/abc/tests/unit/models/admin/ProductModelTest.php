@@ -120,6 +120,11 @@ class ProductModelTest extends ATestCase
                     'meta_keywords'    => '',
                     'meta_description' => '',
                     'language_id'      => 1,
+                    'product_category'    =>
+                        [
+                            0 => '40',
+                            0 => '41',
+                        ],
                 ],
         ];
         try {

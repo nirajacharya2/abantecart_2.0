@@ -11445,6 +11445,8 @@ VALUES  (10,'category',11),
         (10,'download',14),
         (10,'review',15),
         (10,'attributes',16),
+        (10,'attribute_groups',17),
+        (10,'product_type',18),
         (10,'rl_manager',220);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11454,6 +11456,8 @@ VALUES  (11,'text_category',11),
         (11,'text_download',14),
         (11,'text_review',15),
         (11,'text_attribute',16),
+        (11,'text_attribute_groups',17),
+        (11,'text_product_type',18),
         (11,'text_rl_manager',220);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11463,6 +11467,8 @@ VALUES  (12,'catalog/category',11),
         (12,'catalog/download',14),
         (12,'catalog/review',15),
         (12,'catalog/attribute',16),
+        (12,'catalog/attribute_groups',17),
+        (12,'catalog/product_type',18),
         (12,'tool/rl_manager',220);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11472,6 +11478,8 @@ VALUES  (13,'catalog',11),
         (13,'catalog',14),
         (13,'catalog',15),
         (13,'catalog',16),
+        (13,'catalog',17),
+        (13,'catalog',18),
         (13,'catalog',220);
 -- SORT_ORDER
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
@@ -11481,6 +11489,8 @@ VALUES  (14,1,11),
         (14,4,14),
         (14,5,15),
         (14,6,16),
+        (14,6,17),
+        (14,6,18),
         (14,7,220);
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11490,6 +11500,8 @@ VALUES  (15,'core',11),
         (15,'core',14),
         (15,'core',15),
         (15,'core',16),
+        (15,'core',17),
+        (15,'core',18),
         (15,'core',220);
 -- ITEM_RL_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11499,6 +11511,8 @@ VALUES  (40,'207',11),
         (40,'210',14),
         (40,'211',15),
         (40,'212',16),
+        (40,'280',17),
+        (40,'279',18),
         (40,'277',220);
 
 --
@@ -12616,7 +12630,9 @@ VALUES
   ( 274, 1, NOW() ),
   ( 275, 1, NOW() ),
   ( 276, 1, NOW() ),
-  ( 277, 1, NOW() );
+  ( 277, 1, NOW() ),
+  ( 279, 1, NOW() ),
+  ( 280, 1, NOW() );
 
 INSERT INTO `ac_resource_descriptions`
 (`resource_id`, `language_id`, `name`, `title`, `description`, `resource_path`, `resource_code`, `date_added`)
@@ -12699,7 +12715,9 @@ VALUES
   ( 275,1,'Icon Error log', '', '', '', '<i class="fa fa-exclamation-triangle"></i>&nbsp;', NOW() ),
   ( 276,1,'Icon Settings IM', '', '', '', '<i class="fa fa-bullhorn"></i>&nbsp;', NOW() ),
   ( 277,1,'Icon Resource Library', '', '', '', '<i class="fa fa-image"></i>&nbsp;', NOW() ),
-  ( 278,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() );
+  ( 278,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() ),
+  ( 279,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-project-diagram"></i>&nbsp;', NOW() ),
+  ( 280,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-object-group"></i>&nbsp;', NOW() );
 
 --
 -- DDL for table `ac_resource_map`

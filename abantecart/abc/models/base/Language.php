@@ -220,4 +220,9 @@ class Language extends BaseModel
     {
         return $this->hasMany(ZoneDescription::class, 'language_id');
     }
+
+    public function product_type_descriptions()
+    {
+        return $this->hasMany(ProductDescription::class, 'language_id');
+    }
 }
