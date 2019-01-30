@@ -65,7 +65,7 @@ class testProductModel extends ATestCase
 
             //check result
             $updated_products_count = $this->db->table('products')->where('price', '=', $data['price'])->count();
-            $this->assertEquals(1, $updated_products_count);
+            $this->assertEquals(2, $updated_products_count);
         }else{
             $this->assertEquals(0, 0);
         }
