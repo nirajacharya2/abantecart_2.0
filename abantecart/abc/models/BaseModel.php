@@ -44,7 +44,7 @@ class BaseModel extends OrmModel
     const UPDATED_AT = 'date_modified';
     //const DELETED_AT = 'date_deleted';
     const CLI = 0;
-    const ADMIN = 1;
+    const USER = 1;
     const CUSTOMER = 2;
 
     /**
@@ -157,6 +157,9 @@ class BaseModel extends OrmModel
         }
     }
 
+    /**
+     * Boot
+     */
     public static function boot()
     {
         parent::$dispatcher = Registry::getInstance()->get('model_events');
@@ -171,6 +174,28 @@ class BaseModel extends OrmModel
     public function getClass()
     {
         return get_called_class();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUser()
+    {
+        return (isset ($this->actor['user_type'])
+            && ( $this->actor['user_type'] == self::USER
+                || $this->actor['user_type'] == self::CLI
+            )
+        ) ? TRUE : FALSE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCustomer()
+    {
+        return (isset ($this->actor['user_type'])
+            &&  $this->actor['user_type'] == self::CUSTOMER
+        ) ? TRUE : FALSE;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\modules\listeners\ModelAuditListener;
 use abc\tests\unit\modules\listeners\ATestListener;
 
@@ -22,7 +22,7 @@ return [
 
     'EVENTS' => [
         //call some listeners on model event
-        'eloquent.saved: abc\models\base\Product' => [ ATestListener::class ],
+        'eloquent.saved: abc\models\catalog\Product' => [ ATestListener::class ],
         //call listeners on every model event
         'eloquent.*: *' => [
             //this listener firing by base model property $auditEvents

@@ -19,7 +19,7 @@
 namespace unit\models;
 use abc\core\ABC;
 use abc\tests\unit\ATestCase;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\tests\unit\modules\listeners\ATestListener;
 use PHPUnit\Framework\Warning;
 

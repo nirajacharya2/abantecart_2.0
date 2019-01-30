@@ -19,7 +19,7 @@
 namespace abc\tests\unit\models;
 
 use abc\core\lib\ADB;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
 
 /**

@@ -6,7 +6,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
 use abc\core\lib\AUser;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use PhpAbac\AbacFactory;
 
 /**
