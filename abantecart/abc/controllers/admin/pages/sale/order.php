@@ -28,7 +28,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\modules\traits\SaleOrderTrait;
 use H;

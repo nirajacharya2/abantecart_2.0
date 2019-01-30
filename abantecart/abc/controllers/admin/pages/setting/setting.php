@@ -26,7 +26,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfigManager;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));

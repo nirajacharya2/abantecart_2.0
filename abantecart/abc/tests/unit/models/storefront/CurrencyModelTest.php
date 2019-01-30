@@ -19,7 +19,7 @@
 namespace abc\tests\unit\models;
 
 use abc\core\lib\ADB;
-use abc\models\storefront\Currency;
+use abc\models\locale\Currency;
 use abc\tests\unit\ATestCase;
 
 /**

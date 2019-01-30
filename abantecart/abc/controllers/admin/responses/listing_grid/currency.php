@@ -24,7 +24,7 @@ use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {

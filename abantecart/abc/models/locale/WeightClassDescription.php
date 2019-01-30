@@ -1,0 +1,44 @@
+<?php
+
+namespace abc\models\locale;
+
+use abc\models\BaseModel;
+
+/**
+ * Class WeightClassDescription
+ *
+ * @property int $weight_class_id
+ * @property int $language_id
+ * @property string $title
+ * @property string $unit
+ *
+ * @property WeightClass $weight_class
+ * @property Language $language
+ *
+ * @package abc\models
+ */
+class WeightClassDescription extends BaseModel
+{
+    public $incrementing = false;
+    public $timestamps = false;
+
+    protected $casts = [
+        'weight_class_id' => 'int',
+        'language_id'     => 'int',
+    ];
+
+    protected $fillable = [
+        'title',
+        'unit',
+    ];
+
+    public function weight_class()
+    {
+        return $this->belongsTo(WeightClass::class, 'weight_class_id');
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
+}

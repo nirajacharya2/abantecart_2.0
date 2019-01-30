@@ -1,0 +1,76 @@
+<?php
+
+namespace abc\models\user;
+
+use abc\models\BaseModel;
+use abc\models\base\Store;
+use abc\core\lib\AException;
+
+/**
+ * Class AcUserNotification
+ *
+ * @property int                 $user_id
+ * @property int                 $store_id
+ * @property bool                $section
+ * @property string              $sendpoint
+ * @property string              $protocol
+ * @property string              $uri
+ * @property \Carbon\Carbon      $date_added
+ * @property \Carbon\Carbon      $date_modified
+ *
+ * @property \abc\models\User  $user
+ * @property Store $store
+ *
+ * @package abc\models
+ */
+class UserNotification extends BaseModel
+{
+    public $incrementing = false;
+    public $timestamps = false;
+
+    protected $casts = [
+        'user_id'  => 'int',
+        'store_id' => 'int',
+        'section'  => 'bool',
+    ];
+
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
+    protected $fillable = [
+        'uri',
+        'date_added',
+        'date_modified',
+    ];
+
+    /**
+     * UserNotification constructor.
+     *
+     * @param array $attributes
+     */
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes = []);
+        if (!$this->isUser()) {
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access ' . __CLASS__);
+        }
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+}

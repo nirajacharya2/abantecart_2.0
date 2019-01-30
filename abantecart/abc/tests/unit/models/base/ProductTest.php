@@ -19,7 +19,7 @@
 namespace abc\tests\unit\models;
 
 use abc\core\lib\ADB;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
 
 /**
@@ -65,7 +65,7 @@ class testProductModel extends ATestCase
 
             //check result
             $updated_products_count = $this->db->table('products')->where('price', '=', $data['price'])->count();
-            $this->assertEquals(1, $updated_products_count);
+            $this->assertEquals(2, $updated_products_count);
         }else{
             $this->assertEquals(0, 0);
         }

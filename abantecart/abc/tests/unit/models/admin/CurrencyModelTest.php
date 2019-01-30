@@ -18,7 +18,7 @@
 
 namespace unit\models\admin;
 
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use abc\tests\unit\ATestCase;
 
 class CurrencyModelTest extends ATestCase

@@ -18,7 +18,7 @@
 
 namespace abc\tests\unit\models\admin;
 
-use abc\models\admin\Product;
+use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
 use PHPUnit\Framework\Warning;
 
@@ -120,11 +120,10 @@ class ProductModelTest extends ATestCase
                     'meta_keywords'    => '',
                     'meta_description' => '',
                     'language_id'      => 1,
-                    'product_category'    =>
-                        [
-                            0 => '40',
-                            0 => '41',
-                        ],
+                ],
+            'product_category'    =>
+                [
+                    0 => '40',
                 ],
         ];
         try {
@@ -151,7 +150,7 @@ class ProductModelTest extends ATestCase
     public function testDeleteProduct(int $productId)
     {
         try {
-        //    $result = Product::destroy($productId);
+            $result = Product::destroy($productId);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
             $result = false;
@@ -163,7 +162,7 @@ class ProductModelTest extends ATestCase
             $result = false;
         }
 
-        //$this->assertEquals(0, $result);
+        $this->assertEquals(0, $result);
     }
 
 }
