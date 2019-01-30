@@ -25,7 +25,7 @@ use abc\core\lib\AConfigManager;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {

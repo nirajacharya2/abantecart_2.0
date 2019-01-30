@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\system\Store;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;

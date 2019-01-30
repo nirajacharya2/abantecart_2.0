@@ -62,6 +62,45 @@ class Currency extends BaseModel
 
 
     /**
+     * Return array with list of Currencies
+     *
+     * @return array
+     */
+    public function getCurrencies(): array
+    {
+        if (!$this->hasPermission('read')) {
+            return false;
+        }
+        $currency_data = false;
+        //$currency_data = $this->cache->pull('localization.currency');
+
+        if ($currency_data === false) {
+
+            $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
+
+            foreach ($arCurrencies as $result) {
+                $currency_data[$result['code']] = array(
+                    'currency_id'   => $result['currency_id'],
+                    'title'         => $result['title'],
+                    'code'          => $result['code'],
+                    'symbol_left'   => $result['symbol_left'],
+                    'symbol_right'  => $result['symbol_right'],
+                    'decimal_place' => $result['decimal_place'],
+                    'value'         => $result['value'],
+                    'status'        => $result['status'],
+                    'date_modified' => $result['date_modified']
+                );
+            }
+
+            $this->cache->push('localization.currency', $currency_data);
+        }
+
+        return $currency_data;
+    }
+
+
+
+    /**
      * @param       $operation
      *
      * @param array $columns

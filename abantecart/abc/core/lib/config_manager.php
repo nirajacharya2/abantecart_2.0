@@ -24,7 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AForm;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use H;
 
 /**

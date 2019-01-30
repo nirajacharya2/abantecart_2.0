@@ -21,7 +21,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\models\admin\Currency;
+use abc\models\locale\Currency;
 use H;
 
 class ControllerPagesIndexHome extends AController

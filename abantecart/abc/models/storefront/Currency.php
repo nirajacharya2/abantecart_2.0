@@ -18,7 +18,7 @@
 
 namespace abc\models\storefront;
 
-class Currency extends \abc\models\base\Currency
+class Currency extends \abc\models\locale\Currency
 {
     /**
      * @param $operation
