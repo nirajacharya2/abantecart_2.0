@@ -1,10 +1,10 @@
 <?php
 
-use abc\models\base\Currency;
-use abc\models\admin\User;
-use abc\models\base\Customer;
-use abc\models\base\Product;
-use abc\models\base\ProductDescription;
+use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
+use abc\models\customer\Customer;
+use abc\models\locale\Currency;
+use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
 
 return [
