@@ -1,16 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: denis
- * Date: 15/01/2019
- * Time: 16:36
- */
 
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
-use abc\models\base\Audit;
+use abc\models\system\Audit;
 
 class ControllerResponsesToolAuditAjax extends AController
 {

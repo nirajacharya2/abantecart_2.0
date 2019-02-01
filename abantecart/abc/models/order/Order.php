@@ -3,6 +3,10 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\customer\Customer;
+use abc\models\locale\Currency;
+use abc\models\locale\Language;
+use abc\models\system\Store;
 
 /**
  * Class Order

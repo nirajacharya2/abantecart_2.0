@@ -22,8 +22,8 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
-use abc\models\base\Address;
+
+use abc\models\customer\Address;
 use abc\models\storefront\ModelCheckoutExtension;
 use abc\models\storefront\ModelCheckoutOrder;
 use abc\modules\events\ABaseEvent;
@@ -282,7 +282,7 @@ class CheckoutBase extends ALibBase
                 ];
 
                 $icon = $shippingSettings[$ext_txt_id."_shipping_storefront_icon"];
-                if (AHelperUtils::has_value($icon)) {
+                if (H::has_value($icon)) {
                     $icon_data = $modelCheckoutExtension->getSettingImage($icon);
                     $icon_data['image'] = $icon;
                     $output[$ext_txt_id]['icon'] = $icon_data;

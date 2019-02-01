@@ -3,11 +3,12 @@
 namespace abc\models\user;
 
 use abc\models\BaseModel;
-use abc\models\base\Store;
+
 use abc\core\lib\AException;
+use abc\models\system\Store;
 
 /**
- * Class AcUserNotification
+ * Class UserNotification
  *
  * @property int                 $user_id
  * @property int                 $store_id
@@ -18,7 +19,7 @@ use abc\core\lib\AException;
  * @property \Carbon\Carbon      $date_added
  * @property \Carbon\Carbon      $date_modified
  *
- * @property \abc\models\User  $user
+ * @property User  $user
  * @property Store $store
  *
  * @package abc\models
@@ -49,6 +50,8 @@ class UserNotification extends BaseModel
      * UserNotification constructor.
      *
      * @param array $attributes
+     *
+     * @throws AException
      */
     public function __construct(array $attributes = [])
     {

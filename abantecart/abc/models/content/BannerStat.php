@@ -2,8 +2,8 @@
 
 namespace abc\models\content;
 
-use abc\models\base\Banner;
 use abc\models\BaseModel;
+use abc\models\layout\Banner;
 
 /**
  * Class BannerStat
@@ -15,7 +15,7 @@ use abc\models\BaseModel;
  * @property int                  $store_id
  * @property string               $user_info
  *
- * @property \abc\models\base\Banner $banner
+ * @property Banner $banner
  *
  * @package abc\models
  */

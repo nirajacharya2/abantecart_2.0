@@ -20,7 +20,7 @@ namespace abc\models\customer;
 
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
-use abc\models\admin\User;
+use abc\models\user\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CustomerCommunication extends BaseModel
@@ -92,6 +92,15 @@ class CustomerCommunication extends BaseModel
             $communication->save();
     }
 
+    /**
+     * @param $customer_id
+     * @param $to
+     * @param $message
+     * @param int $user_id
+     * @param string $protocol
+     *
+     * @throws \Exception
+     */
     public static function createCustomerCommunicationIm($customer_id, $to, $message, $user_id=0, $protocol='sms'){
             $communication = new CustomerCommunication();
             $communication->subject = 'IM message';

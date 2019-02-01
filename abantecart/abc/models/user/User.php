@@ -3,7 +3,7 @@
 namespace abc\models\user;
 
 use abc\models\BaseModel;
-use abc\models\base\Audit;
+use abc\models\system\Audit;
 use abc\core\lib\AException;
 
 /**
@@ -67,6 +67,8 @@ class User extends BaseModel
      * User constructor.
      *
      * @param array $attributes
+     *
+     * @throws AException
      */
     public function __construct(array $attributes = [])
     {

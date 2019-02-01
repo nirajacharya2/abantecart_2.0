@@ -2,8 +2,6 @@
 
 namespace abc\models\system;
 
-use abc\models\admin\User;
-use abc\models\base\Customer;
 use abc\models\BaseModel;
 
 /**

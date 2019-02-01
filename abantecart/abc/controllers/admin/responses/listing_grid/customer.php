@@ -27,7 +27,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
-use abc\models\admin\User;
+use abc\models\user\User;
 use H;
 use stdClass;
 

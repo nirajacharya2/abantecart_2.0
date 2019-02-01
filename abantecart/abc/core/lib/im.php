@@ -21,14 +21,10 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-use abc\models\base\CustomerCommunication;
+use abc\models\customer\CustomerCommunication;
 use Exception;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AIM for Instant Messages
@@ -49,59 +45,62 @@ if (!class_exists('abc\core\ABC')) {
 class AIM
 {
     protected $registry;
-    protected $protocols = array('email', 'sms');
+    protected $protocols = ['email', 'sms'];
     /**
      * @var array for StoreFront side ONLY!
      * NOTE:
      * each key of array is text_id of sendpoint.
      * To get sendpoint title needs to request language definition in format im_sendpoint_name_{sendpoint_text_id}
      * All sendpoint titles must to be saved in common/im language block for both sides! (admin + storefront)
-     * Values of array is language definitions key that stores in the same block. This values can have %s that will be replaced by sendpoint text variables.
-     * for ex. message have url to product page. Text will have #storefront#rt=product/product&product_id=%s and customer will receive full url to product.
+     * Values of array is language definitions key that stores in the same block. 
+     *          This values can have %s that will be replaced by sendpoint text variables.
+     * for ex. message have url to product page. 
+     *          Text will have #storefront#rt=product/product&product_id=%s 
+     *          and customer will receive full url to product.
      * Some sendpoints have few text variables, for ex. order status and order status name
      * For additional sendpoints ( from extensions) you can store language keys wherever you want.
      */
-    public $sendpoints = array(
+    public $sendpoints = [
         // 0 - storefront (customer) and 1 - Admin (user)
-        'newsletter'              => array(
-            0 => array('text_key' => 'im_newsletter_text_to_customer'),
-            1 => array(),
-        ),
-        'product_review'          => array(
-            0 => array(),
-            1 => array('text_key' => 'im_product_review_text_to_admin'),
-        ),
-        'product_out_of_stock'    => array(
-            0 => array(),
-            1 => array('text_key' => 'im_product_out_of_stock_admin_text'),
-        ),
-        'order_update'            => array(
-            0 => array('text_key' => 'im_order_update_text_to_customer', 'force_send' => array('email')),
-            1 => array('text_key' => 'im_order_update_text_to_admin'),
-        ),
-        'new_order'               => array(
-            0 => array(),
-            1 => array('text_key' => 'im_new_order_text_to_admin'),
-        ),
-        'new_customer'            => array(
-            0 => array(),
-            1 => array('text_key' => 'im_new_customer_admin_text'),
-        ),
-        'customer_account_update' => array(
-            0 => array('text_key' => 'im_customer_account_update_text_to_customer', 'force_send' => array('email')),
-            1 => array(),
-        ),
-        'customer_contact'        => array(
-            0 => array(),
-            1 => array('text_key' => 'im_customer_contact_admin_text'),
-        ),
+        'newsletter'              => [
+            0 => ['text_key' => 'im_newsletter_text_to_customer'],
+            1 => [],
+        ],
+        'product_review'          => [
+            0 => [],
+            1 => ['text_key' => 'im_product_review_text_to_admin'],
+        ],
+        'product_out_of_stock'    => [
+            0 => [],
+            1 => ['text_key' => 'im_product_out_of_stock_admin_text'],
+        ],
+        'order_update'            => [
+            0 => ['text_key' => 'im_order_update_text_to_customer', 'force_send' => ['email']],
+            1 => ['text_key' => 'im_order_update_text_to_admin'],
+        ],
+        'new_order'               => [
+            0 => [],
+            1 => ['text_key' => 'im_new_order_text_to_admin'],
+        ],
+        'new_customer'            => [
+            0 => [],
+            1 => ['text_key' => 'im_new_customer_admin_text'],
+        ],
+        'customer_account_update' => [
+            0 => ['text_key' => 'im_customer_account_update_text_to_customer', 'force_send' => ['email']],
+            1 => [],
+        ],
+        'customer_contact'        => [
+            0 => [],
+            1 => ['text_key' => 'im_customer_contact_admin_text'],
+        ],
         /* TODO: Need to decide how to handle system messages in respect to IM
         'system_messages' => array (
                         0 => '',
                         1 => array('text_key' => 'im_system_messages_admin_text'),
                     ),
         */
-    );
+    ];
 
     public function __construct()
     {
@@ -162,10 +161,10 @@ class AIM
      */
     public function getActiveProtocols($section)
     {
-        if (!in_array($section, array('storefront', 'admin'))) {
-            return array();
+        if (!in_array($section, ['storefront', 'admin'])) {
+            return [];
         }
-        $protocols = array();
+        $protocols = [];
         foreach ($this->protocols as $protocol) {
             if ($this->config->get('config_'.$section.'_'.$protocol.'_status')) {
                 $protocols[$protocol] = $protocol;
@@ -180,23 +179,24 @@ class AIM
      * @param array $filter_arr
      *
      * @return array
+     * @throws Exception
      */
-    public function getIMDriverObjects($filter_arr = array('status' => 1))
+    public function getIMDriverObjects($filter_arr = ['status' => 1])
     {
-        $filter = array(
+        $filter = [
             'category' => 'Communication',
-        );
+        ];
         //returns all drivers for admin side settings page
-        if (AHelperUtils::has_value($filter_arr['status'])) {
+        if (H::has_value($filter_arr['status'])) {
             $filter['status'] = (int)$filter_arr['status'];
         }
 
 
         $extensions = $this->extensions->getExtensionsList($filter);
-        $driver_list = array('email' => new AMailIM());
+        $driver_list = ['email' => new AMailIM()];
 
 
-        $active_drivers = array();
+        $active_drivers = [];
 
         if ($filter_arr['status']) {
             foreach ($this->protocols as $protocol) {
@@ -213,7 +213,7 @@ class AIM
             $driver_txt_id = $ext['key'];
 
             //skip non-installed
-            if (!AHelperUtils::has_value($this->config->get($driver_txt_id.'_status'))) {
+            if (!H::has_value($this->config->get($driver_txt_id.'_status'))) {
                 continue;
             }
 
@@ -245,9 +245,10 @@ class AIM
 
     /**
      * @param string $name
-     * @param array  $data_array
+     * @param array $data_array
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function addSendPoint($name, $data_array)
     {
@@ -263,7 +264,7 @@ class AIM
 
     /**
      * @param string $sendpoint
-     * @param array  $msg_details
+     * @param array $msg_details
      *
      * @return null
      *
@@ -278,11 +279,13 @@ class AIM
      * );
      * 0 - storefront (customer) and 1 - Admin (user)
      * notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
+     * @throws AException
+     * @throws \ReflectionException
      */
-    public function send($sendpoint, $msg_details = array())
+    public function send($sendpoint, $msg_details = [])
     {
         $this->load->language('common/im');
-        $customer_im_settings = array();
+        $customer_im_settings = [];
         if (!ABC::env('IS_ADMIN')) {
             $sendpoints_list = $this->sendpoints;
             //do have storefront sendpoint?
@@ -294,7 +297,7 @@ class AIM
         } else {
             $sendpoints_list = $this->admin_sendpoints;
             //this method forbid sending notifications to customers from admin-side
-            $customer_im_settings = array();
+            $customer_im_settings = [];
         }
         //check sendpoint
         if (!in_array($sendpoint, array_keys($sendpoints_list))) {
@@ -376,7 +379,7 @@ class AIM
                 //send notification to customer, check if selected or forced
                 $force_arr = $sendpoint_data[0]['force_send'];
                 $forced = false;
-                if (AHelperUtils::has_value($force_arr) && in_array($protocol, $force_arr)) {
+                if (H::has_value($force_arr) && in_array($protocol, $force_arr)) {
                     $forced = true;
                 }
                 if ($customer_im_settings[$sendpoint][$protocol] || $forced) {
@@ -396,7 +399,12 @@ class AIM
                                 $driver->send($to, $store_name.$message);
                                 if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
                                     if ($protocol != 'email') {
-                                        CustomerCommunication::createCustomerCommunicationIm($this->customer->getId(), $to,$store_name.$message, $protocol);
+                                        CustomerCommunication::createCustomerCommunicationIm(
+                                            $this->customer->getId(),
+                                            $to,
+                                            $store_name.$message,
+                                            $protocol
+                                        );
                                     }
                             } catch (Exception $e) {
                             }
@@ -434,7 +442,7 @@ class AIM
 
     private function getCustomerNotificationSettings()
     {
-        $settings = array();
+        $settings = [];
         $protocols = $this->protocols;
         //TODO: in the future should to create separate configurable sendpoints list for guests
         $sendpoints = $this->sendpoints;
@@ -463,16 +471,16 @@ class AIM
         }//for guests after order placement
         elseif ($this->session->data['order_id']) {
 
-            $p = array();
+            $p = [];
             foreach ($protocols as $protocol) {
                 $p[] = $this->db->escape($protocol);
             }
 
             $sql = "SELECT DISTINCT odt.`type_id`, odt.`name` as protocol, od.data
-					FROM ".$this->db->table_name('order_data_types')." odt
-					LEFT JOIN ".$this->db->table_name('order_data')." od
-						ON (od.type_id = odt.type_id AND od.order_id = '".(int)$this->session->data['order_id']."')
-					WHERE odt.`name` IN ('".implode("', '", $p)."')";
+                    FROM ".$this->db->table_name('order_data_types')." odt
+                    LEFT JOIN ".$this->db->table_name('order_data')." od
+                        ON (od.type_id = odt.type_id AND od.order_id = '".(int)$this->session->data['order_id']."')
+                    WHERE odt.`name` IN ('".implode("', '", $p)."')";
             $result = $this->db->query($sql);
 
             if ($result->rows) {
@@ -502,10 +510,11 @@ class AIM
 
     /**
      * @param string $protocol
-     * @param int    $customer_id
-     * @param int    $order_id -  to get uri from guest checkout order data
+     * @param int $customer_id
+     * @param int $order_id -  to get uri from guest checkout order data
      *
      * @return string
+     * @throws Exception
      */
     public function getCustomerURI($protocol, $customer_id = 0, $order_id = 0)
     {
@@ -515,19 +524,19 @@ class AIM
         //for registered customers - get address from database
         if ($customer_id && !$order_id) {
             $sql = "SELECT *
-					FROM ".$this->db->table_name('customers')."
-					WHERE customer_id=".$customer_id;
+                    FROM ".$this->db->table_name('customers')."
+                    WHERE customer_id=".$customer_id;
             $customer_info = $this->db->query($sql, true);
             return $customer_info->row[$protocol];
         } elseif ($order_id) {
             //if guests - get im-data from order_data tables
 
             $sql = "SELECT *
-					FROM ".$this->db->table_name('order_data')." od
-					WHERE `type_id` in ( SELECT DISTINCT type_id
-										 FROM ".$this->db->table_name('order_data_types')."
-										 WHERE `name`='".$this->db->escape($protocol)."' )
-						AND order_id = '".$order_id."'";
+                    FROM ".$this->db->table_name('order_data')." od
+                    WHERE `type_id` in ( SELECT DISTINCT type_id
+                                         FROM ".$this->db->table_name('order_data_types')."
+                                         WHERE `name`='".$this->db->escape($protocol)."' )
+                        AND order_id = '".$order_id."'";
             $result = $this->db->query($sql);
 
             if ($result->row['data']) {
@@ -548,15 +557,15 @@ class AIM
     private function _get_admin_im_uri($sendpoint, $protocol)
     {
         $section = ABC::env('IS_ADMIN') ? 1 : 0;
-        $output = array();
+        $output = [];
         $sql = "SELECT un.*
-				FROM ".$this->db->table_name('user_notifications')." un
-				INNER JOIN ".$this->db->table_name('users')." u
-									ON (u.user_id = un.user_id AND u.status = 1)
-				WHERE un.protocol='".$this->db->escape($protocol)."'
-					AND un.sendpoint = '".$this->db->escape($sendpoint)."'
-					AND un.section = '".$section."'
-					AND un.store_id = '".(int)$this->config->get('config_store_id')."'";
+                FROM ".$this->db->table_name('user_notifications')." un
+                INNER JOIN ".$this->db->table_name('users')." u
+                                    ON (u.user_id = un.user_id AND u.status = 1)
+                WHERE un.protocol='".$this->db->escape($protocol)."'
+                    AND un.sendpoint = '".$this->db->escape($sendpoint)."'
+                    AND un.section = '".$section."'
+                    AND un.store_id = '".(int)$this->config->get('config_store_id')."'";
         $result = $this->db->query($sql);
         foreach ($result->rows as $row) {
             $uri = trim($row['uri']);
@@ -573,7 +582,7 @@ class AIM
 //email driver for notification class use
 final class AMailIM
 {
-    public $errors = array();
+    public $errors = [];
     private $registry;
     private $config;
     private $language;
@@ -638,7 +647,7 @@ final class AMailIM
     public function validateURI($emails)
     {
         $this->load->language('common/im');
-        $this->errors = array();
+        $this->errors = [];
         $emails = explode(',', $emails);
         foreach ($emails as $email) {
             $email = trim($email);

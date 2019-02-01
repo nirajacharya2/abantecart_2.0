@@ -21,7 +21,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\models\admin\ModelCatalogCategory;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 

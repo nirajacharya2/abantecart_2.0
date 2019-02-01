@@ -24,7 +24,7 @@ use abc\core\engine\AForm;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
-use abc\models\admin\Product;
+use abc\models\catalog\Product;
 use H;
 
 /**

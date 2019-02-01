@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use abc\models\order\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use abc\core\lib\AConnect;
 use abc\core\lib\AError;

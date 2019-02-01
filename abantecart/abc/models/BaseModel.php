@@ -36,6 +36,7 @@ use ReflectionMethod;
  *
  * @package abc\models
  * @method Builder find(integer $id, array $columns = ['*'])
+ * @method Builder count()
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  */
 class BaseModel extends OrmModel

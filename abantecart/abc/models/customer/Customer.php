@@ -3,7 +3,9 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
-use abc\models\base\Audit;
+use abc\models\order\Order;
+use abc\models\system\Audit;
+use abc\models\system\Store;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
