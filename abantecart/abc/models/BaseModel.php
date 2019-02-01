@@ -42,7 +42,8 @@ class BaseModel extends OrmModel
 {
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
-    //const DELETED_AT = 'date_deleted';
+    const DELETED_AT = 'date_deleted';
+
     const CLI = 0;
     const USER = 1;
     const CUSTOMER = 2;
@@ -119,6 +120,7 @@ class BaseModel extends OrmModel
      *
      * @var array can be 'saving', 'saved', 'deleting', 'deleted'
      * @see full list on https://laravel.com/docs/5.6/eloquent#events
+     * @note retrieved event does not supports in AuditLog Listener!
      */
     public static $auditEvents = [
         //after inserts! Need to know autoincrement value
@@ -136,6 +138,7 @@ class BaseModel extends OrmModel
      */
     public static $auditExcludes = ['date_added', 'date_modified'];
 
+
     /**
      * @param array $attributes
      */
@@ -152,8 +155,12 @@ class BaseModel extends OrmModel
         if (strpos($called_class, 'abc\models\admin') > -1 && $this->actor['user_type'] == 2) {
             return false;
         }
-        if(static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])){
-            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
+
+        //if model supports soft delete
+        if(method_exists($this, 'forceDelete')) {
+            if (static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])) {
+                $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
+            }
         }
     }
 
@@ -162,7 +169,6 @@ class BaseModel extends OrmModel
      */
     public static function boot()
     {
-        parent::$dispatcher = Registry::getInstance()->get('model_events');
         static::$env = ABC::env('MODEL');
         Relation::morphMap(static::$env['MORPH_MAP']);
         parent::boot();

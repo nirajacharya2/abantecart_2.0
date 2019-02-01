@@ -481,16 +481,7 @@ if(is_object($evd)) {
     $registry->set('events', $evd);
 }
 
-//register ORM-model event listeners
-$evd = ABC::getObjectByAlias('EventDispatcher');
-if(is_object($evd)) {
-    foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
-        foreach ($listeners as $listener) {
-            $evd->listen($event_alias, $listener);
-        }
-    }
-    $registry->set('model_events', $evd);
-}
+
 
 //register ABAC
 /**
