@@ -92,6 +92,8 @@ ABC::env(
     ]
 );
 
+
+
 //load vendors classes
 require ABC::env('DIR_VENDOR').'autoload.php';
 
@@ -222,8 +224,6 @@ ABC::env(
         'DIRNAME_TEMPLATES'   => 'templates'.DS,
         'DIRNAME_TEMPLATE'    => 'template'.DS,
         'DIRNAME_VENDOR'      => 'vendor'.DS,
-
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
         'DIR_ASSETS_EXT'     => $dir_public.'extensions'.DS,
     ]
 );
