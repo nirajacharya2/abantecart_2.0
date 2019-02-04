@@ -227,7 +227,6 @@ class BaseModel extends OrmModel
      */
     public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-
         if( $columns[0] == '*' ){
             $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
         }else{

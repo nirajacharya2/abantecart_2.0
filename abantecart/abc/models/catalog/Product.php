@@ -76,14 +76,17 @@ class Product extends BaseModel
      */
     protected $policyGroup  = 'product';
     protected $policyObject = 'product';
+
     /**
      * @var string
      */
     protected $primaryKey = 'product_id';
+
     /**
      * @var bool
      */
     public $timestamps = false;
+
     /**
      * @var array
      */
