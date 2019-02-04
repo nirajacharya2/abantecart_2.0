@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\tests\unit\models;
+namespace abc\tests\unit\models\storefront;
 
 use abc\core\lib\ADB;
 use abc\models\base\CustomerCommunication;
