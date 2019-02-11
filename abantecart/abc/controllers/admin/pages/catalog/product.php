@@ -25,6 +25,8 @@ use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
 use abc\models\admin\Product;
+use abc\models\catalog\ObjectType;
+use abc\models\catalog\ProductType;
 use H;
 
 /**
@@ -426,6 +428,8 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
+        $this->loadLanguage('catalog/product_type');
+
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
@@ -498,7 +502,19 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['length_classes'][$r['length_class_id']] = $r['title'];
         }
 
+        $productTypes = ObjectType::where('object_type', 'Product')
+            ->with('description')
+            ->where('status',1)
+            ->get()
+            ->toArray();
+
+        $this->data['product_types'][] = $this->language->get('text_select');
+        foreach ($productTypes as $productType) {
+            $this->data['product_types'][$productType['object_type_id']] = $productType['description']['name'];
+        }
+
         $fields = [
+            'product_type',
             'product_category',
             'featured',
             'product_store',
@@ -704,6 +720,16 @@ class ControllerPagesCatalogProduct extends AController
             'name'  => 'featured',
             'value' => $this->data['featured'],
             'style' => 'btn_switch btn-group-sm',
+        ]);
+
+        $this->data['form']['fields']['general']['product_type'] = $form->getFieldHtml([
+            'type'        => 'selectbox',
+            'name'        => 'product_type',
+            'value'       => $this->data['product_type'],
+            'options'     => $this->data['product_types'],
+            'placeholder' => $this->language->get('entry_product_type'),
+            'required'     => true,
+            'attr'    => !empty($this->data['product_type']) ? 'disabled=disabled' : '',
         ]);
 
         $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([

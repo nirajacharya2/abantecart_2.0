@@ -24,6 +24,7 @@ use abc\core\lib\Abac;
 use H;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
+use abc\models\QueryBuilder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
@@ -148,10 +149,8 @@ class BaseModel extends OrmModel
         $this->db = $this->registry->get('db');
         parent::__construct($attributes);
         static::boot();
+        $this->newBaseQueryBuilder();
         $called_class = $this->getClass();
-        if (strpos($called_class, 'abc\models\admin') > -1 && $this->actor['user_type'] == 2) {
-            return false;
-        }
         if(static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])){
             $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
         }
@@ -525,39 +524,13 @@ class BaseModel extends OrmModel
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
-    public function setGridRequest($data = [])
+    protected function newBaseQueryBuilder()
     {
-        $query = BaseModel::newModelQuery();
+        $connection = $this->getConnection();
 
-        $sort_data = $this->getTableColumns();
-
-        $sort_order = 'ASC';
-        if (isset($data['order']) && ($data['order'] == 'DESC')) {
-            $sort_order = 'DESC';
-        }
-
-        if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-            $query = $query->orderBy($data['sort'], $sort_order);
-        } else {
-            $query = $query->orderBy('title', $sort_order);
-        }
-
-        if (isset($data['start']) || isset($data['limit'])) {
-            if ($data['start'] < 0) {
-                $data['start'] = 0;
-            }
-
-            if ($data['limit'] < 1) {
-                $data['limit'] = 20;
-            }
-
-            $query = $query->offset((int)$data['start'])
-                ->limit((int)$data['limit']);
-        }
-
-        $query = $query->whereNull('date_deleted');
-
-        return $query;
+        return new QueryBuilder(
+            $connection, $connection->getQueryGrammar(), $connection->getPostProcessor()
+        );
     }
 
 }
