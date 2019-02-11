@@ -3,6 +3,8 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use abc\models\locale\Location;
+use abc\models\locale\Zone;
 
 /**
  * Class TaxRate

@@ -3,6 +3,7 @@
 namespace abc\models\content;
 
 use abc\models\BaseModel;
+use abc\models\system\Store;
 
 /**
  * Class ContentsToStore

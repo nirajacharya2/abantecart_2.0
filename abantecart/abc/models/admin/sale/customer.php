@@ -25,6 +25,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\Model;
 use abc\core\lib\AMail;
 use abc\core\view\AView;
+use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
 use H;
 

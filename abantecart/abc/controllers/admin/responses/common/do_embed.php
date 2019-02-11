@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,437 +17,456 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
+use abc\models\locale\Currency;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesCommonDoEmbed extends AController {
-	public $data = array();
-	public function main() {}
+class ControllerResponsesCommonDoEmbed extends AController
+{
+    public $data = [];
 
-	public function product() {
-		if(!AHelperUtils::has_value($this->request->get['product_id'])){
-			return null;
-		}
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+    public function main()
+    {
+    }
 
-		$form = new AForm('ST');
-		$form->setForm(array(
-					'form_name' => 'getEmbedFrm',
-				));
-		$this->data['form']['form_open'] = $form->getFieldHtml(array(
-					'type' => 'form',
-					'name' => 'getEmbedFrm',
-					'attr' => 'class="aform form-horizontal"',
-				));
+    public function product()
+    {
+        if (!H::has_value($this->request->get['product_id'])) {
+            return null;
+        }
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'image',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'name',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'blurb',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'price',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'rating',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'quantity',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'addtocart',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
+        $form = new AForm('ST');
+        $form->setForm([
+            'form_name' => 'getEmbedFrm',
+        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml([
+            'type' => 'form',
+            'name' => 'getEmbedFrm',
+            'attr' => 'class="aform form-horizontal"',
+        ]);
 
-		$results = $this->language->getAvailableLanguages();
-		$languages = $language_codes = array();
-		foreach ($results as $v) {
-			$languages[$v['code']] = $v['name'];
-			$lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
-			$language_codes[$lng_code] = $v['name'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'language',
-						'value' => $this->config->get('config_storefront_language'),
-						'options' => $language_codes,
-		));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'image',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'name',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'blurb',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'price',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'rating',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'quantity',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'addtocart',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
 
-		$this->load->model('localisation/currency');
-		$results = Currency::all()->toArray();
-		$currencies = array();
-		foreach ($results as $v) {
-			$currencies[$v['code']] = $v['title'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'currency',
-						'value' => $this->config->get('config_currency'),
-						'options' => $currencies,
-		));
+        $results = $this->language->getAvailableLanguages();
+        $languages = $language_codes = [];
+        foreach ($results as $v) {
+            $languages[$v['code']] = $v['name'];
+            $lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
+            $language_codes[$lng_code] = $v['name'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'language',
+            'value'   => $this->config->get('config_storefront_language'),
+            'options' => $language_codes,
+        ]);
 
-		$this->data['text_area'] = $form->getFieldHtml(array(
-						'type'  => 'textarea',
-						'name'  => 'code_area',
-						'attr' => 'rows="10"',
-						'style' => 'ml_field',
-		));
+        $this->load->model('localisation/currency');
+        $results = Currency::all()->toArray();
+        $currencies = [];
+        foreach ($results as $v) {
+            $currencies[$v['code']] = $v['title'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'currency',
+            'value'   => $this->config->get('config_currency'),
+            'options' => $currencies,
+        ]);
 
-		$this->loadModel('catalog/product');
-		$this->loadModel('setting/store');
-		//if loaded not default store - hide store switcher
-		$current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
-		$remote_store_url = $current_store_settings['config_url'];
-		$product_id = $this->request->get['product_id'];
-		$this->data['product_id'] = $product_id;
+        $this->data['text_area'] = $form->getFieldHtml([
+            'type'  => 'textarea',
+            'name'  => 'code_area',
+            'attr'  => 'rows="10"',
+            'style' => 'ml_field',
+        ]);
 
-		$product_stores = $this->model_catalog_product->getProductStoresInfo( $product_id );
+        $this->loadModel('catalog/product');
+        $this->loadModel('setting/store');
+        //if loaded not default store - hide store switcher
+        $current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
+        $remote_store_url = $current_store_settings['config_url'];
+        $product_id = $this->request->get['product_id'];
+        $this->data['product_id'] = $product_id;
 
-		if(sizeof($product_stores) == 1){
-			$remote_store_url = $product_stores[0]['store_url'];
-		}
-		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
-		$this->data['sf_base_url'] = $remote_store_url;
-		$this->data['help_url'] = $this->gen_help_url('embed');
+        $product_stores = $this->model_catalog_product->getProductStoresInfo($product_id);
 
-		$template_name = $this->config->get('config_storefront_template');
-		$this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/default/css/embed.css';
-		//override css url for extension templates
-		if($template_name != 'default'){
-			$css_file = ABC::env('DIR_ROOT') . '/extensions/' . $template_name . '/storefront/view/' . $template_name . '/css/embed.css';
-			if (is_file($css_file)){
-				$this->data['sf_css_embed_url'] = $remote_store_url . 'extensions/' . $template_name . '/storefront/view/' . $template_name . '/css/embed.css';
-			}
-		}
+        if (sizeof($product_stores) == 1) {
+            $remote_store_url = $product_stores[0]['store_url'];
+        }
+        $remote_store_url = $this->prepareUrl($remote_store_url);
+        $this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
+        $this->data['sf_base_url'] = $remote_store_url;
+        $this->data['help_url'] = $this->gen_help_url('embed');
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
+        $template_name = $this->config->get('config_storefront_template');
+        $this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/default/css/embed.css';
+        //override css url for extension templates
+        if ($template_name != 'default') {
+            $css_file =
+                ABC::env('DIR_ROOT').'/extensions/'.$template_name.'/storefront/view/'.$template_name.'/css/embed.css';
+            if (is_file($css_file)) {
+                $this->data['sf_css_embed_url'] =
+                    $remote_store_url.'extensions/'.$template_name.'/storefront/view/'.$template_name.'/css/embed.css';
+            }
+        }
 
-		$this->loadlanguage('common/do_embed');
-		$this->view->batchAssign($this->language->getASet('common/do_embed'));
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('responses/embed/do_embed_product_modal.tpl');
-	}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-	public function categories() {
+        $this->loadlanguage('common/do_embed');
+        $this->view->batchAssign($this->language->getASet('common/do_embed'));
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('responses/embed/do_embed_product_modal.tpl');
+    }
 
-		//this var can be an array
-		$category_id = (array) $this->request->get['category_id'];
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+    public function categories()
+    {
 
-		$form = new AForm('ST');
-		$form->setForm(array(
-					'form_name' => 'getEmbedFrm',
-				));
-		$this->data['form']['form_open'] = $form->getFieldHtml(array(
-					'type' => 'form',
-					'name' => 'getEmbedFrm',
-					'attr' => 'class="aform form-horizontal"',
-				));
+        //this var can be an array
+        $category_id = (array)$this->request->get['category_id'];
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'image',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'name',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
+        $form = new AForm('ST');
+        $form->setForm([
+            'form_name' => 'getEmbedFrm',
+        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml([
+            'type' => 'form',
+            'name' => 'getEmbedFrm',
+            'attr' => 'class="aform form-horizontal"',
+        ]);
 
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'products_count',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'image',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'name',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
 
-		$results = $this->language->getAvailableLanguages();
-		$languages = $language_codes = array();
-		foreach ($results as $v) {
-			$languages[$v['code']] = $v['name'];
-			$lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
-			$language_codes[$lng_code] = $v['name'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'language',
-						'value' => $this->config->get('config_storefront_language'),
-						'options' => $language_codes,
-		));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'products_count',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
 
-		$this->load->model('localisation/currency');
-		$results = Currency::all()->toArray();
-		$currencies = array();
-		foreach ($results as $v) {
-			$currencies[$v['code']] = $v['title'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'currency',
-						'value' => $this->config->get('config_currency'),
-						'options' => $currencies,
-		));
+        $results = $this->language->getAvailableLanguages();
+        $languages = $language_codes = [];
+        foreach ($results as $v) {
+            $languages[$v['code']] = $v['name'];
+            $lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
+            $language_codes[$lng_code] = $v['name'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'language',
+            'value'   => $this->config->get('config_storefront_language'),
+            'options' => $language_codes,
+        ]);
 
-		$this->data['text_area'] = $form->getFieldHtml(array(
-						'type'  => 'textarea',
-						'name'  => 'code_area',
-						'attr' => 'rows="10"',
-						'style' => 'ml_field',
-		));
+        $this->load->model('localisation/currency');
+        $results = Currency::all()->toArray();
+        $currencies = [];
+        foreach ($results as $v) {
+            $currencies[$v['code']] = $v['title'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'currency',
+            'value'   => $this->config->get('config_currency'),
+            'options' => $currencies,
+        ]);
 
-		$this->loadModel('catalog/category');
-		$this->loadModel('setting/store');
-		//if loaded not default store - hide store switcher
-		$current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
-		$remote_store_url = $current_store_settings['config_url'];
+        $this->data['text_area'] = $form->getFieldHtml([
+            'type'  => 'textarea',
+            'name'  => 'code_area',
+            'attr'  => 'rows="10"',
+            'style' => 'ml_field',
+        ]);
 
-		$options = $subcategories = array();
-		//if embed for only one category
-		if( sizeof($category_id)==1 ){
-			$cat_id = current($category_id);
-			$category_info = $this->model_catalog_category->getCategory( $cat_id );
-			$category_stores = $this->model_catalog_category->getCategoryStoresInfo( $cat_id );
+        $this->loadModel('catalog/category');
+        $this->loadModel('setting/store');
+        //if loaded not default store - hide store switcher
+        $current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
+        $remote_store_url = $current_store_settings['config_url'];
 
-			if(sizeof($category_stores) == 1){
-				$remote_store_url = $category_stores[0]['store_url'];
-			}
-			$subcategories = $this->model_catalog_category->getCategories($cat_id);
-			if($category_info['parent_id']==0){
-				$options = $this->model_catalog_category->getCategories(0);
-			}else{
-				$cat_desc = $this->model_catalog_category->getCategoryDescriptions($cat_id);
-				$options = array(0 =>
-								array(  'category_id' => $cat_id,
-										'name'	=> $cat_desc[$this->language->getContentLanguageID()]['name']));
-			}
-		}else if(!sizeof($category_id)){
-			$options = $this->model_catalog_category->getCategoriesData(array('parent_id' => 0));
-			$category_id = array();
-			foreach($options as $c){
-				$category_id[] = $c['category_id'];
-			}
-		}else{
-			foreach($category_id as &$c){
-				$c = (int)$c;
-			}unset($c);
-			$subsql = ' c.category_id IN ('.implode(',',$category_id).') ';
-			$options = $this->model_catalog_category->getCategoriesData(array('subsql_filter' => $subsql));
-		}
+        $subcategories = [];
+        //if embed for only one category
+        if (sizeof($category_id) == 1) {
+            $cat_id = current($category_id);
+            $category_info = $this->model_catalog_category->getCategory($cat_id);
+            $category_stores = $this->model_catalog_category->getCategoryStoresInfo($cat_id);
 
-		if( $subcategories ){
-			$options = array_merge($options,$subcategories);
-		}
-		$opt = array();
-		foreach($options as $cat){
-			$opt[$cat['category_id']] = $cat['name'];
-		}
+            if (sizeof($category_stores) == 1) {
+                $remote_store_url = $category_stores[0]['store_url'];
+            }
+            $subcategories = $this->model_catalog_category->getCategories($cat_id);
+            if ($category_info['parent_id'] == 0) {
+                $options = $this->model_catalog_category->getCategories(0);
+            } else {
+                $cat_desc = $this->model_catalog_category->getCategoryDescriptions($cat_id);
+                $options = [
+                    0 =>
+                        [
+                            'category_id' => $cat_id,
+                            'name'        => $cat_desc[$this->language->getContentLanguageID()]['name'],
+                        ],
+                ];
+            }
+        } else {
+            if (!sizeof($category_id)) {
+                $options = $this->model_catalog_category->getCategoriesData(['parent_id' => 0]);
+                $category_id = [];
+                foreach ($options as $c) {
+                    $category_id[] = $c['category_id'];
+                }
+            } else {
+                foreach ($category_id as &$c) {
+                    $c = (int)$c;
+                }
+                unset($c);
+                $subsql = ' c.category_id IN ('.implode(',', $category_id).') ';
+                $options = $this->model_catalog_category->getCategoriesData(['subsql_filter' => $subsql]);
+            }
+        }
 
-		$this->data['fields'][] = $form->getFieldHtml(array (
-				'type'      => 'checkboxgroup',
-				'name'      => 'category_id[]',
-				'value'     => $category_id,
-				'options'   => $opt,
-				'scrollbox' => true,
-				'style'     => 'medium-field'
-		));
+        if ($subcategories) {
+            $options = array_merge($options, $subcategories);
+        }
+        $opt = [];
+        foreach ($options as $cat) {
+            $opt[$cat['category_id']] = $cat['name'];
+        }
 
-		$this->data['text_area'] = $form->getFieldHtml(array(
-						'type'  => 'textarea',
-						'name'  => 'code_area',
-						'attr' => 'rows="10"',
-						'style' => 'ml_field',
-		));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'      => 'checkboxgroup',
+            'name'      => 'category_id[]',
+            'value'     => $category_id,
+            'options'   => $opt,
+            'scrollbox' => true,
+            'style'     => 'medium-field',
+        ]);
 
-		$this->data['category_id'] = $this->request->get['category_id'];
+        $this->data['text_area'] = $form->getFieldHtml([
+            'type'  => 'textarea',
+            'name'  => 'code_area',
+            'attr'  => 'rows="10"',
+            'style' => 'ml_field',
+        ]);
 
-		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
-		$this->data['sf_base_url'] = $remote_store_url;
-		$this->data['help_url'] = $this->gen_help_url('embed');
+        $this->data['category_id'] = $this->request->get['category_id'];
 
+        $remote_store_url = $this->prepareUrl($remote_store_url);
+        $this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
+        $this->data['sf_base_url'] = $remote_store_url;
+        $this->data['help_url'] = $this->gen_help_url('embed');
 
-		$this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/' . $this->config->get('config_storefront_template').'/css/embed.css';
+        $this->data['sf_css_embed_url'] =
+            $remote_store_url.'storefront/view/'.$this->config->get('config_storefront_template').'/css/embed.css';
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$this->loadlanguage('common/do_embed');
-		$this->view->batchAssign($this->language->getASet('common/do_embed'));
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('responses/embed/do_embed_category_modal.tpl');
-	}
+        $this->loadlanguage('common/do_embed');
+        $this->view->batchAssign($this->language->getASet('common/do_embed'));
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('responses/embed/do_embed_category_modal.tpl');
+    }
 
-	public function manufacturers() {
+    public function manufacturers()
+    {
+        //this var can be an array
+        $manufacturer_id = (array)$this->request->get['manufacturer_id'];
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//this var can be an array
-		$manufacturer_id = (array) $this->request->get['manufacturer_id'];
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+        $form = new AForm('ST');
+        $form->setForm([
+            'form_name' => 'getEmbedFrm',
+        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml([
+            'type' => 'form',
+            'name' => 'getEmbedFrm',
+            'attr' => 'class="aform form-horizontal col-sm-12"',
+        ]);
 
-		$form = new AForm('ST');
-		$form->setForm(array(
-					'form_name' => 'getEmbedFrm',
-				));
-		$this->data['form']['form_open'] = $form->getFieldHtml(array(
-					'type' => 'form',
-					'name' => 'getEmbedFrm',
-					'attr' => 'class="aform form-horizontal col-sm-12"',
-				));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'image',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'name',
+            'value' => 0,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
 
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'image',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'name',
-						'value' => 0,
-						'style' => 'btn_switch btn-group-xs',
-		));
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'  => 'checkbox',
+            'name'  => 'products_count',
+            'value' => 1,
+            'style' => 'btn_switch btn-group-xs',
+        ]);
 
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'checkbox',
-						'name'  => 'products_count',
-						'value' => 1,
-						'style' => 'btn_switch btn-group-xs',
-		));
+        $results = $this->language->getAvailableLanguages();
+        $languages = $language_codes = [];
+        foreach ($results as $v) {
+            $languages[$v['code']] = $v['name'];
+            $lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
+            $language_codes[$lng_code] = $v['name'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'language',
+            'value'   => $this->config->get('config_storefront_language'),
+            'options' => $language_codes,
+        ]);
 
-		$results = $this->language->getAvailableLanguages();
-		$languages = $language_codes = array();
-		foreach ($results as $v) {
-			$languages[$v['code']] = $v['name'];
-			$lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
-			$language_codes[$lng_code] = $v['name'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'language',
-						'value' => $this->config->get('config_storefront_language'),
-						'options' => $language_codes,
-		));
+        $this->load->model('localisation/currency');
+        $results = Currency::all()->toArray();
+        $currencies = [];
+        foreach ($results as $v) {
+            $currencies[$v['code']] = $v['title'];
+        }
+        $this->data['fields'][] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'currency',
+            'value'   => $this->config->get('config_currency'),
+            'options' => $currencies,
+        ]);
 
-		$this->load->model('localisation/currency');
-		$results = Currency::all()->toArray();
-		$currencies = array();
-		foreach ($results as $v) {
-			$currencies[$v['code']] = $v['title'];
-		}
-		$this->data['fields'][] = $form->getFieldHtml(array(
-						'type'  => 'selectbox',
-						'name'  => 'currency',
-						'value' => $this->config->get('config_currency'),
-						'options' => $currencies,
-		));
+        $this->loadModel('catalog/manufacturer');
+        $this->loadModel('setting/store');
+        //if loaded not default store - hide store switcher
+        $current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
+        $remote_store_url = $current_store_settings['config_url'];
 
-		$this->loadModel('catalog/manufacturer');
-		$this->loadModel('setting/store');
-		//if loaded not default store - hide store switcher
-		$current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
-		$remote_store_url = $current_store_settings['config_url'];
+        if (!sizeof($manufacturer_id)) {
+            return null;
+        } else {
+            foreach ($manufacturer_id as &$c) {
+                $c = (int)$c;
+            }
+            unset($c);
+            $subsql = ' m.manufacturer_id IN ('.implode(',', $manufacturer_id).') ';
+            $options = $this->model_catalog_manufacturer->getManufacturers(['subsql_filter' => $subsql]);
+        }
+        reset($manufacturer_id);
 
-		 if(!sizeof($manufacturer_id)){
-			return null;
-		}else{
-			foreach($manufacturer_id as &$c){
-				$c = (int)$c;
-			}unset($c);
-			$subsql = ' m.manufacturer_id IN ('.implode(',',$manufacturer_id).') ';
-			$options = $this->model_catalog_manufacturer->getManufacturers(array('subsql_filter' => $subsql));
-		}
-		reset($manufacturer_id);
+        $opt = [];
+        foreach ($options as $m) {
+            $opt[$m['manufacturer_id']] = $m['name'];
+        }
+        if (sizeof($manufacturer_id) > 1) {
+            $this->data['fields'][] = $form->getFieldHtml([
+                'type'      => 'checkboxgroup',
+                'name'      => 'manufacturer_id[]',
+                'value'     => $manufacturer_id,
+                'options'   => $opt,
+                'scrollbox' => true,
+                'style'     => 'medium-field',
+            ]);
+        } else {
 
-		$opt = array();
-		foreach($options as $m){
-			$opt[$m['manufacturer_id']] = $m['name'];
-		}
-		if(sizeof($manufacturer_id)>1){
-			$this->data['fields'][] = $form->getFieldHtml(array(
-					'type'      => 'checkboxgroup',
-					'name'      => 'manufacturer_id[]',
-					'value'     => $manufacturer_id,
-					'options'   => $opt,
-					'scrollbox' => true,
-					'style'     => 'medium-field'
-			));
-		}else{
+            $this->data['fields'][] = $form->getFieldHtml([
+                'type'  => 'hidden',
+                'name'  => 'manufacturer_id[]',
+                'value' => current($manufacturer_id),
+            ]);
 
-			$this->data['fields'][] = $form->getFieldHtml(array(
-					'type'      => 'hidden',
-					'name'      => 'manufacturer_id[]',
-					'value'     => current($manufacturer_id)
-			));
+            $manufacturer_stores =
+                $this->model_catalog_manufacturer->getManufacturerStoresInfo(current($manufacturer_id));
 
-			$manufacturer_stores = $this->model_catalog_manufacturer->getManufacturerStoresInfo( current($manufacturer_id) );
+            if (sizeof($manufacturer_stores) == 1) {
+                $remote_store_url = $manufacturer_stores[0]['store_url'];
+            }
+        }
 
-			if(sizeof($manufacturer_stores) == 1){
-				$remote_store_url = $manufacturer_stores[0]['store_url'];
-			}
-		}
+        $this->data['text_area'] = $form->getFieldHtml([
+            'type'  => 'textarea',
+            'name'  => 'code_area',
+            'attr'  => 'rows="10"',
+            'style' => 'ml_field',
+        ]);
 
-		$this->data['text_area'] = $form->getFieldHtml(array(
-						'type'  => 'textarea',
-						'name'  => 'code_area',
-						'attr' => 'rows="10"',
-						'style' => 'ml_field',
-		));
+        $this->data['manufacturer_id'] = $this->request->get['manufacturer_id'];
+        $remote_store_url = $this->prepareUrl($remote_store_url);
+        $this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
+        $this->data['sf_base_url'] = $remote_store_url;
+        $this->data['help_url'] = $this->gen_help_url('embed');
 
-		$this->data['manufacturer_id'] = $this->request->get['manufacturer_id'];
-		$remote_store_url = $this->_prepare_url($remote_store_url);
-		$this->data['sf_js_embed_url'] = $remote_store_url.ABC::env('INDEX_FILE').'?rt=r/embed/js';
-		$this->data['sf_base_url'] = $remote_store_url;
-		$this->data['help_url'] = $this->gen_help_url('embed');
+        $this->data['sf_css_embed_url'] =
+            $remote_store_url.'storefront/view/'.$this->config->get('config_storefront_template').'/css/embed.css';
 
-		$this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/' . $this->config->get('config_storefront_template').'/css/embed.css';
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
+        $this->loadlanguage('common/do_embed');
+        $this->view->batchAssign($this->language->getASet('common/do_embed'));
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('responses/embed/do_embed_manufacturer_modal.tpl');
+    }
 
-		$this->loadlanguage('common/do_embed');
-		$this->view->batchAssign($this->language->getASet('common/do_embed'));
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('responses/embed/do_embed_manufacturer_modal.tpl');
-	}
-
-	protected function _prepare_url($url){
-		return str_replace( array( 'http://', 'https://' ), '//', $url);
-	}
+    protected function prepareUrl($url)
+    {
+        return str_replace(['http://', 'https://'], '//', $url);
+    }
 }

@@ -3,7 +3,12 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
-use abc\models\UserNotification;
+use abc\models\catalog\CategoriesToStore;
+use abc\models\catalog\ManufacturersToStore;
+use abc\models\content\ContentsToStore;
+use abc\models\customer\Customer;
+use abc\models\order\Order;
+use abc\models\user\UserNotification;
 
 /**
  * Class Store

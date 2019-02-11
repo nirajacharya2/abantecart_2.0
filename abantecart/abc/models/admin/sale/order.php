@@ -27,6 +27,7 @@ use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -44,6 +45,7 @@ class ModelSaleOrder extends Model
      *
      * @return int
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function addOrder($data)
     {
@@ -181,6 +183,7 @@ class ModelSaleOrder extends Model
      * @param array $data
      *
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function editOrder($order_id, $data)
     {
@@ -347,6 +350,7 @@ class ModelSaleOrder extends Model
      * @param array $data
      *
      * @return bool
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function editOrderProduct($order_id, $data)
@@ -470,7 +474,10 @@ class ModelSaleOrder extends Model
                         $po_ids[] = (int)$k;
                     }
                     //get all data of given product options from db
-                    $sql = "SELECT *, pov.product_option_value_id, povd.name AS option_value_name, pod.name AS option_name
+                    $sql = "SELECT *, 
+                                    pov.product_option_value_id, 
+                                    povd.name AS option_value_name, 
+                                    pod.name AS option_name
                             FROM ".$this->db->table_name('product_options')." po
                             LEFT JOIN ".$this->db->table_name('product_option_descriptions')." pod
                                 ON (pod.product_option_id = po.product_option_id 
@@ -666,14 +673,18 @@ class ModelSaleOrder extends Model
                                         SET quantity = (quantity + ".(int)$product['quantity'].")
                                         WHERE product_id = '".(int)$product['product_id']."'");
 
-                    $option_query = $this->db->query("SELECT *
-                                                        FROM ".$this->db->table_name("order_options")."
-                                                        WHERE order_id = '".(int)$order_id."' AND order_product_id = '".(int)$product['order_product_id']."'");
+                    $option_query = $this->db->query(
+                        "SELECT *
+                        FROM ".$this->db->table_name("order_options")."
+                        WHERE order_id = '".(int)$order_id."' 
+                            AND order_product_id = '".(int)$product['order_product_id']."'");
 
                     foreach ($option_query->rows as $option) {
-                        $this->db->query("UPDATE ".$this->db->table_name("product_option_values")."
-                                            SET quantity = (quantity + ".(int)$product['quantity'].")
-                                            WHERE product_option_value_id = '".(int)$option['product_option_value_id']."' AND subtract = '1'");
+                        $this->db->query(
+                            "UPDATE ".$this->db->table_name("product_option_values")."
+                            SET quantity = (quantity + ".(int)$product['quantity'].")
+                            WHERE product_option_value_id = '".(int)$option['product_option_value_id']."' 
+                                AND subtract = '1'");
                     }
                 }
             }
@@ -693,6 +704,7 @@ class ModelSaleOrder extends Model
      * @param array $data
      *
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function addOrderHistory($order_id, $data)
     {

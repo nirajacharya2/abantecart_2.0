@@ -3,6 +3,31 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use abc\models\catalog\CategoryDescription;
+use abc\models\catalog\DownloadDescription;
+use abc\models\catalog\GlobalAttributesDescription;
+use abc\models\catalog\GlobalAttributesValueDescription;
+use abc\models\catalog\ProductDescription;
+use abc\models\catalog\ProductOptionDescription;
+use abc\models\catalog\ProductOptionValueDescription;
+use abc\models\catalog\ProductTag;
+use abc\models\catalog\ResourceDescription;
+use abc\models\catalog\StockStatus;
+use abc\models\catalog\UrlAlias;
+use abc\models\content\ContentDescription;
+use abc\models\layout\BannerDescription;
+use abc\models\layout\BlockDescription;
+use abc\models\layout\PageDescription;
+use abc\models\order\CouponDescription;
+use abc\models\order\Order;
+use abc\models\order\OrderDataType;
+use abc\models\order\OrderStatusDescription;
+use abc\models\system\FieldDescription;
+use abc\models\system\FieldsGroupDescription;
+use abc\models\system\FormDescription;
+use abc\models\system\StoreDescription;
+use abc\models\system\TaxClassDescription;
+use abc\models\system\TaxRateDescription;
 
 /**
  * Class Language

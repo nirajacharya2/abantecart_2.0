@@ -28,7 +28,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
-use abc\models\base\Product;
+use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
 use H;

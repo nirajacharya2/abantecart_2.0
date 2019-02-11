@@ -3,7 +3,9 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
-use abc\models\base\Audit;
+use abc\models\order\Order;
+use abc\models\system\Audit;
+use abc\models\system\Store;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -72,58 +74,67 @@ class Customer extends BaseModel
         'password',
     ];
 
-//    protected $fillable = [
-//        'store_id',
-//        'firstname',
-//        'lastname',
-//        'loginname',
-//        'email',
-//        'telephone',
-//        'fax',
-//        'sms',
-//        'salt',
-//        'password',
-//        'cart',
-//        'wishlist',
-//        'newsletter',
-//        'address_id',
-//        'status',
-//        'approved',
-//        'customer_group_id',
-//        'ip',
-//        'data',
-//        'date_added',
-//        'date_modified',
-//        'last_login',
-//    ];
+    protected $guarded = [
+        'date_added',
+        'date_modified'
+    ];
 
-
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function addresses()
     {
         return $this->hasMany(Address::class, 'customer_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function customer_notifications()
     {
         return $this->hasMany(CustomerNotification::class, 'customer_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function customer_transactions()
     {
         return $this->hasMany(CustomerTransaction::class, 'customer_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
     public function audits() {
         return $this->morphMany(Audit::class, 'user');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function approve()
+    {
+        if (!$this->hasPermission('write', ['approved'])) {
+            throw new \Exception('Permissions are restricted ' . __CLASS__ . "::" . __METHOD__  ."\n");
+        }
+        $this->approved = 1;
+        $this->save();
     }
 }

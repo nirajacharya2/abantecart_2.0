@@ -20,13 +20,10 @@
 
 namespace abc\core\lib;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ADB
 {
@@ -34,7 +31,7 @@ class ADB
      * @var Capsule
      */
     protected $orm;
-    protected $db_config = array();
+    protected $db_config = [];
     public $error = '';
     public $registry;
 
@@ -53,7 +50,7 @@ class ADB
      * @throws AException
      * @throws \DebugBar\DebugBarException
      */
-    public function __construct($db_config = array())
+    public function __construct($db_config = [])
     {
         if (!$db_config) {
             throw new AException(AC_ERR_LOAD, 'Cannot initiate ADB class with empty config parameter!');
@@ -64,6 +61,16 @@ class ADB
             $this->orm = new Capsule;
             $this->orm->addConnection($this->db_config);
             $this->orm->setAsGlobal();  //this is important
+            //register ORM-model event listeners
+            $evd = ABC::getObjectByAlias('EventDispatcher');
+            if(is_object($evd)) {
+                foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
+                    foreach ($listeners as $listener) {
+                        $evd->listen($event_alias, $listener);
+                    }
+                }
+            }
+            $this->orm->setEventDispatcher($evd);
             $this->orm->bootEloquent();
             $this->orm::connection()->getDatabaseName();
             //check connection
@@ -177,7 +184,7 @@ class ADB
              * @var \stdClass $output
              */
             $output = new \stdClass();
-            $output->row = isset($data[0]) ? $data[0] : array();
+            $output->row = isset($data[0]) ? $data[0] : [];
             //get total rows count for pagination
             if ($data && is_int(strpos($sql,$this->raw_sql_row_count()))) {
                 $output->total_num_rows = $this->sql_get_row_count();
@@ -333,7 +340,7 @@ class ADB
     {
         $item = $this->orm;
         if (method_exists($item, $function_name)) {
-            return call_user_func_array(array($item, $function_name), $args);
+            return call_user_func_array([$item, $function_name], $args);
         } else {
             return null;
         }

@@ -3,6 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
+use abc\models\locale\Language;
 
 /**
  * Class PageDescription

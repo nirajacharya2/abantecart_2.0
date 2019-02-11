@@ -1,29 +1,20 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: denis
- * Date: 19.09.2018
- * Time: 16:59
- */
+
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
-use abc\models\base\CustomerCommunication;
+use abc\models\customer\CustomerCommunication;
 use stdClass;
 use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridCustomerCommunications extends AController
 {
     /**
      * @var array
      */
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -36,25 +27,18 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
 
 
         //Prepare filter config
-        $filter_params =  array_merge(array('date_start', 'date_end'), (array)$this->data['grid_filter_params']);
-        $grid_filter_params = array( 'name', 'model' );
+        $filter_params =  array_merge(['date_start', 'date_end'], (array)$this->data['grid_filter_params']);
+        $grid_filter_params = ['name', 'model'];
 
-       /* if(!$this->request->get['date_start']){
-            $this->request->get['date_start'] = AHelperUtils::dateInt2Display(strtotime('-30 day'));
-        }
-        if(!$this->request->get['date_end']){
-            $this->request->get['date_end'] = AHelperUtils::dateInt2Display(time());
-        } */
-
-        $filter_form = new AFilter(array( 'method' => 'get', 'filter_params' => $filter_params ));
-        $filter_grid = new AFilter(array( 'method' => 'post', 'grid_filter_params' => $grid_filter_params ) );
+        $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
+        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
         $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
 
         $total = count($communications);
 
         $response = new stdClass();
         $response->userdata = new stdClass();
-        $response->userdata->classes = array();
+        $response->userdata->classes = [];
         $response->page = $filter_grid->getParam('page');
         $response->total = $filter_grid->calcTotalPages($total);
         $response->records = $total;
@@ -89,6 +73,7 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
     /**
      * @return mixed
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function communication_info()
     {
@@ -105,8 +90,10 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
 
                 $this->data['message'] = $communication;
                 $this->data['message']['date_added'] =
-                    H::dateISO2Display($this->data['message']['date_added'],
-                        $this->language->get('date_format_short').' '.$this->language->get('time_format'));
+                    H::dateISO2Display(
+                        $this->data['message']['date_added'],
+                        $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                    );
                 $this->data['message']['subject_title'] = $this->language->get('communication_subject_title');
                 $this->data['message']['body_title'] = $this->language->get('communication_body_title');
                 $this->data['message']['date_title'] = $this->language->get('communication_date_title');

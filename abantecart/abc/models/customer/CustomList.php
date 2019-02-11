@@ -3,6 +3,7 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
+use abc\models\layout\CustomBlock;
 
 /**
  * Class CustomList

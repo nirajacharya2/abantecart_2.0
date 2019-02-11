@@ -3,6 +3,8 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
+use abc\models\locale\Country;
+use abc\models\locale\Zone;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

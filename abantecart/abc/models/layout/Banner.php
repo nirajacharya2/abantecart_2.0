@@ -3,7 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
-use abc\models\BannerStat;
+use abc\models\content\BannerStat;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

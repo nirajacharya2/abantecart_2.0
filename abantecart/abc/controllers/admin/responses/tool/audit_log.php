@@ -20,8 +20,7 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\engine\ADispatcher;
-use abc\models\base\Audit;
+use abc\models\system\Audit;
 
 class ControllerResponsesToolAuditLog extends AController
 {
@@ -39,17 +38,17 @@ class ControllerResponsesToolAuditLog extends AController
         $this->data['heading_title'] = $heading_title;
 
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('tool/audit_log'),
             'text'      => $heading_title,
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         if (isset($this->request->get['auditable_type']) && !empty($this->request->get['auditable_type'])) {
             $this->data['auditable_type'] = $this->request->get['auditable_type'];

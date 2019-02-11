@@ -3,6 +3,8 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\order\OrderDownload;
+use abc\models\order\OrderDownloadsHistory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

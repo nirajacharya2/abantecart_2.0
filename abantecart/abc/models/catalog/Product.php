@@ -4,11 +4,13 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\order\CouponsProduct;
+use abc\models\order\OrderProduct;
+use abc\models\system\Audit;
 use abc\models\system\Store;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use abc\models\catalog\ProductDescription;
 
 /**
  * Class Product
@@ -74,14 +76,17 @@ class Product extends BaseModel
      */
     protected $policyGroup  = 'product';
     protected $policyObject = 'product';
+
     /**
      * @var string
      */
     protected $primaryKey = 'product_id';
+
     /**
      * @var bool
      */
     public $timestamps = false;
+
     /**
      * @var array
      */

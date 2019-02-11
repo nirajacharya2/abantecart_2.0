@@ -18,6 +18,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\locale\Language;
 
 /**
  * Class ProductOptionDescription
