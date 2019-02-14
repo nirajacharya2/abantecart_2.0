@@ -346,7 +346,7 @@ class ADB
      */
     public function __call($function_name, $args)
     {
-        $item = $this->orm;
+        $item = $this->orm->getConnection($this->connection_name);
         if (method_exists($item, $function_name)) {
             return call_user_func_array([$item, $function_name], $args);
         } else {
