@@ -76,7 +76,6 @@ class ADB
             }
             $this->orm->setEventDispatcher($evd);
             $this->orm->bootEloquent();
-            $this->orm->getConnection($this->conName)->getDatabaseName();
 
             //check connection
             $this->table($this->raw('DUAL'))->first([$this->raw(1)]);
