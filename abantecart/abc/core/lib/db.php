@@ -73,8 +73,8 @@ class ADB
                         $evd->listen($event_alias, $listener);
                     }
                 }
+                $this->orm->setEventDispatcher($evd);
             }
-            $this->orm->setEventDispatcher($evd);
             $this->orm->bootEloquent();
 
             //check connection
