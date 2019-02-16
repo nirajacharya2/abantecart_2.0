@@ -284,6 +284,10 @@ class ABC extends ABCBase
         } // if need to set batch of values
         else {
             if (is_array($name)) {
+
+                //TODO: add check for existing value.
+                // If string - do not make it an array by second write!
+                // To replicate just set env value via array twice
                 static::$env = array_merge_recursive(static::$env, $name);
                 return true;
             } else {

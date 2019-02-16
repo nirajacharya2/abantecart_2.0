@@ -29,6 +29,7 @@ class ModelAuditListener
      */
     public function handle($eventAlias, $params)
     {
+
         /**
          * @var BaseModel | Product $modelObject
          */
@@ -64,6 +65,7 @@ class ModelAuditListener
 
         //skip empty or "retrieved" event as useless
         if (!$event_name || $event_name == 'retrieved') {
+
             return $this->output(
                 true,
                 'ModelAuditListener: Auditing of model '
@@ -73,6 +75,7 @@ class ModelAuditListener
         //get changed
         $newData = $modelObject->getDirty();
         $oldData = $modelObject->getOriginal();
+
 
         if ($modelObject::$auditExcludes) {
             foreach ($modelObject::$auditExcludes as $excludeColumnName) {
@@ -178,11 +181,11 @@ class ModelAuditListener
             return false;
         }
 
-        return [
-            'result'  => true,
-            'message' => 'ModelAuditListener: Auditing of model '
-                .$modelClassName.' on event "'.$eventAlias.'" has been finished successfully.',
-        ];
+        return $this->output(
+            true,
+            'ModelAuditListener: Auditing of model '
+                .$modelClassName.' on event "'.$eventAlias.'" has been finished successfully.'
+        );
     }
 
     protected function output($result, $message)

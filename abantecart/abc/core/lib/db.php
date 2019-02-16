@@ -68,13 +68,14 @@ class ADB
             //register ORM-model event listeners
             $evd = ABC::getObjectByAlias('EventDispatcher');
             if (is_object($evd)) {
+                $this->orm->setEventDispatcher($evd);
                 foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
                     foreach ($listeners as $listener) {
-                        $evd->listen($event_alias, $listener);
+                        $this->orm->getEventDispatcher()->listen($event_alias, $listener);
                     }
                 }
-                $this->orm->setEventDispatcher($evd);
             }
+
             $this->orm->bootEloquent();
 
             //check connection
