@@ -116,6 +116,11 @@ class BaseModel extends OrmModel
     public static $auditingStrictMode = true;
 
     /**
+     * @var array Data Complex Array (validation, input types, access, casts)
+     */
+    protected $fields = [];
+
+    /**
      * Events of model that calls modelAuditListener
      *
      * @var array can be 'saving', 'saved', 'deleting', 'deleted'
@@ -532,5 +537,11 @@ class BaseModel extends OrmModel
             $connection, $connection->getQueryGrammar(), $connection->getPostProcessor()
         );
     }
+
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
 
 }
