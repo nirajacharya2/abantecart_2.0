@@ -56,7 +56,7 @@ return [
     'ACart'                => ACart::class,
     'AOrder'               => AOrder::class,
     'AOrderManager'        => AOrderManager::class,
-    'EventDispatcher'      => [EventDispatcher::class, null],
+    'EventDispatcher'      => EventDispatcher::class,
     'AEncryption'          => AEncryption::class,
     'ACurrency'            => ACurrency::class,
     'AUser'                => AUser::class,

@@ -28,50 +28,81 @@ class BaseModelTest extends ATestCase
 
     public function testValidationPassed()
     {
-        try {
-            $product = new Product();
-            $product->fill(
+        $result = false;
+        $productId = null;
+        $arProduct = [
+            'status'              => '1',
+            'featured'            => '1',
+            'product_description' =>
                 [
-                    'model'             => 'valid model',
-                    'sku'               => null,
-                    'location'          => 'location-max:128',
-                    'quantity'          => 0,
-                    'stock_checkout'    => '1',
-                    'stock_status_id'   => 1,
-                    'manufacturer_id'   => 1,
-                    'shipping'          => 0,
-                    'ship_individually' => 1,
-                    'free_shipping'     => 1,
-                    'shipping_price'    => '45.12000',
-                ]
-            );
-            $product->save();
-            $product_id = $product->getKey();
+                    'name'             => 'Test product',
+                    'blurb'            => 'Test blurb',
+                    'description'      => 'Test description',
+                    'meta_keywords'    => '',
+                    'meta_description' => '',
+                    'language_id'      => 1,
+                ],
+            'product_tags'        => 'cheeks,makeup',
+            'product_category'    =>
+                [
+                    0 => '40',
+                ],
+            'product_store'       =>
+                [
+                    0 => '0',
+                ],
+            'manufacturer_id'     => '11',
+            'model'               => 'valid model',
+            'call_to_order'       => '0',
+            'price'               => '29.5000',
+            'cost'                => '22',
+            'tax_class_id'        => '1',
+            'subtract'            => '0',
+            'quantity'            => '99',
+            'minimum'             => '1',
+            'maximum'             => '0',
+            'stock_checkout'      => '',
+            'stock_status_id'     => '1',
+            'sku'                 => '124596788',
+            'location'            => 'location-max:128',
+            'keyword'             => '',
+            'date_available'      => '2013-08-29 14:35:30',
+            'sort_order'          => '1',
+            'shipping'            => '1',
+            'free_shipping'       => '0',
+            'ship_individually'   => '0',
+            'shipping_price'      => '0',
+            'length'              => '0.00',
+            'width'               => '0.00',
+            'height'              => '0.00',
+            'length_class_id'     => '0',
+            'weight'              => '75.00',
+            'weight_class_id'     => '2',
+        ];
+        try {
+            $productId = Product::createProduct($arProduct);
             $result = true;
         } catch (\PDOException $e) {
-            $result = false;
             $this->fail($e->getMessage());
         } catch (Warning $e) {
-            $result = false;
             $this->fail($e->getMessage());
         } catch (\Exception $e) {
-            $result = false;
             $this->fail($e->getMessage());
         }
 
-        $this->assertEquals(true, $result);
+        $this->assertIsInt($productId);
 
         //check audits by requestId
         if ($result) {
             $audits = $this->db->table('audits')
                 ->select('*')
                 ->where('request_id', '=', $this->request->getUniqueId())
-                ->where('auditable_id', '=', $product_id)
+                ->where('auditable_id', '=', $productId)
                 ->get();
 
-            $this->assertEquals(11, count($audits));
+            $this->assertEquals(34, count($audits));
         }
-        return $product_id;
+        return $productId;
     }
 
     public function testValidationNotPassed()

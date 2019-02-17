@@ -116,11 +116,6 @@ class BaseModel extends OrmModel
     public static $auditingStrictMode = true;
 
     /**
-     * @var array Data Complex Array (validation, input types, access, casts)
-     */
-    protected $fields = [];
-
-    /**
      * Events of model that calls modelAuditListener
      *
      * @var array can be 'saving', 'saved', 'deleting', 'deleted'
@@ -152,13 +147,17 @@ class BaseModel extends OrmModel
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
+
+        $called_class = $this->getClass();
+        if(static::$env['FORCE_DELETING']
+            && method_exists($this,'forceDelete')
+            && isset(static::$env['FORCE_DELETING'][$called_class])
+        ){
+            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
+        }
         parent::__construct($attributes);
         static::boot();
         $this->newBaseQueryBuilder();
-        $called_class = $this->getClass();
-        if(static::$env['FORCE_DELETING'] && isset(static::$env['FORCE_DELETING'][$called_class])){
-            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
-        }
     }
 
     /**
@@ -166,7 +165,6 @@ class BaseModel extends OrmModel
      */
     public static function boot()
     {
-        parent::$dispatcher = Registry::getInstance()->get('model_events');
         static::$env = ABC::env('MODEL');
         Relation::morphMap(static::$env['MORPH_MAP']);
         parent::boot();
@@ -271,6 +269,15 @@ class BaseModel extends OrmModel
     public function delete()
     {
         if ($this->hasPermission('delete')) {
+            //delete inherits first
+           /* $relations = $this->getRelationships('HasMany');
+            foreach($relations as $method=>$row){
+                $this->{$method}()->delete();
+                $row['model']::where($this->getKeyName(), $this->getKey())->delete();
+                //$this->{$method}()->delete();
+                (new Product())->descriptions()->delete();
+            }*/
+
             parent::delete();
         } else {
             throw new \Exception('No permission for object to delete the model.');
@@ -463,31 +470,38 @@ class BaseModel extends OrmModel
     }
 
     /**
+     * @param string $typeOnly - filter output by relation type
+     *
      * @return array
      * @throws \ReflectionException
      */
-    public function getRelationships()
+    public function getRelationships( $typeOnly = '')
     {
         $model = new static;
         $relationships = [];
+
         foreach ((new ReflectionClass($model))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             if ($method->class != get_class($model)
                 || !empty($method->getParameters())
-                || $method->getName() == __FUNCTION__
+                //note: check if method in list of baseModel class, not child!
+                || in_array($method->getName(), get_class_methods(__CLASS__))
             ) {
                 continue;
             }
 
             try {
                 $return = $method->invoke($model);
-
                 if ($return instanceof Relation) {
-                    $relationships[$method->getName()] = [
-                        'type'  => (new ReflectionClass($return))->getShortName(),
-                        'model' => (new ReflectionClass($return->getRelated()))->getName(),
-                    ];
+                    $type = (new ReflectionClass($return))->getShortName();
+                    if(!$typeOnly || ($type == $typeOnly)) {
+                        $relationships[$method->getName()] = [
+                            'type'  => $type,
+                            'model' => (new ReflectionClass($return->getRelated()))->getName(),
+                        ];
+                    }
                 }
             } catch (Exception $e) {
+
             }
         }
         return $relationships;
@@ -538,10 +552,12 @@ class BaseModel extends OrmModel
         );
     }
 
-    public function getFields()
+    /**
+     * Method returns primary keys array of pivot tables
+     * @return array
+     */
+    public function getKeySet()
     {
-        return $this->fields;
+        return $this->primaryKeySet ?? [];
     }
-
-
 }

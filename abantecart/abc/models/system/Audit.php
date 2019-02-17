@@ -45,6 +45,9 @@ class Audit extends BaseModel
         'new_value',
     ];
 
+    public static $auditingEnabled = false;
+    public static $auditEvents = [];
+
     public function user()
     {
         return $this->morphTo();
