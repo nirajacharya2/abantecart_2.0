@@ -3239,9 +3239,10 @@ body.stickyheader .sticky_left {
 .text-editor {
    padding: 3px;
    margin-bottom: 0px;
+   width: 100%;
 }
 .text-editor .nav.nav-tabs{
-   display: inline-block;
+   display: inline-flex;
    margin-bottom: -10px;
 }
 .text-editor .tab-content{
@@ -3432,4 +3433,8 @@ img.extension-summary-icon{
 
 .primary_content_actions .btn-group{
     margin-bottom: 3px;
+}
+
+.chosen-container-multi .chosen-choices .search-choice .search-choice-close{
+    background-image: none;
 }

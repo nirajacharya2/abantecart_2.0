@@ -254,7 +254,8 @@
     "illuminate/validation": "5.7.*",
     "illuminate/Cache": "5.7.*",
     "illuminate/redis": "5.7.*",
-    "craftcamp/php-abac": "dev-dev-abc"
+    "craftcamp/php-abac": "dev-dev-abc",
+    "laracasts/utilities": "3.0"
   },
   "extra": {
     "installer-paths": {

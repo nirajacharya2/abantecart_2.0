@@ -23,18 +23,19 @@ use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\contracts\AttributeManagerInterface;
+use abc\models\catalog\ObjectType;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\ProductTypeDescription;
 use stdClass;
 
-class ControllerResponsesListingGridProductTypes extends AController
+class ControllerResponsesListingGridObjectTypes extends AController
 {
     public $data = [];
 
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
-        $this->loadLanguage('catalog/product_type');
+        $this->loadLanguage('catalog/object_type');
     }
 
     public function main()
@@ -56,7 +57,7 @@ class ControllerResponsesListingGridProductTypes extends AController
             'language_id' => $this->session->data['content_language_id'],
         ];
 
-        $total = ProductType::all()->count();
+        $total = ObjectType::all()->count();
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -68,25 +69,26 @@ class ControllerResponsesListingGridProductTypes extends AController
         $response->total = $total_pages;
         $response->records = $total;
 
-        $productTypeInst = new ProductType();
+        $productTypeInst = new ObjectType();
         $language_id = $this->language->getContentLanguageID();
 
-        $results = $productTypeInst->getProductTypes($data, $language_id);
+        $results = $productTypeInst->getObjectTypes($data, $language_id);
 
         $i = 0;
         foreach ($results as $result) {
-            $response->rows[$i]['id'] = $result['product_type_id'];
+            $response->rows[$i]['id'] = $result['object_type_id'];
             $response->rows[$i]['cell'] = [
                 $this->html->buildInput([
-                    'name'  => 'title['.$result['product_type_id'].']',
-                    'value' => $result['description']['title'],
+                    'name'  => 'name['.$result['object_type_id'].']',
+                    'value' => $result['description']['name'],
                 ]),
+                $result['object_type'],
                 $this->html->buildInput([
-                    'name'  => 'sort_order['.$result['product_type_id'].']',
+                    'name'  => 'sort_order['.$result['object_type_id'].']',
                     'value' => $result['sort_order'],
                 ]),
                 $this->html->buildCheckbox([
-                    'name'  => 'status['.$result['product_type_id'].']',
+                    'name'  => 'status['.$result['object_type_id'].']',
                     'value' => $result['status'],
                     'style' => 'btn_switch',
                 ]),
@@ -126,12 +128,12 @@ class ControllerResponsesListingGridProductTypes extends AController
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
-                        ProductType::destroy($id);
+                        ObjectType::destroy($id);
                     }
                 }
                 break;
             case 'save':
-                $fields = ['title', 'sort_order', 'status'];
+                $fields = ['name', 'sort_order', 'status'];
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
@@ -142,10 +144,10 @@ class ControllerResponsesListingGridProductTypes extends AController
                                     $error = new AError('');
                                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                                 }
-                                if (in_array($f, ['title'])) {
-                                    ProductType::find($id)->description()->update([$f => $this->request->post[$f][$id]]);
+                                if (in_array($f, ['name'])) {
+                                    ObjectType::find($id)->description()->update([$f => $this->request->post[$f][$id]]);
                                 } else {
-                                    ProductType::find($id)->update([$f => $this->request->post[$f][$id]]);
+                                    ObjectType::find($id)->update([$f => $this->request->post[$f][$id]]);
                                 }
                             }
                         }
@@ -195,17 +197,17 @@ class ControllerResponsesListingGridProductTypes extends AController
                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                 }
                 $data = [$key => $value];
-                if (in_array($key, ['title'])) {
-                    ProductType::find($this->request->get['id'])->description()->update($data);
+                if (in_array($key, ['name'])) {
+                    ObjectType::find($this->request->get['id'])->description()->update($data);
                 } else {
-                    ProductType::find($this->request->get['id'])->update($data);
+                    ObjectType::find($this->request->get['id'])->update($data);
                 }
             }
             return null;
         }
 
         //request sent from jGrid. ID is key of array
-        $fields = ['title', 'sort_order', 'status'];
+        $fields = ['name', 'sort_order', 'status'];
         foreach ($fields as $f) {
             if (isset($this->request->post[$f])) {
                 foreach ($this->request->post[$f] as $k => $v) {
@@ -215,10 +217,10 @@ class ControllerResponsesListingGridProductTypes extends AController
                         return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
 
-                    if (in_array($f, ['title'])) {
-                        ProductType::find($k)->description()->update([$f => $this->request->post[$f][$k]]);
+                    if (in_array($f, ['name'])) {
+                        ObjectType::find($k)->description()->update([$f => $this->request->post[$f][$k]]);
                     } else {
-                        ProductType::find($k)->update([$f => $this->request->post[$f][$k]]);
+                        ObjectType::find($k)->update([$f => $this->request->post[$f][$k]]);
                     }
                 }
             }
@@ -232,7 +234,7 @@ class ControllerResponsesListingGridProductTypes extends AController
     {
         $err = '';
         switch ($field) {
-            case 'title' :
+            case 'name' :
                 if (mb_strlen($value) < 2 || mb_strlen($value) > 32) {
                     $err = $this->language->get('error_name');
                 }

@@ -1841,8 +1841,12 @@ class AHelperUtils extends AHelper
         elseif(count($data) == 1)
             $data = current($data);
 
-        if(!is_string($data) && !is_numeric($data))
+        if(!is_string($data) && !is_numeric($data) && !is_object($data))
             $data = var_export($data, 1);
+
+     //   if (is_object($data)) {
+       //     $data = ' Variable is Object, use DD like functions! ';
+       // }
 
         file_put_contents(
             $filename,

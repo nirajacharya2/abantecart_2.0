@@ -17,6 +17,8 @@ use abc\models\BaseModel;
  */
 class LengthClass extends BaseModel
 {
+    protected $primaryKey = 'length_class_id';
+
     public $timestamps = false;
 
     protected $casts = [
@@ -33,4 +35,10 @@ class LengthClass extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    public function description()
+    {
+        return $this->hasOne(LengthClassDescription::class, 'length_class_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
 }

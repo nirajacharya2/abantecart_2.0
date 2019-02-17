@@ -19,46 +19,18 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
-use abc\models\locale\Language;
 
-/**
- * Class ProductTypeDescription
- *
- * @property string title
- * @property string description
- * @property int stage_id
- *
- * @package abc\models\base
- */
-class ProductTypeDescription extends BaseModel
+class ObjectFieldSetting extends BaseModel
 {
     protected $primaryKey = false;
     public $timestamps = false;
 
-    protected $casts = [
-        'product_type_id'   => 'int',
-        'language_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
-    ];
-
     protected $fillable = [
-        'title',
-        'description',
-        'stage_id',
+        'object_type',
+        'object_type_id',
+        'object_field_name',
+        'field_setting',
+        'field_setting_value'
     ];
-
-    public function product_type()
-    {
-        return $this->belongsTo(ProductType::class, 'product_type_id');
-    }
-
-    public function language()
-    {
-        return $this->belongsTo(Language::class, 'language_id');
-    }
 
 }

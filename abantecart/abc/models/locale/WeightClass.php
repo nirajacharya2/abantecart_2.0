@@ -19,6 +19,7 @@ use abc\models\BaseModel;
  */
 class WeightClass extends BaseModel
 {
+    protected $primaryKey = 'weight_class_id';
     public $timestamps = false;
 
     protected $casts = [
@@ -35,6 +36,12 @@ class WeightClass extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    public function description()
+    {
+        return $this->hasOne(WeightClassDescription::class, 'weight_class_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
 
     public function weight_class_descriptions()
     {

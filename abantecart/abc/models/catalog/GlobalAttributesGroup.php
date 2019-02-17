@@ -28,14 +28,26 @@ class GlobalAttributesGroup extends BaseModel
         'status',
     ];
 
-    public function product_types()
+    public function object_types()
     {
-        return $this->belongsToMany(GlobalAttributesGroup::class, 'global_attribute_group_to_product_type',
-            'attribute_group_id', 'product_type_id');
+        return $this->belongsToMany(GlobalAttributesGroup::class, 'global_attribute_group_to_object_type',
+            'attribute_group_id', 'object_type_id');
     }
 
     public function global_attributes()
     {
         return $this->hasMany(GlobalAttribute::class, 'attribute_group_id');
     }
+
+    public function description()
+    {
+        return $this->hasOne(GlobalAttributesGroupsDescription::class, 'attribute_group_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
+
+    public function descriptions()
+    {
+        return $this->hasMany(GlobalAttributesGroupsDescription::class, 'attribute_group_id');
+    }
+
 }

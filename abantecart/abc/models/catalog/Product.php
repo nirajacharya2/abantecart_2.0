@@ -2,12 +2,16 @@
 
 namespace abc\models\catalog;
 
+use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\locale\LengthClass;
+use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
 use abc\models\order\OrderProduct;
 use abc\models\system\Audit;
 use abc\models\system\Store;
+use abc\models\system\TaxClass;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,52 +19,53 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Product
  *
- * @property int $product_id
- * @property string $model
- * @property string $sku
- * @property string $location
- * @property int $quantity
- * @property string $stock_checkout
- * @property int $stock_status_id
- * @property int $manufacturer_id
- * @property int $shipping
- * @property int $ship_individually
- * @property int $free_shipping
- * @property float $shipping_price
- * @property float $price
- * @property int $tax_class_id
- * @property \Carbon\Carbon $date_available
- * @property float $weight
- * @property int $weight_class_id
- * @property float $length
- * @property float $width
- * @property float $height
- * @property int $length_class_id
- * @property int $status
- * @property int $viewed
- * @property int $sort_order
- * @property int $subtract
- * @property int $minimum
- * @property int $maximum
- * @property float $cost
- * @property int $call_to_order
- * @property string $settings
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * @property ProductOption $options
- * @property CouponsProduct $coupons_products
- * @property OrderProduct $order_products
- * @property ProductDescription $product_descriptions
- * @property ProductDiscount $product_discounts
- * @property ProductOptionDescription $product_option_descriptions
+ * @property int                           $product_id
+ * @property string                        $model
+ * @property string                        $sku
+ * @property string                        $location
+ * @property int                           $quantity
+ * @property string                        $stock_checkout
+ * @property int                           $stock_status_id
+ * @property int                           $manufacturer_id
+ * @property int                           $shipping
+ * @property int                           $ship_individually
+ * @property int                           $free_shipping
+ * @property float                         $shipping_price
+ * @property float                         $price
+ * @property int                           $tax_class_id
+ * @property \Carbon\Carbon                $date_available
+ * @property float                         $weight
+ * @property int                           $weight_class_id
+ * @property float                         $length
+ * @property float                         $width
+ * @property float                         $height
+ * @property int                           $length_class_id
+ * @property int                           $status
+ * @property int                           $viewed
+ * @property int                           $sort_order
+ * @property int                           $subtract
+ * @property int                           $minimum
+ * @property int                           $maximum
+ * @property float                         $cost
+ * @property int                           $call_to_order
+ * @property string                        $settings
+ * @property \Carbon\Carbon                $date_added
+ * @property \Carbon\Carbon                $date_modified
+ * @property ProductOption                 $options
+ * @property CouponsProduct                $coupons_products
+ * @property OrderProduct                  $order_products
+ * @property ProductDescription            $product_descriptions
+ * @property ProductDiscount               $product_discounts
+ * @property ProductOptionDescription      $product_option_descriptions
  * @property ProductOptionValueDescription $product_option_value_descriptions
- * @property ProductOptionValue $product_option_values
- * @property ProductOption $product_options
- * @property ProductSpecial $product_specials
- * @property ProductTag $product_tags
- * @property ProductsFeatured $products_featured
- * @property ProductsRelated $products_related
- * @property Review $reviews
+ * @property ProductOptionValue            $product_option_values
+ * @property ProductOption                 $product_options
+ * @property ProductSpecial                $product_specials
+ * @property ProductTag                    $product_tags
+ * @property ProductsFeatured              $products_featured
+ * @property ProductsRelated               $products_related
+ * @property Review                        $reviews
+ * @property int                           $product_type_id
  *
  * @package abc\models
  */
@@ -74,7 +79,7 @@ class Product extends BaseModel
      * policy rule will be named as {userType-userGroup}.product-product-read
      * For example: system-www-data.product-product-read
      */
-    protected $policyGroup  = 'product';
+    protected $policyGroup = 'product';
     protected $policyObject = 'product';
 
     /**
@@ -114,6 +119,7 @@ class Product extends BaseModel
         'maximum'           => 'int',
         'cost'              => 'float',
         'call_to_order'     => 'int',
+        'product_type_id'   => 'int',
     ];
 
     /**
@@ -158,23 +164,384 @@ class Product extends BaseModel
         'cost',
         'call_to_order',
         'settings',
+        'product_type_id',
     ];
 
     protected $rules = [
-        'product_id'       => 'integer',
-        'model'            => 'string|max:64',
+        'product_id'        => 'integer',
+        'model'             => 'string|max:64',
         //NOTE
         //if need sku as mandatory use "present" instead "required"
-        'sku'              => 'string|max:64|nullable',
-        'location'         => 'string|max:128',
-        'quantity'         => 'integer',
-        'stock_checkout'   => 'max:1|nullable',
-        'stock_status_id'  => 'integer',
-        'manufacturer_id'  => 'integer',
-        'shipping'         => 'integer|max:1|min:0',
-        'ship_individually'=> 'integer|max:1|min:0',
-        'free_shipping'    => 'integer|max:1|min:0',
-        'shipping_price'   => 'numeric',
+        'sku'               => 'string|max:64|nullable',
+        'location'          => 'string|max:128',
+        'quantity'          => 'integer',
+        'stock_checkout'    => 'max:1|nullable',
+        'stock_status_id'   => 'integer',
+        'manufacturer_id'   => 'integer',
+        'shipping'          => 'integer|max:1|min:0',
+        'ship_individually' => 'integer|max:1|min:0',
+        'free_shipping'     => 'integer|max:1|min:0',
+        'shipping_price'    => 'numeric',
+    ];
+
+    protected $fields = [
+        'product_type_id'    => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getProductTypes',
+        ],
+        'status'             => [
+            'cast'       => 'int',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'switch',
+        ],
+        'featured'           => [
+            'cast'       => 'int',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'switch',
+        ],
+        'product_id'         => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'name'               => [
+            'cast'       => 'string',
+            'rule'       => 'required|max:255',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'blurb'              => [
+            'cast'       => 'string',
+            'rule'       => '',
+            'input_type' => 'textarea',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'description'        => [
+            'cast'       => 'string',
+            'rule'       => '',
+            'input_type' => 'textarea',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'meta_keywords'      => [
+            'cast'       => 'string',
+            'rule'       => '',
+            'input_type' => 'textarea',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'meta_description'   => [
+            'cast'       => 'string',
+            'rule'       => '',
+            'input_type' => 'textarea',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'product_tags'       => [
+            'cast'       => 'string',
+            'rule'       => '',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'product_categories' => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getProductCategories',
+            'props'      => [
+                'multiple'        => true,
+                'chips'           => true,
+                'deletable-chips' => true,
+            ],
+        ],
+        'product_stores'     => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getProductStores',
+            'props'      => [
+                'multiple'        => true,
+                'chips'           => true,
+                'deletable-chips' => true,
+            ],
+        ],
+        'manufacturer_id'    => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getManufacturers',
+            'props'      => [
+                'chips'           => true,
+                'deletable-chips' => true,
+            ],
+        ],
+        'model'              => [
+            'cast'       => 'string',
+            'rule'       => 'required|max:64',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 20,
+        ],
+        'call_to_order'      => [
+            'cast'       => 'int',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'switch',
+        ],
+        'price'              => [
+            'cast'       => 'float',
+            'rule'       => 'number',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 30,
+            'props'      => [
+                'type' => 'number',
+                'step' => 0.01,
+            ],
+        ],
+        'cost'               => [
+            'cast'       => 'float',
+            'rule'       => 'number',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 30,
+            'props'      => [
+                'type' => 'number',
+                'step' => 0.01,
+            ],
+        ],
+        'tax_class_id'       => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getTaxClasses',
+            'props'      => [
+                'chips'           => true,
+                'deletable-chips' => true,
+            ],
+        ],
+        'subtract'           => [
+            'cast'       => 'int',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'switch',
+        ],
+        'quantity'           => [
+            'cast'         => 'int',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 1,
+                'min'  => 0,
+            ],
+        ],
+        'minimum'            => [
+            'cast'         => 'int',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 1,
+                'min'  => 0,
+            ],
+        ],
+        'maximum'            => [
+            'cast'         => 'int',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 1,
+                'min'  => 0,
+            ],
+        ],
+        'stock_checkout'     => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getStockCheckouts',
+        ],
+        'stock_status'       => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getStockStatuses',
+        ],
+        'sku'               => [
+            'cast'       => 'string',
+            'rule'       => 'max:64|nullable',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 30,
+        ],
+        'location'          => [
+            'cast'       => 'string',
+            'rule'       => 'string|max:128',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 40,
+        ],
+        'keyword'          => [
+            'cast'       => 'string',
+            'rule'       => 'string|max:128',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 40,
+        ],
+        'date_available' => [
+            'cast'       => 'date',
+            'rule'       => 'date',
+            'input_type' => 'date',
+            'access'     => 'read',
+            'sort_order' => 40,
+        ],
+        'sort_order'          => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'input_type' => 'input',
+            'access'     => 'read',
+            'sort_order' => 1,
+            'props' => [
+                'type' => 'number',
+                'step' => 1,
+                'min'  => 0,
+            ]
+        ],
+        'shipping'          => [
+            'cast'       => 'int',
+            'rule'       => '',
+            'input_type' => 'checkbox',
+            'access'     => 'read',
+            'sort_order' => 1,
+        ],
+        'free_shipping'     => [
+            'cast'       => 'int',
+            'rule'       => '',
+            'input_type' => 'checkbox',
+            'access'     => 'read',
+            'sort_order' => 110,
+        ],
+        'ship_individually' => [
+            'cast'       => 'int',
+            'rule'       => '',
+            'input_type' => 'checkbox',
+            'access'     => 'read',
+            'sort_order' => 100,
+        ],
+        'shipping_price'            => [
+            'cast'         => 'float',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 0.01,
+                'min'  => 0,
+            ],
+        ],
+        'length'            => [
+            'cast'         => 'float',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 0.01,
+                'min'  => 0,
+            ],
+        ],
+        'width'            => [
+            'cast'         => 'float',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 0.01,
+                'min'  => 0,
+            ],
+        ],
+        'height'            => [
+            'cast'         => 'float',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 0.01,
+                'min'  => 0,
+            ],
+        ],
+        'length_class'       => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getLengthClasses',
+        ],
+        'weight'            => [
+            'cast'         => 'float',
+            'rule'         => 'integer',
+            'input_type'   => 'input',
+            'input_format' => 'number',
+            'access'       => 'read',
+            'sort_order'   => 50,
+            'props'        => [
+                'type' => 'number',
+                'step' => 0.01,
+                'min'  => 0,
+            ],
+        ],
+        'weight_class'       => [
+            'cast'       => 'int',
+            'rule'       => 'integer',
+            'access'     => 'read',
+            'sort_order' => 10,
+            'input_type' => 'selectbox',
+            'relation'   => 'getWeightClasses',
+        ]
+
     ];
 
     /**
@@ -197,7 +564,7 @@ class Product extends BaseModel
      * Auditing properties
      *
      */
-    public static $auditExcludes = ['sku' ];
+    public static $auditExcludes = ['sku'];
 
     /**
      * @param array $options
@@ -345,6 +712,104 @@ class Product extends BaseModel
 
     /**
      * @return mixed
+     */
+    public function getProductTypes()
+    {
+        return $this->db->table('object_types as ot')
+            ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
+            ->where('ot.object_type', '=', 'Product')
+            ->where('ot.status', '=', 1)
+            ->where('otd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->select('otd.object_type_id as id', 'otd.name')
+            ->get()
+            ->toArray();
+
+    }
+
+    public function getProductCategories()
+    {
+        $categoryInst = new Category();
+        $categories = $categoryInst->getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $product_categories = [];
+        foreach ($categories as $category) {
+            $product_categories[] = (object)['id' => $category['category_id'], 'name' => htmlspecialchars_decode($category['name'])];
+        }
+        return $product_categories;
+    }
+
+    public function getProductStores()
+    {
+        $stores = Store::active()->select(['store_id as id', 'name'])->get();
+        $result = [];
+        foreach ($stores as $store) {
+            $result[] = (object)['id' => $store->id, 'name' => $store->name];
+        }
+        return $result;
+    }
+
+    public function getManufacturers()
+    {
+        $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
+        $result = [];
+        foreach ($manufacturers as $manufacturer) {
+            $result[] = (object)['id' => $manufacturer->id, 'name' => $manufacturer->name];
+        }
+        return $result;
+    }
+
+    public function getTaxClasses()
+    {
+        $tax_classes = TaxClass::with('description')->get();
+        $result = [];
+        foreach ($tax_classes as $tax_class) {
+            $result[] = (object)['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
+        }
+        return $result;
+    }
+
+    public function getStockCheckouts()
+    {
+        $result = [];
+        $result[] = (object)['id' => '', 'name' => $this->registry->get('language')->get('text_default')];
+        $result[] = (object)['id' => 0, 'name' => $this->registry->get('language')->get('text_no')];
+        $result[] = (object)['id' => 1, 'name' => $this->registry->get('language')->get('text_yes')];
+        return $result;
+    }
+
+    public function getStockStatuses()
+    {
+        $stock_statuses = StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->select(['stock_status_id as id', 'name'])
+            ->get();
+        $result = [];
+        foreach ($stock_statuses as $stock_status) {
+            $result[] = (object)['id' => $stock_status->id, 'name' => $stock_status->name];
+        }
+        return $result;
+    }
+
+    public function getLengthClasses()
+    {
+        $length_classes = LengthClass::with('description')->get();
+        $result = [];
+        foreach ($length_classes as $length_class) {
+            $result[] = (object)['id' => $length_class->length_class_id, 'name' => $length_class->description->title];
+        }
+        return $result;
+    }
+
+    public function getWeightClasses()
+    {
+        $weight_classes = WeightClass::with('description')->get();
+        $result = [];
+        foreach ($weight_classes as $weight_class) {
+            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
+        }
+        return $result;
+    }
+
+    /**
+     * @return mixed
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -364,7 +829,7 @@ class Product extends BaseModel
             //TODO: need to rewrite into relations
             if ($this->manufacturer_id) {
                 $manufacturer = Manufacturer::find($this->manufacturer_id);
-                if($manufacturer) {
+                if ($manufacturer) {
                     $data['manufacturer'] = $manufacturer->toArray();
                 }
             }
@@ -528,7 +993,6 @@ class Product extends BaseModel
     }
 
     /**
-
      * @param array $data - nested array of options with descriptions, values and value descriptions
      *
      * @return bool
@@ -586,7 +1050,7 @@ class Product extends BaseModel
                     $optionValueDescObj->fill($optionValueDescData)->save();
                     unset($optionValueDescObj);
                 }
-                if($option_value['images']){
+                if ($option_value['images']) {
 
                     $title = current($optionValueDescData['name']);
                     $language_id = current($optionValueDescData['language_id']);
@@ -600,7 +1064,7 @@ class Product extends BaseModel
                     );
 
                     if (!$result) {
-                       $this->errors = array_merge($this->errors, $resource_mdl->errors());
+                        $this->errors = array_merge($this->errors, $resource_mdl->errors());
                     }
                 }
             }
@@ -608,7 +1072,6 @@ class Product extends BaseModel
         $this->cache->remove('product');
         return true;
     }
-
 
     protected function removeSubArrays(array $array)
     {
@@ -620,7 +1083,6 @@ class Product extends BaseModel
         return $array;
     }
 
-
     public function keywords()
     {
         if ($this->keywords) {
@@ -628,12 +1090,13 @@ class Product extends BaseModel
         }
 
         $urlAliases = UrlAlias::where('query', '=', 'product_id='.$this->product_id)->get();
-        if($urlAliases){
-            foreach($urlAliases as $urlAlias)
-            $this->keywords[] = [
-                'keyword' => H::SEOEncode($urlAlias->keyword,'product_id',$this->product_id),
-                'language_id'=> $urlAlias->language_id
-            ];
+        if ($urlAliases) {
+            foreach ($urlAliases as $urlAlias) {
+                $this->keywords[] = [
+                    'keyword'     => H::SEOEncode($urlAlias->keyword, 'product_id', $this->product_id),
+                    'language_id' => $urlAlias->language_id,
+                ];
+            }
         }
         $this->cache->remove('product');
         return $this->keywords;
@@ -650,13 +1113,14 @@ class Product extends BaseModel
             $urlAlias = new UrlAlias();
             $urlAlias->query = $query;
             $urlAlias->language_id = (int)$keyword['language_id'];
-            $urlAlias->keyword = H::SEOEncode($keyword['keyword'],'product_id',$this->product_id);
+            $urlAlias->keyword = H::SEOEncode($keyword['keyword'], 'product_id', $this->product_id);
             $urlAlias->save();
         }
         $this->cache->remove('product');
     }
 
-    public function auditables() {
+    public function auditables()
+    {
         return $this->morphMany(Audit::class, 'auditable');
     }
 

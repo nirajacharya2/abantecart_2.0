@@ -4,13 +4,13 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 ?>
 <div id="<?php echo $wrapper_id ?>" class="text-editor panel panel-default">
 	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active">
-			<a href="#text_<?php echo $wrapper_id; ?>" aria-controls="text_<?php echo $wrapper_id; ?>" role="tab" data-toggle="tab">
+		<li role="presentation" class="nav-item active">
+			<a class="nav-link" href="#text_<?php echo $wrapper_id; ?>" aria-controls="text_<?php echo $wrapper_id; ?>" role="tab" data-toggle="tab">
 				&nbsp;&nbsp;&nbsp;<?php echo $tab_text; ?>&nbsp;&nbsp;&nbsp;
 			</a>
 		</li>
-		<li role="presentation">
-			<a href="#visual_<?php echo $wrapper_id; ?>" aria-controls="visual_<?php echo $wrapper_id; ?>" role="tab" data-toggle="tab">
+		<li role="presentation" class="nav-item">
+			<a class="nav-link" href="#visual_<?php echo $wrapper_id; ?>" aria-controls="visual_<?php echo $wrapper_id; ?>" role="tab" data-toggle="tab">
 				&nbsp;&nbsp;&nbsp;<?php echo $tab_visual; ?>&nbsp;&nbsp;&nbsp;
 			</a>
 		</li>

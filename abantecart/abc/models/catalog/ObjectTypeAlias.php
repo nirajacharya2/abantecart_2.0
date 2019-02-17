@@ -20,34 +20,13 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 
-/**
- * Class ProductType
- *
- * @package abc\models
- */
-class ProductType extends BaseModel
+class ObjectTypeAlias extends BaseModel
 {
-    protected $primaryKey = 'product_type_id';
+    protected $primaryKey = false;
     public $timestamps = false;
 
-    protected $casts = [
-        'banner_id'   => 'int',
-        'language_id' => 'int',
-    ];
-
     protected $fillable = [
-        'stage_id'
+        'object_type',
     ];
 
-
-    public function product_type_descriptions()
-    {
-        return $this->hasMany(ProductDescription::class, 'product_type_id');
-    }
-
-    public function global_attribute_groups()
-    {
-        return $this->belongsToMany(GlobalAttributesGroup::class, 'global_attribute_group_to_product_type',
-            'product_type_id', 'attribute_group_id');
-    }
 }

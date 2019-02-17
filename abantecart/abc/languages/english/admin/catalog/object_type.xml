@@ -19,27 +19,35 @@
 <definitions>
 	<definition>
 		<key>heading_title</key>
-		<value><![CDATA[Product Types]]></value>
+		<value><![CDATA[Object Types]]></value>
 	</definition>
 	<definition>
-		<key>text_product_type</key>
-		<value><![CDATA[Product Type]]></value>
+		<key>text_object_type</key>
+		<value><![CDATA[Object Type]]></value>
 	</definition>
 	<definition>
-		<key>column_product_type_sort_order</key>
+		<key>entry_object_type</key>
+		<value><![CDATA[Object Type:]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_sort_order</key>
 		<value><![CDATA[Sort Order]]></value>
 	</definition>
 	<definition>
-		<key>column_product_type_title</key>
+		<key>column_object_type_name</key>
 		<value><![CDATA[Title]]></value>
 	</definition>
 	<definition>
-		<key>column_product_type_status</key>
+		<key>column_object_type_status</key>
 		<value><![CDATA[Status]]></value>
 	</definition>
 	<definition>
-		<key>entry_title</key>
-		<value><![CDATA[Title:]]></value>
+		<key>column_object_type_object_type</key>
+		<value><![CDATA[Object Type]]></value>
+	</definition>
+	<definition>
+		<key>entry_name</key>
+		<value><![CDATA[Name:]]></value>
 	</definition>
 	<definition>
 		<key>entry_sort_order</key>
@@ -52,5 +60,9 @@
 	<definition>
 		<key>entry_attribute_group</key>
 		<value><![CDATA[Attribute Groups:]]></value>
+	</definition>
+	<definition>
+		<key>text_success</key>
+		<value><![CDATA[Success!]]></value>
 	</definition>
 </definitions>

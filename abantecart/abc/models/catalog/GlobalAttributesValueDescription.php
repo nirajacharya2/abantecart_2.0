@@ -20,6 +20,7 @@ use abc\models\locale\Language;
  */
 class GlobalAttributesValueDescription extends BaseModel
 {
+    //protected $primaryKey = '';
     public $incrementing = false;
     public $timestamps = false;
 

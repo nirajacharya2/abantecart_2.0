@@ -378,7 +378,7 @@ class ControllerPagesCatalogAttribute extends AController
             'multilingual' => true,
         ]);
 
-        if ($attribute_type_info['type_key'] != 'download_attribute') {
+        if (!in_array($attribute_type_info['type_key'],['download_attribute', 'product_attribute'])) {
             $parent_attributes = ['' => $this->language->get('text_select')];
             $results =
                 $this->attribute_manager->getAttributes(['attribute_type_id' => $attribute_type_id, 'limit' => null], 0,

@@ -50,6 +50,25 @@ class GlobalAttribute extends BaseModel
         'regexp_pattern',
     ];
 
+    public function description()
+    {
+        return $this->hasOne(GlobalAttributesDescription::class, 'attribute_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
+
+    public function value_description()
+    {
+        return $this->hasOne(GlobalAttributesValueDescription::class, 'attribute_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
+
+    public function global_attributes_value_description()
+    {
+        return $this->hasMany(GlobalAttributesValueDescription::class, 'attribute_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+
+    }
+
     public function global_attributes_descriptions()
     {
         return $this->hasMany(GlobalAttributesDescription::class, 'attribute_id');

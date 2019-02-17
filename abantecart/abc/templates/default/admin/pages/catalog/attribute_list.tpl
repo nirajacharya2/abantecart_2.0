@@ -10,7 +10,7 @@
 			    <span class="caret"></span></a>
 			    <ul class="dropdown-menu " role="menu">
 			    	<?php foreach($inserts as $in){ ?>
-			    		<li><a href="<?php echo $in['href'] ?>" ><?php echo $in['text']; ?></a></li>
+			    		<li><a class="dropdown-item" href="<?php echo $in['href'] ?>" ><?php echo $in['text']; ?></a></li>
 			    	<?php } ?>
 			    </ul>
 			</div>

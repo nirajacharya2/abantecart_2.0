@@ -31,6 +31,12 @@ class TaxClass extends BaseModel
         'date_modified',
     ];
 
+    public function description()
+    {
+        return $this->hasOne(TaxClassDescription::class, 'tax_class_id')
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+    }
+
     public function tax_class_descriptions()
     {
         return $this->hasMany(TaxClassDescription::class, 'tax_class_id');
