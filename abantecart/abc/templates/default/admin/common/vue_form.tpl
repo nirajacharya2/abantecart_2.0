@@ -3,18 +3,23 @@
 	.v-input__slot {
 		margin-bottom: 0 !important;
 	}
+
 	.v-input--selection-controls {
 		margin-top: 0 !important;
 	}
+
 	.flex .container.fluid {
 		padding: 0 !important;
 	}
+
 	.form-title {
 		margin-bottom: 20px;
 	}
+
 	label.v-label {
 		margin-bottom: 0 !important;
 	}
+
 	.v-chip, .v-chip .v-chip__content {
 		border-radius: 4px !important;
 	}
@@ -23,19 +28,46 @@
 <div id="app">
 	<v-app>
 		<v-container fluid>
-			<v-form v-model="formValid" :name="schema.form_name" :action="schema.url">
+			<v-form v-model="formValid" ref="form" :name="schema.form_name" :action="schema.url">
 				<v-layout row wrap>
 					<div class="form-title">
 						<span class="headline">{{schema.title}}</span>
 					</div>
+					<v-flex md12 xs12>
+
+						<v-alert
+								v-model="alert"
+								:value="true"
+								type="success"
+								v-if="formSuccess"
+								icon="check_circle"
+								outline
+								dismissible
+						>
+							{{ formSuccess }}
+						</v-alert>
+					</v-flex>
+					<v-flex md12 xs12>
+						<v-alert
+								v-model="alert_error"
+								:value="true"
+								type="error"
+								outline
+								dismissible
+								v-for="formError in formErrors"
+						>
+							{{formError}}
+						</v-alert>
+					</v-flex>
+
 					<v-flex v-for="(field_options, field_name, index) in schema.form_fields"
 					        :key="index"
 					        v-if="field_types.includes(field_options.type)"
 					        v-bind="field_options.v_flex_props">
 						<v-container fluid>
-							 {{ field_options.value }}
+							{{ field_options.value }}
 							<v-dialog
-									ref="dialog"
+									ref="refObj"
 									v-model="field_options.modal"
 									:return-value.sync="field_options.value"
 									persistent
@@ -49,7 +81,6 @@
 										v-model="field_options.value"
 										:label="field_options.title"
 										:hint="field_options.hint"
-										v-validate=field_options.validate
 										:data-vv-as=field_options.title
 										persistent-hint
 										readonly
@@ -57,19 +88,21 @@
 								<v-date-picker v-model="field_options.value" scrollable>
 									<v-spacer></v-spacer>
 									<v-btn flat color="primary" @click="field_options.modal = false">Cancel</v-btn>
-									<v-btn flat color="primary" @click="$refs.dialog[index].save(field_options.value)">OK</v-btn>
+									<v-btn flat color="primary" @click="$refs.refObj[index-1].save(field_options.value)">OK</v-btn>
 								</v-date-picker>
 							</v-dialog>
 
 							<v-subheader v-if="field_options.type == 'field_title'"
-							     v-bind="field_options.props"
-							     v-html="field_options.value"
-							     :name="field_name"
-							     :id="field_name"
+							             ref="refObj"
+							             v-bind="field_options.props"
+							             v-html="field_options.value"
+							             :name="field_name"
+							             :id="field_name"
 							>
 							</v-subheader>
 
 							<v-text-field
+									ref="refObj"
 									:name="field_name"
 									:id="field_name"
 									:label="field_options.title"
@@ -82,6 +115,7 @@
 
 
 							<v-radio-group
+									ref="refObj"
 									:name="field_name"
 									:id="field_name"
 									v-model="field_options.value"
@@ -99,9 +133,12 @@
 								></v-radio>
 							</v-radio-group>
 
-							<v-switch v-if="field_options.type == 'switch'" v-model="field_options.value" :label="field_options.title"></v-switch>
+							<v-switch v-if="field_options.type == 'switch'" v-model="field_options.value" :label="field_options.title"
+							          ref="refObj"
+							></v-switch>
 
 							<v-checkbox v-if="field_options.type == 'checkbox'"
+							            ref="refObj"
 							            :name="field_name"
 							            :id="field_name"
 							            v-model="field_options.value"
@@ -114,7 +151,9 @@
 
 							<div v-if="field_options.type == 'checkboxgroup'"
 							     :name="field_name"
-							     :id="field_name">
+							     :id="field_name"
+							     ref="refObj"
+							>
 								<v-checkbox
 										v-model="field_options.value"
 										v-for="(value, key) in field_options.options"
@@ -126,6 +165,7 @@
 							</div>
 
 							<v-select
+									ref="refObj"
 									:name="field_name"
 									:id="field_name"
 									:label="field_options.title"
@@ -138,6 +178,7 @@
 									attach
 							></v-select>
 							<v-textarea
+									ref="refObj"
 									v-if="field_options.type == 'textarea'"
 									:name="field_name"
 									:id="field_name"
@@ -149,6 +190,10 @@
 									:error-messages="errors.first(field_name)"
 							></v-textarea>
 						</v-container>
+					</v-flex>
+					<v-flex>
+						<v-btn color="primary" @click="saveForm()">Save</v-btn>
+						<v-btn color="warning" @click="cancelForm()">Cancel</v-btn>
 					</v-flex>
 				</v-layout>
 			</v-form>
@@ -175,16 +220,20 @@
 		var vm = new Vue({
 			el: '#app',
 			data: {
-				dialog: [],
+				refObj: [],
+				alert: true,
+				alert_error: true,
+				formSuccess: '',
+				formErrors: [],
 				schema: myScema,
 				formValid: false,
 				field_types: [
 					'input',
 					'checkbox',
 					'selectbox',
-					'date', 
-					'radio', 
-				    'switch', 
+					'date',
+					'radio',
+					'switch',
 					'checkboxgroup',
 					'field_title',
 					'textarea'
@@ -201,12 +250,41 @@
 				},
 				resetValidation() {
 					this.$refs.form.resetValidation()
+				},
+				saveForm() {
+					//this.validate();
+					this.alert = true;
+					this.alert_error = true;
+					var param = {};
+					param.saveForm = true;
+					param.fields = myScema.form_fields;
+					var queryString = $.param(param);
+
+					axios.post(myScema.url, queryString)
+						.then(response => (this.saveResponse(response)))
+						.catch(function (error) {
+							alert(error);
+						});
+				},
+				saveResponse(response) {
+					if (typeof response.data.success_message !== 'undefined') {
+						this.formSuccess = response.data.success_message;
+					}
+					if (typeof response.data.errors !== 'undefined') {
+						this.formErrors = response.data.errors;
+					}
+					this.$refs.form.scrollTop = 0;
+				},
+				cancelForm() {
+					if (typeof myScema.back_url !== 'undefined') {
+						window.location = myScema.back_url;
+					} else {
+						window.history.back();
+					}
 				}
 			},
 		});
 
-
-		console.log(myScema.form_fields);
 
 		for (var form_field in myScema.form_fields) {
 			if (typeof myScema.form_fields[form_field].ajax_params !== 'undefined' &&
@@ -226,12 +304,15 @@
 			param.relatedTo = data.ajax_params.relatedTo;
 			param.field = data.name;
 			param.field_value = data.value;
+			param.fields = myScema.form_fields;
+			var queryString = $.param(param);
+
 
 			if (typeof unwatchers[param.relatedTo] !== 'undefined') {
 				unwatchers[param.relatedTo]();
 			}
 
-			axios.get(data.ajax_params.ajax_url, {params: param})
+			axios.post(data.ajax_params.ajax_url, queryString)
 				.then(function (response) {
 					myScema.form_fields = response.data;
 
@@ -257,6 +338,7 @@
 					alert(error);
 				});
 		}
+
 	} else {
 		alert('Form data is empty!');
 	}

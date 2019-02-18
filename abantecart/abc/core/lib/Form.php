@@ -34,6 +34,8 @@ class Form
 {
     /* @var $url string */
     public $url;
+    /* @var $back_url string */
+    public $back_url;
     /* @var $form_name string */
     public $form_name;
     /* @var  $title string */
@@ -54,6 +56,9 @@ class Form
     {
         if (isset($data['url'])) {
             $this->url = $data['url'];
+        }
+        if (isset($data['back_url'])) {
+            $this->back_url = $data['back_url'];
         }
         if (isset($data['form_name'])) {
             $this->form_name = $data['form_name'];

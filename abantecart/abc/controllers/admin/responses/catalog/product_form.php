@@ -23,7 +23,8 @@ use abc\core\lib\AJson;
 use abc\core\lib\FormBuilder;
 use abc\models\catalog\Product;
 
-class ControllerResponsesCatalogProductForm extends AController {
+class ControllerResponsesCatalogProductForm extends AController
+{
     public $error = [];
     public $data = [];
 
@@ -32,20 +33,31 @@ class ControllerResponsesCatalogProductForm extends AController {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/product');
-        $field = $this->request->get['field'];
+        $field = $this->request->post['field'];
         if ($field == 'product_type_id') {
             $this->getForm();
         }
+
+        \H::df($this->request->post['fields']);
+
+        $fields = $this->request->post['fields'];
+        $saveForm = $this->request->post['saveForm'];
+        if (is_array($fields) && (bool)$saveForm === true) {
+            $this->saveForm($fields);
+        }
+
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    public function getForm() {
+    public function getForm()
+    {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $product_type_id = (int)$this->request->get['field_value'];
+        $product_type_id = (int)$this->request->post['field_value'];
 
         $formData = [
-            'url'           => $this->html->getSecureURL('catalog/product_form'),
+            'url'           => $this->html->getSecureURL('r/catalog/product_form'),
+            'back_url'      => $this->html->getSecureURL('catalog/product'),
             'form_name'     => 'product_form',
             'title'         => 'Create New product',
             'fields_preset' => [
@@ -56,7 +68,6 @@ class ControllerResponsesCatalogProductForm extends AController {
                 ],
                 'fields'  => [
                     'product_type_id' => [
-                        'value' =>  $product_type_id,
                         'ajax_params'  => [
                             'relatedTo' => 'product_type_id',
                             'ajax_url'  => $this->html->getSecureURL('r/catalog/product_form'),
@@ -69,6 +80,21 @@ class ControllerResponsesCatalogProductForm extends AController {
             ],
         ];
 
+        $productFields = $this->request->post['fields'];
+
+        if ($productFields && is_array($productFields)) {
+            foreach ($productFields as $productFieldName => $productField) {
+                if (empty($productField['value'])) {
+                    continue;
+                }
+                if ((int)$productField['value'] > 0 && $productField['value'] !== '0') {
+                    $formData['fields_preset']['fields'][$productFieldName]['value'] = (int)$productField['value'];
+                } else {
+                    $formData['fields_preset']['fields'][$productFieldName]['value'] = $productField['value'];
+                }
+            }
+        }
+
         $form = new FormBuilder(Product::class, $product_type_id, $formData);
         $this->data['form_fields'] = $form->getForm()->getFormFields();
 
@@ -77,8 +103,28 @@ class ControllerResponsesCatalogProductForm extends AController {
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($this->data['form_fields']));
+        $this->response->setOutput(json_encode($this->data['form_fields']));
 
+    }
+
+    public function saveForm(array $fileds) {
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->data['result'] = [];
+
+        foreach ($fileds as $key => $field) {
+
+        }
+        $this->data['result']['success_message'] = 'Form save complete!';
+
+        $this->data['result']['errors'][] = 'Erro1';
+        $this->data['result']['errors'][] = 'Erro2';
+
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->addJSONHeader();
+        $this->response->setOutput(AJson::encode($this->data['result']));
     }
 }
 

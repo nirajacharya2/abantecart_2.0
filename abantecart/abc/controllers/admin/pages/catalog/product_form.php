@@ -60,7 +60,8 @@ class ControllerPagesCatalogProductForm extends AController
         $product_type_id = (int)$this->request->get['product_type_id'];
 
         $formData = [
-            'url'           => $this->html->getSecureURL('catalog/product_form'),
+            'url'           => $this->html->getSecureURL('r/catalog/product_form'),
+            'back_url'      => $this->html->getSecureURL('catalog/product'),
             'form_name'     => 'product_form',
             'title'         => 'Create New product',
             'fields_preset' => [
