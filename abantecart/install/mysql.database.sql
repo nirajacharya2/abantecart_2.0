@@ -13462,7 +13462,7 @@ CREATE TABLE `ac_object_type_descriptions` (
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   `stage_id` int(6) DEFAULT NULL,
-  KEY `object_type_id_language_idx` (`object_type_id`,`language_id`)
+  PRIMARY KEY (`object_type_id`,`language_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
