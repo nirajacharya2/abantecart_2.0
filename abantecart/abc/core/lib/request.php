@@ -40,6 +40,11 @@ final class ARequest
 
     public function __construct()
     {
+        $headers = getallheaders();
+        if (strpos($headers['Content-Type'], 'application/json') !== false) {
+            $_POST = json_decode(file_get_contents('php://input'), true);
+        }
+
         $_GET = $this->clean($_GET);
         $_POST = $this->clean($_POST);
         $_COOKIE = $this->clean($_COOKIE);
@@ -128,7 +133,7 @@ final class ARequest
                     exit('Forbidden');
                 }
             }
-        } else {
+        } else if(!is_numeric($data)) {
             $data = htmlspecialchars($data, ENT_COMPAT, ABC::env('APP_CHARSET'));
         }
         return $data;

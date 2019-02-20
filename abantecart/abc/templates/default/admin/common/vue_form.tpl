@@ -1,3 +1,5 @@
+<script src='https://cloud.tinymce.com/stable/tinymce.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-mce@latest/dist/vue-mce.web.js"></script>
 <style>
 	.v-input--selection-controls:not(.v-input--hide-details) .v-input__slot,
 	.v-input__slot {
@@ -257,7 +259,6 @@
 				]
 			},
 			mounted() {
-				console.log(this.$refs);
 			},
 			methods: {
 				validate() {
@@ -284,9 +285,8 @@
 							for (var field in myScema.form_fields) {
 								param.fields[field] = myScema.form_fields[field].value;
 							}
-							var queryString = $.param(param);
 
-							axios.post(myScema.url, queryString)
+							axios.post(myScema.url, param)
 								.then(response => (this.saveResponse(response)))
 								.catch(function (error) {
 									alert(error);
@@ -295,7 +295,7 @@
 							this.formError = ' ';
 						}
 						$([document.documentElement, document.body]).animate({
-							scrollTop: $("#elementtoScrollToID").offset().top
+							scrollTop: $(".form-title").offset().top
 						}, 500);
 					}).catch(() => {
 						return false
@@ -355,10 +355,6 @@
 			param.field = data.name;
 			param.field_value = data.value;
 			param.fields = myScema.form_fields;
-			var queryString = $.param(param);
-
-			var queryJson = JSON.stringify(param);
-
 
 			let axiosConfig = {
 				headers: {
@@ -371,7 +367,7 @@
 				unwatchers[param.relatedTo]();
 			}
 
-			axios.post(data.ajax_params.ajax_url, queryString)
+			axios.post(data.ajax_params.ajax_url, param)
 				.then(function (response) {
 					myScema.form_fields = response.data;
 

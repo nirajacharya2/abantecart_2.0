@@ -40,8 +40,10 @@ class ControllerResponsesCatalogProductForm extends AController
             $this->getForm();
         }
 
-        $fields = json_encode($this->request->post['fields'], JSON_NUMERIC_CHECK);
-        $fields = json_decode($fields, true);
+        $fields = $this->request->post['fields'];
+
+        //\H::df($fields);
+        //\H::df($fields['model']);
 
         $saveForm = $this->request->post['saveForm'];
         if (is_array($fields) && (bool)$saveForm === true) {
@@ -82,8 +84,7 @@ class ControllerResponsesCatalogProductForm extends AController
             ],
         ];
 
-        $productFields = json_encode($this->request->post['fields'], JSON_NUMERIC_CHECK);
-        $productFields = json_decode($productFields, true);
+        $productFields = $this->request->post['fields'];
 
         if ($productFields && is_array($productFields)) {
             foreach ($productFields as $productFieldName => $productField) {
