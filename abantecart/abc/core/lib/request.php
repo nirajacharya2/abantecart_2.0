@@ -40,8 +40,7 @@ final class ARequest
 
     public function __construct()
     {
-        $headers = getallheaders();
-        if (strpos($headers['Content-Type'], 'application/json') !== false) {
+        if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
             $_POST = json_decode(file_get_contents('php://input'), true);
         }
 
@@ -128,9 +127,9 @@ final class ARequest
                 $key = $this->clean($key);
                 $data[$key] = $this->clean($value);
                 //check route and forbid if it's wrong
-                if ($key == 'rt' && preg_match('/[^A-Za-z0-9_\/]/', $data[$key])) {
+                if ($key === 'rt' && preg_match('/[^A-Za-z0-9_\/]/', $data[$key])) {
                     http_response_code(403);
-                    exit('Forbidden');
+                    exit('Request forbidden');
                 }
             }
         } else if(!is_numeric($data)) {
