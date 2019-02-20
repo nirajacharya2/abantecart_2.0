@@ -21,6 +21,7 @@ use abc\core\ABC;
 use abc\tests\unit\ATestCase;
 use abc\models\catalog\Product;
 use abc\tests\unit\modules\listeners\ATestListener;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Warning;
 
 class BaseModelTest extends ATestCase
@@ -93,7 +94,7 @@ class BaseModelTest extends ATestCase
         $this->assertIsInt($productId);
 
         //check audits by requestId
-        if ($result) {
+      /*  if ($result) {
             $audits = $this->db->table('audits')
                 ->select('*')
                 ->where('request_id', '=', $this->request->getUniqueId())
@@ -102,7 +103,8 @@ class BaseModelTest extends ATestCase
 
             $this->assertEquals(34, count($audits));
         }
-        return $productId;
+      */
+      return $productId;
     }
 
     public function testValidationNotPassed()
@@ -126,6 +128,9 @@ class BaseModelTest extends ATestCase
             $result = true;
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
+        } catch (ValidationException $e){
+            $error_text = $e->getMessage();
+            $result = true;
         } catch (\Exception $e) {
             $error_text = $e->getMessage();
             if (is_int(strpos($error_text, "'validation' =>"))) {

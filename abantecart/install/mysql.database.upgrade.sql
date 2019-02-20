@@ -1818,7 +1818,7 @@ CREATE TABLE `ac_object_types` (
   `sort_order` int(11) DEFAULT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp DEFAULT NULL,
+  `date_deleted` timestamp NULL,
   `stage_id` int(6) DEFAULT NULL,
   PRIMARY KEY (`object_type_id`),
   INDEX `stage_idx` (`stage_id` ASC)
@@ -1832,9 +1832,9 @@ CREATE TABLE `ac_object_type_descriptions` (
   `description` text,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp DEFAULT NULL,
+  `date_deleted` timestamp NULL,
   `stage_id` int(6) DEFAULT NULL,
-  KEY `object_type_id_language_idx` (`object_type_id`,`language_id`)
+  KEY `object_type_id_language_idx` (`object_type_id`,`language_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
