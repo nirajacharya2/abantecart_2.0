@@ -11447,7 +11447,7 @@ VALUES  (10,'category',11),
         (10,'review',15),
         (10,'attributes',16),
         (10,'attribute_groups',17),
-        (10,'product_type',18),
+        (10,'object_type',18),
         (10,'rl_manager',220);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11458,7 +11458,7 @@ VALUES  (11,'text_category',11),
         (11,'text_review',15),
         (11,'text_attribute',16),
         (11,'text_attribute_groups',17),
-        (11,'text_product_type',18),
+        (11,'text_object_type',18),
         (11,'text_rl_manager',220);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11469,7 +11469,7 @@ VALUES  (12,'catalog/category',11),
         (12,'catalog/review',15),
         (12,'catalog/attribute',16),
         (12,'catalog/attribute_groups',17),
-        (12,'catalog/product_type',18),
+        (12,'catalog/object_type',18),
         (12,'tool/rl_manager',220);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
