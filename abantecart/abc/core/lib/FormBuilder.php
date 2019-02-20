@@ -194,11 +194,11 @@ class FormBuilder
             $field['title'] = $this->registry->get('language')->get('title_'.$field['name']);
         }
 
+        $field = array_merge_recursive($field, $this->fields_preset['default']);
         if (isset($this->fields_preset['fields'][$field_name])) {
             $field = array_merge_recursive($field, $this->fields_preset['fields'][$field_name]);
-        } else {
-            $field = array_merge_recursive($field, $this->fields_preset['default']);
         }
+
 
         $field['rule'] = $this->converValidateRules($field);
 
@@ -217,6 +217,9 @@ class FormBuilder
                 case 'nullable':
                     break;
                 case 'max:1':
+                    break;
+                case 'number':
+                    $modified_rules[] = 'numeric';
                     break;
                 default:
                     $modified_rules[] = $rule;

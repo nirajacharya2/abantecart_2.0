@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Category extends BaseModel
 {
     use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     /**
      * @var string
      */
@@ -66,6 +67,15 @@ class Category extends BaseModel
     public function descriptions()
     {
         return $this->hasMany(CategoryDescription::class, 'category_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function description()
+    {
+        return $this->hasOne(CategoryDescription::class, 'category_id')
+            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
     }
 
     /**

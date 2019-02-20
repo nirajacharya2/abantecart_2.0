@@ -73,6 +73,7 @@ class Product extends BaseModel
 {
     use SoftDeletes;
     const DELETED_AT = 'date_deleted';
+
     /**
      * Access policy properties
      * Note: names must be without dashes and whitespaces
@@ -214,6 +215,7 @@ class Product extends BaseModel
         'name'               => [
             'cast'       => 'string',
             'rule'       => 'required|max:255',
+            'js_rule'    => 'required|max:255',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
@@ -246,16 +248,17 @@ class Product extends BaseModel
             'access'     => 'read',
             'sort_order' => 20,
         ],
-        'product_tags'       => [
+        'tags'       => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
         ],
-        'product_categories' => [
+        'categories' => [
             'cast'       => 'int',
             'rule'       => 'integer',
+            'js_rule'    => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
@@ -294,6 +297,7 @@ class Product extends BaseModel
         'model'              => [
             'cast'       => 'string',
             'rule'       => 'required|max:64',
+            'js_rule'    => 'required|max:64',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
@@ -512,7 +516,7 @@ class Product extends BaseModel
                 'min'  => 0,
             ],
         ],
-        'length_class'       => [
+        'length_class_id'       => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -533,7 +537,7 @@ class Product extends BaseModel
                 'min'  => 0,
             ],
         ],
-        'weight_class'       => [
+        'weight_class_id'       => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -596,6 +600,15 @@ class Product extends BaseModel
     public function descriptions()
     {
         return $this->hasMany(ProductDescription::class, 'product_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function description()
+    {
+        return $this->hasOne(ProductDescription::class, 'product_id')
+            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
     }
 
     /**
@@ -761,6 +774,7 @@ class Product extends BaseModel
     {
         $tax_classes = TaxClass::with('description')->get();
         $result = [];
+        $result[] = (object)['id' => 0, 'name' => $this->registry->get('language')->get('text_none')];
         foreach ($tax_classes as $tax_class) {
             $result[] = (object)['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
         }
@@ -1142,6 +1156,7 @@ class Product extends BaseModel
         if ($productId) {
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
+
 
             self::updateProductLinks($productId, $product_data);
             return $productId;

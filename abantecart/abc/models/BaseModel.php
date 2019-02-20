@@ -251,13 +251,9 @@ class BaseModel extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            if (!$this->validate($this->toArray())) {
-                throw new \Exception(
-                    'Data Validation of model '. static::class.' before save failed: '."\n"
-                    ."Errors:\n". var_export($this->errors, true)
-                );
+            if ($this->validate($this->toArray())) {
+                parent::save();
             }
-            parent::save();
         } else {
             throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
@@ -301,10 +297,10 @@ class BaseModel extends OrmModel
                 $v->validate();
             }catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
-                return false;
+                throw $e;
             }catch (\Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
-                return false;
+                throw $e;
             }
         }
         return true;
@@ -559,5 +555,10 @@ class BaseModel extends OrmModel
     public function getKeySet()
     {
         return $this->primaryKeySet ?? [];
+    }
+
+    public function getFields()
+    {
+        return $this->fields;
     }
 }

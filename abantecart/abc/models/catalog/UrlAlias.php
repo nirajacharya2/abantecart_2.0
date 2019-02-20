@@ -36,4 +36,17 @@ class UrlAlias extends BaseModel
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
+
+    public static function getProductKeyword(int $productId, int $language_id)
+    {
+        $productKeyword = self::select('keyword')
+        ->where('query', '=', 'product_id='.$productId)
+        ->where('language_id', '=', $language_id)
+        ->first();
+        if ($productKeyword) {
+            return $productKeyword->toArray()['keyword'];
+        } else {
+            return '';
+        }
+    }
 }

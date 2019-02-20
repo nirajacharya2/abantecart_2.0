@@ -23,11 +23,19 @@
 	.v-chip, .v-chip .v-chip__content {
 		border-radius: 4px !important;
 	}
+
+	.v-text-field__details {
+		margin-top: 3px;
+	}
+	ul {
+		margin-bottom: 0px !important;
+	}
 </style>
 
 <div id="app">
 	<v-app>
 		<v-container fluid>
+			<!-- <pre>{{ schema }}</pre>   -->
 			<v-form v-model="formValid" ref="form" :name="schema.form_name" :action="schema.url">
 				<v-layout row wrap>
 					<div class="form-title">
@@ -54,9 +62,12 @@
 								type="error"
 								outline
 								dismissible
-								v-for="formError in formErrors"
+								v-if="formError"
 						>
 							{{formError}}
+							<ul>
+								<li v-for="error in errors.all()">{{ error }}</li>
+							</ul>
 						</v-alert>
 					</v-flex>
 
@@ -65,9 +76,8 @@
 					        v-if="field_types.includes(field_options.type)"
 					        v-bind="field_options.v_flex_props">
 						<v-container fluid>
-							{{ field_options.value }}
 							<v-dialog
-									ref="refObj"
+									:ref="'dialog-' + field_name"
 									v-model="field_options.modal"
 									:return-value.sync="field_options.value"
 									persistent
@@ -88,7 +98,7 @@
 								<v-date-picker v-model="field_options.value" scrollable>
 									<v-spacer></v-spacer>
 									<v-btn flat color="primary" @click="field_options.modal = false">Cancel</v-btn>
-									<v-btn flat color="primary" @click="$refs.refObj[index-1].save(field_options.value)">OK</v-btn>
+									<v-btn flat color="primary" @click="applyDate('dialog-' + field_name, field_options.value)">OK</v-btn>
 								</v-date-picker>
 							</v-dialog>
 
@@ -105,8 +115,10 @@
 									ref="refObj"
 									:name="field_name"
 									:id="field_name"
+									key="field_name"
 									:label="field_options.title"
 									v-bind="field_options.props"
+									v-model="field_options.value"
 									v-if="field_options.type == 'input'"
 									v-validate=field_options.validate
 									:data-vv-as=field_options.title
@@ -192,8 +204,12 @@
 						</v-container>
 					</v-flex>
 					<v-flex>
-						<v-btn color="primary" @click="saveForm()">Save</v-btn>
-						<v-btn color="warning" @click="cancelForm()">Cancel</v-btn>
+						<v-btn small color="primary" @click="saveForm()">
+							<v-icon small>save</v-icon>
+							Save</v-btn>
+						<v-btn small flat @click="cancelForm()">
+							<v-icon small>keyboard_backspace</v-icon>
+							Cancel</v-btn>
 					</v-flex>
 				</v-layout>
 			</v-form>
@@ -224,7 +240,8 @@
 				alert: true,
 				alert_error: true,
 				formSuccess: '',
-				formErrors: [],
+				formError: '',
+				fieldErrors: [],
 				schema: myScema,
 				formValid: false,
 				field_types: [
@@ -239,6 +256,9 @@
 					'textarea'
 				]
 			},
+			mounted() {
+				console.log(this.$refs);
+			},
 			methods: {
 				validate() {
 					if (this.$refs.form.validate()) {
@@ -252,28 +272,54 @@
 					this.$refs.form.resetValidation()
 				},
 				saveForm() {
-					//this.validate();
+					this.formError = this.formSuccess = '';
 					this.alert = true;
 					this.alert_error = true;
-					var param = {};
-					param.saveForm = true;
-					param.fields = myScema.form_fields;
-					var queryString = $.param(param);
 
-					axios.post(myScema.url, queryString)
-						.then(response => (this.saveResponse(response)))
-						.catch(function (error) {
-							alert(error);
-						});
+					this.$validator.validateAll().then((result) => {
+						if (result === true) {
+							var param = {};
+							param.saveForm = true;
+							param.fields = {};
+							for (var field in myScema.form_fields) {
+								param.fields[field] = myScema.form_fields[field].value;
+							}
+							var queryString = $.param(param);
+
+							axios.post(myScema.url, queryString)
+								.then(response => (this.saveResponse(response)))
+								.catch(function (error) {
+									alert(error);
+								});
+						} else {
+							this.formError = ' ';
+						}
+						$([document.documentElement, document.body]).animate({
+							scrollTop: $("#elementtoScrollToID").offset().top
+						}, 500);
+					}).catch(() => {
+						return false
+					});
 				},
 				saveResponse(response) {
 					if (typeof response.data.success_message !== 'undefined') {
 						this.formSuccess = response.data.success_message;
+						this.formError = '';
+					}
+					if (typeof response.data.error !== 'undefined') {
+						this.formError = response.data.error;
 					}
 					if (typeof response.data.errors !== 'undefined') {
-						this.formErrors = response.data.errors;
+						this.formError = ' ';
+						this.fieldErrors = response.data.errors;
+						for (var field in this.fieldErrors) {
+							const error = {
+								field: field,
+								msg: this.fieldErrors[field][0],
+							}
+							this.errors.add(error);
+						}
 					}
-					this.$refs.form.scrollTop = 0;
 				},
 				cancelForm() {
 					if (typeof myScema.back_url !== 'undefined') {
@@ -281,7 +327,11 @@
 					} else {
 						window.history.back();
 					}
+				},
+				applyDate(ref, value) {
+					this.$refs[ref][0].save(value);
 				}
+
 			},
 		});
 
@@ -306,6 +356,15 @@
 			param.field_value = data.value;
 			param.fields = myScema.form_fields;
 			var queryString = $.param(param);
+
+			var queryJson = JSON.stringify(param);
+
+
+			let axiosConfig = {
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				}
+			};
 
 
 			if (typeof unwatchers[param.relatedTo] !== 'undefined') {

@@ -1067,11 +1067,11 @@ ADD CONSTRAINT `ac_extension_dependencies_fk_1`
   REFERENCES `ac_extensions` (`extension_id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
-  
-  
-ALTER TABLE `ac_products_related` 
+
+
+ALTER TABLE `ac_products_related`
 ADD INDEX `ac_products_related_ibfk_2_idx` (`related_id` ASC);
-ALTER TABLE `ac_products_related` 
+ALTER TABLE `ac_products_related`
 ADD CONSTRAINT `ac_products_related_ibfk_2`
 FOREIGN KEY (`related_id`)
 REFERENCES `ac_products` (`product_id`)
@@ -1806,3 +1806,72 @@ ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE C
 ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
 ADD INDEX `stage_id` (`stage_id` ASC);
+
+ALTER TABLE `ac_products`
+ADD COLUMN `product_type_id` INT(1) NULL;
+
+DROP TABLE IF EXISTS `ac_object_types`;
+CREATE TABLE `ac_object_types` (
+  `object_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `object_type` varchar(255) DEFAULT NULL,
+  `status` int(11) DEFAULT '0',
+  `sort_order` int(11) DEFAULT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp DEFAULT NULL,
+  `stage_id` int(6) DEFAULT NULL,
+  PRIMARY KEY (`object_type_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_object_type_descriptions`;
+CREATE TABLE `ac_object_type_descriptions` (
+  `object_type_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(250) NOT NULL,
+  `description` text,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp DEFAULT NULL,
+  `stage_id` int(6) DEFAULT NULL,
+  KEY `object_type_id_language_idx` (`object_type_id`,`language_id`)
+  INDEX `stage_idx` (`stage_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `ac_object_type_descriptions`
+ADD CONSTRAINT `ac_object_type_descriptions_object_types_fk`
+  FOREIGN KEY (`object_type_id`)
+  REFERENCES `ac_object_types` (`object_type_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+
+DROP TABLE IF EXISTS `ac_object_type_aliases`;
+CREATE TABLE `ac_object_type_aliases` (
+  `object_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`object_type`),
+  UNIQUE KEY `object_type_UNIQUE` (`object_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `ac_object_type_aliases` (`object_type`) VALUES ('Product');
+INSERT INTO `ac_object_type_aliases` (`object_type`) VALUES ('Category');
+
+DROP TABLE IF EXISTS `ac_object_field_settings`;
+CREATE TABLE `ac_object_field_settings` (
+  `object_type` varchar(255) NOT NULL,
+  `object_type_id` int(11) DEFAULT NULL,
+  `object_field_name` varchar(255) NOT NULL,
+  `field_setting` varchar(255) NOT NULL,
+  `field_setting_value` varchar(255) NOT NULL,
+  UNIQUE KEY `index1` (`object_type`,`object_type_id`,`object_field_name`,`field_setting`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_global_attribute_group_to_object_type`;
+CREATE TABLE `ac_global_attribute_group_to_object_type` (
+  `attribute_group_id` int(11) NOT NULL,
+  `object_type_id` int(11) NOT NULL,
+  KEY `attribute_group_id_object_type_idx` (`attribute_group_id`,`object_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `ac_global_attributes`
+ADD COLUMN `name` VARCHAR(255) NULL AFTER `attribute_type_id`;

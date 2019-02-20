@@ -72,6 +72,7 @@ class ControllerPagesCatalogProductForm extends AController
                 ],
                 'fields'  => [
                     'product_type_id' => [
+                        'value' => $product_type_id,
                         'ajax_params'  => [
                             'relatedTo' => 'product_type_id',
                             'ajax_url'  => $this->html->getSecureURL('r/catalog/product_form'),
@@ -80,6 +81,15 @@ class ControllerPagesCatalogProductForm extends AController
                             "xs12" => true,
                         ],
                     ],
+                    'date_available'  => [
+                        'value' => date('Y-m-d')
+                    ],
+                    'tax_class_id'  => [
+                        'value' => 0
+                    ],
+                    'product_stores' => [
+                        'value' => 0
+                    ]
                 ],
             ],
         ];

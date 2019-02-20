@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CategoryDescription extends BaseModel
 {
     use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     public $incrementing = false;
     public $timestamps = false;
 

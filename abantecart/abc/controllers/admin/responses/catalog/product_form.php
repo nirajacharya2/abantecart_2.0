@@ -22,6 +22,8 @@ use abc\core\engine\AController;
 use abc\core\lib\AJson;
 use abc\core\lib\FormBuilder;
 use abc\models\catalog\Product;
+use Cake\Database\Exception;
+use Illuminate\Validation\ValidationException;
 
 class ControllerResponsesCatalogProductForm extends AController
 {
@@ -38,9 +40,9 @@ class ControllerResponsesCatalogProductForm extends AController
             $this->getForm();
         }
 
-        \H::df($this->request->post['fields']);
+        $fields = json_encode($this->request->post['fields'], JSON_NUMERIC_CHECK);
+        $fields = json_decode($fields, true);
 
-        $fields = $this->request->post['fields'];
         $saveForm = $this->request->post['saveForm'];
         if (is_array($fields) && (bool)$saveForm === true) {
             $this->saveForm($fields);
@@ -80,18 +82,15 @@ class ControllerResponsesCatalogProductForm extends AController
             ],
         ];
 
-        $productFields = $this->request->post['fields'];
+        $productFields = json_encode($this->request->post['fields'], JSON_NUMERIC_CHECK);
+        $productFields = json_decode($productFields, true);
 
         if ($productFields && is_array($productFields)) {
             foreach ($productFields as $productFieldName => $productField) {
                 if (empty($productField['value'])) {
                     continue;
                 }
-                if ((int)$productField['value'] > 0 && $productField['value'] !== '0') {
-                    $formData['fields_preset']['fields'][$productFieldName]['value'] = (int)$productField['value'];
-                } else {
-                    $formData['fields_preset']['fields'][$productFieldName]['value'] = $productField['value'];
-                }
+                $formData['fields_preset']['fields'][$productFieldName]['value'] = $productField['value'];
             }
         }
 
@@ -107,17 +106,42 @@ class ControllerResponsesCatalogProductForm extends AController
 
     }
 
-    public function saveForm(array $fileds) {
+    public function saveForm(array $fields)
+    {
+        $fields = json_encode($fields);
+        $fields = json_decode($fields, true);
+
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->data['result'] = [];
 
-        foreach ($fileds as $key => $field) {
 
+        $fields['product_description'] = [
+          'name' => $fields['name'],
+          'blurb' => $fields['blurb'],
+          'description' => $fields['description'],
+          'meta_keywords' => $fields['meta_keywords'],
+          'meta_description' => $fields['meta_description'],
+          'language_id' => $this->language->getContentLanguageID()
+        ];
+
+        $productInst = new Product();
+        try {
+            $productId = $fields['product_id'];
+            if ($productId) {
+                $productInst->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
+            } else {
+                $productId = $productInst->createProduct($fields);
+            }
+            if ($productId) {
+                $this->data['result']['success_message'] = $this->language->get('text_saved');
+            }
+
+        } catch (ValidationException $e) {
+            $this->data['result']['errors'] = $e->errors();
         }
-        $this->data['result']['success_message'] = 'Form save complete!';
-
-        $this->data['result']['errors'][] = 'Erro1';
-        $this->data['result']['errors'][] = 'Erro2';
+        catch (\Exception $e) {
+            $this->data['result']['error'] = $e->getMessage();
+        }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
