@@ -1,5 +1,3 @@
-<script src='https://cloud.tinymce.com/stable/tinymce.min.js'></script>
-<script src="https://cdn.jsdelivr.net/npm/vue-mce@latest/dist/vue-mce.web.js"></script>
 <style>
 	.v-input--selection-controls:not(.v-input--hide-details) .v-input__slot,
 	.v-input__slot {
@@ -31,6 +29,9 @@
 	}
 	ul {
 		margin-bottom: 0px !important;
+	}
+	.tox-notifications-container {
+		display: none !important;
 	}
 </style>
 
@@ -203,6 +204,19 @@
 									:data-vv-as=field_options.title
 									:error-messages="errors.first(field_name)"
 							></v-textarea>
+
+							<div v-if="field_options.type == 'editor'">
+								<v-subheader v-html="field_options.title">
+								</v-subheader>
+							<editor :init="editorConfig"
+							        :name="field_name"
+							        :id="field_name"
+							        v-model="field_options.value"
+							        v-bind="field_options.props"
+							        v-validate=field_options.validate
+							>
+							</editor>
+							</div>
 						</v-container>
 					</v-flex>
 					<v-flex>
@@ -235,9 +249,28 @@
 
 		Vue.use(VeeValidate);
 
+		tinyConfig = {
+			height: 250,
+			menubar: false,
+			plugins: [
+				'advlist autolink lists link image charmap print preview anchor textcolor',
+				'searchreplace visualblocks code fullscreen',
+				'insertdatetime media table paste code help wordcount'
+			],
+			toolbar: 'undo redo | formatselect | link table searchreplace| bold italic forecolor backcolor ' +
+				'| alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code fullscreen',
+			content_css: [
+
+			]
+		};
+
 		var vm = new Vue({
 			el: '#app',
+			components: {
+				'editor': Editor
+			},
 			data: {
+				editorConfig: tinyConfig,
 				refObj: [],
 				alert: true,
 				alert_error: true,
@@ -255,7 +288,8 @@
 					'switch',
 					'checkboxgroup',
 					'field_title',
-					'textarea'
+					'textarea',
+					'editor'
 				]
 			},
 			mounted() {

@@ -2,16 +2,18 @@
 
 namespace abc\models\catalog;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use H;
 
 /**
  * Class UrlAlias
  *
- * @property int $url_alias_id
- * @property string $query
- * @property string $keyword
- * @property int $language_id
+ * @property int      $url_alias_id
+ * @property string   $query
+ * @property string   $keyword
+ * @property int      $language_id
  *
  * @property Language $language
  *
@@ -37,16 +39,45 @@ class UrlAlias extends BaseModel
         return $this->belongsTo(Language::class, 'language_id');
     }
 
+    private static function getKeyWord(string $query, int $language_id)
+    {
+        $keyword = self::select('keyword')
+            ->where('query', '=', $query)
+            ->where('language_id', '=', $language_id)
+            ->first();
+        if ($keyword && isset($keyword->toArray()['keyword'])) {
+            return $keyword->toArray()['keyword'];
+        }
+        return '';
+    }
+
     public static function getProductKeyword(int $productId, int $language_id)
     {
-        $productKeyword = self::select('keyword')
-        ->where('query', '=', 'product_id='.$productId)
-        ->where('language_id', '=', $language_id)
-        ->first();
-        if ($productKeyword) {
-            return $productKeyword->toArray()['keyword'];
+        return self::getKeyWord('product_id='.$productId, $language_id);
+    }
+
+    public static function getCategoryKeyword(int $categoryId, int $language_id)
+    {
+        return self::getKeyWord('category_id='.$categoryId, $language_id);
+    }
+
+    private static function setKeyword(string $keyword, string $objectKeyName, int $objectId)
+    {
+        $keyword = H::SEOEncode($keyword, $objectKeyName, $objectId);
+        $registry = Registry::getInstance();
+        if ($keyword) {
+            $registry->get('language')->replaceDescriptions('url_aliases',
+                ['query' => $objectKeyName."=".(int)$objectId],
+                [$registry->get('language')->getContentLanguageID() => ['keyword' => $keyword]]);
         } else {
-            return '';
+            self::where('query', '=', $objectKeyName."=".(int)$objectId)
+                ->where('language_id', '=', $registry->get('language')->getContentLanguageID())
+                ->delete();
         }
+    }
+
+    public static function setProductKeyword(string $keyword, int $productId)
+    {
+        self::setKeyword($keyword, 'product_id', $productId);
     }
 }

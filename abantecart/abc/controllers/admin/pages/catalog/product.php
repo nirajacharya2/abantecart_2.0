@@ -427,6 +427,8 @@ class ControllerPagesCatalogProduct extends AController
             $product = EProduct::with('description', 'tags', 'stores', 'categories')->find($product_id)->toArray();
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
 
+            $product_type_id = $product['product_type_id'];
+
             foreach ($product as $fieldName => $fieldValue) {
                 if (is_array($fieldValue) && $fieldName == 'description') {
                     $product = array_merge($product, $fieldValue);
@@ -474,7 +476,6 @@ class ControllerPagesCatalogProduct extends AController
             $formTitle = 'Create New product';
         }
 
-        $product_type_id = (int)$this->request->get['product_type_id'];
 
         $form = new FormBuilder(EProduct::class, $product_type_id, $formData);
         $this->data['form'] = $form->getForm()->toArray();

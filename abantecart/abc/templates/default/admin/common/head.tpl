@@ -28,6 +28,7 @@ use abc\core\ABC; ?>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="/templates/default/admin/assets/js/tinymce-vue/tinymce-vue.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
@@ -98,7 +99,14 @@ use abc\core\ABC; ?>
 <script type="text/javascript" src="vendor/components/jqueryui/jquery-ui.min.js"></script>
 <script type="text/javascript" src="vendor/components/popper/popper.min.js"></script>
 <script type="text/javascript" src="vendor/components/bootstrap/js/bootstrap.min.js"></script>
+
+<?php
+if (strpos($this->request->get['rt'], 'catalog/product') === false) {
+?>
 <script defer type="text/javascript" src="vendor/tinymce/tinymce/tinymce.min.js"></script>
+<?php
+}
+?>
 
 
 <?php foreach ($scripts as $script) { ?>

@@ -230,7 +230,7 @@ class Product extends BaseModel
         'description'        => [
             'cast'       => 'string',
             'rule'       => '',
-            'input_type' => 'textarea',
+            'input_type' => 'editor',
             'access'     => 'read',
             'sort_order' => 20,
         ],
@@ -1157,6 +1157,9 @@ class Product extends BaseModel
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
 
+            if ($product_data['keyword']) {
+                UrlAlias::setProductKeyword($product_data['keyword'], $productId);
+            }
 
             self::updateProductLinks($productId, $product_data);
             return $productId;
@@ -1173,6 +1176,10 @@ class Product extends BaseModel
         $product = Product::find($product_id);
         $product->update($product_data);
         $product->descriptions()->where('language_id', $language_id)->update($product_data['product_description']);
+
+        if ($product_data['keyword']) {
+            UrlAlias::setProductKeyword($product_data['keyword'], $product_id);
+        }
 
         self::updateProductLinks($product_id, $product_data);
     }

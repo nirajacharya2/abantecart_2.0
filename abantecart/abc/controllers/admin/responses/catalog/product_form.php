@@ -22,6 +22,7 @@ use abc\core\engine\AController;
 use abc\core\lib\AJson;
 use abc\core\lib\FormBuilder;
 use abc\models\catalog\Product;
+use abc\models\catalog\UrlAlias;
 use Cake\Database\Exception;
 use Illuminate\Validation\ValidationException;
 
@@ -41,9 +42,6 @@ class ControllerResponsesCatalogProductForm extends AController
         }
 
         $fields = $this->request->post['fields'];
-
-        //\H::df($fields);
-        //\H::df($fields['model']);
 
         $saveForm = $this->request->post['saveForm'];
         if (is_array($fields) && (bool)$saveForm === true) {
