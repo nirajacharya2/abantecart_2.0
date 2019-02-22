@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
 
@@ -296,6 +297,15 @@ class ControllerPagesProductCategory extends AController
                         $in_wishlist = true;
                     }
 
+                    $catalog_mode = false;
+                    if ($result['product_type_id']) {
+                        $prodTypeSettings = Product::getProductTypeSettings((int)$result['product_id']);
+
+                        if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
+                            $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                        }
+                    }
+
                     $products[] = [
                         'product_id'                  => $result['product_id'],
                         'name'                        => $result['name'],
@@ -334,6 +344,7 @@ class ControllerPagesProductCategory extends AController
                             'product/wishlist/remove',
                             '&product_id='.$result['product_id']
                         ),
+                        'catalog_mode'               => $catalog_mode,
                     ];
                 }
                 $this->data['products'] = $products;

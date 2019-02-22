@@ -193,6 +193,7 @@ if ($error){ ?>
 									</div>
 
 									<div class="mt20 ">
+										<?php if(!$catalog_mode) { ?>
 										<?php if(!$product_info['call_to_order']){ ?>
 										<?php if (!$can_buy) { ?>
 										<ul class="productpagecart">
@@ -220,7 +221,8 @@ if ($error){ ?>
 													</a>
 												</li>
 											</ul>
-										<?php } ?>										
+										<?php } ?>
+										<?php } ?>
 										<a class="productprint btn btn-large" href="javascript:window.print();">
 											<i class="fa fa-print fa-fw"></i>
 											<?php echo $button_print; ?>
@@ -228,14 +230,14 @@ if ($error){ ?>
 										<?php echo $this->getHookVar('buttons'); ?>
 									</div>
 
-									<?php 
-										if ($in_wishlist) { 
+									<?php
+										if ($in_wishlist) {
 											$whislist = ' style="display: none;" ';
 											$nowhislist = '';
 										} else {
 											$nowhislist = ' style="display: none;" ';
 											$whislist = '';
-										} 
+										}
 									?>
 									<?php if ($is_customer) { ?>
 									<div class="wishlist">

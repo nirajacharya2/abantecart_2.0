@@ -21,6 +21,8 @@ use abc\models\BaseModel;
  */
 class Setting extends BaseModel
 {
+    protected $primaryKey = 'setting_id';
+
     public $timestamps = false;
 
     protected $casts = [
@@ -33,6 +35,10 @@ class Setting extends BaseModel
     ];
 
     protected $fillable = [
+        'store_id',
+        'group',
+        'group_id',
+        'key',
         'value',
         'date_added',
         'date_modified',

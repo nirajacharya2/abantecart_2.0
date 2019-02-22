@@ -171,7 +171,7 @@ class FormBuilder
 
                     foreach ($methods as $method) {
                         if ($method->name === $setting['field_setting']) {
-                            $field = FormFieldModifier::{$setting['field_setting']}($field);
+                            $field = FormFieldModifier::{$setting['field_setting']}($field, $setting['field_setting_value']);
                         }
                     }
 

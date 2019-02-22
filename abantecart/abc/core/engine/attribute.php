@@ -47,6 +47,7 @@ class Attribute implements AttributeInterface
     protected $core_attribute_types_controllers = [
         'responses/catalog/attribute/getProductOptionSubform',
         'responses/catalog/attribute/getDownloadAttributeSubform',
+        'responses/catalog/attribute/getProductAttributeSubform',
     ];
 
     /**

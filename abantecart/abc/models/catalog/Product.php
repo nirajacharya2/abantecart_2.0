@@ -2,6 +2,7 @@
 
 namespace abc\models\catalog;
 
+use abc\core\engine\Registry;
 use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -10,6 +11,7 @@ use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
 use abc\models\order\OrderProduct;
 use abc\models\system\Audit;
+use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
 use Exception;
@@ -186,76 +188,86 @@ class Product extends BaseModel
     ];
 
     protected $fields = [
-        'product_type_id'    => [
+        'product_type_id'   => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
             'relation'   => 'getProductTypes',
+            'hidable'    => false,
         ],
-        'status'             => [
+        'status'            => [
             'cast'       => 'int',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'switch',
+            'hidable'    => false,
         ],
-        'featured'           => [
+        'featured'          => [
             'cast'       => 'int',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'switch',
+            'hidable'    => true,
         ],
-        'product_id'         => [
+        'product_id'        => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => false,
         ],
-        'name'               => [
+        'name'              => [
             'cast'       => 'string',
             'rule'       => 'required|max:255',
             'js_rule'    => 'required|max:255',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => false,
         ],
-        'blurb'              => [
+        'blurb'             => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'textarea',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => true,
         ],
-        'description'        => [
+        'description'       => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'editor',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => true,
         ],
-        'meta_keywords'      => [
+        'meta_keywords'     => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'textarea',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => true,
         ],
-        'meta_description'   => [
+        'meta_description'  => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'textarea',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => true,
         ],
-        'tags'       => [
+        'tags'              => [
             'cast'       => 'string',
             'rule'       => '',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => true,
         ],
-        'categories' => [
+        'categories'        => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'js_rule'    => 'integer',
@@ -268,8 +280,9 @@ class Product extends BaseModel
                 'chips'           => true,
                 'deletable-chips' => true,
             ],
+            'hidable'    => false,
         ],
-        'product_stores'     => [
+        'product_stores'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -281,8 +294,9 @@ class Product extends BaseModel
                 'chips'           => true,
                 'deletable-chips' => true,
             ],
+            'hidable'    => false,
         ],
-        'manufacturer_id'    => [
+        'manufacturer_id'   => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -293,22 +307,25 @@ class Product extends BaseModel
                 'chips'           => true,
                 'deletable-chips' => true,
             ],
+            'hidable'    => true,
         ],
-        'model'              => [
+        'model'             => [
             'cast'       => 'string',
             'rule'       => 'required|max:64',
             'js_rule'    => 'required|max:64',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 20,
+            'hidable'    => false,
         ],
-        'call_to_order'      => [
+        'call_to_order'     => [
             'cast'       => 'int',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'switch',
+            'hidable'    => true,
         ],
-        'price'              => [
+        'price'             => [
             'cast'       => 'float',
             'rule'       => 'number',
             'input_type' => 'input',
@@ -318,8 +335,9 @@ class Product extends BaseModel
                 'type' => 'number',
                 'step' => 0.01,
             ],
+            'hidable'    => true,
         ],
-        'cost'               => [
+        'cost'              => [
             'cast'       => 'float',
             'rule'       => 'number',
             'input_type' => 'input',
@@ -329,8 +347,9 @@ class Product extends BaseModel
                 'type' => 'number',
                 'step' => 0.01,
             ],
+            'hidable'    => true,
         ],
-        'tax_class_id'       => [
+        'tax_class_id'      => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -341,14 +360,16 @@ class Product extends BaseModel
                 'chips'           => true,
                 'deletable-chips' => true,
             ],
+            'hidable'    => true,
         ],
-        'subtract'           => [
+        'subtract'          => [
             'cast'       => 'int',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'switch',
+            'hidable'    => true,
         ],
-        'quantity'           => [
+        'quantity'          => [
             'cast'         => 'int',
             'rule'         => 'integer',
             'input_type'   => 'input',
@@ -360,8 +381,9 @@ class Product extends BaseModel
                 'step' => 1,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'minimum'            => [
+        'minimum'           => [
             'cast'         => 'int',
             'rule'         => 'integer',
             'input_type'   => 'input',
@@ -373,8 +395,9 @@ class Product extends BaseModel
                 'step' => 1,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'maximum'            => [
+        'maximum'           => [
             'cast'         => 'int',
             'rule'         => 'integer',
             'input_type'   => 'input',
@@ -386,22 +409,25 @@ class Product extends BaseModel
                 'step' => 1,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'stock_checkout'     => [
+        'stock_checkout'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
             'relation'   => 'getStockCheckouts',
+            'hidable'    => true,
         ],
-        'stock_status'       => [
+        'stock_status'      => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
             'relation'   => 'getStockStatuses',
+            'hidable'    => true,
         ],
         'sku'               => [
             'cast'       => 'string',
@@ -409,39 +435,44 @@ class Product extends BaseModel
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 30,
+            'hidable'    => true,
         ],
         'location'          => [
             'cast'       => 'string',
-            'rule'       => 'string|max:128',
+            'rule'       => 'max:128',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 40,
+            'hidable'    => true,
         ],
-        'keyword'          => [
+        'keyword'           => [
             'cast'       => 'string',
-            'rule'       => 'string|max:128',
+            'rule'       => 'max:128',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 40,
+            'hidable'    => true,
         ],
-        'date_available' => [
+        'date_available'    => [
             'cast'       => 'date',
             'rule'       => 'date',
             'input_type' => 'date',
             'access'     => 'read',
             'sort_order' => 40,
+            'hidable'    => true,
         ],
-        'sort_order'          => [
+        'sort_order'        => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'input_type' => 'input',
             'access'     => 'read',
             'sort_order' => 1,
-            'props' => [
+            'props'      => [
                 'type' => 'number',
                 'step' => 1,
                 'min'  => 0,
-            ]
+            ],
+            'hidable'    => true,
         ],
         'shipping'          => [
             'cast'       => 'int',
@@ -449,6 +480,7 @@ class Product extends BaseModel
             'input_type' => 'checkbox',
             'access'     => 'read',
             'sort_order' => 1,
+            'hidable'    => true,
         ],
         'free_shipping'     => [
             'cast'       => 'int',
@@ -456,6 +488,7 @@ class Product extends BaseModel
             'input_type' => 'checkbox',
             'access'     => 'read',
             'sort_order' => 110,
+            'hidable'    => true,
         ],
         'ship_individually' => [
             'cast'       => 'int',
@@ -463,8 +496,9 @@ class Product extends BaseModel
             'input_type' => 'checkbox',
             'access'     => 'read',
             'sort_order' => 100,
+            'hidable'    => true,
         ],
-        'shipping_price'            => [
+        'shipping_price'    => [
             'cast'         => 'float',
             'rule'         => 'integer',
             'input_type'   => 'input',
@@ -476,6 +510,7 @@ class Product extends BaseModel
                 'step' => 0.01,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
         'length'            => [
             'cast'         => 'float',
@@ -489,8 +524,9 @@ class Product extends BaseModel
                 'step' => 0.01,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'width'            => [
+        'width'             => [
             'cast'         => 'float',
             'rule'         => 'integer',
             'input_type'   => 'input',
@@ -502,6 +538,7 @@ class Product extends BaseModel
                 'step' => 0.01,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
         'height'            => [
             'cast'         => 'float',
@@ -515,14 +552,16 @@ class Product extends BaseModel
                 'step' => 0.01,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'length_class_id'       => [
+        'length_class_id'   => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
             'relation'   => 'getLengthClasses',
+            'hidable'    => true,
         ],
         'weight'            => [
             'cast'         => 'float',
@@ -536,15 +575,17 @@ class Product extends BaseModel
                 'step' => 0.01,
                 'min'  => 0,
             ],
+            'hidable'      => true,
         ],
-        'weight_class_id'       => [
+        'weight_class_id'   => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
             'sort_order' => 10,
             'input_type' => 'selectbox',
             'relation'   => 'getWeightClasses',
-        ]
+            'hidable'    => true,
+        ],
 
     ];
 
@@ -1207,6 +1248,40 @@ class Product extends BaseModel
         if (isset($product_data['product_related'])) {
             $product->related()->sync($product_data['product_related']);
         }
+    }
+
+    /**
+     * @param int $productId
+     *
+     * @return array|bool
+     */
+    public static function getProductTypeSettings(int $productId)
+    {
+        if (!$productId) {
+            return false;
+        }
+
+        $product = self::where('product_id', '=', $productId)->first();
+        if (!$product) {
+            return false;
+        }
+
+        $registry = Registry::getInstance();
+        $store_id = $registry->get('config')->get('config_store_id');
+
+        $settings = Setting::where('store_id', $store_id)
+            ->where('group', 'object_type')
+            ->where('group_id', $product->product_type_id)
+            ->get();
+
+        if (!$settings) {
+            return false;
+        }
+        $result = [];
+        foreach ($settings as $setting) {
+            $result[$setting['key']] = $setting['value'];
+        }
+        return $result;
     }
 
 }
