@@ -6,6 +6,8 @@ use abc\core\ABC;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ResourceLibrary
@@ -23,6 +25,11 @@ use abc\models\BaseModel;
  */
 class ResourceLibrary extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $cascadeDeletes = ['descriptions','maps'];
+
     protected $table = 'resource_library';
     protected $primaryKey = 'resource_id';
     public $timestamps = false;
@@ -47,12 +54,12 @@ class ResourceLibrary extends BaseModel
         return $this->belongsTo(ResourceType::class, 'type_id');
     }
 
-    public function resource_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(ResourceDescription::class, 'resource_id');
     }
 
-    public function resource_maps()
+    public function maps()
     {
         return $this->hasMany(ResourceMap::class, 'resource_id');
     }
@@ -65,12 +72,12 @@ class ResourceLibrary extends BaseModel
         $title = '',
         $language_id
     ) {
-        $objects = array(
+        $objects = [
             'products'      => 'Product',
             'product_option_value' => 'ProductOptionValue',
             'categories'    => 'Category',
             'manufacturers' => 'Brand',
-        );
+        ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
             $this->errors[] = "Warning: Missing images for {$object_txt_id}.";

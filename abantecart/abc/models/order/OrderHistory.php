@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderHistory
@@ -21,6 +22,9 @@ use abc\models\BaseModel;
  */
 class OrderHistory extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';
     public $timestamps = false;

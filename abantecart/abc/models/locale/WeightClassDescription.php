@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class WeightClassDescription
@@ -19,7 +20,15 @@ use abc\models\BaseModel;
  */
 class WeightClassDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'weight_class_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

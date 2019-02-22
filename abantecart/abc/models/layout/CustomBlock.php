@@ -3,7 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
-use abc\models\customer\CustomList;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -22,7 +22,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CustomBlock extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','custom_lists'];
+    protected $primaryKey = 'custom_block_id';
+
     public $timestamps = false;
 
     protected $casts = [
@@ -44,7 +48,7 @@ class CustomBlock extends BaseModel
         return $this->belongsTo(Block::class, 'block_id');
     }
 
-    public function block_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(BlockDescription::class, 'custom_block_id');
     }

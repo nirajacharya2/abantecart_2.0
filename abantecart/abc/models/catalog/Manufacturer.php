@@ -3,6 +3,8 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Manufacturer
@@ -17,6 +19,10 @@ use abc\models\BaseModel;
  */
 class Manufacturer extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['stores'];
+
     protected $primaryKey = 'manufacturer_id';
     public $timestamps = false;
 
@@ -29,7 +35,7 @@ class Manufacturer extends BaseModel
         'sort_order',
     ];
 
-    public function manufacturers_to_stores()
+    public function stores()
     {
         return $this->hasMany(ManufacturersToStore::class, 'manufacturer_id');
     }

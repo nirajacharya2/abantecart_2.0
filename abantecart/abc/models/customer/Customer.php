@@ -6,6 +6,7 @@ use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\system\Audit;
 use abc\models\system\Store;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -45,7 +46,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Customer extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['addresses','notifications', 'transactions'];
+
     /**
      * @var string
      */
@@ -98,7 +103,7 @@ class Customer extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function customer_notifications()
+    public function notifications()
     {
         return $this->hasMany(CustomerNotification::class, 'customer_id');
     }
@@ -106,7 +111,7 @@ class Customer extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function customer_transactions()
+    public function transactions()
     {
         return $this->hasMany(CustomerTransaction::class, 'customer_id');
     }

@@ -19,8 +19,8 @@ use abc\models\locale\Language;
  */
 class ProductTag extends BaseModel
 {
-    protected $primaryKey = null;
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+
     public $timestamps = false;
     protected $primaryKeySet = [
         'product_id',

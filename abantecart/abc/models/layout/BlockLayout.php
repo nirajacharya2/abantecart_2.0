@@ -3,6 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BlockLayout extends BaseModel
 {
-    use SoftDeletes;
+
     protected $primaryKey = 'instance_id';
     public $timestamps = false;
 
@@ -50,4 +51,25 @@ class BlockLayout extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    public function children()
+    {
+        return $this->HasMany(BlockLayout::class, 'instance_id', 'parent_instance_id');
+    }
+
+    public function layout()
+    {
+        return $this->belongsTo(Layout::class, 'layout_id');
+    }
+
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
+
+    public function custom_block()
+    {
+        return $this->belongsTo(CustomBlock::class, 'custom_block_id');
+    }
+
 }

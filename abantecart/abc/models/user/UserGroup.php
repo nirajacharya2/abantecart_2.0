@@ -4,9 +4,10 @@ namespace abc\models\user;
 
 use abc\models\BaseModel;
 use abc\core\lib\AException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class AcUserGroup
+ * Class UserGroup
  *
  * @property int                                      $user_group_id
  * @property string                                   $name
@@ -20,6 +21,8 @@ use abc\core\lib\AException;
  */
 class UserGroup extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'user_group_id';
     public $timestamps = false;
 
@@ -39,6 +42,8 @@ class UserGroup extends BaseModel
      * UserGroup constructor.
      *
      * @param array $attributes
+     *
+     * @throws AException
      */
     public function __construct(array $attributes = [])
     {

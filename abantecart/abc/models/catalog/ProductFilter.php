@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductFilter
@@ -18,6 +19,8 @@ use abc\models\BaseModel;
  */
 class ProductFilter extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'filter_id';
     public $timestamps = false;
 

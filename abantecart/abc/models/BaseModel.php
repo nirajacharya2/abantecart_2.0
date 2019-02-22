@@ -24,7 +24,6 @@ use abc\core\lib\Abac;
 use H;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
-use abc\models\QueryBuilder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
@@ -38,12 +37,13 @@ use ReflectionMethod;
  * @package abc\models
  * @method Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
+ * @const string DELETED_AT
  */
 class BaseModel extends OrmModel
 {
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
-    //const DELETED_AT = 'date_deleted';
+
     const CLI = 0;
     const USER = 1;
     const CUSTOMER = 2;
@@ -83,6 +83,7 @@ class BaseModel extends OrmModel
      * @var array
      */
     protected $errors;
+
     /**
      * @var string
      */
@@ -265,15 +266,6 @@ class BaseModel extends OrmModel
     public function delete()
     {
         if ($this->hasPermission('delete')) {
-            //delete inherits first
-           /* $relations = $this->getRelationships('HasMany');
-            foreach($relations as $method=>$row){
-                $this->{$method}()->delete();
-                $row['model']::where($this->getKeyName(), $this->getKey())->delete();
-                //$this->{$method}()->delete();
-                (new Product())->descriptions()->delete();
-            }*/
-
             parent::delete();
         } else {
             throw new \Exception('No permission for object to delete the model.');

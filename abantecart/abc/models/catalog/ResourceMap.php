@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ResourceMap
@@ -21,8 +22,17 @@ use abc\models\BaseModel;
  */
 class ResourceMap extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'resource_id',
+        'object_id',
+        'object_name'
+    ];
+
     protected $table = 'resource_map';
-    public $incrementing = false;
     public $timestamps = false;
 
     protected $casts = [

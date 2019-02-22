@@ -22,7 +22,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CustomerNotification extends BaseModel
 {
     use SoftDeletes;
-    public $incrementing = false;
+    const DELETED_AT = 'date_deleted';
+    protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $casts = [

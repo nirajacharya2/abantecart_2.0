@@ -31,7 +31,7 @@ class DatasetColumnProperty extends BaseModel
         'dataset_column_property_value',
     ];
 
-    public function dataset_definition()
+    public function definition()
     {
         return $this->belongsTo(DatasetDefinition::class, 'dataset_column_id');
     }

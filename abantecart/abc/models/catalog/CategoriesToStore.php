@@ -4,6 +4,8 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\system\Store;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CategoriesToStore
@@ -18,7 +20,18 @@ use abc\models\system\Store;
  */
 class CategoriesToStore extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'category_id',
+        'store_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

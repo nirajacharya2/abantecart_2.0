@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductSpecial
@@ -23,7 +24,10 @@ use abc\models\BaseModel;
  */
 class ProductSpecial extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'product_special_id';
+
     public $timestamps = false;
 
     protected $casts = [

@@ -4,6 +4,7 @@ namespace abc\models\system;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class StoreDescription
@@ -22,7 +23,14 @@ use abc\models\locale\Language;
  */
 class StoreDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'store_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

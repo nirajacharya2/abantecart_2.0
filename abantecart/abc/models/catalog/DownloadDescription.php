@@ -21,7 +21,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DownloadDescription extends BaseModel
 {
     use SoftDeletes;
-    public $incrementing = false;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'download_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

@@ -9,6 +9,8 @@ use abc\models\content\ContentsToStore;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\models\user\UserNotification;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Store
@@ -23,6 +25,18 @@ use abc\models\user\UserNotification;
  */
 class Store extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = [
+        'descriptions',
+        'categories',
+        'contents',
+        'customers',
+        'manufacturers',
+        'orders',
+        'settings',
+        'user_notifications'
+    ];
     protected $primaryKey = 'store_id';
     public $timestamps = false;
 
@@ -36,12 +50,12 @@ class Store extends BaseModel
         'status',
     ];
 
-    public function categories_to_stores()
+    public function categories()
     {
         return $this->hasMany(CategoriesToStore::class, 'store_id');
     }
 
-    public function contents_to_stores()
+    public function contents()
     {
         return $this->hasMany(ContentsToStore::class, 'store_id');
     }
@@ -51,7 +65,7 @@ class Store extends BaseModel
         return $this->hasMany(Customer::class, 'store_id');
     }
 
-    public function manufacturers_to_stores()
+    public function manufacturers()
     {
         return $this->hasMany(ManufacturersToStore::class, 'store_id');
     }
@@ -66,7 +80,7 @@ class Store extends BaseModel
         return $this->hasMany(Setting::class, 'store_id');
     }
 
-    public function store_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(StoreDescription::class, 'store_id');
     }

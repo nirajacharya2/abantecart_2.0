@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesValueDescription
@@ -20,8 +21,14 @@ use abc\models\locale\Language;
  */
 class GlobalAttributesValueDescription extends BaseModel
 {
-    //protected $primaryKey = '';
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'attribute_value_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

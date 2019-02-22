@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\locale\Language;
 
 /**
  * Class StockStatus
@@ -17,6 +18,7 @@ use abc\models\BaseModel;
  */
 class StockStatus extends BaseModel
 {
+    //TODO: needs to rebuild this table!!!
     public $incrementing = false;
     public $timestamps = false;
 

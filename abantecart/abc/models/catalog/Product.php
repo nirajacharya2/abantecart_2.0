@@ -14,6 +14,7 @@ use abc\models\system\Store;
 use abc\models\system\TaxClass;
 use Exception;
 use H;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -71,9 +72,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
     const DELETED_AT = 'date_deleted';
 
+    protected $cascadeDeletes = [
+        'descriptions',
+        'coupons',
+        'discounts',
+        'options',
+        'specials',
+        'tags',
+        'related',
+        'reviews',
+        'categories',
+        'downloads',
+        '',
+        '',
+        '',
+
+
+    ];
     /**
      * Access policy properties
      * Note: names must be without dashes and whitespaces
@@ -745,7 +763,10 @@ class Product extends BaseModel
         $categories = $categoryInst->getCategories(0, $this->registry->get('session')->data['current_store_id']);
         $product_categories = [];
         foreach ($categories as $category) {
-            $product_categories[] = (object)['id' => $category['category_id'], 'name' => htmlspecialchars_decode($category['name'])];
+            $product_categories[] = (object)[
+                                            'id' => $category['category_id'],
+                                            'name' => htmlspecialchars_decode($category['name'])
+                                            ];
         }
         return $product_categories;
     }
@@ -792,7 +813,8 @@ class Product extends BaseModel
 
     public function getStockStatuses()
     {
-        $stock_statuses = StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
+        $stock_statuses =
+            StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
             ->select(['stock_status_id as id', 'name'])
             ->get();
         $result = [];

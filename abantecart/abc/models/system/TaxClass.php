@@ -3,6 +3,8 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TaxClass
@@ -18,6 +20,11 @@ use abc\models\BaseModel;
  */
 class TaxClass extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions', 'rates'];
+
     protected $primaryKey = 'tax_class_id';
     public $timestamps = false;
 
@@ -37,12 +44,12 @@ class TaxClass extends BaseModel
             ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
-    public function tax_class_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(TaxClassDescription::class, 'tax_class_id');
     }
 
-    public function tax_rates()
+    public function rates()
     {
         return $this->hasMany(TaxRate::class, 'tax_class_id');
     }

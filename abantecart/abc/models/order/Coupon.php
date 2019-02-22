@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,7 +32,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Coupon extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','products'];
     protected $primaryKey = 'coupon_id';
     public $timestamps = false;
 
@@ -67,12 +71,12 @@ class Coupon extends BaseModel
         'date_modified',
     ];
 
-    public function coupon_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(CouponDescription::class, 'coupon_id');
     }
 
-    public function coupons_products()
+    public function products()
     {
         return $this->hasMany(CouponsProduct::class, 'coupon_id');
     }

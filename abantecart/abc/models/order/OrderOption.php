@@ -4,6 +4,8 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\catalog\ProductOptionValue;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderOption
@@ -25,6 +27,9 @@ use abc\models\catalog\ProductOptionValue;
  */
 class OrderOption extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'order_option_id';
     public $timestamps = false;
 
@@ -46,6 +51,16 @@ class OrderOption extends BaseModel
         'prefix',
         'settings',
     ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function order_product()
+    {
+        return $this->belongsTo(OrderProduct::class, 'order_product_id');
+    }
 
     public function product_option_value()
     {

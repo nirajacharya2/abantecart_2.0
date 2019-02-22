@@ -4,6 +4,8 @@ namespace abc\models\system;
 
 use abc\models\BaseModel;
 use abc\models\layout\PagesForm;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Form
@@ -23,6 +25,10 @@ use abc\models\layout\PagesForm;
  */
 class Form extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['fields','descriptions', 'groups', 'pages'];
+
     protected $primaryKey = 'form_id';
     public $timestamps = false;
 
@@ -42,17 +48,17 @@ class Form extends BaseModel
         return $this->hasMany(Field::class, 'form_id');
     }
 
-    public function form_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(FormDescription::class, 'form_id');
     }
 
-    public function form_groups()
+    public function groups()
     {
         return $this->hasMany(FormGroup::class, 'form_id');
     }
 
-    public function pages_forms()
+    public function pages()
     {
         return $this->hasMany(PagesForm::class, 'form_id');
     }

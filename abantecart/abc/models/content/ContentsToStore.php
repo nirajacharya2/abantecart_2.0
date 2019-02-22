@@ -18,7 +18,15 @@ use abc\models\system\Store;
  */
 class ContentsToStore extends BaseModel
 {
-    public $incrementing = false;
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'category_id',
+        'store_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

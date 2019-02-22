@@ -4,6 +4,8 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\catalog\Download;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderDownload
@@ -35,6 +37,10 @@ use abc\models\catalog\Download;
  */
 class OrderDownload extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['history'];
+
     protected $primaryKey = 'order_download_id';
     public $timestamps = false;
 
@@ -89,7 +95,7 @@ class OrderDownload extends BaseModel
         return $this->belongsTo(OrderProduct::class, 'order_product_id');
     }
 
-    public function order_downloads_histories()
+    public function history()
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_download_id');
     }

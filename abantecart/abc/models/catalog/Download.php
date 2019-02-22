@@ -5,6 +5,7 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -33,7 +34,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Download extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['attribute_values','descriptions'];
+
     protected $primaryKey = 'download_id';
     public $timestamps = false;
 
@@ -65,12 +69,12 @@ class Download extends BaseModel
         'date_modified',
     ];
 
-    public function download_attribute_values()
+    public function attribute_values()
     {
         return $this->hasMany(DownloadAttributeValue::class, 'download_id');
     }
 
-    public function download_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(DownloadDescription::class, 'download_id');
     }

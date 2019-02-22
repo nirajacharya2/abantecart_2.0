@@ -14,7 +14,12 @@ use abc\models\BaseModel;
  */
 class ExtensionDependency extends BaseModel
 {
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'extension_id',
+        'extension_parent_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

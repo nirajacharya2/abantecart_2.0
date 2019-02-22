@@ -3,6 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PagesLayout
@@ -17,7 +18,13 @@ use abc\models\BaseModel;
  */
 class PagesLayout extends BaseModel
 {
-    public $incrementing = false;
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'page_id',
+        'layout_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

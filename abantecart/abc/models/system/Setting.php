@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Setting
@@ -21,6 +22,9 @@ use abc\models\BaseModel;
  */
 class Setting extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     public $timestamps = false;
 
     protected $casts = [

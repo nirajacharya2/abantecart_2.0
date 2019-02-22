@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductsRelated
@@ -16,8 +17,16 @@ use abc\models\BaseModel;
  */
 class ProductsRelated extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'product_id',
+        'related_id'
+    ];
+
     protected $table = 'products_related';
-    public $incrementing = false;
+
     public $timestamps = false;
 
     protected $casts = [

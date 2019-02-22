@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -19,8 +20,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CountryDescription extends BaseModel
 {
-    use SoftDeletes;
-    public $incrementing = false;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'country_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

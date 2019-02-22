@@ -23,7 +23,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FieldDescription extends BaseModel
 {
     use SoftDeletes;
-    public $incrementing = false;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'field_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

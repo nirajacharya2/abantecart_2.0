@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,7 +29,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Field extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','values', 'group'];
+
     protected $primaryKey = 'field_id';
     public $timestamps = false;
 
@@ -55,17 +59,17 @@ class Field extends BaseModel
         return $this->belongsTo(Form::class, 'form_id');
     }
 
-    public function field_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(FieldDescription::class, 'field_id');
     }
 
-    public function field_values()
+    public function values()
     {
         return $this->hasMany(FieldValue::class, 'field_id');
     }
 
-    public function fields_group()
+    public function group()
     {
         return $this->hasOne(FieldsGroup::class, 'field_id');
     }

@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesDescription
@@ -21,7 +22,14 @@ use abc\models\locale\Language;
  */
 class GlobalAttributesDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'attribute_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [
@@ -35,7 +43,7 @@ class GlobalAttributesDescription extends BaseModel
         'error_text',
     ];
 
-    public function global_attribute()
+    public function attribute()
     {
         return $this->belongsTo(GlobalAttribute::class, 'attribute_id');
     }

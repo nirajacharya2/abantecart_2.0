@@ -22,6 +22,8 @@ namespace abc\models\catalog;
 use abc\core\ABC;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductOption
@@ -45,6 +47,10 @@ use abc\models\BaseModel;
  */
 class ProductOption extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','values'];
     /**
      * @var string
      */
@@ -92,7 +98,7 @@ class ProductOption extends BaseModel
     /**
      * @return mixed
      */
-    public function option_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(ProductOptionDescription::class, 'product_option_id');
     }
@@ -100,7 +106,7 @@ class ProductOption extends BaseModel
     /**
      * @return mixed
      */
-    public function option_values()
+    public function values()
     {
         return $this->hasMany(ProductOptionValue::class, 'product_option_id');
     }
@@ -129,7 +135,6 @@ class ProductOption extends BaseModel
         $rm = ABC::getObjectByAlias('AResourceManager');
         $rm->setType('image');
         foreach($this->option_values as $option_value){
-            $this->registry->get('log')->write($option_value->product_option_value_id);
             //Remove previous resources of object
             $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
         }

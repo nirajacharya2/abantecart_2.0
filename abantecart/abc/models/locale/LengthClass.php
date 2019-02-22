@@ -3,6 +3,8 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class LengthClass
@@ -17,6 +19,9 @@ use abc\models\BaseModel;
  */
 class LengthClass extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'length_class_id';
 
     public $timestamps = false;
@@ -35,6 +40,11 @@ class LengthClass extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    public function descriptions()
+    {
+        return $this->HasMany(LengthClassDescription::class, 'length_class_id');
+    }
 
     public function description()
     {

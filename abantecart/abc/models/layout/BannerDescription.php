@@ -4,6 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -24,9 +25,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BannerDescription extends BaseModel
 {
-    use SoftDeletes;
-    public $incrementing = false;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     public $timestamps = false;
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'banner_id',
+        'language_id'
+    ];
 
     protected $casts = [
         'banner_id'   => 'int',

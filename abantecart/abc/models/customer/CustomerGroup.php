@@ -28,4 +28,9 @@ class CustomerGroup extends BaseModel
         'name',
         'tax_exempt',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_group_id');
+    }
 }

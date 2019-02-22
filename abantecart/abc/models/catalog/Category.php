@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\system\Store;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -24,8 +25,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Category extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
     const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = [
+        'descriptions',
+        'products',
+        'stores'
+    ];
     /**
      * @var string
      */

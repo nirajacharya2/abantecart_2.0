@@ -6,6 +6,7 @@ use abc\models\BaseModel;
 
 use abc\core\lib\AException;
 use abc\models\system\Store;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class UserNotification
@@ -26,7 +27,15 @@ use abc\models\system\Store;
  */
 class UserNotification extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'user_id',
+        'store_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

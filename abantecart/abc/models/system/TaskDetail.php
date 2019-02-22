@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TaskDetail
@@ -17,6 +18,9 @@ use abc\models\BaseModel;
  */
 class TaskDetail extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'task_id';
     public $timestamps = false;
 

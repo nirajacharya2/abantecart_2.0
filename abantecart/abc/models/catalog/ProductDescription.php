@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductDescription
@@ -23,10 +24,12 @@ use abc\models\locale\Language;
  */
 class ProductDescription extends BaseModel
 {
-    protected $primaryKey = null;
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     public $timestamps = false;
 
+    protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'product_id',
         'language_id'

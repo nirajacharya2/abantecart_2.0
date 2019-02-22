@@ -20,6 +20,10 @@ use abc\models\catalog\Product;
 class CouponsProduct extends BaseModel
 {
     protected $primaryKey = 'coupon_product_id';
+    protected $primaryKeySet = [
+        'coupon_id',
+        'product_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

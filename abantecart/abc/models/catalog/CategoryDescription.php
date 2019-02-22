@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -23,9 +24,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CategoryDescription extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
     const DELETED_AT = 'date_deleted';
-    public $incrementing = false;
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'category_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

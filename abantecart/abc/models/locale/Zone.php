@@ -5,6 +5,8 @@ namespace abc\models\locale;
 use abc\models\BaseModel;
 use abc\models\customer\Address;
 use abc\models\system\TaxRate;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Zone
@@ -25,6 +27,9 @@ use abc\models\system\TaxRate;
  */
 class Zone extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
     public $timestamps = false;
 
     protected $casts = [
@@ -54,12 +59,12 @@ class Zone extends BaseModel
         return $this->hasMany(TaxRate::class, 'zone_id');
     }
 
-    public function zone_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(ZoneDescription::class, 'zone_id');
     }
 
-    public function zones_to_locations()
+    public function locations()
     {
         return $this->hasMany(ZonesToLocation::class, 'zone_id');
     }

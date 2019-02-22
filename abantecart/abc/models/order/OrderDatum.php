@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderDatum
@@ -20,7 +21,15 @@ use abc\models\BaseModel;
  */
 class OrderDatum extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'order_id',
+        'type_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

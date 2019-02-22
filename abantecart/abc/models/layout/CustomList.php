@@ -1,9 +1,9 @@
 <?php
 
-namespace abc\models\customer;
+namespace abc\models\layout;
 
 use abc\models\BaseModel;
-use abc\models\layout\CustomBlock;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CustomList
@@ -22,6 +22,9 @@ use abc\models\layout\CustomBlock;
  */
 class CustomList extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'rowid';
     public $timestamps = false;
 

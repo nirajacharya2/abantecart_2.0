@@ -3,6 +3,8 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesGroupsDescription
@@ -15,7 +17,15 @@ use abc\models\BaseModel;
  */
 class GlobalAttributesGroupsDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'attribute_group_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [
@@ -26,4 +36,15 @@ class GlobalAttributesGroupsDescription extends BaseModel
     protected $fillable = [
         'name',
     ];
+
+
+    public function group()
+    {
+        return $this->belongsTo(GlobalAttributesGroup::class, 'attribute_type_id');
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
 }

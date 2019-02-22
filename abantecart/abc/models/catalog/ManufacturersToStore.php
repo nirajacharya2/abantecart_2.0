@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\system\Store;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ManufacturersToStore
@@ -18,7 +19,15 @@ use abc\models\system\Store;
  */
 class ManufacturersToStore extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'manufacturer_id',
+        'store_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

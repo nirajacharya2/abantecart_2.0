@@ -4,6 +4,7 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderStatusDescription
@@ -19,7 +20,14 @@ use abc\models\locale\Language;
  */
 class OrderStatusDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'order_status_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

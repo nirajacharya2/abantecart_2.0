@@ -3,6 +3,7 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,7 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Block extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    protected $cascadeDeletes = ['templates', 'custom_blocks'];
     protected $primaryKey = 'block_id';
     public $timestamps = false;
 
@@ -37,7 +39,7 @@ class Block extends BaseModel
         'date_modified',
     ];
 
-    public function block_templates()
+    public function templates()
     {
         return $this->hasMany(BlockTemplate::class, 'block_id');
     }

@@ -4,6 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\content\BannerStat;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,7 +29,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Banner extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    protected $cascadeDeletes = ['descriptions', 'stats'];
     protected $primaryKey = 'banner_id';
     public $timestamps = false;
 
@@ -59,12 +61,12 @@ class Banner extends BaseModel
         'date_modified',
     ];
 
-    public function banner_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(BannerDescription::class, 'banner_id');
     }
 
-    public function banner_stats()
+    public function stats()
     {
         return $this->hasMany(BannerStat::class, 'banner_id');
     }

@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class LanguageDefinition
@@ -22,6 +23,9 @@ use abc\models\BaseModel;
  */
 class LanguageDefinition extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $primaryKey = 'language_definition_id';
     public $timestamps = false;
 
     protected $casts = [

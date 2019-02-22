@@ -25,7 +25,7 @@ use abc\core\lib\AException;
  */
 class AntMessage extends BaseModel
 {
-    public $incrementing = false;
+    public $primaryKey = 'id';
     public $timestamps = false;
 
     protected $casts = [

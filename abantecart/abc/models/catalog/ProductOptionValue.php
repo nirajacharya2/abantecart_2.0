@@ -4,6 +4,8 @@ namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductOptionValue
@@ -32,6 +34,10 @@ use abc\models\BaseModel;
  */
 class ProductOptionValue extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
+
     protected $primaryKey = 'product_option_value_id';
     public $timestamps = false;
 
@@ -80,7 +86,7 @@ class ProductOptionValue extends BaseModel
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function option_value_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(ProductOptionValueDescription::class, 'product_option_value_id');
     }

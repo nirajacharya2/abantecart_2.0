@@ -3,6 +3,8 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class WeightClass
@@ -19,6 +21,10 @@ use abc\models\BaseModel;
  */
 class WeightClass extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
+
     protected $primaryKey = 'weight_class_id';
     public $timestamps = false;
 
@@ -43,7 +49,7 @@ class WeightClass extends BaseModel
             ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
-    public function weight_class_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(WeightClassDescription::class, 'weight_class_id');
     }

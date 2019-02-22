@@ -7,6 +7,8 @@ use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\locale\Language;
 use abc\models\system\Store;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Order
@@ -80,6 +82,15 @@ use abc\models\system\Store;
  */
 class Order extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = [
+        'order_data',
+        'order_products',
+        'downloads', //see Download model. there cascade deleting too
+        'totals'
+    ];
+
     public $timestamps = false;
     protected $primaryKey = 'order_id';
 
@@ -189,17 +200,17 @@ class Order extends BaseModel
         return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
-    public function order_data()
+    public function data()
     {
         return $this->hasMany(OrderDatum::class, 'order_id');
     }
 
-    public function order_downloads()
+    public function downloads()
     {
         return $this->hasMany(OrderDownload::class, 'order_id');
     }
 
-    public function order_downloads_histories()
+    public function downloads_histories()
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_id');
     }
@@ -209,7 +220,7 @@ class Order extends BaseModel
         return $this->hasMany(OrderProduct::class, 'order_id');
     }
 
-    public function order_totals()
+    public function totals()
     {
         return $this->hasMany(OrderTotal::class, 'order_id');
     }

@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Message
@@ -20,6 +21,9 @@ use abc\models\BaseModel;
  */
 class Message extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'msg_id';
     public $timestamps = false;
 

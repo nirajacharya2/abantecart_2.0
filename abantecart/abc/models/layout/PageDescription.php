@@ -4,6 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PageDescription
@@ -26,7 +27,15 @@ use abc\models\locale\Language;
  */
 class PageDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'page_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

@@ -4,6 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -29,6 +30,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class BlockDescription extends BaseModel
 {
     use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'block_description_id';
+    protected $primaryKeySet = [
+        'custom_block_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

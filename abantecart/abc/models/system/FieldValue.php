@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class FieldValue
@@ -18,6 +19,8 @@ use abc\models\BaseModel;
  */
 class FieldValue extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'value_id';
     public $timestamps = false;
 

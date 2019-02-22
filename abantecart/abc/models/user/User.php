@@ -5,6 +5,8 @@ namespace abc\models\user;
 use abc\models\BaseModel;
 use abc\models\system\Audit;
 use abc\core\lib\AException;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class AcUser
@@ -30,6 +32,11 @@ use abc\core\lib\AException;
  */
 class User extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['notifications'];
+
     protected $primaryKey = 'user_id';
     public $timestamps = false;
 
@@ -89,7 +96,7 @@ class User extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function user_notifications()
+    public function notifications()
     {
         return $this->hasMany(UserNotification::class, 'user_id');
     }

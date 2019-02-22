@@ -3,6 +3,7 @@
 namespace abc\models\content;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -20,9 +21,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Content extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','stores'];
     public $timestamps = false;
 
+    protected $primaryKey = 'content_id';
     protected $casts = [
         'parent_content_id' => 'int',
         'sort_order'        => 'int',
@@ -34,12 +38,12 @@ class Content extends BaseModel
         'status',
     ];
 
-    public function content_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(ContentDescription::class, 'content_id');
     }
 
-    public function contents_to_stores()
+    public function stores()
     {
         return $this->hasMany(ContentsToStore::class, 'content_id');
     }

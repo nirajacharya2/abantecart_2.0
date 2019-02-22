@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductFilterRangesDescription
@@ -15,7 +16,14 @@ use abc\models\BaseModel;
  */
 class ProductFilterRangesDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'range_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

@@ -3,6 +3,8 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesType
@@ -17,6 +19,10 @@ use abc\models\BaseModel;
  */
 class GlobalAttributesType extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'attribute_type_id';
     public $timestamps = false;
 
@@ -31,4 +37,12 @@ class GlobalAttributesType extends BaseModel
         'sort_order',
         'status',
     ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function descriptions()
+    {
+        return $this->hasMany(GlobalAttributesTypeDescription::class, 'attribute_type_id');
+    }
 }

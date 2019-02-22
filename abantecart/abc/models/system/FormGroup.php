@@ -3,6 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class FormGroup
@@ -21,6 +22,8 @@ use abc\models\BaseModel;
  */
 class FormGroup extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'group_id';
     public $timestamps = false;
 

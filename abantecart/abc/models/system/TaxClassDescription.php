@@ -4,6 +4,7 @@ namespace abc\models\system;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TaxClassDescription
@@ -20,7 +21,15 @@ use abc\models\locale\Language;
  */
 class TaxClassDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'tax_class_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

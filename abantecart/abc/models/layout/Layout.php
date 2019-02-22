@@ -3,6 +3,8 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Layout
@@ -20,6 +22,10 @@ use abc\models\BaseModel;
  */
 class Layout extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['pages_layouts', 'block_layouts'];
     protected $primaryKey = 'layout_id';
     public $timestamps = false;
 
@@ -43,5 +49,9 @@ class Layout extends BaseModel
     public function pages_layouts()
     {
         return $this->hasMany(PagesLayout::class, 'layout_id');
+    }
+    public function block_layouts()
+    {
+        return $this->hasMany(BlockLayout::class, 'layout_id');
     }
 }

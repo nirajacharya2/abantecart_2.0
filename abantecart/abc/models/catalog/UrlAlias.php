@@ -6,6 +6,7 @@ use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
 use H;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class UrlAlias
@@ -21,6 +22,8 @@ use H;
  */
 class UrlAlias extends BaseModel
 {
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'url_alias_id';
     public $timestamps = false;
 

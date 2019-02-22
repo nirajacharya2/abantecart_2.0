@@ -19,6 +19,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductOptionValueDescription
@@ -36,7 +37,15 @@ use abc\models\locale\Language;
  */
 class ProductOptionValueDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'product_option_value_id',
+        'language_id',
+        'product_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

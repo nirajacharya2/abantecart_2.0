@@ -3,6 +3,8 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderStatus
@@ -18,14 +20,14 @@ use abc\models\BaseModel;
  */
 class OrderStatus extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions'];
+
     public $timestamps = false;
 
-    public function order_histories()
-    {
-        return $this->hasMany(OrderHistory::class, 'order_status_id');
-    }
 
-    public function order_status_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(OrderStatusDescription::class, 'order_status_id');
     }

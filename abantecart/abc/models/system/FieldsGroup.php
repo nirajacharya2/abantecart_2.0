@@ -3,6 +3,8 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class FieldsGroup
@@ -18,8 +20,16 @@ use abc\models\BaseModel;
  */
 class FieldsGroup extends BaseModel
 {
-    protected $primaryKey = 'field_id';
-    public $incrementing = false;
+    use SoftDeletes;
+
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'field_id',
+        'group_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

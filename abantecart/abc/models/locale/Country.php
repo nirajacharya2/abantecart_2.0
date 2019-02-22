@@ -4,6 +4,7 @@ namespace abc\models\locale;
 
 use abc\models\BaseModel;
 use abc\models\customer\Address;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -25,7 +26,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Country extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+    protected $cascadeDeletes = ['descriptions','zones', 'zones_to_locations'];
+
     protected $primaryKey = 'country_id';
     public $timestamps = false;
 
@@ -47,7 +51,7 @@ class Country extends BaseModel
         return $this->hasMany(Address::class, 'country_id');
     }
 
-    public function country_descriptions()
+    public function descriptions()
     {
         return $this->hasMany(CountryDescription::class, 'country_id');
     }

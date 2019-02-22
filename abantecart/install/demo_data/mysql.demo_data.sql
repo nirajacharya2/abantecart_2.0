@@ -943,7 +943,8 @@ VALUES
 -- Dumping data for table `manufacturers_to_stores`
 --
 
-INSERT INTO `ac_manufacturers_to_stores` 
+INSERT INTO `ac_manufacturers_to_stores`
+(`manufacturer_id`, `store_id`)
 VALUES 
 (11,0),
 (12,0),

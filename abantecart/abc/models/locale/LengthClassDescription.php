@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class LengthClassDescription
@@ -18,7 +19,15 @@ use abc\models\BaseModel;
  */
 class LengthClassDescription extends BaseModel
 {
-    public $incrementing = false;
+
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'length_class_id',
+        'language_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [
@@ -30,6 +39,11 @@ class LengthClassDescription extends BaseModel
         'title',
         'unit',
     ];
+
+    public function length_class()
+    {
+        return $this->belongsTo(LengthClass::class, 'length_class_id');
+    }
 
     public function language()
     {

@@ -42,12 +42,12 @@ class DatasetDefinition extends BaseModel
         return $this->belongsTo(Dataset::class, 'dataset_id');
     }
 
-    public function dataset_column_properties()
+    public function column_properties()
     {
         return $this->hasMany(DatasetColumnProperty::class, 'dataset_column_id');
     }
 
-    public function dataset_values()
+    public function values()
     {
         return $this->hasMany(DatasetValue::class, 'dataset_column_id');
     }

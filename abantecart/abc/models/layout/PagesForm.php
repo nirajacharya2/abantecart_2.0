@@ -4,6 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\system\Form;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PagesForm
@@ -18,7 +19,12 @@ use abc\models\system\Form;
  */
 class PagesForm extends BaseModel
 {
-    public $incrementing = false;
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'page_id',
+        'form_id'
+    ];
     public $timestamps = false;
 
     protected $casts = [

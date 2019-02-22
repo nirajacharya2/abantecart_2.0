@@ -255,7 +255,8 @@
     "illuminate/Cache": "5.7.*",
     "illuminate/redis": "5.7.*",
     "craftcamp/php-abac": "dev-dev-abc",
-    "laracasts/utilities": "^2.0"
+    "laracasts/utilities": "^2.0",
+    "iatstuti/laravel-cascade-soft-deletes" : "1.5.0"
   },
   "extra": {
     "installer-paths": {

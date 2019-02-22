@@ -49,6 +49,58 @@ class DatetimeColumnsChanges extends AbstractMigration
             $this->execute($update);
         }
 
+
+
+        //add primary AI key to pivot tables
+        $pivots = [
+            'banner_descriptions',
+            'category_descriptions',
+            'categories_to_stores',
+            'content_descriptions',
+            'contents_to_stores',
+            'country_descriptions',
+            'coupon_descriptions',
+            'customer_notifications',
+            'download_descriptions',
+            'extension_dependencies',
+            'field_descriptions',
+            'fields_group_descriptions',
+            'fields_groups',
+            'form_descriptions',
+            'global_attributes_descriptions',
+            'global_attributes_type_descriptions',
+            'global_attributes_value_descriptions',
+            'length_class_descriptions',
+            'manufacturers_to_stores',
+            'order_data',
+            'order_status_descriptions',
+            'page_descriptions',
+            'pages_forms',
+            'pages_layouts',
+            'product_descriptions',
+            'product_option_descriptions',
+            'product_option_value_descriptions',
+            'products_related',
+            'products_to_categories',
+            'products_to_downloads',
+            'products_to_stores',
+            'product_tags',
+            'resource_descriptions',
+            'resource_map',
+            'store_descriptions',
+            'tax_class_descriptions',
+            'tax_rate_descriptions',
+            'weight_class_descriptions',
+            'zone_descriptions',
+            'global_attributes_groups_descriptions',
+            ];
+        foreach($pivots as $table_name){
+
+        }
+
+
+
+
         $update = "ALTER TABLE ".$prefix."ant_messages
                    MODIFY COLUMN `viewed_date` timestamp NULL;";
         $this->execute($update);
@@ -1405,6 +1457,7 @@ class DatetimeColumnsChanges extends AbstractMigration
         ADD COLUMN `stage_id` INT(6) NULL,
         ADD INDEX `stage_id` (`stage_id` ASC);";
         $this->execute($update);
+
 
     }
 

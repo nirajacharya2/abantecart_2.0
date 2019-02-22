@@ -3,6 +3,7 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ZoneDescription
@@ -18,7 +19,15 @@ use abc\models\BaseModel;
  */
 class ZoneDescription extends BaseModel
 {
-    public $incrementing = false;
+    use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    protected $primaryKey = 'id';
+    protected $primaryKeySet = [
+        'zone_id',
+        'language_id'
+    ];
+
     public $timestamps = false;
 
     protected $casts = [

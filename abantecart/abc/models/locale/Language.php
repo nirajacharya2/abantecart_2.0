@@ -28,6 +28,8 @@ use abc\models\system\FormDescription;
 use abc\models\system\StoreDescription;
 use abc\models\system\TaxClassDescription;
 use abc\models\system\TaxRateDescription;
+use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Language
@@ -77,6 +79,41 @@ use abc\models\system\TaxRateDescription;
  */
 class Language extends BaseModel
 {
+    use SoftDeletes, CascadeSoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
+    //Note: list of related model for cascade deleting to except Orders
+    protected $cascadeDeletes = [
+        'banner_descriptions',
+        'block_descriptions',
+        'category_descriptions',
+        'content_descriptions',
+        'country_descriptions',
+        'coupon_descriptions',
+        'download_descriptions',
+        'field_descriptions',
+        'fields_group_descriptions',
+        'form_descriptions',
+        'global_attributes_descriptions',
+        'global_attributes_value_descriptions',
+        'definitions',
+        'length_class_descriptions',
+        'order_status_descriptions',
+        'page_descriptions',
+        'product_descriptions',
+        'product_option_descriptions',
+        'product_option_value_descriptions',
+        'product_tags',
+        'resource_descriptions',
+        'stock_statuses',
+        'store_descriptions',
+        'tax_class_descriptions',
+        'tax_rate_descriptions',
+        'url_aliases',
+        'weight_class_descriptions',
+        'zone_descriptions',
+        'product_type_descriptions'
+    ];
     protected $primaryKey = 'language_id';
     public $timestamps = false;
 
@@ -156,7 +193,7 @@ class Language extends BaseModel
         return $this->hasMany(GlobalAttributesValueDescription::class, 'language_id');
     }
 
-    public function language_definitions()
+    public function definitions()
     {
         return $this->hasMany(LanguageDefinition::class, 'language_id');
     }
