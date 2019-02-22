@@ -19,10 +19,11 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
 
 class ObjectFieldSetting extends BaseModel
 {
-    protected $primaryKey = false;
+    protected $primaryKey = 'object_field_setting_id';
     public $timestamps = false;
 
     protected $fillable = [
@@ -32,5 +33,15 @@ class ObjectFieldSetting extends BaseModel
         'field_setting',
         'field_setting_value'
     ];
+
+    protected function setKeysForSaveQuery(Builder $query)
+    {
+        $query
+            ->where('object_type', '=', $this->getAttribute('object_type'))
+            ->where('object_type_id', '=', $this->getAttribute('object_type_id'))
+            ->where('object_field_name', '=', $this->getAttribute('object_field_name'))
+            ->where('field_setting', '=', $this->getAttribute('field_setting'));
+        return $query;
+    }
 
 }

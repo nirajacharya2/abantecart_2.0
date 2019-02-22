@@ -18,13 +18,17 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\catalog\GlobalAttributesGroup;
+use abc\models\catalog\ObjectFieldSetting;
 use abc\models\catalog\ObjectType;
 use abc\models\catalog\ObjectTypeAlias;
+use abc\models\catalog\ObjectTypeSettingValue;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\ProductTypeDescription;
+use abc\models\system\Setting;
 
 class ControllerPagesCatalogObjectType extends AController
 {
@@ -144,6 +148,33 @@ class ControllerPagesCatalogObjectType extends AController
                 $object->update($post);
                 $object->description()->update(['name' => $post['name']]);
                 $object->global_attribute_groups()->sync($post['attribute_group']);
+
+                if (isset($post['catalog_mode'])) {
+                    Setting::updateOrCreate([
+                        'store_id' => $this->registry->get('config')->get('config_store_id'),
+                        'group'    => 'object_type',
+                        'group_id' => $object->object_type_id,
+                        'key'      => 'catalog_mode',
+                    ], [
+                        'value' => $post['catalog_mode'],
+                    ]);
+                }
+
+                foreach ($post as $item => $value) {
+                    if (strpos($item, 'hide_') === 0) {
+                        $fieldName = substr($item, 5, strlen($item));
+
+                        ObjectFieldSetting::updateOrCreate(
+                            [
+                                'object_type'       => $object->object_type,
+                                'object_type_id'    => $object->object_type_id,
+                                'object_field_name' => $fieldName,
+                                'field_setting'     => 'hide',
+                            ],
+                            ['field_setting_value' => $value]
+                        );
+                    }
+                }
             }
 
             $this->session->data['success'] = $this->language->get('text_success');
@@ -257,7 +288,7 @@ class ControllerPagesCatalogObjectType extends AController
                 'listing_grid/object_types/update_field',
                 '&id='.$this->request->get['object_type_id']
             );
-            $form = new AForm('HS');
+            $form = new AForm('ST');
         }
 
         $this->document->addBreadcrumb([
@@ -291,27 +322,53 @@ class ControllerPagesCatalogObjectType extends AController
             'style' => 'button2',
         ]);
 
-        $this->data['form']['fields']['status'] = $form->getFieldHtml([
+        $this->data['form']['fields']['main']['status'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'status',
             'value' => $this->data['status'],
             'style' => 'btn_switch',
         ]);
 
-        $this->data['form']['fields']['sort_order'] = $form->getFieldHtml([
+        $this->data['form']['fields']['main']['sort_order'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'sort_order',
             'value' => $this->data['sort_order'],
             'style' => 'small-field',
         ]);
 
-        $this->data['form']['fields']['name'] = $form->getFieldHtml([
+        $this->data['form']['fields']['main']['name'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'name',
             'value'    => $this->data['name'],
             'required' => true,
             'style'    => 'small-field',
         ]);
+
+        //TODO: change to flexible types and props
+        if ($this->data['object_type'] == 'Product') {
+
+            $store_id = $this->registry->get('config')->get('config_store_id');
+
+            $objectTypeSettingValue = Setting::where('store_id', $store_id)
+                ->where('group', 'object_type')
+                ->where('group_id', $this->request->get['object_type_id'])
+                ->where('key', 'catalog_mode')
+                ->first();
+
+            $catalog_mode = 0;
+            if ($objectTypeSettingValue) {
+                $objectTypeSettingValue = $objectTypeSettingValue->toArray();
+                $catalog_mode = $objectTypeSettingValue['value'];
+            }
+
+            $this->data['form']['fields']['main']['catalog_mode'] = $form->getFieldHtml(
+                [
+                    'type'  => 'checkbox',
+                    'name'  => 'catalog_mode',
+                    'style' => 'btn_switch status_switch',
+                    'value' => $catalog_mode,
+                ]);
+        }
 
         $objectAliases = ObjectTypeAlias::all('object_type')->toArray();
         $arObjectAliases = [$this->language->get('text_select')];
@@ -322,13 +379,17 @@ class ControllerPagesCatalogObjectType extends AController
             $arObjectAliases[$alias['object_type']] = $alias['object_type'];
         }
 
-        $this->data['form']['fields']['object_type'] = $form->getFieldHtml(
+        if ($this->data['object_type']) {
+            $attr = 'disabled';
+        }
+        $this->data['form']['fields']['main']['object_type'] = $form->getFieldHtml(
             [
                 'type'     => 'selectbox',
                 'name'     => 'object_type',
                 'value'    => $this->data['object_type'],
                 'options'  => $arObjectAliases,
                 'required' => true,
+                'attr'     => $attr,
             ]);
 
         $attributeGroups = GlobalAttributesGroup::with('description')->where('status', 1)->get()->toArray();
@@ -345,7 +406,7 @@ class ControllerPagesCatalogObjectType extends AController
             }
         }
 
-        $this->data['form']['fields']['attribute_group'] = $form->getFieldHtml(
+        $this->data['form']['fields']['main']['attribute_group'] = $form->getFieldHtml(
             [
                 'type'     => 'checkboxgroup',
                 'name'     => 'attribute_group[]',
@@ -354,6 +415,46 @@ class ControllerPagesCatalogObjectType extends AController
                 'style'    => 'chosen',
                 'required' => true,
             ]);
+
+        if ($this->data['object_type'] && $this->request->get['object_type_id']) {
+
+            $objectInst = ABC::getModelObjectByAlias($this->data['object_type']);
+            if ($objectInst) {
+
+                $fields = $objectInst->getFields();
+
+                $objectFieldSettings = ObjectFieldSetting::where('object_type', '=', $this->data['object_type'])
+                    ->where('object_type_id', '=', $this->request->get['object_type_id'])
+                    ->where('field_setting', '=', 'hide')
+                    ->get()
+                    ->toArray();
+
+                $objectFieldSettingsVals = [];
+                foreach ($objectFieldSettings as $objectFieldSetting) {
+                    $objectFieldSettingsVals[$objectFieldSetting['object_field_name']] = $objectFieldSetting['field_setting_value'];
+                }
+
+                if (is_array($fields)) {
+                    $fields = array_filter($fields, function ($value, $key) {
+                        if ($value['hidable'] === true) {
+                            return true;
+                        }
+                        return false;
+                    }, ARRAY_FILTER_USE_BOTH);
+
+                    foreach ($fields as $fieldName => $field) {
+                        $this->data['form']['fields']['settings']['hide_'.$fieldName] = $form->getFieldHtml(
+                            [
+                                'type'  => 'checkbox',
+                                'name'  => 'hide_'.$fieldName,
+                                'style' => 'btn_switch status_switch',
+                                'value' => $objectFieldSettingsVals[$fieldName],
+                            ]);
+                    }
+                }
+            }
+
+        }
 
         $this->view->batchAssign($this->data);
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());

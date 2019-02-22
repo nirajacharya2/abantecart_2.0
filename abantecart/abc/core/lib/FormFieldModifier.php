@@ -21,9 +21,11 @@ namespace abc\core\lib;
 class FormFieldModifier
 {
 
-    public static function hide($field)
+    public static function hide($field, $setting_value)
     {
-        $field['input_type'] = 'hidden';
+        if ($setting_value == 1) {
+            $field['input_type'] = 'hidden';
+        }
         return $field;
     }
 

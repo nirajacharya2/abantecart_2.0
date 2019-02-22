@@ -414,6 +414,16 @@ class ControllerPagesProductProduct extends AController
         $this->data['product_id'] = $product_id;
         $this->data['average'] = $average;
 
+        $catalog_mode = false;
+        if ($product_info['product_type_id']) {
+            $prodTypeSettings = Product::getProductTypeSettings($product_id);
+
+            if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
+                $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+            }
+        }
+        $this->data['catalog_mode'] = $catalog_mode;
+
         if (!H::has_value($product_info['stock_checkout'])) {
             $product_info['stock_checkout'] = $this->config->get('config_stock_checkout');
         }

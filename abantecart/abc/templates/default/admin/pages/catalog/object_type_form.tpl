@@ -35,8 +35,41 @@
 
 	<?php echo $form['form_open']; ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
+
+		<ul class="nav nav nav-tabs nav-justified" id="pills-tab" role="tablist">
 		<?php
-				foreach ($form['fields'] as $name => $field) {
+		$i = 0;
+		foreach ($form['fields'] as $key => $value) {
+			$active = '';
+			if ($i == 0) {
+			$active = 'active';
+			}
+		?>
+			<li class="nav-item">
+				<a class="nav-link <?=$active?>" id="pills-<?=$key?>-tab" data-toggle="pill" href="#pills-<?=$key?>" role="tab" aria-controls="pills-<?=$key?>" aria-selected="true">
+					<?php echo $key; ?>
+				</a>
+			</li>
+		<?php
+		$i++;
+		}
+		?>
+		</ul>
+
+		<div class="tab-content p-3" id="pills-tabContent">
+
+		<?php
+		$i = 0;
+		foreach ($form['fields'] as $key => $value) {
+			$active = '';
+		if ($i == 0) {
+		$active = 'show active';
+		}
+		?>
+			<div class="tab-pane fade <?=$active?>" id="pills-<?=$key?>" role="tabpanel" aria-labelledby="pills-<?=$key?>-tab">
+
+		<?php
+				foreach ($value as $name => $field) {
 
 		//Logic to calculate fields width
 		$widthcasses = "col-sm-7";
@@ -62,7 +95,11 @@
 	</div>
 
 	<?php }  ?><!-- <div class="fieldset"> -->
-
+		</div>
+	<?php
+	$i++;
+	}  ?><!-- > -->
+	</div>
 	<?php
 		// extension related piece of form
 		echo $subform; ?>

@@ -63,6 +63,8 @@
 					<div class="blurb"><?php echo $product['blurb'] ?></div>
 					<?php if ($display_price) { ?>
 						<div class="pricetag jumbotron">
+
+							<?php if(!$product['catalog_mode']) { ?>
 							<?php if($product['call_to_order']){ ?>
 							<a data-id="<?php echo $product['product_id'] ?>" href="#"
 								class="btn call_to_order"
@@ -81,6 +83,8 @@
 								<i class="fa fa-cart-plus fa-fw"></i>
 							</a>
 							<?php } ?>
+							<?php } ?>
+
 							<div class="price">
 								<?php if ($product['special']) { ?>
 									<div class="pricenew"><?php echo $product['special'] . $tax_message; ?></div>
