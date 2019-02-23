@@ -24,12 +24,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class StoreDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'store_id',
-        'language_id'
+        'language_id',
     ];
     public $timestamps = false;
 

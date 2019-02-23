@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderTotal extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'order_total_id';
     public $timestamps = false;
 

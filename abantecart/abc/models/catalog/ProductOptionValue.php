@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductOptionValue extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'product_option_value_id';
@@ -116,7 +116,8 @@ class ProductOptionValue extends BaseModel
         return $this->images;
     }
 
-    public function getAllData() {
+    public function getAllData()
+    {
         $this->load('option_value_descriptions');
         $data = $this->toArray();
         $data['images'] = $this->images();

@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Store extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = [
         'descriptions',
         'categories',
@@ -35,7 +35,7 @@ class Store extends BaseModel
         'manufacturers',
         'orders',
         'settings',
-        'user_notifications'
+        'user_notifications',
     ];
     protected $primaryKey = 'store_id';
     public $timestamps = false;

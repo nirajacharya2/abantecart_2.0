@@ -21,12 +21,11 @@ class LengthClassDescription extends BaseModel
 {
 
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'length_class_id',
-        'language_id'
+        'language_id',
     ];
     public $timestamps = false;
 

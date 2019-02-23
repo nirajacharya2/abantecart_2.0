@@ -11,10 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class UrlAlias
  *
- * @property int      $url_alias_id
- * @property string   $query
- * @property string   $keyword
- * @property int      $language_id
+ * @property int $url_alias_id
+ * @property string $query
+ * @property string $keyword
+ * @property int $language_id
  *
  * @property Language $language
  *
@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class UrlAlias extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'url_alias_id';
     public $timestamps = false;
 
@@ -45,9 +45,9 @@ class UrlAlias extends BaseModel
     private static function getKeyWord(string $query, int $language_id)
     {
         $keyword = self::select('keyword')
-            ->where('query', '=', $query)
-            ->where('language_id', '=', $language_id)
-            ->first();
+                       ->where('query', '=', $query)
+                       ->where('language_id', '=', $language_id)
+                       ->first();
         if ($keyword && isset($keyword->toArray()['keyword'])) {
             return $keyword->toArray()['keyword'];
         }

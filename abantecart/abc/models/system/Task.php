@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Task extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'task_id';
     public $timestamps = false;

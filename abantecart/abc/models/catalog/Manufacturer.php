@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Manufacturer extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['stores'];
 
     protected $primaryKey = 'manufacturer_id';

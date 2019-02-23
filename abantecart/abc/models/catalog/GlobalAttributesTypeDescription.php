@@ -20,12 +20,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GlobalAttributesTypeDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'attribute_type_id',
-        'language_id'
+        'language_id',
     ];
     public $timestamps = false;
 

@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ContentDescription extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = ['content_id', 'language_id'];

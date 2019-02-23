@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Review extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'review_id';
     public $timestamps = false;

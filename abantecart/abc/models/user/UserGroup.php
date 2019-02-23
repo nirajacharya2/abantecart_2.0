@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class UserGroup
  *
- * @property int                                      $user_group_id
- * @property string                                   $name
- * @property string                                   $permission
- * @property \Carbon\Carbon                           $date_added
- * @property \Carbon\Carbon                           $date_modified
+ * @property int $user_group_id
+ * @property string $name
+ * @property string $permission
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property \Illuminate\Database\Eloquent\Collection $users
  *
@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class UserGroup extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'user_group_id';
     public $timestamps = false;
 
@@ -49,7 +49,7 @@ class UserGroup extends BaseModel
     {
         parent::__construct($attributes = []);
         if (!$this->isUser()) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access ' . __CLASS__);
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access '.__CLASS__);
         }
     }
 

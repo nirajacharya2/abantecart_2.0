@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FieldValue extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'value_id';
     public $timestamps = false;
 

@@ -22,12 +22,10 @@ class FieldsGroup extends BaseModel
 {
     use SoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'field_id',
-        'group_id'
+        'group_id',
     ];
 
     public $timestamps = false;

@@ -28,7 +28,7 @@ use abc\core\lib\AError;
 class Currency extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'currency_id';
     public $timestamps = false;
 
@@ -61,7 +61,6 @@ class Currency extends BaseModel
      * User methods ????? Todo add RBAC to check for user
      */
 
-
     /**
      * Return array with list of Currencies
      *
@@ -89,7 +88,7 @@ class Currency extends BaseModel
                     'decimal_place' => $result['decimal_place'],
                     'value'         => $result['value'],
                     'status'        => $result['status'],
-                    'date_modified' => $result['date_modified']
+                    'date_modified' => $result['date_modified'],
                 );
             }
 
@@ -98,8 +97,6 @@ class Currency extends BaseModel
 
         return $currency_data;
     }
-
-
 
     /**
      * @param       $operation
@@ -119,16 +116,19 @@ class Currency extends BaseModel
      */
     public function updateCurrencies()
     {
-        $api_key = $this->config->get('alphavantage_api_key') ? $this->config->get('alphavantage_api_key') : 'P6WGY9G9LB22GMBJ';
+        $api_key =
+            $this->config->get('alphavantage_api_key') ? $this->config->get('alphavantage_api_key') : 'P6WGY9G9LB22GMBJ';
 
         $base_currency_code = $this->config->get('config_currency');
 
         $results = $this->where('code', $base_currency_code)
-            ->where('date_modified', '>', date(strtotime('-1 day')))
-            ->get()->toArray();
+                        ->where('date_modified', '>', date(strtotime('-1 day')))
+                        ->get()->toArray();
 
         foreach ($results as $result) {
-            $url = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code.'&to_currency='.$result['code'].'&apikey='.$api_key;
+            $url =
+                'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code
+                .'&to_currency='.$result['code'].'&apikey='.$api_key;
             $connect = new AConnect(true);
             $json = $connect->getData($url);
             if (!$json) {
@@ -140,7 +140,7 @@ class Currency extends BaseModel
             if (isset($json["Realtime Currency Exchange Rate"]["5. Exchange Rate"])) {
                 $value = (float)$json["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
                 $this->where('code', $result['code'])
-                    ->update(['value' => $value]);
+                     ->update(['value' => $value]);
             } elseif (isset($json['Information'])) {
                 $msg = 'Currency Auto Updater Info: '.$json['Information'];
                 $error = new AError($msg);
@@ -149,7 +149,7 @@ class Currency extends BaseModel
             usleep(500);
         }
         $this->where('code', $base_currency_code)
-            ->update(['value' => '1.00000']);
+             ->update(['value' => '1.00000']);
         $this->cache->remove('localization');
 
     }

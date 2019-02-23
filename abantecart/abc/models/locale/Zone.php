@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Zone extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
     public $timestamps = false;
 

@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class BlockDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     /**
      * @var string
@@ -38,7 +37,7 @@ class BlockDescription extends BaseModel
     protected $primaryKey = 'block_description_id';
     protected $primaryKeySet = [
         'custom_block_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

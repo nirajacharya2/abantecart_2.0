@@ -43,6 +43,7 @@ class BaseModel extends OrmModel
 {
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
+    const DELETED_AT = 'date_deleted';
 
     const CLI = 0;
     const USER = 1;
@@ -130,7 +131,7 @@ class BaseModel extends OrmModel
         //before delete
         'deleting',
         //before restore
-        'restoring'
+        'restoring',
     ];
 
     /**
@@ -150,10 +151,10 @@ class BaseModel extends OrmModel
         $this->db = $this->registry->get('db');
 
         $called_class = $this->getClass();
-        if(static::$env['FORCE_DELETING']
-            && method_exists($this,'forceDelete')
+        if (static::$env['FORCE_DELETING']
+            && method_exists($this, 'forceDelete')
             && isset(static::$env['FORCE_DELETING'][$called_class])
-        ){
+        ) {
             $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
         }
         parent::__construct($attributes);
@@ -185,10 +186,10 @@ class BaseModel extends OrmModel
     public function isUser()
     {
         return (isset ($this->actor['user_type'])
-            && ( $this->actor['user_type'] == self::USER
+            && ($this->actor['user_type'] == self::USER
                 || $this->actor['user_type'] == self::CLI
             )
-        ) ? TRUE : FALSE;
+        ) ? true : false;
     }
 
     /**
@@ -197,8 +198,8 @@ class BaseModel extends OrmModel
     public function isCustomer()
     {
         return (isset ($this->actor['user_type'])
-            &&  $this->actor['user_type'] == self::CUSTOMER
-        ) ? TRUE : FALSE;
+            && $this->actor['user_type'] == self::CUSTOMER
+        ) ? true : false;
     }
 
     /**
@@ -224,9 +225,9 @@ class BaseModel extends OrmModel
     public function hasPermission(string $operation, array $columns = ['*']): bool
     {
 
-        if( $columns[0] == '*' ){
+        if ($columns[0] == '*') {
             $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
-        }else{
+        } else {
             $this->affectedColumns = $columns;
         }
 
@@ -287,10 +288,10 @@ class BaseModel extends OrmModel
             $v = ABC::getObjectByAlias('Validator', [ABC::getObjectByAlias('ValidationTranslator'), $data, $rules]);
             try {
                 $v->validate();
-            }catch (ValidationException $e) {
+            } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
                 throw $e;
-            }catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
                 throw $e;
             }
@@ -326,7 +327,7 @@ class BaseModel extends OrmModel
      */
     public function appendRules(array $rules)
     {
-       $this->rules = array_merge($this->rules, $rules);
+        $this->rules = array_merge($this->rules, $rules);
     }
 
     /**
@@ -334,7 +335,7 @@ class BaseModel extends OrmModel
      */
     public function removeRule(string $key)
     {
-       unset($this->rules[$key]);
+        unset($this->rules[$key]);
     }
 
     /**
@@ -343,7 +344,7 @@ class BaseModel extends OrmModel
      */
     public function updateRule(string $key, string $value)
     {
-       $this->rules[$key] = $value;
+        $this->rules[$key] = $value;
     }
 
     /**
@@ -463,7 +464,7 @@ class BaseModel extends OrmModel
      * @return array
      * @throws \ReflectionException
      */
-    public function getRelationships( $typeOnly = '')
+    public function getRelationships($typeOnly = '')
     {
         $model = new static;
         $relationships = [];
@@ -481,7 +482,7 @@ class BaseModel extends OrmModel
                 $return = $method->invoke($model);
                 if ($return instanceof Relation) {
                     $type = (new ReflectionClass($return))->getShortName();
-                    if(!$typeOnly || ($type == $typeOnly)) {
+                    if (!$typeOnly || ($type == $typeOnly)) {
                         $relationships[$method->getName()] = [
                             'type'  => $type,
                             'model' => (new ReflectionClass($return->getRelated()))->getName(),
@@ -542,6 +543,7 @@ class BaseModel extends OrmModel
 
     /**
      * Method returns primary keys array of pivot tables
+     *
      * @return array
      */
     public function getKeySet()

@@ -21,12 +21,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CountryDescription extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'country_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

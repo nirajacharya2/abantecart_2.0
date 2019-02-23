@@ -83,12 +83,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Order extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = [
         'order_data',
         'order_products',
         'downloads', //see Download model. there cascade deleting too
-        'totals'
+        'totals',
     ];
 
     public $timestamps = false;

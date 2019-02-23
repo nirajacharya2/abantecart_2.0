@@ -25,7 +25,6 @@ class Setting extends BaseModel
     protected $primaryKey = 'setting_id';
 
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     public $timestamps = false;
 

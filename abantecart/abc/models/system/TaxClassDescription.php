@@ -22,12 +22,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TaxClassDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'tax_class_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

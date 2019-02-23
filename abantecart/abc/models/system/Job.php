@@ -27,7 +27,6 @@ class Job extends BaseModel
 {
     use SoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
     protected $primaryKey = 'job_id';
     public $timestamps = false;
 

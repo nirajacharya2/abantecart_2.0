@@ -25,14 +25,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CategoryDescription extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     /**
      * @var string
      */
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'category_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

@@ -80,7 +80,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Language extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     //Note: list of related model for cascade deleting to except Orders
     protected $cascadeDeletes = [
@@ -112,7 +111,7 @@ class Language extends BaseModel
         'url_aliases',
         'weight_class_descriptions',
         'zone_descriptions',
-        'product_type_descriptions'
+        'product_type_descriptions',
     ];
     protected $primaryKey = 'language_id';
     public $timestamps = false;

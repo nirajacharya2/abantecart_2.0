@@ -48,8 +48,7 @@ class Customer extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
-    protected $cascadeDeletes = ['addresses','notifications', 'transactions'];
+    protected $cascadeDeletes = ['addresses', 'notifications', 'transactions'];
 
     /**
      * @var string
@@ -81,7 +80,7 @@ class Customer extends BaseModel
 
     protected $guarded = [
         'date_added',
-        'date_modified'
+        'date_modified',
     ];
 
     /**
@@ -127,7 +126,8 @@ class Customer extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function audits() {
+    public function audits()
+    {
         return $this->morphMany(Audit::class, 'user');
     }
 
@@ -137,7 +137,7 @@ class Customer extends BaseModel
     public function approve()
     {
         if (!$this->hasPermission('write', ['approved'])) {
-            throw new \Exception('Permissions are restricted ' . __CLASS__ . "::" . __METHOD__  ."\n");
+            throw new \Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
         }
         $this->approved = 1;
         $this->save();

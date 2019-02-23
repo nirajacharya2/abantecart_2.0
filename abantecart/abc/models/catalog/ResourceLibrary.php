@@ -26,9 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ResourceLibrary extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
-    protected $cascadeDeletes = ['descriptions','maps'];
+    protected $cascadeDeletes = ['descriptions', 'maps'];
 
     protected $table = 'resource_library';
     protected $primaryKey = 'resource_id';
@@ -73,10 +72,10 @@ class ResourceLibrary extends BaseModel
         $language_id
     ) {
         $objects = [
-            'products'      => 'Product',
+            'products'             => 'Product',
             'product_option_value' => 'ProductOptionValue',
-            'categories'    => 'Category',
-            'manufacturers' => 'Brand',
+            'categories'           => 'Category',
+            'manufacturers'        => 'Brand',
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {

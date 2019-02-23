@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ResourceType extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'type_id';
     public $timestamps = false;

@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Category
  *
- * @property int                                      $category_id
- * @property int                                      $parent_id
- * @property int                                      $sort_order
- * @property int                                      $status
- * @property \Carbon\Carbon                           $date_added
- * @property \Carbon\Carbon                           $date_modified
+ * @property int $category_id
+ * @property int $parent_id
+ * @property int $sort_order
+ * @property int $status
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property \Illuminate\Database\Eloquent\Collection $categories_to_stores
  * @property \Illuminate\Database\Eloquent\Collection $category_descriptions
@@ -26,11 +26,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Category extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = [
         'descriptions',
         'products',
-        'stores'
+        'stores',
     ];
     /**
      * @var string
@@ -81,7 +81,7 @@ class Category extends BaseModel
     public function description()
     {
         return $this->hasOne(CategoryDescription::class, 'category_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
     }
 
     /**
@@ -105,13 +105,13 @@ class Category extends BaseModel
         $category_id = (int)$category_id;
 
         $categories = $this->db->table('categories as c')
-            ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id')
-            ->where('c.category_id', '=', (int)$category_id)
-            ->where('cd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
-            ->orderBy('c.sort_order')
-            ->orderBy('cd.name')
-            ->get()
-            ->toArray();
+                               ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id')
+                               ->where('c.category_id', '=', (int)$category_id)
+                               ->where('cd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+                               ->orderBy('c.sort_order')
+                               ->orderBy('cd.name')
+                               ->get()
+                               ->toArray();
 
         $category_info = current($categories);
 
@@ -136,7 +136,7 @@ class Category extends BaseModel
         $category_data = [];
 
         $categories = $this->db->table('categories as c')
-            ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id');
+                               ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id');
         if (!is_null($store_id)) {
             $categories = $categories->rightJoin('categories_to_stores as cs', function ($join) use ($store_id) {
                 $join->on('c.category_id', '=', 'cs.category_id')

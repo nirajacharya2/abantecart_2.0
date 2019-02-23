@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CustomList extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'rowid';
     public $timestamps = false;

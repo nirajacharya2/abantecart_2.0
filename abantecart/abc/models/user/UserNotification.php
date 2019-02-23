@@ -11,16 +11,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class UserNotification
  *
- * @property int                 $user_id
- * @property int                 $store_id
- * @property bool                $section
- * @property string              $sendpoint
- * @property string              $protocol
- * @property string              $uri
- * @property \Carbon\Carbon      $date_added
- * @property \Carbon\Carbon      $date_modified
+ * @property int $user_id
+ * @property int $store_id
+ * @property bool $section
+ * @property string $sendpoint
+ * @property string $protocol
+ * @property string $uri
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
- * @property User  $user
+ * @property User $user
  * @property Store $store
  *
  * @package abc\models
@@ -28,12 +28,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class UserNotification extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'user_id',
-        'store_id'
+        'store_id',
     ];
 
     public $timestamps = false;
@@ -66,7 +65,7 @@ class UserNotification extends BaseModel
     {
         parent::__construct($attributes = []);
         if (!$this->isUser()) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access ' . __CLASS__);
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access '.__CLASS__);
         }
     }
 

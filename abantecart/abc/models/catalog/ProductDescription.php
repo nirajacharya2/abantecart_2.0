@@ -25,14 +25,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     public $timestamps = false;
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'product_id',
-        'language_id'
+        'language_id',
     ];
     protected $casts = [
         'product_id'  => 'int',

@@ -23,13 +23,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ResourceMap extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'resource_id',
         'object_id',
-        'object_name'
+        'object_name',
     ];
 
     protected $table = 'resource_map';

@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderHistory extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';

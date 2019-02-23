@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductFilter extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'filter_id';
     public $timestamps = false;
 

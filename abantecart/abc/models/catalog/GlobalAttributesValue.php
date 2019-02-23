@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GlobalAttributesValue extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'attribute_value_id';
     public $timestamps = false;
@@ -43,7 +43,7 @@ class GlobalAttributesValue extends BaseModel
     public function description()
     {
         return $this->hasMany(GlobalAttributesValueDescription::class, 'attribute_value_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID())->first();
+                    ->where('language_id', $this->registry->get('language')->getContentLanguageID())->first();
 
     }
 

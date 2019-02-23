@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GlobalAttributesGroup extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'attribute_group_id';
     public $timestamps = false;
@@ -47,7 +47,7 @@ class GlobalAttributesGroup extends BaseModel
     public function description()
     {
         return $this->hasOne(GlobalAttributesGroupsDescription::class, 'attribute_group_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
     public function descriptions()

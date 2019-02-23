@@ -11,21 +11,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class AcUser
  *
- * @property int                                      $user_id
- * @property int                                      $user_group_id
- * @property string                                   $username
- * @property string                                   $salt
- * @property string                                   $password
- * @property string                                   $firstname
- * @property string                                   $lastname
- * @property string                                   $email
- * @property int                                      $status
- * @property string                                   $ip
- * @property \Carbon\Carbon                           $last_login
- * @property \Carbon\Carbon                           $date_added
- * @property \Carbon\Carbon                           $date_modified
+ * @property int $user_id
+ * @property int $user_group_id
+ * @property string $username
+ * @property string $salt
+ * @property string $password
+ * @property string $firstname
+ * @property string $lastname
+ * @property string $email
+ * @property int $status
+ * @property string $ip
+ * @property \Carbon\Carbon $last_login
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
- * @property UserGroup                                $user_group
+ * @property UserGroup $user_group
  * @property \Illuminate\Database\Eloquent\Collection $user_notifications
  *
  * @package abc\models
@@ -34,7 +34,6 @@ class User extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
     protected $cascadeDeletes = ['notifications'];
 
     protected $primaryKey = 'user_id';
@@ -81,7 +80,7 @@ class User extends BaseModel
     {
         parent::__construct($attributes = []);
         if (!$this->isUser()) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access ' . __CLASS__);
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access '.__CLASS__);
         }
     }
 
@@ -104,7 +103,8 @@ class User extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function audits() {
+    public function audits()
+    {
         return $this->morphMany(Audit::class, 'user');
     }
 }

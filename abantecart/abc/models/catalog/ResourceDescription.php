@@ -27,12 +27,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ResourceDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'resource_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

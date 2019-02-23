@@ -22,12 +22,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderDatum extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'order_id',
-        'type_id'
+        'type_id',
     ];
 
     public $timestamps = false;

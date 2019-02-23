@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class LengthClass extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'length_class_id';
 
@@ -49,6 +49,6 @@ class LengthClass extends BaseModel
     public function description()
     {
         return $this->hasOne(LengthClassDescription::class, 'length_class_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 }

@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CustomerTransaction extends BaseModel
 {
     use SoftDeletes;
+
     protected $primaryKey = 'customer_transaction_id';
     public $timestamps = false;
 

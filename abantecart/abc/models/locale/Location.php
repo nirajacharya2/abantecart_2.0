@@ -24,8 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Location extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
-    protected $cascadeDeletes = ['tax_rates','zones_to_locations'];
+
+    protected $cascadeDeletes = ['tax_rates', 'zones_to_locations'];
 
     protected $primaryKey = 'location_id';
     public $timestamps = false;

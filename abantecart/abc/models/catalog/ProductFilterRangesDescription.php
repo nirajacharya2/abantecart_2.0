@@ -17,12 +17,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductFilterRangesDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'range_id',
-        'language_id'
+        'language_id',
     ];
     public $timestamps = false;
 

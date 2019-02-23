@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FormGroup extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'group_id';
     public $timestamps = false;
 

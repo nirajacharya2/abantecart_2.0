@@ -26,14 +26,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class BannerDescription extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     public $timestamps = false;
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'banner_id',
-        'language_id'
+        'language_id',
     ];
 
     protected $casts = [

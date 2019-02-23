@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -38,13 +39,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductOptionValueDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'product_option_value_id',
         'language_id',
-        'product_id'
+        'product_id',
     ];
     public $timestamps = false;
 

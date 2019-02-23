@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class WeightClass extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'weight_class_id';
@@ -46,7 +46,7 @@ class WeightClass extends BaseModel
     public function description()
     {
         return $this->hasOne(WeightClassDescription::class, 'weight_class_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
     public function descriptions()

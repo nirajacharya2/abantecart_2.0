@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TaskStep extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'step_id';
     public $timestamps = false;

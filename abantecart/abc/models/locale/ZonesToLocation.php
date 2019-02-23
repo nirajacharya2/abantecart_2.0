@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ZonesToLocation extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'zone_to_location_id';
     public $timestamps = false;

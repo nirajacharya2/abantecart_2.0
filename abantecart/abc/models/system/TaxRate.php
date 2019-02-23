@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TaxRate extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'tax_rate_id';

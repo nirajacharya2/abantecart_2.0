@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderDownloadsHistory extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'order_download_history_id';
 
     protected $table = 'order_downloads_history';

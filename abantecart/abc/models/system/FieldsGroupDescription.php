@@ -22,12 +22,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FieldsGroupDescription extends BaseModel
 {
     use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'group_id',
-        'language_id'
+        'language_id',
     ];
 
     public $timestamps = false;

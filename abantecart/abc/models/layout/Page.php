@@ -26,8 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Page extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
-    protected $cascadeDeletes = ['descriptions','forms', 'layouts'];
+
+    protected $cascadeDeletes = ['descriptions', 'forms', 'layouts'];
 
     protected $primaryKey = 'page_id';
     public $timestamps = false;

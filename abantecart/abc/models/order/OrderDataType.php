@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderDataType extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['order_data'];
 
     protected $primaryKey = 'type_id';

@@ -35,8 +35,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Download extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
-    protected $cascadeDeletes = ['attribute_values','descriptions'];
+
+    protected $cascadeDeletes = ['attribute_values', 'descriptions'];
 
     protected $primaryKey = 'download_id';
     public $timestamps = false;

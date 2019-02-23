@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderProduct extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
+
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';

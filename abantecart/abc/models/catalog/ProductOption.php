@@ -49,8 +49,7 @@ class ProductOption extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
-    protected $cascadeDeletes = ['descriptions','values'];
+    protected $cascadeDeletes = ['descriptions', 'values'];
     /**
      * @var string
      */
@@ -114,7 +113,8 @@ class ProductOption extends BaseModel
     /**
      * @return false|mixed
      */
-    public function getAllData() {
+    public function getAllData()
+    {
         $cache_key = 'product.alldata.'.$this->getKey();
         $data = $this->cache->pull($cache_key);
         if ($data === false) {
@@ -128,13 +128,14 @@ class ProductOption extends BaseModel
         return $data;
     }
 
-    public function delete(){
+    public function delete()
+    {
         /**
          * @var AResourceManager $rm
          */
         $rm = ABC::getObjectByAlias('AResourceManager');
         $rm->setType('image');
-        foreach($this->option_values as $option_value){
+        foreach ($this->option_values as $option_value) {
             //Remove previous resources of object
             $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
         }

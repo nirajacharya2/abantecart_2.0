@@ -22,7 +22,6 @@ class TaxClass extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
 
-    const DELETED_AT = 'date_deleted';
     protected $cascadeDeletes = ['descriptions', 'rates'];
 
     protected $primaryKey = 'tax_class_id';
@@ -41,7 +40,7 @@ class TaxClass extends BaseModel
     public function description()
     {
         return $this->hasOne(TaxClassDescription::class, 'tax_class_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
     public function descriptions()
