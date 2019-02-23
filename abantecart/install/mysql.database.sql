@@ -13484,6 +13484,7 @@ CREATE TABLE `ac_object_types` (
 
 DROP TABLE IF EXISTS `ac_object_type_descriptions`;
 CREATE TABLE `ac_object_type_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `object_type_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(250) NOT NULL,
@@ -13492,7 +13493,7 @@ CREATE TABLE `ac_object_type_descriptions` (
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   `stage_id` int(6) DEFAULT NULL,
-  PRIMARY KEY (`object_type_id`,`language_id`),
+  PRIMARY KEY (`id`,`object_type_id`,`language_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -13500,8 +13501,13 @@ ALTER TABLE `ac_object_type_descriptions`
 ADD CONSTRAINT `ac_object_type_descriptions_object_types_fk`
   FOREIGN KEY (`object_type_id`)
   REFERENCES `ac_object_types` (`object_type_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_object_type_descriptions`
+ADD CONSTRAINT `ac_object_type_descriptions_language_fk`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 DROP TABLE IF EXISTS `ac_object_type_aliases`;

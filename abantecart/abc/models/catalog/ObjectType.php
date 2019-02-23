@@ -20,6 +20,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ObjectType
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class ObjectType extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'object_type_id';
     public $timestamps = false;
 
