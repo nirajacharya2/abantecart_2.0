@@ -3,7 +3,7 @@
 namespace abc\tests\unit\models\storefront;
 
 use abc\core\lib\ADB;
-use abc\models\base\CustomerCommunication;
+use abc\models\customer\CustomerCommunication;
 use abc\tests\unit\ATestCase;
 
 /**

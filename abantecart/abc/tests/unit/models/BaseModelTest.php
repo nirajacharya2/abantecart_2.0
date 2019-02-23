@@ -93,17 +93,6 @@ class BaseModelTest extends ATestCase
 
         $this->assertIsInt($productId);
 
-        //check audits by requestId
-      /*  if ($result) {
-            $audits = $this->db->table('audits')
-                ->select('*')
-                ->where('request_id', '=', $this->request->getUniqueId())
-                ->where('auditable_id', '=', $productId)
-                ->get();
-
-            $this->assertEquals(34, count($audits));
-        }
-      */
       return $productId;
     }
 
