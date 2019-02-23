@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Address extends BaseModel
 {
     use SoftDeletes;
+    const DELETED_AT = 'date_deleted';
+
     protected $primaryKey = 'address_id';
     public $timestamps = false;
 

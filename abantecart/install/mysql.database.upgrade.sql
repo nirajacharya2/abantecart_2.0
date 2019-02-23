@@ -132,11 +132,15 @@ ALTER TABLE `ac_tax_rates` CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NUL
 UPDATE `ac_tax_rates` SET `zone_id` = NULL WHERE `zone_id` = 0;
 
 
-
 ALTER TABLE `ac_category_descriptions`
+  ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  ADD COLUMN `date_deleted` timestamp NULL,
+  ADD COLUMN `stage_id` INT(6) NULL,
   ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`id`, `category_id`, `language_id`),
+  ADD INDEX `stage_id` (`stage_id` ASC),
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -1431,12 +1435,7 @@ ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL;
 
-ALTER TABLE `ac_category_descriptions`
-ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-ADD COLUMN `date_deleted` timestamp NULL,
-ADD COLUMN `stage_id` INT(6) NULL,
-ADD INDEX `stage_id` (`stage_id` ASC);
+
 
 ALTER TABLE `ac_contents`
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

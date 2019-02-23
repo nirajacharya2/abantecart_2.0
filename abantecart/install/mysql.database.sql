@@ -8853,6 +8853,7 @@ CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`
 -- DDL for table `category_descriptions`
 --
 CREATE TABLE `ac_category_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `category_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
@@ -8863,7 +8864,7 @@ CREATE TABLE `ac_category_descriptions` (
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
-  PRIMARY KEY (`category_id`,`language_id`),
+  PRIMARY KEY (`id`, `category_id`,`language_id`),
   KEY `name` (`name`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -13084,17 +13085,16 @@ ALTER TABLE `ac_zones_to_locations`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_zones_to_locations`
   ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE `ac_addresses`
+  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_category_descriptions`
-  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_category_descriptions`
+  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_categories_to_stores`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_categories_to_stores`

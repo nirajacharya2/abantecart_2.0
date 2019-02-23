@@ -20,8 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CategoriesToStore extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-    const DELETED_AT = 'date_deleted';
 
     /**
      * @var string

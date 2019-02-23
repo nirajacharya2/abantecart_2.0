@@ -19,9 +19,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ManufacturersToStore extends BaseModel
 {
-    use SoftDeletes;
-    const DELETED_AT = 'date_deleted';
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'manufacturer_id',

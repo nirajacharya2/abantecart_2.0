@@ -87,12 +87,7 @@ class Product extends BaseModel
         'related',
         'reviews',
         'categories',
-        'downloads',
-        '',
-        '',
-        '',
-
-
+        'downloads'
     ];
     /**
      * Access policy properties
