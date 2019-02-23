@@ -53,6 +53,6 @@ class OrderDataType extends BaseModel
 
     public function order_data()
     {
-        return $this->hasMany(OrderDatum::class, 'type_id');
+        return $this->HasMany(OrderDatum::class, 'type_id');
     }
 }

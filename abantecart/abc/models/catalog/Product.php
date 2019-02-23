@@ -3,13 +3,11 @@
 namespace abc\models\catalog;
 
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
-use abc\models\order\OrderProduct;
 use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
@@ -56,7 +54,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon $date_modified
  * @property ProductOption $options
  * @property CouponsProduct $coupons_products
- * @property OrderProduct $order_products
  * @property ProductDescription $product_descriptions
  * @property ProductDiscount $product_discounts
  * @property ProductOptionDescription $product_option_descriptions
@@ -85,7 +82,6 @@ class Product extends BaseModel
         'tags',
         'related',
         'reviews',
-        'categories',
         'downloads',
     ];
     /**

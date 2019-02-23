@@ -3,7 +3,6 @@
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -20,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BlockTemplate extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes;
 
     protected $primaryKey = 'block_id';
     public $timestamps = false;

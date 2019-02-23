@@ -4,7 +4,6 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -25,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BannerDescription extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes;
 
     public $timestamps = false;
 

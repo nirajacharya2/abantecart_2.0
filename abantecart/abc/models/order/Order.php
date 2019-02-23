@@ -85,7 +85,7 @@ class Order extends BaseModel
     use SoftDeletes, CascadeSoftDeletes;
 
     protected $cascadeDeletes = [
-        'order_data',
+        'data',
         'order_products',
         'downloads', //see Download model. there cascade deleting too
         'totals',

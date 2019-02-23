@@ -176,7 +176,9 @@ class BaseModelTest extends ATestCase
             try {
                 $product->get(['date_deleted']);
                 $result = true;
-            } catch (\PDOException $e) {}
+            } catch (\PDOException $e) {
+                $this->fail($e->getTraceAsString());
+            }
         }
         $this->assertEquals($result, true);
 

@@ -3,7 +3,6 @@
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -20,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CountryDescription extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes;
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [

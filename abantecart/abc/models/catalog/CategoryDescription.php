@@ -4,7 +4,6 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -24,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CategoryDescription extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes;
 
     /**
      * @var string

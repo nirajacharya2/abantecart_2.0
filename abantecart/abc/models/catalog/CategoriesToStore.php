@@ -4,8 +4,6 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\system\Store;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CategoriesToStore

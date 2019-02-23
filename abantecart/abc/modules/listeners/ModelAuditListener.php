@@ -137,6 +137,7 @@ class ModelAuditListener
         $user_name = $user->getUserName();
         $auditData = [];
         $reflect = new ReflectionClass($modelObject);
+        $auditable_type = $reflect->getShortName();
 
         //get primary key value
         $auditable_id = $modelObject->getKey();
@@ -159,7 +160,7 @@ class ModelAuditListener
                 'event'          => $event_name,
                 'request_id'     => $request_id,
                 'session_id'     => $session_id,
-                'auditable_type' => $reflect->getShortName(),
+                'auditable_type' => $auditable_type,
                 'auditable_id'   => $auditable_id,
                 'attribute_name' => $colName,
                 'old_value'      => $oldData[$colName],
@@ -184,7 +185,8 @@ class ModelAuditListener
         return $this->output(
             true,
             'ModelAuditListener: Auditing of model '
-                .$modelClassName.' on event "'.$eventAlias.'" has been finished successfully.'
+                .$modelClassName.' on event "'.$eventAlias.'" ('.$auditable_type.':'.$auditable_id.') '
+                .'has been finished successfully.'
         );
     }
 

@@ -1,11 +1,14 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
---INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `version`, `license_key`, `date_installed`, `date_modified`, `date_added`)
---VALUES ('payment', 'default_cod', 'payment', 1, 1, '1.0.1', null, NOW(), NOW(), NOW() );
---INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `version`, `license_key`, `date_installed`, `date_modified`, `date_added`)
---VALUES ('shipping', 'default_flat_rate_shipping', 'shipping', 1, 1, '1.0.1', null, NOW(), NOW(), NOW() );
+--INSERT INTO `ac_extensions`
+--(`type`, `key`, `category`, `status`, `priority`, `version`, `license_key`, `date_installed`, `date_modified`, `date_added`)
+--VALUES
+--('payment', 'default_cod', 'payment', 1, 1, '1.0.1', null, NOW(), NOW(), NOW() ),
+--('shipping', 'default_flat_rate_shipping', 'shipping', 1, 1, '1.0.1', null, NOW(), NOW(), NOW() );
 
-INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
+INSERT INTO `ac_settings`
+(`group`, `key`, `value`)
+VALUES
 ('default_cod', 'default_cod_sort_order', '1'),
 ('default_cod', 'default_cod_order_status_id', '1'),
 ('default_cod', 'default_cod_status', '1'),
@@ -1613,40 +1616,42 @@ VALUES
 --
 -- Dumping data for table `coupons_products`
 --
-INSERT INTO `ac_coupons_products` VALUES (1,6,68);
+INSERT INTO `ac_coupons_products`
+(`coupon_product_id`, `coupon_id`, `product_id`)
+VALUES (1,6,68);
 --
 -- Dumping data for table `products_featured`
 --
 
-INSERT INTO `ac_products_featured` VALUES (50);
-INSERT INTO `ac_products_featured` VALUES (51);
-INSERT INTO `ac_products_featured` VALUES (52);
-INSERT INTO `ac_products_featured` VALUES (53);
-INSERT INTO `ac_products_featured` VALUES (54);
-INSERT INTO `ac_products_featured` VALUES (55);
-INSERT INTO `ac_products_featured` VALUES (56);
-INSERT INTO `ac_products_featured` VALUES (57);
+INSERT INTO `ac_products_featured`
+(product_id)
+VALUES
+ (50),(51),(52),(53),(54),(55),(56),(57);
 
 --
 -- Dumping data for table `products_related`
 --
 
-INSERT INTO `ac_products_related` VALUES (71,101);
-INSERT INTO `ac_products_related` VALUES (100,108);
-INSERT INTO `ac_products_related` VALUES (101,71);
-INSERT INTO `ac_products_related` VALUES (108,100);
-INSERT INTO `ac_products_related` VALUES (115,116);
-INSERT INTO `ac_products_related` VALUES (115,118);
-INSERT INTO `ac_products_related` VALUES (116,115);
-INSERT INTO `ac_products_related` VALUES (116,118);
-INSERT INTO `ac_products_related` VALUES (118,115);
-INSERT INTO `ac_products_related` VALUES (118,116);
+INSERT INTO `ac_products_related`
+(`product_id`,`related_id`)
+VALUES
+ (71,101),
+ (100,108),
+ (101,71),
+ (108,100),
+ (115,116),
+ (115,118),
+ (116,115),
+ (116,118),
+ (118,115),
+ (118,116);
 
 --
 -- Dumping data for table `products_to_categories`
 --
 
-INSERT INTO `ac_products_to_categories` 
+INSERT INTO `ac_products_to_categories`
+(`product_id`,`category_id`)
 VALUES 
 (50,40),
 (51,40),
@@ -1780,14 +1785,18 @@ VALUES
 -- Dumping data for table `products_to_downloads`
 --
 
-INSERT INTO `ac_products_to_downloads` VALUES (111,1);
-INSERT INTO `ac_products_to_downloads` VALUES (111,2);
+INSERT INTO `ac_products_to_downloads`
+(product_id,download_id)
+VALUES
+ (111,1),
+ (111,2);
 
 --
 -- Dumping data for table `products_to_stores`
 --
 
-INSERT INTO `ac_products_to_stores` 
+INSERT INTO `ac_products_to_stores`
+(product_id,store_id)
 VALUES 
 (50,0),
 (51,0),

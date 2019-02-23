@@ -4,7 +4,6 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
