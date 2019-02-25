@@ -52,8 +52,7 @@ class QueryBuilder extends Builder
     }
 
     public function active() {
-        $this->where('status', 1)
-            ->whereNull('date_deleted');
+        $this->where('status', 1);
         return $this;
     }
 
