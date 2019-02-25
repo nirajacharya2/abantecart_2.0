@@ -275,8 +275,8 @@
       "./vendor/assets/components/jquery-cookie": [
         "components/jquery-cookie"
       ],
-      "./vendor/assets/components/jqGrid": [
-        "components/jqGrid"
+      "./vendor/assets/components/jqgrid": [
+        "components/jqgrid"
       ],
       "./vendor/assets/components/bootstrap": [
         "components/bootstrap"
