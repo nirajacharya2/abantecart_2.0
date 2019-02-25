@@ -225,4 +225,8 @@
 		<key>entry_catalog_mode</key>
 		<value><![CDATA[Catalog mode:]]></value>
 	</definition>
+	<definition>
+		<key>column_object_type_title</key>
+		<value><![CDATA[Object Type Name:]]></value>
+	</definition>
 </definitions>

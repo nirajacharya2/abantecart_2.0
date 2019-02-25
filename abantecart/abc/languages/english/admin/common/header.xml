@@ -313,6 +313,10 @@
 		<value><![CDATA[Product types]]></value>
 	</definition>
 	<definition>
+		<key>text_object_type</key>
+		<value><![CDATA[Object types]]></value>
+	</definition>
+	<definition>
 		<key>text_import_export</key>
 		<value><![CDATA[Import / Export]]></value>
 	</definition>
