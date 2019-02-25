@@ -9940,6 +9940,7 @@ CREATE TABLE `ac_settings` (
   `setting_id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL DEFAULT 0,
   `group` varchar(32) COLLATE utf8_general_ci NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT 0,
   `key` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `value` text COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
