@@ -675,11 +675,11 @@
 		<value><![CDATA[Meta Tag Description]]></value>
 	</definition>
 	<definition>
-		<key>title_product_tags</key>
+		<key>title_tags</key>
 		<value><![CDATA[Product Tags]]></value>
 	</definition>
 	<definition>
-		<key>title_product_categories</key>
+		<key>title_categories</key>
 		<value><![CDATA[Categories]]></value>
 	</definition>
 	<definition>
@@ -751,7 +751,7 @@
 		<value><![CDATA[Length]]></value>
 	</definition>
 	<definition>
-		<key>title_length_class</key>
+		<key>title_length_class_id</key>
 		<value><![CDATA[Length Class]]></value>
 	</definition>
 	<definition>
@@ -759,7 +759,7 @@
 		<value><![CDATA[Weight]]></value>
 	</definition>
 	<definition>
-		<key>title_weight_class</key>
+		<key>title_weight_class_id</key>
 		<value><![CDATA[Weight Class]]></value>
 	</definition>
 </definitions>
