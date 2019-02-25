@@ -85,7 +85,7 @@ class FormBuilder
         if ($this->object_type) {
             $attributes = ObjectType::where('object_type', (new ReflectionClass($this->model))->getShortName())
                 ->with([
-                    'global_attribute_groups.global_attributes.global_attributes_values',
+                    'global_attribute_groups.global_attributes.values',
                 ])
                 ->find($this->object_type);
 
