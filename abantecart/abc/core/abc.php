@@ -24,7 +24,9 @@ use abc\core\lib\ADebug;
 use H;
 use ReflectionClass;
 
-ob_start();
+if(php_sapi_name()!='cli') {
+    ob_start();
+}
 
 require __DIR__.DS.'abc_base.php';
 
