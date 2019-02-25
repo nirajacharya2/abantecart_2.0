@@ -9940,6 +9940,7 @@ CREATE TABLE `ac_settings` (
   `setting_id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL DEFAULT 0,
   `group` varchar(32) COLLATE utf8_general_ci NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT 0,
   `key` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `value` text COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -12865,7 +12866,9 @@ CREATE TABLE `ac_global_attributes_groups` (
   `attribute_group_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
   `status` 				smallint(1) NOT NULL default '0',
-
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`attribute_group_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 

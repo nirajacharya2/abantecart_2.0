@@ -1364,6 +1364,7 @@ ALTER TABLE `ac_reviews`
     ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_settings`
+    ADD COLUMN `group_id` int(11) NOT NULL DEFAULT 0 AFTER `group`,
     ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
 ALTER TABLE `ac_settings`
     ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
