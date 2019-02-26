@@ -157,17 +157,33 @@ class ControllerPagesCatalogProductPromotions extends AController
         foreach ($this->data['product_discounts'] as $i => $item) {
             if ($item['date_start'] == '0000-00-00') {
                 $this->data['product_discounts'][$i]['date_start'] = '';
+            } else {
+                $this->data['product_discounts'][$i]['date_start'] = H::dateISO2Display(
+                    $this->data['product_discounts'][$i]['date_start'],
+                    $this->language->get('date_format_short'));
             }
             if ($item['date_end'] == '0000-00-00') {
                 $this->data['product_discounts'][$i]['date_end'] = '';
+            } else {
+                $this->data['product_discounts'][$i]['date_end'] = H::dateISO2Display(
+                    $this->data['product_discounts'][$i]['date_end'],
+                    $this->language->get('date_format_short'));
             }
         }
         foreach ($this->data['product_specials'] as $i => $item) {
             if ($item['date_start'] == '0000-00-00') {
                 $this->data['product_specials'][$i]['date_start'] = '';
+            } else {
+                $this->data['product_specials'][$i]['date_start'] = H::dateISO2Display(
+                    $this->data['product_specials'][$i]['date_start'],
+                    $this->language->get('date_format_short'));
             }
             if ($item['date_end'] == '0000-00-00') {
                 $this->data['product_specials'][$i]['date_end'] = '';
+            } else {
+                $this->data['product_specials'][$i]['date_end'] = H::dateISO2Display(
+                    $this->data['product_specials'][$i]['date_end'],
+                    $this->language->get('date_format_short'));
             }
         }
 

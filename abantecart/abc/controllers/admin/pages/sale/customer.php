@@ -1313,7 +1313,7 @@ class ControllerPagesSaleCustomer extends AController
         foreach ($notes as &$note) {
             $note->note_added = H::dateISO2Display(
                 $note->note_added,
-                $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                $this->language->get('date_format_long')
             );
             $this->data['notes'][] = $note;
         }

@@ -266,7 +266,7 @@
 					    	<i class="fa fa-refresh"></i>
 						</a>
 						<?php } ?>
-						<?php if ($total_key_count[$total_row['key']] == 1 ) { // do not allow delete of duplicate keys?>
+						<?php if (!$no_recalc_allowed && $total_key_count[$total_row['key']] == 1 ) { // do not allow delete of duplicate keys?>
 						<a class="remove btn btn-xs btn-danger-alt tooltips"
 						   data-original-title="<?php echo $button_delete; ?>"
 						   data-confirmation="delete" onclick="deleteTotal('<?php echo $total_row['order_total_id']; ?>');">

@@ -115,7 +115,8 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['customer_transaction_id'];
             $response->rows[$i]['cell'] = [
-                $result['date_added'],
+                H::dateISO2Display($result['date_added'],
+                    $this->language->get('date_format_long')),
                 $result['user'],
                 $result['debit'],
                 $result['credit'],
