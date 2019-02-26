@@ -12903,7 +12903,8 @@ CREATE TABLE `ac_global_attributes_types` (
 
 INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `controller`, `sort_order`, `status`) VALUES
 (1, 'product_option', 'responses/catalog/attribute/getProductOptionSubform', 1, 1),
-(2, 'download_attribute', 'responses/catalog/attribute/getDownloadAttributeSubform', 2, 1);
+(2, 'download_attribute', 'responses/catalog/attribute/getDownloadAttributeSubform', 2, 1),
+(3, 'product_attribute', 'responses/catalog/attribute/getProductAttributeSubform', 3, 1);
 
 CREATE TABLE `ac_global_attributes_type_descriptions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
