@@ -1434,7 +1434,7 @@ class ExtensionUtils
                     if (!$resources[$section] || !is_array($resources[$section])) {
                         continue;
                     }
-                    $conflict = array_intersect($resources[$section], $section_resources);
+                    $conflict = array_intersect((array)$resources[$section], (array)$section_resources);
                     if (!empty($conflict)) {
                         $conflict_resources[$checked_name][$resource_type][$section] = $conflict;
                     }

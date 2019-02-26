@@ -21,6 +21,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
+use abc\models\locale\Currency;
 use H;
 
 class ControllerPagesIndexHome extends AController
@@ -181,8 +182,8 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('orders', $orders);
 
         if ($this->config->get('config_currency_auto')) {
-            $this->loadModel('localisation/currency');
-            $this->model_localisation_currency->updateCurrencies();
+            $currencyInstance = new Currency();
+            $currencyInstance->updateCurrencies();
         }
 
         $this->view->assign('chart_url', $this->html->getSecureURL('index/chart'));

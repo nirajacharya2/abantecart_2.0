@@ -241,7 +241,6 @@
     "components/chart": "2.7.2",
     "tinymce/tinymce": "4.7.11",
     "tinymce/languages": "4.7.11",
-    "illuminate/database": "5.5.*",
     "robmorgan/phinx": "*",
     "twig/twig": "1.6.5",
     "wapmorgan/unified-archive": "~0.1.0",
@@ -250,9 +249,14 @@
     "maximebf/debugbar": "1.13.1",
     "filp/whoops": "2.1.14",
     "monolog/monolog": "1.23.0",
-    "illuminate/events": "5.5.*",
-    "illuminate/validation": "5.5.*",
-    "craftcamp/php-abac": "dev-dev-abc"
+    "illuminate/database": "5.7.*",
+    "illuminate/events": "5.7.*",
+    "illuminate/validation": "5.7.*",
+    "illuminate/Cache": "5.7.*",
+    "illuminate/redis": "5.7.*",
+    "craftcamp/php-abac": "dev-dev-abc",
+    "laracasts/utilities": "^2.0",
+    "iatstuti/laravel-cascade-soft-deletes" : "1.5.0"
   },
   "extra": {
     "installer-paths": {
@@ -313,6 +317,14 @@
       "./vendor/assets/tinymce/tinymce/languages": [
         "tinymce/languages"
       ]
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~7.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
     }
   }
 }

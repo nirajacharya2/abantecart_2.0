@@ -17,315 +17,317 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\core\lib\ATaskManager;
-use abc\core\lib\AUser;
 use abc\core\view\AView;
-use abc\core\engine\Registry;
-use abc\models\admin\User;
+use abc\models\user\User;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ControllerTaskSaleContact extends AController
+{
+    public $data = [];
+    private $protocol;
+    private $sent_count = 0;
+    private $user_id = 0;
 
-class ControllerTaskSaleContact extends AController{
-	public $data = array();
-	private $protocol;
-	private $sent_count = 0;
-	private $user_id = 0;
+    public function sendSms()
+    {
+        list($task_id, $step_id,) = func_get_args();
+        $this->load->library('json');
+        //for aborting process
+        ignore_user_abort(false);
+        session_write_close();
 
-	public function sendSms(){
-		list($task_id,$step_id,) = func_get_args();
-		$this->load->library('json');
-		//for aborting process
-		ignore_user_abort(false);
-		session_write_close();
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->protocol = 'sms';
+        $this->sent_count = 0;
+        $result = $this->_send($task_id, $step_id);
+        if (!$this->sent_count) {
+            $result = false;
+        }
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$this->protocol = 'sms';
-		$this->sent_count = 0;
-		$result = $this->_send($task_id,$step_id);
-		if(!$this->sent_count){
-			$result = false;
-		}
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $output = ['result' => $result];
+        if ($result) {
+            $output['message'] = $this->sent_count.' sms sent.';
+        } else {
+            $output['error_text'] = $this->sent_count.' sms sent.';
+        }
 
-		$output = array('result'  => $result);
-		if($result){
-			$output['message'] = $this->sent_count . ' sms sent.';
-		}else{
-			$output['error_text'] = $this->sent_count . ' sms sent.';
-		}
+        $this->response->setOutput(AJson::encode($output));
+    }
 
-		$this->response->setOutput(AJson::encode( $output ));
-	}
+    public function sendEmail()
+    {
+        list($task_id, $step_id,) = func_get_args();
 
-	public function sendEmail(){
-		list($task_id,$step_id,) = func_get_args();
+        $this->load->library('json');
+        //for aborting process
+        ignore_user_abort(false);
+        session_write_close();
 
-		$this->load->library('json');
-		//for aborting process
-		ignore_user_abort(false);
-		session_write_close();
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->protocol = 'email';
+        $this->sent_count = 0;
+        $result = $this->_send($task_id, $step_id);
+        if (!$this->sent_count) {
+            $result = false;
+        }
 
-		$this->protocol = 'email';
-		$this->sent_count = 0;
-		$result = $this->_send($task_id,$step_id);
-		if(!$this->sent_count){
-			$result = false;
-		}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $output = ['result' => $result];
+        if ($result) {
+            $output['message'] = $this->sent_count.' emails sent.';
+        } else {
+            $output['error_text'] = $this->sent_count.' emails sent.';
+        }
+        $this->response->setOutput(AJson::encode($output));
+        return $result;
+    }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$output = array('result'  => $result);
-		if($result){
-			$output['message'] = $this->sent_count . ' emails sent.';
-		}else{
-			$output['error_text'] = $this->sent_count . ' emails sent.';
-		}
-		$this->response->setOutput(AJson::encode( $output ));
-		return $result;
-	}
+    protected function _send($task_id, $step_id)
+    {
 
+        $this->loadLanguage('sale/contact');
 
-	private function _send($task_id, $step_id){
+        if (!$task_id || !$step_id) {
+            $error_text = 'Cannot run task step. Task_id (or step_id) has not been set.';
+            $this->_return_error($error_text);
+        }
 
-		$this->loadLanguage('sale/contact');
+        $tm = new ATaskManager();
+        $task_info = $tm->getTaskById($task_id);
+        $sent = (int)$task_info['settings']['sent'];
+        $task_steps = $tm->getTaskSteps($task_id);
+        $step_info = [];
+        foreach ($task_steps as $task_step) {
+            if ($task_step['step_id'] == $step_id) {
+                $step_info = $task_step;
+                if ($task_step['sort_order'] == 1) {
+                    $tm->updateTask($task_id, ['last_time_run' => date('Y-m-d H:i:s')]);
+                }
+                break;
+            }
+        }
 
-		if (!$task_id || !$step_id){
-			$error_text = 'Cannot run task step. Task_id (or step_id) has not been set.';
-			$this->_return_error($error_text);
-		}
+        if (!$step_info) {
+            $error_text = 'Cannot run task step. Looks like task #'.$task_id.' does not contain step #'.$step_id;
+            $this->_return_error($error_text);
+        }
 
-		$tm = new ATaskManager();
-		$task_info = $tm->getTaskById($task_id);
-		$sent = (int)$task_info['settings']['sent'];
-		$task_steps = $tm->getTaskSteps($task_id);
-		$step_info = array();
-		foreach($task_steps as $task_step){
-			if($task_step['step_id'] == $step_id){
-				$step_info = $task_step;
-				if($task_step['sort_order']==1){
-					$tm->updateTask($task_id, array('last_time_run' => date('Y-m-d H:i:s')));
-				}
-				break;
-			}
-		}
+        $this->user_id = $task_info['created_by'];
 
-		if(!$step_info){
-			$error_text = 'Cannot run task step. Looks like task #'.$task_id.' does not contain step #'.$step_id;
-			$this->_return_error($error_text);
-		}
+        $tm->updateStep($step_id, ['last_time_run' => date('Y-m-d H:i:s')]);
 
-		$this->user_id = $task_info['created_by'];
+        if (!$step_info['settings']) {
+            $error_text = 'Cannot run task step #'.$step_id.'. Unknown settings for it.';
+            $this->_return_error($error_text);
+        }
 
-		$tm->updateStep($step_id, array('last_time_run' => date('Y-m-d H:i:s')));
+        $this->loadModel('sale/customer');
+        $this->loadModel('setting/store');
+        $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
+        $from = '';
+        if ($store_info) {
+            $from = $store_info['store_main_email'];
+        }
+        if (!$from) {
+            $from = $this->config->get('store_main_email');
+        }
 
-		if(!$step_info['settings'] ){
-			$error_text = 'Cannot run task step #'.$step_id.'. Unknown settings for it.';
-			$this->_return_error($error_text);
-		}
+        $send_data = [
+            'subject' => $step_info['settings']['subject'],
+            'message' => $step_info['settings']['message'],
+            'sender'  => $step_info['settings']['store_name'],
+            'from'    => $from,
+        ];
+        //send emails in loop and update task's step info for restarting if step or task failed
+        $step_settings = $step_info['settings'];
+        $cnt = 0;
+        $step_result = true;
+        $send_to = $step_info['settings']['to'];
+        //remove step if no recipients
+        if (!$send_to) {
+            $tm->deleteStep($step_id);
+            if (sizeof($task_steps) == 1) {
+                $tm->deleteTask($task_id);
+            }
+            return true;
+        }
+        foreach ($send_to as $to) {
+            $send_data['subscriber'] = in_array($to, $step_info['settings']['subscribers']) ? true : false;
 
-		$this->loadModel('sale/customer');
-		$this->loadModel('setting/store');
-		$store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
-		$from = '';
-		if ($store_info){
-			$from = $store_info['store_main_email'];
-		}
-		if(!$from){
-			$from = $this->config->get('store_main_email');
-		}
+            if ($this->protocol == 'email') {
+                $result = $this->_send_email($to, $send_data);
+            } elseif ($this->protocol == 'sms') {
+                $result = $this->_send_sms($to, $send_data);
+            } else {
+                $result = false;
+            }
 
-		$send_data = array(
-				'subject' => $step_info['settings']['subject'],
-				'message' => $step_info['settings']['message'],
-				'sender' => $step_info['settings']['store_name'],
-				'from' => $from
-		);
-		//send emails in loop and update task's step info for restarting if step or task failed
-		$step_settings =  $step_info['settings'];
-		$cnt = 0;
-		$step_result = true;
-		$send_to = $step_info['settings']['to'];
-		//remove step if no recipients
-		if(!$send_to){
-			$tm->deleteStep($step_id);
-			if(sizeof($task_steps)==1){
-				$tm->deleteTask($task_id);
-			}
-			return true;
-		}
-		foreach($send_to as $to){
-			$send_data['subscriber'] = in_array($to,$step_info['settings']['subscribers']) ? true: false;
+            if ($result) {
+                $this->sent_count++;
+                //remove sent address from step
+                $k = array_search($to, $step_settings['to']);
+                unset($step_settings['to'][$k]);
+                $tm->updateStep($step_id, ['settings' => serialize($step_settings)]);
+                //update task details to show them at the end
+                $sent++;
+                $tm->updateTaskDetails($task_id,
+                    [
+                        //set 1 as "admin"
+                        'created_by' => 1,
+                        'settings'   => [
+                            'recipients_count' => $task_info['settings']['recipients_count'],
+                            'sent'             => $sent,
+                        ],
+                    ]);
 
-			if($this->protocol=='email'){
-				$result = $this->_send_email($to, $send_data);
-			}elseif($this->protocol=='sms'){
-				$result = $this->_send_sms($to, $send_data);
-			}else{
-				$result = false;
-			}
+            } else {
+                $step_result = false;
+            }
+            $cnt++;
+        }
 
-			if($result){
-				$this->sent_count ++;
-				//remove sent address from step
-				$k = array_search($to,$step_settings['to']);
-				unset($step_settings['to'][$k]);
-				$tm->updateStep($step_id, array('settings' => serialize($step_settings)));
-				//update task details to show them at the end
-				$sent++;
-				$tm->updateTaskDetails($task_id,
-						array(
-								//set 1 as "admin"
-								'created_by' => 1,
-								'settings'   => array(
-													'recipients_count' => $task_info['settings']['recipients_count'],
-													'sent'             => $sent
-													)
-				));
+        $tm->updateStep($step_id, ['last_result' => $step_result]);
 
-			}else{
-				$step_result = false;
-			}
-			$cnt++;
-		}
+        if (!$step_result) {
+            $this->_return_error('Some errors during step run.');
+        }
+        return $step_result;
+    }
 
-		$tm->updateStep($step_id, array('last_result' => $step_result));
+    protected function _return_error($error_text)
+    {
+        $error = new AError($error_text);
+        $error->toLog()->toDebug();
+        return $error->toJSONResponse('APP_ERROR_402',
+            [
+                'error_text'  => $error_text,
+                'reset_value' => true,
+            ]);
+    }
 
-		if(!$step_result){
-			$this->_return_error('Some errors during step run.');
-		}
-		return $step_result;
-	}
+    protected function _send_email($email, $data)
+    {
+        if (!$email || !$data) {
+            $error = new AError('Error: Cannot send email. Unknown address or empty message.');
+            $error->toLog();
+            return false;
+        }
 
-	private function _return_error($error_text){
-		$error = new AError($error_text);
-		$error->toLog()->toDebug();
-		return $error->toJSONResponse('APP_ERROR_402',
-				array ('error_text'  => $error_text,
-				       'reset_value' => true
-				));
-	}
+        // HTML Mail
+        $this->data['mail_template_data']['lang_direction'] = $this->language->get('direction');
+        $this->data['mail_template_data']['lang_code'] = $this->language->get('code');
+        $this->data['mail_template_data']['subject'] = $data['subject'];
 
+        $text_unsubscribe = $this->language->get('text_unsubscribe');
+        $message_body = $data['message'];
+        if ($data['subscriber']) {
+            $customer_info = $this->model_sale_customer->getCustomersByEmails([$email]);
+            $customer_id = $customer_info[0]['customer_id'];
+            if ($customer_id) {
+                $message_body .= "\n\n<br><br>".sprintf($text_unsubscribe,
+                        $email,
+                        $this->html->getCatalogURL('account/notification',
+                            '&email='.$email.'&customer_id='.$customer_id));
+            }
+        }
 
-	private function _send_email($email, $data){
-		if(!$email || !$data){
-			$error = new AError('Error: Cannot send email. Unknown address or empty message.');
-			$error->toLog();
-			return false;
-		}
+        $this->data['mail_template_data']['body'] =
+            html_entity_decode($message_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
+        $this->data['mail_template'] = 'mail/contact.tpl';
 
-		// HTML Mail
-		$this->data['mail_template_data']['lang_direction'] = $this->language->get('direction');
-		$this->data['mail_template_data']['lang_code'] = $this->language->get('code');
-		$this->data['mail_template_data']['subject'] = $data['subject'];
+        //allow to change email data from extensions
+        $this->extensions->hk_ProcessData($this, 'cp_sale_contact_mail');
 
-		$text_unsubscribe = $this->language->get('text_unsubscribe');
-		$message_body = $data['message'];
-		if ($data['subscriber']) {
-			$customer_info = $this->model_sale_customer->getCustomersByEmails(array($email));
-			$customer_id = $customer_info[0]['customer_id'];
-			if($customer_id){
-				$message_body .= "\n\n<br><br>" . sprintf($text_unsubscribe,
-												$email,
-												$this->html->getCatalogURL('account/notification',
-																			'&email=' . $email . '&customer_id=' . $customer_id));
-			}
-		}
-
-		$this->data['mail_template_data']['body'] = html_entity_decode($message_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
-		$this->data['mail_template'] = 'mail/contact.tpl';
-
-		//allow to change email data from extensions
-		$this->extensions->hk_ProcessData($this, 'cp_sale_contact_mail');
-
-		$view = new AView($this->registry,0);
-		$view->batchAssign($this->data['mail_template_data']);
-		$html_body = $view->fetch($this->data['mail_template']);
+        $view = new AView($this->registry, 0);
+        $view->batchAssign($this->data['mail_template_data']);
+        $html_body = $view->fetch($this->data['mail_template']);
 
         $this->loadModel('user/user');
 
-		$mail = new AMail($this->config);
-		$mail->setTo($email);
-		$mail->setFrom($data['from']);
-		$mail->setSender($data['sender']);
-		$mail->setSubject($this->data['mail_template_data']['subject']);
-		$mail->setHtml($html_body);
+        $mail = new AMail($this->config);
+        $mail->setTo($email);
+        $mail->setFrom($data['from']);
+        $mail->setSender($data['sender']);
+        $mail->setSubject($this->data['mail_template_data']['subject']);
+        $mail->setHtml($html_body);
         $user = User::find($this->user_id);
-		$mail->setUser($user);
+        $mail->setUser($user);
 
-		$mail->send();
+        $mail->send();
 
-		if ($mail->error) {
-			$error = new AError('AMail Errors: '.implode("\n", $mail->error));
-			$error->toLog()->toDebug();
-			return false;
-		}
+        if ($mail->error) {
+            $error = new AError('AMail Errors: '.implode("\n", $mail->error));
+            $error->toLog()->toDebug();
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private function _send_sms($phone, $data){
-		if(!$phone || !$data){
-			$error = new AError('Error: Cannot send sms. Unknown phone number or empty message.');
-			$error->toLog();
-			return false;
-		}
+    protected function _send_sms($phone, $data)
+    {
+        if (!$phone || !$data) {
+            $error = new AError('Error: Cannot send sms. Unknown phone number or empty message.');
+            $error->toLog();
+            return false;
+        }
 
-		$driver = null;
-		$driver_txt_id = $this->config->get('config_sms_driver');
+        $driver = null;
+        $driver_txt_id = $this->config->get('config_sms_driver');
 
-		//if driver not set - skip protocol
-		if (!$driver_txt_id){
-			return false;
-		}
-		//use safe usage
-		try{
-			include_once(ABC::env('DIR_APP_EXTENSIONS') . $driver_txt_id . '/core/lib/' . $driver_txt_id . '.php');
-			//if class of driver
-			$classname = '\abc\core\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
-			if (!class_exists($classname)){
-				$error = new AError('IM-driver ' . $driver_txt_id . ' load error.');
-				$error->toLog()->toMessages();
-				return false;
-			}
-			/**
-			 * @var \abc\core\lib\AMailIM $driver
-			 */
-			$driver = new $classname();
-		} catch(AException $e){	}
+        //if driver not set - skip protocol
+        if (!$driver_txt_id) {
+            return false;
+        }
+        //use safe usage
+        try {
+            include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.'/core/lib/'.$driver_txt_id.'.php');
+            //if class of driver
+            $classname = '\abc\core\lib\\'.preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
+            if (!class_exists($classname)) {
+                $error = new AError('IM-driver '.$driver_txt_id.' load error.');
+                $error->toLog()->toMessages();
+                return false;
+            }
+            /**
+             * @var \abc\core\lib\AMailIM $driver
+             */
+            $driver = new $classname();
+        } catch (AException $e) {}
 
-		if($driver === null){
-			return false;
-		}
+        if ($driver === null) {
+            return false;
+        }
 
-		$text = $this->config->get('store_name') . ": " .$data['message'];
-		$to = $phone;
-		$result = true;
-		if ($text && $to){
-			//use safe call
-			try{
-				$result = $driver->send($to, $text);
-			} catch(AException $e){
-				return false;
-			}
-		}
+        $text = $this->config->get('store_name').": ".$data['message'];
+        $to = $phone;
+        $result = true;
+        if ($text && $to) {
+            //use safe call
+            try {
+                $result = $driver->send($to, $text);
+            } catch (AException $e) {
+                return false;
+            }
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
 }

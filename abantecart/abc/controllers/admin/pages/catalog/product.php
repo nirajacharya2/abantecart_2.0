@@ -21,20 +21,26 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\lib\FormBuilder;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
+use abc\models\admin\Product;
+use abc\models\catalog\ObjectType;
+use abc\models\catalog\Product as EProduct;
+use abc\models\catalog\ProductType;
+use abc\models\catalog\UrlAlias;
 use H;
+use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
 
 /**
  * Class ControllerPagesCatalogProduct
  *
  * @package abc\controllers\admin
- * @property ModelCatalogProduct $model_catalog_product
- * @property ModelCatalogCategory $model_catalog_category
+ * @property ModelCatalogProduct      $model_catalog_product
+ * @property ModelCatalogCategory     $model_catalog_category
  * @property ModelCatalogManufacturer $model_catalog_manufacturer
  */
-
 class ControllerPagesCatalogProduct extends AController
 {
     public $error = [];
@@ -95,9 +101,18 @@ class ControllerPagesCatalogProduct extends AController
                             'href'  => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),
                             //quick view port URL
                             'vhref' => $this->html->getSecureURL(
-                                                                'r/common/viewport/modal',
-                                                                '&viewport_rt=catalog/product/update&product_id=%ID%'
-                            )
+                                'r/common/viewport/modal',
+                                '&viewport_rt=catalog/product/update&product_id=%ID%'
+                            ),
+                        ],
+                        'audit_log'  => [
+                            'text'  => $this->language->get('text_audit_log'),
+                            'href'  => $this->html->getSecureURL('tool/audit_log', '&auditable_type=Product&auditable_id=%ID%'),
+                            //quick view port URL
+                            'vhref' => $this->html->getSecureURL(
+                                'r/common/viewport/modal',
+                                '&viewport_rt=tool/audit_log&auditable_type=Product&auditable_id=%ID%'
+                            ),
                         ],
                         'general'    => [
                             'text' => $this->language->get('tab_general'),
@@ -353,15 +368,143 @@ class ControllerPagesCatalogProduct extends AController
         if ($this->request->is_POST() && $this->validateForm()) {
             $product_data = $this->prepareData($this->request->post);
             $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
-            $this->model_catalog_product->updateProduct($product_id, $product_data);
-            $this->model_catalog_product->updateProductLinks($product_id, $product_data);
+
+            Product::updateProduct($product_id, $product_data, $this->language->getContentLanguageID());
+
             $this->extensions->hk_ProcessData($this, 'product_update');
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
         }
-        $this->buildForm($args);
+        //$this->buildForm($args);
+        $this->buildFormNew();
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
+
+    public function buildFormNew()
+    {
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->loadLanguage('catalog/product');
+
+        $formData = [
+            'url'           => $this->html->getSecureURL('r/catalog/product_form'),
+            'back_url'      => $this->html->getSecureURL('catalog/product'),
+            'form_name'     => 'product_form',
+            'title'         => $formTitle,
+            'fields_preset' => [
+                'default' => [
+                    "v_flex_props" => [
+                        "xs12" => true,
+                    ],
+                ],
+                'fields'  => [
+                    'product_type_id' => [
+                        'value'        => $product_type_id,
+                        'ajax_params'  => [
+                            'relatedTo' => 'product_type_id',
+                            'ajax_url'  => $this->html->getSecureURL('r/catalog/product_form'),
+                        ],
+                        "v_flex_props" => [
+                            "xs12" => true,
+                        ],
+                    ],
+                    'date_available'  => [
+                        'value'        => date('Y-m-d'),
+                    ],
+                    'tax_class_id'    => [
+                        'value' => 0,
+                    ],
+                    'product_stores'  => [
+                        'value' => 0,
+                    ],
+                ],
+            ],
+        ];
+
+        $product_id = (int)$this->request->get['product_id'];
+        if ($product_id) {
+            $productInfo = EProduct::find($product_id);
+
+            $product = EProduct::with(['description', 'tags', 'stores', 'categories',
+                'attributes' => function($query) use ($productInfo) {
+                $query->where('object_type_id', '=', $productInfo->product_type_id);
+                }])
+                ->find($product_id)
+                ->toArray();
+
+
+            $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
+
+            $product_type_id = $product['product_type_id'];
+
+            foreach ($product as $fieldName => $fieldValue) {
+                if (is_array($fieldValue) && $fieldName == 'description') {
+                    $product = array_merge($product, $fieldValue);
+                   // unset($product[$fieldName]);
+                }
+                if (is_array($fieldValue) && $fieldName == 'tags') {
+                    $tags = $fieldValue;
+                    $arTags = [];
+                    foreach ($tags as $tag) {
+                        $arTags[] = $tag['tag'];
+                    }
+                    $product['tags'] = implode(',', $arTags);
+                    unset($arTags, $tags);
+                }
+                if (is_array($fieldValue) && $fieldName == 'stores') {
+                    $stores = $fieldValue;
+                    $product['stores'] = [];
+                    foreach ($stores as $store) {
+                        $product['stores'][] = $store['store_id'];
+                    }
+                    unset($stores);
+                }
+                if (is_array($fieldValue) && $fieldName == 'categories') {
+                    $categories = $fieldValue;
+                    $product['categories'] = [];
+                    foreach ($categories as $category) {
+                        $product['categories'][] = $category['category_id'];
+                    }
+                    unset($categories);
+                }
+                if (is_array($fieldValue) && $fieldName == 'attributes') {
+                    $attributes = $fieldValue;
+                    foreach ($attributes as $attribute) {
+                        $product[$attribute['attribute_name']] = $attribute['attribute_value'];
+                    }
+                    unset($product['attributes']);
+                }
+            }
+
+            $this->data['active'] = 'general';
+            //load tabs controller
+            $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
+            $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
+            unset($tabs_obj);
+            $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+            $formTitle = 'Product: '.$product->description->name;
+
+            foreach ($product as $fieldName => $filedValue) {
+                $formData['fields_preset']['fields'][$fieldName]['value'] = $filedValue;
+            }
+        } else {
+            $formTitle = 'Create New product';
+        }
+
+
+        $form = new FormBuilder(EProduct::class, $product_type_id, $formData);
+        $this->data['form'] = $form->getForm()->toArray();
+
+        $transformer = new PHPToJavaScriptTransformer($this->document, 'abc');
+        $transformer->put(['form' => $this->data['form']]);
+
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('pages/catalog/product_vue_form.tpl');
+
     }
 
     public function copy()
@@ -375,8 +518,8 @@ class ControllerPagesCatalogProduct extends AController
             $this->extensions->hk_ProcessData($this, 'product_copy');
             if ($this->data['new_product']) {
                 $this->session->data['success'] = sprintf(
-                                                        $this->language->get('text_success_copy'),
-                                                        $this->data['new_product']['name']
+                    $this->language->get('text_success_copy'),
+                    $this->data['new_product']['name']
                 );
                 if ($this->data['new_product']['layout_clone']) {
                     $this->session->data['success'] .= ' '.$this->language->get('text_success_copy_layout');
@@ -415,6 +558,8 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
+        $this->loadLanguage('catalog/product_type');
+
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
@@ -430,8 +575,8 @@ class ControllerPagesCatalogProduct extends AController
             'text'      =>
                 ($product_id
                     ? $this->language->get('text_edit').'&nbsp;'
-                        .$this->language->get('text_product').' - '
-                        .$this->data['product_description'][$content_language_id]['name']
+                    .$this->language->get('text_product').' - '
+                    .$this->data['product_description'][$content_language_id]['name']
                     : $this->language->get('text_insert')
                 ),
             'separator' => ' :: ',
@@ -487,7 +632,19 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['length_classes'][$r['length_class_id']] = $r['title'];
         }
 
+        $productTypes = ObjectType::where('object_type', 'Product')
+            ->with('description')
+            ->where('status', 1)
+            ->get()
+            ->toArray();
+
+        $this->data['product_types'][] = $this->language->get('text_select');
+        foreach ($productTypes as $productType) {
+            $this->data['product_types'][$productType['object_type_id']] = $productType['description']['name'];
+        }
+
         $fields = [
+            'product_type',
             'product_category',
             'featured',
             'product_store',
@@ -548,8 +705,8 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['product_description'] = $this->request->post['product_description'];
         } elseif (isset($product_info)) {
             $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions(
-                                                                                          $product_id,
-                                                                                          $content_language_id
+                $product_id,
+                $content_language_id
             );
         } else {
             $this->data['product_description'] = [];
@@ -577,7 +734,7 @@ class ControllerPagesCatalogProduct extends AController
         if (isset($product_info)
             && $product_info['image']
             && file_exists(ABC::env('DIR_IMAGES').$product_info['image'])
-        ){
+        ) {
             $this->data['preview'] = $this->model_tool_image->resize($product_info['image'], 100, 100);
         } else {
             $this->data['preview'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
@@ -695,6 +852,16 @@ class ControllerPagesCatalogProduct extends AController
             'style' => 'btn_switch btn-group-sm',
         ]);
 
+        $this->data['form']['fields']['general']['product_type'] = $form->getFieldHtml([
+            'type'        => 'selectbox',
+            'name'        => 'product_type',
+            'value'       => $this->data['product_type'],
+            'options'     => $this->data['product_types'],
+            'placeholder' => $this->language->get('entry_product_type'),
+            'required'    => true,
+            'attr'        => !empty($this->data['product_type']) ? 'disabled=disabled' : '',
+        ]);
+
         $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'product_description[name]',
@@ -789,7 +956,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['cost'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'cost',
-            'value' => round($this->data['cost'],3),
+            'value' => round($this->data['cost'], 3),
             'style' => 'small-field',
         ]);
         $this->data['form']['fields']['data']['tax_class'] = $form->getFieldHtml([
@@ -852,9 +1019,9 @@ class ControllerPagesCatalogProduct extends AController
             'type'     => 'selectbox',
             'name'     => 'stock_status_id',
             'value'    => (
-                    H::has_value($this->data['stock_status_id'])
-                    ? (int)$this->data['stock_status_id']
-                    : $this->config->get('config_stock_status_id')
+            H::has_value($this->data['stock_status_id'])
+                ? (int)$this->data['stock_status_id']
+                : $this->config->get('config_stock_status_id')
             ),
             'options'  => $this->data['stock_statuses'],
             'help_url' => $this->gen_help_url('product_inventory'),
@@ -935,7 +1102,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'shipping_price',
-            'value' => round($this->data['shipping_price'],3),
+            'value' => round($this->data['shipping_price'], 3),
             'style' => 'tiny-field',
         ]);
 

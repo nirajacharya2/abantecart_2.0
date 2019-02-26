@@ -17,194 +17,216 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\core\lib\contracts\AttributeManagerInterface;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesListingGridDownload extends AController {
-	public $data = array();
-	public function main() {
+class ControllerResponsesListingGridDownload extends AController
+{
+    public $data = [];
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function main()
+    {
 
-		$this->loadLanguage('catalog/download');
-		$this->loadModel('catalog/download');
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//Prepare filter config
-		$grid_filter_params = array_merge(array ('name'), (array)$this->data['grid_filter_params']);
-		$filter = new AFilter(array( 'method' => 'post', 'grid_filter_params' => $grid_filter_params, 'additional_filter_string' => 'shared=1'));
-		$filter_data = $filter->getFilterData();
+        $this->loadLanguage('catalog/download');
+        $this->loadModel('catalog/download');
 
-		$total = $this->model_catalog_download->getTotalDownloads($filter_data);
-		$response = new stdClass();
-		$response->page = $filter->getParam('page');
-		$response->total = $filter->calcTotalPages($total);
-		$response->records = $total;
-		$response->userdata = new stdClass();
-		$results = $this->model_catalog_download->getDownloads($filter_data);
-		$i = 0;
-		foreach ($results as $result) {
-			if (!is_file(ABC::env('DIR_RESOURCES') . $result[ 'filename' ])) {
-				$response->userdata->classes[ $result[ 'download_id' ] ] = 'warning';
-			}
-			$response->rows[ $i ][ 'id' ] = $result[ 'download_id' ];
-			$response->rows[ $i ][ 'cell' ] = array(
-				$this->html->buildInput(array(
-				                    'name'  => 'name['.$result['download_id'].']',
-				                    'value' => $result['name'],
-								    'attr' => ' maxlength="64" '
-				                )),
-				$this->html->buildCheckbox(array(
-				                    'name'  => 'status['.$result[ 'download_id' ].']',
-				                    'value' => $result['status'],
-				                    'style'  => 'btn_switch',
-				                )),
-				$result[ 'product_count' ],
-			);
-			$i++;
-		}
-		$this->data['response'] = $response;
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
-	}
+        //Prepare filter config
+        $grid_filter_params = array_merge(['name'], (array)$this->data['grid_filter_params']);
+        $filter = new AFilter(
+            [
+                'method'                   => 'post',
+                'grid_filter_params'       => $grid_filter_params,
+                'additional_filter_string' => 'shared=1',
+            ]
+        );
+        $filter_data = $filter->getFilterData();
 
-	public function update() {
+        $total = $this->model_catalog_download->getTotalDownloads($filter_data);
+        $response = new stdClass();
+        $response->page = $filter->getParam('page');
+        $response->total = $filter->calcTotalPages($total);
+        $response->records = $total;
+        $response->userdata = new stdClass();
+        $results = $this->model_catalog_download->getDownloads($filter_data);
+        $i = 0;
+        foreach ($results as $result) {
+            if (!is_file(ABC::env('DIR_RESOURCES').$result['filename'])) {
+                $response->userdata->classes[$result['download_id']] = 'warning';
+            }
+            $response->rows[$i]['id'] = $result['download_id'];
+            $response->rows[$i]['cell'] = [
+                $this->html->buildInput([
+                    'name'  => 'name['.$result['download_id'].']',
+                    'value' => $result['name'],
+                    'attr'  => ' maxlength="64" ',
+                ]),
+                $this->html->buildCheckbox([
+                    'name'  => 'status['.$result['download_id'].']',
+                    'value' => $result['status'],
+                    'style' => 'btn_switch',
+                ]),
+                $result['product_count'],
+            ];
+            $i++;
+        }
+        $this->data['response'] = $response;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['response']));
+    }
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function update()
+    {
 
-		if (!$this->user->canModify('listing_grid/download')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/download'),
-					'reset_value' => true
-				));
-		}
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadModel('catalog/download');
-		$this->loadLanguage('catalog/download');
-		switch ($this->request->post[ 'oper' ]) {
-			case 'del':
-				$ids = explode(',', $this->request->post[ 'id' ]);
-				if (!empty($ids))
-					foreach ($ids as $id) {
-						$this->model_catalog_download->deleteDownload($id);
-					}
-				break;
-			case 'save':
-				$allowedFields = array_merge(array ('name', 'status'), (array)$this->data['allowed_fields']);
-				$ids = explode(',', $this->request->post['id']);
-				if ( !empty($ids) ) {
-					foreach( $ids as $id ) {
-						foreach ( $allowedFields as $field ) {
-							$this->model_catalog_download->editDownload($id, array($field => $this->request->post[$field][$id]) );
-						}
-					}
-				}
-				break;
+        if (!$this->user->canModify('listing_grid/download')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/download'),
+                    'reset_value' => true,
+                ]);
+        }
 
-			default:
+        $this->loadModel('catalog/download');
+        $this->loadLanguage('catalog/download');
+        switch ($this->request->post['oper']) {
+            case 'del':
+                $ids = explode(',', $this->request->post['id']);
+                if (!empty($ids)) {
+                    foreach ($ids as $id) {
+                        $this->model_catalog_download->deleteDownload($id);
+                    }
+                }
+                break;
+            case 'save':
+                $allowedFields = array_merge(['name', 'status'], (array)$this->data['allowed_fields']);
+                $ids = explode(',', $this->request->post['id']);
+                if (!empty($ids)) {
+                    foreach ($ids as $id) {
+                        foreach ($allowedFields as $field) {
+                            $this->model_catalog_download->editDownload($id,
+                                [$field => $this->request->post[$field][$id]]);
+                        }
+                    }
+                }
+                break;
 
+            default:
 
-		}
+        }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		return null;
-	}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        return null;
+    }
 
-	/**
-	 * update only one field
-	 *
-	 */
-	public function update_field() {
+    /**
+     * update only one field
+     *
+     */
+    public function update_field()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if (!$this->user->canModify('listing_grid/download')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/download'),
-					'reset_value' => true
-				));
-		}
+        if (!$this->user->canModify('listing_grid/download')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/download'),
+                    'reset_value' => true,
+                ]);
+        }
 
-		$this->loadLanguage('catalog/download');
-		$this->loadLanguage('catalog/files');
-		$this->loadModel('catalog/download');
-		$allowedFields = array_merge(
-				array (
-					'name',
-					'filename',
-					'mask',
-					'max_downloads',
-					'shared',
-					'expire_days',
-					'sort_order',
-					'activate_order_status_id',
-					'status',
-					'attributes'),
-				(array)$this->data['allowed_fields']);
+        $this->loadLanguage('catalog/download');
+        $this->loadLanguage('catalog/files');
+        $this->loadModel('catalog/download');
+        $allowedFields = array_merge(
+            [
+                'name',
+                'filename',
+                'mask',
+                'max_downloads',
+                'shared',
+                'expire_days',
+                'sort_order',
+                'activate_order_status_id',
+                'status',
+                'attributes',
+            ],
+            (array)$this->data['allowed_fields']);
 
-		if (isset($this->request->get[ 'id' ])) {
-			$download_id = (int)$this->request->get[ 'id' ];
-			$error = '';
-			//request sent from edit form. ID in url
-			foreach ($this->request->post as $key => $value) {
-				if (!in_array($key, $allowedFields)) continue;
-				// check first
-				if($key=='name' && (mb_strlen($value)<2 || mb_strlen($value)>64) ) {
-					$error = $this->language->get('error_download_name');
-				}elseif($key=='activate' && !in_array($value,array('before_order','immediately','order_status','manually')) ) {
-					$error = $this->language->get('error_activate');
-				}elseif($key=='attributes'){
-					$attr_mngr = new AAttribute_Manager('download_attribute');
-					$attr_errors = $attr_mngr->validateAttributeData($value[$download_id]);
-					if($attr_errors){
-						$error = $this->language->get('error_download_attributes').'<br>&nbsp;&nbsp;&nbsp;'. implode('<br>&nbsp;&nbsp;&nbsp;',$attr_errors);
-					}
-				}elseif($key=='mask'){
-					$value = str_replace(' ','_',$value);
-				}
+        if (isset($this->request->get['id'])) {
+            $download_id = (int)$this->request->get['id'];
+            $error = '';
+            //request sent from edit form. ID in url
+            foreach ($this->request->post as $key => $value) {
+                if (!in_array($key, $allowedFields)) {
+                    continue;
+                }
+                // check first
+                if ($key == 'name' && (mb_strlen($value) < 2 || mb_strlen($value) > 64)) {
+                    $error = $this->language->get('error_download_name');
+                } elseif ($key == 'activate'
+                    && !in_array($value,
+                        ['before_order', 'immediately', 'order_status', 'manually'])) {
+                    $error = $this->language->get('error_activate');
+                } elseif ($key == 'attributes') {
+                    /**
+                     * @var AttributeManagerInterface $attr_mngr
+                     */
+                    $attr_mngr = ABC::getObjectByAlias('AttributeManager', ['download_attribute']);
+                    $attr_errors = $attr_mngr->validateAttributeData($value[$download_id]);
+                    if ($attr_errors) {
+                        $error = $this->language->get('error_download_attributes').'<br>&nbsp;&nbsp;&nbsp;'
+                            .implode('<br>&nbsp;&nbsp;&nbsp;', $attr_errors);
+                    }
+                } elseif ($key == 'mask') {
+                    $value = str_replace(' ', '_', $value);
+                }
 
-				if(!$error){
-					$data = array( $key => $value );
-					$this->model_catalog_download->editDownload($download_id, $data);
-				}else{
-					$e = new AError('');
-					return $e->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $error ));
-				}
-			}
-			return null;
-		}else{
-			//request sent from jGrid. ID is key of array
-			foreach ($this->request->post as $field => $value ) {
-				foreach ( $value as $k => $v ) {
-					 if($field=='name'){
-						if (mb_strlen($v) < 2 || mb_strlen($v) >64 ) {
-							$err = $this->language->get('error_name');
-							$error = new AError('');
-							return $error->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $err ));
-						}
-					}
-					$this->model_catalog_download->editDownload($k, array($field => $v) );
-				}
-			}
-		}
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		return null;
-	}
+                if (!$error) {
+                    $data = [$key => $value];
+                    $this->model_catalog_download->editDownload($download_id, $data);
+                } else {
+                    $e = new AError('');
+                    return $e->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $error]);
+                }
+            }
+            return null;
+        } else {
+            //request sent from jGrid. ID is key of array
+            foreach ($this->request->post as $field => $value) {
+                foreach ($value as $k => $v) {
+                    if ($field == 'name') {
+                        if (mb_strlen($v) < 2 || mb_strlen($v) > 64) {
+                            $err = $this->language->get('error_name');
+                            $error = new AError('');
+                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        }
+                    }
+                    $this->model_catalog_download->editDownload($k, [$field => $v]);
+                }
+            }
+        }
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        return null;
+    }
 }

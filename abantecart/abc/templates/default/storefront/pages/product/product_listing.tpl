@@ -63,6 +63,8 @@
 				<?php echo $this->getHookvar('product_listing_details0_'.$product['product_id']);?>
 				<?php if ($display_price) { ?>
 					<div class="pricetag jumbotron">
+
+						<?php if(!$product['catalog_mode']) { ?>
 						<?php if($product['call_to_order']){ ?>
 							<a data-id="<?php echo $product['product_id'] ?>" href="#"
 								   class="btn call_to_order" title="<?php echo $text_call_to_order?>">
@@ -78,6 +80,7 @@
 							>
 								<i class="fa fa-cart-plus fa-fw"></i>
 							</a>
+						<?php } ?>
 						<?php } ?>
 
 						<div class="price">

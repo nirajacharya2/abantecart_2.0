@@ -27,11 +27,11 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
-use abc\core\lib\AAttribute_Manager;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATax;
 use abc\core\lib\AWeight;
+use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogDownload;
 use H;
@@ -48,7 +48,7 @@ class ControllerResponsesProductProduct extends AController
     public $error = [];
     public $data = [];
     /**
-     * @var AAttribute_Manager
+     * @var AttributeManagerInterface
      */
     protected $attribute_manager;
 
@@ -363,9 +363,9 @@ class ControllerResponsesProductProduct extends AController
 
         $data = $this->request->get;
         /**
-         * @var AAttribute_Manager $attribute_manager
+         * @var AttributeManagerInterface $attribute_manager
          */
-        $attribute_manager = ABC::getObjectByAlias('AAttribute_Manager',['product_option']);
+        $attribute_manager = ABC::getObjectByAlias('AttributeManager',['product_option']);
         $option_info = $this->model_catalog_product->getProductOption(
                                                         $this->request->get['product_id'],
                                                         $this->request->get['option_id']
@@ -418,7 +418,7 @@ class ControllerResponsesProductProduct extends AController
             $this->data['option_type']
                 = $this->data['element_types'][$this->data['option_data']['element_type']]['type'];
 
-            $this->attribute_manager = ABC::getObjectByAlias('AAttribute_Manager', ['product_option']);
+            $this->attribute_manager = ABC::getObjectByAlias('AttributeManager', ['product_option']);
 
             $this->data['action'] = $this->html->getSecureURL(
                 'product/product/update_option_values',
@@ -1344,6 +1344,7 @@ class ControllerResponsesProductProduct extends AController
      * @param AForm $form
      *
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     private function _buildAttributesSubform($form)
     {
@@ -1354,7 +1355,7 @@ class ControllerResponsesProductProduct extends AController
         $html_multivalue_elements = HtmlElementFactory::getMultivalueElements();
         $html_elements_with_options = HtmlElementFactory::getElementsWithOptions();
         if (!$attributes) {
-            $attr_mng = new AAttribute_Manager('download_attribute');
+            $attr_mng = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
             $attr_type_id = $attr_mng->getAttributeTypeID('download_attribute');
             $this->data['form']['fields']['attributes']['no_attr'] =
                 sprintf($this->language->get('text_no_download_attributes_yet'),
@@ -1475,7 +1476,10 @@ class ControllerResponsesProductProduct extends AController
                 $this->error['order_status'] = $this->language->get('error_order_status');
             }
         }
-        $attr_mngr = new AAttribute_Manager('download_attribute');
+        /**
+         * @var AttributeManagerInterface $attr_mngr
+         */
+        $attr_mngr = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
         $attr_errors = $attr_mngr->validateAttributeData($data['attributes'][$data['download_id']]);
         if ($attr_errors) {
             $this->error['attributes'] = $attr_errors;
@@ -1529,6 +1533,8 @@ class ControllerResponsesProductProduct extends AController
      */
     public function orderProductForm()
     {
+        $opt_stock_message = null;
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -1667,7 +1673,6 @@ class ControllerResponsesProductProduct extends AController
 
         // Prepare options and values for display
         $product_options = $this->model_catalog_product->getOrderProductOptions($product_id);
-        $option_values_prices = [];
         $options = [];
         foreach ($product_options as $option) {
             if (in_array($option['element_type'], ['U'])) {

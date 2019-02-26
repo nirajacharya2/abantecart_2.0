@@ -20,6 +20,7 @@
 
 namespace abc\models\admin;
 
+use abc\core\ABC;
 use abc\core\engine\Model;
 use abc\core\lib\AdminCommands;
 
@@ -172,7 +173,7 @@ class ModelToolGlobalSearch extends Model
      * @param string $keyword
      *
      * @return int
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function getTotal($search_category, $keyword)
     {
@@ -882,12 +883,13 @@ class ModelToolGlobalSearch extends Model
      * @param string $mode ('total')
      *
      * @return array
-     * @throws \abc\core\lib\AException
      */
     protected function possibleCommands($keyword, $mode = '')
     {
-
-        $commands_obj = new AdminCommands();
+        /**
+         * @var AdminCommands $commands_obj
+         */
+        $commands_obj = ABC::getObjectByAlias('AdminCommands');
         $this->commands = $commands_obj->commands;
         $result = $commands_obj->getCommands($keyword);
 

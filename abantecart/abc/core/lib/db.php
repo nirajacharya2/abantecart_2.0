@@ -20,13 +20,10 @@
 
 namespace abc\core\lib;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ADB
 {
@@ -34,49 +31,67 @@ class ADB
      * @var Capsule
      */
     protected $orm;
-    protected $db_config = array();
+    protected $conName = 'default';
+    protected $db_config = [];
     public $error = '';
     public $registry;
 
     /**
-     * @param array $db_config array(
-     *                         'driver'    => 'mysql',
-     *                         'host'      => 'localhost', // or array ['read' => '****', 'write' = '*****']
-     *                         'port'      => '3306', // or array ['read' => '***', 'write' = '***']
-     *                         'database'  => '***',
-     *                         'username'  => '***',
-     *                         'password'  => '***,
-     *                         'charset'   => 'utf8',
-     *                         'collation' => 'utf8_unicode_ci',
-     *                         'prefix'    => 'ac_'
+     * @param array  $db_config array(
+     *                          'driver'    => 'mysql',
+     *                          'host'      => 'localhost', // or array ['read' => '****', 'write' = '*****']
+     *                          'port'      => '3306', // or array ['read' => '***', 'write' = '***']
+     *                          'database'  => '***',
+     *                          'username'  => '***',
+     *                          'password'  => '***,
+     *                          'charset'   => 'utf8',
+     *                          'collation' => 'utf8_unicode_ci',
+     *                          'prefix'    => 'ac_'
+     *
+     * @param string $conName
      *
      * @throws AException
      * @throws \DebugBar\DebugBarException
      */
-    public function __construct($db_config = array())
+    public function __construct($db_config = [], $conName = 'default')
     {
         if (!$db_config) {
-            throw new AException(AC_ERR_LOAD, 'Cannot initiate ADB class with empty config parameter!');
+            throw new \Exception('Cannot initiate ADB class with empty config parameter!', AC_ERR_LOAD, __FILE__);
         }
         $this->db_config = $this->prepareDBConfig($db_config);
-
+        $this->conName = $conName;
         try {
             $this->orm = new Capsule;
-            $this->orm->addConnection($this->db_config);
+            $this->orm->addConnection($this->db_config, $this->conName);
+
             $this->orm->setAsGlobal();  //this is important
+            //register ORM-model event listeners
+            $evd = ABC::getObjectByAlias('EventDispatcher');
+            if (is_object($evd)) {
+                $this->orm->setEventDispatcher($evd);
+                foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
+                    foreach ($listeners as $listener) {
+                        $this->orm->getEventDispatcher()->listen($event_alias, $listener);
+                    }
+                }
+            }
+
             $this->orm->bootEloquent();
-            $this->orm::connection()->getDatabaseName();
+
             //check connection
-            $this->orm::connection()->table($this->orm::raw('DUAL'))->first([$this->orm::raw(1)]);
+            $this->table($this->raw('DUAL'))->first([$this->raw(1)]);
             $debug_bar = ADebug::$debug_bar;
             if ($debug_bar) {
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
-                $this->orm::select($this->orm::raw("SET SQL_MODE='';"));
+                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
             }
+
         } catch (\PDOException $e) {
             throw new AException($e->getCode(), $e->getTraceAsString(), $e->getFile(), $e->getLine());
+        } catch (\Error $e) {
+            exit($e->getTraceAsString());
         }
         $this->registry = Registry::getInstance();
     }
@@ -171,15 +186,15 @@ class ADB
     {
         $orm = $this->orm;
         try {
-            $result = $orm::select($orm::raw($sql));
+            $result = $orm->getConnection($this->conName)->select($this->raw($sql));
             $data = json_decode(json_encode($result), true);
             /**
              * @var \stdClass $output
              */
             $output = new \stdClass();
-            $output->row = isset($data[0]) ? $data[0] : array();
+            $output->row = isset($data[0]) ? $data[0] : [];
             //get total rows count for pagination
-            if ($data && is_int(strpos($sql,$this->raw_sql_row_count()))) {
+            if ($data && is_int(strpos($sql, $this->raw_sql_row_count()))) {
                 $output->total_num_rows = $this->sql_get_row_count();
                 $data[0]['total_num_rows'] = $output->total_num_rows;
             }
@@ -248,7 +263,7 @@ class ADB
         $orm = $this->orm;
         //todo: need to fix sql-queries
         //Implement second parameter!!!!
-        $output = $orm::connection()->getPdo()->quote($value);
+        $output = $orm::connection($this->conName)->getPdo()->quote($value);
 
         return substr($output, 1, -1);
     }
@@ -260,7 +275,7 @@ class ADB
     {
         $orm = $this->orm;
 
-        return $orm::connection()->getPdo()->lastInsertId();
+        return $orm::connection($this->conName)->getPdo()->lastInsertId();
     }
 
     /**
@@ -272,7 +287,7 @@ class ADB
     {
         if ($this->db_config['driver'] == 'mysql') {
             // turn on total row calculation
-            return (string)$this->orm::raw('SQL_CALC_FOUND_ROWS');
+            return (string)$this->raw('SQL_CALC_FOUND_ROWS');
         }
 
         return false;
@@ -287,7 +302,7 @@ class ADB
     {
         if ($this->db_config['driver'] == 'mysql') {
             // turn on total row calculation
-            return $this->orm::selectOne('select found_rows() as total')->total;
+            return $this->orm->getConnection($this->conName)->selectOne('select found_rows() as total')->total;
         }
 
         return false;
@@ -331,9 +346,9 @@ class ADB
      */
     public function __call($function_name, $args)
     {
-        $item = $this->orm;
+        $item = $this->orm->getConnection($this->conName);
         if (method_exists($item, $function_name)) {
-            return call_user_func_array(array($item, $function_name), $args);
+            return call_user_func_array([$item, $function_name], $args);
         } else {
             return null;
         }
@@ -346,7 +361,12 @@ class ADB
      */
     public function table($table_name)
     {
-        return $this->orm::table($table_name);
+        return $this->orm->getConnection($this->conName)->table($table_name);
+    }
+
+    public function raw($string)
+    {
+        return $this->orm->getConnection($this->conName)->raw($string);
     }
 
     /**
@@ -359,7 +379,7 @@ class ADB
 
     public function database()
     {
-        return $this->orm::schema();
+        return $this->orm->getConnection($this->conName)->getSchemaBuilder();
     }
 
     /**
@@ -367,6 +387,6 @@ class ADB
      */
     public function CurrentTimeStamp()
     {
-        return $this->orm::raw('CURRENT_TIMESTAMP');
+        return $this->raw('CURRENT_TIMESTAMP');
     }
 }

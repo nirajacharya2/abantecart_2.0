@@ -22,8 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\models\base\CustomerCommunication;
-
+use abc\models\customer\CustomerCommunication;
 
 class AMail
 {

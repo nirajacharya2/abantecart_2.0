@@ -42,7 +42,7 @@ class Deploy extends BaseCommand
         $this->publish = new Publish();
     }
 
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'all' : $action;
 

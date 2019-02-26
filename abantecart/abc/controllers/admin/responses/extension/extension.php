@@ -17,47 +17,53 @@ Do not edit or add to this file if you wish to upgrade AbanteCart to newer
 versions in the future. If you wish to customize AbanteCart for your
 needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\ExtensionUtils;
-use abc\core\lib\AAttribute_Manager;
+use abc\core\lib\contracts\AttributeManagerInterface;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesExtensionExtension extends AController {
-	public $data = array();
-	protected $attribute_manager;
+class ControllerResponsesExtensionExtension extends AController
+{
+    public $data = [];
+    /**
+     * @var AttributeManagerInterface
+     */
+    protected $attribute_manager;
 
-	public function __construct($registry, $instance_id, $controller, $parent_controller = '') {
-		parent::__construct($registry, $instance_id, $controller, $parent_controller);
-		$this->attribute_manager = new AAttribute_Manager();
-		$this->loadLanguage('extension/extensions');
-	}
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->attribute_manager = ABC::getObjectByAlias('AttributeManager');
+        $this->loadLanguage('extension/extensions');
+    }
 
-	public function help() {
+    public function help()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$extension = $this->request->get['extension'];
-		$ext = new ExtensionUtils($extension);
-		$help_file_path = ABC::env('DIR_APP_EXTENSIONS') . $extension . '/' . str_replace('..', '', $ext->getConfig('help_file'));
+        $extension = $this->request->get['extension'];
+        $ext = new ExtensionUtils($extension);
+        $help_file_path =
+            ABC::env('DIR_APP_EXTENSIONS').$extension.'/'.str_replace('..', '', $ext->getConfig('help_file'));
 
-		$this->data['content'] = array();
-		$this->data['title'] = $this->language->get('text_help');
-		if ( file_exists($help_file_path) && is_file($help_file_path) ) {
-			$this->data['content'] = file_get_contents($help_file_path);
-		} else {
-			$this->data['content'] = $this->language->get('error_no_help_file');
-		}
-		$this->data['content'] = $this->html->convertLinks($this->data['content']);
+        $this->data['content'] = [];
+        $this->data['title'] = $this->language->get('text_help');
+        if (file_exists($help_file_path) && is_file($help_file_path)) {
+            $this->data['content'] = file_get_contents($help_file_path);
+        } else {
+            $this->data['content'] = $this->language->get('error_no_help_file');
+        }
+        $this->data['content'] = $this->html->convertLinks($this->data['content']);
 
-		$this->view->batchAssign($this->data);
-		$this->response->setOutput($this->view->fetch('responses/extension/howto.tpl'));
+        $this->view->batchAssign($this->data);
+        $this->response->setOutput($this->view->fetch('responses/extension/howto.tpl'));
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}	
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

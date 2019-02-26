@@ -92,6 +92,8 @@ ABC::env(
     ]
 );
 
+
+
 //load vendors classes
 require ABC::env('DIR_VENDOR').'autoload.php';
 
@@ -222,8 +224,6 @@ ABC::env(
         'DIRNAME_TEMPLATES'   => 'templates'.DS,
         'DIRNAME_TEMPLATE'    => 'template'.DS,
         'DIRNAME_VENDOR'      => 'vendor'.DS,
-
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
         'DIR_ASSETS_EXT'     => $dir_public.'extensions'.DS,
     ]
 );
@@ -481,16 +481,7 @@ if(is_object($evd)) {
     $registry->set('events', $evd);
 }
 
-//register ORM-model event listeners
-$evd = ABC::getObjectByAlias('EventDispatcher');
-if(is_object($evd)) {
-    foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
-        foreach ($listeners as $listener) {
-            $evd->listen($event_alias, $listener);
-        }
-    }
-    $registry->set('model_events', $evd);
-}
+
 
 //register ABAC
 /**

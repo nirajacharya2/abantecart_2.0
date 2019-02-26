@@ -1841,8 +1841,12 @@ class AHelperUtils extends AHelper
         elseif(count($data) == 1)
             $data = current($data);
 
-        if(!is_string($data) && !is_numeric($data))
+        if(!is_string($data) && !is_numeric($data) && !is_object($data))
             $data = var_export($data, 1);
+
+     //   if (is_object($data)) {
+       //     $data = ' Variable is Object, use DD like functions! ';
+       // }
 
         file_put_contents(
             $filename,
@@ -1860,6 +1864,11 @@ class AHelperUtils extends AHelper
         $content = glob(rtrim($directory,DS).DS.'*',GLOB_NOSORT);
 
         return ($content ? false : true);
+    }
+
+    public static function isCamelCase($className)
+    {
+        return (bool)preg_match('/^([A-Z][a-z0-9]+)+$/', $className);
     }
 
     /**
@@ -1919,5 +1928,21 @@ class AHelperUtils extends AHelper
             $result .= ' ...';
         }
         return $result;
+    }
+
+    /**
+     * @param string $input
+     * @param string $separator
+     * @param bool $capitalizeFirstChar
+     *
+     * @return string
+     */
+    public static function camelize(string $input, $separator = '_', $capitalizeFirstChar = false)
+    {
+        $string = ucwords($input, $separator);
+        if(!$capitalizeFirstChar){
+            $string = lcfirst($string);
+        }
+        return str_replace($separator, '', $string);
     }
 }

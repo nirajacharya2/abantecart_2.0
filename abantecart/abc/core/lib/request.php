@@ -31,6 +31,7 @@ final class ARequest
     public $server = [];
 
     private $http;
+    private $uniqueId;
     private $version;
     private $browser;
     private $browser_version;
@@ -39,6 +40,10 @@ final class ARequest
 
     public function __construct()
     {
+        if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $_POST = json_decode(file_get_contents('php://input'), true);
+        }
+
         $_GET = $this->clean($_GET);
         $_POST = $this->clean($_POST);
         $_COOKIE = $this->clean($_COOKIE);
@@ -50,6 +55,12 @@ final class ARequest
         $this->cookie = $_COOKIE;
         $this->files = $_FILES;
         $this->server = $_SERVER;
+
+        //generate unique request
+        $this->uniqueId = sprintf(
+            "%08x",
+            abs(crc32($this->getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+        );
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
@@ -116,12 +127,12 @@ final class ARequest
                 $key = $this->clean($key);
                 $data[$key] = $this->clean($value);
                 //check route and forbid if it's wrong
-                if ($key == 'rt' && preg_match('/[^A-Za-z0-9_\/]/', $data[$key])) {
+                if ($key === 'rt' && preg_match('/[^A-Za-z0-9_\/]/', $data[$key])) {
                     http_response_code(403);
-                    exit('Forbidden');
+                    exit('Request forbidden');
                 }
             }
-        } else {
+        } else if(!is_numeric($data)) {
             $data = htmlspecialchars($data, ENT_COMPAT, ABC::env('APP_CHARSET'));
         }
         return $data;
@@ -218,6 +229,10 @@ final class ARequest
 
     }
 
+    public function getUniqueId()
+    {
+        return $this->uniqueId;
+    }
     public function getBrowser()
     {
         return $this->browser;

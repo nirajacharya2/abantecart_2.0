@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!--
+  ~ AbanteCart, Ideal Open Source Ecommerce Solution
+  ~ http://www.abantecart.com
+  ~
+  ~ Copyright 2011-2018 Belavier Commerce LLC
+  ~
+  ~ This source file is subject to Open Software License (OSL 3.0)
+  ~ License details is bundled with this package in the file LICENSE.txt.
+  ~ It is also available at this URL:
+  ~ <http://www.opensource.org/licenses/OSL-3.0>
+  ~
+  ~ UPGRADE NOTE:
+  ~ Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+  ~ versions in the future. If you wish to customize AbanteCart for your
+  ~ needs please refer to http://www.abantecart.com for more information.
+  -->
+
+<definitions>
+	<definition>
+		<key>heading_title</key>
+		<value><![CDATA[Object Types]]></value>
+	</definition>
+	<definition>
+		<key>text_object_type</key>
+		<value><![CDATA[Object Type]]></value>
+	</definition>
+	<definition>
+		<key>entry_object_type</key>
+		<value><![CDATA[Object Type:]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_sort_order</key>
+		<value><![CDATA[Sort Order]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_name</key>
+		<value><![CDATA[Title]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_status</key>
+		<value><![CDATA[Status]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_object_type</key>
+		<value><![CDATA[Object Type]]></value>
+	</definition>
+	<definition>
+		<key>entry_name</key>
+		<value><![CDATA[Name:]]></value>
+	</definition>
+	<definition>
+		<key>entry_sort_order</key>
+		<value><![CDATA[Sort Order:]]></value>
+	</definition>
+	<definition>
+		<key>entry_status</key>
+		<value><![CDATA[Status:]]></value>
+	</definition>
+	<definition>
+		<key>entry_attribute_group</key>
+		<value><![CDATA[Attribute Groups:]]></value>
+	</definition>
+	<definition>
+		<key>text_success</key>
+		<value><![CDATA[Success!]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_product_id</key>
+		<value><![CDATA[Hide Product Id:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_product_type_id</key>
+		<value><![CDATA[Hide Product Type Id:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_status</key>
+		<value><![CDATA[Hide Status:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_featured</key>
+		<value><![CDATA[Hide Featured:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_name</key>
+		<value><![CDATA[Hide Name:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_blurb</key>
+		<value><![CDATA[Hide blurb:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_description</key>
+		<value><![CDATA[Hide description:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_meta_keywords</key>
+		<value><![CDATA[Hide meta keywords:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_meta_description</key>
+		<value><![CDATA[Hide meta description:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_tags</key>
+		<value><![CDATA[Hide tags:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_categories</key>
+		<value><![CDATA[Hide categories:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_product_stores</key>
+		<value><![CDATA[Hide product stores:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_manufacturer_id</key>
+		<value><![CDATA[Hide manufacturer:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_model</key>
+		<value><![CDATA[Hide model:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_call_to_order</key>
+		<value><![CDATA[Hide call to order:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_price</key>
+		<value><![CDATA[Hide price:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_cost</key>
+		<value><![CDATA[Hide cost:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_tax_class_id</key>
+		<value><![CDATA[Hide tax class:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_subtract</key>
+		<value><![CDATA[Hide subtracts:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_quantity</key>
+		<value><![CDATA[Hide quantity:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_minimum</key>
+		<value><![CDATA[Hide minimum:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_maximum</key>
+		<value><![CDATA[Hide maximum:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_stock_checkout</key>
+		<value><![CDATA[Hide stock_checkout:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_stock_status</key>
+		<value><![CDATA[Hide stock_status:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_sku</key>
+		<value><![CDATA[Hide sku:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_keyword</key>
+		<value><![CDATA[Hide keyword:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_location</key>
+		<value><![CDATA[Hide location:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_date_available</key>
+		<value><![CDATA[Hide date_available:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_sort_order</key>
+		<value><![CDATA[Hide sort_order:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_shipping</key>
+		<value><![CDATA[Hide shipping:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_free_shipping</key>
+		<value><![CDATA[Hide free_shipping:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_ship_individually</key>
+		<value><![CDATA[Hide ship_individually:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_shipping_price</key>
+		<value><![CDATA[Hide shipping_price:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_length</key>
+		<value><![CDATA[Hide length:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_width</key>
+		<value><![CDATA[Hide width:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_height</key>
+		<value><![CDATA[Hide height:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_length_class_id</key>
+		<value><![CDATA[Hide length_class:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_weight</key>
+		<value><![CDATA[Hide weight:]]></value>
+	</definition>
+	<definition>
+		<key>entry_hide_weight_class_id</key>
+		<value><![CDATA[Hide weight_class:]]></value>
+	</definition>
+	<definition>
+		<key>entry_catalog_mode</key>
+		<value><![CDATA[Catalog mode:]]></value>
+	</definition>
+	<definition>
+		<key>column_object_type_title</key>
+		<value><![CDATA[Object Type Name:]]></value>
+	</definition>
+</definitions>

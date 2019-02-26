@@ -27,7 +27,6 @@ use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
 
-
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
     echo "Initialisation...\n";
@@ -60,11 +59,9 @@ if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
     php ".$composer_phar." install -d ".dirname(__DIR__, 2)."\n\n\e[0;31m to initialize a project!\e[0m\n\n");
 }
 
-
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
 }
-
 
 ABC::env('IS_ADMIN', true);
 ABC::env('INDEX_FILE', 'index.php');
@@ -81,7 +78,7 @@ $dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.DS : ABC::env('DIR_VEN
 
 $defaults = [
     'DIR_ROOT'            => $dir_root,
-    'DIR_TESTS'           => $dir_root.'tests'.DS,
+    'DIR_TESTS'           => $dir_app.'tests'.DS,
     'DIR_APP'             => $dir_app,
     'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
     'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,
@@ -126,7 +123,6 @@ require_once ABC::env('DIR_VENDOR').'autoload.php';
 include_once('version.php');
 ABC::env('VERSION', ABC::env('MASTER_VERSION').'.'.ABC::env('MINOR_VERSION').'.'.ABC::env('VERSION_BUILT'));
 $dir_lib = ABC::env('DIR_LIB');
-require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');
 require_once($dir_lib.'error.php');
 require_once($dir_lib.'warning.php');
@@ -230,17 +226,6 @@ if(is_object($evd)) {
         }
     }
     $registry->set('events', $evd);
-}
-
-//register ORM-model event listeners
-$evd = ABC::getObjectByAlias('EventDispatcher');
-if(is_object($evd)) {
-    foreach ((array)ABC::env('MODEL')['EVENTS'] as $event_alias => $listeners) {
-        foreach ($listeners as $listener) {
-            $evd->listen($event_alias, $listener);
-        }
-    }
-    $registry->set('model_events', $evd);
 }
 
 

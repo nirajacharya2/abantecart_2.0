@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<definitions>
+  <definition>
+    <key>audit_log_heading_title</key>
+    <value><![CDATA[Audit Log]]></value>
+  </definition>
+</definitions>

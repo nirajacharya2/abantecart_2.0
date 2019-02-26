@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AForm;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
+use abc\models\locale\Currency;
 use H;
 
 /**
@@ -401,8 +402,7 @@ class AConfigManager
             $language_codes[$lng_code] = $v['name'];
         }
 
-        $this->load->model('localisation/currency');
-        $results = $this->model_localisation_currency->getCurrencies();
+        $results = Currency::all()->toArray();
         $currencies = [];
         foreach ($results as $v) {
             $currencies[$v['code']] = $v['title'];

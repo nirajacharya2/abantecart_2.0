@@ -2,6 +2,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET foreign_key_checks = 0;
 
 DROP TABLE IF EXISTS `abc_migration_log`;
+DROP TABLE IF EXISTS `ac_audits`;
 DROP TABLE IF EXISTS `ac_encryption_keys` CASCADE;
 DROP TABLE IF EXISTS `ac_ant_messages` CASCADE;
 DROP TABLE IF EXISTS `ac_store_descriptions` CASCADE;
@@ -126,6 +127,31 @@ DROP TABLE IF EXISTS `ac_pages_layouts` CASCADE;
 DROP TABLE IF EXISTS `ac_layouts` CASCADE;
 DROP TABLE IF EXISTS `ac_pages` CASCADE;
 
+
+CREATE TABLE `ac_audits` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_type` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `alias_id` int(11) DEFAULT NULL,
+  `alias_name` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `event` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `request_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `session_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `auditable_type` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `auditable_id` int(11) DEFAULT NULL,
+  `attribute_name` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `old_value` text COLLATE utf8_general_ci,
+  `new_value` text COLLATE utf8_general_ci,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`,`user_type`,`user_name`),
+  KEY `request_id` (`request_id`,`session_id`),
+  KEY `auditable_type` (`auditable_type`,`auditable_id`),
+  KEY `attribute_name` (`attribute_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 --
 -- DDL for table `stores`
 --
@@ -134,10 +160,15 @@ CREATE TABLE `ac_stores` (
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL,
   `alias` varchar(15) COLLATE utf8_general_ci NOT NULL,
   `status` int(1) NOT NULL,
-   PRIMARY KEY (`store_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+   PRIMARY KEY (`store_id`),
+   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=0;
 
-INSERT INTO `ac_stores` VALUES	(0,'default','default',1);
+INSERT INTO `ac_stores` (`store_id`, `name`, `alias`, `status`) VALUES	(0,'default','default',1);
 
 --
 -- DDL for table `languages`
@@ -152,8 +183,13 @@ CREATE TABLE `ac_languages` (
   `filename` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`language_id`),
-  KEY `name` (`name`)
+  KEY `name` (`name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE UNIQUE INDEX `ac_languages_idx`
 ON `ac_languages` ( `language_id`,`code` );
@@ -176,8 +212,11 @@ CREATE TABLE `ac_language_definitions` (
   `language_value` text NOT NULL COMMENT 'translatable',
   `date_added` timestamp NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY  (`language_definition_id`, `language_id`, `section`, `block`, `language_key`),
-    FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC)
+    FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC),
+    INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -210,9 +249,12 @@ CREATE TABLE `ac_customers` (
   `data` text DEFAULT null,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
-  UNIQUE KEY `customers_loginname` (`loginname`)
+  UNIQUE KEY `customers_loginname` (`loginname`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_customers_idx` ON `ac_customers` ( `store_id`, `address_id`, `customer_group_id` );
@@ -227,14 +269,18 @@ CREATE TABLE `ac_locations` (
   `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`location_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`location_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
 -- Dumping data for table `ac_locations`
 --
 
-INSERT INTO `ac_locations` (`location_id`, `name`, `description`, `date_added`) VALUES
+INSERT INTO `ac_locations` (`location_id`, `name`, `description`, `date_added`)
+VALUES
 (1, 'USA', 'All States', now());
 
 --
@@ -247,9 +293,15 @@ CREATE TABLE `ac_countries` (
   `address_format` text COLLATE utf8_general_ci NOT NULL,
   `status` int(1) NOT NULL DEFAULT '1',
   `sort_order` int(3) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`country_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`country_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_countries_idx` ( `iso_code_2`, `iso_code_3`, `status` )
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-CREATE INDEX `ac_countries_idx` ON `ac_countries` ( `iso_code_2`, `iso_code_3`, `status`  );
+
 
 --
 -- Dumping data for table `countries`
@@ -501,10 +553,16 @@ VALUES
 -- DDL for table `ac_country_descriptions`
 --
 CREATE TABLE `ac_country_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `country_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`country_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`country_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_country_descriptions` (`country_id`, `language_id`, `name`)
@@ -760,7 +818,12 @@ CREATE TABLE `ac_zones` (
   `code` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `status` int(1) NOT NULL DEFAULT '1',
   `sort_order` int(3) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`zone_id`, `country_id` )
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`zone_id`, `country_id` ),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -4707,10 +4770,16 @@ INSERT INTO `ac_zones` (`zone_id`, `country_id`, `code`, `status`, `sort_order`)
 -- DDL for table `ac_zone_descriptions`
 --
 CREATE TABLE `ac_zone_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `zone_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`zone_id`,`language_id`)
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`zone_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_zone_descriptions` (`zone_id`, `language_id`,`name`) VALUES
@@ -8659,7 +8728,10 @@ CREATE TABLE `ac_zones_to_locations` (
   `location_id` int(11) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`zone_to_location_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`zone_to_location_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_zones_to_locations_idx` ON `ac_zones_to_locations` ( `country_id`, `zone_id`, `location_id` );
@@ -8753,6 +8825,9 @@ CREATE TABLE `ac_addresses` (
   `city` varchar(128) COLLATE utf8_general_ci NOT NULL,
   `country_id` int(11) NOT NULL DEFAULT '0',
   `zone_id` int(11) NOT NULL DEFAULT '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`address_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`, `zone_id`  );
@@ -8767,7 +8842,10 @@ CREATE TABLE `ac_categories` (
   `status` int(1) NOT NULL DEFAULT '1',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`category_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`category_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`, `status`  );
 
@@ -8775,14 +8853,20 @@ CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`
 -- DDL for table `category_descriptions`
 --
 CREATE TABLE `ac_category_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `category_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
   `meta_keywords` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `meta_description` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `description` text COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`category_id`,`language_id`),
-  KEY `name` (`name`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`, `category_id`,`language_id`),
+  KEY `name` (`name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -8790,9 +8874,10 @@ CREATE TABLE `ac_category_descriptions` (
 --
 
 CREATE TABLE `ac_categories_to_stores` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `category_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
-  PRIMARY KEY (`category_id`,`store_id`)
+  PRIMARY KEY (`id`,`category_id`,`store_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -8813,18 +8898,27 @@ CREATE TABLE `ac_coupons` (
   `status` int(1) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`coupon_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`coupon_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
 -- DDL for table `coupon_descriptions`
 --
 CREATE TABLE `ac_coupon_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `coupon_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `description` text COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`coupon_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`coupon_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -8840,7 +8934,10 @@ CREATE TABLE `ac_currencies` (
   `value` decimal(15,8) NOT NULL,
   `status` int(1) NOT NULL,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`currency_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`currency_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -8859,7 +8956,12 @@ CREATE TABLE `ac_customer_groups` (
   `customer_group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL,
   `tax_exempt` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`customer_group_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`customer_group_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -8900,7 +9002,10 @@ CREATE TABLE `ac_downloads` (
   `status` int(1) NOT NULL DEFAULT '0', -- in migration set to 1
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`download_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`download_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, `shared` );
 
@@ -8908,10 +9013,16 @@ CREATE INDEX `ac_downloads_idx` ON `ac_downloads` ( `activate_order_status_id`, 
 -- DDL for table `download_descriptions`
 --
 CREATE TABLE `ac_download_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `download_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`download_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`download_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -8971,10 +9082,10 @@ INSERT INTO `ac_extensions` (`type`, `key`, `category`, `status`, `priority`, `v
 
 ('extensions', 'banner_manager', 'extensions', 1, 1, '1.0.1', null, now(), now(), now() ),
 ('extensions', 'forms_manager', 'extensions', 1, 1, '1.0.2', null, now(), now(), now() )
---,
---('extensions', 'neowize_insights', 'extensions', 1, 1, '1.0.5', null, now(), now(), now() ),
---('payment', 'default_pp_standart', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() ),
---('payment', 'default_pp_pro', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() )
+-- ,
+-- ('extensions', 'neowize_insights', 'extensions', 1, 1, '1.0.5', null, now(), now(), now() ),
+-- ('payment', 'default_pp_standart', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() ),
+-- ('payment', 'default_pp_pro', 'payment', 0, 1, '1.0.2', null, now(), now() + INTERVAL 2 MINUTE , now() )
 ;
 
 --
@@ -8992,11 +9103,15 @@ CREATE TABLE `ac_banners` (
     `sort_order` int(11) NOT NULL,
     `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`banner_id`)
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+    PRIMARY KEY (`banner_id`),
+    INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 CREATE TABLE `ac_banner_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `banner_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL COMMENT 'translatable',
@@ -9004,7 +9119,10 @@ CREATE TABLE `ac_banner_descriptions` (
   `meta` text(1500) DEFAULT '' COMMENT 'translatable',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`banner_id`,`language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`, `banner_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -9028,7 +9146,10 @@ CREATE TABLE `ac_length_classes` (
   `iso_code` VARCHAR(5) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`length_class_id`,`iso_code`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`length_class_id`,`iso_code`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -9043,11 +9164,17 @@ INSERT INTO `ac_length_classes` (`length_class_id`, `value`, `iso_code`) VALUES
 -- DDL for table `length_class_descriptions`
 --
 CREATE TABLE `ac_length_class_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `length_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `title` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `unit` varchar(4) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`length_class_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`length_class_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9066,7 +9193,12 @@ CREATE TABLE `ac_manufacturers` (
   `manufacturer_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL,
-  PRIMARY KEY (`manufacturer_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`manufacturer_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
@@ -9074,9 +9206,10 @@ CREATE TABLE `ac_manufacturers` (
 -- DDL for table `manufacturers_to_store`
 --
 CREATE TABLE `ac_manufacturers_to_stores` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `manufacturer_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
-  PRIMARY KEY (`manufacturer_id`,`store_id`)
+  PRIMARY KEY (`id`,`manufacturer_id`,`store_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9085,7 +9218,12 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 CREATE TABLE `ac_order_statuses` (
   `order_status_id` int(11) NOT NULL AUTO_INCREMENT,
   `status_text_id` varchar(64) NOT NULL,
-  PRIMARY KEY (`order_status_id`,`status_text_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`order_status_id`,`status_text_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 CREATE UNIQUE INDEX `ac_order_statuses_idx`
 ON `ac_order_statuses` ( `status_text_id`);
@@ -9111,10 +9249,16 @@ VALUES
 --
 
 CREATE TABLE `ac_order_status_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_status_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`order_status_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`order_status_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9148,7 +9292,7 @@ CREATE TABLE `ac_orders` (
   `store_id` int(11) NOT NULL DEFAULT '0',
   `store_name` varchar(64) COLLATE utf8_general_ci NOT NULL,
   `store_url` varchar(255) COLLATE utf8_general_ci NOT NULL,
-  --????? Need to update code to read NULL for guests.
+  -- ????? Need to update code to read NULL for guests.
   `customer_id` int(11) DEFAULT NULL,
   `customer_group_id` int(11) NOT NULL DEFAULT '0',
   `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
@@ -9194,6 +9338,7 @@ CREATE TABLE `ac_orders` (
   `coupon_id` int(11) NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `payment_method_data` text COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`order_id`, `order_status_id`)
@@ -9230,7 +9375,10 @@ CREATE TABLE `ac_customer_transactions` (
   `description` text COMMENT 'text for customer',
   `date_added` timestamp DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`customer_transaction_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`customer_transaction_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_customer_transactions_idx` ON `ac_customer_transactions` ( `customer_id`, `order_id` );
 
@@ -9242,7 +9390,10 @@ CREATE TABLE `ac_tax_classes` (
   `tax_class_id` int(11) NOT NULL AUTO_INCREMENT,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tax_class_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`tax_class_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -9256,11 +9407,17 @@ INSERT INTO `ac_tax_classes` (`tax_class_id`, `date_added`) VALUES (1, now());
 --
 
 CREATE TABLE `ac_tax_class_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `tax_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `title` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`tax_class_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`tax_class_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_tax_class_descriptions` (`tax_class_id`, `language_id`, `title`, `description`) VALUES (1, 1, 'Taxable Goods', 'Taxed Products');
@@ -9281,7 +9438,10 @@ CREATE TABLE `ac_tax_rates` (
   `tax_exempt_groups` text DEFAULT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tax_rate_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`tax_rate_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_tax_rates_idx` ON `ac_tax_rates` ( `location_id`, `zone_id`, `tax_class_id` );
@@ -9295,10 +9455,16 @@ INSERT INTO `ac_tax_rates` (`tax_rate_id`, `location_id`, `tax_class_id`, `prior
 --
 
 CREATE TABLE `ac_tax_rate_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `tax_rate_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`tax_rate_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`tax_rate_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9320,24 +9486,36 @@ CREATE TABLE `ac_product_options` (
   `required` smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255) NOT NULL default '',
   `settings` text COLLATE utf8_general_ci,
-  PRIMARY KEY (`product_option_id`)
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`product_option_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_product_options_idx` (`attribute_id`, `product_id`, `group_id` )
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-CREATE INDEX `ac_product_options_idx` ON `ac_product_options` (`attribute_id`, `product_id`, `group_id` );
 
 --
 -- DDL for table `product_option_descriptions`
 --
 CREATE TABLE `ac_product_option_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_option_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `option_placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
   `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`product_option_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`product_option_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_product_option_descriptions_idx` ( `product_id` )
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE INDEX `ac_product_option_descriptions_idx` ON `ac_product_option_descriptions` ( `product_id` );
+
 --
 -- DDL for table `product_option_values`
 --
@@ -9357,24 +9535,33 @@ CREATE TABLE `ac_product_option_values` (
   `grouped_attribute_data` text DEFAULT NULL,
   `sort_order` int(3) NOT NULL,
   `default` smallint DEFAULT 0,
-  PRIMARY KEY (`product_option_value_id`)
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`product_option_value_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_product_option_values_idx` ( `product_option_id`, `product_id`, `group_id`, `attribute_value_id` )
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_product_option_values_idx` ON `ac_product_option_values` ( `product_option_id`, `product_id`, `group_id`, `attribute_value_id` );
-
 
 --
 -- DDL for table `product_option_value_descriptions`
 --
 CREATE TABLE `ac_product_option_value_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_option_value_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `name` text COLLATE utf8_general_ci DEFAULT NULL COMMENT 'translatable',
   `grouped_attribute_names` text COLLATE utf8_general_ci DEFAULT NULL,
-  PRIMARY KEY (`product_option_value_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`product_option_value_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_product_option_value_descriptions_idx` ( `product_id` )
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-CREATE INDEX `ac_product_option_value_descriptions_idx` ON `ac_product_option_value_descriptions` ( `product_id` );
 
 --
 -- DDL for table `products`
@@ -9409,14 +9596,17 @@ CREATE TABLE `ac_products` (
   `maximum` int(11) NOT NULL DEFAULT '0',
   `cost` DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `call_to_order` smallint NOT NULL default '0',
+  `product_type_id` int(11) DEFAULT NULL,
   `settings` LONGTEXT,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`product_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_products_idx` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`),
+  INDEX `ac_products_status_idx` (`product_id`, `status`, `date_available`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-
-CREATE INDEX `ac_products_idx` ON `ac_products` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`);
-CREATE INDEX `ac_products_status_idx` ON `ac_products` (`product_id`, `status`, `date_available`);
 
 --
 -- DDL for table `order_products`
@@ -9433,6 +9623,9 @@ CREATE TABLE `ac_order_products` (
   `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `quantity` int(4) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`order_product_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9459,11 +9652,13 @@ CREATE TABLE `ac_order_downloads` (
   `attributes_data` longtext COLLATE utf8_general_ci  DEFAULT NULL,  -- serialized values
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_download_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`order_download_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_order_downloads_idx` (`order_id`, `order_product_id`, `download_id`, `status`, `activate_order_status_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-CREATE INDEX `ac_order_downloads_idx`
-ON `ac_order_downloads` (`order_id`, `order_product_id`, `download_id`, `status`, `activate_order_status_id`);
 --
 -- DDL for table `order_downloads`
 --
@@ -9476,7 +9671,9 @@ CREATE TABLE `ac_order_downloads_history` (
   `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `download_id` int(11) NOT NULL,
   `download_percent` int(11) DEFAULT '0',
-  `time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `date_added` timestamp NULL default CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`order_download_history_id`,`order_download_id`, `order_id`,`order_product_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9490,7 +9687,10 @@ CREATE TABLE `ac_order_data_types` (
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`type_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`type_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 -- write pre-installed IM protocols for guest checkout orders
@@ -9499,13 +9699,18 @@ INSERT INTO `ac_order_data_types` (`language_id`, `name`, `date_added`) VALUES
 (1, 'sms', NOW());
 
 CREATE TABLE `ac_order_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `type_id` int(11) NOT NULL,
   `data` text COLLATE utf8_general_ci DEFAULT NULL,  -- serialized values
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`order_id`, `type_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`order_id`, `type_id`),
+  INDEX `stage_id` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 --
 -- DDL for table `order_history`
 --
@@ -9517,6 +9722,7 @@ CREATE TABLE `ac_order_history` (
   `comment` text COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`order_history_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9538,6 +9744,9 @@ CREATE TABLE `ac_order_options` (
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `prefix` char(1) NOT NULL DEFAULT '',
   `settings` longtext,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`order_option_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9550,15 +9759,18 @@ ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`
 --
 
 CREATE TABLE `ac_order_totals` (
-  `order_total_id` int(10) NOT NULL AUTO_INCREMENT,
+  `order_total_id` INT(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `sort_order` int(3) NOT NULL,
   `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-   `key` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`order_total_id`),
+  `key` varchar(128) NOT NULL DEFAULT '',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  PRIMARY KEY (`order_total_id`,`order_id`),
   KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9566,6 +9778,7 @@ CREATE TABLE `ac_order_totals` (
 -- DDL for table `product_descriptions`
 --
 CREATE TABLE `ac_product_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
@@ -9573,11 +9786,15 @@ CREATE TABLE `ac_product_descriptions` (
   `meta_description` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `description` longtext COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `blurb` text COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`product_id`,`language_id`),
-  KEY `name` (`name`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`product_id`,`language_id`),
+  KEY `name` (`name`),
+  INDEX `ac_product_descriptions_name_idx` (`product_id`, `name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-CREATE INDEX `ac_product_descriptions_name_idx` ON `ac_product_descriptions` (`product_id`, `name`);
 
 --
 -- DDL for table `product_discounts`
@@ -9593,7 +9810,10 @@ CREATE TABLE `ac_product_discounts` (
   `date_end` date NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_discount_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`product_discount_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_product_discounts_idx` ON `ac_product_discounts` (`product_id`, `customer_group_id`);
@@ -9610,9 +9830,10 @@ CREATE TABLE `ac_products_featured` (
 -- DDL for table `product_related`
 --
 CREATE TABLE `ac_products_related` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `related_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`related_id`)
+  PRIMARY KEY (`id`,`product_id`,`related_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9628,7 +9849,10 @@ CREATE TABLE `ac_product_specials` (
   `date_end` date NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_special_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`product_special_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_product_specials_idx` ON `ac_product_specials` ( `product_id`, `customer_group_id` );
@@ -9637,28 +9861,34 @@ CREATE INDEX `ac_product_specials_idx` ON `ac_product_specials` ( `product_id`, 
 -- DDL for table `product_tags`
 --
 CREATE TABLE `ac_product_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `tag` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY  (`product_id`,`tag`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY  (`id`,`product_id`,`tag`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `product_to_categories`
 --
 CREATE TABLE `ac_products_to_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`category_id`)
+  PRIMARY KEY (`id`,`product_id`,`category_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `product_to_downloads`
 --
 CREATE TABLE `ac_products_to_downloads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `download_id` int(11) NOT NULL,
-  PRIMARY KEY (`product_id`,`download_id`)
+  PRIMARY KEY (`id`,`product_id`,`download_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9695,7 +9925,10 @@ CREATE TABLE `ac_reviews` (
   `status` int(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`review_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`review_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_reviews_idx` ON `ac_reviews` ( `product_id`, `customer_id` );
@@ -9707,12 +9940,16 @@ CREATE TABLE `ac_settings` (
   `setting_id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL DEFAULT 0,
   `group` varchar(32) COLLATE utf8_general_ci NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT 0,
   `key` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `value` text COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
  PRIMARY KEY (`setting_id`, `store_id`, `group`, `key`),
- FULLTEXT INDEX `ac_settings_idx` (`value` ASC)
+ FULLTEXT INDEX `ac_settings_idx` (`value` ASC),
+ INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -9935,7 +10172,12 @@ CREATE TABLE `ac_stock_statuses` (
   `stock_status_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `name` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`stock_status_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`stock_status_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9950,13 +10192,19 @@ INSERT INTO `ac_stock_statuses` (`stock_status_id`, `language_id`, `name`) VALUE
 --
 
 CREATE TABLE `ac_store_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `store_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `description` longtext NOT NULL COMMENT 'translatable',
   `title` longtext NOT NULL COMMENT 'translatable',
   `meta_description` longtext NOT NULL COMMENT 'translatable',
   `meta_keywords` longtext NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`store_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`store_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -9968,7 +10216,12 @@ CREATE TABLE `ac_url_aliases` (
   `query` varchar(255) COLLATE utf8_general_ci NOT NULL,
   `keyword` varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `language_id` int(11) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`url_alias_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`url_alias_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE UNIQUE INDEX `ac_url_aliases_idx`
 ON `ac_url_aliases` ( `keyword`, `language_id`);
@@ -9985,7 +10238,10 @@ CREATE TABLE `ac_user_groups` (
   `permission` longtext COLLATE utf8_general_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_group_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`user_group_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -10013,13 +10269,17 @@ CREATE TABLE `ac_users` (
   `last_login` datetime NULL DEFAULT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`user_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=2;
 
 --
 -- DDL for table `user_notifications`
 --
 CREATE TABLE `ac_user_notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
   `section` tinyint(1) NOT NULL COMMENT '1 - admin, 0 - storefront',
@@ -10028,18 +10288,25 @@ CREATE TABLE `ac_user_notifications` (
   `uri` text NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`,`store_id`,`section`,`sendpoint`,`protocol`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`user_id`,`store_id`,`section`,`sendpoint`,`protocol`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `ac_customer_notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
   `sendpoint` varchar(255) NOT NULL,
   `protocol` varchar(30) NOT NULL,
   `status` int(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`customer_id`,`sendpoint`,`protocol`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`customer_id`,`sendpoint`,`protocol`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 --
@@ -10052,7 +10319,10 @@ CREATE TABLE `ac_weight_classes` (
   `iso_code` VARCHAR(5) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`weight_class_id`,`iso_code`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`weight_class_id`,`iso_code`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -10071,11 +10341,17 @@ INSERT INTO `ac_weight_classes` (`weight_class_id`, `value`, `iso_code`) VALUES
 --
 
 CREATE TABLE `ac_weight_class_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `weight_class_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `title` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `unit` varchar(4) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`weight_class_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`weight_class_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10093,16 +10369,19 @@ INSERT INTO `ac_weight_class_descriptions` (`weight_class_id`, `language_id`, `t
 --
 
 CREATE TABLE `ac_pages` (
-  `page_id` int(10) NOT NULL AUTO_INCREMENT,
-  `parent_page_id` int(10) DEFAULT NULL,
+  `page_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_page_id` int(11) DEFAULT NULL,
   `controller` varchar(100) NOT NULL,
   `key_param` varchar(40) NOT NULL DEFAULT '',
   `key_value` varchar(40) NOT NULL DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`page_id`),
   UNIQUE KEY `ac_pages_idx` (`page_id`,`controller`,`key_param`,`key_value`),
   KEY `ac_pages_parent_id_idx` (`parent_page_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
   CONSTRAINT `ac_pages_parent_fk` FOREIGN KEY (`parent_page_id`) REFERENCES `ac_pages` (`page_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
@@ -10126,7 +10405,8 @@ INSERT INTO `ac_pages` (`page_id`, `parent_page_id`, `controller`, `key_param`, 
 --
 
 CREATE TABLE `ac_page_descriptions` (
-  `page_id` int(10) NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `title` varchar(255) NOT NULL COMMENT 'translatable',
@@ -10136,7 +10416,10 @@ CREATE TABLE `ac_page_descriptions` (
   `content` text DEFAULT NULL COMMENT 'translatable', -- Contain the page details if custom content
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`page_id`,`language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`page_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `seo_url`, `keywords`, `description`, `content`, `date_added`) VALUES
@@ -10159,7 +10442,12 @@ CREATE TABLE `ac_contents` (
   `parent_content_id` int(11) NULL DEFAULT NULL,
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`content_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`content_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -10176,7 +10464,7 @@ INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`) VALUES
 -- DDL for table `content_descriptions`
 --
 CREATE TABLE `ac_content_descriptions` (
-  `content_id` int(10) NOT NULL DEFAULT '0',
+  `content_id` int(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `title` varchar(255) NOT NULL COMMENT 'translatable',
@@ -10186,7 +10474,10 @@ CREATE TABLE `ac_content_descriptions` (
   `content` longtext NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`content_id`,`language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`content_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_content_descriptions` (`content_id`, `language_id`, `name`, `title`, `description`, `content`, `date_added`)
@@ -10211,12 +10502,15 @@ CREATE TABLE `ac_contents_to_stores` (
 --
 
 CREATE TABLE `ac_blocks` (
-  `block_id` int(10) NOT NULL auto_increment,
+  `block_id` int(11) NOT NULL auto_increment,
   `block_txt_id` varchar(255) NOT NULL,
   `controller` varchar(255) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`block_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY  (`block_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`) VALUES
@@ -10259,35 +10553,41 @@ INSERT INTO `ac_blocks` (`block_id`, `block_txt_id`, `controller`, `date_added`)
 --
 
 CREATE TABLE `ac_custom_blocks` (
-  `custom_block_id` int(10) NOT NULL auto_increment,
-  `block_id` int(10) NOT NULL,
+  `custom_block_id` int(11) NOT NULL auto_increment,
+  `block_id` int(11) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`custom_block_id`, `block_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`custom_block_id`, `block_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `ac_custom_lists`
 --
 CREATE TABLE `ac_custom_lists` (
-    `rowid` INT(11) NOT NULL AUTO_INCREMENT,
-  `custom_block_id` int(10) NOT NULL,
+  `rowid` INT(11) NOT NULL AUTO_INCREMENT,
+  `custom_block_id` int(11) NOT NULL,
   `data_type` varchar(70) NOT NULL,
-  `id` int(10) NOT NULL,
+  `id` int(11) NOT NULL,
   `sort_order` int(10) NOT NULL DEFAULT 0,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`rowid`),
-  INDEX `ac_custom_block_id_list_idx` (`custom_block_id` )
+  INDEX `ac_custom_block_id_list_idx` (`custom_block_id` ),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `block_descriptions`
 --
 CREATE TABLE `ac_block_descriptions` (
-  `block_description_id` int(10) NOT NULL auto_increment,
-  `custom_block_id` int(10) NOT NULL,
-  `language_id` int(10) NOT NULL,
+  `block_description_id` INT(11) NOT NULL auto_increment,
+  `custom_block_id` INT(11) NOT NULL,
+  `language_id` INT(11) NOT NULL,
   `block_wrapper` varchar(255) NOT NULL default '0',
   `block_framed` tinyint(1) DEFAULT '1',
   `name` varchar(255) NOT NULL COMMENT 'translatable',
@@ -10296,19 +10596,25 @@ CREATE TABLE `ac_block_descriptions` (
   `content` longtext NOT NULL DEFAULT '', -- Contain the block details if custom content
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`block_description_id`, `custom_block_id`, `language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`block_description_id`, `custom_block_id`, `language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `block_templates`
 --
 CREATE TABLE `ac_block_templates` (
-  `block_id` int(10) NOT NULL auto_increment,
-  `parent_block_id` int(10) NOT NULL DEFAULT 0, -- Placeholder where this block can be placed. 0 - any location
+  `block_id` INT(11) NOT NULL auto_increment,
+  `parent_block_id` INT(11) NOT NULL DEFAULT 0, -- Placeholder where this block can be placed. 0 - any location
   `template` varchar(255) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`block_id`, `parent_block_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY  (`block_id`, `parent_block_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `date_added`) VALUES
@@ -10418,13 +10724,16 @@ INSERT INTO `ac_block_templates` (`block_id`, `parent_block_id`, `template`, `da
 -- DDL for table `layouts`
 --
 CREATE TABLE `ac_layouts` (
-  `layout_id` int(10) NOT NULL auto_increment,
+  `layout_id` INT(11) NOT NULL auto_increment,
   `template_id` varchar(100) NOT NULL,
   `layout_name` varchar(255) NOT NULL default '',
   `layout_type` smallint(1) NOT NULL default '0', -- 0 Default, 1 Active layout, 2 draft layout, 3 template layout
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`layout_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY  (`layout_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_name`, `date_added`) VALUES
@@ -10443,9 +10752,10 @@ INSERT INTO `ac_layouts` (`layout_id`, `template_id`, `layout_type`, `layout_nam
 -- DDL for table `pages_layouts`
 --
 CREATE TABLE `ac_pages_layouts` (
-  `layout_id` int(10) NOT NULL,
-  `page_id` int(10) NOT NULL,
-  PRIMARY KEY  (`layout_id`,`page_id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `layout_id` INT(11) NOT NULL,
+  `page_id` INT(11) NOT NULL,
+  PRIMARY KEY  (`id`,`layout_id`,`page_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
@@ -10464,11 +10774,11 @@ INSERT INTO `ac_pages_layouts` (`layout_id`, `page_id`) VALUES
 --
 
 CREATE TABLE `ac_block_layouts` (
-  `instance_id` int(10) NOT NULL AUTO_INCREMENT,
-  `layout_id` int(10) NOT NULL DEFAULT '0',
-  `block_id` int(10) NOT NULL DEFAULT '0',
-  `custom_block_id` int(10) NULL DEFAULT NULL,
-  `parent_instance_id` int(10) DEFAULT NULL,
+  `instance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `layout_id` int(11) NOT NULL DEFAULT '0',
+  `block_id` int(11) NOT NULL DEFAULT '0',
+  `custom_block_id` INT(11) NULL DEFAULT NULL,
+  `parent_instance_id` INT(11) DEFAULT NULL,
   `position` smallint(5) NOT NULL DEFAULT '0',
   `status` smallint(1) NOT NULL DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -10626,7 +10936,9 @@ VALUES
 (1954,	17,	28,	null,	939,	20,	1,	NOW(),	NOW());
 
 -- Customer Account Pages
-INSERT INTO `ac_block_layouts` (`instance_id`,	 `layout_id`,	 `block_id`,	 `custom_block_id`,	 `parent_instance_id`,	 `position`,	 `status`,	 `date_added`,	`date_modified`) VALUES
+INSERT INTO `ac_block_layouts`
+(`instance_id`, `layout_id`, `block_id`, `custom_block_id`, `parent_instance_id`, `position`, `status`, `date_added`, `date_modified`)
+VALUES
 (1900,	18,	5,	null,	null,	50,	1,	NOW(),	NOW()),
 (1901,	18,	4,	null,	null,	40,	1,	NOW(),	NOW()),
 (1902,	18,	3,	null,	null,	30,	0,	NOW(),	NOW()),
@@ -10713,19 +11025,27 @@ CREATE TABLE `ac_forms` (
   `controller` varchar(100) NOT NULL default '',
   `success_page` varchar(100) NOT NULL default '',
   `status` smallint(1) NOT NULL default '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY  (`form_id`),
-  UNIQUE KEY `form_name` (`form_name`)
+  UNIQUE KEY `form_name` (`form_name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
-INSERT INTO `ac_forms` VALUES (2,'ContactUsFrm','content/contact','content/contact/success',1);
+INSERT INTO `ac_forms` (`form_id`, `form_name`,`controller`,`success_page`,`status`)
+VALUES
+(2,'ContactUsFrm','content/contact','content/contact/success',1);
 
 --
 -- DDL for table `forms_pages`
 --
 CREATE TABLE `ac_pages_forms` (
-  `page_id` int(10) NOT NULL,
-  `form_id` int(10) NOT NULL,
-  PRIMARY KEY  (`form_id`,`page_id`)
+  `id` int(11) NOT NULL auto_increment,
+  `page_id` INT(11) NOT NULL,
+  `form_id` INT(11) NOT NULL,
+  PRIMARY KEY  (`id`,`form_id`,`page_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10733,13 +11053,21 @@ CREATE TABLE `ac_pages_forms` (
 --
 
 CREATE TABLE `ac_form_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `form_id` int(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL,
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`form_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`form_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-INSERT INTO `ac_form_descriptions` VALUES (2,1,'Contact Us Form');
+INSERT INTO `ac_form_descriptions`
+(`form_id`, `language_id`, `description`)
+VALUES (2,1,'Contact Us Form');
 
 --
 -- DDL for table `fields`
@@ -10759,8 +11087,13 @@ CREATE TABLE `ac_fields` (
   -- N - Not required, Y - required
   `status` smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255) NOT NULL DEFAULT '',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`field_id`),
-  KEY `field_id` (`field_id`, `form_id`, `status`)
+  KEY `field_id` (`field_id`, `form_id`, `status`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_fields`
@@ -10776,12 +11109,18 @@ VALUES
 --
 
 CREATE TABLE `ac_field_descriptions` (
+  `id` int(11) NOT NULL auto_increment,
   `field_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
   `error_text` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`field_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`field_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_field_descriptions` (`field_id`, `name`, `error_text`, `language_id`)
@@ -10800,7 +11139,12 @@ CREATE TABLE `ac_field_values` (
   `field_id` int(11) NOT NULL DEFAULT '0',
   `value` text COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`value_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`value_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10813,8 +11157,13 @@ CREATE TABLE `ac_form_groups` (
   `form_id` int(11) NOT NULL DEFAULT '0',
   `sort_order` int(3) NOT NULL,
   `status` smallint(1) NOT NULL default '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`group_id`),
-  KEY `group_id` (`group_id`, `form_id`)
+  KEY `group_id` (`group_id`, `form_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10822,11 +11171,17 @@ CREATE TABLE `ac_form_groups` (
 --
 
 CREATE TABLE `ac_fields_groups` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `field_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
   `sort_order` int(3) NOT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`field_id`),
-  KEY `field_id` (`field_id`, `group_id`)
+  KEY `field_id` (`id`,`field_id`, `group_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -10834,11 +11189,17 @@ CREATE TABLE `ac_fields_groups` (
 --
 
 CREATE TABLE `ac_fields_group_descriptions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `group_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL COMMENT 'translatable',
   `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`group_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`group_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -10855,6 +11216,7 @@ CREATE TABLE `ac_messages` (
   `repeated` int(11) NOT NULL default '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY  (`msg_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -10945,7 +11307,7 @@ CREATE TABLE `ac_dataset_values` (
   `value_timestamp` timestamp DEFAULT CURRENT_TIMESTAMP,
   `value_boolean` tinyint(1) DEFAULT NULL,
   `value_sort_order` int(11) NOT NULL AUTO_INCREMENT,
-  `row_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `row_id` INT(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`value_sort_order`),
   KEY `dataset_values_idx` (`value_integer`,`value_float`,`value_varchar`,`value_boolean`,`row_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -11125,6 +11487,8 @@ VALUES  (10,'category',11),
         (10,'download',14),
         (10,'review',15),
         (10,'attributes',16),
+        (10,'attribute_groups',17),
+        (10,'object_type',18),
         (10,'rl_manager',220);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11134,6 +11498,8 @@ VALUES  (11,'text_category',11),
         (11,'text_download',14),
         (11,'text_review',15),
         (11,'text_attribute',16),
+        (11,'text_attribute_groups',17),
+        (11,'text_object_type',18),
         (11,'text_rl_manager',220);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11143,6 +11509,8 @@ VALUES  (12,'catalog/category',11),
         (12,'catalog/download',14),
         (12,'catalog/review',15),
         (12,'catalog/attribute',16),
+        (12,'catalog/attribute_groups',17),
+        (12,'catalog/object_type',18),
         (12,'tool/rl_manager',220);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11152,6 +11520,8 @@ VALUES  (13,'catalog',11),
         (13,'catalog',14),
         (13,'catalog',15),
         (13,'catalog',16),
+        (13,'catalog',17),
+        (13,'catalog',18),
         (13,'catalog',220);
 -- SORT_ORDER
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
@@ -11161,6 +11531,8 @@ VALUES  (14,1,11),
         (14,4,14),
         (14,5,15),
         (14,6,16),
+        (14,6,17),
+        (14,6,18),
         (14,7,220);
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11170,6 +11542,8 @@ VALUES  (15,'core',11),
         (15,'core',14),
         (15,'core',15),
         (15,'core',16),
+        (15,'core',17),
+        (15,'core',18),
         (15,'core',220);
 -- ITEM_RL_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
@@ -11179,6 +11553,8 @@ VALUES  (40,'207',11),
         (40,'210',14),
         (40,'211',15),
         (40,'212',16),
+        (40,'280',17),
+        (40,'279',18),
         (40,'277',220);
 
 --
@@ -12139,8 +12515,13 @@ CREATE TABLE `ac_resource_types` (
   `default_icon` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
   `file_types` varchar(40) NOT NULL default '',
   `access_type`tinyint(1) NOT NULL default '0' COMMENT '0-Public, 1-Secured',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`type_id`),
-  KEY `group_id` (`type_id`, `type_name`)
+  KEY `group_id` (`type_id`, `type_name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 INSERT INTO `ac_resource_types` (`type_id`, `type_name`, `default_icon`, `default_directory`, `file_types`, `access_type`) VALUES
@@ -12160,7 +12541,10 @@ CREATE TABLE `ac_resource_library` (
   `type_id` int(11) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`resource_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`resource_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=100000;
 
 CREATE INDEX `ac_resource_library_idx` ON `ac_resource_library` ( `resource_id`, `type_id`);
@@ -12170,7 +12554,8 @@ CREATE INDEX `ac_resource_library_idx` ON `ac_resource_library` ( `resource_id`,
 --
 
 CREATE TABLE `ac_resource_descriptions` (
-  `resource_id` int(10) NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL auto_increment,
+  `resource_id` INT(11) NOT NULL DEFAULT '0',
   `language_id` int(11) NOT NULL, -- use 1 as default
   `name` varchar(255) NOT NULL DEFAULT '' NULL COMMENT 'translatable',
   `title` varchar(255) NOT NULL DEFAULT '' NULL COMMENT 'translatable',
@@ -12179,11 +12564,13 @@ CREATE TABLE `ac_resource_descriptions` (
   `resource_code` text DEFAULT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`resource_id`,`language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`resource_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_resource_descriptions_name_idx` ( `resource_id`, `name`),
+  INDEX `ac_resource_descriptions_title_idx` ( `resource_id`, `title`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci ;
-
-CREATE INDEX `ac_resource_descriptions_name_idx` ON `ac_resource_descriptions` ( `resource_id`, `name`);
-CREATE INDEX `ac_resource_descriptions_title_idx` ON `ac_resource_descriptions` ( `resource_id`, `title`);
 
 #storefront menu icons
 INSERT INTO `ac_resource_library` ( `resource_id`, `type_id`, `date_added`)
@@ -12285,7 +12672,9 @@ VALUES
   ( 274, 1, NOW() ),
   ( 275, 1, NOW() ),
   ( 276, 1, NOW() ),
-  ( 277, 1, NOW() );
+  ( 277, 1, NOW() ),
+  ( 279, 1, NOW() ),
+  ( 280, 1, NOW() );
 
 INSERT INTO `ac_resource_descriptions`
 (`resource_id`, `language_id`, `name`, `title`, `description`, `resource_path`, `resource_code`, `date_added`)
@@ -12368,24 +12757,30 @@ VALUES
   ( 275,1,'Icon Error log', '', '', '', '<i class="fa fa-exclamation-triangle"></i>&nbsp;', NOW() ),
   ( 276,1,'Icon Settings IM', '', '', '', '<i class="fa fa-bullhorn"></i>&nbsp;', NOW() ),
   ( 277,1,'Icon Resource Library', '', '', '', '<i class="fa fa-image"></i>&nbsp;', NOW() ),
-  ( 278,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() );
+  ( 278,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() ),
+  ( 279,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-project-diagram"></i>&nbsp;', NOW() ),
+  ( 280,1,'Icon Analytics & Insights', '', '', '', '<i class="fa fa-object-group"></i>&nbsp;', NOW() );
 
 --
 -- DDL for table `ac_resource_map`
 --
 
 CREATE TABLE `ac_resource_map` (
+  `id`  int(11) NOT NULL AUTO_INCREMENT,
   `resource_id` int(11) NOT NULL,
   `object_name` varchar(40) NOT NULl,
   `object_id` int(11) NOT NULL,
-  `default`tinyint(1) NOT NULL DEFAULT '0' COMMENT '0-no, 1-Yes',
+  `default` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0-no, 1-Yes',
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY ( `resource_id`, `object_name`, `object_id` )
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY ( `id`,`resource_id`, `object_name`, `object_id` ),
+  INDEX `stage_idx` (`stage_id` ASC),
+  INDEX `ac_resource_map_sorting_idx` ( `resource_id`, `sort_order`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-CREATE INDEX `ac_resource_map_sorting_idx` ON `ac_resource_map` ( `resource_id`, `sort_order`);
 
 INSERT INTO `ac_resource_map` ( `resource_id`, `object_name`, `object_id`, `default`, `sort_order`, `date_added`)
 VALUES
@@ -12406,6 +12801,7 @@ CREATE TABLE `ac_global_attributes` (
   `attribute_parent_id`	int(11) NULL DEFAULT NULL,
   `attribute_group_id` int(11) NULL DEFAULT NULL,
   `attribute_type_id` int(11) NOT NULL,
+  `name` VARCHAR(255) NULL,
   `element_type`  char(1) NOT NULL DEFAULT 'I',
   -- I - text input, T - Text area, S - Select, M - multivalue select, C - Checkbox, R - radio buttons, U - File upload, H - Hidden, G -Checkbox Group, D - Date, E - time, K - Captcha
   `sort_order`  int(3) NOT NULL DEFAULT '0',
@@ -12413,34 +12809,56 @@ CREATE TABLE `ac_global_attributes` (
   `settings`  text COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `status`  smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255),
-  PRIMARY KEY (`attribute_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`attribute_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_global_attributes_idx` ON `ac_global_attributes` ( `attribute_parent_id`, `attribute_group_id`, `attribute_type_id` );
 
 CREATE TABLE `ac_global_attributes_descriptions` (
-  `attribute_id` 		int(11) NOT NULL,
-  `language_id` 		int(11) NOT NULL,
-  `name` 				varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `placeholder` varchar(255) COLLATE utf8_general_ci DEFAULT '' COMMENT 'translatable',
-  `error_text` 	varchar(255) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`attribute_id`,`language_id`)
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `attribute_id` INT(11) NOT NULL,
+  `language_id` INT(11) NOT NULL,
+  `name` VARCHAR(64) NOT NULL COMMENT 'translatable',
+  `placeholder` varchar(255) DEFAULT '' COMMENT 'translatable',
+  `error_text` 	varchar(255) NOT NULL COMMENT 'translatable',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`attribute_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `ac_global_attributes_values` (
   `attribute_value_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `attribute_id` 		int(11) NOT NULL,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`attribute_value_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`attribute_value_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_global_attributes_values_idx` ON `ac_global_attributes_values` ( `attribute_id` );
 
 CREATE TABLE `ac_global_attributes_value_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `attribute_value_id` int(11) NOT NULL,
   `attribute_id` int(11) NOT NULL,
   `language_id`	int(11) NOT NULL,
   `value` text COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  PRIMARY KEY (`attribute_value_id`, `attribute_id`, `language_id` )
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`attribute_value_id`, `attribute_id`, `language_id` ),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -12448,15 +12866,24 @@ CREATE TABLE `ac_global_attributes_groups` (
   `attribute_group_id` 	int(11) NOT NULL AUTO_INCREMENT,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
   `status` 				smallint(1) NOT NULL default '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
   PRIMARY KEY (`attribute_group_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE `ac_global_attributes_groups_descriptions` (
+  `id` 	int(11) NOT NULL AUTO_INCREMENT,
   `attribute_group_id` 	int(11) NOT NULL,
   `language_id` 		int(11) NOT NULL,
   `name` 				varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  PRIMARY KEY (`attribute_group_id`,`language_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`attribute_group_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -12466,22 +12893,29 @@ CREATE TABLE `ac_global_attributes_types` (
   `controller` 			varchar(100) NOT NULL,
   `sort_order` 			int(3) NOT NULL DEFAULT '0',
   `status` 				smallint(1) NOT NULL default '0',
-  PRIMARY KEY (`attribute_type_id`)
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`attribute_type_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `controller`, `sort_order`, `status`) VALUES
 (1, 'product_option', 'responses/catalog/attribute/getProductOptionSubform', 1, 1),
 (2, 'download_attribute', 'responses/catalog/attribute/getDownloadAttributeSubform', 2, 1);
 
-
-
 CREATE TABLE `ac_global_attributes_type_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `attribute_type_id` int(11) NOT NULL,
   `language_id` int(11) NOT NULL,
   `type_name` varchar(64) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`attribute_type_id`,`language_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`attribute_type_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='utf8_general_ci';
 
 INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
@@ -12501,16 +12935,27 @@ CREATE TABLE `ac_product_filters` (
   `feature_id` int(11),
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` smallint(1) NOT NULL default '0',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`filter_id`),
-  KEY `feature_id` (`feature_id`)
+  KEY `feature_id` (`feature_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 CREATE TABLE `ac_product_filter_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `filter_id` int(11) NOT NULL,
   `value` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`filter_id`,`language_id`)
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`filter_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -12521,25 +12966,37 @@ CREATE TABLE `ac_product_filter_ranges` (
   `from` decimal(12,2) NOT NULL DEFAULT '0.00',
   `to` decimal(12,2) NOT NULL DEFAULT '0.00',
   `sort_order` int(3) NOT NULL DEFAULT '0',
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
   PRIMARY KEY (`range_id`),
   KEY `from` (`from`,`to`),
   KEY `filter_id` (`filter_id`),
-  KEY `feature_id` (`feature_id`)
+  KEY `feature_id` (`feature_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 CREATE TABLE `ac_product_filter_ranges_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `range_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
   `language_id` int(11) NOT NULL,
-  PRIMARY KEY (`range_id`,`language_id`)
+    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_deleted` timestamp NULL,
+    `stage_id` INT(6) NULL,
+  PRIMARY KEY (`id`,`range_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 CREATE TABLE `ac_extension_dependencies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `extension_id` int(11) NOT NULL,
   `extension_parent_id` int(11) NOT NULL,
-  PRIMARY KEY (`extension_id`,`extension_parent_id`)
+  PRIMARY KEY (`id`,`extension_id`,`extension_parent_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -12548,8 +13005,13 @@ CREATE TABLE `ac_encryption_keys` (
   `key_name` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `status` int(1) NOT NULL,
   `comment` text COLLATE utf8_general_ci NOT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`key_id`),
-  UNIQUE KEY `encryption_keys_key_name` (`key_name`)
+  UNIQUE KEY `encryption_keys_key_name` (`key_name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
@@ -12566,8 +13028,11 @@ CREATE TABLE `ac_tasks` (
   `max_execution_time` int(11) DEFAULT '0',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`task_id`),
-  UNIQUE KEY `task_name_idx` (`name`)
+  UNIQUE KEY `task_name_idx` (`name`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
@@ -12577,7 +13042,10 @@ CREATE TABLE `ac_task_details` (
   `settings` LONGTEXT DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`task_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`task_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
@@ -12593,8 +13061,11 @@ CREATE TABLE `ac_task_steps` (
   `settings` LONGTEXT DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`step_id`),
-  KEY `task_steps_idx` (`task_id`)
+  KEY `task_steps_idx` (`task_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 ALTER TABLE `ac_language_definitions`
@@ -12617,17 +13088,16 @@ ALTER TABLE `ac_zones_to_locations`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_zones_to_locations`
   ADD FOREIGN KEY (`location_id`) REFERENCES `ac_locations`(`location_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE `ac_addresses`
+  ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE `ac_category_descriptions`
-  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_category_descriptions`
+  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_categories_to_stores`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_categories_to_stores`
@@ -12724,14 +13194,8 @@ ALTER TABLE `ac_order_totals`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_descriptions`
-  ADD FOREIGN KEY (`product_id`)
-  REFERENCES `ac_products`(`product_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `ac_product_descriptions`
-  ADD FOREIGN KEY (`language_id`)
-  REFERENCES `ac_languages`(`language_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_discounts`
   ADD FOREIGN KEY (`product_id`)
@@ -12749,19 +13213,9 @@ ALTER TABLE `ac_product_options`
   ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_option_descriptions`
-  ADD FOREIGN KEY (`product_id`)
-  REFERENCES `ac_products`(`product_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `ac_product_option_descriptions`
-  ADD FOREIGN KEY (`language_id`)
-  REFERENCES `ac_languages`(`language_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `ac_product_option_descriptions`
-  ADD FOREIGN KEY (`product_option_id`)
-  REFERENCES `ac_product_options`(`product_option_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD FOREIGN KEY (`product_option_id`) REFERENCES `ac_product_options`(`product_option_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_option_values`
   ADD FOREIGN KEY (`product_option_id`)
@@ -12799,8 +13253,7 @@ ALTER TABLE `ac_product_tags`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_products_to_categories`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_products_to_categories`
+  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_products_to_downloads`
@@ -12824,13 +13277,11 @@ ALTER TABLE `ac_stock_statuses`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_store_descriptions`
-  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_store_descriptions`
+  ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_tax_class_descriptions`
-  ADD FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_tax_class_descriptions`
+  ADD FOREIGN KEY (`tax_class_id`) REFERENCES `ac_tax_classes`(`tax_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_tax_rates`
@@ -12870,13 +13321,17 @@ ALTER TABLE `ac_page_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_content_descriptions`
-  ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_content_descriptions`
+  ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`id`, `content_id`, `language_id`),
+  ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_contents_to_stores`
-  ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_contents_to_stores`
+  ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`id`, `content_id`, `store_id`),
+  ADD FOREIGN KEY (`content_id`) REFERENCES `ac_contents`(`content_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_custom_blocks`
@@ -12889,9 +13344,9 @@ ALTER TABLE `ac_block_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_block_templates`
   ADD FOREIGN KEY (`block_id`) REFERENCES `ac_blocks`(`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `ac_pages_layouts`
-  ADD FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_pages_layouts`
+  ADD FOREIGN KEY (`layout_id`) REFERENCES `ac_layouts`(`layout_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`page_id`) REFERENCES `ac_pages`(`page_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_pages_forms`
@@ -12969,7 +13424,10 @@ ALTER TABLE `ac_customers`
       `actor_name` varchar(128) DEFAULT '',
       `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
       `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (`job_id`, `job_name`)
+      `date_deleted` timestamp NULL,
+      `stage_id` INT(6) NULL,
+      PRIMARY KEY (`job_id`, `job_name`),
+      INDEX `stage_idx` (`stage_id` ASC)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -12981,7 +13439,10 @@ CREATE TABLE `ac_customer_notes` (
   `note` text COLLATE utf8_unicode_ci NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`note_id`)
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
+  PRIMARY KEY (`note_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ac_customer_notes`
@@ -13000,11 +13461,83 @@ CREATE TABLE `ac_customer_communications` (
   `sent_to_address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`communication_id`),
   KEY `customer_id` (`customer_id`),
   KEY `user_id` (`user_id`),
+  INDEX `stage_idx` (`stage_id` ASC),
   CONSTRAINT `ac_customer_communications_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `ac_customers` (`customer_id`)
     ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_object_types`;
+CREATE TABLE `ac_object_types` (
+  `object_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `object_type` varchar(255) DEFAULT NULL,
+  `status` int(11) DEFAULT '0',
+  `sort_order` int(11) DEFAULT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` int(6) DEFAULT NULL,
+  PRIMARY KEY (`object_type_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_object_type_descriptions`;
+CREATE TABLE `ac_object_type_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `object_type_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(250) NOT NULL,
+  `description` text,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` int(6) DEFAULT NULL,
+  PRIMARY KEY (`id`,`object_type_id`,`language_id`),
+  INDEX `stage_idx` (`stage_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `ac_object_type_descriptions`
+ADD CONSTRAINT `ac_object_type_descriptions_object_types_fk`
+  FOREIGN KEY (`object_type_id`)
+  REFERENCES `ac_object_types` (`object_type_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ac_object_type_descriptions`
+ADD CONSTRAINT `ac_object_type_descriptions_language_fk`
+  FOREIGN KEY (`language_id`)
+  REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+DROP TABLE IF EXISTS `ac_object_type_aliases`;
+CREATE TABLE `ac_object_type_aliases` (
+  `object_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`object_type`),
+  UNIQUE KEY `object_type_UNIQUE` (`object_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `ac_object_type_aliases` (`object_type`) VALUES ('Product');
+INSERT INTO `ac_object_type_aliases` (`object_type`) VALUES ('Category');
+
+DROP TABLE IF EXISTS `ac_object_field_settings`;
+CREATE TABLE `ac_object_field_settings` (
+  `object_type` varchar(255) NOT NULL,
+  `object_type_id` int(11) DEFAULT NULL,
+  `object_field_name` varchar(255) NOT NULL,
+  `field_setting` varchar(255) NOT NULL,
+  `field_setting_value` varchar(255) NOT NULL,
+  UNIQUE KEY `index1` (`object_type`,`object_type_id`,`object_field_name`,`field_setting`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_global_attribute_group_to_object_type`;
+CREATE TABLE `ac_global_attribute_group_to_object_type` (
+  `attribute_group_id` int(11) NOT NULL,
+  `object_type_id` int(11) NOT NULL,
+  KEY `attribute_group_id_object_type_idx` (`attribute_group_id`,`object_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -13269,3 +13802,4 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   REFERENCES `ac_addresses` (`address_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+

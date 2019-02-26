@@ -20,10 +20,12 @@
 
 namespace abc\core\lib;
 
+use Laracasts\Utilities\JavaScript\ViewBinder;
+
 /**
  * Class ADocument
  */
-final class ADocument
+final class ADocument implements ViewBinder
 {
     private $title ='';
     private $description = '';
@@ -37,6 +39,7 @@ final class ADocument
     private $scripts = [];
     private $scripts_bottom = [];
     private $breadcrumbs = [];
+    private $js_var = '';
 
     /**
      * ADocument constructor.
@@ -408,5 +411,16 @@ final class ADocument
         }
 
         return $trimmed_text;
+    }
+
+    public function bind($js)
+    {
+        $this->js_var .= ' '.$js;
+    }
+    public function renderJsVars() {
+        return $this->js_var;
+    }
+    public function clearJsVars() {
+        $this->js_var = '';
     }
 }

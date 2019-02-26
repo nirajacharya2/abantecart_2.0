@@ -606,4 +606,160 @@
 		<key>text_success_relation_set</key>
 		<value><![CDATA[Relations of selected products was set successfully!]]></value>
 	</definition>
+	<definition>
+		<key>text_audit_log</key>
+		<value><![CDATA[Audit Log]]></value>
+	</definition>
+	<definition>
+		<key>title_sku</key>
+		<value><![CDATA[SKU]]></value>
+	</definition>
+	<definition>
+		<key>title_location</key>
+		<value><![CDATA[Misc Location]]></value>
+	</definition>
+	<definition>
+		<key>title_quantity</key>
+		<value><![CDATA[Quantity]]></value>
+	</definition>
+	<definition>
+		<key>title_stock_checkout</key>
+		<value><![CDATA[Stock checkout]]></value>
+	</definition>
+	<definition>
+		<key>title_shipping</key>
+		<value><![CDATA[Requires Shipping]]></value>
+	</definition>
+	<definition>
+		<key>title_ship_individually</key>
+		<value><![CDATA[Ship Individually]]></value>
+	</definition>
+	<definition>
+		<key>title_free_shipping</key>
+		<value><![CDATA[Free Shipping]]></value>
+	</definition>
+	<definition>
+		<key>title_shipping_price</key>
+		<value><![CDATA[Fixed Shipping Price]]></value>
+	</definition>
+	<definition>
+		<key>title_product_type_id</key>
+		<value><![CDATA[Product Type]]></value>
+	</definition>
+	<definition>
+		<key>title_status</key>
+		<value><![CDATA[Status]]></value>
+	</definition>
+	<definition>
+		<key>title_featured</key>
+		<value><![CDATA[Featured Product]]></value>
+	</definition>
+	<definition>
+		<key>title_name</key>
+		<value><![CDATA[Product Name]]></value>
+	</definition>
+	<definition>
+		<key>title_blurb</key>
+		<value><![CDATA[Blurb]]></value>
+	</definition>
+	<definition>
+		<key>title_description</key>
+		<value><![CDATA[Description]]></value>
+	</definition>
+	<definition>
+		<key>title_meta_keywords</key>
+		<value><![CDATA[Meta Tag Keywords]]></value>
+	</definition>
+	<definition>
+		<key>title_meta_description</key>
+		<value><![CDATA[Meta Tag Description]]></value>
+	</definition>
+	<definition>
+		<key>title_tags</key>
+		<value><![CDATA[Product Tags]]></value>
+	</definition>
+	<definition>
+		<key>title_categories</key>
+		<value><![CDATA[Categories]]></value>
+	</definition>
+	<definition>
+		<key>title_product_stores</key>
+		<value><![CDATA[Stores]]></value>
+	</definition>
+	<definition>
+		<key>title_manufacturer_id</key>
+		<value><![CDATA[Manufacturer]]></value>
+	</definition>
+	<definition>
+		<key>title_model</key>
+		<value><![CDATA[Model]]></value>
+	</definition>
+	<definition>
+		<key>title_call_to_order</key>
+		<value><![CDATA[Block Product From Ordering]]></value>
+	</definition>
+	<definition>
+		<key>title_price</key>
+		<value><![CDATA[Price]]></value>
+	</definition>
+	<definition>
+		<key>title_cost</key>
+		<value><![CDATA[Cost]]></value>
+	</definition>
+	<definition>
+		<key>title_tax_class_id</key>
+		<value><![CDATA[Tax Class]]></value>
+	</definition>
+	<definition>
+		<key>title_subtract</key>
+		<value><![CDATA[Track Stock]]></value>
+	</definition>
+	<definition>
+		<key>title_minimum</key>
+		<value><![CDATA[Minimum Quantity]]></value>
+	</definition>
+	<definition>
+		<key>title_maximum</key>
+		<value><![CDATA[Maximum Quantity]]></value>
+	</definition>
+	<definition>
+		<key>title_stock_status</key>
+		<value><![CDATA[Pre-Order Stock Status]]></value>
+	</definition>
+	<definition>
+		<key>title_keyword</key>
+		<value><![CDATA[SEO Keyword]]></value>
+	</definition>
+	<definition>
+		<key>title_date_available</key>
+		<value><![CDATA[Date Available]]></value>
+	</definition>
+	<definition>
+		<key>title_sort_order</key>
+		<value><![CDATA[Sort Order]]></value>
+	</definition>
+	<definition>
+		<key>title_height</key>
+		<value><![CDATA[Height]]></value>
+	</definition>
+	<definition>
+		<key>title_width</key>
+		<value><![CDATA[Width]]></value>
+	</definition>
+	<definition>
+		<key>title_length</key>
+		<value><![CDATA[Length]]></value>
+	</definition>
+	<definition>
+		<key>title_length_class_id</key>
+		<value><![CDATA[Length Class]]></value>
+	</definition>
+	<definition>
+		<key>title_weight</key>
+		<value><![CDATA[Weight]]></value>
+	</definition>
+	<definition>
+		<key>title_weight_class_id</key>
+		<value><![CDATA[Weight Class]]></value>
+	</definition>
 </definitions>

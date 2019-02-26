@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\models\catalog\Product;
 
 class ControllerBlocksFeatured extends AController
 {
@@ -131,6 +132,15 @@ class ControllerBlocksFeatured extends AController
                 $in_wishlist = true;
             }
 
+            $catalog_mode = false;
+            if ($result['product_type_id']) {
+                $prodTypeSettings = Product::getProductTypeSettings((int)$result['product_id']);
+
+                if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
+                    $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                }
+            }
+
             $this->data['products'][] = [
                 'product_id'                  => $result['product_id'],
                 'name'                        => $result['name'],
@@ -164,6 +174,7 @@ class ControllerBlocksFeatured extends AController
                                                                         'product/wishlist/remove',
                                                                         '&product_id='.$result['product_id']
                                                                     ),
+                'catalog_mode'               => $catalog_mode,
             ];
         }
 

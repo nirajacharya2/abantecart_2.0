@@ -28,6 +28,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
+use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\modules\traits\SaleOrderTrait;
 use H;
@@ -1608,7 +1609,7 @@ class ControllerPagesSaleOrder extends AController
                     $is_file = $this->download->isFileAvailable($download_info['filename']);
                     foreach ($download_info['download_history'] as &$h) {
                         $h['time'] = H::dateISO2Display(
-                            $h['time'],
+                            $h['date_added'],
                             $this->language->get('date_format_short').' '.$this->language->get('time_format')
                         );
                     }
@@ -1998,7 +1999,7 @@ class ControllerPagesSaleOrder extends AController
             $order_info['currency'] = $this->request->get['order_currency'];
         }
         $this->loadModel('localisation/currency');
-        $all_currencies = $this->model_localisation_currency->getCurrencies();
+        $all_currencies = Currency::all()->toArray();
         if (sizeof($all_currencies) == 1 || !$order_info['currency']) {
             $order_info['currency'] = $this->config->get('config_currency');
         }

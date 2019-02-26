@@ -46,7 +46,7 @@ class Cache extends BaseCommand
      */
     protected $connect;
 
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'create' : $action;
         //if now options - check action

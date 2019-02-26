@@ -31,7 +31,7 @@ class Migrate extends BaseCommand
     protected $publish;
     public $results = [];
 
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $errors = [];
         if (!in_array($action, ['help'])

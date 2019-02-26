@@ -25,6 +25,7 @@ use abc\core\lib\AConfigManager;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\locale\Currency;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
@@ -145,8 +146,8 @@ class ControllerResponsesListingGridSetting extends AController {
 						&& AHelperUtils::has_value($data['config_currency'])
 						&& $data['config_currency'] != $this->config->get('config_currency')
 				){
-					$this->loadModel('localisation/currency');
-					$this->model_localisation_currency->switchConfigCurrency($data['config_currency']);
+                    $currencyInstance = new Currency();
+                    $currencyInstance->switchConfigCurrency($data['config_currency']);
 				}
 
 				$this->model_setting_setting->editSetting($group, $data, $this->request->get[ 'store_id' ]);

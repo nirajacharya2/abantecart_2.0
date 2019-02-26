@@ -21,8 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\AAttribute;
 use abc\core\engine\ALanguage;
+use abc\core\engine\contracts\AttributeInterface;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use H;
@@ -83,7 +83,7 @@ class ACart  extends ALibBase
      */
     protected $customer;
     /**
-     * @var AAttribute
+     * @var AttributeInterface
      */
     protected $attribute;
     /**
@@ -101,7 +101,7 @@ class ACart  extends ALibBase
     public function __construct($registry, &$c_data = null)
     {
         $this->registry = $registry;
-        $this->attribute = ABC::getObjectByAlias('AAttribute',['product_option']);
+        $this->attribute = ABC::getObjectByAlias('Attribute',['product_option']);
         $this->customer = $registry->get('customer') ?: $c_data['customer'];
         $this->session = $registry->get('session');
         $this->language = $registry->get('language') ?: $c_data['language'];

@@ -20,7 +20,7 @@ namespace abc\commands;
 
 use abc\commands\base\BaseCommand;
 use abc\core\ABC;
-use abc\core\lib\AAssetPublisher;
+use abc\core\lib\AssetPublisher;
 
 /**
  * Class Publish
@@ -29,7 +29,7 @@ use abc\core\lib\AAssetPublisher;
  */
 class Publish extends BaseCommand
 {
-    public function validate(string $action, array $options)
+    public function validate(string $action, array &$options)
     {
         $action = !$action ? 'all' : $action;
         //if now options - check action
@@ -74,7 +74,7 @@ class Publish extends BaseCommand
         $action = !$action ? 'all' : $action;
         $result = false;
         if (in_array($action, ['all', 'core', 'extensions', 'vendors'])) {
-            $ap = new AAssetPublisher();
+            $ap = new AssetPublisher();
             $result = $ap->publish($action, $options);
             $errors = $ap->errors;
         } else {

@@ -309,6 +309,14 @@
 		<value><![CDATA[Global Attributes Groups]]></value>
 	</definition>
 	<definition>
+		<key>text_product_type</key>
+		<value><![CDATA[Product types]]></value>
+	</definition>
+	<definition>
+		<key>text_object_type</key>
+		<value><![CDATA[Object types]]></value>
+	</definition>
+	<definition>
 		<key>text_import_export</key>
 		<value><![CDATA[Import / Export]]></value>
 	</definition>

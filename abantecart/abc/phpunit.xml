@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false">
+    <testsuites>
+        <testsuite name="Feature Tests">
+            <directory suffix="Test.php">./tests/feature</directory>
+        </testsuite>
+
+        <testsuite name="Unit Tests">
+            <directory suffix="Test.php">./tests/unit</directory>
+        </testsuite>
+
+        <testsuite name="abc extensions feature tests">
+            <directory suffix="Test.php">../../extensions/*/tests/feature</directory>
+        </testsuite>
+
+        <testsuite name="abc extensions unit tests">
+            <directory suffix="Test.php">../../extensions/*/tests/unit</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./abc</directory>
+        </whitelist>
+    </filter>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="QUEUE_DRIVER" value="sync"/>
+    </php>
+</phpunit>

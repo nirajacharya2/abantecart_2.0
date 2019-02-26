@@ -24,7 +24,9 @@ use abc\core\lib\ADebug;
 use H;
 use ReflectionClass;
 
-ob_start();
+if(php_sapi_name()!='cli') {
+    ob_start();
+}
 
 require __DIR__.DS.'abc_base.php';
 
@@ -37,6 +39,7 @@ class ABC extends ABCBase
 {
     protected static $env = [];
     protected static $class_map = [];
+    protected static $model_map = [];
     static $stage_name = '';
 
     /**
@@ -61,7 +64,6 @@ class ABC extends ABCBase
         static::loadConfig($stage_name);
         //register autoloader
         spl_autoload_register([$this, 'loadClass'], false);
-
     }
 
     /**
@@ -74,7 +76,7 @@ class ABC extends ABCBase
     function loadClass($className)
     {
         $rootName = explode('\\',$className)[0];
-        if (!in_array($rootName, ['abc','tests'])) {
+        if (!in_array($rootName, ['abc'])) {
             return false;
         }
 
@@ -186,6 +188,7 @@ class ABC extends ABCBase
         }
 
         static::loadClassMap($stage_name);
+        static::loadModelClassMap($stage_name);
 
         return true;
     }
@@ -230,6 +233,20 @@ class ABC extends ABCBase
     }
 
     /**
+     * @param string $stage_name
+     *
+     * @return bool
+     */
+    public static function loadModelClassMap($stage_name = 'default')
+    {
+        static::$model_map = self::env('MODEL')['MORPH_MAP'];
+        if (!static::$model_map) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Function for adding class alias into classmap from outside
      * @param $alias
      * @param $fullClassName
@@ -269,6 +286,10 @@ class ABC extends ABCBase
         } // if need to set batch of values
         else {
             if (is_array($name)) {
+
+                //TODO: add check for existing value.
+                // If string - do not make it an array by second write!
+                // To replicate just set env value via array twice
                 static::$env = array_merge_recursive(static::$env, $name);
                 return true;
             } else {
@@ -305,6 +326,10 @@ class ABC extends ABCBase
     static function getClassMap()
     {
         return static::$class_map;
+    }
+
+    static function getModelClassMap(){
+        return static::$model_map;
     }
 
     /**
@@ -344,6 +369,35 @@ class ABC extends ABCBase
                     $class_name = static::$class_map[$class_alias][0];
                 } else {
                     $class_name = static::$class_map[$class_alias];
+                }
+
+                $args = $args ? $args : static::getClassDefaultArgs($class_alias);
+
+                $reflector = new ReflectionClass($class_name);
+                return $reflector->newInstanceArgs($args);
+            }catch(\ReflectionException $e){}
+        }
+
+        return false;
+    }
+
+    /**
+     * Method returns full name of class if it exists
+     *
+     * @param string $class_alias
+     *
+     * @param array $args
+     *
+     * @return bool|string
+     */
+    static function getModelObjectByAlias(string $class_alias, $args = [])
+    {
+        if (isset(static::$model_map[$class_alias])) {
+            try {
+                if (is_array(static::$model_map[$class_alias])) {
+                    $class_name = static::$model_map[$class_alias][0];
+                } else {
+                    $class_name = static::$model_map[$class_alias];
                 }
 
                 $args = $args ? $args : static::getClassDefaultArgs($class_alias);

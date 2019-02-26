@@ -26,6 +26,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfigManager;
+use abc\models\locale\Currency;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -93,14 +94,14 @@ class ControllerPagesSettingSetting extends AController
                 && AHelperUtils::has_value($post['config_currency'])
                 && $post['config_currency'] != $this->config->get('config_currency')
             ) {
-                $this->loadModel('localisation/currency');
-                $this->model_localisation_currency->switchConfigCurrency($post['config_currency']);
+                $currencyInstance = new Currency();
+                $currencyInstance->switchConfigCurrency($post['config_currency']);
             }
 
             $this->model_setting_setting->editSetting($group, $post, $get['store_id']);
             if ($this->config->get('config_currency_auto')) {
-                $this->loadModel('localisation/currency');
-                $this->model_localisation_currency->updateCurrencies();
+                $currencyInstance = new Currency();
+                $currencyInstance->updateCurrencies();
             }
 
             $this->session->data['success'] = $this->language->get('text_success');

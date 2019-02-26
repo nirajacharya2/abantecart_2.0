@@ -22,7 +22,7 @@ use abc\core\ABC;
 @include(ABC::env('DIR_VENDOR').'autoload.php');
 
 $class_list = [
-    'models' => [ 'ModelBase' ],
+    'models' => [ 'BaseModel' ],
     'core/engine' => [
         'router',
         'page',
