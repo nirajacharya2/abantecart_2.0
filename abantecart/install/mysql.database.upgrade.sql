@@ -1954,4 +1954,8 @@ ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `controller`, `sort_order`, `status`) VALUES
-(3, 'product_attribute', 'responses/catalog/attribute/getProductAttributeSubform', 3, 1);
+(3, 'object_attribute', 'responses/catalog/attribute/getObjectAttributeSubform', 3, 1);
+
+INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
+VALUES
+(3, 1, 'Object Attribute', NOW());
