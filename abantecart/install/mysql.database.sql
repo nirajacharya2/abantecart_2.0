@@ -12922,7 +12922,7 @@ CREATE TABLE `ac_global_attributes_type_descriptions` (
 INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
 VALUES
 (1, 1, 'Product Option', NOW()),
-(2, 1, 'Download Attribute', NOW())
+(2, 1, 'Download Attribute', NOW()),
 (3, 1, 'Object Attribute', NOW());
 
 --
