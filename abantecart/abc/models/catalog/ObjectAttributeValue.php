@@ -28,6 +28,7 @@ class ObjectAttributeValue extends BaseModel
     protected $fillable = [
         'object_id',
         'object_type',
+        'object_type_id',
         'attribute_id',
         'attribute_value',
         'attribute_name'

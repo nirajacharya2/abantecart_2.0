@@ -24,6 +24,7 @@ use abc\core\lib\FormBuilder;
 use abc\models\catalog\Product;
 use abc\models\catalog\UrlAlias;
 use Cake\Database\Exception;
+use H;
 use Illuminate\Validation\ValidationException;
 
 class ControllerResponsesCatalogProductForm extends AController
@@ -107,9 +108,6 @@ class ControllerResponsesCatalogProductForm extends AController
 
     public function saveForm(array $fields)
     {
-        $fields = json_encode($fields);
-        $fields = json_decode($fields, true);
-
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->data['result'] = [];
 

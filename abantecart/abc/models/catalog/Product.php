@@ -20,52 +20,52 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Product
  *
- * @property int $product_id
- * @property string $model
- * @property string $sku
- * @property string $location
- * @property int $quantity
- * @property string $stock_checkout
- * @property int $stock_status_id
- * @property int $manufacturer_id
- * @property int $shipping
- * @property int $ship_individually
- * @property int $free_shipping
- * @property float $shipping_price
- * @property float $price
- * @property int $tax_class_id
- * @property \Carbon\Carbon $date_available
- * @property float $weight
- * @property int $weight_class_id
- * @property float $length
- * @property float $width
- * @property float $height
- * @property int $length_class_id
- * @property int $status
- * @property int $viewed
- * @property int $sort_order
- * @property int $subtract
- * @property int $minimum
- * @property int $maximum
- * @property float $cost
- * @property int $call_to_order
- * @property string $settings
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * @property ProductOption $options
- * @property CouponsProduct $coupons_products
- * @property ProductDescription $product_descriptions
- * @property ProductDiscount $product_discounts
- * @property ProductOptionDescription $product_option_descriptions
+ * @property int                           $product_id
+ * @property string                        $model
+ * @property string                        $sku
+ * @property string                        $location
+ * @property int                           $quantity
+ * @property string                        $stock_checkout
+ * @property int                           $stock_status_id
+ * @property int                           $manufacturer_id
+ * @property int                           $shipping
+ * @property int                           $ship_individually
+ * @property int                           $free_shipping
+ * @property float                         $shipping_price
+ * @property float                         $price
+ * @property int                           $tax_class_id
+ * @property \Carbon\Carbon                $date_available
+ * @property float                         $weight
+ * @property int                           $weight_class_id
+ * @property float                         $length
+ * @property float                         $width
+ * @property float                         $height
+ * @property int                           $length_class_id
+ * @property int                           $status
+ * @property int                           $viewed
+ * @property int                           $sort_order
+ * @property int                           $subtract
+ * @property int                           $minimum
+ * @property int                           $maximum
+ * @property float                         $cost
+ * @property int                           $call_to_order
+ * @property string                        $settings
+ * @property \Carbon\Carbon                $date_added
+ * @property \Carbon\Carbon                $date_modified
+ * @property ProductOption                 $options
+ * @property CouponsProduct                $coupons_products
+ * @property ProductDescription            $product_descriptions
+ * @property ProductDiscount               $product_discounts
+ * @property ProductOptionDescription      $product_option_descriptions
  * @property ProductOptionValueDescription $product_option_value_descriptions
- * @property ProductOptionValue $product_option_values
- * @property ProductOption $product_options
- * @property ProductSpecial $product_specials
- * @property ProductTag $product_tags
- * @property ProductsFeatured $products_featured
- * @property ProductsRelated $products_related
- * @property Review $reviews
- * @property int $product_type_id
+ * @property ProductOptionValue            $product_option_values
+ * @property ProductOption                 $product_options
+ * @property ProductSpecial                $product_specials
+ * @property ProductTag                    $product_tags
+ * @property ProductsFeatured              $products_featured
+ * @property ProductsRelated               $products_related
+ * @property Review                        $reviews
+ * @property int                           $product_type_id
  *
  * @package abc\models
  */
@@ -657,7 +657,7 @@ class Product extends BaseModel
     public function description()
     {
         return $this->hasOne(ProductDescription::class, 'product_id')
-                    ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
     }
 
     /**
@@ -783,13 +783,13 @@ class Product extends BaseModel
     public function getProductTypes()
     {
         return $this->db->table('object_types as ot')
-                        ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
-                        ->where('ot.object_type', '=', 'Product')
-                        ->where('ot.status', '=', 1)
-                        ->where('otd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
-                        ->select('otd.object_type_id as id', 'otd.name')
-                        ->get()
-                        ->toArray();
+            ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
+            ->where('ot.object_type', '=', 'Product')
+            ->where('ot.status', '=', 1)
+            ->where('otd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->select('otd.object_type_id as id', 'otd.name')
+            ->get()
+            ->toArray();
 
     }
 
@@ -851,8 +851,8 @@ class Product extends BaseModel
     {
         $stock_statuses =
             StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
-                       ->select(['stock_status_id as id', 'name'])
-                       ->get();
+                ->select(['stock_status_id as id', 'name'])
+                ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
             $result[] = (object)['id' => $stock_status->id, 'name' => $stock_status->name];
@@ -1006,15 +1006,15 @@ class Product extends BaseModel
         $total_quantity = 0;
         //check product option values
         $option_values = $this->query()->from('product_options')
-                              ->where('product_options.product_id', $this->product_id)
-                              ->where('status', 1)
-                              ->join(
-                                  'product_option_values',
-                                  'product_option_values.product_option_id',
-                                  '=',
-                                  'product_options.product_option_id'
-                              )->select('product_option_values.quantity', 'product_option_values.subtract')
-                              ->get();
+            ->where('product_options.product_id', $this->product_id)
+            ->where('status', 1)
+            ->join(
+                'product_option_values',
+                'product_option_values.product_option_id',
+                '=',
+                'product_options.product_option_id'
+            )->select('product_option_values.quantity', 'product_option_values.subtract')
+            ->get();
         if ($option_values) {
             $notrack_qnt = 0;
             foreach ($option_values as $row) {
@@ -1225,9 +1225,9 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int $product_id
+     * @param int   $product_id
      * @param array $product_data
-     * @param int $language_id
+     * @param int   $language_id
      */
     public static function updateProduct(int $product_id, array $product_data, int $language_id)
     {
@@ -1239,11 +1239,51 @@ class Product extends BaseModel
             UrlAlias::setProductKeyword($product_data['keyword'], $product_id);
         }
 
+        $attributes = array_filter($product_data, function ($k) {
+            return (strpos($k, 'attribute_') === 0);
+        }, ARRAY_FILTER_USE_KEY);
+
+        if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
+            self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
+        }
         self::updateProductLinks($product_id, $product_data);
     }
 
     /**
-     * @param int $product_id
+     * @param int   $productId
+     * @param int   $productTypeId
+     * @param array $attributes
+     */
+    public static function updateProductAttributes(int $productId, int $productTypeId, array $attributes)
+    {
+        foreach ($attributes as $name => $value) {
+            $attributeId = (int)substr($name, strlen('attribute_'), strlen($name));
+            if (!$attributeId) {
+                continue;
+            }
+
+            $attribute = [
+                'object_id'      => $productId,
+                'object_type'    => 'Product',
+                'object_type_id' => $productTypeId,
+                'attribute_id'   => $attributeId,
+                'attribute_name' => $name,
+            ];
+
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+
+            $attributeVal = [
+                'attribute_value' => $value,
+            ];
+
+            ObjectAttributeValue::updateOrCreate($attribute, $attributeVal);
+        }
+    }
+
+    /**
+     * @param int   $product_id
      * @param array $product_data
      */
     public static function updateProductLinks(int $product_id, array $product_data)
@@ -1287,9 +1327,9 @@ class Product extends BaseModel
         $store_id = $registry->get('config')->get('config_store_id');
 
         $settings = Setting::where('store_id', $store_id)
-                           ->where('group', 'object_type')
-                           ->where('group_id', $product->product_type_id)
-                           ->get();
+            ->where('group', 'object_type')
+            ->where('group_id', $product->product_type_id)
+            ->get();
 
         if (!$settings) {
             return false;

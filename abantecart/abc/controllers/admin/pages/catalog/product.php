@@ -471,6 +471,11 @@ class ControllerPagesCatalogProduct extends AController
                 if (is_array($fieldValue) && $fieldName == 'attributes') {
                     $attributes = $fieldValue;
                     foreach ($attributes as $attribute) {
+                        $val = json_decode($attribute['attribute_value'], true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $attribute['attribute_value'] = $val;
+                        }
+
                         $product[$attribute['attribute_name']] = $attribute['attribute_value'];
                     }
                     unset($product['attributes']);

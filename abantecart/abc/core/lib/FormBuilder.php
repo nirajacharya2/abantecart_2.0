@@ -85,47 +85,65 @@ class FormBuilder
         if ($this->object_type) {
             $attributes = ObjectType::where('object_type', (new ReflectionClass($this->model))->getShortName())
                 ->with([
-                    'global_attribute_groups.global_attributes.values',
+                    'global_attribute_groups.global_attributes.values.descriptions',
+                    'global_attribute_groups.global_attributes.description',
                 ])
-                ->find($this->object_type);
+                ->find($this->object_type)
+                ->toArray();
 
-            foreach ($attributes->global_attribute_groups as $attribute_group) {
-                foreach ($attribute_group->global_attributes as $global_attribute) {
+            if (!$attributes) {
+                return;
+            }
 
+            $availibleFieldTypes = HtmlElementFactory::getAvailableElements();
+            $elementsWithOptions = HtmlElementFactory::getElementsWithOptions();
 
-                    $availibleFieldTypes = HtmlElementFactory::getAvailableElements();
-                    $elementsWithOptions = HtmlElementFactory::getElementsWithOptions();
+            foreach ($attributes['global_attribute_groups'] as $attribute_group) {
+                foreach ($attribute_group['global_attributes'] as $global_attribute) {
 
-                    if (!$availibleFieldTypes[$global_attribute->element_type]) {
+                    if (!$availibleFieldTypes[$global_attribute['element_type']]) {
                         continue;
                     }
 
-                    $type = $availibleFieldTypes[$global_attribute->element_type]['type'];
+                    $type = $availibleFieldTypes[$global_attribute['element_type']]['type'];
 
-                    $description = $global_attribute->with('description')->get()->first()->description;
+                    //H::df($attribute_group->toArray());
+                    $description = $global_attribute['description'];
 
                     $fieldOptions = [
-                        'name'        => 'attribute_'.$global_attribute->attribute_id,
-                        'title'       => $description->name,
-                        'placeholder' => $description->placeholder,
-                        'error_text'  => $description->error_text,
+                        'name'        => 'attribute_'.$global_attribute['attribute_id'],
+                        'title'       => $description['name'],
+                        'placeholder' => $description['placeholder'],
+                        'error_text'  => $description['error_text'],
                         'input_type'  => $type,
                         'value'       => '',
-                        'required'    => $global_attribute->required,
+                        'required'    => $global_attribute['required'],
                     ];
 
-                    if (in_array($global_attribute->element_type, $elementsWithOptions)) {
+                    //H::df($fieldOptions);
+                    //H::df($global_attribute->element_type);
+
+                    if (in_array($global_attribute['element_type'], $elementsWithOptions)) {
 
                         $options = [];
-                        foreach ($global_attribute->global_attributes_values as $attributes_value) {
-                            $value_description = GlobalAttributesValueDescription::where('attribute_value_id', $attributes_value->attribute_value_id)
-                                ->where('attribute_id', $attributes_value->attribute_id)
-                                ->where('language_id', $this->registry->get('language')->getContentLanguageID())
-                                ->get()
-                                ->first();
-                            $options[$attributes_value->attribute_value_id] = $value_description->value;
+
+                        foreach ($global_attribute['values'] as $attributes_value) {
+                            foreach ($attributes_value['descriptions'] as $description) {
+                                if ($description['language_id'] === $this->registry->get('language')->getContentLanguageID()) {
+                                    $value_description = $description;
+                                }
+                            }
+
+                            if (is_array($value_description)) {
+                                $options[] = ['value' => $attributes_value['attribute_value_id'], 'text' => $value_description['value']];
+                            }
                         }
-                        $fieldOptions['options'] = $options;
+
+                        $fieldOptions['props']['items'] = $options;
+                        if ($global_attribute['element_type'] == 'M') {
+                            $fieldOptions['props']['multiple'] = true;
+                            $fieldOptions['input_type'] = 'selectbox';
+                        }
                     }
 
                     $this->fields[$fieldOptions['name']] = $fieldOptions;
@@ -218,7 +236,7 @@ class FormBuilder
                 case 'max:1':
                     break;
                 case 'number':
-                    $modified_rules[] = 'numeric';
+                    $modified_rules[] = 'decimal:3';
                     break;
                 default:
                     $modified_rules[] = $rule;
