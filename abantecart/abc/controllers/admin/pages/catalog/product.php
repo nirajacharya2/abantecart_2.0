@@ -424,7 +424,16 @@ class ControllerPagesCatalogProduct extends AController
 
         $product_id = (int)$this->request->get['product_id'];
         if ($product_id) {
-            $product = EProduct::with('description', 'tags', 'stores', 'categories')->find($product_id)->toArray();
+            $productInfo = EProduct::find($product_id);
+
+            $product = EProduct::with(['description', 'tags', 'stores', 'categories',
+                'attributes' => function($query) use ($productInfo) {
+                $query->where('object_type_id', '=', $productInfo->product_type_id);
+                }])
+                ->find($product_id)
+                ->toArray();
+
+
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
 
             $product_type_id = $product['product_type_id'];
@@ -458,6 +467,13 @@ class ControllerPagesCatalogProduct extends AController
                         $product['categories'][] = $category['category_id'];
                     }
                     unset($categories);
+                }
+                if (is_array($fieldValue) && $fieldName == 'attributes') {
+                    $attributes = $fieldValue;
+                    foreach ($attributes as $attribute) {
+                        $product[$attribute['attribute_name']] = $attribute['attribute_value'];
+                    }
+                    unset($product['attributes']);
                 }
             }
 
