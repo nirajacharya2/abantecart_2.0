@@ -196,9 +196,8 @@ class FormBuilder
 
         $field = array_merge_recursive($field, $this->fields_preset['default']);
         if (isset($this->fields_preset['fields'][$field_name])) {
-            $field = array_merge_recursive($field, $this->fields_preset['fields'][$field_name]);
+            $field = array_merge($field, $this->fields_preset['fields'][$field_name]);
         }
-
 
         $field['rule'] = $this->converValidateRules($field);
 

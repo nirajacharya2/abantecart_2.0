@@ -772,6 +772,11 @@ class Product extends BaseModel
         return $this->belongsToMany(Store::class, 'products_to_stores', 'product_id', 'store_id');
     }
 
+    public function attributes()
+    {
+        return $this->morphMany(ObjectAttributeValue::class, 'object');
+    }
+
     /**
      * @return mixed
      */

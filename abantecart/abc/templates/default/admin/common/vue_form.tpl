@@ -27,9 +27,11 @@
 	.v-text-field__details {
 		margin-top: 3px;
 	}
+
 	ul {
 		margin-bottom: 0px !important;
 	}
+
 	.tox-notifications-container {
 		display: none !important;
 	}
@@ -208,24 +210,26 @@
 							<div v-if="field_options.type == 'editor'">
 								<v-subheader v-html="field_options.title">
 								</v-subheader>
-							<editor :init="editorConfig"
-							        :name="field_name"
-							        :id="field_name"
-							        v-model="field_options.value"
-							        v-bind="field_options.props"
-							        v-validate=field_options.validate
-							>
-							</editor>
+								<editor ref="editor"
+										:init="editorConfig"
+								        :name="field_name"
+								        :id="field_name"
+								        v-bind="field_options.props"
+								        v-model="field_options.value"
+								        v-validate=field_options.validate>
+								</editor>
 							</div>
 						</v-container>
 					</v-flex>
 					<v-flex>
 						<v-btn small color="primary" @click="saveForm()">
 							<v-icon small>save</v-icon>
-							Save</v-btn>
+							Save
+						</v-btn>
 						<v-btn small flat @click="cancelForm()">
 							<v-icon small>keyboard_backspace</v-icon>
-							Cancel</v-btn>
+							Cancel
+						</v-btn>
 					</v-flex>
 				</v-layout>
 			</v-form>
@@ -253,15 +257,13 @@
 			height: 250,
 			menubar: false,
 			plugins: [
-				'advlist autolink lists link image charmap print preview anchor textcolor',
+				'advlist autolink lists link image charmap print preview anchor ',
 				'searchreplace visualblocks code fullscreen',
 				'insertdatetime media table paste code help wordcount'
 			],
 			toolbar: 'undo redo | formatselect | link table searchreplace| bold italic forecolor backcolor ' +
 				'| alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code fullscreen',
-			content_css: [
-
-			]
+			content_css: []
 		};
 
 		var vm = new Vue({
@@ -403,7 +405,9 @@
 
 			axios.post(data.ajax_params.ajax_url, param)
 				.then(function (response) {
+
 					myScema.form_fields = response.data;
+
 
 					var form_field = response.data[data.ajax_params.relatedTo];
 					if (typeof form_field !== 'undefined' &&
@@ -421,6 +425,7 @@
 								requestToServer(newValue)
 							},
 								{deep: true});
+
 					}
 				})
 				.catch(function (error) {
