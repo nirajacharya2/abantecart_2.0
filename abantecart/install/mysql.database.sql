@@ -13540,6 +13540,19 @@ CREATE TABLE `ac_global_attribute_group_to_object_type` (
   KEY `attribute_group_id_object_type_idx` (`attribute_group_id`,`object_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `ac_object_attribute_values`;
+CREATE TABLE `ac_object_attribute_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `object_id` int(11) NOT NULL,
+  `object_type` varchar(255) NOT NULL,
+  `object_type_id` int(11) NOT NULL,
+  `attribute_id` int(11) NOT NULL,
+  `attribute_value` varchar(255) NOT NULL,
+  `attribute_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_inx` (`object_id`,`object_type`,`attribute_id`,`object_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 ALTER TABLE `ac_downloads`
 ADD CONSTRAINT `ac_downloads_order_status_fk`
