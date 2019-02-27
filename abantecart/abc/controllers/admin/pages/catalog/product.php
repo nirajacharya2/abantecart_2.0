@@ -441,7 +441,6 @@ class ControllerPagesCatalogProduct extends AController
             foreach ($product as $fieldName => $fieldValue) {
                 if (is_array($fieldValue) && $fieldName == 'description') {
                     $product = array_merge($product, $fieldValue);
-                   // unset($product[$fieldName]);
                 }
                 if (is_array($fieldValue) && $fieldName == 'tags') {
                     $tags = $fieldValue;

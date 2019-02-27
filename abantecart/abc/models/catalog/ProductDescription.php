@@ -9,15 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class ProductDescription
  *
- * @property int $product_id
- * @property int $language_id
- * @property string $name
- * @property string $meta_keywords
- * @property string $meta_description
- * @property string $description
- * @property string $blurb
+ * @property int      $product_id
+ * @property int      $language_id
+ * @property string   $name
+ * @property string   $meta_keywords
+ * @property string   $meta_description
+ * @property string   $description
+ * @property string   $blurb
  *
- * @property Product $product
+ * @property Product  $product
  * @property Language $language
  *
  * @package abc\models
@@ -36,6 +36,9 @@ class ProductDescription extends BaseModel
     protected $casts = [
         'product_id'  => 'int',
         'language_id' => 'int',
+        'description' => 'html',
+        'name'        => 'html',
+        'blurb'       => 'html',
     ];
 
     protected $fillable = [

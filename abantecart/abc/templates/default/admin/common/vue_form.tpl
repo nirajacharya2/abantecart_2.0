@@ -261,8 +261,9 @@
 				'searchreplace visualblocks code fullscreen',
 				'insertdatetime media table paste code help wordcount'
 			],
-			toolbar: 'undo redo | formatselect | link table searchreplace| bold italic forecolor backcolor ' +
+			toolbar: 'undo redo | formatselect fontselect fontsizeselect | link table searchreplace| bold italic forecolor backcolor ' +
 				'| alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code fullscreen',
+			fontsize_formats: '11px 12px 14px 16px 18px 24px 36px 48px',
 			content_css: []
 		};
 

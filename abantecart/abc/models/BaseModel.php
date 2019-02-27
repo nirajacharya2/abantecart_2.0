@@ -41,6 +41,8 @@ use ReflectionMethod;
  */
 class BaseModel extends OrmModel
 {
+    use CastTrait;
+
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
     const DELETED_AT = 'date_deleted';
