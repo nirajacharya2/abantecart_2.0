@@ -121,24 +121,31 @@ class ControllerResponsesCatalogProductForm extends AController
           'language_id' => $this->language->getContentLanguageID()
         ];
 
-        $productInst = new Product();
-        try {
-            $productId = $fields['product_id'];
-            if ($productId) {
-                $productInst->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
-            } else {
-                $productId = $productInst->createProduct($fields);
-            }
-            if ($productId) {
-                $this->data['result']['success_message'] = $this->language->get('text_saved');
+        if ($this->validate($fields)) {
+
+            $productInst = new Product();
+            try {
+                $productId = $fields['product_id'];
+                if ($productId) {
+                    $productInst->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
+                } else {
+                    $productId = $productInst->createProduct($fields);
+                }
+                if ($productId) {
+                    $this->data['result']['success_message'] = $this->language->get('text_saved');
+                }
+
+            } catch (ValidationException $e) {
+                $this->data['result']['errors'] = $e->errors();
+            } catch (\Exception $e) {
+                $this->data['result']['error'] = $e->getMessage();
             }
 
-        } catch (ValidationException $e) {
-            $this->data['result']['errors'] = $e->errors();
+        } else {
+            $this->data['result']['error'] =  $this->error['csrf'];
         }
-        catch (\Exception $e) {
-            $this->data['result']['error'] = $e->getMessage();
-        }
+
+        $this->data['result']['csrf'] =  FormBuilder::getCsrfToken();
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -146,6 +153,17 @@ class ControllerResponsesCatalogProductForm extends AController
         $this->load->library('json');
         $this->response->addJSONHeader();
         $this->response->setOutput(AJson::encode($this->data['result']));
+    }
+
+    private function validate($data) {
+        if (!$this->csrftoken->isTokenValid($data['csrfinstance'], $data['csrftoken'])) {
+            $this->error['csrf'] = $this->language->get('text_system_error');
+        }
+
+        if (!empty($this->error)) {
+            return false;
+        }
+        return true;
     }
 }
 

@@ -74,7 +74,29 @@ class FormBuilder
         $this->loadFields();
         $this->loadRelations();
         $this->applyFieldSettings();
+        $this->fields = array_merge($this->fields, self::getCsrfToken());
         $this->form->setFormFields($this->fields);
+    }
+
+    public static function getCsrfToken()
+    {
+        $registry = Registry::getInstance();
+        $csrftoken = $registry->get('csrftoken');
+        $token['csrftoken'] = [
+            'name'        => 'csrftoken',
+            'input_type'  => 'hidden',
+            'value'       => $csrftoken->setToken()
+        ];
+
+        $instanceId = array_search($token['csrftoken']['value'], $registry->get('session')->data['csrftoken']);
+
+        $token['csrfinstance'] = [
+            'name'        => 'csrfinstance',
+            'input_type'  => 'hidden',
+            'value'       => $instanceId
+        ];
+
+        return $token;
     }
 
     private function loadFields()

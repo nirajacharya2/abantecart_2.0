@@ -356,6 +356,10 @@
 							this.errors.add(error);
 						}
 					}
+					if (typeof response.data.csrf !== 'undefined') {
+						myScema.form_fields.csrfinstance = response.data.csrf.csrfinstance;
+						myScema.form_fields.csrftoken = response.data.csrf.csrftoken;
+					}
 				},
 				cancelForm() {
 					if (typeof myScema.back_url !== 'undefined') {
