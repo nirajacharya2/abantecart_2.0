@@ -18,6 +18,26 @@ use abc\core\ABC; ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="/templates/default_bs3/admin/assets/js/tinymce-vue/tinymce-vue.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+
+
+<?php if ($this->document->renderJsVars()) { ?>
+<script>
+	<?php echo $this->document->renderJsVars(); ?>
+</script>
+<?php } ?>
+
 <?php foreach ($styles as $style) { ?>
 <link rel="<?php echo $style['rel']; ?>" type="text/css" href="<?php echo $style['href']; ?>"
       media="<?php echo $style['media']; ?>"/>
@@ -40,7 +60,14 @@ use abc\core\ABC; ?>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
+
+<?php
+if (strpos($this->request->get['rt'], 'catalog/product') === false) {
+?>
 <script defer type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
+<?php
+}
+?>
 
 
 <?php foreach ($scripts as $script) { ?>
@@ -49,7 +76,7 @@ use abc\core\ABC; ?>
 
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/aform.js'); ?>"></script>
 
-<?php 
+<?php
 	//Generic PHP processed Javascript section
 
 if(is_file(ABC::env('DIR_TEMPLATES').'default_bs3/js/tinymce/langs/'.$language_locale.'.js')){
@@ -118,7 +145,7 @@ var mcei = {
 	body_class: "content post-type-post post-status-auto-draft post-format-standard locale-en-gb",
 	autoresize_on: true,
 	add_unload_trigger: false,
-	height: '262px'	
+	height: '262px'
 };
 
 
@@ -135,7 +162,7 @@ $(document).ready(function () {
 	<?php if($system_notice) { ?>
 		info_alert(<?php abc_js_echo($system_notice); ?>, false);
 	<?php } ?>
-  
+
 	numberSeparators = {decimal:'<?php echo $decimal_point; ?>', thousand:'<?php echo $thousand_point; ?>'};
 });
 
@@ -157,7 +184,7 @@ var system_checker = function () {
 				}
 				growl = showSystemAlert(data);
 			}
-		},	
+		},
 		complete: function() {
 			// Schedule the next request when the current one's complete
 			alertcount--;
@@ -172,7 +199,7 @@ var showSystemAlert = function(data){
 	}
 	if(data.hasOwnProperty('warning')){
 		return warning_alert(data.warning, false);
-		
+
 	}
 	if(data.hasOwnProperty('notice')){
 		return info_alert(data.notice, true);
@@ -187,7 +214,7 @@ var wrapConfirmDelete = function(){
 
     $('a[data-confirmation="delete"]').each( function(){
         if($(this).attr('data-toggle')=='dropdown' ){ return;}
-        
+
        	var action = $(this).attr('onclick');
         if ( action ) {
         	action = 'onclick="'+action+'"';
@@ -197,12 +224,12 @@ var wrapConfirmDelete = function(){
     	    if(href.length==0 || href=='#'){ return;}
     	    action = 'href="' + href +'"';
         }
-        
+
     	var conf_text = $(this).attr('data-confirmation-text');
     	if (!conf_text) {
     		conf_text = <?php abc_js_echo($text_confirm); ?>;
-    	} 
-        
+    	}
+
         $(this).wrap(wrapper);
         popover = '<div class="confirm_popover dropdown-menu dropdown-menu-right alert alert-danger" role="menu">'+
                     '<h5 class="center">'+ conf_text +'</h5>'+
@@ -280,6 +307,6 @@ $(document).ready(function(){
 });
 <?php } ?>
 </script>
-<?php 
+<?php
 	//NOTE: More JS loaded in page.tpl. This is to improve performance. Do not move above to page.tpl
 ?>
