@@ -21,13 +21,13 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\engine\Registry;
 use abc\core\lib\FormBuilder;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
 use abc\models\admin\Product;
 use abc\models\catalog\ObjectType;
-use abc\models\catalog\Product as EProduct;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\UrlAlias;
 use H;
@@ -45,6 +45,16 @@ class ControllerPagesCatalogProduct extends AController
 {
     public $error = [];
     public $data = [];
+    /**
+     * @var $productInstance \abc\models\catalog\Product
+     */
+    private $productInstance;
+
+    public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
+    {
+        $this->productInstance = ABC::getModelObjectByAlias('Product');
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+    }
 
     public function main()
     {
@@ -424,14 +434,20 @@ class ControllerPagesCatalogProduct extends AController
 
         $product_id = (int)$this->request->get['product_id'];
         if ($product_id) {
-            $productInfo = EProduct::find($product_id);
 
-            $product = EProduct::with(['description', 'tags', 'stores', 'categories',
+            $productInfo = $this->productInstance->find($product_id);
+
+            $product = $this->productInstance->with(['description', 'tags', 'stores', 'categories',
                 'attributes' => function($query) use ($productInfo) {
                 $query->where('object_type_id', '=', $productInfo->product_type_id);
                 }])
-                ->find($product_id)
-                ->toArray();
+                ->find($product_id);
+
+                if ($product) {
+                    $product = $product->toArray();
+                } else {
+                    $product = [];
+                }
 
 
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
@@ -496,8 +512,7 @@ class ControllerPagesCatalogProduct extends AController
             $formTitle = 'Create New product';
         }
 
-
-        $form = new FormBuilder(EProduct::class, $product_type_id, $formData);
+        $form = new FormBuilder(ABC::getFullClassName('Product'), $product_type_id, $formData);
         $this->data['form'] = $form->getForm()->toArray();
 
         $transformer = new PHPToJavaScriptTransformer($this->document, 'abc');

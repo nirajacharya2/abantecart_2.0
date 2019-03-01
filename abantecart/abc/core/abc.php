@@ -349,6 +349,13 @@ class ABC extends ABCBase
                 return static::$class_map[$class_alias];
             }
         }
+        if (isset(static::$model_map[$class_alias])) {
+            if (is_array(static::$model_map[$class_alias])) {
+                return static::$model_map[$class_alias][0];
+            } else {
+                return static::$model_map[$class_alias];
+            }
+        }
         return false;
     }
 
