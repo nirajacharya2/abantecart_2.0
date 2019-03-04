@@ -115,6 +115,12 @@ class BaseModel extends OrmModel
     public static $auditingEnabled = true;
 
     /**
+     * Classname of main Model needed for audit log
+     * @var string
+     */
+    protected $mainClassName;
+
+    /**
      * @var bool if TRUE exception will be thrown if failed auditing
      */
     public static $auditingStrictMode = true;
@@ -556,5 +562,18 @@ class BaseModel extends OrmModel
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMainModelClassName(){
+        return $this->mainClassName ?? $this->getClass();
+    }
+    /**
+     * @return string
+     */
+    public function getMainModelClassKey(){
+        return $this->mainClassKey ?? $this->getKeyName();
     }
 }

@@ -29,6 +29,10 @@ class ProductDescription extends BaseModel
     public $timestamps = false;
 
     protected $primaryKey = 'id';
+
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
     protected $primaryKeySet = [
         'product_id',
         'language_id',

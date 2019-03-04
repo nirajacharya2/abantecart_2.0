@@ -284,12 +284,12 @@ class AuditLogTest extends ATestCase
     }
 
     /**
-     * @param string $auditableType
+     * @param string $auditableModel
      * @param int $auditableId
      *
      * @return array
      */
-    public function getLoggedEvents(string $auditableType, int $auditableId): array
+    public function getLoggedEvents(string $auditableModel, int $auditableId): array
     {
         $writtenEvents = [];
         //check records of all events set
@@ -297,7 +297,7 @@ class AuditLogTest extends ATestCase
         $result = $audit
             ->select('event', $this->registry->get('db')->getORM()::raw('count(*) as count'))
             ->distinct()
-            ->where('auditable_type', '=', $auditableType)
+            ->where('auditable_model', '=', $auditableModel)
             ->where('auditable_id', '=', $auditableId)
             ->groupBy('event')
             ->orderBy('event', 'asc')

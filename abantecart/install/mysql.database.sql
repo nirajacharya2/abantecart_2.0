@@ -138,7 +138,9 @@ CREATE TABLE `ac_audits` (
   `event` varchar(255) COLLATE utf8_general_ci NOT NULL,
   `request_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
   `session_id` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
-  `auditable_type` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `main_auditable_model` varchar(255) COLLATE utf8_general_ci DEFAULT NULL,
+  `main_auditable_id` int(11) DEFAULT NULL,
+  `auditable_model` varchar(255) COLLATE utf8_general_ci NOT NULL,
   `auditable_id` int(11) DEFAULT NULL,
   `attribute_name` varchar(255) COLLATE utf8_general_ci NOT NULL,
   `old_value` text COLLATE utf8_general_ci,
@@ -148,7 +150,8 @@ CREATE TABLE `ac_audits` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`user_type`,`user_name`),
   KEY `request_id` (`request_id`,`session_id`),
-  KEY `auditable_type` (`auditable_type`,`auditable_id`),
+  KEY `main_auditable_model` (`main_auditable_model`,`main_auditable_id`),
+  KEY `auditable_model` (`auditable_model`,`auditable_id`),
   KEY `attribute_name` (`attribute_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 

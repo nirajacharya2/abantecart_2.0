@@ -15,8 +15,9 @@ use abc\models\BaseModel;
  * @property string $event
  * @property string $request_id
  * @property string $session_id
- * @property string $auditable_type
- * @property string $auditable_name
+ * @property string $main_auditable_model
+ * @property int $main_auditable_id
+ * @property string $auditable_model
  * @property int $auditable_id
  * @property string $old_value
  * @property string $new_value
@@ -38,8 +39,9 @@ class Audit extends BaseModel
         'event',
         'request_id',
         'session_id',
-        'auditable_type',
-        'auditable_name',
+        'main_auditable_model',
+        'main_auditable_id',
+        'auditable_model',
         'auditable_id',
         'old_value',
         'new_value',
