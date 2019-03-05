@@ -61,4 +61,4 @@ if (H::has_value($request->get['store_id']) || H::has_value($session->data['curr
 // Admin template load
 // Relative paths and directories
 ABC::env('RDIR_ASSETS', 'templates/default/admin/assets/');
-ABC::env('RDIR_TEMPLATE', 'templates/default/admin/');
+ABC::env('RDIR_TEMPLATE', 'templates/'.(ABC::env('adminTemplate') ? ABC::env('adminTemplate') : 'default').'/admin/');
