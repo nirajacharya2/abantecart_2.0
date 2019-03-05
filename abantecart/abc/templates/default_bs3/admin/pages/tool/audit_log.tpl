@@ -8,6 +8,7 @@
 				<v-container>
 					<v-layout row wrap align-center>
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-dialog
 									ref="dialog"
 									v-model="modal"
@@ -30,8 +31,10 @@
 									<v-btn flat color="primary" @click="$refs.dialog.save(date_from)">OK</v-btn>
 								</v-date-picker>
 							</v-dialog>
+							</v-container>
 						</v-flex>
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-dialog
 									ref="dialog2"
 									v-model="modal2"
@@ -54,8 +57,10 @@
 									<v-btn flat color="primary" @click="$refs.dialog2.save(date_to)">OK</v-btn>
 								</v-date-picker>
 							</v-dialog>
+							</v-container>
 						</v-flex>
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-text-field
 									name="user_name"
 									v-model="user_name"
@@ -63,10 +68,12 @@
 									single-line
 									hint="Input User/Alias Name"
 							></v-text-field>
+							</v-container>
 						</v-flex>
 					</v-layout>
 					<v-layout row wrap align-center v-if="!isConcreteObject">
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-select
 									v-model="selected_data_object"
 									:items="data_objects"
@@ -78,10 +85,12 @@
 									hide-selected
 									attach
 							></v-select>
+							</v-container>
 							<div id="id_selected_data_object"></div>
 						</v-flex>
 
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-text-field
 									name="data_object_id"
 									v-model="data_object_id"
@@ -91,8 +100,10 @@
 									mask="###########"
 									hint="Input Data Object ID"
 							></v-text-field>
+							</v-container>
 						</v-flex>
 						<v-flex xs12 sm4>
+							<v-container fluid>
 							<v-select
 									:items="available_fields"
 									v-model="selected_fields"
@@ -104,6 +115,7 @@
 									@input="selectedFieldsChange()"
 									attach
 							></v-select>
+							</v-container>
 							<div id="id_selected_fields"></div>
 						</v-flex>
 						<v-flex xs12 sm12>

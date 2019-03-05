@@ -40,7 +40,8 @@ class ControllerResponsesToolAuditAjax extends AController
             }
         }
 
-        $audit = Audit::groupBy('auditable_type')->groupBy('auditable_id')->groupBy('date_added');
+
+        $audit = Audit::groupBy('main_auditable_model')->groupBy('main_auditable_id')->groupBy('date_added');
         if (is_array($arFilters) && !empty($arFilters)) {
             $auditableTypes = [];
             $auditableIds = [];
@@ -54,11 +55,11 @@ class ControllerResponsesToolAuditAjax extends AController
             }
 
             if (!empty($auditableTypes)) {
-                $audit = $audit->whereIn('auditable_type', $auditableTypes);
+                $audit = $audit->whereIn('main_auditable_model', $auditableTypes);
             }
 
             if (!empty($auditableIds)) {
-                $audit = $audit->whereIn('auditable_id', $auditableIds);
+                $audit = $audit->whereIn('main_auditable_id', $auditableIds);
             }
 
             if (!empty($attributeNames)) {

@@ -58,16 +58,16 @@ class ControllerPagesToolAuditLog extends AController
     public function getDataObjects()
     {
         $auditInstance = new Audit();
-        $auditableTypes = $auditInstance->select('auditable_type')
-            ->groupBy('auditable_type')
+        $auditableTypes = $auditInstance->select('auditable_model')
+            ->groupBy('auditable_model')
             ->get()->toArray();
         $arResult = [];
 
         foreach ($auditableTypes as &$auditableType) {
-            $arResult['classes'][] = $auditableType['auditable_type'];
-            $instance = ABC::getModelObjectByAlias($auditableType['auditable_type']);
+            $arResult['classes'][] = $auditableType['auditable_model'];
+            $instance = ABC::getModelObjectByAlias($auditableType['auditable_model']);
             if (get_class($instance)) {
-                $arResult[$auditableType['auditable_type']]['table_columns'] = $instance->getTableColumns();
+                $arResult[$auditableType['auditable_model']]['table_columns'] = $instance->getTableColumns();
             }
         }
 
