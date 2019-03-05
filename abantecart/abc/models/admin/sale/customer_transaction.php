@@ -92,13 +92,23 @@ class ModelSaleCustomerTransaction extends Model
         // get decrypted customer name first
         $this->load->model('sale/customer');
         $customer_info = $this->model_sale_customer->getCustomer((int)$data['customer_id']);
-        $sql = "SELECT *, t.date_added, t.date_modified,
-                CASE
-                    WHEN t.section=1
-                        THEN CONCAT(u.firstname,' ',u.lastname, ' (',u.username,')')
-                    ELSE
-                        '".$customer_info['firstname'].' '.$customer_info['lastname']."'
-                     END as user
+        $sql = '';
+        if ($mode == 'total_only') {
+            $sql = "SELECT count(*) as total";
+        } else {
+            $sql = "SELECT *,
+                           t.date_added, 
+                           t.date_modified,
+                           CASE
+                            WHEN t.section=1
+                                THEN CONCAT(u.firstname,' ',u.lastname, ' (',u.username,')')
+                            ELSE
+                                '".$customer_info['firstname'].' '.$customer_info['lastname']."'
+                             END as user
+             ";
+        }
+
+        $sql .= "
                 FROM ".$this->db->table_name("customer_transactions")." t
                 LEFT JOIN ".$this->db->table_name("users")." u ON u.user_id = t.created_by
                 WHERE t.customer_id = '".(int)$data['customer_id']."'";
@@ -136,7 +146,7 @@ class ModelSaleCustomerTransaction extends Model
         //If for total, we done building the query
         if ($mode == 'total_only') {
             $query = $this->db->query($sql);
-            return $query->num_rows;
+            return $query->row['total'];
         }
 
         $sort_data = [
