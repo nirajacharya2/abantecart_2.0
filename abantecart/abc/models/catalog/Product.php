@@ -522,7 +522,7 @@ class Product extends BaseModel
         ],
         'length'            => [
             'cast'         => 'float',
-            'rule'         => 'integer',
+            'rule'         => 'number',
             'input_type'   => 'input',
             'input_format' => 'number',
             'access'       => 'read',
@@ -536,7 +536,7 @@ class Product extends BaseModel
         ],
         'width'             => [
             'cast'         => 'float',
-            'rule'         => 'integer',
+            'rule'         => 'number',
             'input_type'   => 'input',
             'input_format' => 'number',
             'access'       => 'read',
@@ -550,7 +550,7 @@ class Product extends BaseModel
         ],
         'height'            => [
             'cast'         => 'float',
-            'rule'         => 'integer',
+            'rule'         => 'number',
             'input_type'   => 'input',
             'input_format' => 'number',
             'access'       => 'read',
@@ -573,7 +573,7 @@ class Product extends BaseModel
         ],
         'weight'            => [
             'cast'         => 'float',
-            'rule'         => 'integer',
+            'rule'         => 'number',
             'input_type'   => 'input',
             'input_format' => 'number',
             'access'       => 'read',
