@@ -1372,6 +1372,10 @@ class ControllerPagesSaleOrder extends AController
 
         //NOTE: This is an empty controller to be hooked from extensions
 
+        if( $this->session->data['error'] ){
+            $this->data['error_warning'] = $this->session->data['error'];
+        }
+
         $this->view->batchAssign($this->data);
 
         $this->addChild('pages/sale/order_summary', 'summary_form', 'pages/sale/order_summary.tpl');
