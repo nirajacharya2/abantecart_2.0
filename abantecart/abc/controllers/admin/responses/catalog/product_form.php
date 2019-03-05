@@ -91,11 +91,17 @@ class ControllerResponsesCatalogProductForm extends AController
                     continue;
                 }
                 $formData['fields_preset']['fields'][$productFieldName]['value'] = $productField['value'];
+
+                if (!is_numeric($productField['value']) && !is_array($productField['value'])) {
+                    $formData['fields_preset']['fields'][$productFieldName]['value'] = htmlspecialchars_decode($productField['value']);
+                }
             }
         }
 
         $form = new FormBuilder(Product::class, $product_type_id, $formData);
         $this->data['form_fields'] = $form->getForm()->getFormFields();
+
+        //H::df($this->data['form_fields']['blurb']->value);
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -111,14 +117,13 @@ class ControllerResponsesCatalogProductForm extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->data['result'] = [];
 
-
         $fields['product_description'] = [
-          'name' => $fields['name'],
-          'blurb' => $fields['blurb'],
-          'description' => $fields['description'],
-          'meta_keywords' => $fields['meta_keywords'],
-          'meta_description' => $fields['meta_description'],
-          'language_id' => $this->language->getContentLanguageID()
+            'name'             => $fields['name'],
+            'blurb'            => $fields['blurb'],
+            'description'      => $fields['description'],
+            'meta_keywords'    => $fields['meta_keywords'],
+            'meta_description' => $fields['meta_description'],
+            'language_id'      => $this->language->getContentLanguageID(),
         ];
 
         if ($this->validate($fields)) {
@@ -142,10 +147,10 @@ class ControllerResponsesCatalogProductForm extends AController
             }
 
         } else {
-            $this->data['result']['error'] =  $this->error['csrf'];
+            $this->data['result']['error'] = $this->error['csrf'];
         }
 
-        $this->data['result']['csrf'] =  FormBuilder::getCsrfToken();
+        $this->data['result']['csrf'] = FormBuilder::getCsrfToken();
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -155,7 +160,8 @@ class ControllerResponsesCatalogProductForm extends AController
         $this->response->setOutput(AJson::encode($this->data['result']));
     }
 
-    private function validate($data) {
+    private function validate($data)
+    {
         if (!$this->csrftoken->isTokenValid($data['csrfinstance'], $data['csrftoken'])) {
             $this->error['csrf'] = $this->language->get('text_system_error');
         }
