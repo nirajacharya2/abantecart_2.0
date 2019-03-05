@@ -42,6 +42,10 @@ class ControllerPagesToolAuditLog extends AController
             $this->data['auditable_id'] = $this->request->get['auditable_id'];
         }
 
+        if (isset($this->request->get['modal_mode'])) {
+            $this->data['modal_mode'] = 1;
+        }
+
         $this->data['ajax_url'] = $this->html->getSecureURL('r/tool/audit_ajax');
 
         $this->data['data_objects'] = $this->getDataObjects();

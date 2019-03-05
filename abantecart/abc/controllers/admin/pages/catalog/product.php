@@ -117,11 +117,11 @@ class ControllerPagesCatalogProduct extends AController
                         ],
                         'audit_log'  => [
                             'text'  => $this->language->get('text_audit_log'),
-                            'href'  => $this->html->getSecureURL('tool/audit_log', '&auditable_type=Product&auditable_id=%ID%'),
+                            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Product&auditable_id=%ID%'),
                             //quick view port URL
                             'vhref' => $this->html->getSecureURL(
                                 'r/common/viewport/modal',
-                                '&viewport_rt=tool/audit_log&auditable_type=Product&auditable_id=%ID%'
+                                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Product&auditable_id=%ID%'
                             ),
                         ],
                         'general'    => [
