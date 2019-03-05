@@ -108,11 +108,11 @@ class ControllerPagesCatalogProduct extends AController
                     'children' => array_merge([
                         'quickview'  => [
                             'text'  => $this->language->get('text_quick_view'),
-                            'href'  => $this->html->getSecureURL('catalog/product/update', '&product_id=%ID%'),
+                            'href'  => $this->html->getSecureURL('catalog/product/update', '&modal_mode=1&product_id=%ID%'),
                             //quick view port URL
                             'vhref' => $this->html->getSecureURL(
                                 'r/common/viewport/modal',
-                                '&viewport_rt=catalog/product/update&product_id=%ID%'
+                                '&modal_mode=1&viewport_rt=catalog/product/update&product_id=%ID%'
                             ),
                         ],
                         'audit_log'  => [
@@ -394,7 +394,6 @@ class ControllerPagesCatalogProduct extends AController
     public function buildFormNew()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $this->loadLanguage('catalog/product');
 
         $formData = [
@@ -520,6 +519,11 @@ class ControllerPagesCatalogProduct extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+
+        if (H::has_value($this->request->get['modal_mode'])) {
+            $this->data['modal_mode'] = 1;
+        }
 
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/catalog/product_vue_form.tpl');
