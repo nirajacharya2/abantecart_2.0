@@ -1,3 +1,8 @@
+<?php if ($this->document->renderJsVars()) { ?>
+<script>
+	<?php echo $this->document->renderJsVars(); ?>
+</script>
+<?php } ?>
 <style>
 	.v-input--selection-controls:not(.v-input--hide-details) .v-input__slot,
 	.v-input__slot {

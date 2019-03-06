@@ -18,19 +18,28 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\engine\Registry;
 use abc\core\lib\AJson;
 use abc\core\lib\FormBuilder;
-use abc\models\catalog\Product;
-use abc\models\catalog\UrlAlias;
-use Cake\Database\Exception;
-use H;
 use Illuminate\Validation\ValidationException;
 
 class ControllerResponsesCatalogProductForm extends AController
 {
     public $error = [];
     public $data = [];
+
+    /**
+     * @var $productInstance \abc\models\catalog\Product
+     */
+    private $productInstance;
+
+    public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
+    {
+        $this->productInstance = ABC::getModelObjectByAlias('Product');
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+    }
 
     public function main()
     {
@@ -98,7 +107,7 @@ class ControllerResponsesCatalogProductForm extends AController
             }
         }
 
-        $form = new FormBuilder(Product::class, $product_type_id, $formData);
+        $form = new FormBuilder(ABC::getFullClassName('Product'), $product_type_id, $formData);
         $this->data['form_fields'] = $form->getForm()->getFormFields();
 
         //H::df($this->data['form_fields']['blurb']->value);
@@ -128,13 +137,12 @@ class ControllerResponsesCatalogProductForm extends AController
 
         if ($this->validate($fields)) {
 
-            $productInst = new Product();
             try {
                 $productId = $fields['product_id'];
                 if ($productId) {
-                    $productInst->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
+                    $this->productInstance->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
                 } else {
-                    $productId = $productInst->createProduct($fields);
+                    $this->productInstance->createProduct($fields);
                 }
                 if ($productId) {
                     $this->data['result']['success_message'] = $this->language->get('text_saved');
