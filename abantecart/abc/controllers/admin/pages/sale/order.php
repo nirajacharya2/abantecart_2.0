@@ -1374,6 +1374,7 @@ class ControllerPagesSaleOrder extends AController
 
         if( $this->session->data['error'] ){
             $this->data['error_warning'] = $this->session->data['error'];
+            unset($this->session->data['error']);
         }
 
         $this->view->batchAssign($this->data);
