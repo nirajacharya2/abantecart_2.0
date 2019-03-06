@@ -1,3 +1,8 @@
+<?php if ($this->document->renderJsVars()) { ?>
+<script>
+	<?php echo $this->document->renderJsVars(); ?>
+</script>
+<?php } ?>
 <style>
 	.v-input--selection-controls:not(.v-input--hide-details) .v-input__slot,
 	.v-input__slot {
@@ -240,7 +245,7 @@
 <script>
 	var unwatchers = [];
 
-	if (typeof abc.form !== 'undefined') {
+	if (typeof abc !== 'undefined' && typeof abc.form !== 'undefined') {
 
 		if (typeof abc.form.form_fields !== 'undefined') {
 			abc.form.form_fields = [].sort.call(abc.form.form_fields, function (a, b) {
@@ -432,6 +437,9 @@
 								{deep: true});
 
 					}
+
+					console.log("mceRepaint");
+					tinyMCE.execCommand("mceRepaint");
 				})
 				.catch(function (error) {
 					alert(error);
