@@ -15,19 +15,22 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models;
 
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 
-trait CastTrait {
+trait CastTrait
+{
 
     use HasAttributes;
 
     /**
      * Cast an attribute to a native PHP type.
      *
-     * @param  string  $key
+     * @param  string $key
      * @param  mixed  $value
+     *
      * @return mixed
      */
     protected function castAttribute($key, $value)
@@ -39,7 +42,7 @@ trait CastTrait {
         switch ($this->getCastType($key)) {
             case 'int':
             case 'integer':
-                return (int) $value;
+                return (int)$value;
             case 'real':
             case 'float':
             case 'double':
@@ -47,10 +50,10 @@ trait CastTrait {
             case 'decimal':
                 return $this->asDecimal($value, explode(':', $this->getCasts()[$key], 2)[1]);
             case 'string':
-                return (string) $value;
+                return (string)$value;
             case 'bool':
             case 'boolean':
-                return (bool) $value;
+                return (bool)$value;
             case 'object':
                 return $this->fromJson($value, true);
             case 'array':
@@ -67,6 +70,8 @@ trait CastTrait {
                 return $this->asTimestamp($value);
             case 'html':
                 return $this->asHtml($value);
+            case 'serialized':
+                return $this->asSerialized($value);
             default:
                 return $value;
         }
@@ -75,6 +80,11 @@ trait CastTrait {
     protected function asHtml($value)
     {
         return htmlspecialchars_decode($value);
+    }
+
+    protected function asSerialized($value)
+    {
+        return unserialize($value);
     }
 
 }

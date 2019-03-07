@@ -28,6 +28,7 @@ use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
 use abc\models\admin\Product;
 use abc\models\catalog\ObjectType;
+use abc\models\catalog\Product;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\UrlAlias;
 use H;
@@ -351,7 +352,12 @@ class ControllerPagesCatalogProduct extends AController
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
         }
-        $this->buildForm();
+
+        if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
+            $this->buildFormNew();
+        } else {
+            $this->buildForm();
+        }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -385,8 +391,13 @@ class ControllerPagesCatalogProduct extends AController
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
         }
-        //$this->buildForm($args);
-        $this->buildFormNew();
+
+        if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
+            $this->buildFormNew();
+        } else {
+            $this->buildForm($args);
+        }
+
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
