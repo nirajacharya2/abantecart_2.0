@@ -14,14 +14,14 @@
 		<?php if($ga_data){?>
 		_gaq.push(['_set', 'currencyCode', '<?php echo $ga_data['currency_code'];?>']);
 		_gaq.push(['_addTrans',
-			'<?php echo $ga_data['transaction_id'];?>',
-			'<?php echo $ga_data['store_name'];?>',
-			'<?php echo $ga_data['total'];?>',
-			'<?php echo $ga_data['tax'];?>',
-			'<?php echo $ga_data['shipping'];?>',
-			'<?php echo $ga_data['city'];?>',
-			'<?php echo $ga_data['state'];?>',
-			'<?php echo $ga_data['country'];?>'
+			<?php abc_js_echo($ga_data['transaction_id']);?>,
+			<?php abc_js_echo($ga_data['store_name']);?>,
+			<?php abc_js_echo($ga_data['total']);?>,
+			<?php abc_js_echo($ga_data['tax']);?>,
+			<?php abc_js_echo($ga_data['shipping']);?>,
+			<?php abc_js_echo($ga_data['city']);?>,
+			<?php abc_js_echo($ga_data['state']);?>,
+			<?php abc_js_echo($ga_data['country']);?>
 		]);
 		_gaq.push(['_trackTrans']);
 		<?php }?>
@@ -30,7 +30,7 @@
 			var ga = document.createElement('script');
 			ga.type = 'text/javascript';
 			ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			ga.src = ('https:' === document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 			var s = document.getElementsByTagName('script')[0];
 			s.parentNode.insertBefore(ga, s);
 		})();
