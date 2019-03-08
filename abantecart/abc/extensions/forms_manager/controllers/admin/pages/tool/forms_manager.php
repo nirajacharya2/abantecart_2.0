@@ -600,6 +600,7 @@ class ControllerPagesToolFormsManager extends AController
                                 'data_type'  => 'form_id',
                                 'id'         => $id,
                                 'sort_order' => (int)$info['sort_order'],
+                                'store_id'           => $this->config->get('config_store_id')
                             ]
                         );
                     } else {
@@ -607,6 +608,7 @@ class ControllerPagesToolFormsManager extends AController
                             [
                                 'data_type' => 'form_id',
                                 'id'        => $id,
+
                             ]
                         );
                     }
@@ -708,6 +710,7 @@ class ControllerPagesToolFormsManager extends AController
                                 'data_type'  => 'form_id',
                                 'id'         => $id,
                                 'sort_order' => (int)$info['sort_order'],
+                                'store_id'   => $this->config->get('config_store_id')
                             ]
                         );
                     } else {

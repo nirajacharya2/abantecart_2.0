@@ -23,10 +23,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class AListingManager extends AListing
 {
     /**
@@ -65,44 +61,59 @@ class AListingManager extends AListing
      * @param array $data
      *
      * @return bool
+     * @throws \Exception
      */
     public function saveCustomListItem($data)
     {
         $custom_block_id = (int)$this->custom_block_id;
+        if(!$custom_block_id){
+            return false;
+        }
+        $data['store_id'] = (int)$data['store_id'];
+
         if (!isset($data['data_type']) && isset($data['listing_datasource'])) {
             $listing_properties = $this->getListingDataSources();
             $data['data_type'] = $listing_properties[$data['listing_datasource']]['data_type'];
         }
 
-        $result = $this->db->query("SELECT *
-									FROM  ".$this->db->table_name("custom_lists")." 
-									WHERE custom_block_id = '".$custom_block_id."'
-											AND id='".$data['id']."'
-											AND data_type='".$data['data_type']."'");
+        $result = $this->db->query(
+            "SELECT *
+            FROM  ".$this->db->table_name("custom_lists")." 
+            WHERE custom_block_id = '".$custom_block_id."'
+                    AND id='".(int)$data['id']."'
+                    AND data_type='".$this->db->escape($data['data_type'])."'
+                    AND store_id='".(int)$data['store_id']."'"
+        );
 
         if ($result->num_rows && $custom_block_id) {
-            $this->db->query("UPDATE ".$this->db->table_name("custom_lists")."
-								SET custom_block_id = '".$custom_block_id."'
-								".(!is_null($data['sort_order']) ? ", sort_order = '".(int)$data['sort_order']."'" : "")
-                ."
-								WHERE custom_block_id = '".$custom_block_id."'
-									  AND id='".$data['id']."'
-										AND data_type='".$data['data_type']."'");
+            $this->db->query(
+                "UPDATE ".$this->db->table_name("custom_lists")."
+                SET custom_block_id = '".$custom_block_id."'
+                ".(!is_null($data['sort_order']) ? ", sort_order = '".(int)$data['sort_order']."'" : "")."
+                WHERE custom_block_id = '".$custom_block_id."'
+                      AND id='".$data['id']."'
+                        AND data_type='".$this->db->escape($data['data_type'])."'
+                        AND store_id='".(int)$data['store_id']."'"
+            );
         } else {
-            $this->db->query("INSERT INTO ".$this->db->table_name("custom_lists")." 
-								( custom_block_id,
-								  data_type,
-								  id,
-								  sort_order,
-								  date_added )
-							  VALUES ('".$custom_block_id."',
-							          '".$data['data_type']."',
-							          '".(int)$data['id']."',
-							          '".( int )$data ['sort_order']."',
-								      NOW())");
+            $this->db->query(
+                "INSERT INTO ".$this->db->table_name("custom_lists")." 
+                ( custom_block_id,
+                  data_type,
+                  id,
+                  sort_order,
+                  store_id,
+                  date_added )
+                VALUES ('".$custom_block_id."',
+                      '".$data['data_type']."',
+                      '".(int)$data['id']."',
+                      '".( int )$data ['sort_order']."',
+                      '".( int )$data ['store_id']."',
+                      NOW())"
+            );
         }
 
-        $this->cache->remove('blocks.custom.'.$custom_block_id);
+        $this->cache->remove('blocks.custom.'.$custom_block_id.$data ['store_id']);
         return true;
     }
 
@@ -110,6 +121,8 @@ class AListingManager extends AListing
 
     /**
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function deleteCustomListItem($data)
     {
@@ -121,21 +134,28 @@ class AListingManager extends AListing
         $custom_block_id = (int)$this->custom_block_id;
 
         $sql = "DELETE FROM  ".$this->db->table_name("custom_lists")." 
-									WHERE custom_block_id = '".$custom_block_id."'
-											AND id='".$data['id']."'
-											AND data_type='".$data['data_type']."'";
+                                    WHERE custom_block_id = '".$custom_block_id."'
+                                            AND id='".$data['id']."'
+                                            AND data_type='".$data['data_type']."'";
         $this->db->query($sql);
         $this->cache->remove('blocks.custom.'.$custom_block_id);
     }
 
     // delete all custom list of custom listing block
 
-    public function deleteCustomListing()
+    /**
+     * @param $store_id
+     *
+     * @throws \Exception
+     */
+    public function deleteCustomListing($store_id)
     {
+        $store_id = (int)$store_id;
         $custom_block_id = (int)$this->custom_block_id;
         $sql = "DELETE FROM  ".$this->db->table_name("custom_lists")."
-				WHERE custom_block_id = '".$custom_block_id."'";
+                WHERE custom_block_id = '".$custom_block_id."'
+                    AND store_id = '".$store_id."'";
         $this->db->query($sql);
-        $this->cache->remove('blocks.custom.'.$custom_block_id);
+        $this->cache->remove('blocks.custom.'.$custom_block_id.$store_id);
     }
 }

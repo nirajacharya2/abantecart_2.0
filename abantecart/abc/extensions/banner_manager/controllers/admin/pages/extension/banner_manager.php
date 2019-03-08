@@ -23,11 +23,11 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
 use abc\extensions\banner_manager\models\admin\extension\ModelExtensionBannerManager;
+use H;
 
 /**
  * @property ModelExtensionBannerManager $model_extension_banner_manager
@@ -374,10 +374,10 @@ class ControllerPagesExtensionBannerManager extends AController
 
         //check if banner is active based on dates and update status
         $now = time();
-        if ( AHelperUtils::dateISO2Int( $this->data['start_date'] ) > $now ) {
+        if ( H::dateISO2Int( $this->data['start_date'] ) > $now ) {
             $this->data['status'] = 0;
         }
-        $stop = AHelperUtils::dateISO2Int( $this->data['end_date'] );
+        $stop = H::dateISO2Int( $this->data['end_date'] );
 
         if ( $stop > 0 && $stop < $now ) {
             $this->data['status'] = 0;
@@ -464,9 +464,9 @@ class ControllerPagesExtensionBannerManager extends AController
         $this->data['form']['fields']['date_start'] = $form->getFieldHtml( [
             'type'       => 'date',
             'name'       => 'start_date',
-            'value'      => AHelperUtils::dateISO2Display( $this->data['start_date'] ),
-            'default'    => AHelperUtils::dateNowDisplay(),
-            'dateformat' => AHelperUtils::format4Datepicker( $this->language->get( 'date_format_short' ) ),
+            'value'      => H::dateISO2Display( $this->data['start_date'] ),
+            'default'    => H::dateNowDisplay(),
+            'dateformat' => H::format4Datepicker( $this->language->get( 'date_format_short' ) ),
             'highlight'  => 'future',
             'style'      => 'small-field',
         ]);
@@ -475,9 +475,9 @@ class ControllerPagesExtensionBannerManager extends AController
         $this->data['form']['fields']['date_end'] = $form->getFieldHtml( [
             'type'       => 'date',
             'name'       => 'end_date',
-            'value'      => AHelperUtils::dateISO2Display( $this->data['end_date'] ),
+            'value'      => H::dateISO2Display( $this->data['end_date'] ),
             'default'    => '',
-            'dateformat' => AHelperUtils::format4Datepicker( $this->language->get( 'date_format_short' ) ),
+            'dateformat' => H::format4Datepicker( $this->language->get( 'date_format_short' ) ),
             'highlight'  => 'past',
             'style'      => 'small-field',
         ]);
@@ -578,10 +578,10 @@ class ControllerPagesExtensionBannerManager extends AController
     protected function _prepareData()
     {
         if ( isset( $this->request->post['start_date'] ) && $this->request->post['start_date'] ) {
-            $this->request->post['start_date'] = AHelperUtils::dateDisplay2ISO( $this->request->post['start_date'] );
+            $this->request->post['start_date'] = H::dateDisplay2ISO( $this->request->post['start_date'] );
         }
         if ( isset( $this->request->post['end_date'] ) && $this->request->post['end_date'] ) {
-            $this->request->post['end_date'] = AHelperUtils::dateDisplay2ISO( $this->request->post['end_date'] );
+            $this->request->post['end_date'] = H::dateDisplay2ISO( $this->request->post['end_date'] );
         }
 
         if ( is_array( $this->request->post['banner_group_name'] ) && isset( $this->request->post['banner_group_name'][1] ) ) {
@@ -671,13 +671,14 @@ class ControllerPagesExtensionBannerManager extends AController
 
             if ( $this->request->post['block_banners'] ) {
                 $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing();
+                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
                 foreach ( $this->request->post['block_banners'] as $k => $id ) {
                     $listing_manager->saveCustomListItem(
                         [
                             'data_type'  => 'banner_id',
                             'id'         => (int)$id,
                             'sort_order' => (int)$k,
+                            'store_id'           => $this->config->get('config_store_id')
                         ]);
 
                 }
@@ -801,7 +802,7 @@ class ControllerPagesExtensionBannerManager extends AController
             // save list if it is custom
             if ( $this->request->post['block_banners'] ) {
                 $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing();
+                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
                 $k = 0;
                 foreach ( $this->request->post['block_banners'] as $id ) {
                     $listing_manager->saveCustomListItem(
@@ -809,13 +810,14 @@ class ControllerPagesExtensionBannerManager extends AController
                             'data_type'  => 'banner_id',
                             'id'         => $id,
                             'sort_order' => (int)$k,
+                            'store_id'           => $this->config->get('config_store_id')
                         ]);
                     $k++;
                 }
             } else {
                 //delete the list as nothing provided
                 $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing();
+                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
             }
 
             $this->session->data ['success'] = $this->language->get( 'text_banner_success' );

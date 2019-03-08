@@ -10574,13 +10574,14 @@ CREATE TABLE `ac_custom_lists` (
   `custom_block_id` int(11) NOT NULL,
   `data_type` varchar(70) NOT NULL,
   `id` int(11) NOT NULL,
+  `store_id` int(11) DEFAULT 0,
   `sort_order` int(10) NOT NULL DEFAULT 0,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`rowid`),
-  INDEX `ac_custom_block_id_list_idx` (`custom_block_id` ),
+  INDEX `ac_custom_block_id_list_idx` (`custom_block_id`, `store_id` ),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 

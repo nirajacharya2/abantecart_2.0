@@ -22,10 +22,6 @@ namespace abc\core\lib;
 
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class AListing
  *
@@ -49,7 +45,7 @@ class AListing
     /**
      * @var array
      */
-    public $data_sources = array();
+    public $data_sources = [];
 
     /**
      * @param int $custom_block_id
@@ -59,65 +55,65 @@ class AListing
         $this->registry = Registry::getInstance();
         $this->custom_block_id = (int)$custom_block_id;
         // datasources
-        $this->data_sources = Array(
-            'catalog_product_getPopularProducts' => array(
+        $this->data_sources = [
+            'catalog_product_getPopularProducts' => [
                 'text'                 => 'text_products_popular',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
                 'storefront_model'     => 'catalog/product',
                 'storefront_method'    => 'getPopularProducts',
                 'storefront_view_path' => 'product/product',
-            ),
-            'catalog_product_getSpecialProducts' => array(
+            ],
+            'catalog_product_getSpecialProducts' => [
                 'text'                 => 'text_products_special',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
                 'storefront_model'     => 'catalog/product',
                 'storefront_method'    => 'getProductSpecials',
                 'storefront_view_path' => 'product/product',
-            ),
-            'catalog_category_getcategories'     => array(
+            ],
+            'catalog_category_getcategories'     => [
                 'text'                 => 'text_categories',
                 'rl_object_name'       => 'categories',
                 'data_type'            => 'category_id',
                 'storefront_model'     => 'catalog/category',
                 'storefront_method'    => 'getCategories',
                 'storefront_view_path' => 'product/category',
-            ),
-            'catalog_category_getmanufacturers'  => array(
+            ],
+            'catalog_category_getmanufacturers'  => [
                 'text'                 => 'text_manufacturers',
                 'rl_object_name'       => 'manufacturers',
                 'data_type'            => 'manufacturer_id',
                 'storefront_model'     => 'catalog/manufacturer',
                 'storefront_method'    => 'getManufacturers',
                 'storefront_view_path' => 'product/manufacturer',
-            ),
-            'catalog_product_getfeatured'        => array(
+            ],
+            'catalog_product_getfeatured'        => [
                 'text'                 => 'text_featured',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
                 'storefront_model'     => 'catalog/product',
                 'storefront_method'    => 'getFeaturedProducts',
                 'storefront_view_path' => 'product/product',
-            ),
-            'catalog_product_getlatest'          => array(
+            ],
+            'catalog_product_getlatest'          => [
                 'text'                 => 'text_latest',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
                 'storefront_model'     => 'catalog/product',
                 'storefront_method'    => 'getLatestProducts',
                 'storefront_view_path' => 'product/product',
-            ),
-            'catalog_product_getbestsellers'     => array(
+            ],
+            'catalog_product_getbestsellers'     => [
                 'text'                 => 'text_bestsellers',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
                 'storefront_model'     => 'catalog/product',
                 'storefront_method'    => 'getBestsellerProducts',
                 'storefront_view_path' => 'product/product',
-            ),
-            'media'                              => array('text' => 'text_media'),
-            'custom_products'                    => array(
+            ],
+            'media'                              => ['text' => 'text_media'],
+            'custom_products'                    => [
 
                 'model'                => 'catalog/product',
                 'total_method'         => 'getTotalProducts',
@@ -131,8 +127,8 @@ class AListing
                 'storefront_method'    => 'getProduct',
                 'storefront_view_path' => 'product/product',
                 'items_list_url'       => 'product/product/related',
-            ),
-            'custom_categories'                  => array(
+            ],
+            'custom_categories'                  => [
                 'model'                => 'catalog/category',
                 'total_method'         => 'getTotalCategories',
                 'method'               => 'getCategoriesData',
@@ -145,8 +141,8 @@ class AListing
                 'storefront_method'    => 'getCategory',
                 'storefront_view_path' => 'product/category',
                 'items_list_url'       => 'product/product/product_categories',
-            ),
-            'custom_manufacturers'               => array(
+            ],
+            'custom_manufacturers'               => [
                 'model'                => 'catalog/manufacturer',
                 'total_method'         => 'getTotalManufacturers',
                 'method'               => 'getManufacturers',
@@ -159,8 +155,8 @@ class AListing
                 'storefront_method'    => 'getManufacturer',
                 'storefront_view_path' => 'product/manufacturer',
                 'items_list_url'       => 'catalog/manufacturer_listing/getManufacturers',
-            ),
-        );
+            ],
+        ];
     }
 
     public function __get($key)
@@ -174,23 +170,33 @@ class AListing
     }
 
     /**
+     * @param int $store_id
+     *
      * @return array
+     * @throws \Exception
      */
-    public function getCustomList()
+    public function getCustomList($store_id=0)
     {
-        if (!$this->custom_block_id) {
-            return array();
+        $store_id = (int)$store_id;
+        if (!(int)$this->custom_block_id) {
+            return [];
         }
+
         $custom_block_id = (int)$this->custom_block_id;
-        $cache_key = 'blocks.custom.'.$custom_block_id;
+        $cache_key = 'blocks.custom.'.$custom_block_id.$store_id;
         $output = $this->cache->pull($cache_key);
+
         if ($output !== false) {
             return $output;
         }
-        $result = $this->db->query("SELECT *
-									FROM `".$this->db->table_name('custom_lists')."`
-									WHERE custom_block_id = '".$custom_block_id."'
-									ORDER BY sort_order");
+
+        $result = $this->db->query(
+            "SELECT *
+            FROM `".$this->db->table_name('custom_lists')."`
+            WHERE custom_block_id = '".$custom_block_id."'
+             AND store_id = '".$store_id."'
+            ORDER BY sort_order"
+        );
         $output = $result->rows;
         $this->cache->push($cache_key, $output);
         return $output;
@@ -230,27 +236,27 @@ class AListing
      *
      * @return array|false
      */
-    public function getListingArguments($model, $method, $args = array())
+    public function getListingArguments($model, $method, $args = [])
     {
         if (!$method || !$model || !$args) {
             return false;
         }
-        $output = array();
+        $output = [];
         if ($model == 'catalog/category' && $method == 'getCategories') {
             $args['parent_id'] = is_null($args['parent_id']) ? 0 : $args['parent_id'];
-            $output = array($args['parent_id'], $args['limit']);
+            $output = [$args['parent_id'], $args['limit']];
         } elseif ($model == 'catalog/manufacturer' && $method == 'getManufacturers') {
-            $output = array(array('limit' => $args['limit']));
+            $output = [['limit' => $args['limit']]];
         } elseif ($model == 'catalog/product' && $method == 'getPopularProducts') {
-            $output = array('limit' => $args['limit']);
+            $output = ['limit' => $args['limit']];
         } elseif ($model == 'catalog/product' && $method == 'getProductSpecials') {
-            $output = array('p.sort_order', 'ASC', 0, 'limit' => $args['limit']);
+            $output = ['p.sort_order', 'ASC', 0, 'limit' => $args['limit']];
         } elseif ($model == 'catalog/product' && $method == 'getBestsellerProducts') {
-            $output = array($args['limit']);
+            $output = [$args['limit']];
         } elseif ($model == 'catalog/product' && $method == 'getFeaturedProducts') {
-            $output = array($args['limit']);
+            $output = [$args['limit']];
         } elseif ($model == 'catalog/product' && $method == 'getLatestProducts') {
-            $output = array($args['limit']);
+            $output = [$args['limit']];
         }
         return $output;
     }

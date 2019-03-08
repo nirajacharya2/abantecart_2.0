@@ -276,7 +276,7 @@ class ControllerPagesDesignBlocks extends AController
             if (strpos($this->request->post['listing_datasource'], 'custom_') !== false) {
                 $listing_manager = new AListingManager($custom_block_id);
                 if ($this->request->post['selected']) {
-                    $listing_manager->deleteCustomListing();
+                    $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
                     $k = 0;
                     foreach ($this->request->post['selected'] as $id) {
                         $listing_manager->saveCustomListItem(
@@ -285,6 +285,7 @@ class ControllerPagesDesignBlocks extends AController
                                 'id'                 => $id,
                                 'limit'              => $this->request->post['limit'],
                                 'sort_order'         => (int)$k,
+                                'store_id'           => $this->config->get('config_store_id')
                             ]);
                         $k++;
                     }
@@ -365,12 +366,12 @@ class ControllerPagesDesignBlocks extends AController
                     // if datasource changed - drop custom list
 
                     if ($block_info['content']['listing_datasource'] != $content['listing_datasource']) {
-                        $listing_manager->deleteCustomListing();
+                        $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
                     }
                     if (strpos($content['listing_datasource'], 'custom_') !== false) {
 
                         if ($this->request->post['selected']) {
-                            $listing_manager->deleteCustomListing();
+                            $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
                             $k = 0;
                             foreach ($this->request->post['selected'] as $id) {
                                 $listing_manager->saveCustomListItem(
@@ -379,6 +380,7 @@ class ControllerPagesDesignBlocks extends AController
                                         'id'                 => $id,
                                         'limit'              => $this->request->post['limit'],
                                         'sort_order'         => $k,
+                                        'store_id'           => $this->config->get('config_store_id')
                                     ]);
                                 $k++;
                             }
