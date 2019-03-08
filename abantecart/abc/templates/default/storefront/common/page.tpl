@@ -145,16 +145,16 @@ if($scripts_bottom && is_array($scripts_bottom)) {
 	<?php if($ga_data){ ?>
 		ga('require', 'ecommerce');
 		ga('ecommerce:addTransaction', {
-			'id': '<?php echo $ga_data['transaction_id'];?>',
-			'affiliation': '<?php echo $ga_data['store_name'];?>',
-			'revenue': '<?php echo $ga_data['total'];?>',
-			'shipping': '<?php echo $ga_data['shipping'];?>',
-			'tax': '<?php echo $ga_data['tax'];?>',
-			'currency': '<?php echo $ga_data['currency_code'];?>',
-			'city':  '<?php echo $ga_data['city'];?>',
-			'state':  '<?php echo $ga_data['state'];?>',
-			'country':  '<?php echo $ga_data['country'];?>'
-		});
+				'id': <?php abc_js_echo($ga_data['transaction_id']);?>,
+				'affiliation': <?php abc_js_echo($ga_data['store_name']);?>,
+				'revenue': <?php abc_js_echo($ga_data['total']);?>,
+				'shipping': <?php abc_js_echo($ga_data['shipping']);?>,
+				'tax': <?php abc_js_echo($ga_data['tax']);?>,
+				'currency': <?php abc_js_echo($ga_data['currency_code']);?>,
+				'city':  <?php abc_js_echo($ga_data['city']);?>,
+				'state':  <?php abc_js_echo($ga_data['state']);?>,
+				'country':  <?php abc_js_echo($ga_data['country']);?>
+			});
 
 	<?php if($ga_data['items']){
 			foreach($ga_data['items'] as $item){ ?>

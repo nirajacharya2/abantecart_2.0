@@ -642,7 +642,7 @@ class ControllerResponsesProductProduct extends AController
 
         //remove html-code from textarea product option
         if (in_array($option_info['element_type'], ['T', 'B'])) {
-            foreach ($this->request->post['name'] as &$v) {
+            foreach ((array)$this->request->post['name'] as &$v) {
                 $v = strip_tags(html_entity_decode($v, ENT_QUOTES, ABC::env('APP_CHARSET')));
                 $v = str_replace('\r\n', "\n", $v);
             }

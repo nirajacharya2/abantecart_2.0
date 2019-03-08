@@ -674,6 +674,9 @@ class AResource
                     'description' => $rsrc_info['description'],
                 ];
             }
+            if($limit && count($resources) == $limit){
+                break;
+            }
         }
 
         if ($limit == 1) {

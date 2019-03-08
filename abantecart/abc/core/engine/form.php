@@ -648,7 +648,7 @@ class AForm
         foreach ($this->fields as $field) {
             // for multivalue required fields
             if (in_array($field['element_type'], HtmlElementFactory::getMultivalueElements())
-                && !sizeof($data[$field['field_name']])
+                && !$data[$field['field_name']]
                 && $field['required'] == 'Y'
             ) {
                 $errors[$field['field_name']] = $field['name'].' '.$this->language->get('text_field_required');
