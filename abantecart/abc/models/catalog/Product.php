@@ -999,7 +999,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return bool|int
+     * @return int
      */
     public function hasAnyStock()
     {
@@ -1024,10 +1024,6 @@ class Product extends BaseModel
                     continue;
                 }
                 $total_quantity += $row->quantity < 0 ? 0 : $row->quantity;
-            }
-            //if some of option value have subtract NO - think product is available
-            if ($total_quantity == 0 && $notrack_qnt) {
-                $total_quantity = true;
             }
         } else {
             //get product quantity without options

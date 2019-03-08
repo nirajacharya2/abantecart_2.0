@@ -2707,7 +2707,7 @@ class ModelCatalogProduct extends Model
         if (!$result->row['status']) {
             return [$this->language->get('text_product_disabled')];
         }
-
+        $hasTrackOptions = $this->hasTrackOptions($product_id);
         $output = [];
         // check is product available
         if (H::dateISO2Int($result->row['date_available']) > time()) {
@@ -2715,20 +2715,21 @@ class ModelCatalogProduct extends Model
         }
 
         //check is stock track for whole product(not options) enabled and product quantity more than 0
-        if ($result->row['base_subtract'] && $result->row['base_quantity'] <= 0 && !$this->hasTrackOptions($product_id)
-            && !$result->row['option_name']) {
+        if ($result->row['base_subtract'] && $result->row['base_quantity'] <= 0 && !$hasTrackOptions) {
             $output[] = $this->language->get('text_product_out_of_stock');
         }
         $out_of_stock = false;
         $error_txt = [];
-        foreach ($result->rows as $k => $row) {
-            if ($row['subtract'] && $row['quantity'] <= 0) {
-                $error_txt[] = $row['option_name'].' => '.$row['option_value_name'];
-                $out_of_stock = true;
+        if($hasTrackOptions) {
+            foreach ($result->rows as $k => $row) {
+                if ($row['subtract'] && $row['quantity'] <= 0) {
+                    $error_txt[] = $row['option_name'].' => '.$row['option_value_name'];
+                    $out_of_stock = true;
+                }
             }
         }
 
-        if ($out_of_stock) {
+        if ($out_of_stock && $hasTrackOptions) {
             $output[] = $this->language->get('text_product_option_out_of_stock');
             $output = array_merge($output, $error_txt);
         }
