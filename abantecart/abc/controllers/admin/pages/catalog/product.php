@@ -28,7 +28,6 @@ use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
 use abc\models\admin\Product;
 use abc\models\catalog\ObjectType;
-use abc\models\catalog\Product;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\UrlAlias;
 use H;
