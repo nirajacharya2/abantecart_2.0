@@ -133,7 +133,7 @@ final class ARequest
                 }
             }
         } else if(!is_numeric($data)) {
-            $data = htmlspecialchars($data, ENT_COMPAT, ABC::env('APP_CHARSET'));
+            $data = htmlspecialchars($data, ENT_NOQUOTES, ABC::env('APP_CHARSET'));
         }
         return $data;
     }
