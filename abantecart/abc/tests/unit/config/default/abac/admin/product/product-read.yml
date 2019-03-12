@@ -14,7 +14,7 @@ rules:
             admin.class:
                 comparison_type: string
                 comparison: isEqual
-                value: abc\models\base\Product
+                value: abc\models\catalog\Product
             admin.affectedColumns:
                 comparison_type: array
                 comparison: NotContainsDiffs

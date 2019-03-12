@@ -28,7 +28,7 @@ return [
 
     'EVENTS'         => [
         //listeners for model Product on "saving" event
-        //'eloquent.saving: abc\models\base\Product' => [ ],
+        //'eloquent.saving: abc\models\catalog\Product' => [ ],
         //listeners for all models on "saving" event
         'eloquent.saving: *' => [],
         //call listeners on every model event
