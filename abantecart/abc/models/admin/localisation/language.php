@@ -189,8 +189,8 @@ class ModelLocalisationLanguage extends Model
             $result = $query->rows;
             foreach ($result as $i => $row) {
                 if (empty($row['image'])) {
-                    if (file_exists(ABC::env('DIR_ROOT').'/admin/languages/'.$row['directory'].'/flag.png')) {
-                        $result[$i]['image'] = 'admin/languages/'.$row['directory'].'/flag.png';
+                    if (file_exists(ABC::env('DIR_ROOT').'/public/templates/'.(ABC::env('adminTemplate') ? ABC::env('adminTemplate') : 'default' ).'/admin/assets/images/languages/'.$result['directory'].'/flag.png')) {
+                        $result[$i]['image'] = 'templates/'.(ABC::env('adminTemplate') ? ABC::env('adminTemplate') : 'default' ).'/admin/assets/images/languages/'.$result['directory'].'/flag.png';
                     }
                 } else {
                     $result[$i]['image'] = $row['image'];
@@ -208,8 +208,8 @@ class ModelLocalisationLanguage extends Model
 
                 foreach ($query->rows as $result) {
                     if (empty($result['image'])) {
-                        if (file_exists(ABC::env('DIR_ROOT').'/admin/languages/'.$result['directory'].'/flag.png')) {
-                            $result['image'] = 'admin/languages/'.$result['directory'].'/flag.png';
+                        if (file_exists(ABC::env('DIR_ROOT').'/public/templates/'.(ABC::env('adminTemplate') ? ABC::env('adminTemplate') : 'default' ).'/admin/assets/images/languages/'.$result['directory'].'/flag.png')) {
+                            $result['image'] = 'templates/'.(ABC::env('adminTemplate') ? ABC::env('adminTemplate') : 'default' ).'/admin/assets/images/languages/'.$result['directory'].'/flag.png';
                         }
                     }
 
