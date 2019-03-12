@@ -69,10 +69,7 @@ class ControllerResponsesGridForm extends AController
         foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['form_id'];
             $response->rows[$i]['cell'] = [
-                $this->html->buildInput([
-                    'name'  => 'form_name['.$result['form_id'].']',
-                    'value' => $result['form_name'],
-                ]),
+                $result['form_name'],
                 $this->html->buildInput([
                     'name'  => 'form_description['.$result['form_id'].']',
                     'value' => $result['description'],
@@ -116,7 +113,7 @@ class ControllerResponsesGridForm extends AController
                 }
                 break;
             case 'save':
-                $fields = ['form_name', 'form_description', 'form_status'];
+                $fields = ['form_description', 'form_status'];
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
