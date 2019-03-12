@@ -885,16 +885,6 @@ class ControllerPagesCatalogProduct extends AController
             'style' => 'btn_switch btn-group-sm',
         ]);
 
-        $this->data['form']['fields']['general']['product_type'] = $form->getFieldHtml([
-            'type'        => 'selectbox',
-            'name'        => 'product_type',
-            'value'       => $this->data['product_type'],
-            'options'     => $this->data['product_types'],
-            'placeholder' => $this->language->get('entry_product_type'),
-            'required'    => true,
-            'attr'        => !empty($this->data['product_type']) ? 'disabled=disabled' : '',
-        ]);
-
         $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'product_description[name]',
