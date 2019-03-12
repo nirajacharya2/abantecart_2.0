@@ -5,15 +5,15 @@
   </div>
   <div class="modal-body">
     <ul class="nav nav-tabs" role="tablist">
-      <li class="active"><a href="#blocks" role="tab" data-toggle="tab"><?php echo $text_available_block; ?></a></li>
+      <li class="nav-item active"><a href="#blocks" class="nav-link active" role="tab" data-toggle="tab"><?php echo $text_available_block; ?></a></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="blocks">
-        <ul class="blocks-list">
+        <div class="row fluid">
           <?php foreach ($blocks as $block) { ?>
-          <li>
+          <div class="col-md-6">
             <a class="block-item" data-id="<?php echo $block['id']; ?>" data-add-url="<?php echo $addBlock; ?>">
               <i class="fa fa-square-o pull-left"></i>
               <?php if ($block['custom_block_id'] > 0) { ?>
@@ -24,9 +24,9 @@
               <span class="info"></span>
               <?php } ?>
             </a>
-          </li>
+          </div>
           <?php } ?>
-        </ul>
+        </div>
       </div>
       <!-- <div class="tab-pane" id="create-block">...</div> -->
     </div>
