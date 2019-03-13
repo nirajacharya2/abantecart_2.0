@@ -13,7 +13,7 @@ class ModelAuditListener
 
     protected $registry;
 
-    const DEBUG_TO_LOG = true;
+    const DEBUG_TO_LOG = false;
 
     public function __construct()
     {
