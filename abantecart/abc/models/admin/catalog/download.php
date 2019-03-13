@@ -310,8 +310,8 @@ class ModelCatalogDownload extends Model
                                           activate_order_status_id,
                                           status,
                                           shared,
-                                          date_added,
-                                          date_modified
+                                          d.date_added,
+                                          d.date_modified
                                     FROM ".$this->db->table_name('downloads')." d
                                     LEFT JOIN ".$this->db->table_name('download_descriptions')." dc
                                         ON d.download_id=dc.download_id AND dc.language_id = '"
