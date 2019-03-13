@@ -111,6 +111,8 @@ class ControllerPagesProductSpecial extends AController
             $sort = 'p.'.$sort;
         } elseif ($sort == 'price') {
             $sort = 'ps.'.$sort;
+        } elseif ($sort == 'p.price') {
+            $sort = 'ps.price';
         }
 
         $this->loadModel('catalog/product');

@@ -47,7 +47,10 @@ class ModelAccountCustomer extends Model
     /**
      * @param array $data
      *
+     * @param bool $subscribe_only
+     *
      * @return int
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function addCustomer( $data , $subscribe_only = false)
@@ -198,6 +201,7 @@ class ModelAccountCustomer extends Model
      *
      * @return bool
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function editCustomer( $data )
     {
@@ -217,7 +221,7 @@ class ModelAccountCustomer extends Model
 
         //update login only if needed
         $loginname = '';
-        if ( ! empty( $data['loginname'] ) ) {
+        if ( ! empty($data['loginname'])  && trim($data['loginname']) != $this->customer->getLoginName()) {
             $loginname = " loginname = '".$this->db->escape( $data['loginname'] )."', ";
             $message_arr = [
                 0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
@@ -287,7 +291,8 @@ class ModelAccountCustomer extends Model
         //get all columns
         $sql = "SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = '".$this->db->getDatabaseName()."' AND TABLE_NAME = '".$this->db->table_name( "customers" )."'";
+                WHERE TABLE_SCHEMA = '".$this->db->getDatabaseName()."' 
+                    AND TABLE_NAME = '".$this->db->table_name( "customers" )."'";
         $result = $this->db->query( $sql );
         $columns = [];
         foreach ( $result->rows as $row ) {
@@ -369,7 +374,8 @@ class ModelAccountCustomer extends Model
         }
 
         if ( $update ) {
-            $sql = "DELETE FROM ".$this->db->table_name( 'customer_notifications' )." WHERE customer_id = ".$customer_id;
+            $sql = "DELETE FROM ".$this->db->table_name( 'customer_notifications' )." 
+                    WHERE customer_id = ".$customer_id;
             $this->db->query( $sql );
 
             foreach ( $update as $sendpoint => $row ) {
@@ -413,6 +419,7 @@ class ModelAccountCustomer extends Model
      * @param string $password
      *
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function editPassword( $loginname, $password )
     {
@@ -513,9 +520,10 @@ class ModelAccountCustomer extends Model
     public function getCustomer( $customer_id )
     {
         $query = $this->db->query(
-                                "SELECT *
-                                FROM ".$this->db->table_name( "customers" )."
-                                WHERE customer_id = '".(int)$customer_id."'" );
+                "SELECT *
+                FROM ".$this->db->table_name( "customers" )."
+                WHERE customer_id = '".(int)$customer_id."'"
+        );
         $result_row = $this->dcrypt->decrypt_data( $query->row, 'customers' );
         $result_row['data'] = unserialize( $result_row['data'] );
 
@@ -674,6 +682,7 @@ class ModelAccountCustomer extends Model
      *
      * @return array
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function validateRegistrationData( $data )
     {
@@ -943,8 +952,8 @@ class ModelAccountCustomer extends Model
     public function getTotalTransactions($transaction_id = 0)
     {
         $sql = "SELECT COUNT(*) AS total
-                                   FROM `".$this->db->table_name( "customer_transactions" )."`
-                                   WHERE customer_id = '".(int)$this->customer->getId()."'";
+               FROM `".$this->db->table_name( "customer_transactions" )."`
+               WHERE customer_id = '".(int)$this->customer->getId()."'";
         if ($transaction_id > 0) {
             $sql .= ' AND customer_transaction_id='.$transaction_id;
         }
@@ -957,6 +966,8 @@ class ModelAccountCustomer extends Model
      * @param int $start
      * @param int $limit
      *
+     * @param int $transaction_id
+     *
      * @return mixed
      * @throws \Exception
      */
@@ -967,16 +978,16 @@ class ModelAccountCustomer extends Model
         }
 
         $sql = "SELECT 
-                                        t.customer_transaction_id,
-                                        t.order_id,
-                                        t.section,
-                                        t.credit,
-                                        t.debit,
-                                        t.transaction_type,
-                                        t.description,
-                                        t.date_added
-                                FROM `".$this->db->table_name( "customer_transactions" )."` t
-                                WHERE customer_id = '".(int)$this->customer->getId()."'";
+                t.customer_transaction_id,
+                t.order_id,
+                t.section,
+                t.credit,
+                t.debit,
+                t.transaction_type,
+                t.description,
+                t.date_added
+        FROM `".$this->db->table_name( "customer_transactions" )."` t
+        WHERE customer_id = '".(int)$this->customer->getId()."'";
 
         if ($transaction_id > 0) {
             $sql .= ' AND customer_transaction_id = '.$transaction_id;
@@ -998,9 +1009,10 @@ class ModelAccountCustomer extends Model
     {
         $query = $this->db->query(
             "SELECT customer_group_id
-                                FROM `".$this->db->table_name( "customer_groups" )."`
-                                WHERE `name` = 'Newsletter Subscribers'
-                                LIMIT 0,1" );
+            FROM `".$this->db->table_name( "customer_groups" )."`
+            WHERE `name` = 'Newsletter Subscribers'
+            LIMIT 0,1"
+        );
         $result = ! $query->row['customer_group_id'] ? (int)$this->config->get( 'config_customer_group_id' ) : $query->row['customer_group_id'];
 
         return $result;

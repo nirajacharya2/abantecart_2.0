@@ -1,11 +1,11 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2019 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,60 +17,63 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\models\storefront\Currency;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerBlocksCurrency extends AController {
-	public $data = [];
-	public function main() {
+
+class ControllerBlocksCurrency extends AController
+{
+    public $data = [];
+
+    public function main()
+    {
 
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-      	$this->data['heading_title'] = $this->language->get('heading_title','blocks/currency');
-		$this->data['currency_code'] = $this->currency->getCode();
+        $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/currency');
+        $this->data['currency_code'] = $this->currency->getCode();
 
-		$get_vars = $this->request->get;
-		$unset = ['currency'];
-		if(isset($get_vars['product_id'])){
-			$unset[] = 'path'; 
-		}
-		//build safe redirect URI
+        $get_vars = $this->request->get;
+        $unset = ['currency'];
+        if (isset($get_vars['product_id'])) {
+            $unset[] = 'path';
+        }
+        //build safe redirect URI
         if (!isset($this->request->get['rt'])) {
             $rt = 'index/home';
             $URI = '';
         } else {
-        	$rt = $this->request->get['rt'];
-        	$unset[] = 'rt';
-			$URI = '&'.$this->html->buildURI($this->request->get, $unset);
-			$URI = $URI=='&' ? '' : $URI;
+            $rt = $this->request->get['rt'];
+            $unset[] = 'rt';
+            $URI = '&'.$this->html->buildURI($this->request->get, $unset);
+            $URI = $URI == '&' ? '' : $URI;
         }
 
-		$currencyInstance = new Currency();
+        $currencyInstance = new Currency();
         $results = $currencyInstance->getCurrencies();
 
-		$currencies = [];
-		if (is_array($results) && $results) {
-			foreach ($results as $result) {
-				if ($result['status']) {
-	   				$currencies[] = [
-						'title' => $result['title'],
-						'code'  => $result['code'],
-						'symbol' => ( !empty( $result['symbol_left'] ) ? $result['symbol_left'] : $result['symbol_right'] ),
-						'href'  => $this->html->getURL($rt, $URI.'&currency='.$result['code'],true)
-					];
-				}
-			}
-		}
-		$this->data['currencies'] = $currencies;
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('blocks/currency.tpl');
+        $currencies = [];
+        if (is_array($results) && $results) {
+            foreach ($results as $result) {
+                if ($result['status']) {
+                    $currencies[] = [
+                        'title'  => $result['title'],
+                        'code'   => $result['code'],
+                        'symbol' => (!empty($result['symbol_left']) ? $result['symbol_left'] : $result['symbol_right']),
+                        'href'   => $this->html->getSEOURL($rt, $URI.'&currency='.$result['code'], true),
+                    ];
+                }
+            }
+        }
+        $this->data['currencies'] = $currencies;
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('blocks/currency.tpl');
 
         //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }
