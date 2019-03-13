@@ -591,7 +591,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
-        $this->loadLanguage('catalog/product_type');
+        $this->loadLanguage('catalog/object_type');
 
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
