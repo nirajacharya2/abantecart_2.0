@@ -753,4 +753,8 @@
 		<key>text_help_link</key>
 		<value><![CDATA[<a href="http://www.abantecart.com/contact-us" target="_abantecart">Need help?</a>]]></value>
 	</definition>
+	<definition>
+		<key>text_audit_log</key>
+		<value><![CDATA[Audit log]]></value>
+	</definition>
 </definitions>
