@@ -353,9 +353,9 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
-            $this->buildFormNew();
-        } else {
             $this->buildForm();
+        } else {
+            $this->buildFormNew();
         }
 
         //update controller data
@@ -392,9 +392,9 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
-            $this->buildFormNew();
-        } else {
             $this->buildForm($args);
+        } else {
+            $this->buildFormNew();
         }
 
         //update controller data
