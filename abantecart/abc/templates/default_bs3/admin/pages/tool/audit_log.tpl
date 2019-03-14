@@ -3,6 +3,7 @@
 		padding: 5px;
 		padding-right: 15px;
 		padding-left: 15px;
+		max-width: 100%;
 	}
 </style>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
