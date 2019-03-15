@@ -3422,3 +3422,7 @@ img.extension-summary-icon{
 .primary_content_actions .btn-group{
 	margin-bottom: 3px;
 }
+select {
+	-moz-appearance: menulist;
+	 -webkit-appearance: menulist;
+}
