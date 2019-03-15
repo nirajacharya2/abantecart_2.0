@@ -295,7 +295,7 @@
 				align: 'left',
 				value: 'alias_name'
 			},
-			{ text: 'Data Object', value: 'auditable_type' },
+			{ text: 'Data Object', value: 'main_auditable_model' },
 			{ text: 'Data Object ID', value: 'auditable_id' },
 			{ text: 'Event', value: 'event' },
 			{ text: 'Date Change', value: 'date_added' },
