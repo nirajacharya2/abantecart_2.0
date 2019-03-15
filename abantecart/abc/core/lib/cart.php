@@ -431,6 +431,15 @@ class ACart  extends ALibBase
             $final_price = $custom_price;
         }
 
+        //check if we need to check main product stock. Do only if no stock trackable options selected
+        if (!$options
+            && $product_query['subtract']
+            && $product_query['quantity'] < $quantity
+            && !$product_query['stock_checkout']
+        ) {
+            $stock = false;
+        }
+
         // product downloads
         $download_data = $this->download->getProductOrderDownloads($product_id);
 
