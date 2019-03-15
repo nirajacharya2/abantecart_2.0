@@ -3422,7 +3422,18 @@ img.extension-summary-icon{
 .primary_content_actions .btn-group{
 	margin-bottom: 3px;
 }
+/*
+Vuetify conflict fixes
+ */
+
 select {
 	-moz-appearance: menulist;
-	 -webkit-appearance: menulist;
+	-webkit-appearance: menulist;
 }
+th.left {
+	float: none !important;
+}
+
+/*
+End Vuetify conflict fixes
+ */
