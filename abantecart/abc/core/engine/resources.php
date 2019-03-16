@@ -640,7 +640,7 @@ class AResource
                         'url'    => $http_path.'images/'.$result['resource_path'],
                         'width'  => $sizes['main']['width'],
                         'height' => $sizes['main']['height'],
-                        'attr'   => 'alt="'.$rsrc_info['title'].'"',
+                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
                     ]),
                     'thumb_url'     => $thumb_url,
                     'thumb_width'   => $sizes['thumb']['width'],
@@ -649,7 +649,7 @@ class AResource
                         'url'    => $thumb_url,
                         'width'  => $sizes['thumb']['width'],
                         'height' => $sizes['thumb']['height'],
-                        'attr'   => 'alt="'.$rsrc_info['title'].'"',
+                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
                     ]),
                 ];
                 if ($sizes['thumb2']) {
@@ -660,7 +660,7 @@ class AResource
                         'url'    => $thumb2_url,
                         'width'  => $sizes['thumb2']['width'],
                         'height' => $sizes['thumb2']['height'],
-                        'attr'   => 'alt="'.$rsrc_info['title'].'"',
+                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
                     ]);
                 }
                 $resources[$k]['description'] = $rsrc_info['description'];
@@ -859,7 +859,7 @@ class AResource
                         'url'    => $thumb_url,
                         'width'  => $width,
                         'height' => $height,
-                        'attr'   => 'alt="'.$row['title'].'"',
+                        'attr'   => 'alt="'.addslashes($row['title']).'"',
                     ]);
                 $output[$object_id]['thumb_url'] = $thumb_url;
             }
