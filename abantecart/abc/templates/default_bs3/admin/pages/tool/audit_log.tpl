@@ -103,7 +103,7 @@
 						</v-flex>
 					</v-layout>
 					<v-layout row wrap align-center v-if="!isConcreteObject">
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-select
 									v-model="selected_data_object"
@@ -120,7 +120,7 @@
 							<div id="id_selected_data_object"></div>
 						</v-flex>
 
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-text-field
 									name="data_object_id"
@@ -133,7 +133,7 @@
 							></v-text-field>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-select
 									:items="available_fields"
@@ -149,6 +149,9 @@
 							</v-container>
 							<div id="id_selected_fields"></div>
 						</v-flex>
+						<v-flex xs12 sm3 style="text-align: center;">
+							<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled" >Add</v-btn>
+						</v-flex>
 						<v-flex xs12 sm12>
 							<v-chip light close small
 							        v-for="item in arFilter"
@@ -162,13 +165,10 @@
 								= {{item.attribute_name}}
 							</v-chip>
 						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
-								<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled" >Add</v-btn>
+						<v-flex xs12 sm6 style="text-align: center;">
+						<v-btn small color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
 						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
-						<v-btn small color="warning" @click="clearSelected()" v-bind:disabled="clearSelectedDisabled">Clear</v-btn>
-						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
+						<v-flex xs12 sm6 style="text-align: center;">
 						<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled" >Clear Filter</v-btn>
 						</v-flex>
 					</v-layout>
@@ -356,30 +356,30 @@
 			this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
 		},
 		watch: {
-			arFilter: function (newVal, oldVal) {
-				this.getDataFromApi();
-			},
+		//	arFilter: function (newVal, oldVal) {
+		//		this.getDataFromApi();
+		//	},
 			selected_data_object: function (newVal, oldVal) {
 				this.clearSelectedDisabled = true;
 				if (newVal.length > 0) {
 					this.clearSelectedDisabled = false;
 				}
 			},
-			pagination: function () {
-				this.getDataFromApi();
-			},
-			date_from: function () {
-				this.getDataFromApi();
-			},
-			date_to: function () {
-				this.getDataFromApi();
-			},
-			user_name: function () {
-				this.debouncedGetDataFromApi();
-			},
-			events: function () {
-				this.debouncedGetDataFromApi();
-			},
+		//	pagination: function () {
+		//		this.getDataFromApi();
+		//	},
+		//	date_from: function () {
+		//		this.getDataFromApi();
+		//	},
+		//	date_to: function () {
+		//		this.getDataFromApi();
+		//	},
+		//	user_name: function () {
+		//		this.debouncedGetDataFromApi();
+		//	},
+		//	events: function () {
+		//		this.debouncedGetDataFromApi();
+		//	},
 		},
 		mounted () {
 		//	this.getDataFromApi();
@@ -400,8 +400,12 @@
 				}
 				this.arFilter.push(filterItem);
 			}
+			this.debouncedGetDataFromApi();
 		},
 		methods: {
+			applyFilter: function() {
+				this.debouncedGetDataFromApi();
+			},
 			dataObjectChange: function () {
 				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
 					this.available_fields = data_objects[this.selected_data_object].table_columns;
@@ -448,6 +452,7 @@
 						this.data_objects.push(this.objectsInArFilter[i]);
 					}
 				}
+				this.debouncedGetDataFromApi();
 			},
 			removeAddedFromSelect: function(item){
 				var index = this.data_objects.indexOf(item);

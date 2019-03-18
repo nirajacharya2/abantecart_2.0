@@ -48,7 +48,7 @@ class ControllerResponsesToolAuditAjax extends AController
         if ( $arFilters || $date_from || $date_to || $user_name || $events) {
 
 
-            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id');
+            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id')->groupBy('main_auditable_model');
             if (is_array($arFilters) && !empty($arFilters)) {
                 $auditableTypes = [];
                 $auditableIds = [];
@@ -94,7 +94,7 @@ class ControllerResponsesToolAuditAjax extends AController
                 $audit = $audit->whereIn('event', $events);
             }
 
-            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS *')]);
+            $audit = $audit->select([$this->db->raw('*')]);
 
             if ($rowsPerPage > 0) {
                 $audit = $audit
@@ -110,7 +110,7 @@ class ControllerResponsesToolAuditAjax extends AController
                 $audit = $audit->orderBy($sortBy, $ordering);
             }
 
-            //   $this->db->enableQueryLog();
+              //$this->db->enableQueryLog();
 
             $this->data['response']['items'] = $audit
                 ->get()
