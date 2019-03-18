@@ -24,7 +24,7 @@
 			<template>
 				<v-container>
 					<v-layout row wrap align-center>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-dialog
 									ref="dialog"
@@ -50,7 +50,7 @@
 							</v-dialog>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-dialog
 									ref="dialog2"
@@ -76,7 +76,7 @@
 							</v-dialog>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-text-field
 									name="user_name"
@@ -85,6 +85,20 @@
 									single-line
 									hint="Input User/Alias Name"
 							></v-text-field>
+							</v-container>
+						</v-flex>
+						<v-flex xs12 sm3>
+							<v-container fluid>
+								<v-select
+										name="events"
+										v-model="events"
+										label="Event"
+										single-line
+										:items="event_items"
+										hint="Select Event Name"
+										attach
+										multiple
+								></v-select>
 							</v-container>
 						</v-flex>
 					</v-layout>
@@ -163,10 +177,12 @@
 					<v-data-table
 							:headers="table_headers"
 							:items="table_items"
+							:rows-per-page-items="table_rows_per_page_items"
 							ref="dTable"
 							:pagination.sync="pagination"
 							:total-items="table_total"
 							:loading="loading"
+							no-data-text="No data, please change filter props."
 							class="elevation-1"
 							expand
 							attach
@@ -284,7 +300,12 @@
 		table_items: [],
 		table_total: 0,
 		loading: true,
-		pagination: { },
+		pagination: {
+			rowsPerPage: 20
+		},
+		events: [],
+		event_items: ['Created', 'Updated', 'Deleted', 'Restored', 'Updating'],
+		table_rows_per_page_items: [10,20,30,40,50,60,70,80,90,100],
 		table_headers: [
 			{
 				text: 'User Name',
@@ -323,6 +344,7 @@
 					|| this.date_from.length > 0
 					|| this.date_to.length > 0
 					|| this.user_name.length > 0
+					|| this.events.length > 0
 					) {
 					return false;
 				}
@@ -353,6 +375,9 @@
 				this.getDataFromApi();
 			},
 			user_name: function () {
+				this.debouncedGetDataFromApi();
+			},
+			events: function () {
 				this.debouncedGetDataFromApi();
 			},
 		},
@@ -415,6 +440,7 @@
 				this.arFilter = [];
 				this.date_from = '';
 				this.date_to = '';
+				this.events = [];
 				this.user_name = '';
 				for (i=0; i<this.objectsInArFilter.length; i++) {
 					var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
@@ -463,6 +489,7 @@
 				param.date_from = this.date_from;
 				param.date_to = this.date_to;
 				param.user_name = this.user_name;
+				param.events = this.events;
 				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.table_items = response.data.items;
