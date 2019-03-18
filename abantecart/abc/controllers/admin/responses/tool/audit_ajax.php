@@ -41,7 +41,7 @@ class ControllerResponsesToolAuditAjax extends AController
         }
 
 
-        $audit = Audit::groupBy('main_auditable_model')->groupBy('main_auditable_id')->groupBy('date_added');
+        $audit = Audit::groupBy('date_added')->groupBy('main_auditable_id')->groupBy('main_auditable_model');
         if (is_array($arFilters) && !empty($arFilters)) {
             $auditableTypes = [];
             $auditableIds = [];
@@ -80,9 +80,7 @@ class ControllerResponsesToolAuditAjax extends AController
             });
         }
 
-        $this->data['response']['total'] = count($audit
-            ->get()
-            ->toArray());
+        $this->data['response']['total'] = $audit->getCountForPagination();
 
         $audit = $audit
             ->offset($page * $rowsPerPage - $rowsPerPage)
