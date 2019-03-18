@@ -304,7 +304,7 @@
 			rowsPerPage: 20
 		},
 		events: [],
-		event_items: ['Created', 'Updated', 'Deleted', 'Restored', 'Updating'],
+		event_items: ['Created', 'Updated', 'Deleted', 'Restored', 'Updating', 'Login', 'Login-failed', 'Create', 'Update', 'Delete'],
 		table_rows_per_page_items: [10,20,30,40,50,60,70,80,90,100],
 		table_headers: [
 			{
