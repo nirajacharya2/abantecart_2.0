@@ -396,13 +396,14 @@ class ControllerPagesProductCategory extends AController
                 $this->document->setTitle($category_info['name']);
                 $this->document->setDescription($category_info['meta_description']);
                 $this->view->assign('heading_title', $category_info['name']);
-                $this->view->assign('text_error', $this->language->get('text_empty'));
                 $this->view->assign('button_continue', $this->language->get('button_continue'));
                 $this->view->assign('continue', $this->html->getHomeURL());
                 $this->view->assign('categories', []);
                 $this->data['products'] = [];
                 $this->view->setTemplate('pages/product/category.tpl');
             }
+
+            $this->view->assign('text_error', $this->language->get('text_empty'));
 
             $this->data['review_status'] = $this->config->get('enable_reviews');
             $this->view->batchAssign($this->data);

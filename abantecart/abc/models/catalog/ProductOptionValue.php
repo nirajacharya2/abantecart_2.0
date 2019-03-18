@@ -118,7 +118,7 @@ class ProductOptionValue extends BaseModel
 
     public function getAllData()
     {
-        $this->load('option_value_descriptions');
+        $this->load('descriptions');
         $data = $this->toArray();
         $data['images'] = $this->images();
         return $data;

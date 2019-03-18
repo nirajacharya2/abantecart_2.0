@@ -805,7 +805,7 @@ class ALayoutManager
 
         foreach ($this->main_placeholders as $placeholder) {
             $block = $this->getLayoutBlockByTxtId($placeholder);
-            if (!empty ($block)) {
+            if (!empty ($data ['blocks'])) {
                 list($block ['block_id'], $block ['custom_block_id']) = explode("_", $block ['block_id']);
                 if (!empty ($data ['blocks'] [$block ['block_id']])) {
                     $block = array_merge($block, $data ['blocks'] [$block ['block_id']]);
@@ -829,7 +829,9 @@ class ALayoutManager
                                 //NOTE: Blocks positions are saved in 10th increment starting from 10
                                 $child ['position'] = ($key + 1) * 10;
                                 $child ['status'] = $block_data['status'];
-                                $this->saveLayoutBlocks($child);
+                                if ($child ['block_id']) {
+                                    $this->saveLayoutBlocks($child);
+                                }
                             }
                         }
                     }
@@ -1001,6 +1003,16 @@ class ALayoutManager
      */
     public function saveLayoutBlocks($data, $instance_id = 0)
     {
+        $parent_instance_id = 'NULL';
+        if (( int )$data ['parent_instance_id'] > 0) {
+            $parent_instance_id = ( int )$data ['parent_instance_id'];
+        }
+
+        $custom_block_id = 'NULL';
+        if (( int )$data ['custom_block_id'] > 0) {
+            $custom_block_id = ( int )$data ['custom_block_id'];
+        }
+
         if (!$instance_id) {
             $this->db->query("INSERT INTO ".$this->db->table_name("block_layouts")."\n 
                                 (layout_id,
@@ -1013,8 +1025,8 @@ class ALayoutManager
                                 date_modified)
                                 VALUES ('".(int)$data ['layout_id']."',
                                         '".(int)$data ['block_id']."',
-                                        '".(int)$data ['custom_block_id']."',
-                                        '".(int)$data ['parent_instance_id']."',
+                                        ".$custom_block_id.",
+                                        ".$parent_instance_id.",
                                         '".(int)$data ['position']."',
                                         '".(int)$data ['status']."',
                                         NOW(),
@@ -1025,8 +1037,8 @@ class ALayoutManager
             $this->db->query("UPDATE ".$this->db->table_name("block_layouts")." \n
                              SET layout_id = '".( int )$data ['layout_id']."',
                                     block_id = '".( int )$data ['block_id']."',
-                                    custom_block_id = '".( int )$data ['custom_block_id']."',
-                                    parent_instance_id = '".( int )$data ['parent_instance_id']."',
+                                    custom_block_id = ".$custom_block_id.",
+                                    parent_instance_id = ".$parent_instance_id.",
                                     position = '".( int )$data ['position']."',
                                     status = '".( int )$data ['status']."',
                                     date_modified = NOW()

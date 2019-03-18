@@ -209,7 +209,8 @@
 .blocks-manager .block-item .title {
   display: block;
   text-transform: capitalize;
-  font-size: 14px;
+  font-size: 14px !important;
+  overflow: auto;
 }
 .blocks-manager .block-item .info {
   display: block;

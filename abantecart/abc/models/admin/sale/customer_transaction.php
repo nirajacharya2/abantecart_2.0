@@ -240,7 +240,7 @@ class ModelSaleCustomerTransaction extends Model
                     `date_added`)
                 VALUES (
                         '".(int)$data['customer_id']."',
-                        '".(int)$data['order_id']."',
+                        ".((int)$data['order_id'] > 0 ? (int)$data['order_id'] : 'NULL').",
                         '".$this->user->getId()."',
                         '".(float)$data['credit']."',
                         '".(float)$data['debit']."',

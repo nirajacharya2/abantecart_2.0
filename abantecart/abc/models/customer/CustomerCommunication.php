@@ -86,7 +86,11 @@ class CustomerCommunication extends BaseModel
                 return;
             }
             $communication->customer_id = $customer_id;
-            $communication->user_id = $mail->getUser()->getId() ?: 0;
+            if ($mail->getUser()) {
+                $communication->user_id = $mail->getUser()->getId() ?: null;
+            } else {
+                $communication->user_id = null;
+            }
             $communication->type = 'email';
             $communication->sent_to_address = $mail->getTo();
             $communication->save();

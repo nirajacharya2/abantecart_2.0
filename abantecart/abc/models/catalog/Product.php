@@ -1174,7 +1174,7 @@ class Product extends BaseModel
     {
         $query = 'product_id='.$this->product_id;
         $urlAlias = new UrlAlias();
-        $urlAlias->where('query', '=', $query)->delete();
+        $urlAlias->where('query', '=', $query)->forceDelete();
         unset($urlAlias);
 
         foreach ((array)$data as $keyword) {

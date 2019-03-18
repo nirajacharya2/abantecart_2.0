@@ -118,10 +118,10 @@ class ProductOption extends BaseModel
         $cache_key = 'product.alldata.'.$this->getKey();
         $data = $this->cache->pull($cache_key);
         if ($data === false) {
-            $this->load('option_descriptions');
+            $this->load('descriptions');
             $data = $this->toArray();
-            foreach ($this->option_values as $optionValue) {
-                $data['option_values'][] = $optionValue->getAllData();
+            foreach ($this->values as $optionValue) {
+                $data['values'][] = $optionValue->getAllData();
             }
             $this->cache->push($cache_key, $data);
         }

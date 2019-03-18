@@ -3,6 +3,7 @@
 		padding: 5px;
 		padding-right: 15px;
 		padding-left: 15px;
+		max-width: 100%;
 	}
 </style>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
@@ -295,7 +296,7 @@
 				align: 'left',
 				value: 'alias_name'
 			},
-			{ text: 'Data Object', value: 'auditable_type' },
+			{ text: 'Data Object', value: 'main_auditable_model' },
 			{ text: 'Data Object ID', value: 'auditable_id' },
 			{ text: 'Event', value: 'event' },
 			{ text: 'Date Change', value: 'date_added' },
@@ -367,15 +368,19 @@
 				this.isSelectedFieldsDisabled = false;
 				var filterItem = {
 					'auditable_type': this.selected_data_object,
-					'attribute_name': data_objects[this.selected_data_object].table_columns,
 					'auditable_id': this.data_object_id,
 				};
+				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
+					filterItem['attribute_name'] = data_objects[this.selected_data_object].table_columns;
+				}
 				this.arFilter.push(filterItem);
 			}
 		},
 		methods: {
 			dataObjectChange: function () {
-				this.available_fields = data_objects[this.selected_data_object].table_columns;
+				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
+					this.available_fields = data_objects[this.selected_data_object].table_columns;
+				}
 				this.isSelectedFieldsDisabled = false;
 				this.isDataObjectIdDisabled = false;
 			},

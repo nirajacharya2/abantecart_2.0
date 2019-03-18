@@ -16,8 +16,6 @@ use abc\core\ABC; ?>
 <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
-
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" />
 
@@ -30,6 +28,8 @@ use abc\core\ABC; ?>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 
 <?php if ($this->document->renderJsVars()) { ?>

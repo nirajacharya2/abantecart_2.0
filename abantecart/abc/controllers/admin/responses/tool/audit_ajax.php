@@ -41,7 +41,7 @@ class ControllerResponsesToolAuditAjax extends AController
         }
 
 
-        $audit = Audit::groupBy('main_auditable_model')->groupBy('main_auditable_id')->groupBy('date_added');
+        $audit = Audit::whereRaw("1 = 1")->groupBy('request_id');
         if (is_array($arFilters) && !empty($arFilters)) {
             $auditableTypes = [];
             $auditableIds = [];
@@ -80,9 +80,7 @@ class ControllerResponsesToolAuditAjax extends AController
             });
         }
 
-        $this->data['response']['total'] = count($audit
-            ->get()
-            ->toArray());
+        $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS *')]);
 
         $audit = $audit
             ->offset($page * $rowsPerPage - $rowsPerPage)
@@ -96,9 +94,17 @@ class ControllerResponsesToolAuditAjax extends AController
             $audit = $audit->orderBy($sortBy, $ordering);
         }
 
+//        $this->db->enableQueryLog();
+
         $this->data['response']['items'] = $audit
             ->get()
             ->toArray();
+
+  //      \H::df($this->db->getQueryLog());
+
+
+        $this->data['response']['total'] = $this->db->sql_get_row_count();
+
 
 
         $this->load->library('json');

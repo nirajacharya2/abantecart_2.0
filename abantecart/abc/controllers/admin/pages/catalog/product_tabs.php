@@ -11,11 +11,11 @@
   License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
+
+ UPGRADE NOTE:
    Do not edit or add to this file if you wish to upgrade AbanteCart to newer
    versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
+   needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
@@ -48,7 +48,7 @@ class ControllerPagesCatalogProductTabs extends AController
             'files'      => 'catalog/product_files',
             'relations'  => 'catalog/product_relations',
             'promotions' => 'catalog/product_promotions',
-            'extensions' => 'catalog/product_extensions',
+           // 'extensions' => 'catalog/product_extensions',
             'layout'     => 'catalog/product_layout'
         ];
 

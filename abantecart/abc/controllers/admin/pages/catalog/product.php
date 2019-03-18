@@ -353,9 +353,9 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
-            $this->buildFormNew();
-        } else {
             $this->buildForm();
+        } else {
+            $this->buildFormNew();
         }
 
         //update controller data
@@ -392,9 +392,9 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
-            $this->buildFormNew();
-        } else {
             $this->buildForm($args);
+        } else {
+            $this->buildFormNew();
         }
 
         //update controller data
@@ -591,7 +591,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
-        $this->loadLanguage('catalog/product_type');
+        $this->loadLanguage('catalog/object_type');
 
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
@@ -883,16 +883,6 @@ class ControllerPagesCatalogProduct extends AController
             'name'  => 'featured',
             'value' => $this->data['featured'],
             'style' => 'btn_switch btn-group-sm',
-        ]);
-
-        $this->data['form']['fields']['general']['product_type'] = $form->getFieldHtml([
-            'type'        => 'selectbox',
-            'name'        => 'product_type',
-            'value'       => $this->data['product_type'],
-            'options'     => $this->data['product_types'],
-            'placeholder' => $this->language->get('entry_product_type'),
-            'required'    => true,
-            'attr'        => !empty($this->data['product_type']) ? 'disabled=disabled' : '',
         ]);
 
         $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([

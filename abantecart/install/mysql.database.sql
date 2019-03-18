@@ -12205,38 +12205,45 @@ VALUES  (40,'269',183),
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (10,'installlog',186),
             (10,'error_log',187),
-            (10,'task',189);
+            (10,'task',189),
+            (10,'audit_log',190);
 -- ITEM_TEXT
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (11,'text_install_upgrade_history',186),
             (11,'text_error_log',187),
-            (11,'text_tasks',189);
+            (11,'text_tasks',189),
+            (11,'text_audit_log',190);
 -- ITEM_URL
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (12,'tool/install_upgrade_history',186),
             (12,'tool/error_log',187),
-            (12,'tool/task',189);
+            (12,'tool/task',189),
+            (12,'tool/audit_log',190);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (13,'logs',186),
             (13,'logs',187),
-            (13,'logs',189);
+            (13,'logs',189),
+            (13,'logs',190);
 -- SORT_ORDER
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
 VALUES  (14,1,186),
             (14,2,187),
-            (14,3,189);
+            (14,3,189),
+            (14,4,190);
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (15,'core',186),
             (15,'core',187),
-            (15,'core',189);
+            (15,'core',189),
+            (15,'core',190);
 
 -- ITEM_RL_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (40,'274',186),
         (40,'275',187),
-        (40,'254',189);
+        (40,'254',189),
+        (40,'275',190);
 
 --
 -- SUBMENU REPORTS->SALES
