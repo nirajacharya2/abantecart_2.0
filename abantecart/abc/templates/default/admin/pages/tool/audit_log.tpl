@@ -365,9 +365,9 @@
 					this.clearSelectedDisabled = false;
 				}
 			},
-			//	pagination: function () {
-			//		this.getDataFromApi();
-			//	},
+				pagination: function () {
+					this.getDataFromApi();
+				},
 			//	date_from: function () {
 			//		this.getDataFromApi();
 			//	},
