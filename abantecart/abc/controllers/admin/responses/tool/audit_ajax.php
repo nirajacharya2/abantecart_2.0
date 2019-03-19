@@ -48,7 +48,7 @@ class ControllerResponsesToolAuditAjax extends AController
         if ( $arFilters || $date_from || $date_to || $user_name || $events) {
 
 
-            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id')->groupBy('main_auditable_model');
+            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id')->groupBy('event')->groupBy('date_added')->groupBy('main_auditable_model')->groupBy('main_auditable_id');
             if (is_array($arFilters) && !empty($arFilters)) {
                 $auditableTypes = [];
                 $auditableIds = [];
@@ -142,6 +142,8 @@ class ControllerResponsesToolAuditAjax extends AController
 
         $this->data['response']['items'] = [];
 
+        //$this->db->enableQueryLog();
+
         if ($arFilters) {
             $audit = new Audit();
             foreach ($arFilters as $key => $value) {
@@ -151,6 +153,8 @@ class ControllerResponsesToolAuditAjax extends AController
                 ->get()
                 ->toArray();
         }
+
+        //\H::df($this->db->getQueryLog());
 
         foreach ($this->data['response']['items'] as &$item) {
             if (!$item['old_value'] && $item['old_value'] !== "0" && $item['old_value'] !== 0) {

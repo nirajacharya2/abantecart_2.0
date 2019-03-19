@@ -287,7 +287,7 @@
 			isConcreteObject: false,
 			objectsInArFilter: [],
 			isSelectedFieldsDisabled: true,
-			isAddDisabled: true,
+			//	isAddDisabled: true,
 			available_fields: [],
 			data_objects: data_objects.classes,
 			const_data_objects: data_objects.classes,
@@ -322,12 +322,13 @@
 					value: 'alias_name'
 				},
 				{ text: 'Data Object', value: 'main_auditable_model' },
-				{ text: 'Data Object ID', value: 'auditable_id' },
+				{ text: 'Data Object ID', value: 'main_auditable_id' },
 				{ text: 'Event', value: 'event' },
 				{ text: 'Date Change', value: 'date_added' },
 			],
 			expand_items: [],
 			expand_headers: [
+				{ text: 'Model', value: 'auditable_model', sortable: false, },
 				{ text: 'Attribute', value: 'attribute_name', sortable: false, },
 				{ text: 'Old Value', value: 'old_value', sortable: false, },
 				{ text: 'New Value', value: 'new_value', sortable: false, },
@@ -350,6 +351,14 @@
 					|| this.user_name.length > 0
 					|| this.events.length > 0
 				) {
+					return false;
+				}
+				return true;
+			},
+			isAddDisabled: function () {
+				if ( this.selected_data_object.length > 0
+					|| this.data_object_id.length > 0
+					|| this.selected_fields.length > 0 ) {
 					return false;
 				}
 				return true;
@@ -418,11 +427,11 @@
 				this.isDataObjectIdDisabled = false;
 			},
 			selectedFieldsChange: function() {
-				if (this.selected_fields.length > 0) {
+				/*if (this.selected_fields.length > 0) {
 					this.isAddDisabled = false;
 				} else {
 					this.isAddDisabled = true;
-				}
+				}*/
 			},
 			clearSelected: function () {
 				this.selected_data_object = '';
@@ -430,7 +439,6 @@
 				this.selected_fields = [];
 				this.isSelectedFieldsDisabled = true;
 				this.isDataObjectIdDisabled = true;
-				this.isAddDisabled = true;
 				this.data_object_id = '';
 			},
 			addFilter: function () {
@@ -524,10 +532,10 @@
 				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
 				props.expanded = true;
 				var filter = {
-					'auditable_type': props.item.auditable_type,
+					'main_auditable_model': props.item.main_auditable_model,
 					'date_added': props.item.date_added,
-					'auditable_id': props.item.auditable_id,
-					'user_id': props.item.user_id
+					'main_auditable_id': props.item.main_auditable_id,
+					'event': props.item.event,
 				};
 				var param = {
 					filter: filter,
