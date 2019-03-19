@@ -165,6 +165,8 @@
 								= {{item.attribute_name}}
 							</v-chip>
 						</v-flex>
+					</v-layout>
+					<v-layout>
 						<v-flex xs12 sm6 style="text-align: center;">
 						<v-btn small color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
 						</v-flex>
@@ -197,10 +199,10 @@
 								>
 									{{ header.text }}
 									<span v-if="pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_upward</i>
+										<i class="material-icons mi-12">arrow_downward</i>
 									</span>
 									<span v-if="!pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_downward</i>
+										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
 								</th>
 								<th class="column" v-if="!expandedAll" @click="expandAll()">
@@ -301,7 +303,9 @@
 		table_total: 0,
 		loading: true,
 		pagination: {
-			rowsPerPage: 20
+			rowsPerPage: 20,
+			descending: true,
+			sortBy: 'date_added'
 		},
 		events: [],
 		event_items: ['Created', 'Updated', 'Deleted', 'Restored', 'Updating', 'Login', 'Login-failed', 'Create', 'Update', 'Delete'],
@@ -441,17 +445,19 @@
 				this.clearSelected();
 			},
 			clearFilter: function () {
-				this.arFilter = [];
+				if (!this.isConcreteObject) {
+					this.arFilter = [];
+					for (i=0; i<this.objectsInArFilter.length; i++) {
+						var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
+						if (index == -1) {
+							this.data_objects.push(this.objectsInArFilter[i]);
+						}
+					}
+				}
 				this.date_from = '';
 				this.date_to = '';
 				this.events = [];
 				this.user_name = '';
-				for (i=0; i<this.objectsInArFilter.length; i++) {
-					var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
-					if (index == -1) {
-						this.data_objects.push(this.objectsInArFilter[i]);
-					}
-				}
 				this.debouncedGetDataFromApi();
 			},
 			removeAddedFromSelect: function(item){
