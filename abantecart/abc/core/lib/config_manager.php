@@ -31,7 +31,6 @@ use H;
  * @property AExtensionManager $extension_manager
  * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
  * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
- * @property \abc\models\admin\ModelLocalisationCurrency $model_localisation_currency
  * @property \abc\models\admin\ModelLocalisationLengthClass $model_localisation_length_class
  * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
  * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
