@@ -94,7 +94,7 @@ class ControllerResponsesToolAuditAjax extends AController
                 $audit = $audit->whereIn('event', $events);
             }
 
-            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS *')]);
+            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS request_id, event, date_added, main_auditable_model, main_auditable_id, user_name, alias_name, id')]);
 
             if ($rowsPerPage > 0) {
                 $audit = $audit
