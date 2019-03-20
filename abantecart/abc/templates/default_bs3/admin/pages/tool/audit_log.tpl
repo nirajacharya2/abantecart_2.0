@@ -24,7 +24,7 @@
 			<template>
 				<v-container>
 					<v-layout row wrap align-center>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-dialog
 									ref="dialog"
@@ -50,7 +50,7 @@
 							</v-dialog>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-dialog
 									ref="dialog2"
@@ -76,7 +76,7 @@
 							</v-dialog>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-text-field
 									name="user_name"
@@ -87,9 +87,23 @@
 							></v-text-field>
 							</v-container>
 						</v-flex>
+						<v-flex xs12 sm3>
+							<v-container fluid>
+								<v-select
+										name="events"
+										v-model="events"
+										label="Event"
+										single-line
+										:items="event_items"
+										hint="Select Event Name"
+										attach
+										multiple
+								></v-select>
+							</v-container>
+						</v-flex>
 					</v-layout>
 					<v-layout row wrap align-center v-if="!isConcreteObject">
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-select
 									v-model="selected_data_object"
@@ -106,7 +120,7 @@
 							<div id="id_selected_data_object"></div>
 						</v-flex>
 
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-text-field
 									name="data_object_id"
@@ -119,7 +133,7 @@
 							></v-text-field>
 							</v-container>
 						</v-flex>
-						<v-flex xs12 sm4>
+						<v-flex xs12 sm3>
 							<v-container fluid>
 							<v-select
 									:items="available_fields"
@@ -135,6 +149,9 @@
 							</v-container>
 							<div id="id_selected_fields"></div>
 						</v-flex>
+						<v-flex xs12 sm3 style="text-align: center;">
+							<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled" >Add</v-btn>
+						</v-flex>
 						<v-flex xs12 sm12>
 							<v-chip light close small
 							        v-for="item in arFilter"
@@ -148,13 +165,12 @@
 								= {{item.attribute_name}}
 							</v-chip>
 						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
-								<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled" >Add</v-btn>
+					</v-layout>
+					<v-layout>
+						<v-flex xs12 sm6 style="text-align: center;">
+						<v-btn small color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
 						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
-						<v-btn small color="warning" @click="clearSelected()" v-bind:disabled="clearSelectedDisabled">Clear</v-btn>
-						</v-flex>
-						<v-flex xs12 sm4 style="text-align: center;">
+						<v-flex xs12 sm6 style="text-align: center;">
 						<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled" >Clear Filter</v-btn>
 						</v-flex>
 					</v-layout>
@@ -163,10 +179,12 @@
 					<v-data-table
 							:headers="table_headers"
 							:items="table_items"
+							:rows-per-page-items="table_rows_per_page_items"
 							ref="dTable"
 							:pagination.sync="pagination"
 							:total-items="table_total"
 							:loading="loading"
+							no-data-text="No data, please change filter props."
 							class="elevation-1"
 							expand
 							attach
@@ -181,10 +199,10 @@
 								>
 									{{ header.text }}
 									<span v-if="pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_upward</i>
+										<i class="material-icons mi-12">arrow_downward</i>
 									</span>
 									<span v-if="!pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_downward</i>
+										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
 								</th>
 								<th class="column" v-if="!expandedAll" @click="expandAll()">
@@ -269,7 +287,7 @@
 		isConcreteObject: false,
 		objectsInArFilter: [],
 		isSelectedFieldsDisabled: true,
-		isAddDisabled: true,
+	//	isAddDisabled: true,
 		available_fields: [],
 		data_objects: data_objects.classes,
 		const_data_objects: data_objects.classes,
@@ -284,7 +302,14 @@
 		table_items: [],
 		table_total: 0,
 		loading: true,
-		pagination: { },
+		pagination: {
+			rowsPerPage: 20,
+			descending: true,
+			sortBy: 'date_added'
+		},
+		events: [],
+		event_items: ['Created', 'Updated', 'Deleted', 'Restored', 'Updating', 'Login', 'Login-failed', 'Create', 'Update', 'Delete'],
+		table_rows_per_page_items: [10,20,30,40,50,60,70,80,90,100],
 		table_headers: [
 			{
 				text: 'User Name',
@@ -297,12 +322,13 @@
 				value: 'alias_name'
 			},
 			{ text: 'Data Object', value: 'main_auditable_model' },
-			{ text: 'Data Object ID', value: 'auditable_id' },
+			{ text: 'Data Object ID', value: 'main_auditable_id' },
 			{ text: 'Event', value: 'event' },
 			{ text: 'Date Change', value: 'date_added' },
 		],
 		expand_items: [],
 		expand_headers: [
+			{ text: 'Model', value: 'auditable_model', sortable: false, },
 			{ text: 'Attribute', value: 'attribute_name', sortable: false, },
 			{ text: 'Old Value', value: 'old_value', sortable: false, },
 			{ text: 'New Value', value: 'new_value', sortable: false, },
@@ -323,7 +349,16 @@
 					|| this.date_from.length > 0
 					|| this.date_to.length > 0
 					|| this.user_name.length > 0
+					|| this.events.length > 0
 					) {
+					return false;
+				}
+				return true;
+			},
+			isAddDisabled: function () {
+				if ( this.selected_data_object.length > 0
+					|| this.data_object_id.length > 0
+					|| this.selected_fields.length > 0 ) {
 					return false;
 				}
 				return true;
@@ -334,9 +369,9 @@
 			this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
 		},
 		watch: {
-			arFilter: function (newVal, oldVal) {
-				this.getDataFromApi();
-			},
+		//	arFilter: function (newVal, oldVal) {
+		//		this.getDataFromApi();
+		//	},
 			selected_data_object: function (newVal, oldVal) {
 				this.clearSelectedDisabled = true;
 				if (newVal.length > 0) {
@@ -346,15 +381,18 @@
 			pagination: function () {
 				this.getDataFromApi();
 			},
-			date_from: function () {
-				this.getDataFromApi();
-			},
-			date_to: function () {
-				this.getDataFromApi();
-			},
-			user_name: function () {
-				this.debouncedGetDataFromApi();
-			},
+		//	date_from: function () {
+		//		this.getDataFromApi();
+		//	},
+		//	date_to: function () {
+		//		this.getDataFromApi();
+		//	},
+		//	user_name: function () {
+		//		this.debouncedGetDataFromApi();
+		//	},
+		//	events: function () {
+		//		this.debouncedGetDataFromApi();
+		//	},
 		},
 		mounted () {
 		//	this.getDataFromApi();
@@ -375,8 +413,12 @@
 				}
 				this.arFilter.push(filterItem);
 			}
+			this.debouncedGetDataFromApi();
 		},
 		methods: {
+			applyFilter: function() {
+				this.debouncedGetDataFromApi();
+			},
 			dataObjectChange: function () {
 				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
 					this.available_fields = data_objects[this.selected_data_object].table_columns;
@@ -385,11 +427,11 @@
 				this.isDataObjectIdDisabled = false;
 			},
 			selectedFieldsChange: function() {
-				if (this.selected_fields.length > 0) {
+				/*if (this.selected_fields.length > 0) {
 					this.isAddDisabled = false;
 				} else {
 					this.isAddDisabled = true;
-				}
+				}*/
 			},
 			clearSelected: function () {
 				this.selected_data_object = '';
@@ -397,7 +439,6 @@
 				this.selected_fields = [];
 				this.isSelectedFieldsDisabled = true;
 				this.isDataObjectIdDisabled = true;
-				this.isAddDisabled = true;
 				this.data_object_id = '';
 			},
 			addFilter: function () {
@@ -412,16 +453,20 @@
 				this.clearSelected();
 			},
 			clearFilter: function () {
-				this.arFilter = [];
-				this.date_from = '';
-				this.date_to = '';
-				this.user_name = '';
-				for (i=0; i<this.objectsInArFilter.length; i++) {
-					var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
-					if (index == -1) {
-						this.data_objects.push(this.objectsInArFilter[i]);
+				if (!this.isConcreteObject) {
+					this.arFilter = [];
+					for (i=0; i<this.objectsInArFilter.length; i++) {
+						var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
+						if (index == -1) {
+							this.data_objects.push(this.objectsInArFilter[i]);
+						}
 					}
 				}
+				this.date_from = '';
+				this.date_to = '';
+				this.events = [];
+				this.user_name = '';
+				this.debouncedGetDataFromApi();
 			},
 			removeAddedFromSelect: function(item){
 				var index = this.data_objects.indexOf(item);
@@ -463,6 +508,7 @@
 				param.date_from = this.date_from;
 				param.date_to = this.date_to;
 				param.user_name = this.user_name;
+				param.events = this.events;
 				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.table_items = response.data.items;
@@ -486,10 +532,10 @@
 				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
 				props.expanded = true;
 				var filter = {
-					'auditable_type': props.item.auditable_type,
+					'main_auditable_model': props.item.main_auditable_model,
 					'date_added': props.item.date_added,
-					'auditable_id': props.item.auditable_id,
-					'user_id': props.item.user_id
+					'main_auditable_id': props.item.main_auditable_id,
+					'event': props.item.event,
 				};
 				var param = {
 					filter: filter,

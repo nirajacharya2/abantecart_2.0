@@ -42,7 +42,6 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('localisation/currency');
-        $this->loadModel('localisation/currency');
 
         $page = $this->request->post['page']; // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
@@ -116,7 +115,6 @@ class ControllerResponsesListingGridCurrency extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('localisation/currency');
         $this->loadLanguage('localisation/currency');
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
@@ -222,7 +220,6 @@ class ControllerResponsesListingGridCurrency extends AController
                 ));
         }
 
-        $this->loadModel('localisation/currency');
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {

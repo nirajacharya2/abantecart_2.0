@@ -30,7 +30,7 @@ $lng_code = 'ru';
 $lng_name = 'Русский';
 $lng_directory = 'russian';
 $lng_locale = 'ru_RU.UTF-8,ru_RU,russian';
-$lng_flag_path = 'extensions'.DS.'default_russian'.DS.'languages'.DS.'storefront'.DS.'russian'.DS.'flag.png';
+$lng_flag_path = 'extensions'.DS.'default_russian'.DS.'templates'.DS.'default'.DS.'storefront'.DS.'assets'.DS.'images'.DS.'flag.png';
 $lng_sort = 2; // sorting order with other languages
 $lng_status = 0; // Status on installation of extension
 

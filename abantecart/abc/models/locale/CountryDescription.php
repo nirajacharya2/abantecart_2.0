@@ -36,6 +36,7 @@ class CountryDescription extends BaseModel
 
     protected $fillable = [
         'name',
+        'language_id',
     ];
 
     public function country()
