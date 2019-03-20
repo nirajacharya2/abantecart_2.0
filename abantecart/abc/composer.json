@@ -222,6 +222,7 @@
     "ext-gd": "*",
     "ext-phar": "*",
     "mnsami/composer-custom-directory-installer": "1.1.*",
+    "wikimedia/composer-merge-plugin": "1.4.1",
     "google/recaptcha": "~1.1",
     "components/jquery": "3.3.1",
     "components/jqueryui": "1.12.1",
@@ -317,6 +318,12 @@
       "./vendor/assets/tinymce/tinymce/languages": [
         "tinymce/languages"
       ]
+    },
+    "merge-plugin": {
+                "include": [
+                    "composer.local.json",
+                    "extensions/*/composer.json"
+                ]
     }
   },
   "require-dev": {
