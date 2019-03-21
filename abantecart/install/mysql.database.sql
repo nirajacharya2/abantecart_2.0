@@ -13730,12 +13730,6 @@ ADD CONSTRAINT `ac_order_history_ibfk_2`
 
 ALTER TABLE `ac_order_products`
 ADD INDEX `ac_order_products_ibfk_2_idx` (`product_id` ASC);
-ALTER TABLE `ac_order_products`
-ADD CONSTRAINT `ac_order_products_ibfk_2`
-  FOREIGN KEY (`product_id`)
-  REFERENCES `ac_products` (`product_id`)
-  ON DELETE NO ACTION
-  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_extension_dependencies`
 ADD CONSTRAINT `ac_extension_dependencies_fk_1`

@@ -34,6 +34,10 @@ body {
 	font-family: unset !important;
 }
 
+[type=reset], [type=submit], button, html [type=button] {
+	-webkit-appearance: unset !important;
+}
+
 .abc_orange {
 	color: #F19013;
 }
