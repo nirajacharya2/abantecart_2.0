@@ -380,7 +380,6 @@ class ControllerResponsesCommonDoEmbed extends AController
             'options' => $language_codes,
         ]);
 
-        $this->load->model('localisation/currency');
         $results = Currency::all()->toArray();
         $currencies = [];
         foreach ($results as $v) {
