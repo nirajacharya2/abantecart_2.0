@@ -3479,3 +3479,6 @@ End Vuetify conflict fixes
 .ui-jqgrid .ui-paging-info {
     margin-top: 5px;
 }
+.btn-group.btn-group-toggle.btn_switch {
+    margin: 0 auto;
+}
