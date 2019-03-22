@@ -40,6 +40,10 @@ input,select,textarea {
 a, .btn-default {
     color: #064770;
 }
+.btn-default {
+    background-color: #fff;
+    border-color: #ccc;
+}
 
 a:hover, .btn-default:hover {
     color: #F19013;
@@ -2475,7 +2479,8 @@ body.stickyheader .sticky_left {
     padding: 10px;
 }
 .btn-primary {
-    background-color: #064770;
+    background-color: #064770 !important;
+    border-color:  #064770 !important;
 }
 .input-group-sm > .form-control, .input-group-sm > .input-group-addon, .input-group-sm > .input-group-btn > .btn {
     border-radius: 3px;
