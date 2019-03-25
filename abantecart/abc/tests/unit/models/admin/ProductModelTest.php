@@ -162,7 +162,7 @@ class ProductModelTest extends ATestCase
             $result = false;
         }
 
-        $this->assertEquals(0, $result);
+        $this->assertEquals(1, $result);
     }
 
 }

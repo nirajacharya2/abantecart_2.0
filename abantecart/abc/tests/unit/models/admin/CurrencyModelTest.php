@@ -87,7 +87,7 @@ class CurrencyModelTest extends ATestCase
     public function testDeleteCurrency(int $createdId)
     {
         $result = Currency::destroy($createdId);
-        $this->assertEquals(0, $result);
+        $this->assertEquals(1, $result);
     }
 
 }
