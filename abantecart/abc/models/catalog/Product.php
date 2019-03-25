@@ -653,6 +653,7 @@ class Product extends BaseModel
 
     /**
      * @return mixed
+     * TODO: needs to replace global content_language_id with some model property
      */
     public function description()
     {
@@ -838,24 +839,46 @@ class Product extends BaseModel
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function getStockCheckouts()
     {
-        $result = [];
-        $result[] = (object)['id' => '', 'name' => $this->registry->get('language')->get('text_default')];
-        $result[] = (object)['id' => 0, 'name' => $this->registry->get('language')->get('text_no')];
-        $result[] = (object)['id' => 1, 'name' => $this->registry->get('language')->get('text_yes')];
+        $language = $this->registry->get('language');
+        $result= [
+            (object)[
+            'id' => '',
+            'name' => $language->get('text_default')
+        ],
+            (object)[
+            'id' => 0,
+            'name' => $language->get('text_no')
+        ],
+            (object)[
+            'id' => 1,
+            'name' => $language->get('text_yes')
+        ]
+        ];
         return $result;
     }
 
-    public function getStockStatuses()
+    /**
+     * @param int $language_id
+     *
+     * @return array
+     */
+    public function getStockStatuses($language_id = 0)
     {
-        $stock_statuses =
-            StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
-                ->select(['stock_status_id as id', 'name'])
-                ->get();
+        $language_id = $language_id ?? $this->registry->get('language')->getContentLanguageID();
+        $stock_statuses = StockStatus::where('language_id', '=', $language_id)
+                            ->select(['stock_status_id as id', 'name'])
+                            ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
-            $result[] = (object)['id' => $stock_status->id, 'name' => $stock_status->name];
+            $result[] = (object)[
+                            'id' => $stock_status->id,
+                            'name' => $stock_status->name
+                        ];
         }
         return $result;
     }
@@ -1072,7 +1095,7 @@ class Product extends BaseModel
         if (!$productId) {
             return false;
         }
-        $this->options()->forceDelete();
+        $this->options()->delete();
         $resource_mdl = new ResourceLibrary();
         foreach ($data as $option) {
             $option['product_id'] = $productId;
@@ -1086,16 +1109,17 @@ class Product extends BaseModel
             $productOptionId = $optionObj->getKey();
             unset($optionObj);
 
-            foreach ((array)$option['descriptions'] as $option_description) {
+            foreach ((array)$option['option_descriptions'] as $option_description) {
                 $option_description['product_id'] = $productId;
                 $option_description['product_option_id'] = $productOptionId;
                 $optionDescData = $this->removeSubArrays($option_description);
+
                 $optionDescObj = new ProductOptionDescription();
                 $optionDescObj->fill($optionDescData)->save();
                 unset($optionDescObj);
             }
 
-            foreach ((array)$option['values'] as $option_value) {
+            foreach ((array)$option['option_values'] as $option_value) {
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
@@ -1108,7 +1132,7 @@ class Product extends BaseModel
                 unset($optionValueObj);
 
                 $optionValueDescData = [];
-                foreach ((array)$option_value['descriptions'] as $option_value_description) {
+                foreach ((array)$option_value['option_value_descriptions'] as $option_value_description) {
                     $option_value_description['product_id'] = $productId;
                     $option_value_description['product_option_value_id'] = $productOptionValueId;
 
@@ -1226,9 +1250,14 @@ class Product extends BaseModel
      */
     public static function updateProduct(int $product_id, array $product_data, int $language_id)
     {
+        /**
+         * @var Product $product
+         */
         $product = Product::find($product_id);
         $product->update($product_data);
-        $product->descriptions()->where('language_id', $language_id)->update($product_data['product_description']);
+        if($product_data['product_description']) {
+            $product->descriptions()->update($product_data['product_description']);
+        }
 
         if ($product_data['keyword']) {
             UrlAlias::setProductKeyword($product_data['keyword'], $product_id);

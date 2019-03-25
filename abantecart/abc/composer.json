@@ -324,7 +324,9 @@
   },
   "autoload-dev": {
     "psr-4": {
+      "Chelout\\RelationshipEvents\\": "vendor/chelout/laravel-relationship-events/src/",
       "Tests\\": "tests/"
+
     }
   }
 }

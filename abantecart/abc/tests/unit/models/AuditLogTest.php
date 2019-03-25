@@ -21,6 +21,7 @@ namespace abc\tests\unit\models\admin;
 use abc\models\catalog\Product;
 use abc\models\system\Audit;
 use abc\tests\unit\ATestCase;
+use Illuminate\Database\Query\Builder;
 use PHPUnit\Framework\Warning;
 
 class AuditLogTest extends ATestCase
@@ -46,7 +47,8 @@ class AuditLogTest extends ATestCase
 
                 'deleting',
                 'deleted',
-                //TODO: check why restore events not fired!
+                'forceDeleted',
+
                 'restoring',
                 'restored',
                 //NOTE: only saving supported!
@@ -121,8 +123,20 @@ class AuditLogTest extends ATestCase
 
         $this->assertIsInt($productId);
 
-        //call retrieve and update events
-        Product::find($productId)->update(['price' => '29.55']);
+        $data = [
+            'price' => '29.55',
+            'product_description' =>
+                    [
+                        'name'             => 'Test update product',
+                        'blurb'            => 'Test update blurb',
+                        'description'      => 'Test update description',
+                        'meta_keywords'    => '',
+                        'meta_description' => '',
+                        'language_id'      => 1,
+                    ]
+        ];
+        $this->UpdateProduct($productId, $data);
+
 
         // now delete, restore and force delete
         try {
@@ -143,10 +157,15 @@ class AuditLogTest extends ATestCase
         //call restore events
         Product::onlyTrashed()
                ->where('product_id', $productId)
+               ->first()
                ->restore();
 
         //force delete
-        Product::find($productId)->forceDelete();
+        /**
+         * @var Product $mdl
+         */
+        $mdl = Product::find($productId);
+        $mdl->forceDelete();
 
         return $productId;
     }
@@ -163,11 +182,14 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "created"  => 27,
-                "deleted"  => 35,
-                "deleting" => 68,
-                "updated"  => 1,
-                "updating" => 1,
+                "created"      => 35,
+                "deleted"      => 49,
+                "deleting"     => 91,
+                "forceDeleted" => 34,
+                "restored"     => 34,
+                "restoring"    => 34,
+                "updated"      => 5,
+                "updating"     => 5,
             ]
         );
     }
@@ -181,8 +203,9 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "deleting" => 68,
-                "updating" => 1,
+                "creating" => 7,
+                "deleting" => 110,
+                "updating" => 5,
             ]
         );
     }
@@ -195,7 +218,7 @@ class AuditLogTest extends ATestCase
             $this->getLoggedEvents('Product', $productId),
             [
                 //1 because saving before creating will skip
-                "saving" => 1,
+                "saving" => 5,
             ]
         );
     }
@@ -217,7 +240,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "updating" => 1,
+                "updating" => 5,
             ]
         );
     }
@@ -229,7 +252,8 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "saving" => 1,
+                "creating" => 7,
+                "saving" => 5,
             ]
         );
     }
@@ -241,7 +265,8 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'updating' => 1,
+                'creating' => 7,
+                'updating' => 5,
             ]
         );
     }
@@ -253,7 +278,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleting' => 68,
+                'deleting' => 224,
             ]
         );
     }
@@ -265,7 +290,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleted' => 35,
+                'deleted' => 201,
             ]
         );
     }
@@ -277,8 +302,8 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleting' => 68,
-                'deleted'  => 35,
+                'deleting' => 262,
+                'deleted'  => 220,
             ]
         );
     }
@@ -297,8 +322,8 @@ class AuditLogTest extends ATestCase
         $result = $audit
             ->select('event', $this->registry->get('db')->getORM()::raw('count(*) as count'))
             ->distinct()
-            ->where('auditable_model', '=', $auditableModel)
-            ->where('auditable_id', '=', $auditableId)
+            ->where('main_auditable_model', '=', $auditableModel)
+            ->where('main_auditable_id', '=', $auditableId)
             ->groupBy('event')
             ->orderBy('event', 'asc')
             ->get();
@@ -309,6 +334,25 @@ class AuditLogTest extends ATestCase
             }
         }
         return $writtenEvents;
+    }
+
+    /**
+     * @depends testCreateProduct
+     *
+     * @param int $productId
+     */
+    public function UpdateProduct(int $productId, $data)
+    {
+        try {
+            Product::updateProduct($productId, $data, 1);
+        } catch (\PDOException $e) {
+            $this->fail($e->getMessage());
+        } catch (Warning $e) {
+            $this->fail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->fail($e->getMessage());
+        }
+
     }
 
 }
