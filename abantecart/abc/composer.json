@@ -212,6 +212,10 @@
     {
         "type": "git",
         "url": "https://github.com/abolabo/php-abac.git"
+    },
+    {
+        "type": "git",
+        "url": "https://github.com/abolabo/laravel-relationship-events.git"
     }
   ],
   "require": {
@@ -249,12 +253,13 @@
     "maximebf/debugbar": "1.13.1",
     "filp/whoops": "2.1.14",
     "monolog/monolog": "1.23.0",
-    "illuminate/database": "5.7.*",
-    "illuminate/events": "5.7.*",
-    "illuminate/validation": "5.7.*",
-    "illuminate/Cache": "5.7.*",
-    "illuminate/redis": "5.7.*",
+    "illuminate/database": "5.8.*",
+    "illuminate/events": "5.8.*",
+    "illuminate/validation": "5.8.*",
+    "illuminate/Cache": "5.8.*",
+    "illuminate/redis": "5.8.*",
     "craftcamp/php-abac": "dev-dev-abc",
+    "chelout/laravel-relationship-events": "dev-abc",
     "laracasts/utilities": "^2.0",
     "iatstuti/laravel-cascade-soft-deletes" : "1.5.0"
   },
@@ -324,9 +329,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Chelout\\RelationshipEvents\\": "vendor/chelout/laravel-relationship-events/src/",
       "Tests\\": "tests/"
-
     }
   }
 }
