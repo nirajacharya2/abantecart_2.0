@@ -3482,3 +3482,7 @@ End Vuetify conflict fixes
 .btn-group.btn-group-toggle.btn_switch {
     margin: 0 auto;
 }
+
+.ui-widget-content.ui-corner-all.form-control.input-sm {
+    border: 1px solid #ddd;
+}
