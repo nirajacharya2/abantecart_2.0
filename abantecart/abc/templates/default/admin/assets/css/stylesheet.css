@@ -16,6 +16,14 @@ body {
     color: #636e7b;
 }
 
+.title {
+    font-size: unset !important;
+    font-weight: unset;
+    line-height: unset !important;
+    letter-spacing: unset !important;
+    font-family: unset !important;
+}
+
 .abc_orange {
     color: #F19013;
 }
@@ -31,6 +39,10 @@ input,select,textarea {
 
 a, .btn-default {
     color: #064770;
+}
+.btn-default {
+    background-color: #fff;
+    border-color: #ccc;
 }
 
 a:hover, .btn-default:hover {
@@ -2224,7 +2236,7 @@ a.resource_edit .img-responsive{
    color: #EEEEEE;
    padding: 15px;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 11px !important;
     margin: 0;
 }
 .dropdown-menu-head .title a {
@@ -2467,12 +2479,13 @@ body.stickyheader .sticky_left {
     padding: 10px;
 }
 .btn-primary {
-    background-color: #064770;
+    background-color: #064770 !important;
+    border-color:  #064770 !important;
 }
 .input-group-sm > .form-control, .input-group-sm > .input-group-addon, .input-group-sm > .input-group-btn > .btn {
     border-radius: 3px;
     font-size: 12px;
-    height: 25px !important;
+    height: 30px !important;
     line-height: 1.3;
     padding: 3px 5px;
 }
@@ -3453,3 +3466,23 @@ th.left {
 /*
 End Vuetify conflict fixes
  */
+
+.ui-pg-table.ui-common-table.ui-pager-table {
+    width: 100%;
+    table-layout: fixed;
+    height: 100%;
+}
+.form-inline .form-group {
+    display: inline-flex;
+}
+
+.ui-jqgrid .ui-paging-info {
+    margin-top: 5px;
+}
+.btn-group.btn-group-toggle.btn_switch {
+    margin: 0 auto;
+}
+
+.ui-widget-content.ui-corner-all.form-control.input-sm {
+    border: 1px solid #ddd;
+}

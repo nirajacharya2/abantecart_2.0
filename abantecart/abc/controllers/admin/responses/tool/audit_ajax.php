@@ -30,6 +30,7 @@ class ControllerResponsesToolAuditAjax extends AController
          * @var string $rowsPerPage
          * @var string $sortBy
          * @var string $descending
+         * @var array $events
          */
         extract($this->request->get);
 
@@ -40,72 +41,86 @@ class ControllerResponsesToolAuditAjax extends AController
             }
         }
 
+        $this->data['response']['total'] = 0;
+        $this->data['response']['items'] = [];
 
-        $audit = Audit::whereRaw("1 = 1")->groupBy('request_id');
-        if (is_array($arFilters) && !empty($arFilters)) {
-            $auditableTypes = [];
-            $auditableIds = [];
-            $attributeNames = [];
-            foreach ($arFilters as $arFilter) {
-                $auditableTypes[] = $arFilter['auditable_type'];
-                if ($arFilter['auditable_id']) {
-                    $auditableIds[] = $arFilter['auditable_id'];
+
+        if ( $arFilters || $date_from || $date_to || $user_name || $events) {
+
+
+            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id')->groupBy('event')->groupBy('date_added')->groupBy('main_auditable_model')->groupBy('main_auditable_id');
+            if (is_array($arFilters) && !empty($arFilters)) {
+                $auditableTypes = [];
+                $auditableIds = [];
+                $attributeNames = [];
+                foreach ($arFilters as $arFilter) {
+                    $auditableTypes[] = $arFilter['auditable_type'];
+                    if ($arFilter['auditable_id']) {
+                        $auditableIds[] = $arFilter['auditable_id'];
+                    }
+                    $attributeNames = array_merge($attributeNames, $arFilter['attribute_name']);
                 }
-                $attributeNames = array_merge($attributeNames, $arFilter['attribute_name']);
+
+                if (!empty($auditableTypes)) {
+                    $audit = $audit->whereIn('main_auditable_model', $auditableTypes);
+                }
+
+                if (!empty($auditableIds)) {
+                    $audit = $audit->whereIn('main_auditable_id', $auditableIds);
+                }
+
+                if (!empty($attributeNames)) {
+                    $audit = $audit->whereIn('attribute_name', $attributeNames);
+                }
+
+            }
+            if ($date_from) {
+                $audit = $audit->where('date_added', '>=', $date_from);
+            }
+            if ($date_to) {
+                $audit = $audit->where('date_added', '<=', $date_to.' 23.59.59');
+            }
+            if ($user_name) {
+                $audit = $audit->where(function ($query) use ($user_name) {
+                    $query->where('user_name', 'like', '%'.$user_name.'%')
+                        ->orWhere('alias_name', 'like', '%'.$user_name.'%');
+                });
             }
 
-            if (!empty($auditableTypes)) {
-                $audit = $audit->whereIn('main_auditable_model', $auditableTypes);
+            if ($events && is_array($events)) {
+                foreach ($events as &$event) {
+                    $event = strtolower($event);
+                }
+                $audit = $audit->whereIn('event', $events);
             }
 
-            if (!empty($auditableIds)) {
-                $audit = $audit->whereIn('main_auditable_id', $auditableIds);
+            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS request_id, event, date_added, main_auditable_model, main_auditable_id, user_name, alias_name, id')]);
+
+            if ($rowsPerPage > 0) {
+                $audit = $audit
+                    ->offset($page * $rowsPerPage - $rowsPerPage)
+                    ->limit($rowsPerPage);
             }
 
-            if (!empty($attributeNames)) {
-                $audit = $audit->whereIn('attribute_name', $attributeNames);
+            if ($sortBy) {
+                $ordering = 'ASC';
+                if ($descending == 'true' or $descending === true) {
+                    $ordering = 'DESC';
+                }
+                $audit = $audit->orderBy($sortBy, $ordering);
             }
 
+              //$this->db->enableQueryLog();
+
+            $this->data['response']['items'] = $audit
+                ->get()
+                ->toArray();
+
+            //\H::df($this->db->getQueryLog());
+
+            $this->data['response']['total'] = $this->db->sql_get_row_count();
+
         }
-        if ($date_from) {
-            $audit = $audit->where('date_added', '>=', $date_from);
-        }
-        if ($date_to) {
-            $audit = $audit->where('date_added', '<=', $date_to.' 23.59.59');
-        }
-        if ($user_name) {
-            $audit = $audit->where(function ($query) use ($user_name) {
-               $query->where('user_name', 'like', '%'.$user_name.'%')
-                   ->orWhere('alias_name', 'like', '%'.$user_name.'%');
-            });
-        }
-
-        $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS *')]);
-
-        $audit = $audit
-            ->offset($page * $rowsPerPage - $rowsPerPage)
-            ->limit($rowsPerPage);
-
-        if ($sortBy) {
-            $ordering = 'ASC';
-            if ($descending == 'true' or $descending === true) {
-                $ordering = 'DESC';
-            }
-            $audit = $audit->orderBy($sortBy, $ordering);
-        }
-
-//        $this->db->enableQueryLog();
-
-        $this->data['response']['items'] = $audit
-            ->get()
-            ->toArray();
-
-  //      \H::df($this->db->getQueryLog());
-
-
-        $this->data['response']['total'] = $this->db->sql_get_row_count();
-
-
 
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));
@@ -127,6 +142,8 @@ class ControllerResponsesToolAuditAjax extends AController
 
         $this->data['response']['items'] = [];
 
+        //$this->db->enableQueryLog();
+
         if ($arFilters) {
             $audit = new Audit();
             foreach ($arFilters as $key => $value) {
@@ -136,6 +153,8 @@ class ControllerResponsesToolAuditAjax extends AController
                 ->get()
                 ->toArray();
         }
+
+        //\H::df($this->db->getQueryLog());
 
         foreach ($this->data['response']['items'] as &$item) {
             if (!$item['old_value'] && $item['old_value'] !== "0" && $item['old_value'] !== 0) {

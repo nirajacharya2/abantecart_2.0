@@ -21,6 +21,14 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
+use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
+use Chelout\RelationshipEvents\Concerns\HasManyEvents;
+use Chelout\RelationshipEvents\Concerns\HasMorphManyEvents;
+use Chelout\RelationshipEvents\Concerns\HasMorphOneEvents;
+use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
+use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
+use Chelout\RelationshipEvents\Concerns\HasOneEvents;
 use H;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,13 +43,21 @@ use ReflectionMethod;
  * Class BaseModel
  *
  * @package abc\models
- * @method Builder find(integer $id, array $columns = ['*'])
+ * @method static Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
  * @const string DELETED_AT
  */
 class BaseModel extends OrmModel
 {
     use CastTrait;
+    use HasOneEvents,
+        HasBelongsToEvents,
+        HasManyEvents,
+        HasBelongsToManyEvents,
+        HasMorphOneEvents,
+        HasMorphToEvents,
+        HasMorphManyEvents,
+        HasMorphToManyEvents;
 
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
@@ -275,7 +291,7 @@ class BaseModel extends OrmModel
     public function delete()
     {
         if ($this->hasPermission('delete')) {
-            parent::delete();
+            return parent::delete();
         } else {
             throw new \Exception('No permission for object to delete the model.');
         }

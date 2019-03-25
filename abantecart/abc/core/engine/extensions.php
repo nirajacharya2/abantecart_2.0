@@ -934,8 +934,8 @@ class ExtensionsApi
         $file = DS.'languages'.DS
                 .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                 .$language_name.DS
+                .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                 .$route.'.xml';
-
 
         //include language file from first matching extension
         foreach ($this->extensions_dir as $ext) {

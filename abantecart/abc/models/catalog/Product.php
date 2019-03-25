@@ -653,6 +653,7 @@ class Product extends BaseModel
 
     /**
      * @return mixed
+     * TODO: needs to replace global content_language_id with some model property
      */
     public function description()
     {
@@ -838,24 +839,46 @@ class Product extends BaseModel
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function getStockCheckouts()
     {
-        $result = [];
-        $result[] = (object)['id' => '', 'name' => $this->registry->get('language')->get('text_default')];
-        $result[] = (object)['id' => 0, 'name' => $this->registry->get('language')->get('text_no')];
-        $result[] = (object)['id' => 1, 'name' => $this->registry->get('language')->get('text_yes')];
+        $language = $this->registry->get('language');
+        $result= [
+            (object)[
+            'id' => '',
+            'name' => $language->get('text_default')
+        ],
+            (object)[
+            'id' => 0,
+            'name' => $language->get('text_no')
+        ],
+            (object)[
+            'id' => 1,
+            'name' => $language->get('text_yes')
+        ]
+        ];
         return $result;
     }
 
-    public function getStockStatuses()
+    /**
+     * @param int $language_id
+     *
+     * @return array
+     */
+    public function getStockStatuses($language_id = 0)
     {
-        $stock_statuses =
-            StockStatus::where('language_id', '=', $this->registry->get('language')->getContentLanguageID())
-                ->select(['stock_status_id as id', 'name'])
-                ->get();
+        $language_id = $language_id ?? $this->registry->get('language')->getContentLanguageID();
+        $stock_statuses = StockStatus::where('language_id', '=', $language_id)
+                            ->select(['stock_status_id as id', 'name'])
+                            ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
-            $result[] = (object)['id' => $stock_status->id, 'name' => $stock_status->name];
+            $result[] = (object)[
+                            'id' => $stock_status->id,
+                            'name' => $stock_status->name
+                        ];
         }
         return $result;
     }
@@ -1227,9 +1250,14 @@ class Product extends BaseModel
      */
     public static function updateProduct(int $product_id, array $product_data, int $language_id)
     {
+        /**
+         * @var Product $product
+         */
         $product = Product::find($product_id);
         $product->update($product_data);
-        $product->descriptions()->where('language_id', $language_id)->update($product_data['product_description']);
+        if($product_data['product_description']) {
+            $product->descriptions()->update($product_data['product_description']);
+        }
 
         if ($product_data['keyword']) {
             UrlAlias::setProductKeyword($product_data['keyword'], $product_id);

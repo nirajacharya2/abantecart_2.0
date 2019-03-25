@@ -13,7 +13,7 @@ class ModelAuditListener
 
     protected $registry;
 
-    const DEBUG_TO_LOG = false;
+    const DEBUG_TO_LOG = true;
 
     public function __construct()
     {
@@ -24,16 +24,73 @@ class ModelAuditListener
      * @param string $eventAlias
      * @param $params
      *
-     * @return array
+     * @return array | false
      * @throws \Exception
      */
     public function handle($eventAlias, $params)
     {
 
+        if (self::DEBUG_TO_LOG === true) {
+            $this->registry->get('log')->write('Start Handle Event: '.$eventAlias);
+        }
+
         /**
          * @var BaseModel | Product $modelObject
          */
-        $modelObject = $params[0];
+        if (is_object($params[1])) {
+
+            $eventsList = [
+                'creating',
+                'created',
+                'updating',
+                'updated',
+                'deleting',
+                'deleted',
+                'saving',
+                'saved',
+                'restoring',
+                'restored',
+                'forceDeleted'
+            ];
+
+            foreach($eventsList as $alias){
+                if(is_int(stripos($eventAlias, $alias))) {
+                    $eventAlias = 'eloquent.'.$alias;
+                    break;
+                }
+            }
+
+
+            if ($params[1] instanceof \Illuminate\Database\Eloquent\Collection) {
+                /**
+                 * @var \Illuminate\Database\Eloquent\Collection $collection
+                 */
+                $collection = $params[1];
+                $messages = '';
+                foreach($collection as $modelObject){
+                    $result = $this->handleModel($eventAlias, $modelObject);
+                    if($result === false){
+                        return false;
+                    }
+                    $messages .= $result['message']."\n";
+                }
+
+                //when all models handled return result
+                return [
+                    'result' => true,
+                    'message'=> $messages
+                ];
+            } else {
+                return $this->handleModel($eventAlias, $params[1]);
+            }
+        } else {
+            return $this->handleModel($eventAlias, $params[0]);
+        }
+
+    }
+
+    protected function handleModel($eventAlias, $modelObject)
+    {
 
         if (!is_object($modelObject)
             || !($modelObject instanceof BaseModel)
@@ -75,7 +132,6 @@ class ModelAuditListener
         //get changed
         $newData = $modelObject->getDirty();
         $oldData = $modelObject->getOriginal();
-
 
         if ($modelObject::$auditExcludes) {
             foreach ($modelObject::$auditExcludes as $excludeColumnName) {
