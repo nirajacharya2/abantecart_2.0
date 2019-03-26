@@ -1818,7 +1818,7 @@ class AHelperUtils extends AHelper
          */
         $event_dispatcher = $registry->get('events');
         if (is_object($event_dispatcher)) {
-            return $event_dispatcher->fire($event_alias, $args);
+            return $event_dispatcher->dispatch($event_alias, $args);
         } else {
             throw new AException('Event Dispatcher not found in Registry!', AC_ERR_CLASS_CLASS_NOT_EXIST);
         }
