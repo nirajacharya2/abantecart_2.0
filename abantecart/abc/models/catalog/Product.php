@@ -1095,7 +1095,7 @@ class Product extends BaseModel
         if (!$productId) {
             return false;
         }
-        $this->options()->delete();
+        $this->options()->forceDelete();
         $resource_mdl = new ResourceLibrary();
         foreach ($data as $option) {
             $option['product_id'] = $productId;
@@ -1109,7 +1109,7 @@ class Product extends BaseModel
             $productOptionId = $optionObj->getKey();
             unset($optionObj);
 
-            foreach ((array)$option['option_descriptions'] as $option_description) {
+            foreach ((array)$option['descriptions'] as $option_description) {
                 $option_description['product_id'] = $productId;
                 $option_description['product_option_id'] = $productOptionId;
                 $optionDescData = $this->removeSubArrays($option_description);
@@ -1119,7 +1119,7 @@ class Product extends BaseModel
                 unset($optionDescObj);
             }
 
-            foreach ((array)$option['option_values'] as $option_value) {
+            foreach ((array)$option['values'] as $option_value) {
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
@@ -1132,7 +1132,7 @@ class Product extends BaseModel
                 unset($optionValueObj);
 
                 $optionValueDescData = [];
-                foreach ((array)$option_value['option_value_descriptions'] as $option_value_description) {
+                foreach ((array)$option_value['descriptions'] as $option_value_description) {
                     $option_value_description['product_id'] = $productId;
                     $option_value_description['product_option_value_id'] = $productOptionValueId;
 
