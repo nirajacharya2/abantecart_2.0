@@ -2,25 +2,10 @@
 
 <?php echo $summary_form; ?>
 
-<ul class="nav nav-tabs nav-justified nav-profile">
-	<?php
-	foreach ($tabs as $tab) {
-		if ($tab['active']) {
-			$classname = 'active';
-		} else {
-			$classname = '';
-		}
-		?>
-	<li class="nav-item">
-		<a class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
-	</li>
-	<?php } ?>
-
-	<?php echo $this->getHookVar('extension_tabs'); ?>
-</ul>
+<?php echo $tabs; ?>
 
 <div id="content" class="panel panel-default">
-	
+
 	<?php echo $form['form_open']; ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 
@@ -74,7 +59,7 @@
 			<?php } ?>
 		</div>
 		<?php
-		 
+
 		} // end of foreach $form['fields']
 
 		echo $this->getHookVar('hk_order_comment_pre');

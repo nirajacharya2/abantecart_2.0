@@ -1,21 +1,6 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<ul class="nav nav-tabs nav-justified nav-profile">
-	<?php
-	foreach ($tabs as $tab) {
-		if ($tab['active']) {
-			$classname = 'active';
-		} else {
-			$classname = '';
-		}
-		?>
-		<li class="nav-item">
-			<a  class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
-		</li>
-	<?php } ?>
-
-	<?php echo $this->getHookVar('extension_tabs'); ?>
-</ul>
+<?php echo $tabs; ?>
 
 <div id="content" class="panel panel-default">
 	<?php if ($customer_id) { ?>
@@ -40,7 +25,7 @@
 						<li><a href="<?php echo $address['href'] ?>"
 							   class="<?php echo $address['title'] == $current_address ? 'disabled' : ''; ?>">
 							   <?php if ($address['default']) { ?>
-							   <i class="fa fa-check"></i> 
+							   <i class="fa fa-check"></i>
 							   <?php } ?>
 							   <?php echo $address['title'] ?>
 							   </a>
@@ -52,7 +37,7 @@
 				<a class="actionitem btn btn-primary tooltips" href="<?php echo $add_address_url; ?>" title="<?php echo $text_add_address; ?>">
 				<i class="fa fa-plus fa-fw"></i>
 				</a>
-			</div>			
+			</div>
 			<div class="btn-group mr10 toolbar">
 				<?php echo $this->getHookVar('toolbar_pre'); ?>
 				<?php if($register_date){?>
@@ -109,7 +94,7 @@
 				</a>
 			</div>
 		</div>
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	</div>
@@ -175,7 +160,7 @@
 				</a>
 			<?php } ?>
 		</div>
-	</div>	
+	</div>
 	</form>
 
 </div>
