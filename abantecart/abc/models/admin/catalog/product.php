@@ -38,59 +38,56 @@ use H;
  */
 class ModelCatalogProduct extends Model
 {
+
     /** @param array $data
      * @return int
      * @throws \Exception
      */
     public function addProduct($data)
     {
-        $affected_tables = [];
         $language_id = (int)$this->language->getContentLanguageID();
 
-        $this->db->query(
-            "INSERT INTO ".$this->db->table_name("products")." 
-            SET model = '".$this->db->escape($data['model'])."',
-                sku = ".($data['sku'] ? "'".$this->db->escape($data['sku'])."'" : "NULL").",
-                location = '".$this->db->escape($data['location'])."',
-                quantity = '".H::preformatInteger($data['quantity'])."',
-                minimum = '".H::preformatInteger($data['minimum'])."',
-                maximum = '".H::preformatInteger($data['maximum'])."',
-                subtract = '".(int)$data['subtract']."',
-                stock_checkout = '".$this->db->escape($data['stock_checkout'])."',
-                stock_status_id = '".(int)$data['stock_status_id']."',
-                date_available = ".($data['date_available']
-                                    ? "'".$this->db->escape($data['date_available'])."'"
-                                    : "NOW()").",
-                manufacturer_id = '".(int)$data['manufacturer_id']."',
-                shipping = '".(int)$data['shipping']."',
-                ship_individually = '".(int)$data['ship_individually']."',
-                free_shipping = '".(int)$data['free_shipping']."',
-                shipping_price = '".H::preformatFloat(
-                                            $data['shipping_price'],
-                                            $this->language->get('decimal_point'))."',
-                price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
-                cost = '".H::preformatFloat($data['cost'], $this->language->get('decimal_point'))."',
-                weight = '".H::preformatFloat(
-                                            $data['weight'],
-                                            $this->language->get('decimal_point'))."',
-                weight_class_id = '".(int)$data['weight_class_id']."',
-                length = '".H::preformatFloat(
-                                            $data['length'],
-                                            $this->language->get('decimal_point'))."',
-                width = '".H::preformatFloat(
-                                            $data['width'],
-                                            $this->language->get('decimal_point'))."',
-                height = '".H::preformatFloat(
-                                            $data['height'],
-                                            $this->language->get('decimal_point'))."',
-                length_class_id = '".(int)$data['length_class_id']."',
-                STATUS = '".(int)$data['status']."',
-                tax_class_id = '".(int)$data['tax_class_id']."',
-                sort_order = '".(int)$data['sort_order']."',
-                date_added = NOW()");
+        $fields = $this->getProductColumns();
+        $preformat_fields = [
+            "shipping_price",
+            "price",
+            "cost",
+            "weight",
+            "length",
+            "width",
+            "height",
+        ];
+        $timestamps = ['date_available'];
 
+        $nullable = ['sku'];
+        $affected_tables = [];
+
+        $insert = [];
+        foreach ($fields as $f) {
+            if (isset($data[$f])) {
+                if (in_array($f, $preformat_fields)) {
+                    $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                    $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                }elseif (in_array($f, $nullable)) {
+                    $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
+                }elseif (in_array($f, $timestamps)) {
+                    $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
+                } else {
+                    $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                }
+
+            }
+        }
+
+        if (!empty($insert)) {
+            $this->db->query(
+                "INSERT INTO `".$this->db->table_name("products")."` 
+                SET ".implode(',', $insert)
+            );
+            $affected_tables[] = 'products';
+        }
         $product_id = $this->db->getLastId();
-        $affected_tables[] = 'products';
+
         // if new product
         if (!is_int(key($data['product_description']))) {
             $update = [];
