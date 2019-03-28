@@ -408,9 +408,9 @@
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
 				};
-				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
-					filterItem['attribute_name'] = data_objects[this.selected_data_object].table_columns;
-				}
+				//if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
+				//	filterItem['attribute_name'] = data_objects[this.selected_data_object].table_columns;
+				//}
 				this.arFilter.push(filterItem);
 			}
 			this.debouncedGetDataFromApi();
