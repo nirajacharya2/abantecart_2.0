@@ -315,36 +315,7 @@ class ModelCatalogProduct extends Model
     {
         $language_id = (int)$this->language->getContentLanguageID();
 
-        $fields = [
-            "model",
-            "sku",
-            "location",
-            "quantity",
-            "minimum",
-            "maximum",
-            "subtract",
-            "stock_checkout",
-            "stock_status_id",
-            "date_available",
-            "manufacturer_id",
-            "shipping",
-            "ship_individually",
-            "free_shipping",
-            "shipping_price",
-            "call_to_order",
-            "price",
-            "cost",
-            "weight",
-            "weight_class_id",
-            "length",
-            "width",
-            "height",
-            "length_class_id",
-            "status",
-            "tax_class_id",
-            "sort_order",
-            "settings",
-        ];
+        $fields = $this->getProductColumns();
         $preformat_fields = [
             "shipping_price",
             "price",
