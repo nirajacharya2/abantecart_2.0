@@ -34,6 +34,12 @@ body {
 	font-family: unset !important;
 }
 
+.input-group input {
+	background-color: unset;
+	border-style: unset;
+	color: unset;
+}
+
 [type=reset], [type=submit], button, html [type=button] {
 	-webkit-appearance: unset !important;
 }
