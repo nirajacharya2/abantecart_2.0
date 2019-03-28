@@ -34,6 +34,12 @@ body {
 	font-family: unset !important;
 }
 
+#importWizardFrmFrm .input-group input {
+	background-color: #fff;
+	border-style: groove;
+	color: unset;
+}
+
 [type=reset], [type=submit], button, html [type=button] {
 	-webkit-appearance: unset !important;
 }

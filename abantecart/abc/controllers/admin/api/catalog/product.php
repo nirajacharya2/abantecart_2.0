@@ -365,13 +365,17 @@ if($upd_array) {
     public function getCategoryByName($name, $parent_id)
     {
         $parent_id = (int)$parent_id;
+        if(!$parent_id){
+            $parent_sql = 'c.parent_id IS NULL ';
+        }else{
+            $parent_sql = 'c.parent_id = '.$parent_id;
+        }
         $result = $this->db->query(
             "SELECT cd.*, c.*
             FROM ".$this->db->table_name("category_descriptions")." cd
             LEFT JOIN ".$this->db->table_name("categories")." c
                  ON (c.category_id = cd.category_id)
-            WHERE c.parent_id = '".$parent_id."' 
-                AND LOWER(name) = '"
+            WHERE ".$parent_sql." AND LOWER(name) = '"
             .$this->db->escape(
                 mb_strtolower(
                     html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET'))

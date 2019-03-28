@@ -65,7 +65,7 @@ abstract class Extension
     /**
      * Load the current object being plugged into.
      *
-     * @param object $object The current object being plugged into.
+     * @param mixed $object The current object being plugged into.
      * @param string $method
      */
     public function loadBaseObject($object, $method)
@@ -934,7 +934,6 @@ class ExtensionsApi
         $file = DS.'languages'.DS
                 .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                 .$language_name.DS
-                .($section ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE'))
                 .$route.'.xml';
 
         //include language file from first matching extension
