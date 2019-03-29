@@ -370,6 +370,7 @@ class ModelToolImportProcess extends Model
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
 
+
         //process options
         $this->addUpdateOptions(
             $product_id,
@@ -644,11 +645,18 @@ class ModelToolImportProcess extends Model
             $opt_val_data['weight_type'] = $prd_weight_info['unit'];
         }
 
-        return $this->model_catalog_product->addProductOptionValueAndDescription(
+        $pd_opt_val_id = $this->model_catalog_product->addProductOptionValueAndDescription(
             $product_id,
             $p_option_id,
             $opt_val_data
         );
+
+        if ($pd_opt_val_id && !empty($data['image'])) {
+            //process images
+            $this->migrateImages($data, 'product_option_value', $pd_opt_val_id, $data['name'], $this->language->getContentLanguageID());
+        }
+
+        return $pd_opt_val_id;
     }
 
     /**
@@ -668,6 +676,7 @@ class ModelToolImportProcess extends Model
             'products'      => 'Product',
             'categories'    => 'Category',
             'manufacturers' => 'Brand',
+            'product_option_value' => 'ProductOptionValue'
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
@@ -1058,6 +1067,20 @@ class ModelToolImportProcess extends Model
                         $tmp_index = ($op_index >= 0) ? $op_index : 0;
                         $op_array[$tmp_index][$keys[0]] = $field_val;
                     }
+                } else if ($keys[0] == 'image') {
+                            //leaf element
+                            //check if we need to split the record data from list of values
+                            if (isset($split_col) && !empty($split_col[$index])) {
+                                $field_val = explode($split_col[$index], $field_val);
+                                $field_val = array_map('trim', $field_val);
+                            }
+                            if (!is_array($field_val)) {
+                                $field_val = [$field_val];
+                            }
+                            $arr['product_option_values']['image'][] = $field_val;
+
+                    $tmp_index = ($op_index >= 0) ? $op_index : 0;
+                    $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
                 } else {
                     for ($i = 0; $i < count($keys) - 1; $i++) {
                         if ($i == 0) {
@@ -1356,6 +1379,12 @@ class ModelToolImportProcess extends Model
                         'title'      => 'Option value sort order (1 or 0)',
                         'multivalue' => 1,
                         'alias'      => 'option value sort order',
+                    ],
+                    'product_options.product_option_values.image' => [
+                        'title'      => 'Option value image or List of URLs/Paths',
+                        'split'      => 1,
+                        'multivalue' => 1,
+                        'alias'      => 'option value image',
                     ],
                 ],
             ],
