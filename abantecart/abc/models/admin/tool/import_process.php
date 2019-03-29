@@ -1057,7 +1057,7 @@ class ModelToolImportProcess extends Model
             $arr = [];
             $field_val = $record[$import_col[$index]];
             $keys = array_reverse(explode('.', $field));
-            if (end($keys) == 'product_options') {
+            if (end($keys) == 'product_options' && !empty($field_val)) {
                 //map options special way
                 //check if this is still same option or it is new name
                 if (count($keys) == 2) {
