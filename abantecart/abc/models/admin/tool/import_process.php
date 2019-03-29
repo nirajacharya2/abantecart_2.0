@@ -1188,16 +1188,6 @@ class ModelToolImportProcess extends Model
                         'update' => true,
                         'alias'  => 'sku',
                     ],
-                    'products.catalog_only'                            => [
-                        'title' => 'Catalog only mode (1 or 0)',
-                        'alias' => 'catalog_only',
-                        'update'   => true,
-                    ],
-                    'products.external_url'                            => [
-                        'title' => 'External URL',
-                        'alias' => 'external_url',
-                        'update'   => true,
-                    ],
                     'products.model'                                   => [
                         'title'  => 'Model (up to 64 chars)',
                         'update' => true,
