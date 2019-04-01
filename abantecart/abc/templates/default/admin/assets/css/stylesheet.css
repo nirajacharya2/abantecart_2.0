@@ -24,6 +24,12 @@ body {
     font-family: unset !important;
 }
 
+#importWizardFrmFrm .input-group input {
+    background-color: #fff;
+    border-style: groove;
+    color: unset;
+}
+
 .abc_orange {
     color: #F19013;
 }
