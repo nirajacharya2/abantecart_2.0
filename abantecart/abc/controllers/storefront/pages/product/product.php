@@ -494,7 +494,7 @@ class ControllerPagesProductProduct extends AController
                     }
                 } else {
                     if ($option_value['subtract'] && $product_info['stock_checkout']) {
-                        if ($option_value['quantity'] <= 0) {
+                        if ($option_value['quantity'] <= 0 && $this->config->get('config_stock_display') && $product_info['stock_status']) {
                             $opt_stock_message = "({$product_info['stock_status']})";
                         }
                     }
