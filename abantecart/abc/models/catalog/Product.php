@@ -1244,9 +1244,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $product_data
-     * @param int   $language_id
+     * @param int $language_id
+     *
+     * @return bool
      */
     public static function updateProduct(int $product_id, array $product_data, int $language_id)
     {
@@ -1254,6 +1256,9 @@ class Product extends BaseModel
          * @var Product $product
          */
         $product = Product::find($product_id);
+        if(!$product){
+            return false;
+        }
         $product->update($product_data);
         if($product_data['product_description']) {
             $product->descriptions()->update($product_data['product_description']);
@@ -1271,6 +1276,7 @@ class Product extends BaseModel
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
         self::updateProductLinks($product_id, $product_data);
+        return true;
     }
 
     /**
