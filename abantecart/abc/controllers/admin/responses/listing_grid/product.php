@@ -178,6 +178,7 @@ class ControllerResponsesListingGridProduct extends AController
 
                             return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
+                        $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
                         $this->model_catalog_product->deleteProduct($id);
                     }
                 }
