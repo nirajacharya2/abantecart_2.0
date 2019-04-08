@@ -31,6 +31,7 @@ use abc\models\catalog\Product;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\UrlAlias;
 use H;
+use Illuminate\Support\Facades\Cache;
 use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
 
 /**
@@ -410,7 +411,6 @@ class ControllerPagesCatalogProduct extends AController
             'url'           => $this->html->getSecureURL('r/catalog/product_form'),
             'back_url'      => $this->html->getSecureURL('catalog/product'),
             'form_name'     => 'product_form',
-            'title'         => $formTitle,
             'fields_preset' => [
                 'default' => [
                     "v_flex_props" => [
@@ -419,7 +419,7 @@ class ControllerPagesCatalogProduct extends AController
                 ],
                 'fields'  => [
                     'product_type_id' => [
-                        'value'        => $product_type_id,
+                        'value'        => $this->request->get['product_type_id'] ? (int) $this->request->get['product_type_id'] : 0,
                         'ajax_params'  => [
                             'relatedTo' => 'product_type_id',
                             'ajax_url'  => $this->html->getSecureURL('r/catalog/product_form'),
@@ -443,6 +443,8 @@ class ControllerPagesCatalogProduct extends AController
 
         $product_id = (int)$this->request->get['product_id'];
         if ($product_id) {
+
+            //$productInfo = Cache::get('product.'.$product_id);
 
             $productInfo = $this->productInstance->find($product_id);
 
@@ -728,7 +730,7 @@ class ControllerPagesCatalogProduct extends AController
 
         if (isset($this->request->post['product_store'])) {
             $this->data['product_store'] = $this->request->post['product_store'];
-        } elseif (isset($product_info)) {
+        } elseif (isset($product_info) && !empty($product_info)) {
             $this->data['product_store'] = $this->model_catalog_product->getProductStores($product_id);
         } else {
             $this->data['product_store'] = [0];
