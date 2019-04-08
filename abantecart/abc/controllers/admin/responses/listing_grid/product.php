@@ -171,11 +171,11 @@ class ControllerResponsesListingGridProduct extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
+                    $ids = array_unique($ids);
                     foreach ($ids as $id) {
                         $err = $this->validateDelete($id);
                         if (!empty($err)) {
                             $error = new AError('');
-
                             return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
                         $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
