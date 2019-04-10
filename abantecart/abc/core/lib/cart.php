@@ -155,6 +155,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getProducts($recalculate = false)
     {
@@ -218,6 +219,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getProduct($key, $recalculate = false)
     {
@@ -432,11 +434,25 @@ class ACart  extends ALibBase
         // product downloads
         $download_data = $this->download->getProductOrderDownloads($product_id);
 
+        $common_quantity = $quantity;
+        //check if this product with another option values already in the cart
+        if($this->cust_data['cart']) {
+            foreach($this->cust_data['cart'] as $cart_product){
+                if($cart_product['product_id'] != $product_id){
+                    continue;
+                }
+                if(!$op_stock_trackable){
+                    $common_quantity += $cart_product['quantity'];
+                }
+            }
+        }
+
         //check if we need to check main product stock. Do only if no stock trackable options selected
-        if (!$op_stock_trackable
+        if ((!$options || !$op_stock_trackable)
             && $product_query['subtract']
-            && $product_query['quantity'] < $quantity
-            && !$product_query['stock_checkout']) {
+            && $product_query['quantity'] < $common_quantity
+            && !$product_query['stock_checkout']
+        ) {
             $stock = false;
         }
 
@@ -477,6 +493,7 @@ class ACart  extends ALibBase
      * @param null $custom_price
      *
      * @throws AException
+     * @throws \ReflectionException
      */
     public function add($product_id, $qty = 1, $options = [], $custom_price = null)
     {
@@ -557,6 +574,7 @@ class ACart  extends ALibBase
      * @param int $qty
      *
      * @throws AException
+     * @throws \ReflectionException
      */
     public function update($key, $qty)
     {
@@ -604,6 +622,7 @@ class ACart  extends ALibBase
      *
      * @return int
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getWeight($product_ids = [])
     {
@@ -653,6 +672,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function basicShippingProducts()
     {
@@ -672,6 +692,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function specialShippingProducts()
     {
@@ -692,6 +713,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function areAllFreeShipping()
     {
@@ -749,6 +771,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getSubTotal($recalculate = false)
     {
@@ -770,6 +793,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getTaxes()
     {
@@ -784,6 +808,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getAppliedTaxes($recalculate = false)
     {
@@ -838,6 +863,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getTotal($recalculate = false)
     {
@@ -862,6 +888,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getFinalTotal($recalculate = false)
     {
@@ -922,6 +949,7 @@ class ACart  extends ALibBase
      *
      * @return mixed
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getFinalTotalData($recalculate = false)
     {
@@ -944,6 +972,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function buildTotalDisplay($recalculate = false)
     {
@@ -970,6 +999,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getTotalAmount($recalc = false)
     {
@@ -981,6 +1011,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function hasMinRequirement()
     {
@@ -996,6 +1027,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function hasMaxRequirement()
     {
@@ -1035,6 +1067,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function hasStock()
     {
@@ -1053,6 +1086,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function hasShipping()
     {
@@ -1072,6 +1106,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function hasDownload()
     {
