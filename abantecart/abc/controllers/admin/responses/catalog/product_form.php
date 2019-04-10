@@ -134,6 +134,8 @@ class ControllerResponsesCatalogProductForm extends AController
             'meta_description' => $fields['meta_description'],
             'language_id'      => $this->language->getContentLanguageID(),
         ];
+        $fields['product_category'] = $fields['categories'];
+        unset($fields['categories']);
 
         if ($this->validate($fields)) {
 
