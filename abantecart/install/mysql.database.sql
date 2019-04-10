@@ -13566,6 +13566,59 @@ CREATE TABLE `ac_object_attribute_values` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `ac_audit_event_descriptions`;
+CREATE TABLE `ac_audit_event_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `audit_event_id` int(11) NOT NULL,
+  `auditable_model_id` int(11) NOT NULL,
+  `auditable_id` int(11) NOT NULL,
+  `field_name` varchar(128) NOT NULL,
+  `old_value` text,
+  `new_value` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_events`;
+CREATE TABLE `ac_audit_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` varchar(128) NOT NULL,
+  `audit_session_id` int(11) NOT NULL,
+  `audit_user_id` int(11) NOT NULL,
+  `audit_alias_id` int(11) DEFAULT NULL,
+  `event_type_id` int(11) NOT NULL,
+  `main_auditable_model_id` int(11) NOT NULL,
+  `main_auditable_id` int(11) DEFAULT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `request_id_UNIQUE` (`request_id`,`audit_user_id`,`event_type_id`,`main_auditable_model_id`,`main_auditable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_models`;
+CREATE TABLE `ac_audit_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_sessions`;
+CREATE TABLE `ac_audit_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq` (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_users`;
+CREATE TABLE `ac_audit_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_userid_indx` (`id`,`name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ALTER TABLE `ac_downloads`
 ADD CONSTRAINT `ac_downloads_order_status_fk`
   FOREIGN KEY (`activate_order_status_id`)

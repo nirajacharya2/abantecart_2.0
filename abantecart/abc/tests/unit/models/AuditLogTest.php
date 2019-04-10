@@ -20,6 +20,7 @@ namespace abc\tests\unit\models\admin;
 
 use abc\models\catalog\Product;
 use abc\models\system\Audit;
+use abc\models\system\AuditEvent;
 use abc\tests\unit\ATestCase;
 use Illuminate\Database\Query\Builder;
 use PHPUnit\Framework\Warning;
@@ -115,10 +116,13 @@ class AuditLogTest extends ATestCase
             $productId = Product::createProduct($arProduct);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
+            \H::df($e->getMessage());
         } catch (Warning $e) {
             $this->fail($e->getMessage());
+            \H::df($e->getMessage());
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
+            \H::df($e->getMessage());
         }
 
         $this->assertIsInt($productId);
@@ -316,23 +320,41 @@ class AuditLogTest extends ATestCase
      */
     public function getLoggedEvents(string $auditableModel, int $auditableId): array
     {
+        $db = $this->registry->get('db');
+
+        $auditableModelId = 0;
+        $auditModel = $db->table('audit_models')
+            ->where('name', '=', $auditableModel)
+            ->first();
+        if ($auditModel) {
+            $auditableModelId = $auditModel->id;
+        } else {
+            $this->fail('No model in Audit Models Table');
+        }
+
+        $requestId = $this->registry->get('request')->getUniqueId();
+
         $writtenEvents = [];
         //check records of all events set
-        $audit = new Audit();
+        //$db->enableQueryLog();
+
+        $audit = new AuditEvent();
         $result = $audit
-            ->select('event', $this->registry->get('db')->getORM()::raw('count(*) as count'))
-            ->distinct()
-            ->where('main_auditable_model', '=', $auditableModel)
+            ->select('event_type_id', $db->getORM()::raw('count(*) as count'))
+            ->leftJoin('audit_event_descriptions', 'audit_event_descriptions.audit_event_id', '=', 'audit_events.id')
+            ->where('main_auditable_model_id', '=', $auditableModelId)
             ->where('main_auditable_id', '=', $auditableId)
-            ->groupBy('event')
-            ->orderBy('event', 'asc')
+            ->where('request_id', '=', $requestId)
+            ->groupBy('event_type_id')
             ->get();
+
 
         if ($result->count()) {
             foreach ($result->toArray() as $row) {
-                $writtenEvents[$row['event']] = $row['count'];
+                $writtenEvents[AuditEvent::getEventById($row['event_type_id'])] = $row['count'];
             }
         }
+
         return $writtenEvents;
     }
 

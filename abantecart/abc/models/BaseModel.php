@@ -156,6 +156,14 @@ class BaseModel extends OrmModel
         'deleting',
         //before restore
         'restoring',
+        //before Detaching on sync
+        'belongsToManyDetaching',
+        //before Attaching on sync
+        'belongsToManyAttaching',
+        //before Detaching on sync
+        'morphToManyDetaching',
+        //before Attaching on sync
+        'morphToManyAttaching',
     ];
 
     /**
