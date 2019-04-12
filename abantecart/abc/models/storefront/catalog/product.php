@@ -190,37 +190,51 @@ class ModelCatalogProduct extends Model
      * @throws \Exception
      */
     public function hasAnyStock($product_id)
-    {
-        if (!(int)$product_id) {
-            return 0;
-        }
-        $total_quantity = 0;
-        //check product option values
-        $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
-                                    FROM ".$this->db->table_name("product_options")." po
-                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
-                                        ON (po.product_option_id = pov.product_option_id)
-                                    WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
-        if ($query->num_rows) {
-            $notrack_qnt = 0;
-            foreach ($query->rows as $row) {
-                //if tracking of stock disabled - set quantity as big
-                if (!$row['subtract']) {
-                    $notrack_qnt += 10000000;
-                    continue;
-                }
-                $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
+        {
+            if (!(int)$product_id) {
+                return 0;
             }
-        } else {
-            //get product quantity without options
-            $query = $this->db->query("SELECT quantity
-                                        FROM ".$this->db->table_name("products")." p
-                                        WHERE p.product_id = '".(int)$product_id."'");
-            $total_quantity = (int)$query->row['quantity'];
-        }
+            $trackable = false;
+            $total_quantity = 0;
+            //check product option values
+            $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
+    									FROM ".$this->db->table_name("product_options")." po
+    									LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+    										ON (po.product_option_id = pov.product_option_id)
+    									WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
+            if ($query->num_rows) {
+                foreach ($query->rows as $row) {
+                    //if tracking of stock disabled - set quantity as big
+                    if (!$row['subtract']) {
+                        $total_quantity = true;
+                        continue;
+                    }else{
+                        $trackable = true;
+                    }
+                    //calculate only if have no options without tracking
+                    if($total_quantity !== true) {
+                        $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
+                    }
+                }
+                //if some of option value have subtract NO - think product is available
+                if ($total_quantity == 0 && !$trackable) {
+                    $total_quantity = true;
+                }
+            }
 
-        return $total_quantity;
-    }
+            if(!$trackable) {
+                //get product quantity without options
+                $query = $this->db->query("SELECT quantity, subtract
+    										FROM ".$this->db->table_name("products")." p
+    										WHERE p.product_id = '".(int)$product_id."'");
+                if($query->row['subtract']) {
+                    $total_quantity = (int)$query->row['quantity'];
+                }else{
+                    $total_quantity = true;
+                }
+            }
+            return $total_quantity;
+        }
 
     public function getProductDataForCart($product_id)
     {
