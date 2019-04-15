@@ -79,12 +79,20 @@ class ModelCatalogCategory extends Model
         $cache_key = 'category.list.'.$parent_id.'.store_'.$store_id.'_limit_'.$limit.'_lang_'.$language_id;
         $cache = $this->cache->pull($cache_key);
 
+        if ((int)$parent_id == 0) {
+            $whereParent = 'c.parent_id IS NULL';
+        } else if ((int)$parent_id > 0) {
+            $whereParent = "c.parent_id = '".(int)$parent_id."'";
+        } else {
+            $whereParent = false;
+        }
+
         if ($cache === false) {
             $query = $this->db->query("SELECT *
 										FROM ".$this->db->table_name("categories")." c
 										LEFT JOIN ".$this->db->table_name("category_descriptions")." cd ON (c.category_id = cd.category_id AND cd.language_id = '".$language_id."')
 										LEFT JOIN ".$this->db->table_name("categories_to_stores")." c2s ON (c.category_id = c2s.category_id)
-										WHERE ".($parent_id < 0 ? "" : "c.parent_id = '".(int)$parent_id."' AND ")."
+										WHERE ".($whereParent ? $whereParent." AND " : "")."
 										     c2s.store_id = '".$store_id."' AND c.status = '1'
 										ORDER BY c.sort_order, LCASE(cd.name)
 										".((int)$limit ? "LIMIT ".(int)$limit : '')." ");
