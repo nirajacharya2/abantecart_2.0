@@ -26,6 +26,7 @@ use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\catalog\Category;
 use stdClass;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
@@ -216,7 +217,7 @@ class ControllerResponsesListingGridCategory extends AController
                     }
                     foreach ($ids as $id) {
                         foreach ($allowedFields as $field) {
-                            $this->model_catalog_category->editCategory($id, array($field => $this->request->post[$field][$id]));
+                            (new Category())->editCategory($id, array($field => $this->request->post[$field][$id]));
                         }
                     }
                 }
@@ -270,7 +271,7 @@ class ControllerResponsesListingGridCategory extends AController
                     return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
                 }
 
-                $this->model_catalog_category->editCategory($category_id, array($field => $value));
+                (new Category())->editCategory($category_id, array($field => $value));
             }
 
             return null;
@@ -287,7 +288,7 @@ class ControllerResponsesListingGridCategory extends AController
                         return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
                     }
                 }
-                $this->model_catalog_category->editCategory($k, array($field => $v));
+                (new Category())->editCategory($k, [$field => $v]);
             }
         }
 

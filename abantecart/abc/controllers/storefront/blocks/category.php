@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -20,6 +20,7 @@
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\models\catalog\Category;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -50,18 +51,18 @@ class ControllerBlocksCategory extends AController {
 		}
 
     	$this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/category') );
-		
+
 		$this->loadModel('catalog/category');
-		
+
 		if (isset($request['path'])) {
 			$this->path = explode('_', $request['path']);
 			$this->category_id = end($this->path);
 		}
 		$this->view->assign('selected_category_id', $this->category_id);
 		$this->view->assign('path', $request['path']);
-		
+
 		//load main level categories
-		$all_categories = $this->model_catalog_category->getAllCategories();
+		$all_categories = (new Category())->getAllCategories();
 		//build thumbnails list
 		$category_ids = array();
 		foreach($all_categories as $category){
@@ -85,7 +86,7 @@ class ControllerBlocksCategory extends AController {
 		//If tpl used by listing block framed was set by listing block settings
 		$this->view->assign('block_framed',true);
 		$this->view->assign('home_href', $this->html->getHomeURL());
-		
+
 		$this->processTemplate();
 
         //init controller data
@@ -143,7 +144,7 @@ class ControllerBlocksCategory extends AController {
 			$category['children'] = $this->_buildNestedCategoryList($category['category_id']);
 			$thumbnail = $this->thumbnails[ $category['category_id'] ];
 			$category['thumb'] = $thumbnail['thumb_url'];
-			//get product counts from children levels. 
+			//get product counts from children levels.
 			if(count($category['children'])) {
 				foreach($category['children'] as $child){
 					$category['product_count'] += $child['product_count'];

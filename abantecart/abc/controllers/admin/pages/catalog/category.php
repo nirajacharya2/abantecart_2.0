@@ -25,11 +25,12 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ALayoutManager;
 use abc\models\admin\ModelCatalogCategory;
+use abc\models\catalog\Category;
 use H;
 
 /**
  * Class ControllerPagesCatalogCategory
- * 
+ *
  * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesCatalogCategory extends AController
@@ -291,7 +292,8 @@ class ControllerPagesCatalogCategory extends AController
                     $this->request->post['category_description'][$content_language_id];
             }
 
-            $category_id = $this->model_catalog_category->addCategory($this->request->post);
+            $category_id = (new Category())->addCategory($this->request->post);
+                //$this->model_catalog_category->addCategory($this->request->post);
             $this->extensions->hk_ProcessData($this, 'insert');
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/category/update', '&category_id='.$category_id));
@@ -321,7 +323,7 @@ class ControllerPagesCatalogCategory extends AController
         }
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            $this->model_catalog_category->editCategory($this->request->get['category_id'], $this->request->post);
+            (new Category())->editCategory($this->request->get['category_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, 'update');
             abc_redirect($this->html->getSecureURL('catalog/category/update',
@@ -371,7 +373,7 @@ class ControllerPagesCatalogCategory extends AController
         $this->view->assign('cancel', $this->html->getSecureURL('catalog/category'));
 
         if ($category_id && $this->request->is_GET()) {
-            $category_info = $this->model_catalog_category->getCategory($category_id);
+            $category_info = (new Category())->getCategory($category_id);
         }
 
         foreach ($this->fields as $f) {
@@ -399,7 +401,7 @@ class ControllerPagesCatalogCategory extends AController
             $this->data['parent_id'] = $this->request->get['parent_id'];
         }
         if ($this->data['parent_id'] == '') {
-            $this->data['parent_id'] = 0;
+            $this->data['parent_id'] = null;
         }
 
         $this->loadModel('setting/store');

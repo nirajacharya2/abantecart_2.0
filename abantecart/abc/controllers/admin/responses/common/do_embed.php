@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\catalog\Category;
 use abc\models\locale\Currency;
 use H;
 
@@ -250,7 +251,7 @@ class ControllerResponsesCommonDoEmbed extends AController
         //if embed for only one category
         if (sizeof($category_id) == 1) {
             $cat_id = current($category_id);
-            $category_info = $this->model_catalog_category->getCategory($cat_id);
+            $category_info = (new Category())->getCategory($cat_id);
             $category_stores = $this->model_catalog_category->getCategoryStoresInfo($cat_id);
 
             if (sizeof($category_stores) == 1) {

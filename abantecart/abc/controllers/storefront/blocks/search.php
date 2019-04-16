@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -19,6 +19,8 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
+use abc\models\catalog\Category;
+
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
@@ -44,7 +46,7 @@ class ControllerBlocksSearch extends AController {
 
 		//load top level categories
 		$this->load->model('catalog/category');
-		$this->data['top_categories'] = $this->model_catalog_category->getCategories(0);
+		$this->data['top_categories'] = (new Category())->getCategories(0);
 		$this->data['button_go'] = $this->language->get('button_go');
 
 		$this->view->batchAssign($this->data);

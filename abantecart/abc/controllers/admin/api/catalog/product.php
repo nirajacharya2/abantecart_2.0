@@ -21,6 +21,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\models\admin\ModelCatalogCategory;
+use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -328,7 +329,7 @@ if($upd_array) {
     protected function replaceCategories($category, $language_id){
         $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
         if (!$exists) {
-            $new_category_id = $this->model_catalog_category->addCategory(
+            $new_category_id = (new Category())->addCategory(
                 [
                     'parent_id' => $category['parent_id'],
                     'status'    => $category['status'],

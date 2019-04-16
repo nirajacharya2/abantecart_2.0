@@ -28,6 +28,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
+use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
@@ -102,7 +103,7 @@ class ControllerPagesProductProduct extends AController
         if (isset($request['path'])) {
             $path = '';
             foreach (explode('_', $request['path']) as $path_id) {
-                $category_info = $this->model_catalog_category->getCategory($path_id);
+                $category_info = (new Category())->getCategory($path_id);
                 if (!$path) {
                     $path = $path_id;
                 } else {
