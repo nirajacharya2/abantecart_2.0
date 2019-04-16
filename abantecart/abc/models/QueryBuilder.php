@@ -51,8 +51,17 @@ class QueryBuilder extends Builder
         return $this;
     }
 
-    public function active() {
-        $this->where('status', 1);
+    /**
+     * @param string $tableName
+     *
+     * @return $this
+     */
+    public function active($tableName = '') {
+        $fieldName = 'status';
+        if (!empty($tableName)) {
+            $fieldName = $tableName.'.'.$fieldName;
+        }
+        $this->where($fieldName, '=',1);
         return $this;
     }
 

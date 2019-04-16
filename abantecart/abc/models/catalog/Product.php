@@ -796,8 +796,7 @@ class Product extends BaseModel
 
     public function getProductCategories()
     {
-        $categoryInst = new Category();
-        $categories = $categoryInst->getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $categories = (new Category())->getCategories(0, $this->registry->get('session')->data['current_store_id']);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[

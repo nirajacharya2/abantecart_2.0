@@ -102,12 +102,17 @@ class ModelCatalogCategory extends Model
      */
     public function editCategory($category_id, $data)
     {
+        $data['parent_id'] = (int)$data['parent_id'] > 0 ? "'".(int)$data['parent_id']."'" : "NULL";
         $content_language_id = $this->language->getContentLanguageID();
         $fields = ['parent_id', 'sort_order', 'status'];
         $update = ['date_modified = NOW()'];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                if ($data[$f] != 'NULL') {
+                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                } else {
+                    $update[] = $f." = ".$this->db->escape($data[$f]);
+                }
             }
         }
         if (!empty($update)) {

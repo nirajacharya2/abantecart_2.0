@@ -25,6 +25,7 @@ use abc\core\engine\Model;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
+use abc\models\catalog\Category;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -437,7 +438,7 @@ class ModelToolImportProcess extends Model
 
         if ($category_id) {
             //update category
-            $this->model_catalog_category->editCategory(
+            (new Category())->editCategory(
                 $category_id,
                 $category_data
             );
@@ -452,7 +453,7 @@ class ModelToolImportProcess extends Model
                 $category[$key] = isset($category[$key]) ? $category[$key] : $val;
             }
 
-            $category_id = $this->model_catalog_category->addCategory($category_data);
+            $category_id = (new Category())->addCategory($category_data);
             if ($category_id) {
                 $this->toLog("Created category '{$category_desc['name']}' with ID {$category_id}.");
                 $status = true;
@@ -1010,7 +1011,7 @@ class ModelToolImportProcess extends Model
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {
-        $category_id = $this->model_catalog_category->addCategory(
+        $category_id = (new Category())->addCategory(
             [
                 'parent_id'            => $pid,
                 'sort_order'           => 0,

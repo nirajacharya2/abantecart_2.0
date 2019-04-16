@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
+use abc\models\catalog\Category;
 
 class ModelCatalogProduct extends Model
 {
@@ -325,7 +326,7 @@ class ModelCatalogProduct extends Model
         if ($cache === false) {
             //get all children categories
             $this->load->model('catalog/category');
-            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT *,
                             p.product_id,
@@ -398,7 +399,7 @@ class ModelCatalogProduct extends Model
         if ($cache === false) {
             //get all children category ids
             $this->load->model('catalog/category');
-            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT COUNT(*) AS total
                     FROM ".$this->db->table_name("products_to_categories")." p2c
