@@ -329,17 +329,14 @@ class Category extends BaseModel
      */
     public function buildPath(int $category_id)
     {
-        H::df($category_id);
         $categories = self::find($category_id);
         if ($categories) {
             $categories = $categories->first(['category_id', 'parent_id']);
         }
 
         if ($categories && $categories->parent_id) {
-            H::df($categories->parent_id);
             return $this->buildPath($categories->parent_id)."_".$category_id;
         } else {
-            H::df($category_id);
             return $category_id;
         }
     }
