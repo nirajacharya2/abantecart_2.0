@@ -30,6 +30,7 @@ use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
 use abc\core\lib\AResourceManager;
 use abc\core\view\AView;
+use abc\models\catalog\Category;
 use H;
 use stdClass;
 
@@ -376,7 +377,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
                         case 'custom_categories':
                             $this->loadModel('catalog/category');
                             $filter = ['subsql_filter' => 'c.category_id in ('.implode(',', $ids).')'];
-                            $results = $this->model_catalog_category->getCategoriesData($filter);
+                            $results = (new Category())->getCategoriesData($filter);
 
                             $id_name = 'category_id';
                             $rl_object_name = 'categories';

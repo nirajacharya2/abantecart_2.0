@@ -3,6 +3,8 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
 use abc\models\system\Store;
 use H;
@@ -32,7 +34,7 @@ class Category extends BaseModel
     protected $cascadeDeletes = [
         'descriptions',
         'products',
-        'stores',
+        //'stores',
     ];
     /**
      * @var string
@@ -102,6 +104,14 @@ class Category extends BaseModel
         return $this->belongsToMany(Store::class, 'categories_to_stores', 'category_id', 'store_id');
     }
 
+    /**
+     * @param        $category_id
+     * @param string $mode
+     *
+     * @return string
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     public function getPath($category_id, $mode = '')
     {
         $category_id = (int)$category_id;
@@ -152,7 +162,7 @@ class Category extends BaseModel
         if ($cache === false) {
             $category_data = [];
 
-            //  $this->db->enableQueryLog();
+            // $this->db->enableQueryLog();
 
             $categories = self::leftJoin('category_descriptions', 'categories.category_id', '=', 'category_descriptions.category_id');
             if (!is_null($storeId)) {
@@ -174,7 +184,7 @@ class Category extends BaseModel
                 ->orderBy('category_descriptions.name')
                 ->get();
 
-            //\H::df($this->db->getQueryLog());
+//            \H::df($this->db->getQueryLog());
 
             foreach ($categories as $category) {
                 $name = $category->name;
@@ -319,23 +329,34 @@ class Category extends BaseModel
      */
     public function buildPath(int $category_id)
     {
-        $categories = self::find($category_id)
-            ->first(['category_id', 'parent_id']);
+        H::df($category_id);
+        $categories = self::find($category_id);
+        if ($categories) {
+            $categories = $categories->first(['category_id', 'parent_id']);
+        }
 
         if ($categories && $categories->parent_id) {
-            return $this->buildPath($categories->parent_id)."_".$categories->category_id;
+            H::df($categories->parent_id);
+            return $this->buildPath($categories->parent_id)."_".$category_id;
         } else {
+            H::df($category_id);
             return $category_id;
         }
     }
 
-    public function getCategoriesData($data, $mode = 'default')
+    /**
+     * @param $data
+     *
+     * @return array|bool
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function getCategoriesData($data)
     {
-
         if ($data['language_id']) {
             $language_id = (int)$data['language_id'];
         } else {
-            $language_id = (int)$this->config->get('storefront_language_id');
+            $language_id = (int)$this->registry->get('language')->getContentLanguageID();
         }
 
         if ($data['store_id']) {
@@ -344,66 +365,60 @@ class Category extends BaseModel
             $store_id = (int)$this->config->get('config_store_id');
         }
 
-        if ($mode == 'total_only') {
-            $total_sql = 'count(*) as total';
-        } else {
-            $total_sql = "*,
-						  c.category_id,
-						  (SELECT count(*) as cnt
-						  	FROM ".$this->db->table_name('products_to_categories')." p2c
-						  	INNER JOIN ".$this->db->table_name('products')." p ON p.product_id = p2c.product_id
-						  	WHERE p2c.category_id = c.category_id AND p.status = '1') as products_count ";
-        }
-        $where = (isset($data['parent_id']) ? " c.parent_id = '".(int)$data['parent_id']."'" : '');
-        //filter result by given ids array
-        if ($data['filter_ids']) {
-            $ids = array();
-            foreach ($data['filter_ids'] as $id) {
-                $id = (int)$id;
-                if ($id) {
-                    $ids[] = $id;
-                }
-            }
-            $where = " c.category_id IN (".implode(', ', $ids).")";
-        }
+        $arSelect = [$this->db->raw('SQL_CALC_FOUND_ROWS  *')];
 
-        $where = $where ? 'WHERE '.$where : '';
+        if (ABC::env('IS_ADMIN')) {
+            $arSelect[] = $this->db->raw("(SELECT count(*) as cnt
+                       FROM ".$this->db->table_name('products_to_categories')." p
+                       WHERE p.category_id = ".$this->db->table_name('categories').".category_id) as products_count");
+            $arSelect[] = $this->db->raw("(SELECT count(*) as cnt
+                       FROM ".$this->db->table_name('categories')." cc
+                       WHERE cc.parent_id = ".$this->db->table_name('categories').".category_id) as subcategory_count,
+                       ".$this->db->table_name('category_descriptions').".name as basename");
+        }
+        $categories = self::select($arSelect)
+            ->leftJoin('category_descriptions', function ($join) use ($language_id) {
+                $join->on('category_descriptions.category_id', '=', 'categories.category_id')
+                    ->where('category_descriptions.language_id', '=', $language_id);
+            })
+            ->join('categories_to_stores', function ($join) use ($store_id) {
+                $join->on('categories_to_stores.category_id', '=', 'categories.category_id')
+                    ->where('categories_to_stores.store_id', '=', $store_id);
+            });
 
-        $sql = "SELECT ".$total_sql."
-				FROM ".$this->db->table_name('categories')." c
-				LEFT JOIN ".$this->db->table_name('category_descriptions')." cd
-					ON (c.category_id = cd.category_id AND cd.language_id = '".$language_id."')
-				INNER JOIN ".$this->db->table_name('categories_to_stores')." cs
-					ON (c.category_id = cs.category_id AND cs.store_id = '".$store_id."')
-				".$where;
+        $data['parent_id'] = (isset($data['parent_id']) && (int)$data['parent_id'] > 0) ? (int)$data['parent_id'] : null;
+
+        $categories = $categories->where('categories.parent_id', '=', $data['parent_id']);
+
 
         if (!empty($data['subsql_filter'])) {
-            $sql .= ($where ? " AND " : 'WHERE ').$data['subsql_filter'];
+            $categories = $categories->whereRaw($data['subsql_filter']);
         }
 
-        //If for total, we done building the query
-        if ($mode == 'total_only') {
-            $query = $this->db->query($sql);
-            return $query->row['total'];
-        }
-
-        $sort_data = array(
+        $sort_data = [
             'name'       => 'cd.name',
             'status'     => 'c.status',
             'sort_order' => 'c.sort_order',
-        );
+        ];
+
+        $desc = false;
 
         if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
-            $sql .= " ORDER BY ".$data['sort'];
+            $sortBy = $data['sort'];
         } else {
-            $sql .= " ORDER BY c.sort_order, cd.name ";
+            $sortBy =  'categories.sort_order, category_descriptions.name';
         }
 
         if (isset($data['order']) && ($data['order'] == 'DESC')) {
-            $sql .= " DESC";
-        } else {
-            $sql .= " ASC";
+            $desc = true;
         }
+
+        if ($desc) {
+            $categories = $categories->orderBy($sortBy, 'desc');
+        } else {
+            $categories = $categories->orderBy($sortBy);
+        }
+
 
         if (isset($data['start']) || isset($data['limit'])) {
             if ($data['start'] < 0) {
@@ -414,24 +429,38 @@ class Category extends BaseModel
                 $data['limit'] = 20;
             }
 
-            $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+            $categories = $categories->limit($data['limit'])
+                ->offset($data['start']);
         }
 
-        $query = $this->db->query($sql);
-        $category_data = array();
-        foreach ($query->rows as $result) {
-            $category_data[] = array(
-                'category_id'    => $result['category_id'],
-                'name'           => $result['name'],
-                'status'         => $result['status'],
-                'sort_order'     => $result['sort_order'],
-                'products_count' => $result['products_count'],
+        $categories = $categories->get();
 
-            );
+        if (!$categories) {
+            return false;
+        }
+
+        $categories = $categories->toArray();
+        $total_num_rows = $this->db->sql_get_row_count();
+
+        $category_data = [];
+        foreach ($categories as $result) {
+            $result['total_num_rows'] = $total_num_rows;
+            if ($data['basename'] == true) {
+                $result['name'] = $result['basename'];
+            } else {
+                $result['name'] = $this->getPath($result['category_id'], $language_id);
+            }
+            $category_data[] = $result;
         }
         return $category_data;
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool|mixed
+     * @throws \abc\core\lib\AException
+     */
     public function addCategory($data)
     {
         $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
@@ -492,9 +521,18 @@ class Category extends BaseModel
         return $categoryId;
     }
 
+    /**
+     * @param $categoryId
+     * @param $data
+     *
+     * @throws \abc\core\lib\AException
+     */
     public function editCategory($categoryId, $data)
     {
-        $data['parent_id'] = (int)$data['parent_id'] > 0 ? "'".(int)$data['parent_id']."'" : null;
+        if (isset($data['parent_id'])) {
+            $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
+        }
+
         $contentLanguageId = $this->registry->get('language')->getContentLanguageID();
 
         self::find($categoryId)->update($data);
@@ -525,14 +563,14 @@ class Category extends BaseModel
 
         if (isset($data['category_store'])) {
             $this->db->table('categories_to_stores')
-                ->where('category_id', '=', $categoryId)
+                ->where('category_id', '=', (int)$categoryId)
                 ->delete();
 
             $categoryToStore = [];
             foreach ($data['category_store'] as $storeId) {
                 $categoryToStore[] = [
                     'category_id' => (int)$categoryId,
-                    'store_id' => (int)$storeId,
+                    'store_id'    => (int)$storeId,
                 ];
             }
             $this->db->table('categories_to_stores')->insert($categoryToStore);
@@ -555,5 +593,142 @@ class Category extends BaseModel
         $this->cache->remove('category');
         $this->cache->remove('product');
 
+    }
+
+    /**
+     * @param $categoryId
+     *
+     * @return bool
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function deleteCategory($categoryId)
+    {
+        $category = self::find((int)$categoryId);
+        if (!$category) {
+            return false;
+        }
+        $category->delete();
+
+        UrlAlias::where('query', '=', 'category_id='.(int)$categoryId)
+            ->delete();
+
+        //delete resources
+        $rm = new AResourceManager();
+        $resources = $rm->getResourcesList(['object_name' => 'categories', 'object_id' => (int)$categoryId]);
+        foreach ($resources as $r) {
+            $rm->unmapResource('categories', $categoryId, $r['resource_id']);
+            //if resource became orphan - delete it
+            if (!$rm->isMapped($r['resource_id'])) {
+                $rm->deleteResource($r['resource_id']);
+            }
+        }
+        //remove layout
+        $lm = new ALayoutManager();
+        $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
+
+        //delete children categories
+        $subCategories = self::select(['category_id'])
+            ->where('parent_id', '=', (int)$categoryId)
+            ->get();
+        if ($subCategories) {
+            foreach ($subCategories as $result) {
+                $this->deleteCategory($result->category_id);
+            }
+        }
+
+        $this->cache->remove('category');
+        $this->cache->remove('product');
+    }
+
+    /**
+     * @return array
+     */
+    public function getLeafCategories()
+    {
+        $categories = self::select(['categories.category_id'])
+            ->leftJoin('categories as t2', 't2.parent_id', '=', 'categories.category_id')
+            ->whereNull('t2.category_id')
+            ->get();
+
+        $result = [];
+        if ($categories) {
+            foreach ($categories as $category) {
+                $result[$category->category_id] = $category->category_id;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param $category_id
+     *
+     * @return array
+     */
+    public function getCategoryDescriptions($category_id)
+    {
+        $category_description_data = [];
+        $categoryDecrs =CategoryDescription::where('category_id', '=', (int)$category_id)
+            ->get();
+
+        if (!$categoryDecrs) {
+            return $category_description_data;
+        }
+
+        $categoryDecrs = $categoryDecrs->toArray();
+        foreach ($categoryDecrs as $result) {
+            $category_description_data[$result['language_id']] = [
+                'name'             => $result['name'],
+                'meta_keywords'    => $result['meta_keywords'],
+                'meta_description' => $result['meta_description'],
+                'description'      => $result['description'],
+            ];
+        }
+
+        return $category_description_data;
+    }
+
+    /**
+     * @param $category_id
+     *
+     * @return array
+     */
+    public function getCategoryStores($category_id)
+    {
+        $stores = $this->db->table('categories_to_stores')
+        ->where('category_id', '=', $category_id)
+            ->get(['store_id']);
+
+        $category_store_data = [];
+        foreach ($stores as $result) {
+            $category_store_data[] = $result->store_id;
+        }
+
+        return $category_store_data;
+    }
+
+    /**
+     * @param $category_id
+     *
+     * @return array
+     */
+    public function getCategoryStoresInfo($category_id)
+    {
+        $storeInfo = $this->db->table('categories_to_stores c2s')
+            ->select(['c2s.*', 's.name AS store_name', 'ss.`value` AS store_url', 'sss.`value` AS store_ssl_url'])
+            ->leftJoin('stores s', 's.store_id', '=', 'c2s.store_id')
+            ->leftJoin('settings ss', function ($join){
+                $join->on('ss.store_id','=','c2s.store_id')
+                    ->where('ss.`key`', '=', 'config_url');
+            })
+            ->leftJoin('settings sss', function ($join){
+                $join->on('sss.store_id','=','c2s.store_id')
+                    ->where('sss.`key`', '=', 'config_ssl_url');
+            })->where('category_id', '=', (int)$category_id)
+            ->get();
+        if ($storeInfo) {
+            return $storeInfo->toArray();
+        }
+        return [];
     }
 }

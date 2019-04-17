@@ -189,7 +189,8 @@ class ControllerPagesCatalogCategory extends AController
             $grid_settings['multiaction_class'] = 'hidden';
         }
 
-        $results = $this->model_catalog_category->getCategories(0);
+        $results = (new Category())->getCategories(0);
+
         $parents = [
             'null' => $this->language->get('text_select_all'),
             0      => $this->language->get('text_top_level'),
@@ -343,11 +344,11 @@ class ControllerPagesCatalogCategory extends AController
 
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('error_name', $this->error['name']);
-        $this->data['categories'] = $this->model_catalog_category->getCategories(0);
+        $this->data['categories'] = (new Category())->getCategories(0);
 
         $categories = [0 => $this->language->get('text_none')];
         foreach ($this->data['categories'] as $c) {
-            $categories[$c['category_id']] = $c['name'];
+            $categories[(int)$c['category_id']] = $c['name'];
         }
 
         if (isset($this->request->get['category_id'])) {
@@ -389,7 +390,7 @@ class ControllerPagesCatalogCategory extends AController
         if (isset($this->request->post['category_description'])) {
             $this->data['category_description'] = $this->request->post['category_description'];
         } elseif (isset($category_info)) {
-            $this->data['category_description'] = $this->model_catalog_category->getCategoryDescriptions($category_id);
+            $this->data['category_description'] = (new Category())->getCategoryDescriptions($category_id);
         } else {
             $this->data['category_description'] = [];
         }
@@ -409,7 +410,7 @@ class ControllerPagesCatalogCategory extends AController
         if (isset($this->request->post['category_store'])) {
             $this->data['category_store'] = $this->request->post['category_store'];
         } elseif (isset($category_info)) {
-            $this->data['category_store'] = $this->model_catalog_category->getCategoryStores($category_id);
+            $this->data['category_store'] = (new Category())->getCategoryStores($category_id);
         } else {
             $this->data['category_store'] = [0];
         }
@@ -664,7 +665,7 @@ class ControllerPagesCatalogCategory extends AController
 
         if (H::has_value($category_id) && $this->request->is_GET()) {
             $this->loadModel('catalog/category');
-            $this->data['category_description'] = $this->model_catalog_category->getCategoryDescriptions($category_id);
+            $this->data['category_description'] = (new Category())->getCategoryDescriptions($category_id);
         }
 
         // Alert messages
@@ -843,7 +844,7 @@ class ControllerPagesCatalogCategory extends AController
                 'key_value'  => $category_id,
             ];
             $this->loadModel('catalog/category');
-            $category_info = $this->model_catalog_category->getCategoryDescriptions($category_id);
+            $category_info = (new Category())->getCategoryDescriptions($category_id);
             if ($category_info) {
                 foreach ($category_info as $language_id => $description) {
                     if (!H::has_value($language_id)) {

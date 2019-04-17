@@ -28,6 +28,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
+use abc\models\catalog\Category;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\modules\traits\SaleOrderTrait;
@@ -507,7 +508,7 @@ class ControllerPagesSaleOrder extends AController
 
         $this->loadModel('catalog/product');
         $this->loadModel('catalog/category');
-        $this->data['categories'] = $this->model_catalog_category->getCategories(0);
+        $this->data['categories'] = (new Category())->getCategories(0);
 
         $this->data['order_products'] = [];
         $order_products = $this->model_sale_order->getOrderProducts($order_id);

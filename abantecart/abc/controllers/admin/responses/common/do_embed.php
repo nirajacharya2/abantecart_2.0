@@ -252,16 +252,16 @@ class ControllerResponsesCommonDoEmbed extends AController
         if (sizeof($category_id) == 1) {
             $cat_id = current($category_id);
             $category_info = (new Category())->getCategory($cat_id);
-            $category_stores = $this->model_catalog_category->getCategoryStoresInfo($cat_id);
+            $category_stores = (new Category())->getCategoryStoresInfo($cat_id);
 
             if (sizeof($category_stores) == 1) {
                 $remote_store_url = $category_stores[0]['store_url'];
             }
-            $subcategories = $this->model_catalog_category->getCategories($cat_id);
+            $subcategories = (new Category())->getCategories($cat_id);
             if ($category_info['parent_id'] == 0) {
-                $options = $this->model_catalog_category->getCategories(0);
+                $options = (new Category())->getCategories(0);
             } else {
-                $cat_desc = $this->model_catalog_category->getCategoryDescriptions($cat_id);
+                $cat_desc = (new Category())->getCategoryDescriptions($cat_id);
                 $options = [
                     0 =>
                         [
@@ -272,7 +272,7 @@ class ControllerResponsesCommonDoEmbed extends AController
             }
         } else {
             if (!sizeof($category_id)) {
-                $options = $this->model_catalog_category->getCategoriesData(['parent_id' => 0]);
+                $options = (new Category())->getCategoriesData(['parent_id' => 0]);
                 $category_id = [];
                 foreach ($options as $c) {
                     $category_id[] = $c['category_id'];
@@ -283,7 +283,7 @@ class ControllerResponsesCommonDoEmbed extends AController
                 }
                 unset($c);
                 $subsql = ' c.category_id IN ('.implode(',', $category_id).') ';
-                $options = $this->model_catalog_category->getCategoriesData(['subsql_filter' => $subsql]);
+                $options = (new Category())->getCategoriesData(['subsql_filter' => $subsql]);
             }
         }
 

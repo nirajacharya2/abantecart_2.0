@@ -867,7 +867,7 @@ class ModelCatalogProduct extends Model
     public function getPath($category_id)
     {
         $string = $category_id.',';
-        $results = $this->model_catalog_category->getCategories((int)$category_id);
+        $results = (new Category())->getCategories((int)$category_id);
         foreach ($results as $result) {
             $string .= $this->getPath($result['category_id']);
         }

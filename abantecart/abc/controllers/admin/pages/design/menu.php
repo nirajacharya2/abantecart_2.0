@@ -24,6 +24,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AContentManager;
 use abc\core\lib\AMenu_Storefront;
+use abc\models\catalog\Category;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -236,11 +237,11 @@ class ControllerPagesDesignMenu extends AController{
 			}
 
 			$item_keys = array(
-					'item_icon', 
-					'item_text', 
-					'item_url', 
-					'parent_id', 
-					'sort_order', 
+					'item_icon',
+					'item_text',
+					'item_url',
+					'parent_id',
+					'sort_order',
 					'item_icon_resource_id'
 			);
 
@@ -411,7 +412,7 @@ class ControllerPagesDesignMenu extends AController{
 				));
 
 		$this->loadModel('catalog/category');
-		$categories = $this->model_catalog_category->getCategories(0);
+		$categories = (new Category())->getCategories(0);
 		$options = array('' => $this->language->get('text_select'));
 		foreach($categories as $c){
 			if(!$c['status']){

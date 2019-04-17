@@ -72,7 +72,7 @@ class ControllerResponsesListingGridCategory extends AController
         }
         $new_level = 0;
         //get all leave categories
-        $leaf_nodes = $this->model_catalog_category->getLeafCategories();
+        $leaf_nodes = (new Category())->getLeafCategories();
         if ($this->request->post['nodeid']) {
             $sort = $filter_data['sort'];
             $order = $filter_data['order'];
@@ -84,7 +84,7 @@ class ControllerResponsesListingGridCategory extends AController
             $new_level = (integer)$this->request->post["n_level"] + 1;
         }
 
-        $results = $this->model_catalog_category->getCategoriesData($filter_data);
+        $results = (new Category())->getCategoriesData($filter_data);
         $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter->getParam('page');
@@ -196,7 +196,7 @@ class ControllerResponsesListingGridCategory extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
-                        $this->model_catalog_category->deleteCategory($id);
+                        (new Category())->deleteCategory($id);
                     }
                 }
                 break;
@@ -339,7 +339,7 @@ class ControllerResponsesListingGridCategory extends AController
 												OR cd.description LIKE '%".$this->db->escape($this->request->post['term'])."%'
 												OR cd.meta_keywords LIKE '%".$this->db->escape($this->request->post['term'])."%'",
             );
-            $results = $this->model_catalog_category->getCategoriesData($filter);
+            $results = (new Category())->getCategoriesData($filter);
             //build thumbnails list
             $category_ids = array();
             foreach ($results as $category) {

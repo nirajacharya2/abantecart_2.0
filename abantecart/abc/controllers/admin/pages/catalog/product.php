@@ -26,6 +26,7 @@ use abc\core\lib\FormBuilder;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
+use abc\models\catalog\Category;
 use abc\models\catalog\ObjectType;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductType;
@@ -86,7 +87,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadModel('catalog/category');
         $this->data['categories'] = ['' => $this->language->get('text_select_category')];
-        $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
+        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
@@ -620,7 +621,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadModel('catalog/category');
         $this->data['categories'] = [];
-        $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
+        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
