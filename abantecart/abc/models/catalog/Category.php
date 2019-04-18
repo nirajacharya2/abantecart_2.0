@@ -499,7 +499,7 @@ class Category extends BaseModel
             $seo_key = H::SEOEncode($data['keyword'], 'category_id', $categoryId);
         } else {
             //Default behavior to save SEO URL keyword from category name in default language
-            $seo_key = H::SEOEncode($data['category_description'][$this->language->getDefaultLanguageID()]['name'],
+            $seo_key = H::SEOEncode($data['category_description'][$this->registry->get('language')->getDefaultLanguageID()]['name'],
                 'category_id',
                 $categoryId);
         }
@@ -711,20 +711,20 @@ class Category extends BaseModel
      */
     public function getCategoryStoresInfo($category_id)
     {
-        $storeInfo = $this->db->table('categories_to_stores c2s')
-            ->select(['c2s.*', 's.name AS store_name', 'ss.`value` AS store_url', 'sss.`value` AS store_ssl_url'])
-            ->leftJoin('stores s', 's.store_id', '=', 'c2s.store_id')
-            ->leftJoin('settings ss', function ($join){
+        $storeInfo = $this->db->table('categories_to_stores AS c2s')
+            ->select(['c2s.*', 's.name AS store_name', 'ss.value AS store_url', 'sss.value AS store_ssl_url'])
+            ->leftJoin('stores AS s', 's.store_id', '=', 'c2s.store_id')
+            ->leftJoin('settings AS ss', function ($join){
                 $join->on('ss.store_id','=','c2s.store_id')
-                    ->where('ss.`key`', '=', 'config_url');
+                    ->where('ss.key', '=', 'config_url');
             })
-            ->leftJoin('settings sss', function ($join){
+            ->leftJoin('settings AS sss', function ($join){
                 $join->on('sss.store_id','=','c2s.store_id')
-                    ->where('sss.`key`', '=', 'config_ssl_url');
+                    ->where('sss.key', '=', 'config_ssl_url');
             })->where('category_id', '=', (int)$category_id)
             ->get();
         if ($storeInfo) {
-            return $storeInfo->toArray();
+            return json_decode($storeInfo, true);
         }
         return [];
     }
