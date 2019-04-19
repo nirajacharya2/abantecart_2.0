@@ -96,7 +96,7 @@ class ControllerPagesProductCategory extends AController
             $parts = explode('_', $request['path']);
             if (count($parts) == 1) {
                 //see if this is a category ID to sub category, need to build full path
-                $parts = explode('_', (new Category())->buildPath($request['path']));
+                $parts = explode('_', (new Category())->buildPath((int)$request['path']));
             }
             foreach ($parts as $path_id) {
                 $category_info = (new Category())->getCategory($path_id);
