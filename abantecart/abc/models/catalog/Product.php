@@ -844,19 +844,19 @@ class Product extends BaseModel
     public function getStockCheckouts()
     {
         $language = $this->registry->get('language');
-        $result= [
+        $result = [
             (object)[
-            'id' => '',
-            'name' => $language->get('text_default')
-        ],
+                'id'   => '',
+                'name' => $language->get('text_default'),
+            ],
             (object)[
-            'id' => 0,
-            'name' => $language->get('text_no')
-        ],
+                'id'   => 0,
+                'name' => $language->get('text_no'),
+            ],
             (object)[
-            'id' => 1,
-            'name' => $language->get('text_yes')
-        ]
+                'id'   => 1,
+                'name' => $language->get('text_yes'),
+            ],
         ];
         return $result;
     }
@@ -870,14 +870,14 @@ class Product extends BaseModel
     {
         $language_id = $language_id ?? $this->registry->get('language')->getContentLanguageID();
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-                            ->select(['stock_status_id as id', 'name'])
-                            ->get();
+            ->select(['stock_status_id as id', 'name'])
+            ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
             $result[] = (object)[
-                            'id' => $stock_status->id,
-                            'name' => $stock_status->name
-                        ];
+                'id'   => $stock_status->id,
+                'name' => $stock_status->name,
+            ];
         }
         return $result;
     }
@@ -1243,9 +1243,9 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int $product_id
+     * @param int   $product_id
      * @param array $product_data
-     * @param int $language_id
+     * @param int   $language_id
      *
      * @return bool
      */
@@ -1255,11 +1255,11 @@ class Product extends BaseModel
          * @var Product $product
          */
         $product = Product::find($product_id);
-        if(!$product){
+        if (!$product) {
             return false;
         }
         $product->update($product_data);
-        if($product_data['product_description']) {
+        if ($product_data['product_description']) {
             $product->descriptions()->update($product_data['product_description']);
         }
 
@@ -1368,6 +1368,61 @@ class Product extends BaseModel
             $result[$setting['key']] = $setting['value'];
         }
         return $result;
+    }
+
+    public function getCatalogOnlyProducts(int $limit = null)
+    {
+        $arSelect = [$this->db->raw('SQL_CALC_FOUND_ROWS *'), 'pd.name as name'];
+
+        //special prices
+        if (is_object($this->registry->get('customer')) && $this->registry->get('customer')->isLogged()) {
+            $customer_group_id = (int)$this->registry->get('customer')->getCustomerGroupId();
+        } else {
+            $customer_group_id = (int)$this->config->get('config_customer_group_id');
+        }
+
+        $sql
+            = " ( SELECT p2sp.price
+                    FROM ".$this->db->table_name("product_specials")." p2sp
+                    WHERE p2sp.product_id = ".$this->db->table_name("products").".product_id
+                            AND p2sp.customer_group_id = '".$customer_group_id."'
+                            AND ((p2sp.date_start = '0000-00-00' OR p2sp.date_start < NOW())
+                            AND (p2sp.date_end = '0000-00-00' OR p2sp.date_end > NOW()))
+                    ORDER BY p2sp.priority ASC, p2sp.price ASC 
+                    LIMIT 1
+                 ) ";
+        $arSelect[] = $this->db->raw("COALESCE( ".$sql.", ".$this->db->table_name("products").".price) as final_price");
+
+        $languageId = (int)$this->config->get('storefront_language_id');
+
+        $products_info = Product::select($arSelect)
+            ->where('products.catalog_only', '=', 1)
+            ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
+                $join->on('products.product_id', '=', 'pd.product_id')
+                    ->where('pd.language_id', '=', $languageId);
+            })
+            ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
+            ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
+            ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
+                $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
+                    ->where('ss.language_id', '=', $languageId);
+            })
+            ->active('products');
+
+        if ($limit) {
+            $products_info = $products_info->limit($limit);
+        }
+
+        $products_info = $products_info->get();
+
+        if (!$products_info) {
+            return false;
+        }
+
+        return [
+            'products_info'  => $products_info->toArray(),
+            'total_num_rows' => $this->db->sql_get_row_count(),
+        ];
     }
 
 }
