@@ -248,7 +248,6 @@ class Category extends BaseModel
                 ->leftJoin('categories_to_stores', 'categories_to_stores.category_id', '=', 'categories.category_id')
                 ->where('categories.category_id', '=', $categoryId)
                 ->where('categories_to_stores.store_id', '=', $storeId)
-                ->active('categories')
                 ->first();
 
             if ($category) {
