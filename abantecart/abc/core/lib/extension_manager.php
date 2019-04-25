@@ -521,6 +521,24 @@ class AExtensionManager
             }
         }
 
+        //update composer if needed
+        //In this process main composer.json will grab composer.json files inside abc/extensions subdirectories
+        //to install all 3d-party code into abc/vendor folder
+
+        if(is_file(ABC::env('DIR_APP_EXTENSIONS').DS.$name.DS.'composer.json')){
+            $composer_phar = ABC::env('DIR_SYSTEM').DS.'temp'.DS.'composer.phar';
+            if(!is_file($composer_phar) && !copy( 'https://getcomposer.org/composer.phar', $composer_phar)){
+                exit('Error! Cannot to download composer.phar file into '.dirname($composer_phar)
+                    . ' directory from https://getcomposer.org/composer.phar !'."\n"
+                    .'Please download it manually to proceed installation'."\n");
+            }
+            $command = 'php '.$composer_phar.' update --no-interaction --ansi';
+            system($command, $exit_code);
+            if($exit_code){
+                exit('Error during executing of command'."\n".$command."\n");
+            }
+        }
+
         //publish assets
         require_once ABC::env('DIR_APP').'commands'.DS.'publish.php';
         $publish = new Publish();
