@@ -454,7 +454,7 @@ class ControllerPagesProductProduct extends AController
         foreach ($product_options as $option) {
             $values = [];
             $disabled_values = [];
-            $name = $price = '';
+            $name = $price = $attr = '';
             $default_value = $cart_product_info['options'][$option['product_option_id']];
             if ($option['element_type'] == 'R') {
                 $default_value = is_array($default_value) ? current($default_value) : (string)$default_value;
@@ -566,8 +566,11 @@ class ControllerPagesProductProduct extends AController
                 }
 
                 //for checkbox with empty value
-                if ($value == '' && $option['element_type'] == 'C') {
-                    $value = 1;
+                if ($option['element_type'] == 'C') {
+                    if($value == '') {
+                        $value = 1;
+                    }
+                    $attr = key($option['option_value']);
                 }
 
                 $option_data = [
@@ -576,6 +579,7 @@ class ControllerPagesProductProduct extends AController
                         HtmlElementFactory::getMultivalueElements())
                         ? 'option['.$option['product_option_id'].']'
                         : 'option['.$option['product_option_id'].'][]',
+                    'attr'             => ' data-attribute-value-id="'.$attr.'"',
                     'value'            => $value,
                     'options'          => $values,
                     'disabled_options' => $disabled_values,

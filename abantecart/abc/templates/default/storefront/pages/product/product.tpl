@@ -489,6 +489,12 @@ if ($error){ ?>
 
 		/* Process images for product options */
 		$('input[name^=\'option\'], select[name^=\'option\']').change(function () {
+			var valId = $(this).val();
+			valId = this.type === 'checkbox' && $(this).attr('data-attribute-value-id') ? $(this).attr('data-attribute-value-id') : valId;
+			//skip not selected radio
+			if( (this.type === 'radio' || this.type === 'checkbox') && $(this).prop('checked') == false){
+				return false;
+			}
 			load_option_images($(this).val(), '<?php echo $product_id; ?>');
 			display_total_price();
 		});
@@ -553,7 +559,7 @@ if ($error){ ?>
 						html1 += '<i class="fa fa-arrows  hidden-xs hidden-sm"></i></a>';
 					}
 				}
-				if (data.images) {
+				if (data.images.length > 0) {
 					for (img in data.images) {
 						var image = data.images[img];
 						html2 += '<li class="producthtumb">';
@@ -566,6 +572,7 @@ if ($error){ ?>
 						html2 += '</li>';
 					}
 				} else {
+					return false;
 					html1 = orig_imgs;
 					html2 = orig_thumbs;
 				}
