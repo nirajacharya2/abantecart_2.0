@@ -4,7 +4,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
-use abc\modules\reports\BaseReportInterface;
+use abc\core\lib\BaseReportInterface;
 use ReflectionClass;
 use ReflectionMethod;
 

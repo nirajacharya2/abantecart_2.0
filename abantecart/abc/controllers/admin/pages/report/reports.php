@@ -5,8 +5,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\lib\AJson;
-use abc\modules\reports\BaseReportInterface;
+use abc\core\lib\BaseReportInterface;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -94,6 +93,7 @@ class ControllerPagesReportReports extends AController
             '0' => $this->language->get('text_select'),
         ];
         $env = ABC::getEnv();
+        \H::df($env);
 
         if (!isset($env['REPORTS']) || !isset($env['REPORTS']['REPORTS_LIST'])) {
             return $arReports;

@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\modules\reports;
+namespace abc\core\lib;
 
 use abc\core\engine\Registry;
 
