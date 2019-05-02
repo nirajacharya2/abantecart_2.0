@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<definitions>
+  <definition>
+    <key>heading_title</key>
+    <value><![CDATA[View allowed reports]]></value>
+  </definition>
+  <definition>
+    <key>reports_heading_title</key>
+    <value><![CDATA[Reports]]></value>
+  </definition>
+  <definition>
+    <key>text_button_view</key>
+    <value><![CDATA[Show report]]></value>
+  </definition>
+  <definition>
+    <key>text_report</key>
+    <value><![CDATA[Report:]]></value>
+  </definition>
+  <definition>
+    <key>text_error_report_not_selected</key>
+    <value><![CDATA[Report not selected!]]></value>
+  </definition>
+  <definition>
+    <key>text_error_post_is_empty</key>
+    <value><![CDATA[Request not correct!]]></value>
+  </definition>
+  <definition>
+    <key>text_error_report_not_in_config</key>
+    <value><![CDATA[alias not exist in reports config file!]]></value>
+  </definition>
+  <definition>
+    <key>text_error_class_not_report</key>
+    <value><![CDATA[class not implement BaseReport interface!]]></value>
+  </definition>
+  <definition>
+    <key>text_error_report_not_exist</key>
+    <value><![CDATA[No Report get parameter!]]></value>
+  </definition>
+</definitions>

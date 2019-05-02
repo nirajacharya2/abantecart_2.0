@@ -134,7 +134,7 @@ class ABC extends ABCBase
      */
     public static function loadConfig($stage_name = 'default')
     {
-        $config_sections = ['config', 'events', 'model'];
+        $config_sections = ['config', 'events', 'model', 'reports', 'main_entities'];
         foreach ($config_sections as $config_section) {
             $KEY = strtoupper($config_section);
             $file_name = $config_section.'.php';
