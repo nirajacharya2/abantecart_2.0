@@ -79,13 +79,13 @@ class ControllerPagesReportKoolReports extends AController
             'separator' => false,
         ]);
         $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('report/reports'),
+            'href'      => $this->html->getSecureURL('report/koolreports'),
             'text'      => 'All Reports',
             'separator' => ' :: ',
             'current'   => false,
         ]);
         $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('report/reports', '&report='.$this->request->get['report']),
+            'href'      => $this->html->getSecureURL('report/koolreports', '&report='.$this->request->get['report']),
             'text'      => 'Report: '.$reportName,
             'separator' => ' :: ',
             'current'   => true,
@@ -122,7 +122,7 @@ class ControllerPagesReportKoolReports extends AController
                     'dir'  => $dir,
                     'path' => $dir.DS,
                     'hash' => $hash,
-                    'url'  => $this->html->getSecureURL('report/reports', '&report='.$hash),
+                    'url'  => $this->html->getSecureURL('report/koolreports', '&report='.$hash),
                 ];
             } else {
                 $output[$group] = array_merge((array)$output[$group], $this->getReportDirs($dir));
