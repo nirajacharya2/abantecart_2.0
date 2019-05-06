@@ -31,6 +31,10 @@ class ControllerPagesReportKoolReports extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
+        //???? try to make directory with temporary assets
+        if(!is_dir(ABC::env('DIR_PUBLIC').'vendor'.DS.'koolreport'.DS)){
+            @mkdir(ABC::env('DIR_PUBLIC').'vendor'.DS.'koolreport'.DS, 0775);
+        }
 
         if (!$this->request->get['report']) {
             $this->getReportList();
