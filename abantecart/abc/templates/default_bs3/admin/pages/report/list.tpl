@@ -19,10 +19,11 @@ include($tpl_common_dir.'action_confirm.tpl'); ?>
 					<dl style="margin-left: 30px"><?php echo '<a class="h5" href="'.$item['url'].'">'
                             .ucfirst($item['name']).'</a>'; ?></dl>
                 <?php } ?>
-				</li>
-				</ul>
-            <?php }
-        } ?>
+
+            <?php } ?>
+			</li>
+			</ul>
+        <?php } ?>
 	</div>
 
 </div>

@@ -11,18 +11,18 @@ include($tpl_common_dir.'action_confirm.tpl'); ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
         <?php foreach ((array)$report_list['reports'] as $group => $items) { ?>
 			<ul style="list-style-type: none;">
-			<li class="h4"><?php echo ucfirst($group); ?></li>
-			<li>&nbsp;&nbsp;&nbsp;
-            <?php
-            foreach ($items as $item) {
-                if (isset($item['name'])) { ?>
-					<dl style="margin-left: 30px"><?php echo '<a class="h5" href="'.$item['url'].'">'
-                            .ucfirst($item['name']).'</a>'; ?></dl>
-                <?php } ?>
+				<li class="h4"><?php echo ucfirst($group); ?></li>
+				<li>&nbsp;&nbsp;&nbsp;
+				<?php
+				foreach ($items as $item) {
+					if (isset($item['name'])) { ?>
+						<dl style="margin-left: 30px"><?php echo '<a class="h5" href="'.$item['url'].'">'
+								.ucfirst($item['name']).'</a>'; ?></dl>
+					<?php } ?>
+				<?php } ?>
 				</li>
-				</ul>
-            <?php }
-        } ?>
+			</ul>
+        <?php } ?>
 	</div>
 
 </div>

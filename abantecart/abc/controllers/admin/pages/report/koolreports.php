@@ -101,11 +101,13 @@ class ControllerPagesReportKoolReports extends AController
         $extDirs = [];
         $extensionReportDirs = glob(ABC::env('DIR_APP_EXTENSIONS').'*/modules/reports/*', GLOB_ONLYDIR);
         foreach ((array)$extensionReportDirs as $dir) {
-            if ($this->config->get(basename($dir).'_status')) {
+            if ($this->config->get(basename(realpath($dir.'/../../../')).'_status')) {
                 $extDirs = array_merge($extDirs, $this->getReportDirs($dir));
             }
         }
-        return array_merge($core_dirs, $extDirs);
+        $output = array_merge_recursive((array)$core_dirs, ['reports' => $extDirs]);
+
+        return $output;
     }
 
     protected function getReportDirs($path)
