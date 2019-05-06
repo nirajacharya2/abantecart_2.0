@@ -14,6 +14,8 @@ class Customers extends baseReport
                       LEFT JOIN ".$this->db_config['DB_PREFIX']."orders o
                       ON o.customer_id = c.customer_id
                       GROUP BY customer_id, firstname, lastname
+                      ORDER BY  SUM(o.total) DESC
+                      LIMIT 0,10
                       ")
              ->pipe($this->dataStore("customers"));
     }
