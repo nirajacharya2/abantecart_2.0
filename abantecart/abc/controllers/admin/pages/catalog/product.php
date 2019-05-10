@@ -346,9 +346,8 @@ class ControllerPagesCatalogProduct extends AController
         $this->document->setTitle($this->language->get('heading_title'));
         if ($this->request->is_POST() && $this->validateForm()) {
             $product_data = $this->prepareData($this->request->post);
-            $product_id = $this->model_catalog_product->addProduct($product_data);
+            $product_id = Product::createProduct($product_data);
             $this->data['product_id'] = $product_id;
-            $this->model_catalog_product->updateProductLinks($product_id, $product_data);
             $this->extensions->hk_ProcessData($this, 'product_insert');
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
@@ -461,6 +460,16 @@ class ControllerPagesCatalogProduct extends AController
                     $product = [];
                 }
 
+                $productStores = $this->db->table('products_to_stores')
+                    ->where('product_id', '=', $product_id)
+                    ->get();
+
+            $product['product_stores'] = [];
+                if ($productStores) {
+                    foreach ($productStores as $productStore) {
+                        $product['product_stores'][] = $productStore->store_id;
+                    }
+                }
 
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
 
@@ -478,14 +487,6 @@ class ControllerPagesCatalogProduct extends AController
                     }
                     $product['tags'] = implode(',', $arTags);
                     unset($arTags, $tags);
-                }
-                if (is_array($fieldValue) && $fieldName == 'stores') {
-                    $stores = $fieldValue;
-                    $product['stores'] = [];
-                    foreach ($stores as $store) {
-                        $product['stores'][] = $store['store_id'];
-                    }
-                    unset($stores);
                 }
                 if (is_array($fieldValue) && $fieldName == 'categories') {
                     $categories = $fieldValue;
@@ -1306,6 +1307,9 @@ class ControllerPagesCatalogProduct extends AController
     {
         if (isset($data['date_available'])) {
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
+        }
+        if (!isset($data['product_description']['language_id'])) {
+            $data['product_description']['language_id'] = $this->language->getContentLanguageID();
         }
         return $data;
     }

@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\admin\ModelCatalogManufacturer;
+use abc\models\catalog\Manufacturer;
 use H;
 
 /**
@@ -168,7 +169,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if (($this->request->is_POST()) && $this->validateForm()) {
-            $manufacturer_id = $this->model_catalog_manufacturer->addManufacturer($this->request->post);
+            $manufacturer_id = (new Manufacturer())->addManufacturer($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, __FUNCTION__, ['manufacturer_id' => $manufacturer_id]);
             abc_redirect($this->html->getSecureURL(
@@ -202,7 +203,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $manufacturer_id = (int)$this->request->get['manufacturer_id'];
 
         if (($this->request->is_POST()) && $this->validateForm()) {
-            $this->model_catalog_manufacturer->editManufacturer($manufacturer_id, $this->request->post);
+            (new Manufacturer())->editManufacturer($manufacturer_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
             abc_redirect($this->html->getSecureURL(

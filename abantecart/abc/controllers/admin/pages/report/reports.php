@@ -93,7 +93,6 @@ class ControllerPagesReportReports extends AController
             '0' => $this->language->get('text_select'),
         ];
         $env = ABC::getEnv();
-        \H::df($env);
 
         if (!isset($env['REPORTS']) || !isset($env['REPORTS']['REPORTS_LIST'])) {
             return $arReports;
