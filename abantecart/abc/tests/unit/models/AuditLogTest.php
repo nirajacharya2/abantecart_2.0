@@ -186,12 +186,12 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "created"      => 35,
-                "deleted"      => 49,
-                "deleting"     => 91,
-                "forceDeleted" => 34,
-                "restored"     => 34,
-                "restoring"    => 34,
+                "created"      => 36,
+                "deleted"      => 50,
+                "deleting"     => 93,
+                "forceDeleted" => 35,
+                "restored"     => 35,
+                "restoring"    => 35,
                 "updated"      => 5,
                 "updating"     => 5,
             ]
@@ -208,7 +208,7 @@ class AuditLogTest extends ATestCase
             $this->getLoggedEvents('Product', $productId),
             [
                 "creating" => 7,
-                "deleting" => 110,
+                "deleting" => 112,
                 "updating" => 5,
             ]
         );
@@ -282,7 +282,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleting' => 224,
+                'deleting' => 226,
             ]
         );
     }
@@ -294,7 +294,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleted' => 201,
+                'deleted' => 202,
             ]
         );
     }
@@ -306,8 +306,8 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleting' => 262,
-                'deleted'  => 220,
+                'deleting' => 264,
+                'deleted'  => 221,
             ]
         );
     }
