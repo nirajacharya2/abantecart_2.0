@@ -26,6 +26,7 @@ use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
 use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use H;
@@ -890,7 +891,7 @@ class ModelToolImportProcess extends Model
         if (!$manufacturer_id) {
             //create category
             $this->load->model('catalog/manufacturer');
-            $manufacturer_id = $this->model_catalog_manufacturer->addManufacturer(
+            $manufacturer_id = (new Manufacturer())->addManufacturer(
                 [
                     'sort_order'         => $sort_order,
                     'name'               => $manufacturer_name,
