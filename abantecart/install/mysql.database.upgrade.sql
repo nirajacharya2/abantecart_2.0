@@ -1855,7 +1855,17 @@ ADD COLUMN `stage_id` INT(6) NULL,
 ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_products`
-ADD COLUMN `product_type_id` INT(1) NULL;
+ADD COLUMN `product_type_id` INT(1) NULL,
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `product_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+
+ALTER TABLE `ac_categories`
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `category_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+
+ALTER TABLE `ac_manufacturers`
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `manufacturer_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
 
 DROP TABLE IF EXISTS `ac_object_types`;
 CREATE TABLE `ac_object_types` (

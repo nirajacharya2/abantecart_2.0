@@ -8840,6 +8840,7 @@ CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`,
 --
 CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `parent_id` int(11),
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
@@ -8848,6 +8849,7 @@ CREATE TABLE `ac_categories` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`category_id`),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`, `status`  );
@@ -9194,6 +9196,7 @@ INSERT INTO `ac_length_class_descriptions` (`length_class_id`, `language_id`, `t
 --
 CREATE TABLE `ac_manufacturers` (
   `manufacturer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -9201,6 +9204,7 @@ CREATE TABLE `ac_manufacturers` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`manufacturer_id`),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9571,6 +9575,7 @@ CREATE TABLE `ac_product_option_value_descriptions` (
 --
 CREATE TABLE `ac_products` (
   `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `model` varchar(64) NOT NULL,
   `sku` varchar(64) DEFAULT NULL,
   `location` varchar(128) NOT NULL,
@@ -9607,6 +9612,7 @@ CREATE TABLE `ac_products` (
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`product_id`),
   INDEX `stage_idx` (`stage_id` ASC),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `ac_products_idx` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`),
   INDEX `ac_products_status_idx` (`product_id`, `status`, `date_available`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
