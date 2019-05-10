@@ -45,7 +45,7 @@ use ReflectionMethod;
  * @package abc\models
  * @method static Builder find(integer $id, array $columns = ['*'])
  * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
- * @const string DELETED_AT
+ * @const   string DELETED_AT
  */
 class BaseModel extends OrmModel
 {
@@ -132,6 +132,7 @@ class BaseModel extends OrmModel
 
     /**
      * Classname of main Model needed for audit log
+     *
      * @var string
      */
     protected $mainClassName;
@@ -248,7 +249,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $operation
+     * @param       $operation
      *
      * @param array $columns
      *
@@ -423,7 +424,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array $data
+     * @param array  $data
      */
     private function syncHasOneRelationship($relationship_name, array $data)
     {
@@ -439,7 +440,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $model
+     * @param       $model
      * @param array $data
      */
     private function syncHasManyRelationship($model, array $data)
@@ -481,7 +482,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array $data
+     * @param array  $data
      *
      * @return mixed
      */
@@ -591,13 +592,17 @@ class BaseModel extends OrmModel
     /**
      * @return string
      */
-    public function getMainModelClassName(){
+    public function getMainModelClassName()
+    {
         return $this->mainClassName ?? $this->getClass();
     }
+
     /**
      * @return string
      */
-    public function getMainModelClassKey(){
+    public function getMainModelClassKey()
+    {
         return $this->mainClassKey ?? $this->getKeyName();
     }
+
 }

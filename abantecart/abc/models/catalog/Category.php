@@ -3,10 +3,13 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\AResource;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use abc\models\system\Setting;
 use abc\models\system\Store;
+use Dyrynda\Database\Support\GeneratesUuid;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Category extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
@@ -69,6 +72,8 @@ class Category extends BaseModel
         'parent_id',
         'sort_order',
         'status',
+        'uuid',
+        'date_deleted'
     ];
 
     /**
@@ -531,7 +536,7 @@ class Category extends BaseModel
 
         $contentLanguageId = $this->registry->get('language')->getContentLanguageID();
 
-        self::find($categoryId)->update($data);
+        self::withTrashed()->find($categoryId)->update($data);
 
         if (!empty($data['category_description'])) {
             foreach ($data['category_description'] as $language_id => $value) {
@@ -726,5 +731,105 @@ class Category extends BaseModel
             return json_decode($storeInfo, true);
         }
         return [];
+    }
+
+    /**
+     * @return array|false|mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function getAllData()
+    {
+        $cache_key = 'category.alldata.'.$this->getKey();
+        $data = $this->cache->pull($cache_key);
+        if ($data === false) {
+            $this->load('descriptions', 'stores');
+            $data = $this->toArray();
+            $data['images'] = $this->getImages();
+            $this->cache->push($cache_key, $data);
+        }
+        return $data;
+    }
+
+    /**
+     * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function getImages()
+    {
+        $images = [];
+        $resource = new AResource('image');
+        // main product image
+        $sizes = [
+            'main'  => [
+                'width'  => $this->config->get('config_image_popup_width'),
+                'height' => $this->config->get('config_image_popup_height'),
+            ],
+            'thumb' => [
+                'width'  => $this->config->get('config_image_thumb_width'),
+                'height' => $this->config->get('config_image_thumb_height'),
+            ],
+        ];
+        $images['image_main'] = $resource->getResourceAllObjects('categories', $this->getKey(), $sizes, 1, false);
+        if ($images['image_main']) {
+            $images['image_main']['sizes'] = $sizes;
+        }
+
+        // additional images
+        $sizes = [
+            'main'   => [
+                'width'  => $this->config->get('config_image_popup_width'),
+                'height' => $this->config->get('config_image_popup_height'),
+            ],
+            'thumb'  => [
+                'width'  => $this->config->get('config_image_additional_width'),
+                'height' => $this->config->get('config_image_additional_height'),
+            ],
+            'thumb2' => [
+                'width'  => $this->config->get('config_image_thumb_width'),
+                'height' => $this->config->get('config_image_thumb_height'),
+            ],
+        ];
+        $images['images'] = $resource->getResourceAllObjects('categories', $this->getKey(), $sizes, 0, false);
+        if (!empty($images)) {
+            $protocolSetting = Setting::select('value')->where('key', '=', 'protocol_url')->first();
+            $protocol = 'http';
+            if ($protocolSetting) {
+                $protocol = $protocolSetting->value;
+            }
+
+            if (isset($images['image_main']['direct_url']) && strpos($images['image_main']['direct_url'], 'http') !== 0) {
+                $images['image_main']['direct_url'] = $protocol.':'.$images['image_main']['direct_url'];
+            }
+            if (isset($images['image_main']['main_url']) && strpos($images['image_main']['main_url'], 'http') !== 0) {
+                $images['image_main']['main_url'] = $protocol.':'.$images['image_main']['main_url'];
+            }
+            if (isset($images['image_main']['thumb_url']) && strpos($images['image_main']['thumb_url'], 'http') !== 0) {
+                $images['image_main']['thumb_url'] = $protocol.':'.$images['image_main']['thumb_url'];
+            }
+            if (isset($images['image_main']['thumb2_url']) && strpos($images['image_main']['thumb2_url'], 'http') !== 0) {
+                $images['image_main']['thumb2_url'] = $protocol.':'.$images['image_main']['thumb2_url'];
+            }
+
+            if ($images['images']) {
+                foreach ($images['images'] as &$img) {
+                    if (isset($img['direct_url']) && strpos($img['direct_url'], 'http') !== 0) {
+                        $img['direct_url'] = $protocol.':'.$img['direct_url'];
+                    }
+                    if (isset($img['main_url']) && strpos($img['main_url'], 'http') !== 0) {
+                        $img['main_url'] = $protocol.':'.$img['main_url'];
+                    }
+                    if (isset($img['thumb_url']) && strpos($img['thumb_url'], 'http') !== 0) {
+                        $img['thumb_url'] = $protocol.':'.$img['thumb_url'];
+                    }
+                    if (isset($img['thumb2_url']) && strpos($img['thumb2_url'], 'http') !== 0) {
+                        $img['thumb2_url'] = $protocol.':'.$img['thumb2_url'];
+                    }
+                }
+            }
+
+        }
+        return $images;
     }
 }

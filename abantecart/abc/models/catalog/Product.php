@@ -2,6 +2,7 @@
 
 namespace abc\models\catalog;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -12,6 +13,7 @@ use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
+use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
@@ -71,7 +73,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
@@ -176,6 +178,8 @@ class Product extends BaseModel
         'call_to_order',
         'settings',
         'product_type_id',
+        'uuid',
+        'date_deleted'
     ];
 
     protected $rules = [
@@ -290,7 +294,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_stores'    => [
+        'product_store'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -810,7 +814,7 @@ class Product extends BaseModel
     public function getProductStores()
     {
         $stores = Store::active()->select(['store_id as id', 'name'])->get();
-        $result = [];
+        $result[] = (object)['id' => 0, 'name' => 'Default'];
         foreach ($stores as $store) {
             $result[] = (object)['id' => $store->id, 'name' => $store->name];
         }
@@ -1226,6 +1230,9 @@ class Product extends BaseModel
      */
     public static function createProduct(array $product_data)
     {
+        if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
+            $product_data['product_store'] = [0 => 0];
+        }
         $product = new Product($product_data);
         $product->save();
         $productId = $product->product_id;
@@ -1260,6 +1267,9 @@ class Product extends BaseModel
         }
         $product->update($product_data);
         if ($product_data['product_description']) {
+            if (!isset($product_data['product_description']['language_id'])) {
+                $product_data['product_description']['language_id'] = $language_id;
+            }
             $product->descriptions()->update($product_data['product_description']);
         }
 

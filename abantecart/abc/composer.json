@@ -225,6 +225,7 @@
     "ext-openssl": "*",
     "ext-gd": "*",
     "ext-phar": "*",
+    "ext-bcmath": "*",
     "mnsami/composer-custom-directory-installer": "1.1.*",
     "wikimedia/composer-merge-plugin": "1.4.0",
     "google/recaptcha": "~1.1",
@@ -263,7 +264,8 @@
     "chelout/laravel-relationship-events": "dev-abc",
     "laracasts/utilities": "^2.0",
     "iatstuti/laravel-cascade-soft-deletes" : "1.5.0",
-    "koolphp/koolreport" : "3.25.4"
+    "koolphp/koolreport" : "3.25.4",
+    "dyrynda/laravel-model-uuid" : "~4.1"
   },
   "extra": {
     "installer-paths": {

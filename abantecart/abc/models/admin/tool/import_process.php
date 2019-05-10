@@ -26,6 +26,7 @@ use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -324,9 +325,7 @@ class ModelToolImportProcess extends Model
         $this->load->model('catalog/product');
         if ($new_product) {
 
-            $product_data['product_description'] = [
-                $language_id => $product_desc,
-            ];
+            $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
 
             //apply default settings for new products only
             $default_arr = [
@@ -343,7 +342,7 @@ class ModelToolImportProcess extends Model
                 $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
             }
 
-            $product_id = $this->model_catalog_product->addProduct($product_data);
+            $product_id = Product::createProduct($product_data);
             if ($product_id) {
                 $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
                 $status = true;
