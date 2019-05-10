@@ -1945,4 +1945,30 @@ class AHelperUtils extends AHelper
         }
         return str_replace($separator, '', $string);
     }
+
+    /**
+     * @return string
+     */
+    public static function genRequestId()
+    {
+        return  sprintf(
+            "%08x",
+            abs(crc32(self::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getRemoteIP()
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
 }

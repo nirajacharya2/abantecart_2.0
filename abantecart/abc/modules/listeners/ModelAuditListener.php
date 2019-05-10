@@ -215,7 +215,12 @@ class ModelAuditListener
                 'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
         }
 
-        $request_id = $this->registry->get('request')->getUniqueId();
+        if ($this->registry->get('request')) {
+            $request_id = $this->registry->get('request')->getUniqueId();
+        } else {
+            $request_id = \H::genRequestId();
+        }
+
         $session_id = session_id();
 
         $user = new UserResolver($this->registry);

@@ -57,10 +57,7 @@ final class ARequest
         $this->server = $_SERVER;
 
         //generate unique request
-        $this->uniqueId = sprintf(
-            "%08x",
-            abs(crc32($this->getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
-        );
+        $this->uniqueId = \H::genRequestId();
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
