@@ -1,12 +1,6 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<ul class="nav nav-tabs nav-justified nav-profile">
-	<li class="nav-item">
-	<a class="nav-link" href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
-	<li class="nav-item" >
-	<a class="nav-link active" href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
-	<?php echo $this->getHookVar('extension_tabs'); ?>
-</ul>
+<?php echo $tabs ?>
 
 <?php
 $template_list = '';
@@ -15,7 +9,7 @@ foreach ($templates as $template) {
   if ($tmpl_id == $template) {
     $item_class = ' class="disabled"';
   }
-  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';    
+  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
 }
 
 ?>
@@ -62,10 +56,10 @@ foreach ($templates as $template) {
 				</div>
 			</form>
 			</div>
-			
+
 		</div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<?php echo $form_begin; ?>
