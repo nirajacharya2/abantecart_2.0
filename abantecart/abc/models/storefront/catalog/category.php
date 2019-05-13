@@ -22,6 +22,7 @@ namespace abc\models\storefront;
 
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
+use abc\models\catalog\Manufacturer;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -334,7 +335,7 @@ class ModelCatalogCategory extends Model
 
                 foreach ($prods as $prod) {
                     if ($prod['manufacturer_id']) {
-                        $brand = $this->model_catalog_manufacturer->getManufacturer($prod['manufacturer_id']);
+                        $brand = (new Manufacturer())->getManufacturer($prod['manufacturer_id']);
                         $brands[$prod['manufacturer_id']] = array(
                             'name' => $brand['name'],
                             'href' => $this->html->getSEOURL('product/manufacturer', '&manufacturer_id='.$brand['manufacturer_id'], '&encode'),

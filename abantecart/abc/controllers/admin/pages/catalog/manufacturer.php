@@ -250,7 +250,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->data['manufacturer_id'] = $manufacturer_id;
 
         if ($manufacturer_id && $this->request->is_GET()) {
-            $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+            $manufacturer_info = (new Manufacturer())->getManufacturer($manufacturer_id);
         }
 
         foreach ($this->fields as $f) {

@@ -494,7 +494,7 @@ class ModelCatalogProduct extends Model
     public function getTotalProductsByManufacturerId($manufacturer_id = 0)
     {
         $query = $this->db->query("SELECT COUNT(*) AS total
-                                    FROM ".$this->db->table_name("products")."
+                                    FROM ".$this->db->table_name("products p")."
                                     WHERE ".$this->getProductFilters()."
                                             AND manufacturer_id = '".(int)$manufacturer_id."'");
 

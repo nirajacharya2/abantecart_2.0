@@ -83,4 +83,9 @@ class UrlAlias extends BaseModel
     {
         self::setKeyword($keyword, 'product_id', $productId);
     }
+
+    public static function setManufacturerKeyword(string $keyword, int $productId)
+    {
+        self::setKeyword($keyword, 'manufacturer_id', $productId);
+    }
 }

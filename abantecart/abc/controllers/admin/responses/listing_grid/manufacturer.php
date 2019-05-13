@@ -137,7 +137,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                             return null;
                         }
 
-                        $this->model_catalog_manufacturer->deleteManufacturer($id);
+                        (new Manufacturer())->deleteManufacturer($id);
                     }
                 }
                 break;

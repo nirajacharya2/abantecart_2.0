@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ALayoutManager;
 use abc\models\admin\ModelCatalogManufacturer;
+use abc\models\catalog\Manufacturer;
 use H;
 
 /**
@@ -54,7 +55,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
         $this->loadModel('catalog/manufacturer');
-        $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+        $manufacturer_info = (new Manufacturer())->getManufacturer($manufacturer_id);
 
         $this->data['help_url'] = $this->gen_help_url('manufacturer_layout');
 
@@ -250,7 +251,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController
 
             $languages = $this->language->getAvailableLanguages();
             $this->loadModel('catalog/manufacturer');
-            $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+            $manufacturer_info = (new Manufacturer())->getManufacturer($manufacturer_id);
             if ($manufacturer_info) {
                 foreach ($languages as $l) {
                     $page_info['page_descriptions'][$l['language_id']] = $manufacturer_info;
