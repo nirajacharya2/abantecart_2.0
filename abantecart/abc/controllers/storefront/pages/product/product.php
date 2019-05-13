@@ -29,6 +29,7 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
 use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
@@ -121,7 +122,8 @@ class ControllerPagesProductProduct extends AController
 
         $this->loadModel('catalog/manufacturer');
         if (isset($request['manufacturer_id'])) {
-            $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($request['manufacturer_id']);
+            $manufacturer_info = (new Manufacturer)->getManufacturer($request['manufacturer_id']);
+
             if ($manufacturer_info) {
                 $this->document->addBreadcrumb([
                     'href'      => $this->html->getSEOURL('product/manufacturer',

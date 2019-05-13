@@ -2,7 +2,11 @@
 
 namespace abc\models\catalog;
 
+use abc\core\ABC;
 use abc\core\engine\AResource;
+use abc\core\lib\AException;
+use abc\core\lib\ALayoutManager;
+use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
@@ -13,9 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Manufacturer
  *
- * @property int $manufacturer_id
- * @property string $name
- * @property int $sort_order
+ * @property int                                      $manufacturer_id
+ * @property string                                   $name
+ * @property int                                      $sort_order
  *
  * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
  *
@@ -73,29 +77,13 @@ class Manufacturer extends BaseModel
             foreach ($data['manufacturer_store'] as $store_id) {
                 $manufacturerToStore[] = [
                     'manufacturer_id' => $manufacturerId,
-                    'store_id'    => (int)$store_id,
+                    'store_id'        => (int)$store_id,
                 ];
             }
             $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
         }
 
-        if ($data['keyword']) {
-            $seo_key = H::SEOEncode($data['keyword'], 'manufacturer_id', $manufacturerId);
-        } else {
-            //Default behavior to save SEO URL keyword from manufacturer name in default language
-            $seo_key = H::SEOEncode($data['name'],
-                'manufacturer_id',
-                $manufacturerId);
-        }
-        if ($seo_key) {
-            $this->registry->get('language')->replaceDescriptions('url_aliases',
-                ['query' => "manufacturer_id=".(int)$manufacturerId],
-                [(int)$this->registry->get('language')->getContentLanguageID() => ['keyword' => $seo_key]]);
-        } else {
-            UrlAlias::where('query', '=', 'manufacturer_id='.(int)$manufacturerId)
-                ->where('language_id', '=', (int)$this->registry->get('language')->getContentLanguageID())
-                ->forceDelete();
-        }
+        UrlAlias::setManufacturerKeyword($data['keyword'] ?? '' , $manufacturerId);
 
         $this->cache->remove('manufacturer');
 
@@ -123,25 +111,13 @@ class Manufacturer extends BaseModel
             foreach ($data['manufacturer_store'] as $storeId) {
                 $manufacturerToStore[] = [
                     'manufacturer_id' => (int)$manufacturerId,
-                    'store_id'    => (int)$storeId,
+                    'store_id'        => (int)$storeId,
                 ];
             }
             $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
         }
 
-        if (isset($data['keyword'])) {
-            $data['keyword'] = H::SEOEncode($data['keyword']);
-            if ($data['keyword']) {
-                $this->registry->get('language')->replaceDescriptions('url_aliases',
-                    ['query' => "manufacturer_id=".(int)$manufacturerId],
-                    [$contentLanguageId => ['keyword' => $data['keyword']]]
-                );
-            } else {
-                UrlAlias::where('query', '=', 'manufacturer_id='.(int)$manufacturerId)
-                    ->where('language_id', '=', $contentLanguageId)
-                    ->forceDelete();
-            }
-        }
+        UrlAlias::setManufacturerKeyword($data['keyword'] ?? '' , $manufacturerId);
 
         $this->cache->remove('manufacturer');
     }
@@ -245,4 +221,90 @@ class Manufacturer extends BaseModel
         }
         return $images;
     }
+
+    public function getManufacturer($manufacturerId)
+    {
+        $manufacturerId = (int)$manufacturerId;
+        if (!$manufacturerId) {
+            return false;
+        }
+        $storeId = (int)$this->config->get('config_store_id');
+        $cacheKey = 'manufacturer.'.$manufacturerId.'.store_'.$storeId;
+        $output = $this->cache->pull($cacheKey);
+
+        if ($output !== false) {
+            return $output;
+        }
+
+        $manufacturer = self::leftJoin('manufacturers_to_stores', 'manufacturers_to_stores.manufacturer_id', '=', 'manufacturers.manufacturer_id')
+            ->where('manufacturers_to_stores.store_id', '=', $storeId)
+            ->where('manufacturers.manufacturer_id', '=', $manufacturerId);
+        $manufacturer = $manufacturer->get()->first();
+
+        if (!$manufacturer) {
+            return false;
+        }
+
+        $output = $manufacturer->toArray();
+
+        if (ABC::env('IS_ADMIN')) {
+            $seoUrl = $this->db->table('url_aliases')
+                ->where('query', '=', 'manufacturer_id='.(int)$manufacturerId)
+                ->get()
+                ->first();
+            if ($seoUrl) {
+                $output['keyword'] = $seoUrl->keyword;
+            }
+        }
+
+        $this->cache->push($cacheKey, $output);
+        return $output;
+    }
+
+    public function deleteManufacturer($manufacturer_id)
+    {
+        if (!(int)$manufacturer_id) {
+            return false;
+        }
+        self::withTrashed()->find((int)$manufacturer_id)->delete();
+
+        $this->db->table('manufacturers_to_stores')
+            ->where('manufacturer_id', '=', (int)$manufacturer_id)
+            ->delete();
+
+        $this->db->table('url_aliases')
+            ->where('query', '=', 'manufacturer_id='.(int)$manufacturer_id)
+            ->delete();
+
+        try {
+            $lm = new ALayoutManager();
+            $lm->deletePageLayout('pages/product/manufacturer', 'manufacturer_id', (int)$manufacturer_id);
+        } catch (AException $e) {
+
+        } catch (\Exception $e) {
+
+        }
+
+        //delete resources
+        try {
+            $rm = new AResourceManager();
+            $resources = $rm->getResourcesList([
+                'object_name' => 'manufacturers',
+                'object_id'   => (int)$manufacturer_id,
+            ]);
+            foreach ($resources as $r) {
+                $rm->unmapResource('manufacturers', $manufacturer_id, $r['resource_id']);
+                //if resource became orphan - delete it
+                if (!$rm->isMapped($r['resource_id'])) {
+                    $rm->deleteResource($r['resource_id']);
+                }
+            }
+        } catch (\ReflectionException $e) {
+
+        } catch (\Exception $e) {
+
+        }
+        $this->cache->remove('manufacturer');
+    }
+
 }

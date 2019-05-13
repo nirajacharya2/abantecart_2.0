@@ -273,7 +273,7 @@ class ModelAccountOrder extends Model
     public function getOrderHistories($order_id)
     {
         $language_id = (int)$this->config->get('storefront_language_id');
-        $query = $this->db->query("SELECT 	date_added, 
+        $query = $this->db->query("SELECT 	oh.date_added, 
                                             osd.name AS status, 
                                             oh.comment, 
                                             oh.notify 

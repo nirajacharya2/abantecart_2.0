@@ -150,6 +150,12 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
     H::setDBUserVars();
 }
 
+
+//session
+$session_id = 'CLI';
+registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\ASession', [$session_id]);
+
+
 // Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
@@ -198,10 +204,6 @@ registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload",
 
 // Log
 $registry->set('log', ABC::getObjectByAlias('ALog', [['app' => 'cli.log']]));
-
-//session
-$session_id = 'CLI';
-registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\ASession', [$session_id]);
 
 // Document
 registerClass($registry, 'document', 'ADocument', [], '\abc\core\lib\ADocument', []);

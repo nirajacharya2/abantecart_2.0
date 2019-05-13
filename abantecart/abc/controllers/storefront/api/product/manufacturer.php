@@ -21,6 +21,7 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\catalog\Manufacturer;
 use abc\models\storefront\ModelCatalogManufacturer;
 
 /**
@@ -39,7 +40,7 @@ class ControllerApiProductManufacturer extends AControllerAPI
         $this->loadModel('catalog/manufacturer');
 
         if ($manufacturer_id) {
-            $data = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
+            $data = (new Manufacturer())->getManufacturer($manufacturer_id);
         } else {
             $data = $this->model_catalog_manufacturer->getManufacturers();
         }

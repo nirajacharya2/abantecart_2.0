@@ -3216,7 +3216,7 @@ body.stickyheader .sticky_left {
 }
 
 #code_options .checkbox_element div.form-inline{
-    width: 100% !important;
+    /*width: 100% !important; */
 }
 
 #code_options .scrollbox .acheckbox input, #code_options .scrollbox div.acheckbox{
