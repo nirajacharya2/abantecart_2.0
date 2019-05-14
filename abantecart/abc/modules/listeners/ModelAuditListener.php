@@ -251,7 +251,7 @@ class ModelAuditListener
         $main_auditable_id = !$main_auditable_id ? $oldData[$modelObject->getMainModelClassKey()] : $main_auditable_id;
 
         $userData = [
-            'user_type_id' => AuditUser::USER_TYPES[$user_type],
+            'user_type_id' => AuditUser::getUserTypeId($user_type),
             'user_id'      => $user_id,
             'name'         => $user_name,
         ];
