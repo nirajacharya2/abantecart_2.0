@@ -488,16 +488,21 @@ class Category extends BaseModel
             }
         }
 
+        $categoryToStore = [];
         if (isset($data['category_store'])) {
-            $categoryToStore = [];
             foreach ($data['category_store'] as $store_id) {
                 $categoryToStore[] = [
                     'category_id' => $categoryId,
                     'store_id'    => (int)$store_id,
                 ];
             }
-            $this->db->table('categories_to_stores')->insert($categoryToStore);
+        } else {
+            $categoryToStore[] = [
+                'category_id' => $categoryId,
+                'store_id'    => 0,
+            ];
         }
+        $this->db->table('categories_to_stores')->insert($categoryToStore);
 
         $categoryName = '';
         if (isset($data['category_description'])) {
@@ -554,20 +559,25 @@ class Category extends BaseModel
             }
         }
 
+        $categoryToStore = [];
         if (isset($data['category_store'])) {
             $this->db->table('categories_to_stores')
                 ->where('category_id', '=', (int)$categoryId)
                 ->delete();
 
-            $categoryToStore = [];
-            foreach ($data['category_store'] as $storeId) {
+            foreach ($data['category_store'] as $store_id) {
                 $categoryToStore[] = [
-                    'category_id' => (int)$categoryId,
-                    'store_id'    => (int)$storeId,
+                    'category_id' => $categoryId,
+                    'store_id'    => (int)$store_id,
                 ];
             }
-            $this->db->table('categories_to_stores')->insert($categoryToStore);
+        } else {
+            $categoryToStore[] = [
+                'category_id' => $categoryId,
+                'store_id'    => 0,
+            ];
         }
+        $this->db->table('categories_to_stores')->insert($categoryToStore);
 
         $categoryName = '';
         if (isset($data['category_description'])) {

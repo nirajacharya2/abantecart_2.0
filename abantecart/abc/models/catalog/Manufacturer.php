@@ -72,16 +72,21 @@ class Manufacturer extends BaseModel
 
         $manufacturerId = $manufacturer->getKey();
 
+        $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
-            $manufacturerToStore = [];
             foreach ($data['manufacturer_store'] as $store_id) {
                 $manufacturerToStore[] = [
                     'manufacturer_id' => $manufacturerId,
                     'store_id'        => (int)$store_id,
                 ];
             }
-            $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+        } else {
+            $manufacturerToStore[] = [
+                'manufacturer_id' => $manufacturerId,
+                'store_id'        => 0,
+            ];
         }
+        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
         UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'] , $manufacturerId);
 
@@ -102,20 +107,26 @@ class Manufacturer extends BaseModel
 
         self::find($manufacturerId)->update($data);
 
+        $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
             $this->db->table('manufacturers_to_stores')
                 ->where('manufacturer_id', '=', (int)$manufacturerId)
                 ->delete();
 
-            $manufacturerToStore = [];
-            foreach ($data['manufacturer_store'] as $storeId) {
+            foreach ($data['manufacturer_store'] as $store_id) {
                 $manufacturerToStore[] = [
-                    'manufacturer_id' => (int)$manufacturerId,
-                    'store_id'        => (int)$storeId,
+                    'manufacturer_id' => $manufacturerId,
+                    'store_id'        => (int)$store_id,
                 ];
             }
-            $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+        } else {
+            $manufacturerToStore[] = [
+                'manufacturer_id' => $manufacturerId,
+                'store_id'        => 0,
+            ];
         }
+
+        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
         UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'] , $manufacturerId);
 
