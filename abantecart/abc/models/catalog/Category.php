@@ -499,23 +499,15 @@ class Category extends BaseModel
             $this->db->table('categories_to_stores')->insert($categoryToStore);
         }
 
-        if ($data['keyword']) {
-            $seo_key = H::SEOEncode($data['keyword'], 'category_id', $categoryId);
-        } else {
-            //Default behavior to save SEO URL keyword from category name in default language
-            $seo_key = H::SEOEncode($data['category_description'][$this->registry->get('language')->getDefaultLanguageID()]['name'],
-                'category_id',
-                $categoryId);
+        $categoryName = '';
+        if (isset($data['category_description'])) {
+            $description = $data['category_description'];
+            if (isset($description[$this->registry->get('language')->getContentLanguageID()]['name'])) {
+                $categoryName = $description[$this->registry->get('language')->getContentLanguageID()]['name'];
+            }
         }
-        if ($seo_key) {
-            $this->registry->get('language')->replaceDescriptions('url_aliases',
-                ['query' => "category_id=".(int)$categoryId],
-                [(int)$this->registry->get('language')->getContentLanguageID() => ['keyword' => $seo_key]]);
-        } else {
-            UrlAlias::where('query', '=', 'category_id='.(int)$categoryId)
-                ->where('language_id', '=', (int)$this->registry->get('language')->getContentLanguageID())
-                ->forceDelete();
-        }
+
+        UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
 
         $this->cache->remove('category');
 
@@ -577,19 +569,16 @@ class Category extends BaseModel
             $this->db->table('categories_to_stores')->insert($categoryToStore);
         }
 
-        if (isset($data['keyword'])) {
-            $data['keyword'] = H::SEOEncode($data['keyword']);
-            if ($data['keyword']) {
-                $this->registry->get('language')->replaceDescriptions('url_aliases',
-                    ['query' => "category_id=".(int)$categoryId],
-                    [$contentLanguageId => ['keyword' => $data['keyword']]]
-                );
-            } else {
-                UrlAlias::where('query', '=', 'category_id='.(int)$categoryId)
-                    ->where('language_id', '=', $contentLanguageId)
-                    ->forceDelete();
+        $categoryName = '';
+        if (isset($data['category_description'])) {
+            $description = $data['category_description'];
+            if (isset($description[$this->registry->get('language')->getContentLanguageID()]['name'])) {
+                $categoryName = $description[$this->registry->get('language')->getContentLanguageID()]['name'];
             }
         }
+
+        UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
+
 
         $this->cache->remove('category');
         $this->cache->remove('product');
@@ -746,6 +735,7 @@ class Category extends BaseModel
             $this->load('descriptions', 'stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
+            $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
             $this->cache->push($cache_key, $data);
         }
         return $data;

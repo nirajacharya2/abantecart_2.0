@@ -91,6 +91,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 return null;
             }
 
+            $this->data['request'] = $this->decodeRequest($this->data['request']);
+
             $category = (new Category())->addCategory($this->data['request']);
             if ($category) {
                 $this->data['result']['category_id'] = $category;
@@ -169,6 +171,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     $this->rest->sendResponse(200);
                     return null;
                 }
+
+                $request = $this->decodeRequest($request);
 
                 (new Category())->editCategory($category->category_id, $request);
 
@@ -249,6 +253,18 @@ class ControllerApiCatalogCategory extends AControllerAPI
 
         $this->rest->setResponseData($this->data['result']);
         $this->rest->sendResponse(200);
+    }
+
+    private function decodeRequest($request)
+    {
+        foreach ($request as &$item) {
+            if (!is_array($item)) {
+                $item = htmlspecialchars_decode(htmlspecialchars_decode($item));
+            } else {
+                $item = $this->decodeRequest($item);
+            }
+        }
+        return $request;
     }
 
 }
