@@ -76,7 +76,7 @@ class AContentManager
         }
         $sql = "INSERT INTO ".$this->db->table_name("contents")." 
                             (parent_content_id, sort_order, status)
-                             VALUES ('".(int)$data['parent_content_id'][0]."',  '".( int )$data ['sort_order'][0]."',
+                             VALUES (".((int)$data['parent_content_id'][0] ?: "NULL").",  '".( int )$data ['sort_order'][0]."',
                                   '".( int )$data ['status']."')";
         $this->db->query($sql);
         $content_id = $this->db->getLastId();
