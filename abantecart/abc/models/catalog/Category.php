@@ -478,10 +478,10 @@ class Category extends BaseModel
             foreach ($data['category_description'] as $languageId => $value) {
                 $arDescription = [
                     'language_id'      => $languageId,
-                    'name'             => $value['name'],
-                    'meta_keywords'    => $value['meta_keywords'],
-                    'meta_description' => $value['meta_description'],
-                    'description'      => $value['description'],
+                    'name'             => $value['name'] ?: '',
+                    'meta_keywords'    => $value['meta_keywords'] ?: '',
+                    'meta_description' => $value['meta_description'] ?: '',
+                    'description'      => $value['description'] ?: '',
                 ];
                 $description = new CategoryDescription($arDescription);
                 $category->descriptions()->save($description);
@@ -538,18 +538,12 @@ class Category extends BaseModel
         if (!empty($data['category_description'])) {
             foreach ($data['category_description'] as $language_id => $value) {
                 $update = [];
-                if (isset($value['name'])) {
-                    $update['name'] = $value['name'];
-                }
-                if (isset($value['description'])) {
-                    $update['description'] = $value['description'];
-                }
-                if (isset($value['meta_keywords'])) {
-                    $update['meta_keywords'] = $value['meta_keywords'];
-                }
-                if (isset($value['meta_description'])) {
-                    $update['meta_description'] = $value['meta_description'];
-                }
+
+                $update['name'] = $value['name'] ?: '';
+                $update['description'] = $value['description'] ?: '';
+                $update['meta_keywords'] = $value['meta_keywords'] ?: '';
+                $update['meta_description'] = $value['meta_description'] ?: '';
+
                 if (!empty($update)) {
                     // insert or update
                     $this->registry->get('language')->replaceDescriptions('category_descriptions',
