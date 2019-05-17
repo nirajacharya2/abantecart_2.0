@@ -415,7 +415,7 @@ class ControllerPagesDesignContent extends AController
                 'options'          => $multiSelect,
                 'value'            => $selected_parents,
                 'disabled_options' => $disabled_parents,
-                'attr'             => 'size = "'.(sizeof($multiSelect) > 10 ? 10 : sizeof($multiSelect)).'"',
+                'attr'             => 'size = "'.(count($multiSelect) < 10 ? 10 : count($multiSelect)).'"',
             ));
         $this->data['form']['fields']['title'] = $form->getFieldHtml(
             array(
