@@ -159,7 +159,7 @@ class AContentManager
         foreach ($data['parent_content_id'] as $parent_id) {
             $sql = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status)
                     VALUES ('".( int )$content_id."',
-                            '".(int)$parent_id."',
+                            ".((int)$parent_id ?: 'NULL').",
                             '".( int )$data['sort_order'][$parent_id]."',
                             '".( int )$data ['status']."'); ";
             $this->db->query($sql);
