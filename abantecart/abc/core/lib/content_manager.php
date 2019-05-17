@@ -368,13 +368,14 @@ class AContentManager
                     ON (i.content_id = id.content_id AND id.language_id = '".$language_id."')
                 WHERE i.content_id = '".( int )$content_id."'
                 ORDER BY i.content_id";
+
         $query = $this->db->query($sql);
         if ($query->num_rows) {
             $i = 0;
             foreach ($query->rows as $row) {
-                $idx = $row['parent_content_id'];
+                $idx = $row['parent_content_id'] ?: 0;
                 if ($i > 0) {
-                    $output[0]['parent_content_id'][] = $row['parent_content_id'];
+                    $output[0]['parent_content_id'][] = $row['parent_content_id'] ?: 0;
                     $output[0]['sort_order'][$idx] = $row['sort_order'];
                     continue;
                 }
