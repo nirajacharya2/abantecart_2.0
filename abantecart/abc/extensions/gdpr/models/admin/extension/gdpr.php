@@ -22,6 +22,7 @@ namespace abc\extensions\gdpr\models\admin\extension;
 use abc\core\ABC;
 use abc\core\engine\Model;
 use abc\models\admin\ModelSaleCustomer;
+use abc\models\customer\Customer;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -45,7 +46,7 @@ class ModelExtensionGdpr extends Model
         }
         $customer_id = (int)$customer_id;
         $this->load->model('sale/customer');
-        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id);
         if (!$customer_info) {
             return false;
         }

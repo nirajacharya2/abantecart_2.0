@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\customer\Customer;
 use H;
 
 class ControllerPagesSaleCustomerTransaction extends AController
@@ -37,11 +38,10 @@ class ControllerPagesSaleCustomerTransaction extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
         $this->loadLanguage( 'sale/customer' );
         $this->loadModel( 'sale/customer_transaction' );
-        $this->loadModel( 'sale/customer' );
 
         $customer_id = $this->request->get['customer_id'];
-        $customer_info = $this->model_sale_customer->getCustomer( $customer_id );
-        if ( !H::has_value( $customer_info ) ) {
+        $customer_info = Customer::find($customer_id );
+        if ( !$customer_info ) {
             abc_redirect( $this->html->getSecureURL( 'sale/customer' ) );
         }
 

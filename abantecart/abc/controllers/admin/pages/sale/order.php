@@ -29,8 +29,10 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
 use abc\models\catalog\Category;
+use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
+use abc\models\order\Order;
 use abc\modules\traits\SaleOrderTrait;
 use H;
 
@@ -1945,7 +1947,10 @@ class ControllerPagesSaleOrder extends AController
             'target' => 'new',
         ]);
 
-        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id);
+        if($customer_info){
+            $customer_info['orders_count'] = Order::where('customer_id', '=', $customer_id)->where('order_status_id', '>',0)->get()->count();
+        }
         $this->data['button_orders_count'] = $this->html->buildElement(
             [
                 'type'  => 'button',

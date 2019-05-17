@@ -26,6 +26,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+use abc\models\customer\Customer;
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
@@ -374,19 +375,23 @@ class ControllerResponsesSaleContact extends AController
 
         switch ($recipient) {
             case 'all_subscribers':
-                $count = $this->model_sale_customer->getTotalAllSubscribers($newsletter_db_filter);
+                $filter = $newsletter_db_filter;
+                $filter['filter']['all_subscribers'] = 1;
+                $count = Customer::getCustomers($filter, 'total_only');
                 break;
             case 'only_subscribers':
+                $filter = $newsletter_db_filter;
                 $count = $this->model_sale_customer->getTotalOnlyNewsletterSubscribers($newsletter_db_filter);
                 break;
             case 'only_customers':
+                $filter = $newsletter_db_filter;
                 $count = $this->model_sale_customer->getTotalOnlyCustomers($db_filter);
                 break;
             case 'ordered':
                 $products = $this->request->post['products'];
                 if (is_array($products)) {
                     foreach ($products as $product_id) {
-                        $results = $this->model_sale_customer->getCustomersByProduct($product_id);
+                        $results = Customer::getCustomersByProduct($product_id);
                         foreach ($results as $result) {
                             $emails[] = trim($result[$protocol]);
                         }

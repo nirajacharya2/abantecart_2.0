@@ -19,92 +19,104 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
+
 use abc\core\engine\AControllerAPI;
 use abc\core\lib\AFilter;
+use abc\models\customer\Customer;
+use H;
 use stdClass;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerApiCustomerSearch
+ *
  * @package abc\controllers\API
- * @property \abc\models\admin\ModelSaleCustomer $model_sale_customer
  */
-class ControllerApiCustomerSearch extends AControllerAPI{
-	public function get(){
+class ControllerApiCustomerSearch extends AControllerAPI
+{
+    public function get()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadLanguage('sale/customer');
-		$this->loadModel('sale/customer');
+        $this->loadLanguage('sale/customer');
 
-		$filter_params = array (
-				'loginname',
-				'firstname',
-				'lastname',
-				'email',
-				'telephone',
-				'fax',
-				'customer_group_id',
-				'approved'
-		);
-		//no keyword search here
-		$grid_filter_params = array ();
-		$filter_data = array (
-				'method'             => 'get',
-				'filter_params'      => $filter_params,
-				'grid_filter_params' => $grid_filter_params
-		);
+        $filter_params = [
+            'loginname',
+            'firstname',
+            'lastname',
+            'email',
+            'telephone',
+            'fax',
+            'customer_group_id',
+            'approved',
+        ];
+        //no keyword search here
+        $grid_filter_params = [];
+        $filter_data = [
+            'method'             => 'get',
+            'filter_params'      => $filter_params,
+            'grid_filter_params' => $grid_filter_params,
+        ];
 
-		$filter = new AFilter($filter_data);
+        $filter = new AFilter($filter_data);
 
-		if (!$filter->getFilterParam('loginname') && !$filter->getFilterParam('lastname')) {
-			$this->rest->setResponseData(array ('Error' => 'Login name or last name is required for customers search'));
-			$this->rest->sendResponse(200);
-			return null;
-		}
-		if (!$filter->getFilterParam('loginname') && strlen($filter->getFilterParam('lastname')) < 3) {
-			$this->rest->setResponseData(array ('Error' => 'Minimum last name length for search is 3 characters'));
-			$this->rest->sendResponse(200);
-			return null;
-		}
+        if (!$filter->getFilterParam('loginname') && !$filter->getFilterParam('lastname')) {
+            $this->rest->setResponseData(['Error' => 'Login name or last name is required for customers search']);
+            $this->rest->sendResponse(200);
+            return null;
+        }
+        if (!$filter->getFilterParam('loginname') && strlen($filter->getFilterParam('lastname')) < 3) {
+            $this->rest->setResponseData(['Error' => 'Minimum last name length for search is 3 characters']);
+            $this->rest->sendResponse(200);
+            return null;
+        }
 
-		$total = $this->model_sale_customer->getTotalCustomers($filter->getFilterData());
-		if ($total > 0) {
-			$total_pages = ceil($total / $filter->getParam('rows'));
-		} else {
-			$total_pages = 0;
-		}
+        $data = $filter->getFilterData();
 
-		//Preserved jqGrid JSON interface 
-		$response = new stdClass();
-		$response->page = $filter->getParam('page');
-		$response->total = $total_pages;
-		$response->records = $total;
+        if (!$data['store_id'] && H::has_value($this->session->data['current_store_id'])) {
+            $data['store_id'] = (int)$this->session->data['current_store_id'];
+        }else {
+            $this->load->model('setting/store');
+        }
+        if (!$data['store_id'] && !$this->model_setting_store->isDefaultStore()) {
+            $data['store_id'] = $this->config->get('config_store_id');
+        }
+        $results = Customer::getCustomers($data);
 
-		$results = $this->model_sale_customer->getCustomers($filter->getFilterData());
-		$i = 0;
+        $total = $results[0]['total_num_rows'];
+        if ($total > 0) {
+            $total_pages = ceil($total / $filter->getParam('rows'));
+        } else {
+            $total_pages = 0;
+        }
 
-		if ($results) {
-			foreach ($results as $result) {
-				$response->rows[$i]['id'] = $result['customer_id'];
-				$response->rows[$i]['cell']['loginname'] = $result['loginname'];
-				$response->rows[$i]['cell']['name'] = $result['name'];
-				$response->rows[$i]['cell']['email'] = $result['email'];
-				$response->rows[$i]['cell']['customer_group'] = $result['customer_group'];
-				$response->rows[$i]['cell']['status'] = $result['status'];
-				$response->rows[$i]['cell']['approved'] = $result['approved'];
-				$i++;
-			}
-		}
+        //Preserved jqGrid JSON interface
+        $response = new stdClass();
+        $response->page = $filter->getParam('page');
+        $response->total = $total_pages;
+        $response->records = $total;
 
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$this->rest->setResponseData($response);
-		$this->rest->sendResponse(200);
+        $i = 0;
 
-	}
+        if ($results) {
+            foreach ($results as $result) {
+                $response->rows[$i]['id'] = $result['customer_id'];
+                $response->rows[$i]['cell']['loginname'] = $result['loginname'];
+                $response->rows[$i]['cell']['name'] = $result['name'];
+                $response->rows[$i]['cell']['email'] = $result['email'];
+                $response->rows[$i]['cell']['customer_group'] = $result['customer_group'];
+                $response->rows[$i]['cell']['status'] = $result['status'];
+                $response->rows[$i]['cell']['approved'] = $result['approved'];
+                $i++;
+            }
+        }
+
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->rest->setResponseData($response);
+        $this->rest->sendResponse(200);
+
+    }
 }

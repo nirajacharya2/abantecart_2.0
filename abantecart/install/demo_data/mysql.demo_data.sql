@@ -460,52 +460,52 @@ INSERT INTO `ac_customers`
 )
 VALUES
 (
-2,
-0,
-'Juliana',
-'Davis',
-'julidavis@abantecart.com',
-'julidavis@abantecart.com',
-'(602) 141-7191',
-'',
-'',
-'6b006ba67f3c172e146991a2ad46d865',
-'a:0:{}',
-NULL,
-0,
-NULL,
-1,
-1,
-1,
-'109.104.166.98',
-NOW(),
-NOW()
+   1,
+   0,
+   'Juliana',
+   'Davis',
+   'julidavis@abantecart.com',
+   'julidavis@abantecart.com',
+   '(602) 141-7191',
+   '',
+   '',
+   '6b006ba67f3c172e146991a2ad46d865',
+   'a:0:{}',
+   NULL,
+   0,
+   NULL,
+   1,
+   1,
+   1,
+   '109.104.166.98',
+   NOW(),
+   NOW()
+),
+
+(
+   2,
+   0,
+   'Keely',
+   'Mccoy',
+   'keelymccoy@abantecart.com',
+   'keelymccoy@abantecart.com',
+   '(602) 916-1822',
+   '',
+   '',
+   '6b006ba67f3c172e146991a2ad46d865',
+   'a:0:{}',
+   NULL,
+   0,
+   NULL,
+   1,
+   1,
+   1,
+   '109.104.166.98',
+   NOW(),NOW()
 ),
 
 (
 3,
-0,
-'Keely',
-'Mccoy',
-'keelymccoy@abantecart.com',
-'keelymccoy@abantecart.com',
-'(602) 916-1822',
-'',
-'',
-'6b006ba67f3c172e146991a2ad46d865',
-'a:0:{}',
-NULL,
-0,
-NULL,
-1,
-1,
-1,
-'109.104.166.98',
-NOW(),NOW()
-),
-
-(
-4,
 0,
 'Zelda',
 'Weiss',
@@ -528,7 +528,7 @@ NOW()
 ),
 
 (
-5,
+4,
 0,
 'Gloria',
 'Macias',
@@ -551,7 +551,7 @@ NOW()
 ),
 
 (
-6,
+5,
 0,
 'Bernard',
 'Horne',
@@ -574,7 +574,7 @@ NOW()
 ),
 
 (
-7,
+6,
 0,
 'James',
 'Curtis',
@@ -597,7 +597,7 @@ NOW()
 ),
 
 (
-8,
+7,
 0,
 'Bruce',
 'Rosarini',
@@ -620,7 +620,7 @@ NOW()
 ),
 
 (
-9,
+8,
 0,
 'Carlos',
 'Compton',
@@ -634,8 +634,8 @@ NOW()
 NULL,
 0,
 NULL,
-1,
-1,
+0,
+0,
 1,
 '109.104.166.98',
 NOW(),
@@ -643,7 +643,7 @@ NOW()
 ),
 
 (
-10,
+9,
 0,
 'Garrison',
 'Baxter',
@@ -662,10 +662,11 @@ NULL,
 1,
 '109.104.166.138',
 NOW(),
-NOW()),
+NOW()
+),
 
 (
-11,
+10,
 0,
 'Anthony',
 'Blair',
@@ -688,7 +689,7 @@ NOW()
 ),
 
 (
-12,
+11,
 0,
 'Allen',
 'Waters',
@@ -711,7 +712,7 @@ NOW()
 ),
 
 (
-13,
+12,
 0,
 'qqqqqq',
 'qqqqqq',
@@ -719,15 +720,15 @@ NOW()
 '1@abantecart',
 '55 555 5555 5555',
 '',
-'',
+'44444444',
 '6b006ba67f3c172e146991a2ad46d865',
 'a:1:{s:3:\"97.\";i:1;}',
 NULL,
 0,
 NULL,
 1,
-1,
-1,
+0,
+3,
 '109.104.166.98',
 NOW(),
 NOW()

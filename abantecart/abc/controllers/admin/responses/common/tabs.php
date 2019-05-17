@@ -17,86 +17,106 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
+use abc\models\customer\Customer;
 use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
-class ControllerResponsesCommonTabs extends AController {
-	public $data = array();
-	public $parent_controller = ''; //rt of page where you plan to place tabs
 
-  	public function main($parent_controller,$data) {
+class ControllerResponsesCommonTabs extends AController
+{
+    public $data = [];
+    public $parent_controller = ''; //rt of page where you plan to place tabs
+
+    public function main($parent_controller, $data)
+    {
         $this->data = $data;
         $this->parent_controller = $parent_controller; //use it in hooks to recognize what page controller calls
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-	    $tabs = (array)$this->data['tabs'];
-	    $this->data['tabs'] = $idx = array();
-	    foreach($tabs as $k=>$tab){
-		    $idx[] = (int)$tab['sort_order'];
-	    }
+        $tabs = (array)$this->data['tabs'];
+        $this->data['tabs'] = $idx = [];
+        foreach ($tabs as $k => $tab) {
+            $idx[] = (int)$tab['sort_order'];
+        }
 
-	    array_multisort($idx,SORT_ASC,$tabs);
-		$this->data['tabs'] = $tabs;
+        array_multisort($idx, SORT_ASC, $tabs);
+        $this->data['tabs'] = $tabs;
 
-		$this->view->batchAssign( $this->data );
-		$this->processTemplate('responses/common/tabs.tpl');
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
-	
-  	public function latest_customers() {
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('responses/common/tabs.tpl');
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
+
+    public function latest_customers()
+    {
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//10 new customers
-		$this->loadModel('sale/customer');		
-		$filter = array(
-			'sort'  => 'date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => 10
-		);
-		$top_customers = $this->model_sale_customer->getCustomers($filter, 'quick');
-		foreach( $top_customers as $indx => $customer) {
-			$top_customers[$indx]['url'] = $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer['customer_id']);
-		}
-		$this->view->assign('top_customers', $top_customers);
-		$this->view->assign('recent_customers', $this->language->get('recent_customers'));
+        //10 new customers
+        $filter = [
+            'sort'  => 'date_added',
+            'order' => 'DESC',
+            'start' => 0,
+            'limit' => 10,
+        ];
+        $top_customers = Customer::getCustomers($filter, 'quick');
+        foreach ($top_customers as $idx => $customer) {
+            $top_customers[$idx]['url'] = $this->html->getSecureURL(
+                'sale/customer/update',
+                '&customer_id='.$customer['customer_id']
+            );
+        }
+        $this->view->assign('top_customers', $top_customers);
+        $this->view->assign('recent_customers', $this->language->get('recent_customers'));
 
-		$this->processTemplate('responses/common/latest_customers.tpl');
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        $this->processTemplate('responses/common/latest_customers.tpl');
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-  	public function latest_orders() {
+    public function latest_orders()
+    {
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//10 new orders
-		$this->loadModel('sale/order');
-		$filter = array(
-			'sort'  => 'o.date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => 10
-		);
-		$top_orders = $this->model_sale_order->getOrders($filter);
-		foreach( $top_orders as $indx => &$order) {
-			$top_orders[$indx]['url'] = $this->html->getSecureURL('sale/order/details', '&order_id='.$order['order_id']);
-			$top_orders[$indx]['total'] = $this->currency->format($order['total'], $this->config->get('config_currency'));
-            $order['date_added'] = H::dateISO2Display($order['date_added'],
-                $this->language->get('date_format_long'));
-		}
-		$this->view->assign('top_orders', $top_orders);
+        //10 new orders
+        $this->loadModel('sale/order');
+        $filter = [
+            'sort'  => 'o.date_added',
+            'order' => 'DESC',
+            'start' => 0,
+            'limit' => 10,
+        ];
+        $top_orders = $this->model_sale_order->getOrders($filter);
+        foreach ($top_orders as $idx => &$order) {
+            $top_orders[$idx]['url'] = $this->html->getSecureURL(
+                                            'sale/order/details',
+                                            '&order_id='.$order['order_id']
+            );
 
-		$this->view->assign('new_orders', $this->language->get('new_orders'));
+            $top_orders[$idx]['total'] = $this->currency->format(
+                                            $order['total'],
+                                            $this->config->get('config_currency')
+            );
 
-		$this->processTemplate('responses/common/latest_orders.tpl');
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+            $order['date_added'] = H::dateISO2Display(
+                                            $order['date_added'],
+                                            $this->language->get('date_format_long')
+            );
+        }
+        $this->view->assign('top_orders', $top_orders);
+
+        $this->view->assign('new_orders', $this->language->get('new_orders'));
+
+        $this->processTemplate('responses/common/latest_orders.tpl');
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
 }
 

@@ -19,47 +19,49 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AJson;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\customer\Customer;
+use H;
 
 /**
  * Class ControllerResponsesUserCustomers
  */
 class ControllerResponsesUserCustomers extends AController {
 
-	public function main() {
+    public function main() {
 
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-        $this->loadModel('sale/customer');
-		$results = $customer_data = array();
-		
-		if (AHelperUtils::has_value($this->request->get['keyword'])) {
-			$results = $this->model_sale_customer->getCustomersByKeyword($this->request->get['keyword']);
-		}elseif(AHelperUtils::has_value($this->request->get['email'])){
-			$results = $this->model_sale_customer->getCustomersByEmails($this->request->get['email']);
-		}
+        $results = $customer_data = [];
+        $filter = [];
+        if (H::has_value($this->session->data['current_store_id'])) {
+            $filter['store_id'] = (int)$this->session->data['current_store_id'];
+        }
 
-		if($results){
-			foreach ($results as $result) {
-				$customer_data[] = array(
-					'customer_id' => $result['customer_id'],
-					'name'        => $result['firstname'] . ' ' . $result['lastname'] . ' (' . $result['email'] . ')'
-				);
-			}
-		}
-		
-		  //update controller data
+        if (H::has_value($this->request->get['keyword'])) {
+            $filter['name_email'] = $this->request->get['keyword'];
+            $results = Customer::getCustomers(['filter' => $filter]);
+        }elseif(H::has_value($this->request->get['email'])){
+            $filter['email'] = $this->request->get['email'];
+            $results = Customer::getCustomers(['filter' => ['email'=> $this->request->get['email'] ]]);
+        }
+
+        if($results){
+            foreach ($results as $result) {
+                $customer_data[] = [
+                    'customer_id' => $result['customer_id'],
+                    'name'        => $result['firstname'] . ' ' . $result['lastname'] . ' (' . $result['email'] . ')'
+                ];
+            }
+        }
+        
+          //update controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
         $this->load->library('json');
-		$this->response->addJSONHeader();
-		$this->response->setOutput(AJson::encode($customer_data));
-	}
+        $this->response->addJSONHeader();
+        $this->response->setOutput(AJson::encode($customer_data));
+    }
 
 }

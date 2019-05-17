@@ -20,6 +20,7 @@ namespace abc\core\helper;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\ADataEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AImage;
@@ -1196,6 +1197,17 @@ class AHelperUtils extends AHelper
     }
 
     /**
+     * @param string $string
+     * @param string $salt_key
+     *
+     * @return string
+     */
+    public static function getHash(string $string, string $salt_key)
+    {
+        return  sha1($salt_key.sha1($salt_key.sha1($string)));
+    }
+
+    /**
      * TODO: in the future
      *
      * @param $zip_filename
@@ -1970,5 +1982,39 @@ class AHelperUtils extends AHelper
             $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $ip;
+    }
+
+    /**
+     * @param array $data
+     * @param string $field
+     * @param mixed $value
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public static function filterByEncryptedField($data, $field, $value)
+    {
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        if (!count($data)) {
+            return [];
+        }
+        if (!self::has_value($field) || !self::has_value($value)) {
+            return $data;
+        }
+        $result_rows = [];
+        foreach ($data as $result) {
+            if ($dcrypt->active) {
+                $f_value = $dcrypt->decrypt_field($result[$field], $result['key_id']);
+            } else {
+                $f_value = $result[$field];
+            }
+            if (!(strpos(strtolower($f_value), strtolower($value)) === false)) {
+                $result_rows[] = $result;
+            }
+        }
+        return $result_rows;
     }
 }

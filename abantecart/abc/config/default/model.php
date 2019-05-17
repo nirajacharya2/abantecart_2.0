@@ -48,6 +48,7 @@ return [
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details
     'FORCE_DELETING' => [
-        //Product::class => false
+        Product::class => true,
+        Customer::class => true,
     ],
 ];

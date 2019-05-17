@@ -21,6 +21,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
+use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use H;
 
@@ -60,9 +61,8 @@ class ControllerPagesIndexHome extends AController
         );
         $this->view->assign('total_order', $this->model_sale_order->getTotalOrders());
 
-        $this->loadModel('sale/customer');
-        $this->view->assign('total_customer', $this->model_sale_customer->getTotalCustomers());
-        $this->view->assign('total_customer_approval', $this->model_sale_customer->getTotalCustomersAwaitingApproval());
+        $this->view->assign('total_customer', Customer::getTotalCustomers());
+        $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0 ]]));
 
         $this->loadModel('catalog/product');
         $this->view->assign('total_product', $this->model_catalog_product->getTotalProducts());
@@ -140,7 +140,7 @@ class ControllerPagesIndexHome extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = $this->model_sale_customer->getCustomers($filter, 'quick');
+        $top_customers = Customer::getCustomers($filter, 'quick');
         foreach ($top_customers as $index => $customer) {
             $action = [];
             $action[] = [

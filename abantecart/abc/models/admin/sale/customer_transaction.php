@@ -25,6 +25,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AMail;
+use abc\models\customer\Customer;
 use abc\models\user\User;
 use H;
 
@@ -73,8 +74,7 @@ class ModelSaleCustomerTransaction extends Model
         $result = $this->db->query($sql);
         $row = $result->row;
         if (empty($row['user']) && $row['section'] != 1) {
-            $this->load->model('sale/customer');
-            $customer_info = $this->model_sale_customer->getCustomer($row['customer_id']);
+            $customer_info = Customer::find($row['customer_id']);
             $row['user'] = $customer_info['firstname'].' '.$customer_info['lastname'];
         }
         return $row;
@@ -86,12 +86,12 @@ class ModelSaleCustomerTransaction extends Model
      *
      * @return mixed
      * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function getCustomerTransactions($data = [], $mode = '')
     {
         // get decrypted customer name first
-        $this->load->model('sale/customer');
-        $customer_info = $this->model_sale_customer->getCustomer((int)$data['customer_id']);
+        $customer_info = Customer::find((int)$data['customer_id']);
         $sql = '';
         if ($mode == 'total_only') {
             $sql = "SELECT count(*) as total";
@@ -255,8 +255,7 @@ class ModelSaleCustomerTransaction extends Model
 
         if ($data['notify']) {
 
-            $this->load->model('sale/customer');
-            $customer_info = $this->model_sale_customer->getCustomer($data['customer_id']);
+            $customer_info = Customer::find($data['customer_id']);
 
             if ($customer_info) {
                 //detect customer's language

@@ -47,6 +47,7 @@ class ModelSaleCustomer extends Model
      * @return int
      * @throws \Exception
      */
+    /*
     public function addCustomer($data)
     {
         //encrypt customer data
@@ -88,7 +89,7 @@ class ModelSaleCustomer extends Model
         );
         return $customer_id;
     }
-
+*/
     /**
      * @param int   $customer_id
      * @param array $address
@@ -135,7 +136,7 @@ class ModelSaleCustomer extends Model
      *
      * @throws \Exception
      */
-    public function editCustomer($customer_id, $data)
+ /*   public function editCustomer($customer_id, $data)
     {
         //encrypt address data
         $key_sql = '';
@@ -177,7 +178,7 @@ class ModelSaleCustomer extends Model
         H::event(
             'abc\models\admin\customer@update',
             [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
-    }
+    }*/
 
     /**
      * @param int   $customer_id
@@ -258,7 +259,7 @@ class ModelSaleCustomer extends Model
      * @return bool
      * @throws \Exception
      */
-    public function editCustomerField($customer_id, $field, $value)
+   /* public function editCustomerField($customer_id, $field, $value)
     {
         if (!$customer_id || !$field) {
             return false;
@@ -320,8 +321,11 @@ class ModelSaleCustomer extends Model
             'abc\models\admin\customer@update',
             [new ABaseEvent($customer_id, __FUNCTION__, [ $field => $value ])]);
         return true;
-    }
+    }*/
 
+
+    //replaced
+    /*
     public function editCustomerNotifications($customer_id, $data)
     {
         if (!$data || !$customer_id) {
@@ -372,7 +376,9 @@ class ModelSaleCustomer extends Model
         $this->db->query($sql);
         return true;
     }
-
+    */
+    //replaced
+    /*
     public function saveCustomerNotificationSettings($customer_id, $settings = [])
     {
 
@@ -417,21 +423,21 @@ class ModelSaleCustomer extends Model
         }
         return true;
     }
-
+*/
     /**
      * @param int    $customer_id
      * @param string $default_address_id
      *
      * @throws \Exception
      */
-    public function setDefaultAddress($customer_id, $default_address_id)
+    /*public function setDefaultAddress($customer_id, $default_address_id)
     {
         if ($customer_id && $default_address_id) {
             $this->db->query("UPDATE ".$this->db->table_name("customers")."
                               SET address_id = '".(int)$default_address_id."'
                               WHERE customer_id = '".(int)$customer_id."'");
         }
-    }
+    }*/
 
     /**
      * @param int    $address_id
@@ -537,7 +543,7 @@ class ModelSaleCustomer extends Model
      *
      * @throws \Exception
      */
-    public function deleteCustomer($customer_id)
+   /* public function deleteCustomer($customer_id)
     {
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("addresses")." 
@@ -555,7 +561,7 @@ class ModelSaleCustomer extends Model
             "DELETE FROM ".$this->db->table_name("customers")." 
             WHERE customer_id = '".(int)$customer_id."'"
         );
-    }
+    }*/
 
     /**
      * @param int $customer_id
@@ -563,7 +569,7 @@ class ModelSaleCustomer extends Model
      * @return array
      * @throws \Exception
      */
-    public function getCustomer($customer_id)
+  /*  public function getCustomer($customer_id)
     {
         $query = $this->db->query("SELECT DISTINCT *,
                                     (SELECT COUNT(order_id)
@@ -575,7 +581,7 @@ class ModelSaleCustomer extends Model
 
         $result_row = $this->dcrypt->decrypt_data($query->row, 'customers');
         return $result_row;
-    }
+    }*/
 
     /**
      * @param array $data
@@ -583,18 +589,21 @@ class ModelSaleCustomer extends Model
      * @return array|int
      * @throws \abc\core\lib\AException
      */
+    /*
     public function getTotalCustomers($data = [])
     {
         return $this->getCustomers($data, 'total_only');
     }
-
+*/
     /**
+     * //replaced
      * @param array  $data
      * @param string $mode
      *
      * @return array|int
      * @throws \abc\core\lib\AException
      */
+    /*
     public function getCustomers($data = [], $mode = 'default')
     {
 
@@ -796,8 +805,9 @@ class ModelSaleCustomer extends Model
 
         return $result_rows;
     }
-
+*/
     /**
+     * //replaced
      * @param array $data
      * @param string $field
      * @param mixed $value
@@ -805,6 +815,7 @@ class ModelSaleCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
+    /*
     protected function filterByEncryptedField($data, $field, $value)
     {
         if (!count($data)) {
@@ -826,26 +837,27 @@ class ModelSaleCustomer extends Model
         }
         return $result_rows;
     }
-
+*/
     /**
+     * //replace
      * @param int $customer_id
      *
      * @throws \Exception
      */
-    public function approve($customer_id)
+    /*public function approve($customer_id)
     {
         $this->db->query(
             "UPDATE ".$this->db->table_name("customers")."
              SET approved = '1'
              WHERE customer_id = '".(int)$customer_id."'"
         );
-    }
+    }*/
 
     /**
      * @return array
      * @throws \Exception
      */
-    public function getCustomersByNewsletter()
+   /* public function getCustomersByNewsletter()
     {
         $store_based = '';
         if (H::has_value($this->session->data['current_store_id'])) {
@@ -862,7 +874,7 @@ class ModelSaleCustomer extends Model
             $result_rows[] = $this->dcrypt->decrypt_data($row, 'customers');
         }
         return $result_rows;
-    }
+    }*/
 
     /**
      * @param string $keyword
@@ -870,7 +882,7 @@ class ModelSaleCustomer extends Model
      * @return array
      * @throws \Exception
      */
-    public function getCustomersByKeyword($keyword)
+  /*  public function getCustomersByKeyword($keyword)
     {
         $store_based = '';
         if (H::has_value($this->session->data['current_store_id'])) {
@@ -893,7 +905,7 @@ class ModelSaleCustomer extends Model
         } else {
             return [];
         }
-    }
+    }*/
 
     /**
      * @param array $emails
@@ -901,7 +913,7 @@ class ModelSaleCustomer extends Model
      * @return array
      * @throws \Exception
      */
-    public function getCustomersByEmails($emails)
+  /*  public function getCustomersByEmails($emails)
     {
         $store_based = '';
         if (H::has_value($this->session->data['current_store_id'])) {
@@ -929,7 +941,7 @@ class ModelSaleCustomer extends Model
         } else {
             return [];
         }
-    }
+    }*/
 
     /**
      * @param int $product_id
@@ -937,7 +949,7 @@ class ModelSaleCustomer extends Model
      * @return array
      * @throws \Exception
      */
-    public function getCustomersByProduct($product_id)
+   /* public function getCustomersByProduct($product_id)
     {
         if (!$product_id) {
             return [];
@@ -959,7 +971,7 @@ class ModelSaleCustomer extends Model
             $result_rows[] = $this->dcrypt->decrypt_data($row, 'customers');
         }
         return $result_rows;
-    }
+    }*/
 
     /**
      * @param int $customer_id
@@ -986,7 +998,7 @@ class ModelSaleCustomer extends Model
      * @return bool
      * @throws \Exception
      */
-    public function is_unique_loginname($loginname, $customer_id = '')
+  /*  public function is_unique_loginname($loginname, $customer_id = '')
     {
         if (empty($loginname)) {
             return false;
@@ -1006,19 +1018,19 @@ class ModelSaleCustomer extends Model
         } else {
             return true;
         }
-    }
+    }*/
 
     /**
      * @return int
      * @throws \Exception
      */
-    public function getTotalCustomersAwaitingApproval()
+   /* public function getTotalCustomersAwaitingApproval()
     {
         $query = $this->db->query("SELECT COUNT(*) AS total
                                    FROM ".$this->db->table_name("customers")."
                                    WHERE approved = '0'");
         return $query->row['total'];
-    }
+    }*/
 
     /**
      * @param int $customer_id
@@ -1083,11 +1095,11 @@ class ModelSaleCustomer extends Model
      * @return array|int
      * @throws \abc\core\lib\AException
      */
-    public function getAllSubscribers($data = [], $mode = 'default')
+   /* public function getAllSubscribers($data = [], $mode = 'default')
     {
         $data['filter']['all_subscribers'] = 1;
         return $this->getCustomers($data, $mode);
-    }
+    }*/
 
     /**
      * @param array $data
@@ -1095,11 +1107,11 @@ class ModelSaleCustomer extends Model
      * @return array|int
      * @throws \abc\core\lib\AException
      */
-    public function getTotalAllSubscribers($data = [])
+  /*  public function getTotalAllSubscribers($data = [])
     {
         $data['filter']['all_subscribers'] = 1;
         return $this->getCustomers($data, 'total_only');
-    }
+    }*/
 
     /**
      * @param array  $data
@@ -1175,7 +1187,7 @@ class ModelSaleCustomer extends Model
      * @return bool
      * @throws \Exception
      */
-    public function isSubscriber($customer_id)
+  /*  public function isSubscriber($customer_id)
     {
         $sql = "SELECT * 
                 FROM `".$this->db->table_name("customers")."`
@@ -1183,7 +1195,7 @@ class ModelSaleCustomer extends Model
                     AND customer_group_id = '".$this->getSubscribersCustomerGroupId()."'";
         $result = $this->db->query($sql);
         return $result->num_rows ? true : false;
-    }
+    }*/
 
     /**
      * @param int $customer_id - customer_id
@@ -1191,7 +1203,7 @@ class ModelSaleCustomer extends Model
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
      */
-    public function sendApproveMail($customer_id)
+  /*  public function sendApproveMail($customer_id)
     {
 
         // send email to customer
@@ -1288,6 +1300,6 @@ class ModelSaleCustomer extends Model
             $mail->setUser($user);
             $mail->send();
         }
-    }
+    }*/
 
 }

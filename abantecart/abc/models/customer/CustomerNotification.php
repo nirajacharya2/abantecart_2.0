@@ -38,6 +38,9 @@ class CustomerNotification extends BaseModel
     ];
 
     protected $fillable = [
+        'customer_id',
+        'sendpoint',
+        'protocol',
         'status',
         'date_added',
         'date_modified',

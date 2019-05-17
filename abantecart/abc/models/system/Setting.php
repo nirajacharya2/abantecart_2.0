@@ -51,4 +51,19 @@ class Setting extends BaseModel
     {
         return $this->belongsTo(Store::class, 'store_id');
     }
+
+    /**
+     * @param int $storeId
+     *
+     * @return object
+     */
+    public static function getStoreSettings($storeId)
+    {
+        $items = static::where('store_id', '=', $storeId)->get();
+        $output = [];
+        foreach ($items as $row){
+            $output[$row->key] = $row->value;
+        }
+        return (object)$output;
+    }
 }

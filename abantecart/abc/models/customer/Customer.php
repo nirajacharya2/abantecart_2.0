@@ -2,10 +2,18 @@
 
 namespace abc\models\customer;
 
+use abc\core\engine\Registry;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
+use abc\core\lib\AIM;
+use abc\core\lib\AIMManager;
 use abc\models\BaseModel;
 use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Store;
+use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -47,7 +55,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Customer extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
-
+    const SUBSCRIBERS_GROUP_NAME = 'Newsletter Subscribers';
     protected $cascadeDeletes = ['addresses', 'notifications', 'transactions'];
 
     /**
@@ -83,12 +91,66 @@ class Customer extends BaseModel
         'date_modified',
     ];
 
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        "store_id",
+        "firstname",
+        "lastname",
+        "loginname",
+        "email",
+        "telephone",
+        "fax",
+        "sms",
+        "salt",
+        "password",
+        "cart",
+        "wishlist",
+        "newsletter",
+        "address_id",
+        "status",
+        "advanced_status",
+        "approved",
+        "customer_group_id",
+        "ip",
+        "data",
+        "date_added",
+        "date_modified",
+        "date_deleted",
+        "stage_id",
+        "last_login"
+    ];
+
+    protected $rules = [
+        'customer_id'       => 'integer',
+        'store_id'          => 'integer',
+        'firstname'         => 'string|max:32',
+        'lastname'          => 'string|max:32',
+        'loginname'         => 'string|max:96',
+        'email'             => 'string|max:96',
+        'telephone'         => 'string|max:32',
+        'fax'               => 'string|max:32',
+        'sms'               => 'string|max:32',
+        'salt'              => 'string|max:8',
+        'password'          => 'string|max:40',
+        'cart'              => 'string|nullable',
+        'wishlist'          => 'string|nullable',
+        'address_id'        => 'int|nullable',
+        'status'            => 'int|digits:1',
+        'advanced_status'   => 'string|max:128',
+        'approved'          => 'int|digits:1',
+        'customer_group_id' => 'int|nullable',
+        'ip'                => 'string|max:50',
+        'data'              => 'string|max:1500|nullable'
+    ];
+
     public function getFields()
     {
         return [
             'store_id' => [
                 'rule' => 'required',
-                'imput_type' => 'selectbox'
+                'input_type' => 'selectbox'
             ],
             'firstname' => [
                 'rule' => 'required_with:lastname|max:32',
@@ -184,153 +246,40 @@ class Customer extends BaseModel
                 'access' => 'read'
             ],
         ];
-
-        /*
-        $rules = [
-            ['email', 'required', 'except' => ['register', 'search']],
-            ['last_name, type_id, speciality_ids, country_id, region_id, city_id', 'required', 'except' => 'search'],
-            ['first_name', 'required', 'except' => [self::SCENARIO_ORGANIZATION, 'search', self::SCENARIO_WITH_USER]],
-            ['npi', 'default', 'setOnEmpty' => true, 'value' => null],
-            ['npi', 'numerical', 'integerOnly' => true],
-            ['npi', 'length', 'is' => 10, 'max'=>10],
-            ['npi', 'validateNpiUnique'],
-            ['npi', 'ext.validators.CareproviderNPILuhnValidator', 'allowEmpty' => true],
-            ['has_schedule', 'numerical', 'integerOnly' => true],
-            ['email', 'email'],
-            [
-                'email',
-                'unique',
-                'className' => 'Careprovider',
-                'criteria' => ['condition' => 'user_id IS NOT NULL'],
-                'except' => ['profile']
-            ],
-            ['language', 'numerical', 'integerOnly' => true],
-            ['prescription_authority_flag', 'default', 'value' => \BaseModel::NO],
-            ['birthday', 'ext.validators.VDateValidator', 'format' => param('date'), 'allowEmpty' => true],
-            ['birthday', 'vbirthday'],
-            ['gender', 'in', 'range' => array_keys(Customer::getGenderOptions())],
-            ['user_id, service_location_id, type_id', 'length', 'max' => 10],
-            ['first_name, last_name, middle_name, mobile, workphone', 'length', 'max' => 255],
-            ['phone, phone_ah, fax', 'length', 'max' => 23],
-            ['mobile, workphone, ttd_number', 'match', 'pattern' => Customer::PATTERN_PHONE],
-            ['phone, phone_ah, fax', 'match', 'pattern' => Customer::PATTERN_PHONE_EXTENDED],
-            ['country_id', 'exist', 'className' => 'Country', 'attributeName' => 'id', 'allowEmpty' => true],
-            ['region_id', 'exist', 'className' => 'Region', 'attributeName' => 'id', 'allowEmpty' => true],
-            ['city_id', 'exist', 'className' => 'City', 'attributeName' => 'id', 'allowEmpty' => true],
-            ['postal_code', 'length', 'max' => 10],
-            ['photoUrl, avatar, vendor', 'length', 'max' => 100],
-            ['postal_code', 'match', 'pattern' => Customer::PATTERN_POSTAL_CODE],
-            [
-                'first_name, middle_name, last_name',
-                'match',
-                'pattern' => Customer::PATTERN_LETTERS_ONLY,
-                'message' => 'Invalid characters. May only contain letters, spaces, and hyphens.',
-                'except' => [self::SCENARIO_ORGANIZATION, self::SCENARIO_WITH_USER],
-            ],
-            [
-                'last_name',
-                'match',
-                'pattern' => Customer::PATTERN_LETTERS_NUMBERS_SPACE_HYPHEN_AMPERSAND_APOSTROPHE_HASH,
-                'message' => 'Invalid characters. May only contain letters, spaces, numbers, ampersands, apostrophe, hyphens and hash.',
-                'on' => self::SCENARIO_ORGANIZATION
-            ],
-            ['grantdir', 'in', 'range' => array_keys(BaseModel::getYesNoOptions())],
-            ['tax_id', 'validateTaxIDs'],
-            ['tax_id', 'length', 'max' => 250],
-            ['phone', 'required'],
-            ['postal_code', 'required', 'except' => self::SCENARIO_CLIENTCP],
-            ['service_location_id', 'required', 'on' => self::SCENARIO_CLIENTCP],
-            ['p_min_age', 'default', 'value' => param('careproviderProfile')['min']['patientMinAge']],
-            ['p_max_age', 'default', 'value' => param('careproviderProfile')['max']['patientMaxAge']],
-            ['p_max_age', 'moreThen', 'then' => 'p_min_age'],
-            ['medicare', 'length', 'max' => 255],
-            ['medicaid, medicaid_site, ihc_number, ancillary_ihc_number', 'length', 'max' => 12],
-            ['site_ihc', 'length', 'max' => 8],
-            ['begin_date, end_date', 'ext.validators.VDateValidator', 'format' => param('date'), 'allowEmpty' => true],
-            ['specialityIds, language_ids, languageIds', 'safe'],
-            ['in_network, attested_provider_indicator, texas_medicaid_indicator, drg_facility_indicator, is_health_steps_indicator', 'boolean'],
-            [
-                'is_ancillary, is_vfc, service_location_id, has_wheelchair, has_signservice, has_behaviorsn, has_phsn',
-                'numerical',
-                'integerOnly' => true
-            ],
-            ['ihc_maximum, h_affiliation', 'numerical', 'integerOnly' => true],
-            ['time_equiv', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 9999],
-            ['vfc_referral, p_number, a_pname', 'length', 'max' => 100],
-            ['h_name', 'length', 'max' => 50],
-            ['driving_dirs, public_trans, add_comments', 'length', 'max' => 250],
-            ['p_min_age', 'in', 'range' => array_keys(self::getPatientAgeOptions('min'))],
-            ['p_max_age', 'in', 'range' => array_keys(self::getPatientAgeOptions('max'))],
-            ['p_gender', 'in', 'range' => array_keys(self::getPatientGenderOptions())],
-            ['spec_services', 'in', 'range' => array_keys(self::getSpecialitySevicesOptions())],
-            ['h_priviledge', 'in', 'range' => array_keys(self::getPriviledgeOptions()), 'allowEmpty' => true],
-            ['profile_type', 'in', 'range' => array_keys(self::getProfileTypeOptions())],
-            ['suffix', 'in', 'range' => array_keys(self::getSuffixOptions())],
-            ['schedule_comment, spec_comments', 'length', 'max' => 250],
-            ['schedule_daytime', 'timeOpenClose'],
-            ['npis', 'safe'],
-            ['npis', 'length'],
-            ['npis', 'validatorNpis'],
-            [
-                'schedule_day1_open, schedule_day1_close,
-                schedule_day2_open, schedule_day3_open,
-                schedule_day4_open, schedule_day5_open,
-                schedule_day6_open, schedule_day7_open,
-                schedule_day1_close, schedule_day2_close,
-                schedule_day3_close, schedule_day4_close,
-                schedule_day5_close, schedule_day6_close, schedule_day7_close',
-                'date',
-                'format' => param('unicodeTime')
-            ],
-            ['serviceLocationTitle, serviceLocationAddress1, serviceLocationType', 'required', 'except' => self::SCENARIO_AUTO],
-            [
-                'serviceLocationTitle',
-                'match',
-                'pattern' => Customer::PATTERN_LETTERS_NUMBERS_SPACE_HYPHEN_APOSTROPHE,
-                'message' => t(
-                    'AlertMessage',
-                    'Invalid character(s). May only contain letters, numbers, spaces, hyphens and apostrophes.'
-                )
-            ],
-            ['serviceLocationTitle', 'similarLocation'],
-            ['serviceLocationTitle', 'length', 'max' => 250],
-            ['serviceLocationAddress2, fax', 'length', 'max'=>250],
-            [
-                'id, user_id, created_date, updated_date, postal_code, service_location_id, prescription_authority_flag,
-                first_name, last_name, middle_name, phone, mobile, workphone, type_id, speciality_id, email, grantdir,
-                language, vendor',
-                'safe',
-                'on' => 'search'
-            ],
-            ['group_name', 'length', 'max' => self::ATTRIBUTE_LENGTH_GROUP_NAME],
-            ['apis', 'safe'],
-            ['stateIds', 'safe'],
-            ['ltssIds', 'safe'],
-            ['pfinIds', 'safe'],
-        ];
-
-        if (user()->getIsType(\User::TYPE_ADMINISTRATOR)) {
-            $rules = CMap::mergeArray($rules, [
-                ['prescription_authority_flag', 'numerical', 'integerOnly' => true],
-                ['is_exportable_cce, is_exportable_ace', 'numerical', 'integerOnly' => true],
-            ]);
-        }
-
-        // Дополняем правила если установлены через конфиг параметров
-        if (!empty(param('careprovider')['rules'])) {
-            $rules = CMap::mergeArray($rules, param('careprovider')['rules']);
-        }
-
-        // так как правила для https://bug.virtualhealth.com/issue/HCSC-243 достаточно объемны, то вынесены в метод.
-        if ($this->getScenario() == self::SCENARIO_WITH_USER) {
-            $rules = CMap::mergeArray($rules, $this->getValidateLevel2Rules());
-        }
-
-        return $this->isNewRecord ? CMap::mergeArray($rules, [
-            ['email', 'unique', 'className' => 'User', 'on' => 'profile']
-        ]) : $rules;
-        */
     }
+
+    /**
+     * @param array $options
+     *
+     * @return bool
+     * @throws \abc\core\lib\AException
+     */
+    public function save($options = [])
+    {
+
+        $data = $this->attributes;
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        if ($dcrypt->active) {
+            $data = $dcrypt->encrypt_data($data, 'customers');
+        }
+        if ($data['password']) {
+            $salt_key = H::genToken(8);
+            $data['salt'] = $salt_key;
+            $data['password'] = H::getHash( $data['password'], $salt_key );
+        }
+
+        $result = parent::save($options);
+        if (isset($data['newsletter'])) {
+            //enable notification setting for newsletter via email
+            $this->saveCustomerNotificationSettings(['newsletter' => ['email' => (int)$data['newsletter']]]);
+        }
+
+        return $result;
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -338,6 +287,11 @@ class Customer extends BaseModel
     public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');
+    }
+
+    public function customer_group()
+    {
+        return $this->HasOne(CustomerGroup::class, 'customer_group_id');
     }
 
     /**
@@ -391,4 +345,369 @@ class Customer extends BaseModel
         $this->approved = 1;
         $this->save();
     }
+
+    /**
+     * @return bool
+     */
+    public function isSubscriber()
+    {
+        $name = $this->customer_group()->where('customer_group_id', '=', $this->customer_group_id)->first()->name;
+        return ($name == self::SUBSCRIBERS_GROUP_NAME);
+    }
+
+    /**
+     * @param array $data
+     * @param string $mode
+     *
+     * @return array|\Illuminate\Support\Collection|int
+     * @throws \abc\core\lib\AException
+     */
+    public static function getCustomers($data = [], $mode = 'default')
+    {
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        $customer = new Customer();
+
+        $aliasC = $db->table_name('customers');
+
+        $select = [];
+        if ($mode == 'total_only' && !$dcrypt->active) {
+            $select[] = $db->raw('COUNT(*) as total');
+        } else {
+            $select = [
+                "customers.*",
+                $db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname) AS name'),
+                'customer_groups.name AS customer_group'
+            ];
+        }
+        if ($mode != 'total_only' && $mode != 'quick') {
+//TODO: add selectSub() here
+            $select[] = $db->raw('(SELECT COUNT(o.order_id) as cnt 
+                                    FROM '.$db->table_name("orders").' o
+                                    WHERE '.$aliasC.'.customer_id = o.customer_id AND o.order_status_id>0) 
+                                   as orders_count');
+        }
+
+        if ($dcrypt->active) {
+            $select[] = 'customers.key_id';
+        }
+
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = $customer->select($db->raw_sql_row_count())
+                          ->select($select)
+                          ->join(
+                              'customer_groups',
+                              'customer_groups.customer_group_id',
+                              '=',
+                              'customers.customer_group_id'
+                          );
+
+        $filter = (isset($data['filter']) ? $data['filter'] : []);
+
+        if (H::has_value($filter['name'])) {
+            $query->where($db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname)'), 'like', '%'.$filter['name'].'%');
+        }
+
+        if (H::has_value($filter['name_email'])) {
+            $query->where($db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname, \' \', '.$aliasC.'.email)'), 'like', '%'.$filter['name_email'].'%');
+        }
+        //more specific login, last and first name search
+        if (H::has_value($filter['loginname'])) {
+            $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), 'like', mb_strtolower($filter['loginname'])."%");
+        }
+        if (H::has_value($filter['firstname'])) {
+            $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), 'like', mb_strtolower($filter['firstname'])."%");
+        }
+        if (H::has_value($filter['lastname'])) {
+            $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), 'like', mb_strtolower($filter['lastname'])."%");
+        }
+        //select differently if encrypted
+        if (!$dcrypt->active) {
+            if (H::has_value($filter['email'])) {
+                $emails = (array)$filter['email'];
+                $query->orWhere(function($query) use ($emails){
+                    foreach($emails as $email) {
+                        $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
+                    }
+                });
+            }
+
+            if (H::has_value($filter['telephone'])) {
+                $query->where('customers.telephone', 'like', "%".$filter['telephone']."%");
+            }
+            if (H::has_value($filter['sms'])) {
+                $query->where('customers.sms', 'like', "%".$filter['sms']."%");
+            }
+        }
+
+        if (H::has_value($filter['customer_group_id'])) {
+            $query->where('customer_groups.customer_group_id', '=', $filter['customer_group_id']);
+        }
+        // select only subscribers (group + customers with subscription)
+        $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
+
+        if (H::has_value($filter['all_subscribers'])) {
+            $query->where(function($query){
+                             $query->where('customers.newsletter', '=', 1)
+                                   ->where('customers.status', '=', 1)
+                                   ->where('customers.approved', '=', 1);
+                         })
+            ->orWhere(function($query) use ($subscriberGroupId){
+                             $query->where('customers.newsletter', '=', 1)
+                                   ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
+                         });
+        }
+
+        // select only customers without newsletter subscribers
+        if (H::has_value($filter['only_customers'])) {
+            $query->where('customer_groups.customer_group_id', '<>', $subscriberGroupId);
+        }
+
+        if (H::has_value($filter['only_with_mobile_phones'])) {
+            $query->where($db->raw("TRIM(COALESCE(".$aliasC.".sms,''))"), '<>', '');
+        }
+
+        //include ids set
+        if (H::has_value($filter['include'])) {
+            $filter['include'] = (array)$filter['include'];
+            foreach($filter['include'] as &$id){
+                $id = (int)$id;
+            }
+            $query->whereIn('customers.customer_id', $filter['include']);
+        }
+        //exclude already selected in chosen element
+        if (H::has_value($filter['exclude'])) {
+            $filter['exclude'] = (array)$filter['exclude'];
+            foreach($filter['exclude'] as &$id){
+                $id = (int)$id;
+            }
+            $query->whereNotIn('customers.customer_id', $filter['exclude']);
+        }
+
+        if (H::has_value($filter['status'])) {
+            $query->where('customers.status', '=', (int)$filter['status']);
+        }
+
+        if (H::has_value($filter['approved'])) {
+            $query->where('customers.approved', '=', (int)$filter['approved']);
+        }
+
+        if (H::has_value($filter['date_added'])) {
+            $query->where($db->raw("DATE(".$aliasC.".date_added)"), '=', $db->raw("DATE('".$db->escape($filter['date_added'])."')"));
+        }
+
+        if ($data['store_id'] !== null) {
+            $query->where('customers.store_id', '=', (int)$data['store_id']);
+        }
+
+        if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
+            $query->join('customer_notifications',
+                function ($join) use($filter){
+                    $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
+                         ->on('customer_notifications.sendpoint', '=', 'newsletter')
+                         ->on('customer_notifications.status', '=', 1)
+                         ->on('customer_notifications.protocol', '=', $filter['newsletter_protocol']);
+                });
+        }
+        //Registry::log()->write(var_export($query->toSql(),true));
+        //If for total, we done building the query
+        if ($mode == 'total_only' && !$dcrypt->active) {
+
+            $result = $query->first();
+            return (int)$result->total;
+        }
+
+        $sort_data = [
+            'name'           => 'name',
+            'loginname'      => 'customers.loginname',
+            'lastname'       => 'customers.lastname',
+            'email'          => 'customers.email',
+            'sms'            => 'customers.sms',
+            'customer_group' => 'customer_group',
+            'status'         => 'customers.status',
+            'approved'       => 'customers.approved',
+            'date_added'     => 'customers.date_added',
+            'orders_count'   => 'orders_count',
+        ];
+
+        //Total calculation for encrypted mode
+        // NOTE: Performance slowdown might be noticed or larger search results
+        if ($mode != 'total_only') {
+            $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'name';
+            if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
+                $sorting = "desc";
+            } else {
+                $sorting = "asc";
+            }
+
+            $query->orderBy( $orderBy, $sorting);
+            if (isset($data['start']) || isset($data['limit'])) {
+                if ($data['start'] < 0) {
+                    $data['start'] = 0;
+                }
+                if ($data['limit'] < 1) {
+                    $data['limit'] = 20;
+                }
+                $query->offset((int)$data['start'])->limit((int)$data['limit']);
+            }
+        }
+
+        $result_rows = $query->get();
+
+//???? TODO need to check when encrypted
+        if ($result_rows->count() &&  $dcrypt->active) {
+            if (H::has_value($filter['email'])) {
+                $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'email', $filter['email']);
+            }
+            if (H::has_value($filter['telephone'])) {
+                $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'telephone', $filter['telephone']);
+            }
+            if (H::has_value($filter['sms'])) {
+                $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'sms', $filter['sms']);
+            }
+        }
+
+        if ($mode == 'total_only') {
+            //we get here only if in data encryption mode
+            return $result_rows->count();
+        }
+        //finally decrypt data and return result
+        $totalNumRows = $db->sql_get_row_count();
+        for ($i = 0; $i < count($result_rows); $i++) {
+            $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
+            $result_rows[$i]['total_num_rows'] = $totalNumRows;
+        }
+
+        return $result_rows;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public static function getTotalCustomers($data = [])
+    {
+        return static::getCustomers($data,'total_only');
+    }
+
+    /**
+     * @param array $settings
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function saveCustomerNotificationSettings($settings = [])
+    {
+
+        if (!$this->customer_id) {
+            return false;
+        }
+
+        $customer_id = $this->customer_id;
+        /**
+         * @var AIMManager | AIM $im
+         */
+        $im = Registry::im();
+        $sendpoints = array_keys($im->sendpoints);
+        $im_protocols = $im->getProtocols();
+
+        $update = [];
+        foreach ($settings as $sendpoint => $row) {
+            if (!in_array($sendpoint, $sendpoints)) {
+                continue;
+            }
+            foreach ($im_protocols as $protocol) {
+                $update[$sendpoint][$protocol] = (int)$settings[$sendpoint][$protocol];
+            }
+        }
+
+        if ($update) {
+            foreach ($update as $sendpoint => $row) {
+                foreach ($row as $protocol => $status) {
+                    CustomerNotification::where('customer_id', '=', $this->customer_id)
+                        ->where('sendpoint', '=',$sendpoint)
+                        ->where('protocol', '=',$protocol)
+                        ->delete();
+
+                    $cn = new CustomerNotification( compact('customer_id', 'sendpoint','protocol','status'));
+                    $cn->save();
+                }
+            }
+        }
+        return true;
+    }
+
+    public static function getCustomersByProduct($product_id)
+    {
+        if (!$product_id) {
+            return [];
+        }
+
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+
+        $query = OrderProduct::where('order_products.product_id', '=', $product_id);
+        /**
+         * @var QueryBuilder $query
+         */
+        $query->select($db->raw_sql_row_count())
+              ->select('customers.*');
+        $query->join('orders', function($join){
+            $join->on('orders.order_id', '=', 'order_products.order_id');
+        });
+        $query->join('customers', function($join){
+            $join->on('orders.customer_id', '=', 'customers.customer_id');
+        })
+        ->where('orders.order_status_id', '>', 0)
+        ->distinct();
+
+        Registry::log()->write(var_export($query->toSql(),true));
+        $result_rows = $query->get();
+        $totalNumRows = $db->sql_get_row_count();
+        for ($i = 0; $i < count($result_rows); $i++) {
+            $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
+            $result_rows[$i]['total_num_rows'] = $totalNumRows;
+        }
+
+        return $result_rows;
+    }
+
+    public static function isUniqueLoginname($loginname, $customer_id = 0)
+    {
+        if (empty($loginname)) {
+            return false;
+        }
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        $aliasC = $db->table_name('customers');
+
+        //exclude current customer from checking
+        $query = static::where($db->raw('LOWER('. $aliasC.'.loginname)'),'=', mb_strtolower($loginname));
+
+        if ($customer_id) {
+            $query->where('customer_id', '<>', $customer_id);
+        }
+
+        return !($query->get()->count());
+    }
+
 }

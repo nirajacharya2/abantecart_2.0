@@ -23,6 +23,7 @@ use abc\core\engine\AForm;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\view\AView;
+use abc\models\customer\Customer;
 use H;
 
 class ExtensionGdpr extends Extension
@@ -207,7 +208,7 @@ $("#gdpr_erase")
             ]
         );
 
-        $customer_info = $that->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id);
         $entry = $that->language->get('gdpr_entry_erase');
         if ($customer_info['data']) {
             $data = unserialize($customer_info['data']);
