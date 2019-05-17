@@ -295,7 +295,7 @@ class ModelAuditListener
                 foreach ($newValue as $cName => $nValue) {
                     $eventDescription[] = [
                         'auditable_model_id' => $auditableModelId,
-                        'auditable_id'       => $auditable_id,
+                        'auditable_id'       => $auditable_id ?: 0,
                         'field_name'         => $cName,
                         'old_value'          => $oldData[$colName][$cName],
                         'new_value'          => $nValue,
@@ -304,7 +304,7 @@ class ModelAuditListener
             } else {
                 $eventDescription[] = [
                     'auditable_model_id' => $auditableModelId,
-                    'auditable_id'       => $auditable_id,
+                    'auditable_id'       => $auditable_id ?: 0,
                     'field_name'         => $colName,
                     'old_value'          => $oldData[$colName],
                     'new_value'          => $newValue,

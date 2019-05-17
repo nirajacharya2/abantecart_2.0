@@ -490,6 +490,9 @@ class Category extends BaseModel
 
         $categoryToStore = [];
         if (isset($data['category_store'])) {
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             foreach ($data['category_store'] as $store_id) {
                 $categoryToStore[] = [
                     'category_id' => $categoryId,
@@ -497,6 +500,9 @@ class Category extends BaseModel
                 ];
             }
         } else {
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             $categoryToStore[] = [
                 'category_id' => $categoryId,
                 'store_id'    => 0,
@@ -566,6 +572,9 @@ class Category extends BaseModel
                 ];
             }
         } else {
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             $categoryToStore[] = [
                 'category_id' => $categoryId,
                 'store_id'    => 0,
