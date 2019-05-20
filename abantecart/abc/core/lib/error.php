@@ -175,10 +175,10 @@ class AError
      *                                     reload_page -> true to reload page after dialog close
      *                                     TODO: Add redirect_url on dialog close
      *
-     * @return null
+     * @return mixed
      * @throws AException
      */
-    public function toJSONResponse($status_text_and_code, $err_data = array())
+    public function toJSONResponse($status_text_and_code, $err_data = [])
     {
         //detect HTTP response status code based on readable text status
         preg_match('/(\d+)$/', $status_text_and_code, $match);

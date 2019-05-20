@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AMenu;
 use abc\core\lib\AResourceManager;
+use abc\models\customer\Customer;
 use H;
 
 /**
@@ -218,11 +219,13 @@ class ControllerCommonHeader extends AController
         $this->view->assign('today_order_count', $today_order_count);
         $this->view->assign('today_sales_amount', $today_sales_amount);
 
-        $this->loadModel('sale/customer');
-        $filter = [
-            'date_added' => date('Y-m-d', time()),
-        ];
-        $today_customer_count = $this->model_sale_customer->getTotalCustomers(['filter' => $filter]);
+        $today_customer_count = Customer::getCustomers(
+            [ 'filter' =>
+                  [
+                    'date_added' => date('Y-m-d', time()),
+                  ]
+            ]
+        );
         $this->view->assign('today_customer_count', $today_customer_count);
 
         $this->loadModel('catalog/review');

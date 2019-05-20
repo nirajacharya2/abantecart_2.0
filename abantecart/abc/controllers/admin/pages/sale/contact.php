@@ -61,7 +61,6 @@ class ControllerPagesSaleContact extends AController {
         }
 
         $this->document->setTitle($this->language->get('text_send_'.$this->data['protocol']));
-        $this->loadModel('sale/customer');
 
         $this->data['token'] = $this->session->data['token'];
 
@@ -214,8 +213,9 @@ class ControllerPagesSaleContact extends AController {
             $db_filter['filter']['only_with_mobile_phones'] = 1;
         }
 
+
+        $db_filter['filter']['newsletter_protocol'] = $this->data['protocol'];
         $newsletter_db_filter = $db_filter;
-        $newsletter_db_filter['filter']['newsletter_protocol'] = $this->data['protocol'];
         $newsletter_db_filter['filter']['all_subscribers'] = 1;
 
         $all_subscribers_count = Customer::getCustomers($newsletter_db_filter, 'total_only');
@@ -223,14 +223,16 @@ class ControllerPagesSaleContact extends AController {
         if($all_subscribers_count){
             $options['all_subscribers'] = $this->language->get('text_all_subscribers') . ' ' . sprintf($this->language->get('text_total_to_be_sent'), $all_subscribers_count);
         }
-        unset($newsletter_db_filter['filter']['all_subscribers']);
-
-        $only_subscribers_count = $this->model_sale_customer->getTotalOnlyNewsletterSubscribers($newsletter_db_filter);
+        $newsletter_db_filter = $db_filter;
+        $newsletter_db_filter['filter']['only_subscribers'] = 1;
+        $only_subscribers_count = Customer::getCustomers($newsletter_db_filter, 'total_only');
         if($only_subscribers_count){
             $options['only_subscribers'] = $this->language->get('text_subscribers_only') . ' ' . sprintf($this->language->get('text_total_to_be_sent'), $only_subscribers_count);
         }
 
-        $only_customers_count = $this->model_sale_customer->getTotalOnlyCustomers($db_filter);
+        $newsletter_db_filter = $db_filter;
+        $newsletter_db_filter['filter']['only_customers'] = 1;
+        $only_customers_count = Customer::getCustomers($newsletter_db_filter, 'total_only');
         if($only_customers_count){
             $options['only_customers']  = $this->language->get('text_customers_only') . ' ' . sprintf($this->language->get('text_total_to_be_sent'), $only_customers_count);
         }

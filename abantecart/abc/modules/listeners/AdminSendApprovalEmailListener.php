@@ -8,7 +8,6 @@ use abc\core\engine\Registry;
 use abc\core\lib\AMail;
 use abc\core\view\AView;
 use abc\models\system\Setting;
-use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -31,7 +30,6 @@ class AdminSendApprovalEmailListener
      */
     public function handle(ABaseEvent $event)
     {
-
 
         $customer_info = $event->args[0];
 

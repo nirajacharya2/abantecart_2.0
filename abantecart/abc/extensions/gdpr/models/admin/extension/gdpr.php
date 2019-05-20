@@ -45,7 +45,7 @@ class ModelExtensionGdpr extends Model
             return false;
         }
         $customer_id = (int)$customer_id;
-        $this->load->model('sale/customer');
+
         $customer_info = Customer::find($customer_id);
         if (!$customer_info) {
             return false;

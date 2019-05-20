@@ -115,9 +115,6 @@ class Customer extends BaseModel
         "customer_group_id",
         "ip",
         "data",
-        "date_added",
-        "date_modified",
-        "date_deleted",
         "stage_id",
         "last_login"
     ];
@@ -270,7 +267,7 @@ class Customer extends BaseModel
             $data['salt'] = $salt_key;
             $data['password'] = H::getHash( $data['password'], $salt_key );
         }
-
+        $this->attributes = $data;
         $result = parent::save($options);
         if (isset($data['newsletter'])) {
             //enable notification setting for newsletter via email
@@ -454,7 +451,11 @@ class Customer extends BaseModel
         // select only subscribers (group + customers with subscription)
         $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
 
-        if (H::has_value($filter['all_subscribers'])) {
+        if (H::has_value($filter['only_subscribers'])) {
+            $query->where(function($query) use ($subscriberGroupId){
+                $query->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
+            });
+        } elseif (H::has_value($filter['all_subscribers'])) {
             $query->where(function($query){
                              $query->where('customers.newsletter', '=', 1)
                                    ->where('customers.status', '=', 1)
@@ -465,9 +466,8 @@ class Customer extends BaseModel
                                    ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
                          });
         }
-
         // select only customers without newsletter subscribers
-        if (H::has_value($filter['only_customers'])) {
+        elseif (H::has_value($filter['only_customers'])) {
             $query->where('customer_groups.customer_group_id', '<>', $subscriberGroupId);
         }
 

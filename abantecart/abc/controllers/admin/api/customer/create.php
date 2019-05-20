@@ -36,7 +36,6 @@ class ControllerApiCustomerCreate extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-$this->loadModel('sale/customer');
         $this->loadModel('sale/customer_group');
 
         $request = $this->rest->getRequestParams();

@@ -31,6 +31,7 @@ class Zone extends BaseModel
 
     protected $cascadeDeletes = ['descriptions'];
     public $timestamps = false;
+    protected $primaryKey = 'zone_id';
 
     protected $casts = [
         'country_id' => 'int',

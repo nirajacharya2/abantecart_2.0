@@ -29,6 +29,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
 use abc\models\catalog\Category;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
@@ -1930,7 +1931,7 @@ class ControllerPagesSaleOrder extends AController
         );
 
         $this->data['list_url'] = $this->html->getSecureURL('sale/customer');
-        $this->loadModel('sale/customer');
+
         $this->loadModel('sale/customer_transaction');
         $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
         $curr = $this->currency->getCurrency($this->config->get('config_currency'));
@@ -2125,8 +2126,8 @@ class ControllerPagesSaleOrder extends AController
         );
 
         //payment address
-        $this->loadModel('sale/customer');
-        $all_addresses = $this->model_sale_customer->getAddressesByCustomerId($customer_id);
+
+        $all_addresses = Address::getAddressesByCustomerId($customer_id);
         $default_address_id = $checkout->getCustomer()->getAddressId();
 
         if (!$order_info['payment_address_id']) {

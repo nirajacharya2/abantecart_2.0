@@ -87,8 +87,12 @@ class CustomerModelTest extends ATestCase{
         $total = Customer::getCustomers(['filter' => ['customer_group_id'=> '1' ]], 'total_only');
         $this->assertEquals(11, $total);
 
-        //only newsletters subscribers (customers by sign or customer group)
+        //all newsletters subscribers (customers by sign or customer group)
         $total = Customer::getCustomers(['filter' => [ 'all_subscribers' => 1 ]], 'total_only');
+        $this->assertEquals(2, $total);
+
+        //only newsletters subscribers (by customer group)
+        $total = Customer::getCustomers(['filter' => [ 'only_subscribers' => 1 ]], 'total_only');
         $this->assertEquals(1, $total);
 
         //only newsletters subscribers (customers by sign or customer group)

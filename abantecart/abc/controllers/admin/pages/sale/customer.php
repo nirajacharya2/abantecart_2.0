@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\admin\ModelSaleCustomerNote;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\modules\events\ABaseEvent;
@@ -384,7 +385,7 @@ class ControllerPagesSaleCustomer extends AController
         if ($customer && $this->request->is_POST() && $this->validateForm($customer_id)) {
             if ((int)$this->request->post['approved']) {
                 if (!$customer->approved && !$customer->isSubscriber()) {
-                    H::event('admin\sendApprovalEmail', new ABaseEvent($customer->toArray()));
+                    H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
                 }
             }
             $customer->update($this->request->post);
@@ -459,8 +460,10 @@ class ControllerPagesSaleCustomer extends AController
                 $a['default'] = 1;
             }
         }
-        $this->data['add_address_url'] =
-            $this->html->getSecureURL('sale/customer/update_address', '&customer_id='.$customer_id);
+        $this->data['add_address_url'] = $this->html->getSecureURL(
+            'sale/customer/update_address',
+            '&customer_id='.$customer_id
+        );
 
         //allow to change this list via hook
         $this->data['fields'] = array_merge([
@@ -503,7 +506,7 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         //new customer or new address
-        if (!isset($customer_id)) {
+        if (!$customer_id) {
             $this->data['action'] = $this->html->getSecureURL('sale/customer/insert');
             $this->data['heading_title'] = $this->language->get('text_insert').$this->language->get('text_customer');
             $this->data['update'] = '';
@@ -749,7 +752,12 @@ class ControllerPagesSaleCustomer extends AController
 
         $customer_id = $this->request->get['customer_id'];
         if ($this->request->is_POST() && $this->validateAddressForm()) {
-            $address_id = $this->model_sale_customer->addAddress($customer_id, $this->request->post);
+            $data = $this->request->post;
+            $data['customer_id'] = $customer_id;
+            $address = new Address($data);
+            $address->save();
+
+            $address_id = $address->address_id;
             $redirect_url = $this->html->getSecureURL(
                 'sale/customer/update',
                 '&customer_id='.$customer_id.'&address_id='.$address_id
@@ -794,7 +802,12 @@ class ControllerPagesSaleCustomer extends AController
             if ($this->request->post['default']) {
                 Customer::find($customer_id)->update(['address_id' => $address_id]);
             }
-            $this->model_sale_customer->editAddress($customer_id, $address_id, $this->request->post);
+
+            $address = Address::find($address_id);
+            $data = $this->request->post;
+            $data['customer_id'] = $customer_id;
+            $address->update($data);
+
             $redirect_url = $this->html->getSecureURL(
                 'sale/customer/update_address',
                 '&customer_id='.$customer_id.'&address_id='.$address_id
@@ -849,7 +862,7 @@ class ControllerPagesSaleCustomer extends AController
                     'title' => $this->language->get('text_view').' '.$this->language->get('tab_history'),
                 ]
             );
-            $this->data['addresses'] = $this->model_sale_customer->getAddressesByCustomerId($customer_id);
+            $this->data['addresses'] = Address::getAddressesByCustomerId($customer_id);
         }
 
         //current edited address
@@ -1014,12 +1027,13 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         $customer_id = $this->request->get['customer_id'];
+        /**
+         * @var Customer $customer
+         */
         $customer = Customer::find($customer_id);
+        H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
         $customer->update(['approved' => 1]);
-        $this->model_sale_customer->editCustomerField($customer_id, 'approved', true);
-        if (!$this->model_sale_customer->isSubscriber($customer_id)) {
-            $this->model_sale_customer->sendApproveMail($customer_id);
-        }
+
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -1085,8 +1099,10 @@ class ControllerPagesSaleCustomer extends AController
                 $this->error['warning'] = $this->language->get('error_delete_default');
                 $this->getAddressForm();
             } else {
-                $this->loadModel('sale/customer_group');
-                $this->model_sale_customer->deleteAddress($customer_id, $address_id);
+                Address::destroy($address_id);
+                Address::find($address_id)
+                       ->where('customer_id', '=', $customer_id)
+                       ->delete();
                 $this->session->data['success'] = $this->language->get('text_success');
                 abc_redirect($this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id));
             }

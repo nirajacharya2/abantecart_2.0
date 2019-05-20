@@ -353,7 +353,6 @@ class ControllerResponsesSaleContact extends AController
 
     public function getRecipientsCount()
     {
-        $this->loadModel('sale/customer');
         $this->loadModel('sale/order');
 
         //init controller data
@@ -381,11 +380,13 @@ class ControllerResponsesSaleContact extends AController
                 break;
             case 'only_subscribers':
                 $filter = $newsletter_db_filter;
-                $count = $this->model_sale_customer->getTotalOnlyNewsletterSubscribers($newsletter_db_filter);
+                $filter['filter']['only_subscribers'] = 1;
+                $count = Customer::getCustomers($filter, 'total_only');
                 break;
             case 'only_customers':
                 $filter = $newsletter_db_filter;
-                $count = $this->model_sale_customer->getTotalOnlyCustomers($db_filter);
+                $filter['filter']['only_customers'] = 1;
+                $count = Customer::getCustomers($filter, 'total_only');
                 break;
             case 'ordered':
                 $products = $this->request->post['products'];

@@ -48,7 +48,7 @@ class ModelSaleContact extends Model{
         }
 
         //first of all needs to define recipient count
-        $this->load->model('sale/customer');
+
         $this->load->model('setting/store');
         $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
         if ($store_info){
@@ -182,14 +182,28 @@ class ModelSaleContact extends Model{
                 $subscribers = $results;
             } else
                 if ($data['recipient'] == 'only_subscribers'){
-                    $only_subscribers = $this->model_sale_customer->getOnlyNewsletterSubscribers(
-                            ['filter' => ['newsletter_protocol' => 'email']]
+
+                    $only_subscribers = Customer::getCustomers(
+                        [
+                            'filter' => [
+                                'only_subscribers' => 1,
+                                'newsletter_protocol' => 'email',
+                            ]
+                        ]
                     );
                     $results = $this->_unify_customer_list('email', $only_subscribers);
                     $subscribers = $results;
                 } else
                     if ($data['recipient'] == 'only_customers'){
-                        $only_customers = $this->model_sale_customer->getOnlyCustomers(['status' => 1, 'approved' => 1]);
+                        $only_customers = Customer::getCustomers(
+                                                [
+                                                    'filter' => [
+                                                        'only_customers' => 1,
+                                                        'status' => 1,
+                                                        'approved' => 1
+                                                    ]
+                                                ]
+                                            );
                         $results = $this->_unify_customer_list('email', $only_customers);
                     }
             foreach ($results as $result){
@@ -241,14 +255,27 @@ class ModelSaleContact extends Model{
                 $subscribers = $results;
             } else
                 if ($data['recipient'] == 'only_subscribers'){
-                    $only_subscribers = $this->model_sale_customer->getOnlyNewsletterSubscribers(
-                            ['filter' => ['newsletter_protocol' => 'sms']]
+                    $only_subscribers = Customer::getCustomers(
+                        [
+                            'filter' => [
+                                'only_subscribers' => 1,
+                                'newsletter_protocol' => 'sms',
+
+                            ]
+                        ]
                     );
                     $results = $this->_unify_customer_list('sms', $only_subscribers);
                     $subscribers = $results;
                 } else
                     if ($data['recipient'] == 'only_customers'){
-                        $only_customers = $this->model_sale_customer->getOnlyCustomers(['status' => 1, 'approved' => 1]);
+                        $only_customers =  Customer::getCustomers(
+                            ['filter' => [
+                                            'only_customers'] = 1,
+                                            'status' => 1,
+                                            'approved' => 1
+                            ],
+                            'total_only'
+                        );
                         $results = $this->_unify_customer_list('sms', $only_customers);
                     }
             foreach ($results as $result){
@@ -303,7 +330,7 @@ class ModelSaleContact extends Model{
      * @return array|bool
      */
     private function _unify_customer_list($field_name = 'email', $list = []){
-        if (!is_array($list)){
+        if (!count($list)){
             return [];
         }
         $output = [];

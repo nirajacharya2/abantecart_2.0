@@ -172,6 +172,8 @@ class BaseModel extends OrmModel
      */
     public static $auditExcludes = ['date_added', 'date_modified'];
 
+    protected $forceDeleting = false;
+
     /**
      * @param array $attributes
      */

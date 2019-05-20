@@ -138,7 +138,6 @@ class ControllerTaskSaleContact extends AController
             $this->_return_error($error_text);
         }
 
-        $this->loadModel('sale/customer');
         $this->loadModel('setting/store');
         $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
         $from = '';

@@ -3,6 +3,7 @@
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\user\User;
@@ -50,5 +51,6 @@ return [
     'FORCE_DELETING' => [
         Product::class => true,
         Customer::class => true,
+        Address::class => true,
     ],
 ];

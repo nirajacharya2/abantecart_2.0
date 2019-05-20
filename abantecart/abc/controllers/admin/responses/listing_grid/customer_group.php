@@ -24,6 +24,7 @@ use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\customer\Customer;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
@@ -97,8 +98,6 @@ class ControllerResponsesListingGridCustomerGroup extends AController
         $this->loadLanguage('sale/customer_group');
         $this->loadModel('sale/customer_group');
         $this->loadModel('setting/store');
-        $this->loadModel('sale/customer');
-
         switch ($this->request->post['oper']) {
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
@@ -116,7 +115,7 @@ class ControllerResponsesListingGridCustomerGroup extends AController
                             return null;
                         }
 
-                        $customer_total = $this->model_sale_customer->getTotalCustomersByCustomerGroupId($id);
+                        $customer_total = Customer::getCustomers(['filter' => ['customer_group_id' => $id]], 'total_only');
                         if ($customer_total) {
                             $this->response->setOutput(sprintf($this->language->get('error_customer'),
                                 $customer_total));

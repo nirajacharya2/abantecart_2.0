@@ -27,6 +27,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
@@ -45,7 +46,6 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer');
         $this->load->library('json');
 
         $approved = [
@@ -173,7 +173,6 @@ class ControllerResponsesListingGridCustomer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('sale/customer');
         $this->loadLanguage('sale/customer');
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
@@ -217,7 +216,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
                             if ($do_approve && !$customer->isSubscriber()) {
                                 //send email when customer was not approved
-                                H::event('admin\sendApprovalEmail', new ABaseEvent($customer->toArray()) );
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                             }
                             //do not change order of calls here!!!
                             $customer->update(['approved'=> $do_approve]);
@@ -255,7 +254,6 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer');
 
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
@@ -299,7 +297,7 @@ class ControllerResponsesListingGridCustomer extends AController
                         if ($field == 'approved') {
                             //send email when customer was not approved
                             if ($value && !$customer->isSubscriber()) {
-                                H::event('admin\sendApprovalEmail', new ABaseEvent($customer->toArray()) );
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                             }
                         }
                         if ($field == 'default' && $address_id) {
@@ -307,8 +305,8 @@ class ControllerResponsesListingGridCustomer extends AController
                             $customer->update([ 'address_id' => $address_id ]);
                         } else {
                             if (H::has_value($address_id)) {
-                                //????
-                                $this->model_sale_customer->editAddressField($address_id, $field, $value);
+                                $address = Address::find($address_id);
+                                $address->update([ $field => $value ]);
                             } else {
                                 $customer->update([$field => $value]);
                             }
@@ -340,7 +338,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     if ($field == 'approved') {
                         if ($v && !$customer->isSubscriber()) {
                             //send email when customer was not approved
-                            H::event('admin\sendApprovalEmail', new ABaseEvent($customer->toArray()) );
+                            H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                         }
                     }
                     $customer->update([$field => $v]);
@@ -443,7 +441,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $customers_data = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('sale/customer');
+
         if (isset($this->request->post['term'])) {
             $filter = [
                 'limit'               => 20,
@@ -465,8 +463,6 @@ class ControllerResponsesListingGridCustomer extends AController
             }
 
             $customers = Customer::getCustomers($filter);
-
-            //$this->model_sale_customer->getCustomers($filter);
             foreach ($customers as $cdata) {
                 $customers_data[] = [
                     'id'   => $cdata['customer_id'],
