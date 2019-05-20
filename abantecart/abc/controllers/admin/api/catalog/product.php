@@ -300,13 +300,25 @@ if($upd_array) {
            $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
         }
 
-        if($data['categories']) {
+        if ($data['category_uuids']) {
+            $categories = Category::select(['category_id'])
+                ->whereIn('uuid', $data['category_uuids'])
+                ->get();
+            if ($categories) {
+                $data['categories'] = [];
+                foreach ($categories as $category) {
+                    $data['categories'][] = $category->category_id;
+                }
+            }
+        }
+
+     /*   if($data['categories']) {
             $categories = [];
             foreach($data['categories'] as $category_branch) {
                 $categories[] = $this->processCategoryTree($category_branch);
             }
             $data['categories'] = $categories;
-        }
+        }*/
 
         return $data;
     }

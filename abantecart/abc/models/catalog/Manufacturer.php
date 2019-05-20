@@ -88,7 +88,7 @@ class Manufacturer extends BaseModel
         }
         $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'] , $manufacturerId);
+        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
 
         $this->cache->remove('manufacturer');
 
@@ -128,7 +128,7 @@ class Manufacturer extends BaseModel
 
         $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'] , $manufacturerId);
+        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
 
         $this->cache->remove('manufacturer');
     }
@@ -278,7 +278,11 @@ class Manufacturer extends BaseModel
         if (!(int)$manufacturer_id) {
             return false;
         }
-        self::withTrashed()->find((int)$manufacturer_id)->delete();
+        $manufacturer = self::withTrashed()->find((int)$manufacturer_id);
+
+        if ($manufacturer) {
+            $manufacturer->delete();
+        }
 
         $this->db->table('manufacturers_to_stores')
             ->where('manufacturer_id', '=', (int)$manufacturer_id)

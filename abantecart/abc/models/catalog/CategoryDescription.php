@@ -47,6 +47,7 @@ class CategoryDescription extends BaseModel
         'meta_keywords',
         'meta_description',
         'description',
+        'date_deleted'
     ];
 
     public function category()
