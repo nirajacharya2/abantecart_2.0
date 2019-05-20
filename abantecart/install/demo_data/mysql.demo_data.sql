@@ -1,4 +1,5 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET FOREIGN_KEY_CHECKS=0;
 
 --INSERT INTO `ac_extensions`
 --(`type`, `key`, `category`, `status`, `priority`, `version`, `license_key`, `date_installed`, `date_modified`, `date_added`)
@@ -724,7 +725,7 @@ NOW()
 '6b006ba67f3c172e146991a2ad46d865',
 'a:1:{s:3:\"97.\";i:1;}',
 NULL,
-0,
+1,
 NULL,
 1,
 0,

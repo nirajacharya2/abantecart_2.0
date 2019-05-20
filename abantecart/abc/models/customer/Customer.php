@@ -517,10 +517,9 @@ class Customer extends BaseModel
                          ->on('customer_notifications.protocol', '=', $filter['newsletter_protocol']);
                 });
         }
-        //Registry::log()->write(var_export($query->toSql(),true));
+
         //If for total, we done building the query
         if ($mode == 'total_only' && !$dcrypt->active) {
-
             $result = $query->first();
             return (int)$result->total;
         }
@@ -678,7 +677,6 @@ class Customer extends BaseModel
         ->where('orders.order_status_id', '>', 0)
         ->distinct();
 
-        Registry::log()->write(var_export($query->toSql(),true));
         $result_rows = $query->get();
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {

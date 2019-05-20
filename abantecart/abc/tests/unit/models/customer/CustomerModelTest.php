@@ -18,7 +18,7 @@ class CustomerModelTest extends ATestCase{
         /**
          * @var Customer $customer
          */
-        $customer = Customer::find(12);
+        $customer = Customer::find(10);
         $customer->update(['sms' => '123456789']);
         $this->assertEquals('123456789', $customer->sms);
         $customer->update(['sms' => '']);
@@ -62,7 +62,7 @@ class CustomerModelTest extends ATestCase{
 
         //by email that contains
         $total = Customer::getCustomers(['filter' => ['email'=> '.com' ]], 'total_only');
-        $this->assertEquals(12, $total);
+        $this->assertEquals(11, $total);
 
         //by emails by list
         $total = Customer::getCustomers(['filter' => [
@@ -133,13 +133,13 @@ class CustomerModelTest extends ATestCase{
     public function testIsUniqueLoginName()
     {
 
-        $result = Customer::isUniqueLoginname('11111111111');
+        $result = Customer::isUniqueLoginname('1@abantecart');
         $this->assertEquals(false, $result);
 
-        $result = Customer::isUniqueLoginname('11111111111', 13);
+        $result = Customer::isUniqueLoginname('1@abantecart', 12);
         $this->assertEquals(true, $result);
 
-        $result = Customer::isUniqueLoginname('11111111111', 12);
+        $result = Customer::isUniqueLoginname('1@abantecart', 11);
         $this->assertEquals(false, $result);
     }
 }
