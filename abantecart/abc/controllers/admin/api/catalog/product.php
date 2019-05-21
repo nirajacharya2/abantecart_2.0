@@ -22,6 +22,7 @@ use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -249,7 +250,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
      */
     private function updateProduct($product, $data)
     {
-
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -265,17 +265,18 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $fills = $product->getFillable();
-$upd_array = [];
+        $upd_array = [];
         foreach ($fills as $fillable) {
             if (isset($data[$fillable])) {
                 $product->{$fillable} = urldecode($data[$fillable]);
-$upd_array[$fillable] = urldecode($data[$fillable]);
+                $upd_array[$fillable] = urldecode($data[$fillable]);
             }
         }
 
-if($upd_array) {
-    $this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
-}
+        if($upd_array) {
+            $product->update($upd_array);
+            //$this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
+        }
 
         //$product->save();
         $product->replaceOptions((array)$data['options']);
@@ -309,6 +310,14 @@ if($upd_array) {
                 foreach ($categories as $category) {
                     $data['categories'][] = $category->category_id;
                 }
+            }
+        }
+        if ($data['manufacturer']['uuid']) {
+            $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
+                ->get()->first();
+            if ($manufacturer) {
+                $data['manufacturer_id'] = $manufacturer->manufacturer_id;
+                unset($data['manufacturer']);
             }
         }
 
