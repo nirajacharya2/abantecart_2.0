@@ -51,7 +51,11 @@ class BaseReport
 
         $this->getGridData($get, $post, $export)->chunk(1000, function($rows) use (&$output) {
             foreach ($rows as &$row) {
-                fputcsv($output, $row->toArray());
+                if ($row instanceof stdClass) {
+                    fputcsv($output, json_decode(json_encode($row), true));
+                } else {
+                    fputcsv($output, $row->toArray());
+                }
             }
         });
 
