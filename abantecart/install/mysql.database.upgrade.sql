@@ -905,8 +905,8 @@ ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
 
 ALTER TABLE `ac_contents`
 CHANGE COLUMN `parent_content_id` `parent_content_id` INT(11) NULL DEFAULT NULL ,
+ADD COLUMN `hide_title` INT(1) NULL DEFAULT '0',
 DROP PRIMARY KEY,
-ADD PRIMARY KEY (`content_id`),
 ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
 
 UPDATE `ac_contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = '0';
