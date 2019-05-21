@@ -10456,6 +10456,7 @@ CREATE TABLE `ac_contents` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   `hide_title` INT(1) NULL,
+  KEY `content_id_idx` (`content_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
