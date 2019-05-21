@@ -88,7 +88,9 @@ class Manufacturer extends BaseModel
         }
         $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        if ($data['keyword'] || $data['name']) {
+            UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }
 
         $this->cache->remove('manufacturer');
 
@@ -128,7 +130,9 @@ class Manufacturer extends BaseModel
 
         $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        if ($data['keyword'] || $data['name']) {
+            UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }
 
         $this->cache->remove('manufacturer');
     }
