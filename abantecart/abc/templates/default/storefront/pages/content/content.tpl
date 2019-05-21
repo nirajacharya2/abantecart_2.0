@@ -1,8 +1,10 @@
 <div class="<?php echo $page_class; ?>">
+	<?php if (!$hide_title) { ?>
 <h1 class="heading1">
   <span class="maintext"><i class="fa fa-list"></i> <?php echo $heading_title; ?></span>
   <span class="subtext"></span>
 </h1>
+	<?php } ?>
 
 <div class="contentpanel">
 	<h4 class="heading4"><?php echo $description; ?></h4>
@@ -21,7 +23,7 @@
 		<i class="fa fa-arrow-right"></i>
 		<?php echo $button_continue->text ?>
 	</a>
-	<?php echo $this->getHookVar('post_content_button'); ?>		
+	<?php echo $this->getHookVar('post_content_button'); ?>
 
 </div>
 </div>

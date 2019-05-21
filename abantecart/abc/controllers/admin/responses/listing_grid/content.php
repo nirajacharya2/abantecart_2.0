@@ -47,7 +47,7 @@ class ControllerResponsesListingGridContent extends AController
 
         //Prepare filter config
         $grid_filter_params = array_merge(
-            ['sort_order', 'id.title', 'status', 'nodeid'], 
+            ['sort_order', 'id.title', 'status', 'nodeid'],
             (array)$this->data['grid_filter_params']
         );
         //Build advanced filter
@@ -184,7 +184,7 @@ class ControllerResponsesListingGridContent extends AController
                 }
                 break;
             case 'save':
-                $allowedFields = array_merge(['sort_order', 'status'], (array)$this->data['allowed_fields']);
+                $allowedFields = array_merge(['sort_order', 'status', 'hide_title'], (array)$this->data['allowed_fields']);
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) //resort required.
                 {
@@ -260,7 +260,8 @@ class ControllerResponsesListingGridContent extends AController
                 'store_id',
                 'sort_order',
                 'status',
-                'parent_content_id'
+                'parent_content_id',
+                'hide_title'
             ],
             (array)$this->data['allowed_fields']
         );

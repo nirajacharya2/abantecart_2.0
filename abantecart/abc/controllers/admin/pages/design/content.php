@@ -320,6 +320,7 @@ class ControllerPagesDesignContent extends AController
             'sort_order',
             'store_id',
             'keyword',
+            'hide_title',
         );
         foreach ($allowedFields as $field) {
             if (isset($this->request->post[$field])) {
@@ -424,6 +425,13 @@ class ControllerPagesDesignContent extends AController
                 'value'        => $this->data['title'],
                 'required'     => true,
                 'multilingual' => true,
+            ));
+        $this->data['form']['fields']['hide_title'] = $form->getFieldHtml(
+            array(
+                'type'  => 'checkbox',
+                'name'  => 'hide_title',
+                'value' => $this->data['hide_title'],
+                'style' => 'btn_switch',
             ));
         $this->data['form']['fields']['description'] = $form->getFieldHtml(
             array(

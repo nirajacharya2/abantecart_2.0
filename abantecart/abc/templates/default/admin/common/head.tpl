@@ -171,7 +171,7 @@ var mcei = {
 	autop: true,
 	indent: false,
 	toolbar_items_size : 'small',
-	toolbar1: "undo,redo,bold,italic,strikethrough,bullist,forecolor backcolor,numlist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
+	toolbar1: "undo,redo,formatselect,fontselect,fontsizeselect,bold,italic,strikethrough,forecolor backcolor | numlist,bullist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
 	toolbar2: "",
 	//toolbar2: "formatselect,underline,alignjustify,forecolor,pastetext,removeformat,charmap,outdent,indent",
 	toolbar3: "",
@@ -185,7 +185,7 @@ var mcei = {
 	body_class: "content post-type-post post-status-auto-draft post-format-standard locale-en-gb",
 	autoresize_on: true,
 	add_unload_trigger: false,
-	height: '262px'
+	height: '242px'
 };
 
 
