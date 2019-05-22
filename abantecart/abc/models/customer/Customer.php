@@ -5,8 +5,6 @@ namespace abc\models\customer;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
-use abc\core\lib\AIM;
-use abc\core\lib\AIMManager;
 use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
@@ -74,6 +72,8 @@ class Customer extends BaseModel
         'status'            => 'int',
         'approved'          => 'int',
         'customer_group_id' => 'int',
+        'cast'              => 'serialized',
+        'data'              => 'serialized'
     ];
 
     protected $dates = [
@@ -116,7 +116,8 @@ class Customer extends BaseModel
         "ip",
         "data",
         "stage_id",
-        "last_login"
+        "last_login",
+        "date_deleted"
     ];
 
     protected $rules = [
@@ -139,7 +140,7 @@ class Customer extends BaseModel
         'approved'          => 'int|digits:1',
         'customer_group_id' => 'int|nullable',
         'ip'                => 'string|max:50',
-        'data'              => 'string|max:1500|nullable'
+        'data'              => 'array|max:1500|nullable'
     ];
 
     public function getFields()
@@ -253,8 +254,16 @@ class Customer extends BaseModel
      */
     public function save($options = [])
     {
+        $inserting = !($this->customer_id);
+        $data = $this->getDirty();
 
-        $data = $this->attributes;
+        if( is_array($data['data']) ){
+            $data['data'] = serialize($data['data']);
+        }
+        if( is_array($data['cart']) ){
+            $data['cart'] = serialize($data['cart']);
+        }
+
         /**
          * @var ADataEncryption $dcrypt
          */
@@ -267,9 +276,9 @@ class Customer extends BaseModel
             $data['salt'] = $salt_key;
             $data['password'] = H::getHash( $data['password'], $salt_key );
         }
-        $this->attributes = $data;
+        $this->fill($data);
         $result = parent::save($options);
-        if (isset($data['newsletter'])) {
+        if (isset($data['newsletter']) && $inserting) {
             //enable notification setting for newsletter via email
             $this->saveCustomerNotificationSettings(['newsletter' => ['email' => (int)$data['newsletter']]]);
         }
@@ -353,10 +362,25 @@ class Customer extends BaseModel
     }
 
     /**
+     * Function returns parsed customers data as array
+     * @param $customer_id
+     *
+     * @return array|\Illuminate\Support\Collection|int
+     * @throws \abc\core\lib\AException
+     */
+    public static function getCustomer($customer_id){
+        $customer_id = (int)$customer_id;
+        if(!$customer_id){
+             return [];
+        }
+        return static::getCustomers(['filter' => ['include' => [$customer_id]]]);
+    }
+
+    /**
      * @param array $data
      * @param string $mode
      *
-     * @return array|\Illuminate\Support\Collection|int
+     * @return array|int
      * @throws \abc\core\lib\AException
      */
     public static function getCustomers($data = [], $mode = 'default')
@@ -418,21 +442,40 @@ class Customer extends BaseModel
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
-            $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), 'like', mb_strtolower($filter['loginname'])."%");
+            if($filter['search_operator'] == 'equal'){
+                $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), '=', mb_strtolower($filter['loginname']));
+            }else {
+                $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), 'like', mb_strtolower($filter['loginname'])."%");
+            }
         }
+
         if (H::has_value($filter['firstname'])) {
-            $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), 'like', mb_strtolower($filter['firstname'])."%");
+            if($filter['search_operator'] == 'equal') {
+                $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), '=', mb_strtolower($filter['firstname']));
+            }else {
+                $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), 'like', mb_strtolower($filter['firstname'])."%");
+            }
         }
+
         if (H::has_value($filter['lastname'])) {
-            $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), 'like', mb_strtolower($filter['lastname'])."%");
+            if($filter['search_operator'] == 'equal') {
+                $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), '=', mb_strtolower($filter['lastname']));
+            }else{
+                $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), 'like', mb_strtolower($filter['lastname'])."%");
+            }
         }
+
         //select differently if encrypted
         if (!$dcrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
-                $query->orWhere(function($query) use ($emails){
+                $query->orWhere(function($query) use ($emails, $filter){
                     foreach($emails as $email) {
-                        $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
+                        if($filter['search_operator'] == 'equal') {
+                            $query->orWhere('customers.email', '=', mb_strtolower($email));
+                        }else {
+                            $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
+                        }
                     }
                 });
             }
@@ -582,6 +625,8 @@ class Customer extends BaseModel
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
+            $result_rows[$i]['data'] = $result_rows[$i]['data'] ? unserialize($result_rows[$i]['data']) : [];
+            $result_rows[$i]['cart'] = $result_rows[$i]['cart'] ? unserialize($result_rows[$i]['cart']) : [];
             $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 
@@ -613,9 +658,7 @@ class Customer extends BaseModel
         }
 
         $customer_id = $this->customer_id;
-        /**
-         * @var AIMManager | AIM $im
-         */
+
         $im = Registry::im();
         $sendpoints = array_keys($im->sendpoints);
         $im_protocols = $im->getProtocols();
@@ -641,6 +684,19 @@ class Customer extends BaseModel
                     $cn = new CustomerNotification( compact('customer_id', 'sendpoint','protocol','status'));
                     $cn->save();
                 }
+            }
+
+            //for newsletter subscription do changes inside customers table
+            //if at least one protocol enabled - set 1, otherwise - 0
+            if ( H::has_value( $settings['newsletter'] ) ) {
+                $newsletter_status = 0;
+                foreach ( $settings['newsletter'] as $protocol => $status ) {
+                    if ( $status ) {
+                        $newsletter_status = 1;
+                        break;
+                    }
+                }
+                $this->update(['newsletter' => $newsletter_status ]);
             }
         }
         return true;
@@ -706,6 +762,41 @@ class Customer extends BaseModel
         }
 
         return !($query->get()->count());
+    }
+
+    public static function getSubscribersGroupId()
+    {
+        return (int)CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
+    }
+
+    public function editCustomerNotifications( $data )
+    {
+        if ( ! $data ) {
+            return false;
+        }
+
+        $customer_id = (int)$this->customer_id;
+
+        if(!$customer_id){
+            return false;
+        }
+
+
+        $db = Registry::db();
+        $im = Registry::im();
+
+        $upd = [];
+        //get only active IM drivers
+        $im_protocols = $im->getProtocols();
+        $columns = $db->database()->getColumnListing("customers");
+
+        foreach ( $im_protocols as $protocol ) {
+            if ( isset( $data[$protocol] ) && in_array($protocol, $columns) ) {
+                $upd[$protocol] = $data[$protocol];
+            }
+        }
+        $this->update($upd);
+        return true;
     }
 
 }

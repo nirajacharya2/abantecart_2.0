@@ -18,6 +18,7 @@
 
 namespace abc\models;
 
+use abc\core\engine\Registry;
 use Illuminate\Database\Query\Builder;
 
 class QueryBuilder extends Builder
@@ -64,5 +65,4 @@ class QueryBuilder extends Builder
         $this->where($fieldName, '=',1);
         return $this;
     }
-
 }

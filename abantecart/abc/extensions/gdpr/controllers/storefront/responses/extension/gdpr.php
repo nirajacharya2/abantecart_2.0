@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AException;
 use abc\extensions\gdpr\models\storefront\extension\ModelExtensionGdpr;
+use abc\models\customer\Customer;
 use H;
 
 /**
@@ -42,8 +43,8 @@ class ControllerResponsesExtensionGdpr extends AController
         }
         $customer_id = $this->customer->getId();
         $this->loadLanguage('gdpr/gdpr');
-        $this->loadModel('account/customer');
-        $customer_info = $this->model_account_customer->getCustomer($customer_id);
+$this->loadModel('account/customer');
+        $customer_info = Customer::getCustomer($customer_id);
         $data = $customer_info['data'];
         //if already requested - do nothing
         if (isset($data['gdpr'])
@@ -68,7 +69,11 @@ class ControllerResponsesExtensionGdpr extends AController
                 )
             );
             $this->toHistory('r');
-            $this->model_account_customer->updateOtherData($customer_id, $data);
+            /**
+             * @var Customer $customer
+             */
+            $customer = Customer::find($customer_id);
+            $customer->update( ['data' => $data ] );
             $this->session->data['success'] = $this->language->get('gdpr_success_requested');
             abc_redirect($this->html->getSecureURL('account/account'));
         }

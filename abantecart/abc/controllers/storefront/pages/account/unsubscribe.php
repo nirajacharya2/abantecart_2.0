@@ -17,66 +17,75 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
+use abc\models\customer\Customer;
+use H;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ControllerPagesAccountUnsubscribe extends AController{
-	public $data = array ();
+class ControllerPagesAccountUnsubscribe extends AController
+{
+    public $data = [];
 
-	public function main(){
+    public function main()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if (AHelperUtils::has_value($this->request->get['customer_id'])
-				&& (int)$this->request->get['customer_id'] > 0
-				&& AHelperUtils::has_value($this->request->get['email'])
-		){
-			$this->loadModel('account/customer');
-			$customer = $this->model_account_customer->getCustomer((int)$this->request->get['customer_id']);
-			//check is customer_id exists and compare his email with given
-			if ($customer && $customer['email'] == $this->request->get['email']){
-				$this->model_account_customer->editNewsletter(0, (int)$this->request->get['customer_id']);
-			} else{
-				//otherwise - redirect to index page
-				abc_redirect($this->html->getHomeURL());
-			}
-		} else{
-			abc_redirect($this->html->getHomeURL());
-		}
+        if (H::has_value($this->request->get['customer_id'])
+            && (int)$this->request->get['customer_id'] > 0
+            && H::has_value($this->request->get['email'])
+        ) {
+            /**
+             * @var Customer $customer
+             */
+            $customer = Customer::find((int)$this->request->get['customer_id']);
+            //check is customer_id exists and compare his email with given
+            if ($customer && $customer->email == $this->request->get['email']) {
+                $customer->update(['newsletter' => 0]);
+            } else {
+                //otherwise - redirect to index page
+                abc_redirect($this->html->getHomeURL());
+            }
+        } else {
+            abc_redirect($this->html->getHomeURL());
+        }
 
-		$this->document->setTitle($this->language->get('heading_title'));
-		$this->document->resetBreadcrumbs();
-		$this->document->addBreadcrumb(
-				array (
-						'href'      => $this->html->getHomeURL(),
-						'text'      => $this->language->get('text_home'),
-						'separator' => false
-				));
+        $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->resetBreadcrumbs();
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]);
 
-		$this->data['heading_title'] = $this->language->get('heading_title');
-		$this->data['text_message'] = $this->language->get('text_message');
-		$this->data['button_continue'] = $this->language->get('button_continue');
-		$this->data['continue'] = $this->html->getHomeURL();
+        $this->data['heading_title'] = $this->language->get('heading_title');
+        $this->data['text_message'] = $this->language->get('text_message');
+        $this->data['button_continue'] = $this->language->get('button_continue');
+        $this->data['continue'] = $this->html->getHomeURL();
 
-		$continue = $this->html->buildElement(
-				array (
-						'type'  => 'button',
-						'name'  => 'continue_button',
-						'text'  => $this->language->get('button_continue'),
-						'style' => 'button'));
-		$this->data['continue_button'] = $continue;
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('common/unsubscribe.tpl');
+        $continue = $this->html->buildElement(
+            [
+                'type'  => 'button',
+                'name'  => 'continue_button',
+                'text'  => $this->language->get('button_continue'),
+                'style' => 'button',
+            ]);
+        $this->data['continue_button'] = $continue;
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('common/unsubscribe.tpl');
 
-		//init controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		unset($this->session->data['success']);
-	}
+        unset($this->session->data['success']);
+    }
 }

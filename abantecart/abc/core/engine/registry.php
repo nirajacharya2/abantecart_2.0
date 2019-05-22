@@ -20,13 +20,33 @@
 
 namespace abc\core\engine;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\core\lib\AConfig;
+use abc\core\lib\AConfigManager;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
+use abc\core\lib\AIM;
+use abc\core\lib\AIMManager;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\ALog;
+use abc\core\lib\ARequest;
+use abc\core\lib\ASession;
 
+/**
+ * Class Registry
+ *
+ * @package abc\core\engine
+ * @method static ALanguage|ALanguageManager language()
+ * @method static ALog log()
+ * @method static ADB db()
+ * @method static ADataEncryption dcrypt()
+ * @method static AIM|AIMManager im()
+ * @method static AConfig|AConfigManager config()
+ * @method static ARequest request()
+ * @method static ASession session()
+ */
 final class Registry
 {
-    private $data = array();
+    private $data = [];
     static private $instance = null;
 
     /**

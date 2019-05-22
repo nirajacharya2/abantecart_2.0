@@ -447,7 +447,7 @@ class AIM
         //TODO: in the future should to create separate configurable sendpoints list for guests
         $sendpoints = $this->sendpoints;
         if (is_callable($this->customer) && $this->customer->isLogged()) {
-            $settings = $this->model_account_customer->getCustomerNotificationSettings();
+            $settings = $this->customer->getCustomerNotificationSettings();
         } //for guests before order creation
         elseif ($this->session->data['guest']) {
             //get im settings for guest

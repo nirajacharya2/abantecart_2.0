@@ -74,8 +74,8 @@ class ExtensionGdpr extends Extension
             ]
         ));
         $customer_id = $that->customer->getId();
-        $that->loadModel('account/customer');
-        $customer_info = $that->model_account_customer->getCustomer($customer_id);
+$that->loadModel('account/customer');
+        $customer_info = Customer::getCustomer($customer_id);;
         $data = $customer_info['data'];
         if (isset($data['gdpr'])
             && isset($data['gdpr']['erasure_requested'])

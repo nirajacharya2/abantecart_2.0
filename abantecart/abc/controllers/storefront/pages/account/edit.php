@@ -17,42 +17,52 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\customer\Customer;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ControllerPagesAccountEdit extends AController
+{
+    public $error = [];
+    public $data = [
+        'predefined_fields' => [
+                'loginname',
+                'firstname',
+                'lastname',
+                'telephone',
+                'email',
+                'fax'
+        ]
+    ];
 
-class ControllerPagesAccountEdit extends AController{
-	public $error = array ();
-	public $data;
+    public function main()
+    {
 
-	public function main(){
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        if (!$this->customer->isLogged()) {
+            $this->session->data['redirect'] = $this->html->getSecureURL('account/edit');
+            abc_redirect($this->html->getSecureURL('account/login'));
+        }
 
-		if (!$this->customer->isLogged()){
-			$this->session->data['redirect'] = $this->html->getSecureURL('account/edit');
-			abc_redirect($this->html->getSecureURL('account/login'));
-		}
+        $this->document->setTitle($this->language->get('heading_title'));
 
-		$this->document->setTitle($this->language->get('heading_title'));
+        $this->loadModel('account/customer');
 
-		$this->loadModel('account/customer');
-
-		$request_data = $this->request->post;
-		if ($this->request->is_POST()){
-            if($this->csrftoken->isTokenValid()){
+        $request_data = $this->request->post;
+        if ($this->request->is_POST()) {
+            if ($this->csrftoken->isTokenValid()) {
                 $this->error = $this->model_account_customer->validateEditData($request_data);
                 //if no update for loginname do not allow edit of username/loginname
-                if (!$this->customer->isLoginnameAsEmail()){
+                if (!$this->customer->isLoginnameAsEmail()) {
                     $request_data['loginname'] = null;
-                } else{
+                } else {
                     //if allow login as email, need to set loginname = email in case email changed
-                    if (!$this->config->get('prevent_email_as_login')){
+                    if (!$this->config->get('prevent_email_as_login')) {
                         $request_data['loginname'] = $request_data['email'];
                     }
                 }
@@ -60,186 +70,168 @@ class ControllerPagesAccountEdit extends AController{
                 $this->error['warning'] = $this->language->get('error_unknown');
             }
 
-			if (!$this->error){
-				$this->model_account_customer->editCustomer($request_data);
-				$this->model_account_customer->editCustomerNotifications($request_data);
-				$this->session->data['success'] = $this->language->get('text_success');
-				$this->extensions->hk_ProcessData($this);
-				abc_redirect($this->html->getSecureURL('account/account'));
-			}
-		}
+            if (!$this->error) {
+                $this->customer->editCustomer($request_data);
+                $this->customer->model()->editCustomerNotifications($request_data);
+                $this->session->data['success'] = $this->language->get('text_success');
+                $this->extensions->hk_ProcessData($this);
+                abc_redirect($this->html->getSecureURL('account/account'));
+            }
+        }
 
-		//check if existing customer has loginname = email. Redirect if not allowed
-		$reset_loginname = false;
-		if ($this->config->get('prevent_email_as_login') && $this->customer->isLoginnameAsEmail()){
-			$this->error['warning'] = $this->language->get('loginname_update_required');
-			$reset_loginname = true;
-		}
+        //check if existing customer has loginname = email. Redirect if not allowed
+        $reset_loginname = false;
+        if ($this->config->get('prevent_email_as_login') && $this->customer->isLoginnameAsEmail()) {
+            $this->error['warning'] = $this->language->get('loginname_update_required');
+            $reset_loginname = true;
+        }
 
-		$this->document->resetBreadcrumbs();
+        $this->document->resetBreadcrumbs();
 
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getHomeURL(),
-				'text'      => $this->language->get('text_home'),
-				'separator' => false
-		));
+        $this->document->addBreadcrumb([
+            'href'      => $this->html->getHomeURL(),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
 
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('account/account'),
-				'text'      => $this->language->get('text_account'),
-				'separator' => $this->language->get('text_separator')
-		));
+        $this->document->addBreadcrumb([
+            'href'      => $this->html->getSecureURL('account/account'),
+            'text'      => $this->language->get('text_account'),
+            'separator' => $this->language->get('text_separator'),
+        ]);
 
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('account/edit'),
-				'text'      => $this->language->get('text_edit'),
-				'separator' => $this->language->get('text_separator')
-		));
+        $this->document->addBreadcrumb([
+            'href'      => $this->html->getSecureURL('account/edit'),
+            'text'      => $this->language->get('text_edit'),
+            'separator' => $this->language->get('text_separator'),
+        ]);
 
-		$this->view->assign('error_warning', $this->error['warning']);
-		$this->view->assign('error_loginname', $this->error['loginname']);
-		$this->view->assign('error_firstname', $this->error['firstname']);
-		$this->view->assign('error_lastname', $this->error['lastname']);
-		$this->view->assign('error_email', $this->error['email']);
-		$this->view->assign('error_telephone', $this->error['telephone']);
+        $this->view->assign('error_warning', $this->error['warning']);
+        $this->view->assign('error_loginname', $this->error['loginname']);
+        $this->view->assign('error_firstname', $this->error['firstname']);
+        $this->view->assign('error_lastname', $this->error['lastname']);
+        $this->view->assign('error_email', $this->error['email']);
+        $this->view->assign('error_telephone', $this->error['telephone']);
+
+        if ($this->request->is_GET()) {
+            $customer_info = Customer::getCustomer($this->customer->getId());
+        }
+
+        foreach($this->data['predefined_fields'] as $field_name){
+            if (isset($request_data[$field_name])) {
+                $$field_name = $request_data[$field_name];
+            } elseif (isset($customer_info)) {
+                $$field_name = $customer_info[$field_name];
+            }else{
+                $$field_name = '';
+            }
+        }
 
 
-		if ($this->request->is_GET()){
-			$customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
-		}
-
-		if (isset($request_data['loginname'])){
-			$loginname = $request_data['loginname'];
-		} elseif (isset($customer_info)){
-			$loginname = $customer_info['loginname'];
-		}
-
-		if (isset($request_data['firstname'])){
-			$firstname = $request_data['firstname'];
-		} elseif (isset($customer_info)){
-			$firstname = $customer_info['firstname'];
-		}
-
-		if (isset($request_data['lastname'])){
-			$lastname = $request_data['lastname'];
-		} elseif (isset($customer_info)){
-			$lastname = $customer_info['lastname'];
-		}
-
-		if (isset($request_data['email'])){
-			$email = $request_data['email'];
-		} elseif (isset($customer_info)){
-			$email = $customer_info['email'];
-		}
-
-		if (isset($request_data['telephone'])){
-			$telephone = $request_data['telephone'];
-		} elseif (isset($customer_info)){
-			$telephone = $customer_info['telephone'];
-		}
-
-		if (isset($request_data['fax'])){
-			$fax = $request_data['fax'];
-		} elseif (isset($customer_info)){
-			$fax = $customer_info['fax'];
-		}
-		$form = new AForm();
-		$form->setForm(array ('form_name' => 'AccountFrm'));
-		$this->data['form']['form_open'] = $form->getFieldHtml(
-				array (
-                    'type'   => 'form',
-                    'name'   => 'AccountFrm',
-                    'action' => $this->html->getSecureURL('account/edit'),
-                    'csrf' => true,
-                )
+        $form = new AForm();
+        $form->setForm(['form_name' => 'AccountFrm']);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'AccountFrm',
+                'action' => $this->html->getSecureURL('account/edit'),
+                'csrf'   => true,
+            ]
         );
 
-		$this->data['reset_loginname'] = $reset_loginname;
+        $this->data['reset_loginname'] = $reset_loginname;
 
-		if ($reset_loginname){
-			$this->data['form']['fields']['loginname'] = $form->getFieldHtml(
-					array (
-							'type'     => 'input',
-							'name'     => 'loginname',
-							'value'    => $loginname,
-							'style'    => 'highlight',
-							'required' => true));
-		} else{
-			$this->data['form']['fields']['loginname'] = $loginname;
-		}
+        if ($reset_loginname) {
+            $this->data['form']['fields']['loginname'] = $form->getFieldHtml(
+                [
+                    'type'     => 'input',
+                    'name'     => 'loginname',
+                    'value'    => $loginname,
+                    'style'    => 'highlight',
+                    'required' => true,
+                ]);
+        } else {
+            $this->data['form']['fields']['loginname'] = $loginname;
+        }
 
-		$this->data['form']['fields']['firstname'] = $form->getFieldHtml(
-				array (
-						'type'     => 'input',
-						'name'     => 'firstname',
-						'value'    => $firstname,
-						'required' => true));
-		$this->data['form']['fields']['lastname'] = $form->getFieldHtml(
-				array (
-						'type'     => 'input',
-						'name'     => 'lastname',
-						'value'    => $lastname,
-						'required' => true));
-		$this->data['form']['fields']['email'] = $form->getFieldHtml(
-				array (
-						'type'     => 'input',
-						'name'     => 'email',
-						'value'    => $email,
-						'required' => true));
-		$this->data['form']['fields']['telephone'] = $form->getFieldHtml(
-				array (
-						'type'  => 'input',
-						'name'  => 'telephone',
-						'value' => $telephone
-				));
-		$this->data['form']['fields']['fax'] = $form->getFieldHtml(
-				array (
-						'type'     => 'input',
-						'name'     => 'fax',
-						'value'    => $fax,
-						'required' => false));
+        $this->data['form']['fields']['firstname'] = $form->getFieldHtml(
+            [
+                'type'     => 'input',
+                'name'     => 'firstname',
+                'value'    => $firstname,
+                'required' => true,
+            ]);
+        $this->data['form']['fields']['lastname'] = $form->getFieldHtml(
+            [
+                'type'     => 'input',
+                'name'     => 'lastname',
+                'value'    => $lastname,
+                'required' => true,
+            ]);
+        $this->data['form']['fields']['email'] = $form->getFieldHtml(
+            [
+                'type'     => 'input',
+                'name'     => 'email',
+                'value'    => $email,
+                'required' => true,
+            ]);
+        $this->data['form']['fields']['telephone'] = $form->getFieldHtml(
+            [
+                'type'  => 'input',
+                'name'  => 'telephone',
+                'value' => $telephone,
+            ]);
+        $this->data['form']['fields']['fax'] = $form->getFieldHtml(
+            [
+                'type'     => 'input',
+                'name'     => 'fax',
+                'value'    => $fax,
+                'required' => false,
+            ]);
 
-		//get only active IM drivers
-		$im_drivers = $this->im->getIMDriverObjects();
-		if ($im_drivers){
-			/**
-			 * @var \abc\core\lib\AMailIM $driver_obj
-			 */
-			foreach ($im_drivers as $protocol => $driver_obj){
-				if (!is_object($driver_obj) || $protocol=='email'){
-					continue;
-				}
+        //get only active IM drivers
+        $im_drivers = $this->im->getIMDriverObjects();
+        if ($im_drivers) {
+            /**
+             * @var \abc\core\lib\AMailIM $driver_obj
+             */
+            foreach ($im_drivers as $protocol => $driver_obj) {
+                if (!is_object($driver_obj) || $protocol == 'email') {
+                    continue;
+                }
 
-				if (isset($request_data[$protocol])){
-					$value = $request_data[$protocol];
-				} elseif (isset($customer_info)){
-					$value = $customer_info[$protocol];
-				}
+                if (isset($request_data[$protocol])) {
+                    $value = $request_data[$protocol];
+                } elseif (isset($customer_info)) {
+                    $value = $customer_info[$protocol];
+                }
 
-				$fld = $driver_obj->getURIField($form, $value);
-				$this->data['form']['fields'][$protocol] = $fld;
-				$this->data['entry_'.$protocol] = $fld->label_text;
-				$this->data['error_'.$protocol] = $this->error[$protocol];
-			}
-		}
+                $fld = $driver_obj->getURIField($form, $value);
+                $this->data['form']['fields'][$protocol] = $fld;
+                $this->data['entry_'.$protocol] = $fld->label_text;
+                $this->data['error_'.$protocol] = $this->error[$protocol];
+            }
+        }
 
-		$this->data['form']['continue'] = $form->getFieldHtml(
-				array (
-						'type' => 'submit',
-						'icon' => 'fa fa-check',
-						'name' => $this->language->get('button_continue')));
-		$this->data['form']['back'] = $form->getFieldHtml(
-				array (
-						'type'  => 'button',
-						'name'  => 'back',
-						'style' => 'button',
-						'icon'  => 'fa fa-arrow-left',
-						'text'  => $this->language->get('button_back')));
-		$this->data['back'] = $this->html->getSecureURL('account/account');
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('pages/account/edit.tpl');
+        $this->data['form']['continue'] = $form->getFieldHtml(
+            [
+                'type' => 'submit',
+                'icon' => 'fa fa-check',
+                'name' => $this->language->get('button_continue'),
+            ]);
+        $this->data['form']['back'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'back',
+                'style' => 'button',
+                'icon'  => 'fa fa-arrow-left',
+                'text'  => $this->language->get('button_back'),
+            ]);
+        $this->data['back'] = $this->html->getSecureURL('account/account');
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('pages/account/edit.tpl');
 
-		//init controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        //init controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

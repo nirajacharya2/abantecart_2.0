@@ -8988,7 +8988,8 @@ CREATE TABLE `ac_online_customers` (
   `referer` text NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ip`),
-  KEY `ac_online_customers_idx` (`date_added`)
+  KEY `ac_online_customers_idx` (`date_added`),
+  KEY `ac_online_customers_idx2` (`customer_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -13699,14 +13700,6 @@ ADD CONSTRAINT `ac_global_attributes_ibfk_2`
   ON DELETE CASCADE
   ON UPDATE CASCADE;
 
-  ALTER TABLE `ac_online_customers`
-  ADD INDEX `ac_online_customers_fk_1_idx` (`customer_id` ASC);
-  ALTER TABLE `ac_online_customers`
-  ADD CONSTRAINT `ac_online_customers_fk_1`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `ac_customers` (`customer_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE;
 
 ALTER TABLE `ac_task_steps`
 ADD CONSTRAINT `ac_task_steps_fk`

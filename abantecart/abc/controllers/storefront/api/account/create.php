@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
+use abc\core\lib\ACustomer;
 use abc\core\lib\AMail;
 
 
@@ -55,8 +56,12 @@ class ControllerApiAccountCreate extends AControllerAPI
         //????? Think of way to validate and block machine registrations (non-human)
         $this->v_error = $this->model_account_customer->validateRegistrationData($request_data);
         if (!$this->v_error) {
-            $this->model_account_customer->addCustomer($request_data);
-
+            $customer_data = $request_data;
+            $customer_data['store_id'] = $this->config->get('store_id');
+            if(!$customer_data['customer_group_id']){
+                $customer_data['customer_group_id'] = (int)$this->config->get( 'config_customer_group_id' );
+            }
+            $this->customer::createCustomer($customer_data);
             unset($this->session->data['guest']);
 
             $this->customer->login($request_data['email'], $request_data['password']);

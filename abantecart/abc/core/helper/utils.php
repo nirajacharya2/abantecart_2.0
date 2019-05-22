@@ -20,7 +20,9 @@ namespace abc\core\helper;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\AConfig;
 use abc\core\lib\ADataEncryption;
+use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AImage;
@@ -28,6 +30,7 @@ use abc\core\lib\JobManager;
 use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
+use abc\models\order\Order;
 use DateTime;
 use DOMDocument;
 use DOMXPath;
@@ -2016,5 +2019,43 @@ class AHelperUtils extends AHelper
             }
         }
         return $result_rows;
+    }
+
+    public static function parseOrderToken( $ot )
+    {
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        /**
+         * @var AConfig $config
+         */
+        $config = Registry::config();
+        if ( ! $ot || ! $config->get( 'config_guest_checkout' ) ) {
+            return [];
+        }
+
+        //try to decrypt order token
+        $enc = new AEncryption( $config->get( 'encryption_key' ) );
+        $decrypted = $enc->decrypt( $ot );
+        list( $order_id, $email ) = explode( '::', $decrypted );
+
+        $order_id = (int)$order_id;
+        if ( ! $decrypted || ! $order_id || ! $email ) {
+            return [];
+        }
+
+        $order = Order::find($order_id);
+        $order_email = $order->email;
+        if($dcrypt->active){
+            $order_email = $dcrypt->decrypt_field($order_email, $order->key_id);
+        }
+
+        //compare emails
+        if ( $order_email != $email ) {
+            return [];
+        }
+
+        return [$order_id, $email];
     }
 }

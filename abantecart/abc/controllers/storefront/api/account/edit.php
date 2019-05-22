@@ -21,6 +21,7 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\customer\Customer;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -28,7 +29,7 @@ if (!class_exists('abc\core\ABC')) {
 
 class ControllerApiAccountEdit extends AControllerAPI
 {
-    protected $v_error = array();
+    protected $v_error = [];
     public $data;
 
     public function post()
@@ -37,20 +38,20 @@ class ControllerApiAccountEdit extends AControllerAPI
         $request_data = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
             $this->rest->sendResponse(401);
             return null;
         }
 
-        $this->loadModel('account/customer');
+$this->loadModel('account/customer');
         $this->loadLanguage('account/edit');
         $this->loadLanguage('account/success');
 
         //TODO Think of way to validate and block machine registrations (non-human)
         $this->v_error = $this->model_account_customer->validateEditData($request_data);
         if (!$this->v_error) {
-            $this->model_account_customer->editCustomer($request_data);
-            $this->model_account_customer->editNewsletter($request_data['newsletter']);
+            $request_data['newsletter'] = 1;
+            $this->customer->model()->update($request_data);
             $this->data['status'] = 1;
             $this->data['text_message'] = $this->language->get('text_success');
         } else {
@@ -74,7 +75,7 @@ class ControllerApiAccountEdit extends AControllerAPI
         $request_data = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
             $this->rest->sendResponse(401);
             return null;
         }
@@ -89,8 +90,8 @@ class ControllerApiAccountEdit extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request_data = $this->rest->getRequestParams();
-        $this->loadModel('account/customer');
-        $customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
+
+        $customer_info = Customer::getCustomer($this->customer->getId());
 
         if (isset($request_data['firstname'])) {
             $firstname = $request_data['firstname'];
@@ -140,46 +141,46 @@ class ControllerApiAccountEdit extends AControllerAPI
             $newsletter = '';
         }
 
-        $this->data['fields']['firstname'] = array(
+        $this->data['fields']['firstname'] = [
             'type'     => 'input',
             'name'     => 'firstname',
             'value'    => $firstname,
             'required' => true,
             'error'    => $this->v_error['firstname'],
-        );
-        $this->data['fields']['lastname'] = array(
+        ];
+        $this->data['fields']['lastname'] = [
             'type'     => 'input',
             'name'     => 'lastname',
             'value'    => $lastname,
             'required' => true,
             'error'    => $this->v_error['lastname'],
-        );
-        $this->data['fields']['email'] = array(
+        ];
+        $this->data['fields']['email'] = [
             'type'     => 'input',
             'name'     => 'email',
             'value'    => $email,
             'required' => true,
             'error'    => $this->v_error['email'],
-        );
-        $this->data['fields']['telephone'] = array(
+        ];
+        $this->data['fields']['telephone'] = [
             'type'  => 'input',
             'name'  => 'telephone',
             'value' => $telephone,
             'error' => $this->v_error['telephone'],
-        );
-        $this->data['fields']['fax'] = array(
+        ];
+        $this->data['fields']['fax'] = [
             'type'     => 'input',
             'name'     => 'fax',
             'value'    => $fax,
             'required' => false,
-        );
+        ];
 
-        $this->data['fields']['newsletter'] = array(
+        $this->data['fields']['newsletter'] = [
             'type'     => 'selectbox',
             'name'     => 'newsletter',
             'value'    => $newsletter,
             'required' => false,
-        );
+        ];
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 

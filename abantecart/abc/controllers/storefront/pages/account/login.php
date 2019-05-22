@@ -24,6 +24,8 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
+use abc\models\customer\Customer;
+use abc\modules\events\ABaseEvent;
 use H;
 
 class ControllerPagesAccountLogin extends AController
@@ -94,22 +96,38 @@ class ControllerPagesAccountLogin extends AController
             if ( $customer_id && $activation_code ) {
                 //get customer
                 $this->loadModel( 'account/customer' );
-                $customer_info = $this->model_account_customer->getCustomer( (int)$customer_id );
-                if ( $customer_info ) {
+                $customer = Customer::find( (int)$customer_id );
+                if ( $customer ) {
+                    $customer_info = $customer->toArray();
+                    $customer_info['data'] = unserialize($customer_info['data']);
                     //if activation code presents in data and matching
                     if ( $activation_code == $customer_info['data']['email_activation'] ) {
                         unset( $customer_info['data']['email_activation'] );
                         if ( ! $customer_info['status'] ) {
-                            //activate now!
-                            $this->model_account_customer->editStatus( $customer_id, 1 );
-                            //update data and remove email_activation code
-                            $this->model_account_customer->updateOtherData( $customer_id, $customer_info['data'] );
+                            //activate
+                            //and update data and remove email_activation code
+                            $customer->update(
+                                [
+                                    'status' => 1,
+                                    'data' => $customer_info['data']
+                                ]
+                            );
                             //send welcome email
+                            //TODO: email Listener needed!!!!
                             $this->model_account_customer->sendWelcomeEmail( $customer_info['email'], true );
                             $this->session->data['success'] = $this->language->get( 'text_success_activated' );
+                            //call event
+                            H::event(
+                                'abc\models\storefront\customer@update',
+                                [new ABaseEvent(
+                                    $customer_id,
+                                    __FUNCTION__,
+                                    //new status here
+                                    1)]
+                            );
                         } else {
                             //update data and remove email_activation code
-                            $this->model_account_customer->updateOtherData( $customer_id, $customer_info['data'] );
+                            $customer->update( ['data' => $customer_info['data']] );
                             $this->session->data['success'] = $this->language->get( 'text_already_activated' );
                         }
                     } elseif ( ! $customer_info['data']['email_activation'] && $customer_info['status'] ) {
@@ -258,7 +276,17 @@ class ControllerPagesAccountLogin extends AController
             if ( $this->config->get( 'config_customer_email_activation' ) ) {
                 //check if account is not confirmed in the email.
                 $this->loadModel( 'account/customer' );
-                $customer_info = $this->model_account_customer->getCustomerByLogin($loginname);
+                $customer_info = Customer::getCustomers(
+                    [
+                        'filter' =>
+                            [
+                                'search_operator' => 'equal',
+                                //if email as login not allowed - seek by login
+                                ($this->config->get('prevent_email_as_login') ? 'loginname' : 'email') => $loginname
+                            ]
+                    ]
+                );
+
                 if ( $customer_info
                     && ! $customer_info['status']
                     && isset( $customer_info['data']['email_activation'] )

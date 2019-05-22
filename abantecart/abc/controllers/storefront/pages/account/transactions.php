@@ -21,6 +21,7 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
+use abc\models\customer\CustomerTransaction;
 use H;
 
 
@@ -64,8 +65,8 @@ class ControllerPagesAccountTransactions extends AController
                 'separator' => $this->language->get('text_separator'),
             ]);
 
-        $this->loadModel('account/customer');
-        $trans_total = $this->model_account_customer->getTotalTransactions();
+$this->loadModel('account/customer');
+        $trans_total = CustomerTransaction::where('customer_id', '=', $this->customer->getId())->get()->count();
 
         $balance = $this->customer->getBalance();
         $this->data['balance_amount'] = $this->currency->format($balance);
@@ -88,7 +89,11 @@ class ControllerPagesAccountTransactions extends AController
 
             $trans = [];
 
-            $results = $this->model_account_customer->getTransactions(($page - 1) * $limit, $limit);
+            $results = CustomerTransaction::select(['*'])
+                            ->where('customer_id', '=', $this->customer->getId())
+                            ->limit($limit)
+                            ->offset(($page - 1) * $limit)
+                            ->get()->toArray();
 
             foreach ($results as $result) {
                 $trans[] = [

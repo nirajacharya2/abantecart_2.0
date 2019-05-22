@@ -28,6 +28,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\core\lib\AMessage;
 use abc\core\view\AView;
+use abc\models\customer\Customer;
 use abc\modules\events\ABaseEvent;
 use H;
 use ReCaptcha\ReCaptcha;
@@ -50,7 +51,7 @@ class ModelAccountCustomer extends Model
      * @return int
      * @throws \abc\core\lib\AException
      */
-    public function addCustomer( $data , $subscribe_only = false)
+   /* public function addCustomer( $data , $subscribe_only = false)
     {
         $key_sql = '';
         if ( $this->dcrypt->active ) {
@@ -192,14 +193,14 @@ class ModelAccountCustomer extends Model
 
         return $customer_id;
     }
-
+*/
     /**
      * @param array $data
      *
      * @return bool
      * @throws \abc\core\lib\AException
      */
-    public function editCustomer( $data )
+  /*  public function editCustomer( $data )
     {
         if ( ! $data ) {
             return false;
@@ -257,7 +258,7 @@ class ModelAccountCustomer extends Model
             [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
 
         return true;
-    }
+    }*/
 
     /**
      * @param array $data
@@ -266,7 +267,7 @@ class ModelAccountCustomer extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      */
-    public function editCustomerNotifications( $data, $customer_id = 0 )
+  /*  public function editCustomerNotifications( $data, $customer_id = 0 )
     {
         if ( ! $data ) {
             return false;
@@ -318,12 +319,12 @@ class ModelAccountCustomer extends Model
             [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
         return true;
     }
-
+*/
     /**
      * @return array
      * @throws \Exception
      */
-    public function getCustomerNotificationSettings()
+  /*  public function getCustomerNotificationSettings()
     {
 
         //get only active IM drivers
@@ -342,7 +343,7 @@ class ModelAccountCustomer extends Model
         }
 
         return $im_settings;
-    }
+    }*/
 
     /**
      * @param array $settings
@@ -350,7 +351,7 @@ class ModelAccountCustomer extends Model
      * @return bool|null
      * @throws \Exception
      */
-    public function saveCustomerNotificationSettings( $settings )
+ /*   public function saveCustomerNotificationSettings( $settings )
     {
         $customer_id = (int)$this->customer->getId();
         //do not save settings for guests
@@ -407,14 +408,14 @@ class ModelAccountCustomer extends Model
 
         return true;
     }
-
+*/
     /**
      * @param string $loginname
      * @param string $password
      *
      * @throws \abc\core\lib\AException
      */
-    public function editPassword( $loginname, $password )
+   /* public function editPassword( $loginname, $password )
     {
         $salt_key = H::genToken( 8 );
         $this->db->query( "UPDATE ".$this->db->table_name( "customers" )."
@@ -438,21 +439,21 @@ class ModelAccountCustomer extends Model
             $this->im->send( 'customer_account_update', $message_arr );
         }
     }
-
+*/
     /**
      * @param int $newsletter
      * @param int $customer_id - optional parameter for unsubscribe page!
      *
      * @throws \Exception
      */
-    public function editNewsletter( $newsletter, $customer_id = 0 )
+ /*   public function editNewsletter( $newsletter, $customer_id = 0 )
     {
         $customer_id = (int)$customer_id ? (int)$customer_id : (int)$this->customer->getId();
         $this->db->query(
             "UPDATE ".$this->db->table_name( "customers" )."
                 SET newsletter = '".(int)$newsletter."'
                 WHERE customer_id = '".$customer_id."'" );
-    }
+    }*/
 
     /**
      * @param $customer_id
@@ -461,7 +462,7 @@ class ModelAccountCustomer extends Model
      * @return bool
      * @throws \Exception
      */
-    public function editStatus( $customer_id, $status )
+   /* public function editStatus( $customer_id, $status )
     {
         $customer_id = (int)$customer_id;
         $status = (int)$status;
@@ -477,7 +478,7 @@ class ModelAccountCustomer extends Model
             [new ABaseEvent($customer_id, __FUNCTION__, $status)]);
 
         return true;
-    }
+    }*/
 
     /**
      * @param $customer_id
@@ -486,6 +487,7 @@ class ModelAccountCustomer extends Model
      * @return bool
      * @throws \Exception
      */
+    /*
     public function updateOtherData( $customer_id, $data )
     {
         $customer_id = (int)$customer_id;
@@ -503,6 +505,7 @@ class ModelAccountCustomer extends Model
 
         return true;
     }
+    */
 
     /**
      * @param int $customer_id
@@ -510,7 +513,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomer( $customer_id )
+   /* public function getCustomer( $customer_id )
     {
         $query = $this->db->query(
                                 "SELECT *
@@ -520,7 +523,7 @@ class ModelAccountCustomer extends Model
         $result_row['data'] = unserialize( $result_row['data'] );
 
         return $result_row;
-    }
+    }*/
 
     /**
      * @param string $email
@@ -529,7 +532,7 @@ class ModelAccountCustomer extends Model
      * @return int
      * @throws \Exception
      */
-    public function getTotalCustomersByEmail( $email, $no_subscribers = true )
+    /*public function getTotalCustomersByEmail( $email, $no_subscribers = true )
     {
         $sql = "SELECT COUNT(*) AS total
                 FROM ".$this->db->table_name( "customers" )."
@@ -543,7 +546,7 @@ class ModelAccountCustomer extends Model
         $query = $this->db->query( $sql );
 
         return $query->row['total'];
-    }
+    }*/
 
     /**
      * Detect type of login configured and select customer
@@ -553,14 +556,14 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomerByLogin( $login )
+  /*  public function getCustomerByLogin( $login )
     {
         if ($this->config->get('prevent_email_as_login')) {
             return $this->getCustomerByLoginname( $login );
         } else {
             return $this->getCustomerByEmail( $login );
         }
-    }
+    }*/
 
     /**
      * @param string $email
@@ -568,7 +571,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomerByEmail( $email )
+   /* public function getCustomerByEmail( $email )
     {
         //assuming that data is not encrypted. Can not call these otherwise
         $query = $this->db->query( "SELECT *
@@ -579,7 +582,7 @@ class ModelAccountCustomer extends Model
             $output['data'] = unserialize( $output['data'] );
         }
         return $output;
-    }
+    }*/
 
     /**
      * @param string $loginname
@@ -587,7 +590,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomerByLoginname( $loginname )
+  /*  public function getCustomerByLoginname( $loginname )
     {
         $query = $this->db->query( "SELECT *
                                     FROM ".$this->db->table_name( "customers" )."
@@ -598,7 +601,7 @@ class ModelAccountCustomer extends Model
         }
 
         return $output;
-    }
+    }*/
 
     /**
      * @param string $loginname
@@ -607,7 +610,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomerByLoginnameAndEmail( $loginname, $email )
+  /*  public function getCustomerByLoginnameAndEmail( $loginname, $email )
     {
         $result_row = $this->getCustomerByLoginname( $loginname );
         //validate it is correct row by matching decrypted email;
@@ -616,7 +619,7 @@ class ModelAccountCustomer extends Model
         } else {
             return [];
         }
-    }
+    }*/
 
     /**
      * @param string $lastname
@@ -625,7 +628,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function getCustomerByLastnameAndEmail( $lastname, $email )
+   /* public function getCustomerByLastnameAndEmail( $lastname, $email )
     {
         $query = $this->db->query( "SELECT *
                                     FROM ".$this->db->table_name( "customers" )."
@@ -646,7 +649,7 @@ class ModelAccountCustomer extends Model
         } else {
             return [];
         }
-    }
+    }*/
 
     /**
      * @param string $loginname
@@ -654,7 +657,7 @@ class ModelAccountCustomer extends Model
      * @return bool
      * @throws \Exception
      */
-    public function is_unique_loginname( $loginname )
+   /* public function is_unique_loginname( $loginname )
     {
         if ( empty( $loginname ) ) {
             return false;
@@ -667,7 +670,7 @@ class ModelAccountCustomer extends Model
         } else {
             return true;
         }
-    }
+    }*/
 
     /**
      * @param array $data
@@ -705,7 +708,7 @@ class ModelAccountCustomer extends Model
                 $this->error['loginname'] = $this->language->get( 'error_loginname' );
                 //validate uniqueness of login name
             } else {
-                if ( ! $this->is_unique_loginname( $data['loginname'] ) ) {
+                if (Customer::getCustomers(['filter' => ['search_operator' => 'equal','loginname'=> $data['loginname'] ]],'total_only')) {
                     $this->error['loginname'] = $this->language->get( 'error_loginname_notunique' );
                 }
             }
@@ -879,7 +882,7 @@ class ModelAccountCustomer extends Model
                 $this->error['loginname'] = $this->language->get( 'error_loginname' );
                 //validate uniqueness of login name
             } else {
-                if ( ! $this->is_unique_loginname( $data['loginname'] ) ) {
+                if ( Customer::getCustomers(['filter' => ['search_operator' => 'equal','loginname'=> $data['loginname'] ]],'total_only') ) {
                     $this->error['loginname'] = $this->language->get( 'error_loginname_notunique' );
                 }
             }
@@ -940,7 +943,7 @@ class ModelAccountCustomer extends Model
      * @throws \Exception
      */
 
-    public function getTotalTransactions($transaction_id = 0)
+    /*public function getTotalTransactions($transaction_id = 0)
     {
         $sql = "SELECT COUNT(*) AS total
                                    FROM `".$this->db->table_name( "customer_transactions" )."`
@@ -951,7 +954,7 @@ class ModelAccountCustomer extends Model
         $query = $this->db->query( $sql);
 
         return (int)$query->row['total'];
-    }
+    }*/
 
     /**
      * @param int $start
@@ -960,7 +963,7 @@ class ModelAccountCustomer extends Model
      * @return mixed
      * @throws \Exception
      */
-    public function getTransactions( $start = 0, $limit = 20, $transaction_id = 0 )
+    /*public function getTransactions( $start = 0, $limit = 20, $transaction_id = 0 )
     {
         if ( $start < 0 ) {
             $start = 0;
@@ -988,13 +991,13 @@ class ModelAccountCustomer extends Model
         $query = $this->db->query( $sql );
 
         return $query->rows;
-    }
+    }*/
 
     /**
      * @return int
      * @throws \Exception
      */
-    public function getSubscribersCustomerGroupId()
+   /* public function getSubscribersCustomerGroupId()
     {
         $query = $this->db->query(
             "SELECT customer_group_id
@@ -1004,7 +1007,7 @@ class ModelAccountCustomer extends Model
         $result = ! $query->row['customer_group_id'] ? (int)$this->config->get( 'config_customer_group_id' ) : $query->row['customer_group_id'];
 
         return $result;
-    }
+    }*/
 
     /**
      * @param string $email
@@ -1106,14 +1109,14 @@ class ModelAccountCustomer extends Model
         if ( ! $customer_id ) {
             return null;
         }
-        $customer_data = $this->getCustomer( $customer_id );
+        $customer_data = Customer::getCustomer($customer_id);
 
         //encrypt token and data
         $enc = new AEncryption( $this->config->get( 'encryption_key' ) );
         $code = H::genToken();
         //store activation code
         $customer_data['data']['email_activation'] = $code;
-        $this->updateOtherData( $customer_id, $customer_data['data'] );
+        Customer::find($customer_id)->update(['data' => $customer_data['data'] ]);
 
         $ac = $enc->encrypt( $customer_id.'::'.$code );
         $activate_url = $this->html->getSecureURL( 'account/login', '&ac='.$ac );
@@ -1208,7 +1211,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
-    public function parseOrderToken( $ot )
+  /*  public function parseOrderToken( $ot )
     {
         if ( ! $ot || ! $this->config->get( 'config_guest_checkout' ) ) {
             return [];
@@ -1232,5 +1235,5 @@ class ModelAccountCustomer extends Model
         }
 
         return [$order_id, $email];
-    }
+    }*/
 }

@@ -19,15 +19,22 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
+use abc\models\customer\Address;
+use abc\models\customer\Customer;
+use abc\models\customer\CustomerNotification;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
 use H;
+use ReCaptcha\ReCaptcha;
 
 /**
  * Class ACustomer
  */
 class ACustomer extends ALibBase
 {
+    static $errors = [];
     /**
      * @var int
      */
@@ -128,7 +135,7 @@ class ACustomer extends ALibBase
     public function __construct($registry, $customer_id = 0)
     {
         $this->cache = $registry->get('cache');
-        $this->config = $registry->get('config');
+        $config = $registry->get('config');
         $this->db = $registry->get('db');
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
@@ -138,8 +145,8 @@ class ACustomer extends ALibBase
 
         $customer_id = (int)$customer_id;
         $customer_id = (!$customer_id && isset($this->session->data['customer_id']))
-                        ? (int)$this->session->data['customer_id']
-                        : $customer_id;
+            ? (int)$this->session->data['customer_id']
+            : $customer_id;
         if ($customer_id) {
             $sql = "SELECT c.*, cg.* 
                      FROM ".$this->db->table_name("customers")." c
@@ -161,7 +168,7 @@ class ACustomer extends ALibBase
             /**
              * @var AEncryption $encryption
              */
-            $encryption = ABC::getObjectByAlias('AEncryption',[$this->config->get('encryption_key')]);
+            $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $this->unauth_customer = unserialize($encryption->decrypt($this->request->cookie['customer']));
             //customer is not valid or not from the same store (under the same domain)
             if (
@@ -217,7 +224,7 @@ class ACustomer extends ALibBase
     {
 
         $approved_only = '';
-        if ($this->config->get('config_customer_approval')) {
+        if ($config->get('config_customer_approval')) {
             $approved_only = " AND approved = '1'";
         }
 
@@ -247,7 +254,7 @@ class ACustomer extends ALibBase
             $this->saveCustomerCart();
 
             //set cookie for unauthenticated user (expire in 1 year)
-            $encryption = new AEncryption($this->config->get('encryption_key'));
+            $encryption = new AEncryption($config->get('encryption_key'));
             $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
                 'customer_id' => $this->customer_id,
@@ -367,7 +374,8 @@ class ACustomer extends ALibBase
             H::event(
                 'abc\core\lib\customer@logout',
                 [new ABaseEvent($customer_id)]);
-        }catch(AException $e){}
+        } catch (AException $e) {
+        }
     }
 
     /**
@@ -617,7 +625,7 @@ class ACustomer extends ALibBase
     public function saveCustomerCart()
     {
         $customer_id = $this->customer_id;
-        $store_id = (int)$this->config->get('config_store_id');
+        $store_id = (int)$config->get('config_store_id');
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
@@ -679,7 +687,7 @@ class ACustomer extends ALibBase
      */
     public function getCustomerCart()
     {
-        $store_id = (int)$this->config->get('config_store_id');
+        $store_id = (int)$config->get('config_store_id');
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -742,7 +750,7 @@ class ACustomer extends ALibBase
      */
     public function mergeCustomerCart($cart)
     {
-        $store_id = (int)$this->config->get('config_store_id');
+        $store_id = (int)$config->get('config_store_id');
         $cart = !is_array($cart) ? [] : $cart;
         //check is format of cart old or new
         $new = $this->isNewCartFormat($cart);
@@ -944,7 +952,7 @@ class ACustomer extends ALibBase
                      WHERE customer_id = '".(int)$this->getId()."'
                         AND order_id = '".(int)$tr_details['order_id']."'
                         AND transaction_type = '".$this->db->escape($tr_details['transaction_type'])."'
-                        AND '". $amount ."'
+                        AND '".$amount."'
                 ";
         $trnData = $this->db->query($sql);
         if ($trnData->num_rows) {
@@ -974,5 +982,353 @@ class ACustomer extends ALibBase
 
         return false;
     }
+
+    public static function createCustomer($data, $subscribe_only = false)
+    {
+        /**
+         * @var AConfig $config
+         */
+        $config = Registry::config();
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        if (!$config || !$db) {
+            throw new AException('AConfig or ADB not found!');
+        }
+
+        if (!(int)$data['customer_group_id']) {
+            $data['customer_group_id'] = (int)$config->get('config_customer_group_id');
+        }
+        if (!isset($data['status'])) {
+            // if need to activate via email  - disable status
+            if ($config->get('config_customer_email_activation')) {
+                $data['status'] = 0;
+            } else {
+                $data['status'] = 1;
+            }
+        }
+        if (isset($data['approved'])) {
+            $data['approved'] = (int)$data['approved'];
+        } elseif (!$config->get('config_customer_approval')) {
+            $data['approved'] = 1;
+        }
+
+        // delete subscription accounts for given email
+        Customer::where($db->raw('LOWER(email)'), '=', mb_strtolower($data['email']))
+                ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
+                ->forceDelete();
+
+        $orm = $db->getORM();
+        try {
+            $orm::beginTransaction();
+
+            $customer = new Customer($data);
+            $customer->save();
+            $customer_id = $customer->customer_id;
+            if(!$subscribe_only) {
+                $address = new Address(
+                    [
+                        'customer_id' => $customer_id,
+                        'firstname'   => $data['firstname'],
+                        'lastname'    => $data['lastname'],
+                        'company'     => $data['company'],
+                        'address_1'   => $data['address_1'],
+                        'address_2'   => $data['address_2'],
+                        'city'        => $data['city'],
+                        'postcode'    => $data['postcode'],
+                        'country_id'  => $data['country_id'],
+                        'zone_id'     => $data['zone_id'],
+                    ]
+                );
+                $address->save();
+                //set address as default
+                $customer->update(['address_id' => $address->address_id]);
+            }
+
+            if (!$data['approved']) {
+                $language = new ALanguage(Registry::getInstance());
+                $language->load($language->language_details['directory']);
+                $language->load('account/create');
+
+                if ($data['subscriber']) {
+                    //notify administrator of pending subscriber approval
+                    $msg_text = sprintf($language->get('text_pending_subscriber_approval'),
+                        $data['firstname'].' '.$data['lastname'], $customer_id);
+                } else {
+                    //notify administrator of pending customer approval
+                    $msg_text = sprintf($language->get('text_pending_customer_approval'),
+                        $data['firstname'].' '.$data['lastname'], $customer_id);
+                }
+                $msg = new AMessage();
+                $msg->saveNotice($language->get('text_new_customer'), $msg_text);
+            }
+
+            $orm::commit();
+        }catch(\Exception $e){
+            $orm::rollback();
+            throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
+        }
+
+        //notify admin
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+        if ( $data['subscriber'] ) {
+            $lang_key = 'im_new_subscriber_text_to_admin';
+        } else {
+            $lang_key = 'im_new_customer_text_to_admin';
+        }
+        $message_arr = [
+            1 => [
+                'message' => sprintf( $language->get( $lang_key ), $customer_id ),
+            ],
+        ];
+        Registry::im()->send( 'new_customer', $message_arr );
+
+        //call event
+        H::event(
+            'abc\core\lib\customer@create',
+            [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
+
+        return $customer_id;
+    }
+
+    public function editCustomer( $data )
+    {
+        if ( ! $data ) {
+            return false;
+        }
+        /**
+         * @var AIM $im
+         */
+        $im = Registry::im();
+        $customer_id = (int)$this->customer_id;
+
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+
+        if ( ! empty( $data['loginname'] ) ) {
+            $message_arr = [
+                0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
+            ];
+            $im->send( 'customer_account_update', $message_arr );
+        }
+        //get existing data and compare
+        /**
+         * @var $customer Customer
+         */
+        $customer = Customer::find($customer_id);
+        foreach ( $customer->toArray() as $rec => $val ) {
+            if ( $rec == 'email' && $val != $data['email'] ) {
+                $message_arr = [
+                    0 => ['message' => sprintf( $language->get( 'im_customer_account_update_email_to_customer' ), $data['email'] )],
+                ];
+                $im->send( 'customer_account_update', $message_arr );
+            }
+        }
+
+        //trim and remove double whitespaces
+        foreach ( ['firstname', 'lastname'] as $f ) {
+            $data[$f] = str_replace( '  ', ' ', trim( $data[$f] ) );
+        }
+
+        $customer->update($data);
+
+        //call event
+        H::event(
+            'abc\core\lib\customer@update',
+            [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
+
+        return true;
+    }
+
+    /**
+     * @param $loginname
+     * @param $password
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function editPassword( $loginname, $password )
+    {
+        /**
+         * @var Customer $customer
+         */
+        $customer = Customer::where('loginname', '=', $loginname)->get();
+        if(!$customer){
+            return false;
+        }
+
+        $customer->update(['password' => $password]);
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+        $message_arr = [
+            0 => ['message' => $language->get( 'im_customer_account_update_password_to_customer' )],
+        ];
+        Registry::im()->send( 'customer_account_update', $message_arr );
+        return true;
+    }
+
+    /**
+     * @return Customer
+     */
+    public function model()
+    {
+        return Customer::find((int)$this->customer_id);
+    }
+
+
+
+    public function getCustomerNotificationSettings()
+    {
+        if(!$this->customer_id){
+            return [];
+        }
+
+        //get only active IM drivers
+        $im_protocols = Registry::im()->getProtocols();
+        $im_settings = [];
+        $cn = CustomerNotification::where('customer', '=', $this->customer_id)->get()->toArray();
+
+        foreach ( $cn as $row ) {
+            if ( ! in_array( $row['protocol'], $im_protocols ) ) {
+                continue;
+            }
+            $im_settings[$row['sendpoint']][$row['protocol']] = (int)$row['status'];
+        }
+
+        return $im_settings;
+    }
+    
+    
+    public static function validateRegistrationData( $data )
+    {
+        static::$errors = [];
+        $config = Registry::config();
+        $request = Registry::request();
+        $session = Registry::session();
+        $language = Registry::language();
+        //If captcha enabled, validate
+        if ( $config->get( 'config_account_create_captcha' ) ) {
+            if ( $config->get( 'config_recaptcha_secret_key' ) ) {
+                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
+                $resp = $recaptcha->verify( $data['g-recaptcha-response'],
+                    $request->getRemoteIP() );
+                if ( ! $resp->isSuccess() && $resp->getErrorCodes() ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            } else {
+                if ( ! isset( $session->data['captcha'] ) || ( $session->data['captcha'] != $data['captcha'] ) ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            }
+        }
+
+        if ( $config->get( 'prevent_email_as_login' ) ) {
+            //validate only if email login is not allowed
+            $login_name_pattern = '/^[\w._-]+$/i';
+            if ( mb_strlen( $data['loginname'] ) < 5
+                || mb_strlen( $data['loginname'] ) > 64
+                || ! preg_match( $login_name_pattern, $data['loginname'] )
+            ) {
+                static::$errors['loginname'] = $language->get( 'error_loginname' );
+                //validate uniqueness of login name
+            } else {
+                if (Customer::getCustomers(['filter' => ['search_operator' => 'equal','loginname'=> $data['loginname'] ]],'total_only')) {
+                    static::$errors['loginname'] = $language->get( 'error_loginname_notunique' );
+                }
+            }
+        }
+
+        if ( ( mb_strlen( $data['firstname'] ) < 1 ) || ( mb_strlen( $data['firstname'] ) > 32 ) ) {
+            static::$errors['firstname'] = $language->get( 'error_firstname' );
+        }
+
+        if ( ( mb_strlen( $data['lastname'] ) < 1 ) || ( mb_strlen( $data['lastname'] ) > 32 ) ) {
+            static::$errors['lastname'] = $language->get( 'error_lastname' );
+        }
+
+        if ( ( mb_strlen( $data['email'] ) > 96 ) || ( ! preg_match( ABC::env( 'EMAIL_REGEX_PATTERN' ), $data['email'] ) ) ) {
+            static::$errors['email'] = $language->get( 'error_email' );
+        }
+
+        if ( $this->getTotalCustomersByEmail( $data['email'] ) ) {
+            static::$errors['warning'] = $language->get( 'error_exists' );
+        }
+
+        if ( mb_strlen( $data['telephone'] ) > 32 ) {
+            static::$errors['telephone'] = $language->get( 'error_telephone' );
+        }
+
+        if ( ( mb_strlen( $data['address_1'] ) < 3 ) || ( mb_strlen( $data['address_1'] ) > 128 ) ) {
+            static::$errors['address_1'] = $language->get( 'error_address_1' );
+        }
+
+        if ( ( mb_strlen( $data['city'] ) < 3 ) || ( mb_strlen( $data['city'] ) > 128 ) ) {
+            static::$errors['city'] = $language->get( 'error_city' );
+        }
+        if ( ( mb_strlen( $data['postcode'] ) < 3 ) || ( mb_strlen( $data['postcode'] ) > 128 ) ) {
+            static::$errors['postcode'] = $language->get( 'error_postcode' );
+        }
+
+        if ( $data['country_id'] == 'FALSE' ) {
+            static::$errors['country'] = $language->get( 'error_country' );
+        }
+
+        if ( $data['zone_id'] == 'FALSE' ) {
+            static::$errors['zone'] = $language->get( 'error_zone' );
+        }
+
+        //check password length considering html entities (special case for characters " > < & )
+        $pass_len = mb_strlen( htmlspecialchars_decode( $data['password'] ) );
+        if ( $pass_len < 4 || $pass_len > 20 ) {
+            static::$errors['password'] = $language->get( 'error_password' );
+        }
+
+        if ( $data['confirm'] != $data['password'] ) {
+            static::$errors['confirm'] = $language->get( 'error_confirm' );
+        }
+
+        if ( $config->get( 'config_account_id' ) ) {
+            $this->load->model( 'catalog/content' );
+
+            $content_info = $this->model_catalog_content->getContent( $config->get( 'config_account_id' ) );
+
+            if ( $content_info ) {
+                if ( ! isset( $data['agree'] ) ) {
+                    static::$errors['warning'] = sprintf( $language->get( 'error_agree' ), $content_info['title'] );
+                }
+            }
+        }
+
+        //validate IM URIs
+        //get only active IM drivers
+        $im_drivers = $this->im->getIMDriverObjects();
+        if ( $im_drivers ) {
+            foreach ( $im_drivers as $protocol => $driver_obj ) {
+                /**
+                 * @var \abc\core\lib\AMailIM $driver_obj
+                 */
+                if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
+                    continue;
+                }
+                $result = $driver_obj->validateURI( $data[$protocol] );
+                if ( ! $result ) {
+                    static::$errors[$protocol] = implode( '<br>', $driver_obj->errors );
+                }
+
+            }
+        }
+
+        $this->extensions->hk_ValidateData( $this );
+
+        return static::$errors;
+    }
+    
 
 }

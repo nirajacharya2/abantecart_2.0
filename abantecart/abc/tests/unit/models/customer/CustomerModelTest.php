@@ -18,12 +18,27 @@ class CustomerModelTest extends ATestCase{
         /**
          * @var Customer $customer
          */
-        $customer = Customer::find(10);
+        $customer = Customer::find(9);
         $customer->update(['sms' => '123456789']);
         $this->assertEquals('123456789', $customer->sms);
         $customer->update(['sms' => '']);
-
     }
+
+    public function testEditCustomerNotifications(){
+        /**
+         * @var Customer $customer
+         */
+        $customer = Customer::find(2);
+        $customer->editCustomerNotifications(['sms'=>'qwqwqw']);
+        $this->assertEquals('qwqwqw', $customer->sms);
+        $customer->update(['sms' => '']);
+    }
+
+
+   /* public function testTypeCasting(){
+        $customer = Customer::find(12);
+        var_dump($customer->cart); exit;
+    }*/
 
     public function testGetCustomers(){
 
@@ -52,13 +67,72 @@ class CustomerModelTest extends ATestCase{
         $total = Customer::getCustomers(['filter' => ['loginname'=> 'b' ]], 'total_only');
         $this->assertEquals(2, $total);
 
+        //by loginname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'loginname'=> 'b' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(0, $total);
+        //by loginname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'loginname'=> '1@abantecart' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(1, $total);
+
         //by first name that starts from
         $total = Customer::getCustomers(['filter' => ['firstname'=> 'c' ]], 'total_only');
+        $this->assertEquals(1, $total);
+
+        //by firstname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'firstname'=> 'c' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(0, $total);
+
+        //by firstname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'firstname'=> 'Allen' ]
+                                        ],
+                                    'total_only'
+        );
         $this->assertEquals(1, $total);
 
         //by last name that starts from
         $total = Customer::getCustomers(['filter' => ['lastname'=> 'c' ]], 'total_only');
         $this->assertEquals(2, $total);
+
+        //by firstname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'lastname'=> 'c' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(0, $total);
+
+        //by firstname that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'lastname'=> 'waters' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(1, $total);
 
         //by email that contains
         $total = Customer::getCustomers(['filter' => ['email'=> '.com' ]], 'total_only');
@@ -73,6 +147,34 @@ class CustomerModelTest extends ATestCase{
                                                 ]
                                             ]
                                         ], 'total_only');
+        $this->assertEquals(2, $total);
+
+        //by email that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'email'=> 'allenwaters@abantecart.com' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(1, $total);
+        //by email that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'email'=> 'nonexists' ]
+                                        ],
+                                    'total_only'
+        );
+        $this->assertEquals(0, $total);
+        //by email that equal to
+        $total = Customer::getCustomers([
+                                    'filter' => [
+                                        'search_operator' => 'equal',
+                                        'email'=> ['1@abantecart', 'allenwaters@abantecart.com'] ]
+                                        ],
+                                    'total_only'
+        );
         $this->assertEquals(2, $total);
 
         //by phone that contains
@@ -132,7 +234,6 @@ class CustomerModelTest extends ATestCase{
 
     public function testIsUniqueLoginName()
     {
-
         $result = Customer::isUniqueLoginname('1@abantecart');
         $this->assertEquals(false, $result);
 
@@ -142,4 +243,5 @@ class CustomerModelTest extends ATestCase{
         $result = Customer::isUniqueLoginname('1@abantecart', 11);
         $this->assertEquals(false, $result);
     }
+
 }
