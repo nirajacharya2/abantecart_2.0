@@ -378,12 +378,28 @@ class ControllerPagesDesignContent extends AController
                 'style' => 'button2',
             ));
 
+        if ($content_id && $this->data['status']) {
+            $href = $this->html->getSecureURL('content/content', '&content_id='.$content_id, '', 'storefront' );
+            if ($this->config->get('enable_seo_url') && trim($this->data['keyword']) !== '') {
+                $href = $this->html->getHomeURL().$this->data['keyword'];
+            }
+            $this->data['form']['show_on_storefront'] = $form->getFieldHtml(
+                array(
+                    'type'  => 'button',
+                    'name'  => 'show_on_storefront',
+                    'text'  => $this->language->get('text_storefront'),
+                    'href'  => $href,
+                    'style' => 'button2',
+                ));
+        }
+
         $this->data['form']['fields']['status'] = $form->getFieldHtml(
             array(
                 'type'  => 'checkbox',
                 'name'  => 'status',
                 'value' => $this->data['status'],
                 'style' => 'btn_switch',
+                'attr' => 'reload_on_save="true"'
             ));
 
         // we need get contents list for multiselect

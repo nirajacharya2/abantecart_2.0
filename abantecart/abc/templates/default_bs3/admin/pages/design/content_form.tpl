@@ -93,6 +93,12 @@
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 				<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
+			<?php if($form['show_on_storefront']){ ?>
+			<a class="btn btn-info" target="_blank"
+			   href="<?php echo $form['show_on_storefront']->href; ?>">
+				<i class="fa fa-external-link-alt"></i> <?php echo $form['show_on_storefront']->text; ?>
+			</a>
+			<?php } ?>
 		</div>
 	</div>
 	</form>
