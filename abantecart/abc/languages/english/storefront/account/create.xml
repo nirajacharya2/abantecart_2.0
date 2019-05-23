@@ -126,6 +126,10 @@
 		<value><![CDATA[Last Name must be between 1 and 32 characters!]]></value>
 	</definition>
 	<definition>
+		<key>error_company</key>
+		<value><![CDATA[Company Name must be less than 32 characters!]]></value>
+	</definition>
+	<definition>
 		<key>error_email</key>
 		<value><![CDATA[Email Address does not appear to be valid!]]></value>
 	</definition>

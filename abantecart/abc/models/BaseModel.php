@@ -30,10 +30,12 @@ use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasOneEvents;
 use H;
+use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\DatabasePresenceVerifier;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
@@ -117,6 +119,10 @@ class BaseModel extends OrmModel
      */
     protected $affectedColumns = [];
 
+    /**
+     * @var Validator $validator
+     */
+    protected $validator;
     /**
      *
      * @var array Data Validation rules
@@ -288,9 +294,9 @@ class BaseModel extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            if ($this->validate($this->toArray())) {
+            //if ($this->validate($this->toArray())) {
                 parent::save();
-            }
+            //}
         } else {
             throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
@@ -309,18 +315,31 @@ class BaseModel extends OrmModel
     }
 
     /**
+     * @return Validator
+     */
+    public function getValidator()
+    {
+        return $this->validator;
+    }
+
+    /**
      * @param $data
      *
+     * @param array $messages
+     * @param array $customAttributes
+     *
      * @return bool
+     * @throws ValidationException
      */
-    public function validate($data)
+    public function validate($data, array $messages = [], array $customAttributes = [])
     {
 
         if ($rules = $this->rules()) {
-            /**
-             * @var Validator $v
-             */
-            $v = ABC::getObjectByAlias('Validator', [ABC::getObjectByAlias('ValidationTranslator'), $data, $rules]);
+            $v = new Validator(new ValidationTranslator(), $data, $rules, $messages, $customAttributes);
+            $connections = [Registry::db()->connection()];
+            $presenceVerifier = new DatabasePresenceVerifier(new ConnectionResolver($connections));
+            $v->setPresenceVerifier($presenceVerifier);
+            $this->validator = $v;
             try {
                 $v->validate();
             } catch (ValidationException $e) {

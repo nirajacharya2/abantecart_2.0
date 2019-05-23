@@ -22,6 +22,7 @@ namespace abc\core\engine;
 
 use abc\core\lib\AConfig;
 use abc\core\lib\AConfigManager;
+use abc\core\lib\ACustomer;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
 use abc\core\lib\AIM;
@@ -30,6 +31,7 @@ use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALog;
 use abc\core\lib\ARequest;
 use abc\core\lib\ASession;
+
 
 /**
  * Class Registry
@@ -43,6 +45,9 @@ use abc\core\lib\ASession;
  * @method static AConfig|AConfigManager config()
  * @method static ARequest request()
  * @method static ASession session()
+ * @method static ALoader load()
+ * @method static ExtensionsApi extensions()
+ * @method static ACustomer customer()
  */
 final class Registry
 {

@@ -53,7 +53,7 @@ class ControllerPagesAccountCreate extends AController
         if ($this->request->is_POST()) {
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors =
-                    array_merge($this->errors, $this->model_account_customer->validateRegistrationData($request_data));
+                    array_merge($this->errors, $this->customer::validateRegistrationData($request_data));
             } else {
                 $this->errors['warning'] = $this->language->get('error_unknown');
             }

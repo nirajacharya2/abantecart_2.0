@@ -69,14 +69,14 @@ class Address extends BaseModel
         'address_id'        => 'integer',
         'customer_id'       => 'integer',
         'company'           => 'string|max:32',
-        'firstname'         => 'string|max:32',
-        'lastname'          => 'string|max:32',
-        'address_1'         => 'string|max:128',
+        'firstname'         => 'string|required|between:1,32',
+        'lastname'          => 'string|required|between:1,32',
+        'address_1'         => 'string|required|between:3,128',
         'address_2'         => 'string|max:128',
-        'postcode'          => 'string|max:10',
-        'city'              => 'string|max:128',
-        'country_id'        => 'int',
-        'zone_id'           => 'int'
+        'postcode'          => 'string|required|between:3,10',
+        'city'              => 'string|required|between:3,128',
+        'country_id'        => 'integer|required',
+        'zone_id'           => 'integer|required'
     ];
 
     /**

@@ -24,9 +24,11 @@ use abc\core\engine\Registry;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerNotification;
+use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
 use H;
+use Illuminate\Validation\ValidationException;
 use ReCaptcha\ReCaptcha;
 
 /**
@@ -1025,6 +1027,7 @@ class ACustomer extends ALibBase
 
             $customer = new Customer($data);
             $customer->save();
+
             $customer_id = $customer->customer_id;
             if(!$subscribe_only) {
                 $address = new Address(
@@ -1065,6 +1068,9 @@ class ACustomer extends ALibBase
             }
 
             $orm::commit();
+        }catch(ValidationException $e){
+            $orm::rollback();
+            throw $e;
         }catch(\Exception $e){
             $orm::rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
@@ -1212,6 +1218,14 @@ class ACustomer extends ALibBase
         $request = Registry::request();
         $session = Registry::session();
         $language = Registry::language();
+        //load storefront language if not loaded
+        if(!$language->load('account/create')) {
+            $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
+        }
+        $language->load('account/create');
+
+        $data['password'] = htmlspecialchars_decode($data['password']);
+
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) ) {
             if ( $config->get( 'config_recaptcha_secret_key' ) ) {
@@ -1229,106 +1243,216 @@ class ACustomer extends ALibBase
             }
         }
 
-        if ( $config->get( 'prevent_email_as_login' ) ) {
+        $customer = new Customer();
+
+        //validate customer model data
+        try {
             //validate only if email login is not allowed
-            $login_name_pattern = '/^[\w._-]+$/i';
-            if ( mb_strlen( $data['loginname'] ) < 5
-                || mb_strlen( $data['loginname'] ) > 64
-                || ! preg_match( $login_name_pattern, $data['loginname'] )
-            ) {
-                static::$errors['loginname'] = $language->get( 'error_loginname' );
-                //validate uniqueness of login name
-            } else {
-                if (Customer::getCustomers(['filter' => ['search_operator' => 'equal','loginname'=> $data['loginname'] ]],'total_only')) {
-                    static::$errors['loginname'] = $language->get( 'error_loginname_notunique' );
-                }
+            if ($config->get('prevent_email_as_login')) {
+
+                $error_messages = ['loginname.*' => $language->get('error_loginname')];
+                $customer->validate(['loginname' => $data['loginname']], $error_messages);
             }
+
+        }catch(ValidationException $e){
+            static::extractValidationErrors($e->errors());
         }
 
-        if ( ( mb_strlen( $data['firstname'] ) < 1 ) || ( mb_strlen( $data['firstname'] ) > 32 ) ) {
-            static::$errors['firstname'] = $language->get( 'error_firstname' );
+        //todo: need to remove this section and move this check via validator
+        if(!static::$errors
+            && $config->get('prevent_email_as_login')
+            && Customer::getCustomers([ 'filter' => [
+                                                    'search_operator' => 'equal',
+                                                    'loginname'       => $data['loginname']
+                                                ]
+                                            ], 'total_only')
+        ){
+            static::$errors['loginname'] = $language->get('error_loginname_notunique');
         }
 
-        if ( ( mb_strlen( $data['lastname'] ) < 1 ) || ( mb_strlen( $data['lastname'] ) > 32 ) ) {
-            static::$errors['lastname'] = $language->get( 'error_lastname' );
-        }
-
-        if ( ( mb_strlen( $data['email'] ) > 96 ) || ( ! preg_match( ABC::env( 'EMAIL_REGEX_PATTERN' ), $data['email'] ) ) ) {
-            static::$errors['email'] = $language->get( 'error_email' );
-        }
-
-        if ( $this->getTotalCustomersByEmail( $data['email'] ) ) {
-            static::$errors['warning'] = $language->get( 'error_exists' );
-        }
-
-        if ( mb_strlen( $data['telephone'] ) > 32 ) {
-            static::$errors['telephone'] = $language->get( 'error_telephone' );
-        }
-
-        if ( ( mb_strlen( $data['address_1'] ) < 3 ) || ( mb_strlen( $data['address_1'] ) > 128 ) ) {
-            static::$errors['address_1'] = $language->get( 'error_address_1' );
-        }
-
-        if ( ( mb_strlen( $data['city'] ) < 3 ) || ( mb_strlen( $data['city'] ) > 128 ) ) {
-            static::$errors['city'] = $language->get( 'error_city' );
-        }
-        if ( ( mb_strlen( $data['postcode'] ) < 3 ) || ( mb_strlen( $data['postcode'] ) > 128 ) ) {
-            static::$errors['postcode'] = $language->get( 'error_postcode' );
-        }
-
-        if ( $data['country_id'] == 'FALSE' ) {
-            static::$errors['country'] = $language->get( 'error_country' );
-        }
-
-        if ( $data['zone_id'] == 'FALSE' ) {
-            static::$errors['zone'] = $language->get( 'error_zone' );
+        //validate customer model data
+        try{
+            $error_messages = [];
+            $error_messages['firstname.*'] = $language->get('error_firstname');
+            $error_messages['lastname.*'] = $language->get('error_lastname');
+            $error_messages['password.*'] = $language->get('error_password');
+            $error_messages['email.*'] = $language->get('error_email');
+            $error_messages['company.*'] = $language->get('error_company');
+            $customer->validate($data, $error_messages);
+        }catch(ValidationException $e){
+            static::extractValidationErrors($e->errors());
         }
 
         //check password length considering html entities (special case for characters " > < & )
-        $pass_len = mb_strlen( htmlspecialchars_decode( $data['password'] ) );
-        if ( $pass_len < 4 || $pass_len > 20 ) {
-            static::$errors['password'] = $language->get( 'error_password' );
+        if ($data['confirm'] != $data['password']) {
+            static::$errors['confirm'] = $language->get('error_confirm');
         }
 
-        if ( $data['confirm'] != $data['password'] ) {
-            static::$errors['confirm'] = $language->get( 'error_confirm' );
+        if(!static::$errors) {
+            if (Customer::getCustomers(['filter' => ['search_operator' => 'equal', 'email' => $data['email']]],
+                'total_only')) {
+                static::$errors['warning'] = $language->get('error_exists');
+            }
         }
 
-        if ( $config->get( 'config_account_id' ) ) {
-            $this->load->model( 'catalog/content' );
+        //validate address model data
+        try{
+            $error_messages = [];
+            $address = new Address();
+            $error_messages['firstname.*'] = $language->get('error_firstname');
+            $error_messages['lastname.*'] = $language->get('error_lastname');
+            $error_messages['address_1.*'] = $language->get('error_address_1');
+            $error_messages['address_2.*'] = $language->get('error_address_2');
+            $error_messages['telephone.*'] = $language->get('error_telephone');
+            $error_messages['city.*'] = $language->get('error_city');
+            $error_messages['postcode.*'] = $language->get('error_postcode');
+            $error_messages['country_id.*'] = $language->get('error_country');
+            $error_messages['zone_id.*'] = $language->get('error_zone');
 
-            $content_info = $this->model_catalog_content->getContent( $config->get( 'config_account_id' ) );
+            $address->validate($data, $error_messages);
+        }catch(ValidationException $e){
+            static::extractValidationErrors($e->errors());
+        }
 
-            if ( $content_info ) {
-                if ( ! isset( $data['agree'] ) ) {
-                    static::$errors['warning'] = sprintf( $language->get( 'error_agree' ), $content_info['title'] );
+        if(isset(static::$errors['country_id'])){
+            static::$errors['country'] = static::$errors['country_id'];
+        }
+        if(isset(static::$errors['zone_id'])){
+            static::$errors['zone'] = static::$errors['zone_id'];
+        }
+
+        if ($config->get('config_account_id')) {
+            Registry::load()->model('catalog/content');
+            /**
+             * @var ModelCatalogContent $model_catalog_content
+             */
+            $content_info = Registry::model_catalog_content()->getContent($config->get('config_account_id'));
+
+            if ($content_info) {
+                if (!isset($data['agree'])) {
+                    static::$errors['warning'] = sprintf($language->get('error_agree'), $content_info['title']);
                 }
             }
         }
 
         //validate IM URIs
         //get only active IM drivers
-        $im_drivers = $this->im->getIMDriverObjects();
-        if ( $im_drivers ) {
-            foreach ( $im_drivers as $protocol => $driver_obj ) {
+        $im_drivers = Registry::im()->getIMDriverObjects();
+        if ($im_drivers) {
+            foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
                  * @var \abc\core\lib\AMailIM $driver_obj
                  */
-                if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
+                if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
                 }
-                $result = $driver_obj->validateURI( $data[$protocol] );
-                if ( ! $result ) {
-                    static::$errors[$protocol] = implode( '<br>', $driver_obj->errors );
+                $result = $driver_obj->validateURI($data[$protocol]);
+                if (!$result) {
+                    static::$errors[$protocol] = implode('<br>', $driver_obj->errors);
                 }
-
             }
         }
 
-        $this->extensions->hk_ValidateData( $this );
-
+        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
         return static::$errors;
     }
-    
 
+    public static function validateSubscribeData( $data )
+    {
+        static::$errors = [];
+        $config = Registry::config();
+        $request = Registry::request();
+        $session = Registry::session();
+        $language = Registry::language();
+        //load storefront language if not loaded
+        if(!$language->load('account/create')) {
+            $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
+        }
+        $language->load('account/create');
+
+        $data['password'] = htmlspecialchars_decode($data['password']);
+
+        //If captcha enabled, validate
+        if ( $config->get( 'config_account_create_captcha' ) ) {
+            if ( $config->get( 'config_recaptcha_secret_key' ) ) {
+                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
+                $resp = $recaptcha->verify( $data['g-recaptcha-response'],
+                    $request->getRemoteIP() );
+                if ( ! $resp->isSuccess() && $resp->getErrorCodes() ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            } else {
+                if ( ! isset( $session->data['captcha'] ) || ( $session->data['captcha'] != $data['captcha'] ) ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            }
+        }
+
+        $customer = new Customer();
+
+        //validate customer model data
+
+        //validate customer model data
+        try{
+            $error_messages = [];
+            $error_messages['firstname.*'] = $language->get('error_firstname');
+            $error_messages['lastname.*'] = $language->get('error_lastname');
+            $error_messages['password.*'] = $language->get('error_password');
+            $error_messages['email.*'] = $language->get('error_email');
+
+            $customer->validate($data, $error_messages);
+        }catch(ValidationException $e){
+            static::extractValidationErrors($e->errors());
+        }
+
+
+
+        if(!static::$errors) {
+            if (Customer::getCustomers(['filter' => ['search_operator' => 'equal', 'email' => $data['email']]],
+                'total_only')) {
+                static::$errors['warning'] = $language->get('error_exists');
+            }
+        }
+
+        //validate IM URIs
+        //get only active IM drivers
+        $im_drivers = Registry::im()->getIMDriverObjects();
+        if ($im_drivers) {
+            foreach ($im_drivers as $protocol => $driver_obj) {
+                /**
+                 * @var \abc\core\lib\AMailIM $driver_obj
+                 */
+                if (!is_object($driver_obj) || $protocol == 'email') {
+                    continue;
+                }
+                $result = $driver_obj->validateURI($data[$protocol]);
+                if (!$result) {
+                    static::$errors[$protocol] = implode('<br>', $driver_obj->errors);
+                }
+            }
+        }
+
+        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        return static::$errors;
+    }
+
+
+
+    protected static function extractValidationErrors(array $errors)
+    {
+        foreach($errors as $k => $errArr){
+            foreach($errArr as $i => $error_text){
+                if(strpos($error_text,'error_')===0){
+                    unset($errArr[$i]);
+                }
+            }
+            if($errArr) {
+               /* if(isset(static::$errors[$k])){
+                    static::$errors[$k] .= " ";
+                }*/
+                static::$errors[$k] = implode(' ', $errArr);
+            }
+        }
+    }
 }

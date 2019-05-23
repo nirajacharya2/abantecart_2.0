@@ -53,8 +53,8 @@ class ControllerApiAccountCreate extends AControllerAPI
         $this->loadModel('account/customer');
         $this->loadLanguage('account/create');
         $this->loadLanguage('account/success');
-        //????? Think of way to validate and block machine registrations (non-human)
-        $this->v_error = $this->model_account_customer->validateRegistrationData($request_data);
+
+        $this->v_error = $this->customer::validateRegistrationData($request_data);
         if (!$this->v_error) {
             $customer_data = $request_data;
             $customer_data['store_id'] = $this->config->get('store_id');

@@ -123,24 +123,35 @@ class Customer extends BaseModel
     protected $rules = [
         'customer_id'       => 'integer',
         'store_id'          => 'integer',
-        'firstname'         => 'string|max:32',
-        'lastname'          => 'string|max:32',
-        'loginname'         => 'string|max:96',
-        'email'             => 'string|max:96',
+        'firstname'         => 'string|required|between:1,32',
+        'lastname'          => 'string|required|between:1,32',
+        //Note: rules with regex pattern must be an array
+        'loginname'         => [
+                                'string',
+                                'required',
+                                //TODO: need to found solution
+                                //'unique:connection.customers',
+                                'between:5,96',
+                                'regex:/^[\w._-]+$/i'
+                                ],
+        'email'             => [
+                                'string',
+                                'required',
+                                'max:96',
+                                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
+                                ],
         'telephone'         => 'string|max:32',
         'fax'               => 'string|max:32',
         'sms'               => 'string|max:32',
         'salt'              => 'string|max:8',
-        'password'          => 'string|max:40',
-        'cart'              => 'string|nullable',
+        'password'          => 'string|required|between:1,40',
         'wishlist'          => 'string|nullable',
-        'address_id'        => 'int|nullable',
-        'status'            => 'int|digits:1',
+        'address_id'        => 'integer|nullable',
+        'status'            => 'integer|digits:1',
         'advanced_status'   => 'string|max:128',
-        'approved'          => 'int|digits:1',
-        'customer_group_id' => 'int|nullable',
+        'approved'          => 'integer|digits:1',
+        'customer_group_id' => 'integer|nullable',
         'ip'                => 'string|max:50',
-        'data'              => 'array|max:1500|nullable'
     ];
 
     public function getFields()
@@ -271,11 +282,13 @@ class Customer extends BaseModel
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'customers');
         }
+
         if ($data['password']) {
             $salt_key = H::genToken(8);
             $data['salt'] = $salt_key;
             $data['password'] = H::getHash( $data['password'], $salt_key );
         }
+
         $this->fill($data);
         $result = parent::save($options);
         if (isset($data['newsletter']) && $inserting) {

@@ -85,6 +85,7 @@ class ADB
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
+
                 $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
             }
 
@@ -274,7 +275,6 @@ class ADB
     public function getLastId()
     {
         $orm = $this->orm;
-
         return $orm::connection($this->conName)->getPdo()->lastInsertId();
     }
 
@@ -380,6 +380,11 @@ class ADB
     public function database()
     {
         return $this->orm->getConnection($this->conName)->getSchemaBuilder();
+    }
+
+    public function connection()
+    {
+        return $this->orm->getConnection($this->conName);
     }
 
 

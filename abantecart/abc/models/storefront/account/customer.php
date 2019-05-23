@@ -678,6 +678,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \abc\core\lib\AException
      */
+    /*
     public function validateRegistrationData( $data )
     {
         $this->error = [];
@@ -783,7 +784,7 @@ class ModelAccountCustomer extends Model
                 /**
                  * @var \abc\core\lib\AMailIM $driver_obj
                  */
-                if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
+               /* if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
                     continue;
                 }
                 $result = $driver_obj->validateURI( $data[$protocol] );
@@ -798,7 +799,7 @@ class ModelAccountCustomer extends Model
 
         return $this->error;
     }
-
+*/
     /**
      * @param array $data
      *
