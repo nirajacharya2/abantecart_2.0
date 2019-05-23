@@ -20,6 +20,7 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\Registry;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;

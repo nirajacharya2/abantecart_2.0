@@ -3,6 +3,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\Registry;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\ResourceLibrary;
 
