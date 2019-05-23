@@ -85,7 +85,7 @@ class ADB
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
-                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
+                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='NO_ZERO_DATE,NO_ZERO_IN_DATE';"));
             }
 
         } catch (\PDOException $e) {
