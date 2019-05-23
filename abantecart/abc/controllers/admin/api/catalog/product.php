@@ -179,6 +179,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
+        (Registry::getInstance())->get('cache')->remove('*');
+
         $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',
             'product_id' => $product_id,
