@@ -533,6 +533,8 @@ class Category extends BaseModel
      */
     public function editCategory($categoryId, $data)
     {
+
+        H::df($data);
         if (isset($data['parent_id'])) {
             $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
         }
@@ -545,10 +547,9 @@ class Category extends BaseModel
             foreach ($data['category_description'] as $language_id => $value) {
                 $update = [];
 
-                $update['name'] = $value['name'] ?: '';
-                $update['description'] = $value['description'] ?: '';
-                $update['meta_keywords'] = $value['meta_keywords'] ?: '';
-                $update['meta_description'] = $value['meta_description'] ?: '';
+                foreach ($value as $key => $item_val) {
+                    $update[$key] = $item_val;
+                }
 
                 if (!empty($update)) {
                     // insert or update
