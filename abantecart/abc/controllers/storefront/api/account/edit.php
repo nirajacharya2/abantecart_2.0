@@ -46,9 +46,7 @@ class ControllerApiAccountEdit extends AControllerAPI
 $this->loadModel('account/customer');
         $this->loadLanguage('account/edit');
         $this->loadLanguage('account/success');
-
-        //TODO Think of way to validate and block machine registrations (non-human)
-        $this->v_error = $this->model_account_customer->validateEditData($request_data);
+        $this->v_error = $this->customer::validateRegistrationData($request_data);
         if (!$this->v_error) {
             $request_data['newsletter'] = 1;
             $this->customer->model()->update($request_data);

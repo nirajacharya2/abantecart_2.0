@@ -72,8 +72,9 @@ class Customer extends BaseModel
         'status'            => 'int',
         'approved'          => 'int',
         'customer_group_id' => 'int',
-        'cast'              => 'serialized',
-        'data'              => 'serialized'
+        'cart'              => 'serialized',
+        'data'              => 'serialized',
+        'wishlist'          => 'serialized'
     ];
 
     protected $dates = [
@@ -123,8 +124,19 @@ class Customer extends BaseModel
     protected $rules = [
         'customer_id'       => 'integer',
         'store_id'          => 'integer',
-        'firstname'         => 'string|required|between:1,32',
-        'lastname'          => 'string|required|between:1,32',
+                                //required only when new customer creating
+        'firstname'         => [
+                                'string',
+                                //required only when new customer creating
+                                'required_without:customer_id',
+                                'between:1,32'
+                               ],
+        'lastname'          => [
+                                'string',
+                                //required only when new customer creating
+                                'required_without:customer_id',
+                                'between:1,32'
+                               ],
         //Note: rules with regex pattern must be an array
         'loginname'         => [
                                 'string',
@@ -133,18 +145,24 @@ class Customer extends BaseModel
                                 //'unique:connection.customers',
                                 'between:5,96',
                                 'regex:/^[\w._-]+$/i'
-                                ],
+                               ],
         'email'             => [
                                 'string',
-                                'required',
+                                //required only when new customer creating
+                                'required_without:customer_id',
                                 'max:96',
                                 'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
-                                ],
+                               ],
         'telephone'         => 'string|max:32',
         'fax'               => 'string|max:32',
         'sms'               => 'string|max:32',
         'salt'              => 'string|max:8',
-        'password'          => 'string|required|between:1,40',
+        'password'          => [
+                                'string',
+                                //required only when new customer creating
+                                'required_without:customer_id',
+                                'between:1,40'
+                               ],
         'wishlist'          => 'string|nullable',
         'address_id'        => 'integer|nullable',
         'status'            => 'integer|digits:1',
@@ -257,6 +275,23 @@ class Customer extends BaseModel
         ];
     }
 
+
+    public function setDataAttribute($value){
+        $this->attributes['data'] = serialize($value);
+    }
+    public function setCartAttribute($value){
+        $this->attributes['cart'] = serialize($value);
+    }
+    public function setWishlistAttribute($value){
+        $this->attributes['wishlist'] = serialize($value);
+    }
+
+    public function setPasswordAttribute($password){
+        $salt_key = H::genToken(8);
+        $this->attributes['salt'] = $salt_key;
+        $this->attributes['password'] = H::getHash( $password, $salt_key );
+    }
+
     /**
      * @param array $options
      *
@@ -266,13 +301,13 @@ class Customer extends BaseModel
     public function save($options = [])
     {
         $inserting = !($this->customer_id);
-        $data = $this->getDirty();
+        $data = $this->attributes;
 
-        if( is_array($data['data']) ){
-            $data['data'] = serialize($data['data']);
-        }
-        if( is_array($data['cart']) ){
-            $data['cart'] = serialize($data['cart']);
+        //remove serialized fields
+        foreach($this->casts as $k=>$v){
+            if($v == 'serialized'){
+                unset($data[$k]);
+            }
         }
 
         /**
@@ -283,11 +318,6 @@ class Customer extends BaseModel
             $data = $dcrypt->encrypt_data($data, 'customers');
         }
 
-        if ($data['password']) {
-            $salt_key = H::genToken(8);
-            $data['salt'] = $salt_key;
-            $data['password'] = H::getHash( $data['password'], $salt_key );
-        }
 
         $this->fill($data);
         $result = parent::save($options);

@@ -113,18 +113,10 @@ class ControllerPagesAccountLogin extends AController
                                 ]
                             );
                             //send welcome email
-                            //TODO: email Listener needed!!!!
-                            $this->model_account_customer->sendWelcomeEmail( $customer_info['email'], true );
+                            $customer_info['activated'] = true;
+                            H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+
                             $this->session->data['success'] = $this->language->get( 'text_success_activated' );
-                            //call event
-                            H::event(
-                                'abc\models\storefront\customer@update',
-                                [new ABaseEvent(
-                                    $customer_id,
-                                    __FUNCTION__,
-                                    //new status here
-                                    1)]
-                            );
                         } else {
                             //update data and remove email_activation code
                             $customer->update( ['data' => $customer_info['data']] );

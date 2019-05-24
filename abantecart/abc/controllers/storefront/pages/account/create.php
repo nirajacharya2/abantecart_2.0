@@ -24,7 +24,9 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AEncryption;
-
+use abc\models\customer\Customer;
+use abc\modules\events\ABaseEvent;
+use H;
 
 /**
  * Class ControllerPagesAccountCreate
@@ -52,8 +54,10 @@ class ControllerPagesAccountCreate extends AController
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
             if ($this->csrftoken->isTokenValid()) {
-                $this->errors =
-                    array_merge($this->errors, $this->customer::validateRegistrationData($request_data));
+                $this->errors = array_merge(
+                                    $this->errors,
+                                    $this->customer::validateRegistrationData($request_data)
+                );
             } else {
                 $this->errors['warning'] = $this->language->get('error_unknown');
             }
@@ -70,25 +74,30 @@ class ControllerPagesAccountCreate extends AController
                 }
                 $this->data['customer_id'] = $this->customer::createCustomer($customer_data);
 
-//????
- $this->model_account_customer->editCustomerNotifications($request_data, $this->data['customer_id']);
+//???? TODO replace this
+ //$this->model_account_customer->editCustomerNotifications($request_data, $this->data['customer_id']);
 
                 unset($this->session->data['guest']);
+
+                $customer = Customer::find($this->data['customer_id']);
+                $customer_info = $customer->toArray();
 
                 if (!$this->config->get('config_customer_approval')) {
                     //add and send account activation link if required
                     if (!$this->config->get('config_customer_email_activation')) {
+                        $customer_info['activated'] = true;
                         //send welcome email
-                        $this->model_account_customer->sendWelcomeEmail($this->request->post['email'], true);
+                        H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+
                         //login customer after create account is approving and email activation are disabled in settings
                         $this->customer->login($request_data['loginname'], $request_data['password']);
                     } else {
                         //send activation email request and wait for confirmation
-                        $this->model_account_customer->emailActivateLink($this->data['customer_id']);
+                        H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info)]);
                     }
                 } else {
                     //send welcome email, but need manual approval
-                    $this->model_account_customer->sendWelcomeEmail($this->request->post['email'], false);
+                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
                 }
 
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -322,19 +331,6 @@ class ControllerPagesAccountCreate extends AController
             }
         }
 
-        //TODO: REMOVE THIS IN 2.0!!!
-        // backward compatibility code
-        $deprecated = $this->data['form']['fields'];
-        foreach ($deprecated as $section => $fields) {
-            foreach ($fields as $name => $fld) {
-                if (in_array($name, ['country', 'zone'])) {
-                    $name .= '_id';
-                }
-                $this->data['form'][$name] = $fld;
-            }
-        }
-        //end of trick
-
         $agree = isset($this->request->post['agree']) ? $this->request->post['agree'] : false;
         $this->data['form']['agree'] = $form->getFieldHtml(
             [
@@ -362,6 +358,7 @@ class ControllerPagesAccountCreate extends AController
         $this->data['error_address_1'] = $this->errors['address_1'];
         $this->data['error_city'] = $this->errors['city'];
         $this->data['error_postcode'] = $this->errors['postcode'];
+        $this->data['error_company'] = $this->errors['company'];
         $this->data['error_country'] = $this->errors['country'];
         $this->data['error_zone'] = $this->errors['zone'];
         $this->data['error_captcha'] = $this->errors['captcha'];
@@ -391,6 +388,7 @@ class ControllerPagesAccountCreate extends AController
             sprintf($this->language->get('text_account_already'), $this->html->getSecureURL('account/login'));
         $this->data['text_account_already'] = $text_account_already;
 
+
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/account/create.tpl');
 
@@ -406,7 +404,9 @@ class ControllerPagesAccountCreate extends AController
         $enc = new  AEncryption($this->config->get('encryption_key'));
         list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
         if ($customer_id && $activation_code) {
-            $this->model_account_customer->emailActivateLink($customer_id);
+            $customer = Customer::find($customer_id);
+            $customer_info = $customer->toArray();
+            H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info)]);
         }
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         abc_redirect($this->html->getSecureURL('account/success'));

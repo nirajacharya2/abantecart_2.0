@@ -150,18 +150,23 @@ class ACustomer extends ALibBase
             ? (int)$this->session->data['customer_id']
             : $customer_id;
         if ($customer_id) {
-            $sql = "SELECT c.*, cg.* 
+            $query = Customer::with('customer_group')->whereIn('customer_id',[$customer_id]);
+
+            /*$sql = "SELECT c.*, cg.*
                      FROM ".$this->db->table_name("customers")." c
                      LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
                         ON c.customer_group_id = cg.customer_group_id
                      WHERE customer_id = '".(int)$customer_id."'";
+            */
             if (!ABC::env('IS_ADMIN')) {
-                $sql .= " AND STATUS = '1'";
+                $query->where('status', '=', 1);
+                //$sql .= " AND STATUS = '1'";
             }
+            $customer_data = $query->get()->toArray();
+            //$customer_data = $this->db->query($sql);
 
-            $customer_data = $this->db->query($sql);
-            if ($customer_data->num_rows) {
-                $this->customerInit($customer_data->row);
+            if ($customer_data) {
+                $this->customerInit($customer_data);
             } else {
                 $this->logout();
             }
@@ -224,30 +229,31 @@ class ACustomer extends ALibBase
      */
     public function login($loginname, $password)
     {
+        $config = Registry::config();
+        $filter = [
+                'search_operator' => 'equal',
+                'loginname' => $loginname,
+                'password' => $password,
+                'status' => 1,
 
-        $approved_only = '';
+        ];
         if ($config->get('config_customer_approval')) {
-            $approved_only = " AND approved = '1'";
+            $filter['approved'] = 1;
         }
 
-        /**
-         * @deprecated !!!
-         */
-        //Supports older passwords for upgraded/migrated stores prior to 1.2.8
-        $add_pass_sql = '';
-        if (ABC::env('SALT')) {
-            $add_pass_sql = " OR password = '".$this->db->escape(md5($password.ABC::env('SALT')))."'";
-        }
-        $customer_data = $this->db->query(
+        $customer_data = Customer::getCustomers(['filter' => $filter]);
+
+
+        /*$customer_data = $this->db->query(
             "SELECT *
             FROM ".$this->db->table_name("customers")."
             WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
             AND (
                 password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
-                        ))".$add_pass_sql.") AND status = '1' ".$approved_only);
-        if ($customer_data->num_rows) {
+                        ))) AND status = '1' ".$approved_only);*/
+        if ($customer_data) {
 
-            $this->customerInit($customer_data->row);
+            $this->customerInit($customer_data[0]);
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
             $cart = $this->getCustomerCart();
@@ -314,7 +320,7 @@ class ACustomer extends ALibBase
         //save it to use in APromotion class
         $this->session->data['customer_group_id'] = (int)$data['customer_group_id'];
 
-        $this->customer_group_name = $data['name'];
+        $this->customer_group_name = $data['customer_group'][0]['name'];
 
         $this->customer_tax_exempt = $data['tax_exempt'];
         //save this sign to use in ATax lib
@@ -332,10 +338,12 @@ class ACustomer extends ALibBase
         }
 
         //insert new record
-        $this->db->query("UPDATE `".$this->db->table_name("customers")."`
+        $customer = Customer::find($customer_id);
+        $customer->update(['last_login' => date('Y-m-d H:i:s')]);
+        /*$this->db->query("UPDATE `".$this->db->table_name("customers")."`
                         SET `last_login` = NOW()
                         WHERE customer_id = ".$customer_id);
-
+*/
         //call event
         H::event(
             'abc\core\lib\customer@login',
@@ -388,7 +396,9 @@ class ACustomer extends ALibBase
     public function isLoggedWithToken($token)
     {
         if ((isset($this->session->data['token']) && !isset($token))
-            || ((isset($token) && (isset($this->session->data['token']) && ($token != $this->session->data['token']))))
+            || (isset($token)
+                && isset($this->session->data['token'])
+                && $token != $this->session->data['token'])
         ) {
             return false;
         } else {
@@ -626,6 +636,7 @@ class ACustomer extends ALibBase
      */
     public function saveCustomerCart()
     {
+        $config = Registry::config();
         $customer_id = $this->customer_id;
         $store_id = (int)$config->get('config_store_id');
         if (!$customer_id) {
@@ -635,11 +646,18 @@ class ACustomer extends ALibBase
             return null;
         }
 
+        $cart = [];
+
         //before write get cart-info from db to non-override cart for other stores of multistore
-        $result = $this->db->query("SELECT cart
-                                    FROM ".$this->db->table_name("customers")."
-                                    WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
-        $cart = unserialize($result->row['cart']);
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            $cart = $customer->cart;
+        }
+/* $result = $this->db->query("SELECT cart
+                            FROM ".$this->db->table_name("customers")."
+                            WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
+$cart = unserialize($result->row['cart']);
+*/
         //check is format of cart old or new
         $new = $this->isNewCartFormat($cart);
 
@@ -647,11 +665,14 @@ class ACustomer extends ALibBase
             $cart = []; //clean cart from old format
         }
         $cart['store_'.$store_id] = $this->session->data['cart'];
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
+        $customer->update(['cart' => $cart, 'ip' => $this->request->getRemoteIP()]);
+
+        /*$this->db->query("UPDATE ".$this->db->table_name("customers")."
                           SET
                                 cart = '".$this->db->escape(serialize($cart))."',
                                 ip = '".$this->db->escape($this->request->getRemoteIP())."'
                           WHERE customer_id = '".(int)$customer_id."'");
+        */
     }
 
     /**
@@ -670,7 +691,13 @@ class ACustomer extends ALibBase
             return false;
         }
 
-        $sql = "SELECT cart
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            return true;
+        }
+        return false;
+
+      /*  $sql = "SELECT cart
                 FROM ".$this->db->table_name("customers")."
                 WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
         $result = $this->db->query($sql);
@@ -678,7 +705,7 @@ class ACustomer extends ALibBase
             return true;
         } else {
             return false;
-        }
+        }*/
     }
 
     /**
@@ -689,6 +716,7 @@ class ACustomer extends ALibBase
      */
     public function getCustomerCart()
     {
+        $config = Registry::config();
         $store_id = (int)$config->get('config_store_id');
         $customer_id = $this->customer_id;
         if (!$customer_id) {
@@ -699,12 +727,44 @@ class ACustomer extends ALibBase
         }
 
         $cart = [];
-        $sql = "SELECT cart
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            $cart = $customer->cart;
+        }
+
+        //clean products
+        if ($cart) {
+            $cart_products = [];
+            foreach ($cart as $key => $val) {
+                $k = explode(':', $key);
+                $cart_products[] = (int)$k[0]; // <-product_id
+            }
+
+            //??? TODO NEED TO THINK HERE
+            $sql = "SELECT product_id
+                    FROM ".$this->db->table_name('products_to_stores')." pts
+                    WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
+
+            $result = $this->db->query($sql);
+            $products = [];
+            foreach ($result->rows as $row) {
+                $products[] = $row['product_id'];
+            }
+
+            $diff = array_diff($cart_products, $products);
+            foreach ($diff as $p) {
+                unset($cart[$p]);
+            }
+        }
+
+
+
+       /* $sql = "SELECT cart
                 FROM ".$this->db->table_name("customers")."
                 WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
 
-        $result = $this->db->query($sql);
-        if ($result->num_rows) {
+        $result = $this->db->query($sql);*/
+     /*   if ($result->num_rows) {
             //load customer saved cart
             if (($result->row['cart']) && (is_string($result->row['cart']))) {
                 $cart = unserialize($result->row['cart']);
@@ -738,7 +798,7 @@ class ACustomer extends ALibBase
                     }
                 }
             }
-        }
+        }*/
 
         return $cart;
     }
@@ -752,14 +812,11 @@ class ACustomer extends ALibBase
      */
     public function mergeCustomerCart($cart)
     {
+        $config = Registry::config();
         $store_id = (int)$config->get('config_store_id');
         $cart = !is_array($cart) ? [] : $cart;
-        //check is format of cart old or new
-        $new = $this->isNewCartFormat($cart);
+        $cart = $cart['store_'.$store_id];
 
-        if ($new) {
-            $cart = $cart['store_'.$store_id];
-        }
         // for case when data format is new but cart for store does not yet created
         $cart = !is_array($cart)
             ? []
@@ -785,7 +842,6 @@ class ACustomer extends ALibBase
     public function clearCustomerCart()
     {
 
-        $cart = [];
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -793,11 +849,13 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
+        $customer = $this->model();
+        $customer->update( ['cart' => [] ]);
+        /*$this->db->query("UPDATE ".$this->db->table_name("customers")."
                         SET
                             cart = '".$this->db->escape(serialize($cart))."'
                         WHERE customer_id = '".(int)$customer_id."'");
-
+*/
         return true;
     }
 
@@ -882,12 +940,7 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
-                            SET
-                                wishlist = '".$this->db->escape(serialize($whishlist))."',
-                                ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                            WHERE customer_id = '".(int)$customer_id."'");
-
+        $this->model()->update( ['wishlist' => $whishlist, 'ip' =>  $this->request->getRemoteIP() ] );
         return true;
     }
 
@@ -906,14 +959,10 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return [];
         }
-        $customer_data = $this->db->query("SELECT wishlist
-                                            FROM ".$this->db->table_name("customers")."
-                                            WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
-        if ($customer_data->num_rows) {
-            //load customer saved cart
-            if (($customer_data->row['wishlist']) && (is_string($customer_data->row['wishlist']))) {
-                return unserialize($customer_data->row['wishlist']);
-            }
+
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            return (array)$customer->wishlist;
         }
 
         return [];
@@ -985,6 +1034,15 @@ class ACustomer extends ALibBase
         return false;
     }
 
+    /**
+     * @param $data
+     * @param bool $subscribe_only
+     *
+     * @return int
+     * @throws AException
+     * @throws ValidationException
+     * @throws \ReflectionException
+     */
     public static function createCustomer($data, $subscribe_only = false)
     {
         /**
@@ -1100,6 +1158,13 @@ class ACustomer extends ALibBase
         return $customer_id;
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
     public function editCustomer( $data )
     {
         if ( ! $data ) {
@@ -1180,15 +1245,16 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return Customer
+     * @return \abc\models\BaseModel
      */
     public function model()
     {
         return Customer::find((int)$this->customer_id);
     }
 
-
-
+    /**
+     * @return array
+     */
     public function getCustomerNotificationSettings()
     {
         if(!$this->customer_id){
@@ -1209,8 +1275,14 @@ class ACustomer extends ALibBase
 
         return $im_settings;
     }
-    
-    
+
+    /**
+     * @param $data
+     *
+     * @return array
+     * @throws AException
+     * @throws \ReflectionException
+     */
     public static function validateRegistrationData( $data )
     {
         static::$errors = [];
@@ -1218,6 +1290,8 @@ class ACustomer extends ALibBase
         $request = Registry::request();
         $session = Registry::session();
         $language = Registry::language();
+
+        $isLogged = Registry::customer() ? Registry::customer()->isLogged() : false;
         //load storefront language if not loaded
         if(!$language->load('account/create')) {
             $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
@@ -1227,7 +1301,7 @@ class ACustomer extends ALibBase
         $data['password'] = htmlspecialchars_decode($data['password']);
 
         //If captcha enabled, validate
-        if ( $config->get( 'config_account_create_captcha' ) ) {
+        if ( $config->get( 'config_account_create_captcha' ) && !$isLogged) {
             if ( $config->get( 'config_recaptcha_secret_key' ) ) {
                 require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
                 $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
@@ -1242,25 +1316,25 @@ class ACustomer extends ALibBase
                 }
             }
         }
-
         $customer = new Customer();
 
         //validate customer model data
         try {
             //validate only if email login is not allowed
-            if ($config->get('prevent_email_as_login')) {
-
+            //only for new accounts
+            if ($config->get('prevent_email_as_login')  && !$isLogged) {
                 $error_messages = ['loginname.*' => $language->get('error_loginname')];
-                $customer->validate(['loginname' => $data['loginname']], $error_messages);
+                $customer->validate($data, $error_messages);
             }
 
         }catch(ValidationException $e){
-            static::extractValidationErrors($e->errors());
+            static::extractValidationErrors($e->errors(), ['loginname']);
         }
 
         //todo: need to remove this section and move this check via validator
         if(!static::$errors
             && $config->get('prevent_email_as_login')
+            && !$isLogged //only for new accounts
             && Customer::getCustomers([ 'filter' => [
                                                     'search_operator' => 'equal',
                                                     'loginname'       => $data['loginname']
@@ -1277,7 +1351,6 @@ class ACustomer extends ALibBase
             $error_messages['lastname.*'] = $language->get('error_lastname');
             $error_messages['password.*'] = $language->get('error_password');
             $error_messages['email.*'] = $language->get('error_email');
-            $error_messages['company.*'] = $language->get('error_company');
             $customer->validate($data, $error_messages);
         }catch(ValidationException $e){
             static::extractValidationErrors($e->errors());
@@ -1289,8 +1362,16 @@ class ACustomer extends ALibBase
         }
 
         if(!static::$errors) {
-            if (Customer::getCustomers(['filter' => ['search_operator' => 'equal', 'email' => $data['email']]],
-                'total_only')) {
+            $filter = [
+                        'search_operator' => 'equal',
+                        'email' => $data['email']
+            ];
+            //if edit data already registered account - exclude it
+            if($isLogged){
+                $filter['exclude'] = [Registry::customer()->getId()];
+            }
+
+            if (Customer::getCustomers( ['filter' => $filter],'total_only') ) {
                 static::$errors['warning'] = $language->get('error_exists');
             }
         }
@@ -1301,6 +1382,7 @@ class ACustomer extends ALibBase
             $address = new Address();
             $error_messages['firstname.*'] = $language->get('error_firstname');
             $error_messages['lastname.*'] = $language->get('error_lastname');
+            $error_messages['company.*'] = $language->get('error_company');
             $error_messages['address_1.*'] = $language->get('error_address_1');
             $error_messages['address_2.*'] = $language->get('error_address_2');
             $error_messages['telephone.*'] = $language->get('error_telephone');
@@ -1311,6 +1393,7 @@ class ACustomer extends ALibBase
 
             $address->validate($data, $error_messages);
         }catch(ValidationException $e){
+            Registry::log()->write(var_export( $e->errors() ,true));
             static::extractValidationErrors($e->errors());
         }
 
@@ -1325,7 +1408,7 @@ class ACustomer extends ALibBase
             Registry::load()->model('catalog/content');
             /**
              * @var ModelCatalogContent $model_catalog_content
-             */
+             TODO: replace it in the future */
             $content_info = Registry::model_catalog_content()->getContent($config->get('config_account_id'));
 
             if ($content_info) {
@@ -1357,6 +1440,13 @@ class ACustomer extends ALibBase
         return static::$errors;
     }
 
+    /**
+     * @param $data
+     *
+     * @return array
+     * @throws AException
+     * @throws \ReflectionException
+     */
     public static function validateSubscribeData( $data )
     {
         static::$errors = [];
@@ -1390,9 +1480,6 @@ class ACustomer extends ALibBase
         }
 
         $customer = new Customer();
-
-        //validate customer model data
-
         //validate customer model data
         try{
             $error_messages = [];
@@ -1405,8 +1492,6 @@ class ACustomer extends ALibBase
         }catch(ValidationException $e){
             static::extractValidationErrors($e->errors());
         }
-
-
 
         if(!static::$errors) {
             if (Customer::getCustomers(['filter' => ['search_operator' => 'equal', 'email' => $data['email']]],
@@ -1437,8 +1522,9 @@ class ACustomer extends ALibBase
         return static::$errors;
     }
 
-
-
+    /**
+     * @param array $errors
+     */
     protected static function extractValidationErrors(array $errors)
     {
         foreach($errors as $k => $errArr){

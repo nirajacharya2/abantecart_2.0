@@ -806,6 +806,7 @@ class ModelAccountCustomer extends Model
      * @return array
      * @throws \Exception
      */
+    /*
     public function validateSubscribeData( $data )
     {
         $this->error = [];
@@ -848,7 +849,7 @@ class ModelAccountCustomer extends Model
                 /**
                  * @var \abc\core\lib\AMailIM $driver_obj
                  */
-                if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
+               /* if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
                     continue;
                 }
                 $result = $driver_obj->validateURI( $data[$protocol] );
@@ -863,14 +864,14 @@ class ModelAccountCustomer extends Model
 
         return $this->error;
     }
-
+*/
     /**
      * @param array $data
      *
      * @return array
      * @throws \Exception
      */
-    public function validateEditData( $data )
+  /*  public function validateEditData( $data )
     {
         $this->error = [];
 
@@ -921,6 +922,7 @@ class ModelAccountCustomer extends Model
                 /**
                  * @var \abc\core\lib\AMailIM $driver_obj
                  */
+  /*
                 if ( ! is_object( $driver_obj ) || $protocol == 'email' ) {
                     continue;
                 }
@@ -936,7 +938,7 @@ class ModelAccountCustomer extends Model
 
         return $this->error;
     }
-
+*/
     /**
      * @param int $transaction_id
      *
@@ -1018,7 +1020,7 @@ class ModelAccountCustomer extends Model
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    public function sendWelcomeEmail( $email, $activated )
+  /*  public function sendWelcomeEmail( $email, $activated )
     {
         if ( ! $email ) {
             return null;
@@ -1097,7 +1099,7 @@ class ModelAccountCustomer extends Model
 
         return true;
     }
-
+*/
     /**
      * @param int $customer_id
      *
@@ -1105,7 +1107,7 @@ class ModelAccountCustomer extends Model
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    public function emailActivateLink( $customer_id )
+  /*  public function emailActivateLink( $customer_id )
     {
         if ( ! $customer_id ) {
             return null;
@@ -1183,12 +1185,12 @@ class ModelAccountCustomer extends Model
 
         return true;
     }
-
+*/
     /**
      * @param string $email
      * @param array $data
      */
-    protected function _send_email( $email, $data )
+  /*  protected function _send_email( $email, $data )
     {
         $mail = new AMail( $this->config );
         $mail->setTo( $email );
@@ -1204,7 +1206,7 @@ class ModelAccountCustomer extends Model
         }
         $mail->setHtml( $data['html_body'] );
         $mail->send();
-    }
+    }*/
 
     /**
      * @param string $ot - order token

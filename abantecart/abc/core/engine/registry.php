@@ -48,6 +48,7 @@ use abc\core\lib\ASession;
  * @method static ALoader load()
  * @method static ExtensionsApi extensions()
  * @method static ACustomer customer()
+ * @method static AHtml html()
  */
 final class Registry
 {

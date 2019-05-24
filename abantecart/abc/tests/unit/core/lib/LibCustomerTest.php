@@ -33,27 +33,28 @@ class LibCustomerTest extends ATestCase{
                 'zone_id' => 'false',
             ]
         );
-
         $this->assertEquals(12, count($errors));
-        $errors = ACustomer::validateRegistrationData(
+
+        $errors = ACustomer::validateSubscribeData(
             [
-                'loginname' => 'testlogin',
-                'firstname' => 'test',
-                'lastname' => 'test',
-                'password' => 'pass*',
-                'confirm' => 'pass*',
+                'loginname' => '',
+                'firstname' => '',
+                'lastname' => '',
                 'email' => '111@aban',
-                'company' => '123456789012345678901234567890123', //33 chars, 32 allowed
-                'address_1' => '',
-                'address_2' => '',
-                'city' => '',
-                'postcode' => '',
-                'country_id' => 'false',
-                'zone_id' => 'false',
+                'password' => '12345'
             ]
         );
-
-        $this->assertEquals(12, count($errors));
+        $this->assertEquals(3, count($errors));
+        $errors = ACustomer::validateSubscribeData(
+            [
+                'loginname' => 'eee_loginname',
+                'firstname' => 'eeee_firstname',
+                'lastname' => 'eeee_lastname',
+                'email' => '111@abantecart.com',
+                'password' => '12345'
+            ]
+        );
+        $this->assertEquals(0, count($errors));
     }
 
     public function testCreateCustomer(){
@@ -108,6 +109,8 @@ class LibCustomerTest extends ATestCase{
             'status'  => 1,
             'ip' => '127.0.0.1',
             'data' => ['some_data' => [1,2,3]],
+            'cart' => ['eeee' => [1,2,3]],
+            'wishlist' => ['rrrrr' => [1,2,3]],
             'company' => 'abcTests',
             'address_1'   => 'some test address1',
             'address_2'   => 'some test address2',
@@ -126,6 +129,10 @@ class LibCustomerTest extends ATestCase{
             exit;
         }
 
+       /* $c = Customer::find($customer_id);
+        var_dump($c->data);
+        var_dump($c->cart);
+        var_dump($c->wishlist);*/
         $result = Customer::where('email', '=', 'test_tmp@abantecart.com')->get()->count();
         $this::assertEquals(1, $result);
 

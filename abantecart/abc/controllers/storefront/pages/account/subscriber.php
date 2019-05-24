@@ -51,26 +51,26 @@ class ControllerPagesAccountSubscriber extends AController
         $this->document->setTitle($this->language->get('text_subscribe_register'));
 
         $request_data = $this->request->post;
+        // generate random password for subscribers only
+        $request_data['password'] = md5(mt_rand(0, 10000)); //random password
+        $request_data['loginname'] = md5(time()); // loginname must be unique!
+        $request_data['newsletter'] = 1; // sign of subscriber
+        $request_data['status'] = 0; //disable login ability for subscribers
+        $request_data['customer_group_id'] = Customer::getSubscribersGroupId();
+        $request_data['ip'] = $this->request->getRemoteIP();
+        //mark customer as subscriber for model
+        $request_data['subscriber'] = true;
+        $request_data['store_id'] = $this->config->get('store_id');
 
         if ($this->request->is_POST()) {
 
             if ($this->csrftoken->isTokenValid()) {
-                $this->error = $this->model_account_customer->validateSubscribeData($request_data);
+                $this->error = $this->customer::validateSubscribeData($request_data);
             } else {
                 $this->error['warning'] = $this->language->get('error_unknown');
             }
 
             if (!$this->error) {
-                // generate random password for subscribers only
-                $request_data['password'] = md5(mt_rand(0, 10000)); //random password
-                $request_data['loginname'] = md5(time()); // loginname must be unique!
-                $request_data['newsletter'] = 1; // sign of subscriber
-                $request_data['status'] = 0; //disable login ability for subscribers
-                $request_data['customer_group_id'] = Customer::getSubscribersGroupId();
-                $request_data['ip'] = $this->request->getRemoteIP();
-                //mark customer as subscriber for model
-                $request_data['subscriber'] = true;
-                $request_data['store_id'] = $this->config->get('store_id');
                 $this->data['customer_id'] = $this->customer::createCustomer($request_data);
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
                 abc_redirect($this->html->getSecureURL('account/subscriber', '&success=1'));
@@ -104,13 +104,10 @@ class ControllerPagesAccountSubscriber extends AController
                 'icon' => 'fa fa-arrow-right',
             ]);
             $this->data['text_subscribe_register'] = $this->language->get('text_success_subscribe_heading');
-
         } else {
-
             if ($this->config->get('prevent_email_as_login')) {
                 $this->data['noemaillogin'] = true;
             }
-
             $form = new AForm();
             $form->setForm(['form_name' => 'SubscriberFrm']);
             $this->data['form']['form_open'] = $form->getFieldHtml(
