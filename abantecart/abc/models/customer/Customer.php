@@ -287,9 +287,11 @@ class Customer extends BaseModel
     }
 
     public function setPasswordAttribute($password){
-        $salt_key = H::genToken(8);
-        $this->attributes['salt'] = $salt_key;
-        $this->attributes['password'] = H::getHash( $password, $salt_key );
+        if (! $this->originalIsEquivalent('password', $password)) {
+            $salt_key = H::genToken(8);
+            $this->attributes['salt'] = $salt_key;
+            $this->attributes['password'] = H::getHash($password, $salt_key);
+        }
     }
 
     /**
@@ -317,7 +319,6 @@ class Customer extends BaseModel
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'customers');
         }
-
 
         $this->fill($data);
         $result = parent::save($options);
@@ -416,7 +417,8 @@ class Customer extends BaseModel
         if(!$customer_id){
              return [];
         }
-        return static::getCustomers(['filter' => ['include' => [$customer_id]]]);
+        $result = static::getCustomers(['filter' => ['include' => [$customer_id]]]);
+        return $result[0];
     }
 
     /**

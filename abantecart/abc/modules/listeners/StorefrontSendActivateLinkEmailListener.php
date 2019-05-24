@@ -53,11 +53,9 @@ class StorefrontSendActivateLinkEmailListener
             $enc = new AEncryption( $store_info->encryption_key );
             $code = H::genToken();
             //store activation code
-            $customer_data['data'] = ['email_activation'=> $code];
+            $data = ['email_activation'=> $code];
 
-Registry::log()->write(var_export($customer_data, true));
-
-            Customer::find($customer_info['customer_id'])->update(['data' => $customer_data['data'] ]);
+            Customer::find($customer_info['customer_id'])->update(['data' => $data ]);
 
             $ac = $enc->encrypt( $customer_info['customer_id'].'::'.$code );
             $activate_url = Registry::html()->getSecureURL( 'account/login', '&ac='.$ac );

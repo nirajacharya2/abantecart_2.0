@@ -224,7 +224,8 @@ class ControllerCommonHeader extends AController
                   [
                     'date_added' => date('Y-m-d', time()),
                   ]
-            ]
+            ],
+            'total_only'
         );
         $this->view->assign('today_customer_count', $today_customer_count);
 

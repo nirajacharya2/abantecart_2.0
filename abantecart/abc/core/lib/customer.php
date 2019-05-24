@@ -23,6 +23,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
+use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerNotification;
 use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
@@ -149,21 +150,20 @@ class ACustomer extends ALibBase
         $customer_id = (!$customer_id && isset($this->session->data['customer_id']))
             ? (int)$this->session->data['customer_id']
             : $customer_id;
-        if ($customer_id) {
-            $query = Customer::with('customer_group')->whereIn('customer_id',[$customer_id]);
 
-            /*$sql = "SELECT c.*, cg.*
-                     FROM ".$this->db->table_name("customers")." c
-                     LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
-                        ON c.customer_group_id = cg.customer_group_id
-                     WHERE customer_id = '".(int)$customer_id."'";
-            */
+        if ($customer_id) {
+            $query = Customer::where('customer_id', '=',$customer_id);
             if (!ABC::env('IS_ADMIN')) {
                 $query->where('status', '=', 1);
-                //$sql .= " AND STATUS = '1'";
             }
-            $customer_data = $query->get()->toArray();
-            //$customer_data = $this->db->query($sql);
+            $customer = $query->first();
+            if($customer){
+                $customer_data = $customer->toArray();
+                if($customer_data['customer_group_id']){
+                    $cg = CustomerGroup::find($customer_data['customer_group_id']);
+                    $customer_data['customer_group_name'] = $cg->name;
+                }
+            }
 
             if ($customer_data) {
                 $this->customerInit($customer_data);
@@ -254,10 +254,12 @@ class ACustomer extends ALibBase
         if ($customer_data) {
 
             $this->customerInit($customer_data[0]);
+
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
             $cart = $this->getCustomerCart();
             $this->mergeCustomerCart($cart);
+
             //save merged cart
             $this->saveCustomerCart();
 
@@ -320,14 +322,13 @@ class ACustomer extends ALibBase
         //save it to use in APromotion class
         $this->session->data['customer_group_id'] = (int)$data['customer_group_id'];
 
-        $this->customer_group_name = $data['customer_group'][0]['name'];
+        $this->customer_group_name = $data['customer_group_name'];
 
         $this->customer_tax_exempt = $data['tax_exempt'];
         //save this sign to use in ATax lib
         $this->session->data['customer_tax_exempt'] = $data['tax_exempt'];
 
         $this->address_id = (int)$data['address_id'];
-
     }
 
     public function setLastLogin($customer_id)
@@ -340,10 +341,7 @@ class ACustomer extends ALibBase
         //insert new record
         $customer = Customer::find($customer_id);
         $customer->update(['last_login' => date('Y-m-d H:i:s')]);
-        /*$this->db->query("UPDATE `".$this->db->table_name("customers")."`
-                        SET `last_login` = NOW()
-                        WHERE customer_id = ".$customer_id);
-*/
+
         //call event
         H::event(
             'abc\core\lib\customer@login',
@@ -643,7 +641,7 @@ class ACustomer extends ALibBase
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return null;
+            return false;
         }
 
         $cart = [];
@@ -653,26 +651,16 @@ class ACustomer extends ALibBase
         if($customer && $customer->status == 1){
             $cart = $customer->cart;
         }
-/* $result = $this->db->query("SELECT cart
-                            FROM ".$this->db->table_name("customers")."
-                            WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
-$cart = unserialize($result->row['cart']);
-*/
-        //check is format of cart old or new
-        $new = $this->isNewCartFormat($cart);
 
-        if (!$new) {
-            $cart = []; //clean cart from old format
-        }
         $cart['store_'.$store_id] = $this->session->data['cart'];
-        $customer->update(['cart' => $cart, 'ip' => $this->request->getRemoteIP()]);
+        $customer->update(
+                [
+                    'cart' => $cart,
+                    'ip' => $this->request->getRemoteIP()
+                ]
+        );
 
-        /*$this->db->query("UPDATE ".$this->db->table_name("customers")."
-                          SET
-                                cart = '".$this->db->escape(serialize($cart))."',
-                                ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                          WHERE customer_id = '".(int)$customer_id."'");
-        */
+        return true;
     }
 
     /**
@@ -1292,6 +1280,7 @@ $cart = unserialize($result->row['cart']);
         $language = Registry::language();
 
         $isLogged = Registry::customer() ? Registry::customer()->isLogged() : false;
+
         //load storefront language if not loaded
         if(!$language->load('account/create')) {
             $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);

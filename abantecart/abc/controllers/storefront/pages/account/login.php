@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\modules\events\ABaseEvent;
 use H;
@@ -74,8 +75,8 @@ class ControllerPagesAccountLogin extends AController
                     unset( $this->session->data['account'] );
 
                     $address_id = $this->customer->getAddressId();
-                    $this->loadModel( 'account/address' );
-                    $address = $this->model_account_address->getAddress( $address_id );
+                    $address = Address::find($address_id );
+                    $address = $address->toArray();
                     $this->tax->setZone( $address['country_id'], $address['zone_id'] );
 
                     if ( $this->session->data['redirect'] ) {
@@ -99,7 +100,6 @@ class ControllerPagesAccountLogin extends AController
                 $customer = Customer::find( (int)$customer_id );
                 if ( $customer ) {
                     $customer_info = $customer->toArray();
-                    $customer_info['data'] = unserialize($customer_info['data']);
                     //if activation code presents in data and matching
                     if ( $activation_code == $customer_info['data']['email_activation'] ) {
                         unset( $customer_info['data']['email_activation'] );
@@ -261,9 +261,11 @@ class ControllerPagesAccountLogin extends AController
      *
      * @return bool
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     private function _validate( $loginname, $password )
     {
+
         if ( $this->customer->login( $loginname, $password ) !== true ) {
             if ( $this->config->get( 'config_customer_email_activation' ) ) {
                 //check if account is not confirmed in the email.
@@ -296,8 +298,11 @@ class ControllerPagesAccountLogin extends AController
             $this->error['message'] .= $this->language->get( 'error_login' );
 
         } else {
-            $this->loadModel( 'account/address' );
-            $address = $this->model_account_address->getAddress( $this->customer->getAddressId() );
+            $address = [];
+            $addressModel = Address::find($this->customer->getAddressId());
+            if($addressModel) {
+                $address = $addressModel->toArray();
+            }
 
             $this->session->data['country_id'] = $address['country_id'];
             $this->session->data['zone_id'] = $address['zone_id'];
