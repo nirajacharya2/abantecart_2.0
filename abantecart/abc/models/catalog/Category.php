@@ -533,8 +533,6 @@ class Category extends BaseModel
      */
     public function editCategory($categoryId, $data)
     {
-
-        H::df($data);
         if (isset($data['parent_id'])) {
             $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
         }
