@@ -121,11 +121,6 @@ class Manufacturer extends BaseModel
                     'store_id'        => (int)$store_id,
                 ];
             }
-        } else {
-            $manufacturerToStore[] = [
-                'manufacturer_id' => $manufacturerId,
-                'store_id'        => 0,
-            ];
         }
 
         $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
