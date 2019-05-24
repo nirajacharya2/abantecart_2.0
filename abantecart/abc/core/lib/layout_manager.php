@@ -1232,7 +1232,7 @@ class ALayoutManager
                                     key_value,
                                     date_added,
                                     date_modified)
-                                VALUES ('".( int )$data ['parent_page_id']."',
+                                VALUES (".(( int )$data ['parent_page_id'] ?: 'NULL').",
                                         '".$this->db->escape($data ['controller'])."',
                                         '".$this->db->escape($data ['key_param'])."',
                                         '".$this->db->escape($data ['key_value'])."',
@@ -1243,7 +1243,7 @@ class ALayoutManager
 
         } else {
             $this->db->query("UPDATE ".$this->db->table_name("pages")." 
-                                SET parent_page_id = '".( int )$data ['parent_page_id']."',
+                                SET parent_page_id = ".(( int )$data ['parent_page_id'] ?: 'NULL').",
                                     controller = '".$this->db->escape($data ['controller'])."',
                                     key_param = '".$this->db->escape($data ['key_param'])."',
                                     key_value = '".$this->db->escape($data ['key_value'])."',

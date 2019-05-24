@@ -60,6 +60,7 @@ class BaseModel extends OrmModel
         HasMorphToEvents,
         HasMorphManyEvents,
         HasMorphToManyEvents;
+    use InitializeModel;
 
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
@@ -202,6 +203,7 @@ class BaseModel extends OrmModel
         static::boot();
         $this->newBaseQueryBuilder();
     }
+
 
     /**
      * Boot

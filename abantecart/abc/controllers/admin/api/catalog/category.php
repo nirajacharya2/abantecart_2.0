@@ -3,6 +3,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\Registry;
 use abc\models\catalog\Category;
 use abc\models\catalog\ResourceLibrary;
 
@@ -91,6 +92,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 return null;
             }
 
+            $this->data['request'] = $this->decodeRequest($this->data['request']);
+
             $category = (new Category())->addCategory($this->data['request']);
             if ($category) {
                 $this->data['result']['category_id'] = $category;
@@ -170,6 +173,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     return null;
                 }
 
+                $request = $this->decodeRequest($request);
+
                 (new Category())->editCategory($category->category_id, $request);
 
                 if (isset($request['category_images'])) {
@@ -204,6 +209,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
             return null;
         }
 
+        (Registry::getInstance())->get('cache')->remove('*');
+
         $this->data['result'] = [
             'status'      => $updateBy ? 'updated' : 'created',
             'category_id' => $category->category_id,
@@ -233,8 +240,10 @@ class ControllerApiCatalogCategory extends AControllerAPI
             }
 
             if ($deleteBy) {
-                Category::where($deleteBy, $request[$deleteBy])
-                    ->delete();
+                Category::withTrashed()->where($deleteBy, $request[$deleteBy])
+                    ->forceDelete();
+                (Registry::getInstance())->get('cache')->remove('*');
+
             } else {
                 $this->rest->setResponseData(['Error' => 'Not correct request, Category_ID not found']);
                 $this->rest->sendResponse(200);
@@ -245,10 +254,23 @@ class ControllerApiCatalogCategory extends AControllerAPI
 
         }
 
+
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->rest->setResponseData($this->data['result']);
         $this->rest->sendResponse(200);
+    }
+
+    private function decodeRequest($request)
+    {
+        foreach ($request as &$item) {
+            if (!is_array($item)) {
+                $item = htmlspecialchars_decode(htmlspecialchars_decode($item));
+            } else {
+                $item = $this->decodeRequest($item);
+            }
+        }
+        return $request;
     }
 
 }

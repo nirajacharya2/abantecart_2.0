@@ -251,7 +251,7 @@ class ModelAuditListener
         $main_auditable_id = !$main_auditable_id ? $oldData[$modelObject->getMainModelClassKey()] : $main_auditable_id;
 
         $userData = [
-            'user_type_id' => AuditUser::USER_TYPES[$user_type],
+            'user_type_id' => AuditUser::getUserTypeId($user_type),
             'user_id'      => $user_id,
             'name'         => $user_name,
         ];
@@ -295,7 +295,7 @@ class ModelAuditListener
                 foreach ($newValue as $cName => $nValue) {
                     $eventDescription[] = [
                         'auditable_model_id' => $auditableModelId,
-                        'auditable_id'       => $auditable_id,
+                        'auditable_id'       => $auditable_id ?: 0,
                         'field_name'         => $cName,
                         'old_value'          => $oldData[$colName][$cName],
                         'new_value'          => $nValue,
@@ -304,7 +304,7 @@ class ModelAuditListener
             } else {
                 $eventDescription[] = [
                     'auditable_model_id' => $auditableModelId,
-                    'auditable_id'       => $auditable_id,
+                    'auditable_id'       => $auditable_id ?: 0,
                     'field_name'         => $colName,
                     'old_value'          => $oldData[$colName],
                     'new_value'          => $newValue,

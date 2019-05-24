@@ -320,6 +320,7 @@ class ControllerPagesDesignContent extends AController
             'sort_order',
             'store_id',
             'keyword',
+            'hide_title',
         );
         foreach ($allowedFields as $field) {
             if (isset($this->request->post[$field])) {
@@ -377,12 +378,28 @@ class ControllerPagesDesignContent extends AController
                 'style' => 'button2',
             ));
 
+        if ($content_id && $this->data['status']) {
+            $href = $this->html->getSecureURL('content/content', '&content_id='.$content_id, '', 'storefront' );
+            if ($this->config->get('enable_seo_url') && trim($this->data['keyword']) !== '') {
+                $href = $this->html->getHomeURL().$this->data['keyword'];
+            }
+            $this->data['form']['show_on_storefront'] = $form->getFieldHtml(
+                array(
+                    'type'  => 'button',
+                    'name'  => 'show_on_storefront',
+                    'text'  => $this->language->get('text_storefront'),
+                    'href'  => $href,
+                    'style' => 'button2',
+                ));
+        }
+
         $this->data['form']['fields']['status'] = $form->getFieldHtml(
             array(
                 'type'  => 'checkbox',
                 'name'  => 'status',
                 'value' => $this->data['status'],
                 'style' => 'btn_switch',
+                'attr' => 'reload_on_save="true"'
             ));
 
         // we need get contents list for multiselect
@@ -415,7 +432,7 @@ class ControllerPagesDesignContent extends AController
                 'options'          => $multiSelect,
                 'value'            => $selected_parents,
                 'disabled_options' => $disabled_parents,
-                'attr'             => 'size = "'.(sizeof($multiSelect) > 10 ? 10 : sizeof($multiSelect)).'"',
+                'attr'             => 'size = "'.(count($multiSelect) < 10 ? 10 : count($multiSelect)).'"',
             ));
         $this->data['form']['fields']['title'] = $form->getFieldHtml(
             array(
@@ -424,6 +441,13 @@ class ControllerPagesDesignContent extends AController
                 'value'        => $this->data['title'],
                 'required'     => true,
                 'multilingual' => true,
+            ));
+        $this->data['form']['fields']['hide_title'] = $form->getFieldHtml(
+            array(
+                'type'  => 'checkbox',
+                'name'  => 'hide_title',
+                'value' => $this->data['hide_title'],
+                'style' => 'btn_switch',
             ));
         $this->data['form']['fields']['description'] = $form->getFieldHtml(
             array(

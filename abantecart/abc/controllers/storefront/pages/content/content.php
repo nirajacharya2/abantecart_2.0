@@ -89,6 +89,7 @@ class ControllerPagesContentContent extends AController
         ));
 
         $this->view->assign('heading_title', $content_info['title']);
+        $this->view->assign('hide_title', $content_info['hide_title']);
         $this->view->assign('button_continue', $this->language->get('button_continue'));
 
         $this->view->assign('description', html_entity_decode($content_info['description']));

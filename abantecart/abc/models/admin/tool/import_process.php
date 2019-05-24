@@ -354,7 +354,7 @@ class ModelToolImportProcess extends Model
         } else {
             //flat array for description (specific for update)
             $product_data['product_description'] = $product_desc;
-            $this->model_catalog_product->updateProduct($product_id, $product_data);
+            Product::updateProduct($product_id, $product_data, $language_id);
             $this->toLog("Updated product '{$product_desc['name']}' with ID {$product_id}.");
             $status = true;
         }
@@ -370,7 +370,6 @@ class ModelToolImportProcess extends Model
 
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
-
 
         //process options
         $this->addUpdateOptions(
@@ -886,7 +885,7 @@ class ModelToolImportProcess extends Model
     {
         $manufacturer_id = null;
         $sql = $this->db->query("SELECT manufacturer_id from ".$this->db->table_name("manufacturers")
-            ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' limit 1");
+            ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' AND date_deleted is NULL limit 1");
         $manufacturer_id = $sql->row['manufacturer_id'];
         if (!$manufacturer_id) {
             //create category
@@ -980,6 +979,7 @@ class ModelToolImportProcess extends Model
                     ON (cd.category_id = c2s.category_id)
                 WHERE language_id = ".(int)$language_id." 
                     AND  c2s.store_id = ".(int)$store_id."
+                    AND cd.date_deleted is NULL
                     AND LCASE(name) = '".$this->db->escape(mb_strtolower($category_name))."'";
         $res = $this->db->query($sql);
         if ($res->num_rows == 1) {
@@ -991,7 +991,8 @@ class ModelToolImportProcess extends Model
                 $sql2 = "SELECT category_id 
                         FROM ".$this->db->table_name("categories")."
                         WHERE category_id IN (".implode(', ', $cIds).") 
-                            AND parent_id = ".(int)$parent_id." 
+                            AND parent_id = ".(int)$parent_id."
+                            AND date_deleted is NULL 
                         ORDER BY parent_id DESC";
                 $res2 = $this->db->query($sql2);
                 return (int)$res2->row['category_id'];

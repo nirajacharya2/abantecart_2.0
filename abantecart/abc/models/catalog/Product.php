@@ -1240,9 +1240,7 @@ class Product extends BaseModel
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
 
-            if ($product_data['keyword']) {
-                UrlAlias::setProductKeyword($product_data['keyword'], $productId);
-            }
+            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
 
             self::updateProductLinks($productId, $product_data);
             return $productId;
@@ -1273,9 +1271,7 @@ class Product extends BaseModel
             $product->descriptions()->update($product_data['product_description']);
         }
 
-        if ($product_data['keyword']) {
-            UrlAlias::setProductKeyword($product_data['keyword'], $product_id);
-        }
+        UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $product_id);
 
         $attributes = array_filter($product_data, function ($k) {
             return (strpos($k, 'attribute_') === 0);

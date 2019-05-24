@@ -72,18 +72,25 @@ class Manufacturer extends BaseModel
 
         $manufacturerId = $manufacturer->getKey();
 
+        $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
-            $manufacturerToStore = [];
             foreach ($data['manufacturer_store'] as $store_id) {
                 $manufacturerToStore[] = [
                     'manufacturer_id' => $manufacturerId,
                     'store_id'        => (int)$store_id,
                 ];
             }
-            $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+        } else {
+            $manufacturerToStore[] = [
+                'manufacturer_id' => $manufacturerId,
+                'store_id'        => 0,
+            ];
         }
+        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?? '' , $manufacturerId);
+        if ($data['keyword'] || $data['name']) {
+            UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }
 
         $this->cache->remove('manufacturer');
 
@@ -102,22 +109,25 @@ class Manufacturer extends BaseModel
 
         self::find($manufacturerId)->update($data);
 
+        $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
             $this->db->table('manufacturers_to_stores')
                 ->where('manufacturer_id', '=', (int)$manufacturerId)
                 ->delete();
 
-            $manufacturerToStore = [];
-            foreach ($data['manufacturer_store'] as $storeId) {
+            foreach ($data['manufacturer_store'] as $store_id) {
                 $manufacturerToStore[] = [
-                    'manufacturer_id' => (int)$manufacturerId,
-                    'store_id'        => (int)$storeId,
+                    'manufacturer_id' => $manufacturerId,
+                    'store_id'        => (int)$store_id,
                 ];
             }
-            $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
         }
 
-        UrlAlias::setManufacturerKeyword($data['keyword'] ?? '' , $manufacturerId);
+        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+
+        if ($data['keyword'] || $data['name']) {
+            UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }
 
         $this->cache->remove('manufacturer');
     }
@@ -135,6 +145,7 @@ class Manufacturer extends BaseModel
             $this->load('stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
+            $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
             $this->cache->push($cache_key, $data);
         }
         return $data;
@@ -266,7 +277,11 @@ class Manufacturer extends BaseModel
         if (!(int)$manufacturer_id) {
             return false;
         }
-        self::withTrashed()->find((int)$manufacturer_id)->delete();
+        $manufacturer = self::withTrashed()->find((int)$manufacturer_id);
+
+        if ($manufacturer) {
+            $manufacturer->delete();
+        }
 
         $this->db->table('manufacturers_to_stores')
             ->where('manufacturer_id', '=', (int)$manufacturer_id)

@@ -534,9 +534,11 @@ class ControllerResponsesListingGridCustomer extends AController
         $mail->setSender($this->config->get('store_name'));
         $mail->setSubject($subject);
         $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-        $arUser = H::recognizeUser();
-        $user = User::find($arUser['user_id']);
-        $mail->setUser($user);
+        //$arUser = H::recognizeUser();
+        //$user = User::find($arUser['user_id']);
+        if ($this->user) {
+            $mail->setUser($this->user);
+        }
         $result = $mail->send();
         if(!$result) {
             $error = new AError('');

@@ -54,20 +54,26 @@ class UrlAlias extends BaseModel
         return '';
     }
 
-    public static function getProductKeyword(int $productId, int $language_id)
+    public static function getProductKeyword(int $productId, int $languageId)
     {
-        return self::getKeyWord('product_id='.$productId, $language_id);
+        return self::getKeyWord('product_id='.$productId, $languageId);
     }
 
-    public static function getCategoryKeyword(int $categoryId, int $language_id)
+    public static function getCategoryKeyword(int $categoryId, int $languageId)
     {
-        return self::getKeyWord('category_id='.$categoryId, $language_id);
+        return self::getKeyWord('category_id='.$categoryId, $languageId);
+    }
+
+    public static function getManufacturerKeyword(int $manufacturerId, int $languageId)
+    {
+        return self::getKeyWord('manufacturer_id='.$manufacturerId, $languageId);
     }
 
     private static function setKeyword(string $keyword, string $objectKeyName, int $objectId)
     {
         $keyword = H::SEOEncode($keyword, $objectKeyName, $objectId);
         $registry = Registry::getInstance();
+
         if ($keyword) {
             $registry->get('language')->replaceDescriptions('url_aliases',
                 ['query' => $objectKeyName."=".(int)$objectId],
@@ -82,6 +88,11 @@ class UrlAlias extends BaseModel
     public static function setProductKeyword(string $keyword, int $productId)
     {
         self::setKeyword($keyword, 'product_id', $productId);
+    }
+
+    public static function setCategoryKeyword(string $keyword, int $categoryId)
+    {
+        self::setKeyword($keyword, 'category_id', $categoryId);
     }
 
     public static function setManufacturerKeyword(string $keyword, int $productId)

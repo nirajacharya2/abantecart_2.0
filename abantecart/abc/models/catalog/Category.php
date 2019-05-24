@@ -478,44 +478,47 @@ class Category extends BaseModel
             foreach ($data['category_description'] as $languageId => $value) {
                 $arDescription = [
                     'language_id'      => $languageId,
-                    'name'             => $value['name'],
-                    'meta_keywords'    => $value['meta_keywords'],
-                    'meta_description' => $value['meta_description'],
-                    'description'      => $value['description'],
+                    'name'             => $value['name'] ?: '',
+                    'meta_keywords'    => $value['meta_keywords'] ?: '',
+                    'meta_description' => $value['meta_description'] ?: '',
+                    'description'      => $value['description'] ?: '',
                 ];
                 $description = new CategoryDescription($arDescription);
                 $category->descriptions()->save($description);
             }
         }
 
+        $categoryToStore = [];
         if (isset($data['category_store'])) {
-            $categoryToStore = [];
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             foreach ($data['category_store'] as $store_id) {
                 $categoryToStore[] = [
                     'category_id' => $categoryId,
                     'store_id'    => (int)$store_id,
                 ];
             }
-            $this->db->table('categories_to_stores')->insert($categoryToStore);
+        } else {
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
+            $categoryToStore[] = [
+                'category_id' => $categoryId,
+                'store_id'    => 0,
+            ];
+        }
+        $this->db->table('categories_to_stores')->insert($categoryToStore);
+
+        $categoryName = '';
+        if (isset($data['category_description'])) {
+            $description = $data['category_description'];
+            if (isset($description[$this->registry->get('language')->getContentLanguageID()]['name'])) {
+                $categoryName = $description[$this->registry->get('language')->getContentLanguageID()]['name'];
+            }
         }
 
-        if ($data['keyword']) {
-            $seo_key = H::SEOEncode($data['keyword'], 'category_id', $categoryId);
-        } else {
-            //Default behavior to save SEO URL keyword from category name in default language
-            $seo_key = H::SEOEncode($data['category_description'][$this->registry->get('language')->getDefaultLanguageID()]['name'],
-                'category_id',
-                $categoryId);
-        }
-        if ($seo_key) {
-            $this->registry->get('language')->replaceDescriptions('url_aliases',
-                ['query' => "category_id=".(int)$categoryId],
-                [(int)$this->registry->get('language')->getContentLanguageID() => ['keyword' => $seo_key]]);
-        } else {
-            UrlAlias::where('query', '=', 'category_id='.(int)$categoryId)
-                ->where('language_id', '=', (int)$this->registry->get('language')->getContentLanguageID())
-                ->forceDelete();
-        }
+        UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
 
         $this->cache->remove('category');
 
@@ -541,18 +544,11 @@ class Category extends BaseModel
         if (!empty($data['category_description'])) {
             foreach ($data['category_description'] as $language_id => $value) {
                 $update = [];
-                if (isset($value['name'])) {
-                    $update['name'] = $value['name'];
+
+                foreach ($value as $key => $item_val) {
+                    $update[$key] = $item_val;
                 }
-                if (isset($value['description'])) {
-                    $update['description'] = $value['description'];
-                }
-                if (isset($value['meta_keywords'])) {
-                    $update['meta_keywords'] = $value['meta_keywords'];
-                }
-                if (isset($value['meta_description'])) {
-                    $update['meta_description'] = $value['meta_description'];
-                }
+
                 if (!empty($update)) {
                     // insert or update
                     $this->registry->get('language')->replaceDescriptions('category_descriptions',
@@ -562,34 +558,39 @@ class Category extends BaseModel
             }
         }
 
+        $categoryToStore = [];
         if (isset($data['category_store'])) {
             $this->db->table('categories_to_stores')
                 ->where('category_id', '=', (int)$categoryId)
                 ->delete();
 
-            $categoryToStore = [];
-            foreach ($data['category_store'] as $storeId) {
+            foreach ($data['category_store'] as $store_id) {
                 $categoryToStore[] = [
-                    'category_id' => (int)$categoryId,
-                    'store_id'    => (int)$storeId,
+                    'category_id' => $categoryId,
+                    'store_id'    => (int)$store_id,
                 ];
             }
-            $this->db->table('categories_to_stores')->insert($categoryToStore);
+        } else {
+            $this->db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
+            $categoryToStore[] = [
+                'category_id' => $categoryId,
+                'store_id'    => 0,
+            ];
         }
+        $this->db->table('categories_to_stores')->insert($categoryToStore);
 
-        if (isset($data['keyword'])) {
-            $data['keyword'] = H::SEOEncode($data['keyword']);
-            if ($data['keyword']) {
-                $this->registry->get('language')->replaceDescriptions('url_aliases',
-                    ['query' => "category_id=".(int)$categoryId],
-                    [$contentLanguageId => ['keyword' => $data['keyword']]]
-                );
-            } else {
-                UrlAlias::where('query', '=', 'category_id='.(int)$categoryId)
-                    ->where('language_id', '=', $contentLanguageId)
-                    ->forceDelete();
+        $categoryName = '';
+        if (isset($data['category_description'])) {
+            $description = $data['category_description'];
+            if (isset($description[$this->registry->get('language')->getContentLanguageID()]['name'])) {
+                $categoryName = $description[$this->registry->get('language')->getContentLanguageID()]['name'];
             }
         }
+
+        UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
+
 
         $this->cache->remove('category');
         $this->cache->remove('product');
@@ -746,6 +747,7 @@ class Category extends BaseModel
             $this->load('descriptions', 'stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
+            $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
             $this->cache->push($cache_key, $data);
         }
         return $data;
