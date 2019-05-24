@@ -1764,12 +1764,12 @@ class AHelperUtils extends AHelper
             if (!class_exists(Registry::class)) {
                 return [];
             }
-            $registry = Registry::getInstance();
-            $user_id = $registry->get('customer')->getId();
+            $user_id = Registry::customer() ? Registry::customer()->getId() : 0;
+            $user_name = Registry::customer() ? Registry::customer()->getLoginName() : 'guest';
             $output = [
                 'user_type' => 2,
                 'user_id'   => $user_id,
-                'user_name' => ($user_id ? $registry->get('customer')->getLoginName() : 'guest'),
+                'user_name' => $user_name
             ];
         }
 
