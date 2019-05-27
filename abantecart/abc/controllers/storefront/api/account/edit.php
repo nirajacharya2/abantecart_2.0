@@ -43,7 +43,6 @@ class ControllerApiAccountEdit extends AControllerAPI
             return null;
         }
 
-$this->loadModel('account/customer');
         $this->loadLanguage('account/edit');
         $this->loadLanguage('account/success');
         $this->v_error = $this->customer::validateRegistrationData($request_data);

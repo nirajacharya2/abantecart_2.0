@@ -65,7 +65,6 @@ class ControllerPagesAccountTransactions extends AController
                 'separator' => $this->language->get('text_separator'),
             ]);
 
-$this->loadModel('account/customer');
         $trans_total = CustomerTransaction::where('customer_id', '=', $this->customer->getId())->get()->count();
 
         $balance = $this->customer->getBalance();

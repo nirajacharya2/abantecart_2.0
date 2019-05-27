@@ -75,8 +75,7 @@ use abc\core\lib\{
  * @property \abc\models\storefront\ModelAccountAddress $model_account_address
  * @property \abc\models\storefront\ModelCheckoutOrder $model_checkout_order
  * @property \abc\models\admin\ModelToolBackup $model_tools_backup
- * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
- * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
+  * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ADB $db

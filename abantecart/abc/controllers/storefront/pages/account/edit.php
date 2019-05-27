@@ -40,7 +40,14 @@ class ControllerPagesAccountEdit extends AController
 
     public function main()
     {
-
+        /**
+         * @var string $loginname
+         * @var string $firstname
+         * @var string $lastname
+         * @var string $telephone
+         * @var string $email
+         * @var string $fax
+         */
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -51,16 +58,16 @@ class ControllerPagesAccountEdit extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->loadModel('account/customer');
-
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
+            $request_data = $this->request->post;
+            $request_data['customer_id'] = $this->customer->getId();
+
             if ($this->csrftoken->isTokenValid()) {
                 $this->error = $this->customer::validateRegistrationData($request_data);
+
                 //if no update for loginname do not allow edit of username/loginname
-                if (!$this->customer->isLoginnameAsEmail()) {
-                    $request_data['loginname'] = null;
-                } else {
+                if ($this->customer->isLoginnameAsEmail()) {
                     //if allow login as email, need to set loginname = email in case email changed
                     if (!$this->config->get('prevent_email_as_login')) {
                         $request_data['loginname'] = $request_data['email'];
@@ -72,7 +79,7 @@ class ControllerPagesAccountEdit extends AController
 
             if (!$this->error) {
                 $this->customer->editCustomer($request_data);
-                $this->customer->model()->editCustomerNotifications($request_data);
+               // $this->customer->model()->editCustomerNotifications($request_data);
                 $this->session->data['success'] = $this->language->get('text_success');
                 $this->extensions->hk_ProcessData($this);
                 abc_redirect($this->html->getSecureURL('account/account'));
@@ -115,6 +122,9 @@ class ControllerPagesAccountEdit extends AController
 
         if ($this->request->is_GET()) {
             $customer_info = Customer::getCustomer($this->customer->getId());
+            if($customer_info){
+                $customer_info = $customer_info->toArray();
+            }
         }
 
         foreach($this->data['predefined_fields'] as $field_name){

@@ -38,7 +38,6 @@ use H;
  * @property \abc\core\engine\ExtensionsAPI              $extensions
  * @property ASession                                    $session
  * @property AConfig                                     $config
- * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
  * @property AResponse                                   $response
  * @property  array()                                    $admin_sendpoints
  */
@@ -290,7 +289,6 @@ class AIM
             $sendpoints_list = $this->sendpoints;
             //do have storefront sendpoint?
             if (!empty($sendpoints_list[$sendpoint][0])) {
-                $this->load->model('account/customer');
                 $customer_im_settings = $this->getCustomerNotificationSettings();
             }
             $this->registry->set('force_skip_errors', true);

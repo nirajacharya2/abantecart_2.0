@@ -72,36 +72,36 @@ class Address extends BaseModel
         'firstname'         => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:address_id',
+                                'required_without:customer_id',
                                 'between:1,32'
                                ],
         'lastname'          => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:address_id',
+                                'required_without:customer_id',
                                 'between:1,32'
                                ],
         'address_1'         => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:address_id',
+                                'required_without:customer_id',
                                 'between:3,128'
                                ],
         'address_2'         => 'string|max:128',
         'postcode'          => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:address_id',
+                                'required_without:customer_id',
                                 'between:3,10'
                                ],
         'city'              => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:address_id',
+                                'required_without:customer_id',
                                 'between:3,128'
                                ],
-        'country_id'        => 'integer|required_without:address_id',
-        'zone_id'           => 'integer|required_without:address_id'
+        'country_id'        => 'integer|required_without:customer_id',
+        'zone_id'           => 'integer|required_without:customer_id'
     ];
 
     /**

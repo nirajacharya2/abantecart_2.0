@@ -44,8 +44,6 @@ class ControllerPagesAccountNotification extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->loadModel('account/customer');
-
         if ($this->request->is_POST() && $this->csrftoken->isTokenValid()) {
             $this->customer->model()->saveCustomerNotificationSettings($this->request->post['settings']);
             $this->session->data['success'] = $this->language->get('text_success');

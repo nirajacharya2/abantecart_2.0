@@ -51,11 +51,7 @@ class ControllerPagesAccountForgotten extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->loadModel('account/customer');
-
-        $customer_details = [];
         if ($this->request->is_POST()) {
-
             if (!$this->csrftoken->isTokenValid()) {
                 $this->error['message'] = $this->language->get('error_unknown');
                 return false;
@@ -188,8 +184,6 @@ class ControllerPagesAccountForgotten extends AController
         }
 
         $this->document->setTitle($this->language->get('heading_title'));
-
-        $this->loadModel('account/customer');
 
         //validate token
         $rtoken = $this->request->get['rtoken'];
@@ -331,9 +325,6 @@ class ControllerPagesAccountForgotten extends AController
 
         $this->document->setTitle($this->language->get('heading_title_loginname'));
 
-        $this->loadModel('account/customer');
-
-        $customer_details = [];
         if ($this->request->is_POST()) {
             $customer_details = $this->_find_customer('loginname', $this->request->post);
             if ($customer_details) {

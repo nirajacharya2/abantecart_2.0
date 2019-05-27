@@ -43,7 +43,6 @@ class ControllerResponsesExtensionGdpr extends AController
         }
         $customer_id = $this->customer->getId();
         $this->loadLanguage('gdpr/gdpr');
-$this->loadModel('account/customer');
         $customer_info = Customer::getCustomer($customer_id);
         $data = $customer_info['data'];
         //if already requested - do nothing

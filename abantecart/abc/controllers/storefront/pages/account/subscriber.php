@@ -44,7 +44,6 @@ class ControllerPagesAccountSubscriber extends AController
         if ($this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/notification'));
         }
-        $this->loadModel('account/customer');
         $this->loadLanguage('account/create');
         $this->loadLanguage('account/newsletter');
 
@@ -71,7 +70,12 @@ class ControllerPagesAccountSubscriber extends AController
             }
 
             if (!$this->error) {
-                $this->data['customer_id'] = $this->customer::createCustomer($request_data);
+                /**
+                 * @var Customer $customer
+                 */
+                $customer = $this->customer::createCustomer($request_data);
+                $this->data['customer_id'] = $customer->customer_id;
+                $this->data['customer_model'] = $customer;
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
                 abc_redirect($this->html->getSecureURL('account/subscriber', '&success=1'));
             }

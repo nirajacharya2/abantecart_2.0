@@ -33,7 +33,7 @@ class LibCustomerTest extends ATestCase{
                 'zone_id' => 'false',
             ]
         );
-        $this->assertEquals(12, count($errors));
+        $this->assertEquals(13, count($errors));
 
         $errors = ACustomer::validateSubscribeData(
             [
@@ -86,7 +86,7 @@ class LibCustomerTest extends ATestCase{
 
 
         try{
-        ACustomer::createCustomer($data);
+            ACustomer::createCustomer($data);
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;
@@ -120,7 +120,8 @@ class LibCustomerTest extends ATestCase{
             'zone_id'     => 3616
         ];
         try{
-            $customer_id = ACustomer::createCustomer($data);
+            $customer_model = ACustomer::createCustomer($data);
+            $customer_id = $customer_model->customer_id;
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;

@@ -513,7 +513,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
         $code = H::genToken(32);
         //save password reset code
-        $this->loadModel('account/customer','storefront')->updateOtherData($customer_id, ['password_reset' => $code]);
+        Customer::find($customer_id)->update(['data' => ['password_reset' => $code] ]);
         //build reset link
         $enc = new AEncryption($this->config->get('encryption_key'));
         $rtoken = $enc->encrypt($customer_id.'::'.$code);

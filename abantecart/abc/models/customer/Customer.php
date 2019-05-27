@@ -140,7 +140,7 @@ class Customer extends BaseModel
         //Note: rules with regex pattern must be an array
         'loginname'         => [
                                 'string',
-                                'required',
+                                'required_without:customer_id',
                                 //TODO: need to found solution
                                 //'unique:connection.customers',
                                 'between:5,96',
@@ -670,8 +670,6 @@ class Customer extends BaseModel
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
-            $result_rows[$i]['data'] = $result_rows[$i]['data'] ? unserialize($result_rows[$i]['data']) : [];
-            $result_rows[$i]['cart'] = $result_rows[$i]['cart'] ? unserialize($result_rows[$i]['cart']) : [];
             $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 

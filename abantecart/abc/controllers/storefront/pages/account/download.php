@@ -40,7 +40,6 @@ class ControllerPagesAccountDownload extends AController
             abc_redirect($this->html->getSecureURL('account/account'));
         }
         // when guest checkout downloads
-        $this->loadModel('account/customer');
         $guest = false;
         $order_token = $this->request->get['ot'];
         if ($order_token) {
@@ -251,7 +250,6 @@ class ControllerPagesAccountDownload extends AController
                 //try to decrypt order token
                 $order_token = $this->request->get['ot'];
                 if ($order_token) {
-                    $this->load->model('account/customer');
                     list($order_id, $email) = H::parseOrderToken($order_token);
                     if ($order_id && $email) {
                         $order_downloads = $this->download->getCustomerOrderDownloads($order_id, 0);

@@ -96,7 +96,6 @@ class ControllerPagesAccountLogin extends AController
             list( $customer_id, $activation_code ) = explode( "::", $enc->decrypt( $this->request->get['ac'] ) );
             if ( $customer_id && $activation_code ) {
                 //get customer
-                $this->loadModel( 'account/customer' );
                 $customer = Customer::find( (int)$customer_id );
                 if ( $customer ) {
                     $customer_info = $customer->toArray();
@@ -269,7 +268,6 @@ class ControllerPagesAccountLogin extends AController
         if ( $this->customer->login( $loginname, $password ) !== true ) {
             if ( $this->config->get( 'config_customer_email_activation' ) ) {
                 //check if account is not confirmed in the email.
-                $this->loadModel( 'account/customer' );
                 $customer_info = Customer::getCustomers(
                     [
                         'filter' =>

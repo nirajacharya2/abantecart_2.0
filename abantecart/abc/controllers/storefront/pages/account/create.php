@@ -50,7 +50,6 @@ class ControllerPagesAccountCreate extends AController
         }
 
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('account/customer');
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
             if ($this->csrftoken->isTokenValid()) {
@@ -72,14 +71,15 @@ class ControllerPagesAccountCreate extends AController
                 if (!$customer_data['customer_group_id']) {
                     $customer_data['customer_group_id'] = (int)$this->config->get('config_customer_group_id');
                 }
-                $this->data['customer_id'] = $this->customer::createCustomer($customer_data);
-
-//???? TODO replace this
- //$this->model_account_customer->editCustomerNotifications($request_data, $this->data['customer_id']);
+                /**
+                 * @var Customer $customer
+                 */
+                $customer = $this->customer::createCustomer($customer_data);
+                $this->data['customer_model'] = $customer;
+                $this->data['customer_id'] = $customer->customer_id;
+                $customer->saveCustomerNotificationSettings($request_data);
 
                 unset($this->session->data['guest']);
-
-                $customer = Customer::find($this->data['customer_id']);
                 $customer_info = $customer->toArray();
 
                 if (!$this->config->get('config_customer_approval')) {
@@ -400,7 +400,6 @@ class ControllerPagesAccountCreate extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('account/customer');
         $enc = new  AEncryption($this->config->get('encryption_key'));
         list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
         if ($customer_id && $activation_code) {

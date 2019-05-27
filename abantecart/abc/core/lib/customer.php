@@ -1143,7 +1143,7 @@ class ACustomer extends ALibBase
             'abc\core\lib\customer@create',
             [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
 
-        return $customer_id;
+        return $customer;
     }
 
     /**
@@ -1233,7 +1233,7 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return \abc\models\BaseModel
+     * @return \abc\models\customer\Customer
      */
     public function model()
     {
@@ -1393,7 +1393,7 @@ class ACustomer extends ALibBase
             static::$errors['zone'] = static::$errors['zone_id'];
         }
 
-        if ($config->get('config_account_id')) {
+        if (!$isLogged && $config->get('config_account_id')) {
             Registry::load()->model('catalog/content');
             /**
              * @var ModelCatalogContent $model_catalog_content

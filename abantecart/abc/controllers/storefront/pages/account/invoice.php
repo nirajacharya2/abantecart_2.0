@@ -50,7 +50,6 @@ class ControllerPagesAccountInvoice extends AController
         $order_info = [];
         $order_token = '';
 
-        $this->loadModel('account/customer');
         $this->loadModel('account/order');
 
         $guest = false;

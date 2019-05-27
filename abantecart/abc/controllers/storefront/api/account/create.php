@@ -50,7 +50,6 @@ class ControllerApiAccountCreate extends AControllerAPI
             return null;
         }
 
-        $this->loadModel('account/customer');
         $this->loadLanguage('account/create');
         $this->loadLanguage('account/success');
 

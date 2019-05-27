@@ -45,7 +45,6 @@ class ControllerPagesAccountPassword extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST() && $this->_validate()) {
-            $this->loadModel('account/customer');
             $this->customer->editPassword($this->customer->getLoginName(), $this->request->post['password']);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('account/account'));
