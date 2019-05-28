@@ -18,6 +18,7 @@
 
 namespace abc\models\customer;
 
+use abc\core\engine\Registry;
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
 use abc\models\user\User;
@@ -77,9 +78,12 @@ class CustomerCommunication extends BaseModel
             $communication = new CustomerCommunication();
             $communication->subject = $mail->getSubject();
             $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
-            $customers = Customer::where('email', '=', $mail->getTo())->limit(1)->get();
             $customer_id = null;
-            foreach ($customers as $customer) {
+            if ((Registry::getInstance())->get('customer')) {
+                $customer_id = (Registry::getInstance())->get('customer')->getId();
+            }
+            if (!$customer_id) {
+                $customer = Customer::where('email', '=', $mail->getTo())->limit(1)->get()->first();
                 $customer_id = $customer->customer_id;
             }
             if (!$customer_id) {
