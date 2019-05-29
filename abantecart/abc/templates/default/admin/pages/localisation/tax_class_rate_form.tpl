@@ -178,10 +178,10 @@
 </div><!-- <div class="tab-content"> -->
 
 
-<?php if (isset($zone_id)) { ?>
+
 	<script type="text/javascript">
 
-		jQuery(function ($) {
+		$(document).on('ready',function ($) {
 			var zone_id = '<?php echo $zone_id; ?>';
 			var toggleZonesSelectbox = function () {
 				if (!$('#cgFrm_all_zones').is(':checked')) {
@@ -189,7 +189,7 @@
 				} else {
 					$('#cgFrm_zone_id_chosen').hide();
 				}
-			}
+			};
 			toggleZonesSelectbox();
 
 
@@ -205,7 +205,7 @@
 								showZones(id, data);
 							}
 						});
-			}
+			};
 
 			var showZones = function (id, data) {
 				var options = '';
@@ -218,7 +218,7 @@
 				});
 
 				$('#' + id).html(options).trigger("chosen:updated");
-			}
+			};
 
 			getZones('cgFrm_zone_id', $('#cgFrm_location_id').val());
 
@@ -235,4 +235,3 @@
 
 		});
 		</script>
-<?php } ?>
