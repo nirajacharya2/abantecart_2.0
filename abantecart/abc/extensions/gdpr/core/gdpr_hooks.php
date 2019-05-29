@@ -43,7 +43,7 @@ class ExtensionGdpr extends Extension
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
         $that->document->addStyle(
             [
-                'href'  => $that->view->templateResource('/css/cookies-alert.css'),
+                'href'  => $that->view->templateResource('assets/css/cookies-alert.css'),
                 'rel'   => 'stylesheet',
                 'media' => 'screen',
             ]
@@ -53,7 +53,7 @@ class ExtensionGdpr extends Extension
     public function onControllerCommonHead_UpdateData()
     {
         $that = $this->baseObject;
-        $that->document->addScriptBottom($that->view->templateResource('/js/gdpr-cookie-monster.min.js'));
+        $that->document->addScriptBottom($that->view->templateResource('assets/js/gdpr-cookie-monster.min.js'));
     }
 
     public function onControllerPagesAccountAccount_InitData()
