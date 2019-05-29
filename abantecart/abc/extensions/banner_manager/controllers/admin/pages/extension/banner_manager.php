@@ -816,8 +816,8 @@ class ControllerPagesExtensionBannerManager extends AController
                 }
             } else {
                 //delete the list as nothing provided
-                $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager = new AListingManager( (int)$custom_block_id );
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
             }
 
             $this->session->data ['success'] = $this->language->get( 'text_banner_success' );
