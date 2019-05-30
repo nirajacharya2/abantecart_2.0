@@ -188,58 +188,58 @@
 
 
 <script type="text/javascript">
-	jQuery(function ($) {
-		$(document).on('ready', function ($) {
-			var zone_id = '<?php echo $zone_id; ?>';
-			var toggleZonesSelectbox = function () {
-				if (!$('#cgFrm_all_zones').is(':checked')) {
-					$('#cgFrm_zone_id_chosen').show();
-				} else {
-					$('#cgFrm_zone_id_chosen').hide();
-				}
-			};
-			toggleZonesSelectbox();
 
-			var getZones = function (id, location_id) {
+(function ($) {
+	$(document).ready(function(){
+		var zone_id = '<?php echo $zone_id; ?>';
+		var toggleZonesSelectbox = function () {
+			if (!$('#cgFrm_all_zones').prop("checked")) {
+				$('#cgFrm_zone_id_chosen').show();
+			} else {
+				$('#cgFrm_zone_id_chosen').hide();
+			}
+		};
+		toggleZonesSelectbox();
 
-				$.ajax(
-					{
-						url: '<?php echo $common_zone; ?>&location_id=' + location_id + '&zone_id=' + zone_id,
-						type: 'GET',
-						dataType: 'json',
-						success: function (data) {
-							result = data;
-							showZones(id, data);
-						}
-					});
-			};
+		var getZones = function (id, location_id) {
 
-			var showZones = function (id, data) {
-				var options = '';
-				$.each(data['options'], function (i, opt) {
-					options += '<option value="' + i + '"';
-					if (opt.selected) {
-						options += 'selected="selected"';
+			$.ajax(
+				{
+					url: '<?php echo $common_zone; ?>&location_id=' + location_id + '&zone_id=' + zone_id,
+					type: 'GET',
+					dataType: 'json',
+					success: function (data) {
+						result = data;
+						showZones(id, data);
 					}
-					options += '>' + opt.value + '</option>'
 				});
+		};
 
-				$('#' + id).html(options).trigger("chosen:updated");
-			};
-
-			getZones('cgFrm_zone_id', $('#cgFrm_location_id').val());
-
-
-			$('#cgFrm_location_id').change(function () {
-				getZones('cgFrm_zone_id', $(this).val());
-				$('#cgFrm_zone_id').val('').change();
-
+		var showZones = function (id, data) {
+			var options = '';
+			$.each(data['options'], function (i, opt) {
+				options += '<option value="' + i + '"';
+				if (opt.selected) {
+					options += 'selected="selected"';
+				}
+				options += '>' + opt.value + '</option>'
 			});
 
-			$('#cgFrm_all_zones').click(function () {
-				toggleZonesSelectbox();
-			});
+			$('#' + id).html(options).trigger("chosen:updated");
+		};
+
+		getZones('cgFrm_zone_id', $('#cgFrm_location_id').val());
+
+
+		$('#cgFrm_location_id').change(function () {
+			getZones('cgFrm_zone_id', $(this).val());
+			$('#cgFrm_zone_id').val('').change();
 
 		});
+
+		$('#cgFrm_all_zones').click(function () {
+			toggleZonesSelectbox();
+		});
 	});
+})(jQuery);
 </script>
