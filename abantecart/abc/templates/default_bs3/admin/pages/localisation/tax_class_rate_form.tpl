@@ -188,57 +188,58 @@
 
 
 <script type="text/javascript">
-
-	$(document).on('ready', function ($) {
-		var zone_id = '<?php echo $zone_id; ?>';
-		var toggleZonesSelectbox = function () {
-			if (!$('#cgFrm_all_zones').is(':checked')) {
-				$('#cgFrm_zone_id_chosen').show();
-			} else {
-				$('#cgFrm_zone_id_chosen').hide();
-			}
-		};
-		toggleZonesSelectbox();
-
-		var getZones = function (id, location_id) {
-
-			$.ajax(
-				{
-					url: '<?php echo $common_zone; ?>&location_id=' + location_id + '&zone_id=' + zone_id,
-					type: 'GET',
-					dataType: 'json',
-					success: function (data) {
-						result = data;
-						showZones(id, data);
-					}
-				});
-		};
-
-		var showZones = function (id, data) {
-			var options = '';
-			$.each(data['options'], function (i, opt) {
-				options += '<option value="' + i + '"';
-				if (opt.selected) {
-					options += 'selected="selected"';
+	jQuery(function ($) {
+		$(document).on('ready', function ($) {
+			var zone_id = '<?php echo $zone_id; ?>';
+			var toggleZonesSelectbox = function () {
+				if (!$('#cgFrm_all_zones').is(':checked')) {
+					$('#cgFrm_zone_id_chosen').show();
+				} else {
+					$('#cgFrm_zone_id_chosen').hide();
 				}
-				options += '>' + opt.value + '</option>'
+			};
+			toggleZonesSelectbox();
+
+			var getZones = function (id, location_id) {
+
+				$.ajax(
+					{
+						url: '<?php echo $common_zone; ?>&location_id=' + location_id + '&zone_id=' + zone_id,
+						type: 'GET',
+						dataType: 'json',
+						success: function (data) {
+							result = data;
+							showZones(id, data);
+						}
+					});
+			};
+
+			var showZones = function (id, data) {
+				var options = '';
+				$.each(data['options'], function (i, opt) {
+					options += '<option value="' + i + '"';
+					if (opt.selected) {
+						options += 'selected="selected"';
+					}
+					options += '>' + opt.value + '</option>'
+				});
+
+				$('#' + id).html(options).trigger("chosen:updated");
+			};
+
+			getZones('cgFrm_zone_id', $('#cgFrm_location_id').val());
+
+
+			$('#cgFrm_location_id').change(function () {
+				getZones('cgFrm_zone_id', $(this).val());
+				$('#cgFrm_zone_id').val('').change();
+
 			});
 
-			$('#' + id).html(options).trigger("chosen:updated");
-		};
-
-		getZones('cgFrm_zone_id', $('#cgFrm_location_id').val());
-
-
-		$('#cgFrm_location_id').change(function () {
-			getZones('cgFrm_zone_id', $(this).val());
-			$('#cgFrm_zone_id').val('').change();
+			$('#cgFrm_all_zones').click(function () {
+				toggleZonesSelectbox();
+			});
 
 		});
-
-		$('#cgFrm_all_zones').click(function () {
-			toggleZonesSelectbox();
-		});
-
 	});
 </script>
