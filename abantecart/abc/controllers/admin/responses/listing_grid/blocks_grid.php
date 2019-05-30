@@ -167,7 +167,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             if (isset($this->request->post['selected']) && is_array($this->request->post['selected'])) {
                 //updating custom list of selected items
                 $listing_manager = new AListingManager($custom_block_id);
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                 $k = 0;
                 foreach ($this->request->post['selected'] as $id) {
                     $listing_manager->saveCustomListItem(
