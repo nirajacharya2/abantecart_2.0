@@ -1091,7 +1091,7 @@ class ExtensionsApi
         $tmpl_id = ABC::env('IS_ADMIN')
             ? $this->registry->get('config')->get('admin_template')
             : $this->registry->get('config')->get('config_storefront_template');
-        $file = $ext_section.ABC::env('DIRNAME_TEMPLATES').$tmpl_id.'/'.$route;
+        $file = ABC::env('DIRNAME_TEMPLATES').$tmpl_id.DS.$ext_section.$route;
         $source = $this->extension_templates;
 
         $section = trim($ext_section, '/');
@@ -1101,7 +1101,7 @@ class ExtensionsApi
         $output = [];
         foreach ($extensions_lookup_list as $ext) {
             //looking for active template tpl
-            $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
+            $f = ABC::env('DIR_APP_EXTENSIONS').$ext.DS.$file;
             $ext_tpls = is_array($source[$ext][$section]) ? $source[$ext][$section] : [];
             if (in_array($route, $ext_tpls)) {
                 if (is_file($f)) {
