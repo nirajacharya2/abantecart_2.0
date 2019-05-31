@@ -1092,7 +1092,7 @@ class ModelToolImportProcess extends Model
                         }
                     }
                     $tmp_index = ($op_index >= 0) ? $op_index : 0;
-                    $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
+                    $op_array[$tmp_index] = array_merge_recursive((array)$op_array[$tmp_index], (array)$arr);
                 }
             } else {
                 foreach ($keys as $key) {

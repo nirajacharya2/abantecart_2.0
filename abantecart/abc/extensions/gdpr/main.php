@@ -42,7 +42,7 @@ $models = [
 
 $templates = [
     'storefront' => [
-        'common/header.post.tpl',
+        'common/header_bottom.post.tpl',
         'responses/extension/gdpr_buttons.tpl',
         'responses/extension/gdpr_view_data_modal.tpl',
     ],

@@ -189,10 +189,11 @@
 
 <script type="text/javascript">
 
-	$(document).on('ready', function ($) {
+(function ($) {
+	$(document).ready(function(){
 		var zone_id = '<?php echo $zone_id; ?>';
 		var toggleZonesSelectbox = function () {
-			if (!$('#cgFrm_all_zones').is(':checked')) {
+			if (!$('#cgFrm_all_zones').prop("checked")) {
 				$('#cgFrm_zone_id_chosen').show();
 			} else {
 				$('#cgFrm_zone_id_chosen').hide();
@@ -239,6 +240,6 @@
 		$('#cgFrm_all_zones').click(function () {
 			toggleZonesSelectbox();
 		});
-
 	});
+})(jQuery);
 </script>

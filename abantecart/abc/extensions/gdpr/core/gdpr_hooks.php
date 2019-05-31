@@ -28,7 +28,7 @@ use H;
 class ExtensionGdpr extends Extension
 {
 
-    public function onControllerCommonHeader_InitData()
+    public function onControllerCommonHeaderBottom_InitData()
     {
         $that = $this->baseObject;
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
