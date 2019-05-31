@@ -289,7 +289,7 @@ class Customer extends BaseModel
     public function setPasswordAttribute($password){
         if (! $this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
-            $this->attributes['salt'] = $salt_key;
+            $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = H::getHash($password, $salt_key);
         }
     }
@@ -308,6 +308,12 @@ class Customer extends BaseModel
         //remove serialized fields
         foreach($this->casts as $k=>$v){
             if($v == 'serialized'){
+                unset($data[$k]);
+            }
+        }
+        //prevent double mutation
+        foreach($data as $k=>$v){
+            if(method_exists($this,'Set'.ucfirst($k).'Attribute')){
                 unset($data[$k]);
             }
         }
@@ -479,35 +485,39 @@ class Customer extends BaseModel
         $filter = (isset($data['filter']) ? $data['filter'] : []);
 
         if (H::has_value($filter['name'])) {
-            $query->where($db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname)'), 'like', '%'.$filter['name'].'%');
+            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%".$filter['name']."%'");
         }
 
         if (H::has_value($filter['name_email'])) {
-            $query->where($db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname, \' \', '.$aliasC.'.email)'), 'like', '%'.$filter['name_email'].'%');
+            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%".$filter['name_email']."%'");
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
             if($filter['search_operator'] == 'equal'){
-                $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), '=', mb_strtolower($filter['loginname']));
+                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
             }else {
-                $query->where($db->raw('LOWER('.$aliasC.'.loginname)'), 'like', mb_strtolower($filter['loginname'])."%");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '".mb_strtolower($filter['loginname'])."%'");
             }
         }
 
         if (H::has_value($filter['firstname'])) {
             if($filter['search_operator'] == 'equal') {
-                $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), '=', mb_strtolower($filter['firstname']));
+                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".mb_strtolower($filter['firstname'])."'");
             }else {
-                $query->where($db->raw('LOWER('.$aliasC.'.firstname)'), 'like', mb_strtolower($filter['firstname'])."%");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".mb_strtolower($filter['firstname'])."%'");
             }
         }
 
         if (H::has_value($filter['lastname'])) {
             if($filter['search_operator'] == 'equal') {
-                $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), '=', mb_strtolower($filter['lastname']));
+                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".mb_strtolower($filter['lastname'])."'");
             }else{
-                $query->where($db->raw('LOWER('.$aliasC.'.lastname)'), 'like', mb_strtolower($filter['lastname'])."%");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".mb_strtolower($filter['lastname'])."%'");
             }
+        }
+
+        if (H::has_value($filter['password'])) {
+            $query->whereRaw($aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('".$db->escape($filter['password'])."')))))");
         }
 
         //select differently if encrypted
@@ -560,7 +570,7 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['only_with_mobile_phones'])) {
-            $query->where($db->raw("TRIM(COALESCE(".$aliasC.".sms,''))"), '<>', '');
+            $query->whereRaw("TRIM(COALESCE(".$aliasC.".sms,'')) <> ''");
         }
 
         //include ids set
@@ -589,7 +599,7 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['date_added'])) {
-            $query->where($db->raw("DATE(".$aliasC.".date_added)"), '=', $db->raw("DATE('".$db->escape($filter['date_added'])."')"));
+            $query->whereRaw("DATE(".$aliasC.".date_added) = DATE('".$db->escape($filter['date_added'])."')");
         }
 
         if ($data['store_id'] !== null) {
@@ -646,7 +656,6 @@ class Customer extends BaseModel
                 $query->offset((int)$data['start'])->limit((int)$data['limit']);
             }
         }
-
         $result_rows = $query->get();
 
 //???? TODO need to check when encrypted
@@ -798,7 +807,7 @@ class Customer extends BaseModel
         $aliasC = $db->table_name('customers');
 
         //exclude current customer from checking
-        $query = static::where($db->raw('LOWER('. $aliasC.'.loginname)'),'=', mb_strtolower($loginname));
+        $query = static::whereRaw("LOWER(". $aliasC.".loginname) = '".mb_strtolower($loginname)."'");
 
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);

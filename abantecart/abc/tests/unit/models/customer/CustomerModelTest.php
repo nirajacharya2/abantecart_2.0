@@ -19,7 +19,7 @@ class CustomerModelTest extends ATestCase{
          * @var Customer $customer
          */
         $customer = Customer::find(9);
-        $customer->update(['sms' => '123456789']);
+        $customer->update(['sms' => '123456789', 'password' => '1234567890', 'loginname' => 'unittest']);
         $this->assertEquals('123456789', $customer->sms);
         $customer->update(['sms' => '']);
     }
@@ -220,6 +220,18 @@ class CustomerModelTest extends ATestCase{
         //only except given ids
         $total = Customer::getCustomers(['filter' => [ 'status' => 1 ]], 'total_only');
         $this->assertEquals(11, $total);
+
+        //check password
+        $account = Customer::getCustomers(
+            [
+                'filter' => [
+                    'search_operator' => 'equal',
+                    'loginname'=> 'unittest',
+                    'password' => '1234567890'
+                ],
+                'limit'=> 1 ]);
+        $this->assertEquals(1, count($account));
+        $this->assertEquals(9, $account->first()->customer_id);
 
     }
 

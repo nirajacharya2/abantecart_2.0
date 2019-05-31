@@ -242,15 +242,6 @@ class ACustomer extends ALibBase
         }
 
         $customer_data = Customer::getCustomers(['filter' => $filter]);
-
-
-        /*$customer_data = $this->db->query(
-            "SELECT *
-            FROM ".$this->db->table_name("customers")."
-            WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
-            AND (
-                password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
-                        ))) AND status = '1' ".$approved_only);*/
         if ($customer_data) {
 
             $this->customerInit($customer_data[0]);
@@ -331,6 +322,12 @@ class ACustomer extends ALibBase
         $this->address_id = (int)$data['address_id'];
     }
 
+    /**
+     * @param $customer_id
+     *
+     * @return bool
+     * @throws AException
+     */
     public function setLastLogin($customer_id)
     {
         $customer_id = (int)$customer_id;
