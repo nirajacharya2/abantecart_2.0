@@ -63,7 +63,9 @@ class ControllerResponsesToolAuditAjax extends AController
                     if ($arFilter['auditable_id']) {
                         $auditableIds[] = $arFilter['auditable_id'];
                     }
-                    $attributeNames = array_merge($attributeNames, $arFilter['field_name']);
+                    if (is_array($arFilter['field_name'])) {
+                        $attributeNames = array_merge($attributeNames, $arFilter['field_name']);
+                    }
                 }
 
                 if (!empty($auditableTypes)) {
