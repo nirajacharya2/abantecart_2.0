@@ -1271,7 +1271,9 @@ class Product extends BaseModel
             $product->descriptions()->update($product_data['product_description']);
         }
 
-        UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $product_id);
+        if ($product_data['keyword'] || $product_data['product_description']['name']) {
+            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $product_id);
+        }
 
         $attributes = array_filter($product_data, function ($k) {
             return (strpos($k, 'attribute_') === 0);
