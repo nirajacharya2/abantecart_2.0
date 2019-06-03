@@ -196,6 +196,7 @@ class ControllerPagesAccountLogin extends AController
                 'name'   => 'loginFrm',
                 'action' => $this->html->getSecureURL( 'account/login' ),
                 'csrf'   => true,
+                'attr'   => 'autocomplete="off"',
             ]
         );
 
@@ -208,6 +209,7 @@ class ControllerPagesAccountLogin extends AController
                 'type'  => 'input',
                 'name'  => 'loginname',
                 'value' => $loginname,
+                'attr'  => 'autocomplete="new-password"',
             ]);
         //support old email based logging. Remove in the future
         $this->data['form2']['email'] = $form->getFieldHtml(
@@ -215,11 +217,13 @@ class ControllerPagesAccountLogin extends AController
                 'type'  => 'input',
                 'name'  => 'email',
                 'value' => $loginname,
+                'attr'  => 'autocomplete="new-password"',
             ]);
         $this->data['form2']['password'] = $form->getFieldHtml(
             [
                 'type' => 'password',
                 'name' => 'password',
+                'attr'  => 'autocomplete="new-password"',
             ]);
         $this->data['form2']['login_submit'] = $form->getFieldHtml(
             [
