@@ -1537,7 +1537,9 @@ class AHelperUtils extends AHelper
                 if (!file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
                     $indexFile = ABC::env('DIR_IMAGES').$path.DS.'index.php';
+                    $old = umask(0);
                     $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775);
+                    umask($old);
                     if ($result) {
                         file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
                         chmod($indexFile, 664);
