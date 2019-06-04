@@ -1146,8 +1146,11 @@ class Product extends BaseModel
                 }
                 if ($option_value['images']) {
 
-                    $title = current($optionValueDescData['name']);
-                    $language_id = current($optionValueDescData['language_id']);
+                    $title = $optionValueDescData['name'];
+                    $title = is_array($title) ? current($title) : (string)$title;
+
+                    $language_id = $optionValueDescData['language_id'];
+                    $language_id = is_array($language_id) ? current($language_id) : (string)$language_id;
 
                     $result = $resource_mdl->updateImageResourcesByUrls(
                         $option_value,
