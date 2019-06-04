@@ -140,7 +140,7 @@ class ControllerPagesIndexHome extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = Customer::getCustomers($filter, 'quick');
+        $top_customers = Customer::getCustomers($filter);
         foreach ($top_customers as $index => $customer) {
             $action = [];
             $action[] = [

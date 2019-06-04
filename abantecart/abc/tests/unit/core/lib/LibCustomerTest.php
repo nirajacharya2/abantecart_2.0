@@ -57,7 +57,12 @@ class LibCustomerTest extends ATestCase{
         $this->assertEquals(0, count($errors));
     }
 
-    public function testCreateCustomer(){
+    public function testCreateCustomer()
+    {
+        $loginname = 'test_loginname';
+        $password = 'ytytytest';
+
+        Customer::whereIn('loginname', ['test_subscriber', $loginname])->forceDelete();
 
         //create subscriber account with the same email to check if it will be deleted
         $data = [
@@ -84,7 +89,6 @@ class LibCustomerTest extends ATestCase{
             'zone_id'     => 3616
         ];
 
-
         try{
             ACustomer::createCustomer($data);
         }catch(ValidationException $e){
@@ -94,15 +98,16 @@ class LibCustomerTest extends ATestCase{
             var_dump($e->getMessage());
             exit;
         }
+
         $data = [
             //'store_id' => 0,
-            'loginname' => 'test_loginname',
+            'loginname' => $loginname,
             'firstname' => 'test firstname',
             'lastname' => 'test lastname',
             'email'    => 'test_tmp@abantecart.com',
             'telephone' => '1234567890',
             'fax' => '0987654321',
-            'password' => 'ytytytest',
+            'password' => $password,
             'newsletter' => '1',
             'customer_group_id' => '1',
             'approved' => 1,
@@ -130,16 +135,19 @@ class LibCustomerTest extends ATestCase{
             exit;
         }
 
-       /* $c = Customer::find($customer_id);
-        var_dump($c->data);
-        var_dump($c->cart);
-        var_dump($c->wishlist);*/
-        $result = Customer::where('email', '=', 'test_tmp@abantecart.com')->get()->count();
-        $this::assertEquals(1, $result);
+        $result = Customer::where('email', '=', 'test_tmp@abantecart.com')->get();
+        $this::assertEquals(1, $result->count());
+
+        //check login
+        $customer = new ACustomer(Registry::getInstance());
+        $result = $customer->login($loginname, $password);
+        $this::assertEquals(true, $result);
+
+        $customer = new ACustomer(Registry::getInstance());
+        $result = $customer->login($loginname, 'test-non-exists-password');
+        $this::assertEquals(false, $result);
 
         //this destroy must remove both newly created customers
         Customer::destroy($customer_id);
-
-
     }
 }

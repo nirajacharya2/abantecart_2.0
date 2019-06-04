@@ -269,10 +269,12 @@ class ModelSaleContact extends Model{
                 } else
                     if ($data['recipient'] == 'only_customers'){
                         $only_customers =  Customer::getCustomers(
-                            ['filter' => [
-                                            'only_customers'] = 1,
+                            [
+                                'filter' => [
+                                            'only_customers' => 1,
                                             'status' => 1,
                                             'approved' => 1
+                                ]
                             ],
                             'total_only'
                         );

@@ -56,8 +56,10 @@ class ControllerPagesAccountForgotten extends AController
                 $this->error['message'] = $this->language->get('error_unknown');
                 return false;
             }
-            $customer_details = $this->_find_customer('password', $$this->request->post);
+            $customer_details = $this->_find_customer('password', $this->request->post);
             if ($customer_details) {
+                $customer_details = $customer_details->toArray();
+
                 //extra check that we have customer details
                 if (!empty($customer_details['email'])) {
                     $this->loadLanguage('mail/account_forgotten');
@@ -419,6 +421,14 @@ class ControllerPagesAccountForgotten extends AController
 
     }
 
+    /**
+     * @param string $mode -
+     * @param $data
+     *
+     * @return bool|mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     protected function _find_customer($mode, $data)
     {
         $output = [];
@@ -476,7 +486,7 @@ class ControllerPagesAccountForgotten extends AController
             $this->error['message'] = $this->language->get('error_not_found');
             return false;
         } else {
-            return $output;
+            return $output->first();
         }
     }
 

@@ -66,7 +66,7 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = Customer::getCustomers($filter, 'quick');
+        $top_customers = Customer::getCustomers($filter);
         foreach ($top_customers as $idx => $customer) {
             $top_customers[$idx]['url'] = $this->html->getSecureURL(
                 'sale/customer/update',

@@ -207,7 +207,7 @@ $("#gdpr_erase")
             ]
         );
 
-        $customer_info = Customer::find($customer_id);
+        $customer_info = Customer::find($customer_id)->toArray();
         $entry = $that->language->get('gdpr_entry_erase');
         if ($customer_info['data']) {
             $data = unserialize($customer_info['data']);

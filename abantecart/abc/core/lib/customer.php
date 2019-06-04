@@ -241,10 +241,9 @@ class ACustomer extends ALibBase
             $filter['approved'] = 1;
         }
 
-        $customer_data = Customer::getCustomers(['filter' => $filter]);
+        $customer_data = Customer::getCustomers(['filter' => $filter])->first();
         if ($customer_data) {
-
-            $this->customerInit($customer_data[0]);
+            $this->customerInit($customer_data->toArray());
 
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
@@ -277,7 +276,6 @@ class ACustomer extends ALibBase
             return true;
         } else {
             $this->extensions->hk_ProcessData($this, 'login_failed');
-
             return false;
         }
     }
@@ -1213,7 +1211,7 @@ class ACustomer extends ALibBase
         /**
          * @var Customer $customer
          */
-        $customer = Customer::where('loginname', '=', $loginname)->get();
+        $customer = Customer::where('loginname', '=', $loginname)->first();
         if(!$customer){
             return false;
         }
@@ -1480,8 +1478,16 @@ class ACustomer extends ALibBase
         }
 
         if(!static::$errors) {
-            if (Customer::getCustomers(['filter' => ['search_operator' => 'equal', 'email' => $data['email']]],
-                'total_only')) {
+            if (Customer::getCustomers(
+                    [
+                        'filter' => [
+                            'search_operator' => 'equal',
+                            'email' => $data['email']
+                        ]
+                    ],
+                    'total_only'
+                )
+            ) {
                 static::$errors['warning'] = $language->get('error_exists');
             }
         }

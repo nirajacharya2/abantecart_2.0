@@ -14,6 +14,7 @@ use abc\models\system\Store;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * Class Customer
@@ -48,6 +49,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $customer_transactions
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
+ * @method static Customer find(int $customer_id) Customer
  * @package abc\models
  */
 class Customer extends BaseModel
@@ -413,17 +415,20 @@ class Customer extends BaseModel
 
     /**
      * Function returns parsed customers data as array
+     *
      * @param $customer_id
+     *
+     * @param string $mode - can be quick(without orders_count), default, total_only(returns row count)
      *
      * @return array|\Illuminate\Support\Collection|int
      * @throws \abc\core\lib\AException
      */
-    public static function getCustomer($customer_id){
+    public static function getCustomer($customer_id, $mode = 'quick'){
         $customer_id = (int)$customer_id;
         if(!$customer_id){
              return [];
         }
-        $result = static::getCustomers(['filter' => ['include' => [$customer_id]]]);
+        $result = static::getCustomers(['filter' => ['include' => [$customer_id]]], $mode);
         return $result[0];
     }
 
@@ -431,10 +436,10 @@ class Customer extends BaseModel
      * @param array $data
      * @param string $mode
      *
-     * @return array|int
+     * @return Collection|int
      * @throws \abc\core\lib\AException
      */
-    public static function getCustomers($data = [], $mode = 'default')
+    public static function getCustomers($data = [], $mode = 'quick')
     {
         /**
          * @var ADataEncryption $dcrypt
@@ -458,8 +463,8 @@ class Customer extends BaseModel
                 'customer_groups.name AS customer_group'
             ];
         }
+
         if ($mode != 'total_only' && $mode != 'quick') {
-//TODO: add selectSub() here
             $select[] = $db->raw('(SELECT COUNT(o.order_id) as cnt 
                                     FROM '.$db->table_name("orders").' o
                                     WHERE '.$aliasC.'.customer_id = o.customer_id AND o.order_status_id>0) 
@@ -610,10 +615,10 @@ class Customer extends BaseModel
             $query->join('customer_notifications',
                 function ($join) use($filter){
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
-                         ->on('customer_notifications.sendpoint', '=', 'newsletter')
-                         ->on('customer_notifications.status', '=', 1)
-                         ->on('customer_notifications.protocol', '=', $filter['newsletter_protocol']);
+                         ->on('customer_notifications.sendpoint', '=', 'newsletter');
                 });
+            $query->where('customer_notifications.status', '=', 1)
+                  ->where('customer_notifications.protocol', '=', $filter['newsletter_protocol']);
         }
 
         //If for total, we done building the query
@@ -632,8 +637,11 @@ class Customer extends BaseModel
             'status'         => 'customers.status',
             'approved'       => 'customers.approved',
             'date_added'     => 'customers.date_added',
-            'orders_count'   => 'orders_count',
         ];
+
+        if($mode != 'quick'){
+            $sort_data['orders_count'] = 'orders_count';
+        }
 
         //Total calculation for encrypted mode
         // NOTE: Performance slowdown might be noticed or larger search results
@@ -660,6 +668,7 @@ class Customer extends BaseModel
 
 //???? TODO need to check when encrypted
         if ($result_rows->count() &&  $dcrypt->active) {
+
             if (H::has_value($filter['email'])) {
                 $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'email', $filter['email']);
             }
@@ -677,7 +686,7 @@ class Customer extends BaseModel
         }
         //finally decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < count($result_rows); $i++) {
+        for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
             $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }

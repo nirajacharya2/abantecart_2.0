@@ -40,7 +40,7 @@ class ControllerPagesSaleCustomerTransaction extends AController
         $this->loadModel( 'sale/customer_transaction' );
 
         $customer_id = $this->request->get['customer_id'];
-        $customer_info = Customer::find($customer_id );
+        $customer_info = Customer::getCustomer($customer_id );
         if ( !$customer_info ) {
             abc_redirect( $this->html->getSecureURL( 'sale/customer' ) );
         }

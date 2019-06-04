@@ -643,6 +643,8 @@ label.h4 {
 
 .form-horizontal .control-label {
    font-weight: normal;
+   text-align: right;
+   line-height: 28px;
 }
 
 .has-success .form-control,

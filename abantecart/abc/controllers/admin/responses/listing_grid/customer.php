@@ -106,7 +106,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $orders_count = 0;
 
         if ($sidx == 'orders_count') {
-            $mode = '';
+            $mode = 'default';
         } else {
             $mode = 'quick';
         }
