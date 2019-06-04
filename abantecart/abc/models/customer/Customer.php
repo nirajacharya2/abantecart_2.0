@@ -130,13 +130,13 @@ class Customer extends BaseModel
         'firstname'         => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:customer_id',
+                                'required',
                                 'between:1,32'
                                ],
         'lastname'          => [
                                 'string',
                                 //required only when new customer creating
-                                'required_without:customer_id',
+                                'required',
                                 'between:1,32'
                                ],
         //Note: rules with regex pattern must be an array

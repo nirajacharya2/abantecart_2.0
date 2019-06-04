@@ -1100,9 +1100,6 @@ class ControllerPagesSaleCustomer extends AController
                 $this->getAddressForm();
             } else {
                 Address::destroy($address_id);
-                Address::find($address_id)
-                       ->where('customer_id', '=', $customer_id)
-                       ->delete();
                 $this->session->data['success'] = $this->language->get('text_success');
                 abc_redirect($this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id));
             }
