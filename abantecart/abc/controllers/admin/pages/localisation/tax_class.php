@@ -365,7 +365,7 @@ class ControllerPagesLocalisationTaxClass extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _getRatesForm()
+    protected function _getRatesForm()
     {
 
         $tax_class_id = (int)$this->request->get['tax_class_id'];
@@ -645,7 +645,7 @@ class ControllerPagesLocalisationTaxClass extends AController
         $this->processTemplate('pages/localisation/tax_class_rate_form.tpl');
     }
 
-    private function _getForm()
+    protected function _getForm()
     {
         $this->data = [];
         $this->data['error'] = $this->error;
@@ -746,7 +746,7 @@ class ControllerPagesLocalisationTaxClass extends AController
         $this->processTemplate('pages/localisation/tax_class_form.tpl');
     }
 
-    private function _validateForm()
+    protected function _validateForm()
     {
         if (!$this->user->canModify('localisation/tax_class')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -779,7 +779,7 @@ class ControllerPagesLocalisationTaxClass extends AController
         }
     }
 
-    private function _validateRateForm()
+    protected function _validateRateForm()
     {
         if (!$this->user->canModify('localisation/tax_class')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -803,7 +803,7 @@ class ControllerPagesLocalisationTaxClass extends AController
         }
     }
 
-    private function _initTabs($active = null)
+    protected function _initTabs($active = null)
     {
 
 
