@@ -325,7 +325,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @param array $messages
      * @param array $customAttributes
@@ -333,9 +333,9 @@ class BaseModel extends OrmModel
      * @return bool
      * @throws ValidationException
      */
-    public function validate($data, array $messages = [], array $customAttributes = [])
+    public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
-
+        $data = !$data ? $this->getDirty() : $data;
         if ($rules = $this->rules()) {
             $v = new Validator(new ValidationTranslator(), $data, $rules, $messages, $customAttributes);
             $connections = [Registry::db()->connection()];

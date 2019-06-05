@@ -67,7 +67,10 @@ class Address extends BaseModel
 
     protected $rules = [
         'address_id'        => 'integer',
-        'customer_id'       => 'integer',
+        'customer_id'       => [
+                                'required_with:address_id',
+                                'integer',
+                                ],
         'company'           => 'string|max:32',
         'firstname'         => [
                                 'string',
