@@ -1,14 +1,13 @@
-<div class="side_block">
-	<?php
-	/**
-	 * @var $this \abc\core\view\AView
-	 */
-    if ($block_framed) { ?>
+<div class="side_block brand-logo">
+	<?php if ($block_framed) { ?>
 		<h2><?php echo $heading_title; ?></h2>
 	<?php }	?>
 
 	<ul class="side_prd_list">
 		<?php
+		/**
+		 * @var $this AView
+		 */
 		if ($content) {
 			foreach ($content as $item) {
 
@@ -32,7 +31,7 @@
 
 				?>
 
-				<li class="col-md-3">
+				<li class="col-md-1">
 				<?php if ($item[ 'resource_code' ]) {
 						echo $item[ 'resource_code' ];
 					} else {?>

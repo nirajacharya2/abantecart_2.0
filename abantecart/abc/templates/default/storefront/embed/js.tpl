@@ -367,7 +367,6 @@ var init = function() {
 		}
 
 		var abc_populate_cart = function(w_url, url_params){
-			if(!w_url) return;
 			//using local jQuery
 			$ = jQuery;
 			var url = w_url+'?rt=r/embed/js/cart'+url_params;

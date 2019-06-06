@@ -1,8 +1,9 @@
 <div class="footer_block">
-<section id="newslettersignup">
+<div id="newslettersignup">
 <h2><?php echo $heading_title; ?></h2>
+	<div class="news-block-content">
 	<div class="pull-left newsletter"><?php echo $text_signup; ?></div>
-	<div class="pull-right">
+	<div class="pull-right-block">
 		<?php echo $form_open;?>
 			<div class="input-group">
 				<?php foreach($form_fields as $field_name=>$field_value){?>
@@ -15,5 +16,6 @@
 			</div>
 		</form>
 	</div>
-</section>
+	</div>
+</div>
 </div>

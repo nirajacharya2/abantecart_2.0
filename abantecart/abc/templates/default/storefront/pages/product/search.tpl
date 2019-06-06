@@ -7,31 +7,29 @@
 
 	<h4 class="heading4"><?php echo $text_criteria; ?></h4>
 	<div class="form-inline">
-		<fieldset>
-			<div class="form-group col-xs-6 col-sm-2 col-lg-2">
+			<div class="form-group">
 				<div class="input-group">
 				    <?php echo $keyword; ?>&nbsp;
 				</div>
-			</div>		
-			<div class="form-group col-xs-6 col-sm-2 col-lg-2">
+			</div>
+			<div class="form-group">
 				<div class="input-group">
 				    <?php echo $category; ?>&nbsp;
 				</div>
-			</div>		
-			<div class="form-group col-xs-12 col-sm-3 col-lg-3">
+			</div>
+			<div class="form-group">
 				    <?php echo $description; ?>&nbsp;
-			</div>		
-			<div class="form-group col-xs-12 col-sm-3 col-lg-3">
+			</div>
+			<div class="form-group">
 				    <?php echo $model; ?>&nbsp;
-			</div>		
-			<div class="form-group col-xs-12 col-sm-2 col-lg-2">
+			</div>
+			<div class="form-group">
 				<div class="input-group">
 				    <?php echo $submit; ?>
 				</div>
-			</div>		
-		</fieldset>
+			</div>
 	</div>
-			
+
 	<h4 class="heading4"><?php echo $text_search; ?></h4>
 	<?php if ($products) { ?>
 	<div class="sorting well">
@@ -46,18 +44,18 @@
 	</div>
 
 	<?php include( $this->templateResource('pages/product/product_listing.tpl', 'file') ) ?>
-		
+
 	<div class="sorting well">
 		<?php echo $pagination_bootstrap; ?>
 		<div class="btn-group pull-right">
 		</div>
 	</div>
-	
+
 <?php } else { ?>
 		<div>
 			<?php echo $text_empty; ?>
 		</div>
-<?php } ?>		
+<?php } ?>
 
 </div>
 
