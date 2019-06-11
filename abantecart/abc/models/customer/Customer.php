@@ -13,6 +13,7 @@ use abc\models\system\Audit;
 use abc\models\system\Store;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
@@ -98,6 +99,7 @@ class Customer extends BaseModel
      * @var array
      */
     protected $fillable = [
+        "customer_id",
         "store_id",
         "firstname",
         "lastname",
@@ -124,55 +126,297 @@ class Customer extends BaseModel
     ];
 
     protected $rules = [
-        'customer_id'       => 'integer',
-        'store_id'          => 'integer',
-                                //required only when new customer creating
-        'firstname'         => [
-                                'string',
-                                //required only when new customer creating
-                                'required',
-                                'between:1,32'
-                               ],
-        'lastname'          => [
-                                'string',
-                                //required only when new customer creating
-                                'required',
-                                'between:1,32'
-                               ],
-        //Note: rules with regex pattern must be an array
-        'loginname'         => [
-                                'string',
-                                'required_without:customer_id',
-                                //TODO: need to found solution
-                                //'unique:connection.customers',
-                                'between:5,96',
-                                'regex:/^[\w._-]+$/i'
-                               ],
-        'email'             => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'max:96',
-                                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
-                               ],
-        'telephone'         => 'string|max:32',
-        'fax'               => 'string|max:32',
-        'sms'               => 'string|max:32',
-        'salt'              => 'string|max:8',
-        'password'          => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:1,40'
-                               ],
-        'wishlist'          => 'string|nullable',
-        'address_id'        => 'integer|nullable',
-        'status'            => 'integer|digits:1',
-        'advanced_status'   => 'string|max:128',
-        'approved'          => 'integer|digits:1',
-        'customer_group_id' => 'integer|nullable',
-        'ip'                => 'string|max:50',
+        'customer_id'       => [
+                                'checks' => [
+                                            'integer'
+                                            ],
+                                'messages' => [
+                                    '*' => [ 'default_text' => 'Customer ID is not Integer!' ]
+                                ]
+                    ],
+        'store_id'          => [
+                    'checks'   => [
+                        'integer',
+                        //required only when new customer creating
+                        'required_without:customer_id',
+                    ],
+                    'messages' => [
+                        'integer'                  => [
+                            'default_text'   => 'Store ID must be an integer!'
+                        ],
+                        'required_without:customer_id' => [
+                            'default_text'   => 'Store ID required.'
+                        ],
+                    ],
+                ],
+
+        'loginname' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:5,96',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_loginname',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Login name must be alphanumeric only and between 5 and 96 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'firstname' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:1,32',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_firstname',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'First Name must be between 1 and 32 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'lastname' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:1,32',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_lastname',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Last Name must be between 1 and 32 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'email' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'max:96',
+                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_email',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Address must be between 3 and 128 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'telephone' => [
+            'checks'   => [
+                'string',
+                'max:32'
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_telephone',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Telephone number must be less than 32 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'fax' => [
+            'checks'   => [
+                'string',
+                'max:32'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Fax number must be less than 32 characters!',
+                ],
+            ],
+        ],
+
+        'sms' => [
+            'checks'   => [
+                'string',
+                'max:32'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Mobile phone number must be less than 32 characters!',
+                ],
+            ],
+        ],
+
+        'salt' => [
+            'checks'   => [
+                'string',
+                'max:10'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Salt must be less than 8 characters!',
+                ],
+            ],
+        ],
+
+        'password' => [
+            'checks'   => [
+                'string',
+                'required_without:customer_id',
+                'required_with:password_confirmation',
+                'same:password_confirmation',
+                'between:3,40',
+            ],
+            'messages' => [
+                'same' => [
+                    'language_key'   => 'error_confirm',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Password confirmation does not match password!',
+                    'section'        => 'storefront',
+                ],
+                '*' => [
+                    'language_key'   => 'error_password',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Password must be between 4 and 20 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'password_confirmation' => [
+                    'checks'   => [
+                        'string',
+                        'required_without:customer_id',
+                        'between:3,40',
+                    ],
+                    'messages' => [
+                        '*' => [
+                            'language_key'   => 'error_confirm',
+                            'language_block' => 'account/create',
+                            'default_text'   => 'Password confirmation does not match password!',
+                            'section'        => 'storefront',
+                        ],
+                    ],
+                ],
+
+        'wishlist' => [
+            'checks'   => [
+                'string',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Wishlist must be a string!',
+                ],
+            ],
+        ],
+
+        'address_id' => [
+            'checks'   => [
+                'integer',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Address ID must be an integer!',
+                ],
+            ],
+        ],
+
+        'status' => [
+            'checks'   => [
+                'integer',
+                'digits:1'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Status must be 1 or 0 !',
+                ],
+            ],
+        ],
+
+        'advanced_status' => [
+            'checks'   => [
+                'string',
+                'max:128'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Advanced Status must be a string and less than 128 characters!',
+                ],
+            ],
+        ],
+
+        'approved' => [
+            'checks'   => [
+                'integer',
+                'digits:1'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => '"Approved" must be 1 or 0 !',
+                ],
+            ],
+        ],
+
+        'customer_group_id' => [
+            'checks'   => [
+                'integer',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Customer Group ID must be an integer or NULL !',
+                ],
+            ],
+        ],
+
+        'ip' => [
+            'checks'   => [
+                'string',
+                'max:50'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'IP-address must be a less that 50 characters!',
+                ],
+            ],
+        ],
+
     ];
+
+    /** Wrap basic method to implement conditional rules
+     * @param array $data
+     * @param array $messages
+     * @param array $customAttributes
+     *
+     * @return bool|void
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function validate( array $data= [], array $messages = [], array $customAttributes = [])
+    {
+        if(Registry::config()->get( 'prevent_email_as_login' )) {
+            $this->rules['loginname']['checks'][] = 'regex:/^[\w._-]+$/i';
+        }
+        //we cannot to define rule as function in the class body.
+        //so, adding validation rule for uniqueness here
+        $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
+        $this->rules['email']['checks'][] = Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
+        parent::validate($data, $messages, $customAttributes);
+    }
 
     public function getFields()
     {

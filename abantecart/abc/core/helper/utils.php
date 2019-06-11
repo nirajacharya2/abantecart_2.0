@@ -19,6 +19,7 @@
 namespace abc\core\helper;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADataEncryption;
@@ -2057,5 +2058,33 @@ class AHelperUtils extends AHelper
         }
 
         return [$order_id, $email];
+    }
+
+    /**
+     * @param string $key - language definition key
+     * @param string $block - language definition block
+     * @param string $default_text - text in case when text by key not found
+     * @param string $section - can be "storefront" or "admin" or empty(auto)
+     *
+     * @return null|string
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public static function lng(string $key, $block= '', $default_text = '', $section = ''){
+        $registry = Registry::getInstance();
+        if( $section ){
+            $section = $section == 'admin' ? 1 : 0;
+            $language = new ALanguage($registry, $registry::language()->getLanguageCode(), $section);
+
+        }else{
+            $language = Registry::language();
+        }
+
+        $text = $language->get($key, $block);
+        //if text not found - set default
+        if($text == $key){
+            $text = $default_text;
+        }
+        return $text;
     }
 }

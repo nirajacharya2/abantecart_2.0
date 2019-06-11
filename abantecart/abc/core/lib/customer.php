@@ -1303,89 +1303,19 @@ class ACustomer extends ALibBase
         $customer = new Customer();
 
         //validate customer model data
-        try {
-            //validate only if email login is not allowed
-            //only for new accounts
-            if ($config->get('prevent_email_as_login')  && !$isLogged) {
-                $error_messages = ['loginname.*' => $language->get('error_loginname')];
-                $customer->validate($data, $error_messages);
-            }
-
-        }catch(ValidationException $e){
-            static::extractValidationErrors($e->errors(), ['loginname']);
-        }
-
-        //todo: need to remove this section and move this check via validator
-        if(!static::$errors
-            && $config->get('prevent_email_as_login')
-            && !$isLogged //only for new accounts
-            && Customer::getCustomers([ 'filter' => [
-                                                    'search_operator' => 'equal',
-                                                    'loginname'       => $data['loginname']
-                                                ]
-                                            ], 'total_only')
-        ){
-            static::$errors['loginname'] = $language->get('error_loginname_notunique');
-        }
-
-        //validate customer model data
         try{
-            $error_messages = [];
-            $error_messages['firstname.*'] = $language->get('error_firstname');
-            $error_messages['lastname.*'] = $language->get('error_lastname');
-            $error_messages['password.*'] = $language->get('error_password');
-            $error_messages['email.*'] = $language->get('error_email');
-            $customer->validate($data, $error_messages);
+            $customer->validate($data);
         }catch(ValidationException $e){
             static::extractValidationErrors($e->errors());
-        }
-
-        //check password length considering html entities (special case for characters " > < & )
-        if ($data['confirm'] != $data['password']) {
-            static::$errors['confirm'] = $language->get('error_confirm');
-        }
-
-        if(!static::$errors) {
-            $filter = [
-                        'search_operator' => 'equal',
-                        'email' => $data['email']
-            ];
-            //if edit data already registered account - exclude it
-            if($isLogged){
-                $filter['exclude'] = [Registry::customer()->getId()];
-            }
-
-            if (Customer::getCustomers( ['filter' => $filter],'total_only') ) {
-                static::$errors['warning'] = $language->get('error_exists');
-            }
         }
 
         //validate address model data
         try{
-            $error_messages = [];
             $address = new Address();
-            $error_messages['firstname.*'] = $language->get('error_firstname');
-            $error_messages['lastname.*'] = $language->get('error_lastname');
-            $error_messages['company.*'] = $language->get('error_company');
-            $error_messages['address_1.*'] = $language->get('error_address_1');
-            $error_messages['address_2.*'] = $language->get('error_address_2');
-            $error_messages['telephone.*'] = $language->get('error_telephone');
-            $error_messages['city.*'] = $language->get('error_city');
-            $error_messages['postcode.*'] = $language->get('error_postcode');
-            $error_messages['country_id.*'] = $language->get('error_country');
-            $error_messages['zone_id.*'] = $language->get('error_zone');
-
-            $address->validate($data, $error_messages);
+            $address->validate($data);
         }catch(ValidationException $e){
-            Registry::log()->write(var_export( $e->errors() ,true));
+           // Registry::log()->write(var_export( $e->errors() ,true));
             static::extractValidationErrors($e->errors());
-        }
-
-        if(isset(static::$errors['country_id'])){
-            static::$errors['country'] = static::$errors['country_id'];
-        }
-        if(isset(static::$errors['zone_id'])){
-            static::$errors['zone'] = static::$errors['zone_id'];
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
@@ -1466,30 +1396,9 @@ class ACustomer extends ALibBase
         $customer = new Customer();
         //validate customer model data
         try{
-            $error_messages = [];
-            $error_messages['firstname.*'] = $language->get('error_firstname');
-            $error_messages['lastname.*'] = $language->get('error_lastname');
-            $error_messages['password.*'] = $language->get('error_password');
-            $error_messages['email.*'] = $language->get('error_email');
-
-            $customer->validate($data, $error_messages);
+            $customer->validate($data);
         }catch(ValidationException $e){
             static::extractValidationErrors($e->errors());
-        }
-
-        if(!static::$errors) {
-            if (Customer::getCustomers(
-                    [
-                        'filter' => [
-                            'search_operator' => 'equal',
-                            'email' => $data['email']
-                        ]
-                    ],
-                    'total_only'
-                )
-            ) {
-                static::$errors['warning'] = $language->get('error_exists');
-            }
         }
 
         //validate IM URIs
@@ -1526,9 +1435,6 @@ class ACustomer extends ALibBase
                 }
             }
             if($errArr) {
-               /* if(isset(static::$errors[$k])){
-                    static::$errors[$k] .= " ";
-                }*/
                 static::$errors[$k] = implode(' ', $errArr);
             }
         }

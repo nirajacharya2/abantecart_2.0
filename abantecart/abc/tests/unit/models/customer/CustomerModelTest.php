@@ -2,6 +2,7 @@
 namespace abc\tests\unit;
 
 use abc\models\customer\Customer;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class CustomerModelTest
@@ -13,6 +14,59 @@ class CustomerModelTest extends ATestCase{
         //init
     }
 
+  /*  public function testValidator()
+    {
+        //validate new customer
+        $customer = new Customer(
+            [
+                'store_id' => 'ewewew',
+                'loginname' => '1@abantecart.com',
+                'firstname' => '',
+                'lastname' => '',
+                'password' => '12',
+                'password_confirmation' => '12',
+                'email' => 'error_1@1',
+                'telephone' => 'error max_length_1234567890123456789012345678901234567890',
+                'fax' => 'error max_length_1234567890123456789012345678901234567890',
+                'sms' => 'error max_length_1234567890123456789012345678901234567890',
+                'salt' => 'error123456789',
+                'wishlist' => 'ab',
+                'address_id' => 'asadff'
+            ]
+        );
+        $errors = [];
+        try{
+            $customer->validate();
+        }catch(ValidationException $e){
+            $errors = $customer->errors()['validation'];
+        }
+
+        $this->assertEquals(11, count($errors));
+
+        //validate with customer_id
+
+        //validate new customer
+        $customer = new Customer(
+            [   'customer_id' => 1,
+                'telephone' => '12345',
+                'fax' => '12458',
+                'sms' => '1254',
+                'salt' => 'salt',
+                'wishlist' => ['a','b', 'c'],
+                'address_id' => 1
+            ]
+        );
+        $errors = [];
+        try{
+            $customer->validate();
+        }catch(ValidationException $e){
+            $errors = $customer->errors()['validation'];
+        }
+
+        $this->assertEquals(0, count($errors));
+
+    }*/
+
     public function testUpdate()
     {
         /**
@@ -22,6 +76,27 @@ class CustomerModelTest extends ATestCase{
         $customer->update(['sms' => '123456789', 'password' => '1234567890', 'loginname' => 'unittest']);
         $this->assertEquals('123456789', $customer->sms);
         $customer->update(['sms' => '']);
+
+        //validation test
+        $errors = [];
+
+        try {
+            $customer->validate(['loginname' => 'unittest']);
+        }catch (ValidationException $e){
+            $errors = $customer->errors()['validation'];
+            var_Dump($errors);
+        }
+        $this->assertEquals(0, count($errors));
+
+        try {
+            //change customer and try check unique loginname for him
+            $customer = Customer::find(8);
+            $customer->validate(['loginname' => 'unittest']);
+        }catch (ValidationException $e){
+            $errors = $customer->errors()['validation'];
+        }
+        $this->assertEquals(1, count($errors));
+
     }
 
     public function testEditCustomerNotifications(){

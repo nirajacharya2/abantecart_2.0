@@ -9,6 +9,11 @@ use abc\models\locale\Country;
 use abc\models\locale\Zone;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+function lng()
+{
+    return '';
+}
+
 /**
  * Class Address
  *
@@ -27,6 +32,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Customer $customer
  * @property Country $country
  * @property Zone $zone
+ *
+ * @method static Address find(int $address_id) Address
  *
  * @package abc\models
  */
@@ -53,6 +60,7 @@ class Address extends BaseModel
     ];
 
     protected $fillable = [
+        'address_id',
         'customer_id',
         'company',
         'firstname',
@@ -66,45 +74,182 @@ class Address extends BaseModel
     ];
 
     protected $rules = [
-        'address_id'        => 'integer',
-        'customer_id'       => [
-                                'required_with:address_id',
-                                'integer',
-                                ],
-        'company'           => 'string|max:32',
-        'firstname'         => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:1,32'
-                               ],
-        'lastname'          => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:1,32'
-                               ],
-        'address_1'         => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:3,128'
-                               ],
-        'address_2'         => 'string|max:128',
-        'postcode'          => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:3,10'
-                               ],
-        'city'              => [
-                                'string',
-                                //required only when new customer creating
-                                'required_without:customer_id',
-                                'between:3,128'
-                               ],
-        'country_id'        => 'integer|required_without:customer_id',
-        'zone_id'           => 'integer|required_without:customer_id'
+        'address_id'  => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key'   => 'error_integer',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Address ID must be an integer!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+        'customer_id' => [
+            'checks'   => [
+                'integer',
+                'required_with:address_id',
+            ],
+            'messages' => [
+                'integer'                  => [
+                    'language_key'   => 'error_integer',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Customer ID must be an integer!',
+                    'section'        => 'storefront',
+                ],
+                'required_with:address_id' => [
+                    'language_key'   => 'error_required_with_address_id',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Customer ID required.',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+        'company'     => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_company',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Company Name must be less than 32 character!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'firstname' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:1,32',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_firstname',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'First Name must be between 1 and 32 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'lastname' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:1,32',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_lastname',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Last Name must be between 1 and 32 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'address_1' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:3,128',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_address_1',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Address must be between 3 and 128 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'address_2' => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_address_2',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Address must be less than 128 character!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'postcode' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:2,10',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_postcode',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Zip/postal code must be between 2 and 10 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'city' => [
+            'checks'   => [
+                'string',
+                //required only when new customer creating
+                'required_without:customer_id',
+                'between:3,128',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_city',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'City must be between 3 and 128 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+
+        'country_id' => [
+            'checks'   => [
+                'integer',
+                'required_without:customer_id',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_country',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Please select a country!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
+        'zone_id'    => [
+            'checks'   => [
+                'integer',
+                'required_without:customer_id',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_zone',
+                    'language_block' => 'account/address',
+                    'default_text'   => 'Please select a region / state!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
     ];
 
     /**
@@ -154,13 +299,13 @@ class Address extends BaseModel
      */
     public static function getAddressesByCustomerId(int $customer_id)
     {
-        if(!$customer_id){
+        if (!$customer_id) {
             return [];
         }
 
         $output = [];
         $rows = static::where('customer_id', '=', $customer_id)->get()->toArray();
-        if(!$rows){
+        if (!$rows) {
             return [];
         }
         /**

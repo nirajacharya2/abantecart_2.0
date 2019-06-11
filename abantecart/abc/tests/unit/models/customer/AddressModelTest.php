@@ -61,6 +61,7 @@ class AddressModelTest extends ATestCase{
              'zone_id'
             ],
             array_keys($errors));
+
         $errors = [];
         $address = Address::find(1);
         //success
@@ -86,6 +87,7 @@ class AddressModelTest extends ATestCase{
         $errors = [];
         //try save without customer_id and address_id - expect errors
         try {
+            $address = new Address();
             $address->validate(
                 [   'company' => 'abc',
                     'firstname' => '',

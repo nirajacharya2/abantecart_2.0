@@ -111,7 +111,7 @@
 	</definition>
 	<definition>
 		<key>error_loginname</key>
-		<value><![CDATA[Login name must be alphanumeric only and between 5 and 64 characters!]]></value>
+		<value><![CDATA[Login name must be alphanumeric only and between 5 and 96 characters!]]></value>
 	</definition>
 	<definition>
 		<key>error_loginname_notunique</key>

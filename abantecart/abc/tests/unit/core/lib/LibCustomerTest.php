@@ -16,24 +16,24 @@ class LibCustomerTest extends ATestCase{
         Registry::config()->set('prevent_email_as_login', 1);
         //set agreement with policy rules
         Registry::config()->set('config_account_id', 1);
-        $errors = ACustomer::validateRegistrationData(
-            [
-                'loginname' => '1@abantecart.com',
-                'firstname' => '',
-                'lastname' => '',
-                'password' => '&nbsp;',
-                'confirm' => '***',
-                'email' => '1@1',
-                'company' => '123456789012345678901234567890123', //33 chars, 32 allowed
-                'address_1' => '',
-                'address_2' => '',
-                'city' => '',
-                'postcode' => '',
-                'country_id' => 'false',
-                'zone_id' => 'false',
-            ]
-        );
-        $this->assertEquals(13, count($errors));
+        $data = [
+            'loginname' => '1@abantecart.com',
+            'firstname' => '',
+            'lastname' => '',
+            'password' => '&n',
+            'password_confirmation' => '&n12',
+            'email' => '1@1',
+            'company' => '123456789012345678901234567890123', //33 chars, 32 allowed
+            'address_1' => '',
+            'address_2' => '',
+            'city' => '',
+            'postcode' => '',
+            'country_id' => 'false',
+            'zone_id' => 'false',
+        ];
+        $errors = ACustomer::validateRegistrationData( $data );
+
+        $this->assertEquals(11, count($errors));
 
         $errors = ACustomer::validateSubscribeData(
             [
@@ -41,19 +41,25 @@ class LibCustomerTest extends ATestCase{
                 'firstname' => '',
                 'lastname' => '',
                 'email' => '111@aban',
-                'password' => '12345'
+                //note: password error will be returned because password confirmation absent
+                'password' => '12345',
+                'password_confirmation' => ''
             ]
         );
-        $this->assertEquals(3, count($errors));
+
+        $this->assertEquals(6, count($errors));
+
         $errors = ACustomer::validateSubscribeData(
             [
                 'loginname' => 'eee_loginname',
                 'firstname' => 'eeee_firstname',
                 'lastname' => 'eeee_lastname',
                 'email' => '111@abantecart.com',
-                'password' => '12345'
+                'password' => '12345',
+                'password_confirmation' => '12345'
             ]
         );
+
         $this->assertEquals(0, count($errors));
     }
 

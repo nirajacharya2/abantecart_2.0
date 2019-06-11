@@ -332,16 +332,54 @@ class BaseModel extends OrmModel
      *
      * @return bool
      * @throws ValidationException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
         $data = !$data ? $this->getDirty() : $data;
+        //do merging to make required_without rule work
+        $data = array_merge($this->getAttributes(), $data);
         if ($rules = $this->rules()) {
-            $v = new Validator(new ValidationTranslator(), $data, $rules, $messages, $customAttributes);
-            $connections = [Registry::db()->connection()];
-            $presenceVerifier = new DatabasePresenceVerifier(new ConnectionResolver($connections));
+            $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
+            if(!$messages){
+                foreach($rules as $attributeName => $item){
+                    //check data for confirmation such as password
+                    if( isset( $rules[$attributeName.'_confirmation'] )
+                        && !isset($data[$attributeName.'_confirmation'])
+                    ){
+                        $data[$attributeName.'_confirmation'] = $data[$attributeName];
+                    }
+                    $msg = $item['messages'];
+                    foreach($msg as $subRule => $langParams) {
+                        $subRule = $attributeName.'.'.$subRule;
+                        if($langParams['language_key']) {
+                            $messages[$subRule] = H::lng(
+                                $langParams['language_key'],
+                                $langParams['language_block'],
+                                $langParams['default_text'],
+                                $langParams['section']
+                            );
+                        }else{
+                            $messages[$subRule] = $langParams['default_text'];
+                        }
+                    }
+                }
+            }
+
+            $v = new Validator(new ValidationTranslator(), $data, $validateRules, $messages, $customAttributes);
+
+            $connections = ['default' => Registry::db()->connection()];
+            $resolver = new ConnectionResolver($connections);
+            $resolver->setDefaultConnection('default');
+            $presenceVerifier = new DatabasePresenceVerifier($resolver);
             $v->setPresenceVerifier($presenceVerifier);
             $this->validator = $v;
+
+            //call validation hooks of extensions
+            $v->after(function ($data) {
+                //Registry::extensions()->hk_ValidateData($this,[$data]);
+            });
             try {
                 $v->validate();
             } catch (ValidationException $e) {
