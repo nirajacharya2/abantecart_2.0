@@ -1282,7 +1282,10 @@ class ACustomer extends ALibBase
         }
         $language->load('account/create');
 
-        $data['password'] = htmlspecialchars_decode($data['password']);
+        $customer_id = $data['customer_id'] ? (int)$data['customer_id'] : null;
+        if($data['password']) {
+            $data['password'] = htmlspecialchars_decode($data['password']);
+        }
 
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) && !$isLogged) {
@@ -1300,7 +1303,8 @@ class ACustomer extends ALibBase
                 }
             }
         }
-        $customer = new Customer();
+
+        $customer = $customer_id ? Customer::find($customer_id) : new Customer();
 
         //validate customer model data
         try{
@@ -1372,8 +1376,9 @@ class ACustomer extends ALibBase
             $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
         }
         $language->load('account/create');
-
-        $data['password'] = htmlspecialchars_decode($data['password']);
+        if($data['password']) {
+            $data['password'] = htmlspecialchars_decode($data['password']);
+        }
 
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) ) {
@@ -1392,7 +1397,7 @@ class ACustomer extends ALibBase
             }
         }
 
-        $customer = new Customer();
+        $customer = $data['customer_id'] ? Customer::find($data['customer_id']) : new Customer();
         //validate customer model data
         try{
             $customer->validate($data);

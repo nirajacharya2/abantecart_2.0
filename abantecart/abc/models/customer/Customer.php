@@ -210,10 +210,16 @@ class Customer extends BaseModel
                 'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
             ],
             'messages' => [
+                'unique' => [
+                    'language_key'   => 'error_email_unique',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Email address must be unique! This email already registered',
+                    'section'        => 'storefront',
+                ],
                 '*' => [
                     'language_key'   => 'error_email',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Address must be between 3 and 128 characters!',
+                    'default_text'   => 'Email must be valid!',
                     'section'        => 'storefront',
                 ],
             ],
