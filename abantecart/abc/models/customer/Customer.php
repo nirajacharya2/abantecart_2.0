@@ -270,45 +270,11 @@ class Customer extends BaseModel
             ],
         ],
 
-        'password' => [
-            'checks'   => [
-                'string',
-                'required_without:customer_id',
-                'required_with:password_confirmation',
-                'same:password_confirmation',
-                'between:3,40',
-            ],
-            'messages' => [
-                'same' => [
-                    'language_key'   => 'error_confirm',
-                    'language_block' => 'account/create',
-                    'default_text'   => 'Password confirmation does not match password!',
-                    'section'        => 'storefront',
-                ],
-                '*' => [
-                    'language_key'   => 'error_password',
-                    'language_block' => 'account/create',
-                    'default_text'   => 'Password must be between 4 and 20 characters!',
-                    'section'        => 'storefront',
-                ],
-            ],
-        ],
-
-        'password_confirmation' => [
-                    'checks'   => [
-                        'string',
-                        'required_without:customer_id',
-                        'between:3,40',
-                    ],
-                    'messages' => [
-                        '*' => [
-                            'language_key'   => 'error_confirm',
-                            'language_block' => 'account/create',
-                            'default_text'   => 'Password confirmation does not match password!',
-                            'section'        => 'storefront',
-                        ],
-                    ],
-                ],
+        /**
+         * See password rule into method validate()
+         *
+         * @see validate()
+         */
 
         'wishlist' => [
             'checks'   => [
@@ -415,6 +381,32 @@ class Customer extends BaseModel
         //so, adding validation rule for uniqueness here
         $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
         $this->rules['email']['checks'][] = Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
+
+        if(!$this->customer_id){
+            $this->rules['password'] = [
+                        'checks'   => [
+                            'string',
+                            'required_with:password_confirmation',
+                            'confirmed',
+                            'between:4,40',
+                        ],
+                        'messages' => [
+                            'confirmed' => [
+                                'language_key'   => 'error_confirm',
+                                'language_block' => 'account/create',
+                                'default_text'   => 'Password confirmation does not match password!',
+                                'section'        => 'storefront',
+                            ],
+                            '*' => [
+                                'language_key'   => 'error_password',
+                                'language_block' => 'account/create',
+                                'default_text'   => 'Password must be between 4 and 40 characters!',
+                                'section'        => 'storefront',
+                            ],
+                        ],
+                    ];
+        }
+
         parent::validate($data, $messages, $customAttributes);
     }
 

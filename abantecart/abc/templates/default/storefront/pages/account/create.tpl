@@ -92,9 +92,9 @@
             } ?>">
 				<label class="col-sm-4 control-label"><?php echo $entry_confirm; ?></label>
 				<div class="input-group col-sm-4">
-                    <?php echo $form['fields']['password']['confirm']; ?>
+                    <?php echo $form['fields']['password']['password_confirmation']; ?>
 				</div>
-				<span class="help-block"><?php echo $error_confirm; ?></span>
+				<span class="help-block"><?php echo $error_password; ?></span>
 			</div>
 		</fieldset>
 	</div>

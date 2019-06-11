@@ -340,14 +340,13 @@ class BaseModel extends OrmModel
         $data = !$data ? $this->getDirty() : $data;
         //do merging to make required_without rule work
         $data = array_merge($this->getAttributes(), $data);
+
         if ($rules = $this->rules()) {
             $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
             if(!$messages){
                 foreach($rules as $attributeName => $item){
                     //check data for confirmation such as password
-                    if( isset( $rules[$attributeName.'_confirmation'] )
-                        && !isset($data[$attributeName.'_confirmation'])
-                    ){
+                    if( isset($rules[$attributeName.'_confirmation']) ){
                         $data[$attributeName.'_confirmation'] = $data[$attributeName];
                     }
                     $msg = $item['messages'];

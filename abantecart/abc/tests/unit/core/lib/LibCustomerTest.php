@@ -20,8 +20,8 @@ class LibCustomerTest extends ATestCase{
             'loginname' => '1@abantecart.com',
             'firstname' => '',
             'lastname' => '',
-            'password' => '&n',
-            'password_confirmation' => '&n12',
+            'password' => '&nbsp',
+            'password_confirmation' => '&nbs',
             'email' => '1@1',
             'company' => '123456789012345678901234567890123', //33 chars, 32 allowed
             'address_1' => '',
@@ -33,7 +33,7 @@ class LibCustomerTest extends ATestCase{
         ];
         $errors = ACustomer::validateRegistrationData( $data );
 
-        $this->assertEquals(11, count($errors));
+        $this->assertEquals(12, count($errors));
 
         $errors = ACustomer::validateSubscribeData(
             [
@@ -51,6 +51,7 @@ class LibCustomerTest extends ATestCase{
 
         $errors = ACustomer::validateSubscribeData(
             [
+                'store_id' => 0,
                 'loginname' => 'eee_loginname',
                 'firstname' => 'eeee_firstname',
                 'lastname' => 'eeee_lastname',

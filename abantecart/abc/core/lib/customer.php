@@ -1306,16 +1306,15 @@ class ACustomer extends ALibBase
         try{
             $customer->validate($data);
         }catch(ValidationException $e){
-            static::extractValidationErrors($e->errors());
+            static::extractValidationErrors($customer->errors()['validation']);
         }
 
         //validate address model data
+        $address = new Address();
         try{
-            $address = new Address();
             $address->validate($data);
         }catch(ValidationException $e){
-           // Registry::log()->write(var_export( $e->errors() ,true));
-            static::extractValidationErrors($e->errors());
+            static::extractValidationErrors($address->errors()['validation']);
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
@@ -1398,7 +1397,7 @@ class ACustomer extends ALibBase
         try{
             $customer->validate($data);
         }catch(ValidationException $e){
-            static::extractValidationErrors($e->errors());
+            static::extractValidationErrors($customer->errors()['validation']);
         }
 
         //validate IM URIs
@@ -1429,11 +1428,11 @@ class ACustomer extends ALibBase
     protected static function extractValidationErrors(array $errors)
     {
         foreach($errors as $k => $errArr){
-            foreach($errArr as $i => $error_text){
+            /*foreach($errArr as $i => $error_text){
                 if(strpos($error_text,'error_')===0){
                     unset($errArr[$i]);
                 }
-            }
+            }*/
             if($errArr) {
                 static::$errors[$k] = implode(' ', $errArr);
             }

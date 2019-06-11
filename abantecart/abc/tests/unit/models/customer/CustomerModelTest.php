@@ -73,7 +73,14 @@ class CustomerModelTest extends ATestCase{
          * @var Customer $customer
          */
         $customer = Customer::find(9);
-        $customer->update(['sms' => '123456789', 'password' => '1234567890', 'loginname' => 'unittest']);
+        $customer->update(
+            [
+                'sms' => '123456789',
+                'password' => '1234567890',
+                'loginname' => 'unittest',
+                'email' => 'unittest@abantecart.com'
+            ]
+        );
         $this->assertEquals('123456789', $customer->sms);
         $customer->update(['sms' => '']);
 
@@ -82,6 +89,7 @@ class CustomerModelTest extends ATestCase{
 
         try {
             $customer->validate(['loginname' => 'unittest']);
+            $customer->validate(['email' => 'unittest@abantecart.com']);
         }catch (ValidationException $e){
             $errors = $customer->errors()['validation'];
             var_Dump($errors);

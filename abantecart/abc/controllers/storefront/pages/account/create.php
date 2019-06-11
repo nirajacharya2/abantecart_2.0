@@ -51,6 +51,7 @@ class ControllerPagesAccountCreate extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
         $request_data = $this->request->post;
+        $request_data['store_id'] = $this->config->get('store_id');
         if ($this->request->is_POST()) {
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors = array_merge(
@@ -247,8 +248,9 @@ class ControllerPagesAccountCreate extends AController
                 'required' => true,
             ]);
 
+        $this->data['entry_zone_id'] = $this->language->get('entry_zone');
         $this->view->assign('zone_id', $this->request->post['zone_id'], 'FALSE');
-        $this->data['form']['fields']['address']['zone'] = $form->getFieldHtml(
+        $this->data['form']['fields']['address']['zone_id'] = $form->getFieldHtml(
             [
                 'type'     => 'selectbox',
                 'name'     => 'zone_id',
@@ -272,7 +274,8 @@ class ControllerPagesAccountCreate extends AController
         foreach ($countries as $item) {
             $options[$item['country_id']] = $item['name'];
         }
-        $this->data['form']['fields']['address']['country'] = $form->getFieldHtml(
+        $this->data['entry_country_id'] = $this->language->get('entry_country');
+        $this->data['form']['fields']['address']['country_id'] = $form->getFieldHtml(
             [
                 'type'     => 'selectbox',
                 'name'     => 'country_id',
@@ -290,11 +293,11 @@ class ControllerPagesAccountCreate extends AController
                 'value'    => $this->request->post['password'],
                 'required' => true,
             ]);
-        $this->data['form']['fields']['password']['confirm'] = $form->getFieldHtml(
+        $this->data['form']['fields']['password']['password_confirmation'] = $form->getFieldHtml(
             [
                 'type'     => 'password',
-                'name'     => 'confirm',
-                'value'    => $this->request->post['confirm'],
+                'name'     => 'password_confirmation',
+                'value'    => $this->request->post['password_confirmation'],
                 'required' => true,
             ]);
 
@@ -354,7 +357,7 @@ class ControllerPagesAccountCreate extends AController
         $this->data['error_email'] = $this->errors['email'];
         $this->data['error_telephone'] = $this->errors['telephone'];
         $this->data['error_password'] = $this->errors['password'];
-        $this->data['error_confirm'] = $this->errors['confirm'];
+        $this->data['error_confirm'] = $this->errors['password_confirmation'];
         $this->data['error_address_1'] = $this->errors['address_1'];
         $this->data['error_city'] = $this->errors['city'];
         $this->data['error_postcode'] = $this->errors['postcode'];
