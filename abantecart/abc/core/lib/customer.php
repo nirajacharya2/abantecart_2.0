@@ -1310,7 +1310,7 @@ class ACustomer extends ALibBase
         try{
             $customer->validate($data);
         }catch(ValidationException $e){
-            static::extractValidationErrors($customer->errors()['validation']);
+            H::SimplifyValidationErrors($customer->errors()['validation'], static::$errors);
         }
 
         //validate address model data
@@ -1318,7 +1318,7 @@ class ACustomer extends ALibBase
         try{
             $address->validate($data);
         }catch(ValidationException $e){
-            static::extractValidationErrors($address->errors()['validation']);
+            H::SimplifyValidationErrors($address->errors()['validation'], static::$errors);
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
@@ -1402,7 +1402,7 @@ class ACustomer extends ALibBase
         try{
             $customer->validate($data);
         }catch(ValidationException $e){
-            static::extractValidationErrors($customer->errors()['validation']);
+            H::SimplifyValidationErrors($customer->errors()['validation'], static::$errors);
         }
 
         //validate IM URIs
@@ -1425,22 +1425,5 @@ class ACustomer extends ALibBase
 
         Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
         return static::$errors;
-    }
-
-    /**
-     * @param array $errors
-     */
-    protected static function extractValidationErrors(array $errors)
-    {
-        foreach($errors as $k => $errArr){
-            /*foreach($errArr as $i => $error_text){
-                if(strpos($error_text,'error_')===0){
-                    unset($errArr[$i]);
-                }
-            }*/
-            if($errArr) {
-                static::$errors[$k] = implode(' ', $errArr);
-            }
-        }
     }
 }

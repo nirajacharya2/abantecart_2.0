@@ -20,15 +20,13 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\lib\ADataset;
 use abc\core\lib\AFile;
+use abc\models\customer\Address;
+use H;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerPagesCheckoutCart
@@ -37,15 +35,15 @@ if ( ! class_exists('abc\core\ABC')) {
  */
 class ControllerPagesCheckoutCart extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     /**
      * NOTE: this method have a few hk_processData calls.
      */
     public function main()
     {
-        $error_msg = array();
+        $error_msg = [];
 
         $cart_rt = 'checkout/cart';
         $product_rt = 'product/product';
@@ -64,7 +62,7 @@ class ControllerPagesCheckoutCart extends AController
             if (isset($this->request->get['option'])) {
                 $option = $this->request->get['option'];
             } else {
-                $option = array();
+                $option = [];
             }
 
             if (isset($this->request->get['quantity'])) {
@@ -93,7 +91,7 @@ class ControllerPagesCheckoutCart extends AController
                 if ($this->request->is_POST()) {
                     $post = $this->request->post;
                     //if this is coupon, validate and apply
-                    if ((isset($post['reset_coupon']) || isset($post['coupon'])) && ! $this->csrftoken->isTokenValid()) {
+                    if ((isset($post['reset_coupon']) || isset($post['coupon'])) && !$this->csrftoken->isTokenValid()) {
                         $this->error['error_warning'] = $this->language->get('error_unknown');
                     } else {
                         if (isset($post['reset_coupon'])) {
@@ -123,7 +121,7 @@ class ControllerPagesCheckoutCart extends AController
 
                     if (isset($post['quantity'])) {
                         //we update cart
-                        if ( ! is_array($post['quantity'])) {
+                        if (!is_array($post['quantity'])) {
 
                             $this->loadModel('catalog/product', 'storefront');
                             $product_id = $post['product_id'];
@@ -131,31 +129,32 @@ class ControllerPagesCheckoutCart extends AController
                             if (isset($post['option'])) {
                                 $options = $post['option'];
                             } else {
-                                $options = array();
+                                $options = [];
                             }
 
                             //for FILE-attributes
-                            if (AHelperUtils::has_value($this->request->files['option']['name'])) {
+                            if (H::has_value($this->request->files['option']['name'])) {
 
                                 $fm = new AFile();
                                 foreach ($this->request->files['option']['name'] as $id => $name) {
 
                                     $attribute_data = $this->model_catalog_product->getProductOption($product_id, $id);
                                     $attribute_data['settings'] = unserialize($attribute_data['settings']);
-                                    $file_path_info = $fm->getUploadFilePath($attribute_data['settings']['directory'], $name);
+                                    $file_path_info =
+                                        $fm->getUploadFilePath($attribute_data['settings']['directory'], $name);
 
                                     $options[$id] = $file_path_info['name'];
 
-                                    if ( ! AHelperUtils::has_value($name)) {
+                                    if (!H::has_value($name)) {
                                         continue;
                                     }
 
-                                    if ($attribute_data['required'] && ! $this->request->files['option']['size'][$id]) {
+                                    if ($attribute_data['required'] && !$this->request->files['option']['size'][$id]) {
                                         $this->session->data['error'] = $this->language->get('error_required_options');
                                         abc_redirect($_SERVER['HTTP_REFERER']);
                                     }
 
-                                    $file_data = array(
+                                    $file_data = [
                                         'option_id' => $id,
                                         'name'      => $file_path_info['name'],
                                         'path'      => $file_path_info['path'],
@@ -163,42 +162,45 @@ class ControllerPagesCheckoutCart extends AController
                                         'tmp_name'  => $this->request->files['option']['tmp_name'][$id],
                                         'error'     => $this->request->files['option']['error'][$id],
                                         'size'      => $this->request->files['option']['size'][$id],
-                                    );
+                                    ];
 
                                     $file_errors = $fm->validateFileOption($attribute_data['settings'], $file_data);
 
-                                    if (AHelperUtils::has_value($file_errors)) {
+                                    if (H::has_value($file_errors)) {
                                         $this->session->data['error'] = implode('<br/>', $file_errors);
                                         abc_redirect($_SERVER['HTTP_REFERER']);
                                     } else {
                                         $result = move_uploaded_file($file_data['tmp_name'], $file_path_info['path']);
 
-                                        if ( ! $result || $this->request->files['package_file']['error']) {
-                                            $this->session->data['error'] .= '<br>Error: '.AHelperUtils::getTextUploadError($this->request->files['option']['error'][$id]);
+                                        if (!$result || $this->request->files['package_file']['error']) {
+                                            $this->session->data['error'] .= '<br>Error: '
+                                                .H::getTextUploadError($this->request->files['option']['error'][$id]);
                                             abc_redirect($_SERVER['HTTP_REFERER']);
                                         }
                                     }
 
                                     $dataset = new ADataset('file_uploads', 'admin');
                                     $dataset->addRows(
-                                        array(
+                                        [
                                             'date_added' => date("Y-m-d H:i:s", time()),
                                             'name'       => $file_path_info['name'],
                                             'type'       => $file_data['type'],
                                             'section'    => 'product_option',
                                             'section_id' => $attribute_data['attribute_id'],
                                             'path'       => $file_path_info['path'],
-                                        )
+                                        ]
                                     );
 
                                 }
                             }
 
-                            if ($text_errors = $this->model_catalog_product->validateProductOptions($product_id, $options)) {
+                            if ($text_errors =
+                                $this->model_catalog_product->validateProductOptions($product_id, $options)) {
                                 $this->session->data['error'] = $text_errors;
                                 //send options values back via _GET
-                                $url = '&'.http_build_query(array('option' => $post['option']));
-                                abc_redirect($this->html->getSecureURL($product_rt, '&product_id='.$post['product_id'].$url));
+                                $url = '&'.http_build_query(['option' => $post['option']]);
+                                abc_redirect($this->html->getSecureURL($product_rt,
+                                    '&product_id='.$post['product_id'].$url));
                             }
 
                             $this->cart->add($post['product_id'], $post['quantity'], $options);
@@ -239,40 +241,40 @@ class ControllerPagesCheckoutCart extends AController
         $this->document->resetBreadcrumbs();
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get('text_home'),
                 'separator' => false,
-            ));
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL('checkout/cart'),
                 'text'      => $this->language->get('text_basket'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         if ($this->cart->hasProducts()) {
 
-            if ( ! $this->cart->hasStock() && ! $this->config->get('config_stock_checkout')) {
+            if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
                 $error_msg[] = $this->language->get('error_stock');
             }
 
             $this->loadModel('tool/seo_url', 'storefront');
 
             $form = new AForm();
-            $form->setForm(array('form_name' => 'cart'));
+            $form->setForm(['form_name' => 'cart']);
             $this->data['form']['form_open'] = $form->getFieldHtml(
-                array(
+                [
                     'type'   => 'form',
                     'name'   => 'cart',
                     'action' => $this->html->getSecureURL($cart_rt),
-                )
+                ]
             );
 
             $cart_products = $this->cart->getProducts();
 
-            $product_ids = array();
+            $product_ids = [];
             foreach ($cart_products as $result) {
                 $product_ids[] = (int)$result['product_id'];
             }
@@ -285,9 +287,9 @@ class ControllerPagesCheckoutCart extends AController
                 $this->config->get('config_image_cart_height')
             );
 
-            $products = array();
+            $products = [];
             foreach ($cart_products as $result) {
-                $option_data = array();
+                $option_data = [];
                 $thumbnail = $thumbnails[$result['product_id']];
 
                 foreach ($result['option'] as $option) {
@@ -298,7 +300,7 @@ class ControllerPagesCheckoutCart extends AController
 
                     $value = $option['value'];
                     // hide binary value for checkbox
-                    if ($option['element_type'] == 'C' && in_array($value, array(0, 1))) {
+                    if ($option['element_type'] == 'C' && in_array($value, [0, 1])) {
                         $value = '';
                     }
 
@@ -313,28 +315,28 @@ class ControllerPagesCheckoutCart extends AController
                         }
                     }
 
-                    $option_data[] = array(
+                    $option_data[] = [
                         'name'  => $option['name'],
                         'value' => $value,
                         'title' => $title,
-                    );
+                    ];
 
                     // product image by option value
-                    $mSizes = array(
+                    $mSizes = [
                         'main'  =>
-                            array(
-                                'width' => $this->config->get('config_image_cart_width'),
-                                'height' => $this->config->get('config_image_cart_height')
-                            ),
-                        'thumb' => array(
-                            'width' =>  $this->config->get('config_image_cart_width'),
-                            'height' => $this->config->get('config_image_cart_height')
-                        ),
-                    );
-
+                            [
+                                'width'  => $this->config->get('config_image_cart_width'),
+                                'height' => $this->config->get('config_image_cart_height'),
+                            ],
+                        'thumb' => [
+                            'width'  => $this->config->get('config_image_cart_width'),
+                            'height' => $this->config->get('config_image_cart_height'),
+                        ],
+                    ];
 
                     $main_image =
-                        $resource->getResourceAllObjects('product_option_value', $option['product_option_value_id'], $mSizes, 1, false);
+                        $resource->getResourceAllObjects('product_option_value', $option['product_option_value_id'],
+                            $mSizes, 1, false);
 
                     if (!empty($main_image)) {
                         $thumbnail['origin'] = $main_image['origin'];
@@ -345,15 +347,15 @@ class ControllerPagesCheckoutCart extends AController
                     }
                 }
 
-                $price_with_tax = $this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax'));
+                $price_with_tax =
+                    $this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax'));
 
-
-                $products[] = array(
+                $products[] = [
                     'remove'     => $form->getFieldHtml(
-                        array(
+                        [
                             'type' => 'checkbox',
                             'name' => 'remove['.$result['key'].']',
-                        )),
+                        ]),
                     'remove_url' => $this->html->getSecureURL($cart_rt, '&remove='.$result['key']),
                     'key'        => $result['key'],
                     'name'       => $result['name'],
@@ -361,37 +363,39 @@ class ControllerPagesCheckoutCart extends AController
                     'thumb'      => $thumbnail,
                     'option'     => $option_data,
                     'quantity'   => $form->getFieldHtml(
-                        array(
+                        [
                             'type'  => 'input',
                             'name'  => 'quantity['.$result['key'].']',
                             'value' => $result['quantity'],
                             'attr'  => ' size="3" ',
                             'style' => 'short',
-                        )),
+                        ]),
                     'stock'      => $result['stock'],
                     'price'      => $this->currency->format($price_with_tax),
                     'total'      => $this->currency->format_total($price_with_tax, $result['quantity']),
-                    'href'       => $this->html->getSEOURL($product_rt, '&product_id='.$result['product_id'].'&key='.$result['key'], true),
-                );
+                    'href'       => $this->html->getSEOURL($product_rt,
+                        '&product_id='.$result['product_id'].'&key='.$result['key'], true),
+                ];
             }
 
             $this->data['products'] = $products;
             $this->data['form']['update'] = $form->getFieldHtml(
-                array(
+                [
                     'type' => 'submit',
                     'name' => $this->language->get('button_update'),
-                ));
+                ]);
 
             $this->data['form']['checkout'] = $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'checkout',
                     'text'  => $this->language->get('button_checkout'),
                     'style' => 'button',
-                ));
+                ]);
 
             if ($this->config->get('config_cart_weight')) {
-                $this->data['weight'] = $this->weight->format($this->cart->getWeight(), $this->config->get('config_weight_class'));
+                $this->data['weight'] =
+                    $this->weight->format($this->cart->getWeight(), $this->config->get('config_weight_class'));
             } else {
                 $this->data['weight'] = false;
             }
@@ -406,13 +410,13 @@ class ControllerPagesCheckoutCart extends AController
                 $this->data['continue'] = $this->html->getHomeURL();
             }
             $this->data['form']['continue_shopping'] = $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'continue_shopping',
                     'text'  => $this->language->get('button_shopping'),
                     'style' => 'button',
                     'href'  => $this->data['continue'],
-                )
+                ]
             );
 
             $this->data['checkout'] = $this->html->getSecureURL($checkout_rt);
@@ -421,49 +425,56 @@ class ControllerPagesCheckoutCart extends AController
             #Check if order total max/min is set and met
             $cf_total_min = $this->config->get('total_order_minimum');
             $cf_total_max = $this->config->get('total_order_maximum');
-            if ( ! $this->cart->hasMinRequirement()) {
+            if (!$this->cart->hasMinRequirement()) {
                 $this->data['form']['checkout'] = '';
-                $error_msg[] = sprintf($this->language->get('error_order_minimum'), $this->currency->format($cf_total_min));
+                $error_msg[] =
+                    sprintf($this->language->get('error_order_minimum'), $this->currency->format($cf_total_min));
             }
-            if ( ! $this->cart->hasMaxRequirement()) {
+            if (!$this->cart->hasMaxRequirement()) {
                 $this->data['form']['checkout'] = '';
-                $error_msg[] = sprintf($this->language->get('error_order_maximum'), $this->currency->format($cf_total_max));
+                $error_msg[] =
+                    sprintf($this->language->get('error_order_maximum'), $this->currency->format($cf_total_max));
             }
 
             //prepare coupon display
             if ($this->config->get('config_coupon_on_cart_page')) {
                 $this->view->assign('coupon_status', $this->config->get('coupon_status'));
                 $action = $this->html->getSecureURL($cart_rt);
-                $coupon_form = $this->dispatch('blocks/coupon_codes', array('action' => $action));
+                $coupon_form = $this->dispatch('blocks/coupon_codes', ['action' => $action]);
                 $this->view->assign('coupon_form', $coupon_form->dispatchGetOutput());
             }
 
             if ($this->config->get('config_shipping_tax_estimate')) {
                 $form = new AForm();
-                $form->setForm(array('form_name' => 'estimate'));
+                $form->setForm(['form_name' => 'estimate']);
                 $this->data['form_estimate']['form_open'] = $form->getFieldHtml(
-                    array(
+                    [
                         'type'   => 'form',
                         'name'   => 'estimate',
                         'action' => $this->html->getSecureURL($cart_rt),
-                    ));
+                    ]);
                 $this->data['estimates_enabled'] = true;
             }
             //try to get shipping address details if we have them
             $country_id = $this->config->get('config_country_id');
             $postcode = $zone_id = '';
-            $zone_data = array();
+            $zone_data = [];
             if ($this->session->data['shipping_address_id']) {
-                $this->loadModel('account/address', 'storefront');
-                $shipping_address = $this->model_account_address->getAddress($this->session->data['shipping_address_id']);
+                $shipping_address = [];
+                if($address = Address::find($this->session->data['shipping_address_id'])){
+                    $shipping_address = $address->toArray();
+                }
+
                 $postcode = $shipping_address['postcode'];
                 $country_id = $shipping_address['country_id'];
                 $zone_id = $shipping_address['zone_id'];
             }
             // use default address of customer for estimate form whe shipping address is unknown
-            if ( ! $zone_id && $this->customer->isLogged()) {
-                $this->loadModel('account/address', 'storefront');
-                $payment_address = $this->model_account_address->getAddress($this->customer->getAddressId());
+            if (!$zone_id && $this->customer->isLogged()) {
+                $payment_address = [];
+                if($address = Address::find($this->session->data['payment_address_id'])){
+                    $payment_address = $address->toArray();
+                }
                 $postcode = $payment_address['postcode'];
                 $country_id = $payment_address['country_id'];
                 $zone_id = $payment_address['zone_id'];
@@ -484,28 +495,28 @@ class ControllerPagesCheckoutCart extends AController
             }
 
             $this->data['form_estimate']['postcode'] = $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'input',
                     'name'  => 'postcode',
                     'value' => $postcode,
                     'style' => 'short',
-                ));
+                ]);
 
             $this->data['form_estimate']['country_zones'] = $form->getFieldHtml(
-                array(
+                [
                     'type'        => 'zones',
                     'name'        => 'country',
                     'submit_mode' => 'id',
                     'value'       => $country_id,
                     'zone_name'   => $zone_data['name'],
                     'zone_value'  => $zone_id,
-                ));
+                ]);
 
             $this->data['form_estimate']['submit'] = $form->getFieldHtml(
-                array(
+                [
                     'type' => 'submit',
                     'name' => $this->language->get('button_text_estimate'),
-                ));
+                ]);
 
             if ($this->session->data['error']) {
                 if (is_array($this->session->data['error'])) {
@@ -524,13 +535,13 @@ class ControllerPagesCheckoutCart extends AController
             $this->data['text_error'] = $this->language->get('text_error');
 
             $this->data['button_continue'] = $this->html->buildElement(
-                array(
+                [
                     'name'  => 'continue',
                     'type'  => 'button',
                     'text'  => $this->language->get('button_continue'),
                     'href'  => $this->html->getHomeURL(),
                     'style' => 'button',
-                ));
+                ]);
             if ($this->config->get('embed_mode') == true) {
                 $this->data['back_url'] = $this->html->getNonSecureURL('r/product/category');
             }
@@ -549,13 +560,13 @@ class ControllerPagesCheckoutCart extends AController
     {
         $promotion = new APromotion();
         $coupon = $promotion->getCouponData($this->request->post['coupon']);
-        if ( ! $coupon) {
+        if (!$coupon) {
             $this->error['error_warning'] = $this->language->get('error_coupon');
         }
 
         $this->extensions->hk_ValidateData($this);
 
-        if ( ! $this->error) {
+        if (!$this->error) {
             return true;
         } else {
             return false;
@@ -592,10 +603,10 @@ class ControllerPagesCheckoutCart extends AController
         }
         //if balance enough to cover order amount
         if ($session['used_balance_full']) {
-            $session['payment_method'] = array(
+            $session['payment_method'] = [
                 'id'    => 'no_payment_required',
                 'title' => $this->language->get('no_payment_required'),
-            );
+            ];
         }
     }
 

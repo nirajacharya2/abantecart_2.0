@@ -21,24 +21,24 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
+use abc\models\customer\Address;
 use abc\models\storefront\ModelAccountOrder;
 use abc\models\storefront\ModelCheckoutOrder;
+use H;
 
 /**
  * Class AOrder
  *
- * @property ACart                                         $cart
- * @property AConfig                                       $config
- * @property ATax                                          $tax
- * @property ACurrency                                     $currency
- * @property ARequest                                      $request
- * @property \abc\core\engine\ALoader                      $load
- * @property ASession                                      $session
- * @property \abc\core\engine\ExtensionsAPI                $extensions
- * @property \abc\models\storefront\ModelAccountAddress    $model_account_address
+ * @property ACart $cart
+ * @property AConfig $config
+ * @property ATax $tax
+ * @property ACurrency $currency
+ * @property ARequest $request
+ * @property \abc\core\engine\ALoader $load
+ * @property ASession $session
+ * @property \abc\core\engine\ExtensionsAPI $extensions
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
- * @property AIM                                           $im
+ * @property AIM $im
  *
  */
 class AOrder extends ALibBase
@@ -89,7 +89,7 @@ class AOrder extends ALibBase
         $this->model_account_order = $this->load->model('account/order', 'storefront');
 
         //if nothing is passed use session array. Customer session, can function on storefront only
-        if (!AHelperUtils::has_value($order_id)) {
+        if (!H::has_value($order_id)) {
             $this->order_id = (int)$this->session->data['order_id'];
         } else {
             $this->order_id = (int)$order_id;
@@ -99,7 +99,7 @@ class AOrder extends ALibBase
             $this->customer = $this->registry->get('customer');
             $this->customer_id = $this->customer->getId();
         } else {
-            $this->customer = ABC::getObjectByAlias('ACustomer',[$registry]);
+            $this->customer = ABC::getObjectByAlias('ACustomer', [$registry]);
         }
     }
 
@@ -138,6 +138,7 @@ class AOrder extends ALibBase
      * @return array
      * NOTE: method to create an order based on provided data array.
      * @throws AException
+     * @throws \ReflectionException
      */
     public function buildOrderData($indata)
     {
@@ -150,7 +151,7 @@ class AOrder extends ALibBase
         $total = 0;
         $taxes = $this->cart->getTaxes();
 
-        $this->load->model('checkout/extension','storefront');
+        $this->load->model('checkout/extension', 'storefront');
 
         $sort_order = [];
 
@@ -163,7 +164,7 @@ class AOrder extends ALibBase
         array_multisort($sort_order, SORT_ASC, $results);
 
         foreach ($results as $result) {
-            $this->load->model('total/'.$result['key'],'storefront');
+            $this->load->model('total/'.$result['key'], 'storefront');
             $this->{'model_total_'.$result['key']}->getTotal($total_data, $total, $taxes, $indata);
         }
 
@@ -188,26 +189,24 @@ class AOrder extends ALibBase
             $order_info['telephone'] = $this->customer->getTelephone();
             $order_info['fax'] = $this->customer->getFax();
 
-            $this->load->model('account/address','storefront');
-
             if ($this->cart->hasShipping()) {
-                $ship_address_id = $indata['shipping_address_id'];
+                $shipping_address = [];
+                if($address = Address::find($indata['shipping_address_id'])){
+                    $shipping_address = $address->toArray();
+                }
 
-                $ship_address = $this->model_account_address->getAddress($ship_address_id);
-
-                $order_info['shipping_firstname'] = $ship_address['firstname'];
-                $order_info['shipping_lastname'] = $ship_address['lastname'];
-                $order_info['shipping_company'] = $ship_address['company'];
-                $order_info['shipping_address_1'] = $ship_address['address_1'];
-                $order_info['shipping_address_2'] = $ship_address['address_2'];
-                $order_info['shipping_city'] = $ship_address['city'];
-                $order_info['shipping_postcode'] = $ship_address['postcode'];
-                $order_info['shipping_zone'] = $ship_address['zone'];
-                $order_info['shipping_zone_id'] = $ship_address['zone_id'];
-                $order_info['shipping_country'] = $ship_address['country'];
-                $order_info['shipping_country_id'] = $ship_address['country_id'];
-                $order_info['shipping_address_format'] = $ship_address['address_format'];
-
+                $order_info['shipping_firstname'] = $shipping_address['firstname'];
+                $order_info['shipping_lastname'] = $shipping_address['lastname'];
+                $order_info['shipping_company'] = $shipping_address['company'];
+                $order_info['shipping_address_1'] = $shipping_address['address_1'];
+                $order_info['shipping_address_2'] = $shipping_address['address_2'];
+                $order_info['shipping_city'] = $shipping_address['city'];
+                $order_info['shipping_postcode'] = $shipping_address['postcode'];
+                $order_info['shipping_zone'] = $shipping_address['zone'];
+                $order_info['shipping_zone_id'] = $shipping_address['zone_id'];
+                $order_info['shipping_country'] = $shipping_address['country'];
+                $order_info['shipping_country_id'] = $shipping_address['country_id'];
+                $order_info['shipping_address_format'] = $shipping_address['address_format'];
             } else {
                 $order_info['shipping_firstname'] = '';
                 $order_info['shipping_lastname'] = '';
@@ -224,22 +223,23 @@ class AOrder extends ALibBase
                 $order_info['shipping_method'] = '';
             }
 
-            $pay_address_id = $indata['payment_address_id'];
+            $payment_address = [];
+            if($address = Address::find($indata['payment_address_id'])){
+                $payment_address = $address->toArray();
+            }
 
-            $pay_address = $this->model_account_address->getAddress($pay_address_id);
-
-            $order_info['payment_firstname'] = $pay_address['firstname'];
-            $order_info['payment_lastname'] = $pay_address['lastname'];
-            $order_info['payment_company'] = $pay_address['company'];
-            $order_info['payment_address_1'] = $pay_address['address_1'];
-            $order_info['payment_address_2'] = $pay_address['address_2'];
-            $order_info['payment_city'] = $pay_address['city'];
-            $order_info['payment_postcode'] = $pay_address['postcode'];
-            $order_info['payment_zone'] = $pay_address['zone'];
-            $order_info['payment_zone_id'] = $pay_address['zone_id'];
-            $order_info['payment_country'] = $pay_address['country'];
-            $order_info['payment_country_id'] = $pay_address['country_id'];
-            $order_info['payment_address_format'] = $pay_address['address_format'];
+            $order_info['payment_firstname'] = $payment_address['firstname'];
+            $order_info['payment_lastname'] = $payment_address['lastname'];
+            $order_info['payment_company'] = $payment_address['company'];
+            $order_info['payment_address_1'] = $payment_address['address_1'];
+            $order_info['payment_address_2'] = $payment_address['address_2'];
+            $order_info['payment_city'] = $payment_address['city'];
+            $order_info['payment_postcode'] = $payment_address['postcode'];
+            $order_info['payment_zone'] = $payment_address['zone'];
+            $order_info['payment_zone_id'] = $payment_address['zone_id'];
+            $order_info['payment_country'] = $payment_address['country'];
+            $order_info['payment_country_id'] = $payment_address['country_id'];
+            $order_info['payment_address_format'] = $payment_address['address_format'];
         } else {
             if (isset($indata['guest'])) {
                 //this is a guest order
@@ -254,8 +254,8 @@ class AOrder extends ALibBase
                 //IM addresses
                 $protocols = $this->im->getProtocols();
                 foreach ($protocols as $protocol) {
-                    if (AHelperUtils::has_value($indata['guest'][$protocol])
-                        && !AHelperUtils::has_value($order_info[$protocol])) {
+                    if (H::has_value($indata['guest'][$protocol])
+                        && !H::has_value($order_info[$protocol])) {
                         $order_info[$protocol] = $indata['guest'][$protocol];
                     }
                 }

@@ -4,7 +4,7 @@
 
     <input class="form-control atext <?php echo $style; ?> passwordset_element" type="password"
 		   placeholder="<?php echo $text_confirm_password; ?>"
-		   name="<?php echo $name ?>_confirm" id="<?php echo $id ?>_confirm"
+		   name="<?php echo $name ?>_confirmation" id="<?php echo $id ?>_confirmation"
            value="" <?php echo $attr; ?> autocomplete="off" />
 
     <div class="input-group-append">

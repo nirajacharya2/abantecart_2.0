@@ -7,7 +7,9 @@ use abc\core\lib\ADataEncryption;
 use abc\models\BaseModel;
 use abc\models\locale\Country;
 use abc\models\locale\Zone;
+use abc\models\QueryBuilder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
 
 function lng()
 {
@@ -363,6 +365,70 @@ class Address extends BaseModel
             ];
         }
         return $output;
+    }
+
+    /**
+     * @param int $customer_id
+     * @param int $language_id
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getAddresses(int $customer_id, int $language_id)
+    {
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = Address::select(
+                            [
+                                'addresses.*',
+                                'countries.*',
+                                'zones.*',
+                                'country_descriptions.name as country',
+                                'zone_descriptions.name as zone'
+                            ]
+
+                        )
+                        ->where('customer_id', '=', $customer_id);
+        $query->leftJoin(
+            'countries',
+            function($join){
+                /**
+                 * @var JoinClause $join
+                 */
+                 $join->on('addresses.country_id', '=', 'countries.country_id');
+            }
+        );
+        $query->leftJoin(
+            'country_descriptions',
+            function($join){
+                /**
+                 * @var JoinClause $join
+                 */
+                 $join->on('country_descriptions.country_id', '=', 'countries.country_id');
+            }
+        );
+        $query->where('country_descriptions.language_id', '=', $language_id);
+        $query->leftJoin(
+            'zones',
+            function($join){
+                /**
+                 * @var JoinClause $join
+                 */
+                 $join->on('addresses.zone_id', '=', 'zones.zone_id');
+            }
+        );
+        $query->leftJoin(
+            'zone_descriptions',
+            function($join){
+                /**
+                 * @var JoinClause $join
+                 */
+                 $join->on('zone_descriptions.zone_id', '=', 'zones.zone_id');
+            }
+        );
+        $query->where('zone_descriptions.language_id', '=', $language_id);
+
+        return $query->get();
     }
 
 }

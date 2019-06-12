@@ -21,6 +21,7 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\customer\Address;
 
 class ControllerApiAccountLogin extends AControllerAPI
 {
@@ -32,11 +33,11 @@ class ControllerApiAccountLogin extends AControllerAPI
         if (isset($request['token'])) {
             //this is the request to authorized
             if ($this->customer->isLoggedWithToken($request['token'])) {
-                $this->rest->setResponseData(array('status' => 1, 'request' => 'authorized'));
+                $this->rest->setResponseData(['status' => 1, 'request' => 'authorized']);
                 $this->rest->sendResponse(200);
                 return null;
             } else {
-                $this->rest->setResponseData(array('status' => 0, 'request' => 'unauthorized'));
+                $this->rest->setResponseData(['status' => 0, 'request' => 'unauthorized']);
                 $this->rest->sendResponse(401);
                 return null;
             }
@@ -49,20 +50,20 @@ class ControllerApiAccountLogin extends AControllerAPI
                 && $this->validate($loginname, $request['password'])
             ) {
                 if (!session_id()) {
-                    $this->rest->setResponseData(array('status' => 0, 'error' => 'Unable to get session ID.'));
+                    $this->rest->setResponseData(['status' => 0, 'error' => 'Unable to get session ID.']);
                     $this->rest->sendResponse(501);
                     return null;
                 }
                 $this->session->data['token'] = session_id();
-                $this->rest->setResponseData(array(
+                $this->rest->setResponseData([
                     'status'  => 1,
                     'success' => 'Logged in',
                     'token'   => $this->session->data['token'],
-                ));
+                ]);
                 $this->rest->sendResponse(200);
                 return null;
             } else {
-                $this->rest->setResponseData(array('status' => 0, 'error' => 'Login attempt failed!'));
+                $this->rest->setResponseData(['status' => 0, 'error' => 'Login attempt failed!']);
                 $this->rest->sendResponse(401);
                 return null;
             }
@@ -75,10 +76,11 @@ class ControllerApiAccountLogin extends AControllerAPI
             return false;
         } else {
             unset($this->session->data['guest']);
-            $this->loadModel('account/address');
-            $address = $this->model_account_address->getAddress($this->customer->getAddressId());
-            $this->session->data['country_id'] = $address['country_id'];
-            $this->session->data['zone_id'] = $address['zone_id'];
+
+            $address = Address::where('customer_id', '=', $this->customer->getAddressId())
+                              ->orderBy('default', 'desc')->first();
+            $this->session->data['country_id'] = $address->country_id;
+            $this->session->data['zone_id'] = $address->zone_id;
             return true;
         }
     }

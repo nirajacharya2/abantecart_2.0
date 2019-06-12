@@ -26,9 +26,12 @@ use abc\core\engine\AForm;
 use abc\models\admin\ModelSaleCustomerNote;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
+use abc\models\customer\CustomerGroup;
 use abc\models\order\Order;
+use abc\models\system\Store;
 use abc\modules\events\ABaseEvent;
 use H;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ControllerPagesSaleCustomer
@@ -344,15 +347,16 @@ class ControllerPagesSaleCustomer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->document->setTitle($this->language->get('heading_title'));
-        if ($this->request->is_POST() && $this->validateForm()) {
+        if ($this->request->is_POST()) {
             $data = $this->request->post;
-            $customer = new Customer($data);
-            $customer->save();
-
-            $customer_id = (int)$customer->customer_id;
-            $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id='.$customer_id);
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($redirect_url);
+            if( $this->validateForm($data) ) {
+                $customer = new Customer($data);
+                $customer->save();
+                $customer_id = (int)$customer->customer_id;
+                $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id='.$customer_id);
+                $this->session->data['success'] = $this->language->get('text_success');
+                abc_redirect($redirect_url);
+            }
         }
         $this->getForm();
 
@@ -382,7 +386,7 @@ class ControllerPagesSaleCustomer extends AController
          */
         $customer = Customer::find($customer_id);
 
-        if ($customer && $this->request->is_POST() && $this->validateForm($customer_id)) {
+        if ($customer && $this->request->is_POST() && $this->validateForm($this->request->post, $customer_id)) {
             if ((int)$this->request->post['approved']) {
                 if (!$customer->approved && !$customer->isSubscriber()) {
                     H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
@@ -659,18 +663,25 @@ class ControllerPagesSaleCustomer extends AController
             ],
         ]);
 
-        $this->loadModel('sale/customer_group');
-        $results = $this->model_sale_customer_group->getCustomerGroups();
-        $groups = ['' => $this->language->get('text_select_group'),];
-        foreach ($results as $item) {
-            $groups[$item['customer_group_id']] = $item['name'];
-        }
+        $groups =
+            ['' => $this->language->get('text_select_group')]
+            +
+            array_column(CustomerGroup::all()->toArray(), 'name', 'customer_group_id');
 
-        $this->data['form']['fields']['details']['customer_group'] = $form->getFieldHtml([
+        $this->data['entry_customer_group_id'] = $this->language->get('entry_customer_group');
+        $this->data['form']['fields']['details']['customer_group_id'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'customer_group_id',
             'value'   => $this->data['customer_group_id'],
             'options' => $groups,
+        ]);
+
+        $this->data['entry_store_id'] = $this->language->get('tab_store');
+        $this->data['form']['fields']['details']['store_id'] = $form->getFieldHtml([
+            'type'    => 'selectbox',
+            'name'    => 'store_id',
+            'value'   => $this->data['store_id'],
+            'options' => array_column(Store::all()->toArray(), 'name', 'store_id')
         ]);
 
         $this->data['section'] = 'details';
@@ -1108,86 +1119,34 @@ class ControllerPagesSaleCustomer extends AController
     }
 
     /**
+     * @param array $data
      * @param null $customer_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    protected function validateForm($customer_id = null)
+    protected function validateForm(array $data, $customer_id = null)
     {
         if (!$this->user->canModify('sale/customer')) {
             $this->error['warning'] = $this->language->get('error_permission');
-
             return false;
         }
 
-        $data = $this->request->post;
-
-        $login_name_pattern = '/^[\w._-]+$/i';
-        if ((mb_strlen($data['loginname']) < 5 || mb_strlen($data['loginname']) > 64)
-            || (!preg_match($login_name_pattern, $data['loginname']) && $this->config->get('prevent_email_as_login'))
-        ) {
-            $this->error['loginname'] = $this->language->get('error_loginname');
-            //check uniqueness of login name
-        } else {
-            if (!Customer::isUniqueLoginname($data['loginname'], $customer_id)) {
-                $this->error['loginname'] = $this->language->get('error_loginname_notunique');
-            }
+        if($customer_id){
+           $data['customer_id'] = $customer_id;
+           $customer = Customer::find($customer_id);
+           if(!$data['password'] && !$data['password_confirmation']){
+               unset($data['password'],$data['password_confirmation']);
+           }
+        }else{
+            $customer = new Customer();
         }
 
-        if (mb_strlen($data['email']) > 96 || !preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])) {
-            $this->error['email'] = $this->language->get('error_email');
-        } //check unique email
-        else {
-            $exists = Customer::getCustomers(['filter' => ['email' => $data['email']]]);
-            if ($exists) {
-                foreach ($exists as $details) {
-                    if ($details['customer_id'] != $customer_id) {
-                        $this->error['email'] = $this->language->get('error_email_exists');
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (mb_strlen($data['telephone']) > 32) {
-            $this->error['telephone'] = $this->language->get('error_telephone');
-        }
-
-        if (($data['password']) || (!isset($this->request->get['customer_id']))) {
-            if (mb_strlen($data['password']) < 4) {
-                $this->error['password'] = $this->language->get('error_password');
-            }
-
-            if (!$this->error['password'] && $data['password'] != $data['password_confirm']) {
-                $this->error['password'] = $this->language->get('error_confirm');
-            }
-        }
-
-        if (mb_strlen($data['firstname']) < 1 || mb_strlen($data['firstname']) > 32) {
-            $this->error['firstname'] = $this->language->get('error_firstname');
-        }
-
-        if (mb_strlen($data['lastname']) < 1 || mb_strlen($data['lastname']) > 32) {
-            $this->error['lastname'] = $this->language->get('error_lastname');
-        }
-
-        //validate IM URIs
-        //get only active IM drivers
-        $im_drivers = $this->im->getIMDriverObjects();
-        if ($im_drivers) {
-            foreach ($im_drivers as $protocol => $driver_obj) {
-                /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
-                 */
-                if (!is_object($driver_obj) || $protocol == 'email') {
-                    continue;
-                }
-                $result = $driver_obj->validateURI($data[$protocol]);
-                if (!$result) {
-                    $this->error[$protocol] = implode('<br>', $driver_obj->errors);
-                }
-            }
+        try{
+            $customer->validate($data);
+        }catch(ValidationException $e){
+            H::SimplifyValidationErrors($customer->errors()['validation'], $this->error);
         }
 
         $this->extensions->hk_ValidateData($this);
