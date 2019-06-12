@@ -2087,4 +2087,10 @@ class AHelperUtils extends AHelper
         }
         return $text;
     }
+
+    public static function SimplifyValidationErrors($array, &$errors){
+        foreach($array as $rule => $msgArr){
+            $errors[$rule] = implode(' ', $msgArr);
+        }
+    }
 }

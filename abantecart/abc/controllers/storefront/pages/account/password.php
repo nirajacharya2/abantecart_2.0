@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2019 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,10 +22,8 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\customer\Customer;
+use Illuminate\Validation\ValidationException;
 
 class ControllerPagesAccountPassword extends AController
 {
@@ -73,14 +71,14 @@ class ControllerPagesAccountPassword extends AController
                 'separator' => $this->language->get('text_separator'),
             ]);
 
-        $this->view->assign('error_warning', $this->error['warning']);
-        $this->view->assign('error_current_password', $this->error['current_password']);
-        $this->view->assign('error_password', $this->error['password']);
-        $this->view->assign('error_confirm', $this->error['confirm']);
+        $this->data['error_warning'] = $this->error['warning'];
+        $this->data['error_current_password'] = $this->error['current_password'];
+        $this->data['error_password'] = $this->error['password'];
+        $this->data['error_password_confirmation'] = $this->error['confirmed'];
 
         $form = new AForm();
         $form->setForm(['form_name' => 'PasswordFrm']);
-        $form_open = $form->getFieldHtml(
+        $this->data['form_open'] = $form->getFieldHtml(
             [
                 'type'   => 'form',
                 'name'   => 'PasswordFrm',
@@ -88,43 +86,40 @@ class ControllerPagesAccountPassword extends AController
                 'csrf'   => true,
             ]
         );
-        $this->view->assign('form_open', $form_open);
 
-        $current_password = $form->getFieldHtml(
+        $this->data['form']['fields']['current_password'] = $form->getFieldHtml(
             [
                 'type'     => 'password',
                 'name'     => 'current_password',
                 'value'    => '',
                 'required' => true,
             ]);
-        $password = $form->getFieldHtml(
+        $this->data['form']['fields']['password'] = $form->getFieldHtml(
             [
                 'type'     => 'password',
                 'name'     => 'password',
                 'value'    => '',
                 'required' => true,
             ]);
-        $confirm = $form->getFieldHtml(
+        $this->data['entry_password_confirmation'] = $this->language->get('entry_confirm');
+        $this->data['form']['fields']['password_confirmation'] = $form->getFieldHtml(
             [
                 'type'     => 'password',
-                'name'     => 'confirm',
+                'name'     => 'password_confirmation',
                 'value'    => '',
                 'required' => true,
             ]);
-        $submit = $form->getFieldHtml(
+        $this->data['submit'] = $form->getFieldHtml(
             [
                 'type' => 'submit',
                 'name' => $this->language->get('button_continue'),
                 'icon' => 'fa fa-check',
             ]);
 
-        $this->view->assign('current_password', $current_password);
-        $this->view->assign('password', $password);
-        $this->view->assign('submit', $submit);
-        $this->view->assign('confirm', $confirm);
-        $this->view->assign('back', $this->html->getSecureURL('account/account'));
 
-        $back = $this->html->buildElement(
+        $this->data['back_url'] = $this->html->getSecureURL('account/account');
+
+        $this->data['button_back'] = $this->html->buildElement(
             [
                 'type'  => 'button',
                 'name'  => 'back',
@@ -132,8 +127,8 @@ class ControllerPagesAccountPassword extends AController
                 'icon'  => 'fa fa-arrow-left',
                 'style' => 'button',
             ]);
-        $this->view->assign('button_back', $back);
 
+        $this->view->batchAssign($this->data);
         $this->processTemplate('pages/account/password.tpl');
 
         //init controller data
@@ -154,14 +149,12 @@ class ControllerPagesAccountPassword extends AController
             $this->error['current_password'] = $this->language->get('error_current_password');
         }
 
-        //check password length considering html entities (special case for characters " > < & )
-        $pass_len = mb_strlen(htmlspecialchars_decode($post['password']));
-        if ($pass_len < 4 || $pass_len > 20) {
-            $this->error['password'] = $this->language->get('error_password');
-        }
+        $customer = $this->customer->model();
 
-        if ($post['confirm'] != $post['password']) {
-            $this->error['confirm'] = $this->language->get('error_confirm');
+        try{
+            $customer->validate( $post );
+        }catch(ValidationException $e){
+            \H::SimplifyValidationErrors($customer->errors()['validation'], $this->error);
         }
 
         $this->extensions->hk_ValidateData($this);

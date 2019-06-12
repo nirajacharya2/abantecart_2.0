@@ -126,6 +126,7 @@ class Customer extends BaseModel
     ];
 
     protected $rules = [
+        /** @see validate() */
         'customer_id'       => [
                                 'checks' => [
                                             'integer'
@@ -134,6 +135,7 @@ class Customer extends BaseModel
                                     '*' => [ 'default_text' => 'Customer ID is not Integer!' ]
                                 ]
                     ],
+        /** @see validate() */
         'store_id'          => [
                     'checks'   => [
                         'integer',
@@ -277,10 +279,33 @@ class Customer extends BaseModel
         ],
 
         /**
-         * See password rule into method validate()
-         *
          * @see validate()
          */
+
+        'password' => [
+                                'checks'   => [
+                                    'string',
+                                    'sometimes',
+                                    'required',
+                                    'required_with:password_confirmation',
+                                    'confirmed',
+                                    'between:4,40',
+                                ],
+                                'messages' => [
+                                    'confirmed' => [
+                                        'language_key'   => 'error_confirm',
+                                        'language_block' => 'account/create',
+                                        'default_text'   => 'Password confirmation does not match password!',
+                                        'section'        => 'storefront',
+                                    ],
+                                    '*' => [
+                                        'language_key'   => 'error_password',
+                                        'language_block' => 'account/create',
+                                        'default_text'   => 'Password must be between 4 and 40 characters!',
+                                        'section'        => 'storefront',
+                                    ],
+                                ],
+                            ],
 
         'wishlist' => [
             'checks'   => [
@@ -388,31 +413,11 @@ class Customer extends BaseModel
         $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
         $this->rules['email']['checks'][] = Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
 
-        if(!$this->customer_id){
-            $this->rules['password'] = [
-                        'checks'   => [
-                            'string',
-                            'required_with:password_confirmation',
-                            'confirmed',
-                            'between:4,40',
-                        ],
-                        'messages' => [
-                            'confirmed' => [
-                                'language_key'   => 'error_confirm',
-                                'language_block' => 'account/create',
-                                'default_text'   => 'Password confirmation does not match password!',
-                                'section'        => 'storefront',
-                            ],
-                            '*' => [
-                                'language_key'   => 'error_password',
-                                'language_block' => 'account/create',
-                                'default_text'   => 'Password must be between 4 and 40 characters!',
-                                'section'        => 'storefront',
-                            ],
-                        ],
-                    ];
+        //do merging to make required_without rule work
+        if($this->customer_id) {
+            $data['customer_id'] = $this->customer_id;
+            $data['store_id'] = $this->store_id ?? Registry::config()->get('store_id');
         }
-
         parent::validate($data, $messages, $customAttributes);
     }
 

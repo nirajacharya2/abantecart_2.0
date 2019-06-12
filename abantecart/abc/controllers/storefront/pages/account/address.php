@@ -22,10 +22,17 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\customer\Address;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Class ControllerPagesAccountAddress
+ *
+ * @package abc\controllers\storefront
+ */
 class ControllerPagesAccountAddress extends AController
 {
-    public $error = [];
+    protected $error = [];
     public $data = [];
 
     public function main()
@@ -45,6 +52,10 @@ class ControllerPagesAccountAddress extends AController
         unset($this->session->data['success']);
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     public function insert()
     {
 
@@ -149,7 +160,7 @@ class ControllerPagesAccountAddress extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function getList()
+    protected function getList()
     {
         $this->document->addBreadcrumb([
             'href'      => $this->html->getHomeURL(),
@@ -233,7 +244,7 @@ class ControllerPagesAccountAddress extends AController
         $this->processTemplate('pages/account/addresses.tpl');
     }
 
-    private function getForm()
+    protected function getForm()
     {
         $this->document->resetBreadcrumbs();
 
@@ -263,21 +274,19 @@ class ControllerPagesAccountAddress extends AController
             ]);
         } else {
             $this->document->addBreadcrumb([
-                'href'      => $this->html->getSecureURL('account/address/update',
-                    'address_id='.$this->request->get['address_id']),
+                'href'      => $this->html->getSecureURL(
+                                            'account/address/update',
+                                            'address_id='.$this->request->get['address_id']
+                               ),
                 'text'      => $this->language->get('text_edit_address'),
                 'separator' => $this->language->get('text_separator'),
             ]);
         }
 
-        $this->view->assign('error_warning', $this->error['warning']);
-        $this->view->assign('error_firstname', $this->error['firstname']);
-        $this->view->assign('error_lastname', $this->error['lastname']);
-        $this->view->assign('error_address_1', $this->error['address_1']);
-        $this->view->assign('error_city', $this->error['city']);
-        $this->data['error_postcode'] = $this->error['postcode'];
-        $this->view->assign('error_country', $this->error['country']);
-        $this->view->assign('error_zone', $this->error['zone']);
+        foreach($this->error as $k => $text){
+            $key = $k=='warning' ? 'error_'.$k : 'error_message_'.$k;
+            $this->view->assign($key, $text);
+        }
 
         if (isset($this->request->get['address_id']) && $this->request->is_GET()) {
             $address_info = $this->model_account_address->getAddress($this->request->get['address_id']);
@@ -436,7 +445,9 @@ class ControllerPagesAccountAddress extends AController
         foreach ($countries as $item) {
             $options[$item['country_id']] = $item['name'];
         }
-        $this->data['form']['fields']['country'] = $form->getFieldHtml([
+        $this->data['entry_zone_id'] = $this->language->get('entry_zone');
+        $this->data['entry_country_id'] = $this->language->get('entry_country');
+        $this->data['form']['fields']['country_id'] = $form->getFieldHtml([
             'type'     => 'selectbox',
             'name'     => 'country_id',
             'options'  => $options,
@@ -466,26 +477,20 @@ class ControllerPagesAccountAddress extends AController
             'name' => $this->language->get('button_continue'),
         ]);
 
-        //TODO: REMOVE THIS IN 2.0!!! deprecated
-        // backward compatibility code
-        $deprecated = array_keys($this->data['form']['fields']);
-        foreach ($deprecated as $name) {
-            $fld = $this->data['form']['fields'][$name];
-            if (in_array($name, ['country', 'zone'])) {
-                $name .= '_id';
-            }
-            $this->data['form'][$name] = $fld;
-        }
-        //end of trick
-
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/account/address.tpl');
     }
 
-    private function validateForm()
+    protected function validateForm()
     {
-        $this->loadModel('account/address');
-        $this->error = $this->model_account_address->validateAddressData($this->request->post);
+        $address = new Address();
+        try{
+            $address->validate($this->request->post);
+        }catch(ValidationException $e){
+            foreach($address->errors()['validation'] as $k=>$arr){
+                $this->error[$k] = implode(' ',$arr);
+            }
+        }
 
         $this->extensions->hk_ValidateData($this);
 
@@ -500,7 +505,7 @@ class ControllerPagesAccountAddress extends AController
         }
     }
 
-    private function validateDelete()
+    protected function validateDelete()
     {
         if ($this->model_account_address->getTotalAddresses() == 1) {
             $this->error['warning'] = $this->language->get('error_delete');

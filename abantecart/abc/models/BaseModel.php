@@ -338,8 +338,6 @@ class BaseModel extends OrmModel
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
         $data = !$data ? $this->getDirty() : $data;
-        //do merging to make required_without rule work
-        $data = array_merge($this->getAttributes(), $data);
 
         if ($rules = $this->rules()) {
             $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
@@ -365,7 +363,6 @@ class BaseModel extends OrmModel
                     }
                 }
             }
-
             $v = new Validator(new ValidationTranslator(), $data, $validateRules, $messages, $customAttributes);
 
             $connections = ['default' => Registry::db()->connection()];
@@ -435,7 +432,7 @@ class BaseModel extends OrmModel
      * @param string $key
      * @param string $value
      */
-    public function updateRule(string $key, string $value)
+    public function updateRule(string $key, array $value)
     {
         $this->rules[$key] = $value;
     }
