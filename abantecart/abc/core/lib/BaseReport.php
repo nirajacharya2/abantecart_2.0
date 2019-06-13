@@ -3,6 +3,7 @@
 namespace abc\core\lib;
 
 use abc\core\engine\Registry;
+use stdClass;
 
 /**
  * Class BaseReport
@@ -50,7 +51,7 @@ class BaseReport
         $output = fopen('php://output', 'w');
 
         $this->getGridData($get, $post, $export)->chunk(1000, function($rows) use (&$output) {
-            foreach ($rows as &$row) {
+            foreach ($rows as $row) {
                 if ($row instanceof stdClass) {
                     fputcsv($output, json_decode(json_encode($row), true));
                 } else {
