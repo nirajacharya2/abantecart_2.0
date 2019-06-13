@@ -313,6 +313,13 @@ class ACustomer extends ALibBase
 
         $this->address_id = (int)$data['address_id'];
 
+        if($this->customer_id && !$this->address_id){
+            $address = $this->db->table('addresses')->where('customer_id','=', $this->customer_id)->first();
+            if($address){
+                $this->address_id = $address->address_id;
+            }
+        }
+
     }
 
     public function setLastLogin($customer_id)
