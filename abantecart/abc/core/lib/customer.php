@@ -25,6 +25,7 @@ use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerNotification;
+use abc\models\customer\CustomerTransaction;
 use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
@@ -157,6 +158,7 @@ class ACustomer extends ALibBase
                 $query->where('status', '=', 1);
             }
             $customer = $query->first();
+            $customer_data = [];
             if($customer){
                 $customer_data = $customer->toArray();
                 if($customer_data['customer_group_id']){
@@ -318,6 +320,13 @@ class ACustomer extends ALibBase
         $this->session->data['customer_tax_exempt'] = $data['tax_exempt'];
 
         $this->address_id = (int)$data['address_id'];
+        //if customer have no default address - take first
+        if($this->customer_id && !$this->address_id){
+            $address = Address::where('customer_id','=', $this->customer_id)->first();
+            if($address){
+                $this->address_id = $address->address_id;
+            }
+        }
     }
 
     /**
@@ -590,38 +599,37 @@ class ACustomer extends ALibBase
             return false;
         }
 
-        $query = $this->db->query("SELECT sum(credit) - sum(debit) AS balance
-                                    FROM ".$this->db->table_name("customer_transactions")."
-                                    WHERE customer_id = '".(int)$this->getId()."'");
-        $balance = (float)$query->row['balance'];
-
-        return $balance;
+        return CustomerTransaction::getBalance($this->customer_id);
     }
 
     /**
      * Record debit transaction
      *
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
      * @throws \Exception
      */
-    public function debitTransaction($tr_details)
+    public function debitTransaction($data)
     {
-        return $this->recordTransaction('debit', $tr_details);
+        $data['debit'] = $data['amount'];
+        unset($data['amount']);
+        return $this->recordTransaction($data);
     }
 
     /**
      * Record credit transaction
      *
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
      * @throws \Exception
      */
-    public function creditTransaction($tr_details)
+    public function creditTransaction($data)
     {
-        return $this->recordTransaction('credit', $tr_details);
+        $data['credit'] = $data['amount'];
+        unset($data['amount']);
+        return $this->recordTransaction($data);
     }
 
     /**
@@ -679,16 +687,6 @@ class ACustomer extends ALibBase
             return true;
         }
         return false;
-
-      /*  $sql = "SELECT cart
-                FROM ".$this->db->table_name("customers")."
-                WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
-        $result = $this->db->query($sql);
-        if ($result->num_rows) {
-            return true;
-        } else {
-            return false;
-        }*/
     }
 
     /**
@@ -723,15 +721,14 @@ class ACustomer extends ALibBase
                 $cart_products[] = (int)$k[0]; // <-product_id
             }
 
-            //??? TODO NEED TO THINK HERE
-            $sql = "SELECT product_id
-                    FROM ".$this->db->table_name('products_to_stores')." pts
-                    WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
-
-            $result = $this->db->query($sql);
+            $product_list = $this->db->table('products_to_stores')
+                        ->select('product_id')
+                        ->where('store_id', '=',$store_id)
+                        ->whereIn('product_id', $cart_products)
+                        ->get();
             $products = [];
-            foreach ($result->rows as $row) {
-                $products[] = $row['product_id'];
+            if($product_list->count()){
+                $products = array_column($product_list->toArray(),'product_id');
             }
 
             $diff = array_diff($cart_products, $products);
@@ -834,11 +831,6 @@ class ACustomer extends ALibBase
         }
         $customer = $this->model();
         $customer->update( ['cart' => [] ]);
-        /*$this->db->query("UPDATE ".$this->db->table_name("customers")."
-                        SET
-                            cart = '".$this->db->escape(serialize($cart))."'
-                        WHERE customer_id = '".(int)$customer_id."'");
-*/
         return true;
     }
 
@@ -952,76 +944,35 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @param string $type
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
      * @throws \Exception
      */
-    protected function recordTransaction($type, $tr_details)
+    protected function recordTransaction($data)
     {
 
         if (!$this->isLogged()) {
             return false;
         }
-        if (!H::has_value($tr_details['transaction_type'])
-            || !H::has_value($tr_details['created_by'])
-        ) {
-            return false;
-        }
 
-        if ($type == 'debit') {
-            $amount = 'debit = '.(float)$tr_details['amount'];
-        } else {
-            if ($type == 'credit') {
-                $amount = 'credit = '.(float)$tr_details['amount'];
-            } else {
-                return false;
-            }
-        }
+        $data['customer_id']  = $this->customer_id;
+        $data['section']  = (int)$data['section'] ?? 0;
 
-        //check if this is not a duplicate transaction
-        $sql = "SELECT customer_transaction_id
-                     FROM ".$this->db->table_name("customer_transactions")." c
-                     WHERE customer_id = '".(int)$this->getId()."'
-                        AND order_id = '".(int)$tr_details['order_id']."'
-                        AND transaction_type = '".$this->db->escape($tr_details['transaction_type'])."'
-                        AND '".$amount."'
-                ";
-        $trnData = $this->db->query($sql);
-        if ($trnData->num_rows) {
-            return true;
-        }
+        $transaction = new CustomerTransaction($data);
+        $transaction->validate();
+        //use firstOrCreate to prevent duplicates
+        $transaction = CustomerTransaction::firstOrCreate($data);
+        $transaction_id = $transaction->customer_transaction_id;
 
-        $this->db->query("INSERT INTO ".$this->db->table_name("customer_transactions")."
-                        SET customer_id = '".(int)$this->getId()."',
-                            order_id = '".(int)$tr_details['order_id']."',
-                            transaction_type = '".$this->db->escape($tr_details['transaction_type'])."',
-                            description = '".$this->db->escape($tr_details['description'])."',
-                            COMMENT = '".$this->db->escape($tr_details['comment'])."',
-                            ".$amount.",
-                            section = '".((int)$tr_details['section'] ? (int)$tr_details['section'] : 0)."',
-                            created_by = '".(int)$tr_details['created_by']."',
-                            date_added = NOW()");
-        $transaction_id = $this->db->getLastId();
-
-        //call event
-        H::event(
-            'abc\core\lib\customer@transaction',
-            [new ABaseEvent((int)$this->getId(), $transaction_id)]);
-
-        if ($this->db->getLastId()) {
-            return true;
-        }
-
-        return false;
+        return $transaction_id;
     }
 
     /**
      * @param $data
      * @param bool $subscribe_only
      *
-     * @return int
+     * @return Customer
      * @throws AException
      * @throws ValidationException
      * @throws \ReflectionException
@@ -1064,7 +1015,7 @@ class ACustomer extends ALibBase
 
         $orm = $db->getORM();
         try {
-            $orm::beginTransaction();
+            $db->beginTransaction();
 
             $customer = new Customer($data);
             $customer->save();
@@ -1108,12 +1059,12 @@ class ACustomer extends ALibBase
                 $msg->saveNotice($language->get('text_new_customer'), $msg_text);
             }
 
-            $orm::commit();
+            $db->commit();
         }catch(ValidationException $e){
-            $orm::rollback();
+            $db->rollback();
             throw $e;
         }catch(\Exception $e){
-            $orm::rollback();
+            $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
         }
 

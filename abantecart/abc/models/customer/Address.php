@@ -11,11 +11,6 @@ use abc\models\QueryBuilder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 
-function lng()
-{
-    return '';
-}
-
 /**
  * Class Address
  *

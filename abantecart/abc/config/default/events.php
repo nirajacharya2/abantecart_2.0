@@ -6,25 +6,29 @@
  */
 
 use abc\modules\listeners\AdminSendApprovalEmailListener;
+use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
 use abc\modules\listeners\StorefrontSendActivateLinkEmailListener;
 use abc\modules\listeners\StorefrontSendWelcomeEmailListener;
 
 return [
 
-    'abc\core\lib\customer@login'           => [],
-    'abc\core\lib\customer@logout'          => [],
-    'abc\core\lib\customer@transaction'     => [],
+    'abc\core\lib\customer@login'       => [],
+    'abc\core\lib\customer@logout'      => [],
+    'abc\core\lib\customer@transaction' => [],
 
-    'admin\sendApprovalEmail'               => [
-            AdminSendApprovalEmailListener::class,
-        ],
+    'admin\sendApprovalEmail'                     => [
+        AdminSendApprovalEmailListener::class,
+    ],
+    'admin\sendNewCustomerTransactionNotifyEmail' => [
+        AdminSendNewTransactionNotifyEmailListener::class,
+    ],
 
-    'storefront\sendWelcomeEmail'               => [
-            StorefrontSendWelcomeEmailListener::class,
-        ],
-    'storefront\sendActivationLinkEmail'               => [
-            StorefrontSendActivateLinkEmailListener::class,
-        ],
+    'storefront\sendWelcomeEmail'        => [
+        StorefrontSendWelcomeEmailListener::class,
+    ],
+    'storefront\sendActivationLinkEmail' => [
+        StorefrontSendActivateLinkEmailListener::class,
+    ],
 
 ];
 

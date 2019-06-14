@@ -27,6 +27,7 @@ use abc\models\admin\ModelSaleCustomerNote;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
+use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\models\system\Store;
 use abc\modules\events\ABaseEvent;
@@ -692,8 +693,8 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         $this->view->assign('help_url', $this->gen_help_url('customer_edit'));
-        $this->loadModel('sale/customer_transaction');
-        $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
+
+        $balance = CustomerTransaction::getBalance($customer_id);
         $currency = $this->currency->getCurrency($this->config->get('config_currency'));
 
         $this->data['balance'] = $this->language->get('text_balance')
@@ -977,8 +978,7 @@ class ControllerPagesSaleCustomer extends AController
         $this->data['section'] = 'address';
 
         $this->view->assign('help_url', $this->gen_help_url('customer_edit'));
-        $this->loadModel('sale/customer_transaction');
-        $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
+        $balance = CustomerTransaction::getBalance($customer_id);
         $this->data['balance'] = $this->language->get('text_balance').' '.$this->currency->format($balance,
                 $this->config->get('config_currency'));
 

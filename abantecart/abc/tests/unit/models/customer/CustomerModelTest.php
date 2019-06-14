@@ -14,7 +14,7 @@ class CustomerModelTest extends ATestCase{
         //init
     }
 
-  /*  public function testValidator()
+    public function testValidator()
     {
         //validate new customer
         $customer = new Customer(
@@ -65,7 +65,7 @@ class CustomerModelTest extends ATestCase{
 
         $this->assertEquals(0, count($errors));
 
-    }*/
+    }
 
     public function testUpdate()
     {

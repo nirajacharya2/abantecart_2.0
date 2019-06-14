@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\customer\Customer;
+use abc\models\customer\CustomerTransaction;
 use H;
 
 class ControllerPagesSaleCustomerTransaction extends AController
@@ -37,7 +38,6 @@ class ControllerPagesSaleCustomerTransaction extends AController
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
         $this->loadLanguage( 'sale/customer' );
-        $this->loadModel( 'sale/customer_transaction' );
 
         $customer_id = $this->request->get['customer_id'];
         $customer_info = Customer::getCustomer($customer_id );
@@ -203,7 +203,7 @@ class ControllerPagesSaleCustomerTransaction extends AController
                                                         '&customer_id='.$customer_id )
         );
 
-        $balance = $this->model_sale_customer_transaction->getBalance( $customer_id );
+        $balance = CustomerTransaction::getBalance( $customer_id );
         $currency = $this->currency->getCurrency($this->config->get('config_currency'));
 
         $this->data['balance'] = $this->language->get('text_balance')
@@ -224,7 +224,6 @@ class ControllerPagesSaleCustomerTransaction extends AController
         ]);
 
         $this->view->assign( 'help_url', $this->gen_help_url( 'customer_transactions_listing' ) );
-
 
         $this->load->model( 'setting/store' );
         if ( !$this->model_setting_store->isDefaultStore() ) {
@@ -298,11 +297,11 @@ class ControllerPagesSaleCustomerTransaction extends AController
                 ];
             }
         }
-        $obj = $this->dispatch('responses/common/tabs', array(
+        $obj = $this->dispatch('responses/common/tabs', [
                 'sale/customer',
                 //parent controller. Use customer to use for other extensions that will add tabs via their hooks
-                array('tabs' => $this->data['tabs'])
-            )
+                ['tabs' => $this->data['tabs']]
+            ]
         );
         $this->data['tabs'] = $obj->dispatchGetOutput();
     }

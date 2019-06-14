@@ -31,6 +31,7 @@ use abc\core\lib\LibException;
 use abc\models\catalog\Category;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
+use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\order\Order;
@@ -1932,8 +1933,7 @@ class ControllerPagesSaleOrder extends AController
 
         $this->data['list_url'] = $this->html->getSecureURL('sale/customer');
 
-        $this->loadModel('sale/customer_transaction');
-        $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
+        $balance = CustomerTransaction::getBalance($customer_id);
         $curr = $this->currency->getCurrency($this->config->get('config_currency'));
 
         $this->data['balance'] = $this->language->get('text_balance')
