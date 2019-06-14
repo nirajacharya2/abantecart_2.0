@@ -76,7 +76,8 @@ class ControllerPagesAccountLogin extends AController
 
                     $address_id = $this->customer->getAddressId();
                     $address = Address::find($address_id );
-                    $address = $address->toArray();
+                    $address = $address ? $address->toArray() : [];
+
                     $this->tax->setZone( $address['country_id'], $address['zone_id'] );
 
                     if ( $this->session->data['redirect'] ) {

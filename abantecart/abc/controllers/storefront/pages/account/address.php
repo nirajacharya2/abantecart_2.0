@@ -23,8 +23,6 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\customer\Address;
-use abc\models\QueryBuilder;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -190,9 +188,9 @@ class ControllerPagesAccountAddress extends AController
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('success', $this->session->data['success']);
 
-        $results = Address::getAddresses($this->customer->getId(), $this->language->getContentLanguageID())
-                          ->toArray();
-
+        $results = Address::getAddresses($this->customer->getId(), $this->language->getContentLanguageID());
+        $results = $results ? $results->toArray() : [];
+        $addresses = [];
         foreach ($results as $result) {
             $formattedAddress = $this->customer->getFormattedAddress($result, $result['address_format']);
 
