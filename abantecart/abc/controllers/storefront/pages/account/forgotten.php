@@ -27,6 +27,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\models\customer\Customer;
 use H;
+use Illuminate\Validation\ValidationException;
 
 class ControllerPagesAccountForgotten extends AController
 {
@@ -192,13 +193,15 @@ class ControllerPagesAccountForgotten extends AController
         $enc = new AEncryption($this->config->get('encryption_key'));
         list($customer_id, $code) = explode("::", $enc->decrypt($rtoken));
         $customer_details = Customer::getCustomer($customer_id);
-        if (empty($customer_id) || empty($customer_details['data']['password_reset'])
-            || $customer_details['data']['password_reset'] != $code) {
+        if (empty($customer_id)
+            || empty($customer_details['data']['password_reset'])
+            || $customer_details['data']['password_reset'] != $code
+        ){
             $this->error['message'] = $this->language->get('error_reset_token');
             return $this->password();
         }
 
-        if ($this->request->is_POST() && $this->_validatePassword()) {
+        if ($this->request->is_POST() && $this->_validatePassword($customer_id)) {
 
             if (!$this->csrftoken->isTokenValid()) {
                 $this->error['warning'] = $this->language->get('error_unknown');
@@ -283,7 +286,7 @@ class ControllerPagesAccountForgotten extends AController
         $confirm = $form->getFieldHtml(
             [
                 'type'     => 'password',
-                'name'     => 'confirm',
+                'name'     => 'password_confirmation',
                 'value'    => '',
                 'required' => true,
             ]);
@@ -490,19 +493,17 @@ class ControllerPagesAccountForgotten extends AController
         }
     }
 
-    private function _validatePassword()
+    private function _validatePassword($customer_id)
     {
         $this->loadLanguage('account/password');
-        $post = $this->request->post;
+        $data = $this->request->post;
+        $data['customer_id'] = $customer_id;
 
-        //check password length considering html entities (special case for characters " > < & )
-        $pass_len = mb_strlen(htmlspecialchars_decode($post['password']));
-        if ($pass_len < 4 || $pass_len > 20) {
-            $this->error['password'] = $this->language->get('error_password');
-        }
-
-        if ($post['confirm'] != $post['password']) {
-            $this->error['confirm'] = $this->language->get('error_confirm');
+        $customer = new Customer();
+        try{
+            $customer->validate($data);
+        }catch (ValidationException $e){
+            H::SimplifyValidationErrors($customer->errors()['validation'], $this->error);
         }
 
         if (!$this->error) {

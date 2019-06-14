@@ -231,6 +231,9 @@ class ACustomer extends ALibBase
      */
     public function login($loginname, $password)
     {
+        if(!$loginname || !$password){
+            return false;
+        }
         $config = Registry::config();
         $filter = [
                 'search_operator' => 'equal',

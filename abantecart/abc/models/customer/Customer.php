@@ -77,7 +77,7 @@ class Customer extends BaseModel
         'customer_group_id' => 'int',
         'cart'              => 'serialized',
         'data'              => 'serialized',
-        'wishlist'          => 'serialized'
+        'wishlist'          => 'serialized',
     ];
 
     protected $dates = [
@@ -122,35 +122,35 @@ class Customer extends BaseModel
         "data",
         "stage_id",
         "last_login",
-        "date_deleted"
+        "date_deleted",
     ];
 
     protected $rules = [
         /** @see validate() */
-        'customer_id'       => [
-                                'checks' => [
-                                            'integer'
-                                            ],
-                                'messages' => [
-                                    '*' => [ 'default_text' => 'Customer ID is not Integer!' ]
-                                ]
-                    ],
+        'customer_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Customer ID is not Integer!'],
+            ],
+        ],
         /** @see validate() */
-        'store_id'          => [
-                    'checks'   => [
-                        'integer',
-                        //required only when new customer creating
-                        'required_without:customer_id',
-                    ],
-                    'messages' => [
-                        'integer'                  => [
-                            'default_text'   => 'Store ID must be an integer!'
-                        ],
-                        'required_without:customer_id' => [
-                            'default_text'   => 'Store ID required.'
-                        ],
-                    ],
+        'store_id'    => [
+            'checks'   => [
+                'integer',
+                //required only when new customer creating
+                'required_without:customer_id',
+            ],
+            'messages' => [
+                'integer'                      => [
+                    'default_text' => 'Store ID must be an integer!',
                 ],
+                'required_without:customer_id' => [
+                    'default_text' => 'Store ID required.',
+                ],
+            ],
+        ],
 
         'loginname' => [
             'checks'   => [
@@ -211,7 +211,7 @@ class Customer extends BaseModel
                 //required only when new customer creating
                 'required_without:customer_id',
                 'max:96',
-                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i'
+                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
             ],
             'messages' => [
                 'unique' => [
@@ -220,7 +220,7 @@ class Customer extends BaseModel
                     'default_text'   => 'Email address must be unique! This email already registered',
                     'section'        => 'storefront',
                 ],
-                '*' => [
+                '*'      => [
                     'language_key'   => 'error_email',
                     'language_block' => 'account/create',
                     'default_text'   => 'Email must be valid!',
@@ -232,7 +232,7 @@ class Customer extends BaseModel
         'telephone' => [
             'checks'   => [
                 'string',
-                'max:32'
+                'max:32',
             ],
             'messages' => [
                 '*' => [
@@ -247,11 +247,11 @@ class Customer extends BaseModel
         'fax' => [
             'checks'   => [
                 'string',
-                'max:32'
+                'max:32',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Fax number must be less than 32 characters!',
+                    'default_text' => 'Fax number must be less than 32 characters!',
                 ],
             ],
         ],
@@ -259,11 +259,11 @@ class Customer extends BaseModel
         'sms' => [
             'checks'   => [
                 'string',
-                'max:32'
+                'max:32',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Mobile phone number must be less than 32 characters!',
+                    'default_text' => 'Mobile phone number must be less than 32 characters!',
                 ],
             ],
         ],
@@ -271,11 +271,11 @@ class Customer extends BaseModel
         'salt' => [
             'checks'   => [
                 'string',
-                'max:10'
+                'max:10',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Salt must be less than 8 characters!',
+                    'default_text' => 'Salt must be less than 8 characters!',
                 ],
             ],
         ],
@@ -285,38 +285,38 @@ class Customer extends BaseModel
          */
 
         'password' => [
-                                'checks'   => [
-                                    'string',
-                                    'sometimes',
-                                    'required',
-                                    'required_with:password_confirmation',
-                                    'confirmed',
-                                    'between:4,40',
-                                ],
-                                'messages' => [
-                                    'confirmed' => [
-                                        'language_key'   => 'error_confirm',
-                                        'language_block' => 'account/create',
-                                        'default_text'   => 'Password confirmation does not match password!',
-                                        'section'        => 'storefront',
-                                    ],
-                                    '*' => [
-                                        'language_key'   => 'error_password',
-                                        'language_block' => 'account/create',
-                                        'default_text'   => 'Password must be between 4 and 40 characters!',
-                                        'section'        => 'storefront',
-                                    ],
-                                ],
-                            ],
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'required_with:password_confirmation',
+                'confirmed',
+                'between:4,40',
+            ],
+            'messages' => [
+                'confirmed' => [
+                    'language_key'   => 'error_confirm',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Password confirmation does not match password!',
+                    'section'        => 'storefront',
+                ],
+                '*'         => [
+                    'language_key'   => 'error_password',
+                    'language_block' => 'account/create',
+                    'default_text'   => 'Password must be between 4 and 40 characters!',
+                    'section'        => 'storefront',
+                ],
+            ],
+        ],
 
         'wishlist' => [
             'checks'   => [
                 'string',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Wishlist must be a string!',
+                    'default_text' => 'Wishlist must be a string!',
                 ],
             ],
         ],
@@ -324,11 +324,11 @@ class Customer extends BaseModel
         'address_id' => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Address ID must be an integer!',
+                    'default_text' => 'Address ID must be an integer!',
                 ],
             ],
         ],
@@ -336,11 +336,11 @@ class Customer extends BaseModel
         'status' => [
             'checks'   => [
                 'integer',
-                'digits:1'
+                'digits:1',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Status must be 1 or 0 !',
+                    'default_text' => 'Status must be 1 or 0 !',
                 ],
             ],
         ],
@@ -348,11 +348,11 @@ class Customer extends BaseModel
         'advanced_status' => [
             'checks'   => [
                 'string',
-                'max:128'
+                'max:128',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Advanced Status must be a string and less than 128 characters!',
+                    'default_text' => 'Advanced Status must be a string and less than 128 characters!',
                 ],
             ],
         ],
@@ -360,11 +360,11 @@ class Customer extends BaseModel
         'approved' => [
             'checks'   => [
                 'integer',
-                'digits:1'
+                'digits:1',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => '"Approved" must be 1 or 0 !',
+                    'default_text' => '"Approved" must be 1 or 0 !',
                 ],
             ],
         ],
@@ -372,11 +372,11 @@ class Customer extends BaseModel
         'customer_group_id' => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Customer Group ID must be an integer or NULL !',
+                    'default_text' => 'Customer Group ID must be an integer or NULL !',
                 ],
             ],
         ],
@@ -384,11 +384,11 @@ class Customer extends BaseModel
         'ip' => [
             'checks'   => [
                 'string',
-                'max:50'
+                'max:50',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'IP-address must be a less that 50 characters!',
+                    'default_text' => 'IP-address must be a less that 50 characters!',
                 ],
             ],
         ],
@@ -396,6 +396,7 @@ class Customer extends BaseModel
     ];
 
     /** Wrap basic method to implement conditional rules
+     *
      * @param array $data
      * @param array $messages
      * @param array $customAttributes
@@ -405,18 +406,20 @@ class Customer extends BaseModel
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    public function validate( array $data= [], array $messages = [], array $customAttributes = [])
+    public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
-        if(Registry::config()->get( 'prevent_email_as_login' )) {
+        if (Registry::config()->get('prevent_email_as_login')) {
             $this->rules['loginname']['checks'][] = 'regex:/^[\w._-]+$/i';
         }
         //we cannot to define rule as function in the class body.
         //so, adding validation rule for uniqueness here
-        $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
-        $this->rules['email']['checks'][] = Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
+        $this->rules['loginname']['checks'][] =
+            Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
+        $this->rules['email']['checks'][] =
+            Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
 
         //do merging to make required_without rule work
-        if($this->customer_id) {
+        if ($this->customer_id) {
             $data['customer_id'] = $this->customer_id;
             $data['store_id'] = $this->store_id ?? Registry::config()->get('store_id');
         }
@@ -426,119 +429,124 @@ class Customer extends BaseModel
     public function getFields()
     {
         return [
-            'store_id' => [
-                'rule' => 'required',
-                'input_type' => 'selectbox'
+            'store_id'          => [
+                'rule'       => 'required',
+                'input_type' => 'selectbox',
             ],
-            'firstname' => [
-                'rule' => 'required_with:lastname|max:32',
+            'firstname'         => [
+                'rule'       => 'required_with:lastname|max:32',
                 'input_type' => 'input',
             ],
-            'lastname' => [
-                'rule' => 'required_with:firstname|max:32',
+            'lastname'          => [
+                'rule'       => 'required_with:firstname|max:32',
                 'input_type' => 'input',
             ],
-            'loginname' => [
-                'rule' => 'unique|max:36|nullable',
+            'loginname'         => [
+                'rule'       => 'unique|max:36|nullable',
                 'input_type' => 'input',
             ],
-            'email' => [
-                'rule' => 'required|email|unique|max:96',
+            'email'             => [
+                'rule'       => 'required|email|unique|max:96',
                 'input_type' => 'input',
             ],
-            'telephone' => [
-                'rule' => 'max:32|nullable',
+            'telephone'         => [
+                'rule'       => 'max:32|nullable',
                 'input_type' => 'input',
             ],
-            'fax' => [
-                'rule' => 'max:32|nullable',
+            'fax'               => [
+                'rule'       => 'max:32|nullable',
                 'input_type' => 'input',
             ],
-            'sms' => [
-                'rule' => 'max:32|nullable',
+            'sms'               => [
+                'rule'       => 'max:32|nullable',
                 'input_type' => 'input',
             ],
-            'salt' => [
-                'rule' => 'max:8|nullable',
+            'salt'              => [
+                'rule'       => 'max:8|nullable',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'password' => [
-                'rule' => 'max:40',
+            'password'          => [
+                'rule'       => 'max:40',
                 'input_type' => 'password',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'cart' => [
-                'rule' => 'json|nullable',
+            'cart'              => [
+                'rule'       => 'json|nullable',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'wishlist' => [
-                'rule' => 'json|nullable',
+            'wishlist'          => [
+                'rule'       => 'json|nullable',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'newsletter' => [
-                'rule' => 'boolean|nullable',
+            'newsletter'        => [
+                'rule'       => 'boolean|nullable',
                 'input_type' => 'checkbox',
             ],
-            'address_id' => [
-                'rule' => 'integer|nullable',
+            'address_id'        => [
+                'rule'       => 'integer|nullable',
                 'input_type' => 'none',
             ],
-            'status' => [
-                'rule' => 'boolean|nullable',
+            'status'            => [
+                'rule'       => 'boolean|nullable',
                 'input_type' => 'checkbox',
             ],
-            'approved' => [
-                'rule' => 'boolean|nullable',
+            'approved'          => [
+                'rule'       => 'boolean|nullable',
                 'input_type' => 'checkbox',
             ],
             'customer_group_id' => [
-                'rule' => 'integer|nullable',
+                'rule'       => 'integer|nullable',
                 'input_type' => 'none',
             ],
-            'ip' => [
-                'rule' => 'ip|nullable',
+            'ip'                => [
+                'rule'       => 'ip|nullable',
                 'input_type' => 'input',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'data' => [
-                'rule' => 'json|nullable',
+            'data'              => [
+                'rule'       => 'json|nullable',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'date_added' => [
-                'rule' => 'date',
+            'date_added'        => [
+                'rule'       => 'date',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'date_modified' => [
-                'rule' => 'date',
+            'date_modified'     => [
+                'rule'       => 'date',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
-            'last_login' => [
-                'rule' => 'date|nullable',
+            'last_login'        => [
+                'rule'       => 'date|nullable',
                 'input_type' => 'none',
-                'access' => 'read'
+                'access'     => 'read',
             ],
         ];
     }
 
-
-    public function setDataAttribute($value){
+    public function setDataAttribute($value)
+    {
         $this->attributes['data'] = serialize($value);
     }
-    public function setCartAttribute($value){
+
+    public function setCartAttribute($value)
+    {
         $this->attributes['cart'] = serialize($value);
     }
-    public function setWishlistAttribute($value){
+
+    public function setWishlistAttribute($value)
+    {
         $this->attributes['wishlist'] = serialize($value);
     }
 
-    public function setPasswordAttribute($password){
-        if (! $this->originalIsEquivalent('password', $password)) {
+    public function setPasswordAttribute($password)
+    {
+        if (!$this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = H::getHash($password, $salt_key);
@@ -557,14 +565,14 @@ class Customer extends BaseModel
         $data = $this->attributes;
 
         //remove serialized fields
-        foreach($this->casts as $k=>$v){
-            if($v == 'serialized'){
+        foreach ($this->casts as $k => $v) {
+            if ($v == 'serialized') {
                 unset($data[$k]);
             }
         }
         //prevent double mutation
-        foreach($data as $k=>$v){
-            if(method_exists($this,'Set'.ucfirst($k).'Attribute')){
+        foreach ($data as $k => $v) {
+            if (method_exists($this, 'Set'.ucfirst($k).'Attribute')) {
                 unset($data[$k]);
             }
         }
@@ -586,7 +594,6 @@ class Customer extends BaseModel
 
         return $result;
     }
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -672,10 +679,11 @@ class Customer extends BaseModel
      * @return array|\Illuminate\Support\Collection|int
      * @throws \abc\core\lib\AException
      */
-    public static function getCustomer($customer_id, $mode = 'quick'){
+    public static function getCustomer($customer_id, $mode = 'quick')
+    {
         $customer_id = (int)$customer_id;
-        if(!$customer_id){
-             return [];
+        if (!$customer_id) {
+            return [];
         }
         $result = static::getCustomers(['filter' => ['include' => [$customer_id]]], $mode);
         return $result[0];
@@ -709,7 +717,7 @@ class Customer extends BaseModel
             $select = [
                 "customers.*",
                 $db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname) AS name'),
-                'customer_groups.name AS customer_group'
+                'customer_groups.name AS customer_group',
             ];
         }
 
@@ -743,46 +751,48 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['name_email'])) {
-            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%".$filter['name_email']."%'");
+            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%"
+                .$filter['name_email']."%'");
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
-            if($filter['search_operator'] == 'equal'){
+            if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
-            }else {
+            } else {
                 $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '".mb_strtolower($filter['loginname'])."%'");
             }
         }
 
         if (H::has_value($filter['firstname'])) {
-            if($filter['search_operator'] == 'equal') {
+            if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".mb_strtolower($filter['firstname'])."'");
-            }else {
+            } else {
                 $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".mb_strtolower($filter['firstname'])."%'");
             }
         }
 
         if (H::has_value($filter['lastname'])) {
-            if($filter['search_operator'] == 'equal') {
+            if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".mb_strtolower($filter['lastname'])."'");
-            }else{
+            } else {
                 $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".mb_strtolower($filter['lastname'])."%'");
             }
         }
 
         if (H::has_value($filter['password'])) {
-            $query->whereRaw($aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('".$db->escape($filter['password'])."')))))");
+            $query->whereRaw($aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('"
+                .$db->escape($filter['password'])."')))))");
         }
 
         //select differently if encrypted
         if (!$dcrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
-                $query->where(function($query) use ($emails, $filter){
-                    foreach($emails as $email) {
-                        if($filter['search_operator'] == 'equal') {
+                $query->where(function ($query) use ($emails, $filter) {
+                    foreach ($emails as $email) {
+                        if ($filter['search_operator'] == 'equal') {
                             $query->orWhere('customers.email', '=', mb_strtolower($email));
-                        }else {
+                        } else {
                             $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
                         }
                     }
@@ -801,24 +811,24 @@ class Customer extends BaseModel
             $query->where('customer_groups.customer_group_id', '=', $filter['customer_group_id']);
         }
         // select only subscribers (group + customers with subscription)
-        $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
+        $subscriberGroupId =
+            CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
-            $query->where(function($query) use ($subscriberGroupId){
+            $query->where(function ($query) use ($subscriberGroupId) {
                 $query->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
             });
         } elseif (H::has_value($filter['all_subscribers'])) {
-            $query->where(function($query){
-                             $query->where('customers.newsletter', '=', 1)
-                                   ->where('customers.status', '=', 1)
-                                   ->where('customers.approved', '=', 1);
-                         })
-            ->orWhere(function($query) use ($subscriberGroupId){
-                             $query->where('customers.newsletter', '=', 1)
-                                   ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
-                         });
-        }
-        // select only customers without newsletter subscribers
+            $query->where(function ($query) {
+                $query->where('customers.newsletter', '=', 1)
+                      ->where('customers.status', '=', 1)
+                      ->where('customers.approved', '=', 1);
+            })
+                  ->orWhere(function ($query) use ($subscriberGroupId) {
+                      $query->where('customers.newsletter', '=', 1)
+                            ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
+                  });
+        } // select only customers without newsletter subscribers
         elseif (H::has_value($filter['only_customers'])) {
             $query->where('customer_groups.customer_group_id', '<>', $subscriberGroupId);
         }
@@ -830,7 +840,7 @@ class Customer extends BaseModel
         //include ids set
         if (H::has_value($filter['include'])) {
             $filter['include'] = (array)$filter['include'];
-            foreach($filter['include'] as &$id){
+            foreach ($filter['include'] as &$id) {
                 $id = (int)$id;
             }
             $query->whereIn('customers.customer_id', $filter['include']);
@@ -838,7 +848,7 @@ class Customer extends BaseModel
         //exclude already selected in chosen element
         if (H::has_value($filter['exclude'])) {
             $filter['exclude'] = (array)$filter['exclude'];
-            foreach($filter['exclude'] as &$id){
+            foreach ($filter['exclude'] as &$id) {
                 $id = (int)$id;
             }
             $query->whereNotIn('customers.customer_id', $filter['exclude']);
@@ -862,7 +872,7 @@ class Customer extends BaseModel
 
         if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
             $query->join('customer_notifications',
-                function ($join) use($filter){
+                function ($join) use ($filter) {
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
                          ->on('customer_notifications.sendpoint', '=', 'newsletter');
                 });
@@ -888,7 +898,7 @@ class Customer extends BaseModel
             'date_added'     => 'customers.date_added',
         ];
 
-        if($mode != 'quick'){
+        if ($mode != 'quick') {
             $sort_data['orders_count'] = 'orders_count';
         }
 
@@ -902,7 +912,7 @@ class Customer extends BaseModel
                 $sorting = "asc";
             }
 
-            $query->orderBy( $orderBy, $sorting);
+            $query->orderBy($orderBy, $sorting);
             if (isset($data['start']) || isset($data['limit'])) {
                 if ($data['start'] < 0) {
                     $data['start'] = 0;
@@ -916,7 +926,7 @@ class Customer extends BaseModel
         $result_rows = $query->get();
 
 //???? TODO need to check when encrypted
-        if ($result_rows->count() &&  $dcrypt->active) {
+        if ($result_rows->count() && $dcrypt->active) {
 
             if (H::has_value($filter['email'])) {
                 $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'email', $filter['email']);
@@ -951,7 +961,7 @@ class Customer extends BaseModel
      */
     public static function getTotalCustomers($data = [])
     {
-        return static::getCustomers($data,'total_only');
+        return static::getCustomers($data, 'total_only');
     }
 
     /**
@@ -987,26 +997,26 @@ class Customer extends BaseModel
             foreach ($update as $sendpoint => $row) {
                 foreach ($row as $protocol => $status) {
                     CustomerNotification::where('customer_id', '=', $this->customer_id)
-                        ->where('sendpoint', '=',$sendpoint)
-                        ->where('protocol', '=',$protocol)
-                        ->delete();
+                                        ->where('sendpoint', '=', $sendpoint)
+                                        ->where('protocol', '=', $protocol)
+                                        ->delete();
 
-                    $cn = new CustomerNotification( compact('customer_id', 'sendpoint','protocol','status'));
+                    $cn = new CustomerNotification(compact('customer_id', 'sendpoint', 'protocol', 'status'));
                     $cn->save();
                 }
             }
 
             //for newsletter subscription do changes inside customers table
             //if at least one protocol enabled - set 1, otherwise - 0
-            if ( H::has_value( $settings['newsletter'] ) ) {
+            if (H::has_value($settings['newsletter'])) {
                 $newsletter_status = 0;
-                foreach ( $settings['newsletter'] as $protocol => $status ) {
-                    if ( $status ) {
+                foreach ($settings['newsletter'] as $protocol => $status) {
+                    if ($status) {
                         $newsletter_status = 1;
                         break;
                     }
                 }
-                $this->update(['newsletter' => $newsletter_status ]);
+                $this->update(['newsletter' => $newsletter_status]);
             }
         }
         return true;
@@ -1034,14 +1044,14 @@ class Customer extends BaseModel
          */
         $query->select($db->raw_sql_row_count())
               ->select('customers.*');
-        $query->join('orders', function($join){
+        $query->join('orders', function ($join) {
             $join->on('orders.order_id', '=', 'order_products.order_id');
         });
-        $query->join('customers', function($join){
+        $query->join('customers', function ($join) {
             $join->on('orders.customer_id', '=', 'customers.customer_id');
         })
-        ->where('orders.order_status_id', '>', 0)
-        ->distinct();
+              ->where('orders.order_status_id', '>', 0)
+              ->distinct();
 
         $result_rows = $query->get();
         $totalNumRows = $db->sql_get_row_count();
@@ -1065,7 +1075,7 @@ class Customer extends BaseModel
         $aliasC = $db->table_name('customers');
 
         //exclude current customer from checking
-        $query = static::whereRaw("LOWER(". $aliasC.".loginname) = '".mb_strtolower($loginname)."'");
+        $query = static::whereRaw("LOWER(".$aliasC.".loginname) = '".mb_strtolower($loginname)."'");
 
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);
@@ -1079,18 +1089,17 @@ class Customer extends BaseModel
         return (int)CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
     }
 
-    public function editCustomerNotifications( $data )
+    public function editCustomerNotifications($data)
     {
-        if ( ! $data ) {
+        if (!$data) {
             return false;
         }
 
         $customer_id = (int)$this->customer_id;
 
-        if(!$customer_id){
+        if (!$customer_id) {
             return false;
         }
-
 
         $db = Registry::db();
         $im = Registry::im();
@@ -1100,8 +1109,8 @@ class Customer extends BaseModel
         $im_protocols = $im->getProtocols();
         $columns = $db->database()->getColumnListing("customers");
 
-        foreach ( $im_protocols as $protocol ) {
-            if ( isset( $data[$protocol] ) && in_array($protocol, $columns) ) {
+        foreach ($im_protocols as $protocol) {
+            if (isset($data[$protocol]) && in_array($protocol, $columns)) {
                 $upd[$protocol] = $data[$protocol];
             }
         }
