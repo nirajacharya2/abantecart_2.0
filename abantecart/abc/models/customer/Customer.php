@@ -778,7 +778,7 @@ class Customer extends BaseModel
         if (!$dcrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
-                $query->orWhere(function($query) use ($emails, $filter){
+                $query->where(function($query) use ($emails, $filter){
                     foreach($emails as $email) {
                         if($filter['search_operator'] == 'equal') {
                             $query->orWhere('customers.email', '=', mb_strtolower($email));
@@ -946,7 +946,7 @@ class Customer extends BaseModel
     /**
      * @param array $data
      *
-     * @return array
+     * @return Collection|int
      * @throws \abc\core\lib\AException
      */
     public static function getTotalCustomers($data = [])

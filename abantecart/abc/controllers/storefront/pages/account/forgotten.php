@@ -56,7 +56,7 @@ class ControllerPagesAccountForgotten extends AController
                 $this->error['message'] = $this->language->get('error_unknown');
                 return false;
             }
-            $customer_details = $this->_find_customer('password', $this->request->post);
+            $customer_details = $this->findCustomer('password', $this->request->post);
             if ($customer_details) {
                 $customer_details = $customer_details->toArray();
 
@@ -328,7 +328,7 @@ class ControllerPagesAccountForgotten extends AController
         $this->document->setTitle($this->language->get('heading_title_loginname'));
 
         if ($this->request->is_POST()) {
-            $customer_details = $this->_find_customer('loginname', $this->request->post);
+            $customer_details = $this->findCustomer('loginname', $this->request->post);
             if ($customer_details) {
                 //extra check that we have customer details
                 if (!empty($customer_details['email'])) {
@@ -429,7 +429,7 @@ class ControllerPagesAccountForgotten extends AController
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    protected function _find_customer($mode, $data)
+    protected function findCustomer($mode, $data)
     {
         $output = [];
         $email = $data['email'];
@@ -462,7 +462,7 @@ class ControllerPagesAccountForgotten extends AController
                         $output = Customer::getCustomers(['filter' =>
                                                                 [
                                                                     'search_operator' => 'equal',
-                                                                    'lastname' => $loginname,
+                                                                    'lastname' => $lastname,
                                                                     'email' => $email
                                                                 ]
                                             ]);
