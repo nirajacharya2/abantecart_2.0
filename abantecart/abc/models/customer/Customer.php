@@ -206,6 +206,8 @@ class Customer extends BaseModel
         'email' => [
             'checks'   => [
                 'string',
+                'sometimes',
+                'required',
                 //required only when new customer creating
                 'required_without:customer_id',
                 'max:96',

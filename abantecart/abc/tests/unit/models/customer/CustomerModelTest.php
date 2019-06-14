@@ -124,15 +124,15 @@ class CustomerModelTest extends ATestCase{
     }*/
 
     public function testGetCustomers(){
-
+        $total_count = $this->registry->get('db')->table('customers')->get()->count();
         $total = Customer::getCustomers([],'total_only');
         $this->assertIsInt($total);
-        $this->assertEquals(12, $total);
+        $this->assertEquals($total_count, $total);
 
         $rows = Customer::getCustomers();
         $total = $rows->count();
-        $this->assertEquals(12, $total);
-        $this->assertEquals(12, $rows[0]['total_num_rows']);
+        $this->assertEquals($total_count, $total);
+        $this->assertEquals($total_count, $rows[0]['total_num_rows']);
 
         //not approved
         $total = Customer::getCustomers(['filter' => ['approved'=>0]], 'total_only');
