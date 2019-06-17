@@ -55,7 +55,7 @@ class Setting extends BaseModel
     /**
      * @param int $storeId
      *
-     * @return object
+     * @return \stdClass
      */
     public static function getStoreSettings($storeId)
     {

@@ -7,7 +7,10 @@
 
 use abc\modules\listeners\AdminSendApprovalEmailListener;
 use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
+use abc\modules\listeners\StorefrontResetPasswordNotifyEmailListener;
 use abc\modules\listeners\StorefrontSendActivateLinkEmailListener;
+use abc\modules\listeners\StorefrontSendLoginNameEmailListener;
+use abc\modules\listeners\StorefrontSendResetPasswordLinkListener;
 use abc\modules\listeners\StorefrontSendWelcomeEmailListener;
 
 return [
@@ -23,11 +26,20 @@ return [
         AdminSendNewTransactionNotifyEmailListener::class,
     ],
 
-    'storefront\sendWelcomeEmail'        => [
+    'storefront\sendWelcomeEmail'             => [
         StorefrontSendWelcomeEmailListener::class,
     ],
-    'storefront\sendActivationLinkEmail' => [
+    'storefront\sendActivationLinkEmail'      => [
         StorefrontSendActivateLinkEmailListener::class,
+    ],
+    'storefront\sendPasswordResetLinkEmail'   => [
+        StorefrontSendResetPasswordLinkListener::class,
+    ],
+    'storefront\sendPasswordResetNotifyEmail' => [
+        StorefrontResetPasswordNotifyEmailListener::class,
+    ],
+    'storefront\sendLoginNameEmail'           => [
+        StorefrontSendLoginNameEmailListener::class,
     ],
 
 ];
