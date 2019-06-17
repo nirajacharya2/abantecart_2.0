@@ -11,11 +11,11 @@
   License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
+
+ UPGRADE NOTE:
    Do not edit or add to this file if you wish to upgrade AbanteCart to newer
    versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
+   needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
 namespace abc\models\storefront;
@@ -491,6 +491,14 @@ class ModelAccountCustomer extends Model
         $customer_id = (int)$customer_id;
         if ( ! $customer_id ) {
             return false;
+        }
+        $query = $this->db->query("SELECT `data` from ".$this->db->table_name( "customers" ).
+        " WHERE customer_id='".$customer_id."'");
+        if ($query->row) {
+            $existData = unserialize($query->row['data']);
+        }
+        if ($existData) {
+            $data = array_merge($existData, $data);
         }
         $this->db->query( "UPDATE ".$this->db->table_name( "customers" )."
                            SET data = '".$this->db->escape( serialize( $data ) )."'
