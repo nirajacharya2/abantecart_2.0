@@ -25,7 +25,6 @@ class QueryBuilder extends Builder
 {
     public function setGridRequest($data = [])
     {
-        $query = $this->newQuery();
         if ($data['sort'] != 'description.title') {
             if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
                 return $this->orderBy($data['sort'], 'desc');
