@@ -12,13 +12,13 @@
 	<div class="content"><?php echo $text_error; ?></div>
 	<?php } ?>
 	<?php if ($categories) { ?>
-	<ul class="thumbnails row">
+	<ul class="thumbnails row sub-cat-blk">
 	    <?php for ($i = 0; $i < sizeof($categories); $i++) { ?>
-	     <li class="col-md-2 col-sm-2 col-xs-6 align_center">
+	     <li class="col-md-1 col-sm-2 col-xs-6 align_center">
 	    	<a href="<?php echo $categories[$i]['href']; ?>">
 	    		<?php echo $categories[$i]['thumb']['thumb_html']; ?>
 	    	</a>
-	    	<div class="mt10 align_center" style="height: 40px;">
+	    	<div class="name align_center">
 	    	<a href="<?php echo $categories[$i]['href']; ?>"><?php echo $categories[$i]['name']; ?></a>
 	    	</div>
 	    </li>

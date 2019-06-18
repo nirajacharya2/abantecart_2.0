@@ -3448,7 +3448,7 @@ select {
 	-moz-appearance: menulist;
 	-webkit-appearance: menulist;
 }
-th.left {
+th.left, td.left {
 	float: none !important;
 }
 

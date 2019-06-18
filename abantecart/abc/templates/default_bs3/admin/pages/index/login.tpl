@@ -12,13 +12,13 @@
 		<div class="form-group">
 			<div class="input-group">
 			<div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-			<?php echo $form['fields']['username']; ?>
+			<?php echo $form['fields']['admin_username']; ?>
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="input-group">
 			<div class="input-group-addon"><i class="fa fa-key fa-fw"></i></div>
-			<?php echo $form['fields']['password']; ?>
+			<?php echo $form['fields']['admin_password']; ?>
 			</div>
 		</div>
 		<div class="form-group">

@@ -71,7 +71,7 @@ html[xmlns] .slides { display: block; }
 .html_carousel div.slide p { font-size: 16px; padding: 0 0 30px 100px; }
 .html_carousel div.slide h4, .html_carousel div.slide p { color: white; margin: 0; }
 div.thumbnails { text-align: center; margin: 15px 0px; }
-div.thumbnails img { cursor: pointer; background-color: white; display: inline-block; border-top:5px solid #efefef }
+div.thumbnails img {}
 div.thumbnails img:hover { background-color: #eee; }
 div.thumbnails img.selected { background-color: #00A1CB; border-top:5px solid #00A1CB }
 .clearfix { float: none; clear: both; }

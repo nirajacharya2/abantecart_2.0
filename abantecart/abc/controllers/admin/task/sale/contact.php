@@ -266,9 +266,9 @@ class ControllerTaskSaleContact extends AController
         $mail->setSender($data['sender']);
         $mail->setSubject($this->data['mail_template_data']['subject']);
         $mail->setHtml($html_body);
-        $user = User::find($this->user_id);
-        $mail->setUser($user);
-
+        if ($this->user) {
+            $mail->setUser($this->user);
+        }
         $mail->send();
 
         if ($mail->error) {

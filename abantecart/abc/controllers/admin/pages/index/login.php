@@ -11,11 +11,11 @@
   License details is bundled with this package in the file LICENSE.txt.
   It is also available at this URL:
   <http://www.opensource.org/licenses/OSL-3.0>
-  
- UPGRADE NOTE: 
+
+ UPGRADE NOTE:
    Do not edit or add to this file if you wish to upgrade AbanteCart to newer
    versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.  
+   needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
@@ -112,11 +112,11 @@ class ControllerPagesIndexLogin extends AController
             )
         );
 
-        $fields = array('username', 'password');
+        $fields = array('admin_username', 'admin_password');
         foreach ($fields as $f) {
             $this->data['form']['fields'][$f] = $form->getFieldHtml(
                 array(
-                    'type'        => ($f == 'password' ? 'password' : 'input'),
+                    'type'        => ($f == 'admin_password' ? 'password' : 'input'),
                     'name'        => $f,
                     'value'       => $this->data[$f],
                     'placeholder' => $this->language->get('entry_'.$f),
@@ -175,8 +175,8 @@ class ControllerPagesIndexLogin extends AController
 
     private function validate()
     {
-        if (isset($this->request->post['username']) && isset($this->request->post['password'])
-            && !$this->user->login($this->request->post['username'], $this->request->post['password'])
+        if (isset($this->request->post['admin_username']) && isset($this->request->post['admin_password'])
+            && !$this->user->login($this->request->post['admin_username'], $this->request->post['admin_password'])
         ) {
             $this->error['warning'] = $this->language->get('error_login');
         }
@@ -185,8 +185,8 @@ class ControllerPagesIndexLogin extends AController
         } else {
             $this->messages->saveNotice(
                 $this->language->get('error_login_message').$this->request->getRemoteIP(),
-                $this->language->get('error_login_message_text').$this->request->post['username']);
+                $this->language->get('error_login_message_text').$this->request->post['admin_username']);
             return false;
         }
     }
-}  
+}

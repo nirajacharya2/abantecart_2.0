@@ -53,12 +53,14 @@ if($faster_browser_rendering == true) {
 	<style><?php echo $this->LoadMinifyCSS('assets/css/onebyone.css'); ?></style>
 	<style><?php echo $this->LoadMinifyCSS('assets/css/font-awesome.min.css'); ?></style>
 	<style><?php echo $this->LoadMinifyCSS('assets/css/style.css'); ?></style>
+	<style><?php echo $this->LoadMinifyCSS('assets/css/stylesheet.css'); ?></style>
 <?php } else { ?>
 	<link href="<?php echo $this->templateResource('assets/css/bootstrap.min.css'); ?>" rel="stylesheet" type='text/css' />
 	<link href="<?php echo $this->templateResource('assets/css/flexslider.css'); ?>" rel="stylesheet" type='text/css' />
 	<link href="<?php echo $this->templateResource('assets/css/onebyone.css'); ?>" rel="stylesheet" type='text/css' />
 	<link href="<?php echo $this->templateResource('assets/css/font-awesome.min.css'); ?>" rel="stylesheet" type='text/css' />
 	<link href="<?php echo $this->templateResource('assets/css/style.css'); ?>" rel="stylesheet" type='text/css' />
+	<link href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" rel="stylesheet" type='text/css' />
 <?php } ?>
 
 <?php 

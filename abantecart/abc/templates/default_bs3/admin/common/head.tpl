@@ -60,6 +60,8 @@ use abc\core\ABC; ?>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
+<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
+
 
 <?php
 if (strpos($this->request->get['rt'], 'catalog/product') === false) {
@@ -90,8 +92,6 @@ if(is_file(ABC::env('DIR_TEMPLATES').'default_bs3/js/tinymce/langs/'.$language_l
 <script type="text/javascript">
 //define tinymce config
 var mcei = {
-	theme: "modern",
-	skin: "lightgray",
 	language: "<?php echo $mce_lang_code; ?>",
 	formats: {
 		alignleft: [{
@@ -130,12 +130,10 @@ var mcei = {
 	menubar: false,
 	autop: true,
 	indent: false,
-	toolbar_items_size : 'small',
-	toolbar1: "undo,redo,formatselect,fontselect,fontsizeselect,bold,italic,strikethrough,forecolor backcolor | numlist,bullist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
-	toolbar2: "",
-	//toolbar2: "formatselect,underline,alignjustify,forecolor,pastetext,removeformat,charmap,outdent,indent",
-	toolbar3: "",
-	toolbar4: "",
+	toolbar: [
+		'undo | redo | formatselect | fontselect | fontsizeselect | bold | italic | strikethrough | forecolor | backcolor',
+		'numlist | bullist | blockquote | hr | alignleft | aligncenter | alignright | link | spellchecker | dfw | fullscreen | table'
+	],
 	selector: '',
 	valid_elements : '*[*]',
 	valid_children : "+body[style]",
@@ -145,8 +143,9 @@ var mcei = {
 	body_class: "content post-type-post post-status-auto-draft post-format-standard locale-en-gb",
 	autoresize_on: true,
 	add_unload_trigger: false,
-	height: '242px'
+	height: 330,
 };
+
 
 
 

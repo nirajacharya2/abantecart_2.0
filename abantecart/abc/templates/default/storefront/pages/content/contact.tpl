@@ -21,7 +21,7 @@
 	<h4 class="heading4"><?php echo $text_edit_address; ?></h4>
 
 	<div class="content-fluid">
-	  <div class="row">
+	  <div class="row m-0">
 	    <div class="col-md-6 pull-left">
 	    <b><?php echo $text_address; ?></b><br />
 	      <?php echo $store; ?><br />
@@ -40,7 +40,7 @@
 	    </div>
 	  </div>
 
-	  <div class="row mt20">
+	  <div class="mt20">
 	  <?php echo $form_output; ?>
 	  </div>
 	</div>

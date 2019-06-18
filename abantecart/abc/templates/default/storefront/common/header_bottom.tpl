@@ -1,5 +1,5 @@
 <?php foreach ($children_blocks as $k => $block) { ?>
-	<div class="col-md-12">
-<?php echo ${$block}; ?>
-	</div>
+		<div class="container-fluid head_bottom_<?php echo $k; ?>">
+			<div class=""><?php echo ${$block}; ?></div>
+		</div>
 <?php } ?>

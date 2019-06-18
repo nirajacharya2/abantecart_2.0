@@ -32,9 +32,9 @@ class ControllerPagesCatalogAttribute extends AController
     public $data = [];
     public $error = [];
     /**
-     * @var AttributeManagerInterface
+     * @var AttributeManagerInterface|AttributeManager
      */
-    private $attribute_manager;
+    protected $attribute_manager;
 
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
@@ -227,8 +227,9 @@ class ControllerPagesCatalogAttribute extends AController
                 $this->language->getContentLanguageID()
             );
 
-            $attribute_type_info =
-                $this->attribute_manager->getAttributeTypeInfoById((int)$attribute_info['attribute_type_id']);
+            $attribute_type_info = $this
+                                    ->attribute_manager
+                                    ->getAttributeTypeInfoById((int)$attribute_info['attribute_type_id']);
 
             //load values for attributes with options
 
@@ -380,9 +381,7 @@ class ControllerPagesCatalogAttribute extends AController
 
         if (!in_array($attribute_type_info['type_key'],['download_attribute', 'product_attribute'])) {
             $parent_attributes = ['' => $this->language->get('text_select')];
-            $results =
-                $this->attribute_manager->getAttributes(['attribute_type_id' => $attribute_type_id, 'limit' => null], 0,
-                    0);
+            $results = $this->attribute_manager->getAttributes(['attribute_type_id' => $attribute_type_id, 'limit' => null]);
             foreach ($results as $type) {
                 if ($attribute_id && $attribute_id == $type['attribute_id']) {
                     continue;

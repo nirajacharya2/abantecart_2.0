@@ -163,7 +163,11 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
         $update = [];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                if($f == 'attribute_parent_id' && !$data[$f]){
+                    $update[] = $f .' = NULL';
+                }else {
+                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                }
             }
         }
         if (!empty($update)) {

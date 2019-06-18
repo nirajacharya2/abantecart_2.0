@@ -21,7 +21,7 @@
 				</thead>
 				<tbody>
 				<tr>
-					<td class="left"><?php echo date('m/d/Y h:i:s A', strtotime($note->note_added)); ?></td>
+					<td class="left"><?php echo $note->note_added; ?></td>
 					<td class="left"><?php echo (!empty($note->firstname) || !empty($note->lastname)) ? $note->firstname.' '.$note->lastname.' ('.$note->username.')' : $note->username; ?></td>
 				</tr>
 				</tbody>

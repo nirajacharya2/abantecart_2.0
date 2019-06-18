@@ -671,7 +671,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
             if ( $this->request->post['block_banners'] ) {
                 $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                 foreach ( $this->request->post['block_banners'] as $k => $id ) {
                     $listing_manager->saveCustomListItem(
                         [
@@ -802,7 +802,7 @@ class ControllerPagesExtensionBannerManager extends AController
             // save list if it is custom
             if ( $this->request->post['block_banners'] ) {
                 $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                 $k = 0;
                 foreach ( $this->request->post['block_banners'] as $id ) {
                     $listing_manager->saveCustomListItem(
@@ -816,8 +816,8 @@ class ControllerPagesExtensionBannerManager extends AController
                 }
             } else {
                 //delete the list as nothing provided
-                $listing_manager = new AListingManager( $custom_block_id );
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager = new AListingManager( (int)$custom_block_id );
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
             }
 
             $this->session->data ['success'] = $this->language->get( 'text_banner_success' );
