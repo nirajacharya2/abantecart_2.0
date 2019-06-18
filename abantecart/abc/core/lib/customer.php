@@ -740,49 +740,6 @@ class ACustomer extends ALibBase
             }
         }
 
-
-
-       /* $sql = "SELECT cart
-                FROM ".$this->db->table_name("customers")."
-                WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
-
-        $result = $this->db->query($sql);*/
-     /*   if ($result->num_rows) {
-            //load customer saved cart
-            if (($result->row['cart']) && (is_string($result->row['cart']))) {
-                $cart = unserialize($result->row['cart']);
-                //check is format of cart old or new
-                $new = $this->isNewCartFormat($cart);
-                if (isset($cart['store_'.$store_id])) {
-                    $cart = $cart['store_'.$store_id];
-                } elseif ($new) {
-                    $cart = [];
-                }
-                //clean products
-                if ($cart) {
-                    $cart_products = [];
-                    foreach ($cart as $key => $val) {
-                        $k = explode(':', $key);
-                        $cart_products[] = (int)$k[0]; // <-product_id
-                    }
-                    $sql = "SELECT product_id
-                            FROM ".$this->db->table_name('products_to_stores')." pts
-                            WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
-
-                    $result = $this->db->query($sql);
-                    $products = [];
-                    foreach ($result->rows as $row) {
-                        $products[] = $row['product_id'];
-                    }
-
-                    $diff = array_diff($cart_products, $products);
-                    foreach ($diff as $p) {
-                        unset($cart[$p]);
-                    }
-                }
-            }
-        }*/
-
         return $cart;
     }
 
@@ -1016,7 +973,6 @@ class ACustomer extends ALibBase
                 ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
                 ->forceDelete();
 
-        $orm = $db->getORM();
         try {
             $db->beginTransaction();
 
