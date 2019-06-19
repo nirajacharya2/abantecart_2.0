@@ -53,4 +53,18 @@ return [
         Customer::class => true,
         Address::class => true,
     ],
+    //you can extends base model with this array
+    'INITIALIZE'       => [
+            Product::class => [
+                //merge with model properties
+                'properties' => [
+                                    'fillable' => [],
+                                    'guarded'  => []
+                ],
+                //add scopes with array of scope class full names
+                'scopes'     => [
+                    //SomeFullScopeClassName  myScope::class,
+                ]
+            ]
+    ]
 ];

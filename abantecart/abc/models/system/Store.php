@@ -2,6 +2,7 @@
 
 namespace abc\models\system;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\CategoriesToStore;
 use abc\models\catalog\ManufacturersToStore;
@@ -88,5 +89,10 @@ class Store extends BaseModel
     public function user_notifications()
     {
         return $this->hasMany(UserNotification::class, 'store_id');
+    }
+
+    public static function isDefaultStore(){
+        $store_settings = Setting::getStoreSettings((int)Registry::session()->data['current_store_id']);
+        return (Registry::config()->get('config_url') == $store_settings->config_url);
     }
 }
