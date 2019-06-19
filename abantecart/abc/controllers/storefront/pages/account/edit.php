@@ -120,12 +120,11 @@ class ControllerPagesAccountEdit extends AController
         $this->view->assign('error_email', $this->error['email']);
         $this->view->assign('error_telephone', $this->error['telephone']);
 
-        if ($this->request->is_GET()) {
-            $customer_info = Customer::getCustomer($this->customer->getId());
-            if($customer_info){
-                $customer_info = $customer_info->toArray();
-            }
+        $customer_info = Customer::getCustomer($this->customer->getId());
+        if($customer_info){
+            $customer_info = $customer_info->toArray();
         }
+
 
         foreach($this->data['predefined_fields'] as $field_name){
             if (isset($request_data[$field_name])) {

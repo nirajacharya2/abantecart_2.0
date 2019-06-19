@@ -2426,6 +2426,7 @@ label.error {
 
 form .help-block {
     text-align: center;
+	color: darkred;
 }
 
 .form-control, .alert {

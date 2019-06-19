@@ -155,8 +155,8 @@ class Customer extends BaseModel
         'loginname' => [
             'checks'   => [
                 'string',
-                //required only when new customer creating
-                'required_without:customer_id',
+                'sometimes',
+                'required',
                 'between:5,96',
             ],
             'messages' => [
@@ -172,8 +172,8 @@ class Customer extends BaseModel
         'firstname' => [
             'checks'   => [
                 'string',
-                //required only when new customer creating
-                'required_without:customer_id',
+                'sometimes',
+                'required',
                 'between:1,32',
             ],
             'messages' => [
@@ -189,8 +189,8 @@ class Customer extends BaseModel
         'lastname' => [
             'checks'   => [
                 'string',
-                //required only when new customer creating
-                'required_without:customer_id',
+                'sometimes',
+                'required',
                 'between:1,32',
             ],
             'messages' => [
