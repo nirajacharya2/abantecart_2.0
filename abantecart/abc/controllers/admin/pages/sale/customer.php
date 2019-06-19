@@ -387,6 +387,10 @@ class ControllerPagesSaleCustomer extends AController
          */
         $customer = Customer::find($customer_id);
 
+        if(!$customer){
+            abc_redirect($this->html->getSecureURL('sale/customer'));
+        }
+
         if ($customer && $this->request->is_POST() && $this->validateForm($this->request->post, $customer_id)) {
             if ((int)$this->request->post['approved']) {
                 if (!$customer->approved && !$customer->isSubscriber()) {
@@ -429,11 +433,12 @@ class ControllerPagesSaleCustomer extends AController
         $this->data['addresses'] = [];
         $customer_info = [];
         if ($customer_id) {
-            $customer_info = Customer::with(['addresses'])
-                                     ->where('customer_id', $customer_id)
-                                     ->first()
-                                     ->toArray();
-            if($customer_info){
+
+            $customer = Customer::with(['addresses'])
+                                 ->where('customer_id', $customer_id)
+                                 ->first();
+            if($customer) {
+                $customer_info = $customer->toArray();
                 $customer_info['orders_count'] = Order::where('customer_id', '=', $customer_id)->where('order_status_id', '>',0)->get()->count();
             }
             $this->data['button_orders_count'] = $this->html->buildElement(
