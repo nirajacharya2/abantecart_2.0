@@ -260,7 +260,7 @@ class ControllerPagesCheckoutAddress extends AController
         );
 
         $addresses = [];
-        $results = Address::getAddresses($this->customer->getId(), $this->language->getContentLanguageID())->toArray();
+        $results = Address::getAddresses($this->customer->getId(), $this->language->getLanguageID())->toArray();
 
         foreach ($results as $result) {
             $addresses[] = [

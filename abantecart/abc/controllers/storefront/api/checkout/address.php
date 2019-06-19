@@ -185,7 +185,7 @@ class ControllerApiCheckoutAddress extends AControllerAPI
     {
 
         $addresses = [];
-        $results = Address::getAddresses($this->customer->getId(), $this->language->getContentLanguageID())
+        $results = Address::getAddresses($this->customer->getId(), $this->language->getLanguageID())
                           ->toArray();
 
         foreach ($results as $result) {
