@@ -188,7 +188,7 @@ class ControllerPagesAccountAddress extends AController
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('success', $this->session->data['success']);
 
-        $results = Address::getAddresses($this->customer->getId(), $this->language->getContentLanguageID());
+        $results = Address::getAddresses($this->customer->getId(), $this->language->getLanguageID());
         $results = $results ? $results->toArray() : [];
         $addresses = [];
         foreach ($results as $result) {

@@ -71,8 +71,10 @@ class ControllerPagesAccountLogin extends AController
                                 : $this->request->post['email'];
                 $password = $this->request->post['password'];
                 if ( isset( $loginname ) && isset( $password ) && $this->_validate( $loginname, $password ) ) {
-                    unset( $this->session->data['guest'] );
-                    unset( $this->session->data['account'] );
+                    unset(
+                        $this->session->data['guest'],
+                        $this->session->data['account']
+                    );
 
                     $address_id = $this->customer->getAddressId();
                     $address = Address::find($address_id );
@@ -84,8 +86,7 @@ class ControllerPagesAccountLogin extends AController
                         $redirect_url = $this->session->data['redirect'];
                         unset( $this->session->data['redirect'] );
                     } else {
-                        //$redirect_url = $this->html->getSecureURL( 'account/account' );
-                        $redirect_url = $this->html->getSecureURL( 'index/home');
+                        $redirect_url = $this->html->getSecureURL( 'account/account' );
                     }
                     $this->extensions->hk_ProcessData( $this );
                     abc_redirect( $redirect_url );

@@ -236,6 +236,7 @@ class Address extends BaseModel
         'zone_id'    => [
             'checks'   => [
                 'integer',
+                'nullable',
                 'required_without:customer_id',
             ],
             'messages' => [
@@ -250,12 +251,21 @@ class Address extends BaseModel
     ];
 
     /**
+     * @param $value
+     */
+    public function SetZoneIdAttribute($value){
+        $value = (int)$value;
+        $value = $value ?? null;
+        $this->zone_id = $value;
+    }
+
+    /**
      * @param array $options
      *
      * @return bool
      * @throws \abc\core\lib\AException
      */
-    public function save($options = [])
+    public function save(array $options = [])
     {
 
         $data = $this->attributes;
@@ -312,11 +322,14 @@ class Address extends BaseModel
 
         foreach ($rows as $row) {
             $row = $dcrypt->decrypt_data($row, 'addresses');
+            $country = null;
             /**
              * @var Country $country
              */
-            $country = Country::find($row['country_id']);
-            if ($country->toArray()) {
+            if( (int)$row['country_id'] ) {
+                $country = Country::find($row['country_id']);
+            }
+            if ($country) {
                 $country_name = $country->name;
                 $iso_code_2 = $country->iso_code_2;
                 $iso_code_3 = $country->iso_code_3;
@@ -328,11 +341,14 @@ class Address extends BaseModel
                 $address_format = '';
             }
 
+            $zone = null;
             /**
              * @var Zone $zone
              */
-            $zone = Zone::find($row['zone_id']);
-            if ($zone->toArray()) {
+            if( (int)$row['zone_id'] ) {
+                $zone = Zone::find($row['zone_id']);
+            }
+            if ($zone) {
                 $zone_name = $zone->name;
                 $zone_code = $zone->code;
             } else {
@@ -349,10 +365,10 @@ class Address extends BaseModel
                 'address_2'      => $row['address_2'],
                 'postcode'       => $row['postcode'],
                 'city'           => $row['city'],
-                'zone_id'        => $row['zone_id'],
+                'zone_id'        => (int)$row['zone_id'],
                 'zone'           => $zone_name,
                 'zone_code'      => $zone_code,
-                'country_id'     => $row['country_id'],
+                'country_id'     => (int)$row['country_id'],
                 'country'        => $country_name,
                 'iso_code_2'     => $iso_code_2,
                 'iso_code_3'     => $iso_code_3,
@@ -395,14 +411,14 @@ class Address extends BaseModel
         );
         $query->leftJoin(
             'country_descriptions',
-            function($join){
+            function($join) use ($language_id){
                 /**
                  * @var JoinClause $join
                  */
-                 $join->on('country_descriptions.country_id', '=', 'countries.country_id');
+                 $join->on('country_descriptions.country_id', '=', 'countries.country_id')
+                     ->where('country_descriptions.language_id', '=', $language_id);
             }
         );
-        $query->where('country_descriptions.language_id', '=', $language_id);
         $query->leftJoin(
             'zones',
             function($join){
@@ -414,15 +430,14 @@ class Address extends BaseModel
         );
         $query->leftJoin(
             'zone_descriptions',
-            function($join){
+            function($join) use ($language_id){
                 /**
                  * @var JoinClause $join
                  */
-                 $join->on('zone_descriptions.zone_id', '=', 'zones.zone_id');
+                 $join->on('zone_descriptions.zone_id', '=', 'zones.zone_id')
+                      ->where('zone_descriptions.language_id', '=', $language_id);
             }
         );
-        $query->where('zone_descriptions.language_id', '=', $language_id);
-
         return $query->get();
     }
 
