@@ -1446,6 +1446,7 @@ ALTER TABLE `ac_weight_classes`
 
 
 ALTER TABLE `ac_addresses`
+CHANGE COLUMN `zone_id` `zone_id` int(11) NULL DEFAULT NULL,
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL;
@@ -2011,7 +2012,7 @@ ALTER TABLE `ac_addresses`
 ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `controller`, `sort_order`, `status`) VALUES
 (3, 'object_attribute', 'responses/catalog/attribute/getObjectAttributeSubform', 3, 1);

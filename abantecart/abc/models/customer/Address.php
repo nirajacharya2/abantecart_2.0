@@ -236,6 +236,7 @@ class Address extends BaseModel
         'zone_id'    => [
             'checks'   => [
                 'integer',
+                'nullable',
                 'required_without:customer_id',
             ],
             'messages' => [
@@ -250,12 +251,21 @@ class Address extends BaseModel
     ];
 
     /**
+     * @param $value
+     */
+    public function SetZoneIdAttribute($value){
+        $value = (int)$value;
+        $value = $value ?? null;
+        $this->zone_id = $value;
+    }
+
+    /**
      * @param array $options
      *
      * @return bool
      * @throws \abc\core\lib\AException
      */
-    public function save($options = [])
+    public function save(array $options = [])
     {
 
         $data = $this->attributes;
