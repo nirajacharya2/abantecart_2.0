@@ -234,6 +234,12 @@ class CustomerTransaction extends BaseModel
         return (float)$query->balance;
     }
 
+    /**
+     * @param $data
+     * @param string $mode
+     *
+     * @return \Illuminate\Support\Collection
+     */
     public static function getTransactions($data, $mode = 'default')
     {
         /**
@@ -295,6 +301,8 @@ class CustomerTransaction extends BaseModel
 
         //If for total, we done building the query
         if ($mode == 'total_only') {
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
             $result = $query->first();
             return (int)$result->total;
         }
@@ -328,6 +336,8 @@ class CustomerTransaction extends BaseModel
              }
          }
 
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         $result_rows = $query->get();
         //finally decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
