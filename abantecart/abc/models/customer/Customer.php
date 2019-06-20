@@ -735,18 +735,17 @@ class Customer extends BaseModel
          * @var QueryBuilder $query
          */
         if($mode != 'total_only'){
-            $query = $customer->selectRaw($db->raw_sql_row_count().' '.$aliasC.'.*')
-                ->join(
-                'customer_groups',
-                'customer_groups.customer_group_id',
-                '=',
-                'customers.customer_group_id'
-            );
-
+            $query = $customer->selectRaw($db->raw_sql_row_count().' '.$aliasC.'.*');
         }else{
             $query = $customer->select();
         }
         $query->addSelect($select);
+        $query->join(
+            'customer_groups',
+            'customer_groups.customer_group_id',
+            '=',
+            'customers.customer_group_id'
+        );
 
         $filter = (isset($inputData['filter']) ? $inputData['filter'] : []);
 
