@@ -690,13 +690,13 @@ class Customer extends BaseModel
     }
 
     /**
-     * @param array $data
+     * @param array $inputData
      * @param string $mode
      *
      * @return Collection|int
      * @throws \abc\core\lib\AException
      */
-    public static function getCustomers($data = [], $mode = 'quick')
+    public static function getCustomers($inputData = [], $mode = 'quick')
     {
         /**
          * @var ADataEncryption $dcrypt
@@ -715,7 +715,6 @@ class Customer extends BaseModel
             $select[] = $db->raw('COUNT(*) as total');
         } else {
             $select = [
-                "customers.*",
                 $db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname) AS name'),
                 'customer_groups.name AS customer_group',
             ];
@@ -735,16 +734,21 @@ class Customer extends BaseModel
         /**
          * @var QueryBuilder $query
          */
-        $query = $customer->select($db->raw_sql_row_count())
-                          ->select($select)
-                          ->join(
-                              'customer_groups',
-                              'customer_groups.customer_group_id',
-                              '=',
-                              'customers.customer_group_id'
-                          );
+        if($mode != 'total_only'){
+            $query = $customer->selectRaw($db->raw_sql_row_count().' '.$aliasC.'.*')
+                ->join(
+                'customer_groups',
+                'customer_groups.customer_group_id',
+                '=',
+                'customers.customer_group_id'
+            );
 
-        $filter = (isset($data['filter']) ? $data['filter'] : []);
+        }else{
+            $query = $customer->select();
+        }
+        $query->addSelect($select);
+
+        $filter = (isset($inputData['filter']) ? $inputData['filter'] : []);
 
         if (H::has_value($filter['name'])) {
             $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%".$filter['name']."%'");
@@ -873,8 +877,8 @@ class Customer extends BaseModel
             $query->whereRaw("DATE(".$aliasC.".date_added) = DATE('".$db->escape($filter['date_added'])."')");
         }
 
-        if ($data['store_id'] !== null) {
-            $query->where('customers.store_id', '=', (int)$data['store_id']);
+        if ($inputData['store_id'] !== null) {
+            $query->where('customers.store_id', '=', (int)$inputData['store_id']);
         }
 
         if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
@@ -894,7 +898,7 @@ class Customer extends BaseModel
         //If for total, we done building the query
         if ($mode == 'total_only' && !$dcrypt->active) {
             //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $inputData);
             $result = $query->first();
             return (int)$result->total;
         }
@@ -918,26 +922,26 @@ class Customer extends BaseModel
         //Total calculation for encrypted mode
         // NOTE: Performance slowdown might be noticed or larger search results
         if ($mode != 'total_only') {
-            $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'name';
-            if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
+            $orderBy = $sort_data[$inputData['sort']] ? $sort_data[$inputData['sort']] : 'name';
+            if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
                 $sorting = "desc";
             } else {
                 $sorting = "asc";
             }
 
             $query->orderBy($orderBy, $sorting);
-            if (isset($data['start']) || isset($data['limit'])) {
-                if ($data['start'] < 0) {
-                    $data['start'] = 0;
+            if (isset($inputData['start']) || isset($inputData['limit'])) {
+                if ($inputData['start'] < 0) {
+                    $inputData['start'] = 0;
                 }
-                if ($data['limit'] < 1) {
-                    $data['limit'] = 20;
+                if ($inputData['limit'] < 1) {
+                    $inputData['limit'] = 20;
                 }
-                $query->offset((int)$data['start'])->limit((int)$data['limit']);
+                $query->offset((int)$inputData['start'])->limit((int)$inputData['limit']);
             }
         }
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $inputData);
         $result_rows = $query->get();
 
 //???? TODO need to check when encrypted
@@ -1058,8 +1062,7 @@ class Customer extends BaseModel
         /**
          * @var QueryBuilder $query
          */
-        $query->select($db->raw_sql_row_count())
-              ->select('customers.*');
+        $query->selectRaw($db->raw_sql_row_count().' '.$db->table_name('customers').'.*');
         $query->join('orders', function ($join) {
             $join->on('orders.order_id', '=', 'order_products.order_id');
         });

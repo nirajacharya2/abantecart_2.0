@@ -667,7 +667,7 @@ class BaseModel extends OrmModel
      * from extension hooks
      *
      */
-    public function _extendQuery($query){
+    public function _extendQuery(&$query){
         return $query;
     }
 }

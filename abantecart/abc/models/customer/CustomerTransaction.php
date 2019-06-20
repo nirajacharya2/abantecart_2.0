@@ -256,13 +256,12 @@ class CustomerTransaction extends BaseModel
             $select[] = $db->raw('COUNT(*) as total');
         } else {
             $select = [
-                "customer_transactions.*",
                 $db->raw($rawInc." as user")
             ];
         }
 
-        $query = CustomerTransaction::select($db->raw_sql_row_count())
-                ->select($select)
+        $query = CustomerTransaction::selectRaw($db->raw_sql_row_count()." ".$db->table_name('customer_transactions').".*")
+                ->addSelect($select)
                 ->leftJoin(
                       'users',
                       'users.user_id',

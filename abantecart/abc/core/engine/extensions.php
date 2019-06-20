@@ -245,7 +245,7 @@ class ExtensionCollection
  * @method hk_create(object $baseObject, array $data, int $set_order_id)
  * @method hk_update(object $baseObject, int $order_id, int $order_status_id, string $comment, bool $notify)
  * @method hk_apply_promotions(object $baseObject, array $total_data, array $total)
- * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder $query)
+ * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder $query, array $inputData = [])
  * @package MyExtensionsApi
  */
 class ExtensionsApi
@@ -1467,7 +1467,7 @@ class ExtensionUtils
      * Function returns array of form fields formatted for AHtml-class
      *
      * @return array
-     * @throws AException
+     * @throws Exception
      */
     public function getSettings()
     {
@@ -1538,7 +1538,7 @@ class ExtensionUtils
      * @param array $data - array of values for check. If it is empty - will check data from config
      *
      * @return array - array of 2 elements: result and array - item_ids list that not valid
-     * @throws AException
+     * @throws Exception
      */
     public function validateSettings($data = [])
     {
