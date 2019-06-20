@@ -754,18 +754,18 @@ INSERT INTO `ac_addresses`
 `country_id`,
 `zone_id`)
 VALUES
-(1,2,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616),
-(2,3,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648),
-(3,4,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616),
-(4,5,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660),
-(5,6,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616),
-(6,7,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634),
-(7,8,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650),
-(8,9,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648),
-(9,10,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648),
-(10,11,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666),
-(11,12,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616),
-(12,13,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
+(1,1,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616),
+(2,2,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648),
+(3,3,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616),
+(4,4,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660),
+(5,5,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616),
+(6,6,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634),
+(7,7,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650),
+(8,8,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648),
+(9,9,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648),
+(10,10,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666),
+(11,11,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616),
+(12,12,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
 
 
 -- set default addresses for customers
