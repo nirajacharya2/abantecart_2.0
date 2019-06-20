@@ -559,7 +559,7 @@ class Customer extends BaseModel
      * @return bool
      * @throws \abc\core\lib\AException
      */
-    public function save($options = [])
+    public function save(array $options = [])
     {
         $inserting = !($this->customer_id);
         $data = $this->attributes;
