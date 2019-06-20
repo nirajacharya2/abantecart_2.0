@@ -780,8 +780,10 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['password'])) {
-            $query->whereRaw($aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('"
-                .$db->escape($filter['password'])."')))))");
+            $query->whereRaw(
+                $aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('"
+                .$db->escape($filter['password'])."')))))"
+            );
         }
 
         //select differently if encrypted
@@ -811,8 +813,9 @@ class Customer extends BaseModel
             $query->where('customer_groups.customer_group_id', '=', $filter['customer_group_id']);
         }
         // select only subscribers (group + customers with subscription)
-        $subscriberGroupId =
-            CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
+        $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)
+                                          ->first()
+                                          ->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($query) use ($subscriberGroupId) {
@@ -820,9 +823,13 @@ class Customer extends BaseModel
             });
         } elseif (H::has_value($filter['all_subscribers'])) {
             $query->where(function ($query) {
-                $query->where('customers.newsletter', '=', 1)
-                      ->where('customers.status', '=', 1)
-                      ->where('customers.approved', '=', 1);
+                $query->where(
+                    [
+                        'customers.newsletter' => 1,
+                        'customers.status' => 1,
+                        'customers.approved' => 1
+                    ]
+                );
             })
                   ->orWhere(function ($query) use ($subscriberGroupId) {
                       $query->where('customers.newsletter', '=', 1)
@@ -874,14 +881,20 @@ class Customer extends BaseModel
             $query->join('customer_notifications',
                 function ($join) use ($filter) {
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
-                         ->on('customer_notifications.sendpoint', '=', 'newsletter');
+                         ->where('customer_notifications.sendpoint', '=', 'newsletter');
                 });
-            $query->where('customer_notifications.status', '=', 1)
-                  ->where('customer_notifications.protocol', '=', $filter['newsletter_protocol']);
+            $query->where(
+                [
+                    'customer_notifications.status' => 1,
+                    'customer_notifications.protocol' => $filter['newsletter_protocol']
+                ]
+            );
         }
 
         //If for total, we done building the query
         if ($mode == 'total_only' && !$dcrypt->active) {
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
             $result = $query->first();
             return (int)$result->total;
         }
@@ -923,6 +936,8 @@ class Customer extends BaseModel
                 $query->offset((int)$data['start'])->limit((int)$data['limit']);
             }
         }
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         $result_rows = $query->get();
 
 //???? TODO need to check when encrypted
@@ -952,6 +967,7 @@ class Customer extends BaseModel
 
         return $result_rows;
     }
+
 
     /**
      * @param array $data
@@ -1053,6 +1069,9 @@ class Customer extends BaseModel
               ->where('orders.order_status_id', '>', 0)
               ->distinct();
 
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+
         $result_rows = $query->get();
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {
@@ -1080,7 +1099,8 @@ class Customer extends BaseModel
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);
         }
-
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         return !($query->get()->count());
     }
 

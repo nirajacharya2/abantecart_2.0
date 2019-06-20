@@ -662,4 +662,12 @@ class BaseModel extends OrmModel
         return $this->mainClassKey ?? $this->getKeyName();
     }
 
+    /*
+     * Trick for affecting on query builder inside static method of models
+     * from extension hooks
+     *
+     */
+    public function _extendQuery($query){
+        return $query;
+    }
 }

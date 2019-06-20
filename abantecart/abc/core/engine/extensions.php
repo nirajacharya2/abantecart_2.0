@@ -25,6 +25,8 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
+use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use Exception;
 use H;
 
@@ -243,6 +245,7 @@ class ExtensionCollection
  * @method hk_create(object $baseObject, array $data, int $set_order_id)
  * @method hk_update(object $baseObject, int $order_id, int $order_status_id, string $comment, bool $notify)
  * @method hk_apply_promotions(object $baseObject, array $total_data, array $total)
+ * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder $query)
  * @package MyExtensionsApi
  */
 class ExtensionsApi
