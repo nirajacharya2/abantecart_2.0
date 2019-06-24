@@ -21,16 +21,12 @@ namespace abc\extensions\gdpr\models\admin\extension;
 
 use abc\core\ABC;
 use abc\core\engine\Model;
-use abc\models\admin\ModelSaleCustomer;
 use abc\models\customer\Customer;
-use abc\modules\events\ABaseEvent;
-use H;
 
 /**
  * Class ModelExtensionGdpr
  *
  * @package abc\extensions\gdpr\model\admin
- * @property ModelSaleCustomer $model_sale_customer
  */
 class ModelExtensionGdpr extends Model
 {
@@ -72,12 +68,13 @@ class ModelExtensionGdpr extends Model
         }
 
         $output = [];
-        foreach ($data_map as $table_name => $columns) {
-            $cfg_cols = $columns;
-            try {
-                $upd = $data = [];
-                if($table_name == 'customers'){
-                    $upd[] = 'status = 0';
+        $this->db->beginTransaction();
+        try {
+            foreach ($data_map as $table_name => $columns) {
+                $cfg_cols = $columns;
+                $updateData = $data = [];
+                if ($table_name == 'customers') {
+                    $updateData['status'] = 0;
                 }
                 foreach ($columns as $column_name) {
                     if (in_array($column_name, $cfg_cols)) {
@@ -97,42 +94,44 @@ class ModelExtensionGdpr extends Model
                             $value = '';
                         }
                         $data[$column_name] = $value;
-                        $upd [] = $column_name." = '".$value."'";
+
+                        $updateData[$column_name] = $value;
                     }
                 }
-                if (!$upd) {
+                if (!$updateData) {
                     continue;
                 }
 
-                $sql = "UPDATE ".$this->db->table_name($table_name)."
-                        SET ".implode(",\n", $upd)."
-                        WHERE customer_id = ".$customer_id;
-                $this->db->query($sql);
-                //call event
-                if($table_name == 'customers') {
-                    H::event(
-                        'abc\models\admin\customer@update',
-                        [new ABaseEvent($customer_id, 'editCustomer', $data)]);
-                }
-
-            } catch (\Exception $e) {
-                $this->log->write('GDPR view data error: '.$sql.' File: '.__FILE__);
+                $this->db->table($table_name)
+                         ->where('customer_id', '=', $customer_id)
+                         ->update($updateData);
             }
+
+
+            $this->saveHistory(
+                [
+                    'customer_id'     => $customer_id,
+                    'request_type'    => 'e',
+                    'email'           => $customer_info['email'],
+                    'name'            => $customer_info['firstname'].' '.$customer_info['lastname'],
+                    'user_agent'      => 'Erased by '
+                                            .$this->user->getUserFirstName()
+                                            .' '
+                                            .$this->user->getUserLastName()
+                                            .' (ID '.$this->user->getId().')',
+                    'accept_language' => '',
+                    'ip'              => $this->request->getRemoteIP(),
+                    'server_ip'       => $this->request->server['SERVER_ADDR'],
+                ]
+            );
+            $this->db->commit();
+
+        } catch (\Exception $e) {
+            $this->log->write('GDPR view data error: '.$sql.' File: '.__FILE__);
+            $this->db->rollback();
         }
 
-        $this->saveHistory(
-            [
-                'customer_id'     => $customer_id,
-                'request_type'    => 'e',
-                'email'           => $customer_info['email'],
-                'name'            => $customer_info['firstname'].' '.$customer_info['lastname'],
-                'user_agent'      => 'Erased by '.$this->user->getUserFirstName().' '.$this->user->getUserLastName()
-                                        .' (ID '.$this->user->getId().')',
-                'accept_language' => '',
-                'ip'              => $this->request->getRemoteIP(),
-                'server_ip'       => $this->request->server['SERVER_ADDR'],
-            ]
-        );
+
         return $output;
 
     }
@@ -195,10 +194,10 @@ class ModelExtensionGdpr extends Model
         }
 
         $sort_data = [
-            'customer_id' => 'customer_id',
-            'name'        => "CONCAT(firstname, ' ', lastname )",
-            'type'        => 'request_type',
-            'date_modified'  => 'date_modified',
+            'customer_id'   => 'customer_id',
+            'name'          => "CONCAT(firstname, ' ', lastname )",
+            'type'          => 'request_type',
+            'date_modified' => 'date_modified',
         ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {

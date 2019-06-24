@@ -29,7 +29,6 @@ use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
-use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
 use H;
 use stdClass;
@@ -277,7 +276,7 @@ class ControllerResponsesListingGridCustomer extends AController
                             'reset_value' => true,
                         ]);
                 }
-                if ($post_data['password'] != $post_data['password_confirm']) {
+                if ($post_data['password'] != $post_data['password_confirmation']) {
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
                         [
                             'error_text'  => $this->language->get('error_confirm'),
@@ -285,7 +284,16 @@ class ControllerResponsesListingGridCustomer extends AController
                         ]);
                 }
                 //passwords do match, save
-                Customer::find($customer_id)->editCustomerField('password', $post_data['password']);
+                $customer = Customer::find($customer_id);
+                if($customer){
+                    $customer->update(
+                        [
+                            'password' => $post_data['password'],
+                            'password_confirmation' => $post_data['password_confirmation']
+                        ]
+                    );
+                }
+
             } else {
                 foreach ($post_data as $field => $value) {
                     $err = $this->validateForm($field, $value, $customer_id);

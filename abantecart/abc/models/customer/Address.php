@@ -31,6 +31,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property Zone $zone
  *
  * @method static Address find(int $address_id) Address
+ * @method static Address select(mixed $address_id) Builder
  *
  * @package abc\models
  */

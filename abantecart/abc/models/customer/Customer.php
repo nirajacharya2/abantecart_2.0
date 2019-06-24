@@ -848,6 +848,9 @@ class Customer extends BaseModel
             $query->whereRaw("TRIM(COALESCE(".$aliasC.".sms,'')) <> ''");
         }
 
+        if (H::has_value($filter['customer_id'])) {
+            $filter['include'] = (array)$filter['include'] + [$filter['customer_id']];
+        }
         //include ids set
         if (H::has_value($filter['include'])) {
             $filter['include'] = (array)$filter['include'];
@@ -1042,6 +1045,12 @@ class Customer extends BaseModel
         return true;
     }
 
+    /**
+     * @param int $product_id
+     *
+     * @return array|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|Collection
+     * @throws \abc\core\lib\AException
+     */
     public static function getCustomersByProduct($product_id)
     {
         if (!$product_id) {
@@ -1085,6 +1094,12 @@ class Customer extends BaseModel
         return $result_rows;
     }
 
+    /**
+     * @param string $loginname
+     * @param int $customer_id
+     *
+     * @return bool
+     */
     public static function isUniqueLoginname($loginname, $customer_id = 0)
     {
         if (empty($loginname)) {
@@ -1107,11 +1122,19 @@ class Customer extends BaseModel
         return !($query->get()->count());
     }
 
+    /**
+     * @return int
+     */
     public static function getSubscribersGroupId()
     {
         return (int)CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)->first()->customer_group_id;
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool
+     */
     public function editCustomerNotifications($data)
     {
         if (!$data) {
