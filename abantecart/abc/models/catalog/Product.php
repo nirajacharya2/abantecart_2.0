@@ -724,6 +724,15 @@ class Product extends BaseModel
     /**
      * @return mixed
      */
+    public function tagLanguaged()
+    {
+        return $this->hasMany(ProductTag::class, 'product_id')
+            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+    }
+
+    /**
+     * @return mixed
+     */
     public function featured()
     {
         return $this->hasOne(ProductsFeatured::class, 'product_id');
@@ -1344,6 +1353,25 @@ class Product extends BaseModel
 
         if (isset($product_data['product_related'])) {
             $product->related()->sync($product_data['product_related']);
+        }
+        if (isset($product_data['product_tags'])) {
+            $tags = explode(',', $product_data['product_tags']);
+            if (is_array($tags)) {
+                $registry = Registry::getInstance();
+                $languageId = $registry->get('language')->getContentLanguageID();
+                $productTags = [];
+                foreach ($tags as $tag) {
+                    $productTag = ProductTag::firstOrCreate([
+                        'tag'         => trim($tag),
+                        'product_id'  => $product->product_id,
+                        'language_id' => $languageId,
+                    ]);
+                    $productTags[] = $productTag->id;
+                }
+                ProductTag::where('product_id', '=', $product->product_id)
+                    ->whereNotIn('id', $productTags)
+                    ->forceDelete();
+            }
         }
     }
 
