@@ -45,9 +45,10 @@ use ReflectionMethod;
  * Class BaseModel
  *
  * @package abc\models
- * @method static Builder|BaseModel find(integer $id, array $columns = ['*'])
- * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
- * @const   string DELETED_AT
+ * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
+ * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder select(mixed $select) Builder
+ * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
 {

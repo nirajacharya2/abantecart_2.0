@@ -51,6 +51,7 @@ use Illuminate\Support\Collection;
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
  * @method static Customer find(int $customer_id) Customer
+ * @method static Customer select(mixed $select) Builder
  * @package abc\models
  */
 class Customer extends BaseModel
