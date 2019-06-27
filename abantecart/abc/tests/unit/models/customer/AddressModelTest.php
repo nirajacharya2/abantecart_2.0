@@ -58,7 +58,6 @@ class AddressModelTest extends ATestCase{
              'postcode',
              'city',
              'country_id',
-             'zone_id'
             ],
             array_keys($errors));
 
