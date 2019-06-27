@@ -51,7 +51,8 @@ class ControllerPagesAccountCreate extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
         $request_data = $this->request->post;
-        $request_data['store_id'] = $this->config->get('store_id');
+        $request_data['store_id'] = $this->config->get('config_store_id');
+
         if ($this->request->is_POST()) {
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors = array_merge(
@@ -68,7 +69,7 @@ class ControllerPagesAccountCreate extends AController
                 }
 
                 $customer_data = $request_data;
-                $customer_data['store_id'] = $this->config->get('store_id');
+
                 if (!$customer_data['customer_group_id']) {
                     $customer_data['customer_group_id'] = (int)$this->config->get('config_customer_group_id');
                 }

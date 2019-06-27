@@ -422,7 +422,7 @@ class Customer extends BaseModel
         //do merging to make required_without rule work
         if ($this->customer_id) {
             $data['customer_id'] = $this->customer_id;
-            $data['store_id'] = $this->store_id ?? Registry::config()->get('store_id');
+            $data['store_id'] = $this->store_id ?? Registry::config()->get('config_store_id');
         }
         parent::validate($data, $messages, $customAttributes);
     }

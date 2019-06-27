@@ -59,7 +59,7 @@ class ControllerPagesAccountSubscriber extends AController
         $request_data['ip'] = $this->request->getRemoteIP();
         //mark customer as subscriber for model
         $request_data['subscriber'] = true;
-        $request_data['store_id'] = $this->config->get('store_id');
+        $request_data['store_id'] = $this->config->get('config_store_id');
 
         if ($this->request->is_POST()) {
 

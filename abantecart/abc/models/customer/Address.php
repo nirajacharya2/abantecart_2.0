@@ -383,9 +383,11 @@ class Address extends BaseModel
      * @param int $customer_id
      * @param int $language_id
      *
-     * @return \Illuminate\Support\Collection
+     * @param int $address_id
+     *
+     * @return \Illuminate\Support\Collection|Address
      */
-    public static function getAddresses(int $customer_id, int $language_id)
+    public static function getAddresses(int $customer_id, int $language_id, int $address_id = null)
     {
         /**
          * @var QueryBuilder $query
@@ -401,6 +403,10 @@ class Address extends BaseModel
 
                         )
                         ->where('customer_id', '=', $customer_id);
+        //if needs to get only one address
+        if($address_id){
+            $query->where('address_id', '=', $address_id);
+        }
         $query->leftJoin(
             'countries',
             function($join){
@@ -439,7 +445,8 @@ class Address extends BaseModel
                       ->where('zone_descriptions.language_id', '=', $language_id);
             }
         );
-        return $query->get();
+
+        return $address_id ? $query->first() : $query->get();
     }
 
 }

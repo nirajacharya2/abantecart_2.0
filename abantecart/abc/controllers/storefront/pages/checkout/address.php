@@ -32,7 +32,7 @@ if (!class_exists('abc\core\ABC')) {
 
 class ControllerPagesCheckoutAddress extends AController
 {
-    private $error = [];
+    public $errors = [];
     public $data = [];
 
     public function shipping()
@@ -93,14 +93,16 @@ class ControllerPagesCheckoutAddress extends AController
             ]);
 
         if ($this->request->is_POST() && $this->csrftoken->isTokenValid()) {
-            if (isset($this->request->post['address_id'])) {
-                $this->session->data['shipping_address_id'] = $this->request->post['address_id'];
+            $post = $this->request->post;
+            $post['customer_id'] = $this->customer->getId();
+            if (isset($post['address_id'])) {
+                $this->session->data['shipping_address_id'] = $post['address_id'];
 
                 unset($this->session->data['shipping_methods'],
                       $this->session->data['shipping_method']);
 
                 if ($this->cart->hasShipping()) {
-                    $address = Address::find($this->request->post['address_id']);
+                    $address = Address::find($post['address_id']);
                     if ($address) {
                         $this->tax->setZone($address->country_id, $address->zone_id);
                     }
@@ -111,14 +113,15 @@ class ControllerPagesCheckoutAddress extends AController
                 abc_redirect($this->html->getSecureURL('checkout/shipping'));
             }
 
-            $address = new Address($this->request->post);
+            $address = new Address($post);
             try {
-                $address->validate($this->request->post);
+                $address->validate($post);
             } catch (ValidationException $e) {
-                H::SimplifyValidationErrors($address->errors()['validation'], $this->error);
+                H::SimplifyValidationErrors($address->errors()['validation'], $this->errors);
+                $this->data['errors'] = $this->errors;
             }
 
-            if (!$this->error) {
+            if (!$this->errors) {
                 $address->save();
                 $this->session->data['shipping_address_id'] = $address->address_id;
 
@@ -131,7 +134,6 @@ class ControllerPagesCheckoutAddress extends AController
                 abc_redirect($this->html->getSecureURL('checkout/shipping'));
             }
         }
-
         $this->_getForm('shipping');
 
         //init controller data
@@ -214,10 +216,10 @@ class ControllerPagesCheckoutAddress extends AController
             try {
                 $address->validate($this->request->post);
             } catch (ValidationException $e) {
-                H::SimplifyValidationErrors($address->errors()['validation'], $this->error);
+                H::SimplifyValidationErrors($address->errors()['validation'], $this->errors);
             }
 
-            if (!$this->error) {
+            if (!$this->errors) {
                 $address->save();
                 $this->session->data['payment_address_id'] = $address->address_id;
 
@@ -234,19 +236,10 @@ class ControllerPagesCheckoutAddress extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _getForm($type)
+    protected function _getForm($type)
     {
 
-        $this->view->assign('heading_title',
-            $this->language->get('text_'.$type).' '.$this->language->get('text_address'));
-        $this->view->assign('error_firstname', $this->error['firstname']);
-        $this->view->assign('error_lastname', $this->error['lastname']);
-        $this->view->assign('error_address_1', $this->error['address_1']);
-        $this->view->assign('error_city', $this->error['city']);
-        $this->view->assign('error_postcode', $this->error['postcode']);
-        $this->view->assign('error_country', $this->error['country']);
-        $this->view->assign('error_zone', $this->error['zone']);
-
+        $this->data['heading_title'] = $this->language->get('text_'.$type).' '.$this->language->get('text_address');
         $this->data['default'] = $this->session->data[$type.'_address_id'];
         $form = new AForm();
         $form->setForm(['form_name' => 'address_1']);
@@ -302,40 +295,40 @@ class ControllerPagesCheckoutAddress extends AController
             ]
         );
 
-        $this->data['form']['firstname'] = $form->getFieldHtml([
+        $this->data['form']['fields']['firstname'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'firstname',
             'value'    => $this->request->post['firstname'],
             'required' => true,
         ]);
-        $this->data['form']['lastname'] = $form->getFieldHtml([
+        $this->data['form']['fields']['lastname'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'lastname',
             'value'    => $this->request->post['lastname'],
             'required' => true,
         ]);
-        $this->data['form']['company'] = $form->getFieldHtml(
+        $this->data['form']['fields']['company'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'company',
                 'value'    => $this->request->post['company'],
                 'required' => false,
             ]);
-        $this->data['form']['address_1'] = $form->getFieldHtml(
+        $this->data['form']['fields']['address_1'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'address_1',
                 'value'    => $this->request->post['address_1'],
                 'required' => true,
             ]);
-        $this->data['form']['address_2'] = $form->getFieldHtml(
+        $this->data['form']['fields']['address_2'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'address_2',
                 'value'    => $this->request->post['address_2'],
                 'required' => false,
             ]);
-        $this->data['form']['city'] = $form->getFieldHtml(
+        $this->data['form']['fields']['city'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'city',
@@ -343,14 +336,14 @@ class ControllerPagesCheckoutAddress extends AController
                 'required' => true,
             ]);
 
-        $this->data['form']['zone'] = $form->getFieldHtml(
+        $this->data['form']['fields']['zone'] = $form->getFieldHtml(
             [
                 'type'     => 'selectbox',
                 'name'     => 'zone_id',
                 'required' => true,
             ]);
 
-        $this->data['form']['postcode'] = $form->getFieldHtml(
+        $this->data['form']['fields']['postcode'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'postcode',
@@ -363,7 +356,7 @@ class ControllerPagesCheckoutAddress extends AController
         foreach ($countries as $item) {
             $options[$item['country_id']] = $item['name'];
         }
-        $this->data['form']['country_id'] = $form->getFieldHtml(
+        $this->data['form']['fields']['country_id'] = $form->getFieldHtml(
             [
                 'type'     => 'selectbox',
                 'name'     => 'country_id',

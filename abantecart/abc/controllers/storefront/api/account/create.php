@@ -56,7 +56,7 @@ class ControllerApiAccountCreate extends AControllerAPI
         $this->v_error = $this->customer::validateRegistrationData($request_data);
         if (!$this->v_error) {
             $customer_data = $request_data;
-            $customer_data['store_id'] = $this->config->get('store_id');
+            $customer_data['store_id'] = $this->config->get('config_store_id');
             if(!$customer_data['customer_group_id']){
                 $customer_data['customer_group_id'] = (int)$this->config->get( 'config_customer_group_id' );
             }

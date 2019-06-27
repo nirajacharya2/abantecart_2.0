@@ -103,7 +103,14 @@ class ControllerPagesCheckoutShipping extends AController
         }
         $this->checkout->setShippingAddress($this->session->data['shipping_address_id']);
         $shipping_address = [];
-        if($address = Address::find($this->session->data['shipping_address_id'])){
+
+        $address = Address::getAddresses(
+                                        $this->customer->getId(),
+                                        $this->language->getLanguageID(),
+                                        $this->session->data['shipping_address_id']
+        );
+
+        if($address){
             $shipping_address = $address->toArray();
         }
         //something wrong with shipping address go to address selection page

@@ -26,7 +26,7 @@
 	?>
 		<div class="registerbox form-horizontal">
 			<table class="table table-striped">
-			<?php foreach ($addresses as $address) { ?>		
+			<?php foreach ($addresses as $address) { ?>
 				<tr>
 					<td class="align_left"><?php echo $address['radio'];?></td>
 					<td class="align_left"><label class="control-label inline" for="address_1_address_id<?php echo $address['address_id']; ?>" style="cursor: pointer;"><?php echo $address['address']; ?></label></td>
@@ -41,9 +41,9 @@
 			    	    <?php echo $form0['continue']->name ?>
 			    	</button>
 			    </div>
-			</div>						
-		</div>		
-	</form>
+			</div>
+		</div>
+		</form>
 	</section>
 	</div>
 	
@@ -56,26 +56,15 @@
 	<div class="registerbox">
 		<fieldset>
 		<?php
-			$field_list = array('firstname' => 'firstname',
-								'lastname' => 'lastname',
-								'company' => 'company', 
-								'address_1' => 'address_1', 
-								'address_2' => 'address_2', 
-								'city' => 'city',
-								'zone' => 'zone',
-								'postcode' => 'postcode',
-								'country' => 'country_id', 
-								);
-			
-			foreach ($field_list as $field_name => $field_id) {
+			foreach ($form['fields'] as $field_name => $field) {
 		?>
-			<div class="form-group <?php if (${'error_'.$field_name}) echo 'has-error'; ?>">
+			<div class="form-group <?php if ($errors[$field_name]) echo 'has-error'; ?>">
 				<label class="control-label col-md-5"><?php echo ${'entry_'.$field_name}; ?></label>
 				<div class="input-group col-md-7">
-				    <?php echo $form[$field_id]; ?>
+				    <?php echo $field; ?>
 				</div>
-				<span class="help-block"><?php echo ${'error_'.$field_name}; ?></span>
-			</div>		
+				<span class="help-block"><?php echo $errors[$field_name]; ?></span>
+			</div>
 		<?php
 			}
 		?>	
@@ -87,7 +76,7 @@
 					    <?php echo $form['continue']->name ?>
 					</button>
 				</div>
-			</div>				
+			</div>
 		</fieldset>	
 	</div>	
 	</form>

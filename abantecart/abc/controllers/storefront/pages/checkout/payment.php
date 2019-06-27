@@ -146,7 +146,12 @@ class ControllerPagesCheckoutPayment extends AController
         $this->checkout->setPaymentAddress($this->session->data['payment_address_id']);
 
         $payment_address = [];
-        if($address = Address::find($this->session->data['payment_address_id'])){
+        $address = Address::getAddresses(
+                                        $this->customer->getId(),
+                                        $this->language->getLanguageID(),
+                                        $this->session->data['payment_address_id']
+        );
+        if($address){
             $payment_address = $address->toArray();
         }
 
@@ -254,8 +259,10 @@ class ControllerPagesCheckoutPayment extends AController
             unset($coupon_form);
         }
 
-        $this->data['address'] =
-            $this->customer->getFormattedAddress($payment_address, $payment_address['address_format']);
+        $this->data['address'] = $this->customer->getFormattedAddress(
+            $payment_address,
+            $payment_address['address_format']
+        );
 
         $form = new AForm();
         $form->setForm(['form_name' => 'payment']);
