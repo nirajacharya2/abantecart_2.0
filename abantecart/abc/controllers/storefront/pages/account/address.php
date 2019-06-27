@@ -67,7 +67,9 @@ class ControllerPagesAccountAddress extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            $address = new Address($this->request->post);
+            $post = $this->request->post;
+            $post['customer_id'] = $this->customer->getId();
+            $address = new Address($post);
             $address->save();
             $this->data['address_id'] = $address->address_id;
             $this->session->data['success'] = $this->language->get('text_insert');
@@ -280,7 +282,7 @@ class ControllerPagesAccountAddress extends AController
             $this->document->addBreadcrumb([
                 'href'      => $this->html->getSecureURL(
                                             'account/address/update',
-                                            'address_id='.$this->request->get['address_id']
+                                            '&address_id='.$this->request->get['address_id']
                                ),
                 'text'      => $this->language->get('text_edit_address'),
                 'separator' => $this->language->get('text_separator'),

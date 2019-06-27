@@ -190,7 +190,9 @@ class ControllerResponsesListingGridCustomer extends AController
                 }
                 break;
             case 'save':
+
                 $ids = explode(',', $this->request->post['id']);
+                $ids = array_unique($ids);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
                         $err = $this->validateForm('status', $this->request->post['status'][$id], $id);
@@ -198,7 +200,7 @@ class ControllerResponsesListingGridCustomer extends AController
                          * @var Customer $customer
                          */
                         $customer = Customer::find($id);
-                        if (!$err) {
+                        if ($customer && !$err) {
                             $customer->update(['status' => $this->request->post['status'][$id]]);
                         } else {
                             $error = new AError('');
@@ -367,6 +369,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
     protected function validateForm($field, $value, $customer_id = '')
     {
+        $this->error = '';
         switch ($field) {
             case 'loginname' :
                 $login_name_pattern = '/^[\w._-]+$/i';
