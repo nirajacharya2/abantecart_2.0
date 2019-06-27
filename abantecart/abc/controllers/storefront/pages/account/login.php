@@ -281,6 +281,10 @@ class ControllerPagesAccountLogin extends AController
                     ]
                 );
 
+                if($customer_info){
+                    $customer_info = $customer_info->first()->toArray();
+                }
+
                 if ( $customer_info
                     && ! $customer_info['status']
                     && isset( $customer_info['data']['email_activation'] )
