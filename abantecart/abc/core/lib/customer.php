@@ -912,7 +912,9 @@ class ACustomer extends ALibBase
     protected function recordTransaction($data)
     {
 
-        if (!$this->isLogged()) {
+        if (!$this->isLogged()
+            || ( (float)$data['credit']===0.0 && (float)$data['debit']===0.0 )
+        ) {
             return false;
         }
 

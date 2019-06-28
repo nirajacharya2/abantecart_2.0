@@ -44,7 +44,7 @@ class ControllerPagesCheckoutSuccess extends AController
             $amount = $this->session->data['used_balance'];
             $data = [
                 'order_id'         => $order_id,
-                'debit'            => $amount,
+                'amount'           => $amount,
                 'transaction_type' => 'order',
                 'created_by'       => $this->customer->getId(),
                 'description'      => sprintf($this->language->get('text_applied_balance_to_order'),
@@ -66,7 +66,11 @@ class ControllerPagesCheckoutSuccess extends AController
                 $this->db->commit();
             }catch(ValidationException $e){
                 $this->db->rollBack();
-                $this->log->write(__FILE__.':'.__LINE__.' '.var_export($e->errors(), true));
+                $this->log->write(
+                    __FILE__.':'.__LINE__
+                    .' ' . var_export($e->errors(), true)
+                    ."\n Data sent: \n". var_export($data, true)
+                );
                 throw $e;
             }catch(\Exception $e){
                 $this->db->rollBack();
@@ -226,7 +230,7 @@ class ControllerPagesCheckoutSuccess extends AController
                 $amount = $this->session->data['used_balance'];
                 $data = [
                     'order_id'         => $order_id,
-                    'debit'            => $amount,
+                    'amount'            => $amount,
                     'transaction_type' => 'order',
                     'created_by'       => $this->customer->getId(),
                     'description'      => sprintf($this->language->get('text_applied_balance_to_order'),
