@@ -255,7 +255,7 @@ class Address extends BaseModel
      * @param $value
      */
     public function SetZoneIdAttribute($value){
-        $value = (int)$value ?? null;
+        $value = (int)$value > 0 ? (int)$value : null;
         $this->attributes['zone_id'] = $value;
     }
 

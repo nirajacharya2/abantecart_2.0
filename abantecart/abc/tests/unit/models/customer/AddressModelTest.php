@@ -58,11 +58,14 @@ class AddressModelTest extends ATestCase{
              'postcode',
              'city',
              'country_id',
+             'zone_id',
             ],
             array_keys($errors));
 
         $errors = [];
+
         $address = Address::find(1);
+
         //success
         try {
             $address->validate(
@@ -83,6 +86,11 @@ class AddressModelTest extends ATestCase{
         }
         $this->assertEquals(0, count($errors));
 
+        //check nullable zone_id
+        $address = new Address();
+        $address->fill( ['zone_id' => '0'] );
+        $this->assertEquals( null, $address->zone_id);
+
         $errors = [];
         //try save without customer_id and address_id - expect errors
         try {
@@ -102,8 +110,8 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-
         $this->assertEquals(7, count($errors));
+
         $errors = [];
         //try save without customer_id - expect errors
         try {
@@ -124,7 +132,31 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-
         $this->assertEquals(1, count($errors));
+
+
+        $errors = [];
+        //try save without customer_id - expect errors
+        try {
+            $address->validate(
+                [
+                    'address_id' => '1',
+                    'customer_id' => '',
+                    'firstname' => 'test',
+                    'lastname' => 'test',
+                    'address_1' => 'test',
+                    'address_2' => 'dsdsds',
+                    'postcode' => '1234',
+                    'city' => 'Poltava',
+                    'country_id' => '12',
+                    'zone_id' => '0'
+                ]
+            );
+        }catch(ValidationException $e){
+            $errors = $address->errors()['validation'];
+        }
+        $this->assertEquals(1, count($errors));
+
+
     }
 }

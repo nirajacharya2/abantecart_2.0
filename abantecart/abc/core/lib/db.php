@@ -25,6 +25,15 @@ use abc\core\engine\Registry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
 
+/**
+ * Class ADB
+ *
+ * @package abc\core\lib
+ *
+ * @method beginTransaction() Capsule
+ * @method commit() Capsule
+ * @method rollback() Capsule
+ */
 class ADB
 {
     /**
