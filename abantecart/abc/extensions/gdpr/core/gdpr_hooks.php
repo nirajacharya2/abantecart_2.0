@@ -213,7 +213,7 @@ $("#gdpr_erase")
         $customer_info = Customer::find($customer_id)->toArray();
         $entry = $that->language->get('gdpr_entry_erase');
         if ($customer_info['data']) {
-            $data = unserialize($customer_info['data']);
+            $data = $customer_info['data'];
             if (isset($data['gdpr']) && isset($data['gdpr']['request_date'])) {
                 $int = H::dateISO2Int($data['gdpr']['request_date']);
                 $entry .= '<br>Erasure Requested at ';
