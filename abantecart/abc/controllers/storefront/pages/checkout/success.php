@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
+use Illuminate\Validation\ValidationException;
 
 class ControllerPagesCheckoutSuccess extends AController
 {
@@ -63,6 +64,10 @@ class ControllerPagesCheckoutSuccess extends AController
 
                 $this->extensions->hk_ProcessData($this);
                 $this->db->commit();
+            }catch(ValidationException $e){
+                $this->db->rollBack();
+                $this->log->write(__FILE__.':'.__LINE__.' '.var_export($e->errors(), true));
+                throw $e;
             }catch(\Exception $e){
                 $this->db->rollBack();
                 $this->log->write(__FILE__.':'.__LINE__.' '.$e->getMessage());

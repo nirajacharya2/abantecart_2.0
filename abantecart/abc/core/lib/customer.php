@@ -611,7 +611,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|ValidationException
      */
     public function debitTransaction($data)
     {
@@ -907,7 +907,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|ValidationException
      */
     protected function recordTransaction($data)
     {
