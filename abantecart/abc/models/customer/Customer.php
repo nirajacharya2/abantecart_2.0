@@ -1012,7 +1012,9 @@ class Customer extends BaseModel
                 continue;
             }
             foreach ($im_protocols as $protocol) {
-                $update[$sendpoint][$protocol] = (int)$settings[$sendpoint][$protocol];
+                $update[$sendpoint][$protocol] = isset($settings[$sendpoint][$protocol])
+                                                ? (int)$settings[$sendpoint][$protocol]
+                                                : 0;
             }
         }
 
