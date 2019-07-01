@@ -247,14 +247,14 @@ class CustomerTransaction extends BaseModel
          */
         $db = Registry::db();
 
-        $customer_info = Customer::find((int)$data['customer_id']);
+        $aliasCu = $db->table_name('customers');
         $aliasC = $db->table_name('customer_transactions');
         $aliasU = $db->table_name('users');
 
         $rawInc = "CASE WHEN ".$aliasC.".section = 1
-                        THEN CONCAT(".$aliasU.".firstname,' ',".$aliasU.".lastname, ' (',".$aliasU.".username,')')
+                        THEN CONCAT(".$aliasCu.".firstname,' ',".$aliasCu.".lastname, ' (',".$aliasCu.".loginname,')') 
                     ELSE
-                        '".$customer_info->firstname." ".$customer_info->lastname."'
+                        CONCAT(".$aliasU.".firstname,' ',".$aliasU.".lastname, ' (',".$aliasU.".username,')')
                     END";
 
         $select = [];
@@ -265,7 +265,9 @@ class CustomerTransaction extends BaseModel
                 $db->raw($rawInc." as user")
             ];
         }
-
+        /**
+         * @var QueryBuilder $query
+         */
         $query = CustomerTransaction::selectRaw($db->raw_sql_row_count()." ".$db->table_name('customer_transactions').".*")
                 ->addSelect($select)
                 ->leftJoin(
@@ -274,7 +276,13 @@ class CustomerTransaction extends BaseModel
                       '=',
                       'customer_transactions.created_by'
                   )
-                ->where(['customer_id'=> $customer_info->customer_id]);
+                ->leftJoin(
+                      'customers',
+                      'customers.customer_id',
+                      '=',
+                      'customer_transactions.created_by'
+                  )
+                ->where(['customer_transactions.customer_id'=> (int)$data['customer_id']]);
 
         $filter = (isset($data['filter']) ? $data['filter'] : []);
 
@@ -294,6 +302,11 @@ class CustomerTransaction extends BaseModel
         if (H::has_value($filter['transaction_type'])) {
             $query->whereRaw( $aliasC.".transaction_type LIKE '%".$db->escape($filter['transaction_type'])."%'");
         }
+
+        if (H::has_value($filter['description'])) {
+            $query->whereRaw( $aliasC.".description LIKE '%".$db->escape($filter['description'])."%'");
+        }
+
         if (H::has_value($filter['user'])) {
             $query->whereRaw( "LOWER(".$rawInc.") like '%".mb_strtolower($db->escape($filter['user']))."%'");
         }
@@ -301,7 +314,7 @@ class CustomerTransaction extends BaseModel
         //If for total, we done building the query
         if ($mode == 'total_only') {
             //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
             $result = $query->first();
             return (int)$result->total;
         }
@@ -336,8 +349,9 @@ class CustomerTransaction extends BaseModel
          }
 
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
         $result_rows = $query->get();
+
         //finally decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {

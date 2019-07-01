@@ -95,6 +95,9 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         }
 
         $results = CustomerTransaction::getTransactions($data);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+
         $total = $results[0]['total_num_rows'];
 
         if ($total > 0) {

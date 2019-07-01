@@ -111,6 +111,8 @@ class ControllerResponsesListingGridCustomer extends AController
         }
 
         $results = Customer::getCustomers($data, $mode);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
 
         if ($mode) {
             //get orders count for customers list by separate request to prevent slow sql issue
