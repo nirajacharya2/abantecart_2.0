@@ -135,9 +135,11 @@ class ProductOption extends BaseModel
          */
         $rm = ABC::getObjectByAlias('AResourceManager');
         $rm->setType('image');
-        foreach ($this->option_values as $option_value) {
-            //Remove previous resources of object
-            $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
+        if($this->option_values) {
+            foreach ($this->option_values as $option_value) {
+                //Remove previous resources of object
+                $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
+            }
         }
         parent::delete();
     }
