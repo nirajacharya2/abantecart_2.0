@@ -1033,9 +1033,9 @@ class Customer extends BaseModel
 
             //for newsletter subscription do changes inside customers table
             //if at least one protocol enabled - set 1, otherwise - 0
-            if (H::has_value($settings['newsletter'])) {
+            if (H::has_value($update['newsletter'])) {
                 $newsletter_status = 0;
-                foreach ($settings['newsletter'] as $protocol => $status) {
+                foreach ($update['newsletter'] as $protocol => $status) {
                     if ($status) {
                         $newsletter_status = 1;
                         break;
