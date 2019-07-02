@@ -285,7 +285,7 @@ class AIM
     {
         $this->load->language('common/im');
         $customer_im_settings = [];
-        if (!ABC::env('IS_ADMIN')) {
+        if (ABC::env('IS_ADMIN') !== true) {
             $sendpoints_list = $this->sendpoints;
             //do have storefront sendpoint?
             if (!empty($sendpoints_list[$sendpoint][0])) {

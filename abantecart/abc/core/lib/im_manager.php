@@ -21,13 +21,9 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AIMManager
@@ -37,7 +33,7 @@ if (!class_exists('abc\core\ABC')) {
 class AIMManager extends AIM
 {
 
-    public $errors = array();
+    public $errors = [];
     //add sendpoints list for admin-side
     /**
      * @var array
@@ -51,44 +47,46 @@ class AIMManager extends AIM
      * For additional sendpoints ( from extensions) you can store language keys wherever you want.
      *
      */
-    public $admin_sendpoints = array(
-        'order_update'              => array(
-            0 => array('text_key' => 'im_order_update_text_to_customer'),
-            1 => array(),
-        ),
-        'account_update'            => array(
-            0 => array(),
-            1 => array('text_key' => 'im_account_update_text_to_admin', 'force_send' => array('email')),
-        ),
-        'customer_account_approved' => array(
-            0 => array('text_key' => 'im_customer_account_approved_text_to_customer', 'force_send' => array('email')),
-            1 => array(),
-        ),
-        'customer_account_update'   => array(
-            0 => array('text_key' => 'im_customer_account_update_text_to_customer', 'force_send' => array('email')),
-            1 => array(),
-        ),
+    public $admin_sendpoints = [
+        'order_update'              => [
+            0 => ['text_key' => 'im_order_update_text_to_customer'],
+            1 => [],
+        ],
+        'account_update'            => [
+            0 => [],
+            1 => ['text_key' => 'im_account_update_text_to_admin', 'force_send' => ['email']],
+        ],
+        'customer_account_approved' => [
+            0 => ['text_key' => 'im_customer_account_approved_text_to_customer', 'force_send' => ['email']],
+            1 => [],
+        ],
+        'customer_account_update'   => [
+            0 => ['text_key' => 'im_customer_account_update_text_to_customer', 'force_send' => ['email']],
+            1 => [],
+        ],
         /* TODO: Need to decide how to handle system messages in respect to IM
-        'system_messages' 			=> array (
+        'system_messages'           => array (
                 0 => array(),
                 1 => array('text_key' => 'im_system_messages_text_to_admin'),
         */
-    );
+    ];
 
     //NOTE: This class is loaded in INIT for admin only
     public function __construct()
     {
         parent::__construct();
-        if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
+        // forbid for non admin calls
+        if (ABC::env('IS_ADMIN') !== true) {
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AIMManager');
         }
     }
 
     /**
      * @param string $name
-     * @param array  $data_array
+     * @param array $data_array
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function addAdminSendPoint($name, $data_array)
     {
@@ -102,26 +100,36 @@ class AIMManager extends AIM
         return true;
     }
 
-    public function send($sendpoint, $text_vars = array())
+    /**
+     * @param string $sendpoint
+     * @param array $text_vars
+     *
+     * @return null
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function send($sendpoint, $text_vars = [])
     {
         return parent::send($sendpoint, $text_vars);
     }
 
     /**
-     * @param int    $customer_id
+     * @param int $customer_id
      * @param string $sendpoint
-     * @param array  $msg_details - structure:
+     * @param array $msg_details - structure:
      *                            array(
      *                            message => 'text',
      *                            );
      *                            notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
      *
      * @return array|bool
+     * @throws AException
+     * @throws \ReflectionException
      */
-    public function sendToCustomer($customer_id, $sendpoint, $msg_details = array())
+    public function sendToCustomer($customer_id, $sendpoint, $msg_details = [])
     {
         if (!$customer_id) {
-            return array();
+            return [];
         }
         $this->load->language('common/im');
         $sendpoints_list = $this->admin_sendpoints;
@@ -206,7 +214,7 @@ class AIMManager extends AIM
                 //send notification to customer, check if selected or forced
                 $force_arr = $sendpoint_data[0]['force_send'];
                 $forced = false;
-                if (AHelperUtils::has_value($force_arr) && in_array($protocol, $force_arr)) {
+                if (H::has_value($force_arr) && in_array($protocol, $force_arr)) {
                     $forced = true;
                 }
                 if ($customer_im_settings[$sendpoint][$protocol] || $forced) {
@@ -237,7 +245,7 @@ class AIMManager extends AIM
     }
 
     /**
-     * @param int   $order_id
+     * @param int $order_id
      * @param array $msg_details - structure:
      *                           array(
      *                           message => 'text',
@@ -245,11 +253,12 @@ class AIMManager extends AIM
      *                           notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
      *
      * @return array|bool
+     * @throws \ReflectionException
      */
-    public function sendToGuest($order_id, $msg_details = array())
+    public function sendToGuest($order_id, $msg_details = [])
     {
         if (!$order_id) {
-            return array();
+            return [];
         }
         $this->load->language('common/im');
         $this->registry->set('force_skip_errors', true);
@@ -341,15 +350,21 @@ class AIMManager extends AIM
         return true;
     }
 
+    /**
+     * @param int $customer_id
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getCustomerIMSettings($customer_id)
     {
         if (!$customer_id) {
-            return array();
+            return [];
         }
 
         //get only active IM drivers
         $im_protocols = $this->getProtocols();
-        $im_settings = array();
+        $im_settings = [];
         $sql = "SELECT *
 				FROM ".$this->db->table_name('customer_notifications')."
 				WHERE customer_id = ".(int)$customer_id;
@@ -364,12 +379,19 @@ class AIMManager extends AIM
         return $im_settings;
     }
 
+    /**
+     * @param int $user_id
+     * @param int $store_id
+     *
+     * @return array
+     * @throws Exception
+     */
     public function getUserIMs($user_id, $store_id)
     {
         $user_id = (int)$user_id;
         $store_id = (int)$store_id;
         if (!$user_id) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT *
@@ -379,7 +401,7 @@ class AIMManager extends AIM
 				ORDER BY `sendpoint`, `protocol`";
         $result = $this->db->query($sql);
 
-        $output = array();
+        $output = [];
         foreach ($result->rows as $row) {
             $section = (int)$row['section'] ? 'admin' : 'storefront';
             $sendpoint = $row['sendpoint'];
@@ -390,9 +412,9 @@ class AIMManager extends AIM
     }
 
     /**
-     * @param int    $user_id
+     * @param int $user_id
      * @param string $sendpoint
-     * @param array  $msg_details
+     * @param array $msg_details
      *
      * @return null
      *
@@ -401,11 +423,13 @@ class AIMManager extends AIM
      * message => 'text',
      * );
      * notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
+     * @throws AException
+     * @throws \ReflectionException
      */
-    public function sendToUser($user_id, $sendpoint, $msg_details = array())
+    public function sendToUser($user_id, $sendpoint, $msg_details = [])
     {
         if (!$user_id) {
-            return array();
+            return [];
         }
 
         $this->load->language('common/im');
@@ -440,7 +464,7 @@ class AIMManager extends AIM
             }
 
             if ($protocol == 'email') {
-                //see AMailAIM class in im.php
+                /**@see AMailAIM class in im.php */
                 $driver = new AMailIM();
             } else {
                 $driver_txt_id = $this->config->get('config_'.$protocol.'_driver');
@@ -520,8 +544,8 @@ class AIMManager extends AIM
         $user_id = (int)$user_id;
         $store_id = (int)$store_id;
 
-        if (!$user_id || !$sendpoint || !in_array($section, array('admin', 'storefront', ''))) {
-            return array();
+        if (!$user_id || !$sendpoint || !in_array($section, ['admin', 'storefront', ''])) {
+            return [];
         }
 
         $sql = "SELECT *
@@ -538,7 +562,7 @@ class AIMManager extends AIM
         $sql .= "ORDER BY un.protocol";
         $result = $this->db->query($sql);
 
-        $output = array();
+        $output = [];
         foreach ($result->rows as $row) {
             if (!$output[$row['protocol']]) {
                 $output[$row['protocol']] = $row['uri'];
@@ -547,14 +571,20 @@ class AIMManager extends AIM
         return $output;
     }
 
+    /**
+     * @param array $settings
+     *
+     * @return bool|null
+     * @throws Exception
+     */
     public function validateUserSettings($settings)
     {
-        $this->errors = array();
+        $this->errors = [];
         if (!$settings) {
             return null;
         }
         //get all installed drivers
-        $drivers = $this->getIMDriverObjects(array('status' => ''));
+        $drivers = $this->getIMDriverObjects(['status' => '']);
         $supported_protocols = array_keys($drivers);
         foreach ($settings as $protocol => $uri) {
 
@@ -578,40 +608,40 @@ class AIMManager extends AIM
         }
     }
 
-    public function saveIMSettings($user_id, $section, $sendpoint, $store_id, $settings = array())
+    public function saveIMSettings($user_id, $section, $sendpoint, $store_id, $settings = [])
     {
 
         $user_id = (int)$user_id;
         $store_id = (int)$store_id;
         $settings = (array)$settings;
-        if (!$user_id || !$sendpoint || !in_array($section, array('admin', 'storefront', ''))) {
+        if (!$user_id || !$sendpoint || !in_array($section, ['admin', 'storefront', ''])) {
             return false;
         }
 
         foreach ($settings as $protocol => $uri) {
             $sql = "DELETE FROM ".$this->db->table_name('user_notifications')."
-				WHERE user_id=".$user_id."
-					AND store_id = '".$store_id."'";
+                    WHERE user_id=".$user_id."
+                        AND store_id = '".$store_id."'";
             if ($section != '') {
                 $sql .= " AND section = '".($section == 'admin' ? 1 : 0)."'";
             }
             $sql .= " AND sendpoint = '".$this->db->escape($sendpoint)."'
-					AND protocol='".$this->db->escape($protocol)."'";
+                      AND protocol='".$this->db->escape($protocol)."'";
 
             $this->db->query($sql);
 
-            $sections = $section ? array($section) : array('admin', 'storefront');
+            $sections = $section ? [$section] : ['admin', 'storefront'];
             foreach ($sections as $s) {
                 $s = $s == 'admin' ? 1 : 0;
                 $sql = "INSERT INTO ".$this->db->table_name('user_notifications')."
-					(user_id, store_id, section, sendpoint, protocol, uri, date_added)
-					VALUES ('".$user_id."',
-							'".$store_id."',
-							'".$s."',
-							'".$this->db->escape($sendpoint)."',
-							'".$this->db->escape($protocol)."',
-							'".$this->db->escape($uri)."',
-							NOW())";
+                        (user_id, store_id, section, sendpoint, protocol, uri, date_added)
+                        VALUES ('".$user_id."',
+                                '".$store_id."',
+                                '".$s."',
+                                '".$this->db->escape($sendpoint)."',
+                                '".$this->db->escape($protocol)."',
+                                '".$this->db->escape($uri)."',
+                                NOW())";
                 $this->db->query($sql);
             }
         }
@@ -619,13 +649,17 @@ class AIMManager extends AIM
         return true;
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function getIMDriversList()
     {
-        $filter = array(
+        $filter = [
             'category' => 'Communication',
-        );
+        ];
         $extensions = $this->extensions->getExtensionsList($filter);
-        $driver_list = array();
+        $driver_list = [];
         foreach ($extensions->rows as $ext) {
             $driver_txt_id = $ext['key'];
 
@@ -636,9 +670,8 @@ class AIMManager extends AIM
             //NOTE! all IM drivers MUST have class by these path
             try {
                 /** @noinspection PhpIncludeInspection */
-                include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.'/core/lib/'.$driver_txt_id.'.php');
-            } catch (AException $e) {
-            }
+                include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.DS.'core'.DS.'lib'.DS.$driver_txt_id.'.php');
+            } catch (\Exception $e) {}
             $classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
 
             if (!class_exists($classname)) {
