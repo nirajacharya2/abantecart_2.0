@@ -22,6 +22,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
 use abc\models\user\User;
+use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CustomerCommunication extends BaseModel
@@ -46,58 +47,66 @@ class CustomerCommunication extends BaseModel
         'date_modified',
     ];
 
-    public function user() {
+    public function user()
+    {
 
         return $this->hasOne(User::class, 'user_id', 'user_id');
     }
 
-    public function customer() {
+    public function customer()
+    {
         return $this->hasOne(Customer::class, 'customer_id', 'customer_id');
     }
 
-    public static function getCustomerCommunications(int $customer_id, $data = []) {
+    public static function getCustomerCommunications(int $customer_id, $data = [])
+    {
         if (is_array($data) && !empty($data)) {
             return CustomerCommunication::where('customer_id', '=', $customer_id)
-                ->offset($data['start'])->take($data['limit'])
-                ->orderBy($data['sort'], $data['order'])
-                ->get();
+                                        ->offset($data['start'])->take($data['limit'])
+                                        ->orderBy($data['sort'], $data['order'])
+                                        ->get();
         } else {
             return CustomerCommunication::where('customer_id', '=', $customer_id)->get();
         }
     }
 
-    public static function getCustomerCommunicationById(int $communication_id) {
+    public static function getCustomerCommunicationById(int $communication_id)
+    {
         if ($communication_id > 0) {
             $communication = CustomerCommunication::find($communication_id);
-            if ($communication)
-            return $communication->toArray(); else return [];
-        } else return [];
+            if ($communication) {
+                return $communication->toArray();
+            } else {
+                return [];
+            }
+        } else {
+            return [];
+        }
     }
 
-    public static function createCustomerCommunication(AMail $mail) {
-            $communication = new CustomerCommunication();
-            $communication->subject = $mail->getSubject();
-            $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
-            $customer_id = null;
-            if ((Registry::getInstance())->get('customer')) {
-                $customer_id = (Registry::getInstance())->get('customer')->getId();
-            }
-            if (!$customer_id) {
-                $customer = Customer::where('email', '=', $mail->getTo())->limit(1)->get()->first();
-                $customer_id = $customer->customer_id;
-            }
-            if (!$customer_id) {
-                return;
-            }
-            $communication->customer_id = $customer_id;
-            if ($mail->getUser()) {
-                $communication->user_id = $mail->getUser()->getId() ?: null;
-            } else {
-                $communication->user_id = null;
-            }
-            $communication->type = 'email';
-            $communication->sent_to_address = $mail->getTo();
-            $communication->save();
+    public static function createCustomerCommunication(AMail $mail)
+    {
+        $communication = new CustomerCommunication();
+        $communication->subject = $mail->getSubject();
+        $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
+        $customer_id = null;
+        if (Registry::customer()) {
+            $customer_id = Registry::customer()->getId();
+        }
+        if (!$customer_id) {
+            $customer = Customer::where('email', '=', $mail->getTo())->limit(1)->get()->first();
+            $customer_id = $customer->customer_id;
+        }
+        if (!$customer_id) {
+            return;
+        }
+        $communication->customer_id = $customer_id;
+        $user = H::recognizeUser();
+
+        $communication->user_id = $user['user_id'];
+        $communication->type = 'email';
+        $communication->sent_to_address = $mail->getTo();
+        $communication->save();
     }
 
     /**
@@ -109,18 +118,19 @@ class CustomerCommunication extends BaseModel
      *
      * @throws \Exception
      */
-    public static function createCustomerCommunicationIm($customer_id, $to, $message, $user_id=0, $protocol='sms'){
-            $communication = new CustomerCommunication();
-            $communication->subject = 'IM message';
-            $communication->body = $message;
-            if (!$customer_id) {
-                return;
-            }
-            $communication->customer_id = $customer_id;
-            $communication->user_id = $user_id;
-            $communication->sent_to_address = $to;
-            $communication->type = $protocol;
-            $communication->save();
+    public static function createCustomerCommunicationIm($customer_id, $to, $message, $user_id = 0, $protocol = 'sms')
+    {
+        $communication = new CustomerCommunication();
+        $communication->subject = 'IM message';
+        $communication->body = $message;
+        if (!$customer_id) {
+            return;
+        }
+        $communication->customer_id = $customer_id;
+        $communication->user_id = $user_id;
+        $communication->sent_to_address = $to;
+        $communication->type = $protocol;
+        $communication->save();
     }
 
 }

@@ -652,8 +652,9 @@ class AMail
             return false;
         }
 
-        if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
-        CustomerCommunication::createCustomerCommunication($this);
+        if (Registry::getInstance()->get('config')->get('config_save_customer_communication')) {
+            CustomerCommunication::createCustomerCommunication($this);
+        }
 
         return true;
     }
