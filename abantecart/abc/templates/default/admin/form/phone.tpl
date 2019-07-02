@@ -28,7 +28,7 @@
 				intlNumber = intlNumber.replace(/[^0-9\+]+/g, '');
 				$(this).val(intlNumber);
 			});
-		}catch(){
+		}catch(e){
 			console.log('intlTelInput initiation failed for input id "<?php echo $id ?>" !');
 		}
 
