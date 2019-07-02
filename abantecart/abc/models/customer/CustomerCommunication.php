@@ -39,6 +39,7 @@ class CustomerCommunication extends BaseModel
     ];
 
     protected $fillable = [
+        'user_id',
         'type',
         'subject',
         'body',
@@ -49,7 +50,6 @@ class CustomerCommunication extends BaseModel
 
     public function user()
     {
-
         return $this->hasOne(User::class, 'user_id', 'user_id');
     }
 
@@ -101,9 +101,11 @@ class CustomerCommunication extends BaseModel
             return;
         }
         $communication->customer_id = $customer_id;
-        $user = H::recognizeUser();
 
-        $communication->user_id = $user['user_id'];
+        $user = Registry::user();
+        if($user){
+           $communication->user_id = $user->getId();
+        }
         $communication->type = 'email';
         $communication->sent_to_address = $mail->getTo();
         $communication->save();
