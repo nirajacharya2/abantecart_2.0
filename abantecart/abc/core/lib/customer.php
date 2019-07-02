@@ -1153,7 +1153,7 @@ class ACustomer extends ALibBase
         //get only active IM drivers
         $im_protocols = Registry::im()->getProtocols();
         $im_settings = [];
-        $cn = CustomerNotification::where('customer', '=', $this->customer_id)->get()->toArray();
+        $cn = CustomerNotification::where('customer_id', '=', $this->customer_id)->get()->toArray();
 
         foreach ( $cn as $row ) {
             if ( ! in_array( $row['protocol'], $im_protocols ) ) {
