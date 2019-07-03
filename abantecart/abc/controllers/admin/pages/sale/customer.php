@@ -528,7 +528,9 @@ class ControllerPagesSaleCustomer extends AController
             'current'   => true,
         ]);
 
-        $this->getTabs($customer_id, 'general');
+        if ($customer_id) {
+            $this->getTabs($customer_id, 'general');
+        }
 
         $this->load->model('setting/store');
         if (!$this->model_setting_store->isDefaultStore()) {
