@@ -344,6 +344,7 @@ class ControllerPagesSaleCustomer extends AController
             $customer_id = $this->model_sale_customer->addCustomer($this->request->post);
             $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id='.$customer_id);
             $this->session->data['success'] = $this->language->get('text_success');
+            $this->extensions->hk_ProcessData($this, 'customer_insert', ['customer_id' => $customer_id]);
             abc_redirect($redirect_url);
         }
         $this->getForm();
