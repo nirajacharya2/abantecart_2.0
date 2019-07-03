@@ -101,9 +101,13 @@ class AIM
         */
     ];
 
-    public function __construct()
+    //this sign for usage im from admin-side when creating order for customer
+    protected $is_admin = 0;
+
+    public function __construct($is_admin = 0)
     {
         $this->registry = Registry::getInstance();
+        $this->is_admin = (int)$is_admin;
     }
 
     /**
@@ -285,7 +289,7 @@ class AIM
     {
         $this->load->language('common/im');
         $customer_im_settings = [];
-        if (ABC::env('IS_ADMIN') !== true) {
+        if (!$this->is_admin) {
             $sendpoints_list = $this->sendpoints;
             //do have storefront sendpoint?
             if (!empty($sendpoints_list[$sendpoint][0])) {
@@ -554,7 +558,7 @@ class AIM
 
     private function _get_admin_im_uri($sendpoint, $protocol)
     {
-        $section = ABC::env('IS_ADMIN') ? 1 : 0;
+        $section = $this->is_admin ? 1 : 0;
         $output = [];
         $sql = "SELECT un.*
                 FROM ".$this->db->table_name('user_notifications')." un

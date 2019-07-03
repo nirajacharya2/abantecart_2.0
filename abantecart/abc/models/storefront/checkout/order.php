@@ -45,6 +45,18 @@ use stdClass;
 class ModelCheckoutOrder extends Model
 {
     public $data = [];
+    protected $im;
+
+    public function __construct(Registry $registry)
+    {
+        parent::__construct($registry);
+        //trick for usage from admin
+        if(ABC::env('IS_ADMIN') === true){
+            $this->im = new AIM(0);
+        }else{
+            $this->im = $this->registry->get('im');
+        }
+    }
 
     /**
      * @param $order_id
