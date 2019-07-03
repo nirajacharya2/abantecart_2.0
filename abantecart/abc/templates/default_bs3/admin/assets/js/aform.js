@@ -91,11 +91,8 @@
         function doPasswordset(elem) {
             var $el = $(elem);
             var $el_strength = $('#' + $el.attr('id') + '_strength');
-            var $el_confirm = $('#' + $el.attr('id') + '_confirm');
-            var $el_confirm_default = $('#' + $el.attr('id') + '_confirm_default');
-
-            var $wrapper = $el.closest('.aform'), $field = $el.closest('.afield');
-            var $wrapper_confirm = $el_confirm.closest('.aform'), $field_confirm = $el_confirm.closest('.afield');
+            var $el_confirm = $('#' + $el.attr('id') + '_confirmation');
+            var $el_confirm_default = $('#' + $el.attr('id') + '_confirmation_default');
 
             if ($el.prop("readonly")) {
                 $field.addClass(o.readonlyClass);
@@ -111,7 +108,7 @@
                 "keyup.aform":function (e) {
                     var pwdStrength = passwordChanged($(this).val());
                     $el_strength.html('<span class="strength' + pwdStrength + '" />');
-                    var confirm = $(this).val() == $el_confirm.val();
+                    var confirm = $(this).val() === $el_confirm.val();
                     if (confirm && pwdStrength > 1)
                         onChangedAction($el, $(this).val(), $(this).attr('data-orgvalue'));
                 }
@@ -124,12 +121,12 @@
                 },
                 "blur.aform":function () {
                     $field_confirm.removeClass(o.focusClass);
-                    if ($(this).val() == '')
+                    if ($(this).val() === '')
                         $el_confirm_default.show();
                 },
                 "keyup.aform":function (e) {
                     var pwdStrength = passwordChanged($el.val());
-                    var confirm = $(this).val() == $el.val();
+                    var confirm = $(this).val() === $el.val();
                     if (confirm && pwdStrength > 1)
                         onChangedAction($el, $el.val(), $el.attr('data-orgvalue'));
                     else
@@ -798,7 +795,7 @@
                     doRadio(elem);
                 }
             } else if (elem.is(":text, :password, input[type='email'], input[type='tel']")) {
-                if (elem.is(":password") && $(elem).is('[name$="_confirm"]')) {
+                if (elem.is(":password") && $(elem).is('[name$="_confirmation"]')) {
                     ;
                 } else if (elem.is(":password") && elem.hasClass('passwordset_element')) {
                     doPasswordset(elem);                    
