@@ -37,8 +37,7 @@
 		<div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
             echo "has-error";
         } ?>">
-			<label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
-                    .$name}; ?></label>
+			<label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
 			<div class="input-group afield col-sm-5">
                 <?php echo $fld; ?>
 			</div>
