@@ -100,10 +100,10 @@
 
             $el.bind({
                 "focus.aform":function () {
-                    $field.addClass(o.focusClass);
+                    $el.addClass(o.focusClass);
                 },
                 "blur.aform":function () {
-                    $field.removeClass(o.focusClass);
+                    $el.removeClass(o.focusClass);
                 },
                 "keyup.aform":function (e) {
                     var pwdStrength = passwordChanged($(this).val());
@@ -116,11 +116,11 @@
 
             $el_confirm.bind({
                 "focus.aform":function () {
-                    $field_confirm.addClass(o.focusClass);
+                    $el_confirm.addClass(o.focusClass);
                     $el_confirm_default.hide();
                 },
                 "blur.aform":function () {
-                    $field_confirm.removeClass(o.focusClass);
+                    $el_confirm.removeClass(o.focusClass);
                     if ($(this).val() === '')
                         $el_confirm_default.show();
                 },
@@ -134,7 +134,7 @@
                 }
             });
 
-            $el_confirm_default.click(function () {
+            $el_confirm_default.on('click',function () {
                 $(this).hide();
                 $el_confirm.focus();
             });

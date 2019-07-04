@@ -90,22 +90,21 @@
 
         function doPasswordset(elem) {
             var $el = $(elem);
-            var $field = $(elem);
             var $el_strength = $('#' + $el.attr('id') + '_strength');
             var $el_confirm = $('#' + $el.attr('id') + '_confirmation');
 
             var $el_confirm_default = $('#' + $el.attr('id') + '_confirmation_default');
 
             if ($el.prop("readonly")) {
-                $field.addClass(o.readonlyClass);
+                $el.addClass(o.readonlyClass);
             }
 
             $el.bind({
                 "focus.aform": function () {
-                    $field.addClass(o.focusClass);
+                    $el.addClass(o.focusClass);
                 },
                 "blur.aform": function () {
-                    $field.removeClass(o.focusClass);
+                    $el.removeClass(o.focusClass);
                 },
                 "keyup.aform": function (e) {
                     var pwdStrength = passwordChanged($(this).val());
@@ -118,21 +117,23 @@
 
             $el_confirm.bind({
                 "focus.aform": function () {
-                    $field_confirm.addClass(o.focusClass);
+                    $el_confirm.addClass(o.focusClass);
                     $el_confirm_default.hide();
                 },
                 "blur.aform": function () {
-                    $field_confirm.removeClass(o.focusClass);
+                    $el_confirm.removeClass(o.focusClass);
                     if ($(this).val() === '')
                         $el_confirm_default.show();
                 },
                 "keyup.aform": function (e) {
                     var pwdStrength = passwordChanged($el.val());
                     var confirm = $(this).val() === $el.val();
-                    if (confirm && pwdStrength > 1)
+                    if (confirm && pwdStrength > 1) {
                         onChangedAction($el, $el.val(), $el.attr('data-orgvalue'));
-                    else
+                    }
+                    else {
                         onChangedAction($el, $el.attr('data-orgvalue'), $el.attr('data-orgvalue'));
+                    }
                 }
             });
 
