@@ -28,7 +28,7 @@ use abc\core\ABC; ?>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script type="text/javascript" src="/templates/default/admin/assets/js/tinymce-vue/tinymce-vue.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
@@ -253,7 +253,7 @@ var wrapConfirmDelete = function(){
     var popover, href;
 
     $('a[data-confirmation="delete"]').each( function(){
-        if($(this).attr('data-toggle')=='dropdown' ){ return;}
+        if($(this).attr('data-toggle') === 'dropdown' ){ return;}
 
        	var action = $(this).attr('onclick');
         if ( action ) {
@@ -261,14 +261,14 @@ var wrapConfirmDelete = function(){
         } else {
 	        href = $(this).attr('href');
 			if(!href){ return;}
-    	    if(href.length==0 || href=='#'){ return;}
+    	    if(href.length === 0 || href === '#'){ return;}
     	    action = 'href="' + href +'"';
         }
 
-    	var conf_text = $(this).attr('data-confirmation-text');
-    	if (!conf_text) {
-    		conf_text = <?php abc_js_echo($text_confirm); ?>;
-    	}
+        var conf_text = $(this).attr('data-confirmation-text');
+        if (!conf_text) {
+            conf_text = <?php abc_js_echo($text_confirm); ?>;
+        }
 
         $(this).wrap(wrapper);
         popover = '<div class="confirm_popover dropdown-menu dropdown-menu-right alert alert-danger" role="menu">'+

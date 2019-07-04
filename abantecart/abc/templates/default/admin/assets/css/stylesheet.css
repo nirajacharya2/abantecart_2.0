@@ -3450,9 +3450,6 @@ img.extension-summary-icon{
     white-space: nowrap;
 }
 
-.primary_content_actions .btn-group{
-    margin-bottom: 3px;
-}
 
 .chosen-container-multi .chosen-choices .search-choice .search-choice-close{
     background-image: none;
@@ -3495,4 +3492,11 @@ End Vuetify conflict fixes
 
 .container {
     padding: 0 10px;
+}
+
+
+a[data-confirmation="delete"].dropdown-toggle::after{
+    border:0 !important;
+    margin:0;
+    content: none;
 }

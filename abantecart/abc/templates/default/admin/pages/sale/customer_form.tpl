@@ -61,7 +61,7 @@
                 <?php if ($reset_password) { ?>
 					<a target="_blank"
 					   class="btn btn-white tooltips"
-					   href="<?php echo $reset_password->href; ?>"
+                       onclick = "sendPasswordReset();return false;"
 					   data-toggle="tooltip"
 					   data-confirmation="delete"
 					   data-confirmation-text="<?php echo $warning_resend_password; ?>"
@@ -180,3 +180,17 @@ foreach ($form['fields'] as $section => $fields) {
 </form>
 
 </div>
+
+<script type="application/javascript">
+	function sendPasswordReset(){
+		$.ajax({
+			url: '<?php echo $reset_password->href; ?>',
+			type:'POST',
+			success: function(data){
+				if(data.result === true) {
+					success_alert(data.success);
+				}
+			}
+		});
+	}
+</script>
