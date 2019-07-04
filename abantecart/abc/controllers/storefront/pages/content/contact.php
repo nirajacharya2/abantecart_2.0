@@ -66,7 +66,7 @@ class ControllerPagesContentContact extends AController
                     if ($resource_info) {
                         $this->data['mail_template_data']['logo_html'] = html_entity_decode(
                             $resource_info['resource_code'],
-                            ENT_QUOTES, 
+                            ENT_QUOTES,
                             ABC::env('APP_CHARSET')
                         );
                     }
@@ -86,16 +86,15 @@ class ControllerPagesContentContact extends AController
             $this->data['mail_template_data']['store_name'] = $this->config->get('store_name');
             $this->data['mail_template_data']['store_url'] = $this->config->get('config_url');
             $this->data['mail_template_data']['text_project_label'] = H::project_base();
-            $this->data['mail_template_data']['entry_enquiry'] =
-            $this->data['mail_plain_text'] = $this->language->get('entry_enquiry');
-            $this->data['mail_plain_text'] .= "\r\n".$post_data['enquiry']."\r\n";
-            $this->data['mail_template_data']['enquiry'] = nl2br($post_data['enquiry']."\r\n");
+            $this->data['mail_template_data']['entry_enquiry'] = $this->language->get('entry_enquiry');
+            $this->data['mail_plain_text'] = '';
+            $this->data['mail_template_data']['enquiry'] = '';
 
             $form_fields = $this->form->getFields();
             $this->data['mail_template_data']['form_fields'] = [];
             foreach ($form_fields as $field_name => $field_info) {
                 if (H::has_value($post_data[$field_name])
-                    && !in_array($field_name, ['first_name', 'email', 'enquiry', 'captcha'])
+                    && !in_array($field_name, ['captcha'])
                 ) {
                     $field_value = $post_data[$field_name];
                     if(is_array($field_value)){

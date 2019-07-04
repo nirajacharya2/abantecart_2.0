@@ -356,6 +356,7 @@ class ControllerPagesSaleCustomer extends AController
                 $customer_id = (int)$customer->customer_id;
                 $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id='.$customer_id);
                 $this->session->data['success'] = $this->language->get('text_success');
+                $this->extensions->hk_ProcessData($this, 'customer_insert', ['customer_id' => $customer_id]);
                 abc_redirect($redirect_url);
             }
         }
@@ -554,7 +555,9 @@ class ControllerPagesSaleCustomer extends AController
             'current'   => true,
         ]);
 
-        $this->getTabs((int)$customer_id, 'general');
+        if ($customer_id) {
+            $this->getTabs($customer_id, 'general');
+        }
 
         $this->load->model('setting/store');
         if (!$this->model_setting_store->isDefaultStore()) {

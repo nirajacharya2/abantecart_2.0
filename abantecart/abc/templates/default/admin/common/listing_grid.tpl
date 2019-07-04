@@ -34,7 +34,7 @@ foreach($jss as $js){
 	<?php } ?>
 	</form>
 </div>
-<?php 
+<?php
 	//load quick view port modal
 	echo $this->html->buildElement(
 		array(
@@ -354,7 +354,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 				echo $html_string.$html_btn."'; \r\n";
 			}
 
-		} // end of action 		
+		} // end of action
 		?>
 			if (actions != '') {
 				var ids = jQuery(table_id).jqGrid('getDataIDs');
@@ -494,6 +494,10 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 			$(table_id).jqGrid('setGridParam').trigger("reloadGrid",[{current:true}]);
 		},
 		ondblClickRow:function (row_id) {
+			//Disable Double click on grid
+		<?php if ($data['disbale_dblClick']) { ?>
+				return false;
+			<?php } ?>
 			// quickview modal
 			var lnk = $('#' + row_id).find("td[aria-describedby$='_action']").find('[data-fullmode-href]');
 			//edit link
