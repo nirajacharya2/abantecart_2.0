@@ -90,6 +90,7 @@
 
         function doPasswordset(elem) {
             var $el = $(elem);
+            var $field = $(elem);
             var $el_strength = $('#' + $el.attr('id') + '_strength');
             var $el_confirm = $('#' + $el.attr('id') + '_confirmation');
 
