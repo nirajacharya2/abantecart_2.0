@@ -46,7 +46,7 @@ use ReflectionMethod;
  *
  * @package abc\models
  * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
- * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder where(string|array $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
  * @method static Builder select(mixed $select) Builder
  * @const  string DELETED_AT
  */

@@ -31,6 +31,10 @@ class CustomerCommunication extends BaseModel
     protected $table = 'customer_communications';
 
     protected $primaryKey = 'communication_id';
+
+    protected $mainClassName = Customer::class;
+    protected $mainClassKey = 'customer_id';
+
     public $timestamps = false;
 
     protected $dates = [
@@ -39,6 +43,7 @@ class CustomerCommunication extends BaseModel
     ];
 
     protected $fillable = [
+        'customer_id',
         'user_id',
         'type',
         'subject',

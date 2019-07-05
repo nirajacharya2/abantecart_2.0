@@ -40,6 +40,9 @@ class CustomerTransaction extends BaseModel
 
     protected $primaryKey = 'customer_transaction_id';
 
+    protected $mainClassName = Customer::class;
+    protected $mainClassKey = 'customer_id';
+
     protected $casts = [
         'customer_id'      => 'int',
         'order_id'         => 'int',
