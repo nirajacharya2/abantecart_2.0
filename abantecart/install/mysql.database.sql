@@ -9583,7 +9583,7 @@ CREATE TABLE `ac_products` (
   `quantity` int(4) NOT NULL DEFAULT '0',
   `stock_checkout` CHAR(1) NULL DEFAULT '',
   `stock_status_id` int(11) NOT NULL,
-  `manufacturer_id` int(11) NOT NULL,
+  `manufacturer_id` int(11) NULL,
   `shipping` int(1) NOT NULL DEFAULT '1',
   `ship_individually` int(1) NOT NULL DEFAULT '0',
   `free_shipping` int(1) NOT NULL DEFAULT '0',
@@ -13872,6 +13872,16 @@ ALTER TABLE `ac_customers`
 ADD CONSTRAINT `ac_customers_ibfk_3`
   FOREIGN KEY (`address_id`)
   REFERENCES `ac_addresses` (`address_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_products`
+  ADD INDEX `ac_products_fk_idx_1` (`manufacturer_id` ASC);
+
+ALTER TABLE `ac_products`
+ADD CONSTRAINT `ac_products_ibfk_1`
+  FOREIGN KEY (`manufacturer_id`)
+  REFERENCES `ac_manufacturers` (`manufacturer_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
 

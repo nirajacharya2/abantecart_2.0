@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2019 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
@@ -32,18 +31,14 @@ use abc\core\lib\AException;
  * Class ControllerApiCatalogProduct
  *
  * @package abc\controllers\admin
- *
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerApiCatalogProduct extends AControllerAPI
 {
-    /**
-     *
-     */
-    const DEFAULT_STATUS = 1;
 
     /**
      * @return null
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function get()
     {
@@ -63,25 +58,22 @@ class ControllerApiCatalogProduct extends AControllerAPI
         if (!\H::has_value($getBy) || !isset($request[$getBy])) {
             $this->rest->setResponseData(['Error' => $getBy.' is missing']);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
         /**
          * @var Product $product
          */
-        $product = Product::where([$getBy => $request[$getBy]]);
-        if ($product === null) {
+        $product = Product::where($getBy, '=', $request[$getBy])->first();
+        if (!$product) {
             $this->rest->setResponseData(
                 ['Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist"]
             );
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
-        $this->data['result'] = [];
-        $item = $product->first();
-        if ($item) {
-            $this->data['result'] = $item->getAllData();
-        }
+        $this->data['result'] = $product->getAllData();
+
         if (!$this->data['result']) {
             $this->data['result'] = ['Error' => 'Requested Product Not Found'];
         }
@@ -123,7 +115,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                  * @var Product $product
                  */
                 $product = Product::where($updateBy, $request[$updateBy])->first();
-                if ($product === null) {
+                if (!$product) {
                     $this->rest->setResponseData(
                         ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
                     );
@@ -205,48 +197,39 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
-        $rels = [];
+        $relations = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
-                $rels[$key] = $data[$key];
+                $relations[$key] = $data[$key];
                 unset($data[$key]);
             }
         }
         //create product
-        $product = new Product();
-        //expand fillable columns for extensions
-        if ($this->data['fillable']) {
-            $product->addFillable($this->data['fillable']);
-        }
-
-        $fills = $product->getFillable();
-        foreach ($fills as $fillable) {
-            if ($fillable == 'date_available') {
-                continue;
-            }
-            $product->{$fillable} = $data[$fillable];
-        }
-
-        $product->save();
-
-        if (!$product || !$product->getKey()) {
-            $this->rest->setResponseData(['Error' => "Product cannot be created"]);
+        $this->db->beginTransaction();
+        try {
+            $product = new Product($data);
+            $product->save();
+            $product->replaceOptions((array)$data['options']);
+            //create defined relationships
+            $product->updateRelationships($relations);
+            $product->updateImages($data);
+            $product->replaceKeywords($data['keywords']);
+            $this->db->commit();
+        }catch(\Exception $e){
+            $error_text = $e->getMessage().' File:'.__FILE__.':'.__LINE__;
+            $this->log->write($error_text);
+            $this->db->rollback();
+            $this->rest->setResponseData(['Error' => "Product cannot be created. ".$error_text]);
             $this->rest->sendResponse(200);
             return null;
         }
-
-        $product->replaceOptions((array)$data['options']);
-        //create defined relationships
-        $product->updateRelationships($rels);
-        $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
 
         return $product;
     }
 
     /**
      * @param Product $product
-     * @param         $data
+     * @param array $data
      *
      * @return mixed
      * @throws \Exception
@@ -254,38 +237,28 @@ class ControllerApiCatalogProduct extends AControllerAPI
     private function updateProduct($product, $data)
     {
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
-        $rels = [];
+        $relations = [];
         foreach ($expected_relations as $key) {
             if (isset($data[$key]) && is_array($data[$key])) {
-                $rels[$key] = $data[$key];
+                $relations[$key] = $data[$key];
                 unset($data[$key]);
             }
         }
 
-        //expand fillable columns for extensions
-        if ($this->data['fillable']) {
-            $product->addFillable($this->data['fillable']);
+        $this->db->beginTransaction();
+        try {
+            $product->update($data);
+            $product->replaceOptions((array)$data['options']);
+            $product->updateRelationships($relations);
+            $product->updateImages($data);
+            $product->replaceKeywords($data['keywords']);
+            $this->db->commit();
+        }catch(\Exception $e){
+            $error_text = $e->getMessage().' File:'.__FILE__.':'.__LINE__;
+            $this->log->write($error_text);
+            $this->db->rollback();
+            return null;
         }
-
-        $fills = $product->getFillable();
-        $upd_array = [];
-        foreach ($fills as $fillable) {
-            if (isset($data[$fillable])) {
-                $product->{$fillable} = urldecode($data[$fillable]);
-                $upd_array[$fillable] = urldecode($data[$fillable]);
-            }
-        }
-
-        if($upd_array) {
-            $product->update($upd_array);
-            //$this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
-        }
-
-        //$product->save();
-        $product->replaceOptions((array)$data['options']);
-        $product->updateRelationships($rels);
-        $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
         return $product;
     }
 
@@ -293,7 +266,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param array $data
      *
      * @return mixed
-     * @throws AException
      */
     protected function prepareData($data)
     {
@@ -316,31 +288,28 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         if ($data['manufacturer']['uuid']) {
-            $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
-                ->get()->first();
+            $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])->first();
             if ($manufacturer) {
                 $data['manufacturer_id'] = $manufacturer->manufacturer_id;
                 unset($data['manufacturer']);
             }
         }
 
-     /*   if($data['categories']) {
-            $categories = [];
-            foreach($data['categories'] as $category_branch) {
-                $categories[] = $this->processCategoryTree($category_branch);
-            }
-            $data['categories'] = $categories;
-        }*/
-
         return $data;
     }
 
+    /**
+     * @param array $category_tree
+     *
+     * @return bool|mixed
+     * @throws AException
+     */
     protected function processCategoryTree(array $category_tree){
         $this->loadModel('catalog/category');
         foreach($category_tree as $lang_code => $category){
             $language_id = $this->language->getLanguageIdByCode($lang_code);
             //Note: start from parent category!
-            if($category_tree['parent_id']!=0){
+            if($category_tree['parent_id'] != 0){
                 throw new AException(
                     'Data integrity check error: Category Tree must start from root category. Parent_id must be 0!'
                 );
@@ -350,8 +319,15 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
     }
 
+    /**
+     * @param array $category
+     * @param int $language_id
+     *
+     * @return bool|mixed
+     * @throws AException
+     */
     protected function replaceCategories($category, $language_id){
-        $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
+        $exists = Category::getCategoryByName($category['name'], $category['parent_id']);
         if (!$exists) {
             $new_category_id = (new Category())->addCategory(
                 [
@@ -360,17 +336,33 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     'sort_order' => $category['sort_order'],
                     'category_description' => [
                         $language_id => [
-                            'name' => html_entity_decode($category['name']),
-                            'meta_keywords'    => html_entity_decode($category['meta_keywords']),
-                            'meta_description' => html_entity_decode($category['meta_description']),
-                            'description'      => html_entity_decode($category['description']),
+                            'name'             => html_entity_decode(
+                                $category['name'],
+                                ENT_QUOTES,
+                                ABC::env('APP_CHARSET')
+                            ),
+                            'meta_keywords'    => html_entity_decode(
+                                $category['meta_keywords'],
+                                ENT_QUOTES,
+                                ABC::env('APP_CHARSET')
+                            ),
+                            'meta_description' => html_entity_decode(
+                                $category['meta_description'],
+                                ENT_QUOTES,
+                                ABC::env('APP_CHARSET')
+                            ),
+                            'description'      => html_entity_decode(
+                                $category['description'],
+                                ENT_QUOTES,
+                                ABC::env('APP_CHARSET')
+                            ),
                         ]
                     ],
                     'category_store' => [$this->config->get('config_store_id')],
                     'keyword' => $category['keyword']
-
                 ]
             );
+
             if($category['children']){
                 $category['children']['parent_id'] = $new_category_id;
                 return $this->replaceCategories($category['children'], $language_id);
@@ -385,29 +377,5 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 return $exists['category_id'];
             }
         }
-    }
-
-    public function getCategoryByName($name, $parent_id)
-    {
-        $parent_id = (int)$parent_id;
-        if(!$parent_id){
-            $parent_sql = 'c.parent_id IS NULL ';
-        }else{
-            $parent_sql = 'c.parent_id = '.$parent_id;
-        }
-        $result = $this->db->query(
-            "SELECT cd.*, c.*
-            FROM ".$this->db->table_name("category_descriptions")." cd
-            LEFT JOIN ".$this->db->table_name("categories")." c
-                 ON (c.category_id = cd.category_id)
-            WHERE ".$parent_sql." AND LOWER(name) = '"
-            .$this->db->escape(
-                mb_strtolower(
-                    html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET'))
-                )
-            )."'"
-        );
-
-        return $result->row;
     }
 }

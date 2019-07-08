@@ -1336,8 +1336,8 @@ ALTER TABLE `ac_product_specials`
     ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_products`
-    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`;
-ALTER TABLE `ac_products`
+    ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`,
+    ADD INDEX `ac_products_fk_idx_1` (`manufacturer_id` ASC),
     ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
     ADD INDEX `stage_id` (`stage_id` ASC);
 
@@ -2020,3 +2020,11 @@ INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `cont
 INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
 VALUES
 (3, 1, 'Object Attribute', NOW());
+
+ALTER TABLE `ac_products`
+CHANGE COLUMN `manudacturer_id` `manufacturer_id` INT(11) NULL DEFAULT NULL,
+  ADD CONSTRAINT `ac_products_ibfk_1`
+  FOREIGN KEY (`manufacturer_id`)
+  REFERENCES `ac_manufacturers` (`manufacturer_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;

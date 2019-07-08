@@ -133,6 +133,7 @@ class Product extends BaseModel
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
+        'settings'          => 'serialized'
     ];
 
     /**
@@ -148,6 +149,7 @@ class Product extends BaseModel
      * @var array
      */
     protected $fillable = [
+        'product_id',
         'model',
         'sku',
         'location',
@@ -183,20 +185,372 @@ class Product extends BaseModel
     ];
 
     protected $rules = [
-        'product_id'        => 'integer',
-        'model'             => 'string|max:64',
-        //NOTE
-        //if need sku as mandatory use "present" instead "required"
-        'sku'               => 'string|max:64|nullable',
-        'location'          => 'string|max:128',
-        'quantity'          => 'integer',
-        'stock_checkout'    => 'max:1|nullable',
-        'stock_status_id'   => 'integer',
-        'manufacturer_id'   => 'integer',
-        'shipping'          => 'integer|max:1|min:0',
-        'ship_individually' => 'integer|max:1|min:0',
-        'free_shipping'     => 'integer|max:1|min:0',
-        'shipping_price'    => 'numeric',
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer!'],
+            ],
+        ],
+
+        'uuid' => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => ':attribute must be a string less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'model' => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_model',
+                    'language_block' => 'catalog/product',
+                    'default_text'   => 'Product Model must be less than 64 characters!',
+                    'section'        => 'admin',
+                ],
+            ],
+        ],
+        'sku' => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'SKU must be less than 64 characters!',
+                ],
+            ],
+        ],
+        'location' => [
+            'checks'   => [
+                'string',
+                'max:128'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Location must be less than 128 characters!',
+                ],
+            ],
+        ],
+        'quantity' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Quantity must be an integer!',
+                ],
+            ],
+        ],
+        'stock_checkout' => [
+            'checks'   => [
+                'string',
+                'size:1',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Stock checkout must have 1 character length!',
+                ],
+            ],
+        ],
+
+        'stock_status_id' => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Pre-Order Stock Status must be an integer!',
+                ],
+            ],
+        ],
+
+        'manufacturer_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:manufacturers',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Manufacturer ID must be an integer and present in database!',
+                ],
+            ],
+        ],
+
+        'shipping' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Require Shipping must be a boolean!',
+                ],
+            ],
+        ],
+
+        'ship_individually' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Shipping Individually must be a boolean!',
+                ],
+            ],
+        ],
+
+        'free_shipping' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Free Shipping must be a boolean!',
+                ],
+            ],
+        ],
+
+        'shipping_price' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+
+        'price' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+
+        'tax_class_id' => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+
+        'date_available' => [
+            'checks'   => [
+                'date'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a date!',
+                ],
+            ],
+        ],
+
+        'weight' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+        'weight_class_id' => [
+            'checks'   => [
+                'integer',
+                'exists:weight_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer and presents in the table weight_classes!',
+                ],
+            ],
+        ],
+
+        'length' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+        'width' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+        'height' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+
+        'length_class_id' => [
+            'checks'   => [
+                'integer',
+                'exists:length_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer and presents in the table length_classes!',
+                ],
+            ],
+        ],
+
+        'status' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a boolean!',
+                ],
+            ],
+        ],
+
+        'viewed' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'sort_order' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+
+        'subtract' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a boolean!',
+                ],
+            ],
+        ],
+
+        'minimum' => [
+            'checks'   => [
+                'integer',
+                'min:1',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Minimal quantity must be an integer and greater than zero!',
+                ],
+            ],
+        ],
+        'maximum' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Maximal quantity must be an integer!',
+                ],
+            ],
+        ],
+
+        'cost' => [
+            'checks'   => [
+                'numeric'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a numeric!',
+                ],
+            ],
+        ],
+
+        'call_to_order' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a boolean!',
+                ],
+            ],
+        ],
+
+        'product_type_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Type must be an integer!',
+                ],
+            ],
+        ],
+
+        'settings' => [
+            'checks'   => [
+                'string',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Settings must be a string!',
+                ],
+            ],
+        ],
+
+
     ];
 
     protected $fields = [
@@ -624,6 +978,14 @@ class Product extends BaseModel
     public static $auditExcludes = ['sku'];
 
     /**
+     * @param $value
+     */
+    public function SetManufacturerIdAttribute($value){
+        $value = (int)$value > 0 ? (int)$value : null;
+        $this->attributes['manufacturer_id'] = $value;
+    }
+
+    /**
      * @param array $options
      *
      * @return bool|void
@@ -727,7 +1089,11 @@ class Product extends BaseModel
     public function tagLanguaged()
     {
         return $this->hasMany(ProductTag::class, 'product_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+            ->where(
+                'language_id',
+                '=',
+                $this->registry->get('language')->getContentLanguageID()
+            );
     }
 
     /**
@@ -916,7 +1282,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

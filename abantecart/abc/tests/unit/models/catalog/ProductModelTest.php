@@ -16,14 +16,83 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\admin;
+namespace abc\tests\unit\models\catalog;
 
 use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Warning;
 
 class ProductModelTest extends ATestCase
 {
+    public function testValidator()
+    {
+        //validate new customer
+        $product = new Product(
+            [
+                'product_id'          => -0.1,
+                'uuid'                => -0.00000000021,
+                'model'               => -0.00000000021,
+                'sku'                 => -1,
+                'location'            => -1,
+                'quantity'            => 'fail',
+                'stock_checkout'      => 'fail',
+                'stock_status_id'     => 'fail',
+                'manufacturer_id'     => 9999,
+                'shipping'            => 'fail',
+                'ship_individually'   => 'fail',
+                'free_shipping'       => 'fail',
+                'shipping_price'      => 'fail',
+                'price'               => 'fail',
+                'tax_class_id'        => 'fail',
+                'date_available'      => NULL,
+                'weight'              => 'fail',
+                'weight_class_id'     => 99999,
+                'length'              => 'fail',
+                'width'               => 'fail',
+                'height'              => 'fail',
+                'length_class_id'     => 'fail',
+                'status'              => 'fail',
+                'viewed'              => 'fail',
+                'sort_order'          => 'fail',
+                'call_to_order'       => -0.00000000021,
+                'cost'                => 'fail',
+                'subtract'            => 'fail',
+                'minimum'             => 'fail',
+                'maximum'             => 'fail',
+                'product_type_id'     => 'fail',
+                'settings'            => -0.00000000021,
+            ]
+        );
+        $errors = [];
+        try{
+            $product->validate();
+        }catch(ValidationException $e){
+            $errors = $product->errors()['validation'];
+        }
+
+        $this->assertEquals(32, count($errors));
+
+
+        //validate new customer
+        $product = new Product(
+            [
+            ]
+        );
+        $errors = [];
+        try{
+            $product->validate();
+        }catch(ValidationException $e){
+            $errors = $product->errors()['validation'];
+        }
+
+        $this->assertEquals(0, count($errors));
+
+    }
+
+
+
+
     /**
      * @return int
      */
@@ -78,6 +147,7 @@ class ProductModelTest extends ATestCase
             'weight'              => '75.00',
             'weight_class_id'     => '2',
         ];
+        $productId = null;
         try {
             $productId = Product::createProduct($arProduct);
         } catch (\PDOException $e) {
