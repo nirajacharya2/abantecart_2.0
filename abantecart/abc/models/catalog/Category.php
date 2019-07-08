@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\core\ABC;
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
@@ -833,5 +834,44 @@ class Category extends BaseModel
 
         }
         return $images;
+    }
+
+    /**
+     * @param $name
+     * @param null $parent_id
+     *
+     * @return array
+     */
+    public static function getCategoryByName($name, $parent_id = null)
+    {
+        $db = Registry::db();
+        $parent_id = (int)$parent_id;
+
+        $name = $db->escape(
+                        mb_strtolower(
+                            html_entity_decode( $name, ENT_QUOTES, ABC::env('APP_CHARSET'))
+                        )
+        );
+
+        $query = Category::select(['category_descriptions.*', 'categories.*'])
+            ->join('category_descriptions',
+                    'category_descriptions.category_id',
+                    '=',
+                    'categories.category_id')
+            ->whereRaw("LOWER(".$db->table_name("category_descriptions").".name) = '".$name."'");
+
+        if($parent_id){
+            $query->where('parent_id', '=', $parent_id);
+        }else{
+            $query->whereNull('parent_id');
+        }
+
+        $result = $query->first();
+
+        if(!$result){
+            return [];
+        }else{
+            return $result->toArray();
+        }
     }
 }
