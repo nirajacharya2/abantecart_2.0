@@ -162,7 +162,7 @@
 								>
 									{{item.auditable_type}}
 									<span v-if="item.auditable_id" > ({{item.auditable_id}}) </span>
-									= {{item.attribute_name}}
+									= {{item.field_name}}
 								</v-chip>
 							</v-flex>
 						</v-layout>
@@ -329,7 +329,7 @@
 			expand_items: [],
 			expand_headers: [
 				{ text: 'Model', value: 'auditable_model', sortable: false, },
-				{ text: 'Attribute', value: 'attribute_name', sortable: false, },
+				{ text: 'Field', value: 'field_name', sortable: false, },
 				{ text: 'Old Value', value: 'old_value', sortable: false, },
 				{ text: 'New Value', value: 'new_value', sortable: false, },
 			],
@@ -444,7 +444,7 @@
 			addFilter: function () {
 				var filterItem = {
 					'auditable_type': this.selected_data_object,
-					'attribute_name': this.selected_fields,
+					'field_name': this.selected_fields,
 					'auditable_id': this.data_object_id,
 				};
 				this.arFilter.push(filterItem);
@@ -532,10 +532,7 @@
 				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
 				props.expanded = true;
 				var filter = {
-					'main_auditable_model': props.item.main_auditable_model,
-					'date_added': props.item.date_added,
-					'main_auditable_id': props.item.main_auditable_id,
-					'event': props.item.event,
+					'audit_event_id': props.item.id,
 				};
 				var param = {
 					filter: filter,

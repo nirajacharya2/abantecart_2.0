@@ -26,6 +26,7 @@ use abc\core\engine\AForm;
 use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\lib\AEncryption;
+use H;
 
 /**
  * Class ControllerPagesAccountInvoice
@@ -49,7 +50,6 @@ class ControllerPagesAccountInvoice extends AController
         $order_info = [];
         $order_token = '';
 
-        $this->loadModel('account/customer');
         $this->loadModel('account/order');
 
         $guest = false;
@@ -58,7 +58,7 @@ class ControllerPagesAccountInvoice extends AController
             //try to decrypt order token
             $order_token = $this->request->get['ot'];
             if ($order_token) {
-                list($order_id, $email) = $this->model_account_customer->parseOrderToken($order_token);
+                list($order_id, $email) = H::parseOrderToken($order_token);
                 if ($order_id && $email) {
                     $guest = true;
                     $order_info = $this->model_account_order->getOrder($order_id, '', 'view');

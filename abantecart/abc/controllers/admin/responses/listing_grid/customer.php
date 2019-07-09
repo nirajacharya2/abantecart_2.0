@@ -27,7 +27,9 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
-use abc\models\user\User;
+use abc\models\customer\Address;
+use abc\models\customer\Customer;
+use abc\modules\events\ABaseEvent;
 use H;
 use stdClass;
 
@@ -43,7 +45,6 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer');
         $this->load->library('json');
 
         $approved = [
@@ -85,7 +86,7 @@ class ControllerResponsesListingGridCustomer extends AController
             }
         }
 
-        $total = $this->model_sale_customer->getTotalCustomers($data);
+        $total = Customer::getCustomers($data, 'total_only');
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -104,12 +105,15 @@ class ControllerResponsesListingGridCustomer extends AController
         $orders_count = 0;
 
         if ($sidx == 'orders_count') {
-            $mode = '';
+            $mode = 'default';
         } else {
             $mode = 'quick';
         }
 
-        $results = $this->model_sale_customer->getCustomers($data, $mode);
+        $results = Customer::getCustomers($data, $mode);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+
         if ($mode) {
             //get orders count for customers list by separate request to prevent slow sql issue
             $customers_ids = [];
@@ -170,7 +174,6 @@ class ControllerResponsesListingGridCustomer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('sale/customer');
         $this->loadLanguage('sale/customer');
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
@@ -185,19 +188,22 @@ class ControllerResponsesListingGridCustomer extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    foreach ($ids as $id) {
-                        $this->model_sale_customer->deleteCustomer($id);
-                    }
+                        Customer::destroy($ids);
                 }
                 break;
             case 'save':
+
                 $ids = explode(',', $this->request->post['id']);
+                $ids = array_unique($ids);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
                         $err = $this->validateForm('status', $this->request->post['status'][$id], $id);
-                        if (!$err) {
-                            $this->model_sale_customer->editCustomerField($id, 'status',
-                                $this->request->post['status'][$id]);
+                        /**
+                         * @var Customer $customer
+                         */
+                        $customer = Customer::find($id);
+                        if ($customer && !$err) {
+                            $customer->update(['status' => $this->request->post['status'][$id]]);
                         } else {
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406',
@@ -210,12 +216,13 @@ class ControllerResponsesListingGridCustomer extends AController
                         $err = $this->validateForm('approved', $do_approve, $id);
                         if (!$err) {
                             //if customer is not subscriber - send email
-                            if ($do_approve && !$this->model_sale_customer->isSubscriber($id)) {
+
+                            if ($do_approve && !$customer->isSubscriber()) {
                                 //send email when customer was not approved
-                                $this->model_sale_customer->sendApproveMail($id);
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                             }
                             //do not change order of calls here!!!
-                            $this->model_sale_customer->editCustomerField($id, 'approved', $do_approve);
+                            $customer->update(['approved'=> $do_approve]);
                         } else {
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406',
@@ -250,7 +257,6 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer');
 
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
@@ -274,7 +280,7 @@ class ControllerResponsesListingGridCustomer extends AController
                             'reset_value' => true,
                         ]);
                 }
-                if ($post_data['password'] != $post_data['password_confirm']) {
+                if ($post_data['password'] != $post_data['password_confirmation']) {
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
                         [
                             'error_text'  => $this->language->get('error_confirm'),
@@ -282,24 +288,39 @@ class ControllerResponsesListingGridCustomer extends AController
                         ]);
                 }
                 //passwords do match, save
-                $this->model_sale_customer->editCustomerField($customer_id, 'password', $post_data['password']);
+                $customer = Customer::find($customer_id);
+                if($customer){
+                    $customer->update(
+                        [
+                            'password' => $post_data['password'],
+                            'password_confirmation' => $post_data['password_confirmation']
+                        ]
+                    );
+                }
+
             } else {
                 foreach ($post_data as $field => $value) {
                     $err = $this->validateForm($field, $value, $customer_id);
                     if (!$err) {
+                        /**
+                         * @var Customer $customer
+                         */
+                        $customer = Customer::find($customer_id);
                         if ($field == 'approved') {
                             //send email when customer was not approved
-                            if ($value && !$this->model_sale_customer->isSubscriber($customer_id)) {
-                                $this->model_sale_customer->sendApproveMail($customer_id);
+                            if ($value && !$customer->isSubscriber()) {
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                             }
                         }
                         if ($field == 'default' && $address_id) {
-                            $this->model_sale_customer->setDefaultAddress($customer_id, $address_id);
+                            //set default address
+                            $customer->update([ 'address_id' => $address_id ]);
                         } else {
                             if (H::has_value($address_id)) {
-                                $this->model_sale_customer->editAddressField($address_id, $field, $value);
+                                $address = Address::find($address_id);
+                                $address->update([ $field => $value ]);
                             } else {
-                                $this->model_sale_customer->editCustomerField($customer_id, $field, $value);
+                                $customer->update([$field => $value]);
                             }
                         }
                     } else {
@@ -322,13 +343,17 @@ class ControllerResponsesListingGridCustomer extends AController
             foreach ($value as $k => $v) {
                 $err = $this->validateForm($field, $v);
                 if (!$err) {
+                    /**
+                     * @var Customer $customer
+                     */
+                    $customer = Customer::find($k);
                     if ($field == 'approved') {
-                        if ($v && !$this->model_sale_customer->isSubscriber($k)) {
+                        if ($v && !$customer->isSubscriber()) {
                             //send email when customer was not approved
-                            $this->model_sale_customer->sendApproveMail($k);
+                            H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
                         }
                     }
-                    $this->model_sale_customer->editCustomerField($k, $field, $v);
+                    $customer->update([$field => $v]);
                 } else {
                     $error = new AError('');
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
@@ -346,6 +371,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
     protected function validateForm($field, $value, $customer_id = '')
     {
+        $this->error = '';
         switch ($field) {
             case 'loginname' :
                 $login_name_pattern = '/^[\w._-]+$/i';
@@ -355,7 +381,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     $this->error = $this->language->get('error_loginname');
                     //check uniqueness of loginname
                 } else {
-                    if (!$this->model_sale_customer->is_unique_loginname($value, $customer_id)) {
+                    if (!Customer::isUniqueLoginname($value, $customer_id)) {
                         $this->error = $this->language->get('error_loginname_notunique');
                     }
                 }
@@ -380,8 +406,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     $this->error = $this->language->get('error_email');
                 }//check unique email
                 else {
-                    $exists = $this->model_sale_customer->getCustomersByEmails([$value]);
-
+                    $exists = Customer::getCustomers(['filter' => ['email'=> $value ]]);
                     if ($exists){
                         foreach($exists as $details) {
                             if ($details['customer_id'] != $customer_id) {
@@ -429,7 +454,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $customers_data = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('sale/customer');
+
         if (isset($this->request->post['term'])) {
             $filter = [
                 'limit'               => 20,
@@ -441,7 +466,16 @@ class ControllerResponsesListingGridCustomer extends AController
                     'exclude'        => (array)$this->request->post['exclude'],
                 ],
             ];
-            $customers = $this->model_sale_customer->getCustomers($filter);
+            if (H::has_value($this->session->data['current_store_id'])) {
+                $filter['store_id'] = (int)$this->session->data['current_store_id'];
+            }else {
+                $this->load->model('setting/store');
+            }
+            if (!$filter['store_id'] && !$this->model_setting_store->isDefaultStore()) {
+                $filter['store_id'] = $this->config->get('config_store_id');
+            }
+
+            $customers = Customer::getCustomers($filter);
             foreach ($customers as $cdata) {
                 $customers_data[] = [
                     'id'   => $cdata['customer_id'],
@@ -478,8 +512,7 @@ class ControllerResponsesListingGridCustomer extends AController
         }
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('sale/customer');
-        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id);
 
         $error_text  = $this->validateBeforePasswordReset($customer_info);
         if($error_text){
@@ -493,7 +526,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
         $code = H::genToken(32);
         //save password reset code
-        $this->loadModel('account/customer','storefront')->updateOtherData($customer_id, ['password_reset' => $code]);
+        Customer::find($customer_id)->update(['data' => ['password_reset' => $code] ]);
         //build reset link
         $enc = new AEncryption($this->config->get('encryption_key'));
         $rtoken = $enc->encrypt($customer_id.'::'.$code);
@@ -514,9 +547,11 @@ class ControllerResponsesListingGridCustomer extends AController
         $mail->setSender($this->config->get('store_name'));
         $mail->setSubject($subject);
         $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-        $arUser = H::recognizeUser();
-        $user = User::find($arUser['user_id']);
-        $mail->setUser($user);
+        //$arUser = H::recognizeUser();
+        //$user = User::find($arUser['user_id']);
+        if ($this->user) {
+            $mail->setUser($this->user);
+        }
         $result = $mail->send();
         if(!$result) {
             $error = new AError('');

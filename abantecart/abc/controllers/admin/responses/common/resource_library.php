@@ -29,6 +29,8 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ResourceUploadHandler;
+use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 
 if (!ini_get('safe_mode')) {
     set_time_limit(0);
@@ -1376,7 +1378,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     private function _getCategoriesTitle($object_id)
     {
         $this->loadModel('catalog/category');
-        $description = $this->model_catalog_category->getCategoryDescriptions($object_id);
+        $description = (new Category())->getCategoryDescriptions($object_id);
         return $description[$this->config->get('storefront_language_id')]['name'];
     }
 
@@ -1403,7 +1405,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     private function _getManufacturersTitle($object_id)
     {
         $this->loadModel('catalog/manufacturer');
-        $description = $this->model_catalog_manufacturer->getManufacturer($object_id);
+        $description = (new Manufacturer())->getManufacturer($object_id);
         return $description['name'];
     }
 

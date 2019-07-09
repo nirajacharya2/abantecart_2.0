@@ -2,6 +2,7 @@
 
 namespace abc\models\catalog;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -12,6 +13,7 @@ use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
+use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
@@ -71,7 +73,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
+    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
@@ -176,6 +178,8 @@ class Product extends BaseModel
         'call_to_order',
         'settings',
         'product_type_id',
+        'uuid',
+        'date_deleted'
     ];
 
     protected $rules = [
@@ -290,7 +294,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_stores'    => [
+        'product_store'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -720,6 +724,15 @@ class Product extends BaseModel
     /**
      * @return mixed
      */
+    public function tagLanguaged()
+    {
+        return $this->hasMany(ProductTag::class, 'product_id')
+            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+    }
+
+    /**
+     * @return mixed
+     */
     public function featured()
     {
         return $this->hasOne(ProductsFeatured::class, 'product_id');
@@ -796,8 +809,7 @@ class Product extends BaseModel
 
     public function getProductCategories()
     {
-        $categoryInst = new Category();
-        $categories = $categoryInst->getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $categories = (new Category())->getCategories(0, $this->registry->get('session')->data['current_store_id']);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[
@@ -811,7 +823,7 @@ class Product extends BaseModel
     public function getProductStores()
     {
         $stores = Store::active()->select(['store_id as id', 'name'])->get();
-        $result = [];
+        $result[] = (object)['id' => 0, 'name' => 'Default'];
         foreach ($stores as $store) {
             $result[] = (object)['id' => $store->id, 'name' => $store->name];
         }
@@ -845,19 +857,19 @@ class Product extends BaseModel
     public function getStockCheckouts()
     {
         $language = $this->registry->get('language');
-        $result= [
+        $result = [
             (object)[
-            'id' => '',
-            'name' => $language->get('text_default')
-        ],
+                'id'   => '',
+                'name' => $language->get('text_default'),
+            ],
             (object)[
-            'id' => 0,
-            'name' => $language->get('text_no')
-        ],
+                'id'   => 0,
+                'name' => $language->get('text_no'),
+            ],
             (object)[
-            'id' => 1,
-            'name' => $language->get('text_yes')
-        ]
+                'id'   => 1,
+                'name' => $language->get('text_yes'),
+            ],
         ];
         return $result;
     }
@@ -871,14 +883,14 @@ class Product extends BaseModel
     {
         $language_id = $language_id ?? $this->registry->get('language')->getContentLanguageID();
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-                            ->select(['stock_status_id as id', 'name'])
-                            ->get();
+            ->select(['stock_status_id as id', 'name'])
+            ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
             $result[] = (object)[
-                            'id' => $stock_status->id,
-                            'name' => $stock_status->name
-                        ];
+                'id'   => $stock_status->id,
+                'name' => $stock_status->name,
+            ];
         }
         return $result;
     }
@@ -1143,8 +1155,11 @@ class Product extends BaseModel
                 }
                 if ($option_value['images']) {
 
-                    $title = current($optionValueDescData['name']);
-                    $language_id = current($optionValueDescData['language_id']);
+                    $title = $optionValueDescData['name'];
+                    $title = is_array($title) ? current($title) : (string)$title;
+
+                    $language_id = $optionValueDescData['language_id'];
+                    $language_id = is_array($language_id) ? current($language_id) : (string)$language_id;
 
                     $result = $resource_mdl->updateImageResourcesByUrls(
                         $option_value,
@@ -1227,6 +1242,9 @@ class Product extends BaseModel
      */
     public static function createProduct(array $product_data)
     {
+        if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
+            $product_data['product_store'] = [0 => 0];
+        }
         $product = new Product($product_data);
         $product->save();
         $productId = $product->product_id;
@@ -1234,9 +1252,7 @@ class Product extends BaseModel
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
 
-            if ($product_data['keyword']) {
-                UrlAlias::setProductKeyword($product_data['keyword'], $productId);
-            }
+            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
 
             self::updateProductLinks($productId, $product_data);
             return $productId;
@@ -1247,6 +1263,8 @@ class Product extends BaseModel
      * @param int   $product_id
      * @param array $product_data
      * @param int   $language_id
+     *
+     * @return bool
      */
     public static function updateProduct(int $product_id, array $product_data, int $language_id)
     {
@@ -1254,13 +1272,19 @@ class Product extends BaseModel
          * @var Product $product
          */
         $product = Product::find($product_id);
+        if (!$product) {
+            return false;
+        }
         $product->update($product_data);
-        if($product_data['product_description']) {
+        if ($product_data['product_description']) {
+            if (!isset($product_data['product_description']['language_id'])) {
+                $product_data['product_description']['language_id'] = $language_id;
+            }
             $product->descriptions()->update($product_data['product_description']);
         }
 
-        if ($product_data['keyword']) {
-            UrlAlias::setProductKeyword($product_data['keyword'], $product_id);
+        if ($product_data['keyword'] || $product_data['product_description']['name']) {
+            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $product_id);
         }
 
         $attributes = array_filter($product_data, function ($k) {
@@ -1271,6 +1295,7 @@ class Product extends BaseModel
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
         self::updateProductLinks($product_id, $product_data);
+        return true;
     }
 
     /**
@@ -1329,6 +1354,25 @@ class Product extends BaseModel
         if (isset($product_data['product_related'])) {
             $product->related()->sync($product_data['product_related']);
         }
+        if (isset($product_data['product_tags'])) {
+            $tags = explode(',', $product_data['product_tags']);
+            if (is_array($tags)) {
+                $registry = Registry::getInstance();
+                $languageId = $registry->get('language')->getContentLanguageID();
+                $productTags = [];
+                foreach ($tags as $tag) {
+                    $productTag = ProductTag::firstOrCreate([
+                        'tag'         => trim($tag),
+                        'product_id'  => $product->product_id,
+                        'language_id' => $languageId,
+                    ]);
+                    $productTags[] = $productTag->id;
+                }
+                ProductTag::where('product_id', '=', $product->product_id)
+                    ->whereNotIn('id', $productTags)
+                    ->forceDelete();
+            }
+        }
     }
 
     /**
@@ -1363,6 +1407,61 @@ class Product extends BaseModel
             $result[$setting['key']] = $setting['value'];
         }
         return $result;
+    }
+
+    public function getCatalogOnlyProducts(int $limit = null)
+    {
+        $arSelect = [$this->db->raw('SQL_CALC_FOUND_ROWS *'), 'pd.name as name'];
+
+        //special prices
+        if (is_object($this->registry->get('customer')) && $this->registry->get('customer')->isLogged()) {
+            $customer_group_id = (int)$this->registry->get('customer')->getCustomerGroupId();
+        } else {
+            $customer_group_id = (int)$this->config->get('config_customer_group_id');
+        }
+
+        $sql
+            = " ( SELECT p2sp.price
+                    FROM ".$this->db->table_name("product_specials")." p2sp
+                    WHERE p2sp.product_id = ".$this->db->table_name("products").".product_id
+                            AND p2sp.customer_group_id = '".$customer_group_id."'
+                            AND ((p2sp.date_start = '0000-00-00' OR p2sp.date_start < NOW())
+                            AND (p2sp.date_end = '0000-00-00' OR p2sp.date_end > NOW()))
+                    ORDER BY p2sp.priority ASC, p2sp.price ASC 
+                    LIMIT 1
+                 ) ";
+        $arSelect[] = $this->db->raw("COALESCE( ".$sql.", ".$this->db->table_name("products").".price) as final_price");
+
+        $languageId = (int)$this->config->get('storefront_language_id');
+
+        $products_info = Product::select($arSelect)
+            ->where('products.catalog_only', '=', 1)
+            ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
+                $join->on('products.product_id', '=', 'pd.product_id')
+                    ->where('pd.language_id', '=', $languageId);
+            })
+            ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
+            ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
+            ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
+                $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
+                    ->where('ss.language_id', '=', $languageId);
+            })
+            ->active('products');
+
+        if ($limit) {
+            $products_info = $products_info->limit($limit);
+        }
+
+        $products_info = $products_info->get();
+
+        if (!$products_info) {
+            return false;
+        }
+
+        return [
+            'products_info'  => $products_info->toArray(),
+            'total_num_rows' => $this->db->sql_get_row_count(),
+        ];
     }
 
 }

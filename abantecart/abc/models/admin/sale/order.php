@@ -791,9 +791,6 @@ class ModelSaleOrder extends Model
                 $mail->setSender($order_query->row['store_name']);
                 $mail->setSubject($subject);
                 $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-                $arUser =  H::recognizeUser();
-                $user = User::find($arUser['user_id']);
-                $mail->setUser($user);
                 $mail->send();
 
                 //send IMs except emails.

@@ -21,11 +21,11 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\view\AView;
 use abc\core\lib\{
     AConfig, AWarning
 };
+use H;
 
 /**
  * @property array $data
@@ -48,8 +48,6 @@ use abc\core\lib\{
  * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
  * @property \abc\models\admin\ModelUserUser $model_user_user
  * @property \abc\models\admin\ModelSaleOrder $model_sale_order
- * @property \abc\models\admin\ModelSaleCustomer $model_sale_customer
- * @property \abc\models\admin\ModelSaleCustomerTransaction $model_sale_customer_transaction
  * @property \abc\models\admin\ModelLocalisationCountry | \abc\models\storefront\ModelLocalisationCountry $model_localisation_country
  * @property \abc\models\admin\ModelLocalisationZone $model_localisation_zone
  * @property \abc\models\admin\ModelLocalisationLocation $model_localisation_location
@@ -72,10 +70,8 @@ use abc\core\lib\{
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
  * @property \abc\models\storefront\ModelAccountOrder $model_account_order
- * @property \abc\models\storefront\ModelAccountAddress $model_account_address
  * @property \abc\models\storefront\ModelCheckoutOrder $model_checkout_order
  * @property \abc\models\admin\ModelToolBackup $model_tools_backup
- * @property \abc\models\storefront\ModelAccountCustomer $model_account_customer
  * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
  * @property \abc\core\lib\AConfig $config
@@ -219,7 +215,7 @@ abstract class AController
         if (is_array($allowed_params) && $allowed_params) {
             sort($allowed_params);
             foreach ($allowed_params as $key) {
-                if (AHelperUtils::has_value($values[$key])) {
+                if (H::has_value($values[$key])) {
                     $cache_params[$key] = $values[$key];
                 }
             }

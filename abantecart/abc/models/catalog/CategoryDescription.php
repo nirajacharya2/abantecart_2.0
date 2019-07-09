@@ -42,10 +42,12 @@ class CategoryDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'language_id',
         'name',
         'meta_keywords',
         'meta_description',
         'description',
+        'date_deleted'
     ];
 
     public function category()

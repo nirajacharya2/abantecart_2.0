@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2019 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,21 +21,19 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\customer\Address;
+use abc\models\locale\Zone;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ControllerApiCheckoutAddress
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelAccountAddress $model_account_address
- */
+  */
 class ControllerApiCheckoutAddress extends AControllerAPI
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function post()
     {
@@ -44,46 +42,63 @@ class ControllerApiCheckoutAddress extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401, array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->sendResponse(401, ['error' => 'Not logged in or Login attempt failed!']);
             return null;
         }
 
         if (!$this->cart->hasProducts()) {
             //No products in the cart.
-            $this->rest->sendResponse(200, array('status' => 2, 'error' => 'Nothing in the cart!'));
+            $this->rest->sendResponse(200, ['status' => 2, 'error' => 'Nothing in the cart!']);
             return null;
         }
 
         if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
             //No stock for products in the cart if tracked.
-            $this->rest->sendResponse(200, array('status' => 3, 'error' => 'No stock for product!'));
+            $this->rest->sendResponse(200, ['status' => 3, 'error' => 'No stock for product!']);
             return null;
         }
 
         //load language from main section
         $this->loadLanguage('checkout/address');
-        $this->loadModel('account/address');
 
         if ($request['action'] == 'remove') {
             if (isset($request['address_id'])) {
-                if ($this->model_account_address->getTotalAddresses() == 1) {
+                if (
+                    Address::where('customer_id', '=', $this->customer->getId())->get()->count() == 1
+                ) {
                     $this->error['warning'] = $this->language->get('error_delete');
                 }
                 if ($this->customer->getAddressId() == $this->request->get['address_id']) {
                     $this->error['warning'] = $this->language->get('error_default');
                 }
                 if (!$this->error) {
-                    $this->model_account_address->deleteAddress($request['address_id']);
-                    $this->rest->sendResponse(200, array('status' => 1, 'error' => 'address removed'));
-                    return null;
+                    $address = Address::find($request['address_id']);
+                    if($address && $address->customer_id == $this->customer->getId()){
+                        $address->forceDelete();
+                        $this->rest->sendResponse(
+                            200,
+                            [
+                                'status' => 1,
+                                'error' => 'address removed'
+                            ]
+                        );
+                        return null;
+                    }else{
+                        $this->error['warning'] = $this->language->get('error_delete');
+                    }
                 } else {
-                    $this->rest->sendResponse(200,
-                        array('status' => 0, 'error' => 'deletion of default address not allowed'));
+                    $this->rest->sendResponse(
+                        200,
+                        [
+                            'status' => 0,
+                            'error' => 'deletion of default address not allowed'
+                        ]
+                    );
                     return null;
                 }
             } else {
                 if (!isset($request['address_id'])) {
-                    $this->rest->sendResponse(200, array('status' => 0, 'error' => 'address id missing '));
+                    $this->rest->sendResponse(200, ['status' => 0, 'error' => 'address id missing ']);
                     return null;
                 }
             }
@@ -91,38 +106,37 @@ class ControllerApiCheckoutAddress extends AControllerAPI
 
         if ($request['mode'] == 'shipping') {
             if (!$this->cart->hasShipping()) {
-                $this->rest->sendResponse(200, array('status' => 0, 'shipping' => 'products do not require shipping'));
+                $this->rest->sendResponse(200, ['status' => 0, 'shipping' => 'products do not require shipping']);
                 return null;
             }
 
             if (isset($request['address_id'])) {
                 $this->session->data['shipping_address_id'] = $request['address_id'];
-                unset($this->session->data['shipping_methods']);
-                unset($this->session->data['shipping_method']);
+                unset($this->session->data['shipping_methods'],$this->session->data['shipping_method']);
 
                 if ($this->cart->hasShipping()) {
-                    $address_info = $this->model_account_address->getAddress($request['address_id']);
-                    if ($address_info) {
-                        $this->tax->setZone($address_info['country_id'], $address_info['zone_id']);
+                    $address = Address::find($request['address_id']);
+                    if ($address) {
+                        $this->tax->setZone($address->country_id, $address->zone_id);
                     }
                 }
 
-                $this->rest->sendResponse(200, array('status' => 1, 'shipping' => 'shipping address selected'));
+                $this->rest->sendResponse(200, ['status' => 1, 'shipping' => 'shipping address selected']);
                 return null;
             }
 
             if ($request['action'] == 'save') {
-                $this->error = $this->model_account_address->validateAddressData($request);
-                if (!$this->error) {
-                    $this->session->data['shipping_address_id'] = $this->model_account_address->addAddress($request);
-                    unset($this->session->data['shipping_methods']);
-                    unset($this->session->data['shipping_method']);
+
+                $address_id = $this->addAddress($request);
+                if($address_id){
+                    $this->session->data['shipping_address_id'] = $address_id;
+                    unset($this->session->data['shipping_methods'],$this->session->data['shipping_method']);
 
                     if ($this->cart->hasShipping()) {
                         $this->tax->setZone($request['country_id'], $request['zone_id']);
                     }
 
-                    $this->rest->sendResponse(200, array('status' => 1, 'shipping' => 'shipping address selected'));
+                    $this->rest->sendResponse(200, ['status' => 1, 'shipping' => 'shipping address selected']);
                     return null;
                 }
             }
@@ -136,19 +150,22 @@ class ControllerApiCheckoutAddress extends AControllerAPI
                     $this->session->data['payment_address_id'] = $request['address_id'];
                     unset($this->session->data['payment_methods']);
                     unset($this->session->data['payment_method']);
-                    $this->rest->sendResponse(200, array('status' => 1, 'payment' => 'payment address selected'));
+                    $this->rest->sendResponse(200, ['status' => 1, 'payment' => 'payment address selected']);
                     return null;
                 }
 
                 if ($request['action'] == 'save') {
-                    $this->error = $this->model_account_address->validateAddressData($this->request->post);
-                    if (!$this->error) {
-                        $this->session->data['payment_address_id'] = $this->model_account_address->addAddress(
-                            $this->request->post
-                        );
-                        unset($this->session->data['payment_methods']);
-                        unset($this->session->data['payment_method']);
-                        $this->rest->sendResponse(200, array('status' => 1, 'payment' => 'payment address selected'));
+
+                    $address_id = $this->addAddress($request);
+                    if($address_id){
+                        $this->session->data['payment_address_id'] = $address_id;
+                        unset($this->session->data['payment_methods'],$this->session->data['payment_method']);
+
+                        if ($this->cart->hasShipping()) {
+                            $this->tax->setZone($request['country_id'], $request['zone_id']);
+                        }
+
+                        $this->rest->sendResponse(200, ['status' => 1, 'payment' => 'payment address selected']);
                         return null;
                     }
                 }
@@ -168,7 +185,8 @@ class ControllerApiCheckoutAddress extends AControllerAPI
     {
 
         $addresses = [];
-        $results = $this->model_account_address->getAddresses();
+        $results = Address::getAddresses($this->customer->getId(), $this->language->getLanguageID())
+                          ->toArray();
 
         foreach ($results as $result) {
             $addresses[] = [
@@ -274,5 +292,36 @@ class ControllerApiCheckoutAddress extends AControllerAPI
             'value'    => $request_data['zone_id'],
             'error'    => $this->error['lastname'],
         ];
+    }
+
+    protected function addAddress($data)
+    {
+        $this->error = [];
+        //add customer_id into data
+        $data['customer_id'] = $this->customer->getId();
+        $address = new Address();
+        try{
+            $messages = [];
+            foreach(['firstname', 'lastname', 'address_1', 'city', 'postcode', 'country_id', 'zone_id'] as $fieldName) {
+                $messages[$fieldName] = $this->language->get('error_'.rtrim($fieldName, '_id'));
+            }
+            $address->validate($data, $messages);
+            //check if pair county-zone exists
+            $exists = Zone::where('country_id', '=', $data['country_id'])
+                            ->where('zone_id', '=', $data['zone_id'])
+                            ->get()->count();
+            if(!$exists){
+                $this->error['zone'] = $this->language->get('error_zone');
+            }
+        }catch(ValidationException $e){
+            $this->error = $address->errors()['validation'];
+            $this->error['warning'] = $this->language->get('gen_data_entry_error');
+        }
+
+        if (!$this->error) {
+            $address->fill($data)->save();
+            return $address->address_id;
+        }
+        return false;
     }
 }

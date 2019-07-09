@@ -82,6 +82,9 @@ form .help-block {
 .field_err {
 	font-style:italic;
 	font-size:12px;
+	color: darkred;
+	flex: 0 0 100%;
+	max-width: 100%;
 }
 
 .passwordset_element { 

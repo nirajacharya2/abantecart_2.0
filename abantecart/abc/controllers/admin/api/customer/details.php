@@ -20,11 +20,15 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
 use abc\core\helper\AHelperUtils;
+use abc\models\customer\Customer;
+use abc\models\customer\CustomerGroup;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
+/**
+ * Class ControllerApiCustomerDetails
+ *
+ * @package abc\controllers\admin
+ */
 class ControllerApiCustomerDetails extends AControllerAPI
 {
     public function get()
@@ -32,32 +36,28 @@ class ControllerApiCustomerDetails extends AControllerAPI
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('sale/customer');
-        $this->loadModel('sale/customer_group');
-
         $request = $this->rest->getRequestParams();
 
-        if (!AHelperUtils::has_value($request['customer_id'])) {
-            $this->rest->setResponseData(array('Error' => 'Customer ID is missing'));
+        if (!H::has_value($request['customer_id'])) {
+            $this->rest->setResponseData(['Error' => 'Customer ID is missing']);
             $this->rest->sendResponse(200);
             return null;
         }
 
-        $customer_details = $this->model_sale_customer->getCustomer($request['customer_id']);
-        if (!count($customer_details)) {
-            $this->rest->setResponseData(array('Error' => 'Incorrect Customer ID or missing customer data'));
+        $customer_details = Customer::with('addresses')
+                                    ->where('customer_id', '=', $request['customer_id'])
+                                    ->get()->toArray();
+
+
+        if (!$customer_details) {
+            $this->rest->setResponseData(['Error' => 'Incorrect Customer ID or missing customer data']);
             $this->rest->sendResponse(200);
             return null;
         }
 
         //clean up data before display
-        unset($customer_details['password']);
-        unset($customer_details['cart']);
-        $cst_grp = $this->model_sale_customer_group->getCustomerGroup($customer_details['customer_group_id']);
-        $customer_details['customer_group'] = $cst_grp['name'];
-
-        $customer_addresses = $this->model_sale_customer->getAddressesByCustomerId($request['customer_id']);
-        $customer_details['addresses'] = $customer_addresses;
+        unset($customer_details['password'],$customer_details['cart']);
+        $customer_details['customer_group'] = CustomerGroup::find($customer_details['customer_group_id'])->name;
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 

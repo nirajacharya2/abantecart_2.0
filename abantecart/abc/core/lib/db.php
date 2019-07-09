@@ -25,6 +25,15 @@ use abc\core\engine\Registry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
 
+/**
+ * Class ADB
+ *
+ * @package abc\core\lib
+ *
+ * @method beginTransaction() Capsule
+ * @method commit() Capsule
+ * @method rollback() Capsule
+ */
 class ADB
 {
     /**
@@ -85,7 +94,7 @@ class ADB
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
-                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
+                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='NO_ZERO_DATE,NO_ZERO_IN_DATE';"));
             }
 
         } catch (\PDOException $e) {
@@ -381,6 +390,12 @@ class ADB
     {
         return $this->orm->getConnection($this->conName)->getSchemaBuilder();
     }
+
+    public function connection()
+    {
+        return $this->orm->getConnection($this->conName);
+    }
+
 
     /**
      * @return mixed

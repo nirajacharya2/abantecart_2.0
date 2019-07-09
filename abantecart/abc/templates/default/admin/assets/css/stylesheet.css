@@ -24,6 +24,12 @@ body {
     font-family: unset !important;
 }
 
+#importWizardFrmFrm .input-group input {
+    background-color: #fff;
+    border-style: groove;
+    color: unset;
+}
+
 .abc_orange {
     color: #F19013;
 }
@@ -3210,7 +3216,7 @@ body.stickyheader .sticky_left {
 }
 
 #code_options .checkbox_element div.form-inline{
-    width: 100% !important;
+    /*width: 100% !important; */
 }
 
 #code_options .scrollbox .acheckbox input, #code_options .scrollbox div.acheckbox{
@@ -3444,9 +3450,6 @@ img.extension-summary-icon{
     white-space: nowrap;
 }
 
-.primary_content_actions .btn-group{
-    margin-bottom: 3px;
-}
 
 .chosen-container-multi .chosen-choices .search-choice .search-choice-close{
     background-image: none;
@@ -3480,9 +3483,20 @@ End Vuetify conflict fixes
     margin-top: 5px;
 }
 .btn-group.btn-group-toggle.btn_switch {
-    margin: 0 auto;
+    margin: 0 auto 0 0;
 }
 
 .ui-widget-content.ui-corner-all.form-control.input-sm {
     border: 1px solid #ddd;
+}
+
+.container {
+    padding: 0 10px;
+}
+
+
+a[data-confirmation="delete"].dropdown-toggle::after{
+    border:0 !important;
+    margin:0;
+    content: none;
 }

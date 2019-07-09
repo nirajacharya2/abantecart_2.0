@@ -25,6 +25,7 @@ use abc\core\engine\AForm;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\CheckOut;
+use abc\models\customer\Address;
 
 /**
  * Class ControllerPagesCheckoutPayment
@@ -35,8 +36,8 @@ use abc\core\lib\CheckOut;
  */
 class ControllerPagesCheckoutPayment extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -113,8 +114,6 @@ class ControllerPagesCheckoutPayment extends AController
             abc_redirect($this->html->getSecureURL($login_rt));
         }
 
-        $this->loadModel('account/address');
-
         if ($this->cart->hasShipping()) {
             if (!isset($this->session->data['shipping_address_id']) || !$this->session->data['shipping_address_id']) {
                 abc_redirect($this->html->getSecureURL($checkout_rt));
@@ -146,8 +145,16 @@ class ControllerPagesCheckoutPayment extends AController
         }
         $this->checkout->setPaymentAddress($this->session->data['payment_address_id']);
 
-        $this->loadModel('account/address');
-        $payment_address = $this->model_account_address->getAddress($this->session->data['payment_address_id']);
+        $payment_address = [];
+        $address = Address::getAddresses(
+                                        $this->customer->getId(),
+                                        $this->language->getLanguageID(),
+                                        $this->session->data['payment_address_id']
+        );
+        if($address){
+            $payment_address = $address->toArray();
+        }
+
         if (!$payment_address) {
             abc_redirect($this->html->getSecureURL($address_rt));
         }
@@ -171,10 +178,10 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         if ($this->cart->getTotalAmount() == 0 && $this->request->get['mode'] != 'edit') {
-            $this->session->data['payment_method'] = array(
+            $this->session->data['payment_method'] = [
                 'id'    => 'no_payment_required',
                 'title' => $this->language->get('no_payment_required'),
-            );
+            ];
 
             abc_redirect($this->html->getSecureURL($confirm_rt));
 
@@ -196,32 +203,32 @@ class ControllerPagesCheckoutPayment extends AController
         $this->document->resetBreadcrumbs();
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get('text_home'),
                 'separator' => false,
-            ));
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL($cart_rt),
                 'text'      => $this->language->get('text_basket'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL($checkout_rt),
                 'text'      => $this->language->get('entry_shipping'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL($payment_rt),
                 'text'      => $this->language->get('entry_payment'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         if (isset($this->session->data['error'])) {
             $this->view->assign('error_warning', $this->session->data['error']);
@@ -236,40 +243,42 @@ class ControllerPagesCheckoutPayment extends AController
         }
         $action = $this->html->getSecureURL($payment_rt, '&mode='.$this->request->get['mode'], true);
 
-        $this->data['change_address'] = HtmlElementFactory::create(array(
+        $this->data['change_address'] = HtmlElementFactory::create([
             'type'  => 'button',
             'name'  => 'change_address',
             'style' => 'button',
             'text'  => $this->language->get('button_change_address'),
-        ));
+        ]);
 
         $this->data['change_address_href'] = $this->html->getSecureURL($address_rt);
 
         if ($this->config->get('coupon_status')) {
             $this->view->assign('coupon_status', $this->config->get('coupon_status'));
-            $coupon_form = $this->dispatch('blocks/coupon_codes', array('action' => $action));
+            $coupon_form = $this->dispatch('blocks/coupon_codes', ['action' => $action]);
             $this->view->assign('coupon_form', $coupon_form->dispatchGetOutput());
             unset($coupon_form);
         }
 
-        $this->data['address'] =
-            $this->customer->getFormattedAddress($payment_address, $payment_address['address_format']);
+        $this->data['address'] = $this->customer->getFormattedAddress(
+            $payment_address,
+            $payment_address['address_format']
+        );
 
         $form = new AForm();
-        $form->setForm(array('form_name' => 'payment'));
+        $form->setForm(['form_name' => 'payment']);
         $this->data['form']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'payment',
                 'action' => $action,
                 'csrf'   => true,
-            )
+            ]
         );
 
         $this->data['payment_methods'] = $this->session->data['payment_methods'];
         $payment = isset($this->request->post['payment_method'])
-                    ? $this->request->post['payment_method']
-                    : $this->session->data['payment_method']['id'];
+            ? $this->request->post['payment_method']
+            : $this->session->data['payment_method']['id'];
 
         //balance handling
         $balance_def_currency = $this->customer->getBalance();
@@ -277,9 +286,9 @@ class ControllerPagesCheckoutPayment extends AController
         $this->data['balance_enough'] = $balance_def_currency >= $order_total ? true : false;
 
         $balance = $this->currency->convert(
-                                            $balance_def_currency,
-                                            $this->config->get('config_currency'),
-                                            $this->session->data['currency']
+            $balance_def_currency,
+            $this->config->get('config_currency'),
+            $this->session->data['currency']
         );
 
         if ($balance != 0
@@ -287,32 +296,32 @@ class ControllerPagesCheckoutPayment extends AController
             && (float)$this->session->data['used_balance'] != 0) {
             if ((float)$this->session->data['used_balance'] == 0 && $balance > 0) {
                 $this->data['apply_balance_button'] = $this->html->buildElement(
-                    array(
+                    [
                         'type'  => 'button',
                         'name'  => 'apply_balance',
                         'href'  => $this->html->getSecureURL($payment_rt, '&mode=edit&balance=apply', true),
                         'text'  => $this->language->get('button_pay_with_balance'),
                         'icon'  => 'fa fa-money',
                         'style' => 'btn-default',
-                    ));
+                    ]);
             } elseif ((float)$this->session->data['used_balance'] > 0) {
                 $this->data['apply_balance_button'] = $this->html->buildElement(
-                    array(
+                    [
                         'type'  => 'button',
                         'name'  => 'apply_balance',
                         'href'  => $this->html->getSecureURL($payment_rt, '&mode=edit&balance=disapply', true),
                         'text'  => $this->language->get('button_disapply_balance'),
                         'icon'  => 'fa fa-times',
                         'style' => 'btn btn-default',
-                    ));
+                    ]);
                 //if balance cover all order amount - build button for continue checkout
                 if ($this->session->data['used_balance_full']) {
                     $this->data['balance_continue_button'] = $this->html->buildElement(
-                        array(
+                        [
                             'type' => 'submit',
                             'name' => $this->language->get('button_continue'),
                             'icon' => 'fa fa-arrow-right',
-                        ));
+                        ]);
                 }
             }
 
@@ -322,7 +331,7 @@ class ControllerPagesCheckoutPayment extends AController
 
             if ((float)$this->session->data['used_balance'] > 0) {
                 $this->data['balance_remains'] = $this->currency->format(
-                                                $balance_def_currency - (float)$this->session->data['used_balance']
+                    $balance_def_currency - (float)$this->session->data['used_balance']
                 );
                 $this->data['balance_used'] = $this->currency->format((float)$this->session->data['used_balance']);
                 $this->data['text_applied_balance'] = $this->language->get('text_applied_balance');
@@ -347,26 +356,26 @@ class ControllerPagesCheckoutPayment extends AController
                 }
 
                 $this->data['payment_methods'][$k]['radio'] = $form->getFieldHtml(
-                    array(
+                    [
                         'type'    => 'radio',
                         'name'    => 'payment_method',
-                        'options' => array($v['id'] => ''),
+                        'options' => [$v['id'] => ''],
                         'value'   => $selected,
-                ));
+                    ]);
             }
         } else {
-            $this->data['payment_methods'] = array();
+            $this->data['payment_methods'] = [];
         }
 
         $this->data['comment'] =
             isset($this->request->post['comment']) ? $this->request->post['comment'] : $this->session->data['comment'];
         $this->data['form']['comment'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'textarea',
                 'name'  => 'comment',
                 'value' => $this->data['comment'],
                 'attr'  => ' rows="3" style="width: 99%" ',
-        ));
+            ]);
 
         if ($this->config->get('config_checkout_id')) {
             $this->loadModel('catalog/content');
@@ -374,9 +383,9 @@ class ControllerPagesCheckoutPayment extends AController
             if ($content_info) {
                 $this->data['text_agree'] = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
-                                                    'r/content/content/loadInfo',
-                                                    '&content_id='.$this->config->get('config_checkout_id'),
-                                                    true
+                    'r/content/content/loadInfo',
+                    '&content_id='.$this->config->get('config_checkout_id'),
+                    true
                 );
                 $this->data['text_agree_href_text'] = $content_info['title'];
             } else {
@@ -387,12 +396,12 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         if ($this->data['text_agree']) {
-            $this->data['form']['agree'] = $form->getFieldHtml(array(
+            $this->data['form']['agree'] = $form->getFieldHtml([
                 'type'    => 'checkbox',
                 'name'    => 'agree',
                 'value'   => '1',
                 'checked' => ($this->request->post['agree'] ? true : false),
-            ));
+            ]);
         }
 
         $this->data['agree'] = $this->request->post['agree'];
@@ -403,16 +412,16 @@ class ControllerPagesCheckoutPayment extends AController
             $this->data['back'] = $this->html->getSecureURL($checkout_rt);
         }
 
-        $this->data['form']['back'] = $form->getFieldHtml(array(
+        $this->data['form']['back'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'back',
             'style' => 'button',
             'text'  => $this->language->get('button_back'),
-        ));
-        $this->data['form']['continue'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['continue'] = $form->getFieldHtml([
             'type' => 'submit',
             'name' => $this->language->get('button_continue'),
-        ));
+        ]);
 
         //render buttons
         $this->view->batchAssign($this->data);
@@ -436,8 +445,8 @@ class ControllerPagesCheckoutPayment extends AController
     {
         if ($action == 'disapply' || $action == 'reapply') {
             unset($this->session->data['used_balance'],
-                  $this->request->get['balance'],
-                  $this->session->data['used_balance_full']
+                $this->request->get['balance'],
+                $this->session->data['used_balance_full']
             );
         }
         if ($action == 'apply' || $action == 'reapply') {
@@ -467,10 +476,10 @@ class ControllerPagesCheckoutPayment extends AController
             }
             //if balance enough to cover order amount
             if ($this->cart->getTotalAmount() == 0 && $this->session->data['used_balance_full']) {
-                $this->session->data['payment_method'] = array(
+                $this->session->data['payment_method'] = [
                     'id'    => 'no_payment_required',
                     'title' => $this->language->get('no_payment_required'),
-                );
+                ];
                 //if enough -redirect on confirmation page
                 abc_redirect($this->html->getSecureURL('checkout/confirm'));
             }

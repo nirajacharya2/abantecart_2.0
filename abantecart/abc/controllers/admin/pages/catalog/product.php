@@ -26,11 +26,13 @@ use abc\core\lib\FormBuilder;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\admin\ModelCatalogProduct;
+use abc\models\catalog\Category;
 use abc\models\catalog\ObjectType;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductType;
 use abc\models\catalog\UrlAlias;
 use H;
+use Illuminate\Support\Facades\Cache;
 use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
 
 /**
@@ -85,7 +87,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadModel('catalog/category');
         $this->data['categories'] = ['' => $this->language->get('text_select_category')];
-        $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
+        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
@@ -344,9 +346,8 @@ class ControllerPagesCatalogProduct extends AController
         $this->document->setTitle($this->language->get('heading_title'));
         if ($this->request->is_POST() && $this->validateForm()) {
             $product_data = $this->prepareData($this->request->post);
-            $product_id = $this->model_catalog_product->addProduct($product_data);
+            $product_id = Product::createProduct($product_data);
             $this->data['product_id'] = $product_id;
-            $this->model_catalog_product->updateProductLinks($product_id, $product_data);
             $this->extensions->hk_ProcessData($this, 'product_insert');
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
@@ -410,7 +411,6 @@ class ControllerPagesCatalogProduct extends AController
             'url'           => $this->html->getSecureURL('r/catalog/product_form'),
             'back_url'      => $this->html->getSecureURL('catalog/product'),
             'form_name'     => 'product_form',
-            'title'         => $formTitle,
             'fields_preset' => [
                 'default' => [
                     "v_flex_props" => [
@@ -419,7 +419,7 @@ class ControllerPagesCatalogProduct extends AController
                 ],
                 'fields'  => [
                     'product_type_id' => [
-                        'value'        => $product_type_id,
+                        'value'        => $this->request->get['product_type_id'] ? (int) $this->request->get['product_type_id'] : 0,
                         'ajax_params'  => [
                             'relatedTo' => 'product_type_id',
                             'ajax_url'  => $this->html->getSecureURL('r/catalog/product_form'),
@@ -444,6 +444,8 @@ class ControllerPagesCatalogProduct extends AController
         $product_id = (int)$this->request->get['product_id'];
         if ($product_id) {
 
+            //$productInfo = Cache::get('product.'.$product_id);
+
             $productInfo = $this->productInstance->find($product_id);
 
             $product = $this->productInstance->with(['description', 'tags', 'stores', 'categories',
@@ -458,6 +460,16 @@ class ControllerPagesCatalogProduct extends AController
                     $product = [];
                 }
 
+                $productStores = $this->db->table('products_to_stores')
+                    ->where('product_id', '=', $product_id)
+                    ->get();
+
+            $product['product_stores'] = [];
+                if ($productStores) {
+                    foreach ($productStores as $productStore) {
+                        $product['product_stores'][] = $productStore->store_id;
+                    }
+                }
 
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
 
@@ -475,14 +487,6 @@ class ControllerPagesCatalogProduct extends AController
                     }
                     $product['tags'] = implode(',', $arTags);
                     unset($arTags, $tags);
-                }
-                if (is_array($fieldValue) && $fieldName == 'stores') {
-                    $stores = $fieldValue;
-                    $product['stores'] = [];
-                    foreach ($stores as $store) {
-                        $product['stores'][] = $store['store_id'];
-                    }
-                    unset($stores);
                 }
                 if (is_array($fieldValue) && $fieldName == 'categories') {
                     $categories = $fieldValue;
@@ -618,7 +622,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadModel('catalog/category');
         $this->data['categories'] = [];
-        $results = $this->model_catalog_category->getCategories(0, $this->session->data['current_store_id']);
+        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
@@ -728,7 +732,7 @@ class ControllerPagesCatalogProduct extends AController
 
         if (isset($this->request->post['product_store'])) {
             $this->data['product_store'] = $this->request->post['product_store'];
-        } elseif (isset($product_info)) {
+        } elseif (isset($product_info) && !empty($product_info)) {
             $this->data['product_store'] = $this->model_catalog_product->getProductStores($product_id);
         } else {
             $this->data['product_store'] = [0];
@@ -1303,6 +1307,9 @@ class ControllerPagesCatalogProduct extends AController
     {
         if (isset($data['date_available'])) {
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
+        }
+        if (!isset($data['product_description']['language_id'])) {
+            $data['product_description']['language_id'] = $this->language->getContentLanguageID();
         }
         return $data;
     }

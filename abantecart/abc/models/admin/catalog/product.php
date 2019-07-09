@@ -39,6 +39,8 @@ use H;
 class ModelCatalogProduct extends Model
 {
 
+    public $data = [];
+
     /** @param array $data
      * @return int
      * @throws \Exception
@@ -48,36 +50,45 @@ class ModelCatalogProduct extends Model
         $language_id = (int)$this->language->getContentLanguageID();
 
         $fields = $this->getProductColumns();
-        $preformat_fields = [
-            "shipping_price",
-            "price",
-            "cost",
-            "weight",
-            "length",
-            "width",
-            "height",
-        ];
-        $timestamps = ['date_available'];
+        $this->data['preformat_fields'] = [
+        "shipping_price",
+        "price",
+        "cost",
+        "weight",
+        "length",
+        "width",
+        "height",
+    ];
+        $this->data['perform_json'] = [];
+        $this->data['perform_serialize'] = [];
+        $this->data['timestamps'] = ['date_available'];
 
-        $nullable = ['sku'];
+        $this->data['nullable'] = ['sku'];
+
         $affected_tables = [];
 
-        $insert = [];
-        foreach ($fields as $f) {
-            if (isset($data[$f])) {
-                if (in_array($f, $preformat_fields)) {
-                    $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
-                    $insert[] = $f." = '".$this->db->escape($data[$f])."'";
-                }elseif (in_array($f, $nullable)) {
-                    $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
-                }elseif (in_array($f, $timestamps)) {
-                    $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
-                } else {
-                    $insert[] = $f." = '".$this->db->escape($data[$f])."'";
-                }
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-            }
-        }
+        $insert = [];
+          foreach ($fields as $f) {
+              if (isset($data[$f])) {
+                  if (in_array($f, $this->data['preformat_fields'])) {
+                      $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                      $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                  }elseif (in_array($f, $this->data['nullable'])) {
+                      $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
+                  }elseif (in_array($f, $this->data['timestamps'])) {
+                      $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
+                  } elseif (in_array($f, $this->data['perform_json'])) {
+                      $insert[] = $f." = '".json_encode($data[$f])."'";
+                  } elseif (in_array($f, $this->data['perform_serialize'])) {
+                      $insert[] = $f." = '".serialize($data[$f])."'";
+                  } else {
+                      $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                  }
+
+              }
+          }
 
         if (!empty($insert)) {
             $this->db->query(
@@ -87,6 +98,7 @@ class ModelCatalogProduct extends Model
             $affected_tables[] = 'products';
         }
         $product_id = $this->db->getLastId();
+
 
         // if new product
         if (!is_int(key($data['product_description']))) {
@@ -313,7 +325,7 @@ class ModelCatalogProduct extends Model
         $language_id = (int)$this->language->getContentLanguageID();
 
         $fields = $this->getProductColumns();
-        $preformat_fields = [
+        $this->data['preformat_fields'] = [
             "shipping_price",
             "price",
             "cost",
@@ -322,21 +334,30 @@ class ModelCatalogProduct extends Model
             "width",
             "height",
         ];
-        $timestamps = ['date_available'];
+        $this->data['perform_json'] = [];
+        $this->data['perform_serialize'] = [];
+        $this->data['timestamps'] = ['date_available'];
 
-        $nullable = ['sku'];
+        $this->data['nullable'] = ['sku'];
+
         $affected_tables = [];
+
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $update = [];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
-                if (in_array($f, $preformat_fields)) {
+                if (in_array($f, $this->data['preformat_fields'])) {
                     $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
                     $update[] = $f." = '".$this->db->escape($data[$f])."'";
-                }elseif (in_array($f, $nullable)) {
+                }elseif (in_array($f, $this->data['nullable'])) {
                     $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
-                }elseif (in_array($f, $timestamps)) {
+                }elseif (in_array($f, $this->data['timestamps'])) {
                     $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
+                } elseif (in_array($f, $this->data['perform_json'])) {
+                    $update[] = $f." = '".json_encode($data[$f])."'";
+                } elseif (in_array($f, $this->data['perform_serialize'])) {
+                    $update[] = $f." = '".serialize($data[$f])."'";
                 } else {
                     $update[] = $f." = '".$this->db->escape($data[$f])."'";
                 }
@@ -830,6 +851,8 @@ class ModelCatalogProduct extends Model
                 $this->insertProductOptionValueDescriptions($product_id, $pd_opt_val_id, $name, $language_id);
             }
         }
+
+
 
         $this->touchProduct($product_id);
 

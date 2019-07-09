@@ -25,6 +25,8 @@ use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
+use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use Exception;
 use H;
 
@@ -243,6 +245,7 @@ class ExtensionCollection
  * @method hk_create(object $baseObject, array $data, int $set_order_id)
  * @method hk_update(object $baseObject, int $order_id, int $order_status_id, string $comment, bool $notify)
  * @method hk_apply_promotions(object $baseObject, array $total_data, array $total)
+ * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder $query, array $inputData = [])
  * @package MyExtensionsApi
  */
 class ExtensionsApi
@@ -1091,7 +1094,7 @@ class ExtensionsApi
         $tmpl_id = ABC::env('IS_ADMIN')
             ? $this->registry->get('config')->get('admin_template')
             : $this->registry->get('config')->get('config_storefront_template');
-        $file = $ext_section.ABC::env('DIRNAME_TEMPLATES').$tmpl_id.'/'.$route;
+        $file = ABC::env('DIRNAME_TEMPLATES').$tmpl_id.DS.$ext_section.$route;
         $source = $this->extension_templates;
 
         $section = trim($ext_section, '/');
@@ -1101,7 +1104,7 @@ class ExtensionsApi
         $output = [];
         foreach ($extensions_lookup_list as $ext) {
             //looking for active template tpl
-            $f = ABC::env('DIR_APP_EXTENSIONS').$ext.$file;
+            $f = ABC::env('DIR_APP_EXTENSIONS').$ext.DS.$file;
             $ext_tpls = is_array($source[$ext][$section]) ? $source[$ext][$section] : [];
             if (in_array($route, $ext_tpls)) {
                 if (is_file($f)) {
@@ -1464,7 +1467,7 @@ class ExtensionUtils
      * Function returns array of form fields formatted for AHtml-class
      *
      * @return array
-     * @throws AException
+     * @throws Exception
      */
     public function getSettings()
     {
@@ -1535,7 +1538,7 @@ class ExtensionUtils
      * @param array $data - array of values for check. If it is empty - will check data from config
      *
      * @return array - array of 2 elements: result and array - item_ids list that not valid
-     * @throws AException
+     * @throws Exception
      */
     public function validateSettings($data = [])
     {

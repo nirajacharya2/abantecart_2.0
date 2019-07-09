@@ -1,14 +1,6 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php if ($update) { ?>
-	<ul class="nav nav-tabs nav-justified nav-profile">
-		<li class="nav-item">
-		<a class="nav-link active" href="<?php echo $manufacturer_edit ?>"><span><?php echo $tab_edit; ?></span></a></li>
-		<li class="nav-item">
-		<a class="nav-link" href="<?php echo $manufacturer_layout ?>"><span><?php echo $tab_layout; ?></span></a></li>
-		<?php echo $this->getHookVar('extension_tabs'); ?>
-	</ul>
-<?php } ?>
+<?php echo $tabs ?>
 
 <div id="content" class="panel panel-default">
 
@@ -36,7 +28,7 @@
 	</div>
 
 	<?php echo $form['form_open']; ?>
-	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
+	<div class="panel-body panel-body-nopadding tab-content col-xs-12 row">
 
 	<div class="col-md-9 mb10">
 		<?php foreach ($form['fields'] as $section => $fields) { ?>
@@ -57,7 +49,7 @@
 				$widthcasses .= " col-xs-12";
 			?>
 		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-			<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+			<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 				<?php if($name == 'keyword') { ?>
 				<span class="input-group-prepend">
@@ -73,7 +65,7 @@
 			<?php }  ?><!-- <div class="fieldset"> -->
 		<?php }  ?>
 	</div>
-	
+
 	<div class="col-md-3 mb10">
 		<div id="image">
 		   <?php if ( !empty($update) ) {

@@ -28,7 +28,7 @@ use abc\core\ABC; ?>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script type="text/javascript" src="/templates/default/admin/assets/js/tinymce-vue/tinymce-vue.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
@@ -171,7 +171,7 @@ var mcei = {
 	autop: true,
 	indent: false,
 	toolbar_items_size : 'small',
-	toolbar1: "undo,redo,bold,italic,strikethrough,bullist,forecolor backcolor,numlist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
+	toolbar1: "undo,redo,formatselect,fontselect,fontsizeselect,bold,italic,strikethrough,forecolor backcolor | numlist,bullist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
 	toolbar2: "",
 	//toolbar2: "formatselect,underline,alignjustify,forecolor,pastetext,removeformat,charmap,outdent,indent",
 	toolbar3: "",
@@ -185,7 +185,7 @@ var mcei = {
 	body_class: "content post-type-post post-status-auto-draft post-format-standard locale-en-gb",
 	autoresize_on: true,
 	add_unload_trigger: false,
-	height: '262px'
+	height: '242px'
 };
 
 
@@ -253,7 +253,7 @@ var wrapConfirmDelete = function(){
     var popover, href;
 
     $('a[data-confirmation="delete"]').each( function(){
-        if($(this).attr('data-toggle')=='dropdown' ){ return;}
+        if($(this).attr('data-toggle') === 'dropdown' ){ return;}
 
        	var action = $(this).attr('onclick');
         if ( action ) {
@@ -261,14 +261,14 @@ var wrapConfirmDelete = function(){
         } else {
 	        href = $(this).attr('href');
 			if(!href){ return;}
-    	    if(href.length==0 || href=='#'){ return;}
+    	    if(href.length === 0 || href === '#'){ return;}
     	    action = 'href="' + href +'"';
         }
 
-    	var conf_text = $(this).attr('data-confirmation-text');
-    	if (!conf_text) {
-    		conf_text = <?php abc_js_echo($text_confirm); ?>;
-    	}
+        var conf_text = $(this).attr('data-confirmation-text');
+        if (!conf_text) {
+            conf_text = <?php abc_js_echo($text_confirm); ?>;
+        }
 
         $(this).wrap(wrapper);
         popover = '<div class="confirm_popover dropdown-menu dropdown-menu-right alert alert-danger" role="menu">'+

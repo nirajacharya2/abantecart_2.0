@@ -26,6 +26,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\admin\ModelCatalogManufacturer;
+use abc\models\catalog\Manufacturer;
 use H;
 use stdClass;
 
@@ -136,7 +137,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                             return null;
                         }
 
-                        $this->model_catalog_manufacturer->deleteManufacturer($id);
+                        (new Manufacturer())->deleteManufacturer($id);
                     }
                 }
                 break;
@@ -162,7 +163,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                 }
                 foreach ($ids as $id) {
                     foreach ($allowedFields as $field) {
-                        $this->model_catalog_manufacturer->editManufacturer(
+                        (new Manufacturer())->editManufacturer(
                             $id,
                             [$field => $this->request->post[$field][$id]]
                         );
@@ -211,7 +212,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                     }
                 }
 
-                $this->model_catalog_manufacturer->editManufacturer($this->request->get['id'], [$field => $value]);
+                (new Manufacturer())->editManufacturer($this->request->get['id'], [$field => $value]);
             }
 
             return null;
@@ -220,7 +221,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         //request sent from jGrid. ID is key of array
         foreach ($this->request->post as $field => $value) {
             foreach ($value as $k => $v) {
-                $this->model_catalog_manufacturer->editManufacturer($k, [$field => $v]);
+                (new Manufacturer())->editManufacturer($k, [$field => $v]);
             }
         }
 

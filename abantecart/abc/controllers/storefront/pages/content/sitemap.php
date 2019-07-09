@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -19,6 +19,7 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
+use abc\models\catalog\Category;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -26,8 +27,8 @@ if (!class_exists('abc\core\ABC')) {
 class ControllerPagesContentSitemap extends AController {
 	/**
 	 * Check if HTML Cache is enabled for the method
-	 * @return array - array of data keys to be used for cache key building  
-	 */	
+	 * @return array - array of data keys to be used for cache key building
+	 */
 	public static function main_cache_keys(){
 		return array();
 	}
@@ -37,25 +38,25 @@ class ControllerPagesContentSitemap extends AController {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-		$this->document->setTitle( $this->language->get('heading_title') ); 
+		$this->document->setTitle( $this->language->get('heading_title') );
 
       	$this->document->resetBreadcrumbs();
 
-      	$this->document->addBreadcrumb( array ( 
+      	$this->document->addBreadcrumb( array (
         	'href'      => $this->html->getHomeURL(),
         	'text'      => $this->language->get('text_home'),
         	'separator' => FALSE
       	 ));
 
-      	$this->document->addBreadcrumb( array ( 
+      	$this->document->addBreadcrumb( array (
         	'href'      => $this->html->getNonSecureURL('content/sitemap'),
         	'text'      => $this->language->get('heading_title'),
         	'separator' => $this->language->get('text_separator')
-      	 ));	
-		
+      	 ));
+
 		$this->loadModel('catalog/category');
 		$this->loadModel('tool/seo_url');
-		
+
 		$this->view->assign('categories_html', $this->_buildCategoriesTree(0));
         $this->view->assign('special', $this->html->getNonSecureURL('product/special'));
         $this->view->assign('account', $this->html->getSecureURL('account/account'));
@@ -73,29 +74,29 @@ class ControllerPagesContentSitemap extends AController {
 		$this->loadModel('catalog/content');
     	$content_pages = $this->model_catalog_content->getContents();
         $this->view->assign('contents', $this->_buildContentTree($content_pages));
-		
+
 		$this->processTemplate('pages/content/sitemap.tpl');
 
         //init controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 	}
-	
+
 	protected function _buildCategoriesTree($parent_id, $current_path = '') {
 		$output = '';
-		
-		$results = $this->model_catalog_category->getCategories($parent_id);
-		
+
+		$results = (new Category())->getCategories($parent_id);
+
 		if ($results) {
 			$output .= '<ul class="list-group">';
     	}
-		
-		foreach ($results as $result) {	
+
+		foreach ($results as $result) {
 			if (!$current_path) {
 				$new_path = $result['category_id'];
 			} else {
 				$new_path = $current_path . '_' . $result['category_id'];
 			}
-			
+
 			$output .= '<li class="list-group-item"><a href="' . $this->html->getSEOURL('product/category', '&path=' . $new_path, true)  . '">' . $result['name'] . '</a>';
         	$output .= $this->_buildCategoriesTree($result['category_id'], $new_path);
         	$output .= '</li>';

@@ -19,15 +19,26 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
+use abc\models\customer\Address;
+use abc\models\customer\Customer;
+use abc\models\customer\CustomerGroup;
+use abc\models\customer\CustomerNotification;
+use abc\models\customer\CustomerTransaction;
+use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
 use H;
+use Illuminate\Validation\ValidationException;
+use ReCaptcha\ReCaptcha;
 
 /**
  * Class ACustomer
  */
 class ACustomer extends ALibBase
 {
+    static $errors = [];
     /**
      * @var int
      */
@@ -128,7 +139,7 @@ class ACustomer extends ALibBase
     public function __construct($registry, $customer_id = 0)
     {
         $this->cache = $registry->get('cache');
-        $this->config = $registry->get('config');
+        $config = $registry->get('config');
         $this->db = $registry->get('db');
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
@@ -138,21 +149,26 @@ class ACustomer extends ALibBase
 
         $customer_id = (int)$customer_id;
         $customer_id = (!$customer_id && isset($this->session->data['customer_id']))
-                        ? (int)$this->session->data['customer_id']
-                        : $customer_id;
+            ? (int)$this->session->data['customer_id']
+            : $customer_id;
+
         if ($customer_id) {
-            $sql = "SELECT c.*, cg.* 
-                     FROM ".$this->db->table_name("customers")." c
-                     LEFT JOIN ".$this->db->table_name("customer_groups")." cg 
-                        ON c.customer_group_id = cg.customer_group_id
-                     WHERE customer_id = '".(int)$customer_id."'";
+            $query = Customer::where('customer_id', '=',$customer_id);
             if (!ABC::env('IS_ADMIN')) {
-                $sql .= " AND STATUS = '1'";
+                $query->where('status', '=', 1);
+            }
+            $customer = $query->first();
+            $customer_data = [];
+            if($customer){
+                $customer_data = $customer->toArray();
+                if($customer_data['customer_group_id']){
+                    $cg = CustomerGroup::find($customer_data['customer_group_id']);
+                    $customer_data['customer_group_name'] = $cg->name;
+                }
             }
 
-            $customer_data = $this->db->query($sql);
-            if ($customer_data->num_rows) {
-                $this->customerInit($customer_data->row);
+            if ($customer_data) {
+                $this->customerInit($customer_data);
             } else {
                 $this->logout();
             }
@@ -161,7 +177,7 @@ class ACustomer extends ALibBase
             /**
              * @var AEncryption $encryption
              */
-            $encryption = ABC::getObjectByAlias('AEncryption',[$this->config->get('encryption_key')]);
+            $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $this->unauth_customer = unserialize($encryption->decrypt($this->request->cookie['customer']));
             //customer is not valid or not from the same store (under the same domain)
             if (
@@ -215,39 +231,35 @@ class ACustomer extends ALibBase
      */
     public function login($loginname, $password)
     {
+        if(!$loginname || !$password){
+            return false;
+        }
+        $config = Registry::config();
+        $filter = [
+                'search_operator' => 'equal',
+                'loginname' => $loginname,
+                'password' => $password,
+                'status' => 1,
 
-        $approved_only = '';
-        if ($this->config->get('config_customer_approval')) {
-            $approved_only = " AND approved = '1'";
+        ];
+        if ($config->get('config_customer_approval')) {
+            $filter['approved'] = 1;
         }
 
-        /**
-         * @deprecated !!!
-         */
-        //Supports older passwords for upgraded/migrated stores prior to 1.2.8
-        $add_pass_sql = '';
-        if (ABC::env('SALT')) {
-            $add_pass_sql = " OR password = '".$this->db->escape(md5($password.ABC::env('SALT')))."'";
-        }
-        $customer_data = $this->db->query(
-            "SELECT *
-            FROM ".$this->db->table_name("customers")."
-            WHERE LOWER(loginname)  = LOWER('".$this->db->escape($loginname)."')
-            AND (
-                password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))
-                        ))".$add_pass_sql.") AND status = '1' ".$approved_only);
-        if ($customer_data->num_rows) {
+        $customer_data = Customer::getCustomers(['filter' => $filter])->first();
+        if ($customer_data) {
+            $this->customerInit($customer_data->toArray());
 
-            $this->customerInit($customer_data->row);
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
             $cart = $this->getCustomerCart();
             $this->mergeCustomerCart($cart);
+
             //save merged cart
             $this->saveCustomerCart();
 
             //set cookie for unauthenticated user (expire in 1 year)
-            $encryption = new AEncryption($this->config->get('encryption_key'));
+            $encryption = new AEncryption($config->get('encryption_key'));
             $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
                 'customer_id' => $this->customer_id,
@@ -269,7 +281,6 @@ class ACustomer extends ALibBase
             return true;
         } else {
             $this->extensions->hk_ProcessData($this, 'login_failed');
-
             return false;
         }
     }
@@ -305,16 +316,28 @@ class ACustomer extends ALibBase
         //save it to use in APromotion class
         $this->session->data['customer_group_id'] = (int)$data['customer_group_id'];
 
-        $this->customer_group_name = $data['name'];
+        $this->customer_group_name = $data['customer_group_name'];
 
         $this->customer_tax_exempt = $data['tax_exempt'];
         //save this sign to use in ATax lib
         $this->session->data['customer_tax_exempt'] = $data['tax_exempt'];
 
         $this->address_id = (int)$data['address_id'];
-
+        //if customer have no default address - take first
+        if($this->customer_id && !$this->address_id){
+            $address = Address::where('customer_id','=', $this->customer_id)->first();
+            if($address){
+                $this->address_id = $address->address_id;
+            }
+        }
     }
 
+    /**
+     * @param $customer_id
+     *
+     * @return bool
+     * @throws AException
+     */
     public function setLastLogin($customer_id)
     {
         $customer_id = (int)$customer_id;
@@ -323,9 +346,8 @@ class ACustomer extends ALibBase
         }
 
         //insert new record
-        $this->db->query("UPDATE `".$this->db->table_name("customers")."`
-                        SET `last_login` = NOW()
-                        WHERE customer_id = ".$customer_id);
+        $customer = Customer::find($customer_id);
+        $customer->update(['last_login' => date('Y-m-d H:i:s')]);
 
         //call event
         H::event(
@@ -367,7 +389,8 @@ class ACustomer extends ALibBase
             H::event(
                 'abc\core\lib\customer@logout',
                 [new ABaseEvent($customer_id)]);
-        }catch(AException $e){}
+        } catch (AException $e) {
+        }
     }
 
     /**
@@ -378,7 +401,9 @@ class ACustomer extends ALibBase
     public function isLoggedWithToken($token)
     {
         if ((isset($this->session->data['token']) && !isset($token))
-            || ((isset($token) && (isset($this->session->data['token']) && ($token != $this->session->data['token']))))
+            || (isset($token)
+                && isset($this->session->data['token'])
+                && $token != $this->session->data['token'])
         ) {
             return false;
         } else {
@@ -577,38 +602,37 @@ class ACustomer extends ALibBase
             return false;
         }
 
-        $query = $this->db->query("SELECT sum(credit) - sum(debit) AS balance
-                                    FROM ".$this->db->table_name("customer_transactions")."
-                                    WHERE customer_id = '".(int)$this->getId()."'");
-        $balance = (float)$query->row['balance'];
-
-        return $balance;
+        return CustomerTransaction::getBalance($this->customer_id);
     }
 
     /**
      * Record debit transaction
      *
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|ValidationException
      */
-    public function debitTransaction($tr_details)
+    public function debitTransaction($data)
     {
-        return $this->recordTransaction('debit', $tr_details);
+        $data['debit'] = $data['amount'];
+        unset($data['amount']);
+        return $this->recordTransaction($data);
     }
 
     /**
      * Record credit transaction
      *
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
      * @throws \Exception
      */
-    public function creditTransaction($tr_details)
+    public function creditTransaction($data)
     {
-        return $this->recordTransaction('credit', $tr_details);
+        $data['credit'] = $data['amount'];
+        unset($data['amount']);
+        return $this->recordTransaction($data);
     }
 
     /**
@@ -616,32 +640,33 @@ class ACustomer extends ALibBase
      */
     public function saveCustomerCart()
     {
+        $config = Registry::config();
         $customer_id = $this->customer_id;
-        $store_id = (int)$this->config->get('config_store_id');
+        $store_id = (int)$config->get('config_store_id');
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return null;
+            return false;
         }
+
+        $cart = [];
 
         //before write get cart-info from db to non-override cart for other stores of multistore
-        $result = $this->db->query("SELECT cart
-                                    FROM ".$this->db->table_name("customers")."
-                                    WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
-        $cart = unserialize($result->row['cart']);
-        //check is format of cart old or new
-        $new = $this->isNewCartFormat($cart);
-
-        if (!$new) {
-            $cart = []; //clean cart from old format
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            $cart = $customer->cart;
         }
+
         $cart['store_'.$store_id] = $this->session->data['cart'];
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
-                          SET
-                                cart = '".$this->db->escape(serialize($cart))."',
-                                ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                          WHERE customer_id = '".(int)$customer_id."'");
+        $customer->update(
+                [
+                    'cart' => $cart,
+                    'ip' => $this->request->getRemoteIP()
+                ]
+        );
+
+        return true;
     }
 
     /**
@@ -660,15 +685,11 @@ class ACustomer extends ALibBase
             return false;
         }
 
-        $sql = "SELECT cart
-                FROM ".$this->db->table_name("customers")."
-                WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
-        $result = $this->db->query($sql);
-        if ($result->num_rows) {
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -679,7 +700,8 @@ class ACustomer extends ALibBase
      */
     public function getCustomerCart()
     {
-        $store_id = (int)$this->config->get('config_store_id');
+        $config = Registry::config();
+        $store_id = (int)$config->get('config_store_id');
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -689,44 +711,32 @@ class ACustomer extends ALibBase
         }
 
         $cart = [];
-        $sql = "SELECT cart
-                FROM ".$this->db->table_name("customers")."
-                WHERE customer_id = '".(int)$customer_id."' AND status = '1'";
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            $cart = $customer->cart;
+        }
 
-        $result = $this->db->query($sql);
-        if ($result->num_rows) {
-            //load customer saved cart
-            if (($result->row['cart']) && (is_string($result->row['cart']))) {
-                $cart = unserialize($result->row['cart']);
-                //check is format of cart old or new
-                $new = $this->isNewCartFormat($cart);
-                if (isset($cart['store_'.$store_id])) {
-                    $cart = $cart['store_'.$store_id];
-                } elseif ($new) {
-                    $cart = [];
-                }
-                //clean products
-                if ($cart) {
-                    $cart_products = [];
-                    foreach ($cart as $key => $val) {
-                        $k = explode(':', $key);
-                        $cart_products[] = (int)$k[0]; // <-product_id
-                    }
-                    $sql = "SELECT product_id
-                            FROM ".$this->db->table_name('products_to_stores')." pts
-                            WHERE store_id = '".$store_id."' AND product_id IN (".implode(', ', $cart_products).")";
+        //clean products
+        if ($cart) {
+            $cart_products = [];
+            foreach ($cart as $key => $val) {
+                $k = explode(':', $key);
+                $cart_products[] = (int)$k[0]; // <-product_id
+            }
 
-                    $result = $this->db->query($sql);
-                    $products = [];
-                    foreach ($result->rows as $row) {
-                        $products[] = $row['product_id'];
-                    }
+            $product_list = $this->db->table('products_to_stores')
+                        ->select('product_id')
+                        ->where('store_id', '=',$store_id)
+                        ->whereIn('product_id', $cart_products)
+                        ->get();
+            $products = [];
+            if($product_list->count()){
+                $products = array_column($product_list->toArray(),'product_id');
+            }
 
-                    $diff = array_diff($cart_products, $products);
-                    foreach ($diff as $p) {
-                        unset($cart[$p]);
-                    }
-                }
+            $diff = array_diff($cart_products, $products);
+            foreach ($diff as $p) {
+                unset($cart[$p]);
             }
         }
 
@@ -742,14 +752,11 @@ class ACustomer extends ALibBase
      */
     public function mergeCustomerCart($cart)
     {
-        $store_id = (int)$this->config->get('config_store_id');
+        $config = Registry::config();
+        $store_id = (int)$config->get('config_store_id');
         $cart = !is_array($cart) ? [] : $cart;
-        //check is format of cart old or new
-        $new = $this->isNewCartFormat($cart);
+        $cart = $cart['store_'.$store_id];
 
-        if ($new) {
-            $cart = $cart['store_'.$store_id];
-        }
         // for case when data format is new but cart for store does not yet created
         $cart = !is_array($cart)
             ? []
@@ -775,7 +782,6 @@ class ACustomer extends ALibBase
     public function clearCustomerCart()
     {
 
-        $cart = [];
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -783,11 +789,8 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
-                        SET
-                            cart = '".$this->db->escape(serialize($cart))."'
-                        WHERE customer_id = '".(int)$customer_id."'");
-
+        $customer = $this->model();
+        $customer->update( ['cart' => [] ]);
         return true;
     }
 
@@ -872,12 +875,7 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return false;
         }
-        $this->db->query("UPDATE ".$this->db->table_name("customers")."
-                            SET
-                                wishlist = '".$this->db->escape(serialize($whishlist))."',
-                                ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                            WHERE customer_id = '".(int)$customer_id."'");
-
+        $this->model()->update( ['wishlist' => $whishlist, 'ip' =>  $this->request->getRemoteIP() ] );
         return true;
     }
 
@@ -896,83 +894,442 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return [];
         }
-        $customer_data = $this->db->query("SELECT wishlist
-                                            FROM ".$this->db->table_name("customers")."
-                                            WHERE customer_id = '".(int)$customer_id."' AND status = '1'");
-        if ($customer_data->num_rows) {
-            //load customer saved cart
-            if (($customer_data->row['wishlist']) && (is_string($customer_data->row['wishlist']))) {
-                return unserialize($customer_data->row['wishlist']);
-            }
+
+        $customer = $this->model();
+        if($customer && $customer->status == 1){
+            return (array)$customer->wishlist;
         }
 
         return [];
     }
 
     /**
-     * @param string $type
-     * @param array $tr_details - amount, order_id, transaction_type, description, comments, creator
+     * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Exception|ValidationException
      */
-    protected function recordTransaction($type, $tr_details)
+    protected function recordTransaction($data)
     {
 
-        if (!$this->isLogged()) {
-            return false;
-        }
-        if (!H::has_value($tr_details['transaction_type'])
-            || !H::has_value($tr_details['created_by'])
+        if (!$this->isLogged()
+            || ( (float)$data['credit']===0.0 && (float)$data['debit']===0.0 )
         ) {
             return false;
         }
 
-        if ($type == 'debit') {
-            $amount = 'debit = '.(float)$tr_details['amount'];
-        } else {
-            if ($type == 'credit') {
-                $amount = 'credit = '.(float)$tr_details['amount'];
+        $data['customer_id']  = $this->customer_id;
+        $data['section']  = (int)$data['section'] ?? 0;
+
+        $transaction = new CustomerTransaction($data);
+        $transaction->validate();
+        //use firstOrCreate to prevent duplicates
+        $transaction = CustomerTransaction::firstOrCreate($data);
+        $transaction_id = $transaction->customer_transaction_id;
+
+        return $transaction_id;
+    }
+
+    /**
+     * @param $data
+     * @param bool $subscribe_only
+     *
+     * @return Customer
+     * @throws AException
+     * @throws ValidationException
+     * @throws \ReflectionException
+     */
+    public static function createCustomer($data, $subscribe_only = false)
+    {
+        /**
+         * @var AConfig $config
+         */
+        $config = Registry::config();
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        if (!$config || !$db) {
+            throw new AException('AConfig or ADB not found!');
+        }
+
+        if (!(int)$data['customer_group_id']) {
+            $data['customer_group_id'] = (int)$config->get('config_customer_group_id');
+        }
+        if (!isset($data['status'])) {
+            // if need to activate via email  - disable status
+            if ($config->get('config_customer_email_activation')) {
+                $data['status'] = 0;
             } else {
-                return false;
+                $data['status'] = 1;
             }
         }
-
-        //check if this is not a duplicate transaction
-        $sql = "SELECT customer_transaction_id
-                     FROM ".$this->db->table_name("customer_transactions")." c
-                     WHERE customer_id = '".(int)$this->getId()."'
-                        AND order_id = '".(int)$tr_details['order_id']."'
-                        AND transaction_type = '".$this->db->escape($tr_details['transaction_type'])."'
-                        AND '". $amount ."'
-                ";
-        $trnData = $this->db->query($sql);
-        if ($trnData->num_rows) {
-            return true;
+        if (isset($data['approved'])) {
+            $data['approved'] = (int)$data['approved'];
+        } elseif (!$config->get('config_customer_approval')) {
+            $data['approved'] = 1;
         }
 
-        $this->db->query("INSERT INTO ".$this->db->table_name("customer_transactions")."
-                        SET customer_id = '".(int)$this->getId()."',
-                            order_id = '".(int)$tr_details['order_id']."',
-                            transaction_type = '".$this->db->escape($tr_details['transaction_type'])."',
-                            description = '".$this->db->escape($tr_details['description'])."',
-                            COMMENT = '".$this->db->escape($tr_details['comment'])."',
-                            ".$amount.",
-                            section = '".((int)$tr_details['section'] ? (int)$tr_details['section'] : 0)."',
-                            created_by = '".(int)$tr_details['created_by']."',
-                            date_added = NOW()");
-        $transaction_id = $this->db->getLastId();
+        // delete subscription accounts for given email
+        Customer::where($db->raw('LOWER(email)'), '=', mb_strtolower($data['email']))
+                ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
+                ->forceDelete();
+
+        try {
+            $db->beginTransaction();
+
+            $customer = new Customer($data);
+            $customer->save();
+
+            $customer_id = $customer->customer_id;
+            if(!$subscribe_only) {
+                $address = new Address();
+                $newData = ['customer_id' => $customer_id];
+                foreach ($address->getFillable() as $key){
+                    if(isset($data[$key])){
+                        $newData[$key] = $data[$key];
+                    }
+                }
+                $address->fill($newData);
+                $address->save();
+                //set address as default
+                $customer->update(['address_id' => $address->address_id]);
+            }
+
+            if (!$data['approved']) {
+                $language = new ALanguage(Registry::getInstance());
+                $language->load($language->language_details['directory']);
+                $language->load('account/create');
+
+                if ($data['subscriber']) {
+                    //notify administrator of pending subscriber approval
+                    $msg_text = sprintf($language->get('text_pending_subscriber_approval'),
+                        $data['firstname'].' '.$data['lastname'], $customer_id);
+                } else {
+                    //notify administrator of pending customer approval
+                    $msg_text = sprintf($language->get('text_pending_customer_approval'),
+                        $data['firstname'].' '.$data['lastname'], $customer_id);
+                }
+                $msg = new AMessage();
+                $msg->saveNotice($language->get('text_new_customer'), $msg_text);
+            }
+
+            $db->commit();
+        }catch(ValidationException $e){
+            $db->rollback();
+            throw $e;
+        }catch(\Exception $e){
+            $db->rollback();
+            throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
+        }
+
+        //notify admin
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+        if ( $data['subscriber'] ) {
+            $lang_key = 'im_new_subscriber_text_to_admin';
+        } else {
+            $lang_key = 'im_new_customer_text_to_admin';
+        }
+        $message_arr = [
+            1 => [
+                'message' => sprintf( $language->get( $lang_key ), $customer_id ),
+            ],
+        ];
+        Registry::im()->send( 'new_customer', $message_arr );
 
         //call event
         H::event(
-            'abc\core\lib\customer@transaction',
-            [new ABaseEvent((int)$this->getId(), $transaction_id)]);
+            'abc\core\lib\customer@create',
+            [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
 
-        if ($this->db->getLastId()) {
-            return true;
-        }
-
-        return false;
+        return $customer;
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function editCustomer( $data )
+    {
+        if ( ! $data ) {
+            return false;
+        }
+        /**
+         * @var AIM $im
+         */
+        $im = Registry::im();
+        $customer_id = (int)$this->customer_id;
+
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+
+        if ( ! empty( $data['loginname'] ) ) {
+            $message_arr = [
+                0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
+            ];
+            $im->send( 'customer_account_update', $message_arr );
+        }
+        //get existing data and compare
+        /**
+         * @var $customer Customer
+         */
+        $customer = Customer::find($customer_id);
+        foreach ( $customer->toArray() as $rec => $val ) {
+            if ( $rec == 'email' && $val != $data['email'] ) {
+                $message_arr = [
+                    0 => ['message' => sprintf( $language->get( 'im_customer_account_update_email_to_customer' ), $data['email'] )],
+                ];
+                $im->send( 'customer_account_update', $message_arr );
+            }
+        }
+
+        //trim and remove double whitespaces
+        foreach ( ['firstname', 'lastname'] as $f ) {
+            $data[$f] = str_replace( '  ', ' ', trim( $data[$f] ) );
+        }
+
+        $customer->update($data);
+
+        //call event
+        H::event(
+            'abc\core\lib\customer@update',
+            [new ABaseEvent($customer_id, __FUNCTION__, $data)]);
+
+        return true;
+    }
+
+    /**
+     * @param $loginname
+     * @param $password
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function editPassword( $loginname, $password )
+    {
+        /**
+         * @var Customer $customer
+         */
+        $customer = Customer::where('loginname', '=', $loginname)->first();
+        if(!$customer){
+            return false;
+        }
+
+        $customer->update(['password' => $password]);
+        $language = new ALanguage( Registry::getInstance() );
+        $language->load( $language->language_details['directory'] );
+        $language->load( 'common/im' );
+        $message_arr = [
+            0 => ['message' => $language->get( 'im_customer_account_update_password_to_customer' )],
+        ];
+        Registry::im()->send( 'customer_account_update', $message_arr );
+        return true;
+    }
+
+    /**
+     * @return \abc\models\customer\Customer
+     */
+    public function model()
+    {
+        return Customer::find((int)$this->customer_id);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCustomerNotificationSettings()
+    {
+        if(!$this->customer_id){
+            return [];
+        }
+
+        //get only active IM drivers
+        $im_protocols = Registry::im()->getProtocols();
+        $im_settings = [];
+        $cn = CustomerNotification::where('customer_id', '=', $this->customer_id)->get()->toArray();
+
+        foreach ( $cn as $row ) {
+            if ( ! in_array( $row['protocol'], $im_protocols ) ) {
+                continue;
+            }
+            $im_settings[$row['sendpoint']][$row['protocol']] = (int)$row['status'];
+        }
+
+        return $im_settings;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return array
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public static function validateRegistrationData( $data )
+    {
+        static::$errors = [];
+        $config = Registry::config();
+        $request = Registry::request();
+        $session = Registry::session();
+        $language = Registry::language();
+
+        $isLogged = Registry::customer() ? Registry::customer()->isLogged() : false;
+
+        //load storefront language if not loaded
+        if(!$language->load('account/create')) {
+            $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
+        }
+        $language->load('account/create');
+
+        $customer_id = $data['customer_id'] ? (int)$data['customer_id'] : null;
+        if($data['password']) {
+            $data['password'] = htmlspecialchars_decode($data['password']);
+        }
+
+        //If captcha enabled, validate
+        if ( $config->get( 'config_account_create_captcha' ) && !$isLogged) {
+            if ( $config->get( 'config_recaptcha_secret_key' ) ) {
+                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
+                $resp = $recaptcha->verify( $data['g-recaptcha-response'],
+                    $request->getRemoteIP() );
+                if ( ! $resp->isSuccess() && $resp->getErrorCodes() ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            } else {
+                if ( ! isset( $session->data['captcha'] ) || ( $session->data['captcha'] != $data['captcha'] ) ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            }
+        }
+
+        $customer = $customer_id ? Customer::find($customer_id) : new Customer();
+
+        //validate customer model data
+        try{
+            $customer->validate($data);
+        }catch(ValidationException $e){
+            H::SimplifyValidationErrors($customer->errors()['validation'], static::$errors);
+        }
+
+        //validate address model data
+        $address = new Address();
+        try{
+            $address->validate($data);
+        }catch(ValidationException $e){
+            H::SimplifyValidationErrors($address->errors()['validation'], static::$errors);
+        }
+
+        if (!$isLogged && $config->get('config_account_id')) {
+            Registry::load()->model('catalog/content');
+            /**
+             * @var ModelCatalogContent $model_catalog_content
+             TODO: replace it in the future */
+            $content_info = Registry::model_catalog_content()->getContent($config->get('config_account_id'));
+
+            if ($content_info) {
+                if (!isset($data['agree'])) {
+                    static::$errors['warning'] = sprintf($language->get('error_agree'), $content_info['title']);
+                }
+            }
+        }
+
+        //validate IM URIs
+        //get only active IM drivers
+        $im_drivers = Registry::im()->getIMDriverObjects();
+        if ($im_drivers) {
+            foreach ($im_drivers as $protocol => $driver_obj) {
+                /**
+                 * @var \abc\core\lib\AMailIM $driver_obj
+                 */
+                if (!is_object($driver_obj) || $protocol == 'email') {
+                    continue;
+                }
+                $result = $driver_obj->validateURI($data[$protocol]);
+                if (!$result) {
+                    static::$errors[$protocol] = implode('<br>', $driver_obj->errors);
+                }
+            }
+        }
+
+        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        return static::$errors;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return array
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public static function validateSubscribeData( $data )
+    {
+        static::$errors = [];
+        $config = Registry::config();
+        $request = Registry::request();
+        $session = Registry::session();
+        $language = Registry::language();
+        //load storefront language if not loaded
+        if(!$language->load('account/create')) {
+            $language = new ALanguage(Registry::getInstance(), Registry::language()->getLanguageCode(), 0);
+        }
+        $language->load('account/create');
+        if($data['password']) {
+            $data['password'] = htmlspecialchars_decode($data['password']);
+        }
+
+        //If captcha enabled, validate
+        if ( $config->get( 'config_account_create_captcha' ) ) {
+            if ( $config->get( 'config_recaptcha_secret_key' ) ) {
+                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
+                $resp = $recaptcha->verify( $data['g-recaptcha-response'],
+                    $request->getRemoteIP() );
+                if ( ! $resp->isSuccess() && $resp->getErrorCodes() ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            } else {
+                if ( ! isset( $session->data['captcha'] ) || ( $session->data['captcha'] != $data['captcha'] ) ) {
+                    static::$errors['captcha'] = $language->get( 'error_captcha' );
+                }
+            }
+        }
+
+        $customer = $data['customer_id'] ? Customer::find($data['customer_id']) : new Customer();
+        //validate customer model data
+        try{
+            $customer->validate($data);
+        }catch(ValidationException $e){
+            H::SimplifyValidationErrors($customer->errors()['validation'], static::$errors);
+        }
+
+        //validate IM URIs
+        //get only active IM drivers
+        $im_drivers = Registry::im()->getIMDriverObjects();
+        if ($im_drivers) {
+            foreach ($im_drivers as $protocol => $driver_obj) {
+                /**
+                 * @var \abc\core\lib\AMailIM $driver_obj
+                 */
+                if (!is_object($driver_obj) || $protocol == 'email') {
+                    continue;
+                }
+                $result = $driver_obj->validateURI($data[$protocol]);
+                if (!$result) {
+                    static::$errors[$protocol] = implode('<br>', $driver_obj->errors);
+                }
+            }
+        }
+
+        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        return static::$errors;
+    }
 }

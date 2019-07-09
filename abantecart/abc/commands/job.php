@@ -65,6 +65,8 @@ class Job extends BaseCommand
                 $result = $this->runJobById($options['job-id']);
             } elseif (isset($options['next-job'])) {
                 $result = $this->runNextJob();
+            } elseif (isset($options['next-jobs'])) {
+                $result = $this->runNextJobs();
             } elseif (isset($options['worker'])) {
                 $result = $this->runWorker($options);
             } else {
@@ -192,6 +194,36 @@ class Job extends BaseCommand
             $this->write('No job found for processing!');
             return true;
         }
+    }
+
+    /**
+     * @return bool
+     * @throws AException
+     */
+    protected function runNextJobs()
+    {
+        //get job from queue
+        $class_name = ABC::getFullClassName('JobManager');
+        /**
+         * @var JobManager $handler
+         */
+        $handler = H::getInstance($class_name, ['registry' => Registry::getInstance()]);
+        $jobs = $handler->getReadyJobs();
+        if ($jobs) {
+            $jobs_info=[];
+            foreach ($jobs as $job) {
+                $this->write('Job found. Start processing job #'.$job['job_id'].'!');
+                $this->runJobById($job['job_id']);
+                if (!$this->errors) {
+                    $this->write(implode("\n", $this->errors));
+                }
+                $jobs_info[] = $this->runJobById($job['job_id']);
+            }
+            return $jobs_info;
+        }
+
+        $this->write('No job found for processing!');
+        return true;
     }
 
     /**

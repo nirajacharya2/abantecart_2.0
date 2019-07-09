@@ -28,6 +28,8 @@ use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AMessage;
+use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
@@ -102,7 +104,7 @@ class ControllerPagesProductProduct extends AController
         if (isset($request['path'])) {
             $path = '';
             foreach (explode('_', $request['path']) as $path_id) {
-                $category_info = $this->model_catalog_category->getCategory($path_id);
+                $category_info = (new Category())->getCategory($path_id);
                 if (!$path) {
                     $path = $path_id;
                 } else {
@@ -120,7 +122,8 @@ class ControllerPagesProductProduct extends AController
 
         $this->loadModel('catalog/manufacturer');
         if (isset($request['manufacturer_id'])) {
-            $manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($request['manufacturer_id']);
+            $manufacturer_info = (new Manufacturer)->getManufacturer($request['manufacturer_id']);
+
             if ($manufacturer_info) {
                 $this->document->addBreadcrumb([
                     'href'      => $this->html->getSEOURL('product/manufacturer',
@@ -453,7 +456,7 @@ class ControllerPagesProductProduct extends AController
         foreach ($product_options as $option) {
             $values = [];
             $disabled_values = [];
-            $name = $price = '';
+            $name = $price = $attr = '';
             $default_value = $cart_product_info['options'][$option['product_option_id']];
             if ($option['element_type'] == 'R') {
                 $default_value = is_array($default_value) ? current($default_value) : (string)$default_value;
@@ -494,7 +497,7 @@ class ControllerPagesProductProduct extends AController
                     }
                 } else {
                     if ($option_value['subtract'] && $product_info['stock_checkout']) {
-                        if ($option_value['quantity'] <= 0) {
+                        if ($option_value['quantity'] <= 0 && $this->config->get('config_stock_display') && $product_info['stock_status']) {
                             $opt_stock_message = "({$product_info['stock_status']})";
                         }
                     }
@@ -565,8 +568,11 @@ class ControllerPagesProductProduct extends AController
                 }
 
                 //for checkbox with empty value
-                if ($value == '' && $option['element_type'] == 'C') {
-                    $value = 1;
+                if ($option['element_type'] == 'C') {
+                    if($value == '') {
+                        $value = 1;
+                    }
+                    $attr = key($option['option_value']);
                 }
 
                 $option_data = [
@@ -575,6 +581,7 @@ class ControllerPagesProductProduct extends AController
                         HtmlElementFactory::getMultivalueElements())
                         ? 'option['.$option['product_option_id'].']'
                         : 'option['.$option['product_option_id'].'][]',
+                    'attr'             => ' data-attribute-value-id="'.$attr.'"',
                     'value'            => $value,
                     'options'          => $values,
                     'disabled_options' => $disabled_values,

@@ -21,11 +21,12 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\customer\Address;
 
 class ControllerApiCheckoutShipping extends AControllerAPI
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function post()
     {
@@ -34,11 +35,11 @@ class ControllerApiCheckoutShipping extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401, array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->sendResponse(401, ['error' => 'Not logged in or Login attempt failed!']);
             return null;
         }
         if ($request['mode'] != 'select' && $request['mode'] != 'list') {
-            $this->rest->sendResponse(400, array('error' => 'Incorrect request mode!'));
+            $this->rest->sendResponse(400, ['error' => 'Incorrect request mode!']);
             return null;
         }
 
@@ -53,19 +54,19 @@ class ControllerApiCheckoutShipping extends AControllerAPI
             //process data
             $this->extensions->hk_ProcessData($this);
 
-            $this->rest->sendResponse(200, array('status' => 1, 'shipping_select' => 'success'));
+            $this->rest->sendResponse(200, ['status' => 1, 'shipping_select' => 'success']);
             return null;
         }
 
         if (!$this->cart->hasProducts()) {
             //No products in the cart.
-            $this->rest->sendResponse(200, array('status' => 2, 'error' => 'Nothing in the cart!'));
+            $this->rest->sendResponse(200, ['status' => 2, 'error' => 'Nothing in the cart!']);
             return null;
         }
 
         if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
             //No stock for products in the cart if tracked.
-            $this->rest->sendResponse(200, array('status' => 3, 'error' => 'No stock for product!'));
+            $this->rest->sendResponse(200, ['status' => 3, 'error' => 'No stock for product!']);
             return null;
         }
 
@@ -75,7 +76,7 @@ class ControllerApiCheckoutShipping extends AControllerAPI
             unset($this->session->data['shipping_methods']);
 
             $this->tax->setZone($this->session->data['country_id'], $this->session->data['zone_id']);
-            $this->rest->sendResponse(200, array('status' => 0, 'shipping' => 'products do not require shipping'));
+            $this->rest->sendResponse(200, ['status' => 0, 'shipping' => 'products do not require shipping']);
             return null;
         }
 
@@ -85,17 +86,18 @@ class ControllerApiCheckoutShipping extends AControllerAPI
 
         if (!$this->session->data['shipping_address_id']) {
             //Problem. Missing shipping address
-            $this->rest->sendResponse(200, array('status' => 4, 'error' => 'Missing shipping address!'));
+            $this->rest->sendResponse(200, ['status' => 4, 'error' => 'Missing shipping address!']);
             return null;
         }
 
-        $this->loadModel('account/address');
-
-        $shipping_address = $this->model_account_address->getAddress($this->session->data['shipping_address_id']);
+        $shipping_address = [];
+        if($address = Address::find($this->session->data['shipping_address_id'])){
+            $shipping_address = $address->toArray();
+        }
 
         if (!$shipping_address) {
             //Problem. Missing shipping address
-            $this->rest->sendResponse(500, array('status' => 4, 'error' => 'Inaccessible shipping address!'));
+            $this->rest->sendResponse(500, ['status' => 4, 'error' => 'Inaccessible shipping address!']);
             return null;
         }
 
@@ -103,14 +105,16 @@ class ControllerApiCheckoutShipping extends AControllerAPI
         if (!$this->config->get('config_tax_customer')) {
             $this->tax->setZone($shipping_address['country_id'], $shipping_address['zone_id']);
         } else { // if tax zone is taken from billing address
-            $address = $this->model_account_address->getAddress($this->customer->getAddressId());
-            $this->tax->setZone($address['country_id'], $address['zone_id']);
+            $address = Address::find($this->customer->getAddressId());
+            if($address) {
+                $this->tax->setZone($address->country_id, $address->zone_id);
+            }
         }
 
         $this->loadModel('checkout/extension');
 
         if (!isset($this->session->data['shipping_methods']) || !$this->config->get('config_shipping_session')) {
-            $quote_data = array();
+            $quote_data = [];
 
             $results = $this->model_checkout_extension->getExtensions('shipping');
             foreach ($results as $result) {
@@ -119,16 +123,16 @@ class ControllerApiCheckoutShipping extends AControllerAPI
                 $quote = $this->{'model_extension_'.$result['key']}->getQuote($shipping_address);
 
                 if ($quote) {
-                    $quote_data[$result['key']] = array(
+                    $quote_data[$result['key']] = [
                         'title'      => $quote['title'],
                         'quote'      => $quote['quote'],
                         'sort_order' => $quote['sort_order'],
                         'error'      => $quote['error'],
-                    );
+                    ];
                 }
             }
 
-            $sort_order = array();
+            $sort_order = [];
 
             foreach ($quote_data as $key => $value) {
                 $sort_order[$key] = $value['sort_order'];
@@ -145,10 +149,12 @@ class ControllerApiCheckoutShipping extends AControllerAPI
             $this->data['error_warning'] = $this->language->get('error_no_shipping');
         }
 
-        $this->data['address'] = $this->customer
-            ->getFormattedAddress($shipping_address, $shipping_address['address_format']);
+        $this->data['address'] = $this->customer->getFormattedAddress(
+                                                                $shipping_address,
+                                                                $shipping_address['address_format']
+                                                            );
         $this->data['shipping_methods'] =
-            $this->session->data['shipping_methods'] ? $this->session->data['shipping_methods'] : array();
+            $this->session->data['shipping_methods'] ? $this->session->data['shipping_methods'] : [];
         $this->data['comment'] = isset($request['comment']) ? $request['comment'] : $this->session->data['comment'];
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

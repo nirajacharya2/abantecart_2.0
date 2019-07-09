@@ -28,6 +28,7 @@ use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\core\lib\ATaskManager;
 use abc\core\view\AView;
+use abc\models\customer\Customer;
 use abc\models\user\User;
 
 class ControllerTaskSaleContact extends AController
@@ -137,7 +138,6 @@ class ControllerTaskSaleContact extends AController
             $this->_return_error($error_text);
         }
 
-        $this->loadModel('sale/customer');
         $this->loadModel('setting/store');
         $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
         $from = '';
@@ -237,7 +237,7 @@ class ControllerTaskSaleContact extends AController
         $text_unsubscribe = $this->language->get('text_unsubscribe');
         $message_body = $data['message'];
         if ($data['subscriber']) {
-            $customer_info = $this->model_sale_customer->getCustomersByEmails([$email]);
+            $customer_info = Customer::getCustomers(['filter' => ['email'=> $email ]]);
             $customer_id = $customer_info[0]['customer_id'];
             if ($customer_id) {
                 $message_body .= "\n\n<br><br>".sprintf($text_unsubscribe,
@@ -266,9 +266,9 @@ class ControllerTaskSaleContact extends AController
         $mail->setSender($data['sender']);
         $mail->setSubject($this->data['mail_template_data']['subject']);
         $mail->setHtml($html_body);
-        $user = User::find($this->user_id);
-        $mail->setUser($user);
-
+        if ($this->user) {
+            $mail->setUser($this->user);
+        }
         $mail->send();
 
         if ($mail->error) {

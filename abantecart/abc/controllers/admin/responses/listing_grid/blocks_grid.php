@@ -30,6 +30,7 @@ use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
 use abc\core\lib\AResourceManager;
 use abc\core\view\AView;
+use abc\models\catalog\Category;
 use H;
 use stdClass;
 
@@ -166,7 +167,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             if (isset($this->request->post['selected']) && is_array($this->request->post['selected'])) {
                 //updating custom list of selected items
                 $listing_manager = new AListingManager($custom_block_id);
-                $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                 $k = 0;
                 foreach ($this->request->post['selected'] as $id) {
                     $listing_manager->saveCustomListItem(
@@ -376,7 +377,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
                         case 'custom_categories':
                             $this->loadModel('catalog/category');
                             $filter = ['subsql_filter' => 'c.category_id in ('.implode(',', $ids).')'];
-                            $results = $this->model_catalog_category->getCategoriesData($filter);
+                            $results = (new Category())->getCategoriesData($filter);
 
                             $id_name = 'category_id';
                             $rl_object_name = 'categories';

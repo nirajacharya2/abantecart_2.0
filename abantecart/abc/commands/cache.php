@@ -29,6 +29,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
+use abc\models\catalog\Category;
 
 /**
  * Class Cache
@@ -168,8 +169,7 @@ class Cache extends BaseCommand
             /**
              * @var \abc\models\admin\ModelCatalogCategory $model
              */
-            $model = $registry->get('model_catalog_category');
-            $categories = $model->getCategoriesData(['store_id' => $store['store_id']]);
+            $categories = (new Category())->getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
                     'product/category',

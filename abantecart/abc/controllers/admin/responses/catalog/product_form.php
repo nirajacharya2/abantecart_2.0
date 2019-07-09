@@ -110,7 +110,6 @@ class ControllerResponsesCatalogProductForm extends AController
         $form = new FormBuilder(ABC::getFullClassName('Product'), $product_type_id, $formData);
         $this->data['form_fields'] = $form->getForm()->getFormFields();
 
-        //H::df($this->data['form_fields']['blurb']->value);
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -134,6 +133,14 @@ class ControllerResponsesCatalogProductForm extends AController
             'meta_description' => $fields['meta_description'],
             'language_id'      => $this->language->getContentLanguageID(),
         ];
+        if (is_array($fields['categories']) && !empty($fields['categories'])) {
+            $fields['product_category'] = $fields['categories'];
+            unset($fields['categories']);
+        }
+
+        if (!isset($fields['product_stores']) || empty($fields['product_stores']) || $fields['product_stores']==0) {
+            $fields['product_stores'] = [0];
+        }
 
         if ($this->validate($fields)) {
 
@@ -142,7 +149,7 @@ class ControllerResponsesCatalogProductForm extends AController
                 if ($productId) {
                     $this->productInstance->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
                 } else {
-                    $this->productInstance->createProduct($fields);
+                    $productId = $this->productInstance->createProduct($fields);
                 }
                 if ($productId) {
                     $this->data['result']['success_message'] = $this->language->get('text_saved');

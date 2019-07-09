@@ -23,27 +23,30 @@ use abc\core\engine\AForm;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\view\AView;
+use abc\models\customer\Customer;
 use H;
 
 class ExtensionGdpr extends Extension
 {
 
-    public function onControllerCommonHeader_InitData()
+    public function onControllerCommonHeaderBottom_InitData()
     {
         $that = $this->baseObject;
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
         $that->loadModel('catalog/content');
         $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
+        $gdpr_expiration_days = $that->config->get('gdpr_expiration_days');
 
         $agree_href = $content_info
                     ? $that->html->getURL('content/content', '&content_id=' . $that->config->get('config_account_id'))
                     : '';
 
+        $that->view->assign('expiration_days', $gdpr_expiration_days ?: 30);
         $that->view->assign('gdpr_privacy_policy_url', $agree_href);
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
         $that->document->addStyle(
             [
-                'href'  => $that->view->templateResource('/css/cookies-alert.css'),
+                'href'  => $that->view->templateResource('assets/css/gdpr-style.css'),
                 'rel'   => 'stylesheet',
                 'media' => 'screen',
             ]
@@ -53,7 +56,8 @@ class ExtensionGdpr extends Extension
     public function onControllerCommonHead_UpdateData()
     {
         $that = $this->baseObject;
-        $that->document->addScriptBottom($that->view->templateResource('/js/gdpr-cookie-monster.min.js'));
+        //$that->document->addScriptBottom($that->view->templateResource('assets/js/gdpr-cookie-monster.min.js'));
+        $that->document->addScriptBottom($that->view->templateResource('assets/js/gdpr-script.js'));
     }
 
     public function onControllerPagesAccountAccount_InitData()
@@ -73,8 +77,7 @@ class ExtensionGdpr extends Extension
             ]
         ));
         $customer_id = $that->customer->getId();
-        $that->loadModel('account/customer');
-        $customer_info = $that->model_account_customer->getCustomer($customer_id);
+        $customer_info = Customer::getCustomer($customer_id);;
         $data = $customer_info['data'];
         if (isset($data['gdpr'])
             && isset($data['gdpr']['erasure_requested'])
@@ -207,10 +210,10 @@ $("#gdpr_erase")
             ]
         );
 
-        $customer_info = $that->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id)->toArray();
         $entry = $that->language->get('gdpr_entry_erase');
         if ($customer_info['data']) {
-            $data = unserialize($customer_info['data']);
+            $data = $customer_info['data'];
             if (isset($data['gdpr']) && isset($data['gdpr']['request_date'])) {
                 $int = H::dateISO2Int($data['gdpr']['request_date']);
                 $entry .= '<br>Erasure Requested at ';

@@ -5,6 +5,9 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
 use abc\models\system\Audit;
+use abc\models\system\AuditEvent;
+use abc\models\system\AuditEventDescription;
+use abc\models\system\AuditModel;
 
 class ControllerResponsesToolAuditAjax extends AController
 {
@@ -48,7 +51,9 @@ class ControllerResponsesToolAuditAjax extends AController
         if ( $arFilters || $date_from || $date_to || $user_name || $events) {
 
 
-            $audit = Audit::whereRaw("1 = 1")->groupBy('request_id')->groupBy('event')->groupBy('date_added')->groupBy('main_auditable_model')->groupBy('main_auditable_id');
+            $audit = AuditEvent::leftJoin('audit_users', 'audit_users.id', '=', 'audit_events.audit_user_id')
+                ->leftJoin('audit_users as audit_aliases', 'audit_aliases.id', '=', 'audit_events.audit_alias_id')
+            ->leftJoin('audit_models', 'audit_models.id', '=', 'audit_events.main_auditable_model_id');
             if (is_array($arFilters) && !empty($arFilters)) {
                 $auditableTypes = [];
                 $auditableIds = [];
@@ -58,11 +63,20 @@ class ControllerResponsesToolAuditAjax extends AController
                     if ($arFilter['auditable_id']) {
                         $auditableIds[] = $arFilter['auditable_id'];
                     }
-                    $attributeNames = array_merge($attributeNames, $arFilter['attribute_name']);
+                    if (is_array($arFilter['field_name'])) {
+                        $attributeNames = array_merge($attributeNames, $arFilter['field_name']);
+                    }
                 }
 
                 if (!empty($auditableTypes)) {
-                    $audit = $audit->whereIn('main_auditable_model', $auditableTypes);
+                    $models = AuditModel::select(['id'])->whereIn('name', $auditableTypes)->get();
+                    $auditableTypes = [];
+                    if ($models) {
+                        foreach ($models as $model) {
+                            $auditableTypes[] = $model->getKey();
+                        }
+                        $audit = $audit->whereIn('main_auditable_model_id', $auditableTypes);
+                    }
                 }
 
                 if (!empty($auditableIds)) {
@@ -70,7 +84,9 @@ class ControllerResponsesToolAuditAjax extends AController
                 }
 
                 if (!empty($attributeNames)) {
-                    $audit = $audit->whereIn('attribute_name', $attributeNames);
+                    $audit = $audit->join('audit_event_descriptions', 'audit_event_descriptions.audit_event_id','=','audit_events.id')
+                        ->groupBy('audit_events.id')
+                        ->whereIn('audit_event_descriptions.field_name', $attributeNames);
                 }
 
             }
@@ -82,19 +98,20 @@ class ControllerResponsesToolAuditAjax extends AController
             }
             if ($user_name) {
                 $audit = $audit->where(function ($query) use ($user_name) {
-                    $query->where('user_name', 'like', '%'.$user_name.'%')
-                        ->orWhere('alias_name', 'like', '%'.$user_name.'%');
+                    $query->where('audit_users.name', 'like', '%'.$user_name.'%')
+                        ->orWhere('audit_aliases.name', 'like', '%'.$user_name.'%');
                 });
             }
 
             if ($events && is_array($events)) {
                 foreach ($events as &$event) {
-                    $event = strtolower($event);
+                    $event = AuditEvent::EVENT_NAMES[strtolower($event)];
                 }
-                $audit = $audit->whereIn('event', $events);
+                $audit = $audit->whereIn('event_type_id', $events);
             }
 
-            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS request_id, event, date_added, main_auditable_model, main_auditable_id, user_name, alias_name, id')]);
+            $audit = $audit->select([$this->db->raw('SQL_CALC_FOUND_ROWS request_id, event_type_id, date_added, '.$this->db->prefix().'audit_models.name as main_auditable_model, main_auditable_id, '
+                .$this->db->prefix().'audit_users.name as user_name, '.$this->db->prefix().'audit_events.id, '.$this->db->prefix().'audit_aliases.name as alias_name')]);
 
             if ($rowsPerPage > 0) {
                 $audit = $audit
@@ -107,14 +124,20 @@ class ControllerResponsesToolAuditAjax extends AController
                 if ($descending == 'true' or $descending === true) {
                     $ordering = 'DESC';
                 }
+                if ($sortBy == 'event') {
+                    $sortBy = 'event_type_id';
+                }
                 $audit = $audit->orderBy($sortBy, $ordering);
             }
 
-              //$this->db->enableQueryLog();
+             // $this->db->enableQueryLog();
 
             $this->data['response']['items'] = $audit
                 ->get()
                 ->toArray();
+            foreach ($this->data['response']['items'] as &$item) {
+                $item['event'] = AuditEvent::getEventById($item['event_type_id']);
+            }
 
             //\H::df($this->db->getQueryLog());
 
@@ -142,13 +165,17 @@ class ControllerResponsesToolAuditAjax extends AController
 
         $this->data['response']['items'] = [];
 
-        //$this->db->enableQueryLog();
+      //  $this->db->enableQueryLog();
 
         if ($arFilters) {
-            $audit = new Audit();
+            $audit = new AuditEventDescription();
+            $audit = $audit->leftJoin('audit_models', 'audit_models.id', '=', 'audit_event_descriptions.auditable_model_id' );
+            $audit = $audit->select(['audit_models.name as auditable_model', 'field_name', 'old_value', 'new_value']);
             foreach ($arFilters as $key => $value) {
                 $audit = $audit->where($key, $value);
             }
+            $audit = $audit->groupBy('audit_models.name')->groupBy('field_name');
+            $audit = $audit->orderBy('audit_models.name')->orderBy('field_name');
             $this->data['response']['items'] = $audit
                 ->get()
                 ->toArray();

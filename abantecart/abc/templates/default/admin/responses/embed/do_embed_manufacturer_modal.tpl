@@ -3,7 +3,7 @@
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 </div>
 <div class="tab-content do_embed">
-	<div class="panel-body panel-body-nopadding">
+	<div class="panel-body panel-body-nopadding row">
 		<div class="col-sm-6 col-xs-12">
 			<div id="embed_container" class="embed_preview" style="pointer-events: none;"></div>
 		</div>
@@ -25,7 +25,7 @@
 				<?php foreach ($fields as $field) {
 				$widthclass = 'col-sm-6 col-xs-12';
 				$label = ${'entry_' . str_replace(array('[', ']'), '', $field->name)};		?>
-				<div class="form-group">
+				<div class="form-group row align-items-start">
 					<?php if($label){?>
 					<label class="control-label col-md-6 col-xs-6" for="<?php echo $field->element_id; ?>">
 						<?php echo $label; ?>

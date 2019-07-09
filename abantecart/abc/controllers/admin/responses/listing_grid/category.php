@@ -26,6 +26,7 @@ use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\catalog\Category;
 use stdClass;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
@@ -71,7 +72,7 @@ class ControllerResponsesListingGridCategory extends AController
         }
         $new_level = 0;
         //get all leave categories
-        $leaf_nodes = $this->model_catalog_category->getLeafCategories();
+        $leaf_nodes = (new Category())->getLeafCategories();
         if ($this->request->post['nodeid']) {
             $sort = $filter_data['sort'];
             $order = $filter_data['order'];
@@ -83,7 +84,7 @@ class ControllerResponsesListingGridCategory extends AController
             $new_level = (integer)$this->request->post["n_level"] + 1;
         }
 
-        $results = $this->model_catalog_category->getCategoriesData($filter_data);
+        $results = (new Category())->getCategoriesData($filter_data);
         $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter->getParam('page');
@@ -195,7 +196,7 @@ class ControllerResponsesListingGridCategory extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
-                        $this->model_catalog_category->deleteCategory($id);
+                        (new Category())->deleteCategory($id);
                     }
                 }
                 break;
@@ -216,7 +217,7 @@ class ControllerResponsesListingGridCategory extends AController
                     }
                     foreach ($ids as $id) {
                         foreach ($allowedFields as $field) {
-                            $this->model_catalog_category->editCategory($id, array($field => $this->request->post[$field][$id]));
+                            (new Category())->editCategory($id, array($field => $this->request->post[$field][$id]));
                         }
                     }
                 }
@@ -270,7 +271,7 @@ class ControllerResponsesListingGridCategory extends AController
                     return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
                 }
 
-                $this->model_catalog_category->editCategory($category_id, array($field => $value));
+                (new Category())->editCategory($category_id, array($field => $value));
             }
 
             return null;
@@ -287,7 +288,7 @@ class ControllerResponsesListingGridCategory extends AController
                         return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
                     }
                 }
-                $this->model_catalog_category->editCategory($k, array($field => $v));
+                (new Category())->editCategory($k, [$field => $v]);
             }
         }
 
@@ -338,7 +339,7 @@ class ControllerResponsesListingGridCategory extends AController
 												OR cd.description LIKE '%".$this->db->escape($this->request->post['term'])."%'
 												OR cd.meta_keywords LIKE '%".$this->db->escape($this->request->post['term'])."%'",
             );
-            $results = $this->model_catalog_category->getCategoriesData($filter);
+            $results = (new Category())->getCategoriesData($filter);
             //build thumbnails list
             $category_ids = array();
             foreach ($results as $category) {

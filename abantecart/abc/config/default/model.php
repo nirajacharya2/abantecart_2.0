@@ -3,6 +3,7 @@
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\user\User;
@@ -48,6 +49,22 @@ return [
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details
     'FORCE_DELETING' => [
-        //Product::class => false
+        //Product::class => true,
+        Customer::class => true,
+        Address::class => true,
     ],
+    //you can extends base model with this array
+    'INITIALIZE'       => [
+            Product::class => [
+                //merge with model properties
+                'properties' => [
+                                    'fillable' => [],
+                                    'guarded'  => []
+                ],
+                //add scopes with array of scope class full names
+                'scopes'     => [
+                    //SomeFullScopeClassName  myScope::class,
+                ]
+            ]
+    ]
 ];

@@ -25,7 +25,10 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\customer\CustomerTransaction;
+use abc\modules\events\ABaseEvent;
 use H;
+use Illuminate\Validation\ValidationException;
 use stdClass;
 
 class ControllerResponsesListingGridCustomerTransaction extends AController
@@ -41,7 +44,6 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer_transaction');
         $this->load->library('json');
 
         $page = $this->request->post['page']; // get the requested page
@@ -92,7 +94,11 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             }
         }
 
-        $total = $this->model_sale_customer_transaction->getTotalCustomerTransactions($data);
+        $results = CustomerTransaction::getTransactions($data);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+
+        $total = $results[0]['total_num_rows'];
 
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
@@ -100,17 +106,11 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             $total_pages = 0;
         }
 
-        if ($page > $total_pages) {
-            $page = $total_pages;
-            $data['start'] = ($page - 1) * $limit;
-        }
-
         $response = new stdClass();
         $response->page = $page;
         $response->total = $total_pages;
         $response->records = $total;
 
-        $results = $this->model_sale_customer_transaction->getCustomerTransactions($data);
         $i = 0;
         foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['customer_transaction_id'];
@@ -132,20 +132,18 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $this->response->setOutput(AJson::encode($this->data['response']));
     }
 
-    protected function validateForm($data = [])
+    protected function preFormatAndValidate($data = [])
     {
         $output = [
             'credit' => (float)$data['credit'],
             'debit'  => (float)$data['debit'],
         ];
 
+        $output['customer_id'] = $data['customer_id'];
+        $output['created_by'] = $this->user->getId();
+
         if (!$output['credit'] && !$output['debit']) {
             $this->error[] = $this->language->get('error_empty_debit_credit');
-        } else {
-            $max = 99999999999.9999;
-            if ($output['credit'] > $max || $output['debit'] > $max) {
-                $this->error[] = $this->language->get('error_incorrect_debit_credit');
-            }
         }
 
         if ($data['transaction_type'][1]) {
@@ -154,9 +152,11 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         } else {
             $output['transaction_type'] = trim($data['transaction_type'][0]);
         }
-
-        if (!$output['transaction_type']) {
-            $this->error[] = $this->language->get('error_transaction_type');
+        $transaction = new CustomerTransaction();
+        try {
+            $transaction->validate($output);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($transaction->errors()['validation'], $this->error);
         }
         $output['transaction_type'] = htmlentities($output['transaction_type'], ENT_QUOTES, ABC::env('APP_CHARSET'));
         $output['comment'] = htmlentities($data['comment'], ENT_QUOTES, ABC::env('APP_CHARSET'));
@@ -197,22 +197,29 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         }
 
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer_transaction');
 
         //check is data valid
-        $valid_data = $this->validateForm($this->request->post);
+        $valid_data = $this->request->post;
         $valid_data['customer_id'] = $this->request->get['customer_id'];
-
+        $valid_data = $this->preFormatAndValidate($valid_data);
         if (!$this->error) {
-            $this->model_sale_customer_transaction->addCustomerTransaction($valid_data);
+            $transaction = new CustomerTransaction($valid_data);
+            $transaction->save();
             $result['result'] = true;
             $result['result_text'] = $this->language->get('text_transaction_success');
-            $balance = $this->model_sale_customer_transaction->getBalance($this->request->get['customer_id']);
+            $balance = CustomerTransaction::getBalance($this->request->get['customer_id']);
             $result['balance'] = $this->language->get('text_balance')
                 .' '.$this->currency->format($balance, $this->config->get('config_currency'));
+            //call event
+            H::event(
+                'admin\sendNewCustomerTransactionNotifyEmail',
+                [
+                    new ABaseEvent($transaction->toArray(), $valid_data),
+                ]
+            );
+
         } else {
             $error = new AError('');
-
             return $error->toJSONResponse('VALIDATION_ERROR_406',
                 [
                     'error_text'   => $this->error,
@@ -237,7 +244,6 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->load->library('json');
         $this->loadLanguage('sale/customer');
-        $this->loadModel('sale/customer_transaction');
 
         if (!$this->user->canAccess('listing_grid/customer_transaction')) {
             $error = new AError('');
@@ -256,9 +262,11 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $this->data['customer_transaction_id'] = $transaction_id;
 
         if ($transaction_id) {
-            $info = $this->model_sale_customer_transaction->getCustomerTransaction(
-                    $this->request->get['customer_transaction_id']
-                );
+            $transaction = CustomerTransaction::find($this->request->get['customer_transaction_id']);
+            $info = [];
+            if ($transaction) {
+                $info = $transaction->toArray();
+            }
             $this->data['text_title'] = $this->language->get('popup_title_info');
             $readonly = true;
         } else {
@@ -308,14 +316,14 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             'attr'  => ($readonly ? 'disabled="disabled"' : '').' maxlength="16"',
         ]);
 
-        $types = $this->model_sale_customer_transaction->getTransactionTypes();
-        $types[''] = $this->language->get('text_option_other_type');
-        reset($types);
+        $types = CustomerTransaction::select('transaction_type')->distinct()->orderBy('transaction_type')->get();
+        $options = array_column($types->toArray(), 'transaction_type', 'transaction_type');
+        $options[''] = $this->language->get('text_option_other_type');
 
         $this->data['form']['fields']['transaction_type'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'transaction_type[0]',
-            'options' => $types,
+            'options' => $options,
             'value'   => $info['transaction_type'] == '' ? current($types) : $info['transaction_type'],
             'attr'    => ($readonly ? 'disabled="disabled"' : ''),
         ]);
@@ -324,7 +332,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             'type'        => 'input',
             'name'        => 'transaction_type[1]',
             'placeholder' => $this->language->get('text_other_type_placeholder'),
-            'value'       => (!in_array($info['transaction_type'], $types) ? $info['transaction_type'] : ''),
+            'value'       => (!in_array($info['transaction_type'], $options) ? $info['transaction_type'] : ''),
             'attr'        => ($readonly ? 'disabled="disabled"' : ''),
         ]);
 

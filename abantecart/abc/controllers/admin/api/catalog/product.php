@@ -20,7 +20,10 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\Registry;
 use abc\models\admin\ModelCatalogCategory;
+use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -177,6 +180,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
+        (Registry::getInstance())->get('cache')->remove('*');
+
         $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',
             'product_id' => $product_id,
@@ -248,7 +253,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
      */
     private function updateProduct($product, $data)
     {
-
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
         $rels = [];
         foreach ($expected_relations as $key) {
@@ -264,17 +268,18 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $fills = $product->getFillable();
-$upd_array = [];
+        $upd_array = [];
         foreach ($fills as $fillable) {
             if (isset($data[$fillable])) {
                 $product->{$fillable} = urldecode($data[$fillable]);
-$upd_array[$fillable] = urldecode($data[$fillable]);
+                $upd_array[$fillable] = urldecode($data[$fillable]);
             }
         }
 
-if($upd_array) {
-    $this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
-}
+        if($upd_array) {
+            $product->update($upd_array);
+            //$this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
+        }
 
         //$product->save();
         $product->replaceOptions((array)$data['options']);
@@ -299,13 +304,33 @@ if($upd_array) {
            $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
         }
 
-        if($data['categories']) {
+        if ($data['category_uuids']) {
+            $categories = Category::select(['category_id'])
+                ->whereIn('uuid', $data['category_uuids'])
+                ->get();
+            if ($categories) {
+                $data['categories'] = [];
+                foreach ($categories as $category) {
+                    $data['categories'][] = $category->category_id;
+                }
+            }
+        }
+        if ($data['manufacturer']['uuid']) {
+            $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
+                ->get()->first();
+            if ($manufacturer) {
+                $data['manufacturer_id'] = $manufacturer->manufacturer_id;
+                unset($data['manufacturer']);
+            }
+        }
+
+     /*   if($data['categories']) {
             $categories = [];
             foreach($data['categories'] as $category_branch) {
                 $categories[] = $this->processCategoryTree($category_branch);
             }
             $data['categories'] = $categories;
-        }
+        }*/
 
         return $data;
     }
@@ -328,7 +353,7 @@ if($upd_array) {
     protected function replaceCategories($category, $language_id){
         $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
         if (!$exists) {
-            $new_category_id = $this->model_catalog_category->addCategory(
+            $new_category_id = (new Category())->addCategory(
                 [
                     'parent_id' => $category['parent_id'],
                     'status'    => $category['status'],

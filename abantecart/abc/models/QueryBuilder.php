@@ -18,13 +18,13 @@
 
 namespace abc\models;
 
+use abc\core\engine\Registry;
 use Illuminate\Database\Query\Builder;
 
 class QueryBuilder extends Builder
 {
     public function setGridRequest($data = [])
     {
-        $query = $this->newQuery();
         if ($data['sort'] != 'description.title') {
             if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
                 return $this->orderBy($data['sort'], 'desc');
@@ -51,9 +51,17 @@ class QueryBuilder extends Builder
         return $this;
     }
 
-    public function active() {
-        $this->where('status', 1);
+    /**
+     * @param string $tableName
+     *
+     * @return $this
+     */
+    public function active($tableName = '') {
+        $fieldName = 'status';
+        if (!empty($tableName)) {
+            $fieldName = $tableName.'.'.$fieldName;
+        }
+        $this->where($fieldName, '=',1);
         return $this;
     }
-
 }

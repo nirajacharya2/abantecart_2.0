@@ -8827,7 +8827,7 @@ CREATE TABLE `ac_addresses` (
   `postcode` varchar(10) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `city` varchar(128) COLLATE utf8_general_ci NOT NULL,
   `country_id` int(11) NOT NULL DEFAULT '0',
-  `zone_id` int(11) NOT NULL DEFAULT '0',
+  `zone_id` int(11),
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
@@ -8840,6 +8840,7 @@ CREATE INDEX `ac_addresses_idx` ON `ac_addresses` ( `customer_id`, `country_id`,
 --
 CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `parent_id` int(11),
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
@@ -8848,6 +8849,7 @@ CREATE TABLE `ac_categories` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`category_id`),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`, `status`  );
@@ -8986,7 +8988,8 @@ CREATE TABLE `ac_online_customers` (
   `referer` text NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ip`),
-  KEY `ac_online_customers_idx` (`date_added`)
+  KEY `ac_online_customers_idx` (`date_added`),
+  KEY `ac_online_customers_idx2` (`customer_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9194,6 +9197,7 @@ INSERT INTO `ac_length_class_descriptions` (`length_class_id`, `language_id`, `t
 --
 CREATE TABLE `ac_manufacturers` (
   `manufacturer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -9201,6 +9205,7 @@ CREATE TABLE `ac_manufacturers` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`manufacturer_id`),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9571,6 +9576,7 @@ CREATE TABLE `ac_product_option_value_descriptions` (
 --
 CREATE TABLE `ac_products` (
   `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) DEFAULT NULL,
   `model` varchar(64) NOT NULL,
   `sku` varchar(64) DEFAULT NULL,
   `location` varchar(128) NOT NULL,
@@ -9607,6 +9613,7 @@ CREATE TABLE `ac_products` (
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`product_id`),
   INDEX `stage_idx` (`stage_id` ASC),
+  KEY `uuid_uniq` (`uuid`),
   INDEX `ac_products_idx` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`),
   INDEX `ac_products_status_idx` (`product_id`, `status`, `date_available`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -10449,7 +10456,8 @@ CREATE TABLE `ac_contents` (
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
-  PRIMARY KEY (`content_id`),
+  `hide_title` INT(1) NULL,
+  KEY `content_id_idx` (`content_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -13104,7 +13112,7 @@ ALTER TABLE `ac_zones_to_locations`
 ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `ac_category_descriptions`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -13566,6 +13574,59 @@ CREATE TABLE `ac_object_attribute_values` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `ac_audit_event_descriptions`;
+CREATE TABLE `ac_audit_event_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `audit_event_id` int(11) NOT NULL,
+  `auditable_model_id` int(11) NOT NULL,
+  `auditable_id` int(11) NOT NULL,
+  `field_name` varchar(128) NOT NULL,
+  `old_value` text,
+  `new_value` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_events`;
+CREATE TABLE `ac_audit_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` varchar(128) NOT NULL,
+  `audit_session_id` int(11) NOT NULL,
+  `audit_user_id` int(11) NOT NULL,
+  `audit_alias_id` int(11) DEFAULT NULL,
+  `event_type_id` int(11) NOT NULL,
+  `main_auditable_model_id` int(11) NOT NULL,
+  `main_auditable_id` int(11) DEFAULT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `request_id_UNIQUE` (`request_id`,`audit_user_id`,`event_type_id`,`main_auditable_model_id`,`main_auditable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_models`;
+CREATE TABLE `ac_audit_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_sessions`;
+CREATE TABLE `ac_audit_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq` (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_users`;
+CREATE TABLE `ac_audit_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_userid_indx` (`id`,`name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ALTER TABLE `ac_downloads`
 ADD CONSTRAINT `ac_downloads_order_status_fk`
   FOREIGN KEY (`activate_order_status_id`)
@@ -13640,14 +13701,6 @@ ADD CONSTRAINT `ac_global_attributes_ibfk_2`
   ON DELETE CASCADE
   ON UPDATE CASCADE;
 
-  ALTER TABLE `ac_online_customers`
-  ADD INDEX `ac_online_customers_fk_1_idx` (`customer_id` ASC);
-  ALTER TABLE `ac_online_customers`
-  ADD CONSTRAINT `ac_online_customers_fk_1`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `ac_customers` (`customer_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE;
 
 ALTER TABLE `ac_task_steps`
 ADD CONSTRAINT `ac_task_steps_fk`

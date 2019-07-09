@@ -24,6 +24,9 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
+use abc\models\customer\Address;
+use abc\models\customer\Customer;
+use abc\modules\events\ABaseEvent;
 use H;
 
 class ControllerPagesAccountLogin extends AController
@@ -68,20 +71,22 @@ class ControllerPagesAccountLogin extends AController
                                 : $this->request->post['email'];
                 $password = $this->request->post['password'];
                 if ( isset( $loginname ) && isset( $password ) && $this->_validate( $loginname, $password ) ) {
-                    unset( $this->session->data['guest'] );
-                    unset( $this->session->data['account'] );
+                    unset(
+                        $this->session->data['guest'],
+                        $this->session->data['account']
+                    );
 
                     $address_id = $this->customer->getAddressId();
-                    $this->loadModel( 'account/address' );
-                    $address = $this->model_account_address->getAddress( $address_id );
+                    $address = Address::find($address_id );
+                    $address = $address ? $address->toArray() : [];
+
                     $this->tax->setZone( $address['country_id'], $address['zone_id'] );
 
                     if ( $this->session->data['redirect'] ) {
                         $redirect_url = $this->session->data['redirect'];
                         unset( $this->session->data['redirect'] );
                     } else {
-                        //$redirect_url = $this->html->getSecureURL( 'account/account' );
-                        $redirect_url = $this->html->getSecureURL( 'index/home');
+                        $redirect_url = $this->html->getSecureURL( 'account/account' );
                     }
                     $this->extensions->hk_ProcessData( $this );
                     abc_redirect( $redirect_url );
@@ -93,23 +98,29 @@ class ControllerPagesAccountLogin extends AController
             list( $customer_id, $activation_code ) = explode( "::", $enc->decrypt( $this->request->get['ac'] ) );
             if ( $customer_id && $activation_code ) {
                 //get customer
-                $this->loadModel( 'account/customer' );
-                $customer_info = $this->model_account_customer->getCustomer( (int)$customer_id );
-                if ( $customer_info ) {
+                $customer = Customer::find( (int)$customer_id );
+                if ( $customer ) {
+                    $customer_info = $customer->toArray();
                     //if activation code presents in data and matching
                     if ( $activation_code == $customer_info['data']['email_activation'] ) {
                         unset( $customer_info['data']['email_activation'] );
                         if ( ! $customer_info['status'] ) {
-                            //activate now!
-                            $this->model_account_customer->editStatus( $customer_id, 1 );
-                            //update data and remove email_activation code
-                            $this->model_account_customer->updateOtherData( $customer_id, $customer_info['data'] );
+                            //activate
+                            //and update data and remove email_activation code
+                            $customer->update(
+                                [
+                                    'status' => 1,
+                                    'data' => $customer_info['data']
+                                ]
+                            );
                             //send welcome email
-                            $this->model_account_customer->sendWelcomeEmail( $customer_info['email'], true );
+                            $customer_info['activated'] = true;
+                            H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+
                             $this->session->data['success'] = $this->language->get( 'text_success_activated' );
                         } else {
                             //update data and remove email_activation code
-                            $this->model_account_customer->updateOtherData( $customer_id, $customer_info['data'] );
+                            $customer->update( ['data' => $customer_info['data']] );
                             $this->session->data['success'] = $this->language->get( 'text_already_activated' );
                         }
                     } elseif ( ! $customer_info['data']['email_activation'] && $customer_info['status'] ) {
@@ -251,14 +262,29 @@ class ControllerPagesAccountLogin extends AController
      *
      * @return bool
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     private function _validate( $loginname, $password )
     {
+
         if ( $this->customer->login( $loginname, $password ) !== true ) {
             if ( $this->config->get( 'config_customer_email_activation' ) ) {
                 //check if account is not confirmed in the email.
-                $this->loadModel( 'account/customer' );
-                $customer_info = $this->model_account_customer->getCustomerByLogin($loginname);
+                $customer_info = Customer::getCustomers(
+                    [
+                        'filter' =>
+                            [
+                                'search_operator' => 'equal',
+                                //if email as login not allowed - seek by login
+                                ($this->config->get('prevent_email_as_login') ? 'loginname' : 'email') => $loginname
+                            ]
+                    ]
+                );
+
+                if($customer_info){
+                    $customer_info = $customer_info->first()->toArray();
+                }
+
                 if ( $customer_info
                     && ! $customer_info['status']
                     && isset( $customer_info['data']['email_activation'] )
@@ -276,8 +302,11 @@ class ControllerPagesAccountLogin extends AController
             $this->error['message'] .= $this->language->get( 'error_login' );
 
         } else {
-            $this->loadModel( 'account/address' );
-            $address = $this->model_account_address->getAddress( $this->customer->getAddressId() );
+            $address = [];
+            $addressModel = Address::find($this->customer->getAddressId());
+            if($addressModel) {
+                $address = $addressModel->toArray();
+            }
 
             $this->session->data['country_id'] = $address['country_id'];
             $this->session->data['zone_id'] = $address['zone_id'];

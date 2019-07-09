@@ -31,7 +31,9 @@ use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use H;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Filesystem\Filesystem;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
@@ -271,6 +273,25 @@ registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
 $cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
 $cache_driver = !$cache_driver ? 'file' : $cache_driver;
 $registry->get('cache')->setCacheStorageDriver($cache_driver);
+
+//Laravel cache
+$container = new \Illuminate\Container\Container();
+$container['config'] = [
+    'cache.default' => 'file',
+    'cache.stores.file' => [
+        'driver' => 'file',
+        'path' => ABC:: env('CACHE')['DIR_CACHE']
+    ]
+];
+// To use the file cache driver we need an instance of Illuminate's Filesystem, also stored in the container
+$container['files'] = new Filesystem;
+// Create the CacheManager
+$cacheManager = new CacheManager($container);
+$cache = $cacheManager->store();
+// Or, if you have multiple drivers:
+// $cache = $cacheManager->store('file');
+$registry->set('Cache', $cache);
+
 
 // Config
 registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);

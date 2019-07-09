@@ -25,6 +25,9 @@ use abc\core\engine\Model;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
+use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
+use abc\models\catalog\Product;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -323,9 +326,7 @@ class ModelToolImportProcess extends Model
         $this->load->model('catalog/product');
         if ($new_product) {
 
-            $product_data['product_description'] = [
-                $language_id => $product_desc,
-            ];
+            $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
 
             //apply default settings for new products only
             $default_arr = [
@@ -342,7 +343,7 @@ class ModelToolImportProcess extends Model
                 $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
             }
 
-            $product_id = $this->model_catalog_product->addProduct($product_data);
+            $product_id = Product::createProduct($product_data);
             if ($product_id) {
                 $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
                 $status = true;
@@ -353,7 +354,7 @@ class ModelToolImportProcess extends Model
         } else {
             //flat array for description (specific for update)
             $product_data['product_description'] = $product_desc;
-            $this->model_catalog_product->updateProduct($product_id, $product_data);
+            Product::updateProduct($product_id, $product_data, $language_id);
             $this->toLog("Updated product '{$product_desc['name']}' with ID {$product_id}.");
             $status = true;
         }
@@ -436,7 +437,7 @@ class ModelToolImportProcess extends Model
 
         if ($category_id) {
             //update category
-            $this->model_catalog_category->editCategory(
+            (new Category())->editCategory(
                 $category_id,
                 $category_data
             );
@@ -451,7 +452,7 @@ class ModelToolImportProcess extends Model
                 $category[$key] = isset($category[$key]) ? $category[$key] : $val;
             }
 
-            $category_id = $this->model_catalog_category->addCategory($category_data);
+            $category_id = (new Category())->addCategory($category_data);
             if ($category_id) {
                 $this->toLog("Created category '{$category_desc['name']}' with ID {$category_id}.");
                 $status = true;
@@ -644,11 +645,18 @@ class ModelToolImportProcess extends Model
             $opt_val_data['weight_type'] = $prd_weight_info['unit'];
         }
 
-        return $this->model_catalog_product->addProductOptionValueAndDescription(
+        $pd_opt_val_id = $this->model_catalog_product->addProductOptionValueAndDescription(
             $product_id,
             $p_option_id,
             $opt_val_data
         );
+
+        if ($pd_opt_val_id && !empty($data['image'])) {
+            //process images
+            $this->migrateImages($data, 'product_option_value', $pd_opt_val_id, $data['name'], $this->language->getContentLanguageID());
+        }
+
+        return $pd_opt_val_id;
     }
 
     /**
@@ -668,6 +676,7 @@ class ModelToolImportProcess extends Model
             'products'      => 'Product',
             'categories'    => 'Category',
             'manufacturers' => 'Brand',
+            'product_option_value' => 'ProductOptionValue'
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
@@ -876,12 +885,12 @@ class ModelToolImportProcess extends Model
     {
         $manufacturer_id = null;
         $sql = $this->db->query("SELECT manufacturer_id from ".$this->db->table_name("manufacturers")
-            ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' limit 1");
+            ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' AND date_deleted is NULL limit 1");
         $manufacturer_id = $sql->row['manufacturer_id'];
         if (!$manufacturer_id) {
             //create category
             $this->load->model('catalog/manufacturer');
-            $manufacturer_id = $this->model_catalog_manufacturer->addManufacturer(
+            $manufacturer_id = (new Manufacturer())->addManufacturer(
                 [
                     'sort_order'         => $sort_order,
                     'name'               => $manufacturer_name,
@@ -970,6 +979,7 @@ class ModelToolImportProcess extends Model
                     ON (cd.category_id = c2s.category_id)
                 WHERE language_id = ".(int)$language_id." 
                     AND  c2s.store_id = ".(int)$store_id."
+                    AND cd.date_deleted is NULL
                     AND LCASE(name) = '".$this->db->escape(mb_strtolower($category_name))."'";
         $res = $this->db->query($sql);
         if ($res->num_rows == 1) {
@@ -981,7 +991,8 @@ class ModelToolImportProcess extends Model
                 $sql2 = "SELECT category_id 
                         FROM ".$this->db->table_name("categories")."
                         WHERE category_id IN (".implode(', ', $cIds).") 
-                            AND parent_id = ".(int)$parent_id." 
+                            AND parent_id = ".(int)$parent_id."
+                            AND date_deleted is NULL 
                         ORDER BY parent_id DESC";
                 $res2 = $this->db->query($sql2);
                 return (int)$res2->row['category_id'];
@@ -1001,7 +1012,7 @@ class ModelToolImportProcess extends Model
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {
-        $category_id = $this->model_catalog_category->addCategory(
+        $category_id = (new Category())->addCategory(
             [
                 'parent_id'            => $pid,
                 'sort_order'           => 0,
@@ -1048,7 +1059,7 @@ class ModelToolImportProcess extends Model
             $arr = [];
             $field_val = $record[$import_col[$index]];
             $keys = array_reverse(explode('.', $field));
-            if (end($keys) == 'product_options') {
+            if (end($keys) == 'product_options' && !empty($field_val)) {
                 //map options special way
                 //check if this is still same option or it is new name
                 if (count($keys) == 2) {
@@ -1058,6 +1069,20 @@ class ModelToolImportProcess extends Model
                         $tmp_index = ($op_index >= 0) ? $op_index : 0;
                         $op_array[$tmp_index][$keys[0]] = $field_val;
                     }
+                } else if ($keys[0] == 'image') {
+                            //leaf element
+                            //check if we need to split the record data from list of values
+                            if (isset($split_col) && !empty($split_col[$index])) {
+                                $field_val = explode($split_col[$index], $field_val);
+                                $field_val = array_map('trim', $field_val);
+                            }
+                            if (!is_array($field_val)) {
+                                $field_val = [$field_val];
+                            }
+                            $arr['product_option_values']['image'][] = $field_val;
+
+                    $tmp_index = ($op_index >= 0) ? $op_index : 0;
+                    $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
                 } else {
                     for ($i = 0; $i < count($keys) - 1; $i++) {
                         if ($i == 0) {
@@ -1067,7 +1092,7 @@ class ModelToolImportProcess extends Model
                         }
                     }
                     $tmp_index = ($op_index >= 0) ? $op_index : 0;
-                    $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
+                    $op_array[$tmp_index] = array_merge_recursive((array)$op_array[$tmp_index], (array)$arr);
                 }
             } else {
                 foreach ($keys as $key) {
@@ -1164,16 +1189,6 @@ class ModelToolImportProcess extends Model
                         'title'  => 'SKU (up to 64 chars)',
                         'update' => true,
                         'alias'  => 'sku',
-                    ],
-                    'products.catalog_only'                            => [
-                        'title' => 'Catalog only mode (1 or 0)',
-                        'alias' => 'catalog_only',
-                        'update'   => true,
-                    ],
-                    'products.external_url'                            => [
-                        'title' => 'External URL',
-                        'alias' => 'external_url',
-                        'update'   => true,
                     ],
                     'products.model'                                   => [
                         'title'  => 'Model (up to 64 chars)',
@@ -1356,6 +1371,12 @@ class ModelToolImportProcess extends Model
                         'title'      => 'Option value sort order (1 or 0)',
                         'multivalue' => 1,
                         'alias'      => 'option value sort order',
+                    ],
+                    'product_options.product_option_values.image' => [
+                        'title'      => 'Option value image or List of URLs/Paths',
+                        'split'      => 1,
+                        'multivalue' => 1,
+                        'alias'      => 'option value image',
                     ],
                 ],
             ],

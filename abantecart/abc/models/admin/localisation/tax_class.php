@@ -20,12 +20,9 @@
 
 namespace abc\models\admin;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ModelLocalisationTaxClass
@@ -48,13 +45,13 @@ class ModelLocalisationTaxClass extends Model
 
         foreach ($data['tax_class'] as $language_id => $value) {
             $this->language->replaceDescriptions('tax_class_descriptions',
-                array('tax_class_id' => (int)$tax_class_id),
-                array(
-                    $language_id => array(
+                ['tax_class_id' => (int)$tax_class_id],
+                [
+                    $language_id => [
                         'title'       => $value['title'],
                         'description' => $value['description'],
-                    ),
-                ));
+                    ],
+                ]);
         }
 
         $this->cache->remove('localization');
@@ -88,12 +85,12 @@ class ModelLocalisationTaxClass extends Model
 
         foreach ($data['tax_rate'] as $language_id => $value) {
             $this->language->replaceDescriptions('tax_rate_descriptions',
-                array('tax_rate_id' => (int)$tax_rate_id),
-                array(
-                    $language_id => array(
+                ['tax_rate_id' => (int)$tax_rate_id],
+                [
+                    $language_id => [
                         'description' => $value['description'],
-                    ),
-                ));
+                    ],
+                ]);
         }
 
         $this->cache->remove('localization');
@@ -110,7 +107,7 @@ class ModelLocalisationTaxClass extends Model
     {
 
         if (count($data['tax_class'])) {
-            $update = array('date_modified = NOW()');
+            $update = ['date_modified = NOW()'];
             $this->db->query("UPDATE ".$this->db->table_name("tax_classes")." 
                               SET ".implode(',', $update)."
                               WHERE tax_class_id = '".(int)$tax_class_id."'");
@@ -119,21 +116,21 @@ class ModelLocalisationTaxClass extends Model
                 //save only if value defined
                 if (isset($value['title'])) {
                     $this->language->replaceDescriptions('tax_class_descriptions',
-                        array('tax_class_id' => (int)$tax_class_id),
-                        array(
-                            $language_id => array(
+                        ['tax_class_id' => (int)$tax_class_id],
+                        [
+                            $language_id => [
                                 'title' => $value['title'],
-                            ),
-                        ));
+                            ],
+                        ]);
                 }
                 if (isset($value['description'])) {
                     $this->language->replaceDescriptions('tax_class_descriptions',
-                        array('tax_class_id' => (int)$tax_class_id),
-                        array(
-                            $language_id => array(
+                        ['tax_class_id' => (int)$tax_class_id],
+                        [
+                            $language_id => [
                                 'description' => $value['description'],
-                            ),
-                        ));
+                            ],
+                        ]);
                 }
             }
 
@@ -150,16 +147,26 @@ class ModelLocalisationTaxClass extends Model
     public function editTaxRate($tax_rate_id, $data)
     {
         $data['tax_exempt_groups'] = serialize($data['tax_exempt_groups']);
-        $fields =
-            array('location_id', 'zone_id', 'priority', 'rate_prefix', 'threshold_condition', 'tax_exempt_groups');
-        $update = array('date_modified = NOW()');
+        $fields = [
+            'location_id', 
+            'zone_id', 
+            'priority', 
+            'rate_prefix', 
+            'threshold_condition', 
+            'tax_exempt_groups'
+        ];
+        $update = ['date_modified = NOW()'];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                if($f == 'zone_id' && !$data[$f]){
+                    $update[] = $f." = NULL";
+                }else {
+                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                }
             }
         }
-        $update[] = "rate = '".AHelperUtils::preformatFloat($data['rate'], $this->language->get('decimal_point'))."'";
-        $update[] = "threshold = '".AHelperUtils::preformatFloat(
+        $update[] = "rate = '".H::preformatFloat($data['rate'], $this->language->get('decimal_point'))."'";
+        $update[] = "threshold = '".H::preformatFloat(
                 $data['threshold'],
                 $this->language->get('decimal_point')
             )."'";
@@ -174,12 +181,12 @@ class ModelLocalisationTaxClass extends Model
         if (count($data['tax_rate'])) {
             foreach ($data['tax_rate'] as $language_id => $value) {
                 $this->language->replaceDescriptions('tax_rate_descriptions',
-                    array('tax_rate_id' => (int)$tax_rate_id),
-                    array(
-                        $language_id => array(
+                    ['tax_rate_id' => (int)$tax_rate_id],
+                    [
+                        $language_id => [
                             'description' => $value['description'],
-                        ),
-                    ));
+                        ],
+                    ]);
             }
             $this->cache->remove('localization');
         }
@@ -245,13 +252,13 @@ class ModelLocalisationTaxClass extends Model
      */
     public function getTaxClassDescriptions($tax_class_id)
     {
-        $tax_data = array();
+        $tax_data = [];
         $query = $this->db->query("SELECT *
                                     FROM ".$this->db->table_name("tax_class_descriptions")." 
                                     WHERE tax_class_id = '".(int)$tax_class_id."'");
         foreach ($query->rows as $result) {
             $tax_data[$result['language_id']] =
-                array('title' => $result['title'], 'description' => $result['description']);
+                ['title' => $result['title'], 'description' => $result['description']];
         }
         return $tax_data;
     }
@@ -285,12 +292,12 @@ class ModelLocalisationTaxClass extends Model
      */
     public function getTaxRateDescriptions($tax_rate_id)
     {
-        $tax_data = array();
+        $tax_data = [];
         $query = $this->db->query("SELECT *
                                     FROM ".$this->db->table_name("tax_rate_descriptions")." 
                                     WHERE tax_rate_id = '".(int)$tax_rate_id."'");
         foreach ($query->rows as $result) {
-            $tax_data[$result['language_id']] = array('description' => $result['description']);
+            $tax_data[$result['language_id']] = ['description' => $result['description']];
         }
         return $tax_data;
     }
@@ -302,7 +309,7 @@ class ModelLocalisationTaxClass extends Model
      * @return array
      * @throws \Exception
      */
-    public function getTaxClasses($data = array(), $mode = 'default')
+    public function getTaxClasses($data = [], $mode = 'default')
     {
         $language_id = $this->session->data['content_language_id'];
         $default_language_id = $this->language->getDefaultLanguageID();
@@ -407,7 +414,7 @@ class ModelLocalisationTaxClass extends Model
      * @return array
      * @throws \Exception
      */
-    public function getTotalTaxClasses($data = array())
+    public function getTotalTaxClasses($data = [])
     {
         return $this->getTaxClasses($data, 'total_only');
     }

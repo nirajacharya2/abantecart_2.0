@@ -431,17 +431,31 @@ class ACart  extends ALibBase
             $final_price = $custom_price;
         }
 
+        // product downloads
+        $download_data = $this->download->getProductOrderDownloads($product_id);
+
+        $common_quantity = $quantity;
+        //check if this product with another option values already in the cart
+        if($this->cust_data['cart']) {
+            foreach($this->cust_data['cart'] as $key => $cart_product){
+                list($pId,) = explode(':',$key);
+                if($product_id != $pId || $key == $product_id.':'.md5(serialize($options))){
+                    continue;
+                }
+                if(!$op_stock_trackable){
+                    $common_quantity += $cart_product['qty'];
+                }
+            }
+        }
+
         //check if we need to check main product stock. Do only if no stock trackable options selected
-        if (!$options
+        if ((!$options || !$op_stock_trackable)
             && $product_query['subtract']
-            && $product_query['quantity'] < $quantity
+            && $product_query['quantity'] < $common_quantity
             && !$product_query['stock_checkout']
         ) {
             $stock = false;
         }
-
-        // product downloads
-        $download_data = $this->download->getProductOrderDownloads($product_id);
 
         $result = [
             'product_id'         => $product_query['product_id'],

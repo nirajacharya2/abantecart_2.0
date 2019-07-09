@@ -22,6 +22,7 @@ namespace abc\models\storefront;
 
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
+use abc\models\catalog\Manufacturer;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -79,12 +80,20 @@ class ModelCatalogCategory extends Model
         $cache_key = 'category.list.'.$parent_id.'.store_'.$store_id.'_limit_'.$limit.'_lang_'.$language_id;
         $cache = $this->cache->pull($cache_key);
 
+        if ((int)$parent_id == 0) {
+            $whereParent = 'c.parent_id IS NULL';
+        } else if ((int)$parent_id > 0) {
+            $whereParent = "c.parent_id = '".(int)$parent_id."'";
+        } else {
+            $whereParent = false;
+        }
+
         if ($cache === false) {
             $query = $this->db->query("SELECT *
 										FROM ".$this->db->table_name("categories")." c
 										LEFT JOIN ".$this->db->table_name("category_descriptions")." cd ON (c.category_id = cd.category_id AND cd.language_id = '".$language_id."')
 										LEFT JOIN ".$this->db->table_name("categories_to_stores")." c2s ON (c.category_id = c2s.category_id)
-										WHERE ".($parent_id < 0 ? "" : "c.parent_id = '".(int)$parent_id."' AND ")."
+										WHERE ".($whereParent ? $whereParent." AND " : "")."
 										     c2s.store_id = '".$store_id."' AND c.status = '1'
 										ORDER BY c.sort_order, LCASE(cd.name)
 										".((int)$limit ? "LIMIT ".(int)$limit : '')." ");
@@ -326,7 +335,7 @@ class ModelCatalogCategory extends Model
 
                 foreach ($prods as $prod) {
                     if ($prod['manufacturer_id']) {
-                        $brand = $this->model_catalog_manufacturer->getManufacturer($prod['manufacturer_id']);
+                        $brand = (new Manufacturer())->getManufacturer($prod['manufacturer_id']);
                         $brands[$prod['manufacturer_id']] = array(
                             'name' => $brand['name'],
                             'href' => $this->html->getSEOURL('product/manufacturer', '&manufacturer_id='.$brand['manufacturer_id'], '&encode'),

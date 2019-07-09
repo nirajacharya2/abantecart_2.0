@@ -19,6 +19,8 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\customer\Customer;
+use H;
 
 /**
  * Class ControllerApiCustomerCreate
@@ -34,7 +36,6 @@ class ControllerApiCustomerCreate extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('sale/customer');
         $this->loadModel('sale/customer_group');
 
         $request = $this->rest->getRequestParams();
@@ -58,7 +59,7 @@ class ControllerApiCustomerCreate extends AControllerAPI
         }
 
         //check if customer exists.
-        $result = $this->model_sale_customer->getCustomersByEmails($request['email']);
+        $result = Customer::getCustomers(['filter' => ['email' => $request['email']]], 'total_only');
         if ($result) {
             $this->rest->setResponseData(['Error' => "Customer with email {$request['email']} already exists."]);
             $this->rest->sendResponse(200);
@@ -66,7 +67,7 @@ class ControllerApiCustomerCreate extends AControllerAPI
         }
         //check if login is unique
         $request['loginname'] = isset($request['loginname']) ? $request['loginname'] : $request['email'];
-        if (!$this->model_sale_customer->is_unique_loginname($request['loginname'])) {
+        if (!Customer::isUniqueLoginname($request['loginname'])) {
             $this->rest->setResponseData(
                 ['Error' => "Customer with loginname {$request['loginname']} already exists."]
             );
@@ -81,10 +82,18 @@ class ControllerApiCustomerCreate extends AControllerAPI
 
         $request['approved'] = isset($request['approved']) ? $request['approved'] : self::APPROVAL;
 
-        $customer_id = $this->model_sale_customer->addCustomer($request);
+        //encrypt customer data
+        if ($this->dcrypt->active) {
+            $request = $this->dcrypt->encrypt_data($request, 'customers');
+
+        }
+
+        $customer = new Customer($request);
+        $customer->save();
+
         //todo Need to add address creation
 
-        $customer_details = $this->model_sale_customer->getCustomer($customer_id);
+        $customer_details = $customer->toArray();
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->rest->setResponseData($customer_details);

@@ -25,6 +25,7 @@ use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AJson;
 use abc\core\lib\AOrder;
+use abc\models\customer\Address;
 
 /**
  * Class ControllerApiCheckoutConfirm
@@ -34,8 +35,8 @@ use abc\core\lib\AOrder;
  */
 class ControllerApiCheckoutConfirm extends AControllerAPI
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function post()
     {
@@ -44,31 +45,31 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401, array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->sendResponse(401, ['error' => 'Not logged in or Login attempt failed!']);
             return null;
         }
 
         if (!$this->cart->hasProducts()) {
             //No products in the cart.
-            $this->rest->sendResponse(200, array('status' => 2, 'error' => 'Nothing in the cart!'));
+            $this->rest->sendResponse(200, ['status' => 2, 'error' => 'Nothing in the cart!']);
             return null;
         }
         if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
             //No stock for products in the cart if tracked.
-            $this->rest->sendResponse(200, array('status' => 3, 'error' => 'No stock for product!'));
+            $this->rest->sendResponse(200, ['status' => 3, 'error' => 'No stock for product!']);
             return null;
         }
 
         if ($this->cart->hasShipping()) {
             if (!isset($this->session->data['shipping_address_id']) || !$this->session->data['shipping_address_id']) {
                 //Problem. Missing shipping address
-                $this->rest->sendResponse(200, array('status' => 4, 'error' => 'Missing shipping address!'));
+                $this->rest->sendResponse(200, ['status' => 4, 'error' => 'Missing shipping address!']);
                 return null;
             }
 
             if (!isset($this->session->data['shipping_method'])) {
                 //Problem. Missing shipping address
-                $this->rest->sendResponse(200, array('status' => 5, 'error' => 'Missing shipping method!'));
+                $this->rest->sendResponse(200, ['status' => 5, 'error' => 'Missing shipping method!']);
                 return null;
             }
         } else {
@@ -80,12 +81,12 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
         }
 
         if (!isset($this->session->data['payment_address_id']) || !$this->session->data['payment_address_id']) {
-            $this->rest->sendResponse(200, array('status' => 6, 'error' => 'Missing payment (billing) address!'));
+            $this->rest->sendResponse(200, ['status' => 6, 'error' => 'Missing payment (billing) address!']);
             return null;
         }
 
         if (!isset($this->session->data['payment_method'])) {
-            $this->rest->sendResponse(200, array('status' => 5, 'error' => 'Missing payment (billing) method!'));
+            $this->rest->sendResponse(200, ['status' => 5, 'error' => 'Missing payment (billing) method!']);
             return null;
         }
 
@@ -98,27 +99,31 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
         $this->session->data['order_id'] = $order->saveOrder();
 
         //build confirmation data
-        $this->loadModel('account/address');
-        $shipping_address = $this->model_account_address->getAddress($this->session->data['shipping_address_id']);
+        $shipping_address = [];
+        if($address = Address::find($this->session->data['shipping_address_id'])){
+            $shipping_address = $address->toArray();
+        }
+
         if ($this->cart->hasShipping()) {
-            $this->data['shipping_address'] = $this->customer
-                ->getFormattedAddress(
-                    $shipping_address,
-                    $shipping_address['address_format']
-                );
+            $this->data['shipping_address'] = $this->customer->getFormattedAddress(
+                                                                            $shipping_address,
+                                                                            $shipping_address['address_format']
+                                                                        );
         } else {
             $this->data['shipping_address'] = '';
         }
 
         $this->data['shipping_method'] = $this->session->data['shipping_method']['title'];
 
-        $payment_address = $this->model_account_address->getAddress($this->session->data['payment_address_id']);
+        $payment_address = [];
+        if($address = Address::find($this->session->data['payment_address_id'])){
+            $payment_address = $address->toArray();
+        }
         if ($payment_address) {
-            $this->data['payment_address'] = $this->customer
-                ->getFormattedAddress(
-                    $payment_address,
-                    $payment_address['address_format']
-                );
+            $this->data['payment_address'] = $this->customer->getFormattedAddress(
+                                                                            $payment_address,
+                                                                            $payment_address['address_format']
+                                                                        );
         } else {
             $this->data['payment_address'] = '';
         }
@@ -132,7 +137,7 @@ class ControllerApiCheckoutConfirm extends AControllerAPI
         $this->loadModel('tool/seo_url');
         $this->loadModel('tool/image');
 
-        $product_ids = array();
+        $product_ids = [];
         foreach ($this->data['products'] as $result) {
             $product_ids[] = (int)$result['product_id'];
         }

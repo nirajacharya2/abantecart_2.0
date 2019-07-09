@@ -39,8 +39,6 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
-    'ValidationTranslator' => ValidationTranslator::class,
-    'Validator'            => Validator::class,
     'ABAC'                 => Abac::class,
     'ABACFactory'          => AbacFactory::class,
     'Checkout'             => CheckOut::class,

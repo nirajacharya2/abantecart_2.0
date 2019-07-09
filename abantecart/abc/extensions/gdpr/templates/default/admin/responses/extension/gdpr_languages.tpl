@@ -5,9 +5,12 @@
 
 use abc\core\engine\AController;
 use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
 
+$registry = Registry::getInstance();
+$registry->get('load')->model('localisation/language_definitions');
 //load storefront side language
-$language = new ALanguage(\abc\core\engine\Registry::getInstance(), 'en', 0);
+$language = new ALanguage($registry, 'en', 0);
 $language->load('gdpr/gdpr');
 
 $filter_data = [

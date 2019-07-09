@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
@@ -95,10 +96,10 @@ class ControllerPagesProductCategory extends AController
             $parts = explode('_', $request['path']);
             if (count($parts) == 1) {
                 //see if this is a category ID to sub category, need to build full path
-                $parts = explode('_', $this->model_catalog_category->buildPath($request['path']));
+                $parts = explode('_', (new Category())->buildPath((int)$request['path']));
             }
             foreach ($parts as $path_id) {
-                $category_info = $this->model_catalog_category->getCategory($path_id);
+                $category_info = (new Category())->getCategory($path_id);
 
                 if ($category_info) {
                     if (!$path) {
@@ -121,7 +122,7 @@ class ControllerPagesProductCategory extends AController
 
         $category_info = [];
         if ($category_id) {
-            $category_info = $this->model_catalog_category->getCategory($category_id);
+            $category_info = (new Category())->getCategory($category_id);
         } elseif ($this->config->get('embed_mode') == true || isset($request['path'])) {
             //Display Top category when embed mode or have PATH parameter
             $category_info['name'] = $this->language->get('text_top_category');
@@ -169,7 +170,7 @@ class ControllerPagesProductCategory extends AController
             }
 
             $this->loadModel('catalog/product');
-            $category_total = $this->model_catalog_category->getTotalCategoriesByCategoryId($category_id);
+            $category_total = (new Category())->getTotalCategoriesByCategoryId($category_id);
             $product_total = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
 
             if ($category_total || $product_total) {

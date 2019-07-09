@@ -276,7 +276,7 @@ class ControllerPagesDesignBlocks extends AController
             if (strpos($this->request->post['listing_datasource'], 'custom_') !== false) {
                 $listing_manager = new AListingManager($custom_block_id);
                 if ($this->request->post['selected']) {
-                    $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                    $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                     $k = 0;
                     foreach ($this->request->post['selected'] as $id) {
                         $listing_manager->saveCustomListItem(
@@ -366,12 +366,12 @@ class ControllerPagesDesignBlocks extends AController
                     // if datasource changed - drop custom list
 
                     if ($block_info['content']['listing_datasource'] != $content['listing_datasource']) {
-                        $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                        $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                     }
                     if (strpos($content['listing_datasource'], 'custom_') !== false) {
 
                         if ($this->request->post['selected']) {
-                            $listing_manager->deleteCustomListing($this->config->get('config_store_id'));
+                            $listing_manager->deleteCustomListing((int)$this->config->get('config_store_id'));
                             $k = 0;
                             foreach ($this->request->post['selected'] as $id) {
                                 $listing_manager->saveCustomListItem(

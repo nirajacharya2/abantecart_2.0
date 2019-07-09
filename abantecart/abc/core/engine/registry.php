@@ -17,52 +17,101 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\engine;
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
-final class Registry{
-	private $data = array ();
-	static private $instance = null;
+use abc\core\lib\AConfig;
+use abc\core\lib\AConfigManager;
+use abc\core\lib\ACustomer;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
+use abc\core\lib\AIM;
+use abc\core\lib\AIMManager;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\ALog;
+use abc\core\lib\ARequest;
+use abc\core\lib\ASession;
+use abc\core\lib\AUser;
 
-	/**
-	 * @return Registry
-	 */
-	static function getInstance(){
-		if (self::$instance == null) {
-			self::$instance = new Registry();
-		}
-		return self::$instance;
-	}
+/**
+ * Class Registry
+ *
+ * @package abc\core\engine
+ * @method static ALanguage|ALanguageManager language()
+ * @method static ALog log()
+ * @method static ADB db()
+ * @method static ADataEncryption dcrypt()
+ * @method static AIM|AIMManager im()
+ * @method static AConfig|AConfigManager config()
+ * @method static ARequest request()
+ * @method static ASession session()
+ * @method static ALoader load()
+ * @method static ExtensionsApi extensions()
+ * @method static ACustomer customer()
+ * @method static AHtml html()
+ * @method static AUser user()
+ */
+final class Registry
+{
+    private $data = [];
+    static private $instance = null;
 
-	private function __construct(){
-	}
+    /**
+     * @return Registry
+     */
+    static function getInstance()
+    {
+        if (self::$instance == null) {
+            self::$instance = new Registry();
+        }
+        return self::$instance;
+    }
 
-	private function __clone(){
-	}
+    private function __construct()
+    {
+    }
 
-	/**
-	 * @param $key string
-	 * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\cache\ACache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
-	 */
-	public function get($key){
-		return (isset($this->data[$key]) ? $this->data[$key] : null);
-	}
+    private function __clone()
+    {
+    }
 
-	/**
-	 * @param $key string
-	 * @param $value mixed
-	 */
-	public function set($key, $value){
-		$this->data[$key] = $value;
-	}
+    /**
+     * @param $key string
+     *
+     * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\cache\ACache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
+     */
+    public function get($key)
+    {
+        return (isset($this->data[$key]) ? $this->data[$key] : null);
+    }
 
-	/**
-	 * @param $key string
-	 * @return bool
-	 */
-	public function has($key){
-		return isset($this->data[$key]);
-	}
+    /**
+     * @param $key string
+     * @param $value mixed
+     */
+    public function set($key, $value)
+    {
+        $this->data[$key] = $value;
+    }
+
+    /**
+     * @param $key string
+     *
+     * @return bool
+     */
+    public function has($key)
+    {
+        return isset($this->data[$key]);
+    }
+
+    /**
+     * Return objects by static call
+     * @param $name
+     *
+     * @return mixed - object or null
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        return self::getInstance()->get($name);
+    }
 }

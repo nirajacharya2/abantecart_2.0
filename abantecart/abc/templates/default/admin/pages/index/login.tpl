@@ -12,14 +12,14 @@
 		<div class="form-group">
 			<div class="input-group">
 				<div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-user fa-fw"></i></span></div>
-			<?php echo $form['fields']['username']; ?>
+			<?php echo $form['fields']['admin_username']; ?>
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="input-group">
 			<div class="input-group-prepend">
 				<span class="input-group-text"><i class="fa fa-key fa-fw"></i></span></div>
-			<?php echo $form['fields']['password']; ?>
+			<?php echo $form['fields']['admin_password']; ?>
 			</div>
 		</div>
 		<div class="form-group">

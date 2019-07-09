@@ -30,10 +30,12 @@ use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasOneEvents;
 use H;
+use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\DatabasePresenceVerifier;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
@@ -43,9 +45,10 @@ use ReflectionMethod;
  * Class BaseModel
  *
  * @package abc\models
- * @method static Builder find(integer $id, array $columns = ['*'])
- * @method static Builder where(string $column, string $operator, mixed $value = null, string $boolean = 'and')
- * @const string DELETED_AT
+ * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
+ * @method static Builder where(string|array $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder select(mixed $select) Builder
+ * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
 {
@@ -58,6 +61,7 @@ class BaseModel extends OrmModel
         HasMorphToEvents,
         HasMorphManyEvents,
         HasMorphToManyEvents;
+    use InitializeModel;
 
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
@@ -118,6 +122,10 @@ class BaseModel extends OrmModel
     protected $affectedColumns = [];
 
     /**
+     * @var Validator $validator
+     */
+    protected $validator;
+    /**
      *
      * @var array Data Validation rules
      */
@@ -132,6 +140,7 @@ class BaseModel extends OrmModel
 
     /**
      * Classname of main Model needed for audit log
+     *
      * @var string
      */
     protected $mainClassName;
@@ -156,12 +165,22 @@ class BaseModel extends OrmModel
         'deleting',
         //before restore
         'restoring',
+        //before Detaching on sync
+        'belongsToManyDetaching',
+        //before Attaching on sync
+        'belongsToManyAttaching',
+        //before Detaching on sync
+        'morphToManyDetaching',
+        //before Attaching on sync
+        'morphToManyAttaching',
     ];
 
     /**
      * @var array - columns list that excluded from audit logging
      */
     public static $auditExcludes = ['date_added', 'date_modified'];
+
+    protected $forceDeleting = false;
 
     /**
      * @param array $attributes
@@ -185,6 +204,7 @@ class BaseModel extends OrmModel
         static::boot();
         $this->newBaseQueryBuilder();
     }
+
 
     /**
      * Boot
@@ -240,7 +260,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $operation
+     * @param       $operation
      *
      * @param array $columns
      *
@@ -277,9 +297,9 @@ class BaseModel extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            if ($this->validate($this->toArray())) {
+            //if ($this->validate($this->toArray())) {
                 parent::save();
-            }
+            //}
         } else {
             throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }
@@ -298,18 +318,65 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $data
+     * @return Validator
+     */
+    public function getValidator()
+    {
+        return $this->validator;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @param array $messages
+     * @param array $customAttributes
      *
      * @return bool
+     * @throws ValidationException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function validate($data)
+    public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
+        $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
-            /**
-             * @var Validator $v
-             */
-            $v = ABC::getObjectByAlias('Validator', [ABC::getObjectByAlias('ValidationTranslator'), $data, $rules]);
+            $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
+            if(!$messages){
+                foreach($rules as $attributeName => $item){
+                    //check data for confirmation such as password
+                    if( isset($rules[$attributeName.'_confirmation']) ){
+                        $data[$attributeName.'_confirmation'] = $data[$attributeName];
+                    }
+                    $msg = $item['messages'];
+                    foreach($msg as $subRule => $langParams) {
+                        $subRule = $attributeName.'.'.$subRule;
+                        if($langParams['language_key']) {
+                            $messages[$subRule] = H::lng(
+                                $langParams['language_key'],
+                                $langParams['language_block'],
+                                $langParams['default_text'],
+                                $langParams['section']
+                            );
+                        }else{
+                            $messages[$subRule] = $langParams['default_text'];
+                        }
+                    }
+                }
+            }
+            $v = new Validator(new ValidationTranslator(), $data, $validateRules, $messages, $customAttributes);
+
+            $connections = ['default' => Registry::db()->connection()];
+            $resolver = new ConnectionResolver($connections);
+            $resolver->setDefaultConnection('default');
+            $presenceVerifier = new DatabasePresenceVerifier($resolver);
+            $v->setPresenceVerifier($presenceVerifier);
+            $this->validator = $v;
+
+            //call validation hooks of extensions
+            $v->after(function ($data) {
+                //Registry::extensions()->hk_ValidateData($this,[$data]);
+            });
             try {
                 $v->validate();
             } catch (ValidationException $e) {
@@ -366,7 +433,7 @@ class BaseModel extends OrmModel
      * @param string $key
      * @param string $value
      */
-    public function updateRule(string $key, string $value)
+    public function updateRule(string $key, array $value)
     {
         $this->rules[$key] = $value;
     }
@@ -415,7 +482,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array $data
+     * @param array  $data
      */
     private function syncHasOneRelationship($relationship_name, array $data)
     {
@@ -431,7 +498,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param $model
+     * @param       $model
      * @param array $data
      */
     private function syncHasManyRelationship($model, array $data)
@@ -473,7 +540,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array $data
+     * @param array  $data
      *
      * @return mixed
      */
@@ -583,13 +650,25 @@ class BaseModel extends OrmModel
     /**
      * @return string
      */
-    public function getMainModelClassName(){
+    public function getMainModelClassName()
+    {
         return $this->mainClassName ?? $this->getClass();
     }
+
     /**
      * @return string
      */
-    public function getMainModelClassKey(){
+    public function getMainModelClassKey()
+    {
         return $this->mainClassKey ?? $this->getKeyName();
+    }
+
+    /*
+     * Trick for affecting on query builder inside static method of models
+     * from extension hooks
+     *
+     */
+    public function _extendQuery($query){
+        return $query;
     }
 }

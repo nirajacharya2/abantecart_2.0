@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
+use abc\models\catalog\Category;
 
 class ModelCatalogProduct extends Model
 {
@@ -190,37 +191,51 @@ class ModelCatalogProduct extends Model
      * @throws \Exception
      */
     public function hasAnyStock($product_id)
-    {
-        if (!(int)$product_id) {
-            return 0;
-        }
-        $total_quantity = 0;
-        //check product option values
-        $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
-                                    FROM ".$this->db->table_name("product_options")." po
-                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
-                                        ON (po.product_option_id = pov.product_option_id)
-                                    WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
-        if ($query->num_rows) {
-            $notrack_qnt = 0;
-            foreach ($query->rows as $row) {
-                //if tracking of stock disabled - set quantity as big
-                if (!$row['subtract']) {
-                    $notrack_qnt += 10000000;
-                    continue;
-                }
-                $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
+        {
+            if (!(int)$product_id) {
+                return 0;
             }
-        } else {
-            //get product quantity without options
-            $query = $this->db->query("SELECT quantity
-                                        FROM ".$this->db->table_name("products")." p
-                                        WHERE p.product_id = '".(int)$product_id."'");
-            $total_quantity = (int)$query->row['quantity'];
-        }
+            $trackable = false;
+            $total_quantity = 0;
+            //check product option values
+            $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
+    									FROM ".$this->db->table_name("product_options")." po
+    									LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+    										ON (po.product_option_id = pov.product_option_id)
+    									WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
+            if ($query->num_rows) {
+                foreach ($query->rows as $row) {
+                    //if tracking of stock disabled - set quantity as big
+                    if (!$row['subtract']) {
+                        $total_quantity = true;
+                        continue;
+                    }else{
+                        $trackable = true;
+                    }
+                    //calculate only if have no options without tracking
+                    if($total_quantity !== true) {
+                        $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
+                    }
+                }
+                //if some of option value have subtract NO - think product is available
+                if ($total_quantity == 0 && !$trackable) {
+                    $total_quantity = true;
+                }
+            }
 
-        return $total_quantity;
-    }
+            if(!$trackable) {
+                //get product quantity without options
+                $query = $this->db->query("SELECT quantity, subtract
+    										FROM ".$this->db->table_name("products")." p
+    										WHERE p.product_id = '".(int)$product_id."'");
+                if($query->row['subtract']) {
+                    $total_quantity = (int)$query->row['quantity'];
+                }else{
+                    $total_quantity = true;
+                }
+            }
+            return $total_quantity;
+        }
 
     public function getProductDataForCart($product_id)
     {
@@ -311,7 +326,7 @@ class ModelCatalogProduct extends Model
         if ($cache === false) {
             //get all children categories
             $this->load->model('catalog/category');
-            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT *,
                             p.product_id,
@@ -384,7 +399,7 @@ class ModelCatalogProduct extends Model
         if ($cache === false) {
             //get all children category ids
             $this->load->model('catalog/category');
-            $subCategories = $this->model_catalog_category->getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT COUNT(*) AS total
                     FROM ".$this->db->table_name("products_to_categories")." p2c
@@ -479,7 +494,7 @@ class ModelCatalogProduct extends Model
     public function getTotalProductsByManufacturerId($manufacturer_id = 0)
     {
         $query = $this->db->query("SELECT COUNT(*) AS total
-                                    FROM ".$this->db->table_name("products")."
+                                    FROM ".$this->db->table_name("products p")."
                                     WHERE ".$this->getProductFilters()."
                                             AND manufacturer_id = '".(int)$manufacturer_id."'");
 
@@ -852,7 +867,7 @@ class ModelCatalogProduct extends Model
     public function getPath($category_id)
     {
         $string = $category_id.',';
-        $results = $this->model_catalog_category->getCategories((int)$category_id);
+        $results = (new Category())->getCategories((int)$category_id);
         foreach ($results as $result) {
             $string .= $this->getPath($result['category_id']);
         }

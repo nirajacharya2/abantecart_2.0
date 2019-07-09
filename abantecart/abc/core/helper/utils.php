@@ -19,7 +19,11 @@
 namespace abc\core\helper;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AImage;
@@ -27,6 +31,7 @@ use abc\core\lib\JobManager;
 use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
+use abc\models\order\Order;
 use DateTime;
 use DOMDocument;
 use DOMXPath;
@@ -1196,6 +1201,17 @@ class AHelperUtils extends AHelper
     }
 
     /**
+     * @param string $string
+     * @param string $salt_key
+     *
+     * @return string
+     */
+    public static function getHash(string $string, string $salt_key)
+    {
+        return  sha1($salt_key.sha1($salt_key.sha1($string)));
+    }
+
+    /**
      * TODO: in the future
      *
      * @param $zip_filename
@@ -1537,7 +1553,9 @@ class AHelperUtils extends AHelper
                 if (!file_exists(ABC::env('DIR_IMAGES').$path)) {
                     // Make sure the index file is there
                     $indexFile = ABC::env('DIR_IMAGES').$path.DS.'index.php';
+                    $old = umask(0);
                     $result = mkdir(ABC::env('DIR_IMAGES').$path, 0775);
+                    umask($old);
                     if ($result) {
                         file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
                         chmod($indexFile, 664);
@@ -1749,12 +1767,12 @@ class AHelperUtils extends AHelper
             if (!class_exists(Registry::class)) {
                 return [];
             }
-            $registry = Registry::getInstance();
-            $user_id = $registry->get('customer')->getId();
+            $user_id = Registry::customer() ? Registry::customer()->getId() : 0;
+            $user_name = Registry::customer() ? Registry::customer()->getLoginName() : 'guest';
             $output = [
                 'user_type' => 2,
                 'user_id'   => $user_id,
-                'user_name' => ($user_id ? $registry->get('customer')->getLoginName() : 'guest'),
+                'user_name' => $user_name
             ];
         }
 
@@ -1944,5 +1962,137 @@ class AHelperUtils extends AHelper
             $string = lcfirst($string);
         }
         return str_replace($separator, '', $string);
+    }
+
+    /**
+     * @return string
+     */
+    public static function genRequestId()
+    {
+        return  sprintf(
+            "%08x",
+            abs(crc32(self::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getRemoteIP()
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+
+    /**
+     * @param array $data
+     * @param string $field
+     * @param mixed $value
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public static function filterByEncryptedField($data, $field, $value)
+    {
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        if (!count($data)) {
+            return [];
+        }
+        if (!self::has_value($field) || !self::has_value($value)) {
+            return $data;
+        }
+        $result_rows = [];
+        foreach ($data as $result) {
+            if ($dcrypt->active) {
+                $f_value = $dcrypt->decrypt_field($result[$field], $result['key_id']);
+            } else {
+                $f_value = $result[$field];
+            }
+            if (!(strpos(strtolower($f_value), strtolower($value)) === false)) {
+                $result_rows[] = $result;
+            }
+        }
+        return $result_rows;
+    }
+
+    public static function parseOrderToken( $ot )
+    {
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        /**
+         * @var AConfig $config
+         */
+        $config = Registry::config();
+        if ( ! $ot || ! $config->get( 'config_guest_checkout' ) ) {
+            return [];
+        }
+
+        //try to decrypt order token
+        $enc = new AEncryption( $config->get( 'encryption_key' ) );
+        $decrypted = $enc->decrypt( $ot );
+        list( $order_id, $email ) = explode( '::', $decrypted );
+
+        $order_id = (int)$order_id;
+        if ( ! $decrypted || ! $order_id || ! $email ) {
+            return [];
+        }
+
+        $order = Order::find($order_id);
+        $order_email = $order->email;
+        if($dcrypt->active){
+            $order_email = $dcrypt->decrypt_field($order_email, $order->key_id);
+        }
+
+        //compare emails
+        if ( $order_email != $email ) {
+            return [];
+        }
+
+        return [$order_id, $email];
+    }
+
+    /**
+     * @param string $key - language definition key
+     * @param string $block - language definition block
+     * @param string $default_text - text in case when text by key not found
+     * @param string $section - can be "storefront" or "admin" or empty(auto)
+     *
+     * @return null|string
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public static function lng(string $key, $block= '', $default_text = '', $section = ''){
+        $registry = Registry::getInstance();
+        if( $section ){
+            $section = $section == 'admin' ? 1 : 0;
+            $language = new ALanguage($registry, $registry::language()->getLanguageCode(), $section);
+
+        }else{
+            $language = Registry::language();
+        }
+
+        $text = $language->get($key, $block);
+        //if text not found - set default
+        if($text == $key){
+            $text = $default_text;
+        }
+        return $text;
+    }
+
+    public static function SimplifyValidationErrors($array, &$errors){
+        foreach($array as $rule => $msgArr){
+            $errors[$rule] = implode(' ', $msgArr);
+        }
     }
 }

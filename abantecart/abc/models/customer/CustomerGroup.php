@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property bool $tax_exempt
  *
+ * @method static CustomerGroup find(int $customer_group_id) CustomerGroup
  * @package abc\models
  */
+
 class CustomerGroup extends BaseModel
 {
     use SoftDeletes;

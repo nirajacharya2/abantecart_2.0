@@ -905,8 +905,8 @@ ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
 
 ALTER TABLE `ac_contents`
 CHANGE COLUMN `parent_content_id` `parent_content_id` INT(11) NULL DEFAULT NULL ,
+ADD COLUMN `hide_title` INT(1) NULL DEFAULT '0',
 DROP PRIMARY KEY,
-ADD PRIMARY KEY (`content_id`),
 ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
 
 UPDATE `ac_contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = '0';
@@ -1446,6 +1446,7 @@ ALTER TABLE `ac_weight_classes`
 
 
 ALTER TABLE `ac_addresses`
+CHANGE COLUMN `zone_id` `zone_id` int(11) NULL DEFAULT NULL,
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL;
@@ -1855,7 +1856,17 @@ ADD COLUMN `stage_id` INT(6) NULL,
 ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_products`
-ADD COLUMN `product_type_id` INT(1) NULL;
+ADD COLUMN `product_type_id` INT(1) NULL,
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `product_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+
+ALTER TABLE `ac_categories`
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `category_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+
+ALTER TABLE `ac_manufacturers`
+ADD COLUMN `uuid` varchar(255) DEFAULT NULL AFTER `manufacturer_id`,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
 
 DROP TABLE IF EXISTS `ac_object_types`;
 CREATE TABLE `ac_object_types` (
@@ -1920,12 +1931,61 @@ CREATE TABLE `ac_global_attribute_group_to_object_type` (
   KEY `attribute_group_id_object_type_idx` (`attribute_group_id`,`object_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `ac_audit_event_descriptions`;
+CREATE TABLE `ac_audit_event_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `audit_event_id` int(11) NOT NULL,
+  `auditable_model_id` int(11) NOT NULL,
+  `auditable_id` int(11) NOT NULL,
+  `field_name` varchar(128) NOT NULL,
+  `old_value` text,
+  `new_value` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_events`;
+CREATE TABLE `ac_audit_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` varchar(128) NOT NULL,
+  `audit_session_id` int(11) NOT NULL,
+  `audit_user_id` int(11) NOT NULL,
+  `audit_alias_id` int(11) DEFAULT NULL,
+  `event_type_id` int(11) NOT NULL,
+  `main_auditable_model_id` int(11) NOT NULL,
+  `main_auditable_id` int(11) DEFAULT NULL,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `request_id_UNIQUE` (`request_id`,`audit_user_id`,`event_type_id`,`main_auditable_model_id`,`main_auditable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_models`;
+CREATE TABLE `ac_audit_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_sessions`;
+CREATE TABLE `ac_audit_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq` (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `ac_audit_users`;
+CREATE TABLE `ac_audit_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_userid_indx` (`id`,`name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ALTER TABLE `ac_global_attributes`
 ADD COLUMN `name` VARCHAR(255) NULL AFTER `attribute_type_id`;
-
-
-
-
 
 ALTER TABLE `ac_orders`
 ADD FOREIGN KEY (`customer_id`) REFERENCES `ac_customers`(`customer_id`) ON DELETE SET NULL;
@@ -1952,7 +2012,7 @@ ALTER TABLE `ac_addresses`
 ALTER TABLE `ac_addresses`
   ADD FOREIGN KEY (`country_id`) REFERENCES `ac_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `ac_addresses`
-  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`zone_id`) REFERENCES `ac_zones`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `controller`, `sort_order`, `status`) VALUES
 (3, 'object_attribute', 'responses/catalog/attribute/getObjectAttributeSubform', 3, 1);

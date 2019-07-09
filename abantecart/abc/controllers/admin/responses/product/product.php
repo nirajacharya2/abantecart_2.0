@@ -34,6 +34,7 @@ use abc\core\lib\AWeight;
 use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogDownload;
+use abc\models\catalog\Category;
 use H;
 
 /**
@@ -214,7 +215,7 @@ class ControllerResponsesProductProduct extends AController
 
             if (!empty($this->request->get['currency']) && !empty($this->request->get['value'])) {
                 $price = $this->currency->format(
-                                            (float)$price, 
+                                            (float)$price,
                                             $this->request->get['currency'],
                                             $this->request->get['value']
                 );
@@ -256,7 +257,7 @@ class ControllerResponsesProductProduct extends AController
         foreach ($categories as $category_id) {
             $category_data[] = [
                 'id'         => $category_id,
-                'name'       => $this->model_catalog_category->getPath($category_id),
+                'name'       => (new Category())->getPath($category_id),
                 'sort_order' => 0,
             ];
 

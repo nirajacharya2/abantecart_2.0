@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
+use abc\models\catalog\Category;
 
 /**
  * Class ControllerApiProductCategory
@@ -66,7 +67,7 @@ class ControllerApiProductCategory extends AControllerAPI
         $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
-        $category_info = $this->model_catalog_category->getCategory($category_id);
+        $category_info = (new Category())->getCategory($category_id);
         if (!$category_info) {
             return array('message' => 'category not found');
         }
@@ -84,8 +85,7 @@ class ControllerApiProductCategory extends AControllerAPI
             ABC::env('APP_CHARSET')
         );
         $category_info['total_products'] = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
-        $category_info['total_subcategories'] =
-            $this->model_catalog_category->getTotalCategoriesByCategoryId($category_id);
+        $category_info['total_subcategories'] = (new Category())->getTotalCategoriesByCategoryId($category_id);
         if ($category_info['total_products']) {
             $category_info['subcategories'] = $this->getCategories($category_id);
         }
@@ -119,8 +119,7 @@ class ControllerApiProductCategory extends AControllerAPI
                 'category_id'         => $result['category_id'],
                 'sort_order'          => $result['sort_order'],
                 'thumb'               => $thumbnail['thumb_url'],
-                'total_subcategories' => $this->model_catalog_category
-                    ->getTotalCategoriesByCategoryId($result['category_id']),
+                'total_subcategories' => (new Category())->getTotalCategoriesByCategoryId($result['category_id']),
             );
         }
 

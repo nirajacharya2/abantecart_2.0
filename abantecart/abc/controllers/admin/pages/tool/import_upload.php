@@ -45,11 +45,15 @@ class ControllerPagesToolImportUpload extends AController
      */
     private $handler;
 
+
     public function main()
     {
+        $this->data['import_format'] = 'other';
+        $this->data['redirect'] = $this->html->getSecureURL('tool/import_export', '&active=import');
+
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('tool/import_export');
-        $redirect = $this->html->getSecureURL('tool/import_export', '&active=import');
+        $redirect = $this->data['redirect'];
 
         if (!$this->request->is_POST() || !$this->user->canModify('tool/import_export')) {
             abc_redirect($redirect);
@@ -125,7 +129,7 @@ class ControllerPagesToolImportUpload extends AController
                     return ['error' => $this->language->get('error_csv_import')];
                 }
                 //do we have internal format or some other
-                $res['format'] = 'other';
+                $res['format'] = $this->data['import_format'];
                 $count_dots = 0;
                 foreach ($cols as $key) {
                     if (strpos($key, ".") !== false) {

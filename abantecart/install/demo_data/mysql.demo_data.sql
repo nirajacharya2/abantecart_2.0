@@ -1,4 +1,5 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET FOREIGN_KEY_CHECKS=0;
 
 --INSERT INTO `ac_extensions`
 --(`type`, `key`, `category`, `status`, `priority`, `version`, `license_key`, `date_installed`, `date_modified`, `date_added`)
@@ -460,52 +461,52 @@ INSERT INTO `ac_customers`
 )
 VALUES
 (
-2,
-0,
-'Juliana',
-'Davis',
-'julidavis@abantecart.com',
-'julidavis@abantecart.com',
-'(602) 141-7191',
-'',
-'',
-'6b006ba67f3c172e146991a2ad46d865',
-'a:0:{}',
-NULL,
-0,
-NULL,
-1,
-1,
-1,
-'109.104.166.98',
-NOW(),
-NOW()
+   1,
+   0,
+   'Juliana',
+   'Davis',
+   'julidavis@abantecart.com',
+   'julidavis@abantecart.com',
+   '(602) 141-7191',
+   '',
+   '',
+   '6b006ba67f3c172e146991a2ad46d865',
+   'a:0:{}',
+   NULL,
+   0,
+   NULL,
+   1,
+   1,
+   1,
+   '109.104.166.98',
+   NOW(),
+   NOW()
+),
+
+(
+   2,
+   0,
+   'Keely',
+   'Mccoy',
+   'keelymccoy@abantecart.com',
+   'keelymccoy@abantecart.com',
+   '(602) 916-1822',
+   '',
+   '',
+   '6b006ba67f3c172e146991a2ad46d865',
+   'a:0:{}',
+   NULL,
+   0,
+   NULL,
+   1,
+   1,
+   1,
+   '109.104.166.98',
+   NOW(),NOW()
 ),
 
 (
 3,
-0,
-'Keely',
-'Mccoy',
-'keelymccoy@abantecart.com',
-'keelymccoy@abantecart.com',
-'(602) 916-1822',
-'',
-'',
-'6b006ba67f3c172e146991a2ad46d865',
-'a:0:{}',
-NULL,
-0,
-NULL,
-1,
-1,
-1,
-'109.104.166.98',
-NOW(),NOW()
-),
-
-(
-4,
 0,
 'Zelda',
 'Weiss',
@@ -528,7 +529,7 @@ NOW()
 ),
 
 (
-5,
+4,
 0,
 'Gloria',
 'Macias',
@@ -551,7 +552,7 @@ NOW()
 ),
 
 (
-6,
+5,
 0,
 'Bernard',
 'Horne',
@@ -574,7 +575,7 @@ NOW()
 ),
 
 (
-7,
+6,
 0,
 'James',
 'Curtis',
@@ -597,7 +598,7 @@ NOW()
 ),
 
 (
-8,
+7,
 0,
 'Bruce',
 'Rosarini',
@@ -620,7 +621,7 @@ NOW()
 ),
 
 (
-9,
+8,
 0,
 'Carlos',
 'Compton',
@@ -634,8 +635,8 @@ NOW()
 NULL,
 0,
 NULL,
-1,
-1,
+0,
+0,
 1,
 '109.104.166.98',
 NOW(),
@@ -643,7 +644,7 @@ NOW()
 ),
 
 (
-10,
+9,
 0,
 'Garrison',
 'Baxter',
@@ -662,10 +663,11 @@ NULL,
 1,
 '109.104.166.138',
 NOW(),
-NOW()),
+NOW()
+),
 
 (
-11,
+10,
 0,
 'Anthony',
 'Blair',
@@ -688,7 +690,7 @@ NOW()
 ),
 
 (
-12,
+11,
 0,
 'Allen',
 'Waters',
@@ -700,7 +702,7 @@ NOW()
 '6b006ba67f3c172e146991a2ad46d865',
 'a:0:{}',
 NULL,
-0,
+1,
 NULL,
 1,
 1,
@@ -711,7 +713,7 @@ NOW()
 ),
 
 (
-13,
+12,
 0,
 'qqqqqq',
 'qqqqqq',
@@ -719,15 +721,15 @@ NOW()
 '1@abantecart',
 '55 555 5555 5555',
 '',
-'',
+'44444444',
 '6b006ba67f3c172e146991a2ad46d865',
 'a:1:{s:3:\"97.\";i:1;}',
 NULL,
-0,
+1,
 NULL,
 1,
-1,
-1,
+0,
+3,
 '109.104.166.98',
 NOW(),
 NOW()
@@ -752,18 +754,18 @@ INSERT INTO `ac_addresses`
 `country_id`,
 `zone_id`)
 VALUES
-(1,2,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616),
-(2,3,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648),
-(3,4,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616),
-(4,5,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660),
-(5,6,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616),
-(6,7,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634),
-(7,8,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650),
-(8,9,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648),
-(9,10,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648),
-(10,11,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666),
-(11,12,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616),
-(12,13,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
+(1,1,'','Juliana','Davis','9778 Golden Crescent','Apt 10','85804-7365','Humansville',223,3616),
+(2,2,'','Keely','Mccoy','5071 Misty Pond Farm','Suite #101','63406-9081','Bumble Bee',223,3648),
+(3,3,'BelfastCo','Zelda','Weiss','6944 Sleepy Fawn Abbey','Suite #31','86014-8121','Lawyers',223,3616),
+(4,4,'','Gloria','Macias','7590 Easy Robin Hollow','','73477-3842','Sandymush',223,3660),
+(5,5,'','Bernard','Horne','5607 Umber Branch Via','','86301-9785','Spook City',223,3616),
+(6,6,'','James','Curtis','6500 Arapahoe Road','','80303','Boulder',223,3634),
+(7,7,'','Bruce','Rosarini','61 Cumberland ST','','68624-2273','Skokie',223,3650),
+(8,8,'','Carlos','Compton','31 Capital Drive','','63142-0892','Fort Misery',223,3648),
+(9,9,'','Garrison','Baxter','Eddie Hoffman Highway','','64034-2948','Shell Pile',223,3648),
+(10,10,'','Anthony','Blair','104 Main Street','','29181-8284','Gassaway',223,3666),
+(11,11,'','Allen','Waters','110 Shenandoah Avenue','','86565-1710','Honohina',223,3616),
+(12,12,'','Tom','Kipling','100 Main Str','','64034-2948','Shell Pile',223,3648);
 
 
 -- set default addresses for customers

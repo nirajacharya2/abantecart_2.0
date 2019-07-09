@@ -25,6 +25,7 @@ use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use H;
 use stdClass;
 
@@ -171,13 +172,14 @@ class ControllerResponsesListingGridProduct extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
+                    $ids = array_unique($ids);
                     foreach ($ids as $id) {
                         $err = $this->validateDelete($id);
                         if (!empty($err)) {
                             $error = new AError('');
-
                             return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
+                        $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
                         $this->model_catalog_product->deleteProduct($id);
                     }
                 }
@@ -202,7 +204,7 @@ class ControllerResponsesListingGridProduct extends AController
 
                                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                                 }
-                                $this->model_catalog_product->updateProduct($id, [$f => $this->request->post[$f][$id]]);
+                                Product::updateProduct($id, [$f => $this->request->post[$f][$id]], $this->language->getContentLanguageID());
                             }
                         }
                     }
@@ -264,10 +266,7 @@ class ControllerResponsesListingGridProduct extends AController
                     $value = H::dateDisplay2ISO($value);
                 }
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProduct($product_id, $data);
-                if(!in_array($key, $product_columns)){
-                    $this->model_catalog_product->updateProductLinks($product_id, $data);
-                }
+                Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
             }
 
             return null;
@@ -287,7 +286,7 @@ class ControllerResponsesListingGridProduct extends AController
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return null;
                     }
-                    $this->model_catalog_product->updateProduct($k, [$f => $v]);
+                    Product::updateProduct($k, [$f => $v], $this->language->getContentLanguageID());
                 }
             }
         }

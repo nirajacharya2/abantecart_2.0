@@ -43,7 +43,7 @@ class ModelCatalogContent extends Model
         }
 
         $cache = [];
-        $sql = "SELECT DISTINCT i.content_id, id.*
+        $sql = "SELECT DISTINCT i.content_id, i.hide_title, id.*
                 FROM ".$this->db->table_name("contents")." i
                 LEFT JOIN ".$this->db->table_name("content_descriptions")." id
                     ON (i.content_id = id.content_id AND id.language_id = '".$language_id."')

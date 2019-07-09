@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $zones
  * @property \Illuminate\Database\Eloquent\Collection $zones_to_locations
  *
+ * @method static Country find(int $country_id) Country
+ *
  * @package abc\models
  */
 class Country extends BaseModel

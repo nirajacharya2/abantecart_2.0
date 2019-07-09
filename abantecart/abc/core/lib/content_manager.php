@@ -75,9 +75,9 @@ class AContentManager
             return false;
         }
         $sql = "INSERT INTO ".$this->db->table_name("contents")." 
-                            (parent_content_id, sort_order, status)
-                             VALUES ('".(int)$data['parent_content_id'][0]."',  '".( int )$data ['sort_order'][0]."',
-                                  '".( int )$data ['status']."')";
+                            (parent_content_id, sort_order, status, hide_title)
+                             VALUES (".((int)$data['parent_content_id'][0] ?: "NULL").",  '".( int )$data ['sort_order'][0]."',
+                                  '".( int )$data ['status']."', '".( int )$data ['hide_title']."')";
         $this->db->query($sql);
         $content_id = $this->db->getLastId();
         //exclude first record from loop above
@@ -157,11 +157,12 @@ class AContentManager
         $this->db->query($sql);
         //insert back
         foreach ($data['parent_content_id'] as $parent_id) {
-            $sql = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status)
+            $sql = "INSERT INTO ".$this->db->table_name("contents")." (content_id,parent_content_id, sort_order, status, hide_title)
                     VALUES ('".( int )$content_id."',
-                            '".(int)$parent_id."',
+                            ".((int)$parent_id ?: 'NULL').",
                             '".( int )$data['sort_order'][$parent_id]."',
-                            '".( int )$data ['status']."'); ";
+                            '".( int )$data ['status']."', 
+                            '".( int )$data ['hide_title']."'); ";
             $this->db->query($sql);
         }
 
@@ -221,6 +222,12 @@ class AContentManager
             return false;
         }
 
+        if ((int)$parent_content_id > 0) {
+            $whereParent = " AND parent_content_id='".(int)$parent_content_id."'";
+        } else {
+            $whereParent = " AND parent_content_id IS NULL";
+        }
+
         switch ($field) {
             case 'status' :
                 $this->db->query("UPDATE ".$this->db->table_name("contents")." 
@@ -230,9 +237,12 @@ class AContentManager
             case 'sort_order' :
                 $this->db->query("UPDATE ".$this->db->table_name("contents")." 
                                 SET `sort_order` = '".(int)$value."'
-                                WHERE content_id = '".(int)$content_id."'
-                                    AND parent_content_id='".(int)$parent_content_id."'");
-
+                                WHERE content_id = '".(int)$content_id."'".$whereParent);
+                break;
+            case 'hide_title' :
+                $this->db->query("UPDATE ".$this->db->table_name("contents")." 
+                                SET `hide_title` = '".(int)$value."'
+                                WHERE content_id = '".(int)$content_id."'".$whereParent);
                 break;
             case 'title' :
             case 'description' :
@@ -368,13 +378,14 @@ class AContentManager
                     ON (i.content_id = id.content_id AND id.language_id = '".$language_id."')
                 WHERE i.content_id = '".( int )$content_id."'
                 ORDER BY i.content_id";
+
         $query = $this->db->query($sql);
         if ($query->num_rows) {
             $i = 0;
             foreach ($query->rows as $row) {
-                $idx = $row['parent_content_id'];
+                $idx = $row['parent_content_id'] ?: 0;
                 if ($i > 0) {
-                    $output[0]['parent_content_id'][] = $row['parent_content_id'];
+                    $output[0]['parent_content_id'][] = $row['parent_content_id'] ?: 0;
                     $output[0]['sort_order'][$idx] = $row['sort_order'];
                     continue;
                 }

@@ -6,6 +6,11 @@ use abc\core\engine\Registry;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
+use abc\models\system\AuditEvent;
+use abc\models\system\AuditModel;
+use abc\models\system\AuditUser;
+use Illuminate\Cache\CacheManager;
+use Illuminate\Support\Facades\Cache;
 use ReflectionClass;
 
 class ModelAuditListener
@@ -22,13 +27,29 @@ class ModelAuditListener
 
     /**
      * @param string $eventAlias
-     * @param $params
+     * @param        $params
      *
      * @return array | false
      * @throws \Exception
      */
     public function handle($eventAlias, $params)
     {
+
+        $relationName = '';
+        $ids = [];
+        $morphAttributes = [];
+        if (is_int(strpos($eventAlias, 'belongsToManyAttaching'))
+            || is_int(strpos($eventAlias, 'belongsToManyDetaching'))) {
+            $relationName = $params[0];
+            $ids = $params[2];
+        }
+
+        if (is_int(strpos($eventAlias, 'morphToManyAttaching'))
+            || is_int(strpos($eventAlias, 'morphToManyDetaching'))) {
+            $relationName = $params[0];
+            $ids = $params[2];
+            $morphAttributes = $params[3];
+        }
 
         if (self::DEBUG_TO_LOG === true) {
             $this->registry->get('log')->write('Start Handle Event: '.$eventAlias);
@@ -50,16 +71,19 @@ class ModelAuditListener
                 'saved',
                 'restoring',
                 'restored',
-                'forceDeleted'
+                'forceDeleted',
+                'belongsToManyDetached',
+                'belongsToManyDetaching',
+                'belongsToManyAttached',
+                'belongsToManyAttaching',
             ];
 
-            foreach($eventsList as $alias){
-                if(is_int(stripos($eventAlias, $alias))) {
+            foreach ($eventsList as $alias) {
+                if (is_int(stripos($eventAlias, $alias))) {
                     $eventAlias = 'eloquent.'.$alias;
                     break;
                 }
             }
-
 
             if ($params[1] instanceof \Illuminate\Database\Eloquent\Collection) {
                 /**
@@ -67,9 +91,9 @@ class ModelAuditListener
                  */
                 $collection = $params[1];
                 $messages = '';
-                foreach($collection as $modelObject){
+                foreach ($collection as $modelObject) {
                     $result = $this->handleModel($eventAlias, $modelObject);
-                    if($result === false){
+                    if ($result === false) {
                         return false;
                     }
                     $messages .= $result['message']."\n";
@@ -77,11 +101,11 @@ class ModelAuditListener
 
                 //when all models handled return result
                 return [
-                    'result' => true,
-                    'message'=> $messages
+                    'result'  => true,
+                    'message' => $messages,
                 ];
             } else {
-                return $this->handleModel($eventAlias, $params[1]);
+                return $this->handleModel($eventAlias, $params[1], $relationName, $ids, $morphAttributes);
             }
         } else {
             return $this->handleModel($eventAlias, $params[0]);
@@ -89,7 +113,7 @@ class ModelAuditListener
 
     }
 
-    protected function handleModel($eventAlias, $modelObject)
+    protected function handleModel($eventAlias, $modelObject, $relationName = '', $ids = [], $morphAttributes = [])
     {
 
         if (!is_object($modelObject)
@@ -162,6 +186,13 @@ class ModelAuditListener
                 'ModelAuditListener: "saved" event not supported. Use "saving" instead!'
             );
         }
+        //Skip updating event after inserts and updates
+        if ($event_name == 'updating' && !$newData) {
+            return $this->output(
+                false,
+                'ModelAuditListener: Skipped "updating" event with empty newData for '.$modelClassName.'.'
+            );
+        }
 
         //skip creating event if created will be fired.
         // creating event do not save auditable_id into audit log table because id does not exists yet
@@ -184,7 +215,12 @@ class ModelAuditListener
                 'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
         }
 
-        $request_id = $this->registry->get('request')->getUniqueId();
+        if ($this->registry->get('request')) {
+            $request_id = $this->registry->get('request')->getUniqueId();
+        } else {
+            $request_id = \H::genRequestId();
+        }
+
         $session_id = session_id();
 
         $user = new UserResolver($this->registry);
@@ -214,29 +250,139 @@ class ModelAuditListener
         $main_auditable_id = $newData[$modelObject->getMainModelClassKey()];
         $main_auditable_id = !$main_auditable_id ? $oldData[$modelObject->getMainModelClassKey()] : $main_auditable_id;
 
-        foreach ($newData as $colName => $newValue) {
-            $auditData[] = [
-                'user_type'            => $user_type,
-                'user_id'              => $user_id,
-                'user_name'            => $user_name,
-                'event'                => $event_name,
-                'request_id'           => $request_id,
-                'session_id'           => $session_id,
-                'main_auditable_model' => $main_auditable_model,
-                'main_auditable_id'    => $main_auditable_id,
-                'auditable_model'      => $auditable_model,
-                'auditable_id'         => $auditable_id,
-                'attribute_name'       => $colName,
-                'old_value'            => $oldData[$colName],
-                'new_value'            => $newValue,
-            ];
+        $userData = [
+            'user_type_id' => AuditUser::getUserTypeId($user_type),
+            'user_id'      => $user_id,
+            'name'         => $user_name,
+        ];
+        $db = $this->registry->get('db');
+
+        $auditModel = $db->table('audit_models')
+            ->where('name', '=', $auditable_model)
+            ->first();
+        if ($auditModel) {
+            $auditableModelId = $auditModel->id;
+        } else {
+            $auditableModelId = $db->table('audit_models')->insertGetId(['name' => $auditable_model]);
         }
 
+        if ($event_name == 'belongsToManyAttaching') {
+            $colName = $relationName;
+            $event_name = 'creating';
+            $newData = [];
+            $oldData = [];
+            foreach ($ids as $id) {
+                $oldData[][$colName] = null;
+                $newData[][$colName] = $id;
+            }
+        }
+
+        if ($event_name == 'belongsToManyDetaching') {
+            $colName = $relationName;
+            $event_name = 'deleting';
+            $newData = [];
+            $oldData = [];
+            foreach ($ids as $id) {
+                $oldData[][$colName] = $id;
+                $newData[][$colName] = null;
+            }
+        }
+
+        $eventDescription = [];
+
+        foreach ($newData as $colName => $newValue) {
+            if (is_array($newValue)) {
+                foreach ($newValue as $cName => $nValue) {
+                    $eventDescription[] = [
+                        'auditable_model_id' => $auditableModelId,
+                        'auditable_id'       => $auditable_id ?: 0,
+                        'field_name'         => $cName,
+                        'old_value'          => $oldData[$colName][$cName],
+                        'new_value'          => $nValue,
+                    ];
+                }
+            } else {
+                $eventDescription[] = [
+                    'auditable_model_id' => $auditableModelId,
+                    'auditable_id'       => $auditable_id ?: 0,
+                    'field_name'         => $colName,
+                    'old_value'          => $oldData[$colName],
+                    'new_value'          => $newValue,
+                ];
+            }
+        }
+
+
+        $db = $this->registry->get('db');
+        $mainModel = $db->table('audit_models')
+            ->where('name', '=', $main_auditable_model)
+            ->first();
+        if ($mainModel) {
+            $mainModelId = $mainModel->id;
+        } else {
+            $mainModelId = $db->table('audit_models')->insertGetId(['name' => $main_auditable_model]);
+        }
+
+        $event = [
+            'request_id'              => $request_id,
+            'event_type_id'           => AuditEvent::EVENT_NAMES[$event_name],
+            'main_auditable_model_id' => $mainModelId,
+            'main_auditable_id'       => $main_auditable_id,
+        ];
+
         try {
-            $this->registry->get('db')->table('audits')->insert($auditData);
+            $this->registry->get('db')->transaction(function () use ($db, $session_id, $userData, $event, $eventDescription) {
+
+                $auditSession = $db->table('audit_sessions')
+                    ->where('session_id', '=', $session_id)
+                    ->first();
+                if ($auditSession) {
+                    $auditSessionId = $auditSession->id;
+                } else {
+                    $auditSessionId = $db->table('audit_sessions')->insertGetId(['session_id' => $session_id]);
+                }
+                $event['audit_session_id'] = $auditSessionId;
+
+                $auditUser = $db->table('audit_users')
+                    ->where('user_type_id', '=', $userData['user_type_id'])
+                    ->where('user_id', '=', $userData['user_id'])
+                    ->where('name', '=', $userData['name'])
+                    ->first();
+                if ($auditUser) {
+                    $auditUserId = $auditUser->id;
+                } else {
+                    $auditUserId = $db->table('audit_users')->insertGetId($userData);
+                }
+                $event['audit_user_id'] = $auditUserId;
+
+                $auditEvent = $db->table('audit_events')
+                    ->where('request_id', '=', $event['request_id'])
+                    ->where('audit_user_id', '=', $auditUserId)
+                    ->where('event_type_id', '=', $event['event_type_id'])
+                    ->where('main_auditable_model_id', '=', $event['main_auditable_model_id'])
+                    ->where('main_auditable_id', '=', $event['main_auditable_id'])
+                    ->first();
+                if ($auditEvent) {
+                    $eventId = $auditEvent->id;
+                } else {
+                    $eventId = $db->table('audit_events')->insertGetId($event);
+                }
+
+                if ($eventId) {
+                    foreach ($eventDescription as &$item) {
+                        $item['audit_event_id'] = $eventId;
+                    }
+                    $db->table('audit_event_descriptions')->insert($eventDescription);
+                }
+
+            });
         } catch (\PDOException $e) {
+            \H::df($e->getMessage());
+
             $error_message = __CLASS__.": Auditing of ".$modelClassName." failed.";
             $this->registry->get('log')->write($error_message);
+            $this->registry->get('log')->write($e->getMessage());
+            $this->registry->get('log')->write($event_name);
             //TODO: need to check
             if ($modelObject::$auditingStrictMode) {
                 return false;
@@ -249,8 +395,8 @@ class ModelAuditListener
         return $this->output(
             true,
             'ModelAuditListener: Auditing of model '
-                .$modelClassName.' on event "'.$eventAlias.'" ('.$auditable_model.':'.$auditable_id.') '
-                .'has been finished successfully.'
+            .$modelClassName.' on event "'.$eventAlias.'" ('.$auditable_model.':'.$auditable_id.') '
+            .'has been finished successfully.'
         );
     }
 

@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
+use abc\models\catalog\Category;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -89,7 +90,7 @@ class ControllerPagesCatalogProductRelations extends AController{
 
 		$this->loadModel('catalog/category');
 		$this->data['categories'] = array ();
-		$results = $this->model_catalog_category->getCategories(0);
+		$results = (new Category())->getCategories(0);
 		foreach ($results as $r) {
 			$this->data['categories'][$r['category_id']] = $r['name'];
 		}
@@ -148,7 +149,7 @@ class ControllerPagesCatalogProductRelations extends AController{
 
 		$this->loadModel('catalog/category');
 		$this->data['categories'] = array ();
-		$results = $this->model_catalog_category->getCategories(0);
+		$results = (new Category())->getCategories(0);
 
 		foreach ($results as $r) {
 			$this->data['categories'][$r['category_id']] = $r['name'];

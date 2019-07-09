@@ -28,8 +28,13 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AOrderManager;
 use abc\core\lib\LibException;
+use abc\models\catalog\Category;
+use abc\models\customer\Address;
+use abc\models\customer\Customer;
+use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
+use abc\models\order\Order;
 use abc\modules\traits\SaleOrderTrait;
 use H;
 
@@ -507,7 +512,7 @@ class ControllerPagesSaleOrder extends AController
 
         $this->loadModel('catalog/product');
         $this->loadModel('catalog/category');
-        $this->data['categories'] = $this->model_catalog_category->getCategories(0);
+        $this->data['categories'] = (new Category())->getCategories(0);
 
         $this->data['order_products'] = [];
         $order_products = $this->model_sale_order->getOrderProducts($order_id);
@@ -1927,9 +1932,8 @@ class ControllerPagesSaleOrder extends AController
         );
 
         $this->data['list_url'] = $this->html->getSecureURL('sale/customer');
-        $this->loadModel('sale/customer');
-        $this->loadModel('sale/customer_transaction');
-        $balance = $this->model_sale_customer_transaction->getBalance($customer_id);
+
+        $balance = CustomerTransaction::getBalance($customer_id);
         $curr = $this->currency->getCurrency($this->config->get('config_currency'));
 
         $this->data['balance'] = $this->language->get('text_balance')
@@ -1944,7 +1948,10 @@ class ControllerPagesSaleOrder extends AController
             'target' => 'new',
         ]);
 
-        $customer_info = $this->model_sale_customer->getCustomer($customer_id);
+        $customer_info = Customer::find($customer_id);
+        if($customer_info){
+            $customer_info['orders_count'] = Order::where('customer_id', '=', $customer_id)->where('order_status_id', '>',0)->get()->count();
+        }
         $this->data['button_orders_count'] = $this->html->buildElement(
             [
                 'type'  => 'button',
@@ -2119,8 +2126,8 @@ class ControllerPagesSaleOrder extends AController
         );
 
         //payment address
-        $this->loadModel('sale/customer');
-        $all_addresses = $this->model_sale_customer->getAddressesByCustomerId($customer_id);
+
+        $all_addresses = Address::getAddressesByCustomerId($customer_id);
         $default_address_id = $checkout->getCustomer()->getAddressId();
 
         if (!$order_info['payment_address_id']) {

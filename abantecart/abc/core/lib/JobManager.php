@@ -493,6 +493,21 @@ class JobManager implements JobManagerInterface
         return $output ? $output : false;
     }
 
+    /**
+     * @return array|bool
+     * @throws \Exception
+     */
+    public function getReadyJobs()
+    {
+        $output = [];
+        $jobs = $this->getJobs(['status' => self::STATUS_READY]);
+        if ($jobs) {
+            $output = $jobs;
+        }
+
+        return $output ? $output : false;
+    }
+
     protected function serialize($value)
     {
         $class_name = ABC::getFullClassName('AJson');
@@ -511,7 +526,7 @@ class JobManager implements JobManagerInterface
          */
         $json_lib = H::getInstance($class_name);
         return $json_lib->decode($value, true);
-        
+
     }
 
 }

@@ -1,4 +1,4 @@
-<div class="thumbnails grid row list-inline">
+<div class="thumbnails grid row list-inline cat-page">
 	<?php
 	$icount = 0;
 	$tax_exempt = $this->customer->isTaxExempt();
@@ -35,14 +35,7 @@
 		}
 		$icount++;
 	?>
-		<div class="col-md-3 col-sm-6 col-xs-12">
-			<div class="fixed_wrapper">
-				<div class="fixed">
-					<a class="prdocutname" href="<?php echo $item['info_url'] ?>"
-					   title="<?php echo $item['title'] ?>"><?php echo $item['title'] ?></a>
-					<?php echo $this->getHookvar('product_listing_name_'.$product['product_id']);?>
-				</div>
-			</div>
+		<div class="col-md-3 col-sm-6 col-xs-12 product-block">
 			<div class="thumbnail">
 				<?php if ($product['special']) { ?>
 					<span class="sale"></span>
@@ -50,40 +43,17 @@
 				<?php if ($product['new_product']) { ?>
 					<span class="new"></span>
 				<?php } ?>
-				<a href="<?php echo $item['info_url'] ?>"><?php echo $item['image'] ?></a>
-
-				<div class="shortlinks">
-					<a class="details" href="<?php echo $item['info_url'] ?>"><?php echo $button_view ?></a>
-					<?php if ($review_status) { ?>
-						<a class="compare" href="<?php echo $item['info_url'] ?>#review"><?php echo $review ?></a>
-					<?php } ?>
-					<?php echo $product['buttons']; ?>
+				<div class="image">
+					<a href="<?php echo $item['info_url'] ?>"><?php echo $item['image'] ?></a>
 				</div>
-				<div class="blurb"><?php echo $product['blurb'] ?></div>
-				<?php echo $this->getHookvar('product_listing_details0_'.$product['product_id']);?>
-				<?php if ($display_price) { ?>
-					<div class="pricetag jumbotron">
-
-						<?php if(!$product['catalog_mode']) { ?>
-						<?php if($product['call_to_order']){ ?>
-							<a data-id="<?php echo $product['product_id'] ?>" href="#"
-								   class="btn call_to_order" title="<?php echo $text_call_to_order?>">
-								<i class="fa fa-phone fa-fw"></i>
-							</a>
-						<?php } else if ($product['track_stock'] && !$product['in_stock']) { ?>
-							<span class="nostock"><?php echo $product['no_stock_text']; ?></span>
-						<?php } else { ?>
-							<a data-id="<?php echo $product['product_id'] ?>"
-							   href="<?php echo $item['buy_url'] ?>"
-							   class="productcart"
-							   title="<?php echo $button_add_to_cart ?>"
-							>
-								<i class="fa fa-cart-plus fa-fw"></i>
-							</a>
-						<?php } ?>
-						<?php } ?>
-
-						<div class="price">
+				<div class="caption">
+					<div class="fixed_wrapper">
+						<div class="fixed">
+							<a class="prdocutname" href="<?php echo $item['info_url'] ?>" title="<?php echo $item['title'] ?>"><?php echo $item['title'] ?></a>
+							<?php echo $this->getHookvar('product_listing_name_'.$product['product_id']);?>
+						</div>
+					</div>
+					<div class="price">
 							<?php if ($product['special']) { ?>
 								<div class="pricenew"><?php echo $product['special'] . $tax_message; ?></div>
 								<div class="priceold"><?php echo $product['price'] ?></div>
@@ -91,23 +61,47 @@
 								<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
 							<?php } ?>
 						</div>
-						<?php if ($is_customer) { ?>
-						<div class="wishlist-in-category">
-							<a class="wishlist_change btn btn-large" data-product-id="<?php echo $product['product_id']; ?>" data-remove-url="<?php echo $product['product_wishlist_remove_url'];?>"
-							   data-add-url="<?php echo $product['product_wishlist_add_url']; ?>" data-in-wishlist="<?php if ($product['in_wishlist']) { echo $product['in_wishlist']; } else { echo 'false';}?>"
-							   href="#" <?php echo $nowhislist; ?>>
-							<?php if ($product['in_wishlist']) { ?>
-							<i class="fa fa-heart fa-fw"></i>
-							<?php } else { ?>
-							<i class="fa fa-heart-o fa-fw"></i>
-							<?php }  ?>
-							</a>
-						</div>
+					<div class="blurb"><?php echo $product['blurb'] ?></div>
+					<div class="caption-bottom">
+						<div class="shortlinks">
+					<a class="details" href="<?php echo $item['info_url'] ?>"><?php echo $button_view ?></a>
+					<?php if ($review_status) { ?>
+						<a class="compare" href="<?php echo $item['info_url'] ?>#review"><?php echo $review ?></a>
+					<?php } ?>
+					<?php echo $product['buttons']; ?>
+				</div>
+						<?php if ($display_price) { ?>
+							<div class="pricetag">
+								<?php if($product['call_to_order']){ ?>
+									<a data-id="<?php echo $product['product_id'] ?>" href="#"
+										   class="btn call_to_order" title="<?php echo $text_call_to_order?>">
+										<i class="fa fa-phone fa-fw"></i>
+									</a>
+								<?php } else if ($product['track_stock'] && !$product['in_stock']) { ?>
+									<span class="nostock"><?php echo $product['no_stock_text']; ?></span>
+								<?php } else { ?>
+									<a data-id="<?php echo $product['product_id'] ?>"
+									   href="<?php echo $item['buy_url'] ?>"
+									   class="productcart"
+									   title="<?php echo $button_add_to_cart ?>"
+									>
+										<i class="fa fa-cart-plus fa-fw"></i>
+									</a>
+								<?php } ?>
+		
+								
+								<?php echo $this->getHookvar('product_listing_details1_'.$product['product_id']);?>
+							</div>
 						<?php } ?>
-						<?php echo $this->getHookvar('product_listing_details1_'.$product['product_id']);?>
+						<?php echo $this->getHookvar('product_listing_details0_'.$product['product_id']);?>
 					</div>
-				<?php } ?>
+				</div>
+				
+				
+				
+				
 			</div>
+			
 		</div>
 	<?php
 	}
@@ -140,7 +134,7 @@
 			$review = $item['rating'];
 		}
 		?>
-		<div>
+		<div class="pro-list-blk col-xs-12 product-block">
 			<div class="thumbnail">
 				<div class="row">
 					<div class="col-md-4">
@@ -157,18 +151,18 @@
 						<a class="prdocutname" href="<?php echo $item['info_url'] ?>"><?php echo $item['title'] ?>
 							<?php echo $product['model'] ? "(".$product['model'].")" :''; ?></a>
 						<div class="productdiscrption"><?php echo $product['description'] ?></div>
+						<div class="price">
+								<?php if ($product['special']) { ?>
+									<div class="pricenew"><?php echo $product['special'] . $tax_message; ?></div>
+									<div class="priceold"><?php echo $product['price'] ?></div>
+								<?php } else { ?>
+									<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
+								<?php } ?>
+							</div>
 						<div class="shortlinks">
-							<a class="details" href="<?php echo $item['info_url'] ?>"><?php echo $button_view ?></a>
-							<?php if ($review_status) { ?>
-								<a class="compare"
-								   href="<?php echo $item['info_url'] ?>#review"><?php echo $review ?></a>
-							<?php } ?>
-							<?php echo $product['buttons'];?>
-						</div>
-						<div class="blurb"><?php echo $product['blurb'] ?></div>
 						<?php echo $this->getHookvar('product_listing_details00_'.$product['product_id']);?>
 						<?php if ($display_price) { ?>
-						<div class="pricetag pricetag_wide pull-right">
+						<div class="pricetag pricetag_wide">
 							<span class="spiral"></span>
 
 							<?php if($product['call_to_order']){ ?>
@@ -189,32 +183,19 @@
 							<?php } ?>
 
 
-							<div class="price">
-								<?php if ($product['special']) { ?>
-									<div class="pricenew"><?php echo $product['special'] . $tax_message; ?></div>
-									<div class="priceold"><?php echo $product['price'] ?></div>
-								<?php } else { ?>
-									<div class="oneprice"><?php echo $product['price'] . $tax_message; ?></div>
-								<?php } ?>
-							</div>
-
-							<?php
-							if ($is_customer) { ?>
-							<div class="wishlist-in-category">
-								<a class="wishlist_change btn btn-large" data-product-id="<?php echo $product['product_id']; ?>" data-remove-url="<?php echo $product['product_wishlist_remove_url'];?>"
-								   data-add-url="<?php echo $product['product_wishlist_add_url']; ?>" data-in-wishlist="<?php if ($product['in_wishlist']) { echo $product['in_wishlist']; } else { echo 'false';}?>"
-								   href="#" <?php echo $nowhislist; ?>>
-								<?php if ($product['in_wishlist']) { ?>
-								<i class="fa fa-heart fa-fw"></i>
-								<?php } else { ?>
-								<i class="fa fa-heart-o fa-fw"></i>
-								<?php }  ?>
-								</a>
-							</div>
-							<?php } ?>
+							
 						</div>
 						<?php } ?>
 						<?php echo $this->getHookvar('product_listing_details11_'.$product['product_id']);?>
+						<a class="details" href="<?php echo $item['info_url'] ?>"><?php echo $button_view ?></a>
+							<?php if ($review_status) { ?>
+								<a class="compare"
+								   href="<?php echo $item['info_url'] ?>#review"><?php echo $review ?></a>
+							<?php } ?>
+							<?php echo $product['buttons'];?>
+						</div>
+						<div class="blurb"><?php echo $product['blurb'] ?></div>
+
 					</div>
 
 				</div>

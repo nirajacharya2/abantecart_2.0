@@ -24,7 +24,9 @@ use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
 use abc\core\engine\Model;
+use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
+use abc\core\lib\AIM;
 use abc\core\lib\AMail;
 use abc\core\lib\AMessage;
 use abc\core\view\AView;
@@ -32,19 +34,29 @@ use abc\modules\events\ABaseEvent;
 use H;
 use stdClass;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ModelCheckoutOrder
  *
  * @property  ModelLocalisationCountry $model_localisation_country
  * @property  ModelLocalisationZone    $model_localisation_zone
+ * @property AIM $im
  */
 class ModelCheckoutOrder extends Model
 {
     public $data = [];
+    protected $im;
+
+    public function __construct(Registry $registry)
+    {
+        parent::__construct($registry);
+        //trick for usage from admin
+        if(ABC::env('IS_ADMIN') === true){
+            $this->im = new AIM(0);
+        }else{
+            $this->im = $this->registry->get('im');
+        }
+    }
 
     /**
      * @param $order_id
@@ -492,10 +504,22 @@ class ModelCheckoutOrder extends Model
         $subject = sprintf($language->get('text_subject'), $order_row['store_name'], $order_id);
 
         // HTML Mail
-        $this->data['mail_template_data']['title'] = sprintf($language->get('text_subject'),
-            html_entity_decode($order_row['store_name'], ENT_QUOTES, ABC::env('APP_CHARSET')), $order_id);
-        $this->data['mail_template_data']['text_greeting'] = sprintf($language->get('text_greeting'),
-            html_entity_decode($order_row['store_name'], ENT_QUOTES, ABC::env('APP_CHARSET')));
+        $this->data['mail_template_data']['title'] = sprintf(
+                                                            $language->get('text_subject'),
+                                                            html_entity_decode(
+                                                                $order_row['store_name'],
+                                                                ENT_QUOTES,
+                                                                ABC::env('APP_CHARSET')
+                                                            ),
+                                                            $order_id);
+        $this->data['mail_template_data']['text_greeting'] = sprintf(
+                                                                $language->get('text_greeting'),
+                                                                html_entity_decode(
+                                                                    $order_row['store_name'],
+                                                                    ENT_QUOTES,
+                                                                    ABC::env('APP_CHARSET')
+                                                                )
+                                                            );
         $this->data['mail_template_data']['text_order_detail'] = $language->get('text_order_detail');
         $this->data['mail_template_data']['text_order_id'] = $language->get('text_order_id');
         $this->data['mail_template_data']['text_invoice'] = $language->get('text_invoice');
@@ -799,7 +823,6 @@ class ModelCheckoutOrder extends Model
             1 => ['message' => sprintf($language->get('im_new_order_text_to_admin'), $order_id)],
         ];
         $this->im->send('new_order', $message_arr);
-
         return true;
     }
 
