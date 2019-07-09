@@ -31,7 +31,7 @@ use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALog;
 use abc\core\lib\ARequest;
 use abc\core\lib\ASession;
-
+use abc\core\lib\AUser;
 
 /**
  * Class Registry
@@ -49,6 +49,7 @@ use abc\core\lib\ASession;
  * @method static ExtensionsApi extensions()
  * @method static ACustomer customer()
  * @method static AHtml html()
+ * @method static AUser user()
  */
 final class Registry
 {

@@ -25,6 +25,20 @@ use abc\models\user\User;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Class CustomerCommunication
+ *
+ * @property  int customer_id
+ * @property  int user_id
+ * @property  string $type
+ * @property  string $subject
+ * @property  string $body
+ * @property  string $sent_to_address
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
+ *
+ * @package abc\models\customer
+ */
 class CustomerCommunication extends BaseModel
 {
     use SoftDeletes;
@@ -91,6 +105,9 @@ class CustomerCommunication extends BaseModel
 
     public static function createCustomerCommunication(AMail $mail)
     {
+        /**
+         * @var CustomerCommunication $communication
+         */
         $communication = new CustomerCommunication();
         $communication->subject = $mail->getSubject();
         $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
@@ -110,6 +127,8 @@ class CustomerCommunication extends BaseModel
         $user = Registry::user();
         if($user){
            $communication->user_id = $user->getId();
+        }else{
+            $communication->user_id = null;
         }
         $communication->type = 'email';
         $communication->sent_to_address = $mail->getTo();
