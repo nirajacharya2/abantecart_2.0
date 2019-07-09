@@ -668,6 +668,8 @@ class Category extends BaseModel
      *
      * @return array
      */
+
+
     public function getCategoryDescriptions($category_id)
     {
         $category_description_data = [];

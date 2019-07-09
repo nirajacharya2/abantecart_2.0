@@ -2,7 +2,6 @@
 
 namespace abc\models\catalog;
 
-use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -736,11 +735,11 @@ class Product extends BaseModel
             'hidable'    => true,
         ],
         'quantity'          => [
-            'cast'         => 'int',
-            'rule'         => 'integer',
+//            'cast'         => 'int',
+//            'rule'         => 'integer',
             'input_type'   => 'input',
             'input_format' => 'number',
-            'access'       => 'read',
+//            'access'       => 'read',
             'sort_order'   => 50,
             'props'        => [
                 'type' => 'number',
@@ -1188,7 +1187,9 @@ class Product extends BaseModel
 
     public function getProductStores()
     {
-        $stores = Store::active()->select(['store_id as id', 'name'])->get();
+        $stores = Store::active()
+                       ->select(['store_id as id', 'name'])
+                       ->get();
         $result[] = (object)['id' => 0, 'name' => 'Default'];
         foreach ($stores as $store) {
             $result[] = (object)['id' => $store->id, 'name' => $store->name];

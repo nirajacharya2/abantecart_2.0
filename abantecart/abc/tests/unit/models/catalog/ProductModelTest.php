@@ -27,7 +27,7 @@ class ProductModelTest extends ATestCase
 {
     public function testValidator()
     {
-        //validate new customer
+        //validate new product
         $product = new Product(
             [
                 'product_id'          => -0.1,
@@ -75,8 +75,40 @@ class ProductModelTest extends ATestCase
 
 
         //validate new customer
+        //validate new customer
         $product = new Product(
             [
+                'uuid'                => 'sssss',
+                'model'               => 'tesmodeltest',
+                'sku'                 => 'testskutest',
+                'location'            => 'somewhere',
+                'quantity'            => 10,
+                'stock_checkout'      => '0',
+                'stock_status_id'     => 1,
+                'manufacturer_id'     => 11,
+                'shipping'            => false,
+                'ship_individually'   => false,
+                'free_shipping'       => '0',
+                'shipping_price'      => 0.0,
+                'price'               => 1.00,
+                'tax_class_id'        => 2,
+                'date_available'      => date('Y-m-d H:i:s'),
+                'weight'              => 0.0,
+                'weight_class_id'     => 1,
+                'length'              => 0.0,
+                'width'               => 0.0,
+                'height'              => 0.0,
+                'length_class_id'     => 1,
+                'status'              => 1,
+                'viewed'              => 0,
+                'sort_order'          => 15,
+                'call_to_order'       => 0,
+                'cost'                => 0.95,
+                'subtract'            => 0,
+                'minimum'             => 1,
+                'maximum'             => 0,
+                'product_type_id'     => null,
+                'settings'            => '',
             ]
         );
         $errors = [];
@@ -84,6 +116,7 @@ class ProductModelTest extends ATestCase
             $product->validate();
         }catch(ValidationException $e){
             $errors = $product->errors()['validation'];
+            var_dump($errors);
         }
 
         $this->assertEquals(0, count($errors));

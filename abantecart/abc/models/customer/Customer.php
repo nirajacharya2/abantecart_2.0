@@ -822,12 +822,12 @@ class Customer extends BaseModel
                                           ->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
-            $query->where(function ($query) use ($subscriberGroupId) {
-                $query->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
+            $query->where(function ($subQuery) use ($subscriberGroupId) {
+                $subQuery->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
             });
         } elseif (H::has_value($filter['all_subscribers'])) {
-            $query->where(function ($query) {
-                $query->where(
+            $query->where(function ($subQuery) {
+                $subQuery->where(
                     [
                         'customers.newsletter' => 1,
                         'customers.status' => 1,
@@ -835,8 +835,8 @@ class Customer extends BaseModel
                     ]
                 );
             })
-                  ->orWhere(function ($query) use ($subscriberGroupId) {
-                      $query->where('customers.newsletter', '=', 1)
+                  ->orWhere(function ($subQuery) use ($subscriberGroupId) {
+                      $subQuery->where('customers.newsletter', '=', 1)
                             ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
                   });
         } // select only customers without newsletter subscribers
