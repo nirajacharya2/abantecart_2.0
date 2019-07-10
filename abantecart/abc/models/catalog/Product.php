@@ -1171,7 +1171,7 @@ class Product extends BaseModel
             ->toArray();
 
     }
-
+//TODO move this into categoryModel
     public function getProductCategories()
     {
         $categories = (new Category())->getCategories(0, $this->registry->get('session')->data['current_store_id']);
@@ -1184,7 +1184,7 @@ class Product extends BaseModel
         }
         return $product_categories;
     }
-
+//TODO move this into categoryModel
     public function getProductStores()
     {
         $stores = Store::active()
@@ -1196,7 +1196,7 @@ class Product extends BaseModel
         }
         return $result;
     }
-
+//TODO move this into manufacturer Model
     public function getManufacturers()
     {
         $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
@@ -1206,7 +1206,7 @@ class Product extends BaseModel
         }
         return $result;
     }
-
+//TODO MOVE THIS
     public function getTaxClasses()
     {
         $tax_classes = TaxClass::with('description')->get();
@@ -1217,7 +1217,7 @@ class Product extends BaseModel
         }
         return $result;
     }
-
+//TODO MOVE THIS
     /**
      * @return array
      */
@@ -1240,7 +1240,7 @@ class Product extends BaseModel
         ];
         return $result;
     }
-
+//TODO MOVE THIS
     /**
      * @param int $language_id
      *
@@ -1261,23 +1261,29 @@ class Product extends BaseModel
         }
         return $result;
     }
-
+//TODO MOVE THIS
     public function getLengthClasses()
     {
         $length_classes = LengthClass::with('description')->get();
         $result = [];
         foreach ($length_classes as $length_class) {
-            $result[] = (object)['id' => $length_class->length_class_id, 'name' => $length_class->description->title];
+            $result[] = (object)[
+                'id' => $length_class->length_class_id,
+                'name' => $length_class->description->title
+            ];
         }
         return $result;
     }
-
+//TODO MOVE THIS
     public function getWeightClasses()
     {
         $weight_classes = WeightClass::with('description')->get();
         $result = [];
         foreach ($weight_classes as $weight_class) {
-            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
+            $result[] = (object)[
+                'id' => $weight_class->weight_class_id,
+                'name' => $weight_class->description->title
+            ];
         }
         return $result;
     }
@@ -1300,7 +1306,6 @@ class Product extends BaseModel
             $data['images'] = $this->images();
             $data['keywords'] = $this->keywords();
 
-            //TODO: need to rewrite into relations
             if ($this->manufacturer_id) {
                 $manufacturer = Manufacturer::find($this->manufacturer_id);
                 if ($manufacturer) {
@@ -1355,7 +1360,15 @@ class Product extends BaseModel
                 'height' => $this->config->get('config_image_thumb_height'),
             ],
         ];
-        $this->images['image_main'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 1, false);
+
+        $this->images['image_main'] = $resource->getResourceAllObjects(
+            'products',
+            $this->product_id,
+            $sizes,
+            1,
+            false
+        );
+
         if ($this->images['image_main']) {
             $this->images['image_main']['sizes'] = $sizes;
         }
@@ -1373,9 +1386,15 @@ class Product extends BaseModel
             'thumb2' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ],
+            ]
         ];
-        $this->images['images'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 0, false);
+        $this->images['images'] = $resource->getResourceAllObjects(
+            'products',
+            $this->product_id,
+            $sizes,
+            0,
+            false
+        );
         return $this->images;
     }
 
@@ -1474,6 +1493,7 @@ class Product extends BaseModel
         if (!$productId) {
             return false;
         }
+
         $this->options()->forceDelete();
         $resource_mdl = new ResourceLibrary();
         foreach ($data as $option) {
@@ -1612,17 +1632,24 @@ class Product extends BaseModel
         if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
             $product_data['product_store'] = [0 => 0];
         }
-        $product = new Product($product_data);
-        $product->save();
-        $productId = $product->product_id;
-        if ($productId) {
+        $db = Registry::db();
+        $db->beginTransaction();
+        try {
+            $product = new Product($product_data);
+            $product->save();
+            $productId = $product->product_id;
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
 
-            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
-
+            UrlAlias::setProductKeyword(
+                $product_data['keyword'] ?: $product_data['product_description']['name'],
+                $productId
+            );
             self::updateProductLinks($productId, $product_data);
+            $db->commit();
             return $productId;
+        }catch(\PDOException $e){
+            $db->rollback();
         }
     }
 
