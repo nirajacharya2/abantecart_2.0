@@ -109,6 +109,7 @@ class Order extends BaseModel
         'currency_id'         => 'int',
         'value'               => 'float',
         'coupon_id'           => 'int',
+        'payment_method_data' => 'serialized',
     ];
 
     protected $dates = [
@@ -117,6 +118,7 @@ class Order extends BaseModel
     ];
 
     protected $fillable = [
+        'order_id',
         'invoice_id',
         'invoice_prefix',
         'store_id',
@@ -159,6 +161,7 @@ class Order extends BaseModel
         'payment_method_key',
         'comment',
         'total',
+        'order_status_id',
         'language_id',
         'currency_id',
         'currency',
@@ -168,6 +171,573 @@ class Order extends BaseModel
         'date_modified',
         'ip',
         'payment_method_data',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'invoice_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'invoice_prefix' => [
+            'checks'   => [
+                'string',
+                'max:10',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'store_id'       => [
+            'checks'   => [
+                'integer',
+                'exists:stores',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'store_name'     => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'store_url' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'customer_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:customers',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'customer_group_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'firstname' => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'lastname'  => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'telephone' => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'fax'       => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'email'               => [
+            'checks'   => [
+                'string',
+                'max:96',
+                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Email must be valid!',
+                ],
+            ],
+        ],
+
+        'shipping_firstname'  => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_lastname'   => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_company'    => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_address_1'  => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_address_2'  => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_city'       => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_postcode'   => [
+            'checks'   => [
+                'string',
+                'max:10',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_zone'       => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_zone_id'    => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'shipping_country'    => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_country_id' => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'shipping_address_format' => [
+            'checks'   => [
+                'string',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_method' => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'shipping_method_key' => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'payment_firstname'   => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_lastname'    => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_company'     => [
+            'checks'   => [
+                'string',
+                'max:32',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_address_1'   => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_address_2'   => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_city'        => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_postcode'    => [
+            'checks'   => [
+                'string',
+                'max:10',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_zone'        => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_zone_id'     => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'payment_country'     => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_country_id'  => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'payment_address_format' => [
+            'checks'   => [
+                'string',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_method' => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'payment_method_key' => [
+            'checks'   => [
+                'string',
+                'max:128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'comment' => [
+            'checks'   => [
+                'string',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'total'   => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'order_status_id' => [
+            'checks'   => [
+                'int',
+                'exists:order_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
+                ],
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'int',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in languages table!',
+                ],
+            ],
+        ],
+        'currency_id' => [
+            'checks'   => [
+                'int',
+                'exists:currencies',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in currencies table!',
+                ],
+            ],
+        ],
+        'currency' => [
+            'checks'   => [
+                'string',
+                'max:3',
+                'exists:currencies,code',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute code must be string :max characters length and must be presents in the table currencies!',
+                ],
+            ],
+        ],
+
+        'value' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'coupon_id' => [
+            'checks'   => [
+                'int',
+                'nullable',
+                'exists:coupons',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in coupons table!',
+                ],
+            ],
+        ],
+        'ip' => [
+            'checks'   => [
+                'ip',
+                'max:50',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be ip-address and maximum :max characters length!',
+                ],
+            ],
+        ],
+        'payment_method_data' => [
+            'checks'   => [
+                'string',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string!',
+                ],
+            ],
+        ],
+
     ];
 
     public function store()
