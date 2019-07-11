@@ -984,16 +984,19 @@ class ACustomer extends ALibBase
             $customer_id = $customer->customer_id;
             if(!$subscribe_only) {
                 $address = new Address();
-                $newData = ['customer_id' => $customer_id];
+                $newData = [];
                 foreach ($address->getFillable() as $key){
                     if(isset($data[$key])){
                         $newData[$key] = $data[$key];
                     }
                 }
-                $address->fill($newData);
-                $address->save();
-                //set address as default
-                $customer->update(['address_id' => $address->address_id]);
+                if($newData) {
+                    $newData['customer_id'] = $customer_id;
+                    $address->fill($newData);
+                    $address->save();
+                    //set address as default
+                    $customer->update(['address_id' => $address->address_id]);
+                }
             }
 
             if (!$data['approved']) {
