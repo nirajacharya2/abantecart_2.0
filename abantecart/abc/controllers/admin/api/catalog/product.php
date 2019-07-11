@@ -305,7 +305,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @throws AException
      */
     protected function processCategoryTree(array $category_tree){
-        $this->loadModel('catalog/category');
         foreach($category_tree as $lang_code => $category){
             $language_id = $this->language->getLanguageIdByCode($lang_code);
             //Note: start from parent category!

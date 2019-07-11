@@ -88,9 +88,9 @@ class ControllerPagesCatalogProductRelations extends AController{
 				'current'   => true
 		));
 
-		$this->loadModel('catalog/category');
+
 		$this->data['categories'] = array ();
-		$results = (new Category())->getCategories(0);
+		$results = Category::getCategories(0);
 		foreach ($results as $r) {
 			$this->data['categories'][$r['category_id']] = $r['name'];
 		}
@@ -147,9 +147,9 @@ class ControllerPagesCatalogProductRelations extends AController{
 		));
 		$this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
-		$this->loadModel('catalog/category');
+
 		$this->data['categories'] = array ();
-		$results = (new Category())->getCategories(0);
+		$results = Category::getCategories(0);
 
 		foreach ($results as $r) {
 			$this->data['categories'][$r['category_id']] = $r['name'];

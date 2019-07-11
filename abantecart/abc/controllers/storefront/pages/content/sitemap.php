@@ -54,7 +54,7 @@ class ControllerPagesContentSitemap extends AController {
         	'separator' => $this->language->get('text_separator')
       	 ));
 
-		$this->loadModel('catalog/category');
+
 		$this->loadModel('tool/seo_url');
 
 		$this->view->assign('categories_html', $this->_buildCategoriesTree(0));
@@ -84,7 +84,7 @@ class ControllerPagesContentSitemap extends AController {
 	protected function _buildCategoriesTree($parent_id, $current_path = '') {
 		$output = '';
 
-		$results = (new Category())->getCategories($parent_id);
+		$results = Category::getCategories($parent_id);
 
 		if ($results) {
 			$output .= '<ul class="list-group">';

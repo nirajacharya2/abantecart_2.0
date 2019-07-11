@@ -1174,7 +1174,7 @@ class Product extends BaseModel
 //TODO move this into categoryModel
     public function getProductCategories()
     {
-        $categories = (new Category())->getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $categories = Category::getCategories(0, $this->registry->get('session')->data['current_store_id']);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[

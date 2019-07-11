@@ -33,12 +33,11 @@ class ControllerApiCatalogCategory extends AControllerAPI
         if ($getBy !== 'pathTree') {
             $category = Category::where($getBy, $request[$getBy])->get()->first();
         } else {
-            $this->load->model('catalog/category');
             $languageId = $this->language->getLanguageCodeByLocale('en');
             $categories = Category::withTrashed()->get();
 
             foreach ($categories as $findcategory) {
-                $pathTree = $this->model_catalog_category->getPath($findcategory->category_id, $languageId, '');
+                $pathTree = Category::getPath($findcategory->category_id, $languageId, '');
                 if ($pathTree == $request[$getBy]) {
                     $category = $findcategory;
                     break;
@@ -58,12 +57,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
         }
 
         $this->data['result'] = [];
-        /**
-         * @var Category $item
-         */
-        $item = $category;
-        if ($item) {
-            $this->data['result'] = $item->getAllData();
+
+        if ($category) {
+            $this->data['result'] = $category->getAllData();
         }
         if (!$this->data['result']) {
             $this->data['result'] = [
@@ -152,12 +148,11 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 if ($updateBy !== 'pathTree') {
                     $category = Category::where($updateBy, $request[$updateBy])->first();
                 } else {
-                    $this->load->model('catalog/category');
                     $languageId = $this->language->getLanguageCodeByLocale('en');
                     $categories = Category::withTrashed()->get();
 
                     foreach ($categories as $findcategory) {
-                        $pathTree = $this->model_catalog_category->getPath($findcategory->category_id, $languageId, '');
+                        $pathTree = Category::getPath($findcategory->category_id, $languageId, '');
                         if ($pathTree === $request[$updateBy]) {
                             $category = $findcategory;
                             break;

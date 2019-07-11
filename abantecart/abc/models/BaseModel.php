@@ -297,9 +297,9 @@ class BaseModel extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            //if ($this->validate($this->toArray())) {
+            if ($this->validate($this->toArray())) {
                 parent::save();
-            //}
+            }
         } else {
             throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
         }

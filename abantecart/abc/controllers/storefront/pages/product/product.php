@@ -41,7 +41,6 @@ use H;
  * @package abc\controllers\storefront
  * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
  * @property ModelCatalogManufacturer $model_catalog_manufacturer
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductProduct extends AController
 {
@@ -99,12 +98,12 @@ class ControllerPagesProductProduct extends AController
         }
 
         $this->loadModel('tool/seo_url');
-        $this->loadModel('catalog/category');
+
 
         if (isset($request['path'])) {
             $path = '';
             foreach (explode('_', $request['path']) as $path_id) {
-                $category_info = (new Category())->getCategory($path_id);
+                $category_info = Category::getCategory($path_id);
                 if (!$path) {
                     $path = $path_id;
                 } else {

@@ -325,8 +325,7 @@ class ModelCatalogProduct extends Model
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
             //get all children categories
-            $this->load->model('catalog/category');
-            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
+            $subCategories = Category::getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT *,
                             p.product_id,
@@ -398,8 +397,7 @@ class ModelCatalogProduct extends Model
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
             //get all children category ids
-            $this->load->model('catalog/category');
-            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
+            $subCategories = Category::getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT COUNT(*) AS total
                     FROM ".$this->db->table_name("products_to_categories")." p2c
@@ -665,8 +663,6 @@ class ModelCatalogProduct extends Model
 
             if ($category_id) {
                 $data = [];
-
-                $this->load->model('catalog/category');
                 $string = rtrim($this->getPath($category_id), ',');
                 $category_ids = explode(',', $string);
 
@@ -774,8 +770,6 @@ class ModelCatalogProduct extends Model
             if ($category_id) {
                 $data = [];
 
-                $this->load->model('catalog/category');
-
                 $string = rtrim($this->getPath($category_id), ',');
                 $category_ids = explode(',', $string);
 
@@ -836,8 +830,6 @@ class ModelCatalogProduct extends Model
             if ($category_id) {
                 $data = [];
 
-                $this->load->model('catalog/category');
-
                 $string = rtrim($this->getPath($category_id), ',');
                 $category_ids = explode(',', $string);
 
@@ -867,7 +859,7 @@ class ModelCatalogProduct extends Model
     public function getPath($category_id)
     {
         $string = $category_id.',';
-        $results = (new Category())->getCategories((int)$category_id);
+        $results = Category::getCategories((int)$category_id);
         foreach ($results as $result) {
             $string .= $this->getPath($result['category_id']);
         }

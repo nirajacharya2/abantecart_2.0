@@ -52,7 +52,7 @@ class ControllerBlocksCategory extends AController {
 
     	$this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/category') );
 
-		$this->loadModel('catalog/category');
+
 
 		if (isset($request['path'])) {
 			$this->path = explode('_', $request['path']);
@@ -62,7 +62,7 @@ class ControllerBlocksCategory extends AController {
 		$this->view->assign('path', $request['path']);
 
 		//load main level categories
-		$all_categories = (new Category())->getAllCategories();
+		$all_categories = Category::getAllCategories();
 		//build thumbnails list
 		$category_ids = array();
 		foreach($all_categories as $category){

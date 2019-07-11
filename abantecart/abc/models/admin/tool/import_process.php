@@ -213,7 +213,6 @@ class ModelToolImportProcess extends Model
         $this->task_id = $task_id;
         $language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
         $store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
-        $this->load->model('catalog/category');
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
             $this->imp_log = new $log_classname(['app' => "categories_import_{$task_id}.txt"]);
@@ -400,8 +399,6 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateCategory($record, $settings, $language_id, $store_id)
     {
-        $this->load->model('catalog/category');
-
         $record = array_map('trim', $record);
         //data mapping
         $data = $this->buildDataMap($record, $settings['import_col'], $settings['categories_fields'],
@@ -488,7 +485,6 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateManufacturer($record, $settings, $language_id, $store_id)
     {
-        $this->load->model('catalog/category');
         $status = false;
         $record = array_map('trim', $record);
         //data mapping
@@ -919,7 +915,6 @@ class ModelToolImportProcess extends Model
         if (!is_array($data['category'])) {
             return [];
         }
-        $this->load->model('catalog/category');
 
         $ret = [];
         for ($i = 0; $i < count($data['category']); $i++) {

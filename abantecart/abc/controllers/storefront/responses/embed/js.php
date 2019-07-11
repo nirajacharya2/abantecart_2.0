@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\models\catalog\Category;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
 
@@ -35,7 +36,6 @@ if (!class_exists('abc\core\ABC')) {
  *
  * @package abc\controllers\storefront
  * @property ModelCatalogManufacturer $model_catalog_manufacturer
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerResponsesEmbedJS extends AController
 {
@@ -283,8 +283,8 @@ class ControllerResponsesEmbedJS extends AController
             return null;
         }
 
-        $this->loadModel('catalog/category');
-        $categories = $this->model_catalog_category->getCategoriesData(array(
+
+        $categories = Category::getCategoriesData(array(
             'filter_ids'    => $category_id,
             'subsql_filter' => ' c.status=1',
         ));

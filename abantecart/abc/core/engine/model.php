@@ -46,7 +46,6 @@ if (!class_exists('abc\core\ABC')) {
  * @property \abc\core\lib\ADocument $document
  * @property \abc\core\lib\ALanguageManager $language
  * @property \abc\core\lib\ADataEncryption $dcrypt
- * @property \abc\models\admin\ModelCatalogCategory | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
  * @property \abc\core\lib\ADownload $download
  * @property \abc\core\lib\AOrderStatus $order_status
  * @property \abc\core\lib\AIMManager $im

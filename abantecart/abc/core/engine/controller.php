@@ -32,7 +32,6 @@ use H;
  * @property array $error
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
- * @property \abc\models\admin\ModelCatalogCategory | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
  * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
  * @property \abc\models\admin\ModelCatalogProduct | \abc\models\storefront\ModelCatalogProduct $model_catalog_product
  * @property \abc\models\admin\ModelCatalogManufacturer | \abc\models\storefront\ModelCatalogManufacturer $model_catalog_manufacturer

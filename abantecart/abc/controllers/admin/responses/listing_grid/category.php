@@ -37,7 +37,6 @@ if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
  * Class ControllerResponsesListingGridCategory
  *
  * @package abc\controllers\admin
- * @property \abc\models\admin\ModelCatalogCategory $model_catalog_category
  */
 class ControllerResponsesListingGridCategory extends AController
 {
@@ -50,7 +49,6 @@ class ControllerResponsesListingGridCategory extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/category');
-        $this->loadModel('catalog/category');
         $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
@@ -72,7 +70,7 @@ class ControllerResponsesListingGridCategory extends AController
         }
         $new_level = 0;
         //get all leave categories
-        $leaf_nodes = (new Category())->getLeafCategories();
+        $leaf_nodes = Category::getLeafCategories();
         if ($this->request->post['nodeid']) {
             $sort = $filter_data['sort'];
             $order = $filter_data['order'];
@@ -84,7 +82,7 @@ class ControllerResponsesListingGridCategory extends AController
             $new_level = (integer)$this->request->post["n_level"] + 1;
         }
 
-        $results = (new Category())->getCategoriesData($filter_data);
+        $results = Category::getCategoriesData($filter_data);
         $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter->getParam('page');
@@ -179,7 +177,6 @@ class ControllerResponsesListingGridCategory extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadModel('catalog/product');
-        $this->loadModel('catalog/category');
         $this->loadLanguage('catalog/category');
         if ( ! $this->user->canModify('listing_grid/category')) {
             $error = new AError('');
@@ -196,7 +193,7 @@ class ControllerResponsesListingGridCategory extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
-                        (new Category())->deleteCategory($id);
+                        Category::deleteCategory($id);
                     }
                 }
                 break;
@@ -251,7 +248,7 @@ class ControllerResponsesListingGridCategory extends AController
                 ));
         }
 
-        $this->loadModel('catalog/category');
+
         $category_id = $this->request->get['id'];
         if (isset($category_id)) {
             //request sent from edit form. ID in url
@@ -329,7 +326,7 @@ class ControllerResponsesListingGridCategory extends AController
         $output = array();
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('catalog/category');
+
         if (isset($this->request->post['term'])) {
             $filter = array(
                 'limit'         => 20,
@@ -339,7 +336,7 @@ class ControllerResponsesListingGridCategory extends AController
 												OR cd.description LIKE '%".$this->db->escape($this->request->post['term'])."%'
 												OR cd.meta_keywords LIKE '%".$this->db->escape($this->request->post['term'])."%'",
             );
-            $results = (new Category())->getCategoriesData($filter);
+            $results = Category::getCategoriesData($filter);
             //build thumbnails list
             $category_ids = array();
             foreach ($results as $category) {

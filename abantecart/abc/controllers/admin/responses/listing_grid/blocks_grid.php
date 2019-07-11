@@ -375,9 +375,8 @@ class ControllerResponsesListingGridBlocksGrid extends AController
 
                             break;
                         case 'custom_categories':
-                            $this->loadModel('catalog/category');
                             $filter = ['subsql_filter' => 'c.category_id in ('.implode(',', $ids).')'];
-                            $results = (new Category())->getCategoriesData($filter);
+                            $results = Category::getCategoriesData($filter);
 
                             $id_name = 'category_id';
                             $rl_object_name = 'categories';

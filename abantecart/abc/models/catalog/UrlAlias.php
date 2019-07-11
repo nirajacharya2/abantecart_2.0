@@ -59,7 +59,7 @@ class UrlAlias extends BaseModel
         return self::getKeyWord('product_id='.$productId, $languageId);
     }
 
-    public static function getCategoryKeyword(int $categoryId, int $languageId)
+    public static function getCategoryKeyword(int $categoryId, $languageId)
     {
         return self::getKeyWord('category_id='.$categoryId, $languageId);
     }

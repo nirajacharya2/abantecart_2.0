@@ -40,7 +40,6 @@ use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
  *
  * @package abc\controllers\admin
  * @property ModelCatalogProduct      $model_catalog_product
- * @property ModelCatalogCategory     $model_catalog_category
  * @property ModelCatalogManufacturer $model_catalog_manufacturer
  */
 class ControllerPagesCatalogProduct extends AController
@@ -85,9 +84,9 @@ class ControllerPagesCatalogProduct extends AController
             'current'   => true,
         ]);
 
-        $this->loadModel('catalog/category');
+
         $this->data['categories'] = ['' => $this->language->get('text_select_category')];
-        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
+        $results = Category::getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }
@@ -620,9 +619,9 @@ class ControllerPagesCatalogProduct extends AController
             'current'   => true,
         ]);
 
-        $this->loadModel('catalog/category');
+
         $this->data['categories'] = [];
-        $results = (new Category())->getCategories(0, $this->session->data['current_store_id']);
+        $results = Category::getCategories(0, $this->session->data['current_store_id']);
         foreach ($results as $r) {
             $this->data['categories'][$r['category_id']] = $r['name'];
         }

@@ -1377,8 +1377,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
      */
     private function _getCategoriesTitle($object_id)
     {
-        $this->loadModel('catalog/category');
-        $description = (new Category())->getCategoryDescriptions($object_id);
+
+        $description = Category::getCategoryDescriptions($object_id);
         return $description[$this->config->get('storefront_language_id')]['name'];
     }
 

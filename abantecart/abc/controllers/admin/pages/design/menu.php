@@ -411,8 +411,8 @@ class ControllerPagesDesignMenu extends AController{
 						'help_url' => $this->gen_help_url('item_url'),
 				));
 
-		$this->loadModel('catalog/category');
-		$categories = (new Category())->getCategories(0);
+
+		$categories = Category::getCategories(0);
 		$options = array('' => $this->language->get('text_select'));
 		foreach($categories as $c){
 			if(!$c['status']){

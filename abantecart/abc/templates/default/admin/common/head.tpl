@@ -57,7 +57,7 @@ use abc\core\ABC; ?>
 </script>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
+<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/all.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
 <link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/bootstrap-fileinput/css/fileinput.min.css" />

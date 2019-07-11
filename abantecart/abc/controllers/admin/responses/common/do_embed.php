@@ -241,7 +241,6 @@ class ControllerResponsesCommonDoEmbed extends AController
             'style' => 'ml_field',
         ]);
 
-        $this->loadModel('catalog/category');
         $this->loadModel('setting/store');
         //if loaded not default store - hide store switcher
         $current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
@@ -251,17 +250,17 @@ class ControllerResponsesCommonDoEmbed extends AController
         //if embed for only one category
         if (sizeof($category_id) == 1) {
             $cat_id = current($category_id);
-            $category_info = (new Category())->getCategory($cat_id);
-            $category_stores = (new Category())->getCategoryStoresInfo($cat_id);
+            $category_info = Category::getCategory($cat_id);
+            $category_stores = Category::getCategoryStoresInfo($cat_id);
 
             if (sizeof($category_stores) == 1) {
                 $remote_store_url = $category_stores[0]['store_url'];
             }
-            $subcategories = (new Category())->getCategories($cat_id);
+            $subcategories = Category::getCategories($cat_id);
             if ($category_info['parent_id'] == 0) {
-                $options = (new Category())->getCategories(0);
+                $options = Category::getCategories(0);
             } else {
-                $cat_desc = (new Category())->getCategoryDescriptions($cat_id);
+                $cat_desc = Category::getCategoryDescriptions($cat_id);
                 $options = [
                     0 =>
                         [
@@ -272,7 +271,7 @@ class ControllerResponsesCommonDoEmbed extends AController
             }
         } else {
             if (!sizeof($category_id)) {
-                $options = (new Category())->getCategoriesData(['parent_id' => 0]);
+                $options = Category::getCategoriesData(['parent_id' => 0]);
                 $category_id = [];
                 foreach ($options as $c) {
                     $category_id[] = $c['category_id'];
@@ -283,7 +282,7 @@ class ControllerResponsesCommonDoEmbed extends AController
                 }
                 unset($c);
                 $subsql = ' c.category_id IN ('.implode(',', $category_id).') ';
-                $options = (new Category())->getCategoriesData(['subsql_filter' => $subsql]);
+                $options = Category::getCategoriesData(['subsql_filter' => $subsql]);
             }
         }
 

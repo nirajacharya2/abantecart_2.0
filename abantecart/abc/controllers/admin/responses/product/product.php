@@ -41,7 +41,6 @@ use H;
  * Class ControllerResponsesProductProduct
  *
  * @package abc\controllers\admin
- * @property ModelCatalogCategory $model_catalog_category
  * @property ModelCatalogDownload $model_catalog_download
  */
 class ControllerResponsesProductProduct extends AController
@@ -245,8 +244,6 @@ class ControllerResponsesProductProduct extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/category');
-
         if (isset($this->request->post['id'])) { // variant for popup listing
             $categories = $this->request->post['id'];
         } else {
@@ -257,7 +254,7 @@ class ControllerResponsesProductProduct extends AController
         foreach ($categories as $category_id) {
             $category_data[] = [
                 'id'         => $category_id,
-                'name'       => (new Category())->getPath($category_id),
+                'name'       => Category::getPath($category_id),
                 'sort_order' => 0,
             ];
 
