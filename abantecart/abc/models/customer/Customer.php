@@ -533,7 +533,7 @@ class Customer extends BaseModel
 
 
     public function SetEmailAttribute($value){
-        $this->attributes['email'] = mb_strtolower($value.ABC::env('APP_CHARSET'));
+        $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
     }
 
     public function setDataAttribute($value)
