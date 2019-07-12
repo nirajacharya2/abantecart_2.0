@@ -971,7 +971,7 @@ class ACustomer extends ALibBase
         }
 
         // delete subscription accounts for given email
-        Customer::where($db->raw('LOWER(email)'), '=', mb_strtolower($data['email']))
+        Customer::where('email', '=', mb_strtolower($data['email']))
                 ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
                 ->forceDelete();
 
