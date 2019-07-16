@@ -423,6 +423,16 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $key
+     *
+     * @return mixed
+     */
+    public function getRule(string $key)
+    {
+        return $this->rules[$key];
+    }
+
+    /**
+     * @param string $key
      */
     public function removeRule(string $key)
     {
