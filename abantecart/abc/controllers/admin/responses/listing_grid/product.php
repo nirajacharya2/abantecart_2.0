@@ -192,6 +192,7 @@ class ControllerResponsesListingGridProduct extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
+                        $upd = [];
                         foreach ($allowedFields as $f) {
                             if ($f == 'status' && !isset($this->request->post['status'][$id])) {
                                 $this->request->post['status'][$id] = 0;
@@ -204,8 +205,12 @@ class ControllerResponsesListingGridProduct extends AController
 
                                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                                 }
-                                Product::updateProduct($id, [$f => $this->request->post[$f][$id]], $this->language->getContentLanguageID());
+                                $upd[$f] = $this->request->post[$f][$id];
                             }
+                        }
+                        if (!empty($upd)) {
+                            Product::updateProduct($id, $upd, $this->language->getContentLanguageID());
+                            $this->extensions->hk_ProcessData($this, 'update', ['product_id' => $id]);
                         }
                     }
                 }
@@ -267,6 +272,7 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 $data = [$key => $value];
                 Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
+                $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             }
 
             return null;
@@ -287,6 +293,7 @@ class ControllerResponsesListingGridProduct extends AController
                         return null;
                     }
                     Product::updateProduct($k, [$f => $v], $this->language->getContentLanguageID());
+                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
                 }
             }
         }
