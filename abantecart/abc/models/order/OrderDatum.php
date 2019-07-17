@@ -34,6 +34,7 @@ class OrderDatum extends BaseModel
     protected $casts = [
         'order_id' => 'int',
         'type_id'  => 'int',
+        'data'     => 'serialized'
     ];
 
     protected $dates = [
@@ -42,9 +43,49 @@ class OrderDatum extends BaseModel
     ];
 
     protected $fillable = [
+        'type_id',
+        'order_id',
         'data',
         'date_added',
         'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'type_id' => [
+            'checks'   => [
+                'integer',
+                'exists:order_data_types'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or does not exists in the table "order_data_types"!',
+                ],
+            ],
+        ],
+        'order_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or does not exists in the table "orders"!',
+                ],
+            ],
+        ],
+        'data' => [
+            'checks'   => [
+                'array',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an array!',
+                ],
+            ],
+        ]
     ];
 
     public function order()

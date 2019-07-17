@@ -384,7 +384,7 @@ class Customer extends BaseModel
 
         'ip' => [
             'checks'   => [
-                'string',
+                'ip',
                 'max:50',
             ],
             'messages' => [

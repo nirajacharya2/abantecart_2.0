@@ -94,6 +94,15 @@ class Order extends BaseModel
     public $timestamps = false;
     protected $primaryKey = 'order_id';
 
+    /**
+     * Access policy properties
+     * Note: names must be without dashes and whitespaces
+     * policy rule will be named as {userType-userGroup}.product-product-read
+     * For example: system-www-data.product-product-read
+     */
+    protected $policyGroup = 'order';
+    protected $policyObject = 'order';
+
     protected $casts = [
         'invoice_id'          => 'int',
         'store_id'            => 'int',
@@ -230,12 +239,11 @@ class Order extends BaseModel
         ],
         'store_url' => [
             'checks'   => [
-                'string',
-                'max:255',
+                'url',
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be string :max characters length!',
+                    'default_text' => ':attribute must be valid URL!',
                 ],
             ],
         ],
@@ -248,7 +256,7 @@ class Order extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute is not integer!',
+                    'default_text' => ':attribute is not integer Or absent in customers table!',
                 ],
             ],
         ],
@@ -729,7 +737,7 @@ class Order extends BaseModel
         ],
         'payment_method_data' => [
             'checks'   => [
-                'string',
+                'array',
             ],
             'messages' => [
                 '*' => [

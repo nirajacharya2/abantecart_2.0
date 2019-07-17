@@ -72,13 +72,13 @@ class OrderModelTest extends ATestCase{
                         'ip' => 'fail',
                         'payment_method_data' => -0,999999999999999,
                     ];
-        $product = new Order( $data );
+        $order = new Order( $data );
         $errors = [];
         try{
-            $product->validate();
+            $order->validate();
         }catch(ValidationException $e){
-            $errors = $product->errors()['validation'];
-            var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            $errors = $order->errors()['validation'];
+           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(51, count($errors));
@@ -96,13 +96,13 @@ class OrderModelTest extends ATestCase{
             'currency' => 'UAH',
             'coupon_id' => 1500,
         ];
-        $product = new Order( $data );
+        $order = new Order( $data );
         $errors = [];
         try{
-            $product->validate();
+            $order->validate();
         }catch(ValidationException $e){
-            $errors = $product->errors()['validation'];
-            var_dump($errors);
+            $errors = $order->errors()['validation'];
+           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(7, count($errors));
@@ -117,16 +117,91 @@ class OrderModelTest extends ATestCase{
             'currency' => 'USD',
             'coupon_id' => null,
         ];
-        $product = new Order( $data );
+        $order = new Order( $data );
         $errors = [];
         try{
-            $product->validate();
+            $order->validate();
         }catch(ValidationException $e){
-            $errors = $product->errors()['validation'];
-            var_dump($errors);
+            $errors = $order->errors()['validation'];
+           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(0, count($errors));
+
+        //check correct value
+        $data = [
+                        'order_id' => 10000,
+                        'invoice_id' => 12,
+                        'invoice_prefix' => 'PRE-',
+                        'store_id' => 0,
+                        'store_name' => 'Test Store',
+                        'store_url' => 'http://localhost/public/',
+                        'customer_id' => 2,
+                        'customer_group_id' => 1,
+                        'firstname' => 'TestName',
+                        'lastname' => 'TestLast',
+                        'telephone' => '+38098123456788',
+                        'fax' => '+38098123456788',
+                        'email' => 'unittest@abantecart.com',
+                        'shipping_firstname' => 'TestShippingName',
+                        'shipping_lastname' => 'TestShippingLastName',
+                        'shipping_company' => 'Abc2.0',
+                        'shipping_address_1' => 'Somewhere1',
+                        'shipping_address_2' => 'Somewhere Street',
+                        'shipping_city' => 'New York',
+                        'shipping_postcode' => '11222',
+                        'shipping_zone' => 'Manhattan',
+                        'shipping_zone_id' => 1,
+                        'shipping_country' => 'USA',
+                        'shipping_country_id' => 1,
+                        'shipping_address_format' => 'blablabla',
+                        'shipping_method' => 'free_shipping.free_shipping',
+                        'shipping_method_key' => 'free_shipping',
+                        'payment_firstname' => 'TestShippingName',
+                        'payment_lastname' => 'TestShippingLastName',
+                        'payment_company' => 'Abc2.0',
+                        'payment_address_1' => 'Somewhere2',
+                        'payment_address_2' => 'Somewhere Street2',
+                        'payment_city' => 'Poltava',
+                        'payment_postcode' => '123456',
+                        'payment_zone' => 'Poltava',
+                        'payment_zone_id' => 2,
+                        'payment_country' => 'Ukraine',
+                        'payment_country_id' => 2,
+                        'payment_address_format' => 'blablabla222',
+                        'payment_method' => 'cod',
+                        'payment_method_key' => 'cod',
+                        'comment' => 'unittest',
+                        'total' => 1.0,
+
+                        'order_status_id' => 1,
+                        'language_id' => 1,
+                        'currency_id' => 1,
+                        'currency' => 'USD',
+
+                        'value' => 1.0,
+                        'coupon_id' => null,
+                        'ip' => '127.0.0.1',
+                        'payment_method_data' => ['some payment' => 'some data'],
+                    ];
+
+        $order = new Order( $data );
+        $errors = [];
+        $order_id = null;
+        try{
+            $order->validate();
+            $order->save();
+        }catch(ValidationException $e){
+            $errors = $order->errors()['validation'];
+            var_Dump(array_intersect_key($data, $errors ));
+            var_Dump($errors);
+        }
+
+        $this->assertEquals(0, count($errors));
+
+        if($order->order_id){
+            Order::destroy($order->order_id);
+        }
 
     }
 }
