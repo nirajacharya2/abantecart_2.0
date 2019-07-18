@@ -1,6 +1,7 @@
 <?php
 namespace abc\tests\unit;
 
+use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
 use Illuminate\Validation\ValidationException;
 
@@ -60,11 +61,32 @@ class OrderDownloadHistoryModelTest extends ATestCase{
         }
         $this->assertEquals(4, count($errors));
 
+
         //valid data
         $data = [
             'order_id' => 2,
             'order_product_id' => 6,
-            'order_download_id' => 1,
+            'name' => 'test-download',
+            'filename' => 'http://',
+            'mask' => 'test-mask',
+            'download_id' => 1,
+            'status' => 0,
+            'remaining_count' => 458,
+            'percentage' => 0,
+            'expire_date' => '2019-05-01 00:00:00',
+            'sort_order' => 1,
+            'activate' => 'sssssss',
+            'activate_order_status_id' => 1,
+            'attributes_data' => ['somedata' => 'somevalue']
+        ];
+
+        $orderDownload = new OrderDownload( $data );
+
+        //valid data
+        $data = [
+            'order_id' => 2,
+            'order_product_id' => 6,
+            'order_download_id' => $orderDownload->order_download_id,
             'filename' => 'http://',
             'mask' => 'test-mask',
             'download_id' => 1,

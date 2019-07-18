@@ -33,12 +33,12 @@ class OrderDownloadModelTest extends ATestCase{
             'attributes_data' => 'fail'
         ];
 
-        $orderDataType = new OrderDownload(  );
+        $orderDownload = new OrderDownload(  );
         $errors = [];
         try{
-            $orderDataType->validate($data);
+            $orderDownload->validate($data);
         }catch(ValidationException $e){
-            $errors = $orderDataType->errors()['validation'];
+            $errors = $orderDownload->errors()['validation'];
            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
         $this->assertEquals(14, count($errors));
@@ -56,12 +56,12 @@ class OrderDownloadModelTest extends ATestCase{
             'name' => 'test',
         ];
 
-        $orderDataType = new OrderDownload();
+        $orderDownload = new OrderDownload();
         $errors = [];
         try{
-            $orderDataType->validate($data);
+            $orderDownload->validate($data);
         }catch(ValidationException $e){
-            $errors = $orderDataType->errors()['validation'];
+            $errors = $orderDownload->errors()['validation'];
             //var_Dump($errors);
         }
         $this->assertEquals(4, count($errors));
@@ -82,12 +82,12 @@ class OrderDownloadModelTest extends ATestCase{
             'name' => 'test',
         ];
 
-        $orderDataType = new OrderDownload();
+        $orderDownload = new OrderDownload();
         $errors = [];
         try{
-            $orderDataType->validate($data);
+            $orderDownload->validate($data);
         }catch(ValidationException $e){
-            $errors = $orderDataType->errors()['validation'];
+            $errors = $orderDownload->errors()['validation'];
             //var_Dump($errors);
         }
         $this->assertEquals(0, count($errors));
@@ -111,17 +111,18 @@ class OrderDownloadModelTest extends ATestCase{
             'attributes_data' => ['somedata' => 'somevalue']
         ];
 
-        $orderDataType = new OrderDownload( $data );
+        $orderDownload = new OrderDownload( $data );
         $errors = [];
         try{
-            $orderDataType->validate($data);
-            $orderDataType->save();
+            $orderDownload->validate($data);
+            $orderDownload->save();
         }catch(ValidationException $e){
-            $errors = $orderDataType->errors()['validation'];
+            $errors = $orderDownload->errors()['validation'];
            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             var_dump($errors);
         }
         $this->assertEquals(0, count($errors));
+        $orderDownload->forceDelete();
     }
 
 }
