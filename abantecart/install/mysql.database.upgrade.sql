@@ -207,7 +207,7 @@ ALTER TABLE `ac_order_products`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
@@ -216,7 +216,7 @@ ALTER TABLE `ac_order_downloads`
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
@@ -574,7 +574,8 @@ ALTER TABLE `ac_customers`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_downloads`
-MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
+MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+CHANGE COLUMN `download_id` `download_id` INT(11) NULL;
 
 ALTER TABLE `ac_downloads`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;

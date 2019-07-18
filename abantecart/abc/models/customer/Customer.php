@@ -336,8 +336,7 @@ class Customer extends BaseModel
 
         'status' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [
@@ -360,8 +359,7 @@ class Customer extends BaseModel
 
         'approved' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [

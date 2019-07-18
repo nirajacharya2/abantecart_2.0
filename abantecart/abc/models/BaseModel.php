@@ -21,6 +21,7 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasManyEvents;
@@ -338,6 +339,12 @@ class BaseModel extends OrmModel
      */
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
+        /*
+         * Disable Temporary strict mode of Carbon class (date-conversion)
+         * to prevent it's exception during validation
+         */
+        $carbonStrictMode = Carbon::isStrictModeEnabled();
+        Carbon::useStrictMode(false);
         $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
@@ -381,12 +388,15 @@ class BaseModel extends OrmModel
                 $v->validate();
             } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             } catch (\Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             }
         }
+        Carbon::useStrictMode($carbonStrictMode);
         return true;
     }
 

@@ -53,6 +53,7 @@ class OrderDownload extends BaseModel
         'percentage'               => 'int',
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
+        'attributes_data'          => 'serialized'
     ];
 
     protected $dates = [
@@ -75,9 +76,172 @@ class OrderDownload extends BaseModel
         'sort_order',
         'activate',
         'activate_order_status_id',
-        'attributes_data',
-        'date_added',
-        'date_modified',
+        'attributes_data'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'order_product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_products'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in order_products table!',
+                ],
+            ],
+        ],
+        'name' => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'filename' => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'mask' => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'download_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:downloads'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'status' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'remaining_count' => [
+            'checks'   => [
+                'integer',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'percentage' => [
+            'checks'   => [
+                'integer',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'expire_date' => [
+            'checks'   => [
+                'date',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a date!',
+                ],
+            ],
+        ],
+        'sort_order' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+
+        'activate' => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'activate_order_status_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_statuses,order_status_id'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
+                ],
+            ],
+        ],
+        'attributes_data' => [
+            'checks'   => [
+                'array',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an array or null!',
+                ],
+            ],
+        ]
     ];
 
     public function download()
