@@ -308,7 +308,7 @@
 				sortBy: 'date_added'
 			},
 			events: [],
-			event_items: ['Created', 'Updated', 'Deleted', 'Restored'],
+			event_items: ['Created', 'Updating', 'Deleted', 'Restored'],
 			table_rows_per_page_items: [10,20,30,40,50,60,70,80,90,100],
 			table_headers: [
 				{
