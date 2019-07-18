@@ -44,8 +44,55 @@ class OrderHistory extends BaseModel
         'order_status_id',
         'notify',
         'comment',
-        'date_added',
-        'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id'        => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'order_status_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
+                ],
+            ],
+        ],
+        'notify'          => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'comment'         => [
+            'checks'   => [
+                'string',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
     ];
 
     public function order_status()
