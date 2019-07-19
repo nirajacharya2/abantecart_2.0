@@ -37,7 +37,7 @@ class OrderStatusModelTest extends ATestCase{
             'status_text_id'        => 'test_status'
         ];
 
-        $orderStatus = new OrderStatus();
+        $orderStatus = new OrderStatus($data);
         $errors = [];
         try {
             $orderStatus->validate($data);

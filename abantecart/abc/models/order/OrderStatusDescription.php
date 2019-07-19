@@ -28,6 +28,10 @@ class OrderStatusDescription extends BaseModel
         'language_id',
     ];
     public $timestamps = false;
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
     protected $casts = [
         'order_status_id' => 'int',
@@ -35,7 +39,48 @@ class OrderStatusDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'language_id',
         'name',
+    ];
+
+    protected $rules = [
+
+        'order_status_id' => [
+            'checks'   => [
+                'int',
+                'exists:order_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in :exists table!',
+                ],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'int',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in :exists table!',
+                ],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'max:32',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ]
     ];
 
     public function order_status()
