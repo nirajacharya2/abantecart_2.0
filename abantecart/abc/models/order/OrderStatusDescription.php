@@ -52,7 +52,7 @@ class OrderStatusDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute is not integer or absent in :exists table!',
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
                 ],
             ],
         ],
@@ -64,7 +64,7 @@ class OrderStatusDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute is not integer or absent in :exists table!',
+                    'default_text' => ':attribute is not integer or absent in languages table!',
                 ],
             ],
         ],

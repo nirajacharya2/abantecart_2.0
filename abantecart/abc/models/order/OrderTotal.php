@@ -27,6 +27,10 @@ class OrderTotal extends BaseModel
 
     protected $primaryKey = 'order_total_id';
     public $timestamps = false;
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
 
     protected $casts = [
         'order_id'   => 'int',
@@ -42,6 +46,94 @@ class OrderTotal extends BaseModel
         'sort_order',
         'type',
         'key',
+    ];
+
+    protected $rules = [
+
+        'order_id' => [
+            'checks'   => [
+                'int',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in orders table!',
+                ],
+            ],
+        ],
+
+        'title' => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'text' => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'value' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'sort_order' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+
+        'type' => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'key' => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
     ];
 
     public function order()
