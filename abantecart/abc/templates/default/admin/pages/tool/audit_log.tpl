@@ -5,6 +5,9 @@
 		padding-left: 15px;
 		max-width: 100%;
 	}
+	.v-menu__content.theme--light {
+		min-width: unset !important;
+	}
 </style>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
