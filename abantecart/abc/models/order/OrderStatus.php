@@ -22,9 +22,33 @@ class OrderStatus extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
 
+    protected $primaryKey = 'order_status_id';
     protected $cascadeDeletes = ['descriptions'];
 
     public $timestamps = false;
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
+    protected $casts = [];
+    protected $fillable = ['status_text_id'];
+
+    protected $rules = [
+
+        'status_text_id' => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ]
+    ];
 
     public function descriptions()
     {
