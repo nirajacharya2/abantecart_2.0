@@ -61,6 +61,125 @@ class OrderProduct extends BaseModel
         'subtract',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'order_id'   => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'name'  => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'model' => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'sku'   => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'total' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'tax' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'quantity' => [
+            'checks'   => [
+                'integer',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'subtract' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+    ];
+
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');
