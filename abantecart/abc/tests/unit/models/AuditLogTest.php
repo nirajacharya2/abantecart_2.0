@@ -186,14 +186,14 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                "created"      => 36,
+                "created"      => 28,
                 "deleted"      => 50,
                 "deleting"     => 93,
                 "forceDeleted" => 35,
                 "restored"     => 35,
                 "restoring"    => 35,
                 "updated"      => 5,
-                "updating"     => 5,
+                "updating"     => 13,
             ]
         );
     }
