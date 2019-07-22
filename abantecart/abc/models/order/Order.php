@@ -184,7 +184,7 @@ class Order extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'order_id' => [
+        'order_id'       => [
             'checks'   => [
                 'integer',
             ],
@@ -194,7 +194,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'invoice_id' => [
+        'invoice_id'     => [
             'checks'   => [
                 'integer',
             ],
@@ -237,7 +237,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'store_url' => [
+        'store_url'      => [
             'checks'   => [
                 'url',
             ],
@@ -248,7 +248,7 @@ class Order extends BaseModel
             ],
         ],
 
-        'customer_id' => [
+        'customer_id'       => [
             'checks'   => [
                 'integer',
                 'nullable',
@@ -315,7 +315,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'email'               => [
+        'email'     => [
             'checks'   => [
                 'string',
                 'max:96',
@@ -328,7 +328,7 @@ class Order extends BaseModel
             ],
         ],
 
-        'shipping_firstname'  => [
+        'shipping_firstname'      => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -339,7 +339,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_lastname'   => [
+        'shipping_lastname'       => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -350,7 +350,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_company'    => [
+        'shipping_company'        => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -361,7 +361,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_address_1'  => [
+        'shipping_address_1'      => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -372,7 +372,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_address_2'  => [
+        'shipping_address_2'      => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -383,7 +383,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_city'       => [
+        'shipping_city'           => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -394,7 +394,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_postcode'   => [
+        'shipping_postcode'       => [
             'checks'   => [
                 'string',
                 'max:10',
@@ -405,7 +405,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_zone'       => [
+        'shipping_zone'           => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -416,7 +416,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_zone_id'    => [
+        'shipping_zone_id'        => [
             'checks'   => [
                 'int',
             ],
@@ -426,7 +426,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_country'    => [
+        'shipping_country'        => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -437,7 +437,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_country_id' => [
+        'shipping_country_id'     => [
             'checks'   => [
                 'int',
             ],
@@ -458,7 +458,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_method' => [
+        'shipping_method'         => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -469,7 +469,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'shipping_method_key' => [
+        'shipping_method_key'     => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -481,7 +481,7 @@ class Order extends BaseModel
             ],
         ],
 
-        'payment_firstname'   => [
+        'payment_firstname'      => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -492,7 +492,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_lastname'    => [
+        'payment_lastname'       => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -503,7 +503,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_company'     => [
+        'payment_company'        => [
             'checks'   => [
                 'string',
                 'max:32',
@@ -514,7 +514,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_address_1'   => [
+        'payment_address_1'      => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -525,7 +525,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_address_2'   => [
+        'payment_address_2'      => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -536,7 +536,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_city'        => [
+        'payment_city'           => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -547,7 +547,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_postcode'    => [
+        'payment_postcode'       => [
             'checks'   => [
                 'string',
                 'max:10',
@@ -558,7 +558,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_zone'        => [
+        'payment_zone'           => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -569,7 +569,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_zone_id'     => [
+        'payment_zone_id'        => [
             'checks'   => [
                 'int',
             ],
@@ -579,7 +579,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_country'     => [
+        'payment_country'        => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -590,7 +590,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_country_id'  => [
+        'payment_country_id'     => [
             'checks'   => [
                 'int',
             ],
@@ -611,7 +611,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_method' => [
+        'payment_method'         => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -622,7 +622,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'payment_method_key' => [
+        'payment_method_key'     => [
             'checks'   => [
                 'string',
                 'max:128',
@@ -667,7 +667,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'language_id' => [
+        'language_id'     => [
             'checks'   => [
                 'int',
                 'exists:languages',
@@ -678,7 +678,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'currency_id' => [
+        'currency_id'     => [
             'checks'   => [
                 'int',
                 'exists:currencies',
@@ -689,7 +689,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'currency' => [
+        'currency'        => [
             'checks'   => [
                 'string',
                 'max:3',
@@ -702,7 +702,7 @@ class Order extends BaseModel
             ],
         ],
 
-        'value' => [
+        'value'               => [
             'checks'   => [
                 'numeric',
             ],
@@ -712,7 +712,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'coupon_id' => [
+        'coupon_id'           => [
             'checks'   => [
                 'int',
                 'nullable',
@@ -724,7 +724,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'ip' => [
+        'ip'                  => [
             'checks'   => [
                 'ip',
                 'max:50',

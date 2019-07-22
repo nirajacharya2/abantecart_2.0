@@ -30,11 +30,13 @@ class OrderDatum extends BaseModel
     ];
 
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
         'order_id' => 'int',
         'type_id'  => 'int',
-        'data'     => 'serialized'
+        'data'     => 'serialized',
     ];
 
     protected $dates = [
@@ -52,10 +54,10 @@ class OrderDatum extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'type_id' => [
+        'type_id'  => [
             'checks'   => [
                 'integer',
-                'exists:order_data_types'
+                'exists:order_data_types',
             ],
             'messages' => [
                 '*' => [
@@ -67,7 +69,7 @@ class OrderDatum extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists:orders'
+                'exists:orders',
             ],
             'messages' => [
                 '*' => [
@@ -75,17 +77,17 @@ class OrderDatum extends BaseModel
                 ],
             ],
         ],
-        'data' => [
+        'data'     => [
             'checks'   => [
                 'array',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be an array!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function order()

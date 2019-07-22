@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\tests\unit;
 
 use abc\models\order\CouponsProduct;
@@ -7,10 +8,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Class CouponProductTest
  */
-class CouponProductModelTest extends ATestCase{
+class CouponProductModelTest extends ATestCase
+{
 
-
-    protected function setUp(){
+    protected function setUp()
+    {
         //init
     }
 
@@ -18,7 +20,7 @@ class CouponProductModelTest extends ATestCase{
     {
         //validate
         $data = [
-            'coupon_id' => 'fail',
+            'coupon_id'  => 'fail',
             'product_id' => 'fail',
         ];
 
@@ -33,10 +35,9 @@ class CouponProductModelTest extends ATestCase{
         }
         $this->assertEquals(2, count($errors));
 
-
         //validate
         $data = [
-            'coupon_id' => 121212121,
+            'coupon_id'  => 121212121,
             'product_id' => 2323232323,
         ];
 
@@ -51,10 +52,9 @@ class CouponProductModelTest extends ATestCase{
         }
         $this->assertEquals(2, count($errors));
 
-
         //validate
         $data = [
-            'coupon_id' => 4,
+            'coupon_id'  => 4,
             'product_id' => 50,
         ];
 

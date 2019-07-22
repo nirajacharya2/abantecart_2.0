@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\tests\unit;
 
 use abc\models\order\OrderStatus;
@@ -7,10 +8,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Class OrderStatusModelTest
  */
-class OrderStatusModelTest extends ATestCase{
+class OrderStatusModelTest extends ATestCase
+{
 
-
-    protected function setUp(){
+    protected function setUp()
+    {
         //init
     }
 
@@ -18,7 +20,7 @@ class OrderStatusModelTest extends ATestCase{
     {
         //validate
         $data = [
-            'status_text_id'        => -0.000000000000000009
+            'status_text_id' => -0.000000000000000009,
         ];
 
         $orderStatus = new OrderStatus();
@@ -31,10 +33,9 @@ class OrderStatusModelTest extends ATestCase{
         }
         $this->assertEquals(1, count($errors));
 
-
         //validate
         $data = [
-            'status_text_id'        => 'test_status'
+            'status_text_id' => 'test_status',
         ];
 
         $orderStatus = new OrderStatus($data);

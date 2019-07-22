@@ -30,13 +30,15 @@ class OrderOption extends BaseModel
 
     protected $primaryKey = 'order_option_id';
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
         'order_id'                => 'int',
         'order_product_id'        => 'int',
         'product_option_value_id' => 'int',
         'price'                   => 'float',
-        'settings'                => 'serialized'
+        'settings'                => 'serialized',
     ];
 
     protected $fillable = [
@@ -51,15 +53,13 @@ class OrderOption extends BaseModel
         'settings',
     ];
 
-
-
     protected $rules = [
         /** @see validate() */
-        'order_id' => [
+        'order_id'                => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:orders'
+                'exists:orders',
             ],
             'messages' => [
                 '*' => [
@@ -67,11 +67,11 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'order_product_id' => [
+        'order_product_id'        => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:order_products'
+                'exists:order_products',
             ],
             'messages' => [
                 '*' => [
@@ -82,7 +82,7 @@ class OrderOption extends BaseModel
         'product_option_value_id' => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -90,11 +90,11 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'name' => [
+        'name'                    => [
             'checks'   => [
                 'string',
                 'max:255',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -102,11 +102,11 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'sku' => [
+        'sku'                     => [
             'checks'   => [
                 'string',
                 'max:64',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -114,11 +114,11 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'value' => [
+        'value'                   => [
             'checks'   => [
                 'string',
                 'max:1500',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -126,7 +126,7 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'price' => [
+        'price'                   => [
             'checks'   => [
                 'numeric',
             ],
@@ -152,16 +152,15 @@ class OrderOption extends BaseModel
         'settings' => [
             'checks'   => [
                 'array',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be an array or null!',
                 ],
             ],
-        ]
+        ],
     ];
-
 
     public function order()
     {

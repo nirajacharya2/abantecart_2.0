@@ -28,6 +28,8 @@ class OrderStatusDescription extends BaseModel
         'language_id',
     ];
     public $timestamps = false;
+    protected $mainClassName = OrderStatus::class;
+    protected $mainClassKey = 'order_status_id';
     protected $dates = [
         'date_added',
         'date_modified',
@@ -73,14 +75,14 @@ class OrderStatusDescription extends BaseModel
             'checks'   => [
                 'string',
                 'max:32',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be string :max characters length!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function order_status()

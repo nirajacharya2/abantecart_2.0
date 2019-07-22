@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\tests\unit;
 
 use abc\models\order\OrderDatum;
@@ -7,10 +8,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Class OrderDatumModelTest
  */
-class OrderDatumModelTest extends ATestCase{
+class OrderDatumModelTest extends ATestCase
+{
 
-
-    protected function setUp(){
+    protected function setUp()
+    {
         //init
     }
 
@@ -18,51 +20,50 @@ class OrderDatumModelTest extends ATestCase{
     {
         //validate
         $data = [
-            'type_id' => 'fail',
+            'type_id'  => 'fail',
             'order_id' => -0.000000000123232,
-            'data' => 'fail',
+            'data'     => 'fail',
         ];
-        $orderDatum = new OrderDatum( $data );
+        $orderDatum = new OrderDatum($data);
         $errors = [];
-        try{
+        try {
             $orderDatum->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $orderDatum->errors()['validation'];
-           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(3, count($errors));
 
         //check validation of presence in database
         $data = [
-            'type_id' => 122,
+            'type_id'     => 122,
             'language_id' => 1500,
         ];
-        $orderDatum = new OrderDatum( $data );
+        $orderDatum = new OrderDatum($data);
         $errors = [];
-        try{
+        try {
             $orderDatum->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $orderDatum->errors()['validation'];
             //var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(3, count($errors));
 
-
         $data = [
-            'type_id' => 2,
+            'type_id'  => 2,
             'order_id' => 2,
-            'data' => ['someData' => 'someValue'],
+            'data'     => ['someData' => 'someValue'],
         ];
 
-        $orderDatum = new OrderDatum( $data );
+        $orderDatum = new OrderDatum($data);
         $errors = [];
         $order_id = null;
-        try{
+        try {
             $orderDatum->validate();
             $orderDatum->save();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $orderDatum->errors()['validation'];
             //var_Dump(array_intersect_key($data, $errors ));
         }

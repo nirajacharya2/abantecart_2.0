@@ -34,6 +34,8 @@ class OrderDownloadsHistory extends BaseModel
 
     protected $table = 'order_downloads_history';
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
         'order_id'          => 'int',
@@ -58,14 +60,13 @@ class OrderDownloadsHistory extends BaseModel
         'download_percent',
     ];
 
-
     protected $rules = [
         /** @see validate() */
-        'order_id' => [
+        'order_id'          => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:orders'
+                'exists:orders',
             ],
             'messages' => [
                 '*' => [
@@ -77,7 +78,7 @@ class OrderDownloadsHistory extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists:order_downloads'
+                'exists:order_downloads',
             ],
             'messages' => [
                 '*' => [
@@ -85,11 +86,11 @@ class OrderDownloadsHistory extends BaseModel
                 ],
             ],
         ],
-        'order_product_id' => [
+        'order_product_id'  => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:order_products'
+                'exists:order_products',
             ],
             'messages' => [
                 '*' => [
@@ -97,11 +98,11 @@ class OrderDownloadsHistory extends BaseModel
                 ],
             ],
         ],
-        'filename' => [
+        'filename'          => [
             'checks'   => [
                 'string',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -109,11 +110,11 @@ class OrderDownloadsHistory extends BaseModel
                 ],
             ],
         ],
-        'mask' => [
+        'mask'              => [
             'checks'   => [
                 'string',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -121,11 +122,11 @@ class OrderDownloadsHistory extends BaseModel
                 ],
             ],
         ],
-        'download_id' => [
+        'download_id'       => [
             'checks'   => [
                 'integer',
                 'nullable',
-                'exists:downloads'
+                'exists:downloads',
             ],
             'messages' => [
                 '*' => [
@@ -133,10 +134,10 @@ class OrderDownloadsHistory extends BaseModel
                 ],
             ],
         ],
-        'download_percent' => [
+        'download_percent'  => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -145,7 +146,6 @@ class OrderDownloadsHistory extends BaseModel
             ],
         ],
     ];
-
 
     public function order_download()
     {

@@ -42,15 +42,15 @@ class OrderDataType extends BaseModel
     protected $fillable = [
         'type_id',
         'language_id',
-        'name'
+        'name',
     ];
 
     protected $rules = [
         /** @see validate() */
-        'type_id' => [
+        'type_id'     => [
             'checks'   => [
                 'integer',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -62,7 +62,7 @@ class OrderDataType extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists:languages'
+                'exists:languages',
             ],
             'messages' => [
                 '*' => [
@@ -70,18 +70,18 @@ class OrderDataType extends BaseModel
                 ],
             ],
         ],
-        'name' => [
+        'name'        => [
             'checks'   => [
                 'string',
                 'max:64',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be string :max characters length!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function language()

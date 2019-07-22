@@ -30,6 +30,8 @@ class CouponDescription extends BaseModel
     ];
 
     public $timestamps = false;
+    protected $mainClassName = Coupon::class;
+    protected $mainClassKey = 'coupon_id';
 
     protected $casts = [
         'coupon_id'   => 'int',
@@ -69,12 +71,12 @@ class CouponDescription extends BaseModel
             ],
         ],
 
-        'name' => [
+        'name'        => [
             'checks'   => [
                 'string',
                 'min:2',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -90,7 +92,7 @@ class CouponDescription extends BaseModel
                 'string',
                 'min:2',
                 'max:1500',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -100,7 +102,7 @@ class CouponDescription extends BaseModel
                     'section'        => 'admin',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function coupon()

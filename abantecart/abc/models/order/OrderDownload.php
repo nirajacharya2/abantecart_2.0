@@ -43,6 +43,8 @@ class OrderDownload extends BaseModel
 
     protected $primaryKey = 'order_download_id';
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
         'order_id'                 => 'int',
@@ -53,7 +55,7 @@ class OrderDownload extends BaseModel
         'percentage'               => 'int',
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
-        'attributes_data'          => 'serialized'
+        'attributes_data'          => 'serialized',
     ];
 
     protected $dates = [
@@ -76,16 +78,16 @@ class OrderDownload extends BaseModel
         'sort_order',
         'activate',
         'activate_order_status_id',
-        'attributes_data'
+        'attributes_data',
     ];
 
     protected $rules = [
         /** @see validate() */
-        'order_id' => [
+        'order_id'         => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:orders'
+                'exists:orders',
             ],
             'messages' => [
                 '*' => [
@@ -97,7 +99,7 @@ class OrderDownload extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists:order_products'
+                'exists:order_products',
             ],
             'messages' => [
                 '*' => [
@@ -105,11 +107,11 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'name' => [
+        'name'             => [
             'checks'   => [
                 'string',
                 'max:64',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -117,11 +119,11 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'filename' => [
+        'filename'         => [
             'checks'   => [
                 'string',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -129,11 +131,11 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'mask' => [
+        'mask'             => [
             'checks'   => [
                 'string',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -141,11 +143,11 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'download_id' => [
+        'download_id'      => [
             'checks'   => [
                 'integer',
                 'nullable',
-                'exists:downloads'
+                'exists:downloads',
             ],
             'messages' => [
                 '*' => [
@@ -153,7 +155,7 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'status' => [
+        'status'           => [
             'checks'   => [
                 'boolean',
             ],
@@ -163,10 +165,10 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'remaining_count' => [
+        'remaining_count'  => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -174,10 +176,10 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'percentage' => [
+        'percentage'       => [
             'checks'   => [
                 'integer',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -185,10 +187,10 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'expire_date' => [
+        'expire_date'      => [
             'checks'   => [
                 'date',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -196,9 +198,9 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'sort_order' => [
+        'sort_order'       => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -207,11 +209,11 @@ class OrderDownload extends BaseModel
             ],
         ],
 
-        'activate' => [
+        'activate'                 => [
             'checks'   => [
                 'string',
                 'max:64',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -223,7 +225,7 @@ class OrderDownload extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists:order_statuses,order_status_id'
+                'exists:order_statuses,order_status_id',
             ],
             'messages' => [
                 '*' => [
@@ -231,17 +233,17 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'attributes_data' => [
+        'attributes_data'          => [
             'checks'   => [
                 'array',
-                'nullable'
+                'nullable',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be an array or null!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function download()

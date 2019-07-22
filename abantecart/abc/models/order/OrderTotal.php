@@ -27,6 +27,10 @@ class OrderTotal extends BaseModel
 
     protected $primaryKey = 'order_total_id';
     public $timestamps = false;
+
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
+
     protected $dates = [
         'date_added',
         'date_modified',
@@ -66,7 +70,7 @@ class OrderTotal extends BaseModel
             'checks'   => [
                 'string',
                 'max:255',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -74,11 +78,11 @@ class OrderTotal extends BaseModel
                 ],
             ],
         ],
-        'text' => [
+        'text'  => [
             'checks'   => [
                 'string',
                 'max:255',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -100,7 +104,7 @@ class OrderTotal extends BaseModel
 
         'sort_order' => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -113,7 +117,7 @@ class OrderTotal extends BaseModel
             'checks'   => [
                 'string',
                 'max:255',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
@@ -126,7 +130,7 @@ class OrderTotal extends BaseModel
             'checks'   => [
                 'string',
                 'max:128',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [

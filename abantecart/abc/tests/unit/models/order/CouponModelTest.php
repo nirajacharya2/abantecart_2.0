@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\tests\unit;
 
 use abc\models\order\Coupon;
@@ -7,10 +8,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Class CouponModelTest
  */
-class CouponModelTest extends ATestCase{
+class CouponModelTest extends ATestCase
+{
 
-
-    protected function setUp(){
+    protected function setUp()
+    {
         //init
     }
 
@@ -18,17 +20,17 @@ class CouponModelTest extends ATestCase{
     {
         //validate
         $data = [
-            'code' => -0.0000000000009,
-            'type' => 1000,
-            'discount' => 'fail',
-            'logged' => 'fail',
-            'shipping' => 'fail',
-            'total' => 'fail',
-            'date_start' => 'fail',
-            'date_end' => 'fail',
-            'uses_total' => 'fail',
+            'code'          => -0.0000000000009,
+            'type'          => 1000,
+            'discount'      => 'fail',
+            'logged'        => 'fail',
+            'shipping'      => 'fail',
+            'total'         => 'fail',
+            'date_start'    => 'fail',
+            'date_end'      => 'fail',
+            'uses_total'    => 'fail',
             'uses_customer' => 'fail',
-            'status' => 'fail',
+            'status'        => 'fail',
         ];
 
         $coupon = new Coupon();
@@ -42,20 +44,19 @@ class CouponModelTest extends ATestCase{
         }
         $this->assertEquals(11, count($errors));
 
-
         //validate
         $data = [
-            'code' => 'testcoupon',
-            'type' => 'p',
-            'discount' => 2.25,
-            'logged' => true,
-            'shipping' => true,
-            'total' => 1.01,
-            'date_start' => date('Y-m-d H:i:s'),
-            'date_end' => date('Y-m-d H:i:s'),
-            'uses_total' => 100,
+            'code'          => 'testcoupon',
+            'type'          => 'p',
+            'discount'      => 2.25,
+            'logged'        => true,
+            'shipping'      => true,
+            'total'         => 1.01,
+            'date_start'    => date('Y-m-d H:i:s'),
+            'date_end'      => date('Y-m-d H:i:s'),
+            'uses_total'    => 100,
             'uses_customer' => 10000,
-            'status' => true
+            'status'        => true,
         ];
 
         $coupon = new Coupon($data);

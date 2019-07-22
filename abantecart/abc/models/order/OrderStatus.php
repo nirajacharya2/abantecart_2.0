@@ -40,14 +40,14 @@ class OrderStatus extends BaseModel
             'checks'   => [
                 'string',
                 'max:64',
-                'required'
+                'required',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be string :max characters length!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function descriptions()

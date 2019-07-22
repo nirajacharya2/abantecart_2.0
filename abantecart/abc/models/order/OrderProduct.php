@@ -38,6 +38,9 @@ class OrderProduct extends BaseModel
     protected $primaryKey = 'order_product_id';
     public $timestamps = false;
 
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
+
     protected $casts = [
         'order_id'   => 'int',
         'product_id' => 'int',

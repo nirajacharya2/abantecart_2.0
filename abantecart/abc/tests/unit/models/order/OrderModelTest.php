@@ -1,4 +1,5 @@
 <?php
+
 namespace abc\tests\unit;
 
 use abc\models\order\Order;
@@ -7,10 +8,11 @@ use Illuminate\Validation\ValidationException;
 /**
  * Class OrderModelTest
  */
-class OrderModelTest extends ATestCase{
+class OrderModelTest extends ATestCase
+{
 
-
-    protected function setUp(){
+    protected function setUp()
+    {
         //init
     }
 
@@ -18,188 +20,186 @@ class OrderModelTest extends ATestCase{
     {
         //validate
         $data = [
-                        'order_id' => 'fail',
-                        'invoice_id' => -0.000000000123232,
-                        'invoice_prefix' => -0.000000000123232,
-                        'store_id' => 'fail',
-                        'store_name' => -0.000000000123232,
-                        'store_url' => -0.000000000123232,
-                        'customer_id' => 'fail',
-                        'customer_group_id' => 'fail',
-                        'firstname' => -0.000000000123232,
-                        'lastname' => -0.000000000123232,
-                        'telephone' => -0.000000000123232,
-                        'fax' => -0.000000000123232,
-                        'email' => -0.000000000123232,
-                        'shipping_firstname' => -0.000000000123232,
-                        'shipping_lastname' => -0.000000000123232,
-                        'shipping_company' => -0.000000000123232,
-                        'shipping_address_1' => -0.000000000123232,
-                        'shipping_address_2' => -0.000000000123232,
-                        'shipping_city' => -0.000000000123232,
-                        'shipping_postcode' => -0.000000000123232,
-                        'shipping_zone' => -0.000000000123232,
-                        'shipping_zone_id' => 'fail',
-                        'shipping_country' => -0.000000000123232,
-                        'shipping_country_id' => 'fail',
-                        'shipping_address_format' => -0.000000000123232,
-                        'shipping_method' => -0.000000000123232,
-                        'shipping_method_key' => -0.000000000123232,
-                        'payment_firstname' => -0.000000000123232,
-                        'payment_lastname' => -0.000000000123232,
-                        'payment_company' => -0.000000000123232,
-                        'payment_address_1' => -0.000000000123232,
-                        'payment_address_2' => -0.000000000123232,
-                        'payment_city' => -0.000000000123232,
-                        'payment_postcode' => -0.000000000123232,
-                        'payment_zone' => -0.000000000123232,
-                        'payment_zone_id' => 'fail',
-                        'payment_country' => -0.000000000123232,
-                        'payment_country_id' => 'fail',
-                        'payment_address_format' => -0.000000000123232,
-                        'payment_method' => -0.000000000123232,
-                        'payment_method_key' => -0.000000000123232,
-                        'comment' => -0.000000000123232,
-                        'total' => 'fail',
+            'order_id'                => 'fail',
+            'invoice_id'              => -0.000000000123232,
+            'invoice_prefix'          => -0.000000000123232,
+            'store_id'                => 'fail',
+            'store_name'              => -0.000000000123232,
+            'store_url'               => -0.000000000123232,
+            'customer_id'             => 'fail',
+            'customer_group_id'       => 'fail',
+            'firstname'               => -0.000000000123232,
+            'lastname'                => -0.000000000123232,
+            'telephone'               => -0.000000000123232,
+            'fax'                     => -0.000000000123232,
+            'email'                   => -0.000000000123232,
+            'shipping_firstname'      => -0.000000000123232,
+            'shipping_lastname'       => -0.000000000123232,
+            'shipping_company'        => -0.000000000123232,
+            'shipping_address_1'      => -0.000000000123232,
+            'shipping_address_2'      => -0.000000000123232,
+            'shipping_city'           => -0.000000000123232,
+            'shipping_postcode'       => -0.000000000123232,
+            'shipping_zone'           => -0.000000000123232,
+            'shipping_zone_id'        => 'fail',
+            'shipping_country'        => -0.000000000123232,
+            'shipping_country_id'     => 'fail',
+            'shipping_address_format' => -0.000000000123232,
+            'shipping_method'         => -0.000000000123232,
+            'shipping_method_key'     => -0.000000000123232,
+            'payment_firstname'       => -0.000000000123232,
+            'payment_lastname'        => -0.000000000123232,
+            'payment_company'         => -0.000000000123232,
+            'payment_address_1'       => -0.000000000123232,
+            'payment_address_2'       => -0.000000000123232,
+            'payment_city'            => -0.000000000123232,
+            'payment_postcode'        => -0.000000000123232,
+            'payment_zone'            => -0.000000000123232,
+            'payment_zone_id'         => 'fail',
+            'payment_country'         => -0.000000000123232,
+            'payment_country_id'      => 'fail',
+            'payment_address_format'  => -0.000000000123232,
+            'payment_method'          => -0.000000000123232,
+            'payment_method_key'      => -0.000000000123232,
+            'comment'                 => -0.000000000123232,
+            'total'                   => 'fail',
 
-                        'order_status_id' => 'fail',
-                        'language_id' => 'fail',
-                        'currency_id' => 'fail',
-                        'currency' => 'fail',
+            'order_status_id' => 'fail',
+            'language_id'     => 'fail',
+            'currency_id'     => 'fail',
+            'currency'        => 'fail',
 
-                        'value' => 'fail',
-                        'coupon_id' => 'fail',
-                        'ip' => 'fail',
-                        'payment_method_data' => -0,999999999999999,
-                    ];
-        $order = new Order( $data );
+            'value'               => 'fail',
+            'coupon_id'           => 'fail',
+            'ip'                  => 'fail',
+            'payment_method_data' => -0,
+            999999999999999,
+        ];
+        $order = new Order($data);
         $errors = [];
-        try{
+        try {
             $order->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(51, count($errors));
 
-
-
-
         //check validation of presence in database
         $data = [
-            'store_id' => 1500,
-            'customer_id' => 1500,
+            'store_id'        => 1500,
+            'customer_id'     => 1500,
             'order_status_id' => 1500,
-            'language_id' => 1500,
-            'currency_id' => 1500,
-            'currency' => 'UAH',
-            'coupon_id' => 1500,
+            'language_id'     => 1500,
+            'currency_id'     => 1500,
+            'currency'        => 'UAH',
+            'coupon_id'       => 1500,
         ];
-        $order = new Order( $data );
+        $order = new Order($data);
         $errors = [];
-        try{
+        try {
             $order->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(7, count($errors));
 
         //check validation of presence in database
         $data = [
-            'store_id' => 0,
-            'customer_id' => null,
+            'store_id'        => 0,
+            'customer_id'     => null,
             'order_status_id' => 1,
-            'language_id' => 1,
-            'currency_id' => 1,
-            'currency' => 'USD',
-            'coupon_id' => null,
+            'language_id'     => 1,
+            'currency_id'     => 1,
+            'currency'        => 'USD',
+            'coupon_id'       => null,
         ];
-        $order = new Order( $data );
+        $order = new Order($data);
         $errors = [];
-        try{
+        try {
             $order->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-           // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
         $this->assertEquals(0, count($errors));
 
         //check correct value
         $data = [
-                        'order_id' => 10000,
-                        'invoice_id' => 12,
-                        'invoice_prefix' => 'PRE-',
-                        'store_id' => 0,
-                        'store_name' => 'Test Store',
-                        'store_url' => 'http://localhost/public/',
-                        'customer_id' => 2,
-                        'customer_group_id' => 1,
-                        'firstname' => 'TestName',
-                        'lastname' => 'TestLast',
-                        'telephone' => '+38098123456788',
-                        'fax' => '+38098123456788',
-                        'email' => 'unittest@abantecart.com',
-                        'shipping_firstname' => 'TestShippingName',
-                        'shipping_lastname' => 'TestShippingLastName',
-                        'shipping_company' => 'Abc2.0',
-                        'shipping_address_1' => 'Somewhere1',
-                        'shipping_address_2' => 'Somewhere Street',
-                        'shipping_city' => 'New York',
-                        'shipping_postcode' => '11222',
-                        'shipping_zone' => 'Manhattan',
-                        'shipping_zone_id' => 1,
-                        'shipping_country' => 'USA',
-                        'shipping_country_id' => 1,
-                        'shipping_address_format' => 'blablabla',
-                        'shipping_method' => 'free_shipping.free_shipping',
-                        'shipping_method_key' => 'free_shipping',
-                        'payment_firstname' => 'TestShippingName',
-                        'payment_lastname' => 'TestShippingLastName',
-                        'payment_company' => 'Abc2.0',
-                        'payment_address_1' => 'Somewhere2',
-                        'payment_address_2' => 'Somewhere Street2',
-                        'payment_city' => 'Poltava',
-                        'payment_postcode' => '123456',
-                        'payment_zone' => 'Poltava',
-                        'payment_zone_id' => 2,
-                        'payment_country' => 'Ukraine',
-                        'payment_country_id' => 2,
-                        'payment_address_format' => 'blablabla222',
-                        'payment_method' => 'cod',
-                        'payment_method_key' => 'cod',
-                        'comment' => 'unittest',
-                        'total' => 1.0,
+            'order_id'                => 10000,
+            'invoice_id'              => 12,
+            'invoice_prefix'          => 'PRE-',
+            'store_id'                => 0,
+            'store_name'              => 'Test Store',
+            'store_url'               => 'http://localhost/public/',
+            'customer_id'             => 2,
+            'customer_group_id'       => 1,
+            'firstname'               => 'TestName',
+            'lastname'                => 'TestLast',
+            'telephone'               => '+38098123456788',
+            'fax'                     => '+38098123456788',
+            'email'                   => 'unittest@abantecart.com',
+            'shipping_firstname'      => 'TestShippingName',
+            'shipping_lastname'       => 'TestShippingLastName',
+            'shipping_company'        => 'Abc2.0',
+            'shipping_address_1'      => 'Somewhere1',
+            'shipping_address_2'      => 'Somewhere Street',
+            'shipping_city'           => 'New York',
+            'shipping_postcode'       => '11222',
+            'shipping_zone'           => 'Manhattan',
+            'shipping_zone_id'        => 1,
+            'shipping_country'        => 'USA',
+            'shipping_country_id'     => 1,
+            'shipping_address_format' => 'blablabla',
+            'shipping_method'         => 'free_shipping.free_shipping',
+            'shipping_method_key'     => 'free_shipping',
+            'payment_firstname'       => 'TestShippingName',
+            'payment_lastname'        => 'TestShippingLastName',
+            'payment_company'         => 'Abc2.0',
+            'payment_address_1'       => 'Somewhere2',
+            'payment_address_2'       => 'Somewhere Street2',
+            'payment_city'            => 'Poltava',
+            'payment_postcode'        => '123456',
+            'payment_zone'            => 'Poltava',
+            'payment_zone_id'         => 2,
+            'payment_country'         => 'Ukraine',
+            'payment_country_id'      => 2,
+            'payment_address_format'  => 'blablabla222',
+            'payment_method'          => 'cod',
+            'payment_method_key'      => 'cod',
+            'comment'                 => 'unittest',
+            'total'                   => 1.0,
 
-                        'order_status_id' => 1,
-                        'language_id' => 1,
-                        'currency_id' => 1,
-                        'currency' => 'USD',
+            'order_status_id' => 1,
+            'language_id'     => 1,
+            'currency_id'     => 1,
+            'currency'        => 'USD',
 
-                        'value' => 1.0,
-                        'coupon_id' => null,
-                        'ip' => '127.0.0.1',
-                        'payment_method_data' => ['some payment' => 'some data'],
-                    ];
+            'value'               => 1.0,
+            'coupon_id'           => null,
+            'ip'                  => '127.0.0.1',
+            'payment_method_data' => ['some payment' => 'some data'],
+        ];
 
-        $order = new Order( $data );
+        $order = new Order($data);
         $errors = [];
         $order_id = null;
-        try{
+        try {
             $order->validate();
             $order->save();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-            var_Dump(array_intersect_key($data, $errors ));
+            var_Dump(array_intersect_key($data, $errors));
             var_Dump($errors);
         }
 
         $this->assertEquals(0, count($errors));
 
-        if($order->order_id){
+        if ($order->order_id) {
             Order::destroy($order->order_id);
         }
 
