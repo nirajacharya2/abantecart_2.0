@@ -9626,7 +9626,7 @@ CREATE TABLE `ac_order_products` (
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '',
-  `model` varchar(6ns4) NOT NULL DEFAULT '',
+  `model` varchar(64) NOT NULL DEFAULT '',
   `sku` varchar(64) DEFAULT NULL,
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
