@@ -122,7 +122,7 @@
 	</definition>
 	<definition>
 		<key>error_description</key>
-		<value><![CDATA[Coupon Description must be between 2 characters!]]></value>
+		<value><![CDATA[Coupon Description must be between 2 and 1500 characters!]]></value>
 	</definition>
 	<definition>
 		<key>error_code</key>

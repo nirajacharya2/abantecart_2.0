@@ -39,12 +39,13 @@ class Coupon extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'discount'   => 'float',
-        'logged'     => 'int',
-        'shipping'   => 'int',
-        'total'      => 'float',
-        'uses_total' => 'int',
-        'status'     => 'int',
+        'discount'      => 'float',
+        'logged'        => 'int',
+        'shipping'      => 'int',
+        'total'         => 'float',
+        'uses_total'    => 'int',
+        'uses_customer' => 'int',
+        'status'        => 'int',
     ];
 
     protected $dates = [
@@ -66,8 +67,142 @@ class Coupon extends BaseModel
         'uses_total',
         'uses_customer',
         'status',
-        'date_added',
-        'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'code' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'between:2,10',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_code',
+                    'language_block' => 'sale/coupon',
+                    'default_text'   => 'Coupon Code must be between 2 and 10 characters!',
+                    'section'        => 'admin',
+                ],
+            ],
+        ],
+
+        'type' => [
+            'checks'   => [
+                'string',
+                'required',
+                'max:1',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Coupon Type must be a string 1 character length!',
+                ],
+            ],
+        ],
+
+        'discount' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'logged'   => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be boolean!',
+                ],
+            ],
+        ],
+        'shipping' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be boolean!',
+                ],
+            ],
+        ],
+
+        'total' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'date_start' => [
+            'checks'   => [
+                'date',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a date!',
+                ],
+            ],
+        ],
+        'date_end'   => [
+            'checks'   => [
+                'date',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a date!',
+                ],
+            ],
+        ],
+
+        'uses_total'    => [
+            'checks'   => [
+                'int',
+                'sometimes',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Total coupon usage count is not integer!',
+                ],
+            ],
+        ],
+        'uses_customer' => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Total coupon usage count is not integer!',
+                ],
+            ],
+        ],
+
+        'status' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'status must be a boolean!',
+                ],
+            ],
+        ],
+
     ];
 
     public function descriptions()

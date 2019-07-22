@@ -36,6 +36,33 @@ class CouponsProduct extends BaseModel
         'product_id',
     ];
 
+    protected $rules = [
+
+        'coupon_id' => [
+            'checks'   => [
+                'int',
+                'exists:coupons',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in coupons table!',
+                ],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'int',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in products table!',
+                ],
+            ],
+        ],
+    ];
+
     public function coupon()
     {
         return $this->belongsTo(Coupon::class, 'coupon_id');

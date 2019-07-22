@@ -37,8 +37,70 @@ class CouponDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'coupon_id',
+        'language_id',
         'name',
         'description',
+    ];
+
+    protected $rules = [
+
+        'coupon_id' => [
+            'checks'   => [
+                'int',
+                'exists:coupons',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in coupons table!',
+                ],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'int',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in languages table!',
+                ],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'min:2',
+                'max:128',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_name',
+                    'language_block' => 'sale/coupon',
+                    'default_text'   => 'Coupon name must be between :min and :max characters!',
+                    'section'        => 'admin',
+                ],
+            ],
+        ],
+        'description' => [
+            'checks'   => [
+                'string',
+                'min:2',
+                'max:1500',
+                'required'
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_description',
+                    'language_block' => 'sale/coupon',
+                    'default_text'   => 'Coupon description must be between 2 characters!',
+                    'section'        => 'admin',
+                ],
+            ],
+        ]
     ];
 
     public function coupon()
