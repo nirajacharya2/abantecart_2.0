@@ -42,7 +42,47 @@
 					<?php } ?>
 				</td>
 			</tr>
+	<tr>
+		<td style="text-align: center">
+			<?php
+				if ($auditLog) {
+				?>
+			<a data-toggle="modal"
+			   class="btn btn-white tooltips"
+			   data-target="#viewport_modal"
+			   href="<?php echo $auditLog->vhref; ?>"
+			   data-fullmode-href="<?php echo $auditLog->href; ?>"
+			   rel="audit_log"
+			   title="<?php echo $auditLog->text; ?>">
+				<i class="fa fa-history "></i> <?php echo $auditLog->text; ?></a>
+			<?php
+				}
+				?>
+		</td>
+		<td>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
 			<?php echo $this->getHookVar('product_summary_hookvar'); ?>
 		</table>
 	</div>
 </div>
+
+
+<?php
+	//load quick view port modal
+	echo $this->html->buildElement(
+array(
+'type' => 'modal',
+'id' => 'viewport_modal',
+'modal_type' => 'lg',
+'data_source' =>'ajax',
+'js_onload' => "
+var url = $(this).data('bs.modal').options.fullmodeHref;
+$('#viewport_modal .modal-header a.btn').attr('href',url);
+",
+'js_onclose' => "$('#".$data['table_id']."').trigger('reloadGrid',[{current:true}]);"
+)
+);
+?>

@@ -572,6 +572,15 @@ class ControllerPagesSaleCustomer extends AController
             'href'   => $this->html->getSecureURL('sale/customer/actonbehalf', '&customer_id='.$customer_id),
             'target' => 'new',
         ]);
+        $this->data['auditLog'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'  => $this->language->get('text_audit_log'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Customer&auditable_id=%ID%'),
+            //quick view port URL
+            'vhref' => $this->html->getSecureURL(
+                'r/common/viewport/modal',
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id=%ID%'),
+        ]);
         $this->data['message'] = $this->html->buildElement([
             'type'   => 'button',
             'text'   => $this->language->get('button_message'),

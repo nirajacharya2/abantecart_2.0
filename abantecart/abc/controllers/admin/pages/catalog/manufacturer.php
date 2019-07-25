@@ -218,6 +218,15 @@ class ControllerPagesCatalogManufacturer extends AController
                 $this->html->getSecureURL('common/do_embed/manufacturers', '&manufacturer_id='.$manufacturer_id));
         }
 
+        $this->data['auditLog'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'  => $this->language->get('text_audit_log'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Manufacturer&auditable_id='.$manufacturer_id),
+            //quick view port URL
+            'vhref' => $this->html->getSecureURL(
+                'r/common/viewport/modal',
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Manufacturer&auditable_id='.$manufacturer_id),
+        ]);
         $this->getForm($args);
 
         //update controller data
