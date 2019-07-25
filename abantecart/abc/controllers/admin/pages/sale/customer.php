@@ -575,11 +575,11 @@ class ControllerPagesSaleCustomer extends AController
         $this->data['auditLog'] = $this->html->buildElement([
             'type'   => 'button',
             'text'  => $this->language->get('text_audit_log'),
-            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Customer&auditable_id=%ID%'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
             //quick view port URL
             'vhref' => $this->html->getSecureURL(
                 'r/common/viewport/modal',
-                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id=%ID%'),
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
         ]);
         $this->data['message'] = $this->html->buildElement([
             'type'   => 'button',
