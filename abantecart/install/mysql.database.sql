@@ -9633,10 +9633,12 @@ CREATE TABLE `ac_order_products` (
   `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `quantity` int(4) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '0',
+  `order_status_id` INT NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
-  PRIMARY KEY (`order_product_id`)
+  PRIMARY KEY (`order_product_id`),
+  INDEX `cba_order_products_ibfk_2_idx1` (`order_status_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
@@ -13877,3 +13879,9 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   ON DELETE SET NULL
   ON UPDATE CASCADE;
 
+ALTER TABLE `abc2dev`.`cba_order_products`
+ADD CONSTRAINT `cba_order_products_ibfk_2`
+  FOREIGN KEY (`order_status_id`)
+  REFERENCES `abc2dev`.`cba_order_statuses` (`order_status_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;

@@ -42,13 +42,14 @@ class OrderProduct extends BaseModel
     protected $mainClassKey = 'order_id';
 
     protected $casts = [
-        'order_id'   => 'int',
-        'product_id' => 'int',
-        'price'      => 'float',
-        'total'      => 'float',
-        'tax'        => 'float',
-        'quantity'   => 'int',
-        'subtract'   => 'int',
+        'order_id'        => 'int',
+        'product_id'      => 'int',
+        'price'           => 'float',
+        'total'           => 'float',
+        'tax'             => 'float',
+        'quantity'        => 'int',
+        'subtract'        => 'int',
+        'order_status_id' => 'int',
     ];
 
     protected $fillable = [
@@ -62,6 +63,7 @@ class OrderProduct extends BaseModel
         'tax',
         'quantity',
         'subtract',
+        'order_status_id',
     ];
 
     protected $rules = [
@@ -170,13 +172,25 @@ class OrderProduct extends BaseModel
             ],
         ],
 
-        'subtract' => [
+        'subtract'        => [
             'checks'   => [
                 'boolean',
             ],
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'order_status_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
                 ],
             ],
         ],

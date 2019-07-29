@@ -20,17 +20,17 @@ class OrderProductModelTest extends ATestCase
     {
         //validate
         $data = [
-            'order_id'   => 'fail',
-            'product_id' => 'fail',
-            'name'       => -0.000000000123232,
-            'model'      => -0.000000000123232,
-            'sku'        => -0.000000000123232,
-            'price'      => 'fail',
-            'total'      => 'fail',
-            'tax'        => 'fail',
-            'quantity'   => 'fail',
-            'subtract'   => 'fail',
-
+            'order_id'        => 'fail',
+            'product_id'      => 'fail',
+            'name'            => -0.000000000123232,
+            'model'           => -0.000000000123232,
+            'sku'             => -0.000000000123232,
+            'price'           => 'fail',
+            'total'           => 'fail',
+            'tax'             => 'fail',
+            'quantity'        => 'fail',
+            'subtract'        => 'fail',
+            'order_status_id' => 'fail',
         ];
 
         $orderProduct = new OrderProduct();
@@ -41,7 +41,7 @@ class OrderProductModelTest extends ATestCase
             $errors = $orderProduct->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(10, count($errors));
+        $this->assertEquals(11, count($errors));
 
         //valid data
         $data = [
@@ -51,11 +51,12 @@ class OrderProductModelTest extends ATestCase
             'model'      => 'test',
             'sku'        => 'test',
 
-            'price'    => 1.25,
-            'total'    => 2.00,
-            'tax'      => 0.75,
-            'quantity' => 1,
-            'subtract' => true,
+            'price'           => 1.25,
+            'total'           => 2.00,
+            'tax'             => 0.75,
+            'quantity'        => 1,
+            'subtract'        => true,
+            'order_status_id' => 1,
         ];
 
         $orderProduct = new OrderProduct($data);

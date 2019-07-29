@@ -2020,3 +2020,18 @@ INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `cont
 INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
 VALUES
 (3, 1, 'Object Attribute', NOW());
+
+#set default order_status_id to complete
+ALTER TABLE `ac_order_products`
+ADD COLUMN `order_status_id` INT NOT NULL DEFAULT '5' AFTER `subtract`,
+ADD INDEX `ac_order_products_ibfk_2_idx1` (`order_status_id` ASC);
+
+#remove default order_status_id and add foreign key
+
+ALTER TABLE `ac_order_products`
+CHANGE COLUMN `order_status_id` `order_status_id` INT(11) NOT NULL,
+ADD CONSTRAINT `ac_order_products_ibfk_2`
+  FOREIGN KEY (`order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;

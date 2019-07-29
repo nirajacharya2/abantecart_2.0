@@ -194,12 +194,12 @@ class AOrder extends ALibBase
             if ($this->cart->hasShipping()) {
                 $shipping_address = [];
                 $address = Address::find($indata['shipping_address_id']);
-                if($address){
+                if ($address) {
                     $shipping_address = $address->toArray();
                     $shipping_address['zone'] = ZoneDescription::where(
                         [
-                            'zone_id' => $shipping_address['zone_id'],
-                            'language_id' => Registry::language()->getContentLanguageID()
+                            'zone_id'     => $shipping_address['zone_id'],
+                            'language_id' => Registry::language()->getContentLanguageID(),
                         ]
                     )->first()->name;
                     $country = Country::with('description')->find($shipping_address['country_id']);
@@ -238,12 +238,12 @@ class AOrder extends ALibBase
 
             $payment_address = [];
             $address = Address::find($indata['payment_address_id']);
-            if($address){
+            if ($address) {
                 $payment_address = $address->toArray();
                 $payment_address['zone'] = ZoneDescription::where(
                     [
-                        'zone_id' => $payment_address['zone_id'],
-                        'language_id' => Registry::language()->getContentLanguageID()
+                        'zone_id'     => $payment_address['zone_id'],
+                        'language_id' => Registry::language()->getContentLanguageID(),
                     ]
                 )->first()->name;
 
@@ -367,18 +367,19 @@ class AOrder extends ALibBase
 
         foreach ($this->cart->getProducts() as $key => $product) {
             $product_data[] = [
-                'key'        => $key,
-                'product_id' => $product['product_id'],
-                'name'       => $product['name'],
-                'model'      => $product['model'],
-                'sku'        => $product['sku'],
-                'option'     => $product['option'],
-                'download'   => $product['download'],
-                'quantity'   => $product['quantity'],
-                'price'      => $product['price'],
-                'total'      => $product['total'],
-                'tax'        => $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']),
-                'stock'      => $product['stock'],
+                'key'             => $key,
+                'product_id'      => $product['product_id'],
+                'name'            => $product['name'],
+                'model'           => $product['model'],
+                'sku'             => $product['sku'],
+                'option'          => $product['option'],
+                'download'        => $product['download'],
+                'quantity'        => $product['quantity'],
+                'price'           => $product['price'],
+                'total'           => $product['total'],
+                'tax'             => $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']),
+                'stock'           => $product['stock'],
+                'order_status_id' => (int)$indata['order_status_id'],
             ];
         }
 
@@ -490,20 +491,19 @@ class AOrder extends ALibBase
         if ($set_order_id) {
             $order = Order::where(
                 [
-                    'order_id' => $set_order_id,
-                    'order_status_id' => 0
+                    'order_id'        => $set_order_id,
+                    'order_status_id' => 0,
                 ]
             )->first();
 
             if (!$order) { // for already processed orders do redirect
                 $order = Order::where('order_id', '=', $set_order_id)
-                                ->where('order_status_id', '>', 0)
-                                ->first();
+                              ->where('order_status_id', '>', 0)
+                              ->first();
                 if ($order) {
                     return false;
                 }
-            }
-            //remove
+            } //remove
             else {
                 //this will remove order with dependencies by Fkeys
                 $order->forceDelete();
@@ -512,13 +512,13 @@ class AOrder extends ALibBase
 
         //clean up based on setting (remove already created or abandoned orders)
         $expireDays = (int)$settings->get('config_expire_order_days');
-        if( $expireDays ) {
+        if ($expireDays) {
             Order::where('order_status_id', '=', 0)
-                ->where(
-                    'date_modified',
-                    '<',
-                    Carbon::now()->subDays($expireDays)->toISOString()
-            )->forceDelete();
+                 ->where(
+                     'date_modified',
+                     '<',
+                     Carbon::now()->subDays($expireDays)->toISOString()
+                 )->forceDelete();
 
         }
 
@@ -567,11 +567,12 @@ class AOrder extends ALibBase
                 // if expire days not set - 0  as unexpired
                 $download['expire_days'] = (int)$download['expire_days'] > 0 ? $download['expire_days'] : 0;
                 $download['max_downloads'] = (int)$download['max_downloads']
-                                            ? (int)$download['max_downloads'] * $product['quantity']
-                                            : '';
+                    ? (int)$download['max_downloads'] * $product['quantity']
+                    : '';
                 //disable download for manual mode for customer
                 $download['status'] = $download['activate'] == 'manually' ? 0 : 1;
-                $download['attributes_data'] = Registry::download()->getDownloadAttributesValues($download['download_id']);
+                $download['attributes_data'] =
+                    Registry::download()->getDownloadAttributesValues($download['download_id']);
                 Registry::download()->addProductDownloadToOrder($order_product_id, $order_id, $download);
             }
         }
@@ -590,7 +591,6 @@ class AOrder extends ALibBase
         return $order_id;
     }
 
-
     protected static function saveIMOrderData($order_id, $data)
     {
         $settings = Registry::config();
@@ -598,7 +598,7 @@ class AOrder extends ALibBase
         $protocols = $im->getProtocols();
 
         $orderDataTypes = OrderDataType::whereIn('name', $protocols)->get();
-        if(!$orderDataTypes){
+        if (!$orderDataTypes) {
             return false;
         }
 
@@ -622,7 +622,7 @@ class AOrder extends ALibBase
                     [
                         'order_id' => $order_id,
                         'type_id'  => $type_id,
-                        'data'     => $im_data
+                        'data'     => $im_data,
                     ]
                 );
 
@@ -631,8 +631,8 @@ class AOrder extends ALibBase
     }
 
     /**
-     * @param int    $order_id
-     * @param int    $order_status_id
+     * @param int $order_id
+     * @param int $order_status_id
      * @param string $comment
      *
      * @throws \abc\core\lib\AException
@@ -669,17 +669,17 @@ class AOrder extends ALibBase
         $order = Order::find($order_id);
         $order->update(
             [
-                'order_status_id' => $order_status_id
+                'order_status_id' => $order_status_id,
             ]
         );
 
         //record history
         $orderHistory = new OrderHistory(
             [
-                'order_id' => $order_id,
+                'order_id'        => $order_id,
                 'order_status_id' => $order_status_id,
-                'notify' => true,
-                'comment' => $comment
+                'notify'          => true,
+                'comment'         => $comment,
             ]
         );
         $orderHistory->save();
@@ -694,8 +694,8 @@ class AOrder extends ALibBase
         foreach ($orderProducts as $product) {
             $orderOptions = OrderOption::where(
                 [
-                    'order_id' => $order_id,
-                    'order_product_id' => $product->order_product_id
+                    'order_id'         => $order_id,
+                    'order_product_id' => $product->order_product_id,
                 ]
             )->get();
 
@@ -705,7 +705,7 @@ class AOrder extends ALibBase
                 $productOptionValues = ProductOptionValue::where(
                     [
                         'product_option_value_id' => $option['product_option_value_id'],
-                        'subtract' => 1
+                        'subtract'                => 1,
                     ]
                 );
                 $productOptionValues->decrement('quantity', (int)$product['quantity']);
@@ -729,11 +729,10 @@ class AOrder extends ALibBase
                 $stockProduct = Product::where(
                     [
                         'product_id' => $product['product_id'],
-                        'subtract' => 1
+                        'subtract'   => 1,
                     ]
                 );
                 $stockProduct->decrement('quantity', (int)$product['quantity']);
-
 
                 //check quantity and send notification when 0 or less
                 if ($stockProduct->get('quantity') <= 0) {
@@ -752,15 +751,14 @@ class AOrder extends ALibBase
         //clean product cache as stock might have changed.
         Registry::cache()->remove('product');
 
-        H::event('storefront\sendOrderConfirmEmail', [new ABaseEvent($orderData)] );
+        H::event('storefront\sendOrderConfirmEmail', [new ABaseEvent($orderData)]);
         return true;
     }
 
-
     /**
-     * @param int        $order_id
-     * @param int        $order_status_id
-     * @param string     $comment
+     * @param int $order_id
+     * @param int $order_status_id
+     * @param string $comment
      * @param bool|false $notify
      *
      * @throws \abc\core\lib\AException
@@ -796,17 +794,17 @@ class AOrder extends ALibBase
         $order = Order::find($order_id);
         $order->update(
             [
-                'order_status_id' => $order_status_id
+                'order_status_id' => $order_status_id,
             ]
         );
 
         //record history
         $orderHistory = new OrderHistory(
             [
-                'order_id' => $order_id,
+                'order_id'        => $order_id,
                 'order_status_id' => $order_status_id,
-                'notify' => (int)$notify,
-                'comment' => $comment
+                'notify'          => (int)$notify,
+                'comment'         => $comment,
             ]
         );
         $orderHistory->save();
@@ -816,7 +814,6 @@ class AOrder extends ALibBase
         $language = new ALanguage($this->registry, $orderData['code']);
         $language->load($language->language_details['directory']);
         $language->load('mail/order_update');
-
 
         $language_im = new ALanguage($this->registry);
         $language->load($language->language_details['directory']);
@@ -842,7 +839,7 @@ class AOrder extends ALibBase
 
         //notify via email
         if ($notify) {
-            H::event('storefront\sendOrderUpdateEmail', [new ABaseEvent($orderData, $orderStatus, $comment)] );
+            H::event('storefront\sendOrderUpdateEmail', [new ABaseEvent($orderData, $orderStatus, $comment)]);
         }
         return true;
     }
