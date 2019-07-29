@@ -55,6 +55,12 @@ class OrderStatus extends BaseModel
         return $this->hasMany(OrderStatusDescription::class, 'order_status_id');
     }
 
+    public function description()
+    {
+        return $this->hasOne(OrderStatusDescription::class, 'order_status_id')
+            ->where('language_id', '=', $this->current_language_id);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'order_status_id');

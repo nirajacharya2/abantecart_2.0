@@ -2,6 +2,7 @@
 
 namespace abc\tests\unit;
 
+use abc\models\locale\Country;
 use abc\models\order\OrderStatus;
 use Illuminate\Validation\ValidationException;
 
@@ -18,6 +19,9 @@ class OrderStatusModelTest extends ATestCase
 
     public function testValidator()
     {
+
+        $order = Country::with('description')->find(223);
+        var_Dump($order->toArray()); exit;
         //validate
         $data = [
             'status_text_id' => -0.000000000000000009,

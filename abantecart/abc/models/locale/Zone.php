@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $zone_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $zones_to_locations
  *
+ * @method static Zone find(int $zone_id) Zone
+ *
  * @package abc\models
  */
 class Zone extends BaseModel

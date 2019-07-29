@@ -97,7 +97,6 @@ class CheckoutBase extends ALibBase
             $this->customer = $data['customer'];
             $this->setCustomer($this->customer);
             $this->customer_id = $this->customer->getId();
-
         }
 
         if(is_object($data['order'])){
@@ -499,25 +498,21 @@ class CheckoutBase extends ALibBase
      */
     public function confirmOrder($data = []){
 
-        $order_id = (int)$data['order_id'] ?: $this->data['order_id'];
+        $order_id = (int)$data['order_id'];
+        if(!$order_id){
+            throw new AException(__CLASS__.': Cannot to confirm order. Unknown order id!');
+        }
+
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
-        /**
-         * @var ModelCheckoutOrder $model
-         */
-        $model = $this->loadModel('checkout/order','storefront');
 
-        if(!$model){
-            throw new LibException(['Cannot to load model checkout/order to confirm order #'.$order_id]);
-        }
-
-        $order_status_id = $this->registry->get('config')->get($this->getPaymentKey().'_order_status_id');
+        $order_status_id = Registry::config()->get($this->getPaymentKey().'_order_status_id');
         if(!$order_status_id){
-            $order_status_id = $this->registry->get('order_status')->getStatusByTextId('pending');
+            $order_status_id = Registry::order_status()->getStatusByTextId('pending');
         }
 
-        $model->confirm(
+        $this->getOrder()->confirm(
             $order_id,
             $order_status_id
         );

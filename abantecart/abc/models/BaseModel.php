@@ -47,7 +47,7 @@ use ReflectionMethod;
  *
  * @package abc\models
  * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
- * @method static Builder where(string|array $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') Builder
  * @method static Builder select(mixed $select) Builder
  * @const  string DELETED_AT
  */
@@ -87,6 +87,11 @@ class BaseModel extends OrmModel
      * @var Registry
      */
     protected $registry;
+
+    /**
+     * @var int
+     */
+    protected $current_language_id;
 
     /**
      * @var \abc\core\lib\AConfig
@@ -190,6 +195,7 @@ class BaseModel extends OrmModel
     {
         $this->actor = H::recognizeUser();
         $this->registry = Registry::getInstance();
+        $this->current_language_id = $this->registry->get('language')->getContentLanguageID();
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
@@ -236,6 +242,29 @@ class BaseModel extends OrmModel
             )
         ) ? true : false;
     }
+
+    /**
+     * @param int $language_id
+     *
+     * @return bool
+     */
+    public function setCurrentLanguageID($language_id)
+    {
+        if(!(int)$language_id){
+            return false;
+        }
+        $this->current_language_id = (int)$language_id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCurrentLanguageID()
+    {
+        return $this->current_language_id;
+    }
+
+
 
     /**
      * @return bool

@@ -21,10 +21,24 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
+use abc\models\catalog\Product;
+use abc\models\catalog\ProductOptionValue;
 use abc\models\customer\Address;
-use abc\models\storefront\ModelAccountOrder;
-use abc\models\storefront\ModelCheckoutOrder;
+use abc\models\locale\Country;
+use abc\models\locale\ZoneDescription;
+use abc\models\order\Order;
+use abc\models\order\OrderDataType;
+use abc\models\order\OrderDatum;
+use abc\models\order\OrderHistory;
+use abc\models\order\OrderOption;
+use abc\models\order\OrderProduct;
+use abc\models\order\OrderStatus;
+use abc\models\order\OrderTotal;
+use abc\modules\events\ABaseEvent;
 use H;
+use Illuminate\Support\Carbon;
 
 /**
  * Class AOrder
@@ -61,14 +75,6 @@ class AOrder extends ALibBase
     protected $customer;
     protected $order_data;
     /**
-     * @var ModelCheckoutOrder $model_checkout_order
-     */
-    protected $model_checkout_order;
-    /**
-     * @var ModelAccountOrder $model_account_order
-     */
-    protected $model_account_order;
-    /**
      * @var array public property. needs to use inside hooks
      */
     public $data = [];
@@ -76,17 +82,13 @@ class AOrder extends ALibBase
     /**
      * AOrder constructor.
      *
-     * @param \abc\core\engine\Registry
+     * @param \abc\core\engine\Registry $registry
      * @param string $order_id
      *
-     * @throws AException
      */
     public function __construct($registry, $order_id = '')
     {
         $this->registry = $registry;
-
-        $this->model_checkout_order = $this->load->model('checkout/order', 'storefront');
-        $this->model_account_order = $this->load->model('account/order', 'storefront');
 
         //if nothing is passed use session array. Customer session, can function on storefront only
         if (!H::has_value($order_id)) {
@@ -126,7 +128,7 @@ class AOrder extends ALibBase
             $this->order_id = $order_id;
         }
         //get order details for specific status. NOTE: Customer ID need to be set in customer class
-        $this->order_data = $this->model_account_order->getOrder($this->order_id, $order_status_id);
+        $this->order_data = Order::getOrderArray($this->order_id, $order_status_id);
         $this->extensions->hk_ProcessData($this, 'load_order_data');
         $output = (array)$this->data + (array)$this->order_data;
         return $output;
@@ -151,11 +153,11 @@ class AOrder extends ALibBase
         $total = 0;
         $taxes = $this->cart->getTaxes();
 
-        $this->load->model('checkout/extension', 'storefront');
+        $this->registry->get('load')->model('checkout/extension', 'storefront');
 
         $sort_order = [];
 
-        $results = $this->model_checkout_extension->getExtensions('total');
+        $results = $this->registry->get('model_checkout_extension')->getExtensions('total');
 
         foreach ($results as $key => $value) {
             $sort_order[$key] = $this->config->get($value['key'].'_sort_order');
@@ -164,8 +166,8 @@ class AOrder extends ALibBase
         array_multisort($sort_order, SORT_ASC, $results);
 
         foreach ($results as $result) {
-            $this->load->model('total/'.$result['key'], 'storefront');
-            $this->{'model_total_'.$result['key']}->getTotal($total_data, $total, $taxes, $indata);
+            $this->registry->get('load')->model('total/'.$result['key'], 'storefront');
+            $this->registry->get('model_total_'.$result['key'])->getTotal($total_data, $total, $taxes, $indata);
         }
 
         $sort_order = [];
@@ -191,8 +193,19 @@ class AOrder extends ALibBase
 
             if ($this->cart->hasShipping()) {
                 $shipping_address = [];
-                if($address = Address::find($indata['shipping_address_id'])){
+                $address = Address::find($indata['shipping_address_id']);
+                if($address){
                     $shipping_address = $address->toArray();
+                    $shipping_address['zone'] = ZoneDescription::where(
+                        [
+                            'zone_id' => $shipping_address['zone_id'],
+                            'language_id' => Registry::language()->getContentLanguageID()
+                        ]
+                    )->first()->name;
+                    $country = Country::with('description')->find($shipping_address['country_id']);
+                    $shipping_address['country'] = $country->description->name;
+                    $shipping_address['address_format'] = $country->address_format;
+
                 }
 
                 $order_info['shipping_firstname'] = $shipping_address['firstname'];
@@ -224,8 +237,19 @@ class AOrder extends ALibBase
             }
 
             $payment_address = [];
-            if($address = Address::find($indata['payment_address_id'])){
+            $address = Address::find($indata['payment_address_id']);
+            if($address){
                 $payment_address = $address->toArray();
+                $payment_address['zone'] = ZoneDescription::where(
+                    [
+                        'zone_id' => $payment_address['zone_id'],
+                        'language_id' => Registry::language()->getContentLanguageID()
+                    ]
+                )->first()->name;
+
+                $country = Country::with('description')->find($payment_address['country_id']);
+                $payment_address['country'] = $country->description->name;
+                $payment_address['address_format'] = $country->address_format;
             }
 
             $order_info['payment_firstname'] = $payment_address['firstname'];
@@ -376,10 +400,10 @@ class AOrder extends ALibBase
             if ($coupon) {
                 $order_info['coupon_id'] = $coupon['coupon_id'];
             } else {
-                $order_info['coupon_id'] = 0;
+                $order_info['coupon_id'] = null;
             }
         } else {
-            $order_info['coupon_id'] = 0;
+            $order_info['coupon_id'] = null;
         }
 
         $order_info['ip'] = $this->request->getRemoteIP();
@@ -413,7 +437,7 @@ class AOrder extends ALibBase
         }
         $this->extensions->hk_ProcessData($this, 'save_order');
         $output = $this->data + $this->order_data;
-        $this->order_id = $this->model_checkout_order->create($output, $this->order_id);
+        $this->order_id = $this->create($output, $this->order_id);
         return (int)$this->order_id;
     }
 
@@ -431,6 +455,396 @@ class AOrder extends ALibBase
     public function getCustomerId()
     {
         return $this->customer_id;
+    }
+
+    /**
+     * @param $data
+     * @param null $set_order_id
+     *
+     * @return null
+     */
+    public function create($data, $set_order_id = null)
+    {
+        $result = $this->extensions->hk_create($this, $data, $set_order_id);
+        if ($result !== null) {
+            return $result;
+        }
+        return null;
+    }
+
+    /**
+     * @param $data
+     * @param string $set_order_id
+     *
+     * @return int
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function _create($data, $set_order_id = '')
+    {
+        $settings = Registry::config();
+        $dcrypt = Registry::dcrypt();
+
+        $set_order_id = (int)$set_order_id;
+        //reuse same order_id or unused one order_status_id = 0
+        if ($set_order_id) {
+            $order = Order::where(
+                [
+                    'order_id' => $set_order_id,
+                    'order_status_id' => 0
+                ]
+            )->first();
+
+            if (!$order) { // for already processed orders do redirect
+                $order = Order::where('order_id', '=', $set_order_id)
+                                ->where('order_status_id', '>', 0)
+                                ->first();
+                if ($order) {
+                    return false;
+                }
+            }
+            //remove
+            else {
+                //this will remove order with dependencies by Fkeys
+                $order->forceDelete();
+            }
+        }
+
+        //clean up based on setting (remove already created or abandoned orders)
+        $expireDays = (int)$settings->get('config_expire_order_days');
+        if( $expireDays ) {
+            Order::where('order_status_id', '=', 0)
+                ->where(
+                    'date_modified',
+                    '<',
+                    Carbon::now()->subDays($expireDays)->toISOString()
+            )->forceDelete();
+
+        }
+
+        if (!$set_order_id && (int)$settings->get('config_start_order_id')) {
+            $maxOrderId = Order::max();
+            if ($maxOrderId && $maxOrderId >= $settings->get('config_start_order_id')) {
+                $set_order_id = $maxOrderId + 1;
+            } elseif ($settings->get('config_start_order_id')) {
+                $set_order_id = (int)$settings->get('config_start_order_id');
+            } else {
+                $set_order_id = 0;
+            }
+        }
+
+        $insert = $data;
+        if ($set_order_id) {
+            $insert['order_id'] = $set_order_id;
+        } else {
+            unset($insert['order_id']);
+        }
+
+        if ($dcrypt->active) {
+            $insert = $dcrypt->encrypt_data($data, 'orders');
+        }
+
+        $order = new Order($insert);
+        $order->save();
+
+        $order_id = $order->order_id;
+
+        foreach ($data['products'] as $product) {
+            $product['order_id'] = $order_id;
+            $product['subtract'] = (int)$product['stock'];
+            $orderProduct = new OrderProduct($product);
+            $orderProduct->save();
+            $order_product_id = $orderProduct->order_product_id;
+
+            foreach ($product['option'] as $option) {
+                $option['order_id'] = $order_id;
+                $option['order_product_id'] = $order_product_id;
+                $orderOption = new OrderOption($option);
+                $orderOption->save();
+            }
+
+            foreach ($product['download'] as $download) {
+                // if expire days not set - 0  as unexpired
+                $download['expire_days'] = (int)$download['expire_days'] > 0 ? $download['expire_days'] : 0;
+                $download['max_downloads'] = (int)$download['max_downloads']
+                                            ? (int)$download['max_downloads'] * $product['quantity']
+                                            : '';
+                //disable download for manual mode for customer
+                $download['status'] = $download['activate'] == 'manually' ? 0 : 1;
+                $download['attributes_data'] = Registry::download()->getDownloadAttributesValues($download['download_id']);
+                Registry::download()->addProductDownloadToOrder($order_product_id, $order_id, $download);
+            }
+        }
+        foreach ($data['totals'] as $total) {
+            $total['order_id'] = $order_id;
+            $total['type'] = $total['total_type'];
+            $total['key'] = $total['id'];
+            $orderTotal = new OrderTotal($total);
+            $orderTotal->save();
+        }
+
+        //save IM URI of order
+        static::saveIMOrderData($order_id, $data);
+        //call event
+        H::event('abc\models\storefront\order@create', [new ABaseEvent($order_id, $data)]);
+        return $order_id;
+    }
+
+
+    protected static function saveIMOrderData($order_id, $data)
+    {
+        $settings = Registry::config();
+        $im = Registry::im();
+        $protocols = $im->getProtocols();
+
+        $orderDataTypes = OrderDataType::whereIn('name', $protocols)->get();
+        if(!$orderDataTypes){
+            return false;
+        }
+
+        foreach ($orderDataTypes as $row) {
+            /**
+             * @var OrderDataType $row
+             */
+            $type_id = $row->type_id;
+            if ($data['customer_id']) {
+                $uri = $im->getCustomerURI($row->name, $data['customer_id']);
+            } else {
+                $uri = $data[$row->protocol];
+            }
+            if ($uri) {
+                $im_data =
+                    [
+                        'uri'    => $uri,
+                        'status' => $settings->get('config_im_guest_'.$row['protocol'].'_status'),
+                    ];
+                OrderDatum::firstOrCreate(
+                    [
+                        'order_id' => $order_id,
+                        'type_id'  => $type_id,
+                        'data'     => $im_data
+                    ]
+                );
+
+            }
+        }
+    }
+
+    /**
+     * @param int    $order_id
+     * @param int    $order_status_id
+     * @param string $comment
+     *
+     * @throws \abc\core\lib\AException
+     */
+    public function confirm($order_id, $order_status_id, $comment = '')
+    {
+        //trigger an event
+        H::event('abc\core\lib\order@beforeConfirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);
+        $this->extensions->hk_confirm($this, $order_id, $order_status_id, $comment);
+        //trigger an event
+        H::event('abc\core\lib\order@afterConfirm', [new ABaseEvent($order_id, $order_status_id, $comment)]);
+    }
+
+    /**
+     * @param int $order_id
+     * @param int $order_status_id
+     * @param string $comment
+     *
+     * @return bool
+     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
+     */
+    public function _confirm($order_id, $order_status_id, $comment = '')
+    {
+        //get only incomplete order (order_status_id = 0)
+        $orderData = Order::getOrderArray($order_id, 0);
+        $orderProducts = OrderProduct::where('order_id', '=', $order_id)->get();
+
+        if (!$orderData || !$orderProducts) {
+            return false;
+        }
+
+        //update order status
+        $order = Order::find($order_id);
+        $order->update(
+            [
+                'order_status_id' => $order_status_id
+            ]
+        );
+
+        //record history
+        $orderHistory = new OrderHistory(
+            [
+                'order_id' => $order_id,
+                'order_status_id' => $order_status_id,
+                'notify' => true,
+                'comment' => $comment
+            ]
+        );
+        $orderHistory->save();
+        $orderData['comment'] = $orderData['comment'].' '.$comment;
+
+        // load language for IM
+        $language = new ALanguage($this->registry, $orderData['code']);
+        $language->load($language->language_details['directory']);
+        $language->load('common/im');
+
+        //update products inventory
+        foreach ($orderProducts as $product) {
+            $orderOptions = OrderOption::where(
+                [
+                    'order_id' => $order_id,
+                    'order_product_id' => $product->order_product_id
+                ]
+            )->get();
+
+            //update options stock
+            $stock_updated = false;
+            foreach ($orderOptions as $option) {
+                $productOptionValues = ProductOptionValue::where(
+                    [
+                        'product_option_value_id' => $option['product_option_value_id'],
+                        'subtract' => 1
+                    ]
+                );
+                $productOptionValues->decrement('quantity', (int)$product['quantity']);
+
+                $stock_updated = true;
+                $quantityLeft = $productOptionValues->get('quantity');
+
+                if ($quantityLeft <= 0) {
+                    //notify admin with out of stock for option based product
+                    $message_arr = [
+                        1 => [
+                            'message' => sprintf($language->get('im_product_out_of_stock_admin_text'),
+                                $product['product_id']),
+                        ],
+                    ];
+                    $this->im->send('product_out_of_stock', $message_arr);
+                }
+            }
+
+            if (!$stock_updated) {
+                $stockProduct = Product::where(
+                    [
+                        'product_id' => $product['product_id'],
+                        'subtract' => 1
+                    ]
+                );
+                $stockProduct->decrement('quantity', (int)$product['quantity']);
+
+
+                //check quantity and send notification when 0 or less
+                if ($stockProduct->get('quantity') <= 0) {
+                    //notify admin with out of stock
+                    $message_arr = [
+                        1 => [
+                            'message' => sprintf($language->get('im_product_out_of_stock_admin_text'),
+                                $product['product_id']),
+                        ],
+                    ];
+                    $this->im->send('product_out_of_stock', $message_arr);
+                }
+            }
+        }
+
+        //clean product cache as stock might have changed.
+        Registry::cache()->remove('product');
+
+        H::event('storefront\sendOrderConfirmEmail', [new ABaseEvent($orderData)] );
+        return true;
+    }
+
+
+    /**
+     * @param int        $order_id
+     * @param int        $order_status_id
+     * @param string     $comment
+     * @param bool|false $notify
+     *
+     * @throws \abc\core\lib\AException
+     */
+    public function update($order_id, $order_status_id, $comment = '', $notify = false)
+    {
+        $this->extensions->hk_update($this, $order_id, $order_status_id, $comment, $notify);
+        //call event
+        H::event('abc\core\lib\order@update', [new ABaseEvent($order_id, $order_status_id, $comment, $notify)]);
+    }
+
+    /**
+     * @param $order_id
+     * @param $order_status_id
+     * @param string $comment
+     * @param bool $notify
+     *
+     * @return bool
+     * @throws AException
+     * @throws \ReflectionException
+     */
+    public function _update($order_id, $order_status_id, $comment = '', $notify = false)
+    {
+        $orderData = Order::getOrderArray($order_id);
+        $orderProducts = OrderProduct::where('order_id', '=', $order_id)->get();
+
+        $orderStatus = OrderStatus::with('description')->find($order_status_id);
+        if (!$orderData || !$orderProducts || !$orderStatus) {
+            return false;
+        }
+
+        //update order status
+        $order = Order::find($order_id);
+        $order->update(
+            [
+                'order_status_id' => $order_status_id
+            ]
+        );
+
+        //record history
+        $orderHistory = new OrderHistory(
+            [
+                'order_id' => $order_id,
+                'order_status_id' => $order_status_id,
+                'notify' => (int)$notify,
+                'comment' => $comment
+            ]
+        );
+        $orderHistory->save();
+
+        //send notifications
+        // load language for IM
+        $language = new ALanguage($this->registry, $orderData['code']);
+        $language->load($language->language_details['directory']);
+        $language->load('mail/order_update');
+
+
+        $language_im = new ALanguage($this->registry);
+        $language->load($language->language_details['directory']);
+        $language_im->load('common/im');
+
+        $message_arr = [
+            0 => [
+                'message' => sprintf(
+                    $language_im->get('im_order_update_text_to_customer'),
+                    $order_id,
+                    $orderStatus->description->name
+                ),
+            ],
+            1 => [
+                'message' => sprintf(
+                    $language_im->get('im_order_update_text_to_admin'),
+                    $order_id,
+                    $orderStatus->description->name
+                ),
+            ],
+        ];
+        $this->im->send('order_update', $message_arr);
+
+        //notify via email
+        if ($notify) {
+            H::event('storefront\sendOrderUpdateEmail', [new ABaseEvent($orderData, $orderStatus, $comment)] );
+        }
+        return true;
     }
 
 }

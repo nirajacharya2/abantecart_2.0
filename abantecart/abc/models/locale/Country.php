@@ -56,7 +56,7 @@ class Country extends BaseModel
     public function description()
     {
         return $this->hasOne(CountryDescription::class, 'country_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', '=', $this->current_language_id);
     }
 
     public function descriptions()

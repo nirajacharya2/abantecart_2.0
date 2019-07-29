@@ -657,12 +657,11 @@ class Product extends BaseModel
 
     /**
      * @return mixed
-     * TODO: needs to replace global content_language_id with some model property
      */
     public function description()
     {
         return $this->hasOne(ProductDescription::class, 'product_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', '=', $this->current_language_id);
     }
 
     /**

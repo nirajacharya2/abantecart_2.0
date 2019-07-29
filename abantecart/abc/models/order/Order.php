@@ -2,13 +2,20 @@
 
 namespace abc\models\order;
 
+use abc\core\engine\Registry;
+use abc\core\lib\ADataEncryption;
 use abc\models\BaseModel;
 use abc\models\customer\Customer;
+use abc\models\locale\Country;
 use abc\models\locale\Currency;
 use abc\models\locale\Language;
+use abc\models\locale\Zone;
+use abc\models\QueryBuilder;
 use abc\models\system\Store;
+use Exception;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
 
 /**
  * Class Order
@@ -77,6 +84,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  * @property \Illuminate\Database\Eloquent\Collection $order_products
  * @property \Illuminate\Database\Eloquent\Collection $order_totals
+ *
+ * @method static QueryBuilder where(string | array $column, string $operator = '=', mixed $value = null, string $boolean = 'and') QueryBuilder
  *
  * @package abc\models
  */
@@ -748,6 +757,28 @@ class Order extends BaseModel
 
     ];
 
+    /**
+     * @param array $options
+     *
+     * @return bool
+     * @throws \abc\core\lib\AException
+     */
+    public function save(array $options = [])
+    {
+
+        $data = $this->attributes;
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+        if ($dcrypt->active) {
+            $data = $dcrypt->encrypt_data($data, 'orders');
+        }
+
+        $this->attributes = $data;
+        return parent::save($options);
+    }
+
     public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');
@@ -801,5 +832,191 @@ class Order extends BaseModel
     public function totals()
     {
         return $this->hasMany(OrderTotal::class, 'order_id');
+    }
+
+    /**
+     * @param int $order_id
+     * @param int|null|string $order_status_id - if NUll - seek greater than 0, 'any' - try to get all statuses, integer - seek specific order status
+     * @param int|null $customer_id
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public static function getOrderArray($order_id, $order_status_id = null, $customer_id = null)
+    {
+        $customer_id = (int)$customer_id;
+        $order = null;
+        try {
+            /**
+             * @var QueryBuilder $query
+             */
+            $query = Order::select(['orders.*', 'order_status_descriptions.name as order_status_name'])
+                          ->where('orders.order_id', '=', $order_id);
+            if ($customer_id) {
+                $query->where('orders.customer_id', '=', $customer_id);
+            }
+
+            $query->leftJoin(
+                'languages',
+                'languages.language_id',
+                '=',
+                'orders.language_id'
+            );
+            $query->leftJoin(
+                'order_status_descriptions',
+                function ($join) {
+                    /**
+                     * @var JoinClause $join
+                     */
+                    $join
+                        ->on(
+                            'orders.order_status_id',
+                            '=',
+                            'order_status_descriptions.order_status_id'
+                        )->where(
+                            'order_status_descriptions.language_id',
+                            '=',
+                            'orders.language_id'
+                        );
+                }
+            );
+
+            if ($order_status_id === null) {
+                //processed order
+                $query->where('orders.order_status_id', '>', '0');
+
+            } elseif ($order_status_id == 'any') {
+                //unrestricted to status
+            } else {
+                //only specific status
+                $query->where('orders.order_status_id', '=', (int)$order_status_id);
+            }
+
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+            /**
+             * @var Order $order
+             */
+            $order = $query->first();
+        }catch(Exception $e){
+            Registry::log()->write(__CLASS__.': '. $e->getMessage());
+
+        }
+        $order_data = [];
+        if ($order) {
+            $order_data = Registry::dcrypt()->decrypt_data($order->toArray(), 'orders');
+            $country = Country::find($order_data['shipping_country_id']);
+            $order_data['shipping_iso_code_2'] = $country ? $country->iso_code_2 : '';
+            $order_data['shipping_iso_code_3'] = $country ? $country->iso_code_3 : '';
+
+            $zone = Zone::find($order_data['shipping_zone_id']);
+            $order_data['shipping_zone_code'] = $zone ? $zone->code : '';
+
+            $country = Country::find($order_data['payment_country_id']);
+            $order_data['payment_iso_code_2'] = $country ? $country->iso_code_2 : '';
+            $order_data['payment_iso_code_3'] = $country ? $country->iso_code_3 : '';
+
+            $zone = Zone::find($order_data['payment_zone_id']);
+            $order_data['payment_zone_code'] = $zone ? $zone->code : '';
+        }
+
+        return $order_data;
+    }
+
+    /**
+     * @param $customer_id
+     * @param int $start
+     * @param int $limit
+     * @param int $order_id
+     *
+     * @return array
+     */
+    public function getCustomerOrdersArray($customer_id, $start = 0, $limit = 20, $order_id = 0)
+    {
+        $query = Order::where('customer_id', '=', $customer_id)
+                      ->where('order_status_id', '>', 0)
+                      ->limit($limit)
+                      ->offset($start);
+        Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
+        return $query->get()->toArray();
+    }
+
+    /**
+     * @param $order_id
+     * @param $order_product_id
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getOrderOptions($order_id, $order_product_id)
+    {
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = OrderOption::where(
+                                [
+                                    'order_id'         => $order_id,
+                                    'order_product_id' => $order_product_id,
+                                ]
+                            )
+                            ->select(['order_options.*', 'product_options.element_type'])
+                            ->leftJoin(
+                                'product_option_values',
+                                'product_option_values.product_option_value_id',
+                                '=',
+                                'order_options.product_option_value_id'
+                            )
+                            ->leftJoin(
+                                'product_options',
+                                'product_options.product_option_id',
+                                '=',
+                                'product_option_values.product_option_id'
+                            );
+        Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
+        return $query->get();
+    }
+
+    /**
+     * @param int $order_id
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getOrderHistories($order_id)
+    {
+        $query = OrderHistory::select(
+                        [
+                            'order_history.*',
+                            'order_status_descriptions.name AS order_status_name',
+                        ]
+        )->where(
+            [
+                'order_history.order_id' => $order_id,
+                'order_history.notify' => 1
+            ]
+        )->leftJoin(
+            'orders',
+            'orders.order_id',
+            '=',
+            'order_history.order_id'
+        )->leftJoin(
+            'order_status_descriptions',
+            function($join){
+                /**
+                 * @var JoinClause $join
+                 */
+                $join
+                ->on(
+                    'orders.order_status_id',
+                    '=',
+                    'order_status_descriptions.order_status_id'
+                )->where(
+                    'order_status_descriptions.language_id',
+                    '=',
+                    'orders.language_id'
+                );
+            }
+        )->orderBy(
+            'order_history.date_added'
+        );
+        return $query->get();
     }
 }

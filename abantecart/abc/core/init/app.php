@@ -442,6 +442,9 @@ $hook->hk_InitEnd();
 
 //load order status class
 registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+//load order class
+registerClass($registry, 'order', 'AOrder', [$registry], "\abc\core\lib\AOrder", [$registry]);
+
 
 //IM
 

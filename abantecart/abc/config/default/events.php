@@ -7,9 +7,11 @@
 
 use abc\modules\listeners\AdminSendApprovalEmailListener;
 use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
+use abc\modules\listeners\StorefrontOrderConfirmEmailListener;
 use abc\modules\listeners\StorefrontResetPasswordNotifyEmailListener;
 use abc\modules\listeners\StorefrontSendActivateLinkEmailListener;
 use abc\modules\listeners\StorefrontSendLoginNameEmailListener;
+use abc\modules\listeners\StorefrontSendOrderUpdateEmailListener;
 use abc\modules\listeners\StorefrontSendResetPasswordLinkListener;
 use abc\modules\listeners\StorefrontSendWelcomeEmailListener;
 
@@ -40,6 +42,12 @@ return [
     ],
     'storefront\sendLoginNameEmail'           => [
         StorefrontSendLoginNameEmailListener::class,
+    ],
+    'storefront\sendOrderConfirmEmail'           => [
+        StorefrontOrderConfirmEmailListener::class,
+    ],
+    'storefront\sendOrderUpdateEmail'           => [
+        StorefrontSendOrderUpdateEmailListener::class,
     ],
 
 ];

@@ -22,6 +22,9 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
+use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use H;
 
 class ControllerPagesAccountHistory extends AController
 {
@@ -64,9 +67,8 @@ class ControllerPagesAccountHistory extends AController
             'separator' => $this->language->get('text_separator'),
         ]);
 
-        $this->loadModel('account/order');
-
-        $order_total = $this->model_account_order->getTotalOrders();
+        $order_total = Order::where('customer_id', '=', $this->customer->getId())
+                            ->where('order_status_id', '>', 0)->count();
 
         if ($order_total) {
             $this->data['action'] = $this->html->getSecureURL('account/history');
@@ -86,10 +88,15 @@ class ControllerPagesAccountHistory extends AController
 
             $orders = [];
 
-            $results = $this->model_account_order->getOrders(($page - 1) * $limit, $limit);
+            $results = (new Order())
+                        ->getCustomerOrdersArray(
+                            $this->customer->getId(),
+                            ($page - 1) * $limit,
+                            $limit
+                        );
 
             foreach ($results as $result) {
-                $product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
+                $product_total = OrderProduct::where('order_id', '=', $result['order_id'])->count();
                 $button = $this->html->buildElement([
                     'type'  => 'button',
                     'name'  => 'button_edit',
@@ -102,8 +109,10 @@ class ControllerPagesAccountHistory extends AController
                     'order_id'   => $result['order_id'],
                     'name'       => $result['firstname'].' '.$result['lastname'],
                     'status'     => $result['status'],
-                    'date_added' => AHelperUtils::dateISO2Display($result['date_added'],
-                        $this->language->get('date_format_short')),
+                    'date_added' => H::dateISO2Display(
+                        $result['date_added'],
+                        $this->language->get('date_format_short')
+                    ),
                     'products'   => $product_total,
                     'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
                     'href'       => $this->html->getSecureURL('account/invoice', '&order_id='.$result['order_id']),
@@ -114,24 +123,23 @@ class ControllerPagesAccountHistory extends AController
             $this->data['order_url'] = $this->html->getSecureURL('account/invoice');
             $this->data['orders'] = $orders;
 
-            $this->data['pagination_bootstrap'] = $this->html->buildElement([
-                'type'       => 'Pagination',
-                'name'       => 'pagination',
-                'text'       => $this->language->get('text_pagination'),
-                'text_limit' => $this->language->get('text_per_page'),
-                'total'      => $order_total,
-                'page'       => $page,
-                'limit'      => $limit,
-                'url'        => $this->html->getSecureURL('account/history', '&limit='.$limit.'&page={page}'),
-                'style'      => 'pagination',
-            ]);
-
+            $this->data['pagination_bootstrap'] = $this->html->buildElement(
+                [
+                    'type'       => 'Pagination',
+                    'name'       => 'pagination',
+                    'text'       => $this->language->get('text_pagination'),
+                    'text_limit' => $this->language->get('text_per_page'),
+                    'total'      => $order_total,
+                    'page'       => $page,
+                    'limit'      => $limit,
+                    'url'        => $this->html->getSecureURL('account/history', '&limit='.$limit.'&page={page}'),
+                    'style'      => 'pagination',
+                ]
+            );
             $this->data['continue'] = $this->html->getSecureURL('account/account');
-
             $this->view->setTemplate('pages/account/history.tpl');
         } else {
             $this->data['continue'] = $this->html->getSecureURL('account/account');
-
             $this->view->setTemplate('pages/error/not_found.tpl');
         }
 
