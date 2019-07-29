@@ -284,5 +284,4 @@ $("#gdpr_erase")
                 '.$agree_chk.'
             </label></div></div>');
     }
-
 }

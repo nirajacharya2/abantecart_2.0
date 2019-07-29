@@ -971,7 +971,7 @@ class ACustomer extends ALibBase
         }
 
         // delete subscription accounts for given email
-        Customer::where($db->raw('LOWER(email)'), '=', mb_strtolower($data['email']))
+        Customer::where('email', '=', mb_strtolower($data['email']))
                 ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
                 ->forceDelete();
 
@@ -984,16 +984,19 @@ class ACustomer extends ALibBase
             $customer_id = $customer->customer_id;
             if(!$subscribe_only) {
                 $address = new Address();
-                $newData = ['customer_id' => $customer_id];
+                $newData = [];
                 foreach ($address->getFillable() as $key){
                     if(isset($data[$key])){
                         $newData[$key] = $data[$key];
                     }
                 }
-                $address->fill($newData);
-                $address->save();
-                //set address as default
-                $customer->update(['address_id' => $address->address_id]);
+                if($newData) {
+                    $newData['customer_id'] = $customer_id;
+                    $address->fill($newData);
+                    $address->save();
+                    //set address as default
+                    $customer->update(['address_id' => $address->address_id]);
+                }
             }
 
             if (!$data['approved']) {

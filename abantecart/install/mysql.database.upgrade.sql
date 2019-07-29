@@ -412,6 +412,9 @@ CREATE TABLE `ac_jobs` (
 ALTER TABLE `ac_customers`
   CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
   CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;
+
+CREATE INDEX `ac_customers_email_idx` ON `ac_customers` ( `email` );
+
 ALTER TABLE `ac_users`
   CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
 ALTER TABLE `ac_ant_messages`

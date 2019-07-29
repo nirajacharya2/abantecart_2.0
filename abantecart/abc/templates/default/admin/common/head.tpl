@@ -23,16 +23,16 @@ use abc\core\ABC; ?>
 </script>
 
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/vuetify/vuetify.css'); ?>" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vue/vue.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.2.5/polyfill.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vuetify/vuetify.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/axios/axios.min.js'); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 
 <style>
@@ -57,7 +57,7 @@ use abc\core\ABC; ?>
 </script>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
+<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
 <link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
 <link rel="stylesheet" type="text/css" href="vendor/components/bootstrap-fileinput/css/fileinput.min.css" />

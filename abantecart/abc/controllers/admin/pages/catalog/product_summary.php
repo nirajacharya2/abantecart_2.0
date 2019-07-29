@@ -56,6 +56,16 @@ class ControllerPagesCatalogProductSummary extends AController
             '&product_id='.$product_info['product_id']
         );
 
+        $this->data['auditLog'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'  => $this->language->get('text_audit_log'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
+            //quick view port URL
+            'vhref' => $this->html->getSecureURL(
+                'r/common/viewport/modal',
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
+        ]);
+
         $this->loadModel('sale/order');
         $this->data['product']['orders'] = $this->model_sale_order
             ->getOrderTotalWithProduct($product_info['product_id']);

@@ -2,6 +2,7 @@
 
 namespace abc\models\customer;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
@@ -526,6 +527,11 @@ class Customer extends BaseModel
                 'access'     => 'read',
             ],
         ];
+    }
+
+
+    public function SetEmailAttribute($value){
+        $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
     }
 
     public function setDataAttribute($value)

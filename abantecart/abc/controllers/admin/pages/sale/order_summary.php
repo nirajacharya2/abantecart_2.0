@@ -27,7 +27,7 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 class ControllerPagesSaleOrderSummary extends AController {
 
 	public $data = array();
-     
+
   	public function main() {
 
           //init controller data
@@ -54,11 +54,11 @@ class ControllerPagesSaleOrderSummary extends AController {
 			if(!$order_info['shipping_method']){
 				$order_info['shipping_method'] = $this->language->get('text_not_applicable');
 			}
-			// no payment 
+			// no payment
 			if(!$order_info['payment_method']){
 				$order_info['payment_method'] = $this->language->get('text_not_applicable');
 			}
-		
+
 			$this->data['order'] = array(
 				'order_id' => '#'.$order_info['order_id'],
 				'customer_name' => $order_info['firstname'] .' '.$order_info['lastname'],
@@ -83,6 +83,16 @@ class ControllerPagesSaleOrderSummary extends AController {
 						'name' => $this->data['order']['customer_name']
 				);
 			}
+
+            $this->data['auditLog'] = $this->html->buildElement([
+                'type'   => 'button',
+                'text'  => $this->language->get('text_audit_log'),
+                'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Order&auditable_id='.$order_info['order_id']),
+                //quick view port URL
+                'vhref' => $this->html->getSecureURL(
+                    'r/common/viewport/modal',
+                    '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Order&auditable_id='.$order_info['order_id']),
+            ]);
 
 			$this->loadModel('localisation/order_status');
 			$status = $this->model_localisation_order_status->getOrderStatus($order_info['order_status_id']);
