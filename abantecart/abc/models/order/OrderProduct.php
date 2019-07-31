@@ -2,8 +2,10 @@
 
 namespace abc\models\order;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -216,4 +218,43 @@ class OrderProduct extends BaseModel
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_product_id');
     }
+
+    public static function getOrderProductOptions($order_id, $order_product_id)
+    {
+        $order_id = (int)$order_id;
+        $order_product_id = (int)$order_product_id;
+        if(!$order_id || !$order_product_id){
+            return false;
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = OrderOption::select(
+            [
+                'order_options.*',
+                'product_options.*',
+                'product_option_values.subtract'
+            ]
+        )->where(
+            [
+                'order_options.order_id' => $order_id,
+                'order_options.order_product_id' => $order_product_id,
+            ]
+        )->leftJoin(
+            'product_option_values',
+            'order_options.product_option_value_id',
+            '=',
+            'product_option_values.product_option_value_id'
+        )->leftJoin(
+            'product_options',
+            'product_option_values.product_option_id',
+            '=',
+            'product_options.product_option_id'
+        );
+
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
+        return $query->get();
+    }
+
+
 }
