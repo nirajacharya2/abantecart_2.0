@@ -189,10 +189,10 @@
 		<thead>
 		<tr>
 			<td></td>
-			<td class="left"><?php echo $column_product; ?></td>
-			<td class="right"><?php echo $column_quantity; ?></td>
-			<td class="right"><?php echo $column_price; ?></td>
-			<td class="right"><?php echo $column_total; ?></td>
+			<td class="align-left"><?php echo $column_product; ?></td>
+			<td class="align-right"><?php echo $column_quantity; ?></td>
+			<td class="align-right"><?php echo $column_price; ?></td>
+			<td class="align-right"><?php echo $column_total; ?></td>
 		</tr>
 		</thead>
 
@@ -214,7 +214,7 @@
 					</a>
 					<?php } ?>
 				</td>
-				<td class="left">
+				<td class="align-left">
 					<a target="_blank" href="<?php echo $order_product['href']; ?>"><?php echo $order_product['name']; ?>
 						(<?php echo $order_product['model']; ?>)</a>
 					<input type="hidden"
@@ -232,7 +232,7 @@
 					<?php }?>
 						</dl>
 					<?php } ?></td>
-				<td class="right">
+				<td class="align-right">
 						<input class="afield no-save" type="text"
 						<?php if (!$order_product['product_status']) { ?>
 							readonly
@@ -255,10 +255,10 @@
 		$total = count($totals); ?>
 		<?php foreach ($totals as $total_row) { ?>
 			<tr>
-				<td colspan="4" class="right">
+				<td colspan="4" class="align-right">
 				<span class="pull-right">
 					<?php echo $total_row['title']; ?>
-					<?php if (!in_array($total_row['type'] , array('subtotal','total'))) { ?>
+					<?php if (!in_array($total_row['type'] , ['subtotal', 'total'])) { ?>
 						<?php if (!$total_row['unavailable']) { ?>
 						<a class="reculc_total btn btn-xs btn-info-alt tooltips"
 						   	data-original-title="<?php echo $text_recalc; ?>"
@@ -277,7 +277,7 @@
 				</span>
 				</td>
 				<td>
-					<?php if (!in_array($total_row['type'] , array('total'))) { ?>
+					<?php if (!in_array($total_row['type'] , ['total'])) { ?>
 						<?php echo $total_row['text']; ?>
 					<?php } else { ?>
 					<b class="<?php echo $total_row['type']; ?>" rel="totals[<?php echo $total_row['order_total_id']; ?>]">
@@ -292,7 +292,7 @@
 		<?php } ?>
 		<?php if ($totals_add) {?>
 			<tr>
-				<td colspan="4" class="right"><span class="pull-right"><?php echo $text_add; ?></span></td>
+				<td colspan="4" class="align-right"><span class="pull-right"><?php echo $text_add; ?></span></td>
 				<td>
 					<b rel="totals[<?php echo $total_row['order_total_id']; ?>]">
 					<a class="add_totals btn btn-xs btn-info-alt tooltips"
@@ -326,7 +326,7 @@
 					</a>
 				</td>
 			</tr>
-		<?php } ?>		
+		<?php } ?>
 		</tbody>
 	</table>
 
@@ -365,20 +365,22 @@
 </div><!-- <div class="tab-content"> -->
 
 <?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'add_product_modal',
-				'modal_type' => 'lg',
-				'data_source' => 'ajax'
-		));
+		[
+            'type'        => 'modal',
+            'id'          => 'add_product_modal',
+            'modal_type'  => 'lg',
+            'data_source' => 'ajax'
+        ]);
 ?>
 
 <?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'add_order_total',
-				'modal_type' => 'md',
-				'title' => $text_order_total_add,
-				'content' => '
-				<form class="aform form-horizontal" enctype="multipart/form-data" method="post" class="add_order_total" action="'.$edit_order_total.'">
+		[
+            'type'       => 'modal',
+            'id'         => 'add_order_total',
+            'modal_type' => 'md',
+            'title'      => $text_order_total_add,
+            'content'    => '
+				<form class="aform form-horizontal add_order_total" enctype="multipart/form-data" method="post" action="'.$edit_order_total.'">
 
 				<div class="mb20">' . $new_total . '
 				</div>
@@ -394,7 +396,7 @@
 				</div>
 				
 				</form>'
-		));
+        ]);
 ?>
 
 <script type="text/javascript">
@@ -413,7 +415,7 @@
 	$(function () {
 
 		$('#add_product').chosen({'width': '100%', 'white-space': 'nowrap'});
-		$('#add_product').on('change', addProduct);
+		$('#add_product').on('change', ProductModal);
 
 		$("#products input").aform({        triggerChanged: false        });
 		$('#products input[type*="text"]').each(function () {
@@ -429,13 +431,13 @@
 		});
 
 		$('a.add').click(function () {
-			addProduct();
+			ProductModal();
 			return false;
 		});
 
 
 		$('a.edit_product').click(function () {
-			addProduct($(this).attr('data-order-product-id'));
+			ProductModal($(this).attr('data-order-product-id'));
 			return false;
 		});
 
@@ -534,7 +536,7 @@
 
 	var order_product_row = <?php echo $order_product_row; ?>;
 
-	function addProduct(order_product_id) {
+	function ProductModal(order_product_id) {
 		var id = '';
 		if(order_product_id > 0){
 			id = '&order_product_id='+order_product_id;
@@ -551,12 +553,17 @@
 					.modal({ keyboard: false})
 					.find('.modal-content')
 					.load('<?php echo $add_product_url; ?>'+id, function () {
-					formOnExit();
+					//formOnExit();
 					bindCustomEvents('#orderProductFrm');
 					spanHelp2Toggles();
 				});
 		}
 	}
+
+	function AddProductToForm(data)
+    {
+        console.log(data);
+    }
 
 	$('a.reculc_total').click(function () {
 		$(this).append('<input type="hidden" name="force_recalc_single" value="1">');

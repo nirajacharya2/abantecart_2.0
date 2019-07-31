@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\admin;
+namespace abc\tests\unit\models\catalog;
 
 use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
@@ -163,6 +163,16 @@ class ProductModelTest extends ATestCase
         }
 
         $this->assertEquals(1, $result);
+    }
+
+
+    public function testStaticMethods()
+    {
+        //test getOrderProductOptionsWithValues
+        $productOptions = Product::getProductOptionsWithValues(80);
+        $this->assertEquals(1, count($productOptions));
+        $this->assertEquals(11, count($productOptions[0]['description']));
+        $this->assertEquals(3, count($productOptions[0]['values']));
     }
 
 }

@@ -101,6 +101,14 @@ class ProductOption extends BaseModel
     {
         return $this->hasMany(ProductOptionDescription::class, 'product_option_id');
     }
+    /**
+     * @return mixed
+     */
+    public function description()
+    {
+        return $this->hasOne(ProductOptionDescription::class, 'product_option_id')
+                    ->where('language_id', '=', $this->current_language_id);
+    }
 
     /**
      * @return mixed

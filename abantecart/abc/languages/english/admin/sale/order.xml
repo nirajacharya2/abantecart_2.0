@@ -432,4 +432,8 @@
 		<key>error_no_payments</key>
 		<value><![CDATA[No payment methods available.<a href="%s">Please enable at least one and try again.</a>]]></value>
 	</definition>
+	<definition>
+		<key>text_edit_order</key>
+		<value><![CDATA[ Edit Order #%s ]]></value>
+	</definition>
 </definitions>

@@ -35,6 +35,8 @@ use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use abc\models\order\OrderStatus;
 use abc\modules\traits\SaleOrderTrait;
 use H;
 
@@ -203,14 +205,13 @@ class ControllerPagesSaleOrder extends AController
             ],
         ];
 
-        $this->loadModel('localisation/order_status');
-        $results = $this->model_localisation_order_status->getOrderStatuses();
+        $results = OrderStatus::with('description')->get();
         $statuses = [
             ''    => $this->language->get('text_select_status'),
             'all' => $this->language->get('text_all_orders'),
         ];
-        foreach ($results as $item) {
-            $statuses[$item['order_status_id']] = $item['name'];
+        foreach ($results->toArray() as $item) {
+            $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
         $form = new AForm();
@@ -283,8 +284,10 @@ class ControllerPagesSaleOrder extends AController
             //recalc totals and update
             $this->session->data['success'] = $this->language->get('text_success');
             $this->session->data['attention'] = $this->language->get('attention_check_total');
-            abc_redirect($this->html->getSecureURL('sale/order/recalc',
-                '&order_id='.$this->request->get['order_id']));
+            abc_redirect(
+                $this->html->getSecureURL('sale/order/recalc',
+                '&order_id='.$this->request->get['order_id'])
+            );
         }
 
         //update controller data
@@ -519,7 +522,7 @@ class ControllerPagesSaleOrder extends AController
 
         foreach ($order_products as $order_product) {
             $option_data = [];
-            $options = $this->model_sale_order->getOrderOptions($order_id, $order_product['order_product_id']);
+            $options = OrderProduct::getOrderProductOptions($order_id, $order_product['order_product_id']);
             foreach ($options as $option) {
                 $value = $option['value'];
                 //generate link to download uploaded files
@@ -744,8 +747,10 @@ class ControllerPagesSaleOrder extends AController
             // Ex. price will be data-price="00.000"
         ]);
 
-        $this->data['add_product_url'] = $this->html->getSecureURL('r/product/product/orderProductForm',
-            '&order_id='.$order_id);
+        $this->data['add_product_url'] = $this->html->getSecureURL(
+            'r/product/product/orderProductForm',
+            '&order_id='.$order_id.'&mode=json'
+        );
         $this->data['edit_order_total'] = $this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id);
         $this->data['delete_order_total'] = $this->html->getSecureURL('sale/order/delete_total',
             '&order_id='.$order_id);
@@ -2222,9 +2227,9 @@ class ControllerPagesSaleOrder extends AController
         $checkout = $this->initCheckout($this->session->data['admin_order']);
         $checkout->getCart()->add(
             $post['product_id'],
-            $post['product'][0]['quantity'],
-            $post['product'][0]['option'],
-            $post['product'][0]['price']
+            $post['quantity'],
+            $post['option'],
+            $post['price']
         );
         $this->session->data['admin_order']['cart'] = $checkout->getCart()->getCartData();
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

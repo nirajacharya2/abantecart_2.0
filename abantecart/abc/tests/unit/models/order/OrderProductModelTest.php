@@ -72,4 +72,11 @@ class OrderProductModelTest extends ATestCase
         $this->assertEquals(0, count($errors));
         $orderProduct->forceDelete();
     }
+
+    public function testStaticMethods()
+    {
+        //test getOrderProductOptions
+        $orderProductOption = OrderProduct::getOrderProductOptions(4,18);
+        $this->assertEquals(24, count($orderProductOption->toArray()[0]));
+    }
 }

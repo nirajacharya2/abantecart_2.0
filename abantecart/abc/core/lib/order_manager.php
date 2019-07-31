@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\order\OrderProduct;
 use H;
 
 
@@ -209,7 +210,7 @@ class AOrderManager extends AOrder
         $order_products = $adm_order_mdl->getOrderProducts($this->order_id);
         foreach ($order_products as $order_product) {
             $option_data = [];
-            $options = $adm_order_mdl->getOrderOptions($this->order_id, $order_product['order_product_id']);
+            $options = OrderProduct::getOrderProductOptions($this->order_id, $order_product['order_product_id']);
             foreach ($options as $option) {
                 $option_data[$option['product_option_id']] = $option['product_option_value_id'];
             }

@@ -3,12 +3,14 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
+use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
@@ -1461,6 +1463,41 @@ class Product extends BaseModel
             'products_info'  => $products_info->toArray(),
             'total_num_rows' => $this->db->sql_get_row_count(),
         ];
+    }
+
+
+    /**
+     * @param int $product_id
+     *
+     * @return array
+     */
+    public static function getProductOptionsWithValues($product_id)
+    {
+        if (!(int)$product_id) {
+            return [];
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = ProductOption::with('description')
+                               ->with('values', 'values.description')
+                               ->where(
+                                   [
+                                       'product_id' => $product_id,
+                                       'group_id' => 0
+                                   ]
+                               )->active()
+                                ->orderBy('sort_order');
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+
+        $productOptions = $query->get()->toArray();
+
+        $elements = HtmlElementFactory::getAvailableElements();
+        foreach($productOptions as &$option){
+            $option['html_type'] = $elements[$option['element_type']]['type'];
+        }
+        return $productOptions;
     }
 
 }

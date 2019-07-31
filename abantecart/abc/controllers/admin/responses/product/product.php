@@ -35,6 +35,10 @@ use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
+use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use abc\models\system\Setting;
 use H;
 
 /**
@@ -1539,7 +1543,7 @@ class ControllerResponsesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadModel('catalog/product');
-        $this->loadModel('sale/order');
+
         $this->loadLanguage('catalog/product');
         $this->loadLanguage('sale/order');
         $this->load->library('json');
@@ -1548,47 +1552,49 @@ class ControllerResponsesProductProduct extends AController
         $order_product_id = (int)$this->request->get['order_product_id'];
         $editable_price = (int)$this->request->get['editable_price'];
         $order_id = (int)$this->request->get['order_id'];
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
 
         $tax = new ATax($this->registry);
         $tax->setZone($order_info['country_id'], $order_info['zone_id']);
 
         $product_id = (int)$this->request->get['product_id'];
+        $product_info = $this->model_catalog_product->getProduct($product_id);
         $preset_values = [];
 
         if ($order_product_id) {
 
             //if unknown product_id but order_product_id we know
-            $order_product_info = $this->model_sale_order->getOrderProducts($order_id, $order_product_id);
+            /**
+             * @var OrderProduct $order_product_info
+             */
+            $order_product_info = OrderProduct::where(['order_id'=>$order_id, 'order_product_id' => $order_product_id ] )->first();
+            //$this->model_sale_order->getOrderProducts($order_id, $order_product_id);
 
             $preset_values['price'] = $this->currency->format(
-                                                            $order_product_info[0]['price'],
-                                                            $order_info['currency'], $order_info['value'],
-                                                            false
+                                            $order_product_info->price,
+                                            $order_info['currency'], $order_info['value'],
+                                            false
             );
             $preset_values['total'] = $this->currency->format((
-                                            $order_product_info[0]['price'] * $order_product_info[0]['quantity']),
+                                            $order_product_info->price * $order_product_info->quantity),
                                             $order_info['currency'],
                                             $order_info['value'],
                                             false
             );
-            $preset_values['quantity'] = $order_product_info[0]['quantity'];
+            $preset_values['quantity'] = $order_product_info->quantity;
 
             if (!$product_id) {
-                $product_id = $order_product_info[0]['product_id'];
+                $product_id = $order_product_info->product_id;
             }
-            $product_info = $this->model_catalog_product->getProduct($product_id);
-            $order_product_options = $this->model_sale_order->getOrderOptions($order_id, $order_product_id);
 
+            $order_product_options = OrderProduct::getOrderProductOptions($order_id, $order_product_id);
             foreach ($order_product_options as $v) {
-
                 if ($v['element_type'] == 'R') {
-                    $preset_values[$v['product_option_id']] = $v['product_option_value_id'];
+                    $preset_values[(int)$v['product_option_id']] = (int)$v['product_option_value_id'];
                 } elseif (in_array($v['element_type'], $elements_with_options)) {
-                    $preset_values[$v['product_option_id']][] = $v['product_option_value_id'];
+                    $preset_values[(int)$v['product_option_id']][(int)$v['product_option_value_id']] = (int)$v['product_option_value_id'];
                 } else {
-                    $preset_values[$v['product_option_id']] = $v['value'];
-
+                    $preset_values[(int)$v['product_option_id']] = (int)$v['value'];
                 }
             }
 
@@ -1599,7 +1605,6 @@ class ControllerResponsesProductProduct extends AController
             );
 
         } elseif($order_id) {
-            $product_info = $this->model_catalog_product->getProduct($product_id);
             $this->data['text_title'] = sprintf($this->language->get('text_add_product_to_order'), $order_id);
             $preset_values['quantity'] = $product_info['minimum'] ? $product_info['minimum'] : 1;
             $preset_values['price'] = $this->currency->format(
@@ -1622,7 +1627,6 @@ class ControllerResponsesProductProduct extends AController
         }
         //when trying to add new product to new order
         else{
-            $product_info = $this->model_catalog_product->getProduct($product_id);
             $this->data['text_title'] = sprintf($this->language->get('text_add_product_to_order'), $order_id);
             $preset_values['quantity'] = $product_info['minimum'] ? $product_info['minimum'] : 1;
 
@@ -1640,10 +1644,10 @@ class ControllerResponsesProductProduct extends AController
                                                 false
             );
             $preset_values['total'] = $currency->format(
-                                                    ($product_info['price'] * $preset_values['quantity']),
-                                                    $order_info['currency'],
-                                                    '',
-                                                    false
+                                                ($product_info['price'] * $preset_values['quantity']),
+                                                $order_info['currency'],
+                                                '',
+                                                false
             );
 
             $form_action = $this->html->getSecureURL(
@@ -1672,7 +1676,7 @@ class ControllerResponsesProductProduct extends AController
         $this->data['text_title'] .= ' - '.$product_info['name'];
 
         // Prepare options and values for display
-        $product_options = $this->model_catalog_product->getOrderProductOptions($product_id);
+        $product_options = Product::getProductOptionsWithValues($product_id);
         $options = [];
         foreach ($product_options as $option) {
             if (in_array($option['element_type'], ['U'])) {
@@ -1680,7 +1684,7 @@ class ControllerResponsesProductProduct extends AController
             } //skip files for now. TODO: add edit file-option in the future
             $values = $prices = [];
             $price = $preset_value = $default_value = '';
-            foreach ($option['option_value'] as $option_value) {
+            foreach ($option['values'] as $option_value) {
                 //default value
                 $default_value = $option_value['default']&& !$order_product_id
                                 ? $option_value['product_option_value_id']
@@ -1693,7 +1697,7 @@ class ControllerResponsesProductProduct extends AController
                     if ($option_value['default'] == 1) {
                         $preset_value = $option_value['product_option_value_id'];
                     } elseif (!in_array($option['element_type'], $elements_with_options)) {
-                        $preset_value = $option_value['name'];
+                        $preset_value = $option_value['description']['name'];
                     }
                 }
 
@@ -1730,7 +1734,7 @@ class ControllerResponsesProductProduct extends AController
                     }
                 }
                 $values[$option_value['product_option_value_id']] =
-                    $option_value['name'].' '.$price.' '.$opt_stock_message;
+                    $option_value['description']['name'].' '.$price.' '.$opt_stock_message;
 
             }
 
@@ -1739,9 +1743,9 @@ class ControllerResponsesProductProduct extends AController
 
                 //add price to option name if it is not element with options
                 if (!in_array($option['element_type'], $elements_with_options)) {
-                    $option['name'] .= ' <small>'.$price.'</small>';
+                    $option['description']['name'] .= ' <small>'.$price.'</small>';
                     if ($opt_stock_message) {
-                        $option['name'] .= '<br />'.$opt_stock_message;
+                        $option['description']['name'] .= '<br />'.$opt_stock_message;
                     }
                 }
 
@@ -1768,8 +1772,8 @@ class ControllerResponsesProductProduct extends AController
                 $option_data = [
                     'type'           => $option['html_type'],
                     'name'           => !in_array($option['element_type'], HtmlElementFactory::getMultivalueElements())
-                                        ? 'product[0][option]['.$option['product_option_id'].']'
-                                        : 'product[0][option]['.$option['product_option_id'].'][]',
+                                        ? 'option['.$option['product_option_id'].']'
+                                        : 'option['.$option['product_option_id'].'][]',
                     'value'          => $value,
                     'options'        => $values,
                     'placeholder'    => $option['option_placeholder'],
@@ -1784,8 +1788,9 @@ class ControllerResponsesProductProduct extends AController
                 }
 
                 $options[] = [
-                    'name' => $option['name'],
-                    'html' => $form->getFieldHtml($option_data),
+                    'product_option_id'  => $option['product_option_id'],
+                    'name'       => $option['description']['name'],
+                    'html'       => $form->getFieldHtml($option_data),
                 ];
             }
         }
@@ -1811,7 +1816,7 @@ class ControllerResponsesProductProduct extends AController
         ]);
         $this->data['form']['fields']['price'] = $form->getFieldHtml([
             'type'  => 'input',
-            'name'  => 'product[0][price]',
+            'name'  => 'price',
             'value' => $preset_values['price'],
             'attr'  => ($editable_price ? '' : 'readonly')
         ]);
@@ -1822,21 +1827,21 @@ class ControllerResponsesProductProduct extends AController
                                                 .' ('.$this->language->get('text_product_in_stock')
                                                 .': '.$product_info['quantity'].')';
             } else {
-                $this->data['column_quantity'] =
-                    $this->language->get('column_quantity').' ('.$this->language->get('text_product_out_of_stock').')';
+                $this->data['column_quantity'] = $this->language->get('column_quantity')
+                                                .' ('.$this->language->get('text_product_out_of_stock').')';
             }
         }
 
         $this->data['form']['fields']['quantity'] = $form->getFieldHtml([
             'type'  => 'input',
-            'name'  => 'product[0][quantity]',
+            'name'  => 'quantity',
             'value' => $preset_values['quantity'],
             'attr'  => ' size="4"',
         ]);
 
         $this->data['form']['fields']['total'] = $form->getFieldHtml([
             'type'  => 'input',
-            'name'  => 'product[0][total]',
+            'name'  => 'total',
             'value' => $preset_values['total'],
             'attr'  => 'readonly',
         ]);
@@ -1855,19 +1860,18 @@ class ControllerResponsesProductProduct extends AController
 
         //url to storefront response controller. Note: if admin under ssl - use https for url and otherwise
         $order_store_id = $order_info['store_id'];
-        $this->loadModel('setting/store');
-        $store_info = $this->model_setting_store->getStore($order_store_id);
-        if (ABC::env('HTTPS') && $store_info['config_ssl_url']) {
-            $total_calc_url = $store_info['config_ssl_url'].'index.php?rt=r/product/product/calculateTotal';
-        } elseif (ABC::env('HTTPS') && !$store_info['config_ssl_url']) {
+        $store_info = Setting::getStoreSettings($order_store_id);
+        if (ABC::env('HTTPS') && $store_info->config_ssl_url) {
+            $total_calc_url = $store_info->config_ssl_url.'index.php?rt=r/product/product/calculateTotal';
+        } elseif (ABC::env('HTTPS') && !$store_info->config_ssl_url) {
             $total_calc_url = str_replace(
                                         'http://',
                                         'https://',
-                                        $store_info['config_url']
+                                        $store_info->config_url
                                         )
                                         .'index.php?rt=r/product/product/calculateTotal';
         } else {
-            $total_calc_url = $store_info['config_url'].'index.php?rt=r/product/product/calculateTotal';
+            $total_calc_url = $store_info->config_url.'index.php?rt=r/product/product/calculateTotal';
         }
 
         $this->data['total_calc_url'] = $total_calc_url;
@@ -1875,6 +1879,8 @@ class ControllerResponsesProductProduct extends AController
         $this->data['currency'] = $this->currency->getCurrency();
         $this->data['decimal_point'] = $this->language->get('decimal_point');
         $this->data['editable_price'] = $editable_price;
+        $this->data['modal_mode'] = $this->request->get['mode'] == 'submit' ?: 'json';
+
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

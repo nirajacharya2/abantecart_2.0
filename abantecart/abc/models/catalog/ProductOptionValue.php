@@ -86,6 +86,12 @@ class ProductOptionValue extends BaseModel
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function description()
+    {
+        return $this->hasOne(ProductOptionValueDescription::class, 'product_option_value_id')
+                    ->where('language_id', '=', $this->current_language_id);
+    }
+
     public function descriptions()
     {
         return $this->hasMany(ProductOptionValueDescription::class, 'product_option_value_id');

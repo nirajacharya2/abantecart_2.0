@@ -27,6 +27,7 @@ use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use abc\models\order\OrderProduct;
 use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
 use H;
@@ -459,7 +460,7 @@ class ModelSaleOrder extends Model
                 if ($product['option']) {
                     //first of all find previous order options
                     // if empty result - order products just added
-                    $order_product_options = $this->getOrderOptions($order_id, $order_product_id);
+                    $order_product_options = OrderProduct::getOrderProductOptions($order_id, $order_product_id);
 
                     $prev_subtract_options = []; //array with previous option values with enabled stock tracking
                     foreach ($order_product_options as $old_value) {
@@ -1194,8 +1195,7 @@ class ModelSaleOrder extends Model
         if ( ! (int)$product_id) {
             return false;
         }
-        $sql
-            = "SELECT count(DISTINCT op.order_id, op.order_product_id) AS total
+        $sql = "SELECT count(DISTINCT op.order_id, op.order_product_id) AS total
                 FROM ".$this->db->table_name('order_products')." op
                 WHERE  op.product_id = '".(int)$product_id."'";
 
