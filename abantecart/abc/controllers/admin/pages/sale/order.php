@@ -749,7 +749,7 @@ class ControllerPagesSaleOrder extends AController
 
         $this->data['add_product_url'] = $this->html->getSecureURL(
             'r/product/product/orderProductForm',
-            '&order_id='.$order_id.'&mode=json'
+            '&order_id='.$order_id.'&mode=json'.'&currency='.$order_info['currency']
         );
         $this->data['edit_order_total'] = $this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id);
         $this->data['delete_order_total'] = $this->html->getSecureURL('sale/order/delete_total',
@@ -1234,11 +1234,10 @@ class ControllerPagesSaleOrder extends AController
             $this->data['success'] = '';
         }
 
-        $this->loadModel('localisation/order_status');
-        $results = $this->model_localisation_order_status->getOrderStatuses();
+        $results = OrderStatus::with('description')->get()->toArray();
         $statuses = ['' => $this->language->get('text_select_status'),];
         foreach ($results as $item) {
-            $statuses[$item['order_status_id']] = $item['name'];
+            $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
         $this->data['order_id'] = $order_id;

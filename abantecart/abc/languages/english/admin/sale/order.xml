@@ -436,4 +436,8 @@
 		<key>text_edit_order</key>
 		<value><![CDATA[ Edit Order #%s ]]></value>
 	</definition>
+	<definition>
+		<key>text_order_status</key>
+		<value><![CDATA[Order Status]]></value>
+	</definition>
 </definitions>

@@ -38,6 +38,7 @@ use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
+use abc\models\order\OrderStatus;
 use abc\models\system\Setting;
 use H;
 
@@ -1549,7 +1550,7 @@ class ControllerResponsesProductProduct extends AController
         $this->load->library('json');
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-        $order_product_id = (int)$this->request->get['order_product_id'];
+        $this->data['order_product_id'] = $order_product_id = (int)$this->request->get['order_product_id'];
         $editable_price = (int)$this->request->get['editable_price'];
         $order_id = (int)$this->request->get['order_id'];
         $order_info = Order::getOrderArray($order_id);
@@ -1557,8 +1558,10 @@ class ControllerResponsesProductProduct extends AController
         $tax = new ATax($this->registry);
         $tax->setZone($order_info['country_id'], $order_info['zone_id']);
 
-        $product_id = (int)$this->request->get['product_id'];
-        $product_info = $this->model_catalog_product->getProduct($product_id);
+        if(!$order_product_id) {
+            $product_id = (int)$this->request->get['product_id'];
+            $product_info = $this->model_catalog_product->getProduct($product_id);
+        }
         $preset_values = [];
 
         if ($order_product_id) {
@@ -1568,7 +1571,9 @@ class ControllerResponsesProductProduct extends AController
              * @var OrderProduct $order_product_info
              */
             $order_product_info = OrderProduct::where(['order_id'=>$order_id, 'order_product_id' => $order_product_id ] )->first();
-            //$this->model_sale_order->getOrderProducts($order_id, $order_product_id);
+
+            $product_id = (int)$order_product_info->product_id;
+            $product_info = $this->model_catalog_product->getProduct($product_id);
 
             $preset_values['price'] = $this->currency->format(
                                             $order_product_info->price,
@@ -1750,7 +1755,7 @@ class ControllerResponsesProductProduct extends AController
                 }
 
                 //set default selection is nothing selected
-                if (!H::has_value($preset_value) && $option['element_type'] != 'C') {
+                if (!H::has_value($preset_value) && $option['html_type'] != 'checkbox') {
                     if (H::has_value($default_value)) {
                         $preset_value = $default_value;
                     }
@@ -1764,7 +1769,7 @@ class ControllerResponsesProductProduct extends AController
                 $value = $preset_value;
                 //for checkbox with empty value
 
-                if ($value == '' && $option['element_type'] == 'C') {
+                if ($value == '' && $option['html_type'] == 'checkbox') {
                     $value = $default_value;
                     $value = $value == '' ? 1 : $value;
                 }
@@ -1779,9 +1784,9 @@ class ControllerResponsesProductProduct extends AController
                     'placeholder'    => $option['option_placeholder'],
                     'regexp_pattern' => $option['regexp_pattern'],
                     'error_text'     => $option['error_text'],
-                    'attr'           => ' data-option-id ="'.$option['product_option_id'].'"',
+                    'attr'           => ' data-option-id ="'.$option['product_option_id'].'" '.($order_product_id ? 'readonly' : ''),
                 ];
-                if ($option['element_type'] == 'C') {
+                if ($option_data['type'] == 'checkbox') {
                     // note: 0 and 1 must be string to prevent collision with 'yes'. (in php 'yes'==1) ;-)
                     $option_data['label_text'] = !in_array($value, ['0', '1']) ? $value : '';
                     $option_data['checked'] = $preset_value ? true : false;
@@ -1851,11 +1856,27 @@ class ControllerResponsesProductProduct extends AController
             'name'  => 'product_id',
             'value' => $product_id,
         ]);
+        $this->data['product_id'] = $product_id;
+        $this->data['product_name'] = $product_info['name'];
+        $this->data['product_url'] = $this->html->getSecureURL('catalog/product/update','&product_id='.$product_id);
 
         $this->data['form']['fields']['order_product_id'] = $form->getFieldHtml([
             'type'  => 'hidden',
             'name'  => 'order_product_id',
             'value' => (int)$order_product_id,
+        ]);
+
+        $results = OrderStatus::with('description')->get()->toArray();
+        $statuses = ['' => $this->language->get('text_select_status'),];
+        foreach ($results as $item) {
+            $statuses[$item['order_status_id']] = $item['description']['name'];
+        }
+
+        $this->data['form']['order_status_id'] = $form->getFieldHtml([
+            'type'  => 'selectbox',
+            'name'  => 'order_status_id',
+            'value' => $product_info['order_status_id'],
+            'options' => $statuses
         ]);
 
         //url to storefront response controller. Note: if admin under ssl - use https for url and otherwise
@@ -1878,6 +1899,7 @@ class ControllerResponsesProductProduct extends AController
 
         $this->data['currency'] = $this->currency->getCurrency();
         $this->data['decimal_point'] = $this->language->get('decimal_point');
+        $this->data['text_order_status'] = $this->language->get('text_order_status');
         $this->data['editable_price'] = $editable_price;
         $this->data['modal_mode'] = $this->request->get['mode'] == 'submit' ?: 'json';
 

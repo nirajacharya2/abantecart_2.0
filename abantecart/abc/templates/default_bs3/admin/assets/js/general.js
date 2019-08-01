@@ -1270,3 +1270,39 @@ jQuery.fn.extend({
 		return params;
 	};
 })(jQuery);
+
+//order edit functions
+
+
+function formatMoney(num, decimal_place, decimal_point, thousand_point) {
+    decimal_place = isNaN(decimal_place = Math.abs(decimal_place)) ? 2 : decimal_place;
+    decimal_point = decimal_point === undefined ? "." : decimal_point;
+    thousand_point = thousand_point === undefined ? "," : thousand_point;
+    var s = num < 0 ? "-" : "",
+        i = parseInt(num = Math.abs(+num || 0).toFixed(decimal_place)) + "",
+        j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + thousand_point : "")
+        + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousand_point)
+        + (decimal_place ? decimal_point + Math.abs(num - i).toFixed(decimal_place).slice(2) : "");
+}
+
+function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
+    str = str === undefined || str.length === 0 ? '0' : str;
+    var final_number = str.replace(thousand_point, '')
+        .replace(currency_symbol, '')
+        .replace(decimal_point, '.')
+        .replace(/[^0-9\-\.]/g, '');
+    final_number = parseFloat(final_number);
+    return final_number;
+}
+
+
+function numberToCurrency(num, currency_location, decimal_place, decimal_point, thousand_point) {
+    var str;
+    if (currency_location === 'left') {
+        str = currency_symbol + formatMoney(num, decimal_place, decimal_point, thousand_point);
+    } else {
+        str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
+    }
+    return str;
+}
