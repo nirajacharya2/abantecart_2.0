@@ -33,7 +33,7 @@ matrix:
 before_script:
 #  - mkdir -p reports
 #create database
-  - if [[ "$DB" == "mariadb" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
+  - if [[ "$DB" == "mariadb" ]]; then service mysql start && mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
   - cd ./abantecart/abc/
 #initiate project with composer
   - composer install
