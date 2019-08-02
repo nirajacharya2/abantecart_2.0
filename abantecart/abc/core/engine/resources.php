@@ -629,6 +629,7 @@ class AResource
                 }
 
                 $resources[$k] = [
+                    'resource_id'   => $result['resource_id'],
                     'origin'        => $origin,
                     'direct_url'    => $direct_url,
                     //set full path to original file only for images (see above)
