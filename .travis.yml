@@ -18,9 +18,11 @@ php:
   # aliased to a recent hhvm version
   #- hhvm
 
+addons:
+  mariadb: '10.0'
 # optionally specify a list of environments, for example to test different RDBMS
 env:
-  - DB=mysql
+  - DB=mariadb
 
 # optionally set up exclutions and allowed failures in the matrix
 matrix:
@@ -31,7 +33,7 @@ matrix:
 before_script:
 #  - mkdir -p reports
 #create database
-  - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
+  - if [[ "$DB" == "mariadb" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
   - cd ./abantecart/abc/
 #initiate project with composer
   - composer install
