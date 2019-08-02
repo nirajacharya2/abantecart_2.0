@@ -4,11 +4,14 @@ namespace abc\models\catalog;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
+use abc\models\order\OrderProduct;
+use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
@@ -179,7 +182,7 @@ class Product extends BaseModel
         'settings',
         'product_type_id',
         'uuid',
-        'date_deleted'
+        'date_deleted',
     ];
 
     protected $rules = [
@@ -294,7 +297,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store'    => [
+        'product_store'     => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -1462,6 +1465,188 @@ class Product extends BaseModel
             'products_info'  => $products_info->toArray(),
             'total_num_rows' => $this->db->sql_get_row_count(),
         ];
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array|bool|false|mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public static function getBestSellerProductIds(array $data)
+    {
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        $cache = Registry::getInstance()->get('cache');
+        $config = Registry::getInstance()->get('config');
+        $limit = (int)$data['limit'];
+
+        $aliasOP = $db->table_name('order_products');
+        $language_id = (int)$config->get('storefront_language_id');
+        $store_id = (int)$config->get('config_store_id');
+
+        $cache_key = 'product.bestseller.ids.'
+            .'.store_'.$store_id
+            .'_lang_'.$language_id
+            .'_'.md5($limit);
+        $productIds = $cache->pull($cache_key);
+        if ($productIds === false) {
+            $productIds = [];
+            $query = OrderProduct::select(['order_products.product_id'])
+                ->leftJoin('orders',
+                    'order_products.order_id',
+                    '=',
+                    'orders.order_id')
+                ->leftJoin('products',
+                    'order_products.product_id',
+                    '=',
+                    'products.product_id')
+                ->where('orders.order_status_id', '>', 0)
+                ->where('order_products.product_id', '>', 0)
+                ->groupBy('order_products.product_id')
+                ->orderBy($db->raw('SUM('.$aliasOP.'.quantity) '), 'DESC');
+
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
+
+            $result_rows = $query->get();
+            if ($result_rows) {
+                $product_data = $result_rows->toArray();
+                $productIds = array_column($product_data, 'product_id');
+                $cache->push($cache_key, $productIds);
+            }
+        }
+        return $productIds;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array|bool|false|mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public static function getBestSellerProducts(array $data)
+    {
+
+        $limit = (int)$data['limit'];
+        $order = $data['order'];
+        $start = (int)$data['start'];
+        $sort = $data['sort'];
+        $total = $data['total'];
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        $cache = Registry::getInstance()->get('cache');
+        $config = Registry::getInstance()->get('config');
+
+        $language_id = (int)$config->get('storefront_language_id');
+        $store_id = (int)$config->get('config_store_id');
+        $cache_key = 'product.bestseller.'
+            .'.store_'.$store_id
+            .'_lang_'.$language_id
+            .'_'.md5($limit.$order.$start.$sort.$total);
+
+        $product_data = $cache->pull($cache_key);
+        if ($product_data === false) {
+            $product_data = [];
+
+            $aliasP = $db->table_name('products');
+            $aliasPD = $db->table_name('product_descriptions');
+            $aliasSS = $db->table_name('stock_statuses');
+
+            $select = [
+                $db->raw($aliasSS.'.name as stock'),
+                'products.*',
+            ];
+
+            $bestSellerIds = self::getBestSellerProductIds($data);
+
+            /**
+             * @var QueryBuilder $query
+             */
+            $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
+                ->addSelect($select)
+                ->leftJoin('product_descriptions', function ($subquery) use ($language_id) {
+                    $subquery->on('products.product_id',
+                        '=',
+                        'product_descriptions.product_id')
+                        ->where('product_descriptions.language_id', '=', $language_id);
+                })
+                ->leftJoin(
+                    'products_to_stores',
+                    'products.product_id',
+                    '=',
+                    'products_to_stores.product_id'
+                )
+                ->leftJoin('stock_statuses', function ($subquery) use ($language_id) {
+                    $subquery->on('products.stock_status_id',
+                        '=',
+                        'stock_statuses.stock_status_id')
+                        ->where('stock_statuses.language_id', '=', $language_id);
+                })
+                ->whereIn('products.product_id', $bestSellerIds)
+                ->whereRaw($aliasP.'.date_available<=NOW()')
+                ->where('products.status', '=', 1)
+                ->where('products_to_stores.store_id', '=', $store_id);
+
+            $sort_data = [
+                'pd.name'       => 'product_descriptions.name',
+                'p.sort_order'  => 'products.sort_order',
+                'p.price'       => 'products.price',
+                'rating'        => 'rating',
+                'date_modified' => 'products.date_modified',
+            ];
+
+            if (!array_key_exists($sort, $sort_data)) {
+                $sort = 'p.sort_order';
+            }
+            if (!$order) {
+                $order = 'ASC';
+            }
+            if ($sort === 'pd.name') {
+                $query = $query->orderByRaw('LCASE('.$aliasPD.'.name)', $order);
+            } else {
+                $query = $query->orderBy($sort_data[$sort], $order);
+            }
+
+            if ($start < 0) {
+                $start = 0;
+            }
+            if ((int)$limit) {
+                $query = $query->offset($start)->limit($limit);
+            }
+
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
+            $result_rows = $query->get();
+            if ($result_rows) {
+                $product_data = $result_rows->toArray();
+                $cache->push($cache_key, $product_data);
+            }
+        }
+        return $product_data;
+    }
+
+    /**
+     * @param array $productIds
+     *
+     * @return array
+     */
+    public static function getProductsAllInfo(array $productIds)
+    {
+        $result = [];
+        foreach ($productIds as $productId) {
+            $category = Category::find($productId);
+            if ($category) {
+                $result[] = $category->getAllData();
+            }
+        }
+        return $result;
     }
 
 }
