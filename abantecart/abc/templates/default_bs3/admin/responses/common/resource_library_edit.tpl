@@ -51,14 +51,14 @@
 			   data-confirmation="delete"
 			   data-confirmation-text="<?php echo $text_confirm_delete; ?>"
 			   data-original-title="<?php echo $button_delete; ?>">
-			   	<i class="fa fa-trash-o"></i>
+			   	<i class="fa fa-trash"></i>
 			</a>
 		<?php
 		} else {
 		?>
 			<a class="btn btn-default disabled rl_delete tooltips" href="#" data-original-title="<?php echo $error_delete; ?>">
 				<span class="fa-stack fa-lg">
-			   		<i class="fa fa-trash-o fa-stack-1x"></i>
+			   		<i class="fa fa-trash fa-stack-1x"></i>
 			   		<i class="fa fa-ban fa-stack-2x text-danger"></i>
 			   </span>
 			</a>
@@ -170,7 +170,7 @@
 							</div>
 						<?php } ?>
 						<button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle">
-							<i class="fa fa-external-link fa-lg"></i>&nbsp;
+							<i class="fa fa-external-link-alt fa-lg"></i>&nbsp;
 							<span class="caret"></span>&nbsp;
 							<span class="badge"><?php echo $total_cnt; ?></span>&nbsp;
 						</button>

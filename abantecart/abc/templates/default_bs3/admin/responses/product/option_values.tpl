@@ -11,7 +11,7 @@
 			<label class="heading col-sm-10"><?php echo $text_option_type; ?>: <?php echo $option_type; ?></label>
 			<div class="input-group col-sm-2">
 			<a class="pull-right btn btn-default tooltips" onclick="optionDelete('<?php echo $button_remove_option->href; ?>')" data-original-title="<?php echo $button_remove_option->text; ?>" data-confirmation="delete">
-			 <i class="fa fa-trash-o"></i>
+			 <i class="fa fa-trash"></i>
 			 </a>
 		    </div>
 		</div>

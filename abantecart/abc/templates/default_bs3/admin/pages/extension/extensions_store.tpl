@@ -70,7 +70,7 @@
 		<div class="btn-group pull-right ml10">
 			<a class="btn btn-white tooltips" href="https://marketplace.abantecart.com" target="new" data-toggle="tooltip"
 				data-original-title="<?php echo $text_marketplace_site; ?>">
-				<i class="fa fa-external-link fa-lg"></i>
+				<i class="fa fa-external-link-alt fa-lg"></i>
 			</a>
 		</div>
 		<div class="btn-group pull-right"> 

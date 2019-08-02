@@ -171,7 +171,7 @@
 			<?php if($form['delete']){?>
 				<a class="btn btn-danger" data-confirmation="delete"
 				   href="<?php echo $form['delete']->href; ?>">
-					<i class="fa fa-trash-o"></i> <?php echo $form['delete']->text; ?>
+					<i class="fa fa-trash"></i> <?php echo $form['delete']->text; ?>
 				</a>
 			<?php } ?>
 		</div>

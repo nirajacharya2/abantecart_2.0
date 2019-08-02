@@ -285,9 +285,9 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 						break;
 					case 'delete':
 						if($href!='href="#"'){
-							$html_btn .= ' '.$href.' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash-o fa-lg"></i>';
+							$html_btn .= ' '.$href.' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
 						}else{
-							$html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-trash-o fa-lg"></i>';
+							$html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
 						}
 						break;
 					case 'save':
