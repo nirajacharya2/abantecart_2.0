@@ -50,6 +50,16 @@ trait SaleOrderTrait
         $checkoutData['customer_id'] = $customer_id;
         $checkoutData['customer'] = $aCustomer;
         $customer_data['coupon'] = $order_info['coupon'];
+        $customer_data['payment_method'] = [
+            'id'    => $order_info['payment_method_key'],
+            'title' => $order_info['payment_method'],
+        ];
+        $customer_data['shipping_method'] = [
+            'id'    => $order_info['shipping_method_key'],
+            'title' => $order_info['shipping_method'],
+        ];
+        $customer_data['payment_method'] = $order_info['payment_method_key'];
+
 
         $checkoutData['cart'] = ABC::getObjectByAlias('ACart', [$this->registry, $customer_data]);
         $checkout =  new CheckOutAdmin($this->registry,$checkoutData);

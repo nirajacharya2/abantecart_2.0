@@ -36,6 +36,7 @@ class OrderOption extends BaseModel
     protected $casts = [
         'order_id'                => 'int',
         'order_product_id'        => 'int',
+        'product_option_id'       => 'int',
         'product_option_value_id' => 'int',
         'price'                   => 'float',
         'settings'                => 'serialized',
@@ -44,6 +45,7 @@ class OrderOption extends BaseModel
     protected $fillable = [
         'order_id',
         'order_product_id',
+        'product_option_id',
         'product_option_value_id',
         'name',
         'sku',
@@ -76,6 +78,17 @@ class OrderOption extends BaseModel
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute is not integer or not presents in order_products table!',
+                ],
+            ],
+        ],
+        'product_option_id'       => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
                 ],
             ],
         ],

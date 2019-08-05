@@ -31,12 +31,15 @@ use abc\core\lib\LibException;
 use abc\models\catalog\Category;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
+use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
 use abc\models\admin\ModelCatalogCategory;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
+use abc\models\order\OrderStatusDescription;
+use abc\models\order\OrderTotal;
 use abc\modules\traits\SaleOrderTrait;
 use H;
 
@@ -461,21 +464,14 @@ class ControllerPagesSaleOrder extends AController
             );
         }
 
-        $this->loadModel('localisation/order_status');
-        $status = $this->model_localisation_order_status->getOrderStatus($order_info['order_status_id']);
-        if ($status) {
-            $this->data['order_status'] = $status['name'];
-        } else {
-            $this->data['order_status'] = '';
-        }
+        $this->data['order_status'] = OrderStatusDescription::where(
+            [
+                'language_id'     => $this->language->getContentLanguageID(),
+                'order_status_id' => $order_info['order_status_id'],
+            ]
+        )->first()->name;
 
-        $this->loadModel('sale/customer_group');
-        $customer_group_info = $this->model_sale_customer_group->getCustomerGroup($order_info['customer_group_id']);
-        if ($customer_group_info) {
-            $this->data['customer_group'] = $customer_group_info['name'];
-        } else {
-            $this->data['customer_group'] = '';
-        }
+        $this->data['customer_group'] = CustomerGroup::find($order_info['customer_group_id'])->name;
 
         if ($order_info['invoice_id']) {
             $this->data['invoice_id'] = $order_info['invoice_prefix'].$order_info['invoice_id'];
@@ -560,9 +556,11 @@ class ControllerPagesSaleOrder extends AController
                 }
 
                 $option_data[] = [
-                    'name'  => $option['name'],
-                    'value' => nl2br($value),
-                    'title' => $title,
+                    'name'                    => $option['name'],
+                    'value'                   => nl2br($value),
+                    'title'                   => $title,
+                    'product_option_id'       => $option['product_option_id'],
+                    'product_option_value_id' => $option['product_option_value_id'],
                 ];
             }
 
@@ -579,7 +577,18 @@ class ControllerPagesSaleOrder extends AController
                     }
                 }
             }
+
+            //get combined database and config info about each order status
+            $orderStatuses = OrderStatus::getOrderStatusConfig();
+            $this->data['cancel_statuses'] = [];
+            foreach ($orderStatuses as $oStatus) {
+                if (in_array('return_to_stock', $oStatus['config']['actions'])) {
+                    $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
+                }
+            }
+
             $this->data['order_products'][] = [
+                'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
                 'product_status'   => $product['status'],
@@ -605,7 +614,11 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->data['currency'] = $this->currency->getCurrency($order_info['currency']);
-        $this->data['totals'] = $this->model_sale_order->getOrderTotals($order_id);
+        $this->data['totals'] = OrderTotal::where('order_id', '=', $order_id)
+                                          ->orderBy('sort_order')
+                                          ->get()
+                                          ->toArray();
+
         //add enabled but not present totals such as discount and fee.
         $add_missing = ['low_order_fee', 'handling', 'coupon', 'shipping', 'tax'];
         $this->loadModel('setting/extension');
@@ -751,7 +764,9 @@ class ControllerPagesSaleOrder extends AController
             'r/product/product/orderProductForm',
             '&order_id='.$order_id.'&mode=json'.'&currency='.$order_info['currency']
         );
-        $this->data['edit_order_total'] = $this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id);
+        //$this->data['edit_order_total'] = $this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id);
+        $this->data['recalculate_totals_url'] =
+            $this->html->getSecureURL('r/sale/order/recalculateExistingOrderTotals', '&order_id='.$order_id);
         $this->data['delete_order_total'] = $this->html->getSecureURL('sale/order/delete_total',
             '&order_id='.$order_id);
 

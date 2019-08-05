@@ -1866,6 +1866,7 @@ class ControllerResponsesProductProduct extends AController
             'value' => (int)$order_product_id,
         ]);
 
+
         $results = OrderStatus::with('description')->get()->toArray();
         $statuses = ['' => $this->language->get('text_select_status'),];
         foreach ($results as $item) {
@@ -1873,10 +1874,11 @@ class ControllerResponsesProductProduct extends AController
         }
 
         $this->data['form']['order_status_id'] = $form->getFieldHtml([
-            'type'  => 'selectbox',
-            'name'  => 'order_status_id',
-            'value' => $product_info['order_status_id'],
-            'options' => $statuses
+            'type'    => 'selectbox',
+            'name'    => 'order_status_id',
+            'value'   => $product_info['order_status_id'],
+            'options' => $statuses,
+            'attr'    => (in_array($product_info['order_status_id'], $this->data['cancel_statuses']) ? 'readonly' : ''),
         ]);
 
         //url to storefront response controller. Note: if admin under ssl - use https for url and otherwise
@@ -1902,7 +1904,6 @@ class ControllerResponsesProductProduct extends AController
         $this->data['text_order_status'] = $this->language->get('text_order_status');
         $this->data['editable_price'] = $editable_price;
         $this->data['modal_mode'] = $this->request->get['mode'] == 'submit' ?: 'json';
-
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

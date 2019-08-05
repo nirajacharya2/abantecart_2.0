@@ -205,9 +205,10 @@
                 $oid = $order_product['order_product_id'];
                 ?>
                 <tbody id="product_<?php echo $oid; ?>">
-                <tr <?php if (!$order_product['product_status']) { ?>class="alert alert-warning"<?php } ?>>
+                <tr <?php if (!$order_product['product_status']
+                || $order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
                     <td>
-                        <?php if ($order_product['product_status']) { ?>
+                        <?php if ($order_product['product_status'] && !$order_product['disable_edit']) { ?>
                             <a class="edit_product btn btn-xs btn-info-alt tooltips"
                                data-original-title="<?php echo $text_edit; ?>"
                                data-order-product-id="<?php echo $oid; ?>">
@@ -237,6 +238,9 @@
                                     </dt>
                                     <dd>
                                         <small title="<?php echo $option['title'] ?>"><?php echo $option['value']; ?></small>
+                                        <input type="hidden"
+                                               name="product[<?php echo $oid; ?>][option][<?php echo $option['product_option_id']; ?>]"
+                                               value="<?php echo $option['product_option_value_id']; ?>"/>
                                     </dd>
                                 <?php } ?>
                             </dl>
@@ -255,38 +259,40 @@
 
             <?php echo $this->getHookVar('list_more_product_last'); ?>
         </table>
-        <table class="table">
+
+
+        <a href="Javascript:void(0);" onclick="recalculateTotals();">recalc</a>
+
+
+        <table class="table table-striped col-sm-2 col-sm-offset-4 pull-right">
             <tbody id="totals">
             <?php $order_total_row = 0;
             $count = 0;
             $total = count($totals); ?>
             <?php foreach ($totals as $total_row) { ?>
                 <tr>
-                    <td colspan="4" class="align-right">
-				<span class="pull-right">
-					<?php echo $total_row['title']; ?>
-                    <?php if (!in_array($total_row['type'], ['subtotal', 'total'])) { ?>
-                        <?php if (!$total_row['unavailable']) { ?>
-                            <a class="recalc_total btn btn-xs btn-info-alt tooltips"
-                               data-original-title="<?php echo $text_recalc; ?>"
-                               data-order-total-id="<?php echo $total_row['order_total_id']; ?>">
-					    	<i class="fa fa-refresh"></i>
-						</a>
-                        <?php } ?>
-						<?php if (!$no_recalc_allowed
-                            && $total_key_count[$total_row['key']] == 1) { // do not allow delete of duplicate keys?>
-                            <a class="remove btn btn-xs btn-danger-alt tooltips"
-                               data-original-title="<?php echo $button_delete; ?>"
-                               data-confirmation="delete"
-                               onclick="deleteTotal('<?php echo $total_row['order_total_id']; ?>');">
-							<i class="fa fa-minus-circle"></i>
-						</a>
-                        <?php } ?>
-                    <?php } ?>
-				</span>
+                    <td class="pull-right">
+                        <?php echo $total_row['title']; ?>
+                        <?php /* if (!in_array($total_row['type'], ['subtotal', 'total'])) { ?>
+                                    <?php if (!$total_row['unavailable']) { ?>
+                                        <a class="recalc_total btn btn-xs btn-info-alt tooltips"
+                                           data-original-title="<?php echo $text_recalc; ?>"
+                                           data-order-total-id="<?php echo $total_row['order_total_id']; ?>">
+                                        <i class="fa fa-refresh"></i>
+                                    </a>
+                                    <?php } ?>
+                                    <?php if (!$no_recalc_allowed
+                                        && $total_key_count[$total_row['key']] == 1) { // do not allow delete of duplicate keys?>
+                                        <a class="remove btn btn-xs btn-danger-alt tooltips"
+                                           data-original-title="<?php echo $button_delete; ?>"
+                                           data-confirmation="delete"
+                                           onclick="deleteTotal('<?php echo $total_row['order_total_id']; ?>');">
+                                        <i class="fa fa-minus-circle"></i>
+                                    </a>
+                                    <?php } ?>
+                                <?php } */ ?>
                     </td>
-                    <td>
-                        <?php if (!in_array($total_row['type'], ['total'])) { ?>
+                    <td><?php if (!in_array($total_row['type'], ['total'])) { ?>
                             <?php echo $total_row['text']; ?>
                         <?php } else { ?>
                             <b class="<?php echo $total_row['type']; ?>"
@@ -300,44 +306,44 @@
                 </tr>
                 <?php $order_total_row++ ?>
             <?php } ?>
-            <?php if ($totals_add) { ?>
-                <tr>
-                    <td colspan="4" class="align-right"><span class="pull-right"><?php echo $text_add; ?></span></td>
-                    <td>
-                        <b rel="totals[<?php echo $total_row['order_total_id']; ?>]">
-                            <a class="add_totals btn btn-xs btn-info-alt tooltips"
-                               data-original-title="<?php echo $text_add; ?>"
-                               data-order-id="<?php echo $order_id; ?>">
-                                <i class="fa fa-plus-circle"></i>
+            <?php /*if ($totals_add) { ?>
+                    <tr>
+                        <td class="align-right"><span class="pull-right"><?php echo $text_add; ?></span></td>
+                        <td>
+                            <b rel="totals[<?php echo $total_row['order_total_id']; ?>]">
+                                <a class="add_totals btn btn-xs btn-info-alt tooltips"
+                                   data-original-title="<?php echo $text_add; ?>"
+                                   data-order-id="<?php echo $order_id; ?>">
+                                    <i class="fa fa-plus-circle"></i>
 
-                                <?php foreach ($totals_add as $total_row) { ?>
-                                    <div class="hidden <?php echo $total_row['key']; ?>">
-                                        <div class="row">
-                                            <input type="hidden" name="key" value="<?php echo $total_row['key']; ?>"/>
-                                            <input type="hidden" name="type" value="<?php echo $total_row['type']; ?>"/>
-                                            <input type="hidden" name="sort_order"
-                                                   value="<?php echo $total_row['sort_order']; ?>"/>
-                                            <div class="col-sm-3 col-xs-12">
-                                                <span class="pull-right"><?php echo $text_order_total_title; ?></span>
-                                            </div>
-                                            <div class="col-sm-4 col-xs-12">
-                                                <input type="text" class="col-sm-2 col-xs-12 no-save"
-                                                       name="title" value="<?php echo $total_row['title']; ?>"/>
-                                            </div>
-                                            <div class="col-sm-2 col-xs-12">
-                                                <span class="pull-right"><?php echo $text_order_total_amount; ?></span>
-                                            </div>
-                                            <div class="col-sm-3 col-xs-12">
-                                                <input type="text" class="col-sm-2 col-xs-12 no-save"
-                                                       name="text" value="<?php echo $total_row['text']; ?>"/>
+                                    <?php foreach ($totals_add as $total_row) { ?>
+                                        <div class="hidden <?php echo $total_row['key']; ?>">
+                                            <div class="row">
+                                                <input type="hidden" name="key" value="<?php echo $total_row['key']; ?>"/>
+                                                <input type="hidden" name="type" value="<?php echo $total_row['type']; ?>"/>
+                                                <input type="hidden" name="sort_order"
+                                                       value="<?php echo $total_row['sort_order']; ?>"/>
+                                                <div class="col-sm-3 col-xs-12">
+                                                    <span class="pull-right"><?php echo $text_order_total_title; ?></span>
+                                                </div>
+                                                <div class="col-sm-4 col-xs-12">
+                                                    <input type="text" class="col-sm-2 col-xs-12 no-save"
+                                                           name="title" value="<?php echo $total_row['title']; ?>"/>
+                                                </div>
+                                                <div class="col-sm-2 col-xs-12">
+                                                    <span class="pull-right"><?php echo $text_order_total_amount; ?></span>
+                                                </div>
+                                                <div class="col-sm-3 col-xs-12">
+                                                    <input type="text" class="col-sm-2 col-xs-12 no-save"
+                                                           name="text" value="<?php echo $total_row['text']; ?>"/>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <?php } ?>
-                            </a>
-                    </td>
-                </tr>
-            <?php } ?>
+                                    <?php } ?>
+                                </a>
+                        </td>
+                    </tr>
+                <?php }*/ ?>
             </tbody>
         </table>
 
@@ -429,7 +435,7 @@
         $(document).on('click', '#products a.remove', function () {
             var id = $(this).attr('data-order-product-row');
             $('#product_' + id).remove();
-            recalculate();
+            recalculateTotals()
             return false;
         });
 
@@ -439,95 +445,43 @@
         });
 
 
-        $('a.edit_product').click(function () {
+        $(document).on('click', 'a.edit_product', function () {
             ProductModal($(this).attr('data-order-product-id'));
             return false;
-        });
-
-        $(document).on('keyup', '#products input', function () {
-            recalculate();
         });
 
 
     });
 
+    function recalculateTotals() {
 
-    function recalculate() {
+        $.ajax({
+            url: '<?php echo $recalculate_totals_url; ?>',
+            dataType: 'json',
+            type: 'post',
+            data: $('#orderFrm').serialize(),
+            beforeSend: function () {
+                //    $('#generate_invoice').attr('disabled', 'disabled');
+            },
+            complete: function () {
+                //$('#generate_invoice').attr('disabled', '');
+            },
+            success: function (data) {
+                if (data.hasOwnProperty('totals')) {
 
-        var qty,
-            price,
-            total,
-            subtotal = 0;
+                    var totals = $('table>tbody#totals');
+                    totals.html('');
+                    $.each(data.totals, function (index, row) {
+                        $('<tr><td class="pull-right">' + row.title + '</td><td>' + row.text + '</td></tr>').appendTo(totals);
+                    });
 
-        //update products
-        $('#products tbody[id^="product"]').each(function (i, v) {
-            qty = $('input[name$="quantity]"]', v).val();
-            price = currencyToNumber(
-                $('input[name$="price]"]', v).val(),
-                thousand_point,
-                decimal_point,
-                currency_symbol
-            );
-            total = qty * price;
-            $('input[name$="total]"]', v)
-                .val(
-                    numberToCurrency(
-                        total,
-                        currency_location,
-                        decimal_place,
-                        decimal_point,
-                        thousand_point
-                    )
-                );
-            subtotal += total;
-        });
-
-        //update first total - subtotal
-        $('#products .subtotal').val(
-            numberToCurrency(
-                subtotal,
-                currency_location,
-                decimal_place,
-                decimal_point,
-                thousand_point
-            )
-        );
-
-        total = 0;
-        $('input[name^="totals"]').each(function (i, v) {
-            //skip grand total
-            var n = currencyToNumber(
-                $(v).val(),
-                thousand_point,
-                decimal_point,
-                currency_symbol
-            );
-            if (!$(v).hasClass('hidden_total') && $.isNumeric(n)) {
-                total += n;
+                }
             }
         });
-
-        //update last - total
-        $('#products .total').html(
-            numberToCurrency(
-                total,
-                currency_location,
-                decimal_place,
-                decimal_point,
-                thousand_point
-            )
-        );
-        $('#products .hidden_total').val(
-            numberToCurrency(
-                total,
-                currency_location,
-                decimal_place,
-                decimal_point,
-                thousand_point
-            )
-        );
-
+        e.stopPropagation();
     }
+
+
 
     $('#generate_invoice').click(function () {
         var that = $(this).parents('p');
@@ -579,7 +533,6 @@
     var newRowCounter = 0;
 
     function AddProductToForm(data) {
-        console.log(data);
         if (data.form.length === 0) {
             return false;
         }
@@ -594,17 +547,19 @@
                 .addClass('alert-success');
         } else {
             newRow = $('#products tbody#product_' + oid);
-            newRow.addClass('alert-warning');
         }
 
         var td = newRow.find('td:eq(0)');
-        td.find('a.edit_product').prop('data-order-product-id', oid);
-        if(!edit_mode){
-          $(
-            '<a class="remove btn btn-xs btn-danger-alt tooltips" ' +
+
+        if (!edit_mode) {
+            td.find('a.edit_product').remove();
+            $(
+                '<a class="remove btn btn-xs btn-danger-alt tooltips" ' +
                 'data-original-title="<?php echo $button_delete; ?>" ' +
-                'data-order-product-row="'+oid+'"><i class="fa fa-minus-circle"></i></a>'
-          ).prependTo(td);
+                'data-order-product-row="' + oid + '"><i class="fa fa-minus-circle"></i></a>'
+            ).prependTo(td);
+        } else {
+            td.find('a.edit_product').prop('data-order-product-id', oid);
         }
 
         //product name with options
@@ -662,9 +617,17 @@
             'name="product[' + oid + '][total]" ' +
             'value="' + currencyToNumber(product_data.total, thousand_point, decimal_point, currency_symbol) + '">'
         );
+
+        if (product_data.quantity > 0) {
+            newRow.addClass('alert-warning');
+        } else {
+            newRow.addClass('alert-danger');
+        }
+
         if (!edit_mode) {
             newRow.appendTo('#products');
         }
+        recalculateTotals();
 
         newRowCounter++;
     }

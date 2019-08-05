@@ -2038,3 +2038,11 @@ ADD CONSTRAINT `ac_order_products_ibfk_2`
   REFERENCES `ac_order_statuses` (`order_status_id`)
   ON DELETE NO ACTION
   ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_options`
+  ADD COLUMN `product_option_id` INT NOT NULL DEFAULT '0'
+  AFTER `order_product_id`,
+  ADD COLUMN `product_option_name` VARCHAR(255) NOT NULL
+  AFTER `product_option_id`,
+  ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
+

@@ -22,6 +22,7 @@ class OrderOptionModelTest extends ATestCase
         $data = [
             'order_id'                => 'fail',
             'order_product_id'        => 'fail',
+            'product_option_id'       => 'fail',
             'product_option_value_id' => 'fail',
             'name'                    => -0.000000000123232,
             'sku'                     => -0.000000000123232,
@@ -39,7 +40,7 @@ class OrderOptionModelTest extends ATestCase
             $errors = $orderOption->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(9, count($errors));
+        $this->assertEquals(10, count($errors));
 
         //check validation of presence in database
         $data = [
@@ -85,14 +86,15 @@ class OrderOptionModelTest extends ATestCase
 
         //valid data
         $data = [
-            'order_id'         => 9,
-            'order_product_id' => 6,
-            'name'             => 'test',
-            'sku'              => 'test',
-            'value'            => 'testvalue',
-            'price'            => 1.25,
-            'prefix'           => '$',
-            'settings'         => ['somedata' => 'somevalue'],
+            'order_id'          => 9,
+            'order_product_id'  => 6,
+            'product_option_id' => 304,
+            'name'              => 'test',
+            'sku'               => 'test',
+            'value'             => 'testvalue',
+            'price'             => 1.25,
+            'prefix'            => '$',
+            'settings'          => ['somedata' => 'somevalue'],
         ];
 
         $orderOption = new OrderOption($data);

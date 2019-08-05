@@ -9747,19 +9747,21 @@ ON `ac_order_history` (`order_id`, `order_status_id`, `notify`);
 --
 
 CREATE TABLE `ac_order_options` (
-  `order_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `product_option_value_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL,
-  `sku` varchar(64) DEFAULT NULL,
-  `value` text NOT NULL,
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `prefix` char(1) NOT NULL DEFAULT '',
-  `settings` longtext,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_option_id`         int(11)       NOT NULL AUTO_INCREMENT,
+  `order_id`                int(11)       NOT NULL,
+  `order_product_id`        int(11)       NOT NULL,
+  `product_option_id`       int(11)       NOT NULL DEFAULT '0',
+  `product_option_name`     varchar(255)  NOT NULL,
+  `product_option_value_id` int(11)       NOT NULL DEFAULT '0',
+  `name`                    varchar(255)  NOT NULL,
+  `sku`                     varchar(64)            DEFAULT NULL,
+  `value`                   text          NOT NULL,
+  `price`                   decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `prefix`                  char(1)       NOT NULL DEFAULT '',
+  `settings`                longtext,
+  `date_added`              timestamp     NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`           timestamp     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`            timestamp     NULL,
   PRIMARY KEY (`order_option_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 

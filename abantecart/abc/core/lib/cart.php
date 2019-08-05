@@ -327,8 +327,8 @@ class ACart  extends ALibBase
                     $groups[] = $option_value_query['group_id'];
                 }
                 $option_data[] = [
-                    'product_option_value_id' => $option_value_query['product_option_value_id'],
                     'product_option_id'       => $product_option_id,
+                    'product_option_value_id' => $option_value_query['product_option_value_id'],
                     'name'                    => $option_query['name'],
                     'element_type'            => $element_type,
                     'settings'                => $option_query['settings'],
@@ -362,6 +362,7 @@ class ACart  extends ALibBase
                 if ($option_value_queries) {
                     foreach ($option_value_queries as $item) {
                         $option_data[] = [
+                            'product_option_id'       => $product_option_id,
                             'product_option_value_id' => $item['product_option_value_id'],
                             'name'                    => $option_query['name'],
                             'value'                   => $item['name'],
@@ -921,8 +922,8 @@ class ACart  extends ALibBase
             $calc_order[$value['key']] = (int)$this->config->get($value['key'].'_calculation_order');
         }
         array_multisort($calc_order, SORT_ASC, $total_extns);
-
         foreach ($total_extns as $extn) {
+
             $sf_total_mdl = $this->load->model('total/'.$extn['key'], 'storefront');
             /**
              * parameters are references!!!

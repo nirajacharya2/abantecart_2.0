@@ -2,6 +2,7 @@
 
 namespace abc\models\order;
 
+use abc\core\ABC;
 use abc\models\BaseModel;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -58,11 +59,30 @@ class OrderStatus extends BaseModel
     public function description()
     {
         return $this->hasOne(OrderStatusDescription::class, 'order_status_id')
-            ->where('language_id', '=', $this->current_language_id);
+                    ->where('language_id', '=', $this->current_language_id);
     }
 
     public function orders()
     {
         return $this->hasMany(Order::class, 'order_status_id');
+    }
+
+    /**
+     * @param string|null $status_text_id
+     *
+     * @return array
+     */
+    public static function getOrderStatusConfig(string $status_text_id = null)
+    {
+
+        $orderStatus = OrderStatus::all()->toArray();
+        $conf = ABC::env('ORDER')['statuses'];
+        foreach ($orderStatus as &$item) {
+            $item['config'] = $conf[$item['status_text_id']];
+            if ($item['status_text_id'] == $status_text_id) {
+                return $item;
+            }
+        }
+        return $orderStatus;
     }
 }
