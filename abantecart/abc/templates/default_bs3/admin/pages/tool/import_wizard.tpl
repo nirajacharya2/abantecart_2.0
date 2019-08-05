@@ -158,7 +158,7 @@
 					data-complete-task-url="<?php echo $form['complete_task_url'] ?>"
 					data-abort-task-url="<?php echo $form['abort_task_url'] ?>"
                     data-task-title="<?php echo $text_import_task_title ?>">
-				<i class="fa fa-paper-plane-o fa-fw"></i> <?php echo $text_load; ?>
+                <i class="fa fa-paper-plane fa-fw"></i> <?php echo $text_load; ?>
 			</button>
 			<a href="<?php echo $form['schedule_url']; ?>" class="btn btn-primary">
 				<i class="fa fa-clock-o fa-fw"></i> <?php echo $button_schedule_import; ?>
@@ -172,7 +172,7 @@
 			</a>
 			<?php } else { ?>
 			<button class="btn btn-primary lock-on-click"
-				<i class="fa fa-paper-plane-o fa-fw"></i> <?php echo $form['submit']->text; ?>
+                <i class="fa fa-paper-plane fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#load_map_modal">
 				<i class="fa fa-code fa-fw"></i> <?php echo $text_load_map; ?>
@@ -204,7 +204,7 @@
 		'content' => $form['serialized_map'] . '
 		<br /><center>
 			<button class="btn btn-primary lock-on-click"
-			<i class="fa fa-paper-plane-o fa-fw"></i>'. $form['submit']->text . '
+			<i class="fa fa-paper-plane fa-fw"></i>'.$form['submit']->text.'
 			</button>
 		</center>
 		',

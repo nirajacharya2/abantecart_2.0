@@ -50,7 +50,7 @@
 					<div class="form-group">
 						<div class="input-group col-sm-offset-3">
 								<a class="btn btn-info btn-xs" onclick="selectAll();">
-									<i class="fa fa-check-square-o fa-fw"></i>	<?php echo $text_select_all; ?>
+                                    <i class="fa fa-check-square fa-fw"></i> <?php echo $text_select_all; ?>
 								</a>
 								<a class="btn btn-default btn-xs" onclick="unselectAll();">
 									<i class="fa fa-square-o fa-fw"></i> <?php echo $text_unselect_all; ?>
