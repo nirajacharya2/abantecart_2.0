@@ -2046,3 +2046,8 @@ ALTER TABLE `ac_order_options`
   AFTER `product_option_id`,
   ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
 
+ALTER TABLE `ac_order_totals`
+  ADD COLUMN `data` LONGTEXT NULL
+  AFTER `value`;
+
+

@@ -24,6 +24,7 @@ class OrderTotalModelTest extends ATestCase
             'title'      => 0.000000000009,
             'text'       => 0.000000000009,
             'value'      => 'fail',
+            'data'       => 0.000000000009,
             'sort_order' => 'fail',
             'type'       => 0.000000000009,
             'key'        => 0.000000000009,
@@ -37,7 +38,7 @@ class OrderTotalModelTest extends ATestCase
             $errors = $orderStatus->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(7, count($errors));
+        $this->assertEquals(8, count($errors));
 
         //validate
         $data = [
@@ -45,6 +46,7 @@ class OrderTotalModelTest extends ATestCase
             'title'      => 'Test Total:',
             'text'       => '$0.01',
             'value'      => 0.01,
+            'data'       => ['some-data' => 'some_value'],
             'sort_order' => 1,
             'type'       => 'unittest',
             'key'        => 'test_total',
@@ -55,6 +57,7 @@ class OrderTotalModelTest extends ATestCase
         try {
             $orderStatus->validate($data);
             $orderStatus->save();
+
         } catch (ValidationException $e) {
             $errors = $orderStatus->errors()['validation'];
             var_dump($errors);

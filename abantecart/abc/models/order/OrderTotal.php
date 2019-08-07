@@ -39,6 +39,7 @@ class OrderTotal extends BaseModel
     protected $casts = [
         'order_id'   => 'int',
         'value'      => 'float',
+        'data'       => 'serialized',
         'sort_order' => 'int',
     ];
 
@@ -47,6 +48,7 @@ class OrderTotal extends BaseModel
         'title',
         'text',
         'value',
+        'data',
         'sort_order',
         'type',
         'key',
@@ -101,6 +103,16 @@ class OrderTotal extends BaseModel
                 ],
             ],
         ],
+        'data'  => [
+            'checks'   => [
+                'array',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a array!',
+                ],
+            ],
+        ],
 
         'sort_order' => [
             'checks'   => [
@@ -139,6 +151,11 @@ class OrderTotal extends BaseModel
             ],
         ],
     ];
+
+    public function setDataAttribute($value)
+    {
+        $this->attributes['data'] = serialize($value);
+    }
 
     public function order()
     {

@@ -313,12 +313,12 @@ class Customer extends BaseModel
 
         'wishlist' => [
             'checks'   => [
-                'string',
+                'array',
                 'nullable',
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => 'Wishlist must be a string!',
+                    'default_text' => 'Wishlist must be an array!',
                 ],
             ],
         ],

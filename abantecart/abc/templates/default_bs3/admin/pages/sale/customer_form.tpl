@@ -146,7 +146,7 @@
 				<?php if($name == 'email') { ?>
 				<span class="input-group-btn">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
-					<i class="fa fa-envelope-o fa-fw"></i>
+					<i class="fa fa-envelope fa-fw"></i>
 					</a>
 				</span>
 				<?php } ?>

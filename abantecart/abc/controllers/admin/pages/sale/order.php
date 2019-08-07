@@ -618,73 +618,35 @@ class ControllerPagesSaleOrder extends AController
                                           ->orderBy('sort_order')
                                           ->get()
                                           ->toArray();
-
-        //add enabled but not present totals such as discount and fee.
-        $add_missing = ['low_order_fee', 'handling', 'coupon', 'shipping', 'tax'];
-        $this->loadModel('setting/extension');
-        $new_totals = [];
-        $total_ext = $this->extensions->getExtensionsList(['filter' => 'total']);
-        if ($total_ext->rows) {
-            foreach ($total_ext->rows as $row) {
-                $match = false;
-                if (!$row['status'] || !in_array($row['key'], $add_missing)) {
-                    continue;
-                }
-                foreach ($this->data['totals'] as $total) {
-                    if ($row['key'] == $total['key']) {
-                        $match = true;
-                        break;
-                    }
-                }
-                if (!$match) {
-                    $new_totals[$row['key']] = $row['key'];
-                    if($this->config->get('config_allow_order_recalc')) {
-                        $this->data['totals_add'][] = [
-                            'key'        => $row['key'],
-                            'type'       => $this->config->get($row['key'].'_total_type'),
-                            'order_id'   => $order_id,
-                            'title'      => $row['key'],
-                            'text'       => '',
-                            'value'      => '',
-                            'sort_order' => $this->config->get($row['key'].'_sort_order'),
-                        ];
-                    }
-                }
-            }
-        }
-        //check which totals we allow to edit (disable edit for missing and disabled totals.
+        //check which totals cannot reapply
         foreach ($this->data['totals'] as &$ototal) {
-            $ototal['unavailable'] = true;
-            //is order prior to 1.2.2 upgrade? do not allow recalc
-            if (!$this->config->get('config_allow_order_recalc') && empty($ototal['key'])) {
-                $this->data['no_recalc_allowed'] = true;
-                continue;
+            if ($this->config->get($ototal['key'].'_status')) {
+                $ototal['unavailable'] = false;
+            } else {
+                $ototal['unavailable'] = true;
             }
+        }
 
-            if ($total_ext->rows) {
-                foreach ($total_ext->rows as $extn) {
-                    if (!$extn['status']) {
-                        //is total in this order missing? do not allow recalculate
-                        if (!$this->config->get('config_allow_order_recalc')
-                            && str_replace('_', '', $ototal['key']) == str_replace('_', '', $extn['key'])
-                        ){
-                            $this->data['no_recalc_allowed'] = true;
-                        }
-                        continue;
-                    }
-                    if (str_replace('_', '', $ototal['key']) == str_replace('_', '', $extn['key'])) {
-                        //all good, total is available
-                        $ototal['unavailable'] = false;
-                    }
-                }
-            }
-        }
-        //count duplicate keys to prevent delete od duplicate (such as tax)
-        //issue with recalc of deleted items if duplicate keys
-        $this->data['total_key_count'] = [];
-        foreach ($this->data['totals'] as $t_old) {
-            $this->data['total_key_count'][$t_old['key']]++;
-        }
+        /* if ($total_ext->rows) {
+             foreach ($total_extensions as $row) {
+                 $match = false;
+
+                 if (!$match) {
+                     $new_totals[$row['key']] = $row['key'];
+                         $this->data['totals_add'][] = [
+                             'id'         => $row['id'],
+                             'key'        => $row['key'],
+                             'type'       => $this->config->get($row['key'].'_total_type'),
+                             'order_id'   => $order_id,
+                             'title'      => $row['key'],
+                             'text'       => '',
+                             'value'      => '',
+                             'sort_order' => $this->config->get($row['key'].'_sort_order'),
+                         ];
+                 }
+             }
+         }*/
+
 
         $this->data['form_title'] = $this->language->get('edit_title_details');
         $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id='.$order_id);
@@ -721,14 +683,42 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
-        $this->data['new_total'] = $form->getFieldHtml(
+        //add enabled but not present totals such as discount and fee.
+        $this->loadModel('setting/extension');
+        $total_ext = $this->extensions->getExtensionsList(['filter' => 'total']);
+
+        //trick for hook
+        $allowed_totals = array_merge(['coupon'], (array)$this->data['manual_totals']);
+
+        $manual_total_list = ['' => $this->language->get('text_select')];
+        foreach ($total_ext->rows as $ext) {
+            if (!in_array($ext['key'], $allowed_totals)) {
+                continue;
+            }
+
+            if ($this->config->get($ext['key'].'_status')) {
+                $manual_total_list[$ext['key']] = $this->extensions->getExtensionName($ext['key']);
+            }
+        }
+        $this->data['manual_totals'] = $form->getFieldHtml(
             [
                 'type'    => 'selectbox',
-                'name'    => 'new_total',
-                'value'   => $this->data['new_total'],
-                'options' => $new_totals,
+                'name'    => 'manual_total',
+                'value'   => $this->data['manually_added_totals'],
+                'options' => $manual_total_list,
             ]
         );
+
+        $this->data['manual_coupon_code_field'] = $form->getFieldHtml(
+            [
+                'type'  => 'input',
+                'name'  => 'coupon_code',
+                'value' => '',
+            ]
+        );
+
+        $this->data['validate_coupon_url'] =
+            $this->html->getSecureURL('r/sale/order/validateCoupon', '&order_id='.$order_id);
 
         //if virtual product (no shipment);
         if (!$this->data['shipping_method']) {

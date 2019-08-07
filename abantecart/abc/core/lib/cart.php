@@ -97,6 +97,7 @@ class ACart  extends ALibBase
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
      *
+     * @throws \Exception
      */
     public function __construct($registry, &$c_data = null)
     {
@@ -112,6 +113,8 @@ class ACart  extends ALibBase
         } else {
             $this->cust_data =& $c_data;
         }
+
+        $this->cust_data['balance'] = $this->customer->getBalance();
         //can load promotion if customer_group_id is provided
         $this->promotion = ABC::getObjectByAlias('APromotion',[$this->cust_data['customer_group_id']]);
 

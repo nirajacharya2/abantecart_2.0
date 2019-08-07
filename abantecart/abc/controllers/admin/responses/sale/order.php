@@ -91,7 +91,6 @@ class ControllerResponsesSaleOrder extends AController
     protected function getTotals()
     {
         $output = [];
-
         $display_totals = $this->checkout->getCart()->buildTotalDisplay(true);
         $output['totals'] = $display_totals['total_data'];
         return $output;
@@ -177,9 +176,32 @@ class ControllerResponsesSaleOrder extends AController
         return ['result' => true ];
     }
 
+    public function validateCoupon()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->reInitOrder($this->request->get['order_id']);
+        $promotion = new APromotion();
+        $coupon = $promotion->getCouponData($this->request->get['coupon_code']);
+        if (!$coupon) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => $this->language->get('error_coupon'),
+                    'reset_value' => true,
+                ]);
+        }
+        $this->data['output'] = $coupon;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['output']));
+    }
+
     public function recalculateExistingOrderTotals()
     {
-
         $order_id = (int)$this->request->get['order_id'];
 
         if (!$order_id) {
@@ -196,8 +218,22 @@ class ControllerResponsesSaleOrder extends AController
                 ]);
         }*/
 
+        $this->reInitOrder($order_id);
+
+        $output = $this->getTotals();
+
+        $this->data['output'] = $output;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['output']));
+    }
+
+    protected function reInitOrder($order_id)
+    {
         $this->loadLanguage('sale/order');
-        $output = [];
+
         /**
          * @var Order $order_info
          */
@@ -219,15 +255,6 @@ class ControllerResponsesSaleOrder extends AController
                 $order_product['option']
             );
         }
-
-        $output = $this->getTotals();
-
-        $this->data['output'] = $output;
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->load->library('json');
-        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
 }

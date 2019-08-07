@@ -9774,17 +9774,18 @@ ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`
 --
 
 CREATE TABLE `ac_order_totals` (
-  `order_total_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `sort_order` int(3) NOT NULL,
-  `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `key` varchar(128) NOT NULL DEFAULT '',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_total_id` INT(11)                              NOT NULL AUTO_INCREMENT,
+  `order_id`       int(11)                              NOT NULL,
+  `title`          varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `text`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `value`          decimal(15,4)                        NOT NULL DEFAULT '0.0000',
+  `data`           LONGTEXT                             NULL,
+  `sort_order`     int(3)                               NOT NULL,
+  `type`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `key`            varchar(128)                         NOT NULL DEFAULT '',
+  `date_added`     timestamp                            NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`  timestamp                            NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`   timestamp                            NULL,
   PRIMARY KEY (`order_total_id`,`order_id`),
   KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;

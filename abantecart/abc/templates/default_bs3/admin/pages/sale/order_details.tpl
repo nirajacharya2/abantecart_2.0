@@ -272,7 +272,17 @@
             <?php foreach ($totals as $total_row) { ?>
                 <tr>
                     <td class="pull-right">
-                        <?php echo $total_row['title']; ?>
+                        <?php echo $total_row['title'];
+                        foreach (['total_type', 'key', 'title', 'text', 'value', 'sort_order', 'unavailable'] as $k) {
+                            ?>
+                            <input
+                                    type="hidden"
+                                    name="order_totals[<?php echo $total_row['type'] ?>][<?php echo $k; ?>]"
+                                    value="<?php echo $total_row[$k] ?>">
+                        <?php } ?>
+                        <input type="hidden" name="order_totals[<?php echo $total_row['type'] ?>][total_type]"
+                               value="<?php echo $total_row['type'] ?>">
+
                         <?php /* if (!in_array($total_row['type'], ['subtotal', 'total'])) { ?>
                                     <?php if (!$total_row['unavailable']) { ?>
                                         <a class="recalc_total btn btn-xs btn-info-alt tooltips"
@@ -306,45 +316,18 @@
                 </tr>
                 <?php $order_total_row++ ?>
             <?php } ?>
-            <?php /*if ($totals_add) { ?>
-                    <tr>
-                        <td class="align-right"><span class="pull-right"><?php echo $text_add; ?></span></td>
-                        <td>
-                            <b rel="totals[<?php echo $total_row['order_total_id']; ?>]">
-                                <a class="add_totals btn btn-xs btn-info-alt tooltips"
-                                   data-original-title="<?php echo $text_add; ?>"
-                                   data-order-id="<?php echo $order_id; ?>">
-                                    <i class="fa fa-plus-circle"></i>
-
-                                    <?php foreach ($totals_add as $total_row) { ?>
-                                        <div class="hidden <?php echo $total_row['key']; ?>">
-                                            <div class="row">
-                                                <input type="hidden" name="key" value="<?php echo $total_row['key']; ?>"/>
-                                                <input type="hidden" name="type" value="<?php echo $total_row['type']; ?>"/>
-                                                <input type="hidden" name="sort_order"
-                                                       value="<?php echo $total_row['sort_order']; ?>"/>
-                                                <div class="col-sm-3 col-xs-12">
-                                                    <span class="pull-right"><?php echo $text_order_total_title; ?></span>
-                                                </div>
-                                                <div class="col-sm-4 col-xs-12">
-                                                    <input type="text" class="col-sm-2 col-xs-12 no-save"
-                                                           name="title" value="<?php echo $total_row['title']; ?>"/>
-                                                </div>
-                                                <div class="col-sm-2 col-xs-12">
-                                                    <span class="pull-right"><?php echo $text_order_total_amount; ?></span>
-                                                </div>
-                                                <div class="col-sm-3 col-xs-12">
-                                                    <input type="text" class="col-sm-2 col-xs-12 no-save"
-                                                           name="text" value="<?php echo $total_row['text']; ?>"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php } ?>
-                                </a>
-                        </td>
-                    </tr>
-                <?php }*/ ?>
             </tbody>
+            <?php //ADD NEW TOTAL ?>
+            <tr>
+                <td class="align-right"></td>
+                <td>
+                    <a class=" hidden add_totals btn btn-xs btn-success tooltips"
+                       data-original-title="<?php echo $text_add; ?>"
+                       data-order-id="<?php echo $order_id; ?>">
+                        <i class="fa fa-plus-circle"></i>
+                    </a>
+                </td>
+            </tr>
         </table>
 
         <?php if ($add_product) { ?>
@@ -385,30 +368,81 @@
     ]);
 ?>
 
-<?php echo $this->html->buildElement(
+<?php
+//ADD MANUAL ORDER TOTAL
+
+$modal_html = '
+    <div class="mb20">'.$manual_totals.'</div>
+    <div class="content container-fluid mb20">
+    
+        <div id="add_manual_coupon" class="manual-total form-inline hidden">
+            <label class="checkbox">'.$entry_coupon_code.'</label>
+            '.$manual_coupon_code_field.'
+        </div>
+        '.$this->getHookVar('order_edit_manual_total_var').'
+    </div>
+    <div class="text-center mb20">
+        <button class="btn btn-primary">
+        <i class="fa fa-save fa-fw"></i>'.$button_add.'
+        </button>
+        <button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-arrow-left fa-fw"></i> '.$button_cancel.'
+        </button>
+    </div>
+    <script type="text/javascript">
+        $("#orderFrm_manual_total").on("change", function(){
+            var div = $("#add_order_total").find("div.manual-total");
+            div.addClass("hidden");
+            div.find("input, select, textarea").attr("disabled","disabled");
+            
+            if($(this).val() !== ""){
+               div = $("#add_order_total").find("div#add_manual_"+$(this).val());
+               div.removeClass("hidden");
+               div.find("input, select, textarea").removeAttr("disabled");
+            }
+        });
+        
+        $("#add_order_total").find("button.btn-primary").on("click", function(e){
+            var that = $(this);
+            var div = $("#add_order_total").find("div.manual-total").not(".hidden");
+            
+            if(div.length>0 && div.attr("id").length>0){
+                
+                
+                try{
+                    //call function dynamically
+                    // its name must be equal to div ID
+                    window[div.attr("id")]();
+                }catch(e){
+                   
+                }
+            }else{
+                
+            }
+            e.stopPropagation();
+        });
+        
+        add_manual_coupon = function(){
+            $.ajax(
+                {
+                url: "'.$validate_coupon_url.'&coupon_code="+$("#orderFrm_coupon_code").val(),
+                dataType: "json",
+                type: "get",
+                success: function(data){
+                        console.log(data);
+                    }
+                }
+            );
+        }
+    </script>
+    ';
+echo $this->html->buildElement(
     [
         'type'       => 'modal',
         'id'         => 'add_order_total',
         'modal_type' => 'md',
         'title'      => $text_order_total_add,
-        'content'    => '
-				<form class="aform form-horizontal add_order_total" enctype="multipart/form-data" method="post" action="'
-            .$edit_order_total.'">
-
-				<div class="mb20">'.$new_total.'
-				</div>
-				<div class="content container-fluid mb20">
-				</div>
-				<div class="text-center mb20">
-					<button class="btn btn-primary lock-on-click">
-					<i class="fa fa-save fa-fw"></i>'.$button_save.'
-					</button>
-					<button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
-					<i class="fa fa-arrow-left fa-fw"></i> '.$button_cancel.'
-					</button>
-				</div>
-				
-				</form>',
+        'content'    => $modal_html,
     ]);
 ?>
 
@@ -468,20 +502,31 @@
             },
             success: function (data) {
                 if (data.hasOwnProperty('totals')) {
-
                     var totals = $('table>tbody#totals');
                     totals.html('');
+                    var totalKeys = [];
                     $.each(data.totals, function (index, row) {
-                        $('<tr><td class="pull-right">' + row.title + '</td><td>' + row.text + '</td></tr>').appendTo(totals);
-                    });
+                        totalKeys[index] = row.key;
+                        var new_row = $('<tr><td id="total-row-' + row.id + '" class="pull-right">'
+                            + row.title + '</td><td>' + row.text + '</td></tr>'
+                        );
+                        if (row.id === 'total') {
+                            new_row.find('td:eq(1)').html('<b class="total">' + row.text + '</b>');
+                        }
 
+                        $.each(row, function (idx, val) {
+                            $('<input type="hidden" name="order_totals[' + row.id + '][' + idx + ']" >').val(val).appendTo(new_row.find('#total-row-' + row.id));
+                        });
+
+                        new_row.appendTo(totals);
+                    });
+                    //show button to add additional total such as coupon
+                    $('a.add_totals').removeClass('hidden');
                 }
             }
         });
-        e.stopPropagation();
+        event.stopPropagation();
     }
-
-
 
     $('#generate_invoice').click(function () {
         var that = $(this).parents('p');
@@ -651,19 +696,19 @@
         return false;
     });
 
-    $('#orderFrm_new_total').change(function () {
-        addTotalSelect($("#orderFrm_new_total option:selected").text());
-    });
+    /* $('#orderFrm_new_total').change(function () {
+         addTotalSelect($("#orderFrm_new_total option:selected").text());
+     });*/
 
     function addTotal() {
         $('#add_order_total').modal({keyboard: false});
-        addTotalSelect($("#orderFrm_new_total option:selected").text());
+        //  addTotalSelect($("#orderFrm_new_total option:selected").text());
     }
 
-    function addTotalSelect(key) {
-        var html = $('.add_totals .hidden.' + key).html();
-        $('#add_order_total form .content').html(html);
-    }
+    /* function addTotalSelect(key) {
+         var html = $('.add_totals .hidden.' + key).html();
+         $('#add_order_total form .content').html(html);
+     }*/
 
     function deleteTotal(order_total_id) {
         location = '<?php echo $delete_order_total; ?>&order_total_id=' + order_total_id;

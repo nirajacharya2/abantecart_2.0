@@ -17,48 +17,50 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\storefront;
+
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ModelTotalTotal extends Model {
-	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {
-		if ($this->config->get('total_status')) {
-			//create new instance of language for case when model called from admin-side
-			$language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
-			$language->load($language->language_details['directory']);
-			$language->load('total/total');
-			$this->load->model('localisation/currency');
+class ModelTotalTotal extends Model
+{
+    public function getTotal(&$total_data, &$total, &$taxes, &$cust_data)
+    {
+        if ($this->config->get('total_status')) {
+            //create new instance of language for case when model called from admin-side
+            $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
+            $language->load($language->language_details['directory']);
+            $language->load('total/total');
+            $this->load->model('localisation/currency');
 
-			//currency based recalculation for all totals
-			$converted_sum = 0;
-			foreach($total_data as $total_record) {
-				$converted_sum += $this->currency->format_number($total_record['value']);
-			}
-			//if there is a conversion fractional loss, adjust total base currency price. 
-			//This is not ideal solution, need to address in the future. 
-			$converted_total = $this->currency->format_number($total);
-			if($converted_total != $converted_sum) {
-				$curr = $this->currency->getCurrency();
-				//calculate adjusted total without rounding
-				$total = $converted_sum / $curr['value'];
-			} 
+            //currency based recalculation for all totals
+            $converted_sum = 0;
+            foreach ($total_data as $total_record) {
+                $converted_sum += $this->currency->format_number($total_record['value']);
+            }
+            //if there is a conversion fractional loss, adjust total base currency price.
+            //This is not ideal solution, need to address in the future.
+            $converted_total = $this->currency->format_number($total);
+            if ($converted_total != $converted_sum) {
+                $curr = $this->currency->getCurrency();
+                //calculate adjusted total without rounding
+                $total = $converted_sum / $curr['value'];
+            }
 
-			//currency display value
-			$converted_sum_txt = $this->currency->format(max(0,$converted_sum), '', 1);
+            //currency display value
+            $converted_sum_txt = $this->currency->format(max(0, $converted_sum), '', 1);
 
-			$total_data[] = array(
-				'id'         => 'total',
-				'title'      => $language->get('text_total'),
-				'text'       => $converted_sum_txt,
-				'converted'  => $converted_sum,
-				'value'      => max(0,$total),
-				'sort_order' => 1000,
-				'total_type' => $this->config->get('total_total_type')
-			);
-		}
-	}
+            $total_data[] = [
+                'id'         => 'total',
+                'key'        => 'total',
+                'title'      => $language->get('text_total'),
+                'text'       => $converted_sum_txt,
+                'converted'  => $converted_sum,
+                'value'      => max(0, $total),
+                'sort_order' => 1000,
+                'total_type' => $this->config->get('total_total_type'),
+            ];
+        }
+    }
 }

@@ -750,7 +750,7 @@ class Order extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be a string!',
+                    'default_text' => ':attribute must be a array!',
                 ],
             ],
         ],

@@ -23,6 +23,7 @@ use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
 use H;
 use ReflectionClass;
+use ReflectionMethod;
 
 if(php_sapi_name()!='cli') {
     ob_start();
@@ -380,8 +381,21 @@ class ABC extends ABCBase
 
                 $args = $args ? $args : static::getClassDefaultArgs($class_alias);
 
+                $refMethod = new ReflectionMethod($class_name, '__construct');
+                $params = $refMethod->getParameters();
+
+                //trick for usage references as constructor parameter
+                $re_args = [];
+                foreach ($params as $key => $param) {
+                    if ($param->isPassedByReference()) {
+                        $re_args[$key] = &$args[$key];
+                    } else {
+                        $re_args[$key] = $args[$key];
+                    }
+                }
+
                 $reflector = new ReflectionClass($class_name);
-                return $reflector->newInstanceArgs($args);
+                return $reflector->newInstanceArgs($re_args);
             }catch(\ReflectionException $e){}
         }
 

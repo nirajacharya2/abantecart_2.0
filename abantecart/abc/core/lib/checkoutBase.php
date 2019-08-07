@@ -25,7 +25,6 @@ use abc\core\engine\Registry;
 
 use abc\models\customer\Address;
 use abc\models\storefront\ModelCheckoutExtension;
-use abc\models\storefront\ModelCheckoutOrder;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -149,8 +148,7 @@ class CheckoutBase extends ALibBase
      * @param string $rt
      * @param string $mode
      *
-     * @return bool|object
-     * @throws AException
+     * @return mixed
      */
     protected function loadModel(string $rt, $mode = '')
     {
@@ -160,6 +158,7 @@ class CheckoutBase extends ALibBase
     /**
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getPaymentList()
     {
@@ -240,7 +239,6 @@ class CheckoutBase extends ALibBase
 
     /**
      * @return array
-     * @throws AException
      */
     public function getShippingList()
     {
@@ -470,8 +468,11 @@ class CheckoutBase extends ALibBase
     {
         return $this->customer;
     }
+
     /**
      * @param ACustomer $customer
+     *
+     * @throws \Exception
      */
     public function setCustomer(ACustomer $customer)
     {
@@ -481,6 +482,7 @@ class CheckoutBase extends ALibBase
                     'country_id' => ($this->data['shipping_country_id'] ?: $this->data['payment_country_id']),
                     'zone_id' => ($this->data['shipping_zone_id'] ?: $this->data['payment_zone_id']),
         ];
+
         $this->tax = new ATax( $this->registry, $c_data );
     }
 

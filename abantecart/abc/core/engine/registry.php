@@ -32,6 +32,7 @@ use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALog;
+use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
 use abc\core\lib\ASession;
 use abc\core\lib\AUser;
@@ -56,6 +57,7 @@ use abc\core\lib\AUser;
  * @method static ACurrency currency()
  * @method static ADownload download()
  * @method static ACache cache()
+ * @method static AOrderStatus order_status()
  */
 final class Registry
 {

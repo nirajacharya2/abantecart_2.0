@@ -7,7 +7,7 @@
 				<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
 					<?php
 					if ($active == 'email'){
-						$icon = 'fa fa-envelope-o';
+                        $icon = 'fa fa-envelope';
 					} elseif ($active == 'sms'){
 						$icon = 'fa fa-mobile';
 					} elseif ($protocols[$active]['icon']){
@@ -22,7 +22,7 @@
 				<ul class="choose-protocol dropdown-menu">
 					<?php foreach ($protocols as $id => $protocol){
 						if ($id == 'email'){
-							$icon = 'fa fa-envelope-o';
+                            $icon = 'fa fa-envelope';
 						} elseif ($id == 'sms'){
 							$icon = 'fa fa-mobile';
 						} elseif ($protocol['icon']){
