@@ -182,8 +182,9 @@ class ControllerResponsesSaleOrder extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->reInitOrder($this->request->get['order_id']);
-        $promotion = new APromotion();
+        $promotion = new APromotion($this->checkout->getCustomer(), $this->checkout->getCart());
         $coupon = $promotion->getCouponData($this->request->get['coupon_code']);
+
         if (!$coupon) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
@@ -218,7 +219,16 @@ class ControllerResponsesSaleOrder extends AController
                 ]);
         }*/
 
-        $this->reInitOrder($order_id);
+        $customer_data = (array)$this->data['customer_data'];
+        if ($this->request->post['manual_totals']) {
+            foreach ($this->request->post['manual_totals'] as $total_txt_id => $value) {
+                if ($total_txt_id == 'coupon') {
+                    $customer_data['coupon'] = $value['coupon_code'];
+                }
+            }
+        }
+        $this->reInitOrder($order_id, $customer_data);
+
 
         $output = $this->getTotals();
 
@@ -230,7 +240,7 @@ class ControllerResponsesSaleOrder extends AController
         $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
-    protected function reInitOrder($order_id)
+    protected function reInitOrder($order_id, $customer_data = [])
     {
         $this->loadLanguage('sale/order');
 
@@ -243,10 +253,10 @@ class ControllerResponsesSaleOrder extends AController
         }
 
         $orderData = $order_info->toArray();
-        $guest = !($orderData['customer_id'] > 0);
+        //$guest = !($orderData['customer_id'] > 0);
 
         //initialize existing order as new
-        $this->checkout = $this->initCheckout($orderData);
+        $this->checkout = $this->initCheckout($orderData, $customer_data);
 
         foreach ($this->request->post['product'] as $order_product_id => $order_product) {
             $this->checkout->getCart()->add(

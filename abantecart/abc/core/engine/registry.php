@@ -21,6 +21,7 @@
 namespace abc\core\engine;
 
 use abc\core\cache\ACache;
+use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConfigManager;
 use abc\core\lib\ACurrency;
@@ -52,6 +53,7 @@ use abc\core\lib\AUser;
  * @method static ALoader load()
  * @method static ExtensionsApi extensions()
  * @method static ACustomer customer()
+ * @method static ACart cart()
  * @method static AHtml html()
  * @method static AUser user()
  * @method static ACurrency currency()

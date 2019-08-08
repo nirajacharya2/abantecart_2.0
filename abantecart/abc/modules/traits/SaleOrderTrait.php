@@ -20,16 +20,19 @@ trait SaleOrderTrait
     /**
      * @param $order_info
      *
+     * @param array $customer_data
+     *
      * @return CheckOutAdmin
      * @throws \abc\core\lib\AException
      */
-    protected function initCheckout($order_info)
+    protected function initCheckout($order_info, $customer_data = [])
     {
 
         $checkoutData = $order_info;
         $customer_id = $order_info['customer_id'];
 
-        $customer_data = [];
+        $customer_data = is_array($customer_data) ? $customer_data : [];
+
         /**
          * @var ACustomer $aCustomer
          */
@@ -55,7 +58,7 @@ trait SaleOrderTrait
 
         $checkoutData['customer_id'] = $customer_id;
         $checkoutData['customer'] = $aCustomer;
-        $customer_data['coupon'] = $order_info['coupon'];
+        $customer_data['coupon'] = $customer_data['coupon'] ?: $order_info['coupon'];
         $customer_data['payment_method'] = [
             'id'    => $order_info['payment_method_key'],
             'title' => $order_info['payment_method'],
@@ -67,6 +70,7 @@ trait SaleOrderTrait
         $customer_data['payment_method'] = $order_info['payment_method_key'];
 
         $c_data =& $customer_data;
+
         $checkoutData['cart'] = ABC::getObjectByAlias('ACart', [$this->registry, $c_data]);
         $checkout =  new CheckOutAdmin($this->registry,$checkoutData);
         $checkoutData['cart']->conciergeMode = $checkout->getConciergeMode();

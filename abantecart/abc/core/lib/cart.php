@@ -116,7 +116,7 @@ class ACart  extends ALibBase
 
         $this->cust_data['balance'] = $this->customer->getBalance();
         //can load promotion if customer_group_id is provided
-        $this->promotion = ABC::getObjectByAlias('APromotion',[$this->cust_data['customer_group_id']]);
+        $this->promotion = ABC::getObjectByAlias('APromotion', [$this->customer, $this]);
 
         if (!isset($this->cust_data['cart']) || !is_array($this->cust_data['cart'])) {
             $this->cust_data['cart'] = [];

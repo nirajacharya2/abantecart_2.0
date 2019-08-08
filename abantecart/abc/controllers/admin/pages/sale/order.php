@@ -288,7 +288,7 @@ class ControllerPagesSaleOrder extends AController
             $this->session->data['success'] = $this->language->get('text_success');
             $this->session->data['attention'] = $this->language->get('attention_check_total');
             abc_redirect(
-                $this->html->getSecureURL('sale/order/recalc',
+                $this->html->getSecureURL('sale/order/details',
                 '&order_id='.$this->request->get['order_id'])
             );
         }
@@ -618,6 +618,7 @@ class ControllerPagesSaleOrder extends AController
                                           ->orderBy('sort_order')
                                           ->get()
                                           ->toArray();
+
         //check which totals cannot reapply
         foreach ($this->data['totals'] as &$ototal) {
             if ($this->config->get($ototal['key'].'_status')) {
@@ -626,6 +627,7 @@ class ControllerPagesSaleOrder extends AController
                 $ototal['unavailable'] = true;
             }
         }
+
 
         /* if ($total_ext->rows) {
              foreach ($total_extensions as $row) {
@@ -752,13 +754,19 @@ class ControllerPagesSaleOrder extends AController
 
         $this->data['add_product_url'] = $this->html->getSecureURL(
             'r/product/product/orderProductForm',
-            '&order_id='.$order_id.'&mode=json'.'&currency='.$order_info['currency']
+            '&order_id='.$order_id
+            .'&mode=json'
+            .'&currency='.$order_info['currency']
         );
-        //$this->data['edit_order_total'] = $this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id);
-        $this->data['recalculate_totals_url'] =
-            $this->html->getSecureURL('r/sale/order/recalculateExistingOrderTotals', '&order_id='.$order_id);
-        $this->data['delete_order_total'] = $this->html->getSecureURL('sale/order/delete_total',
-            '&order_id='.$order_id);
+        $this->data['recalculate_totals_url'] = $this->html->getSecureURL(
+            'r/sale/order/recalculateExistingOrderTotals',
+            '&order_id='.$order_id
+        );
+
+        $this->data['delete_order_total'] = $this->html->getSecureURL(
+            'sale/order/delete_total',
+            '&order_id='.$order_id
+        );
 
         $saved_list_data = json_decode(html_entity_decode($this->request->cookie['grid_params']));
         if ($saved_list_data->table_id == 'order_grid') {
@@ -1706,124 +1714,6 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    /**
-     * Response controller to recalculate an order in admin
-     * IMPORTANT: To prevent conflict of models, call independently
-     *
-     * @void
-     */
-    public function recalc()
-    {
-        $order_id = $this->request->get['order_id'];
-
-        if(!$this->config->get('config_allow_order_recalc')) {
-            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
-        }
-
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-
-        $skip_recalc = [];
-        $new_totals = [];
-        //$log_msg = '';
-
-        if (!$this->user->canModify('sale/order')) {
-            $this->session->data['error'] = $this->language->get('error_permission');
-            return 0;
-        } else {
-            if (!H::has_value($order_id)) {
-                $this->session->data['error'] = "Missing required details";
-                return 0;
-            }
-        }
-
-        //do we have to skip recalc for some totals?
-        if ($this->request->get['skip_recalc']) {
-            $enc = new AEncryption($this->config->get('encryption_key'));
-            $skip_recalc = unserialize($enc->decrypt($this->request->get['skip_recalc']));
-        }
-        //do we have total values passed?
-        if ($this->request->post['totals']) {
-            $new_totals = $this->request->post['totals'];
-        }
-
-        //do we need to add new total record?
-        /**
-         * @var $adm_order_mdl \abc\models\admin\ModelSaleOrder
-         */
-        $adm_order_mdl = $this->load->model('sale/order');
-        if ($this->request->post['key'] && $order_id) {
-            $new_total = $this->request->post;
-            $order_total_id = $adm_order_mdl->addOrderTotal($order_id, $new_total);
-            $skip_recalc[] = $order_total_id;
-        }
-
-        /**
-         * @var AOrderManager $order
-         */
-        $order = ABC::getObjectByAlias('AOrderManager', [$order_id]);
-        //Recalc. If total has changed from original, update and create a log to order history
-        $t_ret = $order->recalcTotals($skip_recalc, $new_totals);
-        if (!$t_ret || $t_ret['error']) {
-            $this->session->data['error'] = "Error recalculating totals! ".$t_ret['error'];
-        } else {
-            $this->session->data['success'] = $this->language->get('text_success');
-        }
-
-
-
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
-        return true;
-    }
-
-    public function delete_total()
-    {
-
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $order_id = $this->request->get['order_id'];
-        $order_total_id = $this->request->get['order_total_id'];
-
-        if (H::has_value($order_id) && H::has_value($order_total_id)) {
-            /**
-             * @var $adm_order_mdl \abc\models\admin\ModelSaleOrder
-             */
-            $adm_order_mdl = $this->load->model('sale/order');
-            $original_totals = $adm_order_mdl->getOrderTotals($order_id);
-            $tobe_deleted = [];
-            foreach ($original_totals as $total) {
-                if ($order_total_id == $total['order_total_id']) {
-                    $tobe_deleted = $total;
-                    break;
-                }
-            }
-            if (empty($tobe_deleted)) {
-                $this->session->data['error'] = "Error deleting total!";
-            } else {
-                $adm_order_mdl->deleteOrderTotal($order_id, $order_total_id);
-                //recalculate order total
-                /**
-                 * @var AOrderManager $order
-                 */
-                $order = ABC::getObjectByAlias('AOrderManager', [$order_id]);
-                $t_ret = $order->recalcTotals();
-                if (!$t_ret || $t_ret['error']) {
-                    $this->session->data['error'] = "Error recalculating totals! ".$t_ret['error'];
-                } else {
-                    $this->session->data['success'] = $this->language->get('text_success');
-                    $this->session->data['attention'] = $this->language->get('attention_check_total');
-                }
-            }
-        }
-
-        abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
-
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-    }
 
     public function createOrder()
     {
