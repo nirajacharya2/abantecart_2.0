@@ -769,7 +769,7 @@ class Customer extends BaseModel
             if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '".mb_strtolower($filter['loginname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".mb_strtolower($filter['loginname'])."%'");
             }
         }
 
