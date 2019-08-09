@@ -77,18 +77,12 @@ class OrderDatum extends BaseModel
                 ],
             ],
         ],
-        'data'     => [
-            'checks'   => [
-                'array',
-                'required',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an array!',
-                ],
-            ],
-        ],
     ];
+
+    public function setDataAttribute($value)
+    {
+        $this->attributes['data'] = serialize($value);
+    }
 
     public function order()
     {

@@ -59,7 +59,7 @@ class OrderStatus extends BaseModel
     public function description()
     {
         return $this->hasOne(OrderStatusDescription::class, 'order_status_id')
-                    ->where('language_id', '=', $this->current_language_id);
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     public function orders()

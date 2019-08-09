@@ -71,6 +71,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Review                        $reviews
  * @property int                           $product_type_id
  *
+ * @method static Product find(int $product_id) Product
+ * @method static Product select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class Product extends BaseModel
@@ -663,7 +666,7 @@ class Product extends BaseModel
     public function description()
     {
         return $this->hasOne(ProductDescription::class, 'product_id')
-            ->where('language_id', '=', $this->current_language_id);
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     /**

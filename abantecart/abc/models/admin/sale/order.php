@@ -27,6 +27,7 @@ use abc\core\engine\Model;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\user\User;
 use abc\modules\events\ABaseEvent;
@@ -247,6 +248,7 @@ class ModelSaleOrder extends Model
         );
 
         $order = $this->getOrder($order_id);
+
         if (isset($data['product'])) {
             // first of all delete removed products
             $order_product_ids = [];
@@ -656,7 +658,7 @@ class ModelSaleOrder extends Model
      * @param int $order_id
      *
      * @throws \Exception
-     */
+     *//*
     public function deleteOrder($order_id)
     {
         if ($this->config->get('config_stock_subtract')) {
@@ -699,7 +701,7 @@ class ModelSaleOrder extends Model
         $this->db->query("DELETE FROM ".$this->db->table_name("order_data")." WHERE order_id = '".(int)$order_id."'");
         $this->db->query("DELETE FROM `".$this->db->table_name("orders")."` WHERE order_id = '".(int)$order_id."'");
     }
-
+*/
     /**
      * @param int $order_id
      * @param array $data
@@ -836,6 +838,7 @@ class ModelSaleOrder extends Model
      * @return array|bool
      * @throws \abc\core\lib\AException
      */
+    /*
     public function getOrder($order_id)
     {
         $order_query = $this->db->query("SELECT *
@@ -952,7 +955,7 @@ class ModelSaleOrder extends Model
             return false;
         }
     }
-
+*/
     /**
      * @param int $order_id
      * @param int $customer_id

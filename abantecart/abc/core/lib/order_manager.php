@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use H;
 
@@ -87,7 +88,7 @@ class AOrderManager extends AOrder
         $skip_recalc = ['handling', 'balance'];
 
         //load order details
-        $order_info = $adm_order_mdl->getOrder($this->order_id);
+        $order_info = Order::getOrderArray($this->order_id);
         $original_totals = $adm_order_mdl->getOrderTotals($this->order_id);
         //identify totals with shared keys (example tax) and link to total ids
         $total2ids = [];

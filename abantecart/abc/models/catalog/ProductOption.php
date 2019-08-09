@@ -20,8 +20,10 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -42,6 +44,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $product_option_values
+ *
+ * @method static ProductOption find(int $product_option_id) ProductOption
+ * @method static ProductOption select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -107,7 +112,7 @@ class ProductOption extends BaseModel
     public function description()
     {
         return $this->hasOne(ProductOptionDescription::class, 'product_option_id')
-                    ->where('language_id', '=', $this->current_language_id);
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     /**
@@ -151,4 +156,48 @@ class ProductOption extends BaseModel
         }
         parent::delete();
     }
+
+    public static function getProductOptionsByIds($po_ids)
+    {
+
+        if (!$po_ids || !is_array($po_ids)) {
+            return false;
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = static::select(
+            [
+                'product_options.*',
+                'product_option_descriptions.name as option_name',
+                'product_option_value_descriptions.name as option_value_name',
+
+            ]
+        )->whereIn('product_options.product_option_id', $po_ids)
+                       ->leftJoin(
+                           'product_option_descriptions',
+                           function ($join) {
+                               $join->on('product_option_descriptions.product_option_id', '=',
+                                   'product_options.product_option_id')
+                                    ->where('product_option_descriptions.language_id', '=',
+                                        static::$current_language_id);
+                           }
+                       )->leftJoin(
+                'product_option_values',
+                'product_options.product_option_id',
+                '=',
+                'product_option_values.product_option_id'
+            )->leftJoin(
+                'product_option_value_descriptions',
+                function ($join) {
+                    $join->on('product_option_value_descriptions.product_option_value_id', '=',
+                        'product_option_values.product_option_value_id')
+                         ->where('product_option_value_descriptions.language_id', '=', static::$current_language_id);
+                }
+            )->orderBy('product_options.product_option_id');
+
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->get();
+    }
 }
+

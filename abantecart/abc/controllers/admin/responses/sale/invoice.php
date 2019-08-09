@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use H;
 
@@ -88,7 +89,7 @@ class ControllerResponsesSaleInvoice extends AController
         }
 
         foreach ($orders as $order_id) {
-            $order_info = $this->model_sale_order->getOrder($order_id);
+            $order_info = Order::getOrderArray($order_id);
 
             if ($order_info) {
                 if ($order_info['invoice_id']) {

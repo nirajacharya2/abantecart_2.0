@@ -610,13 +610,13 @@ class AOrder extends ALibBase
             if ($data['customer_id']) {
                 $uri = $im->getCustomerURI($row->name, $data['customer_id']);
             } else {
-                $uri = $data[$row->protocol];
+                $uri = $data[$row->name];
             }
             if ($uri) {
                 $im_data =
                     [
                         'uri'    => $uri,
-                        'status' => $settings->get('config_im_guest_'.$row['protocol'].'_status'),
+                        'status' => $settings->get('config_im_guest_'.$row->name.'_status'),
                     ];
                 OrderDatum::firstOrCreate(
                     [

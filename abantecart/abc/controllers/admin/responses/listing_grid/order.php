@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\order\Order;
 use abc\models\order\OrderStatus;
 use H;
 use stdClass;
@@ -167,16 +168,14 @@ class ControllerResponsesListingGridOrder extends AController
             case 'del':
                 $ids = explode( ',', $this->request->post['id'] );
                 if ( ! empty( $ids ) ) {
-                    foreach ( $ids as $id ) {
-                        $this->model_sale_order->deleteOrder( $id );
-                    }
+                    Order::whereIn('order_id', $ids)->forceDelete();
                 }
                 break;
             case 'save':
                 $ids = explode( ',', $this->request->post['id'] );
                 if ( ! empty( $ids ) ) {
                     foreach ( $ids as $id ) {
-                        $this->model_sale_order->editOrder( $id, ['order_status_id' => $this->request->post['order_status_id'][$id]]);
+                        Order::editOrder($id, ['order_status_id' => $this->request->post['order_status_id'][$id]]);
                     }
                 }
                 break;
@@ -262,7 +261,7 @@ class ControllerResponsesListingGridOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = $this->model_sale_order->getOrder( $order_id );
+        $order_info = Order::getOrderArray($order_id);
 
         if ( empty( $order_info ) ) {
             $response->error = $this->language->get( 'error_order_load' );

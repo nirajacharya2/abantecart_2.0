@@ -91,7 +91,7 @@ class BaseModel extends OrmModel
     /**
      * @var int
      */
-    protected $current_language_id;
+    protected static $current_language_id;
 
     /**
      * @var \abc\core\lib\AConfig
@@ -195,7 +195,10 @@ class BaseModel extends OrmModel
     {
         $this->actor = H::recognizeUser();
         $this->registry = Registry::getInstance();
-        $this->current_language_id = $this->registry->get('language')->getContentLanguageID();
+        //set current language for getting single description from relation
+        if (!static::$current_language_id) {
+            static::$current_language_id = $this->registry->get('language')->getContentLanguageID();
+        }
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
@@ -248,20 +251,20 @@ class BaseModel extends OrmModel
      *
      * @return bool
      */
-    public function setCurrentLanguageID($language_id)
+    public static function setCurrentLanguageID($language_id)
     {
         if(!(int)$language_id){
             return false;
         }
-        $this->current_language_id = (int)$language_id;
+        static::$current_language_id = (int)$language_id;
     }
 
     /**
      * @return int
      */
-    public function getCurrentLanguageID()
+    public static function getCurrentLanguageID()
     {
-        return $this->current_language_id;
+        return static::$current_language_id;
     }
 
 

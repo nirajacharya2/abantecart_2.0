@@ -327,7 +327,8 @@ class ControllerPagesSaleOrder extends AController
 
         $order_id = (int)$this->request->get['order_id'];
         if ($this->request->is_POST() && $this->_validateForm()) {
-            $this->model_sale_order->editOrder($order_id, $this->request->post);
+            Order::editOrder($order_id, $this->request->post);
+
             if (H::has_value($this->request->post['downloads'])) {
                 $data = $this->request->post['downloads'];
                 $this->loadModel('catalog/download');
@@ -368,7 +369,7 @@ class ControllerPagesSaleOrder extends AController
             }
         }
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
 
         $this->data['order_info'] = $order_info;
 
@@ -829,7 +830,7 @@ class ControllerPagesSaleOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1024,7 +1025,7 @@ class ControllerPagesSaleOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1204,7 +1205,7 @@ class ControllerPagesSaleOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1357,7 +1358,7 @@ class ControllerPagesSaleOrder extends AController
         $order_id = (int)$this->request->get['order_id'];
         $this->data['order_id'] = $order_id;
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
         $this->data['order_info'] = $order_info;
 
         if (empty($order_info)) {
@@ -1485,7 +1486,7 @@ class ControllerPagesSaleOrder extends AController
             );
         }
 
-        $order_info = $this->model_sale_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
         $this->data['order_info'] = $order_info;
 
         //set content language to order language ID.

@@ -311,18 +311,6 @@ class Customer extends BaseModel
             ],
         ],
 
-        'wishlist' => [
-            'checks'   => [
-                'array',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Wishlist must be an array!',
-                ],
-            ],
-        ],
-
         'address_id' => [
             'checks'   => [
                 'integer',

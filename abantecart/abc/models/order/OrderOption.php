@@ -161,19 +161,12 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-
-        'settings' => [
-            'checks'   => [
-                'array',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an array or null!',
-                ],
-            ],
-        ],
     ];
+
+    public function setSettingsAttribute($value)
+    {
+        $this->attributes['settings'] = serialize($value);
+    }
 
     public function order()
     {

@@ -286,4 +286,16 @@ class Language extends BaseModel
     {
         return $this->hasMany(ProductDescription::class, 'language_id');
     }
+
+    public static function getCodeById($language_id)
+    {
+        /**
+         * @var Language $language
+         */
+        $language = static::find($language_id);
+        if (!$language) {
+            return false;
+        }
+        return $language->code;
+    }
 }

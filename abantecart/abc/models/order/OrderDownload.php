@@ -233,18 +233,12 @@ class OrderDownload extends BaseModel
                 ],
             ],
         ],
-        'attributes_data'          => [
-            'checks'   => [
-                'array',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an array or null!',
-                ],
-            ],
-        ],
     ];
+
+    public function setAttributesDataAttribute($value)
+    {
+        $this->attributes['attributes_data'] = serialize($value);
+    }
 
     public function download()
     {

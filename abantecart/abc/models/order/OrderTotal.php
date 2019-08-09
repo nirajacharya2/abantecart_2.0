@@ -103,16 +103,6 @@ class OrderTotal extends BaseModel
                 ],
             ],
         ],
-        'data'  => [
-            'checks'   => [
-                'array',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a array!',
-                ],
-            ],
-        ],
 
         'sort_order' => [
             'checks'   => [

@@ -29,6 +29,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
+ * @method static OrderProduct find(int $order_product_id) OrderProduct
+ * @method static OrderProduct select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class OrderProduct extends BaseModel
