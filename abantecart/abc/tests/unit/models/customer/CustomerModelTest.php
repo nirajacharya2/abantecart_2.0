@@ -148,7 +148,7 @@ class CustomerModelTest extends ATestCase{
 
         //by loginname that starts from
         $total = Customer::getCustomers(['filter' => ['loginname'=> 'b' ]], 'total_only');
-        $this->assertEquals(2, $total);
+        $this->assertEquals(11, $total);
 
         //by loginname that equal to
         $total = Customer::getCustomers([
