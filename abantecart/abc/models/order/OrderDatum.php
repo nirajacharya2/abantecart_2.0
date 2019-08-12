@@ -48,8 +48,6 @@ class OrderDatum extends BaseModel
         'type_id',
         'order_id',
         'data',
-        'date_added',
-        'date_modified',
     ];
 
     protected $rules = [

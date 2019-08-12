@@ -30,7 +30,7 @@ class OrderDatumModelTest extends ATestCase
             $orderDatum->validate();
         } catch (ValidationException $e) {
             $errors = $orderDatum->errors()['validation'];
-            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            //  var_Dump($errors);
         }
 
         $this->assertEquals(2, count($errors));
@@ -49,7 +49,7 @@ class OrderDatumModelTest extends ATestCase
             //var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
-        $this->assertEquals(3, count($errors));
+        $this->assertEquals(2, count($errors));
 
         $data = [
             'type_id'  => 2,
