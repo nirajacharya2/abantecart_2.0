@@ -50,7 +50,7 @@ class StorefrontSendResetPasswordLinkListener
                 $language = $this->registry->get('language');
            }
             $store_info = Setting::getStoreSettings($customer_info['store_id']);
-            $link = Registry::html()->getSecureURL('account/forgotten/reset', '&rtoken='.$rtoken);
+            $link = Registry::html()->getCatalogURL('account/forgotten/reset', '&rtoken='.$rtoken);
 
             $this->data['mail_plain_text'] = sprintf($language->get('text_greeting'), $store_info->store_name)
                 ."\n\n"
