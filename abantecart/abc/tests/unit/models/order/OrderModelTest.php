@@ -6,6 +6,7 @@ use abc\core\engine\Registry;
 use abc\models\catalog\ProductOption;
 use abc\models\order\Order;
 use abc\models\order\OrderDatum;
+use abc\models\order\OrderProduct;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -243,6 +244,16 @@ class OrderModelTest extends ATestCase
 
         $this->assertNotNull($option->product_option_value_id);
         $this->assertEquals('Pink Pool', $option->option_value_name);
+
+        $order = Order::find(6);
+        $customer_id = $order->customer_id;
+        $order->update(['customer_id' => null]);
+
+        $product = OrderProduct::where('order_id', '=', 6)->first();
+
+        $results = Order::getGuestOrdersWithProduct($product->product_id)->toArray();
+        $order->update(['customer_id' => $customer_id]);
+        $this->assertEquals(31, $results[0]['order_product_id']);
 
     }
 }

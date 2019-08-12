@@ -22,6 +22,7 @@ use abc\core\ABC;
 use abc\core\engine\Model;
 use abc\core\lib\ATaskManager;
 use abc\models\customer\Customer;
+use abc\models\order\Order;
 use H;
 
 /**
@@ -230,7 +231,7 @@ class ModelSaleContact extends Model{
                     $emails[] = trim($result['email']);
                 }
                 //guest customers
-                $results = $this->model_sale_order->getGuestOrdersWithProduct($product_id);
+                $results = Order::getGuestOrdersWithProduct($product_id)->toArray();
                 foreach ($results as $result){
                     $emails[] = trim($result['email']);
                 }
@@ -304,17 +305,18 @@ class ModelSaleContact extends Model{
                     $phones[] = trim($result['sms']);
                 }
                 //for guest customers
-                $results = $this->model_sale_order->getGuestOrdersWithProduct($product_id);
+                $results = Order::getGuestOrdersWithProduct($product_id)->toArray();
+                if ($results) {
+                    foreach ($results as $result) {
+                        $order_id = (int)$result['order_id'];
+                        if (!$order_id) {
+                            continue;
+                        }
 
-                foreach ($results as $result){
-                    $order_id = (int)$result['order_id'];
-                    if (!$order_id){
-                        continue;
-                    }
-
-                    $uri = $this->im->getCustomerURI('sms', 0, $order_id);
-                    if ($uri){
-                        $phones[] = $uri;
+                        $uri = $this->im->getCustomerURI('sms', 0, $order_id);
+                        if ($uri) {
+                            $phones[] = $uri;
+                        }
                     }
                 }
             }

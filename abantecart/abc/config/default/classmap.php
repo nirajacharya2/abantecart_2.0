@@ -16,7 +16,6 @@ use abc\core\lib\AJson;
 use abc\core\lib\ALog as ALog;
 use abc\core\lib\ABackup as ABackup;
 use abc\core\lib\AOrder;
-use abc\core\lib\AOrderManager;
 use abc\core\lib\APromotion;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\CheckOut;
@@ -51,7 +50,6 @@ return [
     'APromotion'           => APromotion::class,
     'ACart'                => ACart::class,
     'AOrder'               => AOrder::class,
-    'AOrderManager'        => AOrderManager::class,
     'EventDispatcher'      => EventDispatcher::class,
     'AEncryption'          => AEncryption::class,
     'ACurrency'            => ACurrency::class,

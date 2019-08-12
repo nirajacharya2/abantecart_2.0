@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\models\customer\Customer;
+use abc\models\order\Order;
 use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
@@ -93,7 +94,7 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_orders = $this->model_sale_order->getOrders($filter);
+        $top_orders = Order::getOrders($filter);
         foreach ($top_orders as $idx => &$order) {
             $top_orders[$idx]['url'] = $this->html->getSecureURL(
                                             'sale/order/details',

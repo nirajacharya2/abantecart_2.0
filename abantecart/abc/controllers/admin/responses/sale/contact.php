@@ -27,6 +27,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 use abc\models\customer\Customer;
+use abc\models\order\Order;
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
@@ -397,7 +398,7 @@ class ControllerResponsesSaleContact extends AController
                             $emails[] = trim($result[$protocol]);
                         }
                         //for guests
-                        $results = $this->model_sale_order->getGuestOrdersWithProduct($product_id);
+                        $results = Order::getGuestOrdersWithProduct($product_id)->toArray();
                         foreach ($results as $result) {
                             if ($protocol == 'email') {
                                 $emails[] = trim($result[$protocol]);

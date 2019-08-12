@@ -17,44 +17,48 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AException;
+use abc\models\order\OrderDownload;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerPagesSaleOrderTabs extends AController {
-	public $data = array();
-     
-  	public function main() {
+class ControllerPagesSaleOrderTabs extends AController
+{
+    public $data = [];
+
+    public function main()
+    {
 
         $this->data = func_get_arg(0);
         if (!is_array($this->data)) {
             throw new AException (AC_ERR_LOAD, 'Error: Could not create order tabs. Tabs definition is not array.');
         }
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadLanguage('sale/order');
-		$order_id = $this->request->get['order_id'];
-		$this->data['order_id'] = $order_id;
-		$this->data['groups'] = array('order_details','shipping','payment');
-		
-		$this->data['link_order_details'] = $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id);
-		$this->data['link_shipping'] = $this->html->getSecureURL('sale/order/shipping', '&order_id=' . $order_id);
-		$this->data['link_payment'] = $this->html->getSecureURL('sale/order/payment', '&order_id=' . $order_id);
-		if($this->model_sale_order->getTotalOrderDownloads($order_id)){
-			$this->data['link_files'] = $this->html->getSecureURL('sale/order/files', '&order_id=' . $order_id);
-			$this->data['groups'][] = 'files';
-		}
-		$this->data['link_history'] = $this->html->getSecureURL('sale/order/history', '&order_id=' . $order_id);
-		$this->data['groups'][] = 'history';
+        $this->loadLanguage('sale/order');
+        $order_id = $this->request->get['order_id'];
+        $this->data['order_id'] = $order_id;
+        $this->data['groups'] = ['order_details', 'shipping', 'payment'];
 
-		$this->view->batchAssign( $this->data );
-		$this->processTemplate('pages/sale/order_tabs.tpl');
+        $this->data['link_order_details'] = $this->html->getSecureURL('sale/order/details', '&order_id='.$order_id);
+        $this->data['link_shipping'] = $this->html->getSecureURL('sale/order/shipping', '&order_id='.$order_id);
+        $this->data['link_payment'] = $this->html->getSecureURL('sale/order/payment', '&order_id='.$order_id);
 
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        $download_count = OrderDownload::where('order_id', '=', $order_id)->count();
+        if ($download_count) {
+            $this->data['link_files'] = $this->html->getSecureURL('sale/order/files', '&order_id='.$order_id);
+            $this->data['groups'][] = 'files';
+        }
+        $this->data['link_history'] = $this->html->getSecureURL('sale/order/history', '&order_id='.$order_id);
+        $this->data['groups'][] = 'history';
+
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('pages/sale/order_tabs.tpl');
+
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }
 

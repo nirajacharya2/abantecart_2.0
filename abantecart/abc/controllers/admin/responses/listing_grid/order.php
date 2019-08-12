@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\models\order\Order;
 use abc\models\order\OrderStatus;
@@ -103,8 +104,8 @@ class ControllerResponsesListingGridOrder extends AController
             $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
-
-        $results = $this->model_sale_order->getOrders( $data );
+        //$results = $this->model_sale_order->getOrders( $data );
+        $results = Order::getOrders($data);
         $total = $results[0]['total_num_rows'];
         if ( $total > 0 ) {
             $total_pages = ceil( $total / $limit );
@@ -228,15 +229,33 @@ class ControllerResponsesListingGridOrder extends AController
         }
 
         if ( isset( $this->request->get['id'] ) ) {
-            $this->model_sale_order->editOrder( $this->request->get['id'], $this->request->post );
-
+            try {
+                Order::editOrder($this->request->get['id'], $this->request->post);
+                $this->session->data['success'] = $this->language->get('text_success');
+            } catch (AException $e) {
+                $error = new AError('');
+                return $error->toJSONResponse('APP_ERROR_402',
+                    [
+                        'error_text'  => $e->getMessage(),
+                        'reset_value' => true,
+                    ]);
+            }
             return null;
         }
 
         //request sent from jGrid. ID is key of array
         foreach ( $this->request->post as $field => $value ) {
             foreach ( $value as $k => $v ) {
-                $this->model_sale_order->editOrder( $k, [$field => $v]);
+                try {
+                    Order::editOrder($k, [$field => $v]);
+                } catch (AException $e) {
+                    $error = new AError('');
+                    return $error->toJSONResponse('APP_ERROR_402',
+                        [
+                            'error_text'  => $e->getMessage(),
+                            'reset_value' => true,
+                        ]);
+                }
             }
         }
 

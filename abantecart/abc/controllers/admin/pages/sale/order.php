@@ -271,31 +271,31 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    public function update()
-    {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->document->setTitle($this->language->get('heading_title'));
+    /* public function update()
+     {
+         //init controller data
+         $this->extensions->hk_InitData($this, __FUNCTION__);
+         $this->document->setTitle($this->language->get('heading_title'));
 
-        if ($this->request->is_POST() && $this->_validateForm()) {
-            if (H::has_value($this->request->post['order_product_id'])) { //if present - saving form modal
-                $this->model_sale_order->editOrderProduct($this->request->get['order_id'], $this->request->post);
-            } else {
-                $this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
-            }
-            //recalc totals and update
-            $this->session->data['success'] = $this->language->get('text_success');
-            $this->session->data['attention'] = $this->language->get('attention_check_total');
-            abc_redirect(
-                $this->html->getSecureURL('sale/order/details',
-                '&order_id='.$this->request->get['order_id'])
-            );
-        }
+         if ($this->request->is_POST() && $this->_validateForm()) {
+             if (H::has_value($this->request->post['order_product_id'])) { //if present - saving form modal
+                 $this->model_sale_order->editOrderProduct($this->request->get['order_id'], $this->request->post);
+             } else {
+                 $this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
+             }
+             //recalc totals and update
+             $this->session->data['success'] = $this->language->get('text_success');
+             $this->session->data['attention'] = $this->language->get('attention_check_total');
+             abc_redirect(
+                 $this->html->getSecureURL('sale/order/details',
+                 '&order_id='.$this->request->get['order_id'])
+             );
+         }
 
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        abc_redirect($this->html->getSecureURL('sale/order'));
-    }
+         //update controller data
+         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+         abc_redirect($this->html->getSecureURL('sale/order'));
+     }*/
 
     public function details()
     {
@@ -640,28 +640,6 @@ class ControllerPagesSaleOrder extends AController
             }
         }
 
-
-        /* if ($total_ext->rows) {
-             foreach ($total_extensions as $row) {
-                 $match = false;
-
-                 if (!$match) {
-                     $new_totals[$row['key']] = $row['key'];
-                         $this->data['totals_add'][] = [
-                             'id'         => $row['id'],
-                             'key'        => $row['key'],
-                             'type'       => $this->config->get($row['key'].'_total_type'),
-                             'order_id'   => $order_id,
-                             'title'      => $row['key'],
-                             'text'       => '',
-                             'value'      => '',
-                             'sort_order' => $this->config->get($row['key'].'_sort_order'),
-                         ];
-                 }
-             }
-         }*/
-
-
         $this->data['form_title'] = $this->language->get('edit_title_details');
         $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id='.$order_id);
         $form = new AForm('HS');
@@ -827,11 +805,17 @@ class ControllerPagesSaleOrder extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST() && $this->_validateForm()) {
-            $this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL(
-                'sale/order/shipping',
-                '&order_id='.$this->request->get['order_id'])
+            try {
+                Order::editOrder($this->request->get['order_id'], $this->request->post);
+                $this->session->data['success'] = $this->language->get('text_success');
+            } catch (AException $e) {
+                $this->session->data['error'] = $e->getMessage();
+            }
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+            abc_redirect(
+                $this->html->getSecureURL(
+                    'sale/order/shipping',
+                    '&order_id='.$this->request->get['order_id'])
             );
         }
 
@@ -1022,7 +1006,20 @@ class ControllerPagesSaleOrder extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST() && $this->_validateForm()) {
-            $this->model_sale_order->editOrder($this->request->get['order_id'], $this->request->post);
+            try {
+                Order::editOrder($this->request->get['order_id'], $this->request->post);
+                $this->session->data['success'] = $this->language->get('text_success');
+            } catch (AException $e) {
+                $this->session->data['error'] = $e->getMessage();
+            }
+
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+            abc_redirect(
+                $this->html->getSecureURL(
+                    'sale/order/payment',
+                    '&order_id='.$this->request->get['order_id'])
+            );
+
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL(
                 'sale/order/payment',

@@ -6,6 +6,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
@@ -721,7 +722,7 @@ class Order extends BaseModel
             ],
         ],
 
-        'value' => [
+        'value'     => [
             'checks'   => [
                 'numeric',
             ],
@@ -731,7 +732,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'coupon_id'      => [
+        'coupon_id' => [
             'checks'   => [
                 'int',
                 'nullable',
@@ -743,7 +744,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'ip'             => [
+        'ip'        => [
             'checks'   => [
                 'ip',
                 'max:50',
@@ -899,7 +900,7 @@ class Order extends BaseModel
              * @var QueryBuilder $query
              */
             $query = Order::select(['orders.*', 'order_status_descriptions.name as order_status_name'])
-                ->where('orders.order_id', '=', $order_id);
+                          ->where('orders.order_id', '=', $order_id);
             if ($customer_id) {
                 $query->where('orders.customer_id', '=', $customer_id);
             }
@@ -946,8 +947,8 @@ class Order extends BaseModel
              * @var Order $order
              */
             $order = $query->first();
-        }catch(Exception $e){
-            Registry::log()->write(__CLASS__.': '. $e->getMessage());
+        } catch (Exception $e) {
+            Registry::log()->write(__CLASS__.': '.$e->getMessage());
 
         }
         $order_data = [];
@@ -1039,7 +1040,7 @@ class Order extends BaseModel
         )->where(
             [
                 'order_history.order_id' => $order_id,
-                'order_history.notify'   => 1
+                'order_history.notify'   => 1,
             ]
         )->leftJoin(
             'orders',
@@ -1048,7 +1049,7 @@ class Order extends BaseModel
             'order_history.order_id'
         )->leftJoin(
             'order_status_descriptions',
-            function($join){
+            function ($join) {
                 /**
                  * @var JoinClause $join
                  */
@@ -1126,6 +1127,13 @@ class Order extends BaseModel
         return $output;
     }
 
+    /**
+     * @param int $order_id
+     * @param array $data
+     *
+     * @return bool
+     * @throws AException
+     */
     public static function editOrder(int $order_id, array $data)
     {
         if (!$data || !$order_id) {
@@ -1174,7 +1182,7 @@ class Order extends BaseModel
             Registry::db()->rollback();
             throw new AException('Error during order saving process. See log for details.');
         }
-
+        return true;
     }
 
     /**
@@ -1218,9 +1226,11 @@ class Order extends BaseModel
                     $old_qnt = $order_product->quantity;
                     $order_product->update(
                         [
-                            'price'           => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
+                            'price'           => H::preformatFloat($orderProduct['price'],
+                                    $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'total'           => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
+                            'total'           => H::preformatFloat($orderProduct['total'],
+                                    $language->get('decimal_point'))
                                 / $orderInfo['value'],
                             'quantity'        => $orderProduct['quantity'],
                             'order_status_id' => (int)$orderProduct['order_status_id'],
@@ -1248,14 +1258,16 @@ class Order extends BaseModel
                 } else {
                     $order_product = new OrderProduct(
                         [
-                            'order_id'   => $order_id,
-                            'product_id' => $product_id,
-                            'name'       => $product->description->name,
+                            'order_id'        => $order_id,
+                            'product_id'      => $product_id,
+                            'name'            => $product->description->name,
                             'model'           => $product->model,
                             'sku'             => $product->sku,
-                            'price'           => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
+                            'price'           => H::preformatFloat($orderProduct['price'],
+                                    $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'total'           => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
+                            'total'           => H::preformatFloat($orderProduct['total'],
+                                    $language->get('decimal_point'))
                                 / $orderInfo['value'],
                             'quantity'        => $orderProduct['quantity'],
                             'order_status_id' => $orderProduct['order_status_id'],
@@ -1294,7 +1306,6 @@ class Order extends BaseModel
 
                     $option_types = [];
                     $po_ids = array_keys($orderProduct['option']);
-
 
                     //get all data of given product options from db
                     ProductOption::setCurrentLanguageID($language_id);
@@ -1437,6 +1448,239 @@ class Order extends BaseModel
             }
         }
         return true;
+    }
+
+    public static function getGuestOrdersWithProduct($product_id)
+    {
+        $product_id = (int)$product_id;
+        if (!$product_id) {
+            return [];
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $table_name = Registry::db()->table_name('orders');
+        $query = OrderProduct::where('order_products.product_id', '=', $product_id)
+                             ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
+                             ->join(
+                                 'orders',
+                                 'orders.order_id',
+                                 '=',
+                                 'order_products.order_id'
+                             );
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->get();
+    }
+
+    /**
+     * @param array $inputData
+     * @param string $mode - can be empty or "total_only" (for counting rows)
+     *
+     * @return int|\Illuminate\Support\Collection
+     * @throws AException
+     */
+    public static function getOrders($inputData = [], $mode = '')
+    {
+        $language_id = static::$current_language_id;
+        /**
+         * @var ADataEncryption $dcrypt
+         */
+        $dcrypt = Registry::dcrypt();
+
+        $currency = Registry::currency();
+        /**
+         * @var ADB $db
+         */
+        $db = Registry::db();
+        $aliasO = $db->table_name('orders');
+        $aliasOSD = $db->table_name('order_status_descriptions');
+        $order = new Order();
+
+        $select = [];
+        if ($mode == 'total_only') {
+            $select[] = $db->raw('COUNT(*) as total');
+        } else {
+            $select = [
+                $db->raw('CONCAT('.$aliasO.'.firstname, \' \', '.$aliasO.'.lastname) AS name'),
+                $db->raw("(SELECT name
+                            FROM ".$aliasOSD."
+                            WHERE ".$aliasOSD.".order_status_id = ".$aliasO.".order_status_id
+                                AND ".$aliasOSD.".language_id = '".(int)$language_id."') AS status"),
+                'orders.*',
+            ];
+        }
+
+        /**
+         * @var QueryBuilder $query
+         */
+        if ($mode != 'total_only') {
+            $query = $order->selectRaw($db->raw_sql_row_count().' '.$aliasO.'.*');
+        } else {
+            $query = $order->select();
+        }
+        $query->addSelect($select);
+
+        $query->leftJoin(
+            'order_products',
+            'orders.order_id',
+            '=',
+            'order_products.order_id'
+        );
+
+        if ($inputData['filter_order_status_id'] == 'all') {
+            $query->where('orders.order_status_id', '>=', 0);
+        } else {
+            if (H::has_value($inputData['filter_order_status_id'])) {
+                $query->where('orders.order_status_id', '=', (int)$inputData['filter_order_status_id']);
+            } else {
+                $query->where('orders.order_status_id', '>', 0);
+
+            }
+        }
+
+        if (H::has_value($inputData['filter_product_id'])) {
+            $query->where('order_products.product_id', '=', $inputData['filter_product_id']);
+        }
+
+        if (H::has_value($inputData['filter_coupon_id'])) {
+            $query->where('orders.coupon_id', '=', $inputData['filter_coupon_id']);
+        }
+
+        if (H::has_value($inputData['filter_customer_id'])) {
+            $query->where('orders.customer_id', '=', $inputData['filter_customer_id']);
+        }
+
+        if (H::has_value($inputData['filter_order_id'])) {
+            $query->where('orders.order_id', '=', $inputData['filter_order_id']);
+        }
+
+        if (H::has_value($inputData['filter_name'])) {
+            $query->whereRaw("CONCAT(".$aliasO.".firstname, ' ', ".$aliasO.".lastname) LIKE '%"
+                .$inputData['filter_name']."%'");
+        }
+
+        if (H::has_value($inputData['filter_date_added'])) {
+            $query->whereRaw("DATE(".$aliasO.".date_added) = DATE('".$db->escape($inputData['filter_date_added'])."')");
+        }
+
+        if ($inputData['store_id'] !== null) {
+            $query->where('orders.store_id', '=', (int)$inputData['store_id']);
+        }
+
+        if (H::has_value($inputData['filter_total'])) {
+            $inputData['filter_total'] = trim($inputData['filter_total']);
+            //check if compare signs are used in the request
+            $compare = '';
+            if (in_array(substr($inputData['filter_total'], 0, 2), ['>=', '<='])) {
+                $compare = substr($inputData['filter_total'], 0, 2);
+                $inputData['filter_total'] = substr($inputData['filter_total'], 2, strlen($inputData['filter_total']));
+                $inputData['filter_total'] = trim($inputData['filter_total']);
+            } else {
+                if (in_array(substr($inputData['filter_total'], 0, 1), ['>', '<', '='])) {
+                    $compare = substr($inputData['filter_total'], 0, 1);
+                    $inputData['filter_total'] = substr(
+                        $inputData['filter_total'],
+                        1,
+                        strlen($inputData['filter_total'])
+                    );
+                    $inputData['filter_total'] = trim($inputData['filter_total']);
+                }
+            }
+
+            $inputData['filter_total'] = (float)$inputData['filter_total'];
+            //if we compare, easier select
+            if ($compare) {
+                $query->whereRaw(
+                    "FLOOR(
+                            CAST(".$aliasO.".total as DECIMAL(15,4))) ".
+                    $compare
+                    ."  FLOOR(CAST(".$inputData['filter_total']." as DECIMAL(15,4)))");
+            } else {
+                $currencies = $currency->getCurrencies();
+                $temp = $temp2 = [
+                    $inputData['filter_total'],
+                    ceil($inputData['filter_total']),
+                    floor($inputData['filter_total']),
+                ];
+                foreach ($currencies as $currency1) {
+                    foreach ($currencies as $currency2) {
+                        if ($currency1['code'] != $currency2['code']) {
+                            $temp[] = floor($currency->convert($inputData['filter_total'], $currency1['code'],
+                                $currency2['code']));
+                            $temp2[] = ceil($currency->convert($inputData['filter_total'], $currency1['code'],
+                                $currency2['code']));
+                        }
+                    }
+                }
+                $query->where(function ($query) use ($aliasO, $temp, $temp2) {
+                    /**
+                     * @var QueryBuilder $query
+                     */
+                    $query->orWhereRaw("FLOOR(".$aliasO.".total) IN  (".implode(",", $temp).")");
+                    $query->orWhereRaw(
+                        "FLOOR(
+                             CAST(".$aliasO.".total as DECIMAL(15,4)) * CAST(".$aliasO.".value as DECIMAL(15,4))) 
+                                  IN  (".implode(",", $temp).")");
+                    $query->orWhereRaw("CEIL(".$aliasO.".total) IN  (".implode(",", $temp2).")");
+                    $query->orWhereRaw(
+                        "CEIL(
+                            CAST(".$aliasO.".total as DECIMAL(15,4)) * CAST(".$aliasO.".value as DECIMAL(15,4))) 
+                                IN  (".implode(",", $temp2).")");
+                });
+            }
+        }
+
+        //If for total, we done building the query
+        if ($mode == 'total_only') {
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+            $result = $query->first();
+            return (int)$result->total;
+        }
+
+        $sort_data = [
+            'order_id'   => 'orders.order_id',
+            'name'       => 'name',
+            'status'     => 'status',
+            'date_added' => 'orders.date_added',
+            'total'      => 'orders.total',
+        ];
+
+        // NOTE: Performance slowdown might be noticed or larger search results
+
+        $orderBy = $sort_data[$inputData['sort']] ? $sort_data[$inputData['sort']] : 'name';
+        if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
+            $sorting = "desc";
+        } else {
+            $sorting = "asc";
+        }
+
+        $query->orderBy($orderBy, $sorting);
+        if (isset($inputData['start']) || isset($inputData['limit'])) {
+            if ($inputData['start'] < 0) {
+                $inputData['start'] = 0;
+            }
+            if ($inputData['limit'] < 1) {
+                $inputData['limit'] = 20;
+            }
+            $query->offset((int)$inputData['start'])->limit((int)$inputData['limit']);
+        }
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+        $result_rows = $query->get();
+
+        //finally decrypt data and return result
+        $totalNumRows = $db->sql_get_row_count();
+        for ($i = 0; $i < $result_rows->count(); $i++) {
+            $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'orders');
+            $result_rows[$i]['total_num_rows'] = $totalNumRows;
+        }
+
+        return $result_rows;
+
     }
 
 }
