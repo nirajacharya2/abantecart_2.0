@@ -3,6 +3,7 @@
 namespace abc\modules\listeners;
 
 use abc\core\ABC;
+use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\core\lib\AMail;
@@ -14,13 +15,14 @@ use H;
 class StorefrontSendResetPasswordLinkListener
 {
 
-    protected $registry, $data;
+    protected $registry, $data, $language;
     protected $db;
     const DECIMAL = 2;
 
     public function __construct()
     {
         $this->registry = Registry::getInstance();
+        $this->language = $this->registry->get('language');
     }
 
     /**
@@ -38,8 +40,15 @@ class StorefrontSendResetPasswordLinkListener
         // send email to customer
         if ($customer_info && $customer_info['email']) {
 
-            $this->registry->get('load')->language('mail/account_forgotten');
-            $language = $this->registry->get('language');
+            if (ABC::env('IS_ADMIN')) {
+                //create new instance of language for case when model called from admin-side
+                $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
+                $language->load($language->language_details['filename']);
+                $language->load('mail/account_forgotten');
+            } else {
+                $this->registry->get('load')->language('mail/account_forgotten');
+                $language = $this->registry->get('language');
+           }
             $store_info = Setting::getStoreSettings($customer_info['store_id']);
             $link = Registry::html()->getSecureURL('account/forgotten/reset', '&rtoken='.$rtoken);
 
