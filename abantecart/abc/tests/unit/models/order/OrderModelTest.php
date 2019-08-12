@@ -240,7 +240,8 @@ class OrderModelTest extends ATestCase
         $this->assertEquals($order_ims[2]['uri'], $result['sms']['uri']);
 
         $option = ProductOption::getProductOptionsByIds([304])->first();
-        //var_dump($option->toArray());
+
+        $this->assertNotNull($option->product_option_value_id);
         $this->assertEquals('Pink Pool', $option->option_value_name);
 
     }

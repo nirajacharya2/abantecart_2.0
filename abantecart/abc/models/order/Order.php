@@ -6,6 +6,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
@@ -17,6 +18,7 @@ use abc\models\locale\Language;
 use abc\models\locale\Zone;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
+use abc\modules\events\ABaseEvent;
 use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
@@ -841,10 +843,8 @@ class Order extends BaseModel
 
         if (Registry::config()->get('config_stock_subtract') && $this->attributes['order_status_id'] > 0) {
 
-            $orderProducts = OrderProduct::where('order_id', '=', $order_id)->get();
+            $orderProducts = OrderProduct::where('order_id', '=', $this->order_id)->get();
             if ($orderProducts) {
-
-
                 foreach ($orderProducts as $orderProduct) {
                     $product = Product::find($orderProduct->product_id);
                     $product->update(
@@ -855,7 +855,7 @@ class Order extends BaseModel
 
                     $orderOptions = OrderOption::where(
                         [
-                            'order_id'         => $order_id,
+                            'order_id'         => $this->order_id,
                             'order_product_id' => $orderProduct['order_product_id'],
                         ]
                     )->get();
@@ -1128,154 +1128,53 @@ class Order extends BaseModel
 
     public static function editOrder(int $order_id, array $data)
     {
-        $order = Order::find($order_id);
-        if (!$order) {
+        if (!$data || !$order_id) {
             return false;
         }
 
-        $order->fill($data);
-        $order->save();
+        Registry::db()->beginTransaction();
+        try {
+            $order = Order::find($order_id);
+            if (!$order) {
+                return false;
+            }
 
-        $orderInfo = Order::getOrderArray($order_id);
-        $language_code = Language::getCodeById($orderInfo['language_id']);
-        $oLanguage = new ALanguage(Registry::getInstance(), $language_code);
+            $order->fill($data);
+            $order->save();
 
-        $old_language = Product::getCurrentLanguageID();
+            if (!$data['order_totals']) {
+                return true;
+            }
 
-        if (isset($data['product'])) {
-            // first of all delete removed products
-            $order_product_ids = [];
-            foreach ($data['product'] as $item) {
-                if ($item['order_product_id']) {
-                    $order_product_ids[] = $item['order_product_id'];
+            $orderInfo = Order::getOrderArray($order_id);
+            $language = Language::find($orderInfo['language_id']);
+            $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
+            $oLanguage->load($language->directory);
+
+            $old_language = Product::getCurrentLanguageID();
+            Product::setCurrentLanguageID($orderInfo['language_id']);
+
+            if ($data['order_totals']) {
+                static::editOrderProducts($orderInfo, $data, $oLanguage);
+                //remove previous totals
+                OrderTotal::where('order_id', '=', $order_id)->forceDelete();
+                foreach ($data['order_totals'] as $orderTotal) {
+                    $orderTotal['order_id'] = $order_id;
+                    $total = new OrderTotal($orderTotal);
+                    $total->save();
                 }
             }
-            /**
-             * @var QueryBuilder $query
-             */
-            $query = OrderProduct::where('order_id', '=', $order_id)
-                                 ->whereNotIn('order_product_id', $order_product_ids);
-            //remove deleted products from order
-            $query->forceDelete();
+            Registry::db()->commit();
+            //revert language for model back
+            Product::setCurrentLanguageID($old_language);
 
-            /*$this->db->query("DELETE FROM ".$this->db->table_name("order_products")."
-                              WHERE order_id = '".(int)$order_id."' 
-                                AND order_product_id NOT IN ('".(implode("','", $order_product_ids))."')");*/
-
-            foreach ($data['product'] as $product) {
-                if ($product['product_id']) {
-                    $exists = OrderProduct::where(
-                        [
-                            'order_id'         => $order_id,
-                            'product_id'       => (int)$product['product_id'],
-                            'order_product_id' => (int)$product['order_product_id'],
-                        ]
-                    )->get();
-
-                    /*$exists = $this->db->query(
-                        "SELECT product_id
-                         FROM ".$this->db->table_name("order_products")."
-                         WHERE order_id = '".(int)$order_id."'
-                            AND product_id='".(int)$product['product_id']."'
-                            AND order_product_id = '".(int)$product['order_product_id']."'"
-                    );
-                    $exists = $exists->num_rows;*/
-                    if ($exists) {
-                        $exists->update(
-                            [
-                                'price'    => \H::preformatFloat($product['price'], $oLanguage->get('decimal_point'))
-                                    / $orderInfo['value'],
-                                'total'    => \H::preformatFloat($product['total'], $oLanguage->get('decimal_point'))
-                                    / $orderInfo['value'],
-                                'quantity' => $product['quantity'],
-                            ]
-                        );
-                        /* $this->db->query(
-                             "UPDATE ".$this->db->table_name("order_products")."
-                             SET price = '".
-                             $this->db->escape(
-                                 (H::preformatFloat($product['price'],Registry::language()->get('decimal_point'))
-                                     /
-                                     $order['value'])
-                             )."',
-                                   total = '".
-                             $this->db->escape(
-                                 (H::preformatFloat($product['total'],Registry::language()->get('decimal_point'))
-                                     /
-                                     $order['value'])
-                             )."',
-                             quantity = '".$this->db->escape($product['quantity'])."'
-                             WHERE order_id = '".(int)$order_id."'
-                                 AND order_product_id = '".(int)$product['order_product_id']."'"
-                         );*/
-                    } else {
-                        // new products
-                        //set order language as current language of model
-                        Product::setCurrentLanguageID($orderInfo['language_id']);
-                        /**
-                         * @var Product $newProduct
-                         */
-                        $newProduct = Product::with('description')->find($product['product_id']);
-
-                        $orderProduct = new OrderProduct(
-                            [
-                                'order_id'   => $order_id,
-                                'product_id' => $product['product_id'],
-                                'name'       => $newProduct->description->name,
-                                'model'      => $newProduct->model,
-                                'sku'        => $newProduct->sku,
-                                'price'      => \H::preformatFloat($product['price'], $oLanguage->get('decimal_point'))
-                                    / $orderInfo['value'],
-                                'total'      => \H::preformatFloat($product['total'], $oLanguage->get('decimal_point'))
-                                    / $orderInfo['value'],
-                                'quantity'   => $product['quantity'],
-                            ]
-                        );
-
-                        $orderProduct->save();
-
-                        /* $product_query = $this->db->query(
-                             "SELECT *, p.product_id
-                              FROM ".$this->db->table_name("products")." p
-                              LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                                 ON (p.product_id = pd.product_id)
-                              WHERE p.product_id='".(int)$product['product_id']."'"
-                         );
-
-                         $this->db->query(
-                             "INSERT INTO ".$this->db->table_name("order_products")."
-                             SET order_id = '".(int)$order_id."',
-                                 product_id = '".(int)$product['product_id']."',
-                                 NAME = '".$this->db->escape($product_query->row['name'])."',
-                                 model = '".$this->db->escape($product_query->row['model'])."',
-                                 sku = '".$this->db->escape($product_query->row['sku'])."',
-                                 price = '".$this->db->escape(
-                                     (H::preformatFloat($product['price'],$this->language->get('decimal_point'))
-                                         / $order['value'])
-                                 )."',
-                                 total = '".$this->db->escape(
-                                     (H::preformatFloat($product['total'],$this->language->get('decimal_point'))
-                                         / $order['value'])
-                                 )."',
-                                 quantity = '".$this->db->escape($product['quantity'])."'"
-                         );*/
-                    }
-
-                    static::editOrderProduct($orderInfo, $product, $oLanguage);
-                }
-            }
+            H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
+        } catch (\Exception $e) {
+            Registry::log()->write(__CLASS__.': '.$e->getMessage()."\nTrace: ".$e->getTraceAsString());
+            Registry::db()->rollback();
+            throw new AException('Error during order saving process. See log for details.');
         }
 
-        if ($data['order_totals']) {
-            //remove previous totals
-            OrderTotal::where('order_id', '=', $order_id)->forceDelete();
-
-            foreach ($data['order_totals'] as $orderTotal) {
-                $total = new OrderTotal($orderTotal);
-                $total->save();
-            }
-        }
-//        H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
     }
 
     /**
@@ -1288,63 +1187,47 @@ class Order extends BaseModel
      * @throws Exception
      */
 
-    protected static function editOrderProduct(array $orderInfo, array $data, $language = null)
+    protected static function editOrderProducts(array $orderInfo, array $data, $language = null)
     {
         $language_id = $language ? $language->getLanguageID() : Registry::language()->getLanguageID();
         $order_id = $orderInfo['order_id'];
-        $order_product_id = $data['order_product_id'];
-        $product_id = (int)$data['product_id'];
 
-        if (!$product_id || !$order_id) {
+        if (!$order_id) {
             return false;
         }
-        /**
-         * @var Product $product
-         */
-        $product = Product::with('description')->find($product_id);
-        $product_info = $product->toArray();
+
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
         if (isset($data['product'])) {
             foreach ($data['product'] as $orderProduct) {
-                if ($orderProduct['quantity'] <= 0) { // stupid situation
-                    return false;
+                $order_product_id = $orderProduct['order_product_id'];
+                $product_id = (int)$orderProduct['product_id'];
+                if ($orderProduct['quantity'] < 0) { // stupid situation
+                    continue;
                 }
+
+                /**
+                 * @var Product $product
+                 */
+                $product = Product::with('description')->find($product_id);
+                $product_info = $product->toArray();
                 //check is product exists
                 $order_product = OrderProduct::find($order_product_id);
-                /*$exists = $this->db->query(
-                    "SELECT op.product_id, op.quantity
-                     FROM ".$this->db->table_name("order_products")." op
-                     WHERE op.order_id = '".(int)$order_id."'
-                            AND op.product_id='".(int)$product_id."'
-                            AND op.order_product_id = '".(int)$order_product_id."'");*/
-
                 if ($order_product) {
                     //update order quantity
                     $old_qnt = $order_product->quantity;
                     $order_product->update(
                         [
-                            'price'    => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
+                            'price'           => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'total'    => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
+                            'total'           => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'quantity' => $orderProduct['quantity'],
+                            'quantity'        => $orderProduct['quantity'],
+                            'order_status_id' => (int)$orderProduct['order_status_id'],
                         ]
                     );
 
-                    /* $sql = "UPDATE ".$this->db->table_name("order_products")."
-                             SET price = '".$this->db->escape(
-                                         (H::preformatFloat($product['price'],$this->language->get('decimal_point'))
-                                             / $orderInfo['value']))."',
-                                 total = '".$this->db->escape(
-                                     (H::preformatFloat($product['total'],$this->language->get('decimal_point'))
-                                             / $orderInfo['value'])
-                                 )."',
-                                 quantity = '".$this->db->escape($product['quantity'])."'
-                             WHERE order_id = '".(int)$order_id."' AND order_product_id = '".(int)$order_product_id."'";
-                     $this->db->query($sql);*/
                     //update stock quantity
-
                     $stock_qnt = $product_info['quantity'];
                     $qnt_diff = $old_qnt - $orderProduct['quantity'];
 
@@ -1360,55 +1243,26 @@ class Order extends BaseModel
                                     'quantity' => $new_qnt,
                                 ]
                             );
-                            /* $sql = "UPDATE ".$this->db->table_name("products")."
-                                     SET quantity = '".$new_qnt."'
-                                     WHERE product_id = '".(int)$product_id."' AND subtract = 1";
-                             $this->db->query($sql);*/
                         }
                     }
-
                 } else {
-                    // add new product into order
-                    /*$sql = "SELECT *, p.product_id
-                            FROM ".$this->db->table_name("products")." p
-                            LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                                ON 
-                                (p.product_id = pd.product_id 
-                                    AND pd.language_id=".$this->language->getContentLanguageID()
-                                .")
-                            WHERE p.product_id='".(int)$product_id."'";
-                    $product_query = $this->db->query($sql);*/
-
                     $order_product = new OrderProduct(
                         [
                             'order_id'   => $order_id,
                             'product_id' => $product_id,
                             'name'       => $product->description->name,
-                            'model'      => $product->model,
-                            'sku'        => $product->sku,
-                            'price'      => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
+                            'model'           => $product->model,
+                            'sku'             => $product->sku,
+                            'price'           => H::preformatFloat($orderProduct['price'], $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'total'      => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
+                            'total'           => H::preformatFloat($orderProduct['total'], $language->get('decimal_point'))
                                 / $orderInfo['value'],
-                            'quantity'   => $orderProduct['quantity'],
+                            'quantity'        => $orderProduct['quantity'],
+                            'order_status_id' => $orderProduct['order_status_id'],
                         ]
                     );
                     $order_product->save();
                     $order_product_id = $order_product->order_product_id;
-
-                    /*$sql = "INSERT INTO ".$this->db->table_name("order_products")."
-                            SET order_id = '".(int)$order_id."',
-                                product_id = '".(int)$product_id."',
-                                name = '".$this->db->escape($product_query->row['name'])."',
-                                model = '".$this->db->escape($product_query->row['model'])."',
-                                sku = '".$this->db->escape($product_query->row['sku'])."',
-                                price = '".$this->db->escape((H::preformatFloat($orderProduct['price'],
-                                $this->language->get('decimal_point')) / $orderInfo['value']))."',
-                                total = '".$this->db->escape((H::preformatFloat($orderProduct['total'],
-                                $this->language->get('decimal_point')) / $orderInfo['value']))."',
-                                quantity = '".(int)$orderProduct['quantity']."'";
-                    $this->db->query($sql);
-                    $order_product_id = $this->db->getLastId();*/
 
                     //update stock quantity
                     $qnt_diff = -$orderProduct['quantity'];
@@ -1421,9 +1275,6 @@ class Order extends BaseModel
                                 'quantity' => $new_qnt,
                             ]
                         );
-                        /*  $this->db->query("UPDATE ".$this->db->table_name("products")."
-                                            SET quantity = '".$new_qnt."'
-                                            WHERE product_id = '".(int)$product_id."' AND subtract = 1");*/
                     }
                 }
 
@@ -1441,30 +1292,13 @@ class Order extends BaseModel
                             (int)$old_value['product_option_value_id'];
                     }
 
-                    $option_types = $po_ids = [];
-                    foreach ($orderProduct['option'] as $k => $option) {
-                        $po_ids[] = (int)$k;
-                    }
+                    $option_types = [];
+                    $po_ids = array_keys($orderProduct['option']);
+
+
                     //get all data of given product options from db
                     ProductOption::setCurrentLanguageID($language_id);
                     $product_options_list = ProductOption::getProductOptionsByIds($po_ids);
-
-                    /*$sql = "SELECT *,
-                                    pov.product_option_value_id, 
-                                    povd.name AS option_value_name, 
-                                    pod.name AS option_name
-                            FROM ".$this->db->table_name('product_options')." po
-                            LEFT JOIN ".$this->db->table_name('product_option_descriptions')." pod
-                                ON (pod.product_option_id = po.product_option_id 
-                                    AND pod.language_id=".$this->language->getContentLanguageID().")
-                            LEFT JOIN ".$this->db->table_name('product_option_values')." pov
-                                ON po.product_option_id = pov.product_option_id
-                            LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." povd
-                                ON (povd.product_option_value_id = pov.product_option_value_id 
-                                    AND povd.language_id=".$this->language->getContentLanguageID().")
-                            WHERE po.product_option_id IN (".implode(',', $po_ids).")
-                            ORDER BY po.product_option_id";
-                    $result = $this->db->query($sql);*/
 
                     //list of option value that we do not re-save
                     $exclude_list = [];
@@ -1475,7 +1309,7 @@ class Order extends BaseModel
                             $exclude_list[] = (int)$row->product_option_value_id;
                         }
                         //compound key for cases when val_id is null
-                        $option_value_info[$row->product_option_id.'_'.$row->product_option_value_id] = $row;
+                        $option_value_info[$row->product_option_id.'_'.$row->product_option_value_id] = $row->toArray();
                         $option_types[$row->product_option_id] = $row->element_type;
                     }
 
@@ -1490,13 +1324,6 @@ class Order extends BaseModel
                         $query->whereNotIn('product_option_value_id', $exclude_list);
                     }
                     $query->forceDelete();
-
-                    /*$sql = "DELETE FROM ".$this->db->table_name('order_options')."
-                            WHERE order_id = ".$order_id." AND order_product_id=".(int)$order_product_id;
-                    if ($exclude_list) {
-                        $sql .= " AND product_option_value_id NOT IN (".implode(', ', $exclude_list).")";
-                    }
-                    $this->db->query($sql);*/
 
                     foreach ($orderProduct['option'] as $opt_id => $values) {
 
@@ -1523,6 +1350,7 @@ class Order extends BaseModel
                         $curr_subtract_options = [];
                         foreach ($values as $value) {
                             $arr_key = $opt_id.'_'.$value;
+                            // var_dump($option_value_info); exit;
                             $orderOption = new OrderOption(
                                 [
                                     'order_id'                => $order_id,
@@ -1535,27 +1363,8 @@ class Order extends BaseModel
                                     'prefix'                  => $option_value_info[$arr_key]['prefix'],
                                 ]
                             );
+
                             $orderOption->save();
-
-                            /* $sql = "INSERT INTO ".$this->db->table_name('order_options')."
-                                     (`order_id`,
-                                     `order_product_id`,
-                                     `product_option_value_id`,
-                                     `name`,
-                                     `sku`,
-                                     `value`,
-                                     `price`,
-                                     `prefix`)
-                                 VALUES ('".$order_id."',
-                                         '".(int)$order_product_id."',
-                                         '".(int)$value."',
-                                         '".$this->db->escape($option_value_info[$arr_key]['option_name'])."',
-                                         '".$this->db->escape($option_value_info[$arr_key]['sku'])."',
-                                         '".$this->db->escape($option_value_info[$arr_key]['option_value_name'])."',
-                                         '".$this->db->escape($option_value_info[$arr_key]['price'])."',
-                                         '".$this->db->escape($option_value_info[$arr_key]['prefix'])."')";
-
-                             $this->db->query($sql);*/
 
                             if ($option_value_info[$arr_key]['subtract']) {
                                 $curr_subtract_options[(int)$opt_id][] = (int)$value;
@@ -1584,12 +1393,6 @@ class Order extends BaseModel
                                             ]
                                         );
                                     }
-                                    /* $sql = "UPDATE ".$this->db->table_name("product_option_values")."
-                                           SET quantity = (quantity + ".$orderProduct['quantity'].")
-                                           WHERE product_option_value_id = '".(int)$v."'
-                                                 AND subtract = 1";
-
-                                     $this->db->query($sql);*/
                                 }
                             }
 
@@ -1605,12 +1408,6 @@ class Order extends BaseModel
                                             ]
                                         );
                                     }
-                                    /*$sql = "UPDATE ".$this->db->table_name("product_option_values")."
-                                          SET quantity = (quantity - ".$orderProduct['quantity'].")
-                                          WHERE product_option_value_id = '".(int)$v."'
-                                                AND subtract = 1";
-
-                                    $this->db->query($sql);*/
                                 }
                             }
 
@@ -1631,12 +1428,6 @@ class Order extends BaseModel
                                             ]
                                         );
                                     }
-
-                                    /* $sql = "UPDATE ".$this->db->table_name("product_option_values")."
-                                           SET quantity = ".$sql_incl."
-                                           WHERE product_option_value_id = '".(int)$v."'
-                                                 AND subtract = 1";
-                                     $this->db->query($sql);*/
                                 }
                             }
                         }
@@ -1645,36 +1436,6 @@ class Order extends BaseModel
 
             }
         }
-
-        //fix order total and subtotal
-        /*
-                $sql = "SELECT SUM(total) AS subtotal
-                        FROM ".$this->db->table_name('order_products')."
-                        WHERE order_id=".$order_id;
-                $result = $this->db->query($sql);
-                $subtotal = $result->row['subtotal'];
-                $text = Registry::currency()->format($subtotal, $orderInfo['currency'], $orderInfo['value']);
-
-                $orderSubtotal =
-                $sql = "UPDATE ".$this->db->table_name('order_totals')."
-                        SET `value`='".$subtotal."', `text` = '".$text."'
-                        WHERE order_id=".$order_id." AND type='subtotal'";
-                $this->db->query($sql);
-
-                $sql = "SELECT SUM(`value`) AS total
-                        FROM ".$this->db->table_name('order_totals')."
-                        WHERE order_id=".$order_id." AND type<>'total'";
-                $result = $this->db->query($sql);
-                $total = $result->row['total'];
-                $text = $this->currency->format($total, $orderInfo['currency'], $orderInfo['value']);
-
-                $sql = "UPDATE ".$this->db->table_name('order_totals')."
-                        SET `value`='".$total."', `text` = '".$text."'
-                        WHERE order_id=".$order_id." AND type='total'";
-                $this->db->query($sql);
-
-                $this->cache->remove('product');
-        */
         return true;
     }
 

@@ -169,6 +169,7 @@ class ProductOption extends BaseModel
         $query = static::select(
             [
                 'product_options.*',
+                'product_option_values.*',
                 'product_option_descriptions.name as option_name',
                 'product_option_value_descriptions.name as option_value_name',
 

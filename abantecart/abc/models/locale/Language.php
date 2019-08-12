@@ -75,6 +75,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $weight_class_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $zone_descriptions
  *
+ * @method static Language find(int $language_id) Language
+ * @method static Language select(mixed $select) Builder
  * @package abc\models
  */
 class Language extends BaseModel

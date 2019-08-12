@@ -215,11 +215,13 @@
                             </a>
                         <?php } ?>
                     </td>
-                    <td class="align-left">
+                    <td class="align-left" data-order-product-id="<?php echo $oid; ?>">
                         <a target="_blank"
                            href="<?php echo $order_product['href']; ?>">
-                            <?php echo $order_product['name'].($order_product['model'] ? '('.$order_product['model']
-                                    .')' : ''); ?>
+                            <?php
+                            echo $order_product['name'].($order_product['model'] ? '('.$order_product['model']
+                                    .')' : '');
+                            echo ' - '.$order_product['order_status']; ?>
                         </a>
                         <input type="hidden"
                                name="product[<?php echo $oid; ?>][order_product_id]"
@@ -227,6 +229,9 @@
                         <input type="hidden"
                                name="product[<?php echo $oid; ?>][product_id]"
                                value="<?php echo $order_product['product_id']; ?>"/>
+                        <input type="hidden"
+                               name="product[<?php echo $oid; ?>][order_status_id]"
+                               value="<?php echo $order_product['order_status_id']; ?>"/>
                         <?php
                         if ($order_product['option']) { ?>
                             <dl class="dl-horizontal product-options-list-sm">
@@ -250,8 +255,18 @@
                                name="product[<?php echo $oid; ?>][quantity]"
                                value="<?php echo $order_product['quantity']; ?>"/>
                     </td>
-                    <td class="align-center"><?php echo $order_product['price']; ?></td>
-                    <td class="align-center"><?php echo $order_product['total']; ?></td>
+                    <td class="align-center">
+                        <?php echo $order_product['price']; ?>
+                        <input class="afield no-save" type="hidden"
+                               name="product[<?php echo $oid; ?>][price]"
+                               value="<?php echo $order_product['price']; ?>"/>
+                    </td>
+                    <td class="align-center">
+                        <?php echo $order_product['total']; ?>
+                        <input class="afield no-save" type="hidden"
+                               name="product[<?php echo $oid; ?>][total]"
+                               value="<?php echo $order_product['total']; ?>"/>
+                    </td>
                 </tr>
                 </tbody>
             <?php } ?>
@@ -340,6 +355,7 @@
         'id'          => 'add_product_modal',
         'modal_type'  => 'lg',
         'data_source' => 'ajax',
+        'js_onclose'  => '$("#add_product_modal").find("div.modal-content").html("");',
     ]);
 ?>
 
@@ -487,7 +503,6 @@ echo $this->html->buildElement(
         return false;
     });
 
-
     function ProductModal(order_product_id) {
         var id = '';
         if (order_product_id > 0) {
@@ -499,6 +514,8 @@ echo $this->html->buildElement(
                 id = '&product_id=' + vals[0];
             }
         }
+        var order_status_id = $('input[name="product\[' + order_product_id + '\]\[order_status_id\]"\]').val();
+        id += '&order_status_id=' + order_status_id;
 
         if (id.length > 0) {
             $('#add_product_modal')
@@ -551,7 +568,9 @@ echo $this->html->buildElement(
             .text(data.product_name);
         td.find('input').remove();
         td.find('dl').remove();
+        $('<input type="hidden" name="product[' + oid + '][order_product_id]" value="' + data.order_product_id + '">').appendTo(td);
         $('<input type="hidden" name="product[' + oid + '][product_id]" value="' + data.product_id + '">').appendTo(td);
+        $('<input type="hidden" name="product[' + oid + '][order_status_id]" value="' + data.order_status_id + '">').appendTo(td);
 
         var options = $('<dl class="dl-horizontal product-options-list-sm"></dl>'), product_data = {};
 
@@ -612,31 +631,13 @@ echo $this->html->buildElement(
         recalculateTotals();
 
         newRowCounter++;
+        $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');
     }
-
-    $('a.recalc_total').click(function () {
-        $(this).append('<input type="hidden" name="force_recalc_single" value="1">');
-        var total_id = $(this).attr('data-order-total-id');
-        $('input[name="totals[' + total_id + ']"]').val('');
-        $('#orderFrm').submit();
-        return false;
-    });
-
-    $('a.save_and_recalc').click(function () {
-        $(this).append('<input type="hidden" name="force_recalc" value="1">');
-        $('#orderFrm').submit();
-        return false;
-    });
 
     $('a.add_totals').click(function () {
-        addTotal();
+        $('#add_order_total').modal({keyboard: false});
         return false;
     });
-
-    function addTotal() {
-        $('#add_order_total').modal({keyboard: false});
-    }
-
 
     <?php // "ADD MANUAL" TOTAL JS ?>
 
@@ -667,6 +668,7 @@ echo $this->html->buildElement(
 
         }
         e.stopPropagation();
+        $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');
     });
 
     var add_manual_coupon = function () {
@@ -688,5 +690,9 @@ echo $this->html->buildElement(
             }
         );
     };
+
+    $('#orderFrm').on('submit', function () {
+        $(this).prop('changed', 'submit').attr('data-confirm-exit', 'false');
+    });
 
 </script>

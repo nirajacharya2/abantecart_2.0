@@ -25,8 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
 use abc\core\lib\ACurrency;
-use abc\core\lib\AEncryption;
-use abc\core\lib\AOrderManager;
+use abc\core\lib\AException;
 use abc\core\lib\LibException;
 use abc\models\catalog\Category;
 use abc\models\customer\Address;
@@ -327,7 +326,12 @@ class ControllerPagesSaleOrder extends AController
 
         $order_id = (int)$this->request->get['order_id'];
         if ($this->request->is_POST() && $this->_validateForm()) {
-            Order::editOrder($order_id, $this->request->post);
+            try {
+                Order::editOrder($order_id, $this->request->post);
+            } catch (AException $e) {
+                $this->session->data['error'] = $e->getMessage();
+                abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+            }
 
             if (H::has_value($this->request->post['downloads'])) {
                 $data = $this->request->post['downloads'];
@@ -341,7 +345,7 @@ class ControllerPagesSaleOrder extends AController
                     }
                     $this->model_catalog_download->editOrderDownload($order_download_id, $item);
                 }
-            } else {
+            }/* else {
                 //NOTE: Totals will be recalculated if forced so skip array is not needed.
                 if ($this->config->get('config_allow_order_recalc')
                     && $this->request->post['force_recalc']
@@ -366,7 +370,7 @@ class ControllerPagesSaleOrder extends AController
                         );
                     }
                 }
-            }
+            }*/
         }
 
         $order_info = Order::getOrderArray($order_id);
@@ -583,7 +587,7 @@ class ControllerPagesSaleOrder extends AController
             $orderStatuses = OrderStatus::getOrderStatusConfig();
             $this->data['cancel_statuses'] = [];
             foreach ($orderStatuses as $oStatus) {
-                if (in_array('return_to_stock', $oStatus['config']['actions'])) {
+                if (in_array('return_to_stock', (array)$oStatus['config']['actions'])) {
                     $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
                 }
             }
@@ -593,6 +597,13 @@ class ControllerPagesSaleOrder extends AController
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
                 'product_status'   => $product['status'],
+                'order_status_id'  => $order_product['order_status_id'],
+                'order_status'     => OrderStatusDescription::where(
+                    [
+                        'order_status_id' => (int)$order_product['order_status_id'],
+                        'language_id'     => (int)$order_info['language_id'],
+                    ]
+                )->first()->name,
                 'name'             => $order_product['name'],
                 'model'            => $order_product['model'],
                 'option'           => $option_data,

@@ -30,6 +30,7 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATax;
+use abc\core\lib\AttributeManager;
 use abc\core\lib\AWeight;
 use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogCategory;
@@ -1360,6 +1361,9 @@ class ControllerResponsesProductProduct extends AController
         $html_multivalue_elements = HtmlElementFactory::getMultivalueElements();
         $html_elements_with_options = HtmlElementFactory::getElementsWithOptions();
         if (!$attributes) {
+            /**
+             * @var AttributeManager $attr_mng
+             */
             $attr_mng = ABC::getObjectByAlias('AttributeManager',['download_attribute']);
             $attr_type_id = $attr_mng->getAttributeTypeID('download_attribute');
             $this->data['form']['fields']['attributes']['no_attr'] =
@@ -1561,6 +1565,12 @@ class ControllerResponsesProductProduct extends AController
         if(!$order_product_id) {
             $product_id = (int)$this->request->get['product_id'];
             $product_info = $this->model_catalog_product->getProduct($product_id);
+        } else {
+            $orderProduct = OrderProduct::find($order_product_id);
+            if ($orderProduct) {
+                $product_id = (int)$orderProduct->product_id;
+                $product_info = $this->model_catalog_product->getProduct($product_id);
+            }
         }
         $preset_values = [];
 
@@ -1873,10 +1883,19 @@ class ControllerResponsesProductProduct extends AController
             $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
+        //get combined database and config info about each order status
+        $orderStatuses = OrderStatus::getOrderStatusConfig();
+        $this->data['cancel_statuses'] = [];
+        foreach ($orderStatuses as $oStatus) {
+            if (in_array('return_to_stock', (array)$oStatus['config']['actions'])) {
+                $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
+            }
+        }
+
         $this->data['form']['order_status_id'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'order_status_id',
-            'value'   => $product_info['order_status_id'],
+            'value'   => $this->request->get['order_status_id'],
             'options' => $statuses,
             'attr'    => (in_array($product_info['order_status_id'], $this->data['cancel_statuses']) ? 'readonly' : ''),
         ]);
