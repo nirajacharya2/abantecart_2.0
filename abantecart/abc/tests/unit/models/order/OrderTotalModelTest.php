@@ -38,7 +38,7 @@ class OrderTotalModelTest extends ATestCase
             $errors = $orderStatus->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(8, count($errors));
+        $this->assertEquals(7, count($errors));
 
         //validate
         $data = [

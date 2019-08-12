@@ -32,7 +32,7 @@ class OrderStatusDescriptionModelTest extends ATestCase
             $orderStatusDescription->validate($data);
         } catch (ValidationException $e) {
             $errors = $orderStatusDescription->errors()['validation'];
-            var_dump($errors);
+            //var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
         $this->assertEquals(3, count($errors));

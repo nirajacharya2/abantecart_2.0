@@ -40,7 +40,7 @@ class OrderOptionModelTest extends ATestCase
             $errors = $orderOption->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(10, count($errors));
+        $this->assertEquals(9, count($errors));
 
         //check validation of presence in database
         $data = [

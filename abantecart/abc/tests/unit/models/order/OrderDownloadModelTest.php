@@ -44,7 +44,7 @@ class OrderDownloadModelTest extends ATestCase
             $errors = $orderDownload->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(14, count($errors));
+        $this->assertEquals(13, count($errors));
 
         //check validation of presence in database
         $data = [

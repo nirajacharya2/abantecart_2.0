@@ -33,7 +33,7 @@ class OrderDatumModelTest extends ATestCase
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
-        $this->assertEquals(3, count($errors));
+        $this->assertEquals(2, count($errors));
 
         //check validation of presence in database
         $data = [
