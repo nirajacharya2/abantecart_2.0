@@ -553,10 +553,12 @@ class Customer extends BaseModel
 
     public function setPasswordAttribute($password)
     {
-        if (!$this->originalIsEquivalent('password', $password)) {
+        if (!empty(trim($password)) && !$this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = H::getHash($password, $salt_key);
+        } else {
+            unset($this->attributes['password']);
         }
     }
 
