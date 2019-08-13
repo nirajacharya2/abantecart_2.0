@@ -562,8 +562,6 @@ class ControllerPagesSaleCoupon extends AController
         $store_name = 'For store '.$store_info['store_name'].': ';
 
         if ($this->request->get['coupon_id']) {
-            $this->loadModel('sale/order');
-
             $total = Order::getOrders(['filter_coupon_id' => $this->request->get['coupon_id']], 'total_only');
             $this->data['form']['fields']['total_coupon_usage'] = $form->getFieldHtml([
                 'type'  => 'input',

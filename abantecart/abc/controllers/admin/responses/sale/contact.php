@@ -354,7 +354,6 @@ class ControllerResponsesSaleContact extends AController
 
     public function getRecipientsCount()
     {
-        $this->loadModel('sale/order');
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);

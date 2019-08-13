@@ -32,7 +32,6 @@ class ControllerApiOrderDetails extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
 
         $request = $this->rest->getRequestParams();
 

@@ -53,7 +53,6 @@ class ControllerResponsesSaleOrder extends AController
         }
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
 
         $this->checkout = $this->initCheckout($this->session->data['admin_order']);
 

@@ -28,7 +28,6 @@ use H;
  * Class ControllerApiCustomerOrders
  *
  * @package abc\controllers\API
- * @property \abc\models\admin\ModelSaleOrder $model_sale_order
  */
 class ControllerApiCustomerOrders extends AControllerAPI
 {
@@ -40,7 +39,6 @@ class ControllerApiCustomerOrders extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
 
         $request = $this->rest->getRequestParams();
 

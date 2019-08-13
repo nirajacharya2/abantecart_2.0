@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -176,6 +177,11 @@ class OrderOption extends BaseModel
     public function order_product()
     {
         return $this->belongsTo(OrderProduct::class, 'order_product_id');
+    }
+
+    public function product_option()
+    {
+        return $this->belongsTo(ProductOption::class, 'product_option_id');
     }
 
     public function product_option_value()

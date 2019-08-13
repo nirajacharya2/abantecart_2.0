@@ -42,7 +42,6 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         $page = $this->request->post['page']; // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
@@ -60,10 +59,6 @@ class ControllerResponsesListingGridOrder extends AController
         }
         if ( ! in_array( $sord, $allowedDirection ) ) {
             $sord = $allowedDirection[0];
-        }
-
-        if ( in_array( $sidx, ['customer_id', 'order_id', 'date_added', 'total']) ) {
-            $sidx = 'o.'.$sidx;
         }
 
         $data = [
@@ -104,7 +99,6 @@ class ControllerResponsesListingGridOrder extends AController
             $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
-        //$results = $this->model_sale_order->getOrders( $data );
         $results = Order::getOrders($data);
         $total = $results[0]['total_num_rows'];
         if ( $total > 0 ) {
@@ -153,7 +147,6 @@ class ControllerResponsesListingGridOrder extends AController
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-        $this->loadModel( 'sale/order' );
         $this->loadLanguage( 'sale/order' );
         if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
             $error = new AError( '' );
@@ -203,7 +196,6 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
             $error = new AError( '' );
@@ -270,7 +262,6 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         $response = new stdClass();
 

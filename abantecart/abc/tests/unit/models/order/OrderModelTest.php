@@ -255,5 +255,10 @@ class OrderModelTest extends ATestCase
         $order->update(['customer_id' => $customer_id]);
         $this->assertEquals(31, $results[0]['order_product_id']);
 
+        //TODO: write test Order::getOrders()
+        //TODO: write test Order::getOrdersArray()
+
+
+
     }
 }

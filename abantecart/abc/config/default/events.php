@@ -7,6 +7,7 @@
 
 use abc\modules\listeners\AdminSendApprovalEmailListener;
 use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
+use abc\modules\listeners\AdminSendOrderStatusNotifyEmailListener;
 use abc\modules\listeners\StorefrontOrderConfirmEmailListener;
 use abc\modules\listeners\StorefrontResetPasswordNotifyEmailListener;
 use abc\modules\listeners\StorefrontSendActivateLinkEmailListener;
@@ -26,6 +27,9 @@ return [
     ],
     'admin\sendNewCustomerTransactionNotifyEmail' => [
         AdminSendNewTransactionNotifyEmailListener::class,
+    ],
+    'admin\SendOrderStatusNotifyEmail'            => [
+        AdminSendOrderStatusNotifyEmailListener::class,
     ],
 
     'storefront\sendWelcomeEmail'             => [

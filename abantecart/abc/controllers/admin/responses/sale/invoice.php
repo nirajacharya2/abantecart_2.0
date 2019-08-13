@@ -27,6 +27,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
+use abc\models\order\OrderTotal;
 use H;
 
 class ControllerResponsesSaleInvoice extends AController
@@ -75,8 +76,6 @@ class ControllerResponsesSaleInvoice extends AController
         } else {
             $this->data['logo'] = $this->config->get('config_logo');
         }
-
-        $this->loadModel('sale/order');
 
         $this->data['orders'] = [];
 
@@ -137,7 +136,7 @@ class ControllerResponsesSaleInvoice extends AController
 
                 $product_data = [];
 
-                $products = $this->model_sale_order->getOrderProducts($order_id);
+                $products = OrderProduct::where('order_id', '=', $order_id)->get()->toArray();
 
                 foreach ($products as $product) {
                     $option_data = [];
@@ -169,7 +168,7 @@ class ControllerResponsesSaleInvoice extends AController
                     ];
                 }
 
-                $total_data = $this->model_sale_order->getOrderTotals($order_id);
+                $total_data = OrderTotal::where('order_id', '=', $order_id)->orderBy('sort_order')->get()->toArray();
 
                 $this->data['orders'][] = [
                     'order_id'           => $order_id,
@@ -218,12 +217,27 @@ class ControllerResponsesSaleInvoice extends AController
                 ]);
         }
 
-        $this->loadModel('sale/order');
-
         $json = [];
 
         if (isset($this->request->get['order_id'])) {
-            $json['invoice_id'] = $this->model_sale_order->generateInvoiceId($this->request->get['order_id']);
+            $max = Order::max('invoice_id');
+
+            if ($max && $max >= $this->config->get('starting_invoice_id')) {
+                $invoice_id = (int)$max + 1;
+            } elseif ($this->config->get('starting_invoice_id')) {
+                $invoice_id = (int)$this->config->get('starting_invoice_id');
+            } else {
+                $invoice_id = 1;
+            }
+
+            $order = Order::find($this->request->get['order_id']);
+            $order->update(
+                [
+                    'invoice_id'     => $invoice_id,
+                    'invoice_prefix' => $this->config->get('invoice_prefix'),
+                ]
+            );
+            $json['invoice_id'] = $this->config->get('invoice_prefix').$invoice_id;
         }
 
         //update controller data

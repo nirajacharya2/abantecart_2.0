@@ -38,7 +38,6 @@ class ControllerPagesSaleOrderSummary extends AController
         $this->document->addScript($this->view->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'));
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
 
         if (isset($this->request->get['order_id'])) {
             $order_id = $this->request->get['order_id'];

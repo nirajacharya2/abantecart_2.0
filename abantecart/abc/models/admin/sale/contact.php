@@ -28,8 +28,6 @@ use H;
 /**
  * Class ModelSaleContact
  * @property ModelSettingStore $model_setting_store
- * @property ModelSaleCustomer $model_sale_customer
- * @property ModelSaleOrder $model_sale_order
  */
 class ModelSaleContact extends Model{
     public $errors = [];
@@ -223,7 +221,6 @@ class ModelSaleContact extends Model{
         // All customers by product
         if (isset($data['products']) && is_array($data['products'])){
             $emails = [];
-            $this->load->model('sale/order');
             foreach ($data['products'] as $product_id){
                 // fore registered customers
                 $results = Customer::getCustomersByProduct($product_id);
@@ -297,7 +294,6 @@ class ModelSaleContact extends Model{
         }
         // All customers by product
         if (isset($data['products']) && is_array($data['products']) && $data['products']){
-            $this->load->model('sale/order');
             foreach ($data['products'] as $product_id){
                 //for registered customers
                 $results = Customer::getCustomersByProduct($product_id);

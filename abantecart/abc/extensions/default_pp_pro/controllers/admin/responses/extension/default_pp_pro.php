@@ -124,7 +124,6 @@ class ControllerResponsesExtensionDefaultPpPro extends AController
     {
         $json = [];
         if (H::has_value($this->request->get['order_id'])) {
-            $this->loadModel( 'sale/order' );
             $order_info = Order::getOrderArray($this->request->get['order_id']);
             $this->loadLanguage( 'default_pp_pro/default_pp_pro' );
             if (H::has_value($order_info['payment_method_data'])) {

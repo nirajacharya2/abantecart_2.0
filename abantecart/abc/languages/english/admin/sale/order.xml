@@ -440,4 +440,8 @@
 		<key>text_order_status</key>
 		<value><![CDATA[Order Status]]></value>
 	</definition>
+	<definition>
+		<key>error_system</key>
+		<value><![CDATA[No payment methods available.<a href="%s">Please enable at least one and try again.</a>]]></value>
+	</definition>
 </definitions>

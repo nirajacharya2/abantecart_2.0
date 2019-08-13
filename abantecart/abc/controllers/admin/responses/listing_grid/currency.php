@@ -130,7 +130,6 @@ class ControllerResponsesListingGridCurrency extends AController
             case 'del':
 
                 $this->loadModel('setting/store');
-                $this->loadModel('sale/order');
 
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {

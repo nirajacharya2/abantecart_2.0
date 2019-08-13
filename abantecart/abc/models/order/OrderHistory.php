@@ -97,8 +97,27 @@ class OrderHistory extends BaseModel
         ],
     ];
 
+    public function SetCommentAttribute($value)
+    {
+        $this->attributes['comment'] = strip_tags($value);
+    }
+
     public function order_status()
     {
         return $this->belongsTo(OrderStatus::class, 'order_status_id');
+    }
+
+    public function order_status_description()
+    {
+        return $this->hasOne(OrderStatusDescription::class, 'order_status_id', 'order_status_id')
+                    ->where('language_id', '=', static::$current_language_id);
+    }
+
+    public function save($options = [])
+    {
+        parent::save($options);
+        //touch orders table
+        $order = Order::find($this->order_id);
+        $order->update(['order_status_id' => $this->order_status_id]);
     }
 }

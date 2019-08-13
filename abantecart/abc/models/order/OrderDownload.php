@@ -4,6 +4,7 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\catalog\Download;
+use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -258,5 +259,53 @@ class OrderDownload extends BaseModel
     public function history()
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_download_id');
+    }
+
+    /**
+     * @param int $order_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public static function getOrderDownloads($order_id)
+    {
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = OrderDownload::select(
+            [
+                'order_downloads.*',
+                'order_products.*',
+                'order_products.name AS product_name',
+            ]
+        )
+                              ->leftJoin(
+                                  'order_products',
+                                  'order_products.order_product_id',
+                                  '=',
+                                  'order_downloads.order_product_id'
+                              )
+                              ->where('order_downloads.order_id', '=', $order_id)
+                              ->orderBy('order_products.order_product_id', 'ASC')
+                              ->orderBy('order_downloads.sort_order', 'ASC')
+                              ->orderBy('order_downloads.name', 'ASC')
+                              ->get()
+                              ->toArray();
+
+        $output = [];
+        foreach ($query as $row) {
+            $output[$row['product_id']]['product_name'] = $row['product_name'];
+            // get download_history
+            $row['download_history'] = OrderDownload::where(
+                [
+                    'order_id'          => $order_id,
+                    'order_download_id' => $row['order_download_id'],
+                ]
+            )->get()->toArray();
+
+            $output[$row['product_id']]['downloads'][] = $row;
+        }
+
+        return $output;
     }
 }

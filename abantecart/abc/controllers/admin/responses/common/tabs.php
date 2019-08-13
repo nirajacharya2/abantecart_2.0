@@ -87,7 +87,6 @@ class ControllerResponsesCommonTabs extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         //10 new orders
-        $this->loadModel('sale/order');
         $filter = [
             'sort'  => 'o.date_added',
             'order' => 'DESC',

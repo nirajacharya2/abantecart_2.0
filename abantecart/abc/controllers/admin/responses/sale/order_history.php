@@ -17,63 +17,81 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
+use abc\models\order\OrderHistory;
+use abc\models\order\OrderStatusDescription;
+use abc\modules\events\ABaseEvent;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesSaleOrderHistory extends AController {
+class ControllerResponsesSaleOrderHistory extends AController
+{
 
-	public function main() {
+    public function main()
+    {
 
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->loadLanguage('sale/order');
+        $json = [];
+        if (!$this->user->canModify('sale/order')) {
+            $json['error'] = $this->language->get('error_permission');
+        } else {
+            $post = $this->request->post;
+            $this->db->beginTransaction();
+            try {
+                $data = $post;
+                $data['order_id'] = $this->request->get['order_id'];
+                $data['notify'] = (isset($post['notify']));
 
-		$this->loadLanguage('sale/order');
-		
-		$this->loadModel('sale/order');
-		
-		$json = array();
-    	
-		if (!$this->user->canModify('sale/order')) {
-      		$json['error'] = $this->language->get('error_permission'); 
-    	} else {
-			$this->model_sale_order->addOrderHistory($this->request->get['order_id'], $this->request->post);
-			
-			$json['success'] = $this->language->get('text_success');
-			
-			$json['date_added'] = date($this->language->get('date_format_short'));
+                $oHistory = new OrderHistory($data);
+                $oHistory->save();
+                $this->db->commit();
+                $json['success'] = $this->language->get('text_success');
+                $json['date_added'] = date($this->language->get('date_format_short'));
+                H::event('admin\SendOrderStatusNotifyEmail', [new ABaseEvent($data)]);
+            } catch (\Exception $e) {
+                $json['error'] = sprintf(
+                    $this->language->get('error_system'),
+                    $this->html->getSecureURL('tool/error_log')
+                );
+                $this->db->rollback();
+            }
 
-			$this->loadModel('localisation/order_status');
-			
-			$order_status_info = $this->model_localisation_order_status->getOrderStatus($this->request->post['order_status_id']);
-			
-			if ($order_status_info) {
-				$json['order_status'] = $order_status_info['name'];
-			} else {
-				$json['order_status'] = '';
-			}	
-			
-			if ($this->request->post['notify']) {
-				$json['notify'] = $this->language->get('text_yes');
-			} else {
-				$json['notify'] = $this->language->get('text_no');
-			}
-			
-			if (isset($this->request->post['comment'])) {
-				$json['comment'] = $this->request->post['comment'];
-			} else {
-				$json['comment'] = '';
-			}
-		}
+            $orderStatus = OrderStatusDescription::where(
+                [
+                    'language_id'     => $this->language->getContentLanguageID(),
+                    'order_status_id' => $this->request->post['order_status_id'],
+                ]
+            )->first();
 
-          //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+            if ($orderStatus) {
+                $json['order_status'] = $orderStatus->name;
+            } else {
+                $json['order_status'] = '';
+            }
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($json));
-  	} 
+            if ($this->request->post['notify']) {
+                $json['notify'] = $this->language->get('text_yes');
+            } else {
+                $json['notify'] = $this->language->get('text_no');
+            }
+
+            if (isset($this->request->post['comment'])) {
+                $json['comment'] = $this->request->post['comment'];
+            } else {
+                $json['comment'] = '';
+            }
+        }
+
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($json));
+    }
 
 }

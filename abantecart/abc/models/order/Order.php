@@ -899,7 +899,13 @@ class Order extends BaseModel
             /**
              * @var QueryBuilder $query
              */
-            $query = Order::select(['orders.*', 'order_status_descriptions.name as order_status_name'])
+            $query = Order::select(
+                [
+                    'orders.*',
+                    'order_status_descriptions.name as order_status_name',
+                    'languages.code as language_code',
+                    'languages.filename as language_filename',
+                ])
                           ->where('orders.order_id', '=', $order_id);
             if ($customer_id) {
                 $query->where('orders.customer_id', '=', $customer_id);
@@ -922,7 +928,7 @@ class Order extends BaseModel
                             'orders.order_status_id',
                             '=',
                             'order_status_descriptions.order_status_id'
-                        )->where(
+                        )->on(
                             'order_status_descriptions.language_id',
                             '=',
                             'orders.language_id'
@@ -1522,25 +1528,24 @@ class Order extends BaseModel
         }
         $query->addSelect($select);
 
-        $query->leftJoin(
-            'order_products',
-            'orders.order_id',
-            '=',
-            'order_products.order_id'
-        );
-
         if ($inputData['filter_order_status_id'] == 'all') {
             $query->where('orders.order_status_id', '>=', 0);
         } else {
             if (H::has_value($inputData['filter_order_status_id'])) {
                 $query->where('orders.order_status_id', '=', (int)$inputData['filter_order_status_id']);
             } else {
-                $query->where('orders.order_status_id', '>', 0);
+                $query->where('orders.order_status_id', '>', '0');
 
             }
         }
 
         if (H::has_value($inputData['filter_product_id'])) {
+            $query->leftJoin(
+                'order_products',
+                'orders.order_id',
+                '=',
+                'order_products.order_id'
+            );
             $query->where('order_products.product_id', '=', $inputData['filter_product_id']);
         }
 
@@ -1632,6 +1637,7 @@ class Order extends BaseModel
             }
         }
 
+
         //If for total, we done building the query
         if ($mode == 'total_only') {
             //allow to extends this method from extensions
@@ -1681,6 +1687,39 @@ class Order extends BaseModel
 
         return $result_rows;
 
+    }
+
+    /**
+     * @param array $customers_ids
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public static function getCountOrdersByCustomerIds($customers_ids)
+    {
+        $customers_ids = (array)$customers_ids;
+        $ids = [];
+        foreach ($customers_ids as $cid) {
+            $cid = (int)$cid;
+            if ($cid) {
+                $ids[] = $cid;
+            }
+        }
+
+        if (!$ids) {
+            return [];
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = Order::select('customer_id')
+                      ->selectRaw('COUNT(*) as count')
+                      ->whereIn('customer_id', $ids)
+                      ->where('order_status_id', '>', '0')
+                      ->groupBy('customer_id');
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
+        return $query->get()->pluck('count', 'customer_id');
     }
 
 }
