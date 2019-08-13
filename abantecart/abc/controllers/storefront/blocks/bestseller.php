@@ -47,13 +47,14 @@ class ControllerBlocksBestSeller extends AController {
 
 		$this->data['products'] = array();
 
-		$results = $this->model_catalog_product->getBestSellerProducts(['limit' => $this->config->get('config_bestseller_limit')]);
+		$results = Product::getBestSellerProducts(['limit' => $this->config->get('config_bestseller_limit')]);
+
 		$product_ids = array();
 		foreach($results as $result){
 			$product_ids[] = (int)$result['product_id'];
 		}
 
-		$products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
+		$products_info = Product::getProductsAllInfo($product_ids);
 
 		//get thumbnails by one pass
 		$resource = new AResource('image');

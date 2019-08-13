@@ -539,10 +539,12 @@ class Customer extends BaseModel
 
     public function setPasswordAttribute($password)
     {
-        if (!$this->originalIsEquivalent('password', $password)) {
+        if (!empty(trim($password)) && !$this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = H::getHash($password, $salt_key);
+        } else {
+            unset($this->attributes['password']);
         }
     }
 
@@ -755,7 +757,7 @@ class Customer extends BaseModel
             if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '".mb_strtolower($filter['loginname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".mb_strtolower($filter['loginname'])."%'");
             }
         }
 
