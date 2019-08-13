@@ -16,7 +16,9 @@
 						<?php foreach ($options as $option) { ?>
 							<div class="form-group">
 								<?php if ($option['html']->type != 'hidden') { ?>
-								<label class="control-label col-sm-5"><?php echo $option['name']; ?></label>
+                                    <label class="control-label col-sm-5"
+                                           data-option-name=<?php abc_js_echo($option['html']->name); ?>
+                                    ><?php echo $option['name']; ?></label>
 								<?php } ?>
 								<div class="input-group afield col-sm-6">
 									<?php echo $option['html']; ?>
@@ -39,8 +41,15 @@
 						</div>
 					</div>
 						<?php }  ?>
-			</div>
-		</div>
+                <label class="h4 heading"><?php echo $text_order_status ?></label>
+                <div class="form-group ">
+                    <label class="control-label col-sm-5 col-xs-12"></label>
+                    <div class="input-group afield col-sm-6 col-xs-12">
+                        <?php echo $form['order_status_id']; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 	</div>
 
@@ -53,7 +62,7 @@
 				</button>
 				&nbsp;
 				<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-					<i class="fa fa-sync"></i> <?php echo $form['cancel']->text; ?>
+                    <i class="fa fa-refresh"></i> <?php echo $form['cancel']->text; ?>
 				</a>
 
 			</div>
@@ -64,32 +73,38 @@
 </div>
 
 <script type="application/javascript">
-	var decimal_point = '<?php echo $decimal_point; ?>';
-	var decimal_place = '<?php echo $currency['decimal_place']; ?>';
-	var thousand_point = '<?php echo $thousand_point; ?>';
 
-	var currency_symbol = '<?php echo $currency['symbol_left'] ?? $currency['symbol_right']; ?>';
-	var currency_location = '<?php echo $currency['symbol_left'] ? 'left':'right'; ?>';
+    $('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea')
+        .not('#orderProductFrm_order_status_id')
+        .on('change', display_total_price);
 
-	$('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea').on('change', display_total_price);
-	$('#orderProductFrm_product0quantity').on('keyup', display_total_price);
+    $('#orderProductFrm_quantity')
+        .on('keyup', display_total_price);
 
-	function formatMoney(num, c, d, t) {
-		c = isNaN(c = Math.abs(c)) ? 2 : c,
-				d = d == undefined ? "." : d,
-				t = t == undefined ? "," : t,
-				s = num < 0 ? "-" : "",
-				i = parseInt(num = Math.abs(+num || 0).toFixed(c)) + "",
-				j = (j = i.length) > 3 ? j % 3 : 0;
-		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(num - i).toFixed(c).slice(2) : "");
-	}
+    $('#orderProductFrm_order_status_id').on(
+        'change',
+        function () {
+            var cancel_statuses = ['<?php echo implode("','", $cancel_statuses)?>'];
+
+            if ($.inArray($(this).val(), cancel_statuses) !== -1) {
+                $('#orderProductFrm_quantity').val(0).attr('readonly', 'readonly');
+                $('#orderProductFrm_total').val(0);
+
+            } else {
+                if ($('#orderProductFrm_quantity').val() == 0) {
+                    $('#orderProductFrm_quantity')
+                        .val($('#orderProductFrm_quantity').attr('data-orgvalue'))
+                        .keyup()
+                        .removeAttr('readonly');
+                }
+            }
+        });
+
 
 	function display_total_price() {
-		<?php echo $editable_price ? 'return recalculate();':'' ?>
-
 		var data = $("#orderProductFrm").serialize();
-		data = data.replace(new RegExp("product%5B0%5D%5Boption%5D",'g'),'option'); <?php // data format for storefront response-controller ?>
-		data = data.replace(new RegExp("product%5B0%5D%5Bquantity%5D",'g'),'quantity'); <?php // data format for storefront response-controller ?>
+        data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option'); <?php // data format for storefront response-controller ?>
+        data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity'); <?php // data format for storefront response-controller ?>
 		$.ajax({
 			type: 'POST',
 			url: '<?php echo $total_calc_url;?>',
@@ -97,46 +112,55 @@
 			data: data,
 			success: function (data) {
 				if (data.total) {
-					$('#orderProductFrm_product0price').val(data.price);
-					$('#orderProductFrm_product0total').val(data.total);
+                    $('#orderProductFrm_price').val(data.price);
+                    $('#orderProductFrm_total').val(data.total);
 				}
 			}
 		});
-
 	}
-
-	function get_currency_str(num) {
-		var str;
-		if (currency_location == 'left') {
-			str = currency_symbol + formatMoney(num, decimal_place, decimal_point, thousand_point);
-		} else {
-			str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
-		}
-		return str;
-	}
-
-	function get_currency_num(str) {
-		str = str == undefined || str.length == 0 ? '0' : str;
-		var final_number = str.replace(thousand_point, '');
-		final_number = final_number.replace(currency_symbol, '');
-		final_number = final_number.replace(decimal_point, '.');
-		final_number = parseFloat(final_number.replace(/[^0-9\-\.]/g, ''));
-
-		return final_number;
-	}
-
-<?php if($editable_price){ ?>
-	function recalculate() {
-		var qty, price, total;
-		//update products
-		qty = $('#orderProductFrm_product0quantity').val();
-		price = get_currency_num($('#orderProductFrm_product0price').val());
-		total = qty * price;
-		//update last - total
-		$('#orderProductFrm_product0total').val(get_currency_str(total));
-	}
-	$(document).on('keyup',$('#orderProductFrm_product0price'), recalculate );
-<?php } ?>
 
 	display_total_price();
+
+    var modal_mode = '<?php echo $modal_mode; ?>';
+    <?php //if need to pass js-data back to main page => ?>
+    if (modal_mode === 'json') {
+        $('#orderProductFrm').on('submit', function (e) {
+            var that = $(this);
+            var output = {form: that.serializeArray()};
+            $.each(output.form, function (index, value) {
+                var label = that.find('label[data-option-name="' + value.name + '"]');
+                if (label.length > 0) {
+                    output.form[index].text = label.html();
+                }
+
+                var field = that.find('[name="' + value.name + '"]');
+                var tag = field.prop('tagName');
+
+                if (tag === 'SELECT') {
+                    output.form[index].value_text = field.find('option[value="' + value.value + '"]').text().trim();
+                } else if (tag === "INPUT") {
+                    if (field.prop('type') === 'radio') {
+                        field = field.filter('.changed');
+                        output.form[index].value_text = that.find('label[for="' + field.prop('id') + '"]').text().trim();
+                    }
+                    if (field.prop('type') === 'checkbox') {
+                        field = field.filter('[value="' + value.value + '"]');
+                        output.form[index].value_text = that.find('label[for="' + field.prop('id') + '"]').text().trim();
+                    }
+                }
+            });
+            output.image_url = '<?php echo $image['thumb_url']?>';
+            output.product_id = '<?php echo $product_id; ?>';
+            output.product_name = '<?php echo $product_name; ?> - ' + $('#orderProductFrm_order_status_id  option:selected').text().trim();
+            output.product_url = '<?php echo $product_url; ?>';
+            output.order_product_id = '<?php echo $order_product_id; ?>';
+            output.order_status_id = $('#orderProductFrm_order_status_id').val();
+
+
+            AddProductToForm(output);
+
+            e.preventDefault();
+            $('#add_product_modal').modal('toggle');
+        });
+    }
 </script>
