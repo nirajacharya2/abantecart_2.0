@@ -87,7 +87,7 @@ class ControllerPagesAccountAccount extends AController
                                                 ->get()->count();
         $this->data['total_downloads'] = $this->download->getTotalDownloads();
         $this->data['total_orders'] = Order::where('customer_id', '=', $this->customer->getId())
-                                    ->where('order_status_id', '>', 0)->count();;
+                                           ->where('order_status_id', '>', '0')->count();
 
         $this->view->batchAssign($this->data);
 
