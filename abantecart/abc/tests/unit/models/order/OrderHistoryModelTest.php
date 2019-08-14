@@ -22,7 +22,7 @@ class OrderHistoryModelTest extends ATestCase
         $data = [
             'order_id'        => 'fail',
             'notify'          => 'fail',
-            'comment'         => -0.000000000123232,
+            'comment'         => [],
             'order_status_id' => 'fail',
         ];
         $order = new OrderHistory($data);
@@ -31,7 +31,8 @@ class OrderHistoryModelTest extends ATestCase
             $order->validate();
         } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-            // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            //var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+            //var_Dump($errors);
         }
 
         $this->assertEquals(4, count($errors));
