@@ -41,7 +41,8 @@
                             <?php echo $field; ?>
                         </div>
                     </div>
-                <?php } ?>
+                <?php }
+                if ($modal_mode == 'json') { ?>
                 <label class="h4 heading"><?php echo $text_order_status ?></label>
                 <div class="form-group ">
                     <label class="control-label col-sm-5 col-xs-12"></label>
@@ -49,6 +50,7 @@
                         <?php echo $form['order_status_id']; ?>
                     </div>
                 </div>
+                <?php } ?>
             </div>
         </div>
 

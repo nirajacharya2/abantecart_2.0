@@ -84,10 +84,10 @@
 					<thead>
 					<tr>
 						<td></td>
-						<td class="left"><?php echo $column_product; ?></td>
-						<td class="right"><?php echo $column_quantity; ?></td>
-						<td class="right"><?php echo $column_price; ?></td>
-						<td class="right"><?php echo $column_total; ?></td>
+                        <td class="align-left"><?php echo $column_product; ?></td>
+                        <td class="align-right"><?php echo $column_quantity; ?></td>
+                        <td class="align-right"><?php echo $column_price; ?></td>
+                        <td class="align-right"><?php echo $column_total; ?></td>
 					</tr>
 					</thead>
 
@@ -107,11 +107,11 @@
 									<a class="edit_product btn btn-xs btn-info-alt tooltips"
 									   data-original-title="<?php echo $text_edit; ?>"
 									   data-order-product-id="<?php echo $order_product['order_product_id']; ?>">
-										<i class="fa fa-pencil-alt"></i>
+                                        <i class="fa fa-pencil"></i>
 									</a>
                                 <?php } ?>
 							</td>
-							<td class="left">
+                            <td class="align-left">
 								<a target="_blank"
 								   href="<?php echo $order_product['href']; ?>"><?php echo $order_product['name']; ?>
 									(<?php echo $order_product['model']; ?>)</a>
@@ -136,7 +136,7 @@
                                         <?php } ?>
 									</dl>
                                 <?php } ?></td>
-							<td class="right">
+                            <td class="align-right">
 								<input class="afield no-save" type="text"
                                     <?php if (!$order_product['product_status']) { ?>
 										readonly

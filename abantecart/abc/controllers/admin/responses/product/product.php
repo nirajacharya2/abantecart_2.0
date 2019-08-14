@@ -1922,7 +1922,7 @@ class ControllerResponsesProductProduct extends AController
         $this->data['decimal_point'] = $this->language->get('decimal_point');
         $this->data['text_order_status'] = $this->language->get('text_order_status');
         $this->data['editable_price'] = $editable_price;
-        $this->data['modal_mode'] = $this->request->get['mode'] == 'submit' ?: 'json';
+        $this->data['modal_mode'] = $this->request->get['mode'] == 'json' ? 'json' : 'submit';
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
