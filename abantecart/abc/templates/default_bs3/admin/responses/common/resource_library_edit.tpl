@@ -252,7 +252,7 @@
 	<div class="row">
 		<div class="center">
 			<a class="btn btn-default rl_reset tooltips" href="#" title="<?php echo $button_reload; ?>">
-				<i class="fa fa-refresh"></i>
+                <i class="fa fa-sync"></i>
 			</a>
 			&nbsp;
 			<a class="btn btn-primary rl_save tooltips" href="#" title="<?php echo $button_save; ?>">

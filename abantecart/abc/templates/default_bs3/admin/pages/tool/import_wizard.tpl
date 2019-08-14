@@ -37,7 +37,7 @@
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<a class="btn btn-default lock-on-click tooltips" href="<?php echo $reset_url; ?>" title="<?php echo $button_reset; ?>">
-				<i class="fa fa-refresh fa-fw"></i>
+                <i class="fa fa-sync fa-fw"></i>
 			</a>
 
 			<a href="#" class="btn btn-default export_map tooltips" data-toggle="modal" data-target="#load_map_modal" title="<?php echo $text_load_map; ?>">
@@ -178,7 +178,7 @@
 				<i class="fa fa-code fa-fw"></i> <?php echo $text_load_map; ?>
 			</a>
 			<a href="<?php echo $reset_url; ?>" class="btn btn-default">
-				<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</a>
 			<?php } ?>
 		</div>

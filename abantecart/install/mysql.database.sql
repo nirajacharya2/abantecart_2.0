@@ -12736,7 +12736,7 @@ VALUES
   ( 229,1,'Icon Data', '', '', '', '<i class="fa fa-cubes"></i>&nbsp;', NOW() ),
   ( 230,1,'Icon Updater', '', '', '', '<i class="fa fa-sync"></i>&nbsp;', NOW() ),
   ( 231,1,'Icon Cache', '', '', '', '<i class="fa fa-recycle"></i>&nbsp;', NOW() ),
-  ( 232,1,'Icon Messages', '', '', '', '<i class="fa fa-weixin"></i>&nbsp;', NOW() ),
+  (232, 1, 'Icon Messages', '', '', '', '<i class="fa fa-comments"></i>&nbsp;', NOW()),
   ( 233,1,'Icon Logs', '', '', '', '<i class="fa fa-file"></i>&nbsp;', NOW() ),
   ( 234,1,'Icon Report sale', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() ),
   ( 235,1,'Icon Viewed', '', '', '', '<i class="fa fa-sort-amount-down"></i>&nbsp;', NOW() ),

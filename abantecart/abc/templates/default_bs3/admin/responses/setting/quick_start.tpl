@@ -81,7 +81,7 @@
 		    </button>
 		    <?php } else { ?>
 			<button class="btn btn-default" type="reset">
-				<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>&nbsp;
 			<button class="btn btn-primary">
 				<i class="fa fa-save"></i> <?php echo $text_next; ?> <i class="fa fa-arrow-right"></i>

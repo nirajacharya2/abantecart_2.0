@@ -66,7 +66,7 @@ foreach ($pages as $page) {
 
 			<div class="btn-group toolbar">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reset; ?>">
-					<i class="fa fa-refresh fa-fw"></i>
+                    <i class="fa fa-sync fa-fw"></i>
 				</a>
 			</div>
 
