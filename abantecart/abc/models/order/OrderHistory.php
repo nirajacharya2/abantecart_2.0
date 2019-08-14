@@ -113,7 +113,7 @@ class OrderHistory extends BaseModel
                     ->where('language_id', '=', static::$current_language_id);
     }
 
-    public function save($options = [])
+    public function save(array $options = [])
     {
         parent::save($options);
         //touch orders table

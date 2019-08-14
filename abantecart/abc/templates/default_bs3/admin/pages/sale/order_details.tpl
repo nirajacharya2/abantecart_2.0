@@ -211,7 +211,7 @@
                             <a class="edit_product btn btn-xs btn-info-alt tooltips"
                                data-original-title="<?php echo $text_edit; ?>"
                                data-order-product-id="<?php echo $oid; ?>">
-                                <i class="fa fa-pencil-alt"></i>
+                                <i class="fa fa-pencil"></i>
                             </a>
                         <?php } ?>
                     </td>
@@ -259,13 +259,13 @@
                         <?php echo $order_product['price']; ?>
                         <input class="afield no-save" type="hidden"
                                name="product[<?php echo $oid; ?>][price]"
-                               value="<?php echo $order_product['price']; ?>"/>
+                               value="<?php echo strip_tags($order_product['price']); ?>"/>
                     </td>
                     <td class="align-center">
                         <?php echo $order_product['total']; ?>
                         <input class="afield no-save" type="hidden"
                                name="product[<?php echo $oid; ?>][total]"
-                               value="<?php echo $order_product['total']; ?>"/>
+                               value="<?php echo strip_tags($order_product['total']); ?>"/>
                     </td>
                 </tr>
                 </tbody>
@@ -291,10 +291,10 @@
                                 </td>
                                 <td><?php
                                     if (!in_array($total_row['type'], ['total'])) {
-                                        echo $total_row['text'];
+                                        echo html_entity_decode($total_row['text']);
                                     } else { ?>
                                         <b class="<?php echo $total_row['type']; ?>">
-                                            <?php echo $total_row['text']; ?>
+                                            <?php echo html_entity_decode($total_row['text']); ?>
                                         </b>
                                     <?php }
                                     $count++;

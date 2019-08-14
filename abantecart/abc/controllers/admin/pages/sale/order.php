@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\ACurrency;
 use abc\core\lib\AException;
 use abc\core\lib\LibException;
@@ -322,8 +323,16 @@ class ControllerPagesSaleOrder extends AController
             unset($this->session->data['error']);
         }
 
-        $order_id = (int)$this->request->get['order_id'];
-        if ($this->request->is_POST() && $this->validateHistoryForm()) {
+        if (isset($this->request->get['order_id'])) {
+            $order_id = (int)$this->request->get['order_id'];
+        } else {
+            $order_id = 0;
+        }
+        $order_info = Order::getOrderArray($order_id);
+        $post = $this->request->post;
+        $post['order_status_id'] = $order_info['order_status_id'];
+
+        if ($this->request->is_POST() && $this->validateHistoryForm($order_id, $post)) {
             try {
                 Order::editOrder($order_id, $this->request->post);
             } catch (AException $e) {
@@ -370,8 +379,6 @@ class ControllerPagesSaleOrder extends AController
                 }
             }*/
         }
-
-        $order_info = Order::getOrderArray($order_id);
 
         $this->data['order_info'] = $order_info;
 
@@ -803,7 +810,16 @@ class ControllerPagesSaleOrder extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        if ($this->request->is_POST() && $this->validateHistoryForm()) {
+        if (isset($this->request->get['order_id'])) {
+            $order_id = (int)$this->request->get['order_id'];
+        } else {
+            $order_id = 0;
+        }
+        $order_info = Order::getOrderArray($order_id);
+        $post = $this->request->post;
+        $post['order_status_id'] = $order_info['order_status_id'];
+
+        if ($this->request->is_POST() && $this->validateHistoryForm($order_id, $post)) {
             try {
                 Order::editOrder($this->request->get['order_id'], $this->request->post);
                 $this->session->data['success'] = $this->language->get('text_success');
@@ -817,14 +833,6 @@ class ControllerPagesSaleOrder extends AController
                     '&order_id='.$this->request->get['order_id'])
             );
         }
-
-        if (isset($this->request->get['order_id'])) {
-            $order_id = (int)$this->request->get['order_id'];
-        } else {
-            $order_id = 0;
-        }
-
-        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1004,7 +1012,18 @@ class ControllerPagesSaleOrder extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        if ($this->request->is_POST() && $this->validateHistoryForm()) {
+        if (isset($this->request->get['order_id'])) {
+            $order_id = (int)$this->request->get['order_id'];
+        } else {
+            $order_id = 0;
+        }
+        $order_info = Order::getOrderArray($order_id);
+        $post = $this->request->post;
+        $post['order_status_id'] = $order_info['order_status_id'];
+
+        if ($this->request->is_POST()
+            && $this->validateHistoryForm($this->request->get['order_id'], $post)
+        ) {
             try {
                 Order::editOrder($this->request->get['order_id'], $this->request->post);
                 $this->session->data['success'] = $this->language->get('text_success');
@@ -1025,14 +1044,6 @@ class ControllerPagesSaleOrder extends AController
                 '&order_id='.$this->request->get['order_id'])
             );
         }
-
-        if (isset($this->request->get['order_id'])) {
-            $order_id = (int)$this->request->get['order_id'];
-        } else {
-            $order_id = 0;
-        }
-
-        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1196,8 +1207,17 @@ class ControllerPagesSaleOrder extends AController
         $this->data = [];
         $this->document->setTitle($this->language->get('heading_title'));
 
+        if (isset($this->request->get['order_id'])) {
+            $order_id = (int)$this->request->get['order_id'];
+        } else {
+            $order_id = 0;
+        }
+        $order_info = Order::getOrderArray($order_id);
+        $post = $this->request->post;
+        $post['order_status_id'] = $order_info['order_status_id'];
+
         if ($this->request->is_POST()
-            && $this->validateHistoryForm($this->request->get['order_id'], $this->request->post)) {
+            && $this->validateHistoryForm($order_id, $post)) {
             $post = $this->request->post;
             $this->db->beginTransaction();
             try {
@@ -1227,14 +1247,6 @@ class ControllerPagesSaleOrder extends AController
                 )
             );
         }
-
-        if (isset($this->request->get['order_id'])) {
-            $order_id = (int)$this->request->get['order_id'];
-        } else {
-            $order_id = 0;
-        }
-
-        $order_info = Order::getOrderArray($order_id);
 
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
@@ -1455,6 +1467,8 @@ class ControllerPagesSaleOrder extends AController
             H::SimplifyValidationErrors($oHistory->errors()['validation'], $this->error);
         }
         $this->extensions->hk_ValidateData($this);
+
+        Registry::log()->write(var_export($this->error, true));
 
         if (!$this->error) {
             return true;
