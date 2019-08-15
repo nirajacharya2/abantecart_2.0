@@ -14,6 +14,10 @@ class CustomerTransactionModelTest extends ATestCase{
 
     public function testValidator()
     {
+        $customer_id = 9;
+        $order_id = 2;
+        CustomerTransaction::where(['customer_id' => $customer_id, 'order_id' => $order_id])->forceDelete();
+
         //test fail
         $customerTransaction = new CustomerTransaction();
         $errors = [];
@@ -28,8 +32,8 @@ class CustomerTransactionModelTest extends ATestCase{
         $errors = [];
 
         $validData = [
-                            'customer_id' => 9,
-                            'order_id' => 2,
+                            'customer_id' => $customer_id,
+                            'order_id' => $order_id,
                             'created_by' => 1,
                             'credit' => '0',
                             'debit' => '121254.2365',
@@ -50,9 +54,9 @@ class CustomerTransactionModelTest extends ATestCase{
         //check updating restriction
         try{
             $customerTransaction->update(['transaction_type' => 'blablabla']);
-        }catch(\Exception $e){
-        }
+        }catch(\Exception $e){}
 
+        $customerTransaction = CustomerTransaction::find( $customerTransaction->customer_transaction_id );
         $this->assertEquals('unittest transaction', $customerTransaction->transaction_type);
 
         /**
@@ -60,10 +64,10 @@ class CustomerTransactionModelTest extends ATestCase{
          * @see ACustomer::debitTransaction()
          * */
         CustomerTransaction::updateOrCreate($validData);
-        $count = CustomerTransaction::where($validData)->get()->count();
+        $ct = CustomerTransaction::where($validData)->get();
+        $count = $ct->count();
         $this->assertEquals(1, $count);
 
-        $customerTransaction->forceDelete();
 
     }
 }
