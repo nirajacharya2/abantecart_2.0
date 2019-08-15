@@ -920,7 +920,7 @@ class ACustomer extends ALibBase
 
         $data['customer_id']  = $this->customer_id;
         $data['section']  = (int)$data['section'] ?? 0;
-        $transaction = new CustomerTransaction($data);
+        $transaction = new CustomerTransaction();
         try {
             $transaction->validate($data);
             //use firstOrNew to prevent duplicates

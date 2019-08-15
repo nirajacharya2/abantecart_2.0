@@ -219,7 +219,10 @@ class CustomerTransaction extends BaseModel
     public function save(array $options = [])
     {
         if ($this->customer_transaction_id) {
-            throw new \Exception('You cannot to update transaction. Please use adding of new transaction instead to change balance.');
+            //you cannot to update transaction!
+            //All records must be incremental!
+            //INSERTS ONLY!
+            return true;
         }
         parent::save($options);
     }
