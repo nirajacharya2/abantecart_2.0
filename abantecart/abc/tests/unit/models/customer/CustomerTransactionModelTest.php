@@ -48,14 +48,12 @@ class CustomerTransactionModelTest extends ATestCase{
         $customerTransaction->fill($validData)->save();
 
         //check updating restriction
-        $caught = false;
         try{
             $customerTransaction->update(['transaction_type' => 'blablabla']);
         }catch(\Exception $e){
-            $caught = true;
         }
 
-        $this->assertEquals(true, $caught);
+        $this->assertEquals('unittest transaction', $customerTransaction->transaction_type);
 
         /**
          * test preventing of duplicates
