@@ -246,9 +246,8 @@ class ACart  extends ALibBase
      * @return array
      * @throws AException
      */
-    public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price=null)
+    public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price = null)
     {
-
         if (!H::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
             return [];
         }
@@ -337,11 +336,10 @@ class ACart  extends ALibBase
                     'settings'                => $option_query['settings'],
                     'value'                   => $option_value_query['name'],
                     'prefix'                  => $option_value_query['prefix'],
-                    'price'                   => (
-                    $custom_price !== null
-                        ? $custom_price
-                        : $option_value_query['price']
-                    ),
+                    'price'                   => ( $custom_price !== null
+                                                   ? $custom_price
+                                                   : $option_value_query['price']
+                                                 ),
                     'sku'                     => $option_value_query['sku'],
                     'inventory_quantity'      => (
                     $option_value_query['subtract']
@@ -420,7 +418,6 @@ class ACart  extends ALibBase
             //round base currency price to 2 decimal place
             $decimal_place = 2;
             $price = round($price, $decimal_place);
-
             foreach ($option_data as $item) {
                 if ($item['prefix'] == '%') {
                     $option_price += $price * $item['price'] / 100;

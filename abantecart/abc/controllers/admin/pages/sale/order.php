@@ -2193,7 +2193,7 @@ class ControllerPagesSaleOrder extends AController
             $post['product_id'],
             $post['quantity'],
             $post['option'],
-            $post['price']
+            H::preformatFloat($post['price'])
         );
         $this->session->data['admin_order']['cart'] = $checkout->getCart()->getCartData();
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

@@ -75,7 +75,7 @@
 				</button>
 				&nbsp;
 				<a id="reset_field" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-					<i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+					<i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 				</a>
 			</div>
 		</div>
@@ -116,7 +116,7 @@
 				</button>
 				&nbsp;
 				<a id="reset_field" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-					<i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+					<i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 				</a>
 			</div>
 		</div>
