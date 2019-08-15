@@ -119,22 +119,25 @@ class ControllerResponsesListingGridOrder extends AController
         $response->records = $total;
 
         $i = 0;
-        foreach ( $results as $result ) {
-
+        foreach ( $results->toArray() as $result ) {
             $response->rows[$i]['id'] = $result['order_id'];
-
-            $value = in_array($result['order_status_id'], (array)ABC::env('ORDER')['not_reversal_statuses'])
-                                ? $result['status']
-                                : $result['order_status_id'];
+            if(in_array($this->order_status->getStatusById($result['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) )
+            {
+                $orderStatus = $result['status'];
+            }else{
+                $orderStatus = $this->html->buildSelectBox(
+                    [
+                        'name'    => 'order_status_id['.$result['order_id'].']',
+                        'value'   => $result['order_status_id'],
+                        'options' => $statuses,
+                    ]
+                );
+            }
 
             $response->rows[$i]['cell'] = [
                 $result['order_id'],
                 $result['name'],
-                $this->html->buildSelectBox( [
-                    'name'    => 'order_status_id['.$result['order_id'].']',
-                    'value'   => $value,
-                    'options' => $statuses,
-                ]),
+                $orderStatus,
                 H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
                 $this->currency->format( $result['total'], $result['currency'], $result['value'] ),
             ];

@@ -1336,11 +1336,17 @@ class ControllerPagesSaleOrder extends AController
             'style' => 'button2',
         ]);
 
+        if(in_array($this->order_status->getStatusById($order_info['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) ){
+            $attr = 'readonly';
+        }else{
+            $attr = '';
+        }
         $this->data['form']['fields']['order_status'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'order_status_id',
             'value'   => $order_info['order_status_id'],
             'options' => $statuses,
+            'attr'    => $attr
         ]);
         $this->data['form']['fields']['notify'] = $form->getFieldHtml([
             'type'    => 'checkbox',
@@ -1453,7 +1459,7 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function validateHistoryForm($order_id, $data)
+    protected function validateHistoryForm($order_id, $data)
     {
         if (!$this->user->canModify('sale/order')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -1466,6 +1472,11 @@ class ControllerPagesSaleOrder extends AController
         } catch (ValidationException $e) {
             H::SimplifyValidationErrors($oHistory->errors()['validation'], $this->error);
         }
+
+        if(in_array($this->order_status->getStatusById($data['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) ){
+            $this->error['not_reversal_status'] = 'This Order status is not reversal!';
+        }
+
         $this->extensions->hk_ValidateData($this);
 
         Registry::log()->write(var_export($this->error, true));
@@ -1477,7 +1488,7 @@ class ControllerPagesSaleOrder extends AController
         }
     }
 
-    private function validateDownloadsForm()
+    protected function validateDownloadsForm()
     {
         if (!$this->user->canModify('sale/order')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -1492,7 +1503,7 @@ class ControllerPagesSaleOrder extends AController
         }
     }
 
-    private function _initTabs($active)
+    protected function _initTabs($active)
     {
         $this->data['active'] = $active;
         //load tabs controller
@@ -1783,7 +1794,6 @@ class ControllerPagesSaleOrder extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
-
 
     public function createOrder()
     {
