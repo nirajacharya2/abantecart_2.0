@@ -76,7 +76,7 @@ echo $form['form_open'];
 			<?php } ?>
 			<button title="<?php echo $button_update; ?>" class="btn btn-default pull-right mr10" id="cart_update"
 					value="<?php echo $form['update']->form ?>" type="submit">
-				<i class="fa fa-refresh"></i>
+				<i class="fa fa-sync"></i>
 				<?php echo $button_update; ?>
 			</button>
 			<?php echo $this->getHookVar('post_top_cart_buttons'); ?>
