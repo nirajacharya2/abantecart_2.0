@@ -20,7 +20,7 @@
 			<div class="btn-group mr10 toolbar">
 			<a class="btn btn-white tooltips" target="_invoice" href="<?php echo $invoice_url; ?>" data-toggle="tooltip"
 			   title="<?php echo $text_invoice; ?>" data-original-title="<?php echo $text_invoice; ?>">
-				<i class="fa fa-file-text"></i>
+				<i class="fa fa-file-alt"></i>
 			</a>
 			</div>
 		</div>
