@@ -211,7 +211,7 @@
                             <a class="edit_product btn btn-xs btn-info-alt tooltips"
                                data-original-title="<?php echo $text_edit; ?>"
                                data-order-product-id="<?php echo $oid; ?>">
-                                <i class="fa fa-pencil"></i>
+                                <i class="fa fa-pencil-alt"></i>
                             </a>
                         <?php } ?>
                     </td>
