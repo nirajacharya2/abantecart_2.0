@@ -1367,7 +1367,7 @@ class Product extends BaseModel
                 $languageId = $registry->get('language')->getContentLanguageID();
                 $productTags = [];
                 foreach ($tags as $tag) {
-                    $productTag = ProductTag::firstOrCreate([
+                    $productTag = ProductTag::firstOrNew([
                         'tag'         => trim($tag),
                         'product_id'  => $product->product_id,
                         'language_id' => $languageId,

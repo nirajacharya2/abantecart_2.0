@@ -385,7 +385,7 @@ class AOrder extends ALibBase
 
         $order_info['products'] = $product_data;
         $order_info['totals'] = $total_data;
-        $order_info['comment'] = $indata['comment'];
+        $order_info['comment'] = (string)$indata['comment'];
         $order_info['total'] = $total;
         $order_info['language_id'] = $this->config->get('storefront_language_id');
         $order_info['currency_id'] = $this->currency->getId();
@@ -618,7 +618,7 @@ class AOrder extends ALibBase
                         'uri'    => $uri,
                         'status' => $settings->get('config_im_guest_'.$row->name.'_status'),
                     ];
-                OrderDatum::firstOrCreate(
+                OrderDatum::firstOrNew(
                     [
                         'order_id' => $order_id,
                         'type_id'  => $type_id,

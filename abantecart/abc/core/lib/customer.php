@@ -923,8 +923,8 @@ class ACustomer extends ALibBase
 
         $transaction = new CustomerTransaction($data);
         $transaction->validate();
-        //use firstOrCreate to prevent duplicates
-        $transaction = CustomerTransaction::firstOrCreate($data);
+        //use firstOrNew to prevent duplicates
+        $transaction = CustomerTransaction::firstOrNew($data);
         $transaction_id = $transaction->customer_transaction_id;
 
         return $transaction_id;
