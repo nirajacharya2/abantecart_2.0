@@ -1555,7 +1555,6 @@ class ControllerResponsesProductProduct extends AController
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
         $this->data['order_product_id'] = $order_product_id = (int)$this->request->get['order_product_id'];
-        $editable_price = (int)$this->request->get['editable_price'];
         $order_id = (int)$this->request->get['order_id'];
         $order_info = Order::getOrderArray($order_id);
 
@@ -1833,7 +1832,7 @@ class ControllerResponsesProductProduct extends AController
             'type'  => 'input',
             'name'  => 'price',
             'value' => $preset_values['price'],
-            'attr'  => ($editable_price ? '' : 'readonly')
+            'attr'  => 'readonly'
         ]);
 
         if (!$options && $product_info['subtract']) {
@@ -1921,7 +1920,6 @@ class ControllerResponsesProductProduct extends AController
         $this->data['currency'] = $this->currency->getCurrency();
         $this->data['decimal_point'] = $this->language->get('decimal_point');
         $this->data['text_order_status'] = $this->language->get('text_order_status');
-        $this->data['editable_price'] = $editable_price;
         $this->data['modal_mode'] = $this->request->get['mode'] == 'json' ? 'json' : 'submit';
 
         //update controller data

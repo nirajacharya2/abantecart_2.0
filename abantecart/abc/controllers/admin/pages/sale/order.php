@@ -2091,7 +2091,6 @@ class ControllerPagesSaleOrder extends AController
         $this->data['add_product_url'] = $this->html->getSecureURL(
             'r/product/product/orderProductForm',
             '&callback_rt=sale/order/addProduct'
-            .'&editable_price=1'
         );
 
         //payment address
