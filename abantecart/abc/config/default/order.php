@@ -34,4 +34,10 @@ return [
             ],
         ],
     ],
+    //if order have one of them status it cannot be changed anymore
+    'not_reversal_statuses' => [
+        'refunded',
+        'canceled',
+        'canceled_reversal'
+    ]
 ];

@@ -20,6 +20,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
@@ -121,12 +122,17 @@ class ControllerResponsesListingGridOrder extends AController
         foreach ( $results as $result ) {
 
             $response->rows[$i]['id'] = $result['order_id'];
+
+            $value = in_array($result['order_status_id'], (array)ABC::env('ORDER')['not_reversal_statuses'])
+                                ? $result['status']
+                                : $result['order_status_id'];
+
             $response->rows[$i]['cell'] = [
                 $result['order_id'],
                 $result['name'],
                 $this->html->buildSelectBox( [
                     'name'    => 'order_status_id['.$result['order_id'].']',
-                    'value'   => array_search( $result['status'], $statuses ),
+                    'value'   => $value,
                     'options' => $statuses,
                 ]),
                 H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
