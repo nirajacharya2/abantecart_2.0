@@ -920,12 +920,18 @@ class ACustomer extends ALibBase
 
         $data['customer_id']  = $this->customer_id;
         $data['section']  = (int)$data['section'] ?? 0;
-
         $transaction = new CustomerTransaction($data);
-        $transaction->validate();
-        //use firstOrNew to prevent duplicates
-        $transaction = CustomerTransaction::firstOrNew($data);
-        $transaction_id = $transaction->customer_transaction_id;
+        try {
+            $transaction->validate($data);
+            //use firstOrNew to prevent duplicates
+            $transaction = CustomerTransaction::updateOrCreate($data);
+            $transaction_id = $transaction->customer_transaction_id;
+        } catch (ValidationException $e) {
+            $errors = [];
+            \H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
+            Registry::log()->write(var_export($errors, true));
+            return false;
+        }
 
         return $transaction_id;
     }

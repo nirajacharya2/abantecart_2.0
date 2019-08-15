@@ -618,7 +618,7 @@ class AOrder extends ALibBase
                         'uri'    => $uri,
                         'status' => $settings->get('config_im_guest_'.$row->name.'_status'),
                     ];
-                OrderDatum::firstOrNew(
+                OrderDatum::updateOrCreate(
                     [
                         'order_id' => $order_id,
                         'type_id'  => $type_id,

@@ -61,7 +61,7 @@ class CustomerTransactionModelTest extends ATestCase{
          * test preventing of duplicates
          * @see ACustomer::debitTransaction()
          * */
-        CustomerTransaction::firstOrNew($validData);
+        CustomerTransaction::updateOrCreate($validData);
         $count = CustomerTransaction::where($validData)->get()->count();
         $this->assertEquals(1, $count);
 
