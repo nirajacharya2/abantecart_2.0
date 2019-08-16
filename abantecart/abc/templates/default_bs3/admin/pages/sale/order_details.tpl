@@ -460,6 +460,12 @@ echo $this->html->buildElement(
                     }
                     totals.html('');
                     var totalKeys = [];
+
+                    var cancel_order = false;
+                    if (data.totals.length === 0) {
+                        data.totals['0'] = {id: 'total', title: 'Total', text: '0.00'};
+                        cancel_order = true;
+                    }
                     $.each(data.totals, function (index, row) {
                         totalKeys[index] = row.key;
                         var new_row = $('<tr><td id="total-row-' + row.id + '" class="pull-right">'
@@ -475,11 +481,10 @@ echo $this->html->buildElement(
                         });
                         new_row.appendTo(totals);
                     });
-
-
-                    //show button to add additional total such as coupon
-                    $('a.add_totals').removeClass('hidden');
-
+                    if (!cancel_order) {
+                        //show button to add additional total such as coupon
+                        $('a.add_totals').removeClass('hidden');
+                    }
 
                     //compare two totals (current and calculated) and mark disbalance
                     var new_total = $('input[name="order_totals\[total\]\[value\]"]').val();
@@ -487,7 +492,7 @@ echo $this->html->buildElement(
 
                     var cssClass = '';
                     if (old_total > new_total) {
-                        cssClass = "alert-danger"
+                        cssClass = "alert-danger";
                     } else if (old_total < new_total) {
                         cssClass = "alert-warning";
                     }
