@@ -277,6 +277,7 @@
             <tr>
                 <td class="col-sm-6">
                     <table class="original-totals-table table table-striped col-sm-2 col-sm-offset-4 pull-right"></table>
+                    <input id="original_total" type="hidden" value="<?php echo $order_info['total'] ?>" disabled>
                 </td>
                 <td class="col-sm-6">
                     <table class="table table-striped col-sm-2 col-sm-offset-4 pull-right">
@@ -336,7 +337,11 @@
     </div>
 
     <div class="panel-footer col-xs-12">
-        <div class="text-center">
+        <div id="balance-alert" class="warning alert alert-error alert-danger hidden text-center">
+            Total amount not equal previous value. You have balance disabled in the settings.
+            So you cannot to save order, because needs to create transaction.
+            <?php echo $warning_balance_disabled; ?></div>
+        <div id="submit-buttons" class="text-center">
             <button class="btn btn-primary lock-on-click">
                 <i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
             </button>
@@ -453,7 +458,6 @@ echo $this->html->buildElement(
                         clone.attr('id', 'original-totals').css('opacity', 0.3);
                         clone.appendTo($('.original-totals-table'));
                     }
-
                     totals.html('');
                     var totalKeys = [];
                     $.each(data.totals, function (index, row) {
@@ -464,15 +468,40 @@ echo $this->html->buildElement(
                         if (row.id === 'total') {
                             new_row.find('td:eq(1)').html('<b class="total">' + row.text + '</b>');
                         }
-
                         $.each(row, function (idx, val) {
-                            $('<input type="hidden" name="order_totals[' + row.id + '][' + idx + ']" >').val(val).appendTo(new_row.find('#total-row-' + row.id));
+                            $('<input type="hidden" name="order_totals[' + row.id + '][' + idx + ']" >')
+                                .val(val)
+                                .appendTo(new_row.find('#total-row-' + row.id));
                         });
-
                         new_row.appendTo(totals);
                     });
+
+
                     //show button to add additional total such as coupon
                     $('a.add_totals').removeClass('hidden');
+
+
+                    //compare two totals (current and calculated) and mark disbalance
+                    var new_total = $('input[name="order_totals\[total\]\[value\]"]').val();
+                    var old_total = $('#original_total').val();
+
+                    var cssClass = '';
+                    if (old_total > new_total) {
+                        cssClass = "alert-danger"
+                    } else if (old_total < new_total) {
+                        cssClass = "alert-warning";
+                    }
+
+                    $('tbody#totals').find('td>b.total').parent().addClass(cssClass);
+                    <?php if($balance_disabled){ ?>
+                    if (cssClass.length > 0) {
+                        $('#submit-buttons').hide();
+                        $('#balance-alert').removeClass('hidden');
+                    } else {
+                        $('#submit-buttons').show();
+                        $('#balance-alert').addClass('hidden');
+                    }
+                    <?php } ?>
                 }
             }
         });

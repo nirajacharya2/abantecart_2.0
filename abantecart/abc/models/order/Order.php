@@ -1153,10 +1153,16 @@ class Order extends BaseModel
                 return false;
             }
 
+            if (isset($data['order_totals']['total']['value'])) {
+                $data['total'] = $data['order_totals']['total']['value'];
+                $data['total_difference'] = $order->total - $data['total'];
+            }
+
             $order->fill($data);
             $order->save();
 
             if (!$data['order_totals']) {
+                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
                 return true;
             }
 

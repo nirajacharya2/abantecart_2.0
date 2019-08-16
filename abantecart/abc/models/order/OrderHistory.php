@@ -3,6 +3,8 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\modules\events\ABaseEvent;
+use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -119,5 +121,7 @@ class OrderHistory extends BaseModel
         //touch orders table
         $order = Order::find($this->order_id);
         $order->update(['order_status_id' => $this->order_status_id]);
+        H::event('abc\models\admin\order@update',
+            [new ABaseEvent($this->order_id, ['order_status_id' => $this->order_status_id])]);
     }
 }

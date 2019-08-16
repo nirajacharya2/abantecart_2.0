@@ -337,7 +337,6 @@ class ControllerPagesSaleOrder extends AController
                 Order::editOrder($order_id, $this->request->post);
             } catch (AException $e) {
                 $this->session->data['error'] = $e->getMessage();
-                abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             }
 
             if (H::has_value($this->request->post['downloads'])) {
@@ -378,6 +377,7 @@ class ControllerPagesSaleOrder extends AController
                     }
                 }
             }*/
+            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
         }
 
         $this->data['order_info'] = $order_info;
@@ -391,6 +391,13 @@ class ControllerPagesSaleOrder extends AController
         if (empty($order_info)) {
             $this->session->data['error'] = $this->language->get('error_order_load');
             abc_redirect($this->html->getSecureURL('sale/order'));
+        }
+
+        if (!$order_info['customer_id']) {
+            //if guest checkout - do not check balance system enabling to unblock saving
+            $this->data['balance_disabled'] = false;
+        } else {
+            $this->data['balance_disabled'] = (!$this->config->get('balance_status'));
         }
 
         $this->document->initBreadcrumb([
@@ -1217,7 +1224,8 @@ class ControllerPagesSaleOrder extends AController
         $post['order_status_id'] = $order_info['order_status_id'];
 
         if ($this->request->is_POST()
-            && $this->validateHistoryForm($order_id, $post)) {
+            && $this->validateHistoryForm($order_id, $post)
+        ) {
             $post = $this->request->post;
             $this->db->beginTransaction();
             try {
@@ -1479,7 +1487,9 @@ class ControllerPagesSaleOrder extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        Registry::log()->write(var_export($this->error, true));
+        if ($this->error) {
+            Registry::log()->write(var_export($this->error, true));
+        }
 
         if (!$this->error) {
             return true;

@@ -5,6 +5,8 @@
  * values - listeners
  */
 
+use abc\modules\listeners\AdminOrderUpdateProductStatusesChange;
+use abc\modules\listeners\AdminOrderUpdateTotalBalance;
 use abc\modules\listeners\AdminSendApprovalEmailListener;
 use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
 use abc\modules\listeners\AdminSendOrderStatusNotifyEmailListener;
@@ -31,20 +33,23 @@ return [
     'admin\SendOrderStatusNotifyEmail'            => [
         AdminSendOrderStatusNotifyEmailListener::class,
     ],
-
-    'storefront\sendWelcomeEmail'             => [
+    'abc\models\admin\order@update'               => [
+        AdminOrderUpdateTotalBalance::class,
+        AdminOrderUpdateProductStatusesChange::class,
+    ],
+    'storefront\sendWelcomeEmail'                 => [
         StorefrontSendWelcomeEmailListener::class,
     ],
-    'storefront\sendActivationLinkEmail'      => [
+    'storefront\sendActivationLinkEmail'          => [
         StorefrontSendActivateLinkEmailListener::class,
     ],
-    'storefront\sendPasswordResetLinkEmail'   => [
+    'storefront\sendPasswordResetLinkEmail'       => [
         StorefrontSendResetPasswordLinkListener::class,
     ],
-    'storefront\sendPasswordResetNotifyEmail' => [
+    'storefront\sendPasswordResetNotifyEmail'     => [
         StorefrontResetPasswordNotifyEmailListener::class,
     ],
-    'storefront\sendLoginNameEmail'           => [
+    'storefront\sendLoginNameEmail'               => [
         StorefrontSendLoginNameEmailListener::class,
     ],
     'storefront\sendOrderConfirmEmail'           => [
