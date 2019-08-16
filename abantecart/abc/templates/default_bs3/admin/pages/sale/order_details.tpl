@@ -43,17 +43,19 @@
                         <p class="form-control-static"><?php echo $order_id; ?></p>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-5"><?php echo $entry_invoice_id; ?></label>
-                    <div class="input-group afield col-sm-7"><p class="form-control-static">
-                            <?php if ($invoice_id) {
-                                echo $invoice_id;
-                            } else {
-                                $button_invoice->style = 'btn btn-info';
-                                echo $button_invoice;
-                            } ?>
-                        </p></div>
-                </div>
+                <?php if ($entry_invoice_id) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-5"><?php echo $entry_invoice_id; ?></label>
+                        <div class="input-group afield col-sm-7"><p class="form-control-static">
+                                <?php if ($invoice_id) {
+                                    echo $invoice_id;
+                                } else {
+                                    $button_invoice->style = 'btn btn-info';
+                                    echo $button_invoice;
+                                } ?>
+                            </p></div>
+                    </div>
+                <?php } ?>
                 <div class="form-group">
                     <label class="control-label col-sm-5"><?php echo $entry_customer; ?></label>
                     <div class="input-group afield col-sm-7">
@@ -114,14 +116,17 @@
                                 ?></p>
                         </div>
                     </div>
-                <?php } ?>
-                <div class="form-group">
-                    <label class="control-label col-sm-5"><?php echo $entry_ip; ?></label>
-                    <div class="input-group afield col-sm-7">
-                        <p class="form-control-static"><?php echo $ip; ?></p>
+                <?php }
+                if ($entry_ip) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-5"><?php echo $entry_ip; ?></label>
+                        <div class="input-group afield col-sm-7">
+                            <p class="form-control-static"><?php echo $ip; ?></p>
+                        </div>
                     </div>
-                </div>
-                <?php echo $this->getHookVar('order_details_left_post'); ?>
+                    <?php
+                }
+                echo $this->getHookVar('order_details_left_post'); ?>
             </div>
             <div class="col-sm-6 col-xs-12">
                 <?php echo $this->getHookVar('order_details_right_pre'); ?>
@@ -144,18 +149,23 @@
                         <p class="form-control-static"><?php echo $date_added; ?></p>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-5"><?php echo $entry_shipping_method; ?></label>
-                    <div class="input-group afield col-sm-7">
-                        <p class="form-control-static"><?php echo $form['fields']['shipping_method']; ?></p>
+                <?php if ($entry_shipping_method) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-5"><?php echo $entry_shipping_method; ?></label>
+                        <div class="input-group afield col-sm-7">
+                            <p class="form-control-static"><?php echo $form['fields']['shipping_method']; ?></p>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-5"><?php echo $entry_payment_method; ?></label>
-                    <div class="input-group afield col-sm-7">
-                        <p class="form-control-static"><?php echo $form['fields']['payment_method']; ?></p>
+                <?php }
+
+                if ($entry_payment_method) { ?>
+                    <div class="form-group">
+                        <label class="control-label col-sm-5"><?php echo $entry_payment_method; ?></label>
+                        <div class="input-group afield col-sm-7">
+                            <p class="form-control-static"><?php echo $form['fields']['payment_method']; ?></p>
+                        </div>
                     </div>
-                </div>
+                <?php } ?>
                 <div class="form-group">
                     <label class="control-label col-sm-5"><?php echo $entry_total; ?></label>
                     <div class="input-group afield col-sm-7">
