@@ -91,7 +91,7 @@
                     <label class="control-label col-sm-5"><?php echo $entry_telephone; ?></label>
                     <div class="input-group afield col-sm-7"><?php echo $telephone; ?></div>
                 </div>
-                <?php if ($fax) { ?>
+                <?php if ($fax->value) { ?>
                     <div class="form-group">
                         <label class="control-label col-sm-5"><?php echo $entry_fax; ?></label>
                         <div class="input-group afield col-sm-7"><?php echo $fax; ?></div>

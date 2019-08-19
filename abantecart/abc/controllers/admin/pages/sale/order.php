@@ -526,7 +526,9 @@ class ControllerPagesSaleOrder extends AController
 
         if (isset($order_info['im'])) {
             foreach ($order_info['im'] as $protocol => $setting) {
-                $this->data['im'][$protocol] = $setting['uri'];
+                if ($setting['uri']) {
+                    $this->data['im'][$protocol] = $setting['uri'];
+                }
             }
         }
 
