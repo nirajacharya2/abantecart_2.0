@@ -68,7 +68,7 @@ class ControllerResponsesListingGridOrder extends AController
             'start' => ( $page - 1 ) * $limit,
             'limit' => $limit,
         ];
-        if ( isset( $this->request->get['status'] ) && $this->request->get['status'] != '' ) {
+        if (isset($this->request->get['status']) && $this->request->get['status'] !== 'default') {
             $data['filter_order_status_id'] = $this->request->get['status'];
         }
         if ( H::has_value( $this->request->get['customer_id'] ) ) {
@@ -94,10 +94,10 @@ class ControllerResponsesListingGridOrder extends AController
 
         $results = OrderStatus::with('description')->get();
         $statuses = [
-            ''    => $this->language->get('text_select_status'),
+            'default' => $this->language->get('text_select_status'),
         ];
         foreach ($results->toArray() as $item) {
-            $statuses[$item['order_status_id']] = $item['description']['name'];
+            $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
 
         $results = Order::getOrders($data);

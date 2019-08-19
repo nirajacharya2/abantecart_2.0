@@ -1504,9 +1504,12 @@ class SelectboxHtmlElement extends HtmlElement
      */
     public function getHtml()
     {
+        if ($this->value === null) {
+            $this->value = [];
+        }
 
         if ( ! is_array($this->value)) {
-            $this->value = [$this->value => (string)$this->value];
+            $this->value = [(string)$this->value => (string)$this->value];
         }
 
         $this->options = ! $this->options ? [] : (array)$this->options;

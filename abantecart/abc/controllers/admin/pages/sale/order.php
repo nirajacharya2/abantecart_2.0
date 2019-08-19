@@ -226,8 +226,8 @@ class ControllerPagesSaleOrder extends AController
 
         $results = OrderStatus::with('description')->get();
         $statuses = [
-            ''    => $this->language->get('text_select_status'),
-            'all' => $this->language->get('text_all_orders'),
+            'default' => $this->language->get('text_select_status'),
+            'all'     => $this->language->get('text_all_orders'),
         ];
         foreach ($results->toArray() as $item) {
             $statuses[$item['order_status_id']] = $item['description']['name'];
@@ -272,6 +272,10 @@ class ControllerPagesSaleOrder extends AController
                 'style' => 'button2',
             ]
         );
+
+        if ($search_params['status'] === null || $search_params['status'] === '') {
+            $search_params['status'] = 'default';
+        }
         $grid_search_form['fields']['status'] = $form->getFieldHtml(
             [
                 'type'    => 'selectbox',
