@@ -6,6 +6,7 @@ use abc\models\catalog\ProductDescription;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
+use abc\models\order\Order;
 use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
 
@@ -45,6 +46,7 @@ return [
         'User'               => User::class,
         'ProductDescription' => ProductDescription::class,
         'Category'           => Category::class,
+        'Order'              => Order::class,
     ],
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details
