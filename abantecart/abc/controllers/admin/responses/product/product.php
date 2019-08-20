@@ -1793,7 +1793,8 @@ class ControllerResponsesProductProduct extends AController
                     'placeholder'    => $option['option_placeholder'],
                     'regexp_pattern' => $option['regexp_pattern'],
                     'error_text'     => $option['error_text'],
-                    'attr'           => ' data-option-id ="'.$option['product_option_id'].'" '.($order_product_id ? 'readonly' : ''),
+                    'attr'           => ' data-option-id ="'.$option['product_option_id'].'" '
+                        .($order_product_id ? 'readonly disabled' : ''),
                 ];
                 if ($option_data['type'] == 'checkbox') {
                     // note: 0 and 1 must be string to prevent collision with 'yes'. (in php 'yes'==1) ;-)
