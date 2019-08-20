@@ -1866,7 +1866,7 @@ class ControllerResponsesProductProduct extends AController
             'value' => $product_id,
         ]);
         $this->data['product_id'] = $product_id;
-        $this->data['product_name'] = $product_info['name'];
+        $this->data['product_name'] = html_entity_decode($product_info['name'], ENT_QUOTES, ABC::env('APP_CHARSET'));
         $this->data['product_url'] = $this->html->getSecureURL('catalog/product/update','&product_id='.$product_id);
 
         $this->data['form']['fields']['order_product_id'] = $form->getFieldHtml([
@@ -1877,7 +1877,7 @@ class ControllerResponsesProductProduct extends AController
 
 
         $results = OrderStatus::with('description')->get()->toArray();
-        $statuses = ['' => $this->language->get('text_select_status'),];
+        $statuses = [];
         foreach ($results as $item) {
             $statuses[$item['order_status_id']] = $item['description']['name'];
         }

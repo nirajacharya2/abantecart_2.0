@@ -337,11 +337,6 @@
                 <div class="list-inline input-group afield col-sm-7 col-xs-9">
                     <?php echo $add_product; ?>
                 </div>
-                <div class="list-inline input-group afield col-sm-offset-0 col-sm-3 col-xs-1">
-                    <a class="add btn btn-success tooltips"
-                       data-original-title="<?php echo $text_add; ?>">
-                        <i class="fa fa-plus-circle fa-lg"></i></a>
-                </div>
             </div>
         <?php } ?>
     </div>
@@ -556,6 +551,8 @@ echo $this->html->buildElement(
             $("#add_product").val('').trigger("chosen:updated");
             if (vals) {
                 id = '&product_id=' + vals[0];
+            } else {
+                return false;
             }
         }
         var order_status_id = $('input[name="product\[' + order_product_id + '\]\[order_status_id\]"\]').val();
