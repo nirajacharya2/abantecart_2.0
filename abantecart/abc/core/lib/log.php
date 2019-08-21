@@ -102,7 +102,13 @@ final class ALog
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y-m-d H:i:s";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
-        $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > %level_name% > %message%\n";
+        if (Registry::request()) {
+            $request_id = Registry::request()->getUniqueId();
+        } else {
+            $request_id = \H::genRequestId();
+        }
+        $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > Request ID: ".$request_id
+            ." > %level_name% > %message%\n";
         // create a formatter which allows line breaks in the message
         $formatter = new LineFormatter($output, $dateFormat, true);
         $stream->setFormatter($formatter);
