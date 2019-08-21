@@ -334,7 +334,7 @@ class BaseModel extends OrmModel
                 parent::save();
             //}
         } else {
-            throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
+            throw new \Exception('No permission for object (class '.$this->getClass().') to save the model.');
         }
     }
 

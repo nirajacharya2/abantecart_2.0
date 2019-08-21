@@ -2,6 +2,7 @@
 
 namespace abc\models\order;
 
+use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
@@ -990,9 +991,9 @@ class Order extends BaseModel
     public function getCustomerOrdersArray($customer_id, $start = 0, $limit = 20, $order_id = 0)
     {
         $query = Order::where('customer_id', '=', $customer_id)
-                      ->where('order_status_id', '>', 0)
-                      ->limit($limit)
-                      ->offset($start);
+            ->where('order_status_id', '>', 0)
+            ->limit($limit)
+            ->offset($start);
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
         return $query->get()->toArray();
     }
@@ -1096,8 +1097,8 @@ class Order extends BaseModel
         }
 
         $dataTypes = OrderDataType::whereIn('name', $protocols)
-                                  ->get()
-                                  ->pluck('type_id');
+            ->get()
+            ->pluck('type_id');
         /**
          * @var QueryBuilder $query
          */
@@ -1106,11 +1107,11 @@ class Order extends BaseModel
                 'order_id' => $order_id,
             ]);
         $query->whereIn('order_data.type_id', $dataTypes)
-              ->leftJoin('order_data_types',
-                  'order_data.type_id',
-                  '=',
-                  'order_data_types.type_id'
-              );
+            ->leftJoin('order_data_types',
+                'order_data.type_id',
+                '=',
+                'order_data_types.type_id'
+            );
         $query->whereNotIn('order_data_types.name', ['email']);
 
         //allow to extends this method from extensions
@@ -1142,6 +1143,7 @@ class Order extends BaseModel
      */
     public static function editOrder(int $order_id, array $data)
     {
+
         if (!$data || !$order_id) {
             return false;
         }
@@ -1158,11 +1160,11 @@ class Order extends BaseModel
                 $data['total_difference'] = $order->total - $data['total'];
             }
 
-            $order->fill($data);
-            $order->save();
+            $order->update($data);
 
             if (!$data['order_totals']) {
                 H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
+                Registry::db()->commit();
                 return true;
             }
 
@@ -1173,17 +1175,15 @@ class Order extends BaseModel
 
             $old_language = Product::getCurrentLanguageID();
             Product::setCurrentLanguageID($orderInfo['language_id']);
-
-            if ($data['order_totals']) {
-                static::editOrderProducts($orderInfo, $data, $oLanguage);
-                //remove previous totals
-                OrderTotal::where('order_id', '=', $order_id)->forceDelete();
-                foreach ($data['order_totals'] as $orderTotal) {
-                    $orderTotal['order_id'] = $order_id;
-                    $total = new OrderTotal($orderTotal);
-                    $total->save();
-                }
+            static::editOrderProducts($orderInfo, $data, $oLanguage);
+            //remove previous totals
+            OrderTotal::where('order_id', '=', $order_id)->forceDelete();
+            foreach ($data['order_totals'] as $orderTotal) {
+                $orderTotal['order_id'] = $order_id;
+                $total = new OrderTotal($orderTotal);
+                $total->save();
             }
+
             Registry::db()->commit();
             //revert language for model back
             Product::setCurrentLanguageID($old_language);
@@ -1473,13 +1473,13 @@ class Order extends BaseModel
          */
         $table_name = Registry::db()->table_name('orders');
         $query = OrderProduct::where('order_products.product_id', '=', $product_id)
-                             ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
-                             ->join(
-                                 'orders',
-                                 'orders.order_id',
-                                 '=',
-                                 'order_products.order_id'
-                             );
+            ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
+            ->join(
+                'orders',
+                'orders.order_id',
+                '=',
+                'order_products.order_id'
+            );
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
@@ -1643,7 +1643,6 @@ class Order extends BaseModel
             }
         }
 
-
         //If for total, we done building the query
         if ($mode == 'total_only') {
             //allow to extends this method from extensions
@@ -1719,10 +1718,10 @@ class Order extends BaseModel
          * @var QueryBuilder $query
          */
         $query = Order::select('customer_id')
-                      ->selectRaw('COUNT(*) as count')
-                      ->whereIn('customer_id', $ids)
-                      ->where('order_status_id', '>', '0')
-                      ->groupBy('customer_id');
+            ->selectRaw('COUNT(*) as count')
+            ->whereIn('customer_id', $ids)
+            ->where('order_status_id', '>', '0')
+            ->groupBy('customer_id');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
         return $query->get()->pluck('count', 'customer_id');

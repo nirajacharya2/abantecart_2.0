@@ -53,7 +53,7 @@ class AdminOrderUpdateProductStatusesChange
             foreach ($orderProducts as $product) {
                 $productStatus = $this->registry::order_status()->getStatusById($product->order_status_id);
                 if (!in_array($productStatus, ABC::env('ORDER')['not_reversal_statuses'])) {
-                    $product->update(['order_status_id' => $data['order_status_id']]);
+                    $product->update(['order_status_id' => (int)$data['order_status_id']]);
                 }
             }
         } catch (\Exception $e) {

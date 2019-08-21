@@ -178,7 +178,7 @@ class ControllerResponsesListingGridOrder extends AController
                 $ids = explode( ',', $this->request->post['id'] );
                 if ( ! empty( $ids ) ) {
                     foreach ( $ids as $id ) {
-                        Order::editOrder($id, ['order_status_id' => $this->request->post['order_status_id'][$id]]);
+                        Order::editOrder($id, ['order_status_id' => (int)$this->request->post['order_status_id'][$id]]);
                     }
                 }
                 break;

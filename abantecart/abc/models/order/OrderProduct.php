@@ -41,7 +41,7 @@ class OrderProduct extends BaseModel
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
