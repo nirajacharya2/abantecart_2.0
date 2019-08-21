@@ -310,10 +310,11 @@ if(!$error_warning){
 
 
 	//load total with AJAX call
-	var display_totals = function () {
-		var shipping_method = '';
-		var coupon = encodeURIComponent($("#coupon_code input[name=coupon_code]").val());
-		shipping_method = encodeURIComponent($('#shipping_method :selected').val());
+    function display_totals() {
+        var shipping_method = $('#shipping_method :selected').val();
+        ;
+        var coupon = $("#coupon_code input[name=coupon_code]").val();
+
 		if (!shipping_method) {
 			shipping_method = '';
 		}
@@ -321,7 +322,7 @@ if(!$error_warning){
 			type: 'POST',
 			url: '<?php echo $recalc_totals_url;?>',
 			dataType: 'json',
-			data: 'shipping_method=' + shipping_method + '&coupon=' + coupon,
+            data: 'shipping_method_key=' + shipping_method + '&coupon=' + coupon + '&shipping_method=' + $('#shipping_method :selected').text(),
 			beforeSend: function () {
 				var html = '';
 				html += '<tr>';
@@ -350,7 +351,7 @@ if(!$error_warning){
 		});
 	};
 
-	var getShippings = function () {
+    function getShippings() {
 		var shipping_address_id = $('#shipping_address_id').val();
 		if (!shipping_address_id) {
 			shipping_address_id = '';
@@ -377,12 +378,13 @@ if(!$error_warning){
 					}else{
 						$('#shipping_method_container').hide();
 					}
+                    getPayments();
 				}
 			}
 		});
 	};
 
-	var getPayments = function () {
+    function getPayments() {
 		var payment_address_id = $('#payment_address_id').val();
 		if (!payment_address_id) {
 			payment_address_id = '';
@@ -396,8 +398,6 @@ if(!$error_warning){
 				var html = '';
 				html += '<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>';
 				$('#payment_method_container .afield').html(html);
-			},
-			complete: function () {
 			},
 			success: function (data) {
 				if (!data.error) {
@@ -413,7 +413,10 @@ if(!$error_warning){
 					$('.panel-footer').hide();
 					$('#payment_method_container .afield').html('<div class="alert-danger">'+data.html+'</div>');
 				}
-			}
+            },
+            complete: function () {
+                display_totals();
+            },
 		});
 	};
 
@@ -434,15 +437,12 @@ if(!$error_warning){
 		<?php
 		if(!$error_warning){ ?>
 		getShippings();
-		getPayments();
-		display_totals();
 		<?php } ?>
 	};
 
 	$('#shipping_address_id').on('change', fieldsInit );
 	$('#payment_address_id').on('change', function(){
 		getPayments();
-		display_totals();
 	} );
 
 	$(document).ready( fieldsInit );

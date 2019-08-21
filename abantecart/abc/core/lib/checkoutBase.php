@@ -166,6 +166,15 @@ class CheckoutBase extends ALibBase
             $payment_address = $this->data['guest'];
         }else {
             $payment_address = $this->getAddressById($this->data['payment_address_id']);
+            if (!$payment_address) {
+                $customer_id = $this->data['customer']->getId();
+                if ($customer_id) {
+                    $address = Address::where('customer_id', '=', $customer_id)->first();
+                    if ($address) {
+                        $payment_address = $this->getAddressById($address->address_id);
+                    }
+                }
+            }
         }
 
         if (!$payment_address) {
@@ -247,6 +256,15 @@ class CheckoutBase extends ALibBase
             $shipping_address = $this->data['guest']['shipping'] ?: $this->data['guest'];
         }else {
             $shipping_address = $this->getAddressById($this->data['shipping_address_id']);
+            if (!$shipping_address) {
+                $customer_id = $this->data['customer']->getId();
+                if ($customer_id) {
+                    $address = Address::where('customer_id', '=', $customer_id)->first();
+                    if ($address) {
+                        $shipping_address = $this->getAddressById($address->address_id);
+                    }
+                }
+            }
         }
         if (!$shipping_address) {
             ADebug::warning(

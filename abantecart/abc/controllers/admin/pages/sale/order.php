@@ -1856,20 +1856,21 @@ class ControllerPagesSaleOrder extends AController
         $this->preValidateOrder($customer_id);
 
         if ($this->request->is_POST() && $checkout->getCart()->hasProducts()) {
+            $post = $this->request->post;
             try {
                 $shippings = $checkout->getShippingList();
-                if ($shippings && $this->request->post['shipping_method']) {
-                    list($shp_name, $shp_quote) = explode('.', $this->request->post['shipping_method']);
+
+                if ($shippings && $post['shipping_method']) {
+                    list($shp_name, $shp_quote) = explode('.', $post['shipping_method']);
                     $checkout->setShippingMethod($shippings[$shp_name]['quote'][$shp_quote]);
                     $this->session->data['admin_order']['shipping_method'] = $shippings[$shp_name]['quote'][$shp_quote];
-                    $this->session->data['admin_order']['shipping_address_id'] =
-                        $this->request->post['shipping_address_id'];
+                    $this->session->data['admin_order']['shipping_address_id'] = $post['shipping_address_id'];
                 }
                 $payments = $checkout->getPaymentList();
-                $checkout->setPaymentMethod($payments[$this->request->post['payment_method']]);
+                $checkout->setPaymentMethod($payments[$post['payment_method']]);
                 $this->session->data['admin_order']['payment_method'] =
-                    $payments[$this->request->post['payment_method']];
-                $this->session->data['admin_order']['payment_address_id'] = $this->request->post['payment_address_id'];
+                    $payments[$post['payment_method']];
+                $this->session->data['admin_order']['payment_address_id'] = $post['payment_address_id'];
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);
                 $order_id = $checkout->getOrder()->saveOrder();

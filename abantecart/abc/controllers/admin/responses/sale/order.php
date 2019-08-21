@@ -53,8 +53,15 @@ class ControllerResponsesSaleOrder extends AController
         }
 
         $this->loadLanguage('sale/order');
-
-        $this->checkout = $this->initCheckout($this->session->data['admin_order']);
+        $data = $this->session->data['admin_order'];
+        if ($this->request->post['shipping_method']) {
+            $data['shipping_method_key'] = $this->request->post['shipping_method_key'];
+            $data['shipping_method'] = $this->request->post['shipping_method'];
+        }
+        if ($this->request->post['payment_method']) {
+            $data['payment_method_key'] = $this->request->post['payment_method'];
+        }
+        $this->checkout = $this->initCheckout($data);
 
         switch($this->request->get['action']){
             case 'get_shippings':
@@ -91,6 +98,7 @@ class ControllerResponsesSaleOrder extends AController
     {
         $output = [];
         $display_totals = $this->checkout->getCart()->buildTotalDisplay(true);
+
         $output['totals'] = $display_totals['total_data'];
         return $output;
     }
