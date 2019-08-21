@@ -312,7 +312,6 @@ if(!$error_warning){
 	//load total with AJAX call
     function display_totals() {
         var shipping_method = $('#shipping_method :selected').val();
-        ;
         var coupon = $("#coupon_code input[name=coupon_code]").val();
 
 		if (!shipping_method) {

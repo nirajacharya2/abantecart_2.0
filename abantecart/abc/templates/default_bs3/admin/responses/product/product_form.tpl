@@ -105,6 +105,8 @@
 
 
     function display_total_price() {
+        var disabled = $("#orderProductFrm").find(":disabled");
+        disabled.removeAttr("disabled");
         var data = $("#orderProductFrm").serialize();
         data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option'); <?php // data format for storefront response-controller ?>
         data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity'); <?php // data format for storefront response-controller ?>
@@ -120,6 +122,8 @@
                 }
             }
         });
+
+        disabled.attr("disabled", "disabled");
     }
 
     display_total_price();
@@ -129,6 +133,7 @@
     if (modal_mode === 'json') {
         $('#orderProductFrm').on('submit', function (e) {
             var that = $(this);
+            that.find(":disabled").removeAttr("disabled");
             var output = {form: that.serializeArray()};
             $.each(output.form, function (index, value) {
                 var label = that.find('label[data-option-name="' + value.name + '"]');
