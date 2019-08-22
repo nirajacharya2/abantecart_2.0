@@ -38,7 +38,11 @@
                         <label class="control-label col-sm-5 col-xs-12"
                                for="<?php echo $field->element_id; ?>"><?php echo ${'column_'.$name}; ?></label>
                         <div class="input-group afield col-sm-6 col-xs-12">
-                            <?php echo $field; ?>
+                            <?php echo $field;
+                            if ($field->type == 'hidden' && in_array($field->name, ['price', 'total'])) {
+                                echo '<div id="'.$field->name.'_text" class="form-control-static">'.$field->value
+                                    .'</div>';
+                            } ?>
                         </div>
                     </div>
                 <?php }
@@ -92,6 +96,7 @@
             if ($.inArray($(this).val(), cancel_statuses) !== -1) {
                 $('#orderProductFrm_quantity').val(0).attr('readonly', 'readonly');
                 $('#orderProductFrm_total').val(0);
+                $('#total_text').text(0.00);
 
             } else {
                 if ($('#orderProductFrm_quantity').val() == 0) {
@@ -118,7 +123,9 @@
             success: function (data) {
                 if (data.total) {
                     $('#orderProductFrm_price').val(data.price);
+                    $('#price_text').text(currencyToNumber(data.price));
                     $('#orderProductFrm_total').val(data.total);
+                    $('#total_text').text(currencyToNumber(data.total));
                 }
             }
         });

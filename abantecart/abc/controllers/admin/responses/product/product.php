@@ -1830,7 +1830,7 @@ class ControllerResponsesProductProduct extends AController
             'text' => $this->language->get('button_cancel'),
         ]);
         $this->data['form']['fields']['price'] = $form->getFieldHtml([
-            'type'  => 'input',
+            'type'  => 'hidden',
             'name'  => 'price',
             'value' => $preset_values['price'],
             'attr'  => 'readonly'
@@ -1855,7 +1855,7 @@ class ControllerResponsesProductProduct extends AController
         ]);
 
         $this->data['form']['fields']['total'] = $form->getFieldHtml([
-            'type'  => 'input',
+            'type'  => 'hidden',
             'name'  => 'total',
             'value' => $preset_values['total'],
             'attr'  => 'readonly',
