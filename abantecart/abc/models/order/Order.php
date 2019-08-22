@@ -2,7 +2,6 @@
 
 namespace abc\models\order;
 
-use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
@@ -1276,11 +1275,12 @@ class Order extends BaseModel
                             'model'           => $product->model,
                             'sku'             => $product->sku,
                             'price'           => H::preformatFloat($orderProduct['price'],
-                                    $language->get('decimal_point'))
-                                / $orderInfo['value'],
-                            'total'           => H::preformatFloat($orderProduct['total'],
-                                    $language->get('decimal_point'))
-                                / $orderInfo['value'],
+                                    $language->get('decimal_point')
+                                ) / $orderInfo['value'],
+                            'total'           => H::preformatFloat(
+                                    $orderProduct['total'],
+                                    $language->get('decimal_point')
+                                ) / $orderInfo['value'],
                             'quantity'        => $orderProduct['quantity'],
                             'order_status_id' => $orderProduct['order_status_id'],
                         ]

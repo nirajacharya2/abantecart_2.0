@@ -44,8 +44,10 @@ class StorefrontOrderConfirmEmailListener
 
             $order_id = $order_info['order_id'];
 
-            $this->registry->get('load')->language('mail/account_create');
-            $language = $this->registry->get('language');
+            $language = new ALanguage($this->registry, $order_info['language_code']);
+
+            $language->load($order_info['language_filename']);
+            $language->load('mail/account_create');
             $language->load($order_info['filename']);
             $language->load('mail/order_confirm');
 
@@ -319,9 +321,7 @@ class StorefrontOrderConfirmEmailListener
             $mail->setHtml($html_body);
             $mail->setText($this->data['mail_plain_text']);
             if (is_file(ABC::env('DIR_RESOURCES').$config_mail_logo)) {
-                $mail->addAttachment(ABC::env('DIR_RESOURCES').$config_mail_logo,
-                    md5(pathinfo($config_mail_logo, PATHINFO_FILENAME))
-                    .'.'.pathinfo($config_mail_logo, PATHINFO_EXTENSION));
+                $mail->addAttachment(ABC::env('DIR_RESOURCES').$config_mail_logo);
             }
             $mail->send();
 

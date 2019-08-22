@@ -366,7 +366,6 @@ class AMail
             if (file_exists($attachment['file'])) {
                 $handle = fopen($attachment['file'], 'r');
                 $content = fread($handle, filesize($attachment['file']));
-
                 fclose($handle);
 
                 $message .= '--'.$boundary.$this->newline;
