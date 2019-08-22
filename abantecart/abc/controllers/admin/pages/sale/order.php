@@ -1238,7 +1238,7 @@ class ControllerPagesSaleOrder extends AController
                 $data = [
                     'order_id'        => $this->request->get['order_id'],
                     'order_status_id' => $post['order_status_id'],
-                    'notify'          => (isset($post['notify'])),
+                    'notify'          => ($post['notify'] ? true : false),
                     'comment'         => $post['comment'],
                 ];
                 $oHistory = new OrderHistory($data);
@@ -1384,6 +1384,7 @@ class ControllerPagesSaleOrder extends AController
         $this->data['histories'] = [];
         $results = OrderHistory::with('order_status_description')
                                ->where('order_id', '=', $this->request->get['order_id'])
+                               ->orderBy('date_added')
                                ->get()
                                ->toArray();
         foreach ($results as $result) {

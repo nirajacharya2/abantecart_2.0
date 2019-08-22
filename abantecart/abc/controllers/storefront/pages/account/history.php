@@ -108,7 +108,7 @@ class ControllerPagesAccountHistory extends AController
                 $orders[] = [
                     'order_id'   => $result['order_id'],
                     'name'       => $result['firstname'].' '.$result['lastname'],
-                    'status'     => $result['status'],
+                    'status'     => $result['order_status_name'],
                     'date_added' => H::dateISO2Display(
                         $result['date_added'],
                         $this->language->get('date_format_short')

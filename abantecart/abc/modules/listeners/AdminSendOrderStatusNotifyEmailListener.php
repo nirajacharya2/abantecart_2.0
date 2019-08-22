@@ -30,9 +30,7 @@ class AdminSendOrderStatusNotifyEmailListener
      */
     public function handle(ABaseEvent $event)
     {
-
         $data = $event->args[0];
-
         if (!$data['notify'] || !$data['order_id']) {
             return true;
         }
@@ -60,7 +58,7 @@ class AdminSendOrderStatusNotifyEmailListener
         $message .= $language->get('text_date_added').' '.H::dateISO2Display($orderInfo['date_added'],
                 $language->get('date_format_short'))."\n\n";
         $message .= $language->get('text_order_status')."\n\n";
-        $message .= $orderInfo['Order_status_name']."\n\n";
+        $message .= $orderInfo['order_status_name']."\n\n";
         //send link to order only for registered customers
         if ($orderInfo['customer_id']) {
             $message .= $language->get('text_invoice')."\n";

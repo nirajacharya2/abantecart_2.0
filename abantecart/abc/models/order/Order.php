@@ -989,10 +989,33 @@ class Order extends BaseModel
      */
     public function getCustomerOrdersArray($customer_id, $start = 0, $limit = 20, $order_id = 0)
     {
-        $query = Order::where('customer_id', '=', $customer_id)
-            ->where('order_status_id', '>', 0)
-            ->limit($limit)
-            ->offset($start);
+        $query = Order::select(
+            [
+                'orders.*',
+                'order_status_descriptions.name as order_status_name',
+            ])
+                      ->where('orders.order_status_id', '>', 0)
+                      ->leftJoin(
+                          'order_status_descriptions',
+                          function ($join) {
+                              /**
+                               * @var JoinClause $join
+                               */
+                              $join
+                                  ->on(
+                                      'orders.order_status_id',
+                                      '=',
+                                      'order_status_descriptions.order_status_id'
+                                  )->on(
+                                      'order_status_descriptions.language_id',
+                                      '=',
+                                      'orders.language_id'
+                                  );
+                          }
+                      )
+                      ->where('orders.customer_id', '=', $customer_id)
+                      ->limit($limit)
+                      ->offset($start);
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
         return $query->get()->toArray();
     }
