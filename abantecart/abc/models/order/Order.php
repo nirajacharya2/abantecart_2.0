@@ -995,7 +995,7 @@ class Order extends BaseModel
                 'order_status_descriptions.name as order_status_name',
             ])
                       ->where('orders.order_status_id', '>', 0)
-                      ->leftJoin(
+            ->leftJoin(
                           'order_status_descriptions',
                           function ($join) {
                               /**
@@ -1013,9 +1013,11 @@ class Order extends BaseModel
                                   );
                           }
                       )
-                      ->where('orders.customer_id', '=', $customer_id)
-                      ->limit($limit)
-                      ->offset($start);
+            ->where('orders.customer_id', '=', $customer_id);
+        if ($order_id) {
+            $query->where('order_id', '=', $order_id);
+        }
+        $query->limit($limit)->offset($start);
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
         return $query->get()->toArray();
     }
@@ -1084,10 +1086,10 @@ class Order extends BaseModel
                  */
                 $join
                     ->on(
-                        'orders.order_status_id',
+                        'order_history.order_status_id',
                         '=',
                         'order_status_descriptions.order_status_id'
-                    )->where(
+                    )->on(
                         'order_status_descriptions.language_id',
                         '=',
                         'orders.language_id'

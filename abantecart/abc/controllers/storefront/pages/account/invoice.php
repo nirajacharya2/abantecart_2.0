@@ -296,6 +296,7 @@ class ControllerPagesAccountInvoice extends AController
 
             $histories = [];
             $results = Order::getOrderHistories($order_id);
+
             foreach ($results as $result) {
                 $histories[] = [
                     'date_added' => H::dateISO2Display(
