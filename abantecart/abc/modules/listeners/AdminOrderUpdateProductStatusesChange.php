@@ -72,6 +72,18 @@ class AdminOrderUpdateProductStatusesChange
 
         //send notification email to customer
         $order_info = Order::getOrderArray($order_id);
+        //if order status not reversal or complete - do not sent email
+        if (in_array(
+                Registry::order_status()->getStatusById($order_info['order_status_id']),
+                (array)ABC::env('ORDER')['not_reversal_statuses']
+            )
+            || Registry::order_status()->getStatusById($order_info['order_status_id']) == 'completed'
+        ) {
+            return true;
+        }
+
+
+
         // send email to customer
         if ($order_info && $order_info['email']) {
             $order_id = $order_info['order_id'];
