@@ -187,7 +187,7 @@ class ControllerPagesAccountInvoice extends AController
 
             $products = [];
             $order_products = OrderProduct::where('order_id','=',$order_id)->get();
-            $product_ids = $order_products->pluck('product_id');
+            $product_ids = $order_products->pluck('product_id')->toArray();
 
             //get thumbnails by one pass
             $resource = new AResource('image');
