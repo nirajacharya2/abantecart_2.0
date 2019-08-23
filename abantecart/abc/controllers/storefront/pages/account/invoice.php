@@ -291,6 +291,11 @@ class ControllerPagesAccountInvoice extends AController
             $this->data['totals'] = OrderTotal::where('order_id', '=', $order_id)
                                               ->get()
                                               ->toArray();
+
+            foreach ($this->data['totals'] as &$total) {
+                $total['text'] = html_entity_decode($total['text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+            }
+
             $this->data['comment'] = $order_info['comment'];
             $this->data['product_link'] = $this->html->getSecureURL('product/product', '&product_id=%ID%');
 
