@@ -6,6 +6,7 @@ use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use abc\core\lib\ACurrency;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
@@ -85,6 +86,8 @@ class AdminOrderUpdateProductStatusesChange
 
             $config = Registry::config();
             $aCustomer = new ACustomer(Registry::getInstance(), $order_info['customer_id']);
+
+            $currency = Registry::currency() ?: new ACurrency(Registry::getInstance());
 
             /**
              * @var \stdClass $store_info
@@ -296,12 +299,12 @@ class AdminOrderUpdateProductStatusesChange
                         'model'      => $product['model'],
                         'option'     => $option_data,
                         'quantity'   => $product['quantity'],
-                        'price'      => Registry::currency()->format(
+                        'price'      => $currency->format(
                             $product['price'],
                             $order_info['currency'],
                             $order_info['value']
                         ),
-                        'total'      => Registry::currency()->format_total(
+                        'total'      => $currency->format_total(
                             $product['price'],
                             $product['quantity'],
                             $order_info['currency'],
