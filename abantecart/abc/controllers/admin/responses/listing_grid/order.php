@@ -170,15 +170,42 @@ class ControllerResponsesListingGridOrder extends AController
         switch ( $this->request->post['oper'] ) {
             case 'del':
                 $ids = explode( ',', $this->request->post['id'] );
-                if ( ! empty( $ids ) ) {
-                    Order::whereIn('order_id', $ids)->forceDelete();
+                $this->db->beginTransaction();
+                try {
+                    if (!empty($ids)) {
+                        Order::whereIn('order_id', $ids)->forceDelete();
+                    }
+                    $this->db->commt();
+                } catch (\Exception $e) {
+                    $this->db->rollback();
+                    $error = new AError('');
+
+                    return $error->toJSONResponse('APP_ERROR_402',
+                        [
+                            'error_text'  => 'Application Error occurred. Probably some of orders cannot be removed by cause data dependency. Please see error log for details.',
+                            'reset_value' => true,
+                        ]
+                    );
                 }
                 break;
             case 'save':
                 $ids = explode( ',', $this->request->post['id'] );
                 if ( ! empty( $ids ) ) {
-                    foreach ( $ids as $id ) {
-                        Order::editOrder($id, ['order_status_id' => (int)$this->request->post['order_status_id'][$id]]);
+                    $this->db->beginTransaction();
+                    try {
+                        foreach ($ids as $id) {
+                            Order::editOrder($id,
+                                ['order_status_id' => (int)$this->request->post['order_status_id'][$id]]);
+                        }
+                    } catch (\Exception $e) {
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse('APP_ERROR_402',
+                            [
+                                'error_text'  => 'Application Error occurred. Please see error log for details.',
+                                'reset_value' => true,
+                            ]
+                        );
                     }
                 }
                 break;
