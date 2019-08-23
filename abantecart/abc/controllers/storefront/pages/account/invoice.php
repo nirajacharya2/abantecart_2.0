@@ -307,7 +307,7 @@ class ControllerPagesAccountInvoice extends AController
                     'comment'    => nl2br($result->comment),
                 ];
             }
-            $this->data['historys'] = $histories;
+            $this->data['histories'] = $histories;
 
             if ($guest) {
                 $this->data['continue'] = $this->html->getHomeURL();

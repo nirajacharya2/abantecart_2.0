@@ -102,7 +102,7 @@
 
 	<?php echo $this->getHookVar('order_attributes'); ?>
 
-	<?php if ($historys) { ?>
+    <?php if ($histories) { ?>
 		<div class="container-fluid">
 			<h4 class="heading4"><?php echo $text_order_history; ?></h4>
 			<table class="table table-striped table-bordered">
@@ -111,7 +111,7 @@
 					<th class="align_left"><?php echo $column_status; ?></th>
 					<th class="align_left"><?php echo $column_comment; ?></th>
 				</tr>
-				<?php foreach ($historys as $history) { ?>
+                <?php foreach ($histories as $history) { ?>
 					<tr>
 						<td class="valign_top"><?php echo $history['date_added']; ?></td>
 						<td class="valign_top"><?php echo $history['status']; ?></td>
