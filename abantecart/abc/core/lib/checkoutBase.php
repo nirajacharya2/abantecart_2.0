@@ -526,7 +526,6 @@ class CheckoutBase extends ALibBase
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
-
         $order_status_id = Registry::config()->get($this->getPaymentKey().'_order_status_id');
         if(!$order_status_id){
             $order_status_id = Registry::order_status()->getStatusByTextId('pending');
@@ -536,6 +535,8 @@ class CheckoutBase extends ALibBase
             $order_id,
             $order_status_id
         );
+
+        H::event('abc\checkout\order@confirm', [new ABaseEvent($order_id, $order_status_id)]);
     }
 
     /**
