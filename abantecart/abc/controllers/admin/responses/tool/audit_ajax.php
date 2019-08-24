@@ -186,9 +186,13 @@ class ControllerResponsesToolAuditAjax extends AController
         foreach ($this->data['response']['items'] as &$item) {
             if ($item['old_value'] === null) {
                 $item['old_value'] = 'Empty';
+            } else {
+                $item['old_value'] = htmlspecialchars_decode($item['old_value']);
             }
             if ($item['new_value'] === null) {
                 $item['new_value'] = 'Empty';
+            } else {
+                $item['new_value'] = htmlspecialchars_decode($item['new_value']);
             }
         }
 
