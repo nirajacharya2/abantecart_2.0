@@ -20,7 +20,7 @@ use H;
 class StorefrontOrderConfirmEmailListener
 {
 
-    protected $registry, $data;
+    public $registry, $data;
     protected $db;
     const DECIMAL = 2;
 
