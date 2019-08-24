@@ -184,10 +184,10 @@ class ControllerResponsesToolAuditAjax extends AController
         //\H::df($this->db->getQueryLog());
 
         foreach ($this->data['response']['items'] as &$item) {
-            if (!$item['old_value'] && $item['old_value'] !== "0" && $item['old_value'] !== 0) {
+            if ($item['old_value'] === null) {
                 $item['old_value'] = 'Empty';
             }
-            if (empty($item['new_value']) && $item['new_value'] !== "0" && $item['new_value'] !== 0) {
+            if ($item['new_value'] === null) {
                 $item['new_value'] = 'Empty';
             }
         }
