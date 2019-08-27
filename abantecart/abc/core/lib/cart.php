@@ -458,6 +458,19 @@ class ACart  extends ALibBase
             $stock = false;
         }
 
+        // group sku for each options if presents
+        $SKUs = [];
+        $sku = array_column($option_data, 'sku');
+        foreach ($sku as $sk) {
+            $sk = trim($sk);
+            if ($sk) {
+                $SKUs[] = $sk;
+            }
+        }
+        if (!$SKUs) {
+            $SKUs = [$product_query['sku']];
+        }
+
         $result = [
             'product_id'         => $product_query['product_id'],
             'name'               => $product_query['name'],
@@ -466,7 +479,9 @@ class ACart  extends ALibBase
             'option'             => $option_data,
             'download'           => $download_data,
             'quantity'           => $quantity,
-            'inventory_quantity' => ($product_query['subtract'] ? (int)$product_query['quantity'] : 1000000),
+            'inventory_quantity' => ($product_query['subtract']
+                ? (int)$product_query['quantity']
+                : 1000000),
             'minimum'            => $product_query['minimum'],
             'maximum'            => $product_query['maximum'],
             'stock'              => $stock,
@@ -482,8 +497,9 @@ class ACart  extends ALibBase
             'ship_individually'  => $product_query['ship_individually'],
             'shipping_price'     => $product_query['shipping_price'],
             'free_shipping'      => $product_query['free_shipping'],
-            'sku'                => $product_query['sku'],
+            'sku'                => implode(", ", $SKUs),
         ];
+
         return $result;
     }
 
