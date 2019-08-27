@@ -247,7 +247,7 @@
     "components/chart": "2.7.2",
     "tinymce/tinymce": "4.7.11",
     "tinymce/languages": "4.7.11",
-    "robmorgan/phinx": "*",
+    "robmorgan/phinx": "0.10.8",
     "twig/twig": "1.6.5",
     "wapmorgan/unified-archive": "~0.1.0",
     "symfony/debug": "~3.2",
