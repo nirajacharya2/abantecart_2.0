@@ -699,6 +699,12 @@ class AOrder extends ALibBase
                 ]
             )->get();
 
+            $product->update(
+                [
+                    'order_status_id' => $order_status_id,
+                ]
+            );
+
             //update options stock
             $stock_updated = false;
             foreach ($orderOptions as $option) {
