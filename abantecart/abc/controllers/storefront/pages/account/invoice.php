@@ -23,9 +23,12 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\lib\AEncryption;
+use abc\models\order\Order;
+use abc\models\order\OrderOption;
+use abc\models\order\OrderProduct;
+use abc\models\order\OrderTotal;
 use H;
 
 /**
@@ -50,8 +53,6 @@ class ControllerPagesAccountInvoice extends AController
         $order_info = [];
         $order_token = '';
 
-        $this->loadModel('account/order');
-
         $guest = false;
         $enc = new AEncryption($this->config->get('encryption_key'));
         if (isset($this->request->get['ot']) && $this->config->get('config_guest_checkout')) {
@@ -61,7 +62,7 @@ class ControllerPagesAccountInvoice extends AController
                 list($order_id, $email) = H::parseOrderToken($order_token);
                 if ($order_id && $email) {
                     $guest = true;
-                    $order_info = $this->model_account_order->getOrder($order_id, '', 'view');
+                    $order_info = Order::getOrderArray($order_id);
                 }
             }
         }
@@ -69,11 +70,10 @@ class ControllerPagesAccountInvoice extends AController
         if ($this->request->is_POST() && $this->validate()) {
 
             $guest = true;
-
             $order_id = $this->request->post['order_id'];
             $email = $this->request->post['email'];
             $order_token = $enc->encrypt($order_id.'::'.$email);
-            $order_info = $this->model_account_order->getOrder($order_id, '', 'view');
+            $order_info = Order::getOrderArray($order_id);
 
             //compare emails
             if ($order_info['email'] != $email) {
@@ -126,7 +126,7 @@ class ControllerPagesAccountInvoice extends AController
 
         //get info for registered customers
         if (!$order_info) {
-            $order_info = $this->model_account_order->getOrder($order_id);
+            $order_info = Order::getOrderArray($order_id);
         }
 
         $this->data['success'] = '';
@@ -138,16 +138,14 @@ class ControllerPagesAccountInvoice extends AController
         if ($order_info) {
             $this->data['order_id'] = $order_id;
             $this->data['invoice_id'] =
-                $order_info['invoice_id'] ? $order_info['invoice_prefix'].$order_info['invoice_id'] : '';
-
+                        $order_info['invoice_id']
+                        ? $order_info['invoice_prefix'].$order_info['invoice_id']
+                        : '';
             $this->data['email'] = $order_info['email'];
             $this->data['telephone'] = $order_info['telephone'];
-
             $this->data['mobile_phone'] = $this->im->getCustomerURI('sms', (int)$order_info['customer_id'], $order_id);
-
             $this->data['fax'] = $order_info['fax'];
-
-            $this->data['status'] = $this->model_account_order->getOrderStatus($order_id);
+            $this->data['status'] = $order_info['order_status_name'];
 
             $shipping_data = [
                 'firstname' => $order_info['shipping_firstname'],
@@ -162,8 +160,10 @@ class ControllerPagesAccountInvoice extends AController
                 'country'   => $order_info['shipping_country'],
             ];
 
-            $this->data['shipping_address'] =
-                $this->customer->getFormattedAddress($shipping_data, $order_info['shipping_address_format']);
+            $this->data['shipping_address'] = $this->customer->getFormattedAddress(
+                                                            $shipping_data,
+                                                            $order_info['shipping_address_format']
+                                                        );
             $this->data['shipping_method'] = $order_info['shipping_method'];
 
             $payment_data = [
@@ -179,17 +179,15 @@ class ControllerPagesAccountInvoice extends AController
                 'country'   => $order_info['payment_country'],
             ];
 
-            $this->data['payment_address'] =
-                $this->customer->getFormattedAddress($payment_data, $order_info['payment_address_format']);
+            $this->data['payment_address'] = $this->customer->getFormattedAddress(
+                                                            $payment_data,
+                                                            $order_info['payment_address_format']
+                                                        );
             $this->data['payment_method'] = $order_info['payment_method'];
 
             $products = [];
-            $order_products = $this->model_account_order->getOrderProducts($order_id);
-
-            $product_ids = [];
-            foreach ($order_products as $product) {
-                $product_ids[] = (int)$product['product_id'];
-            }
+            $order_products = OrderProduct::where('order_id','=',$order_id)->get();
+            $product_ids = $order_products->pluck('product_id')->toArray();
 
             //get thumbnails by one pass
             $resource = new AResource('image');
@@ -202,22 +200,27 @@ class ControllerPagesAccountInvoice extends AController
             );
 
             foreach ($order_products as $product) {
-                $options = $this->model_account_order->getOrderOptions($order_id, $product['order_product_id']);
+                $options = OrderOption::where(
+                    [
+                        'order_id'         => $order_id,
+                        'order_product_id' => $product->order_product_id
+                    ]
+                )->get();
                 $thumbnail = $thumbnails[$product['product_id']];
                 $option_data = [];
                 foreach ($options as $option) {
-                    if ($option['element_type'] == 'H') {
+                    if ($option->element_type == 'H') {
                         continue;
                     } //hide hidden options
 
-                    $value = $option['value'];
+                    $value = $option->value;
                     $title = '';
                     // hide binary value for checkbox
-                    if ($option['element_type'] == 'C' && in_array($value, [0, 1])) {
+                    if ($option->element_type == 'C' && in_array($value, [0, 1])) {
                         $value = '';
                     }
                     // strip long textarea value
-                    if ($option['element_type'] == 'T') {
+                    if ($option->element_type == 'T') {
                         $title = strip_tags($value);
                         $title = str_replace('\r\n', "\n", $title);
 
@@ -228,26 +231,31 @@ class ControllerPagesAccountInvoice extends AController
                     }
 
                     $option_data[] = [
-                        'name'  => $option['name'],
+                        'name'  => $option->name,
                         'value' => $value,
                         'title' => $title,
                     ];
                     // product image by option value
-                    $mSizes = array(
+                    $mSizes = [
                         'main'  =>
-                            array(
+                            [
                                 'width' => $this->config->get('config_image_cart_width'),
                                 'height' => $this->config->get('config_image_cart_height')
-                            ),
-                        'thumb' => array(
+                            ],
+                        'thumb' => [
                             'width' =>  $this->config->get('config_image_cart_width'),
                             'height' => $this->config->get('config_image_cart_height')
-                        ),
+                        ],
+                    ];
+
+
+                    $main_image = $resource->getResourceAllObjects(
+                        'product_option_value',
+                        $option->product_option_value_id,
+                        $mSizes,
+                        1,
+                        false
                     );
-
-
-                    $main_image =
-                        $resource->getResourceAllObjects('product_option_value', $option['product_option_value_id'], $mSizes, 1, false);
 
                     if (!empty($main_image)) {
                         $thumbnail['origin'] = $main_image['origin'];
@@ -259,35 +267,52 @@ class ControllerPagesAccountInvoice extends AController
                 }
 
                 $products[] = [
-                    'id'               => $product['product_id'],
-                    'order_product_id' => $product['order_product_id'],
+                    'id'               => $product->product_id,
+                    'order_product_id' => $product->order_product_id,
                     'thumbnail'        => $thumbnail,
-                    'name'             => $product['name'],
-                    'model'            => $product['model'],
+                    'name'             => $product->name,
+                    'model'            => $product->model,
                     'option'           => $option_data,
-                    'quantity'         => $product['quantity'],
-                    'price'            => $this->currency->format($product['price'], $order_info['currency'],
-                        $order_info['value']),
-                    'total'            => $this->currency->format_total($product['price'], $product['quantity'],
-                        $order_info['currency'], $order_info['value']),
+                    'quantity'         => $product->quantity,
+                    'price'            => $this->currency->format(
+                                                                $product->price,
+                                                                $order_info['currency'],
+                                                                $order_info['value']
+                                          ),
+                    'total'            => $this->currency->format_total(
+                                                                $product->price,
+                                                                $product->quantity,
+                                                                $order_info['currency'],
+                                                                $order_info['value']
+                    )
                 ];
             }
             $this->data['products'] = $products;
-            $this->data['totals'] = $this->model_account_order->getOrderTotals($order_id);
+            $this->data['totals'] = OrderTotal::where('order_id', '=', $order_id)
+                                              ->get()
+                                              ->toArray();
+
+            foreach ($this->data['totals'] as &$total) {
+                $total['text'] = html_entity_decode($total['text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+            }
+
             $this->data['comment'] = $order_info['comment'];
             $this->data['product_link'] = $this->html->getSecureURL('product/product', '&product_id=%ID%');
 
             $histories = [];
-            $results = $this->model_account_order->getOrderHistories($order_id);
+            $results = Order::getOrderHistories($order_id);
+
             foreach ($results as $result) {
                 $histories[] = [
-                    'date_added' => AHelperUtils::dateISO2Display($result['date_added'],
-                        $this->language->get('date_format_short').' '.$this->language->get('time_format')),
-                    'status'     => $result['status'],
-                    'comment'    => nl2br($result['comment']),
+                    'date_added' => H::dateISO2Display(
+                                                $result->date_added,
+                                                $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                    ),
+                    'status'     => $result->order_status_name,
+                    'comment'    => nl2br($result->comment),
                 ];
             }
-            $this->data['historys'] = $histories;
+            $this->data['histories'] = $histories;
 
             if ($guest) {
                 $this->data['continue'] = $this->html->getHomeURL();
@@ -452,8 +477,6 @@ class ControllerPagesAccountInvoice extends AController
         $customer_id = $this->customer->getId();
         $order_cancel_ids = [];
 
-        $this->loadModel('account/order');
-
         $guest = false;
         if (isset($this->request->get['ot']) && $this->config->get('config_guest_checkout')) {
             //try to decrypt order token
@@ -469,14 +492,14 @@ class ControllerPagesAccountInvoice extends AController
                 }
                 abc_redirect($this->html->getSecureURL('account/login'));
             }
-            $order_info = $this->model_account_order->getOrder($order_id, '', 'view');
+            $order_info = Order::getOrderArray($order_id);
             //compare emails
             if ($order_info['email'] != $email) {
                 abc_redirect($this->html->getSecureURL('account/login'));
             }
             $guest = true;
         } else {
-            $order_info = $this->model_account_order->getOrder($order_id);
+            $order_info = Order::getOrderArray($order_id);
         }
 
         if (!$order_id && !$guest) {
@@ -503,9 +526,13 @@ class ControllerPagesAccountInvoice extends AController
 
         $new_order_status_id = $this->order_status->getStatusByTextId('canceled_by_customer');
         if ($new_order_status_id) {
-            $this->loadModel('checkout/order');
-            $this->model_checkout_order->update($order_id, $new_order_status_id,
-                $this->language->get('text_request_cancellation_from_customer'), true);
+            $this->checkout->getOrder()->update(
+                $order_id,
+                $new_order_status_id,
+                $this->language->get('text_request_cancellation_from_customer'),
+                true
+            );
+
             $this->session->data['success'] = $this->language->get('text_order_cancellation_success');
 
             $this->messages->saveNotice(

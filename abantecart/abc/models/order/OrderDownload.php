@@ -4,6 +4,7 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\catalog\Download;
+use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -43,6 +44,8 @@ class OrderDownload extends BaseModel
 
     protected $primaryKey = 'order_download_id';
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
         'order_id'                 => 'int',
@@ -53,6 +56,7 @@ class OrderDownload extends BaseModel
         'percentage'               => 'int',
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
+        'attributes_data'          => 'serialized',
     ];
 
     protected $dates = [
@@ -76,9 +80,166 @@ class OrderDownload extends BaseModel
         'activate',
         'activate_order_status_id',
         'attributes_data',
-        'date_added',
-        'date_modified',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id'         => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'order_product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_products',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in order_products table!',
+                ],
+            ],
+        ],
+        'name'             => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'filename'         => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'mask'             => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'download_id'      => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:downloads',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'status'           => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'remaining_count'  => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'percentage'       => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'expire_date'      => [
+            'checks'   => [
+                'date',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a date!',
+                ],
+            ],
+        ],
+        'sort_order'       => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+
+        'activate'                 => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'activate_order_status_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_statuses,order_status_id',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
+                ],
+            ],
+        ],
+    ];
+
+    public function setAttributesDataAttribute($value)
+    {
+        $this->attributes['attributes_data'] = serialize($value);
+    }
 
     public function download()
     {
@@ -98,5 +259,53 @@ class OrderDownload extends BaseModel
     public function history()
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_download_id');
+    }
+
+    /**
+     * @param int $order_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public static function getOrderDownloads($order_id)
+    {
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = OrderDownload::select(
+            [
+                'order_downloads.*',
+                'order_products.*',
+                'order_products.name AS product_name',
+            ]
+        )
+                              ->leftJoin(
+                                  'order_products',
+                                  'order_products.order_product_id',
+                                  '=',
+                                  'order_downloads.order_product_id'
+                              )
+                              ->where('order_downloads.order_id', '=', $order_id)
+                              ->orderBy('order_products.order_product_id', 'ASC')
+                              ->orderBy('order_downloads.sort_order', 'ASC')
+                              ->orderBy('order_downloads.name', 'ASC')
+                              ->get()
+                              ->toArray();
+
+        $output = [];
+        foreach ($query as $row) {
+            $output[$row['product_id']]['product_name'] = $row['product_name'];
+            // get download_history
+            $row['download_history'] = OrderDownload::where(
+                [
+                    'order_id'          => $order_id,
+                    'order_download_id' => $row['order_download_id'],
+                ]
+            )->get()->toArray();
+
+            $output[$row['product_id']]['downloads'][] = $row;
+        }
+
+        return $output;
     }
 }

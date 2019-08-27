@@ -107,8 +107,6 @@ class ControllerResponsesListingGridCountry extends AController
         switch ($this->request->post['oper']) {
             case 'del':
                 $this->loadModel('setting/store');
-                $this->loadModel('sale/order');
-
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {

@@ -11,7 +11,6 @@ AbanteCart brand color styles: #064770 (dark blue) #F19013 (Orange)
 @import url('bootstrap.custom.css');
 @import url('jquery-ui/ui-lightness/jquery-ui-1.10.4.custom.min.css');
 @import url('../js/jquery/fileupload/jquery.fileupload-ui.css');
-@import url('font-awesome.min.css');
 @import url('abantecart.jquery.ui.css');
 @import url('form.css');
 @import url('chosen.bootstrap.css');
@@ -865,7 +864,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 	border-radius: 50px;
 }
 
-.pageheader .fa.fa-pencil {
+.pageheader .fa.fa-pencil-alt {
 	padding: 6px 9px;
 }
 
@@ -881,7 +880,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 	padding: 6px 10px;
 }
 
-.pageheader .fa-file-text {
+.pageheader .fa-file-alt {
 	padding: 6px 10px;
 }
 

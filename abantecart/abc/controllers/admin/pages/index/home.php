@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
+use abc\models\order\Order;
 use H;
 
 class ControllerPagesIndexHome extends AController
@@ -48,18 +49,27 @@ class ControllerPagesIndexHome extends AController
 
         $this->view->assign('token', $this->session->data['token']);
 
-        $this->loadModel('sale/order');
+        $total_sale = Order::where('order_status_id', '>', 0)->sum('total');
+
         $this->view->assign(
             'total_sale',
-            $this->currency->format($this->model_sale_order->getTotalSales(), $this->config->get('config_currency'))
+            $this->currency->format(
+                $total_sale,
+                $this->config->get('config_currency')
+            )
         );
+
+        $total_sale_year = Order::whereRaw("YEAR(date_added) = ".(int)date('Y'))
+                                ->where('order_status_id', '>', 0)
+                                ->sum('total');
         $this->view->assign(
             'total_sale_year',
             $this->currency->format(
-                $this->model_sale_order->getTotalSalesByYear(date('Y')), $this->config->get('config_currency')
+                $total_sale_year,
+                $this->config->get('config_currency')
             )
         );
-        $this->view->assign('total_order', $this->model_sale_order->getTotalOrders());
+        $this->view->assign('total_order', Order::getOrders([], 'total_only'));
 
         $this->view->assign('total_customer', Customer::getTotalCustomers());
         $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0 ]]));
@@ -162,7 +172,7 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('orders_url', $this->html->getSecureURL('sale/order'));
         $this->view->assign('orders_text', $this->language->get('text_order'));
 
-        $results = $this->model_sale_order->getOrders($filter);
+        $results = Order::getOrders($filter)->toArray();
         foreach ($results as $result) {
             $action = [];
             $action[] = [

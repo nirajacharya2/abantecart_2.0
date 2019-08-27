@@ -17,76 +17,86 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.  
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ControllerResponsesCheckoutNoPayment extends AController
+{
+    public $data = [];
 
-class ControllerResponsesCheckoutNoPayment extends AController {
-	public $data = array();
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->data['button_back'] = $this->html->buildElement( array( 'type' => 'button',
-		                                          'name' => 'back',
-			                                      'style' => 'button mr10',
-		                                          'text' => $this->language->get('button_back'),
-												  'icon' => 'fa fa-arrow-left'));
+        $this->data['button_back'] = $this->html->buildElement([
+            'type'  => 'button',
+            'name'  => 'back',
+            'style' => 'button mr10',
+            'text'  => $this->language->get('button_back'),
+            'icon'  => 'fa fa-arrow-left',
+        ]);
 
-		$this->data['button_confirm'] = $this->html->buildElement( array( 'type' => 'button',
-		                                          'name' => 'checkout',
-			                                      'style' => 'button btn-orange pull-right',
-		                                          'text' => $this->language->get('button_confirm'),
-												  'icon' => 'fa fa-check'));
+        $this->data['button_confirm'] = $this->html->buildElement([
+            'type'  => 'button',
+            'name'  => 'checkout',
+            'style' => 'button btn-orange pull-right',
+            'text'  => $this->language->get('button_confirm'),
+            'icon'  => 'fa fa-check',
+        ]);
 
-		$this->data['continue'] = $this->html->getSecureURL('checkout/success');
+        $this->data['continue'] = $this->html->getSecureURL('checkout/success');
 
-		if ($this->request->get['rt'] != 'checkout/guest_step_3') {
-			$this->data['back'] = $this->html->getSecureURL('checkout/cart');
-		} else {
-			$this->data['back'] = $this->html->getSecureURL('checkout/guest_step_2');
-		}
+        if ($this->request->get['rt'] != 'checkout/guest_step_3') {
+            $this->data['back'] = $this->html->getSecureURL('checkout/cart');
+        } else {
+            $this->data['back'] = $this->html->getSecureURL('checkout/guest_step_2');
+        }
 
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('responses/checkout/no_payment.tpl' );
-	}
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('responses/checkout/no_payment.tpl');
+    }
 
-	public function api() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function api()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->data['text_note'] = $this->language->get('text_note');
-		$this->data['process_rt'] = 'checkout/no_payment/api_confirm';
+        $this->data['text_note'] = $this->language->get('text_note');
+        $this->data['process_rt'] = 'checkout/no_payment/api_confirm';
 
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data));
-	}
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data));
+    }
 
-	public function api_confirm() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function api_confirm()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->confirm();
-		$this->data[ 'success' ] = 'completed';
+        $this->confirm();
+        $this->data['success'] = 'completed';
 
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data));
-	}
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data));
+    }
 
-	public function confirm() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function confirm()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->load->model('checkout/order');
-		$this->model_checkout_order->confirm($this->session->data['order_id'], $this->config->get('config_order_status_id'));
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->checkout->getOrder()->confirm(
+            $this->session->data['order_id'],
+            $this->config->get('config_order_status_id')
+        );
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

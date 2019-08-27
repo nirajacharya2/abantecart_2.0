@@ -22,13 +22,12 @@ use abc\core\ABC;
 use abc\core\engine\Model;
 use abc\core\lib\ATaskManager;
 use abc\models\customer\Customer;
+use abc\models\order\Order;
 use H;
 
 /**
  * Class ModelSaleContact
  * @property ModelSettingStore $model_setting_store
- * @property ModelSaleCustomer $model_sale_customer
- * @property ModelSaleOrder $model_sale_order
  */
 class ModelSaleContact extends Model{
     public $errors = [];
@@ -222,7 +221,6 @@ class ModelSaleContact extends Model{
         // All customers by product
         if (isset($data['products']) && is_array($data['products'])){
             $emails = [];
-            $this->load->model('sale/order');
             foreach ($data['products'] as $product_id){
                 // fore registered customers
                 $results = Customer::getCustomersByProduct($product_id);
@@ -230,7 +228,7 @@ class ModelSaleContact extends Model{
                     $emails[] = trim($result['email']);
                 }
                 //guest customers
-                $results = $this->model_sale_order->getGuestOrdersWithProduct($product_id);
+                $results = Order::getGuestOrdersWithProduct($product_id)->toArray();
                 foreach ($results as $result){
                     $emails[] = trim($result['email']);
                 }
@@ -296,7 +294,6 @@ class ModelSaleContact extends Model{
         }
         // All customers by product
         if (isset($data['products']) && is_array($data['products']) && $data['products']){
-            $this->load->model('sale/order');
             foreach ($data['products'] as $product_id){
                 //for registered customers
                 $results = Customer::getCustomersByProduct($product_id);
@@ -304,17 +301,18 @@ class ModelSaleContact extends Model{
                     $phones[] = trim($result['sms']);
                 }
                 //for guest customers
-                $results = $this->model_sale_order->getGuestOrdersWithProduct($product_id);
+                $results = Order::getGuestOrdersWithProduct($product_id)->toArray();
+                if ($results) {
+                    foreach ($results as $result) {
+                        $order_id = (int)$result['order_id'];
+                        if (!$order_id) {
+                            continue;
+                        }
 
-                foreach ($results as $result){
-                    $order_id = (int)$result['order_id'];
-                    if (!$order_id){
-                        continue;
-                    }
-
-                    $uri = $this->im->getCustomerURI('sms', 0, $order_id);
-                    if ($uri){
-                        $phones[] = $uri;
+                        $uri = $this->im->getCustomerURI('sms', 0, $order_id);
+                        if ($uri) {
+                            $phones[] = $uri;
+                        }
                     }
                 }
             }

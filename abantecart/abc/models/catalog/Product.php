@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
 use abc\models\BaseModel;
@@ -71,6 +72,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ProductsRelated               $products_related
  * @property Review                        $reviews
  * @property int                           $product_type_id
+ *
+ * @method static Product find(int $product_id) Product
+ * @method static Product select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -182,7 +186,7 @@ class Product extends BaseModel
         'settings',
         'product_type_id',
         'uuid',
-        'date_deleted',
+        'date_deleted'
     ];
 
     protected $rules = [
@@ -297,7 +301,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store'     => [
+        'product_store'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -660,12 +664,11 @@ class Product extends BaseModel
 
     /**
      * @return mixed
-     * TODO: needs to replace global content_language_id with some model property
      */
     public function description()
     {
         return $this->hasOne(ProductDescription::class, 'product_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     /**
@@ -1364,7 +1367,7 @@ class Product extends BaseModel
                 $languageId = $registry->get('language')->getContentLanguageID();
                 $productTags = [];
                 foreach ($tags as $tag) {
-                    $productTag = ProductTag::firstOrCreate([
+                    $productTag = ProductTag::updateOrCreate([
                         'tag'         => trim($tag),
                         'product_id'  => $product->product_id,
                         'language_id' => $languageId,
@@ -1465,6 +1468,41 @@ class Product extends BaseModel
             'products_info'  => $products_info->toArray(),
             'total_num_rows' => $this->db->sql_get_row_count(),
         ];
+    }
+
+
+    /**
+     * @param int $product_id
+     *
+     * @return array
+     */
+    public static function getProductOptionsWithValues($product_id)
+    {
+        if (!(int)$product_id) {
+            return [];
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = ProductOption::with('description')
+                               ->with('values', 'values.description')
+                               ->where(
+                                   [
+                                       'product_id' => $product_id,
+                                       'group_id' => 0
+                                   ]
+                               )->active()
+                                ->orderBy('sort_order');
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+
+        $productOptions = $query->get()->toArray();
+
+        $elements = HtmlElementFactory::getAvailableElements();
+        foreach($productOptions as &$option){
+            $option['html_type'] = $elements[$option['element_type']]['type'];
+        }
+        return $productOptions;
     }
 
     /**

@@ -21,11 +21,9 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
-use abc\core\helper\AHelperUtils;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use H;
 
 class ControllerApiAccountHistory extends AControllerAPI
 {
@@ -37,15 +35,15 @@ class ControllerApiAccountHistory extends AControllerAPI
         $request_data = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
             $this->rest->sendResponse(401);
             return null;
         }
 
-        $this->loadModel('account/order');
         $this->loadLanguage('account/history');
 
-        $order_total = $this->model_account_order->getTotalOrders();
+        $order_total = Order::where('customer_id', '=', $this->customer->getId())
+                            ->where('order_status_id', '>', 0)->count();
 
         if ($order_total) {
             if (isset($request_data['page']) && is_integer($request_data['page'])) {
@@ -60,20 +58,27 @@ class ControllerApiAccountHistory extends AControllerAPI
                 $this->data['limit'] = $this->config->get('config_catalog_limit');
             }
 
-            $orders = array();
-            $results = $this->model_account_order->getOrders(($page - 1) * $this->data['limit'], $this->data['limit']);
+            $orders = [];
+            $results = (new Order())
+                        ->getCustomerOrdersArray(
+                            $this->customer->getId(),
+                            ($page - 1) * $this->data['limit'],
+                            $this->data['limit']
+                        );
 
             foreach ($results as $result) {
-                $product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
-                $orders[] = array(
+                $product_total = OrderProduct::where('order_id', '=', $result['order_id'])->count();
+                $orders[] = [
                     'order_id'   => $result['order_id'],
                     'name'       => $result['firstname'].' '.$result['lastname'],
                     'status'     => $result['status'],
-                    'date_added' => AHelperUtils::dateISO2Display($result['date_added'],
-                        $this->language->get('date_format_short')),
+                    'date_added' => H::dateISO2Display(
+                        $result['date_added'],
+                        $this->language->get('date_format_short')
+                    ),
                     'products'   => $product_total,
                     'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
-                );
+                ];
             }
 
             $this->data['orders'] = $orders;
@@ -81,7 +86,7 @@ class ControllerApiAccountHistory extends AControllerAPI
             $this->data['page'] = $page;
 
         } else {
-            $this->data['orders'] = array();
+            $this->data['orders'] = [];
             $this->data['total_orders'] = 0;
         }
 

@@ -66,18 +66,18 @@
 				</a>
 				<?php } ?>
 				<a target="_blank"
-				   class="btn btn-white tooltips"
-				   href="<?php echo $message->href; ?>"
-				   data-toggle="tooltip"
-				   title="<?php echo $message->text; ?>"
-				   data-original-title="<?php echo $message->text; ?>"><i class="fa fa-paper-plane-o "></i>
+                   class="btn btn-white tooltips"
+                   href="<?php echo $message->href; ?>"
+                   data-toggle="tooltip"
+                   title="<?php echo $message->text; ?>"
+                   data-original-title="<?php echo $message->text; ?>"><i class="fa fa-paper-plane"></i>
 				</a>
 				<a target="_blank"
-				   class="btn btn-white tooltips"
-				   href="<?php echo $new_order->href; ?>"
-				   data-toggle="tooltip"
-				   title="<?php echo $new_order->text; ?>"
-				   data-original-title="<?php echo $new_order->text; ?>"><i class="fa fa-flag-o "></i>
+                   class="btn btn-white tooltips"
+                   href="<?php echo $new_order->href; ?>"
+                   data-toggle="tooltip"
+                   title="<?php echo $new_order->text; ?>"
+                   data-original-title="<?php echo $new_order->text; ?>"><i class="fa fa-flag"></i>
 				</a>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
@@ -146,7 +146,7 @@
 				<?php if($name == 'email') { ?>
 				<span class="input-group-btn">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
-					<i class="fa fa-envelope-o fa-fw"></i>
+					<i class="fa fa-envelope fa-fw"></i>
 					</a>
 				</span>
 				<?php } ?>
@@ -166,12 +166,12 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<?php if($form['delete']){?>
 				<a class="btn btn-danger" data-confirmation="delete"
 				   href="<?php echo $form['delete']->href; ?>">
-					<i class="fa fa-trash-o"></i> <?php echo $form['delete']->text; ?>
+					<i class="fa fa-trash"></i> <?php echo $form['delete']->text; ?>
 				</a>
 			<?php } ?>
 		</div>

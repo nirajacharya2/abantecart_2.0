@@ -84,7 +84,8 @@
             <div class="panel panel-default">
                 <div class="panel-body text-center">
                     <div class="social_icon">
-                        <a href="https://www.facebook.com/AbanteCart" target="_new"><i class="fa fa-thumbs-o-up fa-4x"></i></a>
+                        <a href="https://www.facebook.com/AbanteCart" target="_new"><i
+                                    class="fa fa-thumbs-up fa-4x"></i></a>
                     </div>
                     <h4><a href="https://www.facebook.com/AbanteCart" target="_new">Like AbanteCart</a></h4>
 

@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\contracts\AttributeManagerInterface;
+use abc\models\order\OrderOption;
 use H;
 
 class ControllerPagesToolFiles extends AController
@@ -151,9 +152,13 @@ class ControllerPagesToolFiles extends AController
                 $attribute_data = $aform->getField($form_info[2]);
             } // if request file from order details page, file is product option value
             elseif ($this->request->get['order_option_id']) {
-                $this->loadModel('sale/order');
-                $attribute_data = $this->model_sale_order->getOrderOption($this->request->get['order_option_id']);
-                $attribute_data['settings'] = unserialize($attribute_data['settings']);
+                /**
+                 * @var OrderOption $orderOption
+                 */
+                $orderOption = OrderOption::with('product_option')
+                                          ->find($this->request->get['order_option_id']);
+                $attribute_data = [];
+                $attribute_data['settings'] = $orderOption->product_option->settings;
             } else {
                 /**
                  * @var AttributeManagerInterface $am

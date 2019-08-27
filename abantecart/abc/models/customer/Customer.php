@@ -311,18 +311,6 @@ class Customer extends BaseModel
             ],
         ],
 
-        'wishlist' => [
-            'checks'   => [
-                'string',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Wishlist must be a string!',
-                ],
-            ],
-        ],
-
         'address_id' => [
             'checks'   => [
                 'integer',
@@ -337,8 +325,7 @@ class Customer extends BaseModel
 
         'status' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [
@@ -361,8 +348,7 @@ class Customer extends BaseModel
 
         'approved' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [
@@ -385,7 +371,7 @@ class Customer extends BaseModel
 
         'ip' => [
             'checks'   => [
-                'string',
+                'ip',
                 'max:50',
             ],
             'messages' => [

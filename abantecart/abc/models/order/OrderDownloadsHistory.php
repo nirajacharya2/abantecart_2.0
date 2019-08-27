@@ -34,25 +34,117 @@ class OrderDownloadsHistory extends BaseModel
 
     protected $table = 'order_downloads_history';
     public $timestamps = false;
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
-        'order_download_id' => 'int',
         'order_id'          => 'int',
+        'order_download_id' => 'int',
         'order_product_id'  => 'int',
         'download_id'       => 'int',
         'download_percent'  => 'int',
     ];
 
     protected $dates = [
-        'time',
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [
+        'order_id',
+        'order_download_id',
+        'order_product_id',
         'filename',
         'mask',
         'download_id',
         'download_percent',
-        'time',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id'          => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'order_download_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_downloads',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in order_downloads table!',
+                ],
+            ],
+        ],
+        'order_product_id'  => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_products',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in order_products table!',
+                ],
+            ],
+        ],
+        'filename'          => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'mask'              => [
+            'checks'   => [
+                'string',
+                'max:128',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'download_id'       => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:downloads',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
+        'download_percent'  => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be an integer!',
+                ],
+            ],
+        ],
     ];
 
     public function order_download()

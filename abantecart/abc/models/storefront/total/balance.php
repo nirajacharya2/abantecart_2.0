@@ -17,30 +17,36 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\storefront;
+
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
+use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ModelTotalBalance extends Model {
-	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {
-		if ($this->config->get('balance_status')) {
-			if((float)$cust_data['used_balance']){
-				//create new instance of language for case when model called from admin-side
-				$language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
-				$language->load($language->language_details['filename']);
-				$total_data[] = array(
-					'id'         => 'balance',
-					'title'      => $language->get('text_balance_checkout'),
-					'text'       => '-'.$this->currency->format( $cust_data['used_balance'] ),
-					'value'      => - $this->session->data['used_balance'],
-					'sort_order' => 999,
-					'total_type' => 'balance'
-				);
-				$total -= $cust_data['used_balance'];
-			}
-		}
-	}
+class ModelTotalBalance extends Model
+{
+    public function getTotal(&$total_data, &$total, &$taxes, &$cust_data)
+    {
+        if ($this->config->get('balance_status')) {
+            if ((float)$cust_data['used_balance']) {
+                //create new instance of language for case when model called from admin-side
+                $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
+                $language->load($language->language_details['filename']);
+                $total_data[] = [
+                    'id'         => 'balance',
+                    'title'      => $language->get('text_balance_checkout'),
+                    'text'       => '-'.$this->currency->format($cust_data['used_balance']),
+                    'value'      => -$cust_data['used_balance'],
+                    'data'       => [
+                        //customer balance at checkout moment
+                        'customer_balance' => $cust_data['balance'],
+                    ],
+                    'sort_order' => 999,
+                    'total_type' => 'balance',
+                ];
+                $total -= $cust_data['used_balance'];
+            }
+        }
+    }
 }

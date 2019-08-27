@@ -83,7 +83,7 @@ if ($action == 'list_object') {
 				   data-confirmation="delete"
 				   data-confirmation-text="<?php echo $text_confirm_delete; ?>"
 				   data-original-title="<?php echo $button_delete; ?>">
-					<i class="fa fa-trash-o"></i></a>
+					<i class="fa fa-trash"></i></a>
 			</li>
 			<?php
 			if ($form_language_switch) { ?>
@@ -153,7 +153,7 @@ if ($action == 'list_object') {
 											   data-mode="<?php echo $mode; ?>"
 											   data-rl-id="<?php echo $rl['resource_id']; ?>"
 											   data-type="<?php echo $type; ?>"
-											   href="#" onclick="return false;"><i class="fa fa-pencil"></i><?php echo $text_edit;?></a></li>
+											   href="#" onclick="return false;"><i class="fa fa-pencil-alt"></i><?php echo $text_edit;?></a></li>
 									<?php if( $mode!='single' && $mode!='list_all' ){?>
 										<li>
 											<?php if($action=='list_object' || $rl['mapped_to_current']){?>

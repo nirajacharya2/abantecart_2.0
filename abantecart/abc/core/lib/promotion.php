@@ -26,8 +26,6 @@ use abc\core\engine\Registry;
 /**
  * Class APromotion
  *
- * @property ACustomer $customer
- * @property ACart     $cart
  * @property AConfig   $config
  * @property ACache    $cache
  * @property ADB       $db
@@ -38,6 +36,14 @@ class APromotion
      * @var Registry
      */
     protected $registry;
+    /**
+     * @var ACart
+     */
+    protected $cart;
+    /**
+     * @var ACustomer
+     */
+    protected $customer;
     /**
      * @var int
      */
@@ -52,25 +58,25 @@ class APromotion
     public $bonus_objects = [];
 
     /**
-     * @param null /int $customer_group_id
+     * @param null $customer
+     * @param null $cart
      */
-    public function __construct($customer_group_id = null)
+    public function __construct(ACustomer $customer = null, ACart $cart = null)
     {
         $this->registry = Registry::getInstance();
+        $this->customer = $customer ?: Registry::customer();
+        $this->cart = $cart ?: Registry::cart();
 
-        if ($customer_group_id) {
-            $this->customer_group_id = $customer_group_id;
-        } else {
-            if (!is_null($this->customer)) {
-                //set customer group
-                if ($this->customer->isLogged()) {
-                    $this->customer_group_id = $this->customer->getCustomerGroupId();
-                } else {
-                    $this->customer_group_id = $this->config->get('config_customer_group_id');
+        if (!is_null($this->customer)) {
+            //set customer group
+            if ($this->customer->isLogged()) {
+                $this->customer_group_id = $this->customer->getCustomerGroupId();
+            } else {
+                $this->customer_group_id = $this->config->get('config_customer_group_id');
 
-                }
             }
         }
+
 
         $this->condition_objects = [
             'product_price',
@@ -508,19 +514,22 @@ class APromotion
 
         $status = true;
         $sql = "SELECT *
-              FROM ".$this->db->table_name("coupons")." c
-              LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
-                    ON (c.coupon_id = cd.coupon_id 
-                        AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
-              WHERE c.code = '".$this->db->escape($coupon_code)."'
-                    AND ((date_start = '0000-00-00' OR date_start < NOW())
-                    AND (date_end = '0000-00-00' OR date_end > NOW()))
-                    AND c.status = '1'";
+                  FROM ".$this->db->table_name("coupons")." c
+                  LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
+                        ON (c.coupon_id = cd.coupon_id 
+                            AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
+                  WHERE c.code = '".$this->db->escape($coupon_code)."'
+                        AND ((date_start IS NULL OR date_start < NOW())
+                        AND (date_end IS NULL  OR date_end > NOW()))
+                        AND c.status = '1'";
 
         $coupon_query = $this->db->query($sql);
+
         $coupon_product_data = [];
         if ($coupon_query->num_rows) {
             if ($coupon_query->row['total'] > $this->cart->getSubTotal()) {
+                var_Dump($coupon_query->row['total'], $this->cart->getSubTotal());
+                exit;
                 $status = false;
             }
             $coupon_redeem_query = $this->db->query(
@@ -530,10 +539,14 @@ class APromotion
                     AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
 
             if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total']
-                && $coupon_query->row['uses_total'] > 0) {
+                && $coupon_query->row['uses_total'] > 0
+            ) {
                 $status = false;
             }
-            if ($coupon_query->row['logged'] && !is_null($this->customer) && !$this->customer->getId()) {
+            if ($coupon_query->row['logged']
+                && !is_null($this->customer)
+                && !$this->customer->getId()
+            ) {
                 $status = false;
             }
 
@@ -578,7 +591,6 @@ class APromotion
         } else {
             $status = false;
         }
-
         if ($status) {
             $coupon_data = [
                 'coupon_id'     => $coupon_query->row['coupon_id'],

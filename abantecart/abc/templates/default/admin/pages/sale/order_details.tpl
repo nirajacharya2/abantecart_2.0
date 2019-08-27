@@ -20,7 +20,7 @@
 			<div class="btn-group mr10 toolbar">
 			<a class="btn btn-white tooltips" target="_invoice" href="<?php echo $invoice_url; ?>" data-toggle="tooltip"
 			   title="<?php echo $text_invoice; ?>" data-original-title="<?php echo $text_invoice; ?>">
-				<i class="fa fa-file-text"></i>
+				<i class="fa fa-file-alt"></i>
 			</a>
 			</div>
 		</div>
@@ -189,147 +189,131 @@
 		<thead>
 		<tr>
 			<td></td>
-			<td class="left"><?php echo $column_product; ?></td>
-			<td class="right"><?php echo $column_quantity; ?></td>
-			<td class="right"><?php echo $column_price; ?></td>
-			<td class="right"><?php echo $column_total; ?></td>
+            <td class="align-left"><?php echo $column_product; ?></td>
+            <td class="align-right"><?php echo $column_quantity; ?></td>
+            <td class="align-right"><?php echo $column_price; ?></td>
+            <td class="align-right"><?php echo $column_total; ?></td>
 		</tr>
 		</thead>
 
-		<?php $order_product_row = 0; ?>
-		<?php foreach ($order_products as $order_product) { ?>
-			<tbody id="product_<?php echo $order_product_row; ?>">
-			<tr <?php if (!$order_product['product_status']) { ?>class="alert alert-warning"<?php } ?>>
+        <?php foreach ($order_products as $order_product) {
+            $oid = $order_product['order_product_id'];
+            ?>
+            <tbody id="product_<?php echo $oid; ?>">
+            <tr <?php if (!$order_product['product_status']
+            || $order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
 				<td>
-					<a class="remove btn btn-xs btn-danger-alt tooltips"
-					   data-original-title="<?php echo $button_delete; ?>"
-					   data-order-product-row="<?php echo $order_product_row; ?>">
-						<i class="fa fa-minus-circle"></i>
-					</a>
-					<?php if ($order_product['product_status']) { ?>
+                    <?php if ($order_product['product_status'] && !$order_product['disable_edit']) { ?>
 					<a class="edit_product btn btn-xs btn-info-alt tooltips"
-					   data-original-title="<?php echo $text_edit; ?>"
-					   data-order-product-id="<?php echo $order_product['order_product_id']; ?>">
+                       data-original-title="<?php echo $text_edit; ?>"
+                       data-order-product-id="<?php echo $oid; ?>">
 						<i class="fa fa-pencil-alt"></i>
 					</a>
 					<?php } ?>
 				</td>
-				<td class="left">
-					<a target="_blank" href="<?php echo $order_product['href']; ?>"><?php echo $order_product['name']; ?>
-						(<?php echo $order_product['model']; ?>)</a>
+                <td class="align-left" data-order-product-id="<?php echo $oid; ?>">
+                    <a target="_blank"
+                       href="<?php echo $order_product['href']; ?>">
+                        <?php
+                        echo $order_product['name'].($order_product['model'] ? '('.$order_product['model']
+                                .')' : '');
+                        echo ' - '.$order_product['order_status']; ?>
+                    </a>
 					<input type="hidden"
-						   name="product[<?php echo $order_product_row; ?>][order_product_id]"
-						   value="<?php echo $order_product['order_product_id']; ?>"/>
+                           name="product[<?php echo $oid; ?>][order_product_id]"
+                           value="<?php echo $oid; ?>"/>
 					<input type="hidden"
-						   name="product[<?php echo $order_product_row; ?>][product_id]"
-						   value="<?php echo $order_product['product_id']; ?>"/>
+                           name="product[<?php echo $oid; ?>][product_id]"
+                           value="<?php echo $order_product['product_id']; ?>"/>
+                    <input type="hidden"
+                           name="product[<?php echo $oid; ?>][order_status_id]"
+                           value="<?php echo $order_product['order_status_id']; ?>"/>
 					<?php
 					if($order_product['option']){ ?>
 						<dl class="dl-horizontal product-options-list-sm">
-					<?php
-					foreach ($order_product['option'] as $option) { ?>
-						<dt><small title="<?php echo $option['title']?>">- <?php echo $option['name']; ?></small></dt><dd><small title="<?php echo $option['title']?>"><?php echo $option['value']; ?></small></dd>
+                            <?php foreach ($order_product['option'] as $option) { ?>
+                                <dt>
+                                    <small title="<?php echo $option['title'] ?>">
+                                        - <?php echo $option['name']; ?></small>
+                                </dt>
+                                <dd>
+                                    <small title="<?php echo $option['title'] ?>"><?php echo $option['value']; ?></small>
+                                    <input type="hidden"
+                                           name="product[<?php echo $oid; ?>][option][<?php echo $option['product_option_id']; ?>]"
+                                           value="<?php echo $option['product_option_value_id']; ?>"/>
+                                </dd>
 					<?php }?>
 						</dl>
 					<?php } ?></td>
-				<td class="right">
-						<input class="afield no-save" type="text"
-						<?php if (!$order_product['product_status']) { ?>
-							readonly
-						<?php } ?>
-							name="product[<?php echo $order_product_row; ?>][quantity]"
-							value="<?php echo $order_product['quantity']; ?>"
-							size="4"/></td>
-				<td><?php echo $order_product['price']; ?></td>
-				<td><?php echo $order_product['total']; ?></td>
+                <td class="align-center">
+                    <?php echo $order_product['quantity']; ?>
+                    <input class="afield no-save" type="hidden"
+                           name="product[<?php echo $oid; ?>][quantity]"
+                           value="<?php echo $order_product['quantity']; ?>"/>
+                </td>
+                <td class="align-center">
+                    <?php echo $order_product['price']; ?>
+                    <input class="afield no-save" type="hidden"
+                           name="product[<?php echo $oid; ?>][price]"
+                           value="<?php echo $order_product['price']; ?>"/>
+                </td>
+                <td class="align-center">
+                    <?php echo $order_product['total']; ?>
+                    <input class="afield no-save" type="hidden"
+                           name="product[<?php echo $oid; ?>][total]"
+                           value="<?php echo $order_product['total']; ?>"/>
+                </td>
 			</tr>
 			</tbody>
-			<?php $order_product_row++ ?>
 		<?php } ?>
 
 		<?php echo $this->getHookVar('list_more_product_last'); ?>
-
+    </table>
+        <table class="table totals-table">
+            <tr>
+                <td class="col-sm-6">
+                    <table class="original-totals-table table table-striped col-sm-2 col-sm-offset-4 pull-right"></table>
+                </td>
+                <td class="col-sm-6">
+                    <table class="table table-striped col-sm-2 col-sm-offset-4 pull-right">
 		<tbody id="totals">
 		<?php $order_total_row = 0;
 		$count = 0;
 		$total = count($totals); ?>
 		<?php foreach ($totals as $total_row) { ?>
 			<tr>
-				<td colspan="4" class="right">
-				<span class="pull-right">
+                <td class="right">
 					<?php echo $total_row['title']; ?>
-					<?php if (!in_array($total_row['type'] , array('subtotal','total'))) { ?>
-						<?php if (!$total_row['unavailable']) { ?>
-						<a class="reculc_total btn btn-xs btn-info-alt tooltips"
-						   	data-original-title="<?php echo $text_recalc; ?>"
-					   		data-order-total-id="<?php echo $total_row['order_total_id']; ?>">
-					    	<i class="fa fa-sync"></i>
-						</a>
-						<?php } ?>
-						<?php if ($total_key_count[$total_row['key']] == 1 ) { // do not alloe delete of duplicate keys?>
-						<a class="remove btn btn-xs btn-danger-alt tooltips"
-						   data-original-title="<?php echo $button_delete; ?>"
-						   data-confirmation="delete" onclick="deleteTotal('<?php echo $total_row['order_total_id']; ?>');">
-							<i class="fa fa-minus-circle"></i>
-						</a>
-						<?php } ?>
-					<?php } ?>
-				</span>
 				</td>
-				<td>
-					<?php if (!in_array($total_row['type'] , array('total'))) { ?>
-						<input type="text" class="col-sm-2 col-xs-12 no-save <?php echo $total_row['type']; ?>"
-									   name="totals[<?php echo $total_row['order_total_id']; ?>]"
-									   value="<?php echo $total_row['text']; ?>"/>
-					<?php } else { ?>
-					<b class="<?php echo $total_row['type']; ?>" rel="totals[<?php echo $total_row['order_total_id']; ?>]">
+                <td><?php
+                    if (!in_array($total_row['type'], ['total'])) {
+                        echo $total_row['text'];
+                    } else { ?>
+                        <b class="<?php echo $total_row['type']; ?>">
 						<?php echo $total_row['text']; ?>
 					</b>
-					<?php } ?>
-					
-					<?php $count++; ?>
+                    <?php }
+                    $count++;
+                    ?>
 				</td>
 			</tr>
 			<?php $order_total_row++ ?>
 		<?php } ?>
-		<?php if ($totals_add) {?>
+        </tbody>
+                        <?php //ADD NEW TOTAL ?>
 			<tr>
-				<td colspan="4" class="right"><span class="pull-right"><?php echo $text_add; ?></span></td>
+                <td id="manual_totals" class="align-right"></td>
 				<td>
-					<b rel="totals[<?php echo $total_row['order_total_id']; ?>]">
-					<a class="add_totals btn btn-xs btn-info-alt tooltips"
-					   data-original-title="<?php echo $text_add; ?>"
-					   data-order-id="<?php echo $order_id; ?>">
+                    <a class=" hidden add_totals btn btn-xs btn-success tooltips"
+                       data-original-title="<?php echo $text_add; ?>"
+                       data-order-id="<?php echo $order_id; ?>">
 					    <i class="fa fa-plus-circle"></i>
-					    
-					    <?php foreach ($totals_add as $total_row) { ?>
-					    <div class="hidden <?php echo $total_row['key']; ?>">
-					    	<div class="row">
-					    	<input type="hidden" name="key" value="<?php echo $total_row['key']; ?>"/>
-					    	<input type="hidden" name="type" value="<?php echo $total_row['type']; ?>"/>
-					    	<input type="hidden" name="sort_order" value="<?php echo $total_row['sort_order']; ?>"/>
-					    	<div class="col-sm-3 col-xs-12">
-					    		<span class="pull-right"><?php echo $text_order_total_title; ?></span>
-					    	</div>
-					    	<div class="col-sm-4 col-xs-12">
-					    		<input type="text" class="col-sm-2 col-xs-12 no-save"
-					    		   name="title" value="<?php echo $total_row['title']; ?>"/>
-					    	</div>
-					    	<div class="col-sm-2 col-xs-12">
-					    		<span class="pull-right"><?php echo $text_order_total_amount; ?></span>
-					    	</div>
-					    	<div class="col-sm-3 col-xs-12">
-					    		<input type="text" class="col-sm-2 col-xs-12 no-save"
-					    		   name="text" value="<?php echo $total_row['text']; ?>"/>
-					    	</div>
-					    	</div>
-					    </div>
-					    <?php } ?>
 					</a>
 				</td>
 			</tr>
-		<?php } ?>		
-		</tbody>
+                    </table>
+                </td>
+            </tr>
 	</table>
 
 	<?php if($add_product){?>
@@ -352,11 +336,6 @@
 			<button class="btn btn-primary lock-on-click">
 			<i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
 			</button>
-			<?php if (!$no_recalc_allowed) { ?>
-			<a class="btn btn-default save_and_recalc" href="#">
-			<i class="fa fa-save fa-fw"></i><i class="fa fa-sync fa-fw"></i> <?php echo $button_save.' & '.$text_recalc.' '.$text_all; ?>
-			</a>
-			<?php } ?>			
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
@@ -368,38 +347,45 @@
 </div><!-- <div class="tab-content"> -->
 
 <?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'add_product_modal',
-				'modal_type' => 'lg',
-				'data_source' => 'ajax'
-		));
+    [
+        'type'        => 'modal',
+        'id'          => 'add_product_modal',
+        'modal_type'  => 'lg',
+        'data_source' => 'ajax',
+        'js_onclose'  => '$("#add_product_modal").find("div.modal-content").html("");',
+    ]);
 ?>
 
-<?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'add_order_total',
-				'modal_type' => 'md',
-				'title' => $text_order_total_add,
-				'content' => '
-				<form class="aform form-horizontal" enctype="multipart/form-data" method="post" class="add_order_total" action="'.$edit_order_total.'">
+<?php
+//ADD MANUAL ORDER TOTAL
 
-				<div class="mb20">' . $new_total . '
+$modal_html = '
+    <div class="mb20">'.$manual_totals.'</div>
+    <div class="content container-fluid mb20">
+    
+        <div id="add_manual_coupon" class="manual-total form-inline hidden">
+            <label class="checkbox">'.$entry_coupon_code.'</label>
+            '.$manual_coupon_code_field.'
 				</div>
-								
-				<div class="content container-fluid mb20">
+        '.$this->getHookVar('order_edit_manual_total_var').'
 				</div>
 								
 				<div class="text-center mb20">
-					<button class="btn btn-primary lock-on-click">
-					<i class="fa fa-save fa-fw"></i>'. $button_save . '
+        <button class="btn btn-primary">
+        <i class="fa fa-save fa-fw"></i>'.$button_add.'
 					</button>
 					<button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
 					<i class="fa fa-arrow-left fa-fw"></i> '. $button_cancel . '
 					</button>
-				</div>
-				
-				</form>'
-		));
+    </div>';
+echo $this->html->buildElement(
+    [
+        'type'       => 'modal',
+        'id'         => 'add_order_total',
+        'modal_type' => 'md',
+        'title'      => $text_order_total_add,
+        'content'    => $modal_html,
+    ]);
 ?>
 
 <script type="text/javascript">
@@ -407,18 +393,14 @@
 	var decimal_point = '<?php echo $decimal_point; ?>';
 	var decimal_place = '<?php echo $currency['decimal_place']; ?>';
 	var thousand_point = '<?php echo $thousand_point; ?>';
-	<?php if ($currency['symbol_left']) { ?>
-	var currency_symbol = '<?php echo $currency['symbol_left']; ?>';
-	var currency_location = 'left';
-	<?php } else { ?>
-	var currency_symbol = '<?php echo $currency['symbol_right']; ?>';
-	var currency_location = 'right';
-	<?php }?>
+
+    var currency_symbol = '<?php echo $currency['symbol_left'] ?? $currency['symbol_right']; ?>';
+    var currency_location = '<?php echo $currency['symbol_left'] ? 'left' : 'right'; ?>';
 
 	$(function () {
 
 		$('#add_product').chosen({'width': '100%', 'white-space': 'nowrap'});
-		$('#add_product').on('change', addProduct);
+        $('#add_product').on('change', ProductModal);
 
 		$("#products input").aform({        triggerChanged: false        });
 		$('#products input[type*="text"]').each(function () {
@@ -429,89 +411,72 @@
 		$(document).on('click', '#products a.remove', function () {
 			var id = $(this).attr('data-order-product-row');
 			$('#product_' + id).remove();
-			recalculate();
+            recalculateTotals();
 			return false;
 		});
 
 		$('a.add').click(function () {
-			addProduct();
+            ProductModal();
 			return false;
 		});
 
 
-		$('a.edit_product').click(function () {
-			addProduct($(this).attr('data-order-product-id'));
+        $(document).on('click', 'a.edit_product', function () {
+            ProductModal($(this).attr('data-order-product-id'));
 			return false;
-		});
-
-		$(document).on('keyup', '#products input', function () {
-			recalculate();
 		});
 
 
 	});
 
-	function formatMoney(num, c, d, t) {
-		c = isNaN(c = Math.abs(c)) ? 2 : c,
-				d = d == undefined ? "." : d,
-				t = t == undefined ? "," : t,
-				s = num < 0 ? "-" : "",
-				i = parseInt(num = Math.abs(+num || 0).toFixed(c)) + "",
-				j = (j = i.length) > 3 ? j % 3 : 0;
-		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(num - i).toFixed(c).slice(2) : "");
-	}
-	;
+    function recalculateTotals() {
 
-	function get_currency_str(num) {
-		var str;
-		if (currency_location == 'left') {
-			str = currency_symbol + formatMoney(num, decimal_place, decimal_point, thousand_point);
-		} else {
-			str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
-		}
-		return str;
-	}
+        $.ajax({
+            url: '<?php echo $recalculate_totals_url; ?>',
+            dataType: 'json',
+            type: 'post',
+            data: $('#orderFrm').serialize(),
+            beforeSend: function () {
+                //    $('#generate_invoice').attr('disabled', 'disabled');
+            },
+            complete: function () {
+                //$('#generate_invoice').attr('disabled', '');
+            },
+            success: function (data) {
+                if (data.hasOwnProperty('totals')) {
 
-	function get_currency_num(str) {
-		str = str == undefined || str.length == 0 ? '0' : str;
-		var final_number = str.replace(thousand_point, '');
-		final_number = final_number.replace(currency_symbol, '');
-		final_number = final_number.replace(decimal_point, '.');
-		final_number = parseFloat(final_number.replace(/[^0-9\-\.]/g, ''));
+                    var totals = $('table>tbody#totals');
+                    if ($('#original-totals').length == 0) {
+                        var clone = totals.clone();
+                        clone.attr('id', 'original-totals').css('opacity', 0.3);
+                        clone.appendTo($('.original-totals-table'));
+                    }
 
-		return final_number;
-	}
+                    totals.html('');
+                    var totalKeys = [];
+                    $.each(data.totals, function (index, row) {
+                        totalKeys[index] = row.key;
+                        var new_row = $('<tr><td id="total-row-' + row.id + '" class="pull-right">'
+                            + row.title + '</td><td>' + row.text + '</td></tr>'
+                        );
+                        if (row.id === 'total') {
+                            new_row.find('td:eq(1)').html('<b class="total">' + row.text + '</b>');
+                        }
 
-	function recalculate() {
-
-		var qty, price, total, total_str;
-		var subtotal = 0;
-
-		//update products
-		$('#products tbody[id^="product"]').each(function (i, v) {
-			qty = $('input[name$="quantity]"]', v).val();
-			price = get_currency_num($('input[name$="price]"]', v).val());
-			total = qty * price;
-			$('input[name$="total]"]', v).val(get_currency_str(total));
-			subtotal += total;
+                        $.each(row, function (idx, val) {
+                            $('<input type="hidden" name="order_totals[' + row.id + '][' + idx + ']" >').val(val).appendTo(new_row.find('#total-row-' + row.id));
 		});
 
-		//update first total - subtotal
-		$('#products .subtotal').val(get_currency_str(subtotal));
-
-		var total = 0;
-		$('input[name^="totals"]').each(function (i, v) {
-			//skip grand total
-			var n = get_currency_num($(v).val());
-			if (!$(v).hasClass('hidden_total') && $.isNumeric(n)) {
-				total += n;
+                        new_row.appendTo(totals);
+                    });
+                    //show button to add additional total such as coupon
+                    $('a.add_totals').removeClass('hidden');
+                }
 			}		
 		});
-		
-		//update last - total
-		$('#products .total').html(get_currency_str(total));
-		$('#products .hidden_total').val(get_currency_str(total));
-
+        if (event) {
+            event.stopPropagation();
+        }
 	}
 
 	$('#generate_invoice').click(function () {
@@ -536,68 +501,196 @@
 		return false;
 	});
 
-
-	var order_product_row = <?php echo $order_product_row; ?>;
-
-	function addProduct(order_product_id) {
+    function ProductModal(order_product_id) {
 		var id = '';
 		if(order_product_id > 0){
 			id = '&order_product_id='+order_product_id;
 		}else{
 			var vals = $("#add_product").chosen().val();
-			$("#add_product").val('').trigger("chosen:updated");;
+            $("#add_product").val('').trigger("chosen:updated");
 			if(vals){
 				id = '&product_id='+vals[0];
 			}
 		}
+        var order_status_id = $('input[name="product\[' + order_product_id + '\]\[order_status_id\]"\]').val();
+        id += '&order_status_id=' + order_status_id;
 
 		if(id.length>0){
 			$('#add_product_modal')
 					.modal({ keyboard: false})
 					.find('.modal-content')
 					.load('<?php echo $add_product_url; ?>'+id, function () {
-					formOnExit();
+                        //formOnExit();
 					bindCustomEvents('#orderProductFrm');
 					spanHelp2Toggles();
 				});
 		}
 	}
 
-	$('a.reculc_total').click(function () {
-		$(this).append('<input type="hidden" name="force_recalc_single" value="1">');
-	    var total_id = $(this).attr('data-order-total-id');
-	    $('input[name="totals['+total_id+']"]').val('');
-	    $('#orderFrm').submit();
-	    return false;
-	});
+    var newRowCounter = 0;
 
-	$('a.save_and_recalc').click(function () {
-		$(this).append('<input type="hidden" name="force_recalc" value="1">');
-	    $('#orderFrm').submit();
+    function AddProductToForm(data) {
+        if (data.form.length === 0) {
 	    return false;
-	});
+        }
+        var newRow,
+            oid = data.order_product_id;
+        var edit_mode = (oid > 0);
+
+        if (!edit_mode) {
+            oid = 'new' + newRowCounter;
+            newRow = $('#products tbody').first().clone()
+                .prop('id', 'product_' + oid)
+                .addClass('alert-success');
+        } else {
+            newRow = $('#products tbody#product_' + oid);
+        }
+
+        var td = newRow.find('td:eq(0)');
+
+        if (!edit_mode) {
+            td.find('a.edit_product').remove();
+            $(
+                '<a class="remove btn btn-xs btn-danger-alt tooltips" ' +
+                'data-original-title="<?php echo $button_delete; ?>" ' +
+                'data-order-product-row="' + oid + '"><i class="fa fa-minus-circle"></i></a>'
+            ).prependTo(td);
+        } else {
+            td.find('a.edit_product').prop('data-order-product-id', oid);
+        }
+
+        //product name with options
+        td = newRow.find('td:eq(1)');
+        td.find('a')
+            .prop('href', data.product_url)
+            .text(data.product_name);
+        td.find('input').remove();
+        td.find('dl').remove();
+        $('<input type="hidden" name="product[' + oid + '][order_product_id]" value="' + data.order_product_id + '">').appendTo(td);
+        $('<input type="hidden" name="product[' + oid + '][product_id]" value="' + data.product_id + '">').appendTo(td);
+        $('<input type="hidden" name="product[' + oid + '][order_status_id]" value="' + data.order_status_id + '">').appendTo(td);
+
+        var options = $('<dl class="dl-horizontal product-options-list-sm"></dl>'), product_data = {};
+
+        $.each(data.form,
+            function (index, value) {
+                if (value.name.startsWith("option[")) {
+                    $('<input ' +
+                        'type="hidden" ' +
+                        'name="product[' + oid + ']' + value.name.replace('option[', '[option][') + '" ' +
+                        'value="' + value.value + '">').appendTo(td);
+
+                    $('<dt>' +
+                        '<small>- ' + value.text + '</small>' +
+                        '</dt>' +
+                        '<dd>' +
+                        '<small>' + (value.value_text ? value.value_text : value.value) +
+                        '</small></dd>').appendTo(options);
+                } else {
+                    product_data[value.name] = value.value;
+                }
+            }
+        );
+        options.appendTo(td);
+        //quantity
+        newRow.find('td:eq(2)').html(
+            product_data.quantity +
+            '<input ' +
+            'type="hidden" ' +
+            'name="product[' + oid + '][quantity]" ' +
+            'value="' + product_data.quantity + '">'
+        );
+        //price
+        newRow.find('td:eq(3)').html(
+            product_data.price +
+            '<input ' +
+            'type="hidden" ' +
+            'name="product[' + oid + '][price]" ' +
+            'value="' + currencyToNumber(product_data.price, thousand_point, decimal_point, currency_symbol) + '">'
+        );
+        //total
+        newRow.find('td:eq(4)').html(
+            product_data.total +
+            '<input ' +
+            'type="hidden" ' +
+            'name="product[' + oid + '][total]" ' +
+            'value="' + currencyToNumber(product_data.total, thousand_point, decimal_point, currency_symbol) + '">'
+        );
+
+        if (product_data.quantity > 0) {
+            newRow.addClass('alert-warning');
+        } else {
+            newRow.addClass('alert-danger');
+        }
+
+        if (!edit_mode) {
+            newRow.appendTo('#products');
+        }
+        recalculateTotals();
+
+        newRowCounter++;
+        $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');
+    }
 
 	$('a.add_totals').click(function () {
-		addTotal();
+        $('#add_order_total').modal({keyboard: false});
 	    return false;
 	});
-	
-	$('#orderFrm_new_total').change(function () {
-		addTotalSelect( $("#orderFrm_new_total option:selected").text() );
+
+    <?php // "ADD MANUAL" TOTAL JS ?>
+
+    $("#orderFrm_manual_total").on("change", function () {
+        var div = $("#add_order_total").find("div.manual-total");
+        div.addClass("hidden");
+        div.find("input, select, textarea").attr("disabled", "disabled");
+
+        if ($(this).val() !== "") {
+            div = $("#add_order_total").find("div#add_manual_" + $(this).val());
+            div.removeClass("hidden");
+            div.find("input, select, textarea").removeAttr("disabled");
+        }
 	});
 
-	function addTotal() {
-		$('#add_order_total').modal({ keyboard: false});
-		addTotalSelect( $("#orderFrm_new_total option:selected").text() );
-	}
+    $("#add_order_total").find("button.btn-primary").on("click", function (e) {
+        var div = $("#add_order_total").find("div.manual-total").not(".hidden");
 
-	function addTotalSelect(key) {
-		var html = $('.add_totals .hidden.'+key).html(); 
-		$('#add_order_total form .content').html(html);
-	}
+        if (div.length > 0 && div.attr("id").length > 0) {
+            try {
+                //call function dynamically
+                // its name must be equal to div ID
+                window[div.attr("id")]();
+            } catch (e) {
+                alert("cannot find function " + div.attr("id") + "!")
+            }
+        } else {
 
-	function deleteTotal(order_total_id) {
-		location = '<?php echo $delete_order_total; ?>&order_total_id=' + order_total_id;
-	}
-	
+        }
+        e.stopPropagation();
+        $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');
+    });
+
+    var add_manual_coupon = function () {
+        $.ajax(
+            {
+                url: "<?php echo $validate_coupon_url; ?>&coupon_code=" + $("#orderFrm_coupon_code").val(),
+                dataType: 'json',
+                type: 'post',
+                data: $('#orderFrm').serialize(),
+                success: function (data) {
+                    $('input[name="manual_totals[coupon][coupon_code]"]').remove();
+                    $('<input type="hidden" name="manual_totals[coupon][coupon_code]" value="' + data.code + '">')
+                        .appendTo($("#manual_totals"));
+                    recalculateTotals();
+
+                    $("#add_order_total").modal("hide");
+                    $("#orderFrm_manual_total").val('').change();
+                }
+            }
+        );
+    };
+
+    $('#orderFrm').on('submit', function () {
+        $(this).prop('changed', 'submit').attr('data-confirm-exit', 'false');
+    });
+
 </script>

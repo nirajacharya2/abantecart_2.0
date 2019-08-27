@@ -199,7 +199,7 @@ if ($logged){ ?>
                     <div class="btn-group">
                         <a onClick="window.open('<?php echo $store; ?>');" class="btn btn-default tp-icon"
                            data-toggle="dropdown" title="<?php echo $text_front; ?>">
-                            <i class="fa fa-external-link fa-lg"></i>
+                            <i class="fa fa-external-link-alt fa-lg"></i>
                         </a>
                     </div>
                 </li>

@@ -618,6 +618,7 @@ class ExtensionsApi
             return false;
         }
         $name = '';
+        $seek_key = $extension.'_name';
         $lang_dir = $this->registry->get('language')->language_details['directory'];
         $filename = ABC::env('DIR_APP_EXTENSIONS')
             .$extension.DS
@@ -635,6 +636,14 @@ class ExtensionsApi
                 .$extension.DS
                 .$extension.'.xml';
         }
+        if (!file_exists($filename)) {
+            $filename = ABC::env('DIR_LANGUAGES')
+                .'english'.DS
+                .'admin'.DS
+                .'total'.DS
+                .$extension.'.xml';
+            $seek_key = 'total_name';
+        }
 
         if (file_exists($filename)) {
             /**
@@ -643,7 +652,7 @@ class ExtensionsApi
             $xml = simplexml_load_file($filename);
             if ($xml && $xml->definition) {
                 foreach ($xml->definition as $def) {
-                    if ((string)$def->key == $extension.'_name') {
+                    if ((string)$def->key == $seek_key) {
                         $name = (string)$def->value;
                         break;
                     }

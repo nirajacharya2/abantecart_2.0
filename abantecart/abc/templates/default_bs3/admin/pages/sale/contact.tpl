@@ -7,7 +7,7 @@
 				<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
 					<?php
 					if ($active == 'email'){
-						$icon = 'fa fa-envelope-o';
+                        $icon = 'fa fa-envelope';
 					} elseif ($active == 'sms'){
 						$icon = 'fa fa-mobile';
 					} elseif ($protocols[$active]['icon']){
@@ -22,7 +22,7 @@
 				<ul class="choose-protocol dropdown-menu">
 					<?php foreach ($protocols as $id => $protocol){
 						if ($id == 'email'){
-							$icon = 'fa fa-envelope-o';
+                            $icon = 'fa fa-envelope';
 						} elseif ($id == 'sms'){
 							$icon = 'fa fa-mobile';
 						} elseif ($protocol['icon']){
@@ -103,10 +103,10 @@
 			<button class="btn btn-primary task_run" data-run-task-url="<?php echo $form['build_task_url'] ?>"
 			        data-complete-task-url="<?php echo $form['complete_task_url'] ?>"
 			        data-abort-task-url="<?php echo $form['abort_task_url'] ?>">
-				<i class="fa fa-paper-plane-o"></i> <?php echo $form['submit']->text; ?>
+                <i class="fa fa-paper-plane"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
-				<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</a>
 		</div>
 	</div>

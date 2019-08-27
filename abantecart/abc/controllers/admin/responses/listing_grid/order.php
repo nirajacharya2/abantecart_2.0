@@ -20,20 +20,21 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
+use abc\models\order\Order;
+use abc\models\order\OrderStatus;
+use H;
 use stdClass;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 class ControllerResponsesListingGridOrder extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -42,7 +43,6 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         $page = $this->request->post['page']; // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
@@ -50,10 +50,10 @@ class ControllerResponsesListingGridOrder extends AController
         $sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
-        $allowedFields = array_merge( array( 'name', 'order_id', 'date_added', 'total' ), (array)$this->data['allowed_fields'] );
-        $allowedSortFields = array_merge( array( 'customer_id', 'order_id', 'name', 'status', 'date_added', 'total' ), (array)$this->data['allowed_sort_fields'] );
+        $allowedFields = array_merge( ['name', 'order_id', 'date_added', 'total'], (array)$this->data['allowed_fields'] );
+        $allowedSortFields = array_merge( ['customer_id', 'order_id', 'name', 'status', 'date_added', 'total'], (array)$this->data['allowed_sort_fields'] );
 
-        $allowedDirection = array( 'asc', 'desc' );
+        $allowedDirection = ['asc', 'desc'];
 
         if ( ! in_array( $sidx, $allowedSortFields ) ) {
             $sidx = $allowedSortFields[0];
@@ -62,23 +62,19 @@ class ControllerResponsesListingGridOrder extends AController
             $sord = $allowedDirection[0];
         }
 
-        if ( in_array( $sidx, array( 'customer_id', 'order_id', 'date_added', 'total' ) ) ) {
-            $sidx = 'o.'.$sidx;
-        }
-
-        $data = array(
+        $data = [
             'sort'  => $sidx,
             'order' => $sord,
             'start' => ( $page - 1 ) * $limit,
             'limit' => $limit,
-        );
-        if ( isset( $this->request->get['status'] ) && $this->request->get['status'] != '' ) {
+        ];
+        if (isset($this->request->get['status']) && $this->request->get['status'] !== 'default') {
             $data['filter_order_status_id'] = $this->request->get['status'];
         }
-        if ( AHelperUtils::has_value( $this->request->get['customer_id'] ) ) {
+        if ( H::has_value( $this->request->get['customer_id'] ) ) {
             $data['filter_customer_id'] = $this->request->get['customer_id'];
         }
-        if ( AHelperUtils::has_value( $this->request->get['product_id'] ) ) {
+        if ( H::has_value( $this->request->get['product_id'] ) ) {
             $data['filter_product_id'] = $this->request->get['product_id'];
         }
 
@@ -91,19 +87,20 @@ class ControllerResponsesListingGridOrder extends AController
                 }
                 $data['filter_'.$rule['field']] = $rule['data'];
                 if ( $rule['field'] == 'date_added' ) {
-                    $data['filter_'.$rule['field']] = AHelperUtils::dateDisplay2ISO( $rule['data'] );
+                    $data['filter_'.$rule['field']] = H::dateDisplay2ISO( $rule['data'] );
                 }
             }
         }
 
-        $this->loadModel( 'localisation/order_status' );
-        $results = $this->model_localisation_order_status->getOrderStatuses();
-        $statuses = array( '' => $this->language->get( 'text_select_status' ), );
-        foreach ( $results as $item ) {
-            $statuses[$item['order_status_id']] = $item['name'];
+        $results = OrderStatus::with('description')->get();
+        $statuses = [
+            'default' => $this->language->get('text_select_status'),
+        ];
+        foreach ($results->toArray() as $item) {
+            $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
 
-        $results = $this->model_sale_order->getOrders( $data );
+        $results = Order::getOrders($data);
         $total = $results[0]['total_num_rows'];
         if ( $total > 0 ) {
             $total_pages = ceil( $total / $limit );
@@ -122,20 +119,28 @@ class ControllerResponsesListingGridOrder extends AController
         $response->records = $total;
 
         $i = 0;
-        foreach ( $results as $result ) {
-
+        foreach ( $results->toArray() as $result ) {
             $response->rows[$i]['id'] = $result['order_id'];
-            $response->rows[$i]['cell'] = array(
+            if(in_array($this->order_status->getStatusById($result['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) )
+            {
+                $orderStatus = $result['status'];
+            }else{
+                $orderStatus = $this->html->buildSelectBox(
+                    [
+                        'name'    => 'order_status_id['.$result['order_id'].']',
+                        'value'   => $result['order_status_id'],
+                        'options' => $statuses,
+                    ]
+                );
+            }
+
+            $response->rows[$i]['cell'] = [
                 $result['order_id'],
                 $result['name'],
-                $this->html->buildSelectBox( array(
-                    'name'    => 'order_status_id['.$result['order_id'].']',
-                    'value'   => array_search( $result['status'], $statuses ),
-                    'options' => $statuses,
-                ) ),
-                AHelperUtils::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
+                $orderStatus,
+                H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
                 $this->currency->format( $result['total'], $result['currency'], $result['value'] ),
-            );
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -151,32 +156,56 @@ class ControllerResponsesListingGridOrder extends AController
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-        $this->loadModel( 'sale/order' );
         $this->loadLanguage( 'sale/order' );
         if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
             $error = new AError( '' );
 
             return $error->toJSONResponse( 'NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'listing_grid/order' ),
                     'reset_value' => true,
-                ) );
+                ]);
         }
 
         switch ( $this->request->post['oper'] ) {
             case 'del':
                 $ids = explode( ',', $this->request->post['id'] );
-                if ( ! empty( $ids ) ) {
-                    foreach ( $ids as $id ) {
-                        $this->model_sale_order->deleteOrder( $id );
+                $this->db->beginTransaction();
+                try {
+                    if (!empty($ids)) {
+                        Order::whereIn('order_id', $ids)->forceDelete();
                     }
+                    $this->db->commt();
+                } catch (\Exception $e) {
+                    $this->db->rollback();
+                    $error = new AError('');
+
+                    return $error->toJSONResponse('APP_ERROR_402',
+                        [
+                            'error_text'  => 'Application Error occurred. Probably some of orders cannot be removed by cause data dependency. Please see error log for details.',
+                            'reset_value' => true,
+                        ]
+                    );
                 }
                 break;
             case 'save':
                 $ids = explode( ',', $this->request->post['id'] );
                 if ( ! empty( $ids ) ) {
-                    foreach ( $ids as $id ) {
-                        $this->model_sale_order->editOrder( $id, array( 'order_status_id' => $this->request->post['order_status_id'][$id] ) );
+                    $this->db->beginTransaction();
+                    try {
+                        foreach ($ids as $id) {
+                            Order::editOrder($id,
+                                ['order_status_id' => (int)$this->request->post['order_status_id'][$id]]);
+                        }
+                    } catch (\Exception $e) {
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse('APP_ERROR_402',
+                            [
+                                'error_text'  => 'Application Error occurred. Please see error log for details.',
+                                'reset_value' => true,
+                            ]
+                        );
                     }
                 }
                 break;
@@ -193,6 +222,8 @@ class ControllerResponsesListingGridOrder extends AController
      * update only one field
      *
      * @return void
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -201,24 +232,23 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         if ( ! $this->user->canModify( 'listing_grid/order' ) ) {
             $error = new AError( '' );
 
             return $error->toJSONResponse( 'NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'listing_grid/order' ),
                     'reset_value' => true,
-                ) );
+                ]);
         }
 
-        if ( AHelperUtils::has_value( $this->request->post['downloads'] ) ) {
+        if ( H::has_value( $this->request->post['downloads'] ) ) {
             $data = $this->request->post['downloads'];
             $this->loadModel( 'catalog/download' );
             foreach ( $data as $order_download_id => $item ) {
                 if ( isset( $item['expire_date'] ) ) {
-                    $item['expire_date'] = $item['expire_date'] ? AHelperUtils::dateDisplay2ISO( $item['expire_date'], $this->language->get( 'date_format_short' ) ) : '';
+                    $item['expire_date'] = $item['expire_date'] ? H::dateDisplay2ISO( $item['expire_date'], $this->language->get( 'date_format_short' ) ) : '';
                 }
                 $this->model_catalog_download->editOrderDownload( $order_download_id, $item );
             }
@@ -227,15 +257,33 @@ class ControllerResponsesListingGridOrder extends AController
         }
 
         if ( isset( $this->request->get['id'] ) ) {
-            $this->model_sale_order->editOrder( $this->request->get['id'], $this->request->post );
-
+            try {
+                Order::editOrder($this->request->get['id'], $this->request->post);
+                $this->session->data['success'] = $this->language->get('text_success');
+            } catch (AException $e) {
+                $error = new AError('');
+                return $error->toJSONResponse('APP_ERROR_402',
+                    [
+                        'error_text'  => $e->getMessage(),
+                        'reset_value' => true,
+                    ]);
+            }
             return null;
         }
 
         //request sent from jGrid. ID is key of array
         foreach ( $this->request->post as $field => $value ) {
             foreach ( $value as $k => $v ) {
-                $this->model_sale_order->editOrder( $k, array( $field => $v ) );
+                try {
+                    Order::editOrder($k, [$field => $v]);
+                } catch (AException $e) {
+                    $error = new AError('');
+                    return $error->toJSONResponse('APP_ERROR_402',
+                        [
+                            'error_text'  => $e->getMessage(),
+                            'reset_value' => true,
+                        ]);
+                }
             }
         }
 
@@ -250,7 +298,6 @@ class ControllerResponsesListingGridOrder extends AController
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'sale/order' );
-        $this->loadModel( 'sale/order' );
 
         $response = new stdClass();
 
@@ -260,22 +307,22 @@ class ControllerResponsesListingGridOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = $this->model_sale_order->getOrder( $order_id );
+        $order_info = Order::getOrderArray($order_id);
 
         if ( empty( $order_info ) ) {
             $response->error = $this->language->get( 'error_order_load' );
         } else {
-            $response->order = array(
+            $response->order = [
                 'order_id'        => '#'.$order_info['order_id'],
                 'name'            => $order_info['firstname'].''.$order_info['lastname'],
                 'email'           => $order_info['email'],
                 'telephone'       => $order_info['telephone'],
-                'date_added'      => AHelperUtils::dateISO2Display( $order_info['date_added'], $this->language->get( 'date_format_short' ) ),
+                'date_added'      => H::dateISO2Display( $order_info['date_added'], $this->language->get( 'date_format_short' ) ),
                 'total'           => $this->currency->format( $order_info['total'], $order_info['currency'], $order_info['value'] ),
                 'order_status'    => $order_info['order_status_id'],
                 'shipping_method' => $order_info['shipping_method'],
                 'payment_method'  => $order_info['payment_method'],
-            );
+            ];
 
             if ( $order_info['customer_id'] ) {
                 $response->order['name'] = '<a href="'.$this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$order_info['customer_id'] ).'">'.$response->order['name'].'</a>';

@@ -129,7 +129,7 @@
 		     <i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 		     </button>&nbsp;
 		     <a class="btn btn-default" href="<?php echo $cancel; ?>">
-		     <i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                 <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 		     </a>
 		   </div>
 		</div>

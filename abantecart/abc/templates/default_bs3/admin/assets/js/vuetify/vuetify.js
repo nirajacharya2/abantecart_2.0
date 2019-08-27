@@ -19565,7 +19565,7 @@ var ICONS_FONTAWESOME4 = {
     'dropdown': 'fa fa-caret-down',
     'radioOn': 'fa fa-dot-circle',
     'radioOff': 'fa fa-circle-o',
-    'edit': 'fa fa-pencil',
+    'edit': 'fa fa-pencil-alt',
     'ratingEmpty': 'fa fa-star-o',
     'ratingFull': 'fa fa-star',
     'ratingHalf': 'fa fa-star-half-o'

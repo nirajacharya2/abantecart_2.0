@@ -40,10 +40,48 @@ class OrderDataType extends BaseModel
     ];
 
     protected $fillable = [
+        'type_id',
         'language_id',
         'name',
-        'date_added',
-        'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'type_id'     => [
+            'checks'   => [
+                'integer',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'name'        => [
+            'checks'   => [
+                'string',
+                'max:64',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
     ];
 
     public function language()

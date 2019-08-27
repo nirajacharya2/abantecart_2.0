@@ -23,6 +23,9 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
+use abc\models\order\Order;
+use abc\models\order\OrderProduct;
+use abc\models\order\OrderTotal;
 use Illuminate\Validation\ValidationException;
 
 class ControllerPagesCheckoutSuccess extends AController
@@ -150,13 +153,14 @@ class ControllerPagesCheckoutSuccess extends AController
             'separator' => $this->language->get('text_separator'),
         ]);
 
-        $this->loadModel('account/order');
-        $order_info = $this->model_account_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
         if ($order_info) {
-            $order_info['order_products'] = $this->model_account_order->getOrderProducts($order_id);
+            $order_info['order_products'] = OrderProduct::where('order_id', '=', $order_id)->get()->toArray();
         }
 
-        $order_totals = $this->model_account_order->getOrderTotals($order_id);
+        $order_totals = OrderTotal::where('order_id', '=', $order_id)
+                                  ->get()
+                                  ->toArray();
         $this->_google_analytics($order_info, $order_totals);
 
         if ($this->errors) {
@@ -167,7 +171,8 @@ class ControllerPagesCheckoutSuccess extends AController
             $order_token = $enc->encrypt($order_id.'::'.$order_info['email']);
             $order_url = $this->html->getSecureURL('account/invoice', '&ot='.$order_token);
             $this->view->assign('text_message',
-                sprintf($this->language->get('text_message_guest'),
+                sprintf(
+                    $this->language->get('text_message_guest'),
                     $order_url,
                     $this->html->getURL('content/contact')
                 )
@@ -217,14 +222,14 @@ class ControllerPagesCheckoutSuccess extends AController
     protected function validate($order_id)
     {
         //check is order incomplete
-        $this->loadModel('checkout/order');
-        $order_info = $this->model_checkout_order->getOrder($order_id);
+        $order_info = Order::getOrderArray($order_id);
         //when order exists but still incomplete by some reasons - mark it as failed
         if ((int)$order_info['order_status_id'] == $this->order_status->getStatusByTextId('incomplete')) {
+
             $new_status_id = $this->order_status->getStatusByTextId('failed');
             $this->db->beginTransaction();
             try {
-                $this->model_checkout_order->confirm($order_id, $new_status_id);
+                $this->checkout->getOrder()->confirm($order_id, $new_status_id);
                 //debit transaction
                 //amount in default currency
                 $amount = $this->session->data['used_balance'];
@@ -331,12 +336,14 @@ class ControllerPagesCheckoutSuccess extends AController
             $ga_data['items'] = [];
             foreach ($order_data['order_products'] as $product) {
                 //try to get option sku for product. If not presents - take main sku from product details
-                $options = $this->model_account_order->getOrderOptions((int)$order_data['order_id'],
-                    $product['order_product_id']);
+                $options = (new Order())->getOrderOptions(
+                    (int)$order_data['order_id'],
+                    $product['order_product_id']
+                );
                 $sku = '';
-                foreach ($options as $opt) {
-                    if ($opt['sku']) {
-                        $sku = $opt['sku'];
+                foreach ($options as $option) {
+                    if ($option->sku) {
+                        $sku = $option->sku;
                         break;
                     }
                 }

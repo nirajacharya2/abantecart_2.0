@@ -26,7 +26,8 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\AJson;
 use abc\core\lib\AWarning;
 use abc\extensions\default_pp_pro\models\admin\extension\ModelExtensionDefaultPpPro;
-
+use abc\models\order\Order;
+use H;
 
 /**
  * Class ControllerResponsesExtensionDefaultPpPro
@@ -122,11 +123,10 @@ class ControllerResponsesExtensionDefaultPpPro extends AController
     public function capture()
     {
         $json = [];
-        if ( AHelperUtils::has_value( $this->request->get['order_id'] ) ) {
-            $this->loadModel( 'sale/order' );
-            $order_info = $this->model_sale_order->getOrder( $this->request->get['order_id'] );
+        if (H::has_value($this->request->get['order_id'])) {
+            $order_info = Order::getOrderArray($this->request->get['order_id']);
             $this->loadLanguage( 'default_pp_pro/default_pp_pro' );
-            if ( AHelperUtils::has_value( $order_info['payment_method_data'] ) ) {
+            if (H::has_value($order_info['payment_method_data'])) {
 
                 if ( $this->config->get( 'default_pp_pro_test' ) ) {
                     $api_endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
@@ -135,7 +135,8 @@ class ControllerResponsesExtensionDefaultPpPro extends AController
                 }
 
                 $payment_method_data = unserialize( $order_info['payment_method_data'] );
-                $already_captured = AHelperUtils::has_value( $payment_method_data['captured_amount'] ) ? (float)$payment_method_data['captured_amount'] : 0;
+                $already_captured =
+                    H::has_value($payment_method_data['captured_amount']) ? (float)$payment_method_data['captured_amount'] : 0;
 
                 $capture_data = [
                     'METHOD'          => 'DoCapture',
@@ -212,16 +213,15 @@ class ControllerResponsesExtensionDefaultPpPro extends AController
 
         $json = [];
 
-        if ( AHelperUtils::has_value( $this->request->get['order_id'] ) ) {
+        if (H::has_value($this->request->get['order_id'])) {
 
             $amount = (float)$this->request->get['amount'];
 
             if ( $amount > 0 ) {
 
-                $this->loadModel( 'sale/order' );
-                $order_info = $this->model_sale_order->getOrder( $this->request->get['order_id'] );
+                $order_info = Order::getOrderArray($this->request->get['order_id']);
 
-                if ( AHelperUtils::has_value( $order_info['payment_method_data'] ) ) {
+                if (H::has_value($order_info['payment_method_data'])) {
 
                     if ( $this->config->get( 'default_pp_pro_test' ) ) {
                         $api_endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
@@ -231,7 +231,8 @@ class ControllerResponsesExtensionDefaultPpPro extends AController
 
                     $payment_method_data = unserialize( $order_info['payment_method_data'] );
 
-                    $already_refunded = AHelperUtils::has_value( $payment_method_data['refunded_amount'] ) ? (float)$payment_method_data['refunded_amount'] : 0;
+                    $already_refunded =
+                        H::has_value($payment_method_data['refunded_amount']) ? (float)$payment_method_data['refunded_amount'] : 0;
 
                     if ( $this->request->get['refund_captured'] ) {
                         $payment_amount = (float)$payment_method_data['captured_amount'];

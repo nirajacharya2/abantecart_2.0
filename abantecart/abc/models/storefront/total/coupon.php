@@ -38,6 +38,7 @@ class ModelTotalCoupon extends Model
      * @param $cust_data
      *
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function getTotal(&$total_data, &$total, &$taxes, &$cust_data)
     {
@@ -90,9 +91,13 @@ class ModelTotalCoupon extends Model
 
                         if ($product['tax_class_id']) {
                             $taxes[$product['tax_class_id']]['total'] -= $discount;
-                            $taxes[$product['tax_class_id']]['tax'] -= $this->tax->calcTotalTaxAmount($product['total'],
-                                    $product['tax_class_id']) - $this->tax->calcTotalTaxAmount($product['total']
-                                    - $discount, $product['tax_class_id']);
+                            $taxes[$product['tax_class_id']]['tax'] -= $this->tax->calcTotalTaxAmount(
+                                    $product['total'],
+                                    $product['tax_class_id'])
+                                - $this->tax->calcTotalTaxAmount(
+                                    ($product['total'] - $discount),
+                                    $product['tax_class_id']
+                                );
                         }
                     }
 
@@ -102,8 +107,10 @@ class ModelTotalCoupon extends Model
                 if ($coupon['shipping'] && isset($ship_data)) {
                     if (isset($ship_data['tax_class_id']) && $ship_data['tax_class_id']) {
                         $taxes[$ship_data['tax_class_id']]['total'] -= $ship_data['cost'];
-                        $taxes[$ship_data['tax_class_id']]['tax'] -= $this->tax->calcTotalTaxAmount($ship_data['cost'],
-                            $ship_data['tax_class_id']);
+                        $taxes[$ship_data['tax_class_id']]['tax'] -= $this->tax->calcTotalTaxAmount(
+                            $ship_data['cost'],
+                            $ship_data['tax_class_id']
+                        );
                     }
 
                     $discount_total += $ship_data['cost'];
@@ -111,9 +118,13 @@ class ModelTotalCoupon extends Model
 
                 $total_data[] = [
                     'id'         => 'coupon',
+                    'key'        => 'coupon',
                     'title'      => $coupon['name'].':',
                     'text'       => '-'.$this->currency->format($discount_total),
                     'value'      => -$discount_total,
+                    'data'       => [
+                        'coupon_details' => $coupon,
+                    ],
                     'sort_order' => $this->config->get('coupon_sort_order'),
                     'total_type' => $this->config->get('coupon_total_type'),
                 ];

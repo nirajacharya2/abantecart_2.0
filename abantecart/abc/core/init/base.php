@@ -78,7 +78,6 @@ $class_list = [
         'customer',
         'checkoutBase',
         'checkout',
-        'order',
         'order_status',
         'currency',
         'tax',

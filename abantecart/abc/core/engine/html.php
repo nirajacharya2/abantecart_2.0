@@ -1504,9 +1504,12 @@ class SelectboxHtmlElement extends HtmlElement
      */
     public function getHtml()
     {
+        if ($this->value === null) {
+            $this->value = [];
+        }
 
         if ( ! is_array($this->value)) {
-            $this->value = [$this->value => (string)$this->value];
+            $this->value = [(string)$this->value => (string)$this->value];
         }
 
         $this->options = ! $this->options ? [] : (array)$this->options;
@@ -1726,6 +1729,7 @@ class CheckboxGroupHtmlElement extends HtmlElement
 
     public function getHtml()
     {
+        $this->value = $this->value === null || $this->value === ''  ? [] : $this->value;
         $this->value = ! is_array($this->value) ? [$this->value => $this->value] : $this->value;
         $this->validateOptions();
         if (isset($this->options) && is_array($this->options)) {

@@ -20,32 +20,35 @@ namespace abc\models\storefront;
 
 use abc\core\engine\Model;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ModelTotalShipping extends Model
 {
     public function getTotal(&$total_data, &$total, &$taxes, &$cust_data)
     {
         $ship_data = $cust_data['shipping_method'];
         if ($this->cart->hasShipping() && isset($ship_data) && $this->config->get('shipping_status')) {
-            $total_data[] = array(
+            $total_data[] = [
                 'id'         => 'shipping',
+                'key'        => 'shipping',
                 'title'      => $ship_data['title'].':',
                 'text'       => $this->currency->format($ship_data['cost']),
                 'value'      => $ship_data['cost'],
                 'sort_order' => $this->config->get('shipping_sort_order'),
                 'total_type' => $this->config->get('shipping_total_type'),
-            );
+            ];
 
             if ($ship_data['tax_class_id']) {
                 if (!isset($taxes[$ship_data['tax_class_id']])) {
                     $taxes[$ship_data['tax_class_id']]['total'] = $ship_data['cost'];
-                    $taxes[$ship_data['tax_class_id']]['tax'] = $this->tax->calcTotalTaxAmount($ship_data['cost'], $ship_data['tax_class_id']);
+                    $taxes[$ship_data['tax_class_id']]['tax'] = $this->tax->calcTotalTaxAmount(
+                        $ship_data['cost'],
+                        $ship_data['tax_class_id']
+                    );
                 } else {
                     $taxes[$ship_data['tax_class_id']]['total'] += $ship_data['cost'];
-                    $taxes[$ship_data['tax_class_id']]['tax'] += $this->tax->calcTotalTaxAmount($ship_data['cost'], $ship_data['tax_class_id']);
+                    $taxes[$ship_data['tax_class_id']]['tax'] += $this->tax->calcTotalTaxAmount(
+                        $ship_data['cost'],
+                        $ship_data['tax_class_id']
+                    );
                 }
             }
 

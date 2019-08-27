@@ -26,6 +26,7 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\extensions\default_pp_pro\models\storefront\extension\ModelExtensionDefaultPPPro;
+use abc\models\order\Order;
 
 /**
  *
@@ -40,9 +41,8 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
     public function main()
     {
         $this->loadLanguage( 'default_pp_pro/default_pp_pro' );
-        $this->load->model( 'checkout/order' );
         $this->load->model( 'extension/default_pp_pro' );
-        $order_info = $this->model_checkout_order->getOrder( $this->session->data['order_id'] );
+        $order_info = Order::getOrderArray( $this->session->data['order_id'] );
 
         $data['action'] = $this->html->getSecureURL( 'extension/default_pp_pro/send' );
 
@@ -224,11 +224,8 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
             $payment_type = 'Sale';
         }
 
-        $this->load->model( 'checkout/order' );
-        $order_info = $this->model_checkout_order->getOrder( $this->session->data['order_id'] );
-
+        $order_info = Order::getOrderArray( $this->session->data['order_id'] );
         $order_total = $this->currency->format( $order_info['total'], $order_info['currency'], '', false );
-
         $products_data = $this->_get_products_data( [
             'currency'    => $order_info['currency'],
             'value'       => '',
@@ -335,7 +332,10 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
             parse_str( $response, $response_data );
 
             if ( ( $response_data['ACK'] == 'Success' ) || ( $response_data['ACK'] == 'SuccessWithWarning' ) ) {
-                $this->model_checkout_order->confirm( $this->session->data['order_id'], $this->config->get( 'config_order_status_id' ) );
+                $this->checkout->getOrder()->confirm(
+                    $this->session->data['order_id'],
+                    $this->config->get( 'config_order_status_id' )
+                );
 
                 $message = '';
                 if ( isset( $response_data['AVSCODE'] ) ) {
@@ -353,8 +353,15 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
                 $response_data['PAYMENTACTION'] = $payment_type;
                 $response_data['payment_method'] = 'default_pp_pro';
 
-                $this->model_checkout_order->updatePaymentMethodData( $this->session->data['order_id'], serialize( $response_data ) );
-                $this->model_checkout_order->update( $this->session->data['order_id'], $this->config->get( 'default_pp_pro_order_status_id' ), $message, false );
+                $order = Order::find($this->session->data['order_id']);
+                $order->update(['payment_method_data' => $response_data]);
+
+                $this->checkout->getOrder()->update(
+                    $this->session->data['order_id'],
+                    $this->config->get( 'default_pp_pro_order_status_id' ),
+                    $message,
+                    false
+                );
 
                 $json['success'] = $this->html->getSecureURL( 'checkout/success' );
             } else {
@@ -509,13 +516,11 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
             $order_id = 0;
         }
 
-        $this->load->model( 'checkout/order' );
-        $order_info = $this->model_checkout_order->getOrder( $order_id );
-
+        $order_info = Order::getOrderArray( $order_id );
         if ( $order_info && $this->request->post['payment_status'] == 'Refunded' ) {
             $order_status_id = $this->order_status->getStatusByTextId( 'refunded' );
             if ( $order_status_id ) {
-                $this->model_checkout_order->update( $order_id, $order_status_id );
+                $this->checkout->getOrder()->update( $order_id, $order_status_id);
             }
         }
     }

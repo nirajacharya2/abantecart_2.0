@@ -5,11 +5,16 @@
  * values - listeners
  */
 
+use abc\modules\listeners\AdminOrderUpdateProductStatusesChange;
+use abc\modules\listeners\AdminOrderUpdateTotalBalance;
 use abc\modules\listeners\AdminSendApprovalEmailListener;
 use abc\modules\listeners\AdminSendNewTransactionNotifyEmailListener;
+use abc\modules\listeners\AdminSendOrderStatusNotifyEmailListener;
+use abc\modules\listeners\StorefrontOrderConfirmEmailListener;
 use abc\modules\listeners\StorefrontResetPasswordNotifyEmailListener;
 use abc\modules\listeners\StorefrontSendActivateLinkEmailListener;
 use abc\modules\listeners\StorefrontSendLoginNameEmailListener;
+use abc\modules\listeners\StorefrontSendOrderUpdateEmailListener;
 use abc\modules\listeners\StorefrontSendResetPasswordLinkListener;
 use abc\modules\listeners\StorefrontSendWelcomeEmailListener;
 
@@ -25,21 +30,33 @@ return [
     'admin\sendNewCustomerTransactionNotifyEmail' => [
         AdminSendNewTransactionNotifyEmailListener::class,
     ],
-
-    'storefront\sendWelcomeEmail'             => [
+    'admin\SendOrderStatusNotifyEmail'            => [
+        AdminSendOrderStatusNotifyEmailListener::class,
+    ],
+    'abc\models\admin\order@update'               => [
+        AdminOrderUpdateTotalBalance::class,
+        AdminOrderUpdateProductStatusesChange::class,
+    ],
+    'storefront\sendWelcomeEmail'                 => [
         StorefrontSendWelcomeEmailListener::class,
     ],
-    'storefront\sendActivationLinkEmail'      => [
+    'storefront\sendActivationLinkEmail'          => [
         StorefrontSendActivateLinkEmailListener::class,
     ],
-    'storefront\sendPasswordResetLinkEmail'   => [
+    'storefront\sendPasswordResetLinkEmail'       => [
         StorefrontSendResetPasswordLinkListener::class,
     ],
-    'storefront\sendPasswordResetNotifyEmail' => [
+    'storefront\sendPasswordResetNotifyEmail'     => [
         StorefrontResetPasswordNotifyEmailListener::class,
     ],
-    'storefront\sendLoginNameEmail'           => [
+    'storefront\sendLoginNameEmail'               => [
         StorefrontSendLoginNameEmailListener::class,
+    ],
+    'storefront\sendOrderConfirmEmail'           => [
+        StorefrontOrderConfirmEmailListener::class,
+    ],
+    'storefront\sendOrderUpdateEmail'           => [
+        StorefrontSendOrderUpdateEmailListener::class,
     ],
 
 ];

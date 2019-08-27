@@ -29,6 +29,7 @@ use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
+use abc\models\order\Order;
 use abc\modules\events\ABaseEvent;
 use H;
 use stdClass;
@@ -120,8 +121,7 @@ class ControllerResponsesListingGridCustomer extends AController
             foreach ($results as $result) {
                 $customers_ids[] = $result['customer_id'];
             }
-            $this->loadModel('sale/order');
-            $orders_count = $this->model_sale_order->getCountOrdersByCustomerIds($customers_ids);
+            $orders_count = Order::getCountOrdersByCustomerIds($customers_ids);
         }
         $i = 0;
         foreach ($results as $result) {

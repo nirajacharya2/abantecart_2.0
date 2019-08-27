@@ -21,6 +21,7 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasManyEvents;
@@ -46,7 +47,7 @@ use ReflectionMethod;
  *
  * @package abc\models
  * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
- * @method static Builder where(string|array $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') Builder
  * @method static Builder select(mixed $select) Builder
  * @const  string DELETED_AT
  */
@@ -86,6 +87,11 @@ class BaseModel extends OrmModel
      * @var Registry
      */
     protected $registry;
+
+    /**
+     * @var int
+     */
+    protected static $current_language_id;
 
     /**
      * @var \abc\core\lib\AConfig
@@ -189,6 +195,10 @@ class BaseModel extends OrmModel
     {
         $this->actor = H::recognizeUser();
         $this->registry = Registry::getInstance();
+        //set current language for getting single description from relation
+        if (!static::$current_language_id) {
+            static::$current_language_id = $this->registry->get('language')->getContentLanguageID();
+        }
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
@@ -235,6 +245,29 @@ class BaseModel extends OrmModel
             )
         ) ? true : false;
     }
+
+    /**
+     * @param int $language_id
+     *
+     * @return bool
+     */
+    public static function setCurrentLanguageID($language_id)
+    {
+        if(!(int)$language_id){
+            return false;
+        }
+        static::$current_language_id = (int)$language_id;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getCurrentLanguageID()
+    {
+        return static::$current_language_id;
+    }
+
+
 
     /**
      * @return bool
@@ -301,7 +334,7 @@ class BaseModel extends OrmModel
                 parent::save();
             //}
         } else {
-            throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
+            throw new \Exception('No permission for object (class '.$this->getClass().') to save the model.');
         }
     }
 
@@ -338,6 +371,12 @@ class BaseModel extends OrmModel
      */
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
+        /*
+         * Disable Temporary strict mode of Carbon class (date-conversion)
+         * to prevent it's exception during validation
+         */
+        $carbonStrictMode = Carbon::isStrictModeEnabled();
+        Carbon::useStrictMode(false);
         $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
@@ -381,12 +420,15 @@ class BaseModel extends OrmModel
                 $v->validate();
             } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             } catch (\Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             }
         }
+        Carbon::useStrictMode($carbonStrictMode);
         return true;
     }
 

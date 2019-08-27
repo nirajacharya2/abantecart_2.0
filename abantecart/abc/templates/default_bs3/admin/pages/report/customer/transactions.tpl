@@ -28,7 +28,7 @@
 				    			<?php echo $search_form['submit']->text ?>
 				    		</button>
 				    		<button type="reset" class="btn btn-xs btn-default tooltips" title="<?php echo $button_reset; ?>">
-				    			<i class="fa fa-refresh"></i>
+                                <i class="fa fa-sync"></i>
 				    		</button>
 	
 				    	</div>

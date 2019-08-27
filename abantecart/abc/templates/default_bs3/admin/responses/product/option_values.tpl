@@ -11,7 +11,7 @@
 			<label class="heading col-sm-10"><?php echo $text_option_type; ?>: <?php echo $option_type; ?></label>
 			<div class="input-group col-sm-2">
 			<a class="pull-right btn btn-default tooltips" onclick="optionDelete('<?php echo $button_remove_option->href; ?>')" data-original-title="<?php echo $button_remove_option->text; ?>" data-confirmation="delete">
-			 <i class="fa fa-trash-o"></i>
+			 <i class="fa fa-trash"></i>
 			 </a>
 		    </div>
 		</div>
@@ -72,7 +72,7 @@
 			 </button>
 			 &nbsp;
 			 <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-			     <i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+                 <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			 </a>
 		</div>
 	</div>
@@ -92,7 +92,7 @@
 					<?php if($with_default){?>
 					<th class="left">
 						<a href="#" title="Click to uncheck default value" class="uncheck tooltips">
-							<?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-refresh"></i>
+                            <?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-sync"></i>
 						</a>
 					</th>
 					<?php }
@@ -127,7 +127,7 @@
 			</button>
 			&nbsp;
 			<a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-			    <i class="fa fa-refresh"></i> <?php echo $button_reset->text; ?>
+                <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			</a>
 		</div>
 	</div>

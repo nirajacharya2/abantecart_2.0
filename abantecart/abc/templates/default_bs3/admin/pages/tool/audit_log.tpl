@@ -254,7 +254,7 @@
 												<template slot="items" slot-scope="expand_props">
 													<tr>
 														<td v-for="expand_header in expand_headers">
-															{{ expand_props.item[expand_header.value] }}
+															<span v-html="expand_props.item[expand_header.value]"></span>
 														</td>
 													</tr>
 												</template>

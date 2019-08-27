@@ -304,7 +304,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 						$html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
 						break;
 					case 'approve':
-						$html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-check-square-o fa-lg"></i>';
+                        $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-check-square fa-lg"></i>';
 						break;
 					case 'actonbehalfof':
 						$html_btn .= ' '.$href.' target="_blank" rel="%ID%"><i class="fa fa-male fa-lg"></i>';

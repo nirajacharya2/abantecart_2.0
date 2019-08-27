@@ -8899,8 +8899,8 @@ CREATE TABLE `ac_coupons` (
   `total` decimal(15,4) NOT NULL,
   `date_start` date NULL,
   `date_end` date NULL,
-  `uses_total` int(11) NOT NULL,
-  `uses_customer` varchar(11) COLLATE utf8_general_ci NOT NULL,
+  `uses_total` int(11) NOT NULL DEFAULT 0,
+  `uses_customer` int(11) NOT NULL DEFAULT 0,
   `status` int(1) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -9627,17 +9627,19 @@ CREATE TABLE `ac_order_products` (
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '',
-  `model` varchar(24) NOT NULL DEFAULT '',
+  `model` varchar(64) NOT NULL DEFAULT '',
   `sku` varchar(64) DEFAULT NULL,
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `quantity` int(4) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '0',
+  `order_status_id` INT NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
-  PRIMARY KEY (`order_product_id`)
+  PRIMARY KEY (`order_product_id`),
+  INDEX `ac_order_products_ibfk_2_idx1` (`order_status_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
@@ -9652,7 +9654,7 @@ CREATE TABLE `ac_order_downloads` (
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
+  `download_id` int(11) NULL,
   `status` int(1) NOT NULL DEFAULT '0',
   `remaining_count` int(11) DEFAULT NULL,
   `percentage` int(11) DEFAULT '0',
@@ -9680,7 +9682,7 @@ CREATE TABLE `ac_order_downloads_history` (
   `order_product_id` int(11) NOT NULL,
   `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
+  `download_id` int(11) NULL,
   `download_percent` int(11) DEFAULT '0',
   `date_added` timestamp NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
@@ -9745,19 +9747,21 @@ ON `ac_order_history` (`order_id`, `order_status_id`, `notify`);
 --
 
 CREATE TABLE `ac_order_options` (
-  `order_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `product_option_value_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL,
-  `sku` varchar(64) DEFAULT NULL,
-  `value` text NOT NULL,
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `prefix` char(1) NOT NULL DEFAULT '',
-  `settings` longtext,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_option_id`         int(11)       NOT NULL AUTO_INCREMENT,
+  `order_id`                int(11)       NOT NULL,
+  `order_product_id`        int(11)       NOT NULL,
+  `product_option_id`       int(11)       NOT NULL DEFAULT '0',
+  `product_option_name`     varchar(255)  NOT NULL,
+  `product_option_value_id` int(11)       NOT NULL DEFAULT '0',
+  `name`                    varchar(255)  NOT NULL,
+  `sku`                     varchar(64)            DEFAULT NULL,
+  `value`                   text          NOT NULL,
+  `price`                   decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `prefix`                  char(1)       NOT NULL DEFAULT '',
+  `settings`                longtext,
+  `date_added`              timestamp     NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`           timestamp     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`            timestamp     NULL,
   PRIMARY KEY (`order_option_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9770,17 +9774,18 @@ ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`
 --
 
 CREATE TABLE `ac_order_totals` (
-  `order_total_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `sort_order` int(3) NOT NULL,
-  `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `key` varchar(128) NOT NULL DEFAULT '',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_total_id` INT(11)                              NOT NULL AUTO_INCREMENT,
+  `order_id`       int(11)                              NOT NULL,
+  `title`          varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `text`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `value`          decimal(15,4)                        NOT NULL DEFAULT '0.0000',
+  `data`           LONGTEXT                             NULL,
+  `sort_order`     int(3)                               NOT NULL,
+  `type`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `key`            varchar(128)                         NOT NULL DEFAULT '',
+  `date_added`     timestamp                            NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`  timestamp                            NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`   timestamp                            NULL,
   PRIMARY KEY (`order_total_id`,`order_id`),
   KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -12731,7 +12736,7 @@ VALUES
   ( 229,1,'Icon Data', '', '', '', '<i class="fa fa-cubes"></i>&nbsp;', NOW() ),
   ( 230,1,'Icon Updater', '', '', '', '<i class="fa fa-sync"></i>&nbsp;', NOW() ),
   ( 231,1,'Icon Cache', '', '', '', '<i class="fa fa-recycle"></i>&nbsp;', NOW() ),
-  ( 232,1,'Icon Messages', '', '', '', '<i class="fa fa-weixin"></i>&nbsp;', NOW() ),
+  (232, 1, 'Icon Messages', '', '', '', '<i class="fa fa-comments"></i>&nbsp;', NOW()),
   ( 233,1,'Icon Logs', '', '', '', '<i class="fa fa-file"></i>&nbsp;', NOW() ),
   ( 234,1,'Icon Report sale', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() ),
   ( 235,1,'Icon Viewed', '', '', '', '<i class="fa fa-sort-amount-down"></i>&nbsp;', NOW() ),
@@ -13183,16 +13188,18 @@ ALTER TABLE `ac_order_downloads`
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`);
+  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_data_types`
   ADD FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages`(`language_id`)
@@ -13772,7 +13779,7 @@ ALTER TABLE `ac_order_downloads`
 ADD CONSTRAINT `ac_order_downloads_ibfk_3`
   FOREIGN KEY (`download_id`)
   REFERENCES `ac_downloads` (`download_id`)
-  ON DELETE NO ACTION
+  ON DELETE SET NULL
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_history`
@@ -13876,3 +13883,9 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   ON DELETE SET NULL
   ON UPDATE CASCADE;
 
+ALTER TABLE `ac_order_products`
+ADD CONSTRAINT `ac_order_products_ibfk_2`
+  FOREIGN KEY (`order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;

@@ -26,6 +26,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\APromotion;
 use abc\core\lib\CheckoutBase;
+use abc\models\order\Order;
 use abc\modules\traits\SaleOrderTrait;
 
 class ControllerResponsesSaleOrder extends AController
@@ -52,9 +53,15 @@ class ControllerResponsesSaleOrder extends AController
         }
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
-
-        $this->checkout = $this->initCheckout($this->session->data['admin_order']);
+        $data = $this->session->data['admin_order'];
+        if ($this->request->post['shipping_method']) {
+            $data['shipping_method_key'] = $this->request->post['shipping_method_key'];
+            $data['shipping_method'] = $this->request->post['shipping_method'];
+        }
+        if ($this->request->post['payment_method']) {
+            $data['payment_method_key'] = $this->request->post['payment_method'];
+        }
+        $this->checkout = $this->initCheckout($data);
 
         switch($this->request->get['action']){
             case 'get_shippings':
@@ -90,8 +97,8 @@ class ControllerResponsesSaleOrder extends AController
     protected function getTotals()
     {
         $output = [];
-
         $display_totals = $this->checkout->getCart()->buildTotalDisplay(true);
+
         $output['totals'] = $display_totals['total_data'];
         return $output;
     }
@@ -174,6 +181,97 @@ class ControllerResponsesSaleOrder extends AController
         }
         $this->session->data['admin_order']['coupon'] = $this->request->post['coupon'];
         return ['result' => true ];
+    }
+
+    public function validateCoupon()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->reInitOrder($this->request->get['order_id']);
+        $promotion = new APromotion($this->checkout->getCustomer(), $this->checkout->getCart());
+        $coupon = $promotion->getCouponData($this->request->get['coupon_code']);
+
+        if (!$coupon) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => $this->language->get('error_coupon'),
+                    'reset_value' => true,
+                ]);
+        }
+        $this->data['output'] = $coupon;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['output']));
+    }
+
+    public function recalculateExistingOrderTotals()
+    {
+        $order_id = (int)$this->request->get['order_id'];
+
+        if (!$order_id) {
+            return null;
+        }
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        /*if (!$this->user->canModify('sale/order')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'sale/order'),
+                    'reset_value' => true,
+                ]);
+        }*/
+
+        $customer_data = (array)$this->data['customer_data'];
+        if ($this->request->post['manual_totals']) {
+            foreach ($this->request->post['manual_totals'] as $total_txt_id => $value) {
+                if ($total_txt_id == 'coupon') {
+                    $customer_data['coupon'] = $value['coupon_code'];
+                }
+            }
+        }
+        $this->reInitOrder($order_id, $customer_data);
+
+
+        $output = $this->getTotals();
+
+        $this->data['output'] = $output;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['output']));
+    }
+
+    protected function reInitOrder($order_id, $customer_data = [])
+    {
+        $this->loadLanguage('sale/order');
+
+        /**
+         * @var Order $order_info
+         */
+        $order_info = Order::find($order_id);
+        if (!$order_info) {
+            return null;
+        }
+
+        $orderData = $order_info->toArray();
+        //$guest = !($orderData['customer_id'] > 0);
+
+        //initialize existing order as new
+        $this->checkout = $this->initCheckout($orderData, $customer_data);
+
+        foreach ($this->request->post['product'] as $order_product_id => $order_product) {
+            $this->checkout->getCart()->add(
+                $order_product['product_id'],
+                $order_product['quantity'],
+                $order_product['option']
+            );
+        }
     }
 
 }

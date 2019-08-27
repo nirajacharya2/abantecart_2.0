@@ -52,6 +52,7 @@ class ProductOptionValueDescription extends BaseModel
         'product_option_value_id' => 'int',
         'language_id'             => 'int',
         'product_id'              => 'int',
+        'grouped_attribute_names' => 'serialized'
     ];
 
     protected $fillable = [

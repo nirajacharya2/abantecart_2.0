@@ -18,7 +18,7 @@
 			</table>
 		<?php } else { ?>
 			<div class="text-center">
-			<h1><i class="fa fa-thumbs-o-up fa-lg"></i></h1>
+                <h1><i class="fa fa-thumbs-up fa-lg"></i></h1>
 			</div>
 		<?php } ?>
 		</div>

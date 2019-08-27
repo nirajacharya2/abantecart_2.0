@@ -97,6 +97,7 @@ class ACart  extends ALibBase
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
      *
+     * @throws \Exception
      */
     public function __construct($registry, &$c_data = null)
     {
@@ -112,8 +113,10 @@ class ACart  extends ALibBase
         } else {
             $this->cust_data =& $c_data;
         }
+
+        $this->cust_data['balance'] = $this->customer->getBalance();
         //can load promotion if customer_group_id is provided
-        $this->promotion = ABC::getObjectByAlias('APromotion',[$this->cust_data['customer_group_id']]);
+        $this->promotion = ABC::getObjectByAlias('APromotion', [$this->customer, $this]);
 
         if (!isset($this->cust_data['cart']) || !is_array($this->cust_data['cart'])) {
             $this->cust_data['cart'] = [];
@@ -243,9 +246,8 @@ class ACart  extends ALibBase
      * @return array
      * @throws AException
      */
-    public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price=null)
+    public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price = null)
     {
-
         if (!H::has_value($product_id) || !is_numeric($product_id) || $quantity == 0) {
             return [];
         }
@@ -327,18 +329,17 @@ class ACart  extends ALibBase
                     $groups[] = $option_value_query['group_id'];
                 }
                 $option_data[] = [
-                    'product_option_value_id' => $option_value_query['product_option_value_id'],
                     'product_option_id'       => $product_option_id,
+                    'product_option_value_id' => $option_value_query['product_option_value_id'],
                     'name'                    => $option_query['name'],
                     'element_type'            => $element_type,
                     'settings'                => $option_query['settings'],
                     'value'                   => $option_value_query['name'],
                     'prefix'                  => $option_value_query['prefix'],
-                    'price'                   => (
-                    $custom_price !== null
-                        ? $custom_price
-                        : $option_value_query['price']
-                    ),
+                    'price'                   => ( $custom_price !== null
+                                                   ? $custom_price
+                                                   : $option_value_query['price']
+                                                 ),
                     'sku'                     => $option_value_query['sku'],
                     'inventory_quantity'      => (
                     $option_value_query['subtract']
@@ -362,6 +363,7 @@ class ACart  extends ALibBase
                 if ($option_value_queries) {
                     foreach ($option_value_queries as $item) {
                         $option_data[] = [
+                            'product_option_id'       => $product_option_id,
                             'product_option_value_id' => $item['product_option_value_id'],
                             'name'                    => $option_query['name'],
                             'value'                   => $item['name'],
@@ -416,7 +418,6 @@ class ACart  extends ALibBase
             //round base currency price to 2 decimal place
             $decimal_place = 2;
             $price = round($price, $decimal_place);
-
             foreach ($option_data as $item) {
                 if ($item['prefix'] == '%') {
                     $option_price += $price * $item['price'] / 100;
@@ -457,6 +458,19 @@ class ACart  extends ALibBase
             $stock = false;
         }
 
+        // group sku for each options if presents
+        $SKUs = [];
+        $sku = array_column($option_data, 'sku');
+        foreach ($sku as $sk) {
+            $sk = trim($sk);
+            if ($sk) {
+                $SKUs[] = $sk;
+            }
+        }
+        if (!$SKUs) {
+            $SKUs = [$product_query['sku']];
+        }
+
         $result = [
             'product_id'         => $product_query['product_id'],
             'name'               => $product_query['name'],
@@ -465,7 +479,9 @@ class ACart  extends ALibBase
             'option'             => $option_data,
             'download'           => $download_data,
             'quantity'           => $quantity,
-            'inventory_quantity' => ($product_query['subtract'] ? (int)$product_query['quantity'] : 1000000),
+            'inventory_quantity' => ($product_query['subtract']
+                ? (int)$product_query['quantity']
+                : 1000000),
             'minimum'            => $product_query['minimum'],
             'maximum'            => $product_query['maximum'],
             'stock'              => $stock,
@@ -481,8 +497,9 @@ class ACart  extends ALibBase
             'ship_individually'  => $product_query['ship_individually'],
             'shipping_price'     => $product_query['shipping_price'],
             'free_shipping'      => $product_query['free_shipping'],
-            'sku'                => $product_query['sku'],
+            'sku'                => implode(", ", $SKUs),
         ];
+
         return $result;
     }
 
@@ -921,8 +938,8 @@ class ACart  extends ALibBase
             $calc_order[$value['key']] = (int)$this->config->get($value['key'].'_calculation_order');
         }
         array_multisort($calc_order, SORT_ASC, $total_extns);
-
         foreach ($total_extns as $extn) {
+
             $sf_total_mdl = $this->load->model('total/'.$extn['key'], 'storefront');
             /**
              * parameters are references!!!

@@ -20,15 +20,20 @@
 
 namespace abc\core\engine;
 
+use abc\core\cache\ACache;
+use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConfigManager;
+use abc\core\lib\ACurrency;
 use abc\core\lib\ACustomer;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
+use abc\core\lib\ADownload;
 use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALog;
+use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
 use abc\core\lib\ASession;
 use abc\core\lib\AUser;
@@ -48,8 +53,13 @@ use abc\core\lib\AUser;
  * @method static ALoader load()
  * @method static ExtensionsApi extensions()
  * @method static ACustomer customer()
+ * @method static ACart cart()
  * @method static AHtml html()
  * @method static AUser user()
+ * @method static ACurrency currency()
+ * @method static ADownload download()
+ * @method static ACache cache()
+ * @method static AOrderStatus order_status()
  */
 final class Registry
 {

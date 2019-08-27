@@ -181,9 +181,9 @@
 				if ($mode == 'single') { ?>
 					<div class="col-sm-3">
 						<a class="btn btn-primary btn-xs rl_select tooltips"
-						   data-original-title="<?php echo $txt_select_resource; ?>"
-						   data-rl-id="<?php echo $resource_id; ?>"
-						   data-type="<?php echo $type; ?>"><i class="fa fa-check-square-o fa-lg"></i>
+                           data-original-title="<?php echo $txt_select_resource; ?>"
+                           data-rl-id="<?php echo $resource_id; ?>"
+                           data-type="<?php echo $type; ?>"><i class="fa fa-check-square fa-lg"></i>
 						</a>
 					</div>
 				<?php } else if ($resource['mapped_to_current'] && $mode != 'list_all') { ?>

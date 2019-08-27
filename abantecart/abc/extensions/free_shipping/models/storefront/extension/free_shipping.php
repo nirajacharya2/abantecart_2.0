@@ -35,7 +35,7 @@ class ModelExtensionFreeShipping extends Model
                                         FROM ".$this->db->table_name("zones_to_locations")."
                                         WHERE location_id = '".(int)$this->config->get('free_shipping_location_id')."'
                                             AND country_id = '".(int)$address['country_id']."'
-                                            AND (zone_id = '".(int)$address['zone_id']."' OR zone_id = '0')");
+                                            AND (zone_id = '".(int)$address['zone_id']."' OR zone_id IS NULL )");
 
             if (!$this->config->get('free_shipping_location_id')) {
                 $status = true;

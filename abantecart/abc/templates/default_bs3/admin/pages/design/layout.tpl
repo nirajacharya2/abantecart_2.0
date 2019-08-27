@@ -66,14 +66,14 @@ foreach ($pages as $page) {
 
 			<div class="btn-group toolbar">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reset; ?>">
-					<i class="fa fa-refresh fa-fw"></i>
+                    <i class="fa fa-sync fa-fw"></i>
 				</a>
 			</div>
 
 			<?php if ($current_ok_delete) { ?>
 			<div class="btn-group toolbar">
 				<a class="actionitem btn btn-default delete_page_layout tooltips" href="<?php echo $page_delete_url; ?>" title="<?php echo $button_delete; ?>">
-					<i class="fa fa-trash-o fa-fw"></i>
+					<i class="fa fa-trash fa-fw"></i>
 				</a>
 			</div>
 			<?php } ?>

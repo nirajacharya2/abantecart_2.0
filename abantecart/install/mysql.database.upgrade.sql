@@ -144,12 +144,11 @@ ALTER TABLE `ac_category_descriptions`
   ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `ac_categories_to_stores`,
+ALTER TABLE `ac_categories_to_stores`
   ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`id`, `category_id`, `store_id`),
-  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `ac_categories_to_stores`
+  ADD FOREIGN KEY (`category_id`) REFERENCES `ac_categories`(`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD FOREIGN KEY (`store_id`) REFERENCES `ac_stores`(`store_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_coupon_descriptions`
@@ -207,7 +206,7 @@ ALTER TABLE `ac_order_products`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_downloads`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads`
@@ -216,7 +215,7 @@ ALTER TABLE `ac_order_downloads`
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
@@ -528,10 +527,10 @@ ALTER TABLE `ac_content_descriptions`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_coupons`
-MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `ac_coupons`
-MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
+MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+CHANGE COLUMN `uses_total` `uses_total` INT(11) NOT NULL DEFAULT 0 ,
+CHANGE COLUMN `uses_customer` `uses_customer` INT(11) NOT NULL DEFAULT 0 ;
 
 ALTER TABLE `ac_currencies`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
@@ -577,7 +576,8 @@ ALTER TABLE `ac_customers`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_downloads`
-MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
+MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+CHANGE COLUMN `download_id` `download_id` INT(11) NULL;
 
 ALTER TABLE `ac_downloads`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
@@ -983,15 +983,15 @@ ADD CONSTRAINT `ac_order_history_ibfk_2`
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_products`
-ADD INDEX `ac_order_products_ibfk_2_idx` (`product_id` ASC);
-ALTER TABLE `ac_order_products`
+CHANGE COLUMN `model` `model` VARCHAR(64) NOT NULL DEFAULT '',
+ADD INDEX `ac_order_products_ibfk_2_idx` (`product_id` ASC),
 ADD CONSTRAINT `ac_order_products_ibfk_2`
   FOREIGN KEY (`product_id`)
   REFERENCES `ac_products` (`product_id`)
   ON DELETE NO ACTION
   ON UPDATE CASCADE;
 
-ALTER TABLE `ac_extension_dependencies`,
+ALTER TABLE `ac_extension_dependencies`
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`id`, `extension_id`, `extension_parent_id`),
@@ -1349,7 +1349,7 @@ ALTER TABLE `ac_resource_descriptions`
     MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
     ADD COLUMN `date_deleted` TIMESTAMP NULL AFTER `date_modified`,
     ADD COLUMN `stage_id` INT(6) NULL AFTER `date_deleted`,
-    ADD INDEX `stage_id` (`stage_id` ASC)
+    ADD INDEX `stage_id` (`stage_id` ASC),
     ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
     DROP PRIMARY KEY,
     ADD PRIMARY KEY (`id`,`resource_id`,`language_id`),
@@ -1615,7 +1615,7 @@ ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
 ADD INDEX `stage_id` (`stage_id` ASC),
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
-  DROP PRIMARY KEY,
+DROP PRIMARY KEY,
 PRIMARY KEY (`id`,`attribute_group_id`,`language_id`);
 
 ALTER TABLE `ac_global_attributes_types`
@@ -1754,7 +1754,7 @@ ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`id`,`product_option_value_id`,`language_id`)
+  ADD PRIMARY KEY (`id`,`product_option_value_id`,`language_id`),
 ADD INDEX `stage_id` (`stage_id` ASC),
 ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1814,7 +1814,7 @@ ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
-ADD INDEX `stage_id` (`stage_id` ASC)
+ADD INDEX `stage_id` (`stage_id` ASC),
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
 PRIMARY KEY (`id`,`tax_class_id`,`language_id`);
@@ -1844,7 +1844,7 @@ ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
-ADD INDEX `stage_id` (`stage_id` ASC)
+ADD INDEX `stage_id` (`stage_id` ASC),
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
 DROP PRIMARY KEY,
 PRIMARY KEY (`id`,`zone_id`,`language_id`),
@@ -2023,3 +2023,31 @@ INSERT INTO `ac_global_attributes_types` (`attribute_type_id`, `type_key`, `cont
 INSERT INTO `ac_global_attributes_type_descriptions` (`attribute_type_id`, `language_id`, `type_name`, `date_added`)
 VALUES
 (3, 1, 'Object Attribute', NOW());
+
+#set default order_status_id to complete
+ALTER TABLE `ac_order_products`
+ADD COLUMN `order_status_id` INT NOT NULL DEFAULT '5' AFTER `subtract`,
+ADD INDEX `ac_order_products_ibfk_2_idx1` (`order_status_id` ASC);
+
+#remove default order_status_id and add foreign key
+
+ALTER TABLE `ac_order_products`
+CHANGE COLUMN `order_status_id` `order_status_id` INT(11) NOT NULL,
+ADD CONSTRAINT `ac_order_products_ibfk_2`
+  FOREIGN KEY (`order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_options`
+  ADD COLUMN `product_option_id` INT NOT NULL DEFAULT '0'
+  AFTER `order_product_id`,
+  ADD COLUMN `product_option_name` VARCHAR(255) NOT NULL
+  AFTER `product_option_id`,
+  ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
+
+ALTER TABLE `ac_order_totals`
+  ADD COLUMN `data` LONGTEXT NULL
+  AFTER `value`;
+
+

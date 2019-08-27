@@ -22,9 +22,6 @@ namespace abc\core\lib;
 
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ATax
@@ -37,7 +34,7 @@ if (!class_exists('abc\core\ABC')) {
  */
 class ATax
 {
-    protected $taxes = array();
+    protected $taxes = [];
     /**
      * @var Registry
      */
@@ -50,6 +47,8 @@ class ATax
     /**
      * @param            $registry Registry
      * @param null|array $c_data
+     *
+     * @throws \Exception
      */
     public function __construct($registry, &$c_data = null)
     {
@@ -97,15 +96,17 @@ class ATax
      *
      * @param int $country_id
      * @param int $zone_id
+     *
+     * @throws \Exception
      */
     public function setZone($country_id, $zone_id)
     {
         $country_id = (int)$country_id;
         $zone_id = (int)$zone_id;
         $results = $this->getTaxes($country_id, $zone_id);
-        $this->taxes = array();
+        $this->taxes = [];
         foreach ($results as $result) {
-            $this->taxes[$result['tax_class_id']][] = array(
+            $this->taxes[$result['tax_class_id']][] = [
                 'tax_class_id'        => $result['tax_class_id'],
                 'rate'                => $result['rate'],
                 'rate_prefix'         => $result['rate_prefix'],
@@ -114,7 +115,7 @@ class ATax
                 'description'         => $result['description'],
                 'tax_exempt_groups'   => unserialize($result['tax_exempt_groups']),
                 'priority'            => $result['priority'],
-            );
+            ];
         }
         $this->customer_data['country_id'] = $country_id;
         $this->customer_data['zone_id'] = $zone_id;
@@ -128,6 +129,7 @@ class ATax
      * @param int $zone_id
      *
      * @return mixed|null
+     * @throws \Exception
      */
     public function getTaxes($country_id, $zone_id)
     {
@@ -166,7 +168,7 @@ class ATax
 						(tc.tax_class_id = td1.tax_class_id AND td1.language_id = '".(int)$language_id."')
 					LEFT JOIN ".$this->db->table_name("tax_class_descriptions")." td2 ON 
 						(tc.tax_class_id = td2.tax_class_id AND td2.language_id = '".(int)$default_lang_id."')
-					WHERE (tr.zone_id = '0' OR tr.zone_id = '".$zone_id."')
+					WHERE (tr.zone_id IS NULL OR tr.zone_id = '".$zone_id."')
 						AND tr.location_id in (SELECT z2l.location_id
 											   FROM ".$this->db->table_name("zones_to_locations")." z2l, "
                 .$this->db->table_name("locations")." l
@@ -241,7 +243,7 @@ class ATax
      *
      * @return float
      */
-    public function calcTaxAmount($amount, $tax_rate = array())
+    public function calcTaxAmount($amount, $tax_rate = [])
     {
         $tax_amount = 0.0;
         if (!$this->customer_data['tax_exempt']
@@ -280,7 +282,7 @@ class ATax
      */
     public function getApplicableRates($amount, $tax_class_id)
     {
-        $rates = array();
+        $rates = [];
         if (isset($this->taxes[$tax_class_id])) {
             foreach ($this->taxes[$tax_class_id] as $tax_rate) {
                 if (!empty($tax_rate) && isset($tax_rate['rate'])) {
@@ -331,7 +333,7 @@ class ATax
      */
     public function getDescription($tax_class_id)
     {
-        return (isset($this->taxes[$tax_class_id]) ? $this->taxes[$tax_class_id] : array());
+        return (isset($this->taxes[$tax_class_id]) ? $this->taxes[$tax_class_id] : []);
     }
 
     /**

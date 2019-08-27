@@ -28,7 +28,7 @@
 			</a>
 			&nbsp;
 			<a class="btn btn-default" data-dismiss="modal" href="#">
-				<i class="fa fa-refresh"></i> <?php echo $button_cancel; ?>
+                <i class="fa fa-sync"></i> <?php echo $button_cancel; ?>
 			</a>
 		</div>
 	</div>
