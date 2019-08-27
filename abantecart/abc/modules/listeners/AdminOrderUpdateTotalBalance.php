@@ -3,14 +3,10 @@
 namespace abc\modules\listeners;
 
 use abc\core\ABC;
-use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
-use abc\core\lib\AEncryption;
-use abc\core\lib\AMail;
 use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\modules\events\ABaseEvent;
-use H;
 use Illuminate\Validation\ValidationException;
 
 class AdminOrderUpdateTotalBalance
@@ -35,6 +31,7 @@ class AdminOrderUpdateTotalBalance
         if (ABC::env('IS_ADMIN') !== true) {
             return true;
         }
+
         $config = $this->registry::config();
         $order_id = $event->args[0];
         $data = $event->args[1];

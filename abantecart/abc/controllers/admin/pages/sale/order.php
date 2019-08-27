@@ -1885,7 +1885,6 @@ class ControllerPagesSaleOrder extends AController
                 $this->extensions->hk_ProcessData($this, 'before_confirm_order');
 
                 $checkout->confirmOrder(['order_id' => $order_id]);
-
                 $this->extensions->hk_ProcessData($this, 'after_confirm_order');
 
                 unset($this->session->data['admin_order']);
