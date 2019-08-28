@@ -20,6 +20,7 @@
 namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\models\catalog\Category;
 
 if (!class_exists('abc\core\ABC')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -47,7 +48,8 @@ class ControllerCommonSeoUrl extends AController {
 
 					if ($url[0] == 'category_id') {
 						if (!isset($this->request->get['path'])) {
-							$this->request->get['path'] = $url[1];
+                            $path = (new Category())->getPath($url[1], 'id');
+							$this->request->get['path'] = $path;
 						} else {
 							$this->request->get['path'] .= '_' . $url[1];
 						}
@@ -64,7 +66,7 @@ class ControllerCommonSeoUrl extends AController {
 					$this->request->get['rt'] = 'pages/error/not_found';
 				}
 			}
-			
+
 			if (isset($this->request->get['product_id'])) {
 				$this->request->get['rt'] = 'pages/product/product';
 			} elseif (isset($this->request->get['path'])) {
