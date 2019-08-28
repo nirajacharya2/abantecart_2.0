@@ -166,7 +166,7 @@
             });
             output.image_url = '<?php echo $image['thumb_url']?>';
             output.product_id = '<?php echo $product_id; ?>';
-            output.product_name = '<?php echo $product_name; ?> - ' + $('#orderProductFrm_order_status_id  option:selected').text().trim();
+            output.product_name = '<?php abc_js_echo($product_name); ?> - ' + $('#orderProductFrm_order_status_id  option:selected').text().trim();
             output.product_url = '<?php echo $product_url; ?>';
             output.order_product_id = '<?php echo $order_product_id; ?>';
             output.order_status_id = $('#orderProductFrm_order_status_id').val();

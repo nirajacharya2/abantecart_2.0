@@ -901,6 +901,7 @@ class Customer extends BaseModel
         }
 
         $sort_data = [
+            'customer_id'    => 'customers.customer_id',
             'name'           => 'name',
             'loginname'      => 'customers.loginname',
             'lastname'       => 'customers.lastname',

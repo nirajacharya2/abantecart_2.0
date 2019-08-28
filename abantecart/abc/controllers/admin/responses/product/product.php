@@ -1614,7 +1614,7 @@ class ControllerResponsesProductProduct extends AController
 
             $this->data['text_title'] = $this->language->get('text_edit_order_product');
             $form_action = $this->html->getSecureURL(
-                                                'sale/order/update',
+                'sale/order/details',
                                                 '&order_id='.$order_id.'&order_product_id='.$order_product_id
             );
 
@@ -1635,7 +1635,7 @@ class ControllerResponsesProductProduct extends AController
             );
 
             $form_action = $this->html->getSecureURL(
-                                                'sale/order/update',
+                'sale/order/details',
                                                 '&order_id='.$order_id.'&product_id='.$product_id
             );
         }
