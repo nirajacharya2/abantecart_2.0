@@ -655,7 +655,15 @@ ALTER TABLE `ac_orders`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_orders`
-MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
+  MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP,
+  CHANGE COLUMN `ip` `ip` VARCHAR(50) NOT NULL DEFAULT ''
+  AFTER `coupon_id`,
+  CHANGE COLUMN `payment_method_data` `payment_method_data` TEXT NOT NULL DEFAULT ''
+  AFTER `ip`,
+  CHANGE COLUMN `shipping_zone_id` `shipping_zone_id` INT(11) NULL DEFAULT NULL,
+  CHANGE COLUMN `payment_zone_id` `payment_zone_id` INT(11) NULL DEFAULT NULL,
+  CHANGE COLUMN `language_id` `language_id` INT(11) NOT NULL;
 
 ALTER TABLE `ac_page_descriptions`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
