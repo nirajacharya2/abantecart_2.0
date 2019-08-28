@@ -123,7 +123,7 @@ class ControllerPagesSaleOrder extends AController
                 ],
                 'edit'   => [
                     'text'     => $this->language->get('text_edit'),
-                    'href'     => $this->html->getSecureURL('sale/order/update', '&order_id=%ID%'),
+                    'href'     => $this->html->getSecureURL('sale/order/details', '&order_id=%ID%'),
                     'children' => array_merge([
                         'quickview' => [
                             'text'  => $this->language->get('text_quick_view'),
