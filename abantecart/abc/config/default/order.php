@@ -38,6 +38,7 @@ return [
     'not_reversal_statuses' => [
         'refunded',
         'canceled',
-        'canceled_reversal'
+        'canceled_reversal',
+        'canceled_by_customer',
     ]
 ];
