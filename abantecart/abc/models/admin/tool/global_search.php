@@ -56,7 +56,7 @@ class ModelToolGlobalSearch extends Model
             "orders"             => [
                 'alias'    => 'order',
                 'id'       => 'order_id',
-                'page'     => 'sale/order/update',
+                'page'     => 'sale/order/details',
                 'response' => '',
             ],
             "customers"          => [
