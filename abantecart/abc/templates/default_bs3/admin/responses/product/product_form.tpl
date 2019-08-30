@@ -46,6 +46,9 @@
                         </div>
                     </div>
                 <?php }
+
+                echo $this->getHookVar('extended_product_fields');
+
                 if ($modal_mode == 'json') { ?>
                 <label class="h4 heading"><?php echo $text_order_status ?></label>
                 <div class="form-group ">
@@ -171,7 +174,7 @@
             output.order_product_id = '<?php echo $order_product_id; ?>';
             output.order_status_id = $('#orderProductFrm_order_status_id').val();
 
-
+            <?php echo $this->getHookVar('extend_js'); ?>
             AddProductToForm(output);
 
             e.preventDefault();

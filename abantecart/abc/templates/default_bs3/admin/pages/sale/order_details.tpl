@@ -660,6 +660,8 @@ echo $this->html->buildElement(
             'value="' + currencyToNumber(product_data.total, thousand_point, decimal_point, currency_symbol) + '">'
         );
 
+        <?php echo $this->getHookVar('extend_js'); ?>
+
         if (product_data.quantity > 0) {
             newRow.addClass('alert-warning');
         } else {

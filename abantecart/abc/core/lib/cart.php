@@ -510,6 +510,7 @@ class ACart  extends ALibBase
      *
      * @param null $custom_price
      *
+     * @return string
      * @throws AException
      * @throws \ReflectionException
      */
@@ -517,7 +518,7 @@ class ACart  extends ALibBase
     {
         $product_id = (int)$product_id;
         if (!$options) {
-            $key = $product_id;
+            $key = (string)$product_id;
         } else {
             $key = $product_id.':'.md5(serialize($options));
         }
@@ -543,6 +544,7 @@ class ACart  extends ALibBase
 
         //reload data for the cart
         $this->getProducts(true);
+        return $key;
     }
 
     /**
