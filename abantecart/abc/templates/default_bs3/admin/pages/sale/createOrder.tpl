@@ -116,7 +116,8 @@
                             <td class="align-left">
                                 <a target="_blank"
                                    href="<?php echo $order_product['href']; ?>"><?php echo $order_product['name']; ?>
-                                    (<?php echo $order_product['model']; ?>)</a>
+                                    <?php echo $order_product['model'] ? '('.$order_product['model'].')' : ''; ?>
+                                </a>
                                 <input type="hidden"
                                        name="product[<?php echo $order_product_row; ?>][order_product_id]"
                                        value="<?php echo $order_product['order_product_id']; ?>"/>

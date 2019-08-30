@@ -2184,6 +2184,7 @@ class ControllerPagesSaleOrder extends AController
         $this->data['apply_coupon_url'] = $this->html->getSecureURL('r/sale/order', '&action=apply_coupon');
 
         $this->view->batchAssign($this->data);
+
         $this->processTemplate('pages/sale/createOrder.tpl');
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -2215,7 +2216,7 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $post = $this->request->post;
         $checkout = $this->initCheckout($this->session->data['admin_order']);
-        $checkout->getCart()->add(
+        $this->data['product_key'] = $checkout->getCart()->add(
             $post['product_id'],
             $post['quantity'],
             $post['option'],
