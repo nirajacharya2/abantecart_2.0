@@ -468,7 +468,7 @@ echo $this->html->buildElement(
 
                     var cancel_order = false;
                     if (data.totals.length === 0) {
-                        data.totals['0'] = {id: 'total', title: 'Total', text: '0.00'};
+                        data.totals['0'] = {id: 'total', title: 'Total', text: '0.00', value: 0.0};
                         cancel_order = true;
                     }
                     $.each(data.totals, function (index, row) {
