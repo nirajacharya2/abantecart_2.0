@@ -1179,7 +1179,7 @@ class Order extends BaseModel
                 return false;
             }
 
-            if (isset($data['order_totals']['total']['value'])) {
+            if ($data['order_totals']['total']['value'] !== null) {
                 $data['total'] = $data['order_totals']['total']['value'];
                 $data['total_difference'] = $order->total - $data['total'];
             }
