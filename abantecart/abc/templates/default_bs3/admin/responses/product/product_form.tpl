@@ -129,6 +129,7 @@
                     $('#price_text').text(currencyToNumber(data.price));
                     $('#orderProductFrm_total').val(data.total);
                     $('#total_text').text(currencyToNumber(data.total));
+                    $('#orderProductFrm_order_status_id').change();
                 }
             }
         });
