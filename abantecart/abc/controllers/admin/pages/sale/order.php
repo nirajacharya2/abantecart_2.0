@@ -103,6 +103,7 @@ class ControllerPagesSaleOrder extends AController
         $extra_params = '';
         $extra_params .= $this->request->get['customer_id'] ? '&customer_id='.$this->request->get['customer_id'] : '';
         $extra_params .= $this->request->get['product_id'] ? '&product_id='.$this->request->get['product_id'] : '';
+        $extra_params .= $this->request->get['status'] ? '&status='.$this->request->get['status'] : '';
 
         $grid_settings = [
             //id of grid

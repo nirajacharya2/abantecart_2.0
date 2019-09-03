@@ -93,9 +93,7 @@ class ControllerResponsesListingGridOrder extends AController
         $results = OrderStatus::with('description')
                               ->where('display_status', '=', '1')
                               ->get();
-        $statuses = [
-            'default' => $this->language->get('text_select_status'),
-        ];
+        $statuses = [];
         foreach ($results->toArray() as $item) {
             $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
