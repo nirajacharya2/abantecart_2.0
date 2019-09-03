@@ -1038,7 +1038,6 @@ class ControllerResponsesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/files');
-        $this->loadModel('localisation/order_status');
         $this->loadModel('catalog/download');
 
         $this->data['download_id'] = $download_id = $this->request->get['download_id'];
@@ -1152,7 +1151,7 @@ class ControllerResponsesProductProduct extends AController
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    private function _buildGeneralSubform($form, $download_id, $product_id)
+    protected function _buildGeneralSubform($form, $download_id, $product_id)
     {
         if ($download_id) {
             $file_data = $this->model_catalog_download->getDownload($download_id);
@@ -1183,8 +1182,6 @@ class ControllerResponsesProductProduct extends AController
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
         ]);
-
-        $order_statuses = $this->model_localisation_order_status->getOrderStatuses();
 
         $this->data['date_added'] = H::dateISO2Display(
                                             $file_data['date_added'],
@@ -1311,16 +1308,22 @@ class ControllerResponsesProductProduct extends AController
             'style'    => 'download_activate no-save',
         ]);
 
-        $options = ['' => $this->language->get('text_select')];
-        foreach ($order_statuses as $order_status) {
-            $options[$order_status['order_status_id']] = $order_status['name'];
+        $results = OrderStatus::with('description')
+                              ->where('display_status', '=', '1')
+                              ->get()
+                              ->toArray();
+        $statuses = [
+            '' => $this->language->get('text_all_orders'),
+        ];
+        foreach ($results as $item) {
+            $statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
         $this->data['form']['fields']['general']['activate'] .= $form->getFieldHtml([
             'type'     => 'selectbox',
             'name'     => 'activate_order_status_id',
             'value'    => $file_data['activate_order_status_id'],
-            'options'  => $options,
+            'options'  => $statuses,
             'required' => true,
             'style'    => ' no-save ',
         ]);
@@ -1878,9 +1881,14 @@ class ControllerResponsesProductProduct extends AController
 
 
         $results = OrderStatus::with('description')->get()->toArray();
-        $statuses = [];
+        $statuses = $disabled_statuses = [];
         foreach ($results as $item) {
-            $statuses[$item['order_status_id']] = $item['description']['name'];
+            if ($item['display_status'] || $order_info['order_status_id'] == $this->request->get['order_status_id']) {
+                $statuses[$item['order_status_id']] = $item['description']['name'];
+            }
+            if (!$item['display_status']) {
+                $disabled_statuses[] = (string)$item['order_status_id'];
+            }
         }
 
         //get combined database and config info about each order status
@@ -1893,11 +1901,12 @@ class ControllerResponsesProductProduct extends AController
         }
 
         $this->data['form']['order_status_id'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'order_status_id',
-            'value'   => $this->request->get['order_status_id'],
-            'options' => $statuses,
-            'attr'    => (in_array($product_info['order_status_id'], $this->data['cancel_statuses']) ? 'readonly' : ''),
+            'type'             => 'selectbox',
+            'name'             => 'order_status_id',
+            'value'            => $this->request->get['order_status_id'],
+            'options'          => $statuses,
+            'disabled_options' => $disabled_statuses,
+            'attr'             => (in_array($product_info['order_status_id'], $this->data['cancel_statuses']) ? 'readonly' : ''),
         ]);
 
         //url to storefront response controller. Note: if admin under ssl - use https for url and otherwise

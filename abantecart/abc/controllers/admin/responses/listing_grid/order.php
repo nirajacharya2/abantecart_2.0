@@ -92,7 +92,9 @@ class ControllerResponsesListingGridOrder extends AController
             }
         }
 
-        $results = OrderStatus::with('description')->get();
+        $results = OrderStatus::with('description')
+                              ->where('display_status', '=', '1')
+                              ->get();
         $statuses = [
             'default' => $this->language->get('text_select_status'),
         ];
@@ -121,7 +123,10 @@ class ControllerResponsesListingGridOrder extends AController
         $i = 0;
         foreach ( $results->toArray() as $result ) {
             $response->rows[$i]['id'] = $result['order_id'];
-            if(in_array($this->order_status->getStatusById($result['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) )
+            //if status not-reversal or not displayed
+            if (in_array($this->order_status->getStatusById($result['order_status_id']),
+                    (array)ABC::env('ORDER')['not_reversal_statuses'])
+                || !in_array($result['order_status_id'], array_keys($statuses)))
             {
                 $orderStatus = $result['status'];
             }else{
@@ -328,12 +333,10 @@ class ControllerResponsesListingGridOrder extends AController
                 $response->order['name'] = '<a href="'.$this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$order_info['customer_id'] ).'">'.$response->order['name'].'</a>';
             }
 
-            $this->loadModel( 'localisation/order_status' );
-            $status = $this->model_localisation_order_status->getOrderStatus( $order_info['order_status_id'] );
-            if ( $status ) {
-                $response->order['order_status'] = $status['name'];
+            $status = OrderStatus::with('description')->find($order_info['order_status_id']);
+            if ($status) {
+                $response->order['order_status'] = $status['description']['name'];
             }
-
         }
         $this->data['response'] = $response;
         //update controller data

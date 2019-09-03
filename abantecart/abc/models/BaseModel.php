@@ -21,6 +21,7 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use abc\core\lib\AException;
 use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
@@ -388,6 +389,10 @@ class BaseModel extends OrmModel
                         $data[$attributeName.'_confirmation'] = $data[$attributeName];
                     }
                     $msg = $item['messages'];
+                    if (!is_array($msg)) {
+                        throw new AException('Validation messages not found for attribute '.$attributeName.' of model '
+                            .$this->getClass());
+                    }
                     foreach($msg as $subRule => $langParams) {
                         $subRule = $attributeName.'.'.$subRule;
                         if($langParams['language_key']) {

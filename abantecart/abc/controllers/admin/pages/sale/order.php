@@ -224,7 +224,9 @@ class ControllerPagesSaleOrder extends AController
             ],
         ];
 
-        $results = OrderStatus::with('description')->get();
+        $results = OrderStatus::with('description')
+                              ->where('display', '=', '1')
+                              ->get();
         $statuses = [
             'default' => $this->language->get('text_select_status'),
             'all'     => $this->language->get('text_all_orders'),
@@ -1305,8 +1307,14 @@ class ControllerPagesSaleOrder extends AController
 
         $results = OrderStatus::with('description')->get()->toArray();
         $statuses = ['' => $this->language->get('text_select_status'),];
+        $disabled_statuses = [];
         foreach ($results as $item) {
-            $statuses[$item['order_status_id']] = $item['description']['name'];
+            if ($item['display_status'] || $order_info['order_status_id'] == $item['order_status_id']) {
+                $statuses[$item['order_status_id']] = $item['description']['name'];
+            }
+            if (!$item['display_status']) {
+                $disabled_statuses[] = (string)$item['order_status_id'];
+            }
         }
 
         $this->data['order_id'] = $order_id;
@@ -1356,12 +1364,14 @@ class ControllerPagesSaleOrder extends AController
             $attr = '';
         }
         $this->data['form']['fields']['order_status'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'order_status_id',
-            'value'   => $order_info['order_status_id'],
-            'options' => $statuses,
-            'attr'    => $attr
+            'type'             => 'selectbox',
+            'name'             => 'order_status_id',
+            'value'            => $order_info['order_status_id'],
+            'options'          => $statuses,
+            'disabled_options' => $disabled_statuses,
+            'attr'             => $attr
         ]);
+
         $this->data['form']['fields']['notify'] = $form->getFieldHtml([
             'type'    => 'checkbox',
             'name'    => 'notify',
@@ -1369,6 +1379,7 @@ class ControllerPagesSaleOrder extends AController
             'checked' => false,
             'style'   => 'btn_switch',
         ]);
+
         $this->data['form']['fields']['append'] = $form->getFieldHtml([
             'type'  => 'checkbox',
             'name'  => 'append',
@@ -1650,10 +1661,9 @@ class ControllerPagesSaleOrder extends AController
 
         $this->_initTabs('files');
 
-        $this->loadModel('localisation/order_status');
-        $status = $this->model_localisation_order_status->getOrderStatus($order_info['order_status_id']);
+        $status = OrderStatus::with('description')->find($order_info['order_status_id']);
         if ($status) {
-            $this->data['order_status'] = $status['name'];
+            $this->data['order_status'] = $status['description']['name'];
         } else {
             $this->data['order_status'] = '';
         }

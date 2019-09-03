@@ -1699,6 +1699,8 @@ ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
+  ADD COLUMN `display_status` int(1) NOT NULL DEFAULT '1'
+  AFTER `status_text_id`,
 ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_order_totals`

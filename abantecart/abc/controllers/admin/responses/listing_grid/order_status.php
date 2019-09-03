@@ -21,10 +21,14 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\order\Order;
+use abc\models\order\OrderStatus;
+use abc\models\order\OrderStatusDescription;
+use H;
+use Illuminate\Validation\ValidationException;
 use stdClass;
 
 class ControllerResponsesListingGridOrderStatus extends AController
@@ -38,11 +42,9 @@ class ControllerResponsesListingGridOrderStatus extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('localisation/order_status');
-        $this->loadModel('localisation/order_status');
 
         $page = $this->request->post['page']; // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
-        $sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
         $sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
@@ -59,7 +61,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
             'content_language_id' => $this->session->data['content_language_id'],
         ];
 
-        $total = $this->model_localisation_order_status->getTotalOrderStatuses();
+        $total = OrderStatus::count();
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -76,7 +78,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
         $response->total = $total_pages;
         $response->records = $total;
 
-        $results = $this->model_localisation_order_status->getOrderStatuses($data);
+        $results = OrderStatus::getOrderStatuses($data);
         $i = 0;
 
         $base_order_statuses = $this->order_status->getBaseStatuses();
@@ -84,7 +86,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
         foreach ($results as $result) {
             $id = $result['order_status_id'];
             $response->rows[$i]['id'] = $id;
-            if (AHelperUtils::has_value($base_order_statuses[$id])) {
+            if (H::has_value($base_order_statuses[$id])) {
                 $response->userdata->classes[$id] = 'disable-delete';
             }
             $response->rows[$i]['cell'] = [
@@ -93,6 +95,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
                     'value' => $result['name'],
                 ]),
                 $result['status_text_id'],
+                mb_strtoupper($result['display_status'] ? $this->language->get('text_on') : $this->language->get('text_off')),
             ];
             $i++;
         }
@@ -118,39 +121,67 @@ class ControllerResponsesListingGridOrderStatus extends AController
                     'reset_value' => true,
                 ]);
         }
-
-        $this->loadModel('localisation/order_status');
         $this->loadModel('setting/store');
         $this->loadLanguage('localisation/order_status');
-
+        $this->db->beginTransaction();
         switch ($this->request->post['oper']) {
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    foreach ($ids as $id) {
-                        $err = $this->_validateDelete($id);
-                        if (!empty($err)) {
-                            $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    try {
+                        foreach ($ids as $id) {
+                            $err = $this->_validateDelete($id);
+                            if (!empty($err)) {
+                                $error = new AError('');
+                                return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            }
+                            $oStatus = OrderStatus::find($id);
+                            if ($oStatus) {
+                                $oStatus->forceDelete();
+                            }
                         }
-                        $this->model_localisation_order_status->deleteOrderStatus($id);
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse(
+                            'VALIDATION_ERROR_406',
+                            ['error_text' => 'Application Error! See error log for details.']
+                        );
                     }
                 }
                 break;
             case 'save':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    foreach ($ids as $id) {
-                        if (isset($this->request->post['order_status'][$id])) {
-                            foreach ($this->request->post['order_status'][$id] as $value) {
-                                if (!$this->_validate_field($value['name'])) {
-                                    $this->response->setOutput($this->language->get('error_name'));
-                                    return null;
+
+                    try {
+                        foreach (array_unique($ids) as $id) {
+                            if (isset($this->request->post['order_status'][$id])) {
+                                foreach ($this->request->post['order_status'][$id] as $key => $value) {
+                                    if (!$this->validateStatusName($value)) {
+                                        $this->response->setOutput($this->language->get('error_name'));
+                                        return null;
+                                    }
+
+                                    OrderStatusDescription::updateOrInsert(
+                                        [
+                                            'order_status_id' => $id,
+                                            'language_id'     => $this->language->getContentLanguageID(),
+                                        ],
+                                        ['name' => $value]);
                                 }
+
                             }
-                            $this->model_localisation_order_status->editOrderStatus($id,
-                                ['order_status' => $this->request->post['order_status'][$id]]);
                         }
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse('VALIDATION_ERROR_406',
+                            ['error_text' => 'Application Error! See error log for details.']);
                     }
                 }
                 break;
@@ -165,6 +196,8 @@ class ControllerResponsesListingGridOrderStatus extends AController
      * update only one field
      *
      * @return void
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -182,34 +215,62 @@ class ControllerResponsesListingGridOrderStatus extends AController
                 ]);
         }
 
+        $post = $this->request->post;
         $this->loadLanguage('localisation/order_status');
-        $this->loadModel('localisation/order_status');
-        if (isset($this->request->get['id']) && !empty($this->request->post)) {
+        if (isset($this->request->get['id']) && !empty($post)) {
             //request sent from edit form. ID in url
             $fields = ['name', 'status_text_id'];
+
             foreach ($fields as $field_name) {
-                if (isset($this->request->post[$field_name])) {
-                    if (!$this->_validate_field($this->request->post[$field_name])) {
+                if (isset($post[$this->request->get['id']][$field_name])) {
+                    if (!$this->validateStatusName($post[$this->request->get['id']][$field_name])) {
                         $error = new AError('');
                         return $error->toJSONResponse('VALIDATION_ERROR_406',
                             ['error_text' => $this->language->get('error_'.$field_name)]);
                     }
                 }
             }
+            $orderStatusId = $this->request->get['id'];
+            $this->db->beginTransaction();
+            try {
+                $oStatus = OrderStatus::find($orderStatusId);
+                $oStatus->update($post);
+                $orderStatusDesc = OrderStatusDescription::where(
+                    [
+                        'order_status_id' => $orderStatusId,
+                        'language_id'     => $this->language->getContentLanguageID(),
+                    ]
+                )->first();
+                $orderStatusDesc->update($post);
+                $this->db->commit();
+            } catch (\Exception $e) {
+                Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                $this->db->rollback();
+                $error = new AError('');
+                return $error->toJSONResponse('VALIDATION_ERROR_406',
+                    ['error_text' => 'Application Error! See error log for details.']);
+            }
 
-            $this->model_localisation_order_status->editOrderStatus($this->request->get['id'], $this->request->post);
             return null;
         }
 
         //request sent from jGrid. ID is key of array
         if (isset($this->request->post['order_status'])) {
             foreach ($this->request->post['order_status'] as $id => $value) {
-                if (!$this->_validate_field($value['name'])) {
+
+                if (!$this->validateStatusName($value['name'])) {
+                    var_dump($value['name']);
                     $error = new AError('');
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
                         ['error_text' => $this->language->get('error_name')]);
                 }
-                $this->model_localisation_order_status->editOrderStatus($id, ['name' => $value['name']]);
+                OrderStatusDescription::updateOrInsert(
+                    [
+                        'order_status_id' => $id,
+                        'language_id'     => $this->language->getContentLanguageID(),
+                    ],
+                    ['name' => $value['name']]
+                );
             }
         }
 
@@ -217,12 +278,17 @@ class ControllerResponsesListingGridOrderStatus extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validate_field($value)
+    protected function validateStatusName($name)
     {
-        if (mb_strlen($value) < 3 || mb_strlen($value) > 32) {
-            return false;
+        $this->error = [];
+        $oStatusDesc = new OrderStatusDescription();
+        try {
+            $oStatusDesc->validate(['name' => $name]);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($oStatusDesc->errors()['validation'], $this->error);
         }
-        return true;
+
+        return !($this->error);
     }
 
     private function _validateDelete($order_status_id)
