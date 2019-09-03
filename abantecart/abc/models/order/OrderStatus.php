@@ -49,6 +49,7 @@ class OrderStatus extends BaseModel
             'checks'   => [
                 'string',
                 'max:64',
+                'sometimes',
                 'required',
             ],
             'messages' => [
