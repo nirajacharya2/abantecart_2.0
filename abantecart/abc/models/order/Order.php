@@ -1713,7 +1713,7 @@ class Order extends BaseModel
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'orders');
             $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
-        Registry::log()->write($query->toSql());
+
         return $result_rows;
 
     }
