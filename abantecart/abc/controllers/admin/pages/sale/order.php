@@ -225,7 +225,7 @@ class ControllerPagesSaleOrder extends AController
         ];
 
         $results = OrderStatus::with('description')
-                              ->where('display', '=', '1')
+                              ->where('display_status', '=', '1')
                               ->get();
         $statuses = [
             'default' => $this->language->get('text_select_status'),
