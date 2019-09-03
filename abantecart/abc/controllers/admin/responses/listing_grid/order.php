@@ -30,7 +30,6 @@ use abc\models\order\OrderStatus;
 use H;
 use stdClass;
 
-
 class ControllerResponsesListingGridOrder extends AController
 {
     public $error = [];
@@ -38,7 +37,6 @@ class ControllerResponsesListingGridOrder extends AController
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
