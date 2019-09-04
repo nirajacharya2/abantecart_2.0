@@ -4,7 +4,7 @@
             <?php
             //note: need to seek a string! int cause a bug when $v is 0
             echo(in_array((string)$v, (array)$value) ? ' selected="selected" ' : '') ?>
-            <?php echo(in_array((string)$v, (array)$disabled_options) ? ' disabled="disabled" ' : '') ?>
+            <?php echo(in_array((string)$v, $disabled_options) ? ' disabled="disabled" ' : '') ?>
 		data-orgvalue="<?php echo (in_array($v, $value) ? 'true':'false') ?>"
 		><?php echo $text ?></option>
 <?php } ?>

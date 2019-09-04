@@ -1517,6 +1517,12 @@ class SelectboxHtmlElement extends HtmlElement
             $opt = (string)$opt;
         }
         unset($opt);
+        $this->disabled_options = (array)$this->disabled_options;
+        $disabled = [];
+        foreach ((array)$this->disabled_options as $id) {
+            $disabled[] = (string)$id;
+        }
+        $this->disabled_options = $disabled;
 
         $text_continue_typing = $text_looking_for = '';
         if (is_object($this->language)) {
@@ -1548,6 +1554,7 @@ class SelectboxHtmlElement extends HtmlElement
                 'extra'                => $this->extra,
             ]
         );
+
         if ( ! empty($this->help_url)) {
             $this->view->assign('help_url', $this->help_url);
         }

@@ -358,32 +358,12 @@ class ControllerPagesSaleOrder extends AController
                     }
                     $this->model_catalog_download->editOrderDownload($order_download_id, $item);
                 }
-            }/* else {
-                //NOTE: Totals will be recalculated if forced so skip array is not needed.
-                if ($this->config->get('config_allow_order_recalc')
-                    && $this->request->post['force_recalc']
-                ){
-                    $this->session->data['attention'] = $this->language->get('attention_check_total');
-                    abc_redirect($this->html->getSecureURL('sale/order/recalc', '&order_id='.$order_id));
-                }else{
-                    if($this->request->post['force_recalc_single']){
-                        //recalc single only
-                        $skip_recalc = [];
-                        foreach ($this->request->post['totals'] as $key => $value) {
-                            if (H::has_value($value)) {
-                                $skip_recalc[] = $key;
-                            }
-                        }
+            }
+            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+        }
 
-                        $enc = new AEncryption($this->config->get('encryption_key'));
-                        abc_redirect($this->html->getSecureURL(
-                                'sale/order/recalc',
-                                '&order_id='.$order_id.'&skip_recalc='.$enc->encrypt(serialize($skip_recalc))
-                            )
-                        );
-                    }
-                }
-            }*/
+        if ($this->error) {
+            $this->session->data['error'] = implode(' ', $this->error);
             abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
         }
 

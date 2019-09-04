@@ -119,7 +119,7 @@ class OrderStatus extends BaseModel
     public static function getOrderStatusConfig(string $status_text_id = null)
     {
 
-        $orderStatus = OrderStatus::all()->toArray();
+        $orderStatus = OrderStatus::with('description')->get()->toArray();
         $conf = ABC::env('ORDER')['statuses'];
         foreach ($orderStatus as &$item) {
             $item['config'] = $conf[$item['status_text_id']];

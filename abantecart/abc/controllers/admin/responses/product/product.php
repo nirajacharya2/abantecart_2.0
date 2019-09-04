@@ -1879,25 +1879,31 @@ class ControllerResponsesProductProduct extends AController
             'value' => (int)$order_product_id,
         ]);
 
-
-        $results = OrderStatus::with('description')->get()->toArray();
-        $statuses = $disabled_statuses = [];
-        foreach ($results as $item) {
-            if ($item['display_status'] || $order_info['order_status_id'] == $this->request->get['order_status_id']) {
-                $statuses[$item['order_status_id']] = $item['description']['name'];
-            }
-            if (!$item['display_status']) {
-                $disabled_statuses[] = (string)$item['order_status_id'];
-            }
-        }
-
         //get combined database and config info about each order status
         $orderStatuses = OrderStatus::getOrderStatusConfig();
         $this->data['cancel_statuses'] = [];
+        $statuses = $disabled_statuses = [];
         foreach ($orderStatuses as $oStatus) {
+            if ($oStatus['display_status'] || $oStatus['order_status_id'] == $this->request->get['order_status_id']) {
+                $statuses[$oStatus['order_status_id']] = $oStatus['description']['name'];
+            }
+            if (!$oStatus['display_status']) {
+                $disabled_statuses[] = (string)$oStatus['order_status_id'];
+            }
             if (in_array('return_to_stock', (array)$oStatus['config']['actions'])) {
                 $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
             }
+        }
+
+        $readonly = '';
+        if (in_array(
+            $this->order_status->getStatusById($this->request->get['order_status_id']),
+            (array)ABC::env('ORDER')['not_reversal_statuses'])
+        ) {
+            $readonly = 'readonly';
+            $disabled_statuses = $statuses;
+            unset($disabled_statuses[$this->request->get['order_status_id']]);
+            $disabled_statuses = array_keys($disabled_statuses);
         }
 
         $this->data['form']['order_status_id'] = $form->getFieldHtml([
@@ -1906,10 +1912,11 @@ class ControllerResponsesProductProduct extends AController
             'value'            => $this->request->get['order_status_id'],
             'options'          => $statuses,
             'disabled_options' => $disabled_statuses,
-            'attr'             => (in_array($product_info['order_status_id'], $this->data['cancel_statuses']) ? 'readonly' : ''),
+            'attr'             => $readonly,
         ]);
 
-        //url to storefront response controller. Note: if admin under ssl - use https for url and otherwise
+        //url to storefront response controller.
+        // Note: if admin under ssl - use https for url and otherwise
         $order_store_id = $order_info['store_id'];
         $store_info = Setting::getStoreSettings($order_store_id);
         if (ABC::env('HTTPS') && $store_info->config_ssl_url) {
