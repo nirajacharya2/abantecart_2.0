@@ -135,6 +135,7 @@ class ControllerPagesLocalisationOrderStatus extends AController
                 $orderStatus = new OrderStatus($this->request->post);
                 $orderStatus->save();
                 $order_status_id = $orderStatus->order_status_id;
+                $post['order_status_id'] = $order_status_id;
                 $orderStatusDescription = new OrderStatusDescription($post);
                 $orderStatusDescription->save();
                 $this->extensions->hk_ProcessData($this, __FUNCTION__, ['order_status_id' => $order_status_id]);

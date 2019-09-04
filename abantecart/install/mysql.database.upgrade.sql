@@ -1703,6 +1703,18 @@ ADD COLUMN `stage_id` INT(6) NULL,
   AFTER `status_text_id`,
 ADD INDEX `stage_id` (`stage_id` ASC);
 
+ALTER TABLE `ac_order_status_descriptions`
+  ADD FOREIGN KEY (`order_status_id`)
+REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_order_status_descriptions`
+  ADD FOREIGN KEY (`language_id`)
+REFERENCES `ac_languages` (`language_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
 ALTER TABLE `ac_order_totals`
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,

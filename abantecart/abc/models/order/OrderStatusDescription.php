@@ -41,6 +41,7 @@ class OrderStatusDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'order_status_id',
         'language_id',
         'name',
     ];

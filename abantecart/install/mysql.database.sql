@@ -13211,7 +13211,8 @@ ALTER TABLE `ac_order_data_types`
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`order_status_id`)
   REFERENCES `ac_order_statuses`(`order_status_id`)
-   ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`language_id`)
