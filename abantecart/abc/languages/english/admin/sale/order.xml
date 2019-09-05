@@ -444,4 +444,8 @@
 		<key>error_system</key>
 		<value><![CDATA[No payment methods available.<a href="%s">Please enable at least one and try again.</a>]]></value>
 	</definition>
+	<definition>
+		<key>text_tracking_products</key>
+		<value><![CDATA[Tracking Order Products]]></value>
+	</definition>
 </definitions>

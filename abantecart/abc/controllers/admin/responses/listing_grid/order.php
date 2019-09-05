@@ -119,6 +119,7 @@ class ControllerResponsesListingGridOrder extends AController
         $i = 0;
         foreach ( $results->toArray() as $result ) {
             $response->rows[$i]['id'] = $result['order_id'];
+            $response->userdata->order_status_id[$result['order_id']] = $result['order_status_id'];
             //if status not-reversal or not displayed
             if (in_array($this->order_status->getStatusById($result['order_status_id']),
                     (array)ABC::env('ORDER')['not_reversal_statuses'])

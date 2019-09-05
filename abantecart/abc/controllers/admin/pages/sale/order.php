@@ -117,25 +117,32 @@ class ControllerPagesSaleOrder extends AController
             'multiselect'  => 'true',
             // actions
             'actions'      => [
-                'print'  => [
-                    'text'   => $this->language->get('button_invoice'),
-                    'href'   => $this->html->getSecureURL('sale/invoice', '&order_id=%ID%'),
-                    'target' => '_invoice',
+                'view' => [
+                    'text'  => $this->language->get('text_quick_view'),
+                    'href'  => $this->html->getSecureURL('sale/order/details',
+                        '&order_id=%ID%'),
+                    //quick view port URL
+                    'vhref' => $this->html->getSecureURL(
+                        'r/common/viewport/modal',
+                        '&viewport_rt=sale/order/details&order_id=%ID%'
+                    ),
                 ],
+                'tracking' => [
+                    'text'  => $this->language->get('text_tracking_products'),
+                    'href'  => $this->html->getSecureURL(
+                        'sale/order/details',
+                        '&order_id=%ID%'
+                    ),
+                    //quick view port URL
+                    'vhref' => $this->html->getSecureURL(
+                        'r/sale/order_tracking/products&order_id=%ID%'
+                    ),
+                ],
+
                 'edit'   => [
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('sale/order/details', '&order_id=%ID%'),
                     'children' => array_merge([
-                        'quickview' => [
-                            'text'  => $this->language->get('text_quick_view'),
-                            'href'  => $this->html->getSecureURL('sale/order/details',
-                                '&order_id=%ID%'),
-                            //quick view port URL
-                            'vhref' => $this->html->getSecureURL(
-                                'r/common/viewport/modal',
-                                '&viewport_rt=sale/order/details&order_id=%ID%'
-                            ),
-                        ],
                         'details'   => [
                             'text' => $this->language->get('tab_order_details'),
                             'href' => $this->html->getSecureURL(
@@ -173,6 +180,11 @@ class ControllerPagesSaleOrder extends AController
                         ],
 
                     ], (array)$this->data['grid_edit_expand']),
+                ],
+                'print'  => [
+                    'text'   => $this->language->get('button_invoice'),
+                    'href'   => $this->html->getSecureURL('sale/invoice', '&order_id=%ID%'),
+                    'target' => '_invoice',
                 ],
                 'save'   => [
                     'text' => $this->language->get('button_save'),
@@ -446,7 +458,6 @@ class ControllerPagesSaleOrder extends AController
         $this->data['store_url'] = $order_info['store_url'];
         $this->data['comment'] = nl2br($order_info['comment']);
         $this->data['firstname'] = $order_info['firstname'];
-        $this->data['lastname'] = $order_info['lastname'];
         $this->data['lastname'] = $order_info['lastname'];
         $this->data['total'] = $this->currency->format(
             $order_info['total'],

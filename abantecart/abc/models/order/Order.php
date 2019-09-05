@@ -111,7 +111,6 @@ class Order extends BaseModel
         'totals',
     ];
 
-    public $timestamps = false;
     protected $primaryKey = 'order_id';
 
     /**
@@ -1544,7 +1543,7 @@ class Order extends BaseModel
                 $db->raw("(SELECT name
                             FROM ".$aliasOSD."
                             WHERE ".$aliasOSD.".order_status_id = ".$aliasO.".order_status_id
-                                AND ".$aliasOSD.".language_id = '".(int)$language_id."') AS status"),
+                                AND ".$aliasOSD.".language_id = '".(int)$language_id."' LIMIT 1) AS status"),
             ];
         }
 
