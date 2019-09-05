@@ -759,7 +759,9 @@ class Category extends BaseModel
             $this->load('descriptions', 'stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
-            $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
+            if ($this->getKey() && $this->registry->get('language')->getContentLanguageID()) {
+                $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
+            }
             $this->cache->push($cache_key, $data);
         }
         return $data;
