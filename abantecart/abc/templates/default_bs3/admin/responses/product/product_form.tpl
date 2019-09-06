@@ -39,7 +39,7 @@
                                for="<?php echo $field->element_id; ?>"><?php echo ${'column_'.$name}; ?></label>
                         <div class="input-group afield col-sm-6 col-xs-12">
                             <?php echo $field;
-                            if ($field->type == 'hidden' && in_array($field->name, ['price', 'total'])) {
+                            if ($field->type == 'hidden' && in_array($field->name, [ 'price','total'])) {
                                 echo '<div id="'.$field->name.'_text" class="form-control-static">'.$field->value
                                     .'</div>';
                             } ?>
@@ -118,6 +118,7 @@
         var data = $("#orderProductFrm").serialize();
         data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option'); <?php // data format for storefront response-controller ?>
         data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity'); <?php // data format for storefront response-controller ?>
+        data = data.replace(new RegExp("product%5Bprice%5D", 'g'), 'price'); <?php // data format for storefront response-controller ?>
         $.ajax({
             type: 'POST',
             url: '<?php echo $total_calc_url;?>',
@@ -125,7 +126,7 @@
             data: data,
             success: function (data) {
                 if (data.total) {
-                    $('#orderProductFrm_price').val(data.price);
+                    $('#orderProductFrm_price').val(currencyToNumber(data.price));
                     $('#price_text').text(currencyToNumber(data.price));
                     $('#orderProductFrm_total').val(data.total);
                     $('#total_text').text(currencyToNumber(data.total));

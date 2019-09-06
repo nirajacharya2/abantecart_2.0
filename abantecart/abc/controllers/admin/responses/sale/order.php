@@ -28,6 +28,7 @@ use abc\core\lib\APromotion;
 use abc\core\lib\CheckoutBase;
 use abc\models\order\Order;
 use abc\modules\traits\SaleOrderTrait;
+use H;
 
 class ControllerResponsesSaleOrder extends AController
 {
@@ -269,9 +270,64 @@ class ControllerResponsesSaleOrder extends AController
             $this->checkout->getCart()->add(
                 $order_product['product_id'],
                 $order_product['quantity'],
-                $order_product['option']
+                $order_product['option'],
+                $order_product['price']
             );
         }
+    }
+
+    /*
+     * Calculate product total based on options selected
+     * */
+    public function calculateTotal()
+    {
+
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->checkout = $this->initCheckout(['customer_id' => $this->request->get['customer_id']]);
+        $output = [];
+
+        if (H::has_value($this->request->post['product_id'])
+            && is_numeric($this->request->post['product_id'])) {
+            $product_id = $this->request->post['product_id'];
+            if (isset($this->request->post['option'])) {
+                $option = $this->request->post['option'];
+            } else {
+                $option = [];
+            }
+
+            if (isset($this->request->post['quantity'])) {
+                $quantity = (int)$this->request->post['quantity'];
+            } else {
+                $quantity = 1;
+            }
+
+            $custom_price = $this->request->post['price'] ?: null;
+            $result = $this->checkout->getCart()->buildProductDetails($product_id, $quantity, $option, $custom_price);
+
+            $output['total'] = (float)$this->tax->calculate(
+                $result['total'],
+                $result['tax_class_id'],
+                (int)$this->config->get('config_tax')
+            );
+            $output['price'] = (float)$this->tax->calculate(
+                $result['price'],
+                $result['tax_class_id'],
+                (int)$this->config->get('config_tax')
+            );
+
+            $output['total'] = $this->currency->format_total($output['price'], $quantity);
+            $output['price'] = $this->currency->format($output['price']);
+
+        }
+
+        $this->data['output'] = $output;
+        //init controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
 }

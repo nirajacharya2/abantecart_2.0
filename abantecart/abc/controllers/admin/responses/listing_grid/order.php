@@ -30,7 +30,6 @@ use abc\models\order\OrderStatus;
 use H;
 use stdClass;
 
-
 class ControllerResponsesListingGridOrder extends AController
 {
     public $error = [];
@@ -38,7 +37,6 @@ class ControllerResponsesListingGridOrder extends AController
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
@@ -92,10 +90,10 @@ class ControllerResponsesListingGridOrder extends AController
             }
         }
 
-        $results = OrderStatus::with('description')->get();
-        $statuses = [
-            'default' => $this->language->get('text_select_status'),
-        ];
+        $results = OrderStatus::with('description')
+                              ->where('display_status', '=', '1')
+                              ->get();
+        $statuses = [];
         foreach ($results->toArray() as $item) {
             $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
@@ -121,7 +119,11 @@ class ControllerResponsesListingGridOrder extends AController
         $i = 0;
         foreach ( $results->toArray() as $result ) {
             $response->rows[$i]['id'] = $result['order_id'];
-            if(in_array($this->order_status->getStatusById($result['order_status_id']), (array)ABC::env('ORDER')['not_reversal_statuses']) )
+            $response->userdata->order_status_id[$result['order_id']] = $result['order_status_id'];
+            //if status not-reversal or not displayed
+            if (in_array($this->order_status->getStatusById($result['order_status_id']),
+                    (array)ABC::env('ORDER')['not_reversal_statuses'])
+                || !in_array($result['order_status_id'], array_keys($statuses)))
             {
                 $orderStatus = $result['status'];
             }else{
@@ -138,7 +140,7 @@ class ControllerResponsesListingGridOrder extends AController
                 $result['order_id'],
                 $result['name'],
                 $orderStatus,
-                H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
+                H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' )." ".$this->language->get( 'time_format_short' ) ),
                 $this->currency->format( $result['total'], $result['currency'], $result['value'] ),
             ];
             $i++;
@@ -328,12 +330,10 @@ class ControllerResponsesListingGridOrder extends AController
                 $response->order['name'] = '<a href="'.$this->html->getSecureURL( 'sale/customer/update', '&customer_id='.$order_info['customer_id'] ).'">'.$response->order['name'].'</a>';
             }
 
-            $this->loadModel( 'localisation/order_status' );
-            $status = $this->model_localisation_order_status->getOrderStatus( $order_info['order_status_id'] );
-            if ( $status ) {
-                $response->order['order_status'] = $status['name'];
+            $status = OrderStatus::with('description')->find($order_info['order_status_id']);
+            if ($status) {
+                $response->order['order_status'] = $status['description']['name'];
             }
-
         }
         $this->data['response'] = $response;
         //update controller data

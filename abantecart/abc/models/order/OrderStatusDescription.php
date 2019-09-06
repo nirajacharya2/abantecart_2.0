@@ -41,6 +41,7 @@ class OrderStatusDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'order_status_id',
         'language_id',
         'name',
     ];
@@ -79,7 +80,10 @@ class OrderStatusDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be string :max characters length!',
+                    'language_key'   => 'error_name',
+                    'language_block' => 'localisation/order_status',
+                    'section'        => 'admin',
+                    'default_text'   => ':attribute must be string 32 characters length!',
                 ],
             ],
         ],

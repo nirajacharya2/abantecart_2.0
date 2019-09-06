@@ -444,4 +444,12 @@
 		<key>error_system</key>
 		<value><![CDATA[No payment methods available.<a href="%s">Please enable at least one and try again.</a>]]></value>
 	</definition>
+	<definition>
+		<key>text_tracking_products</key>
+		<value><![CDATA[Tracking Order Products]]></value>
+	</definition>
+	<definition>
+		<key>text_confirm_redirect_to_order_details</key>
+		<value><![CDATA[This status require adjustment of order total amount. You will be redirected to order edit page. Proceed? ]]></value>
+	</definition>
 </definitions>

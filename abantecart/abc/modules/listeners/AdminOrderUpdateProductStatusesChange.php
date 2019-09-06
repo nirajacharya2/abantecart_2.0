@@ -58,15 +58,33 @@ class AdminOrderUpdateProductStatusesChange
                 Registry::log()->write(__CLASS__.": order #".$order_id." have no any products!");
                 return true;
             }
+            Registry::db()->beginTransaction();
             try {
+                $common_order_status = null;
                 foreach ($orderProducts as $product) {
                     $productStatus = $this->registry::order_status()->getStatusById($product->order_status_id);
+                    if($common_order_status !== false){
+                        if($common_order_status === null){
+                            $common_order_status = $product->order_status_id;
+                        }elseif($common_order_status != $product->order_status_id){
+                            $common_order_status = false;
+                        }
+
+                    }
                     if (!in_array($productStatus, ABC::env('ORDER')['not_reversal_statuses'])) {
                         $product->update(['order_status_id' => (int)$data['order_status_id']]);
                     }
                 }
+
+                //check if needed to change common order status
+                if($common_order_status !== false){
+                    $order = Order::find($order_id);
+                    $order->update(['order_status_id' => $common_order_status]);
+                }
+                Registry::db()->commit();
             } catch (\Exception $e) {
                 Registry::log()->write(__CLASS__.": ".$e->getMessage());
+                Registry::db()->rollback();
             }
         }
 

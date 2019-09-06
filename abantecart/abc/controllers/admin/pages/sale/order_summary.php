@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\models\order\Order;
+use abc\models\order\OrderStatus;
 use H;
 
 class ControllerPagesSaleOrderSummary extends AController
@@ -100,10 +101,9 @@ class ControllerPagesSaleOrderSummary extends AController
                     .$order_info['order_id']),
             ]);
 
-            $this->loadModel('localisation/order_status');
-            $status = $this->model_localisation_order_status->getOrderStatus($order_info['order_status_id']);
+            $status = OrderStatus::with('description')->find($order_info['order_status_id']);
             if ($status) {
-                $this->data['order']['order_status'] = $status['name'];
+                $this->data['order']['order_status'] = $status['description']['name'];
             }
 
         }

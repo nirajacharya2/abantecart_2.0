@@ -111,7 +111,6 @@ class Order extends BaseModel
         'totals',
     ];
 
-    public $timestamps = false;
     protected $primaryKey = 'order_id';
 
     /**
@@ -1544,8 +1543,7 @@ class Order extends BaseModel
                 $db->raw("(SELECT name
                             FROM ".$aliasOSD."
                             WHERE ".$aliasOSD.".order_status_id = ".$aliasO.".order_status_id
-                                AND ".$aliasOSD.".language_id = '".(int)$language_id."') AS status"),
-                'orders.*',
+                                AND ".$aliasOSD.".language_id = '".(int)$language_id."' LIMIT 1) AS status"),
             ];
         }
 
@@ -1560,7 +1558,7 @@ class Order extends BaseModel
         $query->addSelect($select);
 
         if ($inputData['filter_order_status_id'] == 'all') {
-            $query->where('orders.order_status_id', '>=', 0);
+            $query->where('orders.order_status_id', '>=', '0');
         } else {
             if (H::has_value($inputData['filter_order_status_id'])) {
                 $query->where('orders.order_status_id', '=', (int)$inputData['filter_order_status_id']);

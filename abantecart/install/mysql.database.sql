@@ -9225,12 +9225,13 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 -- DDL for table `order_status_description`
 --
 CREATE TABLE `ac_order_statuses` (
-  `order_status_id` int(11) NOT NULL AUTO_INCREMENT,
-  `status_text_id` varchar(64) NOT NULL,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
+  `order_status_id` int(11)     NOT NULL AUTO_INCREMENT,
+  `status_text_id`  varchar(64) NOT NULL,
+  `display_status`  int(1)      NOT NULL DEFAULT '1',
+  `date_added`      timestamp   NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`   timestamp   NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`    timestamp   NULL,
+  `stage_id`        INT(6)      NULL,
   PRIMARY KEY (`order_status_id`,`status_text_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -13210,7 +13211,8 @@ ALTER TABLE `ac_order_data_types`
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`order_status_id`)
   REFERENCES `ac_order_statuses`(`order_status_id`)
-   ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`language_id`)

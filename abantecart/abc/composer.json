@@ -103,9 +103,9 @@
       "type": "package",
       "package": {
         "name": "components/font-awesome",
-        "version": "5.0.6",
+        "version": "5.0.x-dev",
         "dist": {
-          "url": "https://github.com/components/font-awesome/archive/master.zip",
+          "url": "https://github.com/components/font-awesome/archive/5.0.zip",
           "type": "zip"
         }
       }
@@ -236,7 +236,7 @@
     "components/jquery-cookie": "2.2.0",
     "components/popper": "1.4.13",
     "components/modernizr": "3.5.0",
-    "components/font-awesome": "5.0.6",
+    "components/font-awesome": "5.0.x-dev",
     "blueimp/jquery-file-upload": "9.21.0",
     "drmonty/animate.css": "3.5.2",
     "kartik-v/bootstrap-fileinput": "dev-master",

@@ -22,6 +22,7 @@ namespace abc\models\admin;
 
 use abc\core\ABC;
 use abc\core\lib\contracts\AttributeManagerInterface;
+use abc\models\order\OrderStatus;
 use \H;
 use abc\core\engine\Model;
 use abc\core\lib\AResourceManager;
@@ -29,7 +30,6 @@ use abc\core\lib\AResourceManager;
 /**
  * Class ModelCatalogDownload
  *
- * @property ModelLocalisationOrderStatus $model_localisation_order_status
  */
 class ModelCatalogDownload extends Model
 {
@@ -684,11 +684,10 @@ class ModelCatalogDownload extends Model
 
         if ((int)$download_info['activate_order_status_id'] > 0) {
             if ((int)$download_info['activate_order_status_id'] != (int)$download_info['order_status_id']) {
-                $this->load->model('localisation/order_status');
-                $order_status_info =
-                    $this->model_localisation_order_status->getOrderStatus($download_info['activate_order_status_id']);
+
+                $status = OrderStatus::with('description')->find($download_info['activate_order_status_id']);
                 $text_status[] =
-                    sprintf($this->language->get('text_order_status_required'), $order_status_info['name']);
+                    sprintf($this->language->get('text_order_status_required'), $status['description']['name']);
             }
         }
 

@@ -1288,6 +1288,8 @@ function formatMoney(num, decimal_place, decimal_point, thousand_point) {
 
 function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
     str = str === undefined || str.length === 0 ? '0' : str;
+    //remove html-tags from currency formatted string
+    str = str.replace( /<.*?>/g, '' );
     var final_number = str.replace(thousand_point, '')
         .replace(currency_symbol, '')
         .replace(decimal_point, '.')
