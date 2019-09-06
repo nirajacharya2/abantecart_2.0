@@ -1639,7 +1639,7 @@ class ControllerResponsesProductProduct extends AController
 
             $form_action = $this->html->getSecureURL(
                 'sale/order/details',
-                                                '&order_id='.$order_id.'&product_id='.$product_id
+                '&order_id='.$order_id.'&product_id='.$product_id
             );
         }
         //when trying to add new product to new order
@@ -1654,17 +1654,17 @@ class ControllerResponsesProductProduct extends AController
                 $currency = $this->currency;
             }
 
-            $preset_values['price'] = $currency->format(
+            $preset_values['price'] = $currency->convert(
                                                 $product_info['price'],
-                                                $order_info['currency'],
-                                                '',
-                                                false
+                                                $this->currency->getCode(),
+                                                $currency->getCode()
             );
+
             $preset_values['total'] = $currency->format(
-                                                ($product_info['price'] * $preset_values['quantity']),
-                                                $order_info['currency'],
-                                                '',
-                                                false
+                                            ($product_info['price'] * $preset_values['quantity']),
+                                            $order_info['currency'],
+                                            '',
+                                            false
             );
 
             $form_action = $this->html->getSecureURL(
@@ -1832,12 +1832,21 @@ class ControllerResponsesProductProduct extends AController
             'name' => 'cancel',
             'text' => $this->language->get('button_cancel'),
         ]);
-        $this->data['form']['fields']['price'] = $form->getFieldHtml([
-            'type'  => 'hidden',
-            'name'  => 'price',
-            'value' => $preset_values['price'],
-            'attr'  => 'readonly'
-        ]);
+
+        if($order_product_id) {
+            $this->data['form']['fields']['price'] = $form->getFieldHtml([
+                'type'  => 'hidden',
+                'name'  => 'price',
+                'value' => $preset_values['price'],
+                'attr'  => 'readonly'
+            ]);
+        }else{
+            $this->data['form']['fields']['price'] = $form->getFieldHtml([
+                'type'  => 'input',
+                'name'  => 'price',
+                'value' => $preset_values['price'],
+            ]);
+        }
 
         if (!$options && $product_info['subtract']) {
             if ($product_info['quantity']) {
@@ -1917,22 +1926,11 @@ class ControllerResponsesProductProduct extends AController
 
         //url to storefront response controller.
         // Note: if admin under ssl - use https for url and otherwise
-        $order_store_id = $order_info['store_id'];
-        $store_info = Setting::getStoreSettings($order_store_id);
-        if (ABC::env('HTTPS') && $store_info->config_ssl_url) {
-            $total_calc_url = $store_info->config_ssl_url.'index.php?rt=r/product/product/calculateTotal';
-        } elseif (ABC::env('HTTPS') && !$store_info->config_ssl_url) {
-            $total_calc_url = str_replace(
-                                        'http://',
-                                        'https://',
-                                        $store_info->config_url
-                                        )
-                                        .'index.php?rt=r/product/product/calculateTotal';
-        } else {
-            $total_calc_url = $store_info->config_url.'index.php?rt=r/product/product/calculateTotal';
-        }
-
-        $this->data['total_calc_url'] = $total_calc_url;
+        $this->data['total_calc_url'] = $this->html->getSecureURL(
+            'r/sale/order/calculateTotal',
+            '&customer_id='.($order_info['customer_id'] ?: $this->request->get['customer_id'])
+            .'&currency='.$this->currency->getCode()
+        );
 
         $this->data['currency'] = $this->currency->getCurrency();
         $this->data['decimal_point'] = $this->language->get('decimal_point');
