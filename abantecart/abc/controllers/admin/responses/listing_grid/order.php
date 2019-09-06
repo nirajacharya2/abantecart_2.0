@@ -140,7 +140,7 @@ class ControllerResponsesListingGridOrder extends AController
                 $result['order_id'],
                 $result['name'],
                 $orderStatus,
-                H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' ) ),
+                H::dateISO2Display( $result['date_added'], $this->language->get( 'date_format_short' )." ".$this->language->get( 'time_format_short' ) ),
                 $this->currency->format( $result['total'], $result['currency'], $result['value'] ),
             ];
             $i++;
