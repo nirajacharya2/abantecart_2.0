@@ -302,8 +302,7 @@ echo $this->html->buildElement(
                                 break;
                             case 'delete':
                                 if ($href != 'href="#"') {
-                                    $html_btn .= ' '.$href
-                                        .' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
+                                    $html_btn .= ' '.$href.' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
                                 } else {
                                     $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
                                 }
@@ -336,14 +335,13 @@ echo $this->html->buildElement(
                                 $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
                                 break;
                             case 'uninstall':
-                                $html_btn .= ' '.$href
-                                    .' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
+                                $html_btn .= ' '.$href .' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
                                 break;
                             case 'view':
                                 $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-eye fa-lg"></i>';
                                 break;
                             case 'tracking':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-shipping-fast fa-lg"></i>';
+                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-box-open fa-lg"></i>';
                                 break;
                             default:
                                 $html_btn .= ' '.$href.' id="action_'.$type.'_%ID%"  '

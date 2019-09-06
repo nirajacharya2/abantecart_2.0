@@ -212,13 +212,13 @@ class ControllerPagesSaleOrder extends AController
             [
                 'name'  => 'name',
                 'index' => 'name',
-                'width' => 140,
-                'align' => 'center',
+                'width' => 90,
+                'align' => 'left',
             ],
             [
                 'name'   => 'status',
                 'index'  => 'status',
-                'width'  => 140,
+                'width'  => 90,
                 'align'  => 'center',
                 'search' => false,
             ],
