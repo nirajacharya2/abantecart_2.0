@@ -292,8 +292,8 @@ class ControllerResponsesSaleOrderTracking extends AController
             ];
         }
 
-
-
+        $this->data['order_edit_url'] = $this->html->getSecureURL('sale/order/details', '&order_id='. $order_id);
+        $this->data['redirect_confirm_text'] = $this->language->get('text_confirm_redirect_to_order_details');
 
         $this->view->batchAssign($this->data);
         $this->view->assign('help_url', $this->gen_help_url('order_details'));
