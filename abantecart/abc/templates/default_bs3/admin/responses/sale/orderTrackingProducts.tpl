@@ -121,7 +121,7 @@
         return false;
     }
 
-    $('#orderTrackProductFrm_product220order_status_id').on('change', function(){
+    $('#orderTrackProductFrm select').on('change', function(){
         var recalc_statuses = <?php echo json_encode($cancel_statuses); ?>;
         if($.inArray(parseInt($(this).val()), recalc_statuses) >= 0){
             if(confirm(<?php abc_js_echo($redirect_confirm_text);?>)){
