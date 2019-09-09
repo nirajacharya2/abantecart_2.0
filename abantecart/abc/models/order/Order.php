@@ -1375,7 +1375,6 @@ class Order extends BaseModel
                     $query->forceDelete();
 
                     foreach ($orderProduct['option'] as $opt_id => $values) {
-
                         if (!is_array($values)) { // for non-multioptional elements
                             //do not save empty input and textarea
                             if (in_array($option_types[$opt_id], ['I', 'T']) && $values == '') {
@@ -1398,8 +1397,8 @@ class Order extends BaseModel
 
                         $curr_subtract_options = [];
                         foreach ($values as $value) {
+                            if(!$value){ continue;}
                             $arr_key = $opt_id.'_'.$value;
-                            // var_dump($option_value_info); exit;
                             $orderOption = new OrderOption(
                                 [
                                     'order_id'                => $order_id,
@@ -1412,7 +1411,6 @@ class Order extends BaseModel
                                     'prefix'                  => $option_value_info[$arr_key]['prefix'],
                                 ]
                             );
-
                             $orderOption->save();
 
                             if ($option_value_info[$arr_key]['subtract']) {
