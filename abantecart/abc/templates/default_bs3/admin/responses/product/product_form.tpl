@@ -89,7 +89,13 @@
         .on('change', display_total_price);
 
     $('#orderProductFrm_quantity')
-        .on('keyup', display_total_price);
+        .on('keyup', function(){
+            console.log($(this).val());
+            if($(this).val() == ''){
+                $(this).val('1');
+            }
+            display_total_price();
+        });
 
     $('#orderProductFrm_order_status_id').on(
         'change',
