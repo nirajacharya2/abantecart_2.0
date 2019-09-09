@@ -271,7 +271,7 @@ class ControllerResponsesSaleOrder extends AController
                 $order_product['product_id'],
                 $order_product['quantity'],
                 $order_product['option'],
-                $order_product['price']
+                H::preformatFloat($order_product['price'])
             );
         }
     }
