@@ -165,12 +165,12 @@ class ControllerResponsesSaleOrderTracking extends AController
 
         $this->data['order_products'] = [];
 
-        $order_products = OrderProduct::where('order_id', '=', $order_id)->get()->toArray();
+        $order_products = OrderProduct::where('order_id', '=', $order_id)->orderBy('date_added')->get()->toArray();
 
         //get combined database and config info about each order status
         $orderStatuses = OrderStatus::getOrderStatusConfig();
 
-        foreach ($order_products as $order_product) {
+        foreach ($order_products as $kk => $order_product) {
             $option_data = [];
             $options = OrderProduct::getOrderProductOptions($order_id, $order_product['order_product_id']);
             foreach ($options as $option) {
@@ -258,38 +258,36 @@ class ControllerResponsesSaleOrderTracking extends AController
                 $disabled_statuses = array_keys($disabled_statuses);
             }
 
-            $this->data['order_products'][] = [
-                'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
-                'order_product_id' => $order_product['order_product_id'],
-                'product_id'       => $order_product['product_id'],
-                'product_status'   => $product['status'],
-                'order_status_id'  => $form->getFieldHtml([
-                                            'type'             => 'selectbox',
-                                            'name'             => 'product['.$order_product['order_product_id'].'][order_status_id]',
-                                            'value'            => $order_product['order_status_id'],
-                                            'options'          => $statuses,
-                                            'disabled_options' => $disabled_statuses,
-                                            'attr'             => $readonly,
-                                        ]),
-                'name'             => $order_product['name'],
-                'model'            => $order_product['model'],
-                'option'           => $option_data,
-                'quantity'         => $order_product['quantity'],
-                'price'            => $this->currency->format(
-                    $order_product['price'],
-                    $order_info['currency'],
-                    $order_info['value']
-                ),
-                'total'            => $this->currency->format_total(
-                    $order_product['price'],
-                    $order_product['quantity'],
-                    $order_info['currency'], $order_info['value']
-                ),
-                'href'             => $this->html->getSecureURL(
-                    'catalog/product/update',
-                    '&product_id='.$order_product['product_id']
-                ),
-            ];
+            $this->data['order_products'][$kk] =
+                array_merge($order_product,
+                            [
+                                'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
+                                'product_status'   => $product['status'],
+                                'order_status_id'  => $form->getFieldHtml([
+                                    'type'             => 'selectbox',
+                                    'name'             => 'product['.$order_product['order_product_id'].'][order_status_id]',
+                                    'value'            => $order_product['order_status_id'],
+                                    'options'          => $statuses,
+                                    'disabled_options' => $disabled_statuses,
+                                    'attr'             => $readonly,
+                                ]),
+                                'option'           => $option_data,
+                                'price'            => $this->currency->format(
+                                    $order_product['price'],
+                                    $order_info['currency'],
+                                    $order_info['value']
+                                ),
+                                'total'            => $this->currency->format_total(
+                                    $order_product['price'],
+                                    $order_product['quantity'],
+                                    $order_info['currency'], $order_info['value']
+                                ),
+                                'href'             => $this->html->getSecureURL(
+                                    'catalog/product/update',
+                                    '&product_id='.$order_product['product_id']
+                                ),
+                            ]
+                );
         }
 
         $this->data['order_edit_url'] = $this->html->getSecureURL('sale/order/details', '&order_id='. $order_id);
