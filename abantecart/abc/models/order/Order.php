@@ -1016,7 +1016,9 @@ class Order extends BaseModel
         if ($order_id) {
             $query->where('order_id', '=', $order_id);
         }
-        $query->limit($limit)->offset($start);
+        $query->orderByDesc('orders.date_added')
+              ->limit($limit)
+              ->offset($start);
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
         return $query->get()->toArray();
     }
