@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static CustomerTransaction find(int $customer_transaction_id) CustomerTransaction
  * @method static QueryBuilder where(mixed $conditions, string $condition = null, mixed $value = null)
  * @method static QueryBuilder select(mixed $fields)
- * @method static CustomerTransaction firstOrNew(array $attributes, array $values = []) QueryBuilder
+ * @method static CustomerTransaction firstOrCreate(array $attributes, array $values = []) QueryBuilder
  *
  * @package abc\models
  */
