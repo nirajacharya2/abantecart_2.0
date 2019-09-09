@@ -1,7 +1,7 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php 
-/* preview development is not complete. future */ 
+<?php
+/* preview development is not complete. future */
 	if ($preview_id) { ?>
 <div class="alert alert-info"><?php echo $text_preview_generated; ?> <a href="<?php echo $preview_url; ?>" target="_blank"><?php echo $text_click_here; ?></a></div>
 <?php } ?>
@@ -13,7 +13,7 @@ foreach ($templates as $template) {
   if ($tmpl_id == $template) {
     $item_class = ' class="disabled"';
   }
-  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';    
+  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
 }
 
 $current_ok_delete = false;
@@ -22,7 +22,7 @@ foreach ($pages as $page) {
   $uri = '&tmpl_id=' . $tmpl_id . '&page_id=' . $page['page_id'] . '&layout_id=' . $page['layout_id'];
 
   $item_class = '';
-  if ($page['page_id'] == $current_page['page_id'] && $page['layout_id'] == $current_page['layout_id']) { 
+  if ($page['page_id'] == $current_page['page_id'] && $page['layout_id'] == $current_page['layout_id']) {
     $item_class = ' class="disabled"';
     if (empty($page['restricted'])) {
       $page_delete_url = $page_delete_url . $uri;
@@ -40,7 +40,7 @@ foreach ($pages as $page) {
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
 			  <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown" title="<?php echo $text_select_template; ?>">
-			    <i class="fa fa-photo"></i>
+			    <i class="fa fa-image"></i>
 			    <?php echo $tmpl_id; ?> <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu">
@@ -78,7 +78,7 @@ foreach ($pages as $page) {
 			</div>
 			<?php } ?>
 
-<?php 
+<?php
 /* preview development is not complete. future
 ?>
 			<div class="btn-group mr10 toolbar">
@@ -86,12 +86,12 @@ foreach ($pages as $page) {
 					<i class="fa fa-eye fa-fw"></i>
 				</a>
 			</div>
-<?php 
+<?php
  */
-?>	
+?>
 		</div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<?php echo $form_begin; ?>
@@ -108,10 +108,10 @@ foreach ($pages as $page) {
 $('.delete_page_layout').click(function(e) {
   e.stopPropagation();
   e.preventDefault();
-  
+
   if (confirm(<?php abc_js_echo($text_delete_confirm); ?>)) {
     var url = $(this).attr('href');
-    window.location = url + '&confirmed_delete=yes';  
+    window.location = url + '&confirmed_delete=yes';
   }
 });
 
