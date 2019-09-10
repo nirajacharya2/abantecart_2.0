@@ -185,41 +185,41 @@ class AOrder extends ALibBase
         if ($this->customer->getId()) {
             $order_info['customer_id'] = $this->customer->getId();
             $order_info['customer_group_id'] = $this->customer->getCustomerGroupId();
-            $order_info['firstname'] = $this->customer->getFirstName();
-            $order_info['lastname'] = $this->customer->getLastName();
-            $order_info['email'] = $this->customer->getEmail();
-            $order_info['telephone'] = $this->customer->getTelephone();
-            $order_info['fax'] = $this->customer->getFax();
+            $order_info['firstname'] = (string)$this->customer->getFirstName();
+            $order_info['lastname'] = (string)$this->customer->getLastName();
+            $order_info['email'] = (string)$this->customer->getEmail();
+            $order_info['telephone'] = (string)$this->customer->getTelephone();
+            $order_info['fax'] = (string)$this->customer->getFax();
 
             if ($this->cart->hasShipping()) {
                 $shipping_address = [];
                 $address = Address::find($indata['shipping_address_id']);
                 if ($address) {
                     $shipping_address = $address->toArray();
-                    $shipping_address['zone'] = ZoneDescription::where(
+                    $shipping_address['zone'] = (string) ZoneDescription::where(
                         [
                             'zone_id'     => $shipping_address['zone_id'],
                             'language_id' => Registry::language()->getContentLanguageID(),
                         ]
                     )->first()->name;
                     $country = Country::with('description')->find($shipping_address['country_id']);
-                    $shipping_address['country'] = $country->description->name;
-                    $shipping_address['address_format'] = $country->address_format;
+                    $shipping_address['country'] = (string)$country->description->name;
+                    $shipping_address['address_format'] = (string)$country->address_format;
 
                 }
 
-                $order_info['shipping_firstname'] = $shipping_address['firstname'];
-                $order_info['shipping_lastname'] = $shipping_address['lastname'];
-                $order_info['shipping_company'] = $shipping_address['company'];
-                $order_info['shipping_address_1'] = $shipping_address['address_1'];
-                $order_info['shipping_address_2'] = $shipping_address['address_2'];
-                $order_info['shipping_city'] = $shipping_address['city'];
-                $order_info['shipping_postcode'] = $shipping_address['postcode'];
-                $order_info['shipping_zone'] = $shipping_address['zone'];
+                $order_info['shipping_firstname'] = (string)$shipping_address['firstname'];
+                $order_info['shipping_lastname'] = (string)$shipping_address['lastname'];
+                $order_info['shipping_company'] = (string)$shipping_address['company'];
+                $order_info['shipping_address_1'] = (string)$shipping_address['address_1'];
+                $order_info['shipping_address_2'] = (string)$shipping_address['address_2'];
+                $order_info['shipping_city'] = (string)$shipping_address['city'];
+                $order_info['shipping_postcode'] = (string)$shipping_address['postcode'];
+                $order_info['shipping_zone'] = (string)$shipping_address['zone'];
                 $order_info['shipping_zone_id'] = $shipping_address['zone_id'];
-                $order_info['shipping_country'] = $shipping_address['country'];
+                $order_info['shipping_country'] = (string)$shipping_address['country'];
                 $order_info['shipping_country_id'] = $shipping_address['country_id'];
-                $order_info['shipping_address_format'] = $shipping_address['address_format'];
+                $order_info['shipping_address_format'] = (string)$shipping_address['address_format'];
             } else {
                 $order_info['shipping_firstname'] = '';
                 $order_info['shipping_lastname'] = '';
@@ -240,7 +240,7 @@ class AOrder extends ALibBase
             $address = Address::find($indata['payment_address_id']);
             if ($address) {
                 $payment_address = $address->toArray();
-                $payment_address['zone'] = ZoneDescription::where(
+                $payment_address['zone'] = (string)ZoneDescription::where(
                     [
                         'zone_id'     => $payment_address['zone_id'],
                         'language_id' => Registry::language()->getContentLanguageID(),
@@ -248,32 +248,32 @@ class AOrder extends ALibBase
                 )->first()->name;
 
                 $country = Country::with('description')->find($payment_address['country_id']);
-                $payment_address['country'] = $country->description->name;
-                $payment_address['address_format'] = $country->address_format;
+                $payment_address['country'] = (string)$country->description->name;
+                $payment_address['address_format'] = (string)$country->address_format;
             }
 
-            $order_info['payment_firstname'] = $payment_address['firstname'];
-            $order_info['payment_lastname'] = $payment_address['lastname'];
-            $order_info['payment_company'] = $payment_address['company'];
-            $order_info['payment_address_1'] = $payment_address['address_1'];
-            $order_info['payment_address_2'] = $payment_address['address_2'];
-            $order_info['payment_city'] = $payment_address['city'];
-            $order_info['payment_postcode'] = $payment_address['postcode'];
-            $order_info['payment_zone'] = $payment_address['zone'];
+            $order_info['payment_firstname'] = (string)$payment_address['firstname'];
+            $order_info['payment_lastname'] = (string)$payment_address['lastname'];
+            $order_info['payment_company'] = (string)$payment_address['company'];
+            $order_info['payment_address_1'] = (string)$payment_address['address_1'];
+            $order_info['payment_address_2'] = (string)$payment_address['address_2'];
+            $order_info['payment_city'] = (string)$payment_address['city'];
+            $order_info['payment_postcode'] = (string)$payment_address['postcode'];
+            $order_info['payment_zone'] = (string)$payment_address['zone'];
             $order_info['payment_zone_id'] = $payment_address['zone_id'];
-            $order_info['payment_country'] = $payment_address['country'];
+            $order_info['payment_country'] = (string)$payment_address['country'];
             $order_info['payment_country_id'] = $payment_address['country_id'];
-            $order_info['payment_address_format'] = $payment_address['address_format'];
+            $order_info['payment_address_format'] = (string)$payment_address['address_format'];
         } else {
             if (isset($indata['guest'])) {
                 //this is a guest order
                 $order_info['customer_id'] = 0;
                 $order_info['customer_group_id'] = $this->config->get('config_customer_group_id');
-                $order_info['firstname'] = $indata['guest']['firstname'];
-                $order_info['lastname'] = $indata['guest']['lastname'];
-                $order_info['email'] = $indata['guest']['email'];
-                $order_info['telephone'] = $indata['guest']['telephone'];
-                $order_info['fax'] = $indata['guest']['fax'];
+                $order_info['firstname'] = (string)$indata['guest']['firstname'];
+                $order_info['lastname'] = (string)$indata['guest']['lastname'];
+                $order_info['email'] = (string)$indata['guest']['email'];
+                $order_info['telephone'] = (string)$indata['guest']['telephone'];
+                $order_info['fax'] = (string)$indata['guest']['fax'];
 
                 //IM addresses
                 $protocols = $this->im->getProtocols();
@@ -286,31 +286,31 @@ class AOrder extends ALibBase
 
                 if ($this->cart->hasShipping()) {
                     if (isset($indata['guest']['shipping'])) {
-                        $order_info['shipping_firstname'] = $indata['guest']['shipping']['firstname'];
-                        $order_info['shipping_lastname'] = $indata['guest']['shipping']['lastname'];
-                        $order_info['shipping_company'] = $indata['guest']['shipping']['company'];
-                        $order_info['shipping_address_1'] = $indata['guest']['shipping']['address_1'];
-                        $order_info['shipping_address_2'] = $indata['guest']['shipping']['address_2'];
-                        $order_info['shipping_city'] = $indata['guest']['shipping']['city'];
-                        $order_info['shipping_postcode'] = $indata['guest']['shipping']['postcode'];
-                        $order_info['shipping_zone'] = $indata['guest']['shipping']['zone'];
+                        $order_info['shipping_firstname'] = (string)$indata['guest']['shipping']['firstname'];
+                        $order_info['shipping_lastname'] = (string)$indata['guest']['shipping']['lastname'];
+                        $order_info['shipping_company'] = (string)$indata['guest']['shipping']['company'];
+                        $order_info['shipping_address_1'] = (string)$indata['guest']['shipping']['address_1'];
+                        $order_info['shipping_address_2'] = (string)$indata['guest']['shipping']['address_2'];
+                        $order_info['shipping_city'] = (string)$indata['guest']['shipping']['city'];
+                        $order_info['shipping_postcode'] = (string)$indata['guest']['shipping']['postcode'];
+                        $order_info['shipping_zone'] = (string)$indata['guest']['shipping']['zone'];
                         $order_info['shipping_zone_id'] = $indata['guest']['shipping']['zone_id'];
-                        $order_info['shipping_country'] = $indata['guest']['shipping']['country'];
+                        $order_info['shipping_country'] = (string)$indata['guest']['shipping']['country'];
                         $order_info['shipping_country_id'] = $indata['guest']['shipping']['country_id'];
-                        $order_info['shipping_address_format'] = $indata['guest']['shipping']['address_format'];
+                        $order_info['shipping_address_format'] = (string)$indata['guest']['shipping']['address_format'];
                     } else {
-                        $order_info['shipping_firstname'] = $indata['guest']['firstname'];
-                        $order_info['shipping_lastname'] = $indata['guest']['lastname'];
-                        $order_info['shipping_company'] = $indata['guest']['company'];
-                        $order_info['shipping_address_1'] = $indata['guest']['address_1'];
-                        $order_info['shipping_address_2'] = $indata['guest']['address_2'];
-                        $order_info['shipping_city'] = $indata['guest']['city'];
-                        $order_info['shipping_postcode'] = $indata['guest']['postcode'];
-                        $order_info['shipping_zone'] = $indata['guest']['zone'];
+                        $order_info['shipping_firstname'] = (string)$indata['guest']['firstname'];
+                        $order_info['shipping_lastname'] = (string)$indata['guest']['lastname'];
+                        $order_info['shipping_company'] = (string)$indata['guest']['company'];
+                        $order_info['shipping_address_1'] = (string)$indata['guest']['address_1'];
+                        $order_info['shipping_address_2'] = (string)$indata['guest']['address_2'];
+                        $order_info['shipping_city'] = (string)$indata['guest']['city'];
+                        $order_info['shipping_postcode'] = (string)$indata['guest']['postcode'];
+                        $order_info['shipping_zone'] = (string)$indata['guest']['zone'];
                         $order_info['shipping_zone_id'] = $indata['guest']['zone_id'];
-                        $order_info['shipping_country'] = $indata['guest']['country'];
+                        $order_info['shipping_country'] = (string)$indata['guest']['country'];
                         $order_info['shipping_country_id'] = $indata['guest']['country_id'];
-                        $order_info['shipping_address_format'] = $indata['guest']['address_format'];
+                        $order_info['shipping_address_format'] = (string)$indata['guest']['address_format'];
                     }
                 } else {
                     $order_info['shipping_firstname'] = '';
@@ -328,18 +328,18 @@ class AOrder extends ALibBase
                     $order_info['shipping_method'] = '';
                 }
 
-                $order_info['payment_firstname'] = $indata['guest']['firstname'];
-                $order_info['payment_lastname'] = $indata['guest']['lastname'];
-                $order_info['payment_company'] = $indata['guest']['company'];
-                $order_info['payment_address_1'] = $indata['guest']['address_1'];
-                $order_info['payment_address_2'] = $indata['guest']['address_2'];
-                $order_info['payment_city'] = $indata['guest']['city'];
-                $order_info['payment_postcode'] = $indata['guest']['postcode'];
-                $order_info['payment_zone'] = $indata['guest']['zone'];
+                $order_info['payment_firstname'] = (string)$indata['guest']['firstname'];
+                $order_info['payment_lastname'] = (string)$indata['guest']['lastname'];
+                $order_info['payment_company'] = (string)$indata['guest']['company'];
+                $order_info['payment_address_1'] = (string)$indata['guest']['address_1'];
+                $order_info['payment_address_2'] = (string)$indata['guest']['address_2'];
+                $order_info['payment_city'] = (string)$indata['guest']['city'];
+                $order_info['payment_postcode'] = (string)$indata['guest']['postcode'];
+                $order_info['payment_zone'] = (string)$indata['guest']['zone'];
                 $order_info['payment_zone_id'] = $indata['guest']['zone_id'];
-                $order_info['payment_country'] = $indata['guest']['country'];
+                $order_info['payment_country'] = (string)$indata['guest']['country'];
                 $order_info['payment_country_id'] = $indata['guest']['country_id'];
-                $order_info['payment_address_format'] = $indata['guest']['address_format'];
+                $order_info['payment_address_format'] = (string)$indata['guest']['address_format'];
 
             } else {
                 return [];
@@ -347,18 +347,18 @@ class AOrder extends ALibBase
         }
 
         if (isset($indata['shipping_method']['title'])) {
-            $order_info['shipping_method'] = $indata['shipping_method']['title'];
+            $order_info['shipping_method'] = (string)$indata['shipping_method']['title'];
             // note - id by mask method_txt_id.method_option_id. for ex. default_weight.default_weight_1
-            $order_info['shipping_method_key'] = $indata['shipping_method']['id'];
+            $order_info['shipping_method_key'] = (string)$indata['shipping_method']['id'];
         } else {
             $order_info['shipping_method'] = '';
             $order_info['shipping_method_key'] = '';
         }
 
         if (isset($indata['payment_method']['title'])) {
-            $order_info['payment_method'] = $indata['payment_method']['title'];
+            $order_info['payment_method'] = (string)$indata['payment_method']['title'];
             preg_match('/^([^.]+)/', $indata['payment_method']['id'], $matches);
-            $order_info['payment_method_key'] = $matches[1];
+            $order_info['payment_method_key'] = (string)$matches[1];
         } else {
             $order_info['payment_method'] = '';
         }
@@ -369,9 +369,9 @@ class AOrder extends ALibBase
             $product_data[] = [
                 'key'             => $key,
                 'product_id'      => $product['product_id'],
-                'name'            => $product['name'],
-                'model'           => $product['model'],
-                'sku'             => $product['sku'],
+                'name'            => (string)$product['name'],
+                'model'           => (string)$product['model'],
+                'sku'             => (string)$product['sku'],
                 'option'          => $product['option'],
                 'download'        => $product['download'],
                 'quantity'        => $product['quantity'],
