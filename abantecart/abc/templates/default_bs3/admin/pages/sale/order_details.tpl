@@ -214,10 +214,9 @@
                 $oid = $order_product['order_product_id'];
                 ?>
                 <tbody id="product_<?php echo $oid; ?>">
-                <tr <?php if (!$order_product['product_status']
-                || $order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
+                <tr <?php if ($order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
                     <td>
-                        <?php if ($order_product['product_status'] && !$order_product['disable_edit']) { ?>
+                        <?php if ( !$order_product['disable_edit']) { ?>
                             <a class="edit_product btn btn-xs btn-info-alt tooltips"
                                data-original-title="<?php echo $text_edit; ?>"
                                data-order-product-id="<?php echo $oid; ?>">
