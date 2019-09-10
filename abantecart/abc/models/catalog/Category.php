@@ -124,7 +124,7 @@ class Category extends BaseModel
         $categories = $this->db->table('categories as c')
             ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id')
             ->where('c.category_id', '=', (int)$category_id)
-            ->where('cd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->where('cd.language_id', '=', $this->registry->get('language')->getLanguageID())
             ->orderBy('c.sort_order')
             ->orderBy('cd.name')
             ->get()
