@@ -78,7 +78,9 @@ final class ALog
 
         $this->app_filename = $dir_logs.$application_log_filename;
         if (is_file($this->app_filename) && !is_writable($this->app_filename)) {
-            error_log('ALog Error: Log file '.$this->app_filename.' is not writable!');
+            $error_text = 'ALog Error: Log file '.$this->app_filename.' is not writable!';
+            error_log($error_text);
+            throw new \Exception($error_text);
         } else {
             $this->security_filename = $dir_logs.$security_filename;
             if (is_file($this->security_filename) && !is_writable($this->security_filename)) {
