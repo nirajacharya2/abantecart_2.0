@@ -45,6 +45,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
 
         $page = $this->request->post['page']; // get the requested page
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
+        $sidx = $this->request->post['sidx']; // get the direction
         $sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
@@ -55,6 +56,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
         }
 
         $data = [
+            'sort'                => $sidx,
             'order'               => strtoupper($sord),
             'start'               => ($page - 1) * $limit,
             'limit'               => $limit,
