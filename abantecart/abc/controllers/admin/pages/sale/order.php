@@ -206,7 +206,7 @@ class ControllerPagesSaleOrder extends AController
             [
                 'name'  => 'order_id',
                 'index' => 'order_id',
-                'width' => 60,
+                'width' => 40,
                 'align' => 'center',
             ],
             [
@@ -232,7 +232,7 @@ class ControllerPagesSaleOrder extends AController
             [
                 'name'  => 'total',
                 'index' => 'total',
-                'width' => 90,
+                'width' => 55,
                 'align' => 'center',
             ],
         ];
