@@ -1232,7 +1232,7 @@ p {
 }
 .reslibrary .thmb.view_details:before {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: "Font Awesome 5 Free";
 	color: #F19013;
 	font-size: 36px;
 	position:absolute;
@@ -3388,14 +3388,14 @@ body.stickyheader .sticky_left {
     text-decoration: none;
 }
 #task_modal .modal-body a.details-button:after {
-    font-family: FontAwesome;
+    font-family: "Font Awesome 5 Free";
     content: "\f066";
     font-size: 20px;
-    font-weight: 400;
+    font-weight: 900;
     position: relative;
 }
 #task_modal .modal-body a.details-button.collapsed:after {
-    font-family: FontAwesome;
+    font-family: "Font Awesome 5 Free";
     content: "\f065";
 }
 
