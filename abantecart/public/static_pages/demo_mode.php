@@ -57,11 +57,11 @@ $message =
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>AbanteCart - Demo Mode</title>
-	<link rel="stylesheet" type="text/css" href="view/css/stylesheet.css"/>
+	<link rel="stylesheet" type="text/css" href="./view/css/stylesheet.css"/>
 </head>
 <body>
 <div id="container">
-	<div id="header"><img src="view/images/logo.png" alt="AbanteCart" title="AbanteCart"/></div>
+	<div id="header"><img src="./view/images/logo.png" alt="AbanteCart" title="AbanteCart"/></div>
 	<div id="content">
 		<div id="content_top"></div>
 		<div id="content_middle">
