@@ -22,7 +22,6 @@ use abc\core\engine\Registry;
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
 use abc\models\user\User;
-use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -124,7 +123,7 @@ class CustomerCommunication extends BaseModel
         }
         $communication->customer_id = $customer_id;
 
-        $user = Registry::user();
+        $user = Registry::User();
         if($user){
            $communication->user_id = $user->getId();
         }else{
@@ -153,7 +152,7 @@ class CustomerCommunication extends BaseModel
             return;
         }
         $communication->customer_id = $customer_id;
-        $communication->user_id = $user_id;
+        $communication->user_id = (int)$user_id ?: null;
         $communication->sent_to_address = $to;
         $communication->type = $protocol;
         $communication->save();

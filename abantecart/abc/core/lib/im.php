@@ -405,6 +405,7 @@ class AIM
                                             $this->customer->getId(),
                                             $to,
                                             $store_name.$message,
+                                            (Registry::User() ? Registry::User()->getId() : null),
                                             $protocol
                                         );
                                     }
