@@ -282,7 +282,10 @@ class ControllerPagesAccountLogin extends AController
                 );
 
                 if($customer_info){
-                    $customer_info = $customer_info->first()->toArray();
+                    $customer_info = $customer_info->first();
+                    if ($customer_info) {
+                        $customer_info = $customer_info->toArray();
+                    }
                 }
 
                 if ( $customer_info
