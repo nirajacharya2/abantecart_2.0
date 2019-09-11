@@ -54,7 +54,7 @@
 	  	<br /><br />
 		<div class="form-group text-center">
 			<label><?php echo $quick_start_last_footer; ?></label>
-		</div>		
+		</div>
 	  	<?php } ?>
 	</div>
 	<div class="panel-footer">
@@ -67,17 +67,17 @@
 			    </a>
 			</div>
 		    <?php } ?>
-			
+
 		    <?php if ($back) { ?>
 			<div class="btn-group">
 			    <a class="btn btn-white step_back" href="<?php echo $back; ?>">
 			        <i class="fa fa-arrow-left"></i> <?php echo $button_back; ?>
 			    </a>
-			</div>		    
+			</div>
 		    <?php } ?>
 		    <?php if ($competed) { ?>
 		    <button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
-		    	<i class="fa fa-close fa-fw"></i> <?php echo $button_close; ?>
+		    	<i class="fa fa-times fa-fw"></i> <?php echo $button_close; ?>
 		    </button>
 		    <?php } else { ?>
 			<button class="btn btn-default" type="reset">
