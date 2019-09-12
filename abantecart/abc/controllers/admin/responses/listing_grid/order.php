@@ -274,20 +274,26 @@ class ControllerResponsesListingGridOrder extends AController
         }
 
         //request sent from jGrid. ID is key of array
+        $update = [];
         foreach ( $this->request->post as $field => $value ) {
-            foreach ( $value as $k => $v ) {
-                try {
-                    Order::editOrder($k, [$field => $v]);
-                } catch (AException $e) {
-                    $error = new AError('');
-                    return $error->toJSONResponse('APP_ERROR_402',
-                        [
-                            'error_text'  => $e->getMessage(),
-                            'reset_value' => true,
-                        ]);
-                }
+            foreach ( $value as $orderId => $v ) {
+                $update[$orderId][$field] = $v;
             }
         }
+        //now update orders
+        foreach($update as $orderId => $values) {
+            try {
+                Order::editOrder($orderId, $values);
+            } catch (AException $e) {
+                $error = new AError('');
+                return $error->toJSONResponse('APP_ERROR_402',
+                    [
+                        'error_text'  => $e->getMessage(),
+                        'reset_value' => true,
+                    ]);
+            }
+        }
+
 
         //update controller data
         $this->extensions->hk_UpdateData( $this, __FUNCTION__ );

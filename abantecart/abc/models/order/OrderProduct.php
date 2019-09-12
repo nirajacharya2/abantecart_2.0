@@ -206,6 +206,10 @@ class OrderProduct extends BaseModel
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+    public function order_status()
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_status_id');
+    }
 
     public function product()
     {

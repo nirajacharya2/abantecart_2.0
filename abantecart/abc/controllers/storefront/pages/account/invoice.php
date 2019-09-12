@@ -28,6 +28,7 @@ use abc\core\lib\AEncryption;
 use abc\models\order\Order;
 use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
+use abc\models\order\OrderStatusDescription;
 use abc\models\order\OrderTotal;
 use H;
 
@@ -187,6 +188,10 @@ class ControllerPagesAccountInvoice extends AController
 
             $products = [];
             $order_products = OrderProduct::where('order_id','=',$order_id)->get();
+            $order_statuses = OrderStatusDescription::where('language_id','=',$this->language->getLanguageID())
+                                                      ->get()
+                                                      ->toArray();
+            $orderStatuses = array_column($order_statuses,'name','order_status_id');
             $product_ids = $order_products->pluck('product_id')->toArray();
 
             //get thumbnails by one pass
@@ -269,6 +274,8 @@ class ControllerPagesAccountInvoice extends AController
                 $products[] = [
                     'id'               => $product->product_id,
                     'order_product_id' => $product->order_product_id,
+                    'order_status_id'  => $product->order_status_id,
+                    'order_status'     => $orderStatuses[$product->order_status_id],
                     'thumbnail'        => $thumbnail,
                     'name'             => $product->name,
                     'model'            => $product->model,

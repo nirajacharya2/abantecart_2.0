@@ -1255,7 +1255,7 @@ class Order extends BaseModel
                  * @var Product $product
                  */
                 $product = Product::with('description')->find($product_id);
-                $product_info = $product->toArray();
+                $product_info = $product ? $product->toArray() : [];
                 //check is product exists
                 $order_product = OrderProduct::find($order_product_id);
                 if ($order_product) {
@@ -1274,22 +1274,23 @@ class Order extends BaseModel
                         ]
                     );
 
-                    //update stock quantity
-                    $stock_qnt = $product_info['quantity'];
-                    $qnt_diff = $old_qnt - $orderProduct['quantity'];
-
-                    if ($qnt_diff != 0) {
-                        if ($qnt_diff < 0) {
-                            $new_qnt = $stock_qnt - abs($qnt_diff);
-                        } else {
-                            $new_qnt = $stock_qnt + $qnt_diff;
-                        }
-                        if ($product_info['subtract']) {
-                            $product->update(
-                                [
-                                    'quantity' => $new_qnt,
-                                ]
-                            );
+                    //update stock quantity if product presents
+                    if( $product_info['quantity'] !== null ) {
+                        $stock_qnt = $product_info['quantity'];
+                        $qnt_diff = $old_qnt - $orderProduct['quantity'];
+                        if ($qnt_diff != 0) {
+                            if ($qnt_diff < 0) {
+                                $new_qnt = $stock_qnt - abs($qnt_diff);
+                            } else {
+                                $new_qnt = $stock_qnt + $qnt_diff;
+                            }
+                            if ($product_info['subtract']) {
+                                $product->update(
+                                    [
+                                        'quantity' => $new_qnt,
+                                    ]
+                                );
+                            }
                         }
                     }
                 } else {
@@ -1318,13 +1319,15 @@ class Order extends BaseModel
                     $qnt_diff = -$orderProduct['quantity'];
                     $stock_qnt = $product->quantity;
                     $new_qnt = $stock_qnt - (int)$orderProduct['quantity'];
-
-                    if ($product_info['subtract']) {
-                        $product->update(
-                            [
-                                'quantity' => $new_qnt,
-                            ]
-                        );
+                    //if product presents in database
+                    if( $product_info['quantity'] !== null ) {
+                        if ($product_info['subtract']) {
+                            $product->update(
+                                [
+                                    'quantity' => $new_qnt,
+                                ]
+                            );
+                        }
                     }
                 }
 
@@ -1436,7 +1439,7 @@ class Order extends BaseModel
                                         $productOptionValue->update(
                                             [
                                                 'quantity' => ($productOptionValue->quantity
-                                                    + $orderProduct['quantity']),
+                                                                + $orderProduct['quantity']),
                                             ]
                                         );
                                     }

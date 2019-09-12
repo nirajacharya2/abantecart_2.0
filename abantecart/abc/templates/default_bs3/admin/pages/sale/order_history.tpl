@@ -55,6 +55,10 @@
 		<?php } ?>
 
 		<?php foreach ($form['fields'] as $name => $field) {
+		    if($field->type == 'hidden'){
+		        echo $field;
+		        continue;
+            }
 
 		//Logic to calculate fields width
 		$widthcasses = "col-sm-7";
