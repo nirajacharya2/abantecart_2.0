@@ -135,6 +135,7 @@
                         <p class="form-control-static"><?php echo $total; ?></p>
                     </div>
                 </div>
+                <?php if ($entry_order_status) {?>
                 <div class="form-group">
                     <label class="control-label col-sm-5"><?php echo $entry_order_status; ?></label>
                     <div class="input-group afield col-sm-7" id="order_status">
@@ -143,7 +144,8 @@
                         </p>
                     </div>
                 </div>
-                <?php echo $this->getHookVar('order_details_right_post'); ?>
+                <?php }
+                echo $this->getHookVar('order_details_right_post'); ?>
             </div>
         </div>
 
