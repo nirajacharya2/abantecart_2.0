@@ -528,7 +528,10 @@ class ControllerResponsesListingGridCustomer extends AController
         //save password reset code
         Customer::find($customer_id)->update(['data' => ['password_reset' => $code] ]);
         //build reset link
-        $enc = new AEncryption($this->config->get('encryption_key'));
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
         $rtoken = $enc->encrypt($customer_id.'::'.$code);
 
         $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken=' . $rtoken, null, 'storefront');

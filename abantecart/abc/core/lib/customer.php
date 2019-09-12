@@ -259,7 +259,10 @@ class ACustomer extends ALibBase
             $this->saveCustomerCart();
 
             //set cookie for unauthenticated user (expire in 1 year)
-            $encryption = new AEncryption($config->get('encryption_key'));
+            /**
+             * @var AEncryption $enc
+             */
+            $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
                 'customer_id' => $this->customer_id,

@@ -1201,17 +1201,6 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * @param string $string
-     * @param string $salt_key
-     *
-     * @return string
-     */
-    public static function getHash(string $string, string $salt_key)
-    {
-        return  sha1($salt_key.sha1($salt_key.sha1($string)));
-    }
-
-    /**
      * TODO: in the future
      *
      * @param $zip_filename
@@ -2039,7 +2028,10 @@ class AHelperUtils extends AHelper
         }
 
         //try to decrypt order token
-        $enc = new AEncryption( $config->get( 'encryption_key' ) );
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
         $decrypted = $enc->decrypt( $ot );
         list( $order_id, $email ) = explode( '::', $decrypted );
 

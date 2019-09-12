@@ -17,338 +17,348 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ADataset;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
+use H;
 use ReCaptcha\ReCaptcha;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerPagesIndexForgotPassword extends AController {
+class ControllerPagesIndexForgotPassword extends AController
+{
 
-	public $data = array();
-	private $user_data;
-	public $error = array();
+    protected $user_data;
+    public $error = [];
 
-	public function main() {
-		if($this->user->isLogged()){
-			$this->user->logout();
-			unset($this->session->data['token']);
-		}
+    public function main()
+    {
+        if ($this->user->isLogged()) {
+            $this->user->logout();
+            unset($this->session->data['token']);
+        }
 
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
-		
-		$this->loadLanguage('common/forgot_password');
-		$this->document->setTitle( $this->language->get('heading_title') );
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if ($this->request->is_POST() && $this->_validate()) {
+        $this->loadLanguage('common/forgot_password');
+        $this->document->setTitle($this->language->get('heading_title'));
 
-			//generate hash
-			$hash = AHelperUtils::genToken(32);
-			$enc = new AEncryption($this->config->get('encryption_key'));
-			$rtoken = $enc->encrypt($this->request->post['username'].'::'.$hash);
-			$link = $this->html->getSecureURL('index/forgot_password/validate','&rtoken='.$rtoken);
-	
-			//create a scratch data for future use 
-			$password_reset = new ADataset ();
-			$password_reset->createDataset('admin_pass_reset', $this->request->post['username']);
-			$password_reset->setDatasetProperties(array(
-								'hash' => $hash,
-								'email' => $this->request->post['email'] )
-								);
-			$mail = new AMail( $this->config );
-			$mail->setTo($this->request->post['email']);
-			$mail->setFrom($this->config->get('store_main_email'));
-			$mail->setSender($this->config->get('config_owner'));
-			$mail->setSubject(sprintf($this->language->get('reset_email_subject'), $this->config->get('store_name')));
-			$mail->setHtml(sprintf($this->language->get('reset_email_body_html'), $link, $link));
-			$mail->setText(sprintf($this->language->get('reset_email_body_text'), $link, $link));
-			$mail->	send();
+        if ($this->request->is_POST() && $this->_validate()) {
 
-			abc_redirect($this->html->getSecureURL('index/forgot_password','&mail=sent'));
-		}
+            //generate hash
+            $hash = H::genToken(32);
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
+            $rtoken = $enc->encrypt($this->request->post['username'].'::'.$hash);
+            $link = $this->html->getSecureURL('index/forgot_password/validate', '&rtoken='.$rtoken);
 
-		$this->data['login'] =  $this->html->getSecureURL('index/login');
+            //create a scratch data for future use
+            $password_reset = new ADataset ();
+            $password_reset->createDataset('admin_pass_reset', $this->request->post['username']);
+            $password_reset->setDatasetProperties([
+                    'hash'  => $hash,
+                    'email' => $this->request->post['email'],
+                ]
+            );
+            $mail = new AMail($this->config);
+            $mail->setTo($this->request->post['email']);
+            $mail->setFrom($this->config->get('store_main_email'));
+            $mail->setSender($this->config->get('config_owner'));
+            $mail->setSubject(sprintf($this->language->get('reset_email_subject'), $this->config->get('store_name')));
+            $mail->setHtml(sprintf($this->language->get('reset_email_body_html'), $link, $link));
+            $mail->setText(sprintf($this->language->get('reset_email_body_text'), $link, $link));
+            $mail->send();
 
-		if ( isset($this->request->get['mail']) && $this->request->get['mail'] == 'sent' ) {
+            abc_redirect($this->html->getSecureURL('index/forgot_password', '&mail=sent'));
+        }
 
-			$this->data['show_instructions'] = true;
+        $this->data['login'] = $this->html->getSecureURL('index/login');
 
-		} else {
+        if (isset($this->request->get['mail']) && $this->request->get['mail'] == 'sent') {
+            $this->data['show_instructions'] = true;
+        } else {
+            $this->data['error'] = $this->error;
+            $fields = ['username', 'email', 'captcha'];
+            foreach ($fields as $f) {
+                if (isset ($this->request->post [$f])) {
+                    $this->data [$f] = $this->request->post [$f];
+                } else {
+                    $this->data[$f] = '';
+                }
+            }
 
-			$this->data['error'] = $this->error;
+            $this->data['action'] = $this->html->getSecureURL('index/forgot_password');
+            $this->data['update'] = '';
+            $form = new AForm('ST');
 
-			$fields = array('username', 'email', 'captcha');
-			foreach ( $fields as $f ) {
-				if (isset ( $this->request->post [$f] )) {
-					$this->data [$f] = $this->request->post [$f];
-				} else {
-					$this->data[$f] = '';
-				}
-			}
+            $form->setForm(
+                [
+                    'form_name' => 'forgotFrm',
+                    'update'    => $this->data['update'],
+                ]
+            );
 
-			$this->data['action'] = $this->html->getSecureURL('index/forgot_password');
-			$this->data['update'] = '';
-			$form = new AForm('ST');
+            $this->data['form']['id'] = 'forgotFrm';
+            $this->data['form']['form_open'] = $form->getFieldHtml(
+                [
+                    'type'   => 'form',
+                    'name'   => 'forgotFrm',
+                    'action' => $this->data['action'],
+                ]
+            );
+            $this->data['form']['submit'] = $form->getFieldHtml(
+                [
+                    'type'  => 'button',
+                    'name'  => 'submit',
+                    'text'  => $this->language->get('button_reset_password'),
+                    'style' => 'button3',
+                ]
+            );
 
-			$form->setForm(
-				array(
-					'form_name' => 'forgotFrm',
-					'update' => $this->data['update'],
-				)
-			);
+            $this->data['form']['fields']['username'] = $form->getFieldHtml(
+                [
+                    'type'        => 'input',
+                    'name'        => 'username',
+                    'value'       => $this->data['username'],
+                    'required'    => true,
+                    'placeholder' => $this->language->get('entry_username'),
+                ]
+            );
+            $this->data['form']['fields']['email'] = $form->getFieldHtml(
+                [
+                    'type'        => 'input',
+                    'name'        => 'email',
+                    'value'       => $this->data['email'],
+                    'required'    => true,
+                    'placeholder' => $this->language->get('entry_email'),
+                ]
+            );
 
-			$this->data['form']['id'] = 'forgotFrm';
-			$this->data['form']['form_open'] = $form->getFieldHtml(
-				array(
-					'type' => 'form',
-					'name' => 'forgotFrm',
-					'action' => $this->data['action'],
-				)
-			);
-			$this->data['form']['submit'] = $form->getFieldHtml(
-				array(
-					'type' => 'button',
-					'name' => 'submit',
-					'text' => $this->language->get('button_reset_password'),
-					'style' => 'button3',
-				)
-			);
+            if ($this->config->get('config_recaptcha_site_key')) {
+                $this->data['form']['fields']['captcha'] = $form->getFieldHtml(
+                    [
+                        'type'               => 'recaptcha',
+                        'name'               => 'captcha',
+                        'recaptcha_site_key' => $this->config->get('config_recaptcha_site_key'),
+                        'language_code'      => $this->language->getLanguageCode(),
+                    ]
+                );
+            } else {
+                $this->data['form']['fields']['captcha'] = $form->getFieldHtml(
+                    [
+                        'type'        => 'captcha',
+                        'name'        => 'captcha',
+                        'value'       => $this->data['captcha'],
+                        'required'    => true,
+                        'placeholder' => $this->language->get('entry_captcha'),
+                    ]
+                );
+            }
+        }
 
-			$this->data['form']['fields']['username'] = $form->getFieldHtml(
-			    array(
-			    	'type' => 'input',
-			    	'name' => 'username',
-			    	'value' => $this->data['username'],
-			    	'required' => true,
-			    	'placeholder' => $this->language->get('entry_username'),
-			    )
-			);
-			$this->data['form']['fields']['email'] = $form->getFieldHtml(
-			    array(
-			    	'type' => 'input',
-			    	'name' => 'email',
-			    	'value' => $this->data['email'],
-			    	'required' => true,
-			    	'placeholder' => $this->language->get('entry_email'),
-			    )
-			);
+        $this->view->batchAssign($this->data);
 
-			if($this->config->get('config_recaptcha_site_key')) {
-				$this->data['form']['fields']['captcha'] = $form->getFieldHtml(
-					array(
-						'type' => 'recaptcha',
-						'name' => 'captcha',
-						'recaptcha_site_key' => $this->config->get('config_recaptcha_site_key'),
-						'language_code' => $this->language->getLanguageCode()
-					)
-				);			
-			} else {
-				$this->data['form']['fields']['captcha'] = $form->getFieldHtml(
-					array(
-						'type' => 'captcha',
-						'name' => 'captcha',
-						'value' => $this->data['captcha'],
-						'required' => true,
-						'placeholder' => $this->language->get('entry_captcha'),
-					)
-				);			
-			}
-		}
+        $this->processTemplate('pages/index/forgot_password.tpl');
 
-		$this->view->batchAssign( $this->data );
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		$this->processTemplate('pages/index/forgot_password.tpl' );
+    public function validate()
+    {
+        if ($this->user->isLogged()) {
+            $this->user->logout();
+            unset($this->session->data['token']);
+        }
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->loadLanguage('common/forgot_password');
+        $this->document->setTitle($this->language->get('heading_title'));
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        //validate token
 
-	public function validate() {
-		if($this->user->isLogged()){
-			$this->user->logout();
-			unset($this->session->data['token']);
-		}
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
-		$this->loadLanguage('common/forgot_password');
-		$this->document->setTitle( $this->language->get('heading_title') );
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
+        list($username, $hash) = explode("::", $enc->decrypt($this->request->get['rtoken']));
+        //get hash from dataset
+        $dataset = new ADataset('admin_pass_reset', $username, 'silent');
+        $reset_data = $dataset->getDatasetProperties();
+        if ($this->_validateToken($reset_data, $hash) === false) {
+            //not valid rtoken go back
+            $this->main();
+            return null;
+        }
 
-		//validate token
-		$enc = new AEncryption($this->config->get('encryption_key'));	
-		list($username, $hash) = explode("::", $enc->decrypt($this->request->get['rtoken']));
-		//get hash from dataset
-		$dataset = new ADataset('admin_pass_reset', $username, 'silent');
-		$reset_data = $dataset->getDatasetProperties();
-		if($this->_validateToken($reset_data, $hash) === false) {
-			//not valid rtoken go back
-			$this->main();
-			return null;
-		}
+        $this->data['text_heading'] = $this->language->get('text_heading_reset');
+        $this->data['login'] = $this->html->getSecureURL('index/login');
 
-		$this->data['text_heading'] =  $this->language->get('text_heading_reset');
-		$this->data['login'] =  $this->html->getSecureURL('index/login');
+        if ($this->request->is_POST() && $this->_validatePassword()) {
 
-		if ($this->request->is_POST() && $this->_validatePassword()) {
+            //generate password
+            $password = $this->request->post['password'];
+            $this->model_user_user->editUser($this->user_data['user_id'], ['password' => $password]);
 
-			//generate password
-			$password = $this->request->post['password'];
-			$this->model_user_user->editUser($this->user_data['user_id'], array('password' => $password));
+            $mail = new AMail($this->config);
+            $mail->setTo($this->user_data['email']);
+            $mail->setFrom($this->config->get('store_main_email'));
+            $mail->setSender($this->config->get('config_owner'));
+            $mail->setSubject(sprintf($this->language->get('reset_email_subject'), $this->config->get('store_name')));
+            $mail->setHtml($this->language->get('new_password_email_body'));
+            $mail->setText($this->language->get('new_password_email_body'));
+            $mail->send();
 
-			$mail = new AMail($this->config);
-			$mail->setTo($this->user_data['email']);
-			$mail->setFrom($this->config->get('store_main_email'));
-			$mail->setSender($this->config->get('config_owner'));
-			$mail->setSubject(sprintf($this->language->get('reset_email_subject'), $this->config->get('store_name')));
-			$mail->setHtml($this->language->get('new_password_email_body'));
-			$mail->setText($this->language->get('new_password_email_body'));
-			$mail->send();
+            //destroy scratch data
+            $dataset->dropDataset();
 
-			//destroy scratch data
-			$dataset->dropDataset();
-			
-			$this->data['show_instructions'] = true;
-			$this->data['text_instructions'] =  $this->language->get('text_instructions_reset');
-			
-			//all done and password is reset
-								
-		} else {
-		
-			$this->data['error'] = $this->error;
-			$this->data['action'] = $this->html->getSecureURL('index/forgot_password/validate', '&rtoken='.$this->request->get['rtoken']);
-			$this->data['update'] = '';
-			$form = new AForm('ST');
+            $this->data['show_instructions'] = true;
+            $this->data['text_instructions'] = $this->language->get('text_instructions_reset');
 
-			$form->setForm(
-				array(
-					'form_name' => 'forgotFrm',
-					'update' => $this->data['update'],
-				)
-			);
+            //all done and password is reset
 
-			$this->data['form']['id'] = 'forgotFrm';
-			$this->data['form']['form_open'] = $form->getFieldHtml(
-				array(
-					'type' => 'form',
-					'name' => 'forgotFrm',
-					'action' => $this->data['action'],
-				)
-			);
-			$this->data['form']['submit'] = $form->getFieldHtml(
-				array(
-					'type' => 'button',
-					'name' => 'submit',
-					'text' => $this->language->get('text_please_confirm'),
-					'style' => 'button3',
-				)
-			);
+        } else {
 
-			$this->data['form']['fields']['password'] = $form->getFieldHtml(
-				array(
-					'type' => 'passwordset',
-					'name' => 'password',
-					'value' => $this->data['password'],
-				)
-			);
+            $this->data['error'] = $this->error;
+            $this->data['action'] = $this->html->getSecureURL(
+                'index/forgot_password/validate',
+                '&rtoken='.$this->request->get['rtoken']
+            );
+            $this->data['update'] = '';
+            $form = new AForm('ST');
 
-		}
+            $form->setForm(
+                [
+                    'form_name' => 'forgotFrm',
+                    'update'    => $this->data['update'],
+                ]
+            );
 
-		$this->view->batchAssign( $this->data );
+            $this->data['form']['id'] = 'forgotFrm';
+            $this->data['form']['form_open'] = $form->getFieldHtml(
+                [
+                    'type'   => 'form',
+                    'name'   => 'forgotFrm',
+                    'action' => $this->data['action'],
+                ]
+            );
+            $this->data['form']['submit'] = $form->getFieldHtml(
+                [
+                    'type'  => 'button',
+                    'name'  => 'submit',
+                    'text'  => $this->language->get('text_please_confirm'),
+                    'style' => 'button3',
+                ]
+            );
 
-		$this->processTemplate('pages/index/forgot_password.tpl' );
+            $this->data['form']['fields']['password'] = $form->getFieldHtml(
+                [
+                    'type'  => 'passwordset',
+                    'name'  => 'password',
+                    'value' => $this->data['password'],
+                ]
+            );
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        }
 
-	private function _validate() {
-		if($this->config->get('config_recaptcha_secret_key')) {
-			/** @noinspection PhpIncludeInspection */
-			require_once ABC::env('DIR_VENDOR') . '/google_recaptcha/autoload.php';
-			$recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
-			$resp = $recaptcha->verify(	$this->request->post['g-recaptcha-response'],
-										$this->request->getRemoteIP());
-			if (!$resp->isSuccess() && $resp->getErrorCodes()) {
-				$this->error['captcha'] = $this->language->get('error_captcha');
-				return FALSE;
-			}
-		} else {
-			if (!isset($this->session->data['captcha']) || ($this->session->data['captcha'] != $this->request->post['captcha'])) {
-				$this->error['captcha'] = $this->language->get('error_captcha');
-				return FALSE;
-			}
-		}
+        $this->view->batchAssign($this->data);
 
-		if ( mb_strlen($this->request->post['username']) < 1 ) {
-			$this->error['username'] = $this->language->get('error_username');
-		}
+        $this->processTemplate('pages/index/forgot_password.tpl');
 
-		if (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $this->request->post['email'])) {
-			$this->error['email'] = $this->language->get('error_email');
-		}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		if ( !$this->error && !$this->user->validate($this->request->post['username'], $this->request->post['email']) ) {
-			$this->error['warning'] = $this->language->get('error_match');
-		}
+    protected function _validate()
+    {
+        if ($this->config->get('config_recaptcha_secret_key')) {
+            /** @noinspection PhpIncludeInspection */
+            require_once ABC::env('DIR_VENDOR').'/google_recaptcha/autoload.php';
+            $recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
+            $resp = $recaptcha->verify($this->request->post['g-recaptcha-response'],
+                $this->request->getRemoteIP());
+            if (!$resp->isSuccess() && $resp->getErrorCodes()) {
+                $this->error['captcha'] = $this->language->get('error_captcha');
+                return false;
+            }
+        } else {
+            if (!isset($this->session->data['captcha'])
+                || ($this->session->data['captcha'] != $this->request->post['captcha'])) {
+                $this->error['captcha'] = $this->language->get('error_captcha');
+                return false;
+            }
+        }
 
-		$this->extensions->hk_ValidateData($this);
+        if (mb_strlen($this->request->post['username']) < 1) {
+            $this->error['username'] = $this->language->get('error_username');
+        }
 
-		if (!$this->error) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-	}
+        if (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $this->request->post['email'])) {
+            $this->error['email'] = $this->language->get('error_email');
+        }
 
-	private function _validateToken($reset_data, $check_hash) {
-		$email = $reset_data['email'];
-		$hash = $reset_data['hash'];
-		if ( empty($email) || empty($hash) || $hash != $check_hash) {
-			$this->error['warning'] =  $this->language->get('error_hash');
-		} else {
-			$this->loadModel('user/user');
-			$users = $this->model_user_user->getUsers( array( 'subsql_filter' => "email = '".$this->db->escape($email)."'" ) );
-			if ( empty( $users ) ) {
-				$this->error['warning'] =  $this->language->get('error_hash');
-			} else {
-				$this->user_data = $users[0];
-			}
-		}
+        if (!$this->error && !$this->user->validate($this->request->post['username'], $this->request->post['email'])) {
+            $this->error['warning'] = $this->language->get('error_match');
+        }
 
-		if (!$this->error) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-	}
-	
-	private function _validatePassword() {
+        $this->extensions->hk_ValidateData($this);
 
-		$this->loadLanguage('user/user');
+        if (!$this->error) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-		if ( !empty($this->request->post['password']) ) {
-			if ( mb_strlen($this->request->post['password']) < 4 ) {
-				$this->error['password'] = $this->language->get('error_password');
-			}
+    protected function _validateToken($reset_data, $check_hash)
+    {
+        $email = $reset_data['email'];
+        $hash = $reset_data['hash'];
+        if (empty($email) || empty($hash) || $hash != $check_hash) {
+            $this->error['warning'] = $this->language->get('error_hash');
+        } else {
+            $this->loadModel('user/user');
+            $users = $this->model_user_user->getUsers(['subsql_filter' => "email = '".$this->db->escape($email)."'"]);
+            if (empty($users)) {
+                $this->error['warning'] = $this->language->get('error_hash');
+            } else {
+                $this->user_data = $users[0];
+            }
+        }
 
-			if (!$this->error['password'] && $this->request->post['password'] != $this->request->post['password_confirm']) {
-				$this->error['password'] = $this->language->get('error_confirm');
-			}
-		}
+        if (!$this->error) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-		$this->extensions->hk_ValidateData($this);
+    protected function _validatePassword()
+    {
 
-		if (!$this->error) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-	}
+        $this->loadLanguage('user/user');
+
+        if (!empty($this->request->post['password'])) {
+            if (mb_strlen($this->request->post['password']) < 4) {
+                $this->error['password'] = $this->language->get('error_password');
+            }
+
+            if (!$this->error['password']
+                && $this->request->post['password'] != $this->request->post['password_confirm']) {
+                $this->error['password'] = $this->language->get('error_confirm');
+            }
+        }
+
+        $this->extensions->hk_ValidateData($this);
+
+        if (!$this->error) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

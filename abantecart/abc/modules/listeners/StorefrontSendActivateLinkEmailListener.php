@@ -50,7 +50,10 @@ class StorefrontSendActivateLinkEmailListener
 
 
             //encrypt token and data
-            $enc = new AEncryption( $store_info->encryption_key );
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption', [ $store_info->encryption_key ]);
             $code = H::genToken();
             //store activation code
             $data = ['email_activation'=> $code];

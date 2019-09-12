@@ -86,7 +86,6 @@ $class_list = [
         'cart',
         'user',
         'dataset',
-        'encryption',
         'menu_control',
         'menu_control_storefront',
         'rest',

@@ -65,7 +65,10 @@ class StorefrontSendOrderUpdateEmailListener
                 $message .= $orderData['store_url'].'index.php?rt=account/invoice&order_id='.$order_id."\n\n";
             } //give link on order page for quest
             elseif ($config->get('config_guest_checkout') && $orderData['email']) {
-                $enc = new AEncryption($config->get('encryption_key'));
+                /**
+                 * @var AEncryption $enc
+                 */
+                $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
                 $order_token = $enc->encrypt($order_id.'::'.$orderData['email']);
                 if ($order_token) {
                     $message .= $language->get('text_invoice')."\n";

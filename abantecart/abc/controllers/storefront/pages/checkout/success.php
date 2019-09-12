@@ -20,6 +20,7 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
@@ -167,7 +168,10 @@ class ControllerPagesCheckoutSuccess extends AController
             $this->view->assign('text_message', implode('<br>', $this->errors));
         } elseif ($this->session->data['account'] == 'guest') {
             //give link on order page for quest
-            $enc = new AEncryption($this->config->get('encryption_key'));
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
             $order_token = $enc->encrypt($order_id.'::'.$order_info['email']);
             $order_url = $this->html->getSecureURL('account/invoice', '&ot='.$order_token);
             $this->view->assign('text_message',

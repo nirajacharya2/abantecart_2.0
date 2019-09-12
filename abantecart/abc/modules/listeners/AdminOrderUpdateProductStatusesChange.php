@@ -205,7 +205,10 @@ class AdminOrderUpdateProductStatusesChange
 
             //give link on order page for quest
             if ($config->get('config_guest_checkout') && $order_info['email']) {
-                $enc = new AEncryption($config->get('encryption_key'));
+                /**
+                 * @var AEncryption $enc
+                 */
+                $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
                 $order_token = $enc->encrypt($order_id.'::'.$order_info['email']);
                 $this->data['mail_template_data']['invoice'] = $order_info['store_url']
                     .'index.php?rt=account/invoice&ot='.$order_token."\n\n";

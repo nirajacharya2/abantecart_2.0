@@ -20,6 +20,7 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ACustomer;
@@ -404,7 +405,11 @@ class ControllerPagesAccountCreate extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $enc = new  AEncryption($this->config->get('encryption_key'));
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
+
         list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
         if ($customer_id && $activation_code) {
             $customer = Customer::find($customer_id);

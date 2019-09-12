@@ -20,6 +20,7 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
@@ -384,7 +385,10 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
     {
 
         $this->load->library( 'encryption' );
-        $encryption = new AEncryption( $this->config->get( 'encryption_key' ) );
+        /**
+         * @var AEncryption $enc
+         */
+        $encryption = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
 
         $this->data['products'] = [];
         $this->data['items_total'] = 0.0;

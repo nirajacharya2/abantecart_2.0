@@ -69,7 +69,10 @@ class AdminSendOrderStatusNotifyEmailListener
                 )."\n\n";
         } //give link on order page for quest
         elseif ($config->get('config_guest_checkout') && $orderInfo['email']) {
-            $enc = new AEncryption($config->get('encryption_key'));
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $order_token = $enc->encrypt($order_id.'::'.$orderInfo['email']);
             $message .= $language->get('text_invoice')."\n";
             $message .= html_entity_decode(

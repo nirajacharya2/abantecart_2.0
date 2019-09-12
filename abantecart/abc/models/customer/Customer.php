@@ -6,6 +6,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
+use abc\core\lib\AEncryption;
 use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
@@ -401,10 +402,10 @@ class Customer extends BaseModel
         }
         //we cannot to define rule as function in the class body.
         //so, adding validation rule for uniqueness here
-        $this->rules['loginname']['checks'][] =
-            Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
-        $this->rules['email']['checks'][] =
-            Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
+        $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')
+                                                    ->ignore($this->customer_id, 'customer_id');
+        $this->rules['email']['checks'][] = Rule::unique('customers', 'email')
+                                                    ->ignore($this->customer_id, 'customer_id');
 
         //do merging to make required_without rule work
         if ($this->customer_id) {
@@ -542,7 +543,11 @@ class Customer extends BaseModel
         if (!empty(trim($password)) && !$this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
-            $this->attributes['password'] = H::getHash($password, $salt_key);
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption');
+            $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
             unset($this->attributes['password']);
         }
@@ -778,9 +783,17 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['password'])) {
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption');
             $query->whereRaw(
-                $aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('"
-                .$db->escape($filter['password'])."')))))"
+                $aliasC.".password = ".$enc->getRawSqlHash(
+                    ABC::env('DB_CURRENT_DRIVER'),
+                    'customers',
+                    $db->escape($filter['password']
+                    )
+                )
             );
         }
 

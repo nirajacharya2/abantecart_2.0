@@ -55,7 +55,11 @@ class ControllerPagesAccountInvoice extends AController
         $order_token = '';
 
         $guest = false;
-        $enc = new AEncryption($this->config->get('encryption_key'));
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
+
         if (isset($this->request->get['ot']) && $this->config->get('config_guest_checkout')) {
             //try to decrypt order token
             $order_token = $this->request->get['ot'];
@@ -487,7 +491,10 @@ class ControllerPagesAccountInvoice extends AController
         $guest = false;
         if (isset($this->request->get['ot']) && $this->config->get('config_guest_checkout')) {
             //try to decrypt order token
-            $enc = new AEncryption($this->config->get('encryption_key'));
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
             $decrypted = $enc->decrypt($this->request->get['ot']);
             list($order_id, $email) = explode('::', $decrypted);
 
