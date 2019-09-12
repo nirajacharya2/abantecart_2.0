@@ -1260,6 +1260,10 @@ class ControllerPagesSaleOrder extends AController
             $this->session->data['error'] = $this->language->get('error_order_load');
             abc_redirect($this->html->getSecureURL('sale/order'));
         }
+        if ($this->error) {
+            $this->session->data['error'] = implode('<br>', $this->error);
+            abc_redirect($this->html->getSecureURL('sale/order/history', '&order_id='.$order_id));
+        }
 
         //set content language to order language ID.
         if ($this->language->getContentLanguageID() != $order_info['language_id']) {
@@ -1402,6 +1406,11 @@ class ControllerPagesSaleOrder extends AController
             ];
         }
 
+        if( $this->session->data['error'] ){
+            $this->data['error_warning'] = $this->session->data['error'];
+            unset($this->session->data['error']);
+        }
+
         $this->addChild('pages/sale/order_summary', 'summary_form', 'pages/sale/order_summary.tpl');
 
         $this->view->assign('help_url', $this->gen_help_url('order_history'));
@@ -1495,7 +1504,7 @@ class ControllerPagesSaleOrder extends AController
             $this->error['not_reversal_status'] = 'This Order status is not reversal!';
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, $data);
 
         if ($this->error) {
             Registry::log()->write(var_export($this->error, true));
