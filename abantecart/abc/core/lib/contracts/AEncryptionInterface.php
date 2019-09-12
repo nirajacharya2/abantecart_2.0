@@ -9,7 +9,7 @@ interface AEncryptionInterface
      *
      * @param string $key
      */
-    function __construct(string $key);
+    function __construct( $key);
 
     /**
      * Encode function

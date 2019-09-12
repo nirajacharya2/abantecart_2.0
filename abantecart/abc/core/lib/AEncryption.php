@@ -33,9 +33,9 @@ final class AEncryption implements AEncryptionInterface
      *
      * @param string $key
      */
-    function __construct(string $key)
+    function __construct( $key)
     {
-        $this->key = $key;
+        $this->key = (string)$key;
     }
 
     /**
