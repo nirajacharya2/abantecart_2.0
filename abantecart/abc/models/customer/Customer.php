@@ -400,6 +400,9 @@ class Customer extends BaseModel
         if (Registry::config()->get('prevent_email_as_login')) {
             $this->rules['loginname']['checks'][] = 'regex:/^[\w._-]+$/i';
         }
+        if (!Registry::config()->get('prevent_email_as_login')) {
+            $this->rules['loginname']['messages'] = $this->rules['email']['messages'];
+        }
         //we cannot to define rule as function in the class body.
         //so, adding validation rule for uniqueness here
         $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')

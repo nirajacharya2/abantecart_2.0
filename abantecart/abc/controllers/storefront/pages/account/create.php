@@ -55,6 +55,11 @@ class ControllerPagesAccountCreate extends AController
         $request_data['store_id'] = $this->config->get('config_store_id');
 
         if ($this->request->is_POST()) {
+            //if allow login as email, need to set loginname = email
+            if (!$this->config->get('prevent_email_as_login')) {
+                $request_data['loginname'] = $request_data['email'];
+            }
+
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors = array_merge(
                                     $this->errors,
@@ -64,10 +69,6 @@ class ControllerPagesAccountCreate extends AController
                 $this->errors['warning'] = $this->language->get('error_unknown');
             }
             if (!$this->errors) {
-                //if allow login as email, need to set loginname = email
-                if (!$this->config->get('prevent_email_as_login')) {
-                    $request_data['loginname'] = $request_data['email'];
-                }
 
                 $customer_data = $request_data;
 
