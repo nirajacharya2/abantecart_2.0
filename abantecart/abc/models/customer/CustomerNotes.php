@@ -14,8 +14,6 @@ class CustomerNotes extends BaseModel
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
 
-    public $timestamps = false;
-
     protected $casts = [
         'customer_id' => 'int',
         'user_id'      => 'int',

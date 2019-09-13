@@ -66,10 +66,6 @@ class Customer extends BaseModel
      * @var string
      */
     protected $primaryKey = 'customer_id';
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
 
     protected $casts = [
         'store_id'          => 'int',

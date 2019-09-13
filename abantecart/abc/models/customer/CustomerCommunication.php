@@ -48,8 +48,6 @@ class CustomerCommunication extends BaseModel
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
 
-    public $timestamps = false;
-
     protected $dates = [
         'date_added',
         'date_modified',

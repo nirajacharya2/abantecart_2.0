@@ -41,7 +41,6 @@ class OrderProduct extends BaseModel
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';
-    public $timestamps = true;
 
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
@@ -55,6 +54,11 @@ class OrderProduct extends BaseModel
         'quantity'        => 'int',
         'subtract'        => 'int',
         'order_status_id' => 'int',
+    ];
+
+    protected $dates = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [

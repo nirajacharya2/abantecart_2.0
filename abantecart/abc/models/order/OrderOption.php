@@ -43,6 +43,11 @@ class OrderOption extends BaseModel
         'settings'                => 'serialized',
     ];
 
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
     protected $fillable = [
         'order_id',
         'order_product_id',

@@ -20,10 +20,13 @@ class CustomerGroup extends BaseModel
 {
     use SoftDeletes;
     protected $primaryKey = 'customer_group_id';
-    public $timestamps = false;
 
     protected $casts = [
         'tax_exempt' => 'bool',
+    ];
+    protected $dates = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [

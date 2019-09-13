@@ -36,8 +36,6 @@ class Coupon extends BaseModel
 
     protected $cascadeDeletes = ['descriptions', 'products'];
     protected $primaryKey = 'coupon_id';
-    public $timestamps = false;
-
     protected $casts = [
         'discount'      => 'float',
         'logged'        => 'int',

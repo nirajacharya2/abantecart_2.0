@@ -31,7 +31,6 @@ class OrderStatus extends BaseModel
     protected $primaryKey = 'order_status_id';
     protected $cascadeDeletes = ['descriptions'];
 
-    public $timestamps = false;
     protected $dates = [
         'date_added',
         'date_modified',

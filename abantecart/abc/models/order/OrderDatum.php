@@ -29,7 +29,6 @@ class OrderDatum extends BaseModel
         'type_id',
     ];
 
-    public $timestamps = false;
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 

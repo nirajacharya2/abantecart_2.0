@@ -27,7 +27,6 @@ class OrderStatusDescription extends BaseModel
         'order_status_id',
         'language_id',
     ];
-    public $timestamps = false;
     protected $mainClassName = OrderStatus::class;
     protected $mainClassKey = 'order_status_id';
     protected $dates = [

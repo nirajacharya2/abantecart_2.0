@@ -28,8 +28,6 @@ class OrderDataType extends BaseModel
     protected $cascadeDeletes = ['order_data'];
 
     protected $primaryKey = 'type_id';
-    public $timestamps = false;
-
     protected $casts = [
         'language_id' => 'int',
     ];

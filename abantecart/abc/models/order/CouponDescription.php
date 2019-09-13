@@ -29,7 +29,6 @@ class CouponDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
     protected $mainClassName = Coupon::class;
     protected $mainClassKey = 'coupon_id';
 

@@ -28,7 +28,6 @@ class OrderHistory extends BaseModel
 
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';
-    public $timestamps = false;
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 

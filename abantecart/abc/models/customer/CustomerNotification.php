@@ -28,8 +28,6 @@ class CustomerNotification extends BaseModel
 
     protected $primaryKey = 'id';
 
-    public $timestamps = false;
-
     protected $casts = [
         'customer_id' => 'int',
         'status'      => 'int',

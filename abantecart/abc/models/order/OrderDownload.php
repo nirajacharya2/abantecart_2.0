@@ -43,7 +43,6 @@ class OrderDownload extends BaseModel
     protected $cascadeDeletes = ['history'];
 
     protected $primaryKey = 'order_download_id';
-    public $timestamps = false;
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 
@@ -236,6 +235,11 @@ class OrderDownload extends BaseModel
         ],
     ];
 
+
+    public function setDownloadIdAttribute($value)
+    {
+        $this->attributes['download_id'] = empty($value) ? null : (int)$value;
+    }
     public function setAttributesDataAttribute($value)
     {
         $this->attributes['attributes_data'] = serialize($value);

@@ -33,7 +33,6 @@ class OrderDownloadsHistory extends BaseModel
     protected $primaryKey = 'order_download_history_id';
 
     protected $table = 'order_downloads_history';
-    public $timestamps = false;
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 
