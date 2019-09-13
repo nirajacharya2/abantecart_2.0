@@ -266,7 +266,6 @@ class Order extends BaseModel
                 ],
             ],
         ],
-
         'customer_id'       => [
             'checks'   => [
                 'integer',
@@ -438,6 +437,7 @@ class Order extends BaseModel
         'shipping_zone_id'        => [
             'checks'   => [
                 'int',
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -591,6 +591,7 @@ class Order extends BaseModel
         'payment_zone_id'        => [
             'checks'   => [
                 'int',
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -759,6 +760,23 @@ class Order extends BaseModel
     public function setPaymentMethodDataAttribute($value)
     {
         $this->attributes['payment_method_data'] = serialize($value);
+    }
+
+    public function setCustomerIdAttribute($value)
+    {
+        $this->attributes['customer_id'] = empty($value) ? null : (int)$value;
+    }
+    public function setCouponIdAttribute($value)
+    {
+        $this->attributes['coupon_id'] = empty($value) ? null : (int)$value;
+    }
+    public function setShippingZoneIdAttribute($value)
+    {
+        $this->attributes['shipping_zone_id'] = empty($value) ? null : (int)$value;
+    }
+    public function setPaymentZoneIdAttribute($value)
+    {
+        $this->attributes['payment_zone_id'] = empty($value) ? null : (int)$value;
     }
 
     /**

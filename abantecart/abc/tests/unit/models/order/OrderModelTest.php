@@ -20,7 +20,7 @@ class OrderModelTest extends ATestCase
         //init
     }
 
-    /*
+
         public function testValidator()
         {
             //validate
@@ -210,7 +210,7 @@ class OrderModelTest extends ATestCase
                 //Order::destroy($order->order_id);
             }
 
-        }*/
+        }
 
     public function testStatic()
     {
