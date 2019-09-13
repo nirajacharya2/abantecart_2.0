@@ -456,18 +456,19 @@ echo $this->html->buildElement(
                 //$('#generate_invoice').attr('disabled', '');
             },
             success: function (data) {
+
+                var totals = $('table>tbody#totals');
+                if ($('#original-totals').length == 0) {
+                    var clone = totals.clone();
+                    clone.attr('id', 'original-totals').css('opacity', 0.3);
+                    clone.appendTo($('.original-totals-table'));
+                }
+                totals.html('');
+                $('#submit-buttons').show();
+
                 if (data.hasOwnProperty('totals')) {
-
-                    var totals = $('table>tbody#totals');
-                    if ($('#original-totals').length == 0) {
-                        var clone = totals.clone();
-                        clone.attr('id', 'original-totals').css('opacity', 0.3);
-                        clone.appendTo($('.original-totals-table'));
-                    }
-                    totals.html('');
-                    var totalKeys = [];
-
-                    var cancel_order = false;
+                    var totalKeys = [],
+                        cancel_order = false;
                     if (data.totals.length === 0) {
                         data.totals['0'] = {id: 'total', title: 'Total', text: '0.00', value: 0.0};
                         cancel_order = true;
@@ -513,6 +514,10 @@ echo $this->html->buildElement(
                         $('#balance-alert').addClass('hidden');
                     }
                     <?php } ?>
+                }else if(data.hasOwnProperty('error')){
+                    var error_text = $('<tr id="totals_error"><td class="col-sm-12"><div class="alert-danger">' + data.error.text + '</div></td></tr>');
+                    error_text.appendTo(totals);
+                    $('#submit-buttons').hide();
                 }
             }
         });
