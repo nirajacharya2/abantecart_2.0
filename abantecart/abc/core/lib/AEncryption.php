@@ -73,14 +73,34 @@ final class AEncryption implements AEncryptionInterface
      * @param string $tableAlias
      * @param string $password
      *
+     * @param string $section - can be 'storefront' or 'admin'
+     *
      * @return string
      */
-    public function getRawSqlHash(string $dbDriver, string $tableAlias, string $password){
+    public function getRawSqlHash(string $dbDriver, string $tableAlias, string $password, string $section = 'storefront'){
         $db = Registry::db();
-        switch($dbDriver){
-            case 'mysql':
-            default:
-                return "SHA1(CONCAT(".$db->table_name($tableAlias).".salt, SHA1(CONCAT(".$db->table_name($tableAlias).".salt, SHA1('".$db->escape($password)."')))))";
+        if($section == 'admin') {
+            switch ($dbDriver) {
+                case 'mysql':
+                default:
+                    return "SHA1(
+                                CONCAT(".$db->table_name($tableAlias).".salt, 
+                                        SHA1(CONCAT(".$db->table_name($tableAlias).".salt, 
+                                             SHA1('".$db->escape($password)."')))
+                                       )
+                                )";
+            }
+        }else{
+            switch ($dbDriver) {
+                case 'mysql':
+                default:
+                    return "SHA1(
+                                CONCAT(".$db->table_name($tableAlias).".salt, 
+                                        SHA1(CONCAT(".$db->table_name($tableAlias).".salt, 
+                                             SHA1('".$db->escape($password)."')))
+                                       )
+                                )";
+            }
         }
     }
 

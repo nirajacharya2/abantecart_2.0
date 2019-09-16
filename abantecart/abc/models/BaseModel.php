@@ -258,6 +258,7 @@ class BaseModel extends OrmModel
             return false;
         }
         static::$current_language_id = (int)$language_id;
+        return true;
     }
 
     /**
@@ -313,6 +314,9 @@ class BaseModel extends OrmModel
          * @var Abac $abac
          */
         $abac = $this->registry->get('abac');
+        if(!$abac){
+            return true;
+        }
         $resourceObject = new \stdClass();
         $resourceObject->name = $this->policyObject;
         $resourceObject->getColumns = $columns;
@@ -488,7 +492,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $key
-     * @param string $value
+     * @param array $value
      */
     public function updateRule(string $key, array $value)
     {

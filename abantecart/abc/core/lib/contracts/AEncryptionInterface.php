@@ -24,10 +24,11 @@ interface AEncryptionInterface
      * @param string $dbDriver
      * @param string $tableAlias
      * @param string $password
+     * @param string $section
      *
      * @return string
      */
-    public function getRawSqlHash(string $dbDriver, string $tableAlias, string $password);
+    public function getRawSqlHash(string $dbDriver, string $tableAlias, string $password, string $section = 'storefront');
 
     /**
      * Decode function

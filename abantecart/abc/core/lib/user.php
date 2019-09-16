@@ -21,7 +21,11 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
+use abc\models\user\User;
+use Cake\Database\Exception;
 use H;
+use Illuminate\Support\Carbon;
 
 /**
  * Class AUser
@@ -73,16 +77,14 @@ final class AUser
         $this->session = $registry->get('session');
 
         if (isset($this->session->data['user_id'])) {
-            $user_query = $this->db->query("SELECT * 
-                                            FROM ".$this->db->table_name("users")." 
-                                            WHERE user_id = '".(int)$this->session->data['user_id']."'");
-            if ($user_query->num_rows) {
-                $this->userId = (int)$user_query->row['user_id'];
-                $this->userGroupId = (int)$user_query->row['user_group_id'];
-                $this->email = $user_query->row['email'];
-                $this->username = $user_query->row['username'];
-                $this->firstname = $user_query->row['firstname'];
-                $this->lastname = $user_query->row['lastname'];
+            $user = User::find((int)$this->session->data['user_id']);
+            if ($user) {
+                $this->userId = (int)$user->user_id;
+                $this->userGroupId = (int)$user->user_group_id;
+                $this->email = $user->email;
+                $this->username = $user->username;
+                $this->firstname = $user->firstname;
+                $this->lastname = $user->lastname;
                 $this->lastLogin = $this->session->data['user_last_login'];
                 $this->userInit();
             } else {
@@ -102,21 +104,28 @@ final class AUser
      */
     public function login($username, $password)
     {
+        /**
+        * @var AEncryption $enc
+        */
+        $enc = ABC::getObjectByAlias('AEncryption');
+        $sqlString = $enc->getRawSqlHash(ABC::env('DB_CURRENT_DRIVER'), 'users', $password, 'admin');
+        /**
+         * @var User $user
+         */
+        $user = User::where(
+            [
+                'users.username' => $username,
+                'users.status'   => 1,
+            ]
+        )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
+         ->first();
 
-        $sql = "SELECT *, SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))))
-                FROM ".$this->db->table_name("users")."
-                WHERE username = '".$this->db->escape($username)."'
-                AND password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('".$this->db->escape($password)."')))))
-                AND status = 1";
+        if ($user) {
+            $this->userId = $this->session->data['user_id'] = (int)$user->user_id;
+            $this->userGroupId = (int)$user->user_group_id;
+            $this->username = $user->username;
 
-        $user_query = $this->db->query($sql);
-
-        if ($user_query->num_rows) {
-            $this->userId = $this->session->data['user_id'] = (int)$user_query->row['user_id'];
-            $this->userGroupId = (int)$user_query->row['user_group_id'];
-            $this->username = $user_query->row['username'];
-
-            $this->lastLogin = $this->session->data['user_last_login'] = $user_query->row['last_login'];
+            $this->lastLogin = $this->session->data['user_last_login'] = $user->last_login;
             if (!$this->lastLogin || $this->lastLogin == 'null' || $this->lastLogin == '0000-00-00 00:00:00') {
                 $this->session->data['user_last_login'] = $this->lastLogin = '';
             }
@@ -138,11 +147,20 @@ final class AUser
      * @return void
      * @throws \Exception
      */
-    private function userInit()
+    protected function userInit()
     {
-        $this->db->query("UPDATE ".$this->db->table_name("users")." 
-                            SET ip = '".$this->db->escape($this->request->getRemoteIP())."'
-                            WHERE user_id = '".$this->userId."';");
+        $user = User::find($this->userId);
+        try{
+
+            $user->update(
+                [
+                    'ip' => $this->request->getRemoteIP()
+                ]
+            );
+        }catch(Exception $e){
+            Registry::log()->write(__CLASS__.': '.$e->getMessage());
+        }
+
 
         $user_group_query = $this->db->query("SELECT `permission`
                                               FROM ".$this->db->table_name("user_groups")."
@@ -154,11 +172,19 @@ final class AUser
         }
     }
 
-    private function updateLastLogin()
+    protected function updateLastLogin()
     {
-        $this->db->query("UPDATE ".$this->db->table_name("users")." 
-                        SET last_login = NOW()
-                        WHERE user_id = '".$this->userId."';");
+        $user = User::find($this->userId);
+        try{
+
+            $user->update(
+                [
+                    'last_login' => Carbon::now()
+                ]
+            );
+        }catch(Exception $e){
+            Registry::log()->write(__CLASS__.': '.$e->getMessage());
+        }
     }
 
     public function logout()
