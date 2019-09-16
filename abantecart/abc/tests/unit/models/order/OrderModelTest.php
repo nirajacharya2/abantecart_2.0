@@ -89,7 +89,7 @@ class OrderModelTest extends ATestCase
                 // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             }
 
-            $this->assertEquals(51, count($errors));
+            $this->assertEquals(48, count($errors));
 
             //check validation of presence in database
             $data = [
