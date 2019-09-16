@@ -88,7 +88,7 @@ class ControllerResponsesSaleInvoice extends AController
         }
 
         foreach ($orders as $order_id) {
-            $order_info = Order::getOrderArray($order_id);
+            $order_info = Order::getOrderArray($order_id, 'any');
 
             if ($order_info) {
                 if ($order_info['invoice_id']) {

@@ -41,7 +41,7 @@ class ControllerApiOrderDetails extends AControllerAPI
             return null;
         }
 
-        $order_details = Order::getOrderArray($request['order_id']);
+        $order_details = Order::getOrderArray($request['order_id'], 'any');
         if (!count($order_details)) {
             $this->rest->setResponseData(['Error' => 'Incorrect order ID or missing order data']);
             $this->rest->sendResponse(200);

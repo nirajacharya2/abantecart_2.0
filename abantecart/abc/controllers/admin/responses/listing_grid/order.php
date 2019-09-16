@@ -315,7 +315,7 @@ class ControllerResponsesListingGridOrder extends AController
             $order_id = 0;
         }
 
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
 
         if ( empty( $order_info ) ) {
             $response->error = $this->language->get( 'error_order_load' );

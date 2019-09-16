@@ -1211,7 +1211,7 @@ class Order extends BaseModel
                 return true;
             }
 
-            $orderInfo = Order::getOrderArray($order_id);
+            $orderInfo = Order::getOrderArray($order_id, 'any');
             $language = Language::find($orderInfo['language_id']);
             $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
             $oLanguage->load($language->directory);

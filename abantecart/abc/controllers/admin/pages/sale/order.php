@@ -347,7 +347,9 @@ class ControllerPagesSaleOrder extends AController
         } else {
             $order_id = 0;
         }
-        $order_info = Order::getOrderArray($order_id);
+
+        $order_info = Order::getOrderArray($order_id, 'any');
+
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
@@ -822,7 +824,7 @@ class ControllerPagesSaleOrder extends AController
         } else {
             $order_id = 0;
         }
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
@@ -1024,7 +1026,7 @@ class ControllerPagesSaleOrder extends AController
         } else {
             $order_id = 0;
         }
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
@@ -1219,7 +1221,7 @@ class ControllerPagesSaleOrder extends AController
         } else {
             $order_id = 0;
         }
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
@@ -1435,7 +1437,7 @@ class ControllerPagesSaleOrder extends AController
         $order_id = (int)$this->request->get['order_id'];
         $this->data['order_id'] = $order_id;
 
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         $this->data['order_info'] = $order_info;
 
         if (empty($order_info)) {
@@ -1594,7 +1596,7 @@ class ControllerPagesSaleOrder extends AController
             );
         }
 
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         $this->data['order_info'] = $order_info;
 
         //set content language to order language ID.

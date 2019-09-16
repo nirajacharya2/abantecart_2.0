@@ -37,7 +37,7 @@ class ControllerResponsesSaleOrderTracking extends AController
             $order_id = 0;
         }
 
-        $order_info = Order::getOrderArray($order_id);
+        $order_info = Order::getOrderArray($order_id, 'any');
         if(!$order_info){
             exit('order # '.$order_id.' not found!');
         }
