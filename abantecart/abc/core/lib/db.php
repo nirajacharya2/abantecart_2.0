@@ -70,7 +70,11 @@ class ADB
         $this->db_config = $this->prepareDBConfig($db_config);
         $this->conName = $conName;
         try {
-            $this->orm = new Capsule;
+            if(Registry::db()){
+                $this->orm = Registry::db()->getOrm();
+            }else {
+                $this->orm = new Capsule;
+            }
             $this->orm->addConnection($this->db_config, $this->conName);
 
             $this->orm->setAsGlobal();  //this is important
