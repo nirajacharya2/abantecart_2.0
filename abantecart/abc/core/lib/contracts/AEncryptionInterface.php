@@ -43,7 +43,9 @@ interface AEncryptionInterface
      * @param string $keyword
      * @param string $salt_key
      *
-     * @return string
+     * @param string $section
+     *
+     * @return string|false
      */
-    static function getHash(string $keyword, string $salt_key);
+    static function getHash(string $keyword, string $salt_key, string $section = 'storefront');
 }

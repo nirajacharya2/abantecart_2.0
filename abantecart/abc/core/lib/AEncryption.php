@@ -158,9 +158,11 @@ final class AEncryption implements AEncryptionInterface
      * @param string $keyword
      * @param string $salt_key
      *
+     * @param string $section
+     *
      * @return string
      */
-    static function getHash(string $keyword, string $salt_key)
+    static function getHash(string $keyword, string $salt_key, string $section = 'storefront')
     {
         return  sha1($salt_key.sha1($salt_key.sha1($keyword)));
 
