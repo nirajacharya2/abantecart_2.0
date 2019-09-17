@@ -739,7 +739,7 @@ class Customer extends BaseModel
             $query = $customer->select();
         }
         $query->addSelect($select);
-        $query->join(
+        $query->leftJoin(
             'customer_groups',
             'customer_groups.customer_group_id',
             '=',
