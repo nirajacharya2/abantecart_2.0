@@ -222,6 +222,10 @@ class CustomerTransaction extends BaseModel
             //you cannot to update transaction!
             //All records must be incremental!
             //INSERTS ONLY!
+            Registry::log()->write(
+                'Customer '.$this->customer_id.' attempts to update transaction # '.$this->customer_transaction_id
+                .'. Action is prohibited.'
+            );
             return true;
         }
         parent::save($options);
