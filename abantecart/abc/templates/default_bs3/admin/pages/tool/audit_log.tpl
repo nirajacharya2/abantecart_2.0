@@ -303,6 +303,9 @@
 	var auditable_type = '<?php echo $auditable_type; ?>';
 	var auditable_id = '<?php echo $auditable_id; ?>';
 
+	var curDate = new Date();
+	curDate = curDate.toISOString().substr(0, 10);
+
 	var vm = new Vue({
 		el: '#app',
 		data: {
@@ -317,7 +320,7 @@
 			const_data_objects: data_objects.classes,
 			selected_data_object: '',
 			selected_fields: [],
-			date_from: '',
+			date_from: curDate,
 			date_from1: '',
 			date_to: '',
 			modal: '',

@@ -339,7 +339,7 @@ class CustomerTransaction extends BaseModel
 
          // NOTE: Performance slowdown might be noticed or larger search results
          if ($mode != 'total_only') {
-             $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'name';
+             $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'customer_transactions.date_added';
              if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
                  $sorting = "desc";
              } else {
@@ -370,4 +370,20 @@ class CustomerTransaction extends BaseModel
 
         return $result_rows;
     }
+
+    /**
+     * @return mixed
+     */
+    public static function getTransactionTypes()
+    {
+        $query = self::select(['transaction_type'])
+            ->distinct(['transaction_type'])
+            ->orderBy('transaction_type')
+            ->withTrashed();
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        $result_rows = $query->get();
+        return $result_rows;
+    }
+
 }

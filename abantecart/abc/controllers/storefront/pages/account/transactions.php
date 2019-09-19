@@ -88,11 +88,19 @@ class ControllerPagesAccountTransactions extends AController
 
             $trans = [];
 
-            $results = CustomerTransaction::select(['*'])
-                            ->where('customer_id', '=', $this->customer->getId())
-                            ->limit($limit)
-                            ->offset(($page - 1) * $limit)
-                            ->get()->toArray();
+            $page = $this->request->get['page']; // get the requested page
+            $limit = $this->request->get['rows']; // get how many rows we want to have into the grid
+            $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
+            $sord = $this->request->get['sord']; // get the direction
+            $data = [
+                'sort'        => $sidx,
+                'order'       => $sord,
+                'start'       => ($page - 1) * $limit,
+                'limit'       => $limit,
+                'customer_id' => (int)$this->customer->getId(),
+            ];
+
+            $results = CustomerTransaction::getTransactions($data);
 
             foreach ($results as $result) {
                 $trans[] = [
