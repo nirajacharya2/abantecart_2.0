@@ -213,7 +213,7 @@ class CustomerTransaction extends BaseModel
      *
      * @param array $options
      *
-     * @return bool|void
+     * @return bool
      * @throws \Exception
      */
     public function save(array $options = [])
@@ -223,12 +223,13 @@ class CustomerTransaction extends BaseModel
             //All records must be incremental!
             //INSERTS ONLY!
             Registry::log()->write(
-                'Customer '.$this->customer_id.' attempts to update transaction # '.$this->customer_transaction_id
-                .'. Action is prohibited.'
+                "Customer ".$this->customer_id." attempts to update transaction # ".$this->customer_transaction_id
+                .". Action is prohibited. "
+                ."\n Input Data: ".var_export($this->getAttributes(), true)
             );
             return true;
         }
-        parent::save($options);
+         return parent::save($options);
     }
 
     public function customer()
