@@ -218,7 +218,7 @@ class CustomerTransaction extends BaseModel
      */
     public function save(array $options = [])
     {
-        if ($this->customer_transaction_id) {
+        if ($this->exists) {
             //you cannot to update transaction!
             //All records must be incremental!
             //INSERTS ONLY!
