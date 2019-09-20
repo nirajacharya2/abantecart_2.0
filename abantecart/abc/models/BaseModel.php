@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\DatabasePresenceVerifier;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
@@ -211,9 +212,23 @@ class BaseModel extends OrmModel
         ) {
             $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
         }
+
+
         parent::__construct($attributes);
         static::boot();
         $this->newBaseQueryBuilder();
+
+        //process validation rules
+        if($this->actor['user_type_name']) {
+            $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
+            $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
+            $userTypeRulesEnv = (array)ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
+            $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
+
+            if ($userTypeRules) {
+                $this->rules = array_merge($this->rules, $userTypeRules);
+            }
+        }
     }
 
 
@@ -268,8 +283,6 @@ class BaseModel extends OrmModel
     {
         return static::$current_language_id;
     }
-
-
 
     /**
      * @return bool
@@ -386,6 +399,19 @@ class BaseModel extends OrmModel
 
         if ($rules = $this->rules()) {
             $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
+
+            //override rule by lambda function to implement logic of rule depends on model data
+            //This lambda function must to return Rule validation of
+            foreach($rules as $key => $rule){
+                if($rule['lambda'] instanceof \Closure){
+                    $lambdaResult = $rule['lambda']($this);
+                    if(!($lambdaResult instanceof Rule)){
+                        throw new \Exception('Lambda-function as model rule must return instance of '.Rule::class.'!');
+                    }
+                    $validateRules[$key] = [ $lambdaResult ];
+                }
+            }
+
             if(!$messages){
                 foreach($rules as $attributeName => $item){
                     //check data for confirmation such as password
@@ -421,10 +447,6 @@ class BaseModel extends OrmModel
             $v->setPresenceVerifier($presenceVerifier);
             $this->validator = $v;
 
-            //call validation hooks of extensions
-            $v->after(function ($data) {
-                //Registry::extensions()->hk_ValidateData($this,[$data]);
-            });
             try {
                 $v->validate();
             } catch (ValidationException $e) {
