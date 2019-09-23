@@ -2072,4 +2072,10 @@ ALTER TABLE `ac_order_totals`
   ADD COLUMN `data` LONGTEXT NULL
   AFTER `value`;
 
+ALTER TABLE `ac_categories`
+ADD COLUMN `path` VARCHAR(255) NOT NULL DEFAULT '' AFTER `parent_id`;
+
+ALTER TABLE `ac_categories`
+ADD INDEX `ac_categories_trees_idx` (`path`);
+
 

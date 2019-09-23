@@ -9,6 +9,7 @@ use abc\models\locale\Currency;
 use abc\models\order\Order;
 use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
+use abc\modules\listeners\ModelCategoryListener;
 
 return [
     /** events for ORM Models
@@ -37,6 +38,9 @@ return [
         'eloquent.*: *'      => [
             //this listener firing by base model property $auditEvents
             ModelAuditListener::class,
+        ],
+        'eloquent.saved: abc\models\catalog\Category' => [
+            ModelCategoryListener::class
         ],
     ],
     'MORPH_MAP'      => [

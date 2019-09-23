@@ -8843,6 +8843,7 @@ CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
   `uuid` varchar(255) DEFAULT NULL,
   `parent_id` int(11),
+  `path` VARCHAR(255) NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -8850,10 +8851,11 @@ CREATE TABLE `ac_categories` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`category_id`),
-  KEY `uuid_uniq` (`uuid`),
+  KEY `uuid_unique` (`uuid`),
+  INDEX `ac_categories_idx` ( `category_id`, `parent_id`, `status`  ),
+  INDEX `ac_categories_trees_idx` ( `path` ),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`, `status`  );
 
 --
 -- DDL for table `category_descriptions`
