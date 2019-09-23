@@ -25,7 +25,9 @@ use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\models\catalog\Category;
+use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
 
@@ -95,13 +97,26 @@ class ControllerPagesProductCategory extends AController
             $path = '';
             $parts = explode('_', $request['path']);
             if (count($parts) == 1) {
-                //see if this is a category ID to sub category, need to build full path
-                $parts = explode('_', (new Category())->buildPath((int)$request['path']));
+                /**
+                 * @var Category $category
+                 */
+                $category = Category::find((int)$request['path']);
+                if($category) {
+                    $parts = explode('_', $category->path);
+                }
             }
-            foreach ($parts as $path_id) {
-                $category_info = (new Category())->getCategory($path_id);
 
-                if ($category_info) {
+            /**
+             * @var QueryBuilder $query
+             */
+            $query = CategoryDescription::select(['category_id', 'name']);
+            $descriptions  = $query->whereIn('category_id', $parts)
+                ->where('language_id', '=', $this->language->getLanguageID())
+                ->get()->toArray();
+            $categoryNames = array_column($descriptions,'name', 'category_id');
+
+            foreach ($parts as $path_id) {
+                if ($categoryNames[$path_id]) {
                     if (!$path) {
                         $path = $path_id;
                     } else {
@@ -110,7 +125,7 @@ class ControllerPagesProductCategory extends AController
 
                     $this->document->addBreadcrumb([
                         'href'      => $this->html->getSEOURL('product/category', '&path='.$path, '&encode'),
-                        'text'      => $category_info['name'],
+                        'text'      => $categoryNames[$path_id],
                         'separator' => $this->language->get('text_separator'),
                     ]);
                 }

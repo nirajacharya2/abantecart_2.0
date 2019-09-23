@@ -40,16 +40,11 @@ class Category extends BaseModel
     protected $cascadeDeletes = [
         'descriptions',
         'products',
-        //'stores',
     ];
     /**
      * @var string
      */
     protected $primaryKey = 'category_id';
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
 
     /**
      * @var array
@@ -74,7 +69,6 @@ class Category extends BaseModel
     protected $fillable = [
         'parent_id',
         'path',
-        'nodes',
         'sort_order',
         'status',
         'uuid',
