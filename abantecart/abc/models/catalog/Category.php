@@ -82,11 +82,13 @@ class Category extends BaseModel
 
     public function SetParentIdAttribute($value)
     {
+        $value = (int)$value ?: null;
         if(!$value){
             $this->attributes['path'] = '';
         }elseif($this->exists){
             $this->attributes['path'] = $this->getPath($this->category_id, 'id');
         }
+        $this->attributes['parent_id'] = $value;
     }
 
     /**
