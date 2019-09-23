@@ -23,10 +23,10 @@ class ModelCategoryListener
         if (!is_object($category)
             || !($category instanceof Category)
         ) {
-            return $this->output(
+            return [
                 false,
                 __CLASS__.': Argument 1 is not instance of model '.Category::class
-            );
+            ];
         }
 
         try {
@@ -39,7 +39,7 @@ class ModelCategoryListener
             Registry::log()->write($e->getMessage());
         }
 
-        return true;
+        return [ true ];
     }
 
 }
