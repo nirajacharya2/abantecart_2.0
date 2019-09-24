@@ -205,6 +205,17 @@ class AImage
             return false;
         }
 
+        if(!is_writable(dirname($filename))){
+            $userInfo = posix_getpwuid(posix_getuid());
+            $user = $userInfo['name'];
+            $groupInfo = posix_getgrgid(posix_getgid());
+            $group = $groupInfo = $groupInfo['name'];
+            $error_text = "AImage: directory ".dirname($filename)." is not writable for user ".$user.':'.$group;
+            $warning = new AWarning($error_text);
+            $warning->toLog();
+            return false;
+        }
+
         $quality = (int)$quality;
         $quality = $quality > 100 ? 100 : $quality;
         $quality = $quality < 1 ? 1 : $quality;
