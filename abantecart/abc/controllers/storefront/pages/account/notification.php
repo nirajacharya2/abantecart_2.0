@@ -127,6 +127,15 @@ class ControllerPagesAccountNotification extends AController
                         $checked = true;
                     }
                 }
+                $point['values'][$protocol.'_hidden'] = $form->getFieldHtml(
+                    [
+                        'type'    => 'hidden',
+                        'name'    => 'settings['.$sendpoint.']['.$protocol.']',
+                        'value'   => '0',
+                        'checked' => false,
+                        'attr'    => $read_only,
+                    ]
+                );
                 $point['values'][$protocol] = $form->getFieldHtml(
                     [
                         'type'    => 'checkbox',
