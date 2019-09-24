@@ -84,7 +84,7 @@ class ControllerResponsesCommonTabs extends AController
 
         //10 new orders
         $filter = [
-            'sort'  => 'o.date_added',
+            'sort'  => 'date_added',
             'order' => 'DESC',
             'start' => 0,
             'limit' => 10,
