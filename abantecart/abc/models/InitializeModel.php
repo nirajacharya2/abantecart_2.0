@@ -29,7 +29,7 @@ trait InitializeModel
         if ($env['MODEL']['INITIALIZE'][$modelClassName]['properties']) {
             foreach ($env['MODEL']['INITIALIZE'][$modelClassName]['properties'] as $property => $values) {
                 // add properties
-                if (is_array($values) && !empty($values)) {
+                if (is_array($values) && !empty($values) && property_exists($this, $property)) {
                     $this->{$property} = array_merge((array)$this->{$property}, $values);
                 }
             }
