@@ -199,7 +199,9 @@ class BaseModel extends OrmModel
         $this->registry = Registry::getInstance();
         //set current language for getting single description from relation
         if (!static::$current_language_id) {
-            static::$current_language_id = $this->registry->get('language')->getContentLanguageID();
+            static::$current_language_id = ABC::env('IS_ADMIN')
+                                            ? $this->registry->get('language')->getContentLanguageID()
+                                            : $this->registry->get('language')->getLanguageID();
         }
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
