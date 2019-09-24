@@ -91,17 +91,17 @@ class ControllerPagesAccountCreate extends AController
                     if (!$this->config->get('config_customer_email_activation')) {
                         $customer_info['activated'] = true;
                         //send welcome email
-                        H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+                        H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info, $request_data)]);
 
                         //login customer after create account is approving and email activation are disabled in settings
                         $this->customer->login($request_data['loginname'], $request_data['password']);
                     } else {
                         //send activation email request and wait for confirmation
-                        H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info)]);
+                        H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info, $request_data)]);
                     }
                 } else {
                     //send welcome email, but need manual approval
-                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info, $request_data)]);
                 }
 
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
