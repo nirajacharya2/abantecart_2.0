@@ -140,6 +140,24 @@ class BaseModel extends OrmModel
     protected $rules = [];
 
     /**
+     *
+     * @var array Data Validation rules for admin side
+     */
+    protected $rulesUser = [];
+
+    /**
+     *
+     * @var array Data Validation rules for storefront side
+     */
+    protected $rulesCustomer = [];
+
+    /**
+     *
+     * @var array Data Validation rules for CLI side
+     */
+    protected $rulesCli = [];
+
+    /**
      * Auditing setup
      *
      * @var bool
