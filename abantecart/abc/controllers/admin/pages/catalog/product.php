@@ -1276,7 +1276,7 @@ class ControllerPagesCatalogProduct extends AController
             }
         }
 
-        $this->extensions->hk_ValidateData($this, __FUNCTION__);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $this->request->post);
 
         if (!$this->error) {
             return true;
@@ -1294,7 +1294,7 @@ class ControllerPagesCatalogProduct extends AController
             $this->error['warning'] = $this->language->get_error('error_permission');
         }
 
-        $this->extensions->hk_ValidateData($this, __FUNCTION__);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $this->request->post);
 
         if (!$this->error) {
             return true;
