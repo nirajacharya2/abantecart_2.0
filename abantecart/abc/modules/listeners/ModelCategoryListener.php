@@ -17,8 +17,9 @@ class ModelCategoryListener
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    protected function handle($eventAlias, $category, $options = [])
-    {
+    public function handle()
+    {   /** @var Category $category */
+        $category = func_get_arg(0);
 
         if (!is_object($category)
             || !($category instanceof Category)
@@ -32,8 +33,11 @@ class ModelCategoryListener
         try {
 
             if($category && $category->parent_id && $category->path == ''){
-                $category->path = $category->getPath($category->category_id,'id');
-                $category->save();
+                $category::setCurrentLanguageID(1);
+                $path = $category->getPath($category->category_id, 'id');
+                Registry::db()->table('categories')
+                              ->where('category_id', '=', $category->category_id)
+                              ->update(['path' => $path]);
             }
         } catch (\PDOException $e) {
             Registry::log()->write($e->getMessage());

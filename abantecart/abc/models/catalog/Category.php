@@ -22,6 +22,7 @@ use Illuminate\Database\Query\JoinClause;
  *
  * @property int                                      $category_id
  * @property int                                      $parent_id
+ * @property string                                   $path
  * @property int                                      $sort_order
  * @property int                                      $status
  * @property \Carbon\Carbon                           $date_added
@@ -31,6 +32,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property \Illuminate\Database\Eloquent\Collection $category_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
  *
+ * @method static Category find(int $customer_id) Category
+ * @method static Category select(mixed $select) Builder
  * @package abc\models
  */
 class Category extends BaseModel
@@ -105,7 +108,7 @@ class Category extends BaseModel
     public function description()
     {
         return $this->hasOne(CategoryDescription::class, 'category_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', '=', static::$current_language_id);
     }
 
     /**
@@ -132,32 +135,47 @@ class Category extends BaseModel
      * @throws \ReflectionException
      * @throws AException
      */
-    public function getPath($category_id, $mode = '')
+    public function getPath($category_id = null, $mode = '')
     {
         $category_id = (int)$category_id;
+        if(!$category_id && $this->exists){
+            $category_id = $this->category_id;
+        }
 
-        $categories = $this->db->table('categories as c')
-            ->leftJoin('category_descriptions as cd', 'c.category_id', '=', 'cd.category_id')
-            ->where('c.category_id', '=', (int)$category_id)
-            ->where('cd.language_id', '=', static::$current_language_id)
-            ->orderBy('c.sort_order')
-            ->orderBy('cd.name')
-            ->get()
-            ->toArray();
+        $query = Category::where('categories.category_id', '=', (int)$category_id)
+                 ->orderBy('categories.sort_order');
+        if($mode !='id') {
+            $query->leftJoin(
+                'category_descriptions',
+                'categories.category_id',
+                '=',
+                'category_descriptions.category_id'
+            )
+                  ->where('category_descriptions.language_id', '=', static::$current_language_id)
+                  ->orderBy('category_descriptions.name');
+        }
+        $categories = $query->get()->toArray();
 
         $category_info = current($categories);
 
-        if ($category_info->parent_id) {
+        if ($category_info['parent_id']) {
             if ($mode == 'id') {
-                return $this->getPath($category_info->parent_id, $mode).'_'
-                    .$category_info->category_id;
+                return $this->getPath(
+                            $category_info['parent_id'],
+                            $mode
+                    )
+                    .'_'
+                    .$category_info['category_id'];
             } else {
-                return $this->getPath($category_info->parent_id, $mode)
+                return $this->getPath(
+                            $category_info['parent_id'],
+                            $mode
+                    )
                     .$this->registry->get('language')->get('text_separator')
-                    .$category_info->name;
+                    .$category_info['name'];
             }
         } else {
-            return $mode == 'id' ? $category_info->category_id : $category_info->name;
+            return $mode == 'id' ? $category_info['category_id'] : $category_info['name'];
         }
     }
 
@@ -272,9 +290,8 @@ class Category extends BaseModel
                       WHERE  p2c.category_id = ".$this->db->table_name('categories').".category_id
                      ) as products_count");
             }
-
+            /** @var QueryBuilder  $category */
             $category = self::select($arSelect);
-
             $category = $category->leftJoin('category_descriptions', function ($join) use ($languageId) {
                 /** @var JoinClause $join */
                 $join->on('category_descriptions.category_id', '=', 'categories.category_id')
@@ -307,13 +324,21 @@ class Category extends BaseModel
         $cache = $this->cache->pull($cacheKey);
 
         if ($cache === false) {
+            /** @var QueryBuilder $categories */
             $categories = self::select(['categories.category_id'])
-                ->leftJoin('categories_to_stores', 'categories_to_stores.category_id', '=', 'categories.category_id');
+                ->leftJoin(
+                    'categories_to_stores',
+                    'categories_to_stores.category_id',
+                    '=',
+                    'categories.category_id'
+                );
 
             if ($parentId >= 0) {
-                $categories = $categories->where('categories.parent_id', '=', $parentId);
+                $categories = $categories
+                    ->where('categories.parent_id', '=', $parentId);
             }
-            $categories = $categories->where('categories_to_stores.store_id', '=', $storeId)
+            $categories = $categories
+                ->where('categories_to_stores.store_id', '=', $storeId)
                 ->active('categories')
                 ->get();
 
@@ -344,10 +369,14 @@ class Category extends BaseModel
      */
     public function getTotalCategoriesByCategoryId($parentId = null)
     {
-        $categoriesCount = 0;
+        /** @var QueryBuilder $categories */
         $categories = self::select(['categories.category_id'])
-            ->leftJoin('categories_to_stores', 'categories_to_stores.category_id', '=', 'categories.category_id')
-            ->where('categories_to_stores.store_id', '=', (int)$this->config->get('config_store_id'))
+            ->leftJoin(
+                'categories_to_stores',
+                'categories_to_stores.category_id',
+                '=',
+                'categories.category_id'
+            )->where('categories_to_stores.store_id', '=', (int)$this->config->get('config_store_id'))
             ->active('categories');
         if ($parentId) {
             $categories = $categories->where('categories.parent_id', '=', $parentId);
@@ -358,25 +387,6 @@ class Category extends BaseModel
         return $categoriesCount;
     }
 
-    /**
-     * @param $category_id
-     *
-     * @return string
-     * @throws \Exception
-     */
-    public function buildPath(int $category_id)
-    {
-        $categories = self::find($category_id);
-        if ($categories) {
-            $categories = $categories->first(['category_id', 'parent_id']);
-        }
-
-        if ($categories && $categories->parent_id) {
-            return $this->buildPath($categories->parent_id)."_".$category_id;
-        } else {
-            return $category_id;
-        }
-    }
 
     /**
      * @param $data
@@ -512,8 +522,23 @@ class Category extends BaseModel
     public function addCategory($data)
     {
         $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
-        $category = new Category($data);
-        $category->save();
+        $this->db->beginTransaction();
+        $category = null;
+        try {
+            $category = new Category($data);
+            $category->save();
+            $this->db->commit();
+            //build path
+            $category->update(
+                [
+                    'path' => $this->getPath($category->category_id, 'id')
+                ]
+            );
+        }catch(\Exception $e){
+
+            Registry::log()->write($e->getMessage());
+            $this->db->rollback();
+        }
 
         if (!$category) {
             return false;
@@ -560,8 +585,8 @@ class Category extends BaseModel
         $categoryName = '';
         if (isset($data['category_description'])) {
             $description = $data['category_description'];
-            if (isset($description[$this->registry->get('language')->getContentLanguageID()]['name'])) {
-                $categoryName = $description[$this->registry->get('language')->getContentLanguageID()]['name'];
+            if (isset($description[static::$current_language_id]['name'])) {
+                $categoryName = $description[static::$current_language_id]['name'];
             }
         }
 

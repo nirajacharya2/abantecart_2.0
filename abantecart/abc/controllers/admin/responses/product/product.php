@@ -254,17 +254,19 @@ class ControllerResponsesProductProduct extends AController
         $this->loadModel('catalog/category');
 
         if (isset($this->request->post['id'])) { // variant for popup listing
-            $categories = $this->request->post['id'];
+            $categoryIds = (array)$this->request->post['id'];
         } else {
-            $categories = [];
+            $categoryIds = [];
         }
         $category_data = [];
 
-        foreach ($categories as $category_id) {
+        $categories = Category::with('description')
+                              ->whereIn('category_id', $categoryIds);
+        foreach ($categories as $category) {
             $category_data[] = [
-                'id'         => $category_id,
-                'name'       => (new Category())->getPath($category_id),
-                'sort_order' => 0,
+                'id'         => $category['category_id'],
+                'name'       => $category['description']['name'],
+                'sort_order' => $category['sort_order'],
             ];
 
         }
