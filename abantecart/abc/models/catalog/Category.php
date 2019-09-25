@@ -86,10 +86,12 @@ class Category extends BaseModel
     public function SetParentIdAttribute($value)
     {
         $value = (int)$value ?: null;
-        if(!$value){
-            $this->attributes['path'] = '';
-        }elseif($this->exists){
+        if($this->exists){
             $this->attributes['path'] = $this->getPath($this->category_id, 'id');
+        }else{
+            //if newly created category - let listener ModelCategoryListener update path on "saved" eloquent event firing
+            //this done to get path after category_id getting from database
+            $this->attributes['path'] =  '';
         }
         $this->attributes['parent_id'] = $value;
     }
@@ -175,7 +177,7 @@ class Category extends BaseModel
                     .$category_info['name'];
             }
         } else {
-            return $mode == 'id' ? $category_info['category_id'] : $category_info['name'];
+            return $mode == 'id' ? $category_id : $category_info['name'];
         }
     }
 

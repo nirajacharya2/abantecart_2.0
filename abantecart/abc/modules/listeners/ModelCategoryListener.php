@@ -31,7 +31,7 @@ class ModelCategoryListener
         }
 
         try {
-            if($category && $category->path == ''){
+            if($category && $category->category_id && $category->path == ''){
                 $category::setCurrentLanguageID(1);
                 $path = $category->getPath($category->category_id, 'id');
                 Registry::db()->table('categories')
