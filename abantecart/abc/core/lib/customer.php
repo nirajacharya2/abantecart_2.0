@@ -1081,18 +1081,18 @@ class ACustomer extends ALibBase
         $language->load( $language->language_details['directory'] );
         $language->load( 'common/im' );
 
-        if ( ! empty( $data['loginname'] ) ) {
-            $message_arr = [
-                0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
-            ];
-            $im->send( 'customer_account_update', $message_arr );
-        }
         //get existing data and compare
         /**
          * @var $customer Customer
          */
         $customer = Customer::find($customer_id);
         foreach ( $customer->toArray() as $rec => $val ) {
+            if ($rec == 'loginname' && $val != $data['loginname']) {
+                $message_arr = [
+                    0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
+                ];
+                $im->send( 'customer_account_update', $message_arr );
+            }
             if ( $rec == 'email' && $val != $data['email'] ) {
                 $message_arr = [
                     0 => ['message' => sprintf( $language->get( 'im_customer_account_update_email_to_customer' ), $data['email'] )],
