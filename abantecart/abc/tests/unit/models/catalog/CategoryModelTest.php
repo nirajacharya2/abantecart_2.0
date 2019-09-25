@@ -26,10 +26,15 @@ class CategoryModelTest extends ATestCase
 
     public function testGetPath()
     {
+        /** @var Category $category */
         $category = Category::where('parent_id', '>', 0)->first();
 
         $path = $category->getPath($category->category_id,'id');
         $this->assertIsInt(strpos($path, '_'));
+
+        $category = Category::whereNull('parent_id')->first();
+        $path = $category->getPath($category->category_id,'id');
+        $this->assertEquals($path, $category->category_id);
     }
 
 
