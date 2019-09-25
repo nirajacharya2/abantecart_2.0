@@ -102,7 +102,7 @@ class ControllerPagesProductCategory extends AController
                  */
                 $category = Category::find((int)$request['path']);
                 if($category) {
-                    $parts = explode('_', $category->path);
+                    $parts = explode('_', ($category->path ?: $request['path']));
                 }
             }
 
