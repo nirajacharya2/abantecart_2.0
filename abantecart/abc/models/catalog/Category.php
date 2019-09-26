@@ -53,9 +53,11 @@ class Category extends BaseModel
      * @var array
      */
     protected $casts = [
-        'parent_id'  => 'int',
-        'sort_order' => 'int',
-        'status'     => 'int',
+        'parent_id'             => 'int',
+        'sort_order'            => 'int',
+        'status'                => 'int',
+        'total_products_count'  => 'int',
+        'active_products_count' => 'int',
     ];
 
     /**
@@ -72,6 +74,8 @@ class Category extends BaseModel
     protected $fillable = [
         'parent_id',
         'path',
+        'total_products_count',
+        'active_products_count',
         'sort_order',
         'status',
         'uuid',
@@ -87,7 +91,23 @@ class Category extends BaseModel
     {
         $value = (int)$value ?: null;
         if($this->exists){
-            $this->attributes['path'] = $this->getPath($this->category_id, 'id');
+            //recalculate path and product count for category
+            $calc = $this->calculatePath($this->category_id);
+            $this->attributes['path'] = $calc['path'];
+            $this->attributes['total_products_count'] = $calc['total_products_count'];
+            $this->attributes['active_products_count'] = $calc['active_products_count'];
+
+            $parents = explode('_',$calc['path']);
+            array_pop($parents);
+            //tree IDs without current category_id
+            $tree = array_merge($parents, $calc['children']);
+            foreach($tree as $childId){
+                $child = Category::find($childId);
+                if($child){
+                    //run this mutator recursively for each child
+                    $child->update(['parent_id' => $child->parent_id]);
+                }
+            }
         }else{
             //if newly created category - let listener ModelCategoryListener update path on "saved" eloquent event firing
             //this done to get path after category_id getting from database
@@ -178,6 +198,69 @@ class Category extends BaseModel
             }
         } else {
             return $mode == 'id' ? $category_id : $category_info['name'];
+        }
+    }
+    /**
+     * @param        $category_id
+     *
+     * @return array
+     * @throws \ReflectionException
+     * @throws AException
+     */
+    public function calculatePath($category_id = null)
+    {
+        $category_id = (int)$category_id;
+        if(!$category_id && $this->exists){
+            $category_id = $this->category_id;
+        }
+
+        $query = Category::where('categories.category_id', '=', (int)$category_id)
+                 ->orderBy('categories.sort_order');
+
+        $categories = $query->get()->toArray();
+
+        $category_info = current($categories);
+        $childrenIDs = $this->getChildrenIDs($category_id);
+
+        if ($category_info['parent_id']) {
+                $calc = $this->calculatePath( $category_info['parent_id']);
+                return [
+                    'children' => array_merge($calc['children'], $childrenIDs),
+                    'path' => $calc['path'] .'_'.$category_info['category_id'],
+                    'active_products_count' => $category_info['active_products_count'] + $calc['active_products_count'],
+                    'total_products_count' => $category_info['total_products_count'] + $calc['total_products_count']
+                ];
+        } else {
+            $output = ['children' => $childrenIDs];
+            $childrenIDs[] = $category_id;
+            $p2cAlias = Registry::db()->table_name('products_to_categories');
+            $pAlias = Registry::db()->table_name('products');
+            /** @var QueryBuilder $query */
+            $query = Store::selectRaw(
+                '(SELECT COUNT('.$pAlias.'.product_id)
+                FROM '.$pAlias.'
+                INNER JOIN '.$p2cAlias.'
+                    ON ('.$p2cAlias.'.product_id = '.$pAlias.'.product_id)
+                WHERE '.$pAlias.'.status = 1 
+                        AND COALESCE('.$pAlias.'.date_available, NOW()) <= NOW()
+                        AND '.$pAlias.'.date_deleted IS NULL
+                        AND '.$p2cAlias.'.category_id IN ('.implode(", ", $childrenIDs).')
+                ) as active_products_count'
+            )->selectRaw(
+                '(SELECT COUNT('.$pAlias.'.product_id)
+                FROM '.$pAlias.'
+                INNER JOIN '.$p2cAlias.'
+                    ON ('.$p2cAlias.'.product_id = '.$pAlias.'.product_id)
+                WHERE '.$p2cAlias.'.category_id IN ('.implode(", ", $childrenIDs).')
+                    AND '.$pAlias.'.date_deleted IS NULL
+                ) as total_products_count'
+            );
+
+            $result = $query->distinct()->first();
+            $output['path'] = $category_id;
+            $output['active_products_count'] = (int)$result->active_products_count;
+            $output['total_products_count'] = (int)$result->total_products_count;
+            return $output;
         }
     }
 

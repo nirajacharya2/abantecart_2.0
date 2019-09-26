@@ -96,6 +96,7 @@ class ControllerPagesProductCategory extends AController
         if (isset($request['path'])) {
             $path = '';
             $parts = explode('_', $request['path']);
+            $category_id = end($parts);
             if (count($parts) == 1) {
                 /**
                  * @var Category $category
@@ -130,7 +131,6 @@ class ControllerPagesProductCategory extends AController
                     ]);
                 }
             }
-            $category_id = array_pop($parts);
         } else {
             $category_id = 0;
         }
