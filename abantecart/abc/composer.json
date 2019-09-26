@@ -103,9 +103,9 @@
       "type": "package",
       "package": {
         "name": "components/font-awesome",
-        "version": "5.0.6",
+        "version": "5.0.x-dev",
         "dist": {
-          "url": "https://github.com/components/font-awesome/archive/master.zip",
+          "url": "https://github.com/components/font-awesome/archive/5.0.zip",
           "type": "zip"
         }
       }
@@ -236,7 +236,7 @@
     "components/jquery-cookie": "2.2.0",
     "components/popper": "1.4.13",
     "components/modernizr": "3.5.0",
-    "components/font-awesome": "5.0.6",
+    "components/font-awesome": "5.0.x-dev",
     "blueimp/jquery-file-upload": "9.21.0",
     "drmonty/animate.css": "3.5.2",
     "kartik-v/bootstrap-fileinput": "dev-master",
@@ -247,9 +247,10 @@
     "components/chart": "2.7.2",
     "tinymce/tinymce": "4.7.11",
     "tinymce/languages": "4.7.11",
-    "robmorgan/phinx": "*",
+    "robmorgan/phinx": "0.10.8",
     "twig/twig": "1.6.5",
     "wapmorgan/unified-archive": "~0.1.0",
+    "symfony/console": "4.3.3",
     "symfony/debug": "~3.2",
     "symfony/var-dumper": "~3.2",
     "maximebf/debugbar": "1.13.1",

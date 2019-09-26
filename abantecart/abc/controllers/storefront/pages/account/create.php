@@ -20,6 +20,7 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ACustomer;
@@ -54,6 +55,11 @@ class ControllerPagesAccountCreate extends AController
         $request_data['store_id'] = $this->config->get('config_store_id');
 
         if ($this->request->is_POST()) {
+            //if allow login as email, need to set loginname = email
+            if (!$this->config->get('prevent_email_as_login')) {
+                $request_data['loginname'] = $request_data['email'];
+            }
+
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors = array_merge(
                                     $this->errors,
@@ -63,10 +69,6 @@ class ControllerPagesAccountCreate extends AController
                 $this->errors['warning'] = $this->language->get('error_unknown');
             }
             if (!$this->errors) {
-                //if allow login as email, need to set loginname = email
-                if (!$this->config->get('prevent_email_as_login')) {
-                    $request_data['loginname'] = $request_data['email'];
-                }
 
                 $customer_data = $request_data;
 
@@ -89,17 +91,17 @@ class ControllerPagesAccountCreate extends AController
                     if (!$this->config->get('config_customer_email_activation')) {
                         $customer_info['activated'] = true;
                         //send welcome email
-                        H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+                        H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info, $request_data)]);
 
                         //login customer after create account is approving and email activation are disabled in settings
                         $this->customer->login($request_data['loginname'], $request_data['password']);
                     } else {
                         //send activation email request and wait for confirmation
-                        H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info)]);
+                        H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_info, $request_data)]);
                     }
                 } else {
                     //send welcome email, but need manual approval
-                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info)]);
+                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_info, $request_data)]);
                 }
 
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -404,7 +406,11 @@ class ControllerPagesAccountCreate extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $enc = new  AEncryption($this->config->get('encryption_key'));
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
+
         list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
         if ($customer_id && $activation_code) {
             $customer = Customer::find($customer_id);

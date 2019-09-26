@@ -323,6 +323,10 @@ class ModelAuditListener
             $mainModelId = $db->table('audit_models')->insertGetId(['name' => $main_auditable_model]);
         }
 
+        if ($mainModelId !== $auditableModelId && $event_name === 'created') {
+            $event_name = 'updating';
+        }
+
         $event = [
             'request_id'              => $request_id,
             'event_type_id'           => AuditEvent::EVENT_NAMES[$event_name],

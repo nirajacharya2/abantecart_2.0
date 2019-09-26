@@ -261,6 +261,7 @@ CREATE TABLE `ac_customers` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_customers_idx` ON `ac_customers` ( `store_id`, `address_id`, `customer_group_id` );
+CREATE INDEX `ac_customers_email_idx` ON `ac_customers` ( `email` );
 CREATE FULLTEXT INDEX `ac_customers_name_idx` ON `ac_customers` (`firstname`, `lastname`);
 
 --
@@ -8842,6 +8843,7 @@ CREATE TABLE `ac_categories` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
   `uuid` varchar(255) DEFAULT NULL,
   `parent_id` int(11),
+  `path` VARCHAR(255) NOT NULL DEFAULT '',
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -8849,10 +8851,11 @@ CREATE TABLE `ac_categories` (
   `date_deleted` timestamp NULL,
   `stage_id` INT(6) NULL,
   PRIMARY KEY (`category_id`),
-  KEY `uuid_uniq` (`uuid`),
+  KEY `uuid_unique` (`uuid`),
+  INDEX `ac_categories_idx` ( `category_id`, `parent_id`, `status`  ),
+  INDEX `ac_categories_trees_idx` ( `path` ),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
-CREATE INDEX `ac_categories_idx` ON `ac_categories` ( `category_id`, `parent_id`, `status`  );
 
 --
 -- DDL for table `category_descriptions`
@@ -8898,8 +8901,8 @@ CREATE TABLE `ac_coupons` (
   `total` decimal(15,4) NOT NULL,
   `date_start` date NULL,
   `date_end` date NULL,
-  `uses_total` int(11) NOT NULL,
-  `uses_customer` varchar(11) COLLATE utf8_general_ci NOT NULL,
+  `uses_total` int(11) NOT NULL DEFAULT 0,
+  `uses_customer` int(11) NOT NULL DEFAULT 0,
   `status` int(1) NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -9224,12 +9227,13 @@ CREATE TABLE `ac_manufacturers_to_stores` (
 -- DDL for table `order_status_description`
 --
 CREATE TABLE `ac_order_statuses` (
-  `order_status_id` int(11) NOT NULL AUTO_INCREMENT,
-  `status_text_id` varchar(64) NOT NULL,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
+  `order_status_id` int(11)     NOT NULL AUTO_INCREMENT,
+  `status_text_id`  varchar(64) NOT NULL,
+  `display_status`  int(1)      NOT NULL DEFAULT '1',
+  `date_added`      timestamp   NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`   timestamp   NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`    timestamp   NULL,
+  `stage_id`        INT(6)      NULL,
   PRIMARY KEY (`order_status_id`,`status_text_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -9294,61 +9298,62 @@ INSERT INTO `ac_order_status_descriptions` (`order_status_id`, `language_id`, `n
 -- NOTE: If update table keep in mind ac_orders_enc
 --
 CREATE TABLE `ac_orders` (
-  `order_id` int(11) NOT NULL AUTO_INCREMENT,
-  `invoice_id` int(11) NOT NULL DEFAULT '0',
-  `invoice_prefix` varchar(10) COLLATE utf8_general_ci NOT NULL,
-  `store_id` int(11) NOT NULL DEFAULT '0',
-  `store_name` varchar(64) COLLATE utf8_general_ci NOT NULL,
-  `store_url` varchar(255) COLLATE utf8_general_ci NOT NULL,
+  `order_id`                int(11)       NOT NULL AUTO_INCREMENT,
+  `invoice_id`              int(11)       NOT NULL DEFAULT '0',
+  `invoice_prefix`          varchar(10)   NOT NULL,
+  `store_id`                int(11)       NOT NULL DEFAULT '0',
+  `store_name`              varchar(64)   NOT NULL,
+  `store_url`               varchar(255)  NOT NULL,
   -- ????? Need to update code to read NULL for guests.
-  `customer_id` int(11) DEFAULT NULL,
-  `customer_group_id` int(11) NOT NULL DEFAULT '0',
-  `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `lastname` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `telephone` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `fax` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `email` varchar(96) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `shipping_firstname` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `shipping_lastname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `shipping_company` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `shipping_address_1` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `shipping_address_2` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `shipping_city` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `shipping_postcode` varchar(10) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `shipping_zone` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `shipping_zone_id` int(11) NOT NULL,
-  `shipping_country` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `shipping_country_id` int(11) NOT NULL,
-  `shipping_address_format` text COLLATE utf8_general_ci NOT NULL,
-  `shipping_method` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `shipping_method_key` varchar(128) NOT NULL DEFAULT '',
-  `payment_firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `payment_lastname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `payment_company` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `payment_address_1` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `payment_address_2` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `payment_city` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `payment_postcode` varchar(10) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `payment_zone` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `payment_zone_id` int(11) NOT NULL,
-  `payment_country` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `payment_country_id` int(11) NOT NULL,
-  `payment_address_format` text COLLATE utf8_general_ci NOT NULL,
-  `payment_method` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `payment_method_key` varchar(128) NOT NULL DEFAULT '',
-  `comment` text COLLATE utf8_general_ci NOT NULL,
-  `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `order_status_id` int(11) NOT NULL DEFAULT '0',
-  `language_id` int(11) NOT NULL DEFAULT '0',
-  `currency_id` int(11) NOT NULL,
-  `currency` varchar(3) COLLATE utf8_general_ci NOT NULL,
-  `value` decimal(15,8) NOT NULL,
-  `coupon_id` int(11) NULL,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `ip` varchar(50) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `payment_method_data` text COLLATE utf8_general_ci NOT NULL,
+  `customer_id`             int(11)                DEFAULT NULL,
+  `customer_group_id`       int(11)       NOT NULL DEFAULT '0',
+  `firstname`               varchar(32)   NOT NULL DEFAULT '',
+  `lastname`                varchar(32)   NOT NULL,
+  `telephone`               varchar(32)   NOT NULL DEFAULT '',
+  `fax`                     varchar(32)   NOT NULL DEFAULT '',
+  `email`                   varchar(96)   NOT NULL DEFAULT '',
+  `shipping_firstname`      varchar(32)   NOT NULL,
+  `shipping_lastname`       varchar(32)   NOT NULL DEFAULT '',
+  `shipping_company`        varchar(32)   NOT NULL,
+  `shipping_address_1`      varchar(128)  NOT NULL,
+  `shipping_address_2`      varchar(128)  NOT NULL,
+  `shipping_city`           varchar(128)  NOT NULL,
+  `shipping_postcode`       varchar(10)   NOT NULL DEFAULT '',
+  `shipping_zone`           varchar(128)  NOT NULL,
+  `shipping_zone_id`        int(11)                DEFAULT NULL,
+  `shipping_country`        varchar(128)  NOT NULL,
+  `shipping_country_id`     int(11)       NOT NULL,
+  `shipping_address_format` text          NOT NULL,
+  `shipping_method`         varchar(128)  NOT NULL DEFAULT '',
+  `shipping_method_key`     varchar(128)  NOT NULL DEFAULT '',
+  `payment_firstname`       varchar(32)   NOT NULL DEFAULT '',
+  `payment_lastname`        varchar(32)   NOT NULL DEFAULT '',
+  `payment_company`         varchar(32)   NOT NULL,
+  `payment_address_1`       varchar(128)  NOT NULL,
+  `payment_address_2`       varchar(128)  NOT NULL,
+  `payment_city`            varchar(128)  NOT NULL,
+  `payment_postcode`        varchar(10)   NOT NULL DEFAULT '',
+  `payment_zone`            varchar(128)  NOT NULL,
+  `payment_zone_id`         int(11)                DEFAULT NULL,
+  `payment_country`         varchar(128)  NOT NULL,
+  `payment_country_id`      int(11)       NOT NULL,
+  `payment_address_format`  text          NOT NULL,
+  `payment_method`          varchar(128)  NOT NULL DEFAULT '',
+  `payment_method_key`      varchar(128)  NOT NULL DEFAULT '',
+  `comment`                 text          NOT NULL,
+  `total`                   decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `order_status_id`         int(11)       NOT NULL DEFAULT '0',
+  `language_id`             int(11)       NOT NULL,
+  `currency_id`             int(11)       NOT NULL,
+  `currency`                varchar(3)    NOT NULL,
+  `value`                   decimal(15,8) NOT NULL,
+  `coupon_id`               int(11)       NULL,
+  `ip`                      varchar(50)   NOT NULL DEFAULT '',
+  `payment_method_data`     text          NOT NULL DEFAULT '',
+  `date_added`              timestamp     NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`           timestamp     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`            timestamp     NULL,
+
   PRIMARY KEY (`order_id`, `order_status_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9415,15 +9420,16 @@ INSERT INTO `ac_tax_classes` (`tax_class_id`, `date_added`) VALUES (1, now());
 --
 
 CREATE TABLE `ac_tax_class_descriptions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tax_class_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `title` varchar(128) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `description` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
+  `id`            int(11)                              NOT NULL AUTO_INCREMENT,
+  `tax_class_id`  int(11)                              NOT NULL,
+  `language_id`   int(11)                              NOT NULL,
+  `title`         varchar(128)                         NOT NULL
+  COMMENT 'translatable',
+  `description`   varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'translatable',
+  `date_added`    timestamp                            NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp                            NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`  timestamp                            NULL,
+  `stage_id`      INT(6)                               NULL,
   PRIMARY KEY (`id`,`tax_class_id`,`language_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -9583,7 +9589,7 @@ CREATE TABLE `ac_products` (
   `quantity` int(4) NOT NULL DEFAULT '0',
   `stock_checkout` CHAR(1) NULL DEFAULT '',
   `stock_status_id` int(11) NOT NULL,
-  `manufacturer_id` int(11) NULL,
+  `manufacturer_id` int(11) NOT NULL,
   `shipping` int(1) NOT NULL DEFAULT '1',
   `ship_individually` int(1) NOT NULL DEFAULT '0',
   `free_shipping` int(1) NOT NULL DEFAULT '0',
@@ -9626,17 +9632,19 @@ CREATE TABLE `ac_order_products` (
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '',
-  `model` varchar(24) NOT NULL DEFAULT '',
+  `model` varchar(64) NOT NULL DEFAULT '',
   `sku` varchar(64) DEFAULT NULL,
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `total` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `tax` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `quantity` int(4) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '0',
+  `order_status_id` INT NOT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
-  PRIMARY KEY (`order_product_id`)
+  PRIMARY KEY (`order_product_id`),
+  INDEX `ac_order_products_ibfk_2_idx1` (`order_status_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_order_products_idx` ON `ac_order_products` (`order_id`,  `product_id`);
@@ -9651,7 +9659,7 @@ CREATE TABLE `ac_order_downloads` (
   `name` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
+  `download_id` int(11) NULL,
   `status` int(1) NOT NULL DEFAULT '0',
   `remaining_count` int(11) DEFAULT NULL,
   `percentage` int(11) DEFAULT '0',
@@ -9679,7 +9687,7 @@ CREATE TABLE `ac_order_downloads_history` (
   `order_product_id` int(11) NOT NULL,
   `filename` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `mask` varchar(128) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `download_id` int(11) NOT NULL,
+  `download_id` int(11) NULL,
   `download_percent` int(11) DEFAULT '0',
   `date_added` timestamp NULL default CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
@@ -9744,19 +9752,21 @@ ON `ac_order_history` (`order_id`, `order_status_id`, `notify`);
 --
 
 CREATE TABLE `ac_order_options` (
-  `order_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `order_product_id` int(11) NOT NULL,
-  `product_option_value_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL,
-  `sku` varchar(64) DEFAULT NULL,
-  `value` text NOT NULL,
-  `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `prefix` char(1) NOT NULL DEFAULT '',
-  `settings` longtext,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_option_id`         int(11)       NOT NULL AUTO_INCREMENT,
+  `order_id`                int(11)       NOT NULL,
+  `order_product_id`        int(11)       NOT NULL,
+  `product_option_id`       int(11)       NOT NULL DEFAULT '0',
+  `product_option_name`     varchar(255)  NOT NULL,
+  `product_option_value_id` int(11)       NOT NULL DEFAULT '0',
+  `name`                    varchar(255)  NOT NULL,
+  `sku`                     varchar(64)            DEFAULT NULL,
+  `value`                   text          NOT NULL,
+  `price`                   decimal(15,4) NOT NULL DEFAULT '0.0000',
+  `prefix`                  char(1)       NOT NULL DEFAULT '',
+  `settings`                longtext,
+  `date_added`              timestamp     NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`           timestamp     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`            timestamp     NULL,
   PRIMARY KEY (`order_option_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
@@ -9769,17 +9779,18 @@ ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`
 --
 
 CREATE TABLE `ac_order_totals` (
-  `order_total_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `text` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `sort_order` int(3) NOT NULL,
-  `type` varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `key` varchar(128) NOT NULL DEFAULT '',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
+  `order_total_id` INT(11)                              NOT NULL AUTO_INCREMENT,
+  `order_id`       int(11)                              NOT NULL,
+  `title`          varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `text`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `value`          decimal(15,4)                        NOT NULL DEFAULT '0.0000',
+  `data`           LONGTEXT                             NULL,
+  `sort_order`     int(3)                               NOT NULL,
+  `type`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `key`            varchar(128)                         NOT NULL DEFAULT '',
+  `date_added`     timestamp                            NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified`  timestamp                            NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`   timestamp                            NULL,
   PRIMARY KEY (`order_total_id`,`order_id`),
   KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
@@ -12730,7 +12741,7 @@ VALUES
   ( 229,1,'Icon Data', '', '', '', '<i class="fa fa-cubes"></i>&nbsp;', NOW() ),
   ( 230,1,'Icon Updater', '', '', '', '<i class="fa fa-sync"></i>&nbsp;', NOW() ),
   ( 231,1,'Icon Cache', '', '', '', '<i class="fa fa-recycle"></i>&nbsp;', NOW() ),
-  ( 232,1,'Icon Messages', '', '', '', '<i class="fa fa-weixin"></i>&nbsp;', NOW() ),
+  (232, 1, 'Icon Messages', '', '', '', '<i class="fa fa-comments"></i>&nbsp;', NOW()),
   ( 233,1,'Icon Logs', '', '', '', '<i class="fa fa-file"></i>&nbsp;', NOW() ),
   ( 234,1,'Icon Report sale', '', '', '', '<i class="fa fa-signal"></i>&nbsp;', NOW() ),
   ( 235,1,'Icon Viewed', '', '', '', '<i class="fa fa-sort-amount-down"></i>&nbsp;', NOW() ),
@@ -13182,16 +13193,18 @@ ALTER TABLE `ac_order_downloads`
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_download_id`) REFERENCES `ac_order_downloads`(`order_download_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
-  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`download_id`) REFERENCES `ac_downloads`(`download_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_downloads_history`
   ADD FOREIGN KEY (`order_product_id`) REFERENCES `ac_order_products`(`order_product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`);
+  ADD FOREIGN KEY (`order_id`) REFERENCES `ac_orders`(`order_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_data`
-  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`);
+  ADD FOREIGN KEY (`type_id`) REFERENCES `ac_order_data_types`(`type_id`)
+  ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `ac_order_data_types`
   ADD FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages`(`language_id`)
@@ -13200,7 +13213,8 @@ ALTER TABLE `ac_order_data_types`
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`order_status_id`)
   REFERENCES `ac_order_statuses`(`order_status_id`)
-   ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_status_descriptions`
   ADD FOREIGN KEY (`language_id`)
@@ -13771,7 +13785,7 @@ ALTER TABLE `ac_order_downloads`
 ADD CONSTRAINT `ac_order_downloads_ibfk_3`
   FOREIGN KEY (`download_id`)
   REFERENCES `ac_downloads` (`download_id`)
-  ON DELETE NO ACTION
+  ON DELETE SET NULL
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_history`
@@ -13875,13 +13889,9 @@ ADD CONSTRAINT `ac_customers_ibfk_3`
   ON DELETE SET NULL
   ON UPDATE CASCADE;
 
-ALTER TABLE `ac_products`
-  ADD INDEX `ac_products_fk_idx_1` (`manufacturer_id` ASC);
-
-ALTER TABLE `ac_products`
-ADD CONSTRAINT `ac_products_ibfk_1`
-  FOREIGN KEY (`manufacturer_id`)
-  REFERENCES `ac_manufacturers` (`manufacturer_id`)
-  ON DELETE SET NULL
+ALTER TABLE `ac_order_products`
+ADD CONSTRAINT `ac_order_products_ibfk_2`
+  FOREIGN KEY (`order_status_id`)
+  REFERENCES `ac_order_statuses` (`order_status_id`)
+  ON DELETE NO ACTION
   ON UPDATE CASCADE;
-

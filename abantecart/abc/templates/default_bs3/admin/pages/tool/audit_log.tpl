@@ -11,7 +11,7 @@
 <?php if($modal_mode) { ?>
 <div class="panel-heading">
 	<div class="panel-btns">
-		<a class="panel-close" onclick="$('#viewport_modal').modal('hide');" >×</a>
+		<a class="panel-close" onclick="$('#viewport_modal').modal('hide');">×</a>
 	</div>
 	<h4 class="panel-title">Audit Log</h4>
 </div>
@@ -22,58 +22,71 @@
 		<v-app>
 			<v-content>
 				<template>
+					<v-dialog
+							v-model="loading"
+							hide-overlay
+							persistent
+							width="300"
+							attach="body"
+					>
+						<v-card
+								color="primary"
+								dark
+						>
+							<v-card-text>
+								Please stand by
+								<v-progress-linear
+										indeterminate
+										color="white"
+										class="mb-0"
+								></v-progress-linear>
+							</v-card-text>
+						</v-card>
+					</v-dialog>
 					<v-container>
 						<v-layout row wrap align-center>
 							<v-flex xs12 sm3>
-								<v-container fluid>
-									<v-dialog
+								<v-container fluid style="position: relative;">
+									<v-menu
 											ref="dialog"
 											v-model="modal"
-											:return-value.sync="date_from"
-											persistent
-											lazy
-											full-width
-											width="290px"
+											:close-on-content-click="false"
+											attach
 									>
-										<v-text-field
-												slot="activator"
-												v-model="date_from"
-												:allowed-dates="allowedDate()"
-												label="Date from"
-												readonly
-										></v-text-field>
-										<v-date-picker v-model="date_from" scrollable>
-											<v-spacer></v-spacer>
-											<v-btn flat color="primary" @click="modal = false">Cancel</v-btn>
-											<v-btn flat color="primary" @click="$refs.dialog.save(date_from)">OK</v-btn>
-										</v-date-picker>
-									</v-dialog>
+										<template v-slot:activator="{ on }">
+											<v-text-field
+													v-model="date_from"
+													label="Date From"
+													persistent-hint
+													readonly
+													prepend-icon="event"
+													v-on="on"
+											></v-text-field>
+										</template>
+										<v-date-picker v-model="date_from" no-title @input="modal = false"></v-date-picker>
+									</v-menu>
 								</v-container>
 							</v-flex>
 							<v-flex xs12 sm3>
-								<v-container fluid>
-									<v-dialog
+								<v-container fluid style="position: relative;">
+									<v-menu
 											ref="dialog2"
 											v-model="modal2"
-											:return-value.sync="date_to"
-											persistent
-											lazy
-											full-width
-											width="290px"
+											:close-on-content-click="false"
+											attach
 									>
-										<v-text-field
-												slot="activator"
-												v-model="date_to"
-												:allowed-dates="allowedDate()"
-												label="Date to"
-												readonly
-										></v-text-field>
-										<v-date-picker v-model="date_to" scrollable>
-											<v-spacer></v-spacer>
-											<v-btn flat color="primary" @click="modal2 = false">Cancel</v-btn>
-											<v-btn flat color="primary" @click="$refs.dialog2.save(date_to)">OK</v-btn>
-										</v-date-picker>
-									</v-dialog>
+										<template v-slot:activator="{ on }">
+											<v-text-field
+													v-model="date_to"
+													label="Date To"
+													persistent-hint
+													readonly
+													prepend-icon="event"
+													v-on="on"
+											></v-text-field>
+										</template>
+										<v-date-picker v-model="date_to" no-title @input="modal2 = false"></v-date-picker>
+									</v-menu>
 								</v-container>
 							</v-flex>
 							<v-flex xs12 sm3>
@@ -150,7 +163,7 @@
 								<div id="id_selected_fields"></div>
 							</v-flex>
 							<v-flex xs12 sm3 style="text-align: center;">
-								<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled" >Add</v-btn>
+								<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled">Add</v-btn>
 							</v-flex>
 							<v-flex xs12 sm12>
 								<v-chip light close small
@@ -161,7 +174,7 @@
 								        @input="removeChip(item)"
 								>
 									{{item.auditable_type}}
-									<span v-if="item.auditable_id" > ({{item.auditable_id}}) </span>
+									<span v-if="item.auditable_id"> ({{item.auditable_id}}) </span>
 									= {{item.field_name}}
 								</v-chip>
 							</v-flex>
@@ -171,98 +184,107 @@
 								<v-btn small color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
 							</v-flex>
 							<v-flex xs12 sm6 style="text-align: center;">
-								<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled" >Clear Filter</v-btn>
+								<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled">Clear Filter</v-btn>
 							</v-flex>
 						</v-layout>
 					</v-container>
 					<v-container>
-						<v-data-table
-								:headers="table_headers"
-								:items="table_items"
-								:rows-per-page-items="table_rows_per_page_items"
-								ref="dTable"
-								:pagination.sync="pagination"
-								:total-items="table_total"
-								:loading="loading"
-								no-data-text="No data, please change filter props."
-								class="elevation-1"
-								expand
-								attach
-						>
-							<template slot="headers" slot-scope="props">
-								<tr>
-									<th
-											v-for="header in props.headers"
-											:key="header.text"
-											:class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-											@click="changeSort(header.value)"
-									>
-										{{ header.text }}
-										<span v-if="pagination.descending && header.value === pagination.sortBy">
+						<div style="position: relative;">
+							<v-data-table
+									:headers="table_headers"
+									:items="table_items"
+									:rows-per-page-items="table_rows_per_page_items"
+									ref="dTable"
+									:pagination.sync="pagination"
+									:total-items="table_total"
+									no-data-text="No data, please change filter props."
+									class="elevation-1"
+									expand
+									attach
+									hide-actions
+							>
+								<template slot="headers" slot-scope="props">
+									<tr>
+										<th
+												v-for="header in props.headers"
+												:key="header.text"
+												:class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+												@click="changeSort(header.value)"
+										>
+											{{ header.text }}
+											<span v-if="pagination.descending && header.value === pagination.sortBy">
 										<i class="material-icons mi-12">arrow_downward</i>
 									</span>
-										<span v-if="!pagination.descending && header.value === pagination.sortBy">
+											<span v-if="!pagination.descending && header.value === pagination.sortBy">
 										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
-									</th>
-									<th class="column" v-if="!expandedAll" @click="expandAll()">
-										Expand all
-										<v-icon small>unfold_more</v-icon>
-									</th>
-									<th class="column" v-if="expandedAll" @click="unExpandAll()">
-										Expand all
-										<v-icon small>unfold_less</v-icon>
-									</th>
-								</tr>
-							</template>
-							<template slot="items" slot-scope="props">
-								<tr @click="expandFunction(props)" style="background-color: #E5E5E5">
-									<td v-for="table_header in table_headers">
-										{{ props.item[table_header.value] }}
-									</td>
-									<td>
-										<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="!props.expanded">expand_more</i>
-										<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="props.expanded">expand_less</i>
-									</td>
-								</tr>
-							</template>
-							<template slot="expand" slot-scope="props">
-								<v-card flat>
-									<v-card-text>
-
-										<!--	<v-flex row>
-										<v-flex xs12 sm6>
-											<p><strong>Event:</strong>  {{props.item.event}} </p>
-											<p><strong>Data object:</strong>  {{props.item.auditable_type}} </p>
-											<p><strong>Data object ID:</strong>  {{props.item.auditable_id}} </p>
-										</v-flex>
-										<v-flex xs12 sm6>
-											<p><strong>User:</strong>  {{props.item.user_name}} </p>
-											<p><strong>Alias:</strong>  {{props.item.alias_name}} </p>
-											<p><strong>Date modify:</strong>  {{props.item.date_added}} </p>
-										</v-flex>
-									</v-flex> -->
-
-										<v-data-table
-												:headers="expand_headers"
-												:items="expand_items[props.index]"
-												:pagination.sync="expand_pagination[props.index]"
-												:total-items="expand_table_total[props.index]"
-												:pagination.sync="{ rowsPerPage: -1 }"
-												hide-actions
-										>
-											<template slot="items" slot-scope="expand_props">
-												<tr>
-													<td v-for="expand_header in expand_headers">
-														{{ expand_props.item[expand_header.value] }}
-													</td>
-												</tr>
-											</template>
-										</v-data-table>
-									</v-card-text>
-								</v-card>
-							</template>
-						</v-data-table>
+										</th>
+										<th class="column" v-if="!expandedAll" @click="expandAll()">
+											Expand all
+											<v-icon small>unfold_more</v-icon>
+										</th>
+										<th class="column" v-if="expandedAll" @click="unExpandAll()">
+											Expand all
+											<v-icon small>unfold_less</v-icon>
+										</th>
+									</tr>
+								</template>
+								<template slot="items" slot-scope="props">
+									<tr @click="expandFunction(props)" style="background-color: #E5E5E5">
+										<td v-for="table_header in table_headers">
+											{{ props.item[table_header.value] }}
+										</td>
+										<td>
+											<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="!props.expanded">expand_more</i>
+											<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="props.expanded">expand_less</i>
+										</td>
+									</tr>
+								</template>
+								<template slot="expand" slot-scope="props">
+									<v-card flat>
+										<v-card-text>
+											<v-data-table
+													:headers="expand_headers"
+													:items="expand_items[props.index]"
+													:pagination.sync="expand_pagination[props.index]"
+													:total-items="expand_table_total[props.index]"
+													:pagination.sync="{ rowsPerPage: -1 }"
+													hide-actions
+											>
+												<template slot="items" slot-scope="expand_props">
+													<tr>
+														<td v-for="expand_header in expand_headers">
+															<span v-html="expand_props.item[expand_header.value]"></span>
+														</td>
+													</tr>
+												</template>
+											</v-data-table>
+										</v-card-text>
+									</v-card>
+								</template>
+							</v-data-table>
+							<v-layout row justify-center align-end>
+								<v-flex xs6 md6 justify-center>
+									<v-pagination v-model="pagination.page"
+									              total-visible="7"
+									              @input="applyFilter"
+									              v-if="Math.ceil(table_total/pagination.rowsPerPage) > 1"
+									              :length="Math.ceil(table_total/pagination.rowsPerPage)"
+									></v-pagination>
+								</v-flex>
+								<v-flex xs3 offset-xs6 offset-md4 md1 justify-end>
+									<v-select
+											:items="rowsPerPage"
+											v-model="pagination.rowsPerPage"
+											@input="applyFilter"
+											label="Rows"
+											dense
+											hide-details
+											attach
+									></v-select>
+								</v-flex>
+							</v-layout>
+						</div>
 					</v-container>
 				</template>
 			</v-content>
@@ -277,12 +299,17 @@
 
 
 <script>
-	var data_objects =  <?php echo $data_objects; ?>;
+	var data_objects = <?php echo $data_objects; ?>;
 	var auditable_type = '<?php echo $auditable_type; ?>';
 	var auditable_id = '<?php echo $auditable_id; ?>';
 
-	var vm = new Vue({ el: '#app',
+	var curDate = new Date();
+	curDate = curDate.toISOString().substr(0, 10);
+
+	var vm = new Vue({
+		el: '#app',
 		data: {
+			rowsPerPage: [10, 20, 30, 40, 50],
 			arFilter: [],
 			isConcreteObject: false,
 			objectsInArFilter: [],
@@ -293,7 +320,8 @@
 			const_data_objects: data_objects.classes,
 			selected_data_object: '',
 			selected_fields: [],
-			date_from: '',
+			date_from: curDate,
+			date_from1: '',
 			date_to: '',
 			modal: '',
 			modal2: '',
@@ -308,8 +336,8 @@
 				sortBy: 'date_added'
 			},
 			events: [],
-			event_items: ['Created', 'Updated', 'Deleted', 'Restored'],
-			table_rows_per_page_items: [10,20,30,40,50,60,70,80,90,100],
+			event_items: ['Created', 'Updating', 'Deleted', 'Restored'],
+			table_rows_per_page_items: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 			table_headers: [
 				{
 					text: 'User Name',
@@ -321,21 +349,21 @@
 					align: 'left',
 					value: 'alias_name'
 				},
-				{ text: 'Data Object', value: 'main_auditable_model' },
-				{ text: 'Data Object ID', value: 'main_auditable_id' },
-				{ text: 'Event', value: 'event' },
-				{ text: 'Date Change', value: 'date_added' },
+				{text: 'Data Object', value: 'main_auditable_model'},
+				{text: 'Data Object ID', value: 'main_auditable_id'},
+				{text: 'Event', value: 'event'},
+				{text: 'Date Change', value: 'date_added'},
 			],
 			expand_items: [],
 			expand_headers: [
-				{ text: 'Model', value: 'auditable_model', sortable: false, },
-				{ text: 'Field', value: 'field_name', sortable: false, },
-				{ text: 'Old Value', value: 'old_value', sortable: false, },
-				{ text: 'New Value', value: 'new_value', sortable: false, },
+				{text: 'Model', value: 'auditable_model', sortable: false,},
+				{text: 'Field', value: 'field_name', sortable: false,},
+				{text: 'Old Value', value: 'old_value', sortable: false,},
+				{text: 'New Value', value: 'new_value', sortable: false,},
 			],
 			expand_pagination: [],
 			expand_table_total: [],
-			data_object_id:'',
+			data_object_id: '',
 			isDataObjectIdDisabled: true,
 			isDataObjectDisabled: false,
 			expandedAll: false,
@@ -356,9 +384,9 @@
 				return true;
 			},
 			isAddDisabled: function () {
-				if ( this.selected_data_object.length > 0
+				if (this.selected_data_object.length > 0
 					|| this.data_object_id.length > 0
-					|| this.selected_fields.length > 0 ) {
+					|| this.selected_fields.length > 0) {
 					return false;
 				}
 				return true;
@@ -369,9 +397,6 @@
 			this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
 		},
 		watch: {
-			//	arFilter: function (newVal, oldVal) {
-			//		this.getDataFromApi();
-			//	},
 			selected_data_object: function (newVal, oldVal) {
 				this.clearSelectedDisabled = true;
 				if (newVal.length > 0) {
@@ -381,21 +406,8 @@
 			pagination: function () {
 				this.getDataFromApi();
 			},
-			//	date_from: function () {
-			//		this.getDataFromApi();
-			//	},
-			//	date_to: function () {
-			//		this.getDataFromApi();
-			//	},
-			//	user_name: function () {
-			//		this.debouncedGetDataFromApi();
-			//	},
-			//	events: function () {
-			//		this.debouncedGetDataFromApi();
-			//	},
 		},
-		mounted () {
-			//	this.getDataFromApi();
+		mounted() {
 			if (auditable_type != '' && auditable_id != '') {
 				this.isConcreteObject = true;
 				this.selected_data_object = auditable_type;
@@ -408,25 +420,22 @@
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
 				};
-				//if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
-				//	filterItem['attribute_name'] = data_objects[this.selected_data_object].table_columns;
-				//}
 				this.arFilter.push(filterItem);
 			}
 			this.debouncedGetDataFromApi();
 		},
 		methods: {
-			applyFilter: function() {
+			applyFilter: function () {
 				this.debouncedGetDataFromApi();
 			},
 			dataObjectChange: function () {
-				if (typeof data_objects[this.selected_data_object] !== 'undefined' ) {
+				if (typeof data_objects[this.selected_data_object] !== 'undefined') {
 					this.available_fields = data_objects[this.selected_data_object].table_columns;
 				}
 				this.isSelectedFieldsDisabled = false;
 				this.isDataObjectIdDisabled = false;
 			},
-			selectedFieldsChange: function() {
+			selectedFieldsChange: function () {
 				/*if (this.selected_fields.length > 0) {
 					this.isAddDisabled = false;
 				} else {
@@ -455,7 +464,7 @@
 			clearFilter: function () {
 				if (!this.isConcreteObject) {
 					this.arFilter = [];
-					for (i=0; i<this.objectsInArFilter.length; i++) {
+					for (i = 0; i < this.objectsInArFilter.length; i++) {
 						var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
 						if (index == -1) {
 							this.data_objects.push(this.objectsInArFilter[i]);
@@ -468,7 +477,7 @@
 				this.user_name = '';
 				this.debouncedGetDataFromApi();
 			},
-			removeAddedFromSelect: function(item){
+			removeAddedFromSelect: function (item) {
 				var index = this.data_objects.indexOf(item);
 				if (index > -1) {
 					this.data_objects.splice(index, 1);
@@ -481,16 +490,12 @@
 				return true;
 			},
 			selectChip: function (item) {
-				//this.data_objects.push(item.auditable_type);
-				//this.selected_data_object = item.auditable_type;
-				//this.data_object_id = item.auditable_id;
-				//this.selected_fields = item.attribute_name;
 			},
 			removeChip: function (item) {
 				var index = -1;
-				for (i=0;i<this.arFilter.length;i++) {
+				for (i = 0; i < this.arFilter.length; i++) {
 					if (this.arFilter[i].auditable_type == item.auditable_type) {
-						index=i;
+						index = i;
 					}
 				}
 				if (index > -1) {
@@ -501,15 +506,16 @@
 			applyFilter: function () {
 				this.getDataFromApi();
 			},
-			getDataFromApi () {
+			getDataFromApi() {
 				this.loading = true;
-				var param =  this.pagination;
+				var param = this.pagination;
 				param.filter = this.arFilter;
 				param.date_from = this.date_from;
 				param.date_to = this.date_to;
 				param.user_name = this.user_name;
 				param.events = this.events;
-				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
+				this.unExpandAll();
+				var promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.table_items = response.data.items;
 						vm.table_total = response.data.total;
@@ -517,10 +523,10 @@
 					})
 					.catch(function (error) {
 						vm.loading = false;
-						alert('Ошибка! Не могу связаться с API. ' + error);
+						alert('No connection to API. ' + error);
 					});
 			},
-			expandFunction: function(props){
+			expandFunction: function (props) {
 				if (!props.expanded) {
 					this.getExpandDataFromApi(props);
 				} else {
@@ -536,19 +542,19 @@
 				};
 				var param = {
 					filter: filter,
-					getDetail:  true,
+					getDetail: true,
 				}
-				var promise =  axios.get('<?php echo $ajax_url; ?>', {params: param })
+				var promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.expand_items[props.index] = response.data.items;
 						vm.expand_table_total[props.index] = response.data.total;
 						props.expanded = true;
-						vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
+						vm.$set(vm.$refs.dTable.expanded, props.index, true);
 						vm.loading = false;
 					})
 					.catch(function (error) {
 						vm.loading = false;
-						alert('Ошибка! Не могу связаться с API. ' + error);
+						alert('No connection to API. ' + error);
 					});
 			},
 			expandAll: function () {

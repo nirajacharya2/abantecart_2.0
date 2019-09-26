@@ -19,36 +19,31 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\order\Order;
 use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerApiOrderDetails extends AControllerAPI
 {
-    /**
-     * @return null
-     */
+
     public function get()
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('sale/order');
-        $this->loadModel('sale/order');
 
         $request = $this->rest->getRequestParams();
 
         if (!H::has_value($request['order_id'])) {
-            $this->rest->setResponseData(array('Error' => 'Order ID is missing'));
+            $this->rest->setResponseData(['Error' => 'Order ID is missing']);
             $this->rest->sendResponse(200);
             return null;
         }
 
-        $order_details =  $this->model_sale_order->getOrder($request['order_id']);
+        $order_details = Order::getOrderArray($request['order_id'], 'any');
         if (!count($order_details)) {
-            $this->rest->setResponseData(array('Error' => 'Incorrect order ID or missing order data'));
+            $this->rest->setResponseData(['Error' => 'Incorrect order ID or missing order data']);
             $this->rest->sendResponse(200);
             return null;
         }

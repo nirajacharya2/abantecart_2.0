@@ -321,7 +321,7 @@ class ControllerPagesUserUser extends AController
                 'name'     => $f,
                 'value'    => $this->data[$f],
                 'required' => true,
-                'attr'     => (in_array($f, ['password', 'password_confirm']) ? 'class="no-save"' : ''),
+                'attr'     => (in_array($f, ['password', 'password_confirmation']) ? 'class="no-save"' : ''),
                 'style'    => ($f == 'password' ? 'medium-field' : ''),
             ]);
         }
@@ -484,7 +484,7 @@ class ControllerPagesUserUser extends AController
                 $this->error['password'] = $this->language->get('error_password');
             }
 
-            if ($this->request->post['password'] != $this->request->post['password_confirm']) {
+            if ($this->request->post['password'] != $this->request->post['password_confirmation']) {
                 $this->error['password'] = $this->language->get('error_confirm');
             }
         }

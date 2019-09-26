@@ -49,11 +49,11 @@
 				   data-original-title="<?php echo $button_orders_count->title; ?>"><?php echo $button_orders_count->text; ?>
 				</a>
 				<a target="_blank"
-				   class="btn btn-white tooltips"
-				   href="<?php echo $message->href; ?>"
-				   data-toggle="tooltip"
-				   title="<?php echo $message->text; ?>"
-				   data-original-title="<?php echo $message->text; ?>"><i class="fa fa-paper-plane-o "></i>
+                   class="btn btn-white tooltips"
+                   href="<?php echo $message->href; ?>"
+                   data-toggle="tooltip"
+                   title="<?php echo $message->text; ?>"
+                   data-original-title="<?php echo $message->text; ?>"><i class="fa fa-paper-plane"></i>
 				</a>
 				<a target="_blank"
 				   class="btn btn-white tooltips"
@@ -106,7 +106,7 @@
 				<?php if($name == 'email') { ?>
 				<span class="input-group-btn">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
-					<i class="fa fa-envelope-o fa-fw"></i>
+					<i class="fa fa-envelope fa-fw"></i>
 					</a>
 				</span>
 				<?php } ?>

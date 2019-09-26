@@ -21,6 +21,8 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use abc\core\lib\AException;
+use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasManyEvents;
@@ -36,6 +38,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\DatabasePresenceVerifier;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
@@ -46,7 +49,7 @@ use ReflectionMethod;
  *
  * @package abc\models
  * @method static Builder|BaseModel find(integer|array $id, array $columns = ['*']) Builder
- * @method static Builder where(string|array $column, string $operator, mixed $value = null, string $boolean = 'and') Builder
+ * @method static Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') Builder
  * @method static Builder select(mixed $select) Builder
  * @const  string DELETED_AT
  */
@@ -86,6 +89,11 @@ class BaseModel extends OrmModel
      * @var Registry
      */
     protected $registry;
+
+    /**
+     * @var int
+     */
+    protected static $current_language_id;
 
     /**
      * @var \abc\core\lib\AConfig
@@ -130,6 +138,24 @@ class BaseModel extends OrmModel
      * @var array Data Validation rules
      */
     protected $rules = [];
+
+    /**
+     *
+     * @var array Data Validation rules for admin side
+     */
+    protected $rulesUser = [];
+
+    /**
+     *
+     * @var array Data Validation rules for storefront side
+     */
+    protected $rulesCustomer = [];
+
+    /**
+     *
+     * @var array Data Validation rules for CLI side
+     */
+    protected $rulesCli = [];
 
     /**
      * Auditing setup
@@ -189,6 +215,12 @@ class BaseModel extends OrmModel
     {
         $this->actor = H::recognizeUser();
         $this->registry = Registry::getInstance();
+        //set current language for getting single description from relation
+        if (!static::$current_language_id) {
+            static::$current_language_id = ABC::env('IS_ADMIN')
+                                            ? $this->registry->get('language')->getContentLanguageID()
+                                            : $this->registry->get('language')->getLanguageID();
+        }
         $this->config = $this->registry->get('config');
         $this->cache = $this->registry->get('cache');
         $this->db = $this->registry->get('db');
@@ -200,9 +232,23 @@ class BaseModel extends OrmModel
         ) {
             $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
         }
+
+
         parent::__construct($attributes);
         static::boot();
         $this->newBaseQueryBuilder();
+
+        //process validation rules
+        if($this->actor['user_type_name']) {
+            $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
+            $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
+            $userTypeRulesEnv = (array)ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
+            $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
+
+            if ($userTypeRules) {
+                $this->rules = array_merge($this->rules, $userTypeRules);
+            }
+        }
     }
 
 
@@ -234,6 +280,28 @@ class BaseModel extends OrmModel
                 || $this->actor['user_type'] == self::CLI
             )
         ) ? true : false;
+    }
+
+    /**
+     * @param int $language_id
+     *
+     * @return bool
+     */
+    public static function setCurrentLanguageID($language_id)
+    {
+        if(!(int)$language_id){
+            return false;
+        }
+        static::$current_language_id = (int)$language_id;
+        return true;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getCurrentLanguageID()
+    {
+        return static::$current_language_id;
     }
 
     /**
@@ -279,6 +347,9 @@ class BaseModel extends OrmModel
          * @var Abac $abac
          */
         $abac = $this->registry->get('abac');
+        if(!$abac){
+            return true;
+        }
         $resourceObject = new \stdClass();
         $resourceObject->name = $this->policyObject;
         $resourceObject->getColumns = $columns;
@@ -301,7 +372,7 @@ class BaseModel extends OrmModel
                 parent::save();
             }
         } else {
-            throw new \Exception('No permission for object (class '.__CLASS__.') to save the model.');
+            throw new \Exception('No permission for object (class '.$this->getClass().') to save the model.');
         }
     }
 
@@ -338,10 +409,29 @@ class BaseModel extends OrmModel
      */
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {
+        /*
+         * Disable Temporary strict mode of Carbon class (date-conversion)
+         * to prevent it's exception during validation
+         */
+        $carbonStrictMode = Carbon::isStrictModeEnabled();
+        Carbon::useStrictMode(false);
         $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
             $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
+
+            //override rule by lambda function to implement logic of rule depends on model data
+            //This lambda function must to return Rule validation of
+            foreach($rules as $key => $rule){
+                if($rule['lambda'] instanceof \Closure){
+                    $lambdaResult = $rule['lambda']($this);
+                    if(!($lambdaResult instanceof Rule)){
+                        throw new \Exception('Lambda-function as model rule must return instance of '.Rule::class.'!');
+                    }
+                    $validateRules[$key] = [ $lambdaResult ];
+                }
+            }
+
             if(!$messages){
                 foreach($rules as $attributeName => $item){
                     //check data for confirmation such as password
@@ -349,6 +439,10 @@ class BaseModel extends OrmModel
                         $data[$attributeName.'_confirmation'] = $data[$attributeName];
                     }
                     $msg = $item['messages'];
+                    if (!is_array($msg)) {
+                        throw new AException('Validation messages not found for attribute '.$attributeName.' of model '
+                            .$this->getClass());
+                    }
                     foreach($msg as $subRule => $langParams) {
                         $subRule = $attributeName.'.'.$subRule;
                         if($langParams['language_key']) {
@@ -373,20 +467,19 @@ class BaseModel extends OrmModel
             $v->setPresenceVerifier($presenceVerifier);
             $this->validator = $v;
 
-            //call validation hooks of extensions
-            $v->after(function ($data) {
-                //Registry::extensions()->hk_ValidateData($this,[$data]);
-            });
             try {
                 $v->validate();
             } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             } catch (\Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             }
         }
+        Carbon::useStrictMode($carbonStrictMode);
         return true;
     }
 
@@ -423,6 +516,16 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $key
+     *
+     * @return mixed
+     */
+    public function getRule(string $key)
+    {
+        return $this->rules[$key];
+    }
+
+    /**
+     * @param string $key
      */
     public function removeRule(string $key)
     {
@@ -431,7 +534,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $key
-     * @param string $value
+     * @param array $value
      */
     public function updateRule(string $key, array $value)
     {

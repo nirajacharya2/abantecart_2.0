@@ -798,7 +798,7 @@ var spanHelp2Toggles = function () {
         var $label = $(this);
         var $help = $label.find('span.help');
         if ($help.length > 0) {
-            var $icon = '&nbsp;<i class="fa fa-comment-o"></i>';
+            var $icon = '&nbsp;<i class="fa fa-comment"></i>';
             var content = $help.text().replace('"', '&quot;').replace("'", '&apos;');
             //destroy span
             $help.remove();

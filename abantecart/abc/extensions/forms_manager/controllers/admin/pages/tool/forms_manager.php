@@ -206,7 +206,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->model_tool_forms_manager->removeField($this->request->get['form_id'], $this->request->get['field_id']);
         $this->session->data['success'] = $this->language->get('text_field_removed');
         abc_redirect(
-            $this->html->getSecureURL('tool/forms_manager/update','&form_id='.$this->request->get['form_id'])
+            $this->html->getSecureURL('tool/forms_manager/update', '&form_id='.$this->request->get['form_id'])
         );
     }
 
@@ -223,15 +223,15 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['form_data'] = $this->model_tool_forms_manager->getFormById($this->request->get['form_id']);
 
         $this->data['form_edit_title'] = isset($this->data['form_data']['description'])
-                                        ? $this->data['form_data']['description']
-                                        : $this->language->get('entry_add_new_form');
+            ? $this->data['form_data']['description']
+            : $this->language->get('entry_add_new_form');
 
         $this->data['cancel'] = $this->html->getSecureURL('tool/forms_manager');
         $this->data['heading_title'] = $this->language->get('forms_manager_name');
 
         $this->data['update'] = $this->html->getSecureURL(
-                                                    'grid/form/update_field',
-                                                    '&form_id='.$this->data['form_data']['form_id']
+            'grid/form/update_field',
+            '&form_id='.$this->data['form_data']['form_id']
         );
 
         $this->data['field_id'] = (int)$this->request->get['field_id'];
@@ -239,11 +239,11 @@ class ControllerPagesToolFormsManager extends AController
         if ($this->request->get['form_id']) {
             $head_form = new AForm('HS');
             $this->data['entry_edit_form'] = $this->language->get('text_edit')
-                                            .'&nbsp;'.$this->language->get('text_form');
+                .'&nbsp;'.$this->language->get('text_form');
             $this->data['form_id'] = $this->request->get['form_id'];
             $this->data['action'] = $this->html->getSecureURL(
-                                                        'tool/forms_manager/update',
-                                                        '&form_id='.$this->data['form_data']['form_id']
+                'tool/forms_manager/update',
+                '&form_id='.$this->data['form_data']['form_id']
             );
 
         } else {
@@ -312,6 +312,7 @@ class ControllerPagesToolFormsManager extends AController
             'name'     => 'form_name',
             'value'    => isset($this->data['form_data']['form_name']) ? $this->data['form_data']['form_name'] : '',
             'required' => true,
+            'attr'     => ($this->request->get['form_id'] ? 'readonly' : ''),
             'style'    => 'large-field',
         ]);
 
@@ -319,8 +320,8 @@ class ControllerPagesToolFormsManager extends AController
             'type'         => 'input',
             'name'         => 'form_description',
             'value'        => isset($this->data['form_data']['description'])
-                                ? $this->data['form_data']['description']
-                                : '',
+                ? $this->data['form_data']['description']
+                : '',
             'required'     => true,
             'style'        => 'large-field',
             'multilingual' => true,
@@ -331,8 +332,8 @@ class ControllerPagesToolFormsManager extends AController
             'name'     => 'controller_path',
             'options'  => $this->controllers,
             'value'    => isset($this->data['form_data']['controller'])
-                                ? $this->data['form_data']['controller']
-                                : 'forms_manager/default_email',
+                ? $this->data['form_data']['controller']
+                : 'forms_manager/default_email',
             'required' => true,
             'style'    => 'large-field',
         ]);
@@ -341,8 +342,8 @@ class ControllerPagesToolFormsManager extends AController
             'type'  => 'input',
             'name'  => 'success_page',
             'value' => isset($this->data['form_data']['success_page'])
-                                ? $this->data['form_data']['success_page']
-                                : 'forms_manager/default_email/success',
+                ? $this->data['form_data']['success_page']
+                : 'forms_manager/default_email/success',
             'style' => 'large-field',
         ]);
 
@@ -463,16 +464,16 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['urls']['get_fields_list'] = $this->html->getSecureURL('forms_manager/fields/get_fields_list',
             '&form_id='.$this->request->get['form_id']);
         $this->data['urls']['load_field'] = $this->html->getSecureURL(
-                                                        'forms_manager/fields/load_field',
-                                                        '&form_id='.$this->request->get['form_id']
+            'forms_manager/fields/load_field',
+            '&form_id='.$this->request->get['form_id']
         );
         $this->data['urls']['update_field'] = $this->html->getSecureURL(
-                                                        'forms_manager/fields/updateField',
-                                                        '&form_id='.$this->request->get['form_id']
+            'forms_manager/fields/updateField',
+            '&form_id='.$this->request->get['form_id']
         );
         $this->data['urls']['update_form'] = $this->html->getSecureURL(
-                                                        'forms_manager/fields/update_form',
-                                                        '&form_id='.$this->request->get['form_id']
+            'forms_manager/fields/update_form',
+            '&form_id='.$this->request->get['form_id']
         );
         $this->data['text_success_field'] = $this->language->get('text_success_field');
 
@@ -560,8 +561,8 @@ class ControllerPagesToolFormsManager extends AController
             }
 
             $content = isset($this->request->post['form_id'])
-                        ? serialize(['form_id' => $this->request->post['form_id']])
-                        : [];
+                ? serialize(['form_id' => $this->request->post['form_id']])
+                : [];
 
             $custom_block_id = $layout->saveBlockDescription(
                 $this->data['block_id'],
@@ -600,7 +601,7 @@ class ControllerPagesToolFormsManager extends AController
                                 'data_type'  => 'form_id',
                                 'id'         => $id,
                                 'sort_order' => (int)$info['sort_order'],
-                                'store_id'           => $this->config->get('config_store_id')
+                                'store_id'   => $this->config->get('config_store_id'),
                             ]
                         );
                     } else {
@@ -618,7 +619,7 @@ class ControllerPagesToolFormsManager extends AController
 
             $this->session->data ['success'] = $this->language->get('text_success');
             abc_redirect(
-                $this->html->getSecureURL('tool/forms_manager/edit_block','&custom_block_id='.$custom_block_id)
+                $this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id='.$custom_block_id)
             );
         }
 
@@ -696,8 +697,8 @@ class ControllerPagesToolFormsManager extends AController
 
             // save list if it is custom
             $this->request->post['selected'] = json_decode(
-                                                    html_entity_decode($this->request->post['selected'][0]),
-                                                    true
+                html_entity_decode($this->request->post['selected'][0]),
+                true
             );
 
             if ($this->request->post['selected']) {
@@ -710,7 +711,7 @@ class ControllerPagesToolFormsManager extends AController
                                 'data_type'  => 'form_id',
                                 'id'         => $id,
                                 'sort_order' => (int)$info['sort_order'],
-                                'store_id'   => $this->config->get('config_store_id')
+                                'store_id'   => $this->config->get('config_store_id'),
                             ]
                         );
                     } else {
@@ -807,13 +808,13 @@ class ControllerPagesToolFormsManager extends AController
             $form = new AForm ('ST');
         } else {
             $this->data ['action'] = $this->html->getSecureURL(
-                                                    'tool/forms_manager/edit_block',
-                                                    '&custom_block_id='.$custom_block_id
+                'tool/forms_manager/edit_block',
+                '&custom_block_id='.$custom_block_id
             );
             $this->data ['form_title'] = $this->language->get('text_edit').' '.$this->data['name'];
             $this->data ['update'] = $this->html->getSecureURL(
-                                                    'listing_grid/blocks_grid/update_field',
-                                                    '&custom_block_id='.$custom_block_id
+                'listing_grid/blocks_grid/update_field',
+                '&custom_block_id='.$custom_block_id
             );
             $form = new AForm ('HS');
         }
@@ -856,11 +857,11 @@ class ControllerPagesToolFormsManager extends AController
                 'style' => 'btn_switch',
             ]);
             $this->data['entry_block_status_note'] = $this->html->convertLinks(
-                                                                $this->language->get('entry_block_status_note')
+                $this->language->get('entry_block_status_note')
             );
             $this->data['form']['fields']['block_status_note'] = '';
             $this->data['entry_block_status_note'] = $this->html->convertLinks(
-                                                                $this->language->get('entry_block_status_note')
+                $this->language->get('entry_block_status_note')
             );
         }
 

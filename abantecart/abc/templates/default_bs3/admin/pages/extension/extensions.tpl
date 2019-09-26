@@ -7,12 +7,12 @@
 			<?php if(!$mp_connected) { ?>
 			<div class="btn-group">
 			    <a class="btn btn-orange mp-connect tooltips" title="<?php echo $text_marketplace_connect; ?>" data-toggle="modal" data-target="#amp_modal">
-			    	<i class="fa fa-sign-in fa-fw"></i> <?php echo $text_connect ?>
+			    	<i class="fa fa-sign-in-alt fa-fw"></i> <?php echo $text_connect ?>
 			    </a>
 			</div>
 			<?php } else { ?>
 			<div class="btn-group">
-			    <a	class="btn btn-default tooltips" 
+			    <a	class="btn btn-default tooltips"
 			    	title="<?php echo $text_connected; ?>"
 			    	data-confirmation="delete"
 			    	onclick="disconnect(); return false;" href="#"
@@ -33,16 +33,16 @@
 			    <a class="btn btn-default tooltips" href="<?php echo $setting_url;?>" title="<?php echo $text_configuration_settings; ?>">
 			    	<i class="fa fa-gears fa-fw"></i>
 			    </a>
-			</div>			
+			</div>
 			<?php } ?>
 		</div>
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>		
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
-	
+
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<?php echo $listing_grid; ?>
 	</div>
-	
+
 	<div class="panel-footer col-xs-12">
 		<div class="text-center">
 			<a href="<?php echo $more_extensions_url; ?>" class="btn btn-orange lock-on-click">
@@ -50,7 +50,7 @@
 			</a>
 		</div>
 	</div>
-	
+
 </div>
 
 <?php
@@ -79,7 +79,7 @@ echo $this->html->buildElement(
 ?>
 
 <?php
-	if(!$mp_connected) { 
+	if(!$mp_connected) {
 	echo $this->html->buildElement(
 		array('type' => 'modal',
 				'id' => 'amp_modal',
@@ -90,7 +90,7 @@ echo $this->html->buildElement(
 							',
 				'footer' => ''
 		));
-	}	
+	}
 ?>
 
 <script type="application/javascript">
@@ -154,7 +154,7 @@ echo $this->html->buildElement(
 			if (value == 1 && switcher.attr('data-orgvalue')!=0) {
 			    var row_id = $(this).parents('tr').attr('id');
 			    var extension = userdata.extension_id[ row_id ];
-			
+
 			    $('#license_modal').modal({show: false, remote: '<?php echo $dependants_url; ?>&extension='+ extension});
 			    var data = $('#license_modal .modal-body').html();
 			    if(data.length>0){
@@ -169,7 +169,7 @@ echo $this->html->buildElement(
 			    		$(that).parents('td').find('.quicksave .icon_reset').click();
 			    	});
 			    }else{
-			
+
 			    }
 			}
 		});
@@ -181,8 +181,8 @@ echo $this->html->buildElement(
     	$('#iframe_loading').show();
     	$('#amp_modal').modal('show');
   	});
-  	
-  	$('#amp_frame').on('load', function() {  
+
+  	$('#amp_frame').on('load', function() {
     	$('#iframe_loading').hide();
 	});
 
@@ -197,7 +197,7 @@ echo $this->html->buildElement(
 					location.reload();
 				} else if(data == 'error')  {
 					error_alert(<?php abc_js_echo($error_mp_connection); ?>,true);
-				} else {				
+				} else {
 					location.reload();
 				}
 			},
@@ -211,8 +211,8 @@ echo $this->html->buildElement(
 
 	var reload_page = function(){
 		location.reload();
-		//important to clean up the modal 
+		//important to clean up the modal
 		$('#amp_modal').modal('hide');
-		$("#amp_modal").find(".modal-body").empty(); 
+		$("#amp_modal").find(".modal-body").empty();
 	}
 </script>

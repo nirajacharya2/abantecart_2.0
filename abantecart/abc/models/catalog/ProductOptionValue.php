@@ -30,6 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $order_options
  *
+ * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
+ * @method static ProductOptionValue select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class ProductOptionValue extends BaseModel
@@ -84,6 +87,12 @@ class ProductOptionValue extends BaseModel
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function description()
+    {
+        return $this->hasOne(ProductOptionValueDescription::class, 'product_option_value_id')
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     public function descriptions()

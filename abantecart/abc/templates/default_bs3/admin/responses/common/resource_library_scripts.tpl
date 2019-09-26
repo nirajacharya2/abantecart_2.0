@@ -246,7 +246,7 @@ var loadMedia = function (type, wrapper) {
 								'data-original-title="<?php abc_echo_html2view($button_delete); ?>" ' +
 								'data-confirmation="delete" ' +
 								'data-confirmation-text="<?php abc_echo_html2view($text_confirm_delete); ?>" ' +
-								'onclick="delete_resource(' + item['resource_id'] + ',\'' + json.object_name + '\',\'' + json.object_id + '\');"><i class="fa fa-trash-o"></i></a>';
+								'onclick="delete_resource(' + item['resource_id'] + ',\'' + json.object_name + '\',\'' + json.object_id + '\');"><i class="fa fa-trash"></i></a>';
 					}
 					html += '</div>';
 				} else {

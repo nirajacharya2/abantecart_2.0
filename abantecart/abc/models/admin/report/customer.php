@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2019 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,33 +20,29 @@
 
 namespace abc\models\admin;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 class ModelReportCustomer extends Model
 {
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return array|int
+     * @throws \Exception
      */
-    public function getOnlineCustomers($data = array(), $mode = 'default')
+    public function getOnlineCustomers($data = [], $mode = 'default')
     {
         if ($mode == 'total_only') {
             $total_sql = 'SELECT co.ip, co.customer_id as total';
         } else {
-            $total_sql
-                = "SELECT	c.status, 
-                                    co.ip, co.customer_id, 
-                                    CONCAT(c.firstname, ' ', c.lastname) as customer, 
-                                    co.url, co.referer, 
-                                    co.date_added 
-                        ";
+            $total_sql = "SELECT  c.status, 
+                    co.ip, co.customer_id, 
+                    CONCAT(c.firstname, ' ', c.lastname) as customer, 
+                    co.url, co.referer, 
+                    co.date_added 
+        ";
         }
 
         $sql = $total_sql." FROM ".$this->db->table_name("online_customers")." co 
@@ -74,12 +70,12 @@ class ModelReportCustomer extends Model
             return $total;
         }
 
-        $sort_data = array(
+        $sort_data = [
             'customer'    => 'customer',
             'ip'          => 'co.ip',
             'url'         => 'co.url',
             'date_added ' => 'co.date_added ',
-        );
+        ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -112,19 +108,22 @@ class ModelReportCustomer extends Model
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
-    public function getTotalOnlineCustomers($data = array())
+    public function getTotalOnlineCustomers($data = [])
     {
         return $this->getOnlineCustomers($data, 'total_only');
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function getCustomerOrders($data = array(), $mode = 'default')
+    public function getCustomerOrders($data = [], $mode = 'default')
     {
         if ($mode == 'total_only') {
             $total_sql = 'SELECT COUNT(DISTINCT o.customer_id) as total';
@@ -144,26 +143,26 @@ class ModelReportCustomer extends Model
                                 LEFT JOIN `".$this->db->table_name("customer_groups")."` cg ON (o.customer_group_id = cg.customer_group_id) 
                             ";
 
-        $filter = (isset($data['filter']) ? $data['filter'] : array());
-        $implode = array();
+        $filter = (isset($data['filter']) ? $data['filter'] : []);
+        $implode = [];
         $where = '';
-        if (AHelperUtils::has_value($filter['order_status'])) {
+        if (H::has_value($filter['order_status'])) {
             $implode[] = " o.order_status_id = ".(int)$filter['order_status']." ";
         }
 
-        if (AHelperUtils::has_value($filter['customer_id'])) {
+        if (H::has_value($filter['customer_id'])) {
             $implode[] = " o.customer_id = ".(int)$filter['customer_id']." ";
         }
         if ( ! empty($filter['date_start'])) {
-            $date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+            $date_start = H::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
             $implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') >= DATE_FORMAT('".$this->db->escape($date_start)."','%Y-%m-%d') ";
         }
         if ( ! empty($filter['date_end'])) {
-            $date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+            $date_end = H::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
             $implode[] = " DATE_FORMAT(o.date_added,'%Y-%m-%d') <= DATE_FORMAT('".$this->db->escape($date_end)."','%Y-%m-%d') ";
         }
         //filter for first and last name
-        if (AHelperUtils::has_value($filter['customer'])) {
+        if (H::has_value($filter['customer'])) {
             $implode[] = "CONCAT(o.firstname, ' ', o.lastname) LIKE '%".$this->db->escape($filter['customer'], true)."%' collate utf8_general_ci";
         }
 
@@ -185,12 +184,12 @@ class ModelReportCustomer extends Model
 
         $sql .= " GROUP BY o.customer_id ";
 
-        $sort_data = array(
+        $sort_data = [
             'customer_group' => 'cg.name',
             'orders'         => 'COUNT(o.order_id)',
             'products '      => 'SUM(op.quantity)',
             'total'          => 'SUM(o.total)',
-        );
+        ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -222,19 +221,23 @@ class ModelReportCustomer extends Model
      * @param array $data
      *
      * @return int
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function getTotalCustomerOrders($data = array())
+    public function getTotalCustomerOrders($data = [])
     {
         return $this->getCustomerOrders($data, 'total_only');
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function getCustomerTransactions($data = array(), $mode = 'default')
+    public function getCustomerTransactions($data = [], $mode = 'default')
     {
         if ($mode == 'total_only') {
             $total_sql = 'SELECT COUNT(DISTINCT c.customer_id) as total';
@@ -258,22 +261,22 @@ class ModelReportCustomer extends Model
                                 LEFT JOIN `".$this->db->table_name("users")."` u ON u.user_id = ct.created_by 
                             ";
 
-        $filter = (isset($data['filter']) ? $data['filter'] : array());
-        $implode = array();
+        $filter = (isset($data['filter']) ? $data['filter'] : []);
+        $implode = [];
         $where = '';
-        if (AHelperUtils::has_value($filter['customer_id'])) {
+        if (H::has_value($filter['customer_id'])) {
             $implode[] = " c.customer_id = ".(int)$filter['customer_id']." ";
         }
         if ( ! empty($filter['date_start'])) {
-            $date_start = AHelperUtils::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
+            $date_start = H::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
             $implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') >= DATE_FORMAT('".$this->db->escape($date_start)."','%Y-%m-%d') ";
         }
         if ( ! empty($filter['date_end'])) {
-            $date_end = AHelperUtils::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
+            $date_end = H::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
             $implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') <= DATE_FORMAT('".$this->db->escape($date_end)."','%Y-%m-%d') ";
         }
         //filter for first and last name
-        if (AHelperUtils::has_value($filter['customer'])) {
+        if (H::has_value($filter['customer'])) {
             $implode[] = "CONCAT(c.firstname, ' ', c.lastname) LIKE '%".$this->db->escape($filter['customer'], true)."%' collate utf8_general_ci";
         }
 
@@ -296,12 +299,12 @@ class ModelReportCustomer extends Model
             return $query->row['total'];
         }
 
-        $sort_data = array(
+        $sort_data = [
             'transaction_type' => 'ct.transaction_type',
             'debit'            => 'ct.debit',
             'credit'           => 'ct.credit',
             'date_added'       => 'ct.date_added',
-        );
+        ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -334,23 +337,26 @@ class ModelReportCustomer extends Model
      * @param array $data
      *
      * @return mixed
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
-    public function getTotalCustomerTransactions($data = array())
+    public function getTotalCustomerTransactions($data = [])
     {
         return $this->getCustomerTransactions($data, 'total_only');
     }
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getCustomersCountByDay()
     {
-        $customer_data = array();
+        $customer_data = [];
         for ($i = 0; $i < 24; $i++) {
-            $customer_data[$i] = array(
+            $customer_data[$i] = [
                 'hour'  => $i,
                 'total' => 0,
-            );
+            ];
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, HOUR(date_added) AS hour 
@@ -359,10 +365,10 @@ class ModelReportCustomer extends Model
                 GROUP BY HOUR(date_added) 
                 ORDER BY date_added ASC");
         foreach ($query->rows as $result) {
-            $customer_data[$result['hour']] = array(
+            $customer_data[$result['hour']] = [
                 'hour'  => $result['hour'],
                 'total' => $result['total'],
-            );
+            ];
         }
 
         return $customer_data;
@@ -370,17 +376,18 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getCustomersCountByWeek()
     {
-        $customer_data = array();
+        $customer_data = [];
         $date_start = strtotime('-'.date('w').' days');
         for ($i = 0; $i < 7; $i++) {
             $date = date('Y-m-d', $date_start + ($i * 86400));
-            $order_data[date('w', strtotime($date))] = array(
+            $order_data[date('w', strtotime($date))] = [
                 'day'   => date('D', strtotime($date)),
                 'total' => 0,
-            );
+            ];
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
@@ -388,10 +395,10 @@ class ModelReportCustomer extends Model
                 WHERE DATE(date_added) >= DATE('".$this->db->escape(date('Y-m-d', $date_start))."') 
                 GROUP BY DAYNAME(date_added)");
         foreach ($query->rows as $result) {
-            $customer_data[date('w', strtotime($result['date_added']))] = array(
+            $customer_data[date('w', strtotime($result['date_added']))] = [
                 'day'   => date('D', strtotime($result['date_added'])),
                 'total' => $result['total'],
-            );
+            ];
         }
 
         return $customer_data;
@@ -399,16 +406,17 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getCustomersCountByMonth()
     {
-        $customer_data = array();
+        $customer_data = [];
         for ($i = 1; $i <= date('t'); $i++) {
             $date = date('Y').'-'.date('m').'-'.$i;
-            $customer_data[date('j', strtotime($date))] = array(
+            $customer_data[date('j', strtotime($date))] = [
                 'day'   => date('d', strtotime($date)),
                 'total' => 0,
-            );
+            ];
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
@@ -417,10 +425,10 @@ class ModelReportCustomer extends Model
                 GROUP BY DATE(date_added)");
 
         foreach ($query->rows as $result) {
-            $customer_data[date('j', strtotime($result['date_added']))] = array(
+            $customer_data[date('j', strtotime($result['date_added']))] = [
                 'day'   => date('d', strtotime($result['date_added'])),
                 'total' => $result['total'],
-            );
+            ];
         }
 
         return $customer_data;
@@ -428,28 +436,35 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getCustomersCountByYear()
     {
-        $customer_data = array();
+        $customer_data = [];
         for ($i = 1; $i <= 12; $i++) {
-            $customer_data[$i] = array(
+            $customer_data[$i] = [
                 'month' => date('M', mktime(0, 0, 0, $i)),
                 'total' => 0,
-            );
+            ];
         }
         $query = $this->db->query(
             "SELECT COUNT(*) AS total, date_added 
-                FROM `".$this->db->table_name("customers")."` 
-                WHERE YEAR(date_added) = YEAR(NOW()) 
-                GROUP BY MONTH(date_added)");
+            FROM `".$this->db->table_name("customers")."` 
+            WHERE YEAR(date_added) = YEAR(NOW()) 
+            GROUP BY MONTH(date_added)");
         foreach ($query->rows as $result) {
-            $customer_data[date('n', strtotime($result['date_added']))] = array(
+            $customer_data[date('n', strtotime($result['date_added']))] = [
                 'month' => date('M', strtotime($result['date_added'])),
                 'total' => $result['total'],
-            );
+            ];
         }
 
         return $customer_data;
+    }
+    
+    public function clearOnlineCustomers()
+    {
+        $sql = "DELETE FROM ".$this->db->table_name("online_customers");
+        $this->db->query($sql);
     }
 }

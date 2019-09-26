@@ -213,15 +213,23 @@ class CustomerTransaction extends BaseModel
      *
      * @param array $options
      *
-     * @return bool|void
+     * @return bool
      * @throws \Exception
      */
     public function save(array $options = [])
     {
-        if ($this->customer_transaction_id) {
-            throw new \Exception('You cannot to update transaction. Please use adding of new transaction instead to change balance.');
+        if ($this->exists) {
+            //you cannot to update transaction!
+            //All records must be incremental!
+            //INSERTS ONLY!
+            Registry::log()->write(
+                "Customer ".$this->customer_id." attempts to update transaction # ".$this->customer_transaction_id
+                .". Action is prohibited. "
+                ."\n Input Data: ".var_export($this->getAttributes(), true)
+            );
+            return true;
         }
-        parent::save($options);
+         return parent::save($options);
     }
 
     public function customer()
@@ -332,7 +340,7 @@ class CustomerTransaction extends BaseModel
 
          // NOTE: Performance slowdown might be noticed or larger search results
          if ($mode != 'total_only') {
-             $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'name';
+             $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'customer_transactions.date_added';
              if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
                  $sorting = "desc";
              } else {
@@ -363,4 +371,20 @@ class CustomerTransaction extends BaseModel
 
         return $result_rows;
     }
+
+    /**
+     * @return mixed
+     */
+    public static function getTransactionTypes()
+    {
+        $query = self::select(['transaction_type'])
+            ->distinct(['transaction_type'])
+            ->orderBy('transaction_type')
+            ->withTrashed();
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        $result_rows = $query->get();
+        return $result_rows;
+    }
+
 }

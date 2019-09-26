@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\view\AView;
+use abc\models\order\Order;
 use H;
 
 /**
@@ -58,7 +59,7 @@ class ExtensionDefaultPpPro extends Extension
     {
         $that = $this->baseObject;
         $order_id = $that->data['order_id'];
-        $order_info = $that->model_sale_order->getOrder( $order_id );
+        $order_info = Order::getOrderArray($order_id);
         //are we logged in and in admin?
         if ( ABC::env( 'IS_ADMIN' ) && $that->user->isLogged() ) {
             if ( $order_info['payment_method_key'] != 'default_pp_pro' ) {

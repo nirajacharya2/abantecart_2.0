@@ -25,6 +25,7 @@ use abc\core\engine\AForm;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\models\locale\Currency;
+use abc\models\order\OrderStatus;
 use H;
 
 /**
@@ -34,7 +35,6 @@ use H;
  * @property \abc\models\admin\ModelLocalisationLengthClass $model_localisation_length_class
  * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
  * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
- * @property \abc\models\admin\ModelLocalisationOrderStatus $model_localisation_order_status
  * @property \abc\models\admin\ModelSaleCustomerGroup $model_sale_customer_group
  * @property ASession $session
  * @property \abc\core\lib\ALanguageManager $language
@@ -738,11 +738,13 @@ class AConfigManager
             $customer_groups[$item['customer_group_id']] = $item['name'];
         }
 
-        $this->load->model('localisation/order_status');
         $order_statuses = [];
-        $results = $this->model_localisation_order_status->getOrderStatuses();
+        $results = OrderStatus::with('description')
+                              ->where('display_status', '=', '1')
+                              ->get()
+                              ->toArray();
         foreach ($results as $item) {
-            $order_statuses[$item['order_status_id']] = $item['name'];
+            $order_statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
         $cntmnr = new AContentManager();

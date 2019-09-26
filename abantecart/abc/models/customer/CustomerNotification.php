@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class CustomerNotification
  *
- * @property int $customer_id
- * @property string $sendpoint
- * @property string $protocol
- * @property int $status
+ * @property int            $customer_id
+ * @property string         $sendpoint
+ * @property string         $protocol
+ * @property int            $status
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
- * @property Customer $customer
+ * @property Customer       $customer
  *
  * @package abc\models
  */
@@ -23,9 +23,10 @@ class CustomerNotification extends BaseModel
 {
     use SoftDeletes;
 
-    protected $primaryKey = 'id';
+    protected $mainClassName = Customer::class;
+    protected $mainClassKey = 'customer_id';
 
-    public $timestamps = false;
+    protected $primaryKey = 'id';
 
     protected $casts = [
         'customer_id' => 'int',

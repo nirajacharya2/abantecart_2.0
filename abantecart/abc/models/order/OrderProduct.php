@@ -2,8 +2,10 @@
 
 namespace abc\models\order;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -27,6 +29,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
+ * @method static OrderProduct find(int $order_product_id) OrderProduct
+ * @method static OrderProduct select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class OrderProduct extends BaseModel
@@ -36,16 +41,24 @@ class OrderProduct extends BaseModel
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';
-    public $timestamps = false;
+
+    protected $mainClassName = Order::class;
+    protected $mainClassKey = 'order_id';
 
     protected $casts = [
-        'order_id'   => 'int',
-        'product_id' => 'int',
-        'price'      => 'float',
-        'total'      => 'float',
-        'tax'        => 'float',
-        'quantity'   => 'int',
-        'subtract'   => 'int',
+        'order_id'        => 'int',
+        'product_id'      => 'int',
+        'price'           => 'float',
+        'total'           => 'float',
+        'tax'             => 'float',
+        'quantity'        => 'int',
+        'subtract'        => 'int',
+        'order_status_id' => 'int',
+    ];
+
+    protected $dates = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [
@@ -59,11 +72,147 @@ class OrderProduct extends BaseModel
         'tax',
         'quantity',
         'subtract',
+        'order_status_id',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'order_id'   => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in orders table!',
+                ],
+            ],
+        ],
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'name'  => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'model' => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+        'sku'   => [
+            'checks'   => [
+                'string',
+                'max:64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be string :max characters length!',
+                ],
+            ],
+        ],
+
+        'price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'total' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'tax' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'quantity' => [
+            'checks'   => [
+                'integer',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'subtract'        => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'order_status_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:order_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
+                ],
+            ],
+        ],
+
     ];
 
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+    public function order_status()
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
     public function product()
@@ -80,4 +229,43 @@ class OrderProduct extends BaseModel
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'order_product_id');
     }
+
+    public static function getOrderProductOptions($order_id, $order_product_id)
+    {
+        $order_id = (int)$order_id;
+        $order_product_id = (int)$order_product_id;
+        if(!$order_id || !$order_product_id){
+            return false;
+        }
+        /**
+         * @var QueryBuilder $query
+         */
+        $query = OrderOption::select(
+            [
+                'order_options.*',
+                'product_options.*',
+                'product_option_values.subtract'
+            ]
+        )->where(
+            [
+                'order_options.order_id' => $order_id,
+                'order_options.order_product_id' => $order_product_id,
+            ]
+        )->leftJoin(
+            'product_option_values',
+            'order_options.product_option_value_id',
+            '=',
+            'product_option_values.product_option_value_id'
+        )->leftJoin(
+            'product_options',
+            'product_option_values.product_option_id',
+            '=',
+            'product_options.product_option_id'
+        );
+
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
+        return $query->get();
+    }
+
+
 }

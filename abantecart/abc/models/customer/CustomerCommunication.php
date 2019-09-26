@@ -22,9 +22,22 @@ use abc\core\engine\Registry;
 use abc\core\lib\AMail;
 use abc\models\BaseModel;
 use abc\models\user\User;
-use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Class CustomerCommunication
+ *
+ * @property  int customer_id
+ * @property  int user_id
+ * @property  string $type
+ * @property  string $subject
+ * @property  string $body
+ * @property  string $sent_to_address
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
+ *
+ * @package abc\models\customer
+ */
 class CustomerCommunication extends BaseModel
 {
     use SoftDeletes;
@@ -34,8 +47,6 @@ class CustomerCommunication extends BaseModel
 
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
-
-    public $timestamps = false;
 
     protected $dates = [
         'date_added',
@@ -91,6 +102,9 @@ class CustomerCommunication extends BaseModel
 
     public static function createCustomerCommunication(AMail $mail)
     {
+        /**
+         * @var CustomerCommunication $communication
+         */
         $communication = new CustomerCommunication();
         $communication->subject = $mail->getSubject();
         $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
@@ -107,9 +121,11 @@ class CustomerCommunication extends BaseModel
         }
         $communication->customer_id = $customer_id;
 
-        $user = Registry::user();
+        $user = Registry::User();
         if($user){
            $communication->user_id = $user->getId();
+        }else{
+            $communication->user_id = null;
         }
         $communication->type = 'email';
         $communication->sent_to_address = $mail->getTo();
@@ -134,7 +150,7 @@ class CustomerCommunication extends BaseModel
             return;
         }
         $communication->customer_id = $customer_id;
-        $communication->user_id = $user_id;
+        $communication->user_id = (int)$user_id ?: null;
         $communication->sent_to_address = $to;
         $communication->type = $protocol;
         $communication->save();

@@ -35,7 +35,9 @@ class ControllerResponsesCheckoutProcess extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->data['output'] = '';
         try {
-            $this->checkout->confirmOrder(array_merge($this->request->get, $this->request->post));
+            $data = array_merge($this->request->get, $this->request->post);
+            $data['order_id'] = $this->session->data['order_id'];
+            $this->checkout->confirmOrder($data);
         }catch(LibException $e){
             $error = new AError($e->getMessages());
             $error->toLog()->toMessages('Checkout Process Error');

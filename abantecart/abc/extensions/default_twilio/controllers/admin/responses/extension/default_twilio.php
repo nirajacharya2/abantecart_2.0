@@ -59,13 +59,9 @@ class ControllerResponsesExtensionDefaultTwilio extends AController
         $sender = new \Twilio\Rest\Client($AccountSid, $AuthToken);
         $to = preg_replace('/[^0-9\+]/', '', $this->request->get['to']);
 
-        if ($this->config->get('default_twilio_test')) {
-            //sandbox number without errors from api
-            $from = '+15005550006';
-        } else {
-            $from = $this->config->get('default_twilio_sender_phone');
-            $from = '+'.ltrim($from, '+');
-        }
+        $from = $this->config->get('default_twilio_sender_phone');
+        $from = $from ? '+'.ltrim($from, '+') : '';
+
         $error_message = '';
         try {
             $sender->messages->create(

@@ -178,7 +178,7 @@ echo $tabs; ?>
         </button>
         &nbsp;
         <a class="btn btn-default" href="<?php echo $button_restore_defaults->href; ?>">
-            <i class="fa fa-refresh"></i> <?php echo $button_restore_defaults->text; ?>
+            <i class="fa fa-sync"></i> <?php echo $button_restore_defaults->text; ?>
         </a>
         <?php if ( $add_sett ) { ?>
             &nbsp;

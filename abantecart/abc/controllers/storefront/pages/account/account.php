@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\models\customer\Address;
+use abc\models\order\Order;
 
 class ControllerPagesAccountAccount extends AController
 {
@@ -84,11 +85,9 @@ class ControllerPagesAccountAccount extends AController
         $this->data['total_wishlist'] = count($this->customer->getWishList());
         $this->data['total_addresses'] = Address::where('customer_id', '=', $this->customer->getId())
                                                 ->get()->count();
-
         $this->data['total_downloads'] = $this->download->getTotalDownloads();
-
-        $this->loadModel('account/order');
-        $this->data['total_orders'] = $this->model_account_order->getTotalOrders();
+        $this->data['total_orders'] = Order::where('customer_id', '=', $this->customer->getId())
+                                           ->where('order_status_id', '>', '0')->count();
 
         $this->view->batchAssign($this->data);
 

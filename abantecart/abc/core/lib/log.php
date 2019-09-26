@@ -78,7 +78,9 @@ final class ALog
 
         $this->app_filename = $dir_logs.$application_log_filename;
         if (is_file($this->app_filename) && !is_writable($this->app_filename)) {
-            error_log('ALog Error: Log file '.$this->app_filename.' is not writable!');
+            $error_text = 'ALog Error: Log file '.$this->app_filename.' is not writable!';
+            error_log($error_text);
+            throw new \Exception($error_text);
         } else {
             $this->security_filename = $dir_logs.$security_filename;
             if (is_file($this->security_filename) && !is_writable($this->security_filename)) {
@@ -102,7 +104,13 @@ final class ALog
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y-m-d H:i:s";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
-        $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > %level_name% > %message%\n";
+        if (Registry::request()) {
+            $request_id = Registry::request()->getUniqueId();
+        } else {
+            $request_id = \H::genRequestId();
+        }
+        $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > Request ID: ".$request_id
+            ." > %level_name% > %message%\n";
         // create a formatter which allows line breaks in the message
         $formatter = new LineFormatter($output, $dateFormat, true);
         $stream->setFormatter($formatter);

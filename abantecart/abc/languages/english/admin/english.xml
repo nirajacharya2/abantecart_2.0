@@ -757,4 +757,8 @@
 		<key>text_audit_log</key>
 		<value><![CDATA[Audit log]]></value>
 	</definition>
+	<definition>
+		<key>error_system</key>
+		<value><![CDATA[ Application Error. Please see <a href="%s">error log</a> for details! ]]></value>
+	</definition>
 </definitions>

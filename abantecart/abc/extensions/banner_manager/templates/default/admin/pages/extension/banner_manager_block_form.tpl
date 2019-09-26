@@ -51,7 +51,7 @@ echo $tabs; ?>
 		     <i class="fa fa-save"></i> <?php echo $form['submit']->text; ?>
 		     </button>&nbsp;
 		     <a class="btn btn-default" href="<?php echo $cancel; ?>">
-		     <i class="fa fa-refresh"></i> <?php echo $form['cancel']->text; ?>
+		     <i class="fa fa-sync"></i> <?php echo $form['cancel']->text; ?>
 		     </a>
 		   </div>
 		</div>

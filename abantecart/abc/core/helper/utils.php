@@ -1201,17 +1201,6 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * @param string $string
-     * @param string $salt_key
-     *
-     * @return string
-     */
-    public static function getHash(string $string, string $salt_key)
-    {
-        return  sha1($salt_key.sha1($salt_key.sha1($string)));
-    }
-
-    /**
      * TODO: in the future
      *
      * @param $zip_filename
@@ -1749,17 +1738,19 @@ class AHelperUtils extends AHelper
             $user_id = function_exists('posix_geteuid') ? posix_geteuid() : '1000';
             $output = [
                 'user_type' => 0,
+                'user_type_name' => 'cli',
                 'user_id'   => $user_id,
                 'user_name' => (function_exists('posix_getpwuid') ? posix_getpwuid($user_id)['name'] : 'system user'),
             ];
         } elseif (ABC::env('IS_ADMIN')) {
-            if (!class_exists(Registry::class) || !Registry::getInstance()->get('user')) {
+            if (!class_exists(Registry::class) || !Registry::user()) {
                 return [];
             }
             $registry = Registry::getInstance();
             $user_id = $registry->get('user')->getId();
             $output = [
                 'user_type' => 1,
+                'user_type_name' => 'user',
                 'user_id'   => $user_id,
                 'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin'),
             ];
@@ -1771,6 +1762,7 @@ class AHelperUtils extends AHelper
             $user_name = Registry::customer() ? Registry::customer()->getLoginName() : 'guest';
             $output = [
                 'user_type' => 2,
+                'user_type_name' => 'customer',
                 'user_id'   => $user_id,
                 'user_name' => $user_name
             ];
@@ -2039,7 +2031,10 @@ class AHelperUtils extends AHelper
         }
 
         //try to decrypt order token
-        $enc = new AEncryption( $config->get( 'encryption_key' ) );
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
         $decrypted = $enc->decrypt( $ot );
         list( $order_id, $email ) = explode( '::', $decrypted );
 

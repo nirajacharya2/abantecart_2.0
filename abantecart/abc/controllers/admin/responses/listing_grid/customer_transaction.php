@@ -316,7 +316,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             'attr'  => ($readonly ? 'disabled="disabled"' : '').' maxlength="16"',
         ]);
 
-        $types = CustomerTransaction::select('transaction_type')->distinct()->orderBy('transaction_type')->get();
+        $types = CustomerTransaction::getTransactionTypes();
         $options = array_column($types->toArray(), 'transaction_type', 'transaction_type');
         $options[''] = $this->language->get('text_option_other_type');
 

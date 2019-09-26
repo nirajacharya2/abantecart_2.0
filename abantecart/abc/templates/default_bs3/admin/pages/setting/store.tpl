@@ -20,7 +20,7 @@
 				   title="<?php echo $delete_store_button->title; ?>"
 				   href="<?php echo $delete_store_button->href; ?>"
 				   data-confirmation="delete"
-					><i class="fa fa-trash-o fa-fw"></i></a>
+					><i class="fa fa-trash fa-fw"></i></a>
 			</div>
 			<?php } ?>
 		</div>			

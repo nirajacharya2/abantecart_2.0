@@ -35,7 +35,7 @@
 				?>
 	        <li class="<?php echo $active; ?>" data-type="<?php echo $rl_type['type_name']; ?>">
 				  <a class="actionitem tooltips" data-original-title="<?php echo $text_type.': '.$rl_type['type_name']; ?>"
-					 onclick="return false;" href="#"> 
+					 onclick="return false;" href="#">
 					 <i class="fa <?php echo $icon; ?>"></i>
 				  </a>
 	        </li>
@@ -60,7 +60,7 @@
 					</div>
 					<div class="col-sm-12 col-xs-12 center">
 						<a class="btn tooltips rl_add_code" data-original-title="<?php echo $text_add_code; ?>" <?php echo $wrapper_id ? 'data-wrapper_id="'.$wrapper_id.'"' :'' ?> <?php echo $field_id ? 'data-field="'.$field_id.'"' :'' ?>>
-							<i class="fa fa-file-code-o " style="font-size: 5em;"></i>
+							<i class="fa fa-file-code" style="font-size: 5em;"></i>
 						</a>
 						<p class="ellipsis"><?php echo $text_add_code; ?></p>
 					</div>
@@ -126,7 +126,7 @@
 						</button>
 						&nbsp;
 						<a class="btn btn-default rl_reset tooltips" title="<?php echo $button_reload; ?>" href="<?php echo $cancel; ?>">
-							<i class="fa fa-refresh"></i> <?php echo $button_reset; ?>
+                            <i class="fa fa-sync"></i> <?php echo $button_reset; ?>
 						</a>
 					</div>
 				</div>

@@ -18,6 +18,7 @@
 
 namespace abc\tests\unit;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use PHPUnit\Framework\TestCase;
 use abc\core\lib\ACustomer;
@@ -60,7 +61,7 @@ class ATestCase extends TestCase
         //add admin to the scope
         $this->registry->set('request', new ARequest());
         $this->registry->get('session')->data['user_id'] = 1;
-        $this->registry->set('user', new AUser($this->registry));
+        $this->registry->set('user', ABC::getObjectByAlias('AUser',[$this->registry]));
     }
 
     public function __get($key)

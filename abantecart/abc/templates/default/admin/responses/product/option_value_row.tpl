@@ -13,7 +13,7 @@
 				if ($option_data['element_type'] == 'T') {
 					?>
 					<a class="input-group-addon btn btn-xs btn-default" data-toggle="modal"
-					   data-target="#option_value_modal"><i class="fa fa-pencil"></i></a>
+					   data-target="#option_value_modal"><i class="fa fa-pencil-alt"></i></a>
 				<?php }
 				?></div>
 		</td>

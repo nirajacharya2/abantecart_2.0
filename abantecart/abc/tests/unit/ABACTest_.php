@@ -85,7 +85,7 @@ class ABACTest extends ATestCase{
         $result = false;
         //login user as topAdmin
         $this->registry->get('session')->data['user_id'] = 1;
-        $this->registry->set('user', new AUser($this->registry));
+        $this->registry->set('user', ABC::getObjectByAlias('AUser',[$this->registry]));
 
         //unset object to run test aas admin
         $this->registry->set('os_user', null);

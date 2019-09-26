@@ -12,7 +12,7 @@
 				<a class="btn btn-white tooltips" target="_invoice" href="<?php echo $invoice_url; ?>"
 				   data-toggle="tooltip"
 				   title="<?php echo $text_invoice; ?>" data-original-title="<?php echo $text_invoice; ?>">
-					<i class="fa fa-file-text"></i>
+					<i class="fa fa-file-alt"></i>
 				</a>
 				<?php if (!empty ($help_url)) : ?>
 					<a class="btn btn-white tooltips" href="<?php echo $help_url; ?>" target="new" data-toggle="tooltip"
@@ -133,7 +133,7 @@
 				</button>
 				&nbsp;
 				<a class="btn btn-default" href="<?php echo $cancel; ?>">
-					<i class="fa fa-refresh"></i> <?php echo $form['cancel']->text; ?>
+                    <i class="fa fa-sync"></i> <?php echo $form['cancel']->text; ?>
 				</a>
 			</div>
 		</div>

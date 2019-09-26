@@ -16,16 +16,13 @@ use abc\core\lib\AJson;
 use abc\core\lib\ALog as ALog;
 use abc\core\lib\ABackup as ABackup;
 use abc\core\lib\AOrder;
-use abc\core\lib\AOrderManager;
 use abc\core\lib\APromotion;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\CheckOut;
 use abc\core\lib\CheckOutAdmin;
 use abc\core\lib\ACurrency;
 use abc\core\lib\UserResolver;
-use abc\models\ValidationTranslator;
 use Illuminate\Events\Dispatcher as EventDispatcher;
-use Illuminate\Validation\Validator;
 use PhpAbac\AbacFactory;
 
 return [
@@ -53,7 +50,6 @@ return [
     'APromotion'           => APromotion::class,
     'ACart'                => ACart::class,
     'AOrder'               => AOrder::class,
-    'AOrderManager'        => AOrderManager::class,
     'EventDispatcher'      => EventDispatcher::class,
     'AEncryption'          => AEncryption::class,
     'ACurrency'            => ACurrency::class,

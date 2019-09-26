@@ -20,6 +20,7 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
@@ -62,7 +63,10 @@ class ControllerPagesAccountForgotten extends AController
                 //save password reset code
                 $customer->update(['data' => ['password_reset' => $code]]);
                 //build reset link
-                $enc = new AEncryption($this->config->get('encryption_key'));
+                /**
+                 * @var AEncryption $enc
+                 */
+                $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
                 $rtoken = $enc->encrypt($customer->customer_id.'::'.$code);
 
                 H::event(
@@ -165,7 +169,10 @@ class ControllerPagesAccountForgotten extends AController
 
         //validate token
         $rtoken = $this->request->get['rtoken'];
-        $enc = new AEncryption($this->config->get('encryption_key'));
+        /**
+         * @var AEncryption $enc
+         */
+        $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
         list($customer_id, $code) = explode("::", $enc->decrypt($rtoken));
         $customer_details = Customer::getCustomer($customer_id);
         if (empty($customer_id)

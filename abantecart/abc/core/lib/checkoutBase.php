@@ -25,7 +25,6 @@ use abc\core\engine\Registry;
 
 use abc\models\customer\Address;
 use abc\models\storefront\ModelCheckoutExtension;
-use abc\models\storefront\ModelCheckoutOrder;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -97,7 +96,6 @@ class CheckoutBase extends ALibBase
             $this->customer = $data['customer'];
             $this->setCustomer($this->customer);
             $this->customer_id = $this->customer->getId();
-
         }
 
         if(is_object($data['order'])){
@@ -150,8 +148,7 @@ class CheckoutBase extends ALibBase
      * @param string $rt
      * @param string $mode
      *
-     * @return bool|object
-     * @throws AException
+     * @return mixed
      */
     protected function loadModel(string $rt, $mode = '')
     {
@@ -161,6 +158,7 @@ class CheckoutBase extends ALibBase
     /**
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getPaymentList()
     {
@@ -168,6 +166,15 @@ class CheckoutBase extends ALibBase
             $payment_address = $this->data['guest'];
         }else {
             $payment_address = $this->getAddressById($this->data['payment_address_id']);
+            if (!$payment_address) {
+                $customer_id = $this->data['customer']->getId();
+                if ($customer_id) {
+                    $address = Address::where('customer_id', '=', $customer_id)->first();
+                    if ($address) {
+                        $payment_address = $this->getAddressById($address->address_id);
+                    }
+                }
+            }
         }
 
         if (!$payment_address) {
@@ -241,7 +248,6 @@ class CheckoutBase extends ALibBase
 
     /**
      * @return array
-     * @throws AException
      */
     public function getShippingList()
     {
@@ -250,6 +256,15 @@ class CheckoutBase extends ALibBase
             $shipping_address = $this->data['guest']['shipping'] ?: $this->data['guest'];
         }else {
             $shipping_address = $this->getAddressById($this->data['shipping_address_id']);
+            if (!$shipping_address) {
+                $customer_id = $this->data['customer']->getId();
+                if ($customer_id) {
+                    $address = Address::where('customer_id', '=', $customer_id)->first();
+                    if ($address) {
+                        $shipping_address = $this->getAddressById($address->address_id);
+                    }
+                }
+            }
         }
         if (!$shipping_address) {
             ADebug::warning(
@@ -471,8 +486,11 @@ class CheckoutBase extends ALibBase
     {
         return $this->customer;
     }
+
     /**
      * @param ACustomer $customer
+     *
+     * @throws \Exception
      */
     public function setCustomer(ACustomer $customer)
     {
@@ -482,6 +500,7 @@ class CheckoutBase extends ALibBase
                     'country_id' => ($this->data['shipping_country_id'] ?: $this->data['payment_country_id']),
                     'zone_id' => ($this->data['shipping_zone_id'] ?: $this->data['payment_zone_id']),
         ];
+
         $this->tax = new ATax( $this->registry, $c_data );
     }
 
@@ -499,28 +518,25 @@ class CheckoutBase extends ALibBase
      */
     public function confirmOrder($data = []){
 
-        $order_id = (int)$data['order_id'] ?: $this->data['order_id'];
+        $order_id = (int)$data['order_id'];
+        if(!$order_id){
+            throw new AException(__CLASS__.': Cannot to confirm order. Unknown order id!');
+        }
+
         $this->validatePaymentDetails($data);
         $this->processPayment($data);
 
-        /**
-         * @var ModelCheckoutOrder $model
-         */
-        $model = $this->loadModel('checkout/order','storefront');
-
-        if(!$model){
-            throw new LibException(['Cannot to load model checkout/order to confirm order #'.$order_id]);
-        }
-
-        $order_status_id = $this->registry->get('config')->get($this->getPaymentKey().'_order_status_id');
+        $order_status_id = Registry::config()->get($this->getPaymentKey().'_order_status_id');
         if(!$order_status_id){
-            $order_status_id = $this->registry->get('order_status')->getStatusByTextId('pending');
+            $order_status_id = Registry::order_status()->getStatusByTextId('pending');
         }
 
-        $model->confirm(
+        $this->getOrder()->confirm(
             $order_id,
             $order_status_id
         );
+
+        H::event('abc\checkout\order@confirm', [new ABaseEvent($order_id, $order_status_id)]);
     }
 
     /**

@@ -1,8 +1,8 @@
 <select class="form-control aselect <?php echo $style ?>" data-placeholder="<?php echo $placeholder ?>" name="<?php echo $name ?>" id="<?php echo $id ?>" data-orgvalue="<?php echo $ovalue; ?>"  <?php echo $attr ?>>
 <?php foreach ( $options as $v => $text ) { ?>
 		<option value="<?php echo $v ?>"
-		<?php echo (in_array((string)$v, (array)$value, true) ? ' selected="selected" ':'') ?>
-		<?php echo (in_array((string)$v, (array)$disabled_options, true) ? ' disabled="disabled" ':'') ?>
+            <?php echo(in_array((string)$v, (array)$value) ? ' selected="selected" ' : '') ?>
+            <?php echo(in_array((string)$v, (array)$disabled_options) ? ' disabled="disabled" ' : '') ?>
 		data-orgvalue="<?php echo (in_array($v, $value) ? 'true':'false') ?>"
 		><?php echo $text ?></option>
 <?php } ?>

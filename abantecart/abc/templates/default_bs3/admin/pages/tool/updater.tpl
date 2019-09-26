@@ -13,7 +13,7 @@
 					<div class="btn-group">
 						<a class="btn btn-orange mp-connect tooltips" title="<?php echo $text_marketplace_connect; ?>"
 						   data-toggle="modal" data-target="#amp_modal">
-							<i class="fa fa-sign-in fa-fw"></i> <?php echo $text_connect ?>
+							<i class="fa fa-sign-in-alt fa-fw"></i> <?php echo $text_connect ?>
 						</a>
 					</div>
 				<?php }else{ ?>

@@ -21,6 +21,20 @@
 				<a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>" title="<?php echo $button_add; ?>">
 				<i class="fa fa-plus"></i>
 				</a>
+				<?php
+				if ($auditLog) {
+				?>
+				<a data-toggle="modal"
+				   class="btn btn-white tooltips"
+				   data-target="#viewport_modal"
+				   href="<?php echo $auditLog->vhref; ?>"
+				   data-fullmode-href="<?php echo $auditLog->href; ?>"
+				   rel="audit_log"
+				   title="<?php echo $auditLog->text; ?>">
+					<i class="fa fa-history "></i></a>
+				<?php
+				}
+				?>
 			</div>
 		</div>
 
@@ -67,7 +81,7 @@
 			<?php }  ?><!-- <div class="fieldset"> -->
 		<?php }  ?>
 	</div>
-	
+
 	<div class="col-md-3 mb10">
 		<div id="image">
 		   <?php if ( !empty($update) ) {
@@ -84,7 +98,7 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
@@ -103,3 +117,20 @@
 		});
 	});
 </script>
+
+<?php
+	//load quick view port modal
+	echo $this->html->buildElement(
+array(
+'type' => 'modal',
+'id' => 'viewport_modal',
+'modal_type' => 'lg',
+'data_source' =>'ajax',
+'js_onload' => "
+var url = $(this).data('bs.modal').options.fullmodeHref;
+$('#viewport_modal .modal-header a.btn').attr('href',url);
+",
+'js_onclose' => "$('#".$data['table_id']."').trigger('reloadGrid',[{current:true}]);"
+)
+);
+?>

@@ -43,6 +43,28 @@
 				<td class="summary_label"><?php echo $entry_payment_method; ?></td>
 				<td class="summary_value"><?php echo $order['payment_method']; ?></td>
 			</tr>
+			<tr>
+				<td>
+					<?php
+				if ($auditLog) {
+				?>
+					<a data-toggle="modal"
+					   class="btn btn-white tooltips"
+					   data-target="#viewport_modal"
+					   href="<?php echo $auditLog->vhref; ?>"
+					   data-fullmode-href="<?php echo $auditLog->href; ?>"
+					   rel="audit_log"
+					   title="<?php echo $auditLog->text; ?>">
+						<i class="fa fa-history "></i> <?php echo $auditLog->text; ?></a>
+					<?php
+				}
+				?>
+				</td>
+				<td>
+				</td>
+				<td></td>
+				<td></td>
+			</tr>
 			<?php echo $this->getHookVar('order_summary_hook_var'); ?>
 		</table>
 	</div>

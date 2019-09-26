@@ -189,6 +189,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
                         $category->parent_id = $parentCategory->category_id;
                         $category->save();
                     }
+                } else {
+                    $category->parent_id = null;
+                    $category->save();
                 }
             }
         } catch (\PDOException $e) {

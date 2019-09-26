@@ -95,9 +95,7 @@ class ALayout
 
         //for Maintenance mode
         if ($this->config->get('config_maintenance')) {
-            /** @noinspection PhpIncludeInspection */
-            require_once(ABC::env('DIR_CORE')."lib/user.php");
-            $this->registry->set('user', new AUser($this->registry));
+            $this->registry->set('user', ABC::getObjectByAlias('AUser',[$this->registry]));
             if (!$this->user->isLogged()) {
                 $controller = 'pages/index/maintenance';
             }

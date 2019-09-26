@@ -28,6 +28,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property UserGroup $user_group
  * @property \Illuminate\Database\Eloquent\Collection $user_notifications
  *
+ *
+ * @method static User find(int $user_id) User
+ * @method static User select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class User extends BaseModel
@@ -74,14 +78,10 @@ class User extends BaseModel
      *
      * @param array $attributes
      *
-     * @throws AException
      */
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes = []);
-        if (!$this->isUser()) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access '.__CLASS__);
-        }
     }
 
     /**

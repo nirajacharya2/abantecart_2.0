@@ -63,7 +63,7 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 			</button>
 			&nbsp;
 			<a id="reset_field" class="btn btn-default" href="<?php echo $head_form['button_reset']->href; ?>">
-				<i class="fa fa-refresh"></i> <?php echo $head_form['button_reset']->text; ?>
+				<i class="fa fa-sync"></i> <?php echo $head_form['button_reset']->text; ?>
 			</a>
 		</div>
 	</div>

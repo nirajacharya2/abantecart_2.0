@@ -2,9 +2,11 @@
 
 namespace abc\models\customer;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
+use abc\core\lib\AEncryption;
 use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
@@ -64,10 +66,6 @@ class Customer extends BaseModel
      * @var string
      */
     protected $primaryKey = 'customer_id';
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
 
     protected $casts = [
         'store_id'          => 'int',
@@ -310,18 +308,6 @@ class Customer extends BaseModel
             ],
         ],
 
-        'wishlist' => [
-            'checks'   => [
-                'string',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Wishlist must be a string!',
-                ],
-            ],
-        ],
-
         'address_id' => [
             'checks'   => [
                 'integer',
@@ -336,8 +322,7 @@ class Customer extends BaseModel
 
         'status' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [
@@ -360,8 +345,7 @@ class Customer extends BaseModel
 
         'approved' => [
             'checks'   => [
-                'integer',
-                'digits:1',
+                'boolean'
             ],
             'messages' => [
                 '*' => [
@@ -384,7 +368,7 @@ class Customer extends BaseModel
 
         'ip' => [
             'checks'   => [
-                'string',
+                'ip',
                 'max:50',
             ],
             'messages' => [
@@ -412,12 +396,15 @@ class Customer extends BaseModel
         if (Registry::config()->get('prevent_email_as_login')) {
             $this->rules['loginname']['checks'][] = 'regex:/^[\w._-]+$/i';
         }
+        if (!Registry::config()->get('prevent_email_as_login')) {
+            $this->rules['loginname']['messages'] = $this->rules['email']['messages'];
+        }
         //we cannot to define rule as function in the class body.
         //so, adding validation rule for uniqueness here
-        $this->rules['loginname']['checks'][] =
-            Rule::unique('customers', 'loginname')->ignore($this->customer_id, 'customer_id');
-        $this->rules['email']['checks'][] =
-            Rule::unique('customers', 'email')->ignore($this->customer_id, 'customer_id');
+        $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')
+                                                    ->ignore($this->customer_id, 'customer_id');
+        $this->rules['email']['checks'][] = Rule::unique('customers', 'email')
+                                                    ->ignore($this->customer_id, 'customer_id');
 
         //do merging to make required_without rule work
         if ($this->customer_id) {
@@ -530,6 +517,11 @@ class Customer extends BaseModel
         ];
     }
 
+
+    public function SetEmailAttribute($value){
+        $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
+    }
+
     public function setDataAttribute($value)
     {
         $this->attributes['data'] = serialize($value);
@@ -547,10 +539,16 @@ class Customer extends BaseModel
 
     public function setPasswordAttribute($password)
     {
-        if (!$this->originalIsEquivalent('password', $password)) {
+        if (!empty(trim($password)) && !$this->originalIsEquivalent('password', $password)) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
-            $this->attributes['password'] = H::getHash($password, $salt_key);
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption');
+            $this->attributes['password'] = $enc::getHash($password, $salt_key);
+        } else {
+            unset($this->attributes['password']);
         }
     }
 
@@ -741,7 +739,7 @@ class Customer extends BaseModel
             $query = $customer->select();
         }
         $query->addSelect($select);
-        $query->join(
+        $query->leftJoin(
             'customer_groups',
             'customer_groups.customer_group_id',
             '=',
@@ -763,7 +761,7 @@ class Customer extends BaseModel
             if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '".mb_strtolower($filter['loginname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".mb_strtolower($filter['loginname'])."%'");
             }
         }
 
@@ -784,9 +782,17 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['password'])) {
+            /**
+             * @var AEncryption $enc
+             */
+            $enc = ABC::getObjectByAlias('AEncryption');
             $query->whereRaw(
-                $aliasC.".password = SHA1(CONCAT(".$aliasC.".salt, SHA1(CONCAT(".$aliasC.".salt, SHA1('"
-                .$db->escape($filter['password'])."')))))"
+                $aliasC.".password = ".$enc->getRawSqlHash(
+                    ABC::env('DB_CURRENT_DRIVER'),
+                    'customers',
+                    $db->escape($filter['password']
+                    )
+                )
             );
         }
 
@@ -907,6 +913,7 @@ class Customer extends BaseModel
         }
 
         $sort_data = [
+            'customer_id'    => 'customers.customer_id',
             'name'           => 'name',
             'loginname'      => 'customers.loginname',
             'lastname'       => 'customers.lastname',

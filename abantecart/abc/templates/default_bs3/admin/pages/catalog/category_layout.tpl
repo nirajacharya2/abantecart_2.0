@@ -9,7 +9,7 @@ foreach ($templates as $template) {
   if ($tmpl_id == $template) {
     $item_class = ' class="disabled"';
   }
-  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';    
+  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
 }
 
 ?>
@@ -19,7 +19,7 @@ foreach ($templates as $template) {
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
 			  <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown" title="<?php echo $text_select_template; ?>">
-			    <i class="fa fa-photo"></i>
+			    <i class="fa fa-image"></i>
 			    <?php echo $tmpl_id; ?> <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu">
@@ -35,7 +35,7 @@ foreach ($templates as $template) {
 
 			<div class="btn-group mr10 toolbar">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reset; ?>">
-					<i class="fa fa-refresh fa-fw"></i>
+                    <i class="fa fa-sync fa-fw"></i>
 				</a>
 			</div>
 
@@ -56,10 +56,10 @@ foreach ($templates as $template) {
 				</div>
 			</form>
 			</div>
-			
+
 		</div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<?php echo $form_begin; ?>
@@ -74,7 +74,7 @@ foreach ($templates as $template) {
 			<i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $current_url; ?>">
-			<i class="fa fa-refresh fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</a>
 		</div>
 	</div>

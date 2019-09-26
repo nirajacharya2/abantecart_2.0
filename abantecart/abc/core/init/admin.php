@@ -4,7 +4,6 @@ use abc\core\lib\AConfig;
 use abc\core\lib\AExtensionManager;
 
 $lib_list = [
-    'order_manager',
     'layout_manager',
     'content_manager',
     'package_manager',

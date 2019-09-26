@@ -11,7 +11,6 @@ AbanteCart brand color styles: #064770 (dark blue) #F19013 (Orange)
 @import url('bootstrap.custom.css');
 @import url('jquery-ui/ui-lightness/jquery-ui-1.10.4.custom.min.css');
 @import url('../js/jquery/fileupload/jquery.fileupload-ui.css');
-@import url('font-awesome.min.css');
 @import url('abantecart.jquery.ui.css');
 @import url('form.css');
 @import url('chosen.bootstrap.css');
@@ -865,7 +864,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 	border-radius: 50px;
 }
 
-.pageheader .fa.fa-pencil {
+.pageheader .fa.fa-pencil-alt {
 	padding: 6px 9px;
 }
 
@@ -881,7 +880,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 	padding: 6px 10px;
 }
 
-.pageheader .fa-file-text {
+.pageheader .fa-file-alt {
 	padding: 6px 10px;
 }
 
@@ -1233,7 +1232,7 @@ p {
 }
 .reslibrary .thmb.view_details:before {
 	content: "\f00c";
-	font-family: FontAwesome;
+	font-family: "Font Awesome 5 Free";
 	color: #F19013;
 	font-size: 36px;
 	position:absolute;
@@ -3389,14 +3388,14 @@ body.stickyheader .sticky_left {
     text-decoration: none;
 }
 #task_modal .modal-body a.details-button:after {
-    font-family: FontAwesome;
+    font-family: "Font Awesome 5 Free";
     content: "\f066";
     font-size: 20px;
-    font-weight: 400;
+    font-weight: 900;
     position: relative;
 }
 #task_modal .modal-body a.details-button.collapsed:after {
-    font-family: FontAwesome;
+    font-family: "Font Awesome 5 Free";
     content: "\f065";
 }
 
@@ -3450,6 +3449,11 @@ select {
 }
 th.left, td.left {
 	float: none !important;
+}
+
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col-auto, .col-lg, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-auto, .col-md, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-md-auto, .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-auto {
+	padding-top: 0px;
+	padding-bottom: 0px;
 }
 
 /*

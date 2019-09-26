@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\models\order\OrderProduct;
 
 class ControllerPagesCatalogProductSummary extends AController
 {
@@ -56,9 +57,21 @@ class ControllerPagesCatalogProductSummary extends AController
             '&product_id='.$product_info['product_id']
         );
 
-        $this->loadModel('sale/order');
-        $this->data['product']['orders'] = $this->model_sale_order
-            ->getOrderTotalWithProduct($product_info['product_id']);
+        $this->data['auditLog'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'  => $this->language->get('text_audit_log'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
+            //quick view port URL
+            'vhref' => $this->html->getSecureURL(
+                'r/common/viewport/modal',
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
+        ]);
+
+        $this->data['product']['orders'] = OrderProduct::select('product_id, order_product_id')
+                                                       ->where('product_id', '=', $product_info['product_id'])
+                                                       ->distinct()
+                                                       ->count();
+
         $this->data['product']['orders_url'] = $this->html->getSecureURL(
             'sale/order',
             '&product_id='.$product_info['product_id']);

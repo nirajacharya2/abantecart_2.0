@@ -83,7 +83,7 @@ if ($logged){ ?>
                 <li class="hidden-xs">
                     <div class="btn-group">
                         <a href="<?php echo $rl_manager_url; ?>" class="btn btn-default tp-icon"><i
-                                    class="fa fa-photo"></i></a>
+                                    class="fa fa-image"></i></a>
                     </div>
                 </li>
                 <?php if ($ant){ ?>
@@ -199,7 +199,7 @@ if ($logged){ ?>
                     <div class="btn-group">
                         <a onClick="window.open('<?php echo $store; ?>');" class="btn btn-default tp-icon"
                            data-toggle="dropdown" title="<?php echo $text_front; ?>">
-                            <i class="fa fa-external-link fa-lg"></i>
+                            <i class="fa fa-external-link-alt fa-lg"></i>
                         </a>
                     </div>
                 </li>

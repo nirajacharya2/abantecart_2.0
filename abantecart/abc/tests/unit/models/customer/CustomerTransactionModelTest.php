@@ -14,6 +14,10 @@ class CustomerTransactionModelTest extends ATestCase{
 
     public function testValidator()
     {
+        $customer_id = 9;
+        $order_id = 2;
+        CustomerTransaction::where(['customer_id' => $customer_id, 'order_id' => $order_id])->forceDelete();
+
         //test fail
         $customerTransaction = new CustomerTransaction();
         $errors = [];
@@ -28,8 +32,8 @@ class CustomerTransactionModelTest extends ATestCase{
         $errors = [];
 
         $validData = [
-                            'customer_id' => 9,
-                            'order_id' => 2,
+                            'customer_id' => $customer_id,
+                            'order_id' => $order_id,
                             'created_by' => 1,
                             'credit' => '0',
                             'debit' => '121254.2365',
@@ -48,24 +52,22 @@ class CustomerTransactionModelTest extends ATestCase{
         $customerTransaction->fill($validData)->save();
 
         //check updating restriction
-        $caught = false;
         try{
             $customerTransaction->update(['transaction_type' => 'blablabla']);
-        }catch(\Exception $e){
-            $caught = true;
-        }
+        }catch(\Exception $e){}
 
-        $this->assertEquals(true, $caught);
+        $customerTransaction = CustomerTransaction::find( $customerTransaction->customer_transaction_id );
+        $this->assertEquals('unittest transaction', $customerTransaction->transaction_type);
 
         /**
          * test preventing of duplicates
          * @see ACustomer::debitTransaction()
          * */
-        CustomerTransaction::firstOrCreate($validData);
-        $count = CustomerTransaction::where($validData)->get()->count();
+        CustomerTransaction::updateOrCreate($validData);
+        $ct = CustomerTransaction::where($validData)->get();
+        $count = $ct->count();
         $this->assertEquals(1, $count);
 
-        $customerTransaction->forceDelete();
 
     }
 }

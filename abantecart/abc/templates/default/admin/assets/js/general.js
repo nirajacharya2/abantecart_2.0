@@ -732,7 +732,7 @@ $(document).on('click', ".task_run", function () {
 
     if (abort_task_url && abort_task_url.length > 0) {
         progress_html += '<div class="center abort_button">' +
-            '<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle-o fa-fw"></i> Stop</a>' +
+            '<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle fa-fw"></i> Stop</a>' +
             '</div>';
     }
     progress_html += '</div>';
@@ -1297,3 +1297,41 @@ $('.modal').on('show.bs.modal', function (e) {
         modal.find('.modal-content').load(button.attr('href'));
     }
 });
+
+//order edit functions
+
+
+function formatMoney(num, decimal_place, decimal_point, thousand_point) {
+    decimal_place = isNaN(decimal_place = Math.abs(decimal_place)) ? 2 : decimal_place;
+    decimal_point = decimal_point === undefined ? "." : decimal_point;
+    thousand_point = thousand_point === undefined ? "," : thousand_point;
+    var s = num < 0 ? "-" : "",
+        i = parseInt(num = Math.abs(+num || 0).toFixed(decimal_place)) + "",
+        j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + thousand_point : "")
+        + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousand_point)
+        + (decimal_place ? decimal_point + Math.abs(num - i).toFixed(decimal_place).slice(2) : "");
+}
+
+function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
+    str = str === undefined || str.length === 0 ? '0' : str;
+    //remove html-tags from currency formatted string
+    str = str.replace( /<.*?>/g, '' );
+    var final_number = str.replace(thousand_point, '')
+        .replace(currency_symbol, '')
+        .replace(decimal_point, '.')
+        .replace(/[^0-9\-\.]/g, '');
+    final_number = parseFloat(final_number);
+    return final_number;
+}
+
+
+function numberToCurrency(num, currency_location, decimal_place, decimal_point, thousand_point) {
+    var str;
+    if (currency_location === 'left') {
+        str = currency_symbol + formatMoney(num, decimal_place, decimal_point, thousand_point);
+    } else {
+        str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
+    }
+    return str;
+}

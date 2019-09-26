@@ -259,7 +259,10 @@ class ACustomer extends ALibBase
             $this->saveCustomerCart();
 
             //set cookie for unauthenticated user (expire in 1 year)
-            $encryption = new AEncryption($config->get('encryption_key'));
+            /**
+             * @var AEncryption $enc
+             */
+            $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
                 'customer_id' => $this->customer_id,
@@ -920,12 +923,18 @@ class ACustomer extends ALibBase
 
         $data['customer_id']  = $this->customer_id;
         $data['section']  = (int)$data['section'] ?? 0;
-
-        $transaction = new CustomerTransaction($data);
-        $transaction->validate();
-        //use firstOrCreate to prevent duplicates
-        $transaction = CustomerTransaction::firstOrCreate($data);
-        $transaction_id = $transaction->customer_transaction_id;
+        $transaction = new CustomerTransaction();
+        try {
+            $transaction->validate($data);
+            //use firstOrNew to prevent duplicates
+            $transaction = CustomerTransaction::updateOrCreate($data);
+            $transaction_id = $transaction->customer_transaction_id;
+        } catch (ValidationException $e) {
+            $errors = [];
+            \H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
+            Registry::log()->write(var_export($errors, true));
+            return false;
+        }
 
         return $transaction_id;
     }
@@ -971,7 +980,7 @@ class ACustomer extends ALibBase
         }
 
         // delete subscription accounts for given email
-        Customer::where($db->raw('LOWER(email)'), '=', mb_strtolower($data['email']))
+        Customer::where('email', '=', mb_strtolower($data['email']))
                 ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
                 ->forceDelete();
 
@@ -984,16 +993,19 @@ class ACustomer extends ALibBase
             $customer_id = $customer->customer_id;
             if(!$subscribe_only) {
                 $address = new Address();
-                $newData = ['customer_id' => $customer_id];
+                $newData = [];
                 foreach ($address->getFillable() as $key){
                     if(isset($data[$key])){
                         $newData[$key] = $data[$key];
                     }
                 }
-                $address->fill($newData);
-                $address->save();
-                //set address as default
-                $customer->update(['address_id' => $address->address_id]);
+                if($newData) {
+                    $newData['customer_id'] = $customer_id;
+                    $address->fill($newData);
+                    $address->save();
+                    //set address as default
+                    $customer->update(['address_id' => $address->address_id]);
+                }
             }
 
             if (!$data['approved']) {
@@ -1069,18 +1081,18 @@ class ACustomer extends ALibBase
         $language->load( $language->language_details['directory'] );
         $language->load( 'common/im' );
 
-        if ( ! empty( $data['loginname'] ) ) {
-            $message_arr = [
-                0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
-            ];
-            $im->send( 'customer_account_update', $message_arr );
-        }
         //get existing data and compare
         /**
          * @var $customer Customer
          */
         $customer = Customer::find($customer_id);
         foreach ( $customer->toArray() as $rec => $val ) {
+            if (!empty($data['loginname']) && $rec == 'loginname' && $val != $data['loginname']) {
+                $message_arr = [
+                    0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
+                ];
+                $im->send( 'customer_account_update', $message_arr );
+            }
             if ( $rec == 'email' && $val != $data['email'] ) {
                 $message_arr = [
                     0 => ['message' => sprintf( $language->get( 'im_customer_account_update_email_to_customer' ), $data['email'] )],

@@ -10,7 +10,7 @@
 			<div class="btn-group mr10 toolbar">
 			<a class="btn btn-white tooltips" target="_invoice" href="<?php echo $invoice_url; ?>" data-toggle="tooltip"
 			   title="<?php echo $text_invoice; ?>" data-original-title="<?php echo $text_invoice; ?>">
-				<i class="fa fa-file-text"></i>
+				<i class="fa fa-file-alt"></i>
 			</a>
 			</div>
 		</div>
@@ -55,7 +55,10 @@
 		<?php } ?>
 
 		<?php foreach ($form['fields'] as $name => $field) {
-
+            if($field->type == 'hidden'){
+                echo $field;
+                continue;
+            }
 		//Logic to calculate fields width
 		$widthcasses = "col-sm-7";
 		if (is_int(stripos($field->style, 'large-field'))) {

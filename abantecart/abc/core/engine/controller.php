@@ -46,13 +46,11 @@ use H;
  * @property \abc\models\admin\ModelUserUserGroup $model_user_user_group
  * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
  * @property \abc\models\admin\ModelUserUser $model_user_user
- * @property \abc\models\admin\ModelSaleOrder $model_sale_order
  * @property \abc\models\admin\ModelLocalisationCountry | \abc\models\storefront\ModelLocalisationCountry $model_localisation_country
  * @property \abc\models\admin\ModelLocalisationZone $model_localisation_zone
  * @property \abc\models\admin\ModelLocalisationLocation $model_localisation_location
  * @property \abc\models\admin\ModelLocalisationLanguage $model_localisation_language
  * @property \abc\models\admin\ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
- * @property \abc\models\admin\ModelLocalisationOrderStatus $model_localisation_order_status
  * @property \abc\models\admin\ModelReportViewed $model_report_viewed
  * @property \abc\models\admin\ModelSaleCoupon $model_sale_coupon
  * @property \abc\models\admin\ModelSaleContact $model_sale_contact

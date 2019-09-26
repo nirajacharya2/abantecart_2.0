@@ -1504,9 +1504,12 @@ class SelectboxHtmlElement extends HtmlElement
      */
     public function getHtml()
     {
+        if ($this->value === null) {
+            $this->value = [];
+        }
 
         if ( ! is_array($this->value)) {
-            $this->value = [$this->value => (string)$this->value];
+            $this->value = [(string)$this->value => (string)$this->value];
         }
 
         $this->options = ! $this->options ? [] : (array)$this->options;
@@ -1514,6 +1517,12 @@ class SelectboxHtmlElement extends HtmlElement
             $opt = (string)$opt;
         }
         unset($opt);
+        $this->disabled_options = (array)$this->disabled_options;
+        $disabled = [];
+        foreach ((array)$this->disabled_options as $id) {
+            $disabled[] = (string)$id;
+        }
+        $this->disabled_options = $disabled;
 
         $text_continue_typing = $text_looking_for = '';
         if (is_object($this->language)) {
@@ -1545,6 +1554,7 @@ class SelectboxHtmlElement extends HtmlElement
                 'extra'                => $this->extra,
             ]
         );
+
         if ( ! empty($this->help_url)) {
             $this->view->assign('help_url', $this->help_url);
         }
@@ -1726,6 +1736,7 @@ class CheckboxGroupHtmlElement extends HtmlElement
 
     public function getHtml()
     {
+        $this->value = $this->value === null || $this->value === ''  ? [] : $this->value;
         $this->value = ! is_array($this->value) ? [$this->value => $this->value] : $this->value;
         $this->validateOptions();
         if (isset($this->options) && is_array($this->options)) {

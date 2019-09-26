@@ -17,217 +17,302 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\order\Order;
+use abc\models\order\OrderStatus;
+use abc\models\order\OrderStatusDescription;
+use H;
+use Illuminate\Validation\ValidationException;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesListingGridOrderStatus extends AController{
-	public $data = array();
-	public function main(){
+class ControllerResponsesListingGridOrderStatus extends AController
+{
+    public $data = [];
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function main()
+    {
 
-		$this->loadLanguage('localisation/order_status');
-		$this->loadModel('localisation/order_status');
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$page = $this->request->post['page']; // get the requested page
-		$limit = $this->request->post['rows']; // get how many rows we want to have into the grid
-		$sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
-		$sord = $this->request->post['sord']; // get the direction
+        $this->loadLanguage('localisation/order_status');
 
-		// process jGrid search parameter
-		$allowedDirection = array ('asc', 'desc');
+        $page = $this->request->post['page']; // get the requested page
+        $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
+        $sidx = $this->request->post['sidx']; // get the direction
+        $sord = $this->request->post['sord']; // get the direction
 
-		if (!in_array($sord, $allowedDirection)) $sord = $allowedDirection[0];
+        // process jGrid search parameter
+        $allowedDirection = ['asc', 'desc'];
 
-		$data = array (
-				'order'               => strtoupper($sord),
-				'start'               => ($page - 1) * $limit,
-				'limit'               => $limit,
-				'content_language_id' => $this->session->data['content_language_id'],
-		);
+        if (!in_array($sord, $allowedDirection)) {
+            $sord = $allowedDirection[0];
+        }
 
-		$total = $this->model_localisation_order_status->getTotalOrderStatuses();
-		if ($total > 0){
-			$total_pages = ceil($total / $limit);
-		} else{
-			$total_pages = 0;
-		}
+        $data = [
+            'sort'                => $sidx,
+            'order'               => strtoupper($sord),
+            'start'               => ($page - 1) * $limit,
+            'limit'               => $limit,
+            'content_language_id' => $this->session->data['content_language_id'],
+        ];
 
-		if ($page > $total_pages){
-			$page = $total_pages;
-			$data['start'] = ($page - 1) * $limit;
-		}
+        $total = OrderStatus::count();
+        if ($total > 0) {
+            $total_pages = ceil($total / $limit);
+        } else {
+            $total_pages = 0;
+        }
 
-		$response = new stdClass();
-		$response->page = $page;
-		$response->total = $total_pages;
-		$response->records = $total;
+        if ($page > $total_pages) {
+            $page = $total_pages;
+            $data['start'] = ($page - 1) * $limit;
+        }
 
-		$results = $this->model_localisation_order_status->getOrderStatuses($data);
-		$i = 0;
+        $response = new stdClass();
+        $response->page = $page;
+        $response->total = $total_pages;
+        $response->records = $total;
 
-		$base_order_statuses = $this->order_status->getBaseStatuses();
+        $results = OrderStatus::getOrderStatuses($data);
+        $i = 0;
 
-		foreach ($results as $result){
-			$id = $result['order_status_id'];
-			$response->rows[$i]['id'] = $id;
-			if (AHelperUtils::has_value($base_order_statuses[$id])){
-				$response->userdata->classes[$id] = 'disable-delete';
-			}
-			$response->rows[$i]['cell'] = array (
-					$this->html->buildInput(array (
-							'name'  => 'order_status[' . $id . '][name]',
-							'value' => $result['name']
-					)),
-					$result['status_text_id']
-			);
-			$i++;
-		}
-		$this->data['response'] = $response;
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
-	}
+        $base_order_statuses = $this->order_status->getBaseStatuses();
 
-	public function update(){
+        foreach ($results as $result) {
+            $id = $result['order_status_id'];
+            $response->rows[$i]['id'] = $id;
+            if (H::has_value($base_order_statuses[$id])) {
+                $response->userdata->classes[$id] = 'disable-delete';
+            }
+            $response->rows[$i]['cell'] = [
+                $this->html->buildInput([
+                    'name'  => 'order_status['.$id.'][name]',
+                    'value' => $result['name'],
+                ]),
+                $result['status_text_id'],
+                mb_strtoupper($result['display_status'] ? $this->language->get('text_on') : $this->language->get('text_off')),
+            ];
+            $i++;
+        }
+        $this->data['response'] = $response;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['response']));
+    }
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function update()
+    {
 
-		if (!$this->user->canModify('listing_grid/order_status')){
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-					array ('error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/order_status'),
-					       'reset_value' => true
-					));
-		}
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadModel('localisation/order_status');
-		$this->loadModel('setting/store');
-		$this->loadModel('sale/order');
-		$this->loadLanguage('localisation/order_status');
+        if (!$this->user->canModify('listing_grid/order_status')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
+                        'listing_grid/order_status'),
+                    'reset_value' => true,
+                ]);
+        }
+        $this->loadModel('setting/store');
+        $this->loadLanguage('localisation/order_status');
+        $this->db->beginTransaction();
+        switch ($this->request->post['oper']) {
+            case 'del':
+                $ids = explode(',', $this->request->post['id']);
+                if (!empty($ids)) {
+                    try {
+                        foreach ($ids as $id) {
+                            $err = $this->_validateDelete($id);
+                            if (!empty($err)) {
+                                $error = new AError('');
+                                return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            }
+                            $oStatus = OrderStatus::find($id);
+                            if ($oStatus) {
+                                $oStatus->forceDelete();
+                            }
+                        }
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse(
+                            'VALIDATION_ERROR_406',
+                            ['error_text' => 'Application Error! See error log for details.']
+                        );
+                    }
+                }
+                break;
+            case 'save':
+                $ids = explode(',', $this->request->post['id']);
+                if (!empty($ids)) {
 
-		switch($this->request->post['oper']){
-			case 'del':
-				$ids = explode(',', $this->request->post['id']);
-				if (!empty($ids))
-					foreach ($ids as $id){
-						$err = $this->_validateDelete($id);
-						if (!empty($err)){
-							$error = new AError('');
-							return $error->toJSONResponse('VALIDATION_ERROR_406', array ('error_text' => $err));
-						}
-						$this->model_localisation_order_status->deleteOrderStatus($id);
-					}
-				break;
-			case 'save':
-				$ids = explode(',', $this->request->post['id']);
-				if (!empty($ids))
-					foreach ($ids as $id){
-						if (isset($this->request->post['order_status'][$id])){
-							foreach ($this->request->post['order_status'][$id] as $value){
-								if (!$this->_validate_field($value['name'])){
-									$this->response->setOutput($this->language->get('error_name'));
-									return null;
-								}
-							}
-							$this->model_localisation_order_status->editOrderStatus($id, array ('order_status' => $this->request->post['order_status'][$id]));
-						}
-					}
-				break;
-			default:
-		}
+                    try {
+                        foreach (array_unique($ids) as $id) {
+                            if (isset($this->request->post['order_status'][$id])) {
+                                foreach ($this->request->post['order_status'][$id] as $key => $value) {
+                                    if (!$this->validateStatusName($value)) {
+                                        $this->response->setOutput($this->language->get('error_name'));
+                                        return null;
+                                    }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+                                    OrderStatusDescription::updateOrInsert(
+                                        [
+                                            'order_status_id' => $id,
+                                            'language_id'     => $this->language->getContentLanguageID(),
+                                        ],
+                                        ['name' => $value]);
+                                }
 
-	/**
-	 * update only one field
-	 *
-	 * @return void
-	 */
-	public function update_field(){
+                            }
+                        }
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                        $this->db->rollback();
+                        $error = new AError('');
+                        return $error->toJSONResponse('VALIDATION_ERROR_406',
+                            ['error_text' => 'Application Error! See error log for details.']);
+                    }
+                }
+                break;
+            default:
+        }
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		if (!$this->user->canModify('listing_grid/order_status')){
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-					array ('error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/order_status'),
-					       'reset_value' => true
-					));
-		}
+    /**
+     * update only one field
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function update_field()
+    {
 
-		$this->loadLanguage('localisation/order_status');
-		$this->loadModel('localisation/order_status');
-		if (isset($this->request->get['id']) && !empty($this->request->post)){
-			//request sent from edit form. ID in url
-			$fields = array ('name', 'status_text_id');
-			foreach ($fields as $field_name){
-				if (isset($this->request->post[$field_name])){
-					if (!$this->_validate_field($this->request->post[$field_name])){
-						$error = new AError('');
-						return $error->toJSONResponse('VALIDATION_ERROR_406', array ('error_text' => $this->language->get('error_' . $field_name)));
-					}
-				}
-			}
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-			$this->model_localisation_order_status->editOrderStatus($this->request->get['id'], $this->request->post);
-			return null;
-		}
+        if (!$this->user->canModify('listing_grid/order_status')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
+                        'listing_grid/order_status'),
+                    'reset_value' => true,
+                ]);
+        }
 
-		//request sent from jGrid. ID is key of array
-		if (isset($this->request->post['order_status'])){
-			foreach ($this->request->post['order_status'] as $id => $value){
-				if (!$this->_validate_field($value['name'])){
-					$error = new AError('');
-					return $error->toJSONResponse('VALIDATION_ERROR_406', array ('error_text' => $this->language->get('error_name')));
-				}
-				$this->model_localisation_order_status->editOrderStatus($id, array ('name' => $value['name']));
-			}
-		}
+        $post = $this->request->post;
+        $this->loadLanguage('localisation/order_status');
+        if (isset($this->request->get['id']) && !empty($post)) {
+            //request sent from edit form. ID in url
+            $fields = ['name', 'status_text_id'];
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+            foreach ($fields as $field_name) {
+                if (isset($post[$this->request->get['id']][$field_name])) {
+                    if (!$this->validateStatusName($post[$this->request->get['id']][$field_name])) {
+                        $error = new AError('');
+                        return $error->toJSONResponse('VALIDATION_ERROR_406',
+                            ['error_text' => $this->language->get('error_'.$field_name)]);
+                    }
+                }
+            }
+            $orderStatusId = $this->request->get['id'];
+            $this->db->beginTransaction();
+            try {
+                $oStatus = OrderStatus::find($orderStatusId);
+                $oStatus->update($post);
+                $orderStatusDesc = OrderStatusDescription::where(
+                    [
+                        'order_status_id' => $orderStatusId,
+                        'language_id'     => $this->language->getContentLanguageID(),
+                    ]
+                )->first();
+                $orderStatusDesc->update($post);
+                $this->db->commit();
+            } catch (\Exception $e) {
+                Registry::log()->write(__CLASS__.': '.$e->getMessage());
+                $this->db->rollback();
+                $error = new AError('');
+                return $error->toJSONResponse('VALIDATION_ERROR_406',
+                    ['error_text' => 'Application Error! See error log for details.']);
+            }
 
-	private function _validate_field($value){
-		if (mb_strlen($value) < 3 || mb_strlen($value) > 32){
-			return false;
-		}
-		return true;
-	}
+            return null;
+        }
 
-	private function _validateDelete($order_status_id){
+        //request sent from jGrid. ID is key of array
+        if (isset($this->request->post['order_status'])) {
+            foreach ($this->request->post['order_status'] as $id => $value) {
 
-		if (in_array($order_status_id, array_keys($this->order_status->getBaseStatuses()))){
-			return $this->language->get('error_nondeletable');
-		}
+                if (!$this->validateStatusName($value['name'])) {
+                    var_dump($value['name']);
+                    $error = new AError('');
+                    return $error->toJSONResponse('VALIDATION_ERROR_406',
+                        ['error_text' => $this->language->get('error_name')]);
+                }
+                OrderStatusDescription::updateOrInsert(
+                    [
+                        'order_status_id' => $id,
+                        'language_id'     => $this->language->getContentLanguageID(),
+                    ],
+                    ['name' => $value['name']]
+                );
+            }
+        }
 
-		if ($this->config->get('config_order_status_id') == $order_status_id){
-			return $this->language->get('error_default');
-		}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		$store_total = $this->model_setting_store->getTotalStoresByOrderStatusId($order_status_id);
-		if ($store_total){
-			return sprintf($this->language->get('error_store'), $store_total);
-		}
+    protected function validateStatusName($name)
+    {
+        $this->error = [];
+        $oStatusDesc = new OrderStatusDescription();
+        try {
+            $oStatusDesc->validate(['name' => $name]);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($oStatusDesc->errors()['validation'], $this->error);
+        }
 
-		$order_total = $this->model_sale_order->getOrderHistoryTotalByOrderStatusId($order_status_id);
-		if ($order_total){
-			return sprintf($this->language->get('error_order'), $order_total);
-		}
-	}
+        return !($this->error);
+    }
+
+    private function _validateDelete($order_status_id)
+    {
+
+        if (in_array($order_status_id, array_keys($this->order_status->getBaseStatuses()))) {
+            return $this->language->get('error_nondeletable');
+        }
+
+        if ($this->config->get('config_order_status_id') == $order_status_id) {
+            return $this->language->get('error_default');
+        }
+
+        $store_total = $this->model_setting_store->getTotalStoresByOrderStatusId($order_status_id);
+        if ($store_total) {
+            return sprintf($this->language->get('error_store'), $store_total);
+        }
+
+        $order_id = Order::where('order_status_id', '=', $order_status_id)->first()->order_id;
+        if ($order_id) {
+            return sprintf($this->language->get('error_order'), $order_id);
+        }
+    }
 
 }

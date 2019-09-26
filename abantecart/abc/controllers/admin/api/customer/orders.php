@@ -17,63 +17,63 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-namespace abc\controllers\admin;
-use abc\core\engine\AControllerAPI;
-use abc\core\helper\AHelperUtils;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+namespace abc\controllers\admin;
+
+use abc\core\engine\AControllerAPI;
+use abc\models\order\Order;
+use H;
 
 /**
  * Class ControllerApiCustomerOrders
+ *
  * @package abc\controllers\API
- * @property \abc\models\admin\ModelSaleOrder $model_sale_order
  */
-class ControllerApiCustomerOrders extends AControllerAPI {
-  
-	public function get() {
+class ControllerApiCustomerOrders extends AControllerAPI
+{
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    public function get()
+    {
 
-		$this->loadLanguage('sale/order');
-		$this->loadModel('sale/order');
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$request = $this->rest->getRequestParams();
-		
-		if ( !AHelperUtils::has_value($request['customer_id']) ) {
-			$this->rest->setResponseData( array('Error' => 'Customer ID is missing') );
-			$this->rest->sendResponse(200);
-			return null;
-		}		
+        $this->loadLanguage('sale/order');
 
-		$filter = array(
-			'filter_customer_id' => $request['customer_id'],
-			'sort'  => 'o.date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => 20
-		);		
+        $request = $this->rest->getRequestParams();
 
-		if($request['start']) {
-			$filter['start'] = (int)$request['start'];
-		}
-		if($request['limit']) {
-			$filter['limit'] = (int)$request['limit'];
-		}
+        if (!H::has_value($request['customer_id'])) {
+            $this->rest->setResponseData(['Error' => 'Customer ID is missing']);
+            $this->rest->sendResponse(200);
+            return null;
+        }
 
-		$orders =  $this->model_sale_order->getOrders($filter);
-		if (!count($orders)) {
-			$this->rest->setResponseData( array('Message' => 'No order records found for the customer') );
-			$this->rest->sendResponse(200);
-			return null;
-		}
-			    
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+        $filter = [
+            'filter_customer_id' => $request['customer_id'],
+            'sort'               => 'o.date_added',
+            'order'              => 'DESC',
+            'start'              => 0,
+            'limit'              => 20,
+        ];
 
-		$this->rest->setResponseData( $orders );
-		$this->rest->sendResponse( 200 );
-	    
-	    }
+        if ($request['start']) {
+            $filter['start'] = (int)$request['start'];
+        }
+        if ($request['limit']) {
+            $filter['limit'] = (int)$request['limit'];
+        }
+
+        $orders = Order::getOrders($filter);
+        if (!count($orders)) {
+            $this->rest->setResponseData(['Message' => 'No order records found for the customer']);
+            $this->rest->sendResponse(200);
+            return null;
+        }
+
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->rest->setResponseData($orders);
+        $this->rest->sendResponse(200);
+
+    }
 }

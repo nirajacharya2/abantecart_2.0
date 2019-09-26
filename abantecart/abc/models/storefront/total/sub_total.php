@@ -17,52 +17,54 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\storefront;
+
 use abc\core\engine\ALanguage;
 use abc\core\engine\Model;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ModelTotalSubTotal extends Model {
-	public function getTotal(&$total_data, &$total, &$taxes, &$cust_data) {
-		if ($this->config->get('sub_total_status')) {
-			//create new instance of language for case when model called from admin-side
-			$language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
-			$language->load($language->language_details['directory']);
-			$language->load('total/sub_total');
+class ModelTotalSubTotal extends Model
+{
+    public function getTotal(&$total_data, &$total, &$taxes, &$cust_data)
+    {
+        if ($this->config->get('sub_total_status')) {
+            //create new instance of language for case when model called from admin-side
+            $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
+            $language->load($language->language_details['directory']);
+            $language->load('total/sub_total');
 
-			//currency based recalculation for all products to avoid fractional loss
-			$converted_sum = 0;
-			$subtotal = 0;
-			$products = $this->cart->getProducts();
-			foreach ($products as $product){
-				$subtotal += $product['total'];
-				//correct way to calc total with currency conversion. 
-				$converted_sum += $this->currency->format_number($product['price']) * (int)$product['quantity'];
-			}
+            //currency based recalculation for all products to avoid fractional loss
+            $converted_sum = 0;
+            $subtotal = 0;
+            $products = $this->cart->getProducts();
+            foreach ($products as $product) {
+                $subtotal += $product['total'];
+                //correct way to calc total with currency conversion.
+                $converted_sum += $this->currency->format_number($product['price']) * (int)$product['quantity'];
+            }
 
-			//if there is a conversion fractional loss, adjust subtotal base currency price. 
-			//This is not ideal solution, need to address in the future. 
-			$converted_subtotal = $this->currency->format_number($subtotal);
-			if($converted_subtotal != $converted_sum) {
-				$curr = $this->currency->getCurrency();
-				//calculate adjusted total without rounding
-				$subtotal = $converted_sum / $curr['value'];
-			} 
+            //if there is a conversion fractional loss, adjust subtotal base currency price.
+            //This is not ideal solution, need to address in the future.
+            $converted_subtotal = $this->currency->format_number($subtotal);
+            if ($converted_subtotal != $converted_sum) {
+                $curr = $this->currency->getCurrency();
+                //calculate adjusted total without rounding
+                $subtotal = $converted_sum / $curr['value'];
+            }
 
-			//currency display value
-			$converted_sum_txt = $this->currency->format(max(0,$converted_sum), '', 1);
-			$total_data[] = array( 
-				'id'         => 'subtotal',
-				'title'      => $language->get('text_sub_total'),
-				'text'       => $converted_sum_txt,
-				'converted'  => $converted_sum,
-				'value'      => $subtotal,
-				'sort_order' => $this->config->get('sub_total_sort_order'),
-				'total_type' => $this->config->get('sub_total_total_type')
-			);
-			$total += $this->cart->getSubTotal();
-		}
-	}
+            //currency display value
+            $converted_sum_txt = $this->currency->format(max(0, $converted_sum), '', 1);
+            $total_data[] = [
+                'id'         => 'subtotal',
+                'key'        => 'sub_total',
+                'title'      => $language->get('text_sub_total'),
+                'text'       => $converted_sum_txt,
+                'converted'  => $converted_sum,
+                'value'      => $subtotal,
+                'sort_order' => $this->config->get('sub_total_sort_order'),
+                'total_type' => $this->config->get('sub_total_total_type'),
+            ];
+            $total += $this->cart->getSubTotal();
+        }
+    }
 }

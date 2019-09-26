@@ -21,8 +21,16 @@
 		<value><![CDATA[Order Status Text ID]]></value>
 	</definition>
 	<definition>
-		<key>entry_text_id</key>
+		<key>column_display_status</key>
+		<value><![CDATA[Display Status]]></value>
+	</definition>
+	<definition>
+		<key>entry_status_text_id</key>
 		<value><![CDATA[Order Status Text ID:]]></value>
+	</definition>
+	<definition>
+		<key>entry_display_status</key>
+		<value><![CDATA[Display Status:]]></value>
 	</definition>
 	<definition>
 		<key>column_action</key>

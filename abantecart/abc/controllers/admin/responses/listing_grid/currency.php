@@ -25,6 +25,7 @@ use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\locale\Currency;
+use abc\models\order\Order;
 use stdClass;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
@@ -33,7 +34,7 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 
 class ControllerResponsesListingGridCurrency extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -48,12 +49,12 @@ class ControllerResponsesListingGridCurrency extends AController
         $sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
         $sord = $this->request->post['sord']; // get the direction
 
-        $data = array(
+        $data = [
             'sort'  => $sidx,
             'order' => strtoupper($sord),
             'start' => ($page - 1) * $limit,
             'limit' => $limit,
-        );
+        ];
 
         $total = Currency::count();
         if ($total > 0) {
@@ -80,26 +81,26 @@ class ControllerResponsesListingGridCurrency extends AController
         foreach ($results as $result) {
 
             $response->rows[$i]['id'] = $result['currency_id'];
-            $response->rows[$i]['cell'] = array(
-                $this->html->buildInput(array(
+            $response->rows[$i]['cell'] = [
+                $this->html->buildInput([
                     'name'  => 'title['.$result['currency_id'].']',
                     'value' => $result['title'],
-                )),
-                $this->html->buildInput(array(
+                ]),
+                $this->html->buildInput([
                     'name'  => 'code['.$result['currency_id'].']',
                     'value' => $result['code'],
-                )),
-                $this->html->buildInput(array(
+                ]),
+                $this->html->buildInput([
                     'name'  => 'value['.$result['currency_id'].']',
                     'value' => $result['value'],
-                )),
+                ]),
                 AHelperUtils::dateISO2Display($result['date_modified'], $this->language->get('date_format_short')),
-                $this->html->buildCheckbox(array(
+                $this->html->buildCheckbox([
                     'name'  => 'status['.$result['currency_id'].']',
                     'value' => $result['status'],
                     'style' => 'btn_switch',
-                )),
-            );
+                ]),
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -119,17 +120,16 @@ class ControllerResponsesListingGridCurrency extends AController
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/currency'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         switch ($this->request->post['oper']) {
             case 'del':
 
                 $this->loadModel('setting/store');
-                $this->loadModel('sale/order');
 
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
@@ -147,14 +147,17 @@ class ControllerResponsesListingGridCurrency extends AController
                                 $err = sprintf($this->language->get('error_store'), $store_total);
                             }
                         }
-                        $order_total = $this->model_sale_order->getTotalOrdersByCurrencyId($id);
+                        $order_total = Order::where('order_status_id', '>', 0)
+                                            ->where('currency_id', '=', $id)
+                                            ->count();
+
                         if ($order_total) {
                             $err = sprintf($this->language->get('error_order'), $order_total);
                         }
 
                         if (!empty($err)) {
                             $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
 
                         if ($id) {
@@ -164,7 +167,8 @@ class ControllerResponsesListingGridCurrency extends AController
                 }
                 break;
             case 'save':
-                $allowedFields = array_merge(array('title', 'code', 'value', 'status'), (array)$this->data['allowed_fields']);
+                $allowedFields =
+                    array_merge(['title', 'code', 'value', 'status'], (array)$this->data['allowed_fields']);
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
@@ -179,7 +183,7 @@ class ControllerResponsesListingGridCurrency extends AController
                                 $err = $this->_validateField($f, $this->request->post[$f][$id]);
                                 if (!empty($err)) {
                                     $error = new AError('');
-                                    return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                                 }
                                 $arUpdate = array_merge($arUpdate, [$f => $this->request->post[$f][$id]]);
                             }
@@ -214,10 +218,10 @@ class ControllerResponsesListingGridCurrency extends AController
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/currency'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         if (isset($this->request->get['id'])) {
@@ -226,23 +230,23 @@ class ControllerResponsesListingGridCurrency extends AController
                 $err = $this->_validateField($key, $value);
                 if (!empty($err)) {
                     $error = new AError('');
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                 }
-                $data = array($key => $value);
+                $data = [$key => $value];
                 Currency::find($this->request->get['id'])->update($data);
             }
             return null;
         }
 
         //request sent from jGrid. ID is key of array
-        $allowedFields = array_merge(array('title', 'code', 'value', 'status'), (array)$this->data['allowed_fields']);
+        $allowedFields = array_merge(['title', 'code', 'value', 'status'], (array)$this->data['allowed_fields']);
         foreach ($allowedFields as $f) {
             if (isset($this->request->post[$f])) {
                 foreach ($this->request->post[$f] as $k => $v) {
                     $err = $this->_validateField($f, $v);
                     if (!empty($err)) {
                         $error = new AError('');
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
                     $result = Currency::find($k)->update([$f => $v]);
                     if (!$result) {

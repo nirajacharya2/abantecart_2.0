@@ -27,6 +27,7 @@ use abc\models\admin\ModelSaleCustomerNote;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
+use abc\models\customer\CustomerNotes;
 use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\models\system\Store;
@@ -521,7 +522,8 @@ class ControllerPagesSaleCustomer extends AController
             $this->data['action'] = $this->html->getSecureURL('sale/customer/insert');
             $this->data['heading_title'] = $this->language->get('text_insert').$this->language->get('text_customer');
             $this->data['update'] = '';
-            $form = new AForm('ST');
+            $formType = $this->data['new_customer_form_type'] ?: 'ST';
+            $form = new AForm($formType);
         } else {
             $this->data['customer_id'] = $customer_id;
             $this->data['action'] = $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id);
@@ -533,7 +535,8 @@ class ControllerPagesSaleCustomer extends AController
                 'listing_grid/customer/update_field',
                 '&id='.$customer_id
             );
-            $form = new AForm('HS');
+            $formType = $this->data['edit_customer_form_type'] ?: 'HS';
+            $form = new AForm($formType);
 
             $this->data['reset_password'] = $this->html->buildElement(
                 [
@@ -571,6 +574,15 @@ class ControllerPagesSaleCustomer extends AController
             'text'   => $this->language->get('button_actas'),
             'href'   => $this->html->getSecureURL('sale/customer/actonbehalf', '&customer_id='.$customer_id),
             'target' => 'new',
+        ]);
+        $this->data['auditLog'] = $this->html->buildElement([
+            'type'   => 'button',
+            'text'  => $this->language->get('text_audit_log'),
+            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
+            //quick view port URL
+            'vhref' => $this->html->getSecureURL(
+                'r/common/viewport/modal',
+                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
         ]);
         $this->data['message'] = $this->html->buildElement([
             'type'   => 'button',
@@ -1222,15 +1234,13 @@ class ControllerPagesSaleCustomer extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->loadModel('sale/customer_note');
-
         if ($this->request->is_POST()) {
             $data = [
                 'user_id'     => $this->user->getId(),
                 'customer_id' => $this->request->get['customer_id'],
             ];
             $data = array_merge($data, $this->request->post);
-            if ($this->model_sale_customer_note->addNote($data)) {
+            if (CustomerNotes::create($data)->save()) {
                 $this->session->data['success'] = $this->language->get('text_success');
             }
             abc_redirect($this->html->getSecureURL('sale/customer/notes',
@@ -1283,7 +1293,7 @@ class ControllerPagesSaleCustomer extends AController
             $this->data['success'] = '';
         }
 
-        $notes = $this->model_sale_customer_note->getNotes($customer_id);
+        $notes = CustomerNotes::getNotes($customer_id);
         $this->data['notes'] = [];
         foreach ($notes as &$note) {
             $note->note_added = H::dateISO2Display(

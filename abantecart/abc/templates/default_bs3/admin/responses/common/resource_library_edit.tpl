@@ -51,14 +51,14 @@
 			   data-confirmation="delete"
 			   data-confirmation-text="<?php echo $text_confirm_delete; ?>"
 			   data-original-title="<?php echo $button_delete; ?>">
-			   	<i class="fa fa-trash-o"></i>
+			   	<i class="fa fa-trash"></i>
 			</a>
 		<?php
 		} else {
 		?>
 			<a class="btn btn-default disabled rl_delete tooltips" href="#" data-original-title="<?php echo $error_delete; ?>">
 				<span class="fa-stack fa-lg">
-			   		<i class="fa fa-trash-o fa-stack-1x"></i>
+			   		<i class="fa fa-trash fa-stack-1x"></i>
 			   		<i class="fa fa-ban fa-stack-2x text-danger"></i>
 			   </span>
 			</a>
@@ -71,7 +71,7 @@
 </ul>
 
 <div class="row edit_resource_form">
-	<div class="col-xs-12">	
+	<div class="col-xs-12">
 		<?php if (!empty ($resource['resource_code'])) { ?>
 			<div class="form-group <?php echo(!empty($error['resource_code']) ? "has-error" : ""); ?>">
 				<label class="control-label"
@@ -110,7 +110,7 @@
 			<div class="row">
 				<label class="col-sm-5 ellipsis control-label"><?php echo $text_image_size; ?></label>
 				<div class="col-sm-7">
-					<?php echo $details['width']; ?> x <?php echo $details['height']; ?> 
+					<?php echo $details['width']; ?> x <?php echo $details['height']; ?>
 				</div>
 			</div>
 			<?php } ?>
@@ -125,13 +125,13 @@
 				<div class="col-sm-7">
 					<?php echo $details['file_size']; ?>
 				</div>
-			</div>	
+			</div>
 			<div class="row">
 				<label class="col-sm-5 ellipsis control-label"><?php echo $text_file_path; ?></label>
 				<div class="col-sm-7">
 					<input type="text" value="<?php echo $details['file_path']; ?>" class="rl_details form-control input-sm" readonly>
 				</div>
-			</div>	
+			</div>
 			<div class="row">
 				<label class="col-sm-5 ellipsis control-label"><?php echo $text_file_url; ?></label>
 				<div class="col-sm-7">
@@ -170,7 +170,7 @@
 							</div>
 						<?php } ?>
 						<button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle">
-							<i class="fa fa-external-link fa-lg"></i>&nbsp;
+							<i class="fa fa-external-link-alt fa-lg"></i>&nbsp;
 							<span class="caret"></span>&nbsp;
 							<span class="badge"><?php echo $total_cnt; ?></span>&nbsp;
 						</button>
@@ -181,9 +181,9 @@
 				if ($mode == 'single') { ?>
 					<div class="col-sm-3">
 						<a class="btn btn-primary btn-xs rl_select tooltips"
-						   data-original-title="<?php echo $txt_select_resource; ?>"
-						   data-rl-id="<?php echo $resource_id; ?>"
-						   data-type="<?php echo $type; ?>"><i class="fa fa-check-square-o fa-lg"></i>
+                           data-original-title="<?php echo $txt_select_resource; ?>"
+                           data-rl-id="<?php echo $resource_id; ?>"
+                           data-type="<?php echo $type; ?>"><i class="fa fa-check-square fa-lg"></i>
 						</a>
 					</div>
 				<?php } else if ($resource['mapped_to_current'] && $mode != 'list_all') { ?>
@@ -252,7 +252,7 @@
 	<div class="row">
 		<div class="center">
 			<a class="btn btn-default rl_reset tooltips" href="#" title="<?php echo $button_reload; ?>">
-				<i class="fa fa-refresh"></i>
+                <i class="fa fa-sync"></i>
 			</a>
 			&nbsp;
 			<a class="btn btn-primary rl_save tooltips" href="#" title="<?php echo $button_save; ?>">
@@ -261,15 +261,15 @@
 			&nbsp;
 			<?php if ($mode == 'single') { ?>
 				<a class="btn btn-primary rl_save rl_select tooltips" data-rl-id="<?php echo $resource_id; ?>" data-type="<?php echo $type; ?>"  title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } elseif ($mode == 'list_all') { ?>
 				<a class="btn btn-primary rl_save rl_close tooltips" data-rl-id="<?php echo $resource_id; ?>" data-type="<?php echo $type; ?>"  title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } else { ?>
 				<a class="btn btn-primary rl_link rl_save rl_close tooltips" href="#" title="<?php echo $button_save_n_apply; ?>">
-					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-close fa-fw"></i> 
+					<i class="fa fa-save fa-fw"></i> <i class="fa fa-check fa-fw"></i> <i class="fa fa-times fa-fw"></i>
 				</a>&nbsp;
 			<?php } ?>
 		</div>

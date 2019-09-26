@@ -135,7 +135,7 @@ if (ABC::env('ADMIN_SECRET') !== null
     ABC::env(
         [
             'IS_ADMIN'      => true,
-            'DIR_LANGUAGES' => $dir_app.'languages'.DS.'admin'.DS,
+            'DIR_LANGUAGES' => $dir_app.'languages'.DS,
             'DIR_BACKUP'    => $dir_app.'system'.DS.'backup'.DS,
             'DIR_DATA'      => $dir_app.'system'.DS.'data'.DS,
         ]
@@ -149,7 +149,7 @@ if (ABC::env('ADMIN_SECRET') !== null
     );
 } else {
     ABC::env('IS_ADMIN', false);
-    ABC::env('DIR_LANGUAGES', $dir_app.DS.'languages'.DS.'storefront'.DS);
+    ABC::env('DIR_LANGUAGES', $dir_app.DS.'languages'.DS);
     ABC::env(
         'SESSION_ID',
         ABC::env('UNIQUE_ID') ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10)) : 'AC_SF_PHPSESSID'
@@ -442,6 +442,9 @@ $hook->hk_InitEnd();
 
 //load order status class
 registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+//load order class
+registerClass($registry, 'order', 'AOrder', [$registry], "\abc\core\lib\AOrder", [$registry]);
+
 
 //IM
 

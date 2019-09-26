@@ -6,8 +6,10 @@ use abc\models\catalog\ProductDescription;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
+use abc\models\order\Order;
 use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
+use abc\modules\listeners\ModelCategoryListener;
 
 return [
     /** events for ORM Models
@@ -37,6 +39,9 @@ return [
             //this listener firing by base model property $auditEvents
             ModelAuditListener::class,
         ],
+        'eloquent.saved: abc\models\catalog\Category' => [
+            ModelCategoryListener::class
+        ],
     ],
     'MORPH_MAP'      => [
         'Currency'           => Currency::class,
@@ -45,6 +50,7 @@ return [
         'User'               => User::class,
         'ProductDescription' => ProductDescription::class,
         'Category'           => Category::class,
+        'Order'              => Order::class,
     ],
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details
