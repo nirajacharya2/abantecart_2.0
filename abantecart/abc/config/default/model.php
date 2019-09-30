@@ -39,6 +39,8 @@ return [
             //this listener firing by base model property $auditEvents
             ModelAuditListener::class,
         ],
+        //listener recalculates product counts of category,
+        // count of subcategories and build path
         'eloquent.saved: abc\models\catalog\Category' => [
             ModelCategoryListener::class
         ],

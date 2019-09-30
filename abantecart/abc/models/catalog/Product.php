@@ -815,7 +815,7 @@ class Product extends BaseModel
 
     public function getProductCategories()
     {
-        $categories = (new Category())->getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $categories = (new Category())->getCategories(0, static::$current_language_id);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[
@@ -1277,10 +1277,12 @@ class Product extends BaseModel
         /**
          * @var Product $product
          */
-        $product = Product::find($product_id);
+        $product = Product::with('categories')->find($product_id);
         if (!$product) {
             return false;
         }
+        $prevCategories = $product->categories->toArray();
+
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {
@@ -1301,6 +1303,10 @@ class Product extends BaseModel
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
         self::updateProductLinks($product_id, $product_data);
+
+        $affectedCategoryIDs = array_merge($prevCategories, $product->categories->toArray());
+        Registry::log()->write(var_export($affectedCategoryIDs, true));
+
         return true;
     }
 

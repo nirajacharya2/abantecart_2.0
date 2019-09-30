@@ -41,7 +41,7 @@ class CategoryModelTest extends ATestCase
 //        /** @var Category $category */
 //        $category = Category::find(3515);
 //
-//        $result = $category->calculatePath($category->category_id);
+//        $result = $category->getCategoryBranchInfo($category->category_id);
 //
 //var_Dump($result);
 ////        $this->assertEquals($path, $category->category_id);

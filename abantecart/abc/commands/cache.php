@@ -169,7 +169,7 @@ class Cache extends BaseCommand
             /**
              * @var \abc\models\admin\ModelCatalogCategory $model
              */
-            $categories = (new Category())->getCategoriesData(['store_id' => $store['store_id']]);
+            $categories = Category::getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
                     'product/category',

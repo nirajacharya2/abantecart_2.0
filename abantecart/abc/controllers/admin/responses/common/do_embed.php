@@ -272,7 +272,7 @@ class ControllerResponsesCommonDoEmbed extends AController
             }
         } else {
             if (!sizeof($category_id)) {
-                $options = (new Category())->getCategoriesData(['parent_id' => 0]);
+                $options = Category::getCategoriesData(['parent_id' => 0]);
                 $category_id = [];
                 foreach ($options as $c) {
                     $category_id[] = $c['category_id'];
@@ -283,7 +283,7 @@ class ControllerResponsesCommonDoEmbed extends AController
                 }
                 unset($c);
                 $subsql = ' c.category_id IN ('.implode(',', $category_id).') ';
-                $options = (new Category())->getCategoriesData(['subsql_filter' => $subsql]);
+                $options = Category::getCategoriesData(['subsql_filter' => $subsql]);
             }
         }
 
