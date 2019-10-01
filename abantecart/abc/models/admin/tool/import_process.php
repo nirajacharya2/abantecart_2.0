@@ -213,7 +213,6 @@ class ModelToolImportProcess extends Model
         $this->task_id = $task_id;
         $language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
         $store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
-        $this->load->model('catalog/category');
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
             $this->imp_log = new $log_classname(['app' => "categories_import_{$task_id}.txt"]);
@@ -400,8 +399,6 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateCategory($record, $settings, $language_id, $store_id)
     {
-        $this->load->model('catalog/category');
-
         $record = array_map('trim', $record);
         //data mapping
         $data = $this->buildDataMap($record, $settings['import_col'], $settings['categories_fields'],
@@ -437,7 +434,7 @@ class ModelToolImportProcess extends Model
 
         if ($category_id) {
             //update category
-            (new Category())->editCategory(
+            Category::editCategory(
                 $category_id,
                 $category_data
             );
@@ -452,7 +449,7 @@ class ModelToolImportProcess extends Model
                 $category[$key] = isset($category[$key]) ? $category[$key] : $val;
             }
 
-            $category_id = (new Category())->addCategory($category_data);
+            $category_id = Category::addCategory($category_data);
             if ($category_id) {
                 $this->toLog("Created category '{$category_desc['name']}' with ID {$category_id}.");
                 $status = true;
@@ -488,7 +485,6 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateManufacturer($record, $settings, $language_id, $store_id)
     {
-        $this->load->model('catalog/category');
         $status = false;
         $record = array_map('trim', $record);
         //data mapping
@@ -531,6 +527,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return bool
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     protected function addUpdateOptions($product_id, $data = [], $weight_class_id, $language_id, $store_id)
@@ -606,6 +603,7 @@ class ModelToolImportProcess extends Model
      * @param $data
      *
      * @return bool|int|null
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     protected function saveOptionValue($product_id, $weight_class_id, $p_option_id, $data)
@@ -919,7 +917,6 @@ class ModelToolImportProcess extends Model
         if (!is_array($data['category'])) {
             return [];
         }
-        $this->load->model('catalog/category');
 
         $ret = [];
         for ($i = 0; $i < count($data['category']); $i++) {
@@ -1012,7 +1009,7 @@ class ModelToolImportProcess extends Model
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {
-        $category_id = (new Category())->addCategory(
+        $category_id = Category::addCategory(
             [
                 'parent_id'            => $pid,
                 'sort_order'           => 0,

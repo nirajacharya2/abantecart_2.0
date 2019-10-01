@@ -21,10 +21,10 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 
@@ -33,7 +33,6 @@ use abc\core\lib\AException;
  *
  * @package abc\controllers\admin
  *
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerApiCatalogProduct extends AControllerAPI
 {
@@ -66,10 +65,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
         /**
-         * @var Product $product
+         * @var QueryBuilder $query
          */
-        $product = Product::where([$getBy => $request[$getBy]]);
-        if ($product === null) {
+        $query = Product::where([$getBy => $request[$getBy]]);
+        if ($query === null) {
             $this->rest->setResponseData(
                 ['Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist"]
             );
@@ -78,7 +77,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $this->data['result'] = [];
-        $item = $product->first();
+        $item = $query->first();
         if ($item) {
             $this->data['result'] = $item->getAllData();
         }
@@ -293,7 +292,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param array $data
      *
      * @return mixed
-     * @throws AException
      */
     protected function prepareData($data)
     {
@@ -336,7 +334,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     }
 
     protected function processCategoryTree(array $category_tree){
-        $this->loadModel('catalog/category');
+
         foreach($category_tree as $lang_code => $category){
             $language_id = $this->language->getLanguageIdByCode($lang_code);
             //Note: start from parent category!
@@ -353,7 +351,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     protected function replaceCategories($category, $language_id){
         $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
         if (!$exists) {
-            $new_category_id = (new Category())->addCategory(
+            $new_category_id = Category::addCategory(
                 [
                     'parent_id' => $category['parent_id'],
                     'status'    => $category['status'],

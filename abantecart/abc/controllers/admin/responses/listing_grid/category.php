@@ -21,7 +21,6 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
@@ -30,15 +29,10 @@ use abc\models\catalog\Category;
 use H;
 use stdClass;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ControllerResponsesListingGridCategory
  *
  * @package abc\controllers\admin
- * @property \abc\models\admin\ModelCatalogCategory $model_catalog_category
  */
 class ControllerResponsesListingGridCategory extends AController
 {
@@ -51,7 +45,6 @@ class ControllerResponsesListingGridCategory extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/category');
-        $this->loadModel('catalog/category');
         $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
@@ -59,6 +52,16 @@ class ControllerResponsesListingGridCategory extends AController
         $grid_filter_params = array_merge(['name'], (array)$this->data['grid_filter_params']);
         $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
         $filter_data = $filter->getFilterData();
+        if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
+            $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
+            $allowedFields = array_merge(['name'], (array)$this->data['allowed_fields']);
+            foreach ($searchData['rules'] as $rule) {
+                if (!in_array($rule['field'], $allowedFields)) {
+                    continue;
+                }
+                $filter_data[$rule['field']] = $rule['data'];
+            }
+        }
         //Add custom params
         //set parent to null to make search work by all category tree
 
@@ -66,14 +69,16 @@ class ControllerResponsesListingGridCategory extends AController
         //NOTE: search by all categories when parent_id not set or zero (top level)
 
         if ($filter_data['subsql_filter']) {
-            $filter_data['parent_id'] = ($filter_data['parent_id'] == 'null' || $filter_data['parent_id'] < 1) ? null : $filter_data['parent_id'];
+            $filter_data['parent_id'] = ($filter_data['parent_id'] == 'null' || $filter_data['parent_id'] < 1)
+                                        ? null
+                                        : $filter_data['parent_id'];
         }
         if ($filter_data['parent_id'] === null || $filter_data['parent_id'] === 'null') {
             unset($filter_data['parent_id']);
         }
         $new_level = 0;
         //get all leave categories
-        $leaf_nodes = (new Category())->getLeafCategories();
+        $leaf_nodes = Category::getLeafCategories();
         if ($this->request->post['nodeid']) {
             $sort = $filter_data['sort'];
             $order = $filter_data['order'];
@@ -180,11 +185,9 @@ class ControllerResponsesListingGridCategory extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadModel('catalog/product');
-        $this->loadModel('catalog/category');
         $this->loadLanguage('catalog/category');
         if ( ! $this->user->canModify('listing_grid/category')) {
             $error = new AError('');
-
             return $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/category'),
@@ -197,7 +200,16 @@ class ControllerResponsesListingGridCategory extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
-                        (new Category())->deleteCategory($id);
+                        $result = Category::deleteCategory($id);
+                        if(!$result) {
+                            $error = new AError('');
+                            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                                [
+                                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
+                                        'listing_grid/category'),
+                                    'reset_value' => true,
+                                ]);
+                        }
                     }
                 }
                 break;
@@ -218,7 +230,7 @@ class ControllerResponsesListingGridCategory extends AController
                     }
                     foreach ($ids as $id) {
                         foreach ($allowedFields as $field) {
-                            (new Category())->editCategory($id, [$field => $this->request->post[$field][$id]]);
+                            Category::editCategory($id, [$field => $this->request->post[$field][$id]]);
                         }
                     }
                 }
@@ -254,7 +266,6 @@ class ControllerResponsesListingGridCategory extends AController
                 ]);
         }
 
-        $this->loadModel('catalog/category');
         $category_id = $this->request->get['id'];
         if (isset($category_id)) {
             //request sent from edit form. ID in url
@@ -262,7 +273,6 @@ class ControllerResponsesListingGridCategory extends AController
                 if ($field == 'keyword') {
                     if ($err = $this->html->isSEOkeywordExists('category_id='.$category_id, $value)) {
                         $error = new AError('');
-
                         return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
                 }
@@ -270,11 +280,10 @@ class ControllerResponsesListingGridCategory extends AController
                 $err = $this->_validateField($category_id, $field, $value);
                 if ( ! empty($err)) {
                     $error = new AError('');
-
                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                 }
 
-                (new Category())->editCategory($category_id, [$field => $value]);
+                Category::editCategory($category_id, [$field => $value]);
             }
 
             return null;
@@ -287,11 +296,10 @@ class ControllerResponsesListingGridCategory extends AController
                     if (mb_strlen($v[$language_id]['name']) < 2 || mb_strlen($v[$language_id]['name']) > 32) {
                         $err = $this->language->get('error_name');
                         $error = new AError('');
-
                         return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
                 }
-                (new Category())->editCategory($k, [$field => $v]);
+                Category::editCategory($k, [$field => $v]);
             }
         }
 
@@ -331,14 +339,10 @@ class ControllerResponsesListingGridCategory extends AController
         $output = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('catalog/category');
         if (isset($this->request->post['term'])) {
             $filter = [
                 'limit'         => 20,
-                'language_id'   => $this->language->getContentLanguageID(),
-                'subsql_filter' => "cd.name LIKE '%".$this->db->escape($this->request->post['term'])."%'
-                                            OR cd.description LIKE '%".$this->db->escape($this->request->post['term'])."%'
-                                            OR cd.meta_keywords LIKE '%".$this->db->escape($this->request->post['term'])."%'",
+                'name' => $this->request->post['term']
             ];
             $results = Category::getCategoriesData($filter);
             //build thumbnails list

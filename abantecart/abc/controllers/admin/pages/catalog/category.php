@@ -24,14 +24,12 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ALayoutManager;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\catalog\Category;
 use H;
 
 /**
  * Class ControllerPagesCatalogCategory
  *
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesCatalogCategory extends AController
 {
@@ -189,7 +187,7 @@ class ControllerPagesCatalogCategory extends AController
             $grid_settings['multiaction_class'] = 'hidden';
         }
 
-        $results = (new Category())->getCategories(0);
+        $results = Category::getCategories();
 
         $parents = [
             'null' => $this->language->get('text_select_all'),
@@ -293,11 +291,12 @@ class ControllerPagesCatalogCategory extends AController
                     $this->request->post['category_description'][$content_language_id];
             }
 
-            $category_id = (new Category())->addCategory($this->request->post);
-                //$this->model_catalog_category->addCategory($this->request->post);
-            $this->extensions->hk_ProcessData($this, 'insert');
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('catalog/category/update', '&category_id='.$category_id));
+            $category_id = Category::addCategory($this->request->post);
+            if($category_id) {
+                $this->extensions->hk_ProcessData($this, 'insert');
+                $this->session->data['success'] = $this->language->get('text_success');
+                abc_redirect($this->html->getSecureURL('catalog/category/update', '&category_id='.$category_id));
+            }
         }
         $this->getForm();
 
@@ -324,7 +323,7 @@ class ControllerPagesCatalogCategory extends AController
         }
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            (new Category())->editCategory($this->request->get['category_id'], $this->request->post);
+            Category::editCategory($this->request->get['category_id'], $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, 'update');
             abc_redirect($this->html->getSecureURL('catalog/category/update',
@@ -354,7 +353,7 @@ class ControllerPagesCatalogCategory extends AController
 
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('error_name', $this->error['name']);
-        $this->data['categories'] = (new Category())->getCategories(0);
+        $this->data['categories'] = Category::getCategories();
 
         $categories = [0 => $this->language->get('text_none')];
         foreach ($this->data['categories'] as $c) {
@@ -384,7 +383,7 @@ class ControllerPagesCatalogCategory extends AController
         $this->view->assign('cancel', $this->html->getSecureURL('catalog/category'));
 
         if ($category_id && $this->request->is_GET()) {
-            $category_info = (new Category())->getCategory($category_id);
+            $category_info = Category::getCategory($category_id);
         }
 
         foreach ($this->fields as $f) {
@@ -400,7 +399,7 @@ class ControllerPagesCatalogCategory extends AController
         if (isset($this->request->post['category_description'])) {
             $this->data['category_description'] = $this->request->post['category_description'];
         } elseif (isset($category_info)) {
-            $this->data['category_description'] = (new Category())->getCategoryDescriptions($category_id);
+            $this->data['category_description'] = Category::getCategoryDescriptions($category_id);
         } else {
             $this->data['category_description'] = [];
         }
@@ -420,7 +419,7 @@ class ControllerPagesCatalogCategory extends AController
         if (isset($this->request->post['category_store'])) {
             $this->data['category_store'] = $this->request->post['category_store'];
         } elseif (isset($category_info)) {
-            $this->data['category_store'] = (new Category())->getCategoryStores($category_id);
+            $this->data['category_store'] = Category::getCategoryStores($category_id);
         } else {
             $this->data['category_store'] = [0];
         }
@@ -674,8 +673,7 @@ class ControllerPagesCatalogCategory extends AController
         $this->data['help_url'] = $this->gen_help_url('layout_edit');
 
         if (H::has_value($category_id) && $this->request->is_GET()) {
-            $this->loadModel('catalog/category');
-            $this->data['category_description'] = (new Category())->getCategoryDescriptions($category_id);
+            $this->data['category_description'] = Category::getCategoryDescriptions($category_id);
         }
 
         // Alert messages
@@ -853,8 +851,7 @@ class ControllerPagesCatalogCategory extends AController
                 'key_param'  => $page_key_param,
                 'key_value'  => $category_id,
             ];
-            $this->loadModel('catalog/category');
-            $category_info = (new Category())->getCategoryDescriptions($category_id);
+            $category_info = Category::getCategoryDescriptions($category_id);
             if ($category_info) {
                 foreach ($category_info as $language_id => $description) {
                     if (!H::has_value($language_id)) {

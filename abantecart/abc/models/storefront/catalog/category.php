@@ -291,77 +291,7 @@ class ModelCatalogCategory extends Model
         return $query->row['total'];
     }
 
-    /**
-     * @deprecated since 1.1.7
-     *
-     * @param int    $parent_id
-     * @param string $path
-     *
-     * @return array
-     */
-    public function getCategoriesDetails($parent_id = 0, $path = '')
-    {
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
 
-        $resource = new AResource('image');
-        $cache_key = 'category.details.'.$parent_id.'.store_'.$store_id.'_lang_'.$language_id;
-        $categories = $this->cache->pull($cache_key);
-        if ($categories !== false) {
-            return $categories;
-        }
-
-        $this->load->model('catalog/product');
-        $this->load->model('catalog/manufacturer');
-
-        $results = $this->getCategories($parent_id);
-
-        foreach ($results as $result) {
-            if (!$path) {
-                $new_path = $result['category_id'];
-            } else {
-                $new_path = $path.'_'.$result['category_id'];
-            }
-
-            $prods = $brands = array();
-
-            if ($parent_id == 0) {
-
-                $data['filter'] = array();
-                $data['filter']['category_id'] = $result['category_id'];
-                $data['filter']['status'] = 1;
-
-                $prods = $this->model_catalog_product->getProducts($data);
-
-                foreach ($prods as $prod) {
-                    if ($prod['manufacturer_id']) {
-                        $brand = (new Manufacturer())->getManufacturer($prod['manufacturer_id']);
-                        $brands[$prod['manufacturer_id']] = array(
-                            'name' => $brand['name'],
-                            'href' => $this->html->getSEOURL('product/manufacturer', '&manufacturer_id='.$brand['manufacturer_id'], '&encode'),
-                        );
-                    }
-                }
-            }
-
-            $thumbnail = $resource->getMainThumb('categories',
-                $result['category_id'],
-                $this->config->get('config_image_category_width'),
-                $this->config->get('config_image_category_height'));
-
-            $categories[] = array(
-                'category_id'   => $result['category_id'],
-                'name'          => $result['name'],
-                'children'      => $this->getCategoriesDetails($result['category_id'], $new_path),
-                'href'          => $this->html->getSEOURL('product/category', '&path='.$new_path, '&encode'),
-                'brands'        => $brands,
-                'product_count' => count($prods),
-                'thumb'         => $thumbnail['thumb_url'],
-            );
-        }
-        $this->cache->push($cache_key, $categories);
-        return $categories;
-    }
 
     /**
      * Get Total products in categories

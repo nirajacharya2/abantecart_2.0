@@ -25,7 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
-use abc\models\storefront\ModelCatalogCategory;
+use abc\models\catalog\Category;
 use abc\modules\traits\ProductListingTrait;
 
 /**
@@ -33,7 +33,6 @@ use abc\modules\traits\ProductListingTrait;
  *
  * @package abc\controllers\storefront
  * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductSearch extends AController
 {
@@ -137,7 +136,6 @@ class ControllerPagesProductSearch extends AController
             ]
         );
 
-        $this->loadModel('catalog/category');
         $categories = $this->getCategories(0);
         $options = [0 => $this->language->get('text_category')];
         if ($categories) {
@@ -469,7 +467,7 @@ class ControllerPagesProductSearch extends AController
         $data = [];
         $cat_id = explode(',', $parent_id);
         end($cat_id);
-        $results = $this->model_catalog_category->getCategories(current($cat_id));
+        $results = Category::getCategories(current($cat_id));
 
         foreach ($results as $result) {
             if (in_array($result['category_id'], $this->path)) {

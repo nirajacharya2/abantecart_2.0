@@ -28,14 +28,12 @@ use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Product;
 use abc\models\QueryBuilder;
-use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductCategory
  *
  * @package abc\controllers\storefront
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductCategory extends AController
 {
@@ -86,7 +84,6 @@ class ControllerPagesProductCategory extends AController
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $this->loadModel('catalog/category');
         $this->loadModel('tool/seo_url');
 
         if (!isset($request['path']) && isset($request['category_id'])) {
@@ -137,7 +134,7 @@ class ControllerPagesProductCategory extends AController
 
         $category_info = [];
         if ($category_id) {
-            $category_info = (new Category())->getCategory($category_id);
+            $category_info = Category::getCategory($category_id);
         } elseif ($this->config->get('embed_mode') == true || isset($request['path'])) {
             //Display Top category when embed mode or have PATH parameter
             $category_info['name'] = $this->language->get('text_top_category');
@@ -185,13 +182,12 @@ class ControllerPagesProductCategory extends AController
             }
 
             $this->loadModel('catalog/product');
-            $category_total = (new Category())->getTotalCategoriesByCategoryId($category_id);
+            $category_total = Category::getTotalCategoriesByCategoryId($category_id);
             $product_total = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
 
             if ($category_total || $product_total) {
                 $categories = [];
-
-                $results = $this->model_catalog_category->getCategories($category_id);
+                $results = Category::getCategories($category_id);
                 $category_ids = [];
                 foreach ($results as $result) {
                     $category_ids[] = (int)$result['category_id'];

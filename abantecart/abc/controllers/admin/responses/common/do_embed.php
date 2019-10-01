@@ -173,7 +173,7 @@ class ControllerResponsesCommonDoEmbed extends AController
     {
 
         //this var can be an array
-        $category_id = (array)$this->request->get['category_id'];
+        $categoryIds = (array)$this->request->get['category_id'];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -241,7 +241,6 @@ class ControllerResponsesCommonDoEmbed extends AController
             'style' => 'ml_field',
         ]);
 
-        $this->loadModel('catalog/category');
         $this->loadModel('setting/store');
         //if loaded not default store - hide store switcher
         $current_store_settings = $this->model_setting_store->getStore($this->config->get('config_store_id'));
@@ -249,19 +248,19 @@ class ControllerResponsesCommonDoEmbed extends AController
 
         $subcategories = [];
         //if embed for only one category
-        if (sizeof($category_id) == 1) {
-            $cat_id = current($category_id);
-            $category_info = (new Category())->getCategory($cat_id);
-            $category_stores = (new Category())->getCategoryStoresInfo($cat_id);
+        if (sizeof($categoryIds) == 1) {
+            $cat_id = current($categoryIds);
+            $category_info = Category::getCategory($cat_id);
+            $category_stores = Category::getCategoryStoresInfo($cat_id);
 
             if (sizeof($category_stores) == 1) {
                 $remote_store_url = $category_stores[0]['store_url'];
             }
-            $subcategories = (new Category())->getCategories($cat_id);
+            $subcategories = Category::getCategories($cat_id);
             if ($category_info['parent_id'] == 0) {
-                $options = (new Category())->getCategories(0);
+                $options = Category::getCategories();
             } else {
-                $cat_desc = (new Category())->getCategoryDescriptions($cat_id);
+                $cat_desc = Category::getCategoryDescriptions($cat_id);
                 $options = [
                     0 =>
                         [
@@ -271,19 +270,15 @@ class ControllerResponsesCommonDoEmbed extends AController
                 ];
             }
         } else {
-            if (!sizeof($category_id)) {
+            if (!sizeof($categoryIds)) {
                 $options = Category::getCategoriesData(['parent_id' => 0]);
-                $category_id = [];
-                foreach ($options as $c) {
-                    $category_id[] = $c['category_id'];
-                }
+                $categoryIds = array_column($options->toArray(), 'category_id');
             } else {
-                foreach ($category_id as &$c) {
+                foreach ($categoryIds as &$c) {
                     $c = (int)$c;
                 }
                 unset($c);
-                $subsql = ' c.category_id IN ('.implode(',', $category_id).') ';
-                $options = Category::getCategoriesData(['subsql_filter' => $subsql]);
+                $options = Category::getCategoriesData(['include' => $categoryIds]);
             }
         }
 
@@ -298,7 +293,7 @@ class ControllerResponsesCommonDoEmbed extends AController
         $this->data['fields'][] = $form->getFieldHtml([
             'type'      => 'checkboxgroup',
             'name'      => 'category_id[]',
-            'value'     => $category_id,
+            'value'     => $categoryIds,
             'options'   => $opt,
             'scrollbox' => true,
             'style'     => 'medium-field',

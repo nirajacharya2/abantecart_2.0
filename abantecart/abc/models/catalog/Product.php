@@ -804,18 +804,21 @@ class Product extends BaseModel
     {
         return $this->db->table('object_types as ot')
             ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
-            ->where('ot.object_type', '=', 'Product')
-            ->where('ot.status', '=', 1)
-            ->where('otd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->where(
+                [
+                    'ot.object_type' => 'Product',
+                    'ot.status' => 1,
+                    'otd.language_id' => static::$current_language_id
+                ]
+            )
             ->select('otd.object_type_id as id', 'otd.name')
             ->get()
             ->toArray();
-
     }
 
     public function getProductCategories()
     {
-        $categories = (new Category())->getCategories(0, static::$current_language_id);
+        $categories = Category::getCategories(0, static::$current_language_id);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[
@@ -1680,11 +1683,14 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public static function getProductsAllInfo(array $productIds)
     {
         $result = [];
         foreach ($productIds as $productId) {
+            /** @var Category $category */
             $category = Category::find($productId);
             if ($category) {
                 $result[] = $category->getAllData();

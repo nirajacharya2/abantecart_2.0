@@ -33,21 +33,18 @@ use abc\core\lib\ATax;
 use abc\core\lib\AttributeManager;
 use abc\core\lib\AWeight;
 use abc\core\lib\contracts\AttributeManagerInterface;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
-use abc\models\system\Setting;
 use H;
 
 /**
  * Class ControllerResponsesProductProduct
  *
  * @package abc\controllers\admin
- * @property ModelCatalogCategory $model_catalog_category
  * @property ModelCatalogDownload $model_catalog_download
  */
 class ControllerResponsesProductProduct extends AController
@@ -251,24 +248,22 @@ class ControllerResponsesProductProduct extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/category');
-
-        if (isset($this->request->post['id'])) { // variant for popup listing
+        if (isset($this->request->post['id'])) {
+            // variant for popup listing
             $categoryIds = (array)$this->request->post['id'];
         } else {
             $categoryIds = [];
         }
-        $category_data = [];
 
         $categories = Category::with('description')
                               ->whereIn('category_id', $categoryIds);
+        $category_data = [];
         foreach ($categories as $category) {
             $category_data[] = [
                 'id'         => $category['category_id'],
                 'name'       => $category['description']['name'],
                 'sort_order' => $category['sort_order'],
             ];
-
         }
 
         //update controller data
@@ -281,7 +276,6 @@ class ControllerResponsesProductProduct extends AController
 
     public function related()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -1565,7 +1559,8 @@ class ControllerResponsesProductProduct extends AController
 
         $tax = new ATax($this->registry);
         $tax->setZone($order_info['country_id'], $order_info['zone_id']);
-
+        $product_info = [];
+        $product_id = null;
         if(!$order_product_id) {
             $product_id = (int)$this->request->get['product_id'];
             $product_info = $this->model_catalog_product->getProduct($product_id);

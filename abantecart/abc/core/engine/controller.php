@@ -32,7 +32,6 @@ use H;
  * @property array $error
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
- * @property \abc\models\admin\ModelCatalogCategory | \abc\models\storefront\ModelCatalogCategory $model_catalog_category
  * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
  * @property \abc\models\admin\ModelCatalogProduct | \abc\models\storefront\ModelCatalogProduct $model_catalog_product
  * @property \abc\models\admin\ModelCatalogManufacturer | \abc\models\storefront\ModelCatalogManufacturer $model_catalog_manufacturer
@@ -67,8 +66,6 @@ use H;
  * @property \abc\models\storefront\ModelToolSeoUrl $model_tool_seo_url
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
- * @property \abc\models\storefront\ModelAccountOrder $model_account_order
- * @property \abc\models\storefront\ModelCheckoutOrder $model_checkout_order
  * @property \abc\models\admin\ModelToolBackup $model_tools_backup
  * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager

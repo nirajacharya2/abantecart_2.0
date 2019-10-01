@@ -21,6 +21,7 @@ namespace abc\core;
 use abc\core\engine\Registry;
 use abc\core\engine\ARouter;
 use abc\core\lib\ADebug;
+use abc\models\BaseModel;
 use H;
 use ReflectionClass;
 use ReflectionMethod;
@@ -338,7 +339,7 @@ class ABC extends ABCBase
      *
      * @param $class_alias
      *
-     * @return bool|string
+     * @return bool|object|BaseModel
      */
     static function getFullClassName(string $class_alias)
     {

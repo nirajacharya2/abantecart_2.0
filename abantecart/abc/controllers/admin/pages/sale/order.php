@@ -34,7 +34,6 @@ use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\order\Order;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderHistory;
@@ -51,7 +50,6 @@ use Illuminate\Validation\ValidationException;
  * Class ControllerPagesSaleOrder
  *
  * @package abc\controllers\admin
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesSaleOrder extends AController
 {
@@ -529,8 +527,7 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->loadModel('catalog/product');
-        $this->loadModel('catalog/category');
-        $this->data['categories'] = (new Category())->getCategories(0);
+        $this->data['categories'] = Category::getCategories();
 
         $this->data['order_products'] = [];
 
