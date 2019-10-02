@@ -10,6 +10,7 @@ use abc\models\order\Order;
 use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
 use abc\modules\listeners\ModelCategoryListener;
+use abc\modules\listeners\ModelProductListener;
 
 return [
     /** events for ORM Models

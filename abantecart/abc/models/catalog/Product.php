@@ -647,7 +647,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function coupons()
     {
@@ -655,7 +655,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function descriptions()
     {
@@ -663,7 +663,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function description()
     {
@@ -672,7 +672,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function discounts()
     {
@@ -680,7 +680,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function options()
     {
@@ -688,7 +688,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_descriptions()
     {
@@ -696,7 +696,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_values()
     {
@@ -704,7 +704,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_value_descriptions()
     {
@@ -712,7 +712,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function specials()
     {
@@ -720,7 +720,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tags()
     {
@@ -728,7 +728,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tagLanguaged()
     {
@@ -737,7 +737,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function featured()
     {
@@ -745,7 +745,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function related()
     {
@@ -753,7 +753,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function reviews()
     {
@@ -761,7 +761,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function categories()
     {
@@ -769,7 +769,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function manufacturer()
     {
@@ -777,7 +777,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function downloads()
     {
@@ -785,20 +785,23 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'products_to_stores', 'product_id', 'store_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
     public function attributes()
     {
         return $this->morphMany(ObjectAttributeValue::class, 'object');
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function getProductTypes()
     {
@@ -816,6 +819,11 @@ class Product extends BaseModel
             ->toArray();
     }
 
+    /**
+     * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     public function getProductCategories()
     {
         $categories = Category::getCategories(0, static::$current_language_id);
@@ -1284,7 +1292,7 @@ class Product extends BaseModel
         if (!$product) {
             return false;
         }
-        $prevCategories = $product->categories->toArray();
+        $product_data['product_category_prev'] = $product->categories->pluck('category_id')->toArray();
 
         $product->update($product_data);
         if ($product_data['product_description']) {
@@ -1305,10 +1313,7 @@ class Product extends BaseModel
         if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
-        self::updateProductLinks($product_id, $product_data);
-
-        $affectedCategoryIDs = array_merge($prevCategories, $product->categories->toArray());
-        Registry::log()->write(var_export($affectedCategoryIDs, true));
+        self::updateProductLinks($product, $product_data);
 
         return true;
     }
@@ -1347,15 +1352,30 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int   $product_id
+     * @param int|Product $product
      * @param array $product_data
+     *
+     * @return bool
      */
-    public static function updateProductLinks(int $product_id, array $product_data)
+    public static function updateProductLinks(&$product, array $product_data)
     {
-        $product = Product::find($product_id);
+        if(is_int($product)) {
+            $product = Product::find($product);
+        }
 
-        if (isset($product_data['product_category'])) {
+        if(!$product || !$product instanceof Product){
+            return false;
+        }
+
+        if ($product_data['product_category'] != $product_data['product_category_prev']) {
             $product->categories()->sync($product_data['product_category']);
+
+            //touch all categories to call update listener that calculates products count in it
+            $affectedCategories = (array)$product_data['product_category'] + (array)$product_data['product_category_prev'];
+            foreach($affectedCategories as $categoryId){
+                $category = Category::find($categoryId);
+                $category->touch();
+            }
         }
 
         if (isset($product_data['product_store'])) {
@@ -1388,6 +1408,7 @@ class Product extends BaseModel
                     ->forceDelete();
             }
         }
+        return true;
     }
 
     /**

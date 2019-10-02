@@ -18,8 +18,6 @@ class ModelCategoryListener
 
         $category = func_get_arg(0);
 
-        Registry::log()->write(var_export($category->isDirty(['parent_id']), true));
-
         if (!is_object($category)
             || !($category instanceof Category)
         ) {
@@ -33,8 +31,8 @@ class ModelCategoryListener
             if($category && $category->category_id){
                 //calculate and modify current category
                 $this->modify($category);
-                //if parent changed - modify parent tree branch
-                if($category->isDirty(['parent_id'])){
+                //also modify parent tree branch
+                if($category->isDirty(['parent_id']) || $category->isDirty(['date_modified'])){
                     $oldParentId = (int)$category->getOriginal('parent_id');
                     if($oldParentId){
                         $parent = Category::find($oldParentId);

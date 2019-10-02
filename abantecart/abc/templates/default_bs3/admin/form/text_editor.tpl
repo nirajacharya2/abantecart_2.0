@@ -1,6 +1,6 @@
 <?php
 //unique id
-$wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
+$wrapper_id = \H::randomWord(6);
 ?>
 <div id="<?php echo $wrapper_id ?>" class="text-editor panel panel-default">
 	<ul class="nav nav-tabs" role="tablist">
@@ -103,7 +103,7 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 
 
 <script type="application/javascript">
-	$(document).ready(function () {
+	$(document).load(function () {
 		tinymce.remove();
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
@@ -212,7 +212,7 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 		$('#<?php echo $wrapper_id; ?> a[href="#visual_<?php echo $wrapper_id; ?>"]').tab('show');
 		<?php } ?>
 
-		//event for addmedia button
+		//event for add-media button
 		$('#<?php echo $wrapper_id; ?> a.add_media').on('click',function(){
 			//get data container
 			var id = $("#<?php echo $wrapper_id ?> ul.nav-tabs li.active>a").attr('aria-controls');

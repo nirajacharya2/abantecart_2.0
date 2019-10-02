@@ -361,6 +361,7 @@ class ControllerPagesCatalogProduct extends AController
 
     public function update()
     {
+
         $args = func_get_args();
 
         //init controller data
@@ -451,7 +452,6 @@ class ControllerPagesCatalogProduct extends AController
                         'description',
                         'tags',
                         'stores',
-                        'categories',
                         'attributes' => function($query) use ($productInfo) {
                                             /** @var QueryBuilder $query */
                                             $query->where(
@@ -461,24 +461,36 @@ class ControllerPagesCatalogProduct extends AController
                                             );
                                         }
                     ]
-                )->find($product_id);
+                )
+                ->find($product_id);
 
-                if ($product) {
-                    $product = $product->toArray();
-                } else {
-                    $product = [];
-                }
+            if ($product) {
+                $product = $product->toArray();
+            } else {
+                $product = [];
+            }
 
-                $productStores = $this->db->table('products_to_stores')
-                    ->where('product_id', '=', $product_id)
-                    ->get();
+            $productStores = $this->db->table('products_to_stores')
+                ->where('product_id', '=', $product_id)
+                ->get()->toArray();
+            $product['product_stores'] = array_column($productStores, 'store_id');
 
-            $product['product_stores'] = [];
-                if ($productStores) {
-                    foreach ($productStores as $productStore) {
-                        $product['product_stores'][] = $productStore->store_id;
-                    }
-                }
+            $productCategories = $this->db->table('products_to_categories')
+                ->leftJoin(
+                    'category_descriptions',
+                    'category_descriptions.category_id',
+                    '=',
+                    'products_to_categories.category_id'
+                    )
+                ->where(
+                    [
+                        'products_to_categories.product_id' => $product_id,
+                        'category_descriptions.language_id' => $this->language->getContentLanguageID()
+                    ]
+                )
+                ->get()
+                ->toArray();
+            $product['categories'] = array_column($productCategories, 'name', 'category_id');
 
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
             $product_type_id = $product['product_type_id'];
@@ -497,12 +509,7 @@ class ControllerPagesCatalogProduct extends AController
                     unset($arTags, $tags);
                 }
                 if (is_array($fieldValue) && $fieldName == 'categories') {
-                    $categories = $fieldValue;
-                    $product['categories'] = [];
-                    foreach ($categories as $category) {
-                        $product['categories'][] = $category['category_id'];
-                    }
-                    unset($categories);
+                    //$product['categories'] = array_column(array_column($fieldValue, 'pivot'), 'category_id');
                 }
                 if (is_array($fieldValue) && $fieldName == 'attributes') {
                     $attributes = $fieldValue;
@@ -624,11 +631,6 @@ class ControllerPagesCatalogProduct extends AController
             'separator' => ' :: ',
             'current'   => true,
         ]);
-
-        $this->data['categories'] = [];
-
-        $results = Category::getCategories(0, $this->session->data['current_store_id']);
-        $this->data['categories'] =  array_column($results, 'category_id', 'name');
 
         $this->loadModel('setting/store');
         $this->data['stores'] = [0 => $this->language->get('text_default')];
@@ -935,6 +937,9 @@ class ControllerPagesCatalogProduct extends AController
             'name'  => 'product_tags',
             'value' => $this->data['product_tags'],
         ]);
+
+        $results = Category::getCategories(0, $this->session->data['current_store_id']);
+        $this->data['categories'] =  array_column($results, 'name', 'category_id');
 
         $this->data['form']['fields']['general']['category'] = $form->getFieldHtml([
             'type'        => 'checkboxgroup',
