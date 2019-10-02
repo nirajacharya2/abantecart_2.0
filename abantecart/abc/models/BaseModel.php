@@ -52,7 +52,7 @@ use ReflectionMethod;
  * @method static QueryBuilder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*' ) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
- * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, strinng $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
