@@ -260,8 +260,8 @@ jQuery(document).ready(function() {
 		$('.sticky_header').addClass('panel_frozen')
 			.addClass('fa-toggle-on')
 			.removeClass('fa-toggle-off');
-	}  
-   
+	}
+
 	$('.sticky_left').click(function(){
 		if(jQuery.cookie('sticky-leftpanel')) {
 			$.removeCookie("sticky-leftpanel");
@@ -499,7 +499,7 @@ function notice(text, autohide, elm, type, icon) {
 	if(autohide == null || autohide == 'false' || autohide == false) {
 		delay = 0;
 	}
-	
+
 	var growl = $.growl({
 		icon: icon,
 		message: "&nbsp;&nbsp;"+text+"&nbsp;&nbsp;&nbsp;"
@@ -515,7 +515,7 @@ function notice(text, autohide, elm, type, icon) {
 		animate: {
 			enter: 'animated fadeInLeft',
 			exit: 'animated fadeOutLeft'
-		}	
+		}
 	});
 	return growl;
 }
@@ -713,7 +713,7 @@ $(document).on('click', ".task_run", function () {
 
 	if(abort_task_url && abort_task_url.length > 0){
 		progress_html += '<div class="center abort_button">' +
-							'<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle-o fa-fw"></i> Stop</a>' +
+							'<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle fa-fw"></i> Stop</a>' +
 				'</div>';
 	}
 	progress_html += '</div>';

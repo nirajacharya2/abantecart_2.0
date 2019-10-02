@@ -52,7 +52,7 @@
 	<div class="panel-footer col-xs-12">
 		<div class="text-center">
 			<button class="btn btn-primary lock-on-click task_schedule">
-				<i class="fa fa-clock-o fa-fw"></i> <?php echo $form['backup_schedule']->text; ?>
+				<i class="fa fa-clock fa-fw"></i> <?php echo $form['backup_schedule']->text; ?>
 			</button>
 		</div>
 	</div>

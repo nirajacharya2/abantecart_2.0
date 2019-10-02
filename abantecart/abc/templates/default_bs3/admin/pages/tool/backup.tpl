@@ -6,9 +6,9 @@
 		<div class="primary_content_actions pull-left">
 		</div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
-	
+
 	<?php echo $form['form_open']; ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $tab_backup; ?></label>
@@ -45,7 +45,7 @@
 				</div>
 			</div>
 			<?php } ?>
-			
+
 		<?php } ?>
 
 	</div>
@@ -56,7 +56,7 @@
 					<i class="fa fa-database"></i> <?php echo $form['backup_now']->text; ?>
 				</button>
 				<button class="btn btn-primary lock-on-click task_schedule" >
-					<i class="fa fa-clock-o fa-fw"></i> <?php echo $form['backup_schedule']->text; ?>
+					<i class="fa fa-clock fa-fw"></i> <?php echo $form['backup_schedule']->text; ?>
 				</button>
 		</div>
 	</div>

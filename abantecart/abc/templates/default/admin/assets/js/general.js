@@ -732,7 +732,7 @@ $(document).on('click', ".task_run", function () {
 
     if (abort_task_url && abort_task_url.length > 0) {
         progress_html += '<div class="center abort_button">' +
-            '<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle-o fa-fw"></i> Stop</a>' +
+            '<a class="btn btn-default abort" title="Interrupt Task" ><i class="fa fa-times-circle fa-fw"></i> Stop</a>' +
             '</div>';
     }
     progress_html += '</div>';

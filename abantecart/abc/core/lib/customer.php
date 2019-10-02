@@ -1087,7 +1087,7 @@ class ACustomer extends ALibBase
          */
         $customer = Customer::find($customer_id);
         foreach ( $customer->toArray() as $rec => $val ) {
-            if ($rec == 'loginname' && $val != $data['loginname']) {
+            if (!empty($data['loginname']) && $rec == 'loginname' && $val != $data['loginname']) {
                 $message_arr = [
                     0 => ['message' => sprintf( $language->get( 'im_customer_account_update_login_to_customer' ), $data['loginname'] )],
                 ];

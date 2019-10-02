@@ -161,7 +161,7 @@
                 <i class="fa fa-paper-plane fa-fw"></i> <?php echo $text_load; ?>
 			</button>
 			<a href="<?php echo $form['schedule_url']; ?>" class="btn btn-primary">
-				<i class="fa fa-clock-o fa-fw"></i> <?php echo $button_schedule_import; ?>
+				<i class="fa fa-clock fa-fw"></i> <?php echo $button_schedule_import; ?>
 			</a>
 			<a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#export_map_modal">
 				<i class="fa fa-code fa-fw"></i> <?php echo $text_export_map; ?>
