@@ -1270,8 +1270,7 @@ class Product extends BaseModel
             $product->descriptions()->save($description);
 
             UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
-
-            self::updateProductLinks($productId, $product_data);
+            self::updateProductLinks($product, $product_data);
             return $productId;
         }
     }
