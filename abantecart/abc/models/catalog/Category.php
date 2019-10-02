@@ -25,9 +25,10 @@ use Illuminate\Support\Collection;
  * @property int                                      $category_id
  * @property int                                      $parent_id
  * @property string                                   $path
+ * @property string                                   $uuid
  * @property int                                      $total_products_count
-   @property int                                      $active_products_count
-   @property int                                      $children_count
+ * @property int                                      $active_products_count
+ * @property int                                      $children_count
  * @property int                                      $sort_order
  * @property int                                      $status
  * @property \Carbon\Carbon                           $date_added
@@ -38,7 +39,6 @@ use Illuminate\Support\Collection;
  * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
  *
  * @method static Category find(int $customer_id) Category
- * @method static Category select(mixed $select = '*') Builder
  * @package abc\models
  */
 class Category extends BaseModel
@@ -1055,6 +1055,44 @@ class Category extends BaseModel
             return json_decode($storeInfo, true);
         }
         return [];
+    }
+
+    /**
+     * @param $category_id
+     *
+     * @return array
+     */
+    public static function getCategoryInfo($category_id)
+    {
+        $category_id = (int)$category_id;
+        $language_id = static::$current_language_id;
+
+        /** @var QueryBuilder $query */
+        $query = static::select(["category_descriptions", 'categories.*']);
+        $query->selectRaw("(SELECT keyword
+                            FROM ".Registry::db()->table_name("url_aliases")." 
+                            WHERE query = 'category_id=".$category_id."'
+                            AND language_id='".$language_id."' ) as keyword");
+        $query->leftJoin(
+            'category_descriptions',
+            'category_descriptions.category_id',
+            '=',
+            'categories.category_id'
+        );
+
+        $query->where(
+            [
+                'categories.category_id' => $category_id,
+                'category_descriptions.language_id' => $language_id
+            ]
+        );
+
+        $query->orderBy('categories.sort_order');
+        $query->orderBy('category_descriptions.name');
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->get()->toArray();
     }
 
 }

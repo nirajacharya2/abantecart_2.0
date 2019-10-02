@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int                           $product_id
  * @property string                        $model
  * @property string                        $sku
+ * @property string                        $uuid
  * @property string                        $location
  * @property int                           $quantity
  * @property string                        $stock_checkout
