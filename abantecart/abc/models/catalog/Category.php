@@ -876,6 +876,8 @@ class Category extends BaseModel
             $cache->remove('category');
             $cache->remove('product');
             $db->commit();
+            //call event listener on saved
+            $category->touch();
             return true;
         }catch(\Exception $e){
             $db->rollback();
