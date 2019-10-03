@@ -927,12 +927,14 @@ class ModelToolImportProcess extends Model
             }
 
             $last_parent_id = 0;
+            $catIds = [];
             foreach ($categories as $index => $c_name) {
                 if($c_name===''){ continue; }
                 //is parent?
                 $is_parent = ($index + 1 == count($categories)) ? false : true;
                 //check if category exists with this name
                 $cid = $this->getCategory($c_name, $language_id, $store_id, $last_parent_id);
+                $catIds[] = (int)$cid;
                 if ($is_parent) {
                     if (!$cid) {
                         $last_parent_id = $this->saveCategory($c_name, $language_id, $store_id, $last_parent_id);
@@ -951,6 +953,14 @@ class ModelToolImportProcess extends Model
                         $ret[] = ['category_id' => $cid, 'parent_id' => $last_parent_id];
                     }
                     break;
+                }
+            }
+
+            //just touch categories to run recalculation of products count etc
+            foreach($catIds as $id){
+                $category = Category::find($id);
+                if($category){
+                    $category->touch();
                 }
             }
         }
