@@ -302,25 +302,7 @@ class ModelToolImportProcess extends Model
             }
         }
 
-        // import category if needed
-        $categories = [];
-        if ($data['categories'] && $data['categories']['category']) {
-            $categories = $this->processCategories($data['categories'], $language_id, $store_id);
-        }
 
-        // import brand if needed
-        $manufacturer_id = 0;
-        if ($manufacturers['manufacturer']) {
-            $manufacturer_id = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
-        }
-
-        // import or update product
-        $product_data = array_merge(
-            $product,
-            [
-                'manufacturer_id' => $manufacturer_id,
-            ]
-        );
 
         $this->load->model('catalog/product');
         if ($new_product) {
@@ -358,6 +340,26 @@ class ModelToolImportProcess extends Model
             $status = true;
         }
 
+        // import category if needed
+        $categories = [];
+        if ($data['categories'] && $data['categories']['category']) {
+           $categories = $this->processCategories($data['categories'], $language_id, $store_id);
+        }
+
+        // import brand if needed
+        $manufacturer_id = 0;
+        if ($manufacturers['manufacturer']) {
+           $manufacturer_id = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+        }
+
+        // import or update product
+        $product_data = array_merge(
+           $product,
+           [
+               'manufacturer_id' => $manufacturer_id,
+           ]
+        );
+
         $product_links = [
             'product_store' => [$store_id],
         ];
@@ -374,8 +376,6 @@ class ModelToolImportProcess extends Model
         $this->addUpdateOptions(
             $product_id,
             $data['product_options'],
-            $language_id,
-            $store_id,
             $product_data['weight_class_id']
         );
 
@@ -523,14 +523,12 @@ class ModelToolImportProcess extends Model
      * @param int $product_id
      * @param array $data
      * @param int $weight_class_id
-     * @param int $language_id
-     * @param int $store_id
      *
      * @return bool
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    protected function addUpdateOptions($product_id, $data = [], $weight_class_id, $language_id, $store_id)
+    protected function addUpdateOptions($product_id, $data = [], $weight_class_id)
     {
         if (!is_array($data) || empty($data)) {
             //no option details
@@ -910,7 +908,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     protected function processCategories($data, $language_id, $store_id)
     {
