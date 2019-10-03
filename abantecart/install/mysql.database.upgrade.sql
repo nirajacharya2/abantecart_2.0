@@ -2082,3 +2082,5 @@ ADD COLUMN `active_products_count` int(11) NOT NULL DEFAULT '0' AFTER `total_pro
 ADD COLUMN `children_count` int(11) NOT NULL DEFAULT '0' AFTER `active_products_count`;
 
 
+INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
+('general','config_google_tag_manager_id','');

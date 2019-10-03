@@ -711,6 +711,13 @@ class AConfigManager
             'style' => 'medium-field',
         ]);
 
+        $fields['google_tag_manager'] = $form->getFieldHtml($props[] = [
+            'type'  => 'input',
+            'name'  => 'config_google_tag_manager_id',
+            'value' => $data['config_google_tag_manager_id'],
+            'style' => 'medium-field',
+        ]);
+
         if (isset($data['one_field'])) {
             $fields = $this->filterField($fields, $props, $data['one_field']);
         }
