@@ -32,13 +32,11 @@ class ModelCategoryListener
                 //calculate and modify current category
                 $this->modify($category);
                 //also modify parent tree branch
-                if($category->isDirty(['parent_id']) || $category->isDirty(['date_modified'])){
-                    $oldParentId = (int)$category->getOriginal('parent_id');
-                    if($oldParentId){
-                        $parent = Category::find($oldParentId);
-                        if($parent){
-                            $this->modify($parent);
-                        }
+                $oldParentId = (int)$category->getOriginal('parent_id');
+                if($oldParentId){
+                    $parent = Category::find($oldParentId);
+                    if($parent){
+                        $this->modify($parent);
                     }
                 }
             }

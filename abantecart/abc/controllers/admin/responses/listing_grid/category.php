@@ -200,13 +200,13 @@ class ControllerResponsesListingGridCategory extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
-                        $result = Category::deleteCategory($id);
-                        if(!$result) {
+                        try {
+                            Category::deleteCategory($id);
+                        }catch(\Exception $e) {
                             $error = new AError('');
                             return $error->toJSONResponse('NO_PERMISSIONS_402',
                                 [
-                                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
-                                        'listing_grid/category'),
+                                    'error_text'  => $e->getMessage(),
                                     'reset_value' => true,
                                 ]);
                         }

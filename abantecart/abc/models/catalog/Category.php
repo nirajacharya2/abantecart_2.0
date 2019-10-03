@@ -470,45 +470,45 @@ class Category extends BaseModel
     }
 
     /**
-     * @param int $parentId
+     * @param int $categoryId
+     *
+     * @param string $mode - can be empty or "active_only"
      *
      * @return array
      */
-    public static function getChildrenIDs($parentId)
+    public static function getChildrenIDs($categoryId, $mode = '')
     {
-        $parentId = (int)$parentId;
-        $languageId = static::$current_language_id;
-        $storeId = (int)Registry::config()->get('config_store_id');
-        $cacheKey = 'category.list.'.$parentId.'.store_'.$storeId.'_lang_'.$languageId;
-        $cache = Registry::cache()->pull($cacheKey);
-
-        if ($cache === false) {
-            /** @var QueryBuilder|Collection $query */
-            $query = self::select(['categories.category_id']);
-            $query->leftJoin(
-                'categories_to_stores',
-                'categories_to_stores.category_id',
-                '=',
-                'categories.category_id'
-            );
-
-            if ($parentId >= 0) {
-                $query->where('categories.parent_id', '=', $parentId);
-            }
-            $query->where('categories_to_stores.store_id', '=', $storeId)
-                  ->active('categories');
-
-            //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
-            $categories = $query->get();
-            $cache = [];
-            foreach ($categories as $category) {
-                $cache[] = $category->category_id;
-                $cache = array_merge($cache, static::getChildrenIDs($category->category_id));
-            }
-            Registry::cache()->push($cacheKey, $cache);
+        $categoryId = (int)$categoryId;
+        if(!$categoryId){
+            return [];
         }
-        return $cache;
+
+        $storeId = (int)Registry::config()->get('config_store_id');
+
+        /** @var QueryBuilder|Collection $query */
+        $query = self::select(['categories.category_id']);
+        $query->leftJoin(
+            'categories_to_stores',
+            'categories_to_stores.category_id',
+            '=',
+            'categories.category_id'
+        );
+        $query->where('categories.parent_id', '=', $categoryId);
+        $query->where('categories_to_stores.store_id', '=', $storeId);
+        if($mode == 'active_only') {
+            $query->active('categories');
+        }
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
+        $categories = $query->get();
+        $output = [];
+        foreach ($categories as $category) {
+            $output[] = $category->category_id;
+            $output = (array)$output + (array)static::getChildrenIDs($category->category_id);
+        }
+
+        return $output;
     }
 
     /**
@@ -789,6 +789,8 @@ class Category extends BaseModel
 
             Registry::cache()->remove('category');
             $db->commit();
+            //call listener on saved event after commit
+            $category->touch();
             return $categoryId;
         }catch(\Exception $e){
             Registry::log()->write($e->getMessage());
@@ -913,7 +915,7 @@ class Category extends BaseModel
                 'query',
                 '=',
                 'category_id='.(int)$categoryId
-            )->delete();
+            )->forceDelete();
 
             //delete resources
             $rm = new AResourceManager();
@@ -935,9 +937,15 @@ class Category extends BaseModel
             $lm = new ALayoutManager();
             $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
             $category = static::find($categoryId);
+            $parentId = $category->parent_id;
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
-            $category->delete();
+            $category->forceDelete();
+            $parent = Category::find($parentId);
+            if($parent){
+                //run recalculation of products count and subcategories count
+                $parent->touch();
+            }
         }
 
         $cache->remove('category');
