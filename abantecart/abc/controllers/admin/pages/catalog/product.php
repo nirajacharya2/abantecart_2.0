@@ -51,6 +51,8 @@ class ControllerPagesCatalogProduct extends AController
 
     public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
     {
+        //temporary disable new product form
+        $this->data['oldForm'] = true;
         $this->productInstance = ABC::getModelObjectByAlias('Product');
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
     }

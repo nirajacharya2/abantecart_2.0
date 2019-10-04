@@ -36,14 +36,13 @@ class CategoryModelTest extends ATestCase
         $path = $category->getPath($category->category_id,'id');
         $this->assertEquals($path, $category->category_id);
     }
-//    public function testCalculatePath()
+//    public function testGetChildrenIDs()
 //    {
 //        /** @var Category $category */
-//        $category = Category::find(3515);
+//        $children = Category::getChildrenIDs(90);
 //
-//        $result = $category->getCategoryBranchInfo($category->category_id);
 //
-//var_Dump($result);
+//var_Dump($children);
 ////        $this->assertEquals($path, $category->category_id);
 //    }
 

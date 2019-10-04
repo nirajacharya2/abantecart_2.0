@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AData;
+use abc\core\lib\AException;
 
 /**
  * Class ControllerPagesToolImportExport
@@ -250,7 +251,8 @@ class ControllerPagesToolImportExport extends AController
      * @param array $data
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
+     * @throws \ReflectionException
      */
     protected function buildTableFields($form, $data)
     {
@@ -299,7 +301,7 @@ class ControllerPagesToolImportExport extends AController
      * @param string $name
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     private function _get_table_children($form, $data, $name)
     {
@@ -569,8 +571,6 @@ class ControllerPagesToolImportExport extends AController
                 $this->data['cols'] = fgetcsv($fh, 0, $import_data['delimiter']);
                 $this->data['data'] = fgetcsv($fh, 0, $import_data['delimiter']);
             }
-        } else {
-            //unsupported type
         }
 
         $this->data['request_count'] = $import_data['request_count'];
@@ -613,11 +613,15 @@ class ControllerPagesToolImportExport extends AController
             if (!$task_details) {
                 $this->session->data['error'] = implode('<br>', $this->model_tool_import_process->errors);
             } else {
-                $this->session->data['success'] = sprintf($this->language->get('text_success_scheduled'),
-                    $this->html->getSecureURL('tool/job'));
+                $this->session->data['success'] = sprintf(
+                                                        $this->language->get('text_success_scheduled'),
+                                                        $this->html->getSecureURL('tool/job')
+                );
             }
-            abc_redirect($this->html->getSecureURL('tool/import_export/'.($file_format
-                == 'internal' ? 'internal_import' : 'import_wizard')));
+            abc_redirect($this->html->getSecureURL(
+                'tool/import_export/'
+                .($file_format == 'internal' ? 'internal_import' : 'import_wizard'))
+            );
         }
     }
 

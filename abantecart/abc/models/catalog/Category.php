@@ -297,12 +297,11 @@ class Category extends BaseModel
         $childrenIDs = $children = static::getChildrenIDs($category_id);
         $childrenIDs[] = $category_id;
 
-        //get category products count
         $p2cAlias = Registry::db()->table_name('products_to_categories');
         $pAlias = Registry::db()->table_name('products');
         /** @var QueryBuilder $query */
         $query = Category::select('parent_id')
-                         ->where('category_id', '=', $category_id)
+                         ->where('categories.category_id', '=', $category_id)
                          ->selectRaw(
             '(SELECT COUNT('.$pAlias.'.product_id)
             FROM '.$pAlias.'
@@ -505,7 +504,7 @@ class Category extends BaseModel
         $output = [];
         foreach ($categories as $category) {
             $output[] = $category->category_id;
-            $output = (array)$output + (array)static::getChildrenIDs($category->category_id);
+            $output = array_merge($output, static::getChildrenIDs($category->category_id));
         }
 
         return $output;

@@ -306,9 +306,7 @@ class ModelToolImportProcess extends Model
 
         $this->load->model('catalog/product');
         if ($new_product) {
-
             $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
-
             //apply default settings for new products only
             $default_arr = [
                 'status'          => 1,
@@ -364,10 +362,20 @@ class ModelToolImportProcess extends Model
             'product_store' => [$store_id],
         ];
 
+        $product_links['product_category'] = [];
         if (count($categories)) {
             $product_links['product_category'] = array_column($categories, 'category_id');
         }
         $this->model_catalog_product->updateProductLinks($product_id, $product_links);
+
+
+        //just touch categories to run recalculation of products count etc
+        foreach($product_links['product_category'] as $id){
+            $category = Category::find($id);
+            if($category){
+                $category->touch();
+            }
+        }
 
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
@@ -884,7 +892,6 @@ class ModelToolImportProcess extends Model
             ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' AND date_deleted is NULL limit 1");
         $manufacturer_id = $sql->row['manufacturer_id'];
         if (!$manufacturer_id) {
-            //create category
             $this->load->model('catalog/manufacturer');
             $manufacturer_id = (new Manufacturer())->addManufacturer(
                 [
@@ -953,14 +960,6 @@ class ModelToolImportProcess extends Model
                         $ret[] = ['category_id' => $cid, 'parent_id' => $last_parent_id];
                     }
                     break;
-                }
-            }
-
-            //just touch categories to run recalculation of products count etc
-            foreach($catIds as $id){
-                $category = Category::find($id);
-                if($category){
-                    $category->touch();
                 }
             }
         }
