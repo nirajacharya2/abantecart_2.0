@@ -31,6 +31,7 @@ use Illuminate\Support\Collection;
  * @property int                                      $children_count
  * @property int                                      $sort_order
  * @property int                                      $status
+ * @property CategoryDescription                      $description
  * @property \Carbon\Carbon                           $date_added
  * @property \Carbon\Carbon                           $date_modified
  *

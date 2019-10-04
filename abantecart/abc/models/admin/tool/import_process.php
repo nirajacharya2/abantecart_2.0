@@ -933,6 +933,8 @@ class ModelToolImportProcess extends Model
                 $categories[] = str_replace(',', '', $data['category'][$i]);
             }
 
+            $categories = $this->checkCategoryTree($categories, $language_id, $store_id);
+
             $last_parent_id = 0;
             $catIds = [];
             foreach ($categories as $index => $c_name) {
@@ -964,6 +966,73 @@ class ModelToolImportProcess extends Model
             }
         }
         return $ret;
+    }
+
+    /**
+     * @param array $nameTree
+     * @param $language_id
+     * @param $store_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    protected function checkCategoryTree($nameTree = [], $language_id, $store_id)
+    {
+        Category::setCurrentLanguageID($language_id);
+        $output = $nameTree;
+        $fullPath = [];
+        $k=0;
+        foreach($nameTree as $c_name) {
+            if($c_name === ''){ continue; }
+            $parentId = $fullPath ? $fullPath[$k-1] : 0;
+            $fullPath[$k] = $this->getCategory($c_name, $language_id, $store_id, $parentId);
+            $k++;
+        }
+
+        //if full path already exists  - returns original tree
+        if(Category::where('path', '=', implode("_", $fullPath))->count() == 1){
+            return $output;
+        }
+
+        //if sub-path
+        $parts = $fullPath;
+        /** @var Category $category */
+        $category = null;
+        while(count($parts)>0){
+            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->get();
+            if($category){
+                break;
+            }
+            array_shift($parts);
+        }
+
+        if(!$category){
+            $parts = $fullPath;
+            while(count($parts)>0){
+                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->get();
+                if($category){
+                    break;
+                }
+                array_pop($parts);
+            }
+        }
+
+        //if not found - returns original tree
+        if(!$category){
+            return $output;
+        }
+
+        //if category tree is a part of existing category - change tree
+        $catPath = explode("_", $category->path);
+        foreach ($catPath as $id){
+            if($id!=$fullPath[0]) {
+                /** @var Category $item */
+                $item = Category::with('description')->find($id);
+                array_unshift($output,$item->description->name);
+            }
+        }
+
+        return $output;
     }
 
     /**
