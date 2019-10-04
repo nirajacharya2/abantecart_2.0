@@ -999,7 +999,7 @@ class ModelToolImportProcess extends Model
         /** @var Category $category */
         $category = null;
         while(count($parts)>0){
-            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->get();
+            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
             if($category){
                 break;
             }
@@ -1009,7 +1009,7 @@ class ModelToolImportProcess extends Model
         if(!$category){
             $parts = $fullPath;
             while(count($parts)>0){
-                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->get();
+                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
                 if($category){
                     break;
                 }
