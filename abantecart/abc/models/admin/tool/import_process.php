@@ -306,6 +306,7 @@ class ModelToolImportProcess extends Model
 
         $this->load->model('catalog/product');
         if ($new_product) {
+            $product_data = $product;
             $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
             //apply default settings for new products only
             $default_arr = [
