@@ -2,7 +2,6 @@
 
 namespace abc\models\catalog;
 
-use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
@@ -22,6 +21,8 @@ use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Product
@@ -59,6 +60,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string                        $settings
  * @property \Carbon\Carbon                $date_added
  * @property \Carbon\Carbon                $date_modified
+ * @property ProductDescription            $description
+ * @property ProductDescription            $descriptions
+ * @property Collection                    $categories
  * @property ProductOption                 $options
  * @property CouponsProduct                $coupons_products
  * @property ProductDescription            $product_descriptions
@@ -1080,7 +1084,7 @@ class Product extends BaseModel
             }
         } else {
             //get product quantity without options
-            $total_quantity = (int)$this::find($this->product_id)->first()->quantity;
+            $total_quantity = (int)$this::find($this->product_id)->quantity;
         }
 
         return $total_quantity;
@@ -1473,12 +1477,14 @@ class Product extends BaseModel
         $products_info = Product::select($arSelect)
             ->where('products.catalog_only', '=', 1)
             ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
+                /** @var JoinClause $join */
                 $join->on('products.product_id', '=', 'pd.product_id')
                     ->where('pd.language_id', '=', $languageId);
             })
             ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
             ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
             ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
+                /** @var JoinClause $join */
                 $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
                     ->where('ss.language_id', '=', $languageId);
             })
@@ -1539,8 +1545,6 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public static function getBestSellerProductIds(array $data)
     {
@@ -1563,8 +1567,9 @@ class Product extends BaseModel
         $productIds = $cache->pull($cache_key);
         if ($productIds === false) {
             $productIds = [];
-            $query = OrderProduct::select(['order_products.product_id'])
-                ->leftJoin('orders',
+            /** @var QueryBuilder $query */
+            $query = OrderProduct::select(['order_products.product_id']);
+            $query->leftJoin('orders',
                     'order_products.order_id',
                     '=',
                     'orders.order_id')
@@ -1579,7 +1584,7 @@ class Product extends BaseModel
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-
+            /** @var Collection $result_rows */
             $result_rows = $query->get();
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
@@ -1594,8 +1599,6 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public static function getBestSellerProducts(array $data)
     {
@@ -1639,11 +1642,11 @@ class Product extends BaseModel
              */
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
                 ->addSelect($select)
-                ->leftJoin('product_descriptions', function ($subquery) use ($language_id) {
-                    $subquery->on('products.product_id',
+                ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
+                    $subQuery->on('products.product_id',
                         '=',
                         'product_descriptions.product_id')
-                        ->where('product_descriptions.language_id', '=', $language_id);
+                             ->where('product_descriptions.language_id', '=', $language_id);
                 })
                 ->leftJoin(
                     'products_to_stores',
@@ -1651,11 +1654,12 @@ class Product extends BaseModel
                     '=',
                     'products_to_stores.product_id'
                 )
-                ->leftJoin('stock_statuses', function ($subquery) use ($language_id) {
-                    $subquery->on('products.stock_status_id',
+                ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
+                    /** @var JoinClause $subQuery */
+                    $subQuery->on('products.stock_status_id',
                         '=',
                         'stock_statuses.stock_status_id')
-                        ->where('stock_statuses.language_id', '=', $language_id);
+                             ->where('stock_statuses.language_id', '=', $language_id);
                 })
                 ->whereIn('products.product_id', $bestSellerIds)
                 ->whereRaw($aliasP.'.date_available<=NOW()')

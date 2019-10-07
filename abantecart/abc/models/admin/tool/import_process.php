@@ -986,12 +986,15 @@ class ModelToolImportProcess extends Model
         foreach($nameTree as $c_name) {
             if($c_name === ''){ continue; }
             $parentId = $fullPath ? $fullPath[$k-1] : 0;
-            $fullPath[$k] = $this->getCategory($c_name, $language_id, $store_id, $parentId);
+            $exist = $this->getCategory($c_name, $language_id, $store_id, $parentId);
+            if($exist) {
+                $fullPath[$k] = $exist;
+            }
             $k++;
         }
 
         //if full path already exists  - returns original tree
-        if(Category::where('path', '=', implode("_", $fullPath))->count() == 1){
+        if(!$fullPath || Category::where('path', '=', implode("_", $fullPath))->count() == 1){
             return $output;
         }
 
@@ -1004,6 +1007,7 @@ class ModelToolImportProcess extends Model
             if($category){
                 break;
             }
+            $category = null;
             array_shift($parts);
         }
 
@@ -1014,6 +1018,7 @@ class ModelToolImportProcess extends Model
                 if($category){
                     break;
                 }
+                $category = null;
                 array_pop($parts);
             }
         }
