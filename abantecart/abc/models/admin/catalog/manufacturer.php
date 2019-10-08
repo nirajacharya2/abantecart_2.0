@@ -241,11 +241,11 @@ class ModelCatalogManufacturer extends Model
             }
 
             if ($mode == 'total_only') {
-                $total_sql = 'count(*) as total';
+                $total_sql = 'count(DISTINCT m.manufacturer_id) as total';
             } else {
-                $total_sql = 'ms.*, m.*';
+                $total_sql = 'ms.store_id, m.*';
             }
-            $sql = "SELECT ".$total_sql." 
+            $sql = "SELECT DISTINCT ".$total_sql." 
                     FROM ".$this->db->table_name("manufacturers")." m
                     INNER JOIN ".$this->db->table_name('manufacturers_to_stores')." ms
                     ON (m.manufacturer_id = ms.manufacturer_id 
@@ -297,7 +297,7 @@ class ModelCatalogManufacturer extends Model
             $manufacturer_data = $this->cache->pull($cache_key);
             if ($manufacturer_data === false) {
                 $query = $this->db->query(
-                    "SELECT *
+                    "SELECT DISTINCT m.*, m2s.store_id
                     FROM ".$this->db->table_name("manufacturers")." m
                     LEFT JOIN ".$this->db->table_name("manufacturers_to_stores")." m2s
                         ON (m.manufacturer_id = m2s.manufacturer_id)
@@ -310,6 +310,20 @@ class ModelCatalogManufacturer extends Model
             return $manufacturer_data;
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * @param int $manufacturer_id
