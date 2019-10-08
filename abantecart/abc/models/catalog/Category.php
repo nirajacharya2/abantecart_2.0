@@ -412,7 +412,7 @@ class Category extends BaseModel
      *
      * @return false|mixed
      */
-    public static function getCategory(int $categoryId)
+    public static function getCategory($categoryId)
     {
         $db = Registry::db();
         $storeId = (int)Registry::config()->get('config_store_id');
@@ -785,7 +785,7 @@ class Category extends BaseModel
             }
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $category, func_get_args());
-            UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
+            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
 
             Registry::cache()->remove('category');
             $db->commit();
@@ -869,7 +869,7 @@ class Category extends BaseModel
                 }
             }
 
-            UrlAlias::setCategoryKeyword($data['keyword'] ?: $categoryName, (int)$categoryId);
+            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
 
@@ -902,6 +902,10 @@ class Category extends BaseModel
         if (!$category) {
             throw new \Exception('Cannot to find category ID '.$categoryId);
         }
+
+        //run recalculation of products count before delete
+        //(in case with data inconsistency)
+        $category->touch()->resfresh();
 
         //do not allow non empty category
         if($category->total_products_count){
