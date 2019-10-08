@@ -905,7 +905,8 @@ class Category extends BaseModel
 
         //run recalculation of products count before delete
         //(in case with data inconsistency)
-        $category->touch()->resfresh();
+        $category->touch();
+        $category->refresh();
 
         //do not allow non empty category
         if($category->total_products_count){
