@@ -399,7 +399,7 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductLinks($this->request->get['id'], $data);
+                Product::updateProductLinks($this->request->get['id'], $data);
             }
 
             return null;

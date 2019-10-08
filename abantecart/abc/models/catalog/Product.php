@@ -1363,16 +1363,37 @@ class Product extends BaseModel
      */
     public static function updateProductLinks(&$product, array $product_data)
     {
-        if(is_int($product)) {
-            $product = Product::find($product);
+        if(is_numeric($product)) {
+            $model = Product::find($product);
+        }else{
+            $model = $product;
         }
 
-        if(!$product || !$product instanceof Product){
+        if(!$model instanceof Product){
             return false;
         }
 
+        if( !is_array($product_data['product_category_prev']) ){
+            $product_data['product_category_prev'] = $model->categories()
+                                                            ->where('product_id', '=', $model->getKey())
+                                                            ->get()->pluck('category_id')->toArray();
+        }
+
         if ($product_data['product_category'] != $product_data['product_category_prev']) {
-            $product->categories()->sync($product_data['product_category']);
+
+            $ids = (array)$product_data['product_category'];
+            $product_data['product_category'] = [];
+            foreach($ids as $id){
+                $id = (int)$id;
+                if($id){
+                    $product_data['product_category'][] = $id;
+                }
+            }
+            if($product_data['product_category']) {
+                $model->categories()->sync($product_data['product_category']);
+            }else{
+                $model->categories()->detach($product_data['product_category_prev']);
+            }
 
             //touch all categories to call update listener that calculates products count in it
             $affectedCategories = (array)$product_data['product_category'] + (array)$product_data['product_category_prev'];
@@ -1383,15 +1404,15 @@ class Product extends BaseModel
         }
 
         if (isset($product_data['product_store'])) {
-            $product->stores()->sync($product_data['product_store']);
+            $model->stores()->sync($product_data['product_store']);
         }
 
         if (isset($product_data['product_download'])) {
-            $product->downloads()->sync($product_data['product_download']);
+            $model->downloads()->sync($product_data['product_download']);
         }
 
         if (isset($product_data['product_related'])) {
-            $product->related()->sync($product_data['product_related']);
+            $model->related()->sync($product_data['product_related']);
         }
         if (isset($product_data['product_tags'])) {
             $tags = explode(',', $product_data['product_tags']);
@@ -1402,12 +1423,12 @@ class Product extends BaseModel
                 foreach ($tags as $tag) {
                     $productTag = ProductTag::updateOrCreate([
                         'tag'         => trim($tag),
-                        'product_id'  => $product->product_id,
+                        'product_id'  => $model->product_id,
                         'language_id' => $languageId,
                     ]);
                     $productTags[] = $productTag->id;
                 }
-                ProductTag::where('product_id', '=', $product->product_id)
+                ProductTag::where('product_id', '=', $model->product_id)
                     ->whereNotIn('id', $productTags)
                     ->forceDelete();
             }

@@ -24,6 +24,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 
 class ControllerPagesCatalogProductRelations extends AController
 {
@@ -51,7 +52,7 @@ class ControllerPagesCatalogProductRelations extends AController
         }
 
         if ($this->request->is_POST()) {
-            $this->model_catalog_product->updateProductLinks($product_id, $this->request->post);
+            Product::updateProductLinks($product_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product_relations', '&product_id='.$product_id));
         }
@@ -96,9 +97,7 @@ class ControllerPagesCatalogProductRelations extends AController
         $this->loadModel('setting/store');
         $this->data['stores'] = [0 => $this->language->get('text_default')];
         $results = $this->model_setting_store->getStores();
-        foreach ($results as $r) {
-            $this->data['stores'][$r['store_id']] = $r['name'];
-        }
+        $this->data['stores'] = array_column($results, 'name', 'store_id');
 
         $this->data['product_category'] = $this->model_catalog_product->getProductCategories($product_id);
         $this->data['product_store'] = $this->model_catalog_product->getProductStores($product_id);
@@ -147,10 +146,7 @@ class ControllerPagesCatalogProductRelations extends AController
 
         $this->data['categories'] = [];
         $results = Category::getCategories();
-
-        foreach ($results as $r) {
-            $this->data['categories'][$r['category_id']] = $r['name'];
-        }
+        $this->data['categories'] = array_column($results, 'name', 'category_id');
 
         $this->data['form']['fields']['category'] = $form->getFieldHtml([
             'type'        => 'checkboxgroup',
