@@ -283,9 +283,8 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 $data = [$key => $value];
                 Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
-                $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             }
-
+            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             return null;
         }
 
