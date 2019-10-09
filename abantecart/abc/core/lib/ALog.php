@@ -26,10 +26,6 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use DebugBar\Bridge\MonologCollector;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ALog
  */
@@ -77,6 +73,13 @@ final class ALog
         }
 
         $this->app_filename = $dir_logs.$application_log_filename;
+
+        if(!is_file($this->app_filename)){
+            $tmp = fopen($this->app_filename,'a');
+            chmod($this->app_filename, 0664);
+            fclose($tmp);
+        }
+
         if (is_file($this->app_filename) && !is_writable($this->app_filename)) {
             $error_text = 'ALog Error: Log file '.$this->app_filename.' is not writable!';
             error_log($error_text);
@@ -100,7 +103,7 @@ final class ALog
             }
         }
 
-        $stream = new StreamHandler($this->app_filename, Logger::DEBUG);
+        $stream = new StreamHandler($this->app_filename, Logger::DEBUG, 0664);
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y-m-d H:i:s";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
@@ -123,7 +126,7 @@ final class ALog
         $this->loggers['error'] = $logger;
 
         if ($this->app_filename != $this->security_filename) {
-            $stream = new StreamHandler($this->security_filename, Logger::DEBUG);
+            $stream = new StreamHandler($this->security_filename, Logger::DEBUG, 0664);
             $stream->setFormatter($formatter);
             $logger = new Logger('security_logger');
             $debug_bar = ADebug::$debug_bar;
@@ -137,7 +140,7 @@ final class ALog
         }
 
         if ($this->app_filename != $this->warning_filename) {
-            $stream = new StreamHandler($this->warning_filename, Logger::DEBUG);
+            $stream = new StreamHandler($this->warning_filename, Logger::DEBUG, 0664);
             $stream->setFormatter($formatter);
             $logger = new Logger('warning_logger');
             $debug_bar = ADebug::$debug_bar;

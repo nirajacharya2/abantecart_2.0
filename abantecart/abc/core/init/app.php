@@ -106,7 +106,6 @@ $dir_lib = $dir_app.'core'.DS.'lib'.DS;
 require_once $dir_lib.'debug.php';
 ADebug::register();
 require_once $dir_lib.'error.php';
-require_once $dir_lib.'log.php';
 require_once $dir_lib.'exceptions.php';
 require_once $dir_lib.'error.php';
 require_once $dir_lib.'warning.php';

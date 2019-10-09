@@ -2,8 +2,20 @@
 
 namespace abc\core\lib;
 
+/**
+ * Class CategoryApiClient
+ *
+ * @package abc\core\lib
+ * Comment for search     -    a/catalog/category
+ */
+
 class CategoryApiClient extends BaseApiClient implements ApiClient
 {
+    /**
+     * @param array $data
+     *
+     * @return bool|null
+     */
     public function create(array $data)
     {
         if (!$this->token) {
