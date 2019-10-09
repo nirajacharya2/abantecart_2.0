@@ -237,6 +237,17 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->replaceOptions((array)$data['options']);
         //create defined relationships
         $product->updateRelationships($rels);
+
+        //touch categories to run recalculation
+        if($rels['categories']){
+            foreach($rels['categories'] as $id){
+                $category = Category::find($id);
+                if($category){
+                    $category->touch();
+                }
+            }
+        }
+
         $product->updateImages($data);
         $product->replaceKeywords($data['keywords']);
 
@@ -277,7 +288,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         if($upd_array) {
             $product->update($upd_array);
-            //$this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
         }
 
         //$product->save();
@@ -322,32 +332,16 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
 
-     /*   if($data['categories']) {
-            $categories = [];
-            foreach($data['categories'] as $category_branch) {
-                $categories[] = $this->processCategoryTree($category_branch);
-            }
-            $data['categories'] = $categories;
-        }*/
-
         return $data;
     }
 
-    protected function processCategoryTree(array $category_tree){
-
-        foreach($category_tree as $lang_code => $category){
-            $language_id = $this->language->getLanguageIdByCode($lang_code);
-            //Note: start from parent category!
-            if($category_tree['parent_id']!=0){
-                throw new AException(
-                    'Data integrity check error: Category Tree must start from root category. Parent_id must be 0!'
-                );
-            }
-            //note: only one language yet
-            return $this->replaceCategories($category, $language_id);
-        }
-    }
-
+    /**
+     * @param array $category
+     * @param int $language_id
+     *
+     * @return bool|mixed
+     * @throws \Exception
+     */
     protected function replaceCategories($category, $language_id){
         $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
         if (!$exists) {
