@@ -22,6 +22,7 @@ namespace abc\models\admin;
 
 use abc\core\ABC;
 use abc\core\engine\Model;
+use abc\core\engine\Registry;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
@@ -273,6 +274,14 @@ class ModelToolImportProcess extends Model
         $product_desc = $this->filterArray($data['product_descriptions']);
         $manufacturers = $this->filterArray($data['manufacturers']);
 
+        $product_data = $product;
+
+        // import brand if needed
+        $product_data['manufacturer_id'] = 0;
+        if ($manufacturers['manufacturer']) {
+            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+        }
+
         //check if row is complete and uniform
         if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
             $this->toLog('Error: Record is not complete or missing required data. Skipping!');
@@ -302,11 +311,8 @@ class ModelToolImportProcess extends Model
             }
         }
 
-
-
         $this->load->model('catalog/product');
         if ($new_product) {
-            $product_data = $product;
             $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
             //apply default settings for new products only
             $default_arr = [
@@ -345,20 +351,6 @@ class ModelToolImportProcess extends Model
            $categories = $this->processCategories($data['categories'], $language_id, $store_id);
         }
 
-        // import brand if needed
-        $manufacturer_id = 0;
-        if ($manufacturers['manufacturer']) {
-           $manufacturer_id = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
-        }
-
-        // import or update product
-        $product_data = array_merge(
-           $product,
-           [
-               'manufacturer_id' => $manufacturer_id,
-           ]
-        );
-
         $product_links = [
             'product_store' => [$store_id],
         ];
@@ -367,16 +359,7 @@ class ModelToolImportProcess extends Model
         if (count($categories)) {
             $product_links['product_category'] = array_column($categories, 'category_id');
         }
-        $this->model_catalog_product->updateProductLinks($product_id, $product_links);
-
-
-        //just touch categories to run recalculation of products count etc
-        foreach($product_links['product_category'] as $id){
-            $category = Category::find($id);
-            if($category){
-                $category->touch();
-            }
-        }
+        Product::updateProductLinks($product_id, $product_links);
 
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
