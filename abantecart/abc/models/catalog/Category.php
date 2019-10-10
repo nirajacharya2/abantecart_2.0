@@ -919,14 +919,11 @@ class Category extends BaseModel
         $subCategories[] = $categoryId;
 
         foreach($subCategories as $categoryId) {
-            $seo = UrlAlias::where(
+            UrlAlias::where(
                 'query',
                 '=',
                 'category_id='.(int)$categoryId
-            )->get();
-            if($seo){
-                $seo->forceDelete();
-            }
+            )->forceDelete();
 
 
             //delete resources
