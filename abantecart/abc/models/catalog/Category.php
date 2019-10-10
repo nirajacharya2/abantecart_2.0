@@ -16,7 +16,6 @@ use Dyrynda\Database\Support\GeneratesUuid;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 
@@ -144,7 +143,7 @@ class Category extends BaseModel
             $data = $this->toArray();
             $data['images'] = $this->getImages();
             if ($this->getKey()) {
-                $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), static::$current_language_id);
+                $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
             }
             $this->cache->push($cache_key, $data);
         }
@@ -869,8 +868,12 @@ class Category extends BaseModel
                     $categoryName = $description[$language->getContentLanguageID()]['name'];
                 }
             }
+            if($data['keyword']) {
+                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            }elseif( $data['keywords']){
+                UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
+            }
 
-            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
 

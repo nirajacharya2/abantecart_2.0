@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
  *
+ * @method static Manufacturer find(int $customer_id) Manufacturer
  * @package abc\models
  */
 class Manufacturer extends BaseModel
@@ -91,6 +92,8 @@ class Manufacturer extends BaseModel
 
         if ($data['keyword'] || $data['name']) {
             UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }elseif( $data['keywords']){
+            UrlAlias::replaceKeywords($data['keywords'], $manufacturer->getKeyName(), $manufacturer->getKey());
         }
 
         Registry::cache()->remove('manufacturer');
@@ -323,6 +326,7 @@ class Manufacturer extends BaseModel
 
         }
         $this->cache->remove('manufacturer');
+        return true;
     }
 
 }
