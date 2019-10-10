@@ -949,16 +949,19 @@ class Category extends BaseModel
             $lm = new ALayoutManager();
             $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
             $category = static::find($categoryId);
+            $parentId = null;
             if($category) {
                 $parentId = $category->parent_id;
                 //allow to extends this method from extensions
                 Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
                 $category->forceDelete();
             }
-            $parent = Category::find($parentId);
-            if($parent){
-                //run recalculation of products count and subcategories count
-                $parent->touch();
+            if($parentId) {
+                $parent = Category::find($parentId);
+                if ($parent) {
+                    //run recalculation of products count and subcategories count
+                    $parent->touch();
+                }
             }
         }
 
