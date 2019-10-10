@@ -1110,4 +1110,35 @@ class Category extends BaseModel
         return $query->get()->toArray();
     }
 
+    /**
+     * @param string $name
+     * @param int|null $parent_id
+     *
+     * @return QueryBuilder|\Illuminate\Database\Eloquent\Model|null
+     */
+    public static function getCategoryByName(string $name, $parent_id = null)
+    {
+        $db = Registry::db();
+        $name = $db->escape(mb_strtolower( html_entity_decode($name, ENT_QUOTES, ABC::env('APP_CHARSET'))));
+        /** @var QueryBuilder $query */
+        $query = CategoryDescription::whereRaw("LOWER(name) = '".$name."'");
+        $query->join(
+            'categories',
+            'categories.category_id',
+            '=',
+            'category_descriptions.category_id'
+        );
+        $query->addSelect('category_descriptions.*');
+        $query->addSelect('categories.*');
+        $parent_id = (int)$parent_id;
+        if(!$parent_id){
+            $query->whereNull('categories.parent_id');
+        }else{
+            $query->where(['categories.parent_id', $parent_id]);
+        }
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->first();
+    }
 }

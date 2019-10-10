@@ -18,7 +18,6 @@
 
 namespace abc\controllers\admin;
 
-use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
 use abc\models\catalog\Category;
@@ -237,6 +236,17 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->replaceOptions((array)$data['options']);
         //create defined relationships
         $product->updateRelationships($rels);
+
+        //touch categories to run recalculation
+        if($rels['categories']){
+            foreach($rels['categories'] as $id){
+                $category = Category::find($id);
+                if($category){
+                    $category->touch();
+                }
+            }
+        }
+
         $product->updateImages($data);
         $product->replaceKeywords($data['keywords']);
 
@@ -277,7 +287,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         if($upd_array) {
             $product->update($upd_array);
-            //$this->db->table('products')->where('product_id', $product->product_id)->update($upd_array);
         }
 
         //$product->save();
@@ -322,34 +331,19 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
 
-     /*   if($data['categories']) {
-            $categories = [];
-            foreach($data['categories'] as $category_branch) {
-                $categories[] = $this->processCategoryTree($category_branch);
-            }
-            $data['categories'] = $categories;
-        }*/
-
         return $data;
     }
 
-    protected function processCategoryTree(array $category_tree){
-
-        foreach($category_tree as $lang_code => $category){
-            $language_id = $this->language->getLanguageIdByCode($lang_code);
-            //Note: start from parent category!
-            if($category_tree['parent_id']!=0){
-                throw new AException(
-                    'Data integrity check error: Category Tree must start from root category. Parent_id must be 0!'
-                );
-            }
-            //note: only one language yet
-            return $this->replaceCategories($category, $language_id);
-        }
-    }
-
+    /**
+     * @param array $category
+     * @param int $language_id
+     *
+     * @return bool|mixed
+     * @throws \Exception
+     */
     protected function replaceCategories($category, $language_id){
-        $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
+        /** @var Category $exists */
+        $exists = Category::getCategoryByName( $category['name'], $category['parent_id']);
         if (!$exists) {
             $new_category_id = Category::addCategory(
                 [
@@ -377,35 +371,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }else{
             if($category['children']){
-                $category['children']['parent_id'] = $exists['category_id'];
+                $category['children']['parent_id'] = $exists->category_id;
                 return $this->replaceCategories($category['children'], $language_id);
             }else{
-                return $exists['category_id'];
+                return $exists->category_id;
             }
         }
-    }
-
-    public function getCategoryByName($name, $parent_id)
-    {
-        $parent_id = (int)$parent_id;
-        if(!$parent_id){
-            $parent_sql = 'c.parent_id IS NULL ';
-        }else{
-            $parent_sql = 'c.parent_id = '.$parent_id;
-        }
-        $result = $this->db->query(
-            "SELECT cd.*, c.*
-            FROM ".$this->db->table_name("category_descriptions")." cd
-            LEFT JOIN ".$this->db->table_name("categories")." c
-                 ON (c.category_id = cd.category_id)
-            WHERE ".$parent_sql." AND LOWER(name) = '"
-            .$this->db->escape(
-                mb_strtolower(
-                    html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET'))
-                )
-            )."'"
-        );
-
-        return $result->row;
     }
 }
