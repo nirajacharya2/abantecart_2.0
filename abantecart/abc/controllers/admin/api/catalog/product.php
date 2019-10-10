@@ -23,6 +23,7 @@ use abc\core\engine\Registry;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
+use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -248,7 +249,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
+
+        UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
 
         return $product;
     }
@@ -293,7 +295,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
+        UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
         return $product;
     }
 
