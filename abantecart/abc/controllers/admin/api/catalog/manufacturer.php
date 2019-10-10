@@ -74,7 +74,7 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                 return null;
             }
 
-            $manufacturer = (new Manufacturer())->addManufacturer($this->data['request']);
+            $manufacturer = Manufacturer::addManufacturer($this->data['request']);
 
             $manufacturerObj = Manufacturer::find($manufacturer);
             if ($manufacturerObj && $this->data['fillable'] && is_array($this->data['fillable'])) {

@@ -867,17 +867,17 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return int|null
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     protected function processManufacturer($manufacturer_name, $sort_order, $store_id)
     {
         $manufacturer_id = null;
-        $sql = $this->db->query("SELECT manufacturer_id from ".$this->db->table_name("manufacturers")
-            ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' AND date_deleted is NULL limit 1");
-        $manufacturer_id = $sql->row['manufacturer_id'];
+        $query = Manufacturer::select();
+        $query->whereRaw("LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."'");
+        $result = $query->first();
+        $manufacturer_id = $result->manufacturer_id;
         if (!$manufacturer_id) {
-            $this->load->model('catalog/manufacturer');
-            $manufacturer_id = (new Manufacturer())->addManufacturer(
+            $manufacturer_id = Manufacturer::addManufacturer(
                 [
                     'sort_order'         => $sort_order,
                     'name'               => $manufacturer_name,
@@ -888,6 +888,12 @@ class ModelToolImportProcess extends Model
                 $this->toLog("Created manufacturer '{$manufacturer_name}' with ID {$manufacturer_id}.");
             } else {
                 $this->toLog("Error: Failed to create manufacturer '{$manufacturer_name}'.");
+            }
+        }else{
+            //do this to run event listener on save
+            $manufacturer = Manufacturer::find($manufacturer_id);
+            if($manufacturer){
+                $manufacturer->touch();
             }
         }
         return $manufacturer_id;
