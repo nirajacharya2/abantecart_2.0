@@ -16,6 +16,7 @@ use Dyrynda\Database\Support\GeneratesUuid;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 
@@ -918,11 +919,15 @@ class Category extends BaseModel
         $subCategories[] = $categoryId;
 
         foreach($subCategories as $categoryId) {
-            UrlAlias::where(
+            $seo = UrlAlias::where(
                 'query',
                 '=',
                 'category_id='.(int)$categoryId
-            )->forceDelete();
+            )->get();
+            if($seo){
+                $seo->forceDelete();
+            }
+
 
             //delete resources
             $rm = new AResourceManager();
@@ -944,10 +949,12 @@ class Category extends BaseModel
             $lm = new ALayoutManager();
             $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
             $category = static::find($categoryId);
-            $parentId = $category->parent_id;
-            //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
-            $category->forceDelete();
+            if($category) {
+                $parentId = $category->parent_id;
+                //allow to extends this method from extensions
+                Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
+                $category->forceDelete();
+            }
             $parent = Category::find($parentId);
             if($parent){
                 //run recalculation of products count and subcategories count
