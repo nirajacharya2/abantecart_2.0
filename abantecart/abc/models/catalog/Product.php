@@ -2,7 +2,6 @@
 
 namespace abc\models\catalog;
 
-use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
@@ -22,6 +21,8 @@ use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Product
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int                           $product_id
  * @property string                        $model
  * @property string                        $sku
+ * @property string                        $uuid
  * @property string                        $location
  * @property int                           $quantity
  * @property string                        $stock_checkout
@@ -58,6 +60,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string                        $settings
  * @property \Carbon\Carbon                $date_added
  * @property \Carbon\Carbon                $date_modified
+ * @property ProductDescription            $description
+ * @property ProductDescription            $descriptions
+ * @property Collection                    $categories
  * @property ProductOption                 $options
  * @property CouponsProduct                $coupons_products
  * @property ProductDescription            $product_descriptions
@@ -190,372 +195,20 @@ class Product extends BaseModel
     ];
 
     protected $rules = [
-        /** @see validate() */
-        'product_id' => [
-            'checks'   => [
-                'integer',
-            ],
-            'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer!'],
-            ],
-        ],
-
-        'uuid' => [
-            'checks'   => [
-                'string',
-                'max:64',
-                'nullable'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text'   => ':attribute must be a string less than 255 characters!',
-                ],
-            ],
-        ],
-
-        'model' => [
-            'checks'   => [
-                'string',
-                'max:64',
-            ],
-            'messages' => [
-                '*' => [
-                    'language_key'   => 'error_model',
-                    'language_block' => 'catalog/product',
-                    'default_text'   => 'Product Model must be less than 64 characters!',
-                    'section'        => 'admin',
-                ],
-            ],
-        ],
-        'sku' => [
-            'checks'   => [
-                'string',
-                'max:64',
-                'nullable'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text'   => 'SKU must be less than 64 characters!',
-                ],
-            ],
-        ],
-        'location' => [
-            'checks'   => [
-                'string',
-                'max:128'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text'   => 'Location must be less than 128 characters!',
-                ],
-            ],
-        ],
-        'quantity' => [
-            'checks'   => [
-                'integer'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Quantity must be an integer!',
-                ],
-            ],
-        ],
-        'stock_checkout' => [
-            'checks'   => [
-                'string',
-                'size:1',
-                'nullable'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Stock checkout must have 1 character length!',
-                ],
-            ],
-        ],
-
-        'stock_status_id' => [
-            'checks'   => [
-                'integer',
-                'sometimes',
-                'required'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Pre-Order Stock Status must be an integer!',
-                ],
-            ],
-        ],
-
-        'manufacturer_id' => [
-            'checks'   => [
-                'integer',
-                'nullable',
-                'exists:manufacturers',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Manufacturer ID must be an integer and present in database!',
-                ],
-            ],
-        ],
-
-        'shipping' => [
-            'checks'   => [
-                'boolean'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Require Shipping must be a boolean!',
-                ],
-            ],
-        ],
-
-        'ship_individually' => [
-            'checks'   => [
-                'boolean'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Shipping Individually must be a boolean!',
-                ],
-            ],
-        ],
-
-        'free_shipping' => [
-            'checks'   => [
-                'boolean'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Free Shipping must be a boolean!',
-                ],
-            ],
-        ],
-
-        'shipping_price' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-
-        'price' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-
-        'tax_class_id' => [
-            'checks'   => [
-                'integer',
-                'sometimes',
-                'required'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
-                ],
-            ],
-        ],
-
-        'date_available' => [
-            'checks'   => [
-                'date'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a date!',
-                ],
-            ],
-        ],
-
-        'weight' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-        'weight_class_id' => [
-            'checks'   => [
-                'integer',
-                'exists:weight_classes',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer and presents in the table weight_classes!',
-                ],
-            ],
-        ],
-
-        'length' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-        'width' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-        'height' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-
-        'length_class_id' => [
-            'checks'   => [
-                'integer',
-                'exists:length_classes',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer and presents in the table length_classes!',
-                ],
-            ],
-        ],
-
-        'status' => [
-            'checks'   => [
-                'boolean'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a boolean!',
-                ],
-            ],
-        ],
-
-        'viewed' => [
-            'checks'   => [
-                'integer',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
-                ],
-            ],
-        ],
-        'sort_order' => [
-            'checks'   => [
-                'integer',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
-                ],
-            ],
-        ],
-
-        'subtract' => [
-            'checks'   => [
-                'boolean',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a boolean!',
-                ],
-            ],
-        ],
-
-        'minimum' => [
-            'checks'   => [
-                'integer',
-                'min:1',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Minimal quantity must be an integer and greater than zero!',
-                ],
-            ],
-        ],
-        'maximum' => [
-            'checks'   => [
-                'integer',
-                'min:0',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Maximal quantity must be an integer!',
-                ],
-            ],
-        ],
-
-        'cost' => [
-            'checks'   => [
-                'numeric'
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a numeric!',
-                ],
-            ],
-        ],
-
-        'call_to_order' => [
-            'checks'   => [
-                'boolean',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be a boolean!',
-                ],
-            ],
-        ],
-
-        'product_type_id' => [
-            'checks'   => [
-                'integer',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Product Type must be an integer!',
-                ],
-            ],
-        ],
-
-        'settings' => [
-            'checks'   => [
-                'string',
-                'nullable',
-            ],
-            'messages' => [
-                '*' => [
-                    'default_text' => 'Settings must be a string!',
-                ],
-            ],
-        ],
-
-
+        'product_id'        => 'integer',
+        'model'             => 'string|max:64',
+        //NOTE
+        //if need sku as mandatory use "present" instead "required"
+        'sku'               => 'string|max:64|nullable',
+        'location'          => 'string|max:128',
+        'quantity'          => 'integer',
+        'stock_checkout'    => 'max:1|nullable',
+        'stock_status_id'   => 'integer',
+        'manufacturer_id'   => 'integer',
+        'shipping'          => 'integer|max:1|min:0',
+        'ship_individually' => 'integer|max:1|min:0',
+        'free_shipping'     => 'integer|max:1|min:0',
+        'shipping_price'    => 'numeric',
     ];
 
     protected $fields = [
@@ -983,14 +636,6 @@ class Product extends BaseModel
     public static $auditExcludes = ['sku'];
 
     /**
-     * @param $value
-     */
-    public function SetManufacturerIdAttribute($value){
-        $value = (int)$value > 0 ? (int)$value : null;
-        $this->attributes['manufacturer_id'] = $value;
-    }
-
-    /**
      * @param array $options
      *
      * @return bool|void
@@ -1007,7 +652,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function coupons()
     {
@@ -1015,7 +660,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function descriptions()
     {
@@ -1023,7 +668,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function description()
     {
@@ -1032,7 +677,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function discounts()
     {
@@ -1040,7 +685,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function options()
     {
@@ -1048,7 +693,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_descriptions()
     {
@@ -1056,7 +701,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_values()
     {
@@ -1064,7 +709,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function option_value_descriptions()
     {
@@ -1072,7 +717,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function specials()
     {
@@ -1080,7 +725,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tags()
     {
@@ -1088,7 +733,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tagLanguaged()
     {
@@ -1097,7 +742,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function featured()
     {
@@ -1105,7 +750,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function related()
     {
@@ -1113,7 +758,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function reviews()
     {
@@ -1121,7 +766,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function categories()
     {
@@ -1129,7 +774,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function manufacturer()
     {
@@ -1137,7 +782,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function downloads()
     {
@@ -1145,37 +790,48 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'products_to_stores', 'product_id', 'store_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
     public function attributes()
     {
         return $this->morphMany(ObjectAttributeValue::class, 'object');
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function getProductTypes()
     {
         return $this->db->table('object_types as ot')
             ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
-            ->where('ot.object_type', '=', 'Product')
-            ->where('ot.status', '=', 1)
-            ->where('otd.language_id', '=', $this->registry->get('language')->getContentLanguageID())
+            ->where(
+                [
+                    'ot.object_type' => 'Product',
+                    'ot.status' => 1,
+                    'otd.language_id' => static::$current_language_id
+                ]
+            )
             ->select('otd.object_type_id as id', 'otd.name')
             ->get()
             ->toArray();
-
     }
-//TODO move this into categoryModel
+
+    /**
+     * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     public function getProductCategories()
     {
-        $categories = Category::getCategories(0, $this->registry->get('session')->data['current_store_id']);
+        $categories = Category::getCategories(0, static::$current_language_id);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[
@@ -1185,19 +841,17 @@ class Product extends BaseModel
         }
         return $product_categories;
     }
-//TODO move this into categoryModel
+
     public function getProductStores()
     {
-        $stores = Store::active()
-                       ->select(['store_id as id', 'name'])
-                       ->get();
+        $stores = Store::active()->select(['store_id as id', 'name'])->get();
         $result[] = (object)['id' => 0, 'name' => 'Default'];
         foreach ($stores as $store) {
             $result[] = (object)['id' => $store->id, 'name' => $store->name];
         }
         return $result;
     }
-//TODO move this into manufacturer Model
+
     public function getManufacturers()
     {
         $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
@@ -1207,7 +861,7 @@ class Product extends BaseModel
         }
         return $result;
     }
-//TODO MOVE THIS
+
     public function getTaxClasses()
     {
         $tax_classes = TaxClass::with('description')->get();
@@ -1218,7 +872,7 @@ class Product extends BaseModel
         }
         return $result;
     }
-//TODO MOVE THIS
+
     /**
      * @return array
      */
@@ -1241,7 +895,7 @@ class Product extends BaseModel
         ];
         return $result;
     }
-//TODO MOVE THIS
+
     /**
      * @param int $language_id
      *
@@ -1262,35 +916,29 @@ class Product extends BaseModel
         }
         return $result;
     }
-//TODO MOVE THIS
+
     public function getLengthClasses()
     {
         $length_classes = LengthClass::with('description')->get();
         $result = [];
         foreach ($length_classes as $length_class) {
-            $result[] = (object)[
-                'id' => $length_class->length_class_id,
-                'name' => $length_class->description->title
-            ];
+            $result[] = (object)['id' => $length_class->length_class_id, 'name' => $length_class->description->title];
         }
         return $result;
     }
-//TODO MOVE THIS
+
     public function getWeightClasses()
     {
         $weight_classes = WeightClass::with('description')->get();
         $result = [];
         foreach ($weight_classes as $weight_class) {
-            $result[] = (object)[
-                'id' => $weight_class->weight_class_id,
-                'name' => $weight_class->description->title
-            ];
+            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
         }
         return $result;
     }
 
     /**
-     * @return array
+     * @return mixed
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1307,6 +955,7 @@ class Product extends BaseModel
             $data['images'] = $this->images();
             $data['keywords'] = $this->keywords();
 
+            //TODO: need to rewrite into relations
             if ($this->manufacturer_id) {
                 $manufacturer = Manufacturer::find($this->manufacturer_id);
                 if ($manufacturer) {
@@ -1361,15 +1010,7 @@ class Product extends BaseModel
                 'height' => $this->config->get('config_image_thumb_height'),
             ],
         ];
-
-        $this->images['image_main'] = $resource->getResourceAllObjects(
-            'products',
-            $this->product_id,
-            $sizes,
-            1,
-            false
-        );
-
+        $this->images['image_main'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 1, false);
         if ($this->images['image_main']) {
             $this->images['image_main']['sizes'] = $sizes;
         }
@@ -1387,15 +1028,9 @@ class Product extends BaseModel
             'thumb2' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ]
+            ],
         ];
-        $this->images['images'] = $resource->getResourceAllObjects(
-            'products',
-            $this->product_id,
-            $sizes,
-            0,
-            false
-        );
+        $this->images['images'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 0, false);
         return $this->images;
     }
 
@@ -1449,7 +1084,7 @@ class Product extends BaseModel
             }
         } else {
             //get product quantity without options
-            $total_quantity = (int)$this::find($this->product_id)->first()->quantity;
+            $total_quantity = (int)$this::find($this->product_id)->quantity;
         }
 
         return $total_quantity;
@@ -1632,24 +1267,16 @@ class Product extends BaseModel
         if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
             $product_data['product_store'] = [0 => 0];
         }
-        $db = Registry::db();
-        $db->beginTransaction();
-        try {
-            $product = new Product($product_data);
-            $product->save();
-            $productId = $product->product_id;
+        $product = new Product($product_data);
+        $product->save();
+        $productId = $product->product_id;
+        if ($productId) {
             $description = new ProductDescription($product_data['product_description']);
             $product->descriptions()->save($description);
 
-            UrlAlias::setProductKeyword(
-                $product_data['keyword'] ?: $product_data['product_description']['name'],
-                $productId
-            );
-            self::updateProductLinks($productId, $product_data);
-            $db->commit();
+            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
+            self::updateProductLinks($product, $product_data);
             return $productId;
-        }catch(\PDOException $e){
-            $db->rollback();
         }
     }
 
@@ -1665,10 +1292,12 @@ class Product extends BaseModel
         /**
          * @var Product $product
          */
-        $product = Product::find($product_id);
+        $product = Product::with('categories')->find($product_id);
         if (!$product) {
             return false;
         }
+        $product_data['product_category_prev'] = $product->categories->pluck('category_id')->toArray();
+
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {
@@ -1688,7 +1317,8 @@ class Product extends BaseModel
         if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
-        self::updateProductLinks($product_id, $product_data);
+        self::updateProductLinks($product, $product_data);
+
         return true;
     }
 
@@ -1726,27 +1356,63 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int   $product_id
+     * @param int|Product $product
      * @param array $product_data
+     *
+     * @return bool
      */
-    public static function updateProductLinks(int $product_id, array $product_data)
+    public static function updateProductLinks(&$product, array $product_data)
     {
-        $product = Product::find($product_id);
+        if(is_numeric($product)) {
+            $model = Product::find($product);
+        }else{
+            $model = $product;
+        }
 
-        if (isset($product_data['product_category'])) {
-            $product->categories()->sync($product_data['product_category']);
+        if(!$model instanceof Product){
+            return false;
+        }
+
+        if( !is_array($product_data['product_category_prev']) ){
+            $product_data['product_category_prev'] = $model->categories()
+                                                            ->where('product_id', '=', $model->getKey())
+                                                            ->get()->pluck('category_id')->toArray();
+        }
+
+        if ($product_data['product_category'] != $product_data['product_category_prev']) {
+
+            $ids = (array)$product_data['product_category'];
+            $product_data['product_category'] = [];
+            foreach($ids as $id){
+                $id = (int)$id;
+                if($id){
+                    $product_data['product_category'][] = $id;
+                }
+            }
+            if($product_data['product_category']) {
+                $model->categories()->sync($product_data['product_category']);
+            }else{
+                $model->categories()->detach($product_data['product_category_prev']);
+            }
+
+            //touch all categories to call update listener that calculates products count in it
+            $affectedCategories = (array)$product_data['product_category'] + (array)$product_data['product_category_prev'];
+            foreach($affectedCategories as $categoryId){
+                $category = Category::find($categoryId);
+                $category->touch();
+            }
         }
 
         if (isset($product_data['product_store'])) {
-            $product->stores()->sync($product_data['product_store']);
+            $model->stores()->sync($product_data['product_store']);
         }
 
         if (isset($product_data['product_download'])) {
-            $product->downloads()->sync($product_data['product_download']);
+            $model->downloads()->sync($product_data['product_download']);
         }
 
         if (isset($product_data['product_related'])) {
-            $product->related()->sync($product_data['product_related']);
+            $model->related()->sync($product_data['product_related']);
         }
         if (isset($product_data['product_tags'])) {
             $tags = explode(',', $product_data['product_tags']);
@@ -1757,16 +1423,17 @@ class Product extends BaseModel
                 foreach ($tags as $tag) {
                     $productTag = ProductTag::updateOrCreate([
                         'tag'         => trim($tag),
-                        'product_id'  => $product->product_id,
+                        'product_id'  => $model->product_id,
                         'language_id' => $languageId,
                     ]);
                     $productTags[] = $productTag->id;
                 }
-                ProductTag::where('product_id', '=', $product->product_id)
+                ProductTag::where('product_id', '=', $model->product_id)
                     ->whereNotIn('id', $productTags)
                     ->forceDelete();
             }
         }
+        return true;
     }
 
     /**
@@ -1831,12 +1498,14 @@ class Product extends BaseModel
         $products_info = Product::select($arSelect)
             ->where('products.catalog_only', '=', 1)
             ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
+                /** @var JoinClause $join */
                 $join->on('products.product_id', '=', 'pd.product_id')
                     ->where('pd.language_id', '=', $languageId);
             })
             ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
             ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
             ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
+                /** @var JoinClause $join */
                 $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
                     ->where('ss.language_id', '=', $languageId);
             })
@@ -1897,8 +1566,6 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public static function getBestSellerProductIds(array $data)
     {
@@ -1921,8 +1588,9 @@ class Product extends BaseModel
         $productIds = $cache->pull($cache_key);
         if ($productIds === false) {
             $productIds = [];
-            $query = OrderProduct::select(['order_products.product_id'])
-                ->leftJoin('orders',
+            /** @var QueryBuilder $query */
+            $query = OrderProduct::select(['order_products.product_id']);
+            $query->leftJoin('orders',
                     'order_products.order_id',
                     '=',
                     'orders.order_id')
@@ -1937,7 +1605,7 @@ class Product extends BaseModel
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-
+            /** @var Collection $result_rows */
             $result_rows = $query->get();
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
@@ -1952,8 +1620,6 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public static function getBestSellerProducts(array $data)
     {
@@ -1997,11 +1663,11 @@ class Product extends BaseModel
              */
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
                 ->addSelect($select)
-                ->leftJoin('product_descriptions', function ($subquery) use ($language_id) {
-                    $subquery->on('products.product_id',
+                ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
+                    $subQuery->on('products.product_id',
                         '=',
                         'product_descriptions.product_id')
-                        ->where('product_descriptions.language_id', '=', $language_id);
+                             ->where('product_descriptions.language_id', '=', $language_id);
                 })
                 ->leftJoin(
                     'products_to_stores',
@@ -2009,11 +1675,12 @@ class Product extends BaseModel
                     '=',
                     'products_to_stores.product_id'
                 )
-                ->leftJoin('stock_statuses', function ($subquery) use ($language_id) {
-                    $subquery->on('products.stock_status_id',
+                ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
+                    /** @var JoinClause $subQuery */
+                    $subQuery->on('products.stock_status_id',
                         '=',
                         'stock_statuses.stock_status_id')
-                        ->where('stock_statuses.language_id', '=', $language_id);
+                             ->where('stock_statuses.language_id', '=', $language_id);
                 })
                 ->whereIn('products.product_id', $bestSellerIds)
                 ->whereRaw($aliasP.'.date_available<=NOW()')
@@ -2062,11 +1729,14 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public static function getProductsAllInfo(array $productIds)
     {
         $result = [];
         foreach ($productIds as $productId) {
+            /** @var Category $category */
             $category = Category::find($productId);
             if ($category) {
                 $result[] = $category->getAllData();

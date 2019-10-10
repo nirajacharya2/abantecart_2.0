@@ -39,7 +39,7 @@ if (!class_exists('abc\core\ABC')) {
  */
 class ControllerResponsesEmbedJS extends AController
 {
-    public $data = array();
+    public $data = [];
 
     /**
      * NOTE: main() is bootstrap method
@@ -218,7 +218,7 @@ class ControllerResponsesEmbedJS extends AController
 
         if (!$product_options) {
             $product_info['button_addtocart'] = $this->html->buildElement(
-                array(
+                [
                     'type' => 'button',
                     'name' => 'addtocart'.$product_id,
                     'text' => $this->language->get('button_add_to_cart'),
@@ -228,28 +228,28 @@ class ControllerResponsesEmbedJS extends AController
                                 .'" data-href = "'
                                 .$this->html->getURL('r/embed/js/addtocart', '&product_id='.$product_id)
                                 .'"',
-                )
+                ]
             );
         } else {
             $product_info['button_addtocart'] = $this->html->buildElement(
-                array(
+                [
                     'type' => 'button',
                     'name' => 'addtocart'.$product_id,
                     'text' => $this->language->get('button_add_to_cart'),
                     'attr' => ' data-href="'.$this->data['product_details_url'].'"  data-id="'.$product_id
                         .'" data-html="true" data-target="#abc_embed_modal" data-toggle="abcmodal" ',
-                )
+                ]
             );
             $product_info['options'] = $product_options;
         }
 
         $product_info['quantity'] = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'quantity',
                 'value' => $product_info['minimum'],
                 'style' => 'short',
-            )
+            ]
         );
 
         $this->data['product'] = $product_info;
@@ -272,9 +272,9 @@ class ControllerResponsesEmbedJS extends AController
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $category_id = (array)$this->request->get['category_id'];
+        $categoryIds = (array)$this->request->get['category_id'];
 
-        if (!$category_id) {
+        if (!$categoryIds) {
             return null;
         }
 
@@ -283,18 +283,17 @@ class ControllerResponsesEmbedJS extends AController
             return null;
         }
 
-
-        $categories = Category::getCategoriesData(array(
-            'filter_ids'    => $category_id,
-            'subsql_filter' => ' c.status=1',
-        ));
+        $categories = Category::getCategoriesData([
+            'include'    => $categoryIds,
+            'status'     => 1
+        ]);
 
         //can not locate categories? get out
         if (!$categories) {
             return null;
         }
 
-        $ids = array();
+        $ids = [];
         foreach ($categories as $result) {
             $ids[] = (int)$result['category_id'];
         }
@@ -357,16 +356,16 @@ class ControllerResponsesEmbedJS extends AController
         }
 
         $this->loadModel('catalog/manufacturer');
-        $manufacturers = $this->model_catalog_manufacturer->getManufacturersData(array(
+        $manufacturers = $this->model_catalog_manufacturer->getManufacturersData([
             'subsql_filter' => ' m.manufacturer_id IN ('.implode(',', $manufacturer_id).')',
-        ));
+        ]);
 
         //can not locate manufacturers? get out
         if (!$manufacturers) {
             return null;
         }
 
-        $ids = array();
+        $ids = [];
         foreach ($manufacturers as $result) {
             $ids[] = (int)$result['manufacturer_id'];
         }

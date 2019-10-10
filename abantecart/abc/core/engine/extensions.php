@@ -245,7 +245,7 @@ class ExtensionCollection
  * @method hk_create(object $baseObject, array $data, int $set_order_id)
  * @method hk_update(object $baseObject, int $order_id, int $order_status_id, string $comment, bool $notify)
  * @method hk_apply_promotions(object $baseObject, array $total_data, array $total)
- * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder $query, array $inputData = [])
+ * @method hk_extendQuery (BaseModel $model, string $method, QueryBuilder|BaseModel $query, array $inputData = [])
  * @package MyExtensionsApi
  */
 class ExtensionsApi

@@ -22,6 +22,7 @@ namespace abc\models\admin;
 
 use abc\core\ABC;
 use abc\core\engine\Model;
+use abc\core\engine\Registry;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
@@ -273,6 +274,14 @@ class ModelToolImportProcess extends Model
         $product_desc = $this->filterArray($data['product_descriptions']);
         $manufacturers = $this->filterArray($data['manufacturers']);
 
+        $product_data = $product;
+
+        // import brand if needed
+        $product_data['manufacturer_id'] = 0;
+        if ($manufacturers['manufacturer']) {
+            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+        }
+
         //check if row is complete and uniform
         if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
             $this->toLog('Error: Record is not complete or missing required data. Skipping!');
@@ -302,31 +311,9 @@ class ModelToolImportProcess extends Model
             }
         }
 
-        // import category if needed
-        $categories = [];
-        if ($data['categories'] && $data['categories']['category']) {
-            $categories = $this->processCategories($data['categories'], $language_id, $store_id);
-        }
-
-        // import brand if needed
-        $manufacturer_id = 0;
-        if ($manufacturers['manufacturer']) {
-            $manufacturer_id = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
-        }
-
-        // import or update product
-        $product_data = array_merge(
-            $product,
-            [
-                'manufacturer_id' => $manufacturer_id,
-            ]
-        );
-
         $this->load->model('catalog/product');
         if ($new_product) {
-
             $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
-
             //apply default settings for new products only
             $default_arr = [
                 'status'          => 1,
@@ -358,14 +345,21 @@ class ModelToolImportProcess extends Model
             $status = true;
         }
 
+        // import category if needed
+        $categories = [];
+        if ($data['categories'] && $data['categories']['category']) {
+           $categories = $this->processCategories($data['categories'], $language_id, $store_id);
+        }
+
         $product_links = [
             'product_store' => [$store_id],
         ];
 
+        $product_links['product_category'] = [];
         if (count($categories)) {
             $product_links['product_category'] = array_column($categories, 'category_id');
         }
-        $this->model_catalog_product->updateProductLinks($product_id, $product_links);
+        Product::updateProductLinks($product_id, $product_links);
 
         //process images
         $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
@@ -374,8 +368,6 @@ class ModelToolImportProcess extends Model
         $this->addUpdateOptions(
             $product_id,
             $data['product_options'],
-            $language_id,
-            $store_id,
             $product_data['weight_class_id']
         );
 
@@ -434,7 +426,7 @@ class ModelToolImportProcess extends Model
 
         if ($category_id) {
             //update category
-            (new Category())->editCategory(
+            Category::editCategory(
                 $category_id,
                 $category_data
             );
@@ -449,7 +441,7 @@ class ModelToolImportProcess extends Model
                 $category[$key] = isset($category[$key]) ? $category[$key] : $val;
             }
 
-            $category_id = (new Category())->addCategory($category_data);
+            $category_id = Category::addCategory($category_data);
             if ($category_id) {
                 $this->toLog("Created category '{$category_desc['name']}' with ID {$category_id}.");
                 $status = true;
@@ -523,13 +515,12 @@ class ModelToolImportProcess extends Model
      * @param int $product_id
      * @param array $data
      * @param int $weight_class_id
-     * @param int $language_id
-     * @param int $store_id
      *
      * @return bool
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    protected function addUpdateOptions($product_id, $data = [], $weight_class_id, $language_id, $store_id)
+    protected function addUpdateOptions($product_id, $data = [], $weight_class_id)
     {
         if (!is_array($data) || empty($data)) {
             //no option details
@@ -602,6 +593,7 @@ class ModelToolImportProcess extends Model
      * @param $data
      *
      * @return bool|int|null
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     protected function saveOptionValue($product_id, $weight_class_id, $p_option_id, $data)
@@ -884,7 +876,6 @@ class ModelToolImportProcess extends Model
             ." WHERE LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."' AND date_deleted is NULL limit 1");
         $manufacturer_id = $sql->row['manufacturer_id'];
         if (!$manufacturer_id) {
-            //create category
             $this->load->model('catalog/manufacturer');
             $manufacturer_id = (new Manufacturer())->addManufacturer(
                 [
@@ -908,7 +899,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     protected function processCategories($data, $language_id, $store_id)
     {
@@ -926,13 +917,17 @@ class ModelToolImportProcess extends Model
                 $categories[] = str_replace(',', '', $data['category'][$i]);
             }
 
+            $categories = $this->checkCategoryTree($categories, $language_id, $store_id);
+
             $last_parent_id = 0;
+            $catIds = [];
             foreach ($categories as $index => $c_name) {
                 if($c_name===''){ continue; }
                 //is parent?
                 $is_parent = ($index + 1 == count($categories)) ? false : true;
                 //check if category exists with this name
                 $cid = $this->getCategory($c_name, $language_id, $store_id, $last_parent_id);
+                $catIds[] = (int)$cid;
                 if ($is_parent) {
                     if (!$cid) {
                         $last_parent_id = $this->saveCategory($c_name, $language_id, $store_id, $last_parent_id);
@@ -955,6 +950,78 @@ class ModelToolImportProcess extends Model
             }
         }
         return $ret;
+    }
+
+    /**
+     * @param array $nameTree
+     * @param $language_id
+     * @param $store_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    protected function checkCategoryTree($nameTree = [], $language_id, $store_id)
+    {
+        Category::setCurrentLanguageID($language_id);
+        $output = $nameTree;
+        $fullPath = [];
+        $k=0;
+        foreach($nameTree as $c_name) {
+            if($c_name === ''){ continue; }
+            $parentId = $fullPath ? $fullPath[$k-1] : 0;
+            $exist = $this->getCategory($c_name, $language_id, $store_id, $parentId);
+            if($exist) {
+                $fullPath[$k] = $exist;
+            }
+            $k++;
+        }
+
+        //if full path already exists  - returns original tree
+        if(!$fullPath || Category::where('path', '=', implode("_", $fullPath))->count() == 1){
+            return $output;
+        }
+
+        //if sub-path
+        $parts = $fullPath;
+        /** @var Category $category */
+        $category = null;
+        while(count($parts)>0){
+            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
+            if($category){
+                break;
+            }
+            $category = null;
+            array_shift($parts);
+        }
+
+        if(!$category){
+            $parts = $fullPath;
+            while(count($parts)>0){
+                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
+                if($category){
+                    break;
+                }
+                $category = null;
+                array_pop($parts);
+            }
+        }
+
+        //if not found - returns original tree
+        if(!$category){
+            return $output;
+        }
+
+        //if category tree is a part of existing category - change tree
+        $catPath = explode("_", $category->path);
+        foreach ($catPath as $id){
+            if($id!=$fullPath[0]) {
+                /** @var Category $item */
+                $item = Category::with('description')->find($id);
+                array_unshift($output,$item->description->name);
+            }
+        }
+
+        return $output;
     }
 
     /**
@@ -1007,7 +1074,7 @@ class ModelToolImportProcess extends Model
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {
-        $category_id = (new Category())->addCategory(
+        $category_id = Category::addCategory(
             [
                 'parent_id'            => $pid,
                 'sort_order'           => 0,

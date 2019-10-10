@@ -26,7 +26,6 @@ use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\models\catalog\Category;
-use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
 
 /**
@@ -136,7 +135,6 @@ class ControllerPagesProductSearch extends AController
                 'value' => $request['keyword'],
             ]
         );
-
 
         $categories = $this->getCategories(0);
         $options = [0 => $this->language->get('text_category')];

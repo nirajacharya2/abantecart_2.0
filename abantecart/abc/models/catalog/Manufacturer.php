@@ -8,9 +8,9 @@ use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
-use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int                                      $manufacturer_id
  * @property string                                   $name
+ * @property string                                   $uuid
  * @property int                                      $sort_order
  *
  * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
@@ -59,7 +60,7 @@ class Manufacturer extends BaseModel
      * @param $data
      *
      * @return bool|mixed
-     * @throws \abc\core\lib\AException
+     * @throws \Exception
      */
     public function addManufacturer($data)
     {
@@ -101,14 +102,10 @@ class Manufacturer extends BaseModel
      * @param $manufacturerId
      * @param $data
      *
-     * @throws \abc\core\lib\AException
      */
     public function editManufacturer($manufacturerId, $data)
     {
-        $contentLanguageId = $this->registry->get('language')->getContentLanguageID();
-
         self::find($manufacturerId)->update($data);
-
         $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
             $this->db->table('manufacturers_to_stores')
@@ -247,10 +244,16 @@ class Manufacturer extends BaseModel
             return $output;
         }
 
-        $manufacturer = self::leftJoin('manufacturers_to_stores', 'manufacturers_to_stores.manufacturer_id', '=', 'manufacturers.manufacturer_id')
-            ->where('manufacturers_to_stores.store_id', '=', $storeId)
-            ->where('manufacturers.manufacturer_id', '=', $manufacturerId);
-        $manufacturer = $manufacturer->get()->first();
+        /** @var QueryBuilder $query */
+        $query = self::leftJoin(
+            'manufacturers_to_stores',
+            'manufacturers_to_stores.manufacturer_id',
+            '=',
+            'manufacturers.manufacturer_id'
+        );
+        $query->where('manufacturers_to_stores.store_id', '=', $storeId);
+        $query->where('manufacturers.manufacturer_id', '=', $manufacturerId);
+        $manufacturer = $query->get()->first();
 
         if (!$manufacturer) {
             return false;

@@ -325,7 +325,7 @@ class ModelCatalogProduct extends Model
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
             //get all children categories
-            $subCategories = Category::getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT *,
                             p.product_id,
@@ -397,7 +397,7 @@ class ModelCatalogProduct extends Model
         $cache = $this->cache->pull($cache_key);
         if ($cache === false) {
             //get all children category ids
-            $subCategories = Category::getChildrenIDs((int)$category_id);
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
             $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
             $sql = "SELECT COUNT(*) AS total
                     FROM ".$this->db->table_name("products_to_categories")." p2c
@@ -663,6 +663,7 @@ class ModelCatalogProduct extends Model
 
             if ($category_id) {
                 $data = [];
+
                 $string = rtrim($this->getPath($category_id), ',');
                 $category_ids = explode(',', $string);
 
@@ -829,7 +830,6 @@ class ModelCatalogProduct extends Model
 
             if ($category_id) {
                 $data = [];
-
                 $string = rtrim($this->getPath($category_id), ',');
                 $category_ids = explode(',', $string);
 
@@ -852,6 +852,7 @@ class ModelCatalogProduct extends Model
     }
 
     /**
+     * TODO: optimize it. Path now in db
      * @param int $category_id
      *
      * @return string

@@ -31,7 +31,6 @@ use abc\core\lib\AMessage;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
-use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
 use H;
 
@@ -98,7 +97,6 @@ class ControllerPagesProductProduct extends AController
         }
 
         $this->loadModel('tool/seo_url');
-
 
         if (isset($request['path'])) {
             $path = '';
@@ -603,7 +601,7 @@ class ControllerPagesProductProduct extends AController
                 ];
 
                 // main product image
-                $mSizes = array(
+                $mSizes = [
                     'main'  => [
                         'width'  => $this->config->get('config_image_popup_width'),
                         'height' => $this->config->get('config_image_popup_height'),
@@ -612,7 +610,7 @@ class ControllerPagesProductProduct extends AController
                         'width'  => $this->config->get('config_image_thumb_width'),
                         'height' => $this->config->get('config_image_thumb_height'),
                     ],
-                );
+                ];
 
                 $option_images['main'] =
                     $resource->getResourceAllObjects('product_option_value', $option_data['value'], $mSizes, 1, false);
@@ -621,24 +619,24 @@ class ControllerPagesProductProduct extends AController
                 }
 
                 // additional images
-                $oSizes = array(
+                $oSizes = [
                     'main'   =>
-                        array(
+                        [
                             'width'  => $this->config->get('config_image_popup_width'),
                             'height' => $this->config->get('config_image_popup_height'),
-                        ),
+                        ],
                     'thumb'  =>
-                        array(
+                        [
                             'width'  => $this->config->get('config_image_additional_width'),
                             'height' => $this->config->get('config_image_additional_height'),
-                        ),
+                        ],
                     //product image zoom related thumbnail
                     'thumb2' =>
-                        array(
+                        [
                             'width'  => $this->config->get('config_image_thumb_width'),
                             'height' => $this->config->get('config_image_thumb_height'),
-                        ),
-                );
+                        ],
+                ];
 
                 $option_images['images'] =
                     $resource->getResourceAllObjects('product_option_value', $option_data['value'], $oSizes, 0, false);

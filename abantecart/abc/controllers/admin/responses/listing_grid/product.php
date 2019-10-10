@@ -25,6 +25,7 @@ use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use H;
 use stdClass;
@@ -180,7 +181,19 @@ class ControllerResponsesListingGridProduct extends AController
                             return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         }
                         $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+
+                        $categories = $this->db->table('products_to_categories')
+                                     ->where(['product_id' => $id])
+                                     ->get();
+                        //TODO: think here!!!
                         $this->model_catalog_product->deleteProduct($id);
+                        //run products count recalculation
+                        foreach($categories as $item){
+                            $category = Category::find($item->category_id);
+                            if($category){
+                                $category->touch();
+                            }
+                        }
                     }
                 }
                 break;
@@ -234,6 +247,7 @@ class ControllerResponsesListingGridProduct extends AController
      *
      * @return void
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
      */
     public function update_field()
     {
@@ -256,9 +270,6 @@ class ControllerResponsesListingGridProduct extends AController
 
         $product_id = (int)$this->request->get['id'];
         if ($product_id) {
-
-            $product_columns = $this->model_catalog_product->getProductColumns();
-
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $err = $this->validateField($key, $value);
@@ -272,9 +283,8 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 $data = [$key => $value];
                 Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
-                $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             }
-
+            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             return null;
         }
 
@@ -389,7 +399,7 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductLinks($this->request->get['id'], $data);
+                Product::updateProductLinks($this->request->get['id'], $data);
             }
 
             return null;

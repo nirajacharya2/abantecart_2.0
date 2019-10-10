@@ -63,7 +63,6 @@ $class_list = [
         'connect',
         'document',
         'image',
-        'log',
         'mail',
         'message',
         'pagination',

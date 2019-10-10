@@ -17,10 +17,8 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\core\engine;
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * @property \abc\core\lib\AConfig $config
@@ -50,36 +48,43 @@ if (!class_exists('abc\core\ABC')) {
  * @property \abc\core\lib\AOrderStatus $order_status
  * @property \abc\core\lib\AIMManager $im
  */
-abstract class Model{
-	/**
-	 * @var Registry
-	 */
-	public $registry;
-	/**
-	 * @param $registry Registry
-	 */
-	public function __construct($registry){
-		$this->registry = $registry;
-	}
+abstract class Model
+{
+    /**
+     * @var Registry
+     */
+    public $registry;
 
-	/**
-	 * @param $key
-	 * @return mixed
-	 */
-	public function __get($key){
-		return $this->registry->get($key);
-	}
+    /**
+     * @param $registry Registry
+     */
+    public function __construct($registry)
+    {
+        $this->registry = $registry;
+    }
 
-	public function __set($key, $value){
-		$this->registry->set($key, $value);
-	}
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        return $this->registry->get($key);
+    }
 
-	public function __call($method, $args){
-		if (!$this->registry->has('extensions')) {
-			return null;
-		}
-		array_unshift($args, $this);
-		$return = call_user_func_array(array ($this->registry->get('extensions'), $method), $args);
-		return $return;
-	}
+    public function __set($key, $value)
+    {
+        $this->registry->set($key, $value);
+    }
+
+    public function __call($method, $args)
+    {
+        if (!$this->registry->has('extensions')) {
+            return null;
+        }
+        array_unshift($args, $this);
+        $return = call_user_func_array([$this->registry->get('extensions'), $method], $args);
+        return $return;
+    }
 }

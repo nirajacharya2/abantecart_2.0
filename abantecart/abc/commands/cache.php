@@ -165,10 +165,6 @@ class Cache extends BaseCommand
             }
 
             //loop by all categories of store
-            $registry->get('load')->model('catalog/category');
-            /**
-             * @var \abc\models\admin\ModelCatalogCategory $model
-             */
             $categories = Category::getCategoriesData(['store_id' => $store['store_id']]);
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(

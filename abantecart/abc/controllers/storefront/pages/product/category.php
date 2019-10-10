@@ -28,14 +28,12 @@ use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Product;
 use abc\models\QueryBuilder;
-use abc\models\storefront\ModelCatalogCategory;
 use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductCategory
  *
  * @package abc\controllers\storefront
- * @property ModelCatalogCategory $model_catalog_category
  */
 class ControllerPagesProductCategory extends AController
 {
@@ -86,7 +84,6 @@ class ControllerPagesProductCategory extends AController
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-
         $this->loadModel('tool/seo_url');
 
         if (!isset($request['path']) && isset($request['category_id'])) {
@@ -96,6 +93,7 @@ class ControllerPagesProductCategory extends AController
         if (isset($request['path'])) {
             $path = '';
             $parts = explode('_', $request['path']);
+            $category_id = end($parts);
             if (count($parts) == 1) {
                 /**
                  * @var Category $category
@@ -130,7 +128,6 @@ class ControllerPagesProductCategory extends AController
                     ]);
                 }
             }
-            $category_id = array_pop($parts);
         } else {
             $category_id = 0;
         }
@@ -190,7 +187,6 @@ class ControllerPagesProductCategory extends AController
 
             if ($category_total || $product_total) {
                 $categories = [];
-
                 $results = Category::getCategories($category_id);
                 $category_ids = [];
                 foreach ($results as $result) {

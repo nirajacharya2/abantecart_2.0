@@ -2,6 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" dir="<?php echo $direction; ?>" lang="<?php echo $lang; ?>" xml:lang="<?php echo $lang; ?>" <?php echo $this->getHookVar('hk_html_attribute'); ?>>
 <head><?php	echo $head; ?></head>
 <body class="<?php echo $page_css_class; ?>">
+<?php
+if ($google_tag_manager) {
+    ?>
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo trim($google_tag_manager); ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+    <?php
+}
+?>
 <div class="container-fixed" style="max-width: <?php echo $layout_width; ?>">
 
 <?php if($maintenance_warning){ ?>
@@ -33,7 +42,7 @@ echo ${$header}; ?>
 		$present_columns++;
 		$center_padding .= ' ct_padding_right';
 	}
-?>  
+?>
 
 	<div class="container-fluid">
 		<?php if ( !empty(${$column_left} ) ) { ?>
@@ -49,11 +58,11 @@ echo ${$header}; ?>
 		<?php echo ${$content_top}; ?>
 		<!-- content top blocks placeholder (EOF) -->
 		<?php } ?>
-		
+
 		<div class="<?php echo $center_padding; ?>">
 		<?php echo $content; ?>
 		</div>
-		 
+
 		<?php if ( !empty( ${$content_bottom} ) ) { ?>
 		<!-- content bottom blocks placeholder -->
 		<?php echo ${$content_bottom}; ?>

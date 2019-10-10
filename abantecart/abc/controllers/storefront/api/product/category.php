@@ -41,7 +41,7 @@ class ControllerApiProductCategory extends AControllerAPI
         }
 
         if (!isset($this->request->get['path']) && !isset($this->request->get['category_id'])) {
-            $this->rest->setResponseData(array('Error' => 'Missing one of required category parameters'));
+            $this->rest->setResponseData(['Error' => 'Missing one of required category parameters']);
             $this->rest->sendResponse(200);
             return null;
         }
@@ -62,13 +62,12 @@ class ControllerApiProductCategory extends AControllerAPI
     public function getCategoryDetails($category_id)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
         $category_info = Category::getCategory($category_id);
         if (!$category_info) {
-            return array('message' => 'category not found');
+            return ['message' => 'category not found'];
         }
         $resource = new AResource('image');
         $thumbnail = $resource->getMainThumb('categories',
@@ -95,10 +94,9 @@ class ControllerApiProductCategory extends AControllerAPI
     public function getCategories($parent_category_id = 0)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $results = Category::getCategories($parent_category_id);
 
-        $category_ids = $categories = array();
+        $category_ids = $categories = [];
         foreach ($results as $result) {
             $category_ids[] = (int)$result['category_id'];
         }
@@ -113,13 +111,13 @@ class ControllerApiProductCategory extends AControllerAPI
 
         foreach ($results as $result) {
             $thumbnail = $thumbnails[$result['category_id']];
-            $categories[] = array(
+            $categories[] = [
                 'name'                => $result['name'],
                 'category_id'         => $result['category_id'],
                 'sort_order'          => $result['sort_order'],
                 'thumb'               => $thumbnail['thumb_url'],
                 'total_subcategories' => Category::getTotalCategoriesByCategoryId($result['category_id']),
-            );
+            ];
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

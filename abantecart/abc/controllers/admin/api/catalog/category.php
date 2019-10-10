@@ -4,6 +4,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
 use abc\models\catalog\Category;
 use abc\models\catalog\ResourceLibrary;
 
@@ -11,6 +12,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
 {
     public function get()
     {
+        $category = null;
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
@@ -34,12 +36,13 @@ class ControllerApiCatalogCategory extends AControllerAPI
             $category = Category::where($getBy, $request[$getBy])->get()->first();
         } else {
             $languageId = $this->language->getLanguageCodeByLocale('en');
+            Category::setCurrentLanguageID($languageId);
             $categories = Category::withTrashed()->get();
 
-            foreach ($categories as $findcategory) {
-                $pathTree = Category::getPath($findcategory->category_id, $languageId, '');
+            foreach ($categories as $findCategory) {
+                $pathTree = Category::getPath($findCategory->category_id);
                 if ($pathTree == $request[$getBy]) {
-                    $category = $findcategory;
+                    $category = $findCategory;
                     break;
                 }
             }
@@ -57,7 +60,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
         }
 
         $this->data['result'] = [];
-
+        /**
+         * @var Category $category
+         */
         if ($category) {
             $this->data['result'] = $category->getAllData();
         }
@@ -90,15 +95,15 @@ class ControllerApiCatalogCategory extends AControllerAPI
 
             $this->data['request'] = $this->decodeRequest($this->data['request']);
 
-            $category = (new Category())->addCategory($this->data['request']);
-            if ($category) {
-                $this->data['result']['category_id'] = $category;
+            $category_id = Category::addCategory($this->data['request']);
+            if ($category_id) {
+                $this->data['result']['category_id'] = $category_id;
                 if (isset($this->data['request']['category_images'])) {
                     $categoryImages['images'] = $this->data['request']['category_images'];
                     $resource_mdl = new ResourceLibrary();
                     $resource_mdl->updateImageResourcesByUrls($categoryImages,
                         'categories',
-                        $category,
+                        $category_id,
                         '',
                         $this->language->getContentLanguageID());
                 }
@@ -106,7 +111,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     $parentCategory = Category::where('uuid', '=', $this->data['request']['parent_uuid'])
                         ->get()
                         ->first();
-                    $categoryObj = Category::find($category);
+                    $categoryObj = Category::find($category_id);
                     if ($parentCategory && $categoryObj) {
                         $categoryObj->parent_id = $parentCategory->category_id;
                         $categoryObj->save();
@@ -130,6 +135,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
+        $category =  null;
         try {
 
             $this->data['request'] = $request;
@@ -149,12 +155,13 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     $category = Category::where($updateBy, $request[$updateBy])->first();
                 } else {
                     $languageId = $this->language->getLanguageCodeByLocale('en');
+                    Category::setCurrentLanguageID($languageId);
                     $categories = Category::withTrashed()->get();
 
-                    foreach ($categories as $findcategory) {
-                        $pathTree = Category::getPath($findcategory->category_id, $languageId, '');
+                    foreach ($categories as $findCategory) {
+                        $pathTree = Category::getPath($findCategory->category_id);
                         if ($pathTree === $request[$updateBy]) {
-                            $category = $findcategory;
+                            $category = $findCategory;
                             break;
                         }
                     }
@@ -162,7 +169,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
 
                 if ($category === null) {
                     $this->rest->setResponseData(
-                        ['Error' => "Category with {$updateBy}: {$request[$updateBy]} does not exist"]
+                        [
+                            'Error' => "Category with {$updateBy}: {$request[$updateBy]} does not exist"
+                        ]
                     );
                     $this->rest->sendResponse(200);
                     return null;
@@ -170,7 +179,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
 
                 $request = $this->decodeRequest($request);
 
-                (new Category())->editCategory($category->category_id, $request);
+                if( !Category::editCategory($category->category_id, $request) ){
+                    throw new AException('Cannot to save category. Please see error log for details');
+                }
 
                 if (isset($request['category_images'])) {
                     $categoryImages['images'] = $request['category_images'];

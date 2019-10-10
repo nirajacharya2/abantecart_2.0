@@ -2076,6 +2076,11 @@ ALTER TABLE `ac_categories`
 ADD COLUMN `path` VARCHAR(255) NOT NULL DEFAULT '' AFTER `parent_id`;
 
 ALTER TABLE `ac_categories`
-ADD INDEX `ac_categories_trees_idx` (`path`);
+ADD INDEX `ac_categories_trees_idx` (`path`),
+ADD COLUMN `total_products_count` int(11) NOT NULL DEFAULT '0' AFTER `path`,
+ADD COLUMN `active_products_count` int(11) NOT NULL DEFAULT '0' AFTER `total_products_count`,
+ADD COLUMN `children_count` int(11) NOT NULL DEFAULT '0' AFTER `active_products_count`;
 
 
+INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
+('general','config_google_tag_manager_id','');

@@ -17,39 +17,44 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\models\catalog\Category;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerBlocksSearch extends AController {
-	public $data=array();
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
-		$this->loadLanguage('blocks/search');
+class ControllerBlocksSearch extends AController
+{
+    public $data = [];
 
-		$this->data['heading_title'] = $this->language->get('heading_title', 'blocks/search');
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->loadLanguage('blocks/search');
 
-		$this->data['text_advanced'] = $this->language->get('text_advanced');
-		$this->data['entry_search'] = $this->language->get('entry_search');
-		$this->data['text_category'] = $this->language->get('text_category');
-		$this->data['search'] = $this->html->buildElement(
-												array ('type'=>'input',
-					                                    'name'=>'filter_keyword',
-					                                    'value'=> (isset($this->request->get['keyword']) ? $this->request->get['keyword'] : $this->language->get('text_keyword')),
-														'placeholder' => $this->language->get('text_keyword')
+        $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/search');
 
-												));
+        $this->data['text_advanced'] = $this->language->get('text_advanced');
+        $this->data['entry_search'] = $this->language->get('entry_search');
+        $this->data['text_category'] = $this->language->get('text_category');
+        $this->data['search'] = $this->html->buildElement(
+            [
+                'type'        => 'input',
+                'name'        => 'filter_keyword',
+                'value'       => (isset($this->request->get['keyword'])
+                                ? $this->request->get['keyword']
+                                : $this->language->get('text_keyword')),
+                'placeholder' => $this->language->get('text_keyword'),
 
-		//load top level categories
-		$this->data['top_categories'] = Category::getCategories(0);
-		$this->data['button_go'] = $this->language->get('button_go');
+            ]);
 
-		$this->view->batchAssign($this->data);
-		$this->processTemplate();
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        //load top level categories
+        $this->data['top_categories'] = Category::getCategories();
+        $this->data['button_go'] = $this->language->get('button_go');
+
+        $this->view->batchAssign($this->data);
+        $this->processTemplate();
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

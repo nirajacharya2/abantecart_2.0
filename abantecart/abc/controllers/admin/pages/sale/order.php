@@ -34,7 +34,6 @@ use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerTransaction;
 use abc\models\locale\Currency;
-use abc\models\admin\ModelCatalogCategory;
 use abc\models\order\Order;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderHistory;
@@ -528,7 +527,7 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->loadModel('catalog/product');
-        $this->data['categories'] = Category::getCategories(0);
+        $this->data['categories'] = Category::getCategories();
 
         $this->data['order_products'] = [];
 
