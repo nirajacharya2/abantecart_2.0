@@ -11,6 +11,7 @@ use abc\core\lib\ACustomer;
 use abc\core\lib\AdminCommands;
 use abc\core\lib\AUser;
 use abc\core\lib\AEncryption;
+use abc\core\lib\exceptions\AExceptionHandler;
 use abc\core\lib\JobManager;
 use abc\core\lib\AJson;
 use abc\core\lib\ALog as ALog;
@@ -26,8 +27,8 @@ use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
 
 return [
-    'AViewRender'          => \abc\core\view\AViewDefaultRender::class,
-    'ALog'                 => [
+    'AViewRender'       => \abc\core\view\AViewDefaultRender::class,
+    'ALog'              => [
         ALog::class,
         [
             'app'      => 'application.log',
@@ -36,24 +37,25 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
-    'ABAC'                 => Abac::class,
-    'ABACFactory'          => AbacFactory::class,
-    'Checkout'             => CheckOut::class,
-    'CheckoutAdmin'        => CheckOutAdmin::class,
-    'AResourceManager'     => AResourceManager::class,
-    'ABackup'              => ABackup::class,
-    'JobManager'           => JobManager::class,
-    'AJson'                => AJson::class,
-    'ACustomer'            => ACustomer::class,
-    'Attribute'            => Attribute::class,
-    'AttributeManager'     => AttributeManager::class,
-    'APromotion'           => APromotion::class,
-    'ACart'                => ACart::class,
-    'AOrder'               => AOrder::class,
-    'EventDispatcher'      => EventDispatcher::class,
-    'AEncryption'          => AEncryption::class,
-    'ACurrency'            => ACurrency::class,
-    'AUser'                => AUser::class,
-    'UserResolver'         => UserResolver::class,
-    'AdminCommands'        => AdminCommands::class,
+    'ABAC'              => Abac::class,
+    'ABACFactory'       => AbacFactory::class,
+    'Checkout'          => CheckOut::class,
+    'CheckoutAdmin'     => CheckOutAdmin::class,
+    'AResourceManager'  => AResourceManager::class,
+    'ABackup'           => ABackup::class,
+    'JobManager'        => JobManager::class,
+    'AJson'             => AJson::class,
+    'ACustomer'         => ACustomer::class,
+    'Attribute'         => Attribute::class,
+    'AttributeManager'  => AttributeManager::class,
+    'APromotion'        => APromotion::class,
+    'ACart'             => ACart::class,
+    'AOrder'            => AOrder::class,
+    'EventDispatcher'   => EventDispatcher::class,
+    'AEncryption'       => AEncryption::class,
+    'ACurrency'         => ACurrency::class,
+    'AUser'             => AUser::class,
+    'UserResolver'      => UserResolver::class,
+    'AdminCommands'     => AdminCommands::class,
+    'AExceptionHandler' => AExceptionHandler::class,
 ];

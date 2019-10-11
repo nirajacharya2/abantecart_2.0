@@ -18,12 +18,12 @@
 
 namespace abc\controllers\admin;
 
-use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
+use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
@@ -249,7 +249,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
+
+        UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
 
         return $product;
     }
@@ -294,7 +295,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
-        $product->replaceKeywords($data['keywords']);
+        UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
         return $product;
     }
 
@@ -343,7 +344,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @throws \Exception
      */
     protected function replaceCategories($category, $language_id){
-        $exists = $this->getCategoryByName($category['name'], $category['parent_id']);
+        /** @var Category $exists */
+        $exists = Category::getCategoryByName( $category['name'], $category['parent_id']);
         if (!$exists) {
             $new_category_id = Category::addCategory(
                 [
@@ -371,35 +373,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }else{
             if($category['children']){
-                $category['children']['parent_id'] = $exists['category_id'];
+                $category['children']['parent_id'] = $exists->category_id;
                 return $this->replaceCategories($category['children'], $language_id);
             }else{
-                return $exists['category_id'];
+                return $exists->category_id;
             }
         }
-    }
-
-    public function getCategoryByName($name, $parent_id)
-    {
-        $parent_id = (int)$parent_id;
-        if(!$parent_id){
-            $parent_sql = 'c.parent_id IS NULL ';
-        }else{
-            $parent_sql = 'c.parent_id = '.$parent_id;
-        }
-        $result = $this->db->query(
-            "SELECT cd.*, c.*
-            FROM ".$this->db->table_name("category_descriptions")." cd
-            LEFT JOIN ".$this->db->table_name("categories")." c
-                 ON (c.category_id = cd.category_id)
-            WHERE ".$parent_sql." AND LOWER(name) = '"
-            .$this->db->escape(
-                mb_strtolower(
-                    html_entity_decode($name, ENT_QUOTES,ABC::env('APP_CHARSET'))
-                )
-            )."'"
-        );
-
-        return $result->row;
     }
 }

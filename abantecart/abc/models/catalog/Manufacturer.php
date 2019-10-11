@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\core\ABC;
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
  *
+ * @method static Manufacturer find(int $customer_id) Manufacturer
  * @package abc\models
  */
 class Manufacturer extends BaseModel
@@ -33,8 +35,6 @@ class Manufacturer extends BaseModel
     protected $cascadeDeletes = ['stores'];
 
     protected $primaryKey = 'manufacturer_id';
-    public $timestamps = false;
-
     protected $casts = [
         'sort_order' => 'int',
     ];
@@ -62,8 +62,9 @@ class Manufacturer extends BaseModel
      * @return bool|mixed
      * @throws \Exception
      */
-    public function addManufacturer($data)
+    public static function addManufacturer($data)
     {
+        $db = Registry::db();
         $manufacturer = new Manufacturer($data);
         $manufacturer->save();
 
@@ -87,13 +88,15 @@ class Manufacturer extends BaseModel
                 'store_id'        => 0,
             ];
         }
-        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+        $db->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
         if ($data['keyword'] || $data['name']) {
             UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+        }elseif( $data['keywords']){
+            UrlAlias::replaceKeywords($data['keywords'], $manufacturer->getKeyName(), $manufacturer->getKey());
         }
 
-        $this->cache->remove('manufacturer');
+        Registry::cache()->remove('manufacturer');
 
         return $manufacturerId;
     }
@@ -323,6 +326,7 @@ class Manufacturer extends BaseModel
 
         }
         $this->cache->remove('manufacturer');
+        return true;
     }
 
 }

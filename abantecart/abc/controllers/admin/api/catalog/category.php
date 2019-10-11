@@ -218,7 +218,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
             return null;
         }
 
-        (Registry::getInstance())->get('cache')->remove('*');
+        Registry::cache()->remove('*');
 
         $this->data['result'] = [
             'status'      => $updateBy ? 'updated' : 'created',
