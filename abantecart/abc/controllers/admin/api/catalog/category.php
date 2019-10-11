@@ -183,7 +183,11 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     throw new AException('Cannot to save category. Please see error log for details');
                 }
 
-                if (isset($request['category_images'])) {
+                //remove all mapped images if image array not set
+                // made because http cannot send empty array!
+                $request['category_images'] = $request['category_images'] ?: [];
+
+                if (is_array($request['category_images'])) {
                     $categoryImages['images'] = $request['category_images'];
                     $resource_mdl = new ResourceLibrary();
                     $resource_mdl->updateImageResourcesByUrls($categoryImages,

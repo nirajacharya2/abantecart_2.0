@@ -151,7 +151,10 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                     }
                 }
 
-                if (isset($request['manufacturer_images'])) {
+                //remove all mapped images if image array not set
+                // made because http cannot send empty array!
+                $request['manufacturer_images'] = $request['manufacturer_images'] ?: [];
+                if (is_array($request['manufacturer_images'])) {
                     $manufacturerImages['images'] = $request['manufacturer_images'];
                     $resource_mdl = new ResourceLibrary();
                     $resource_mdl->updateImageResourcesByUrls($manufacturerImages,
