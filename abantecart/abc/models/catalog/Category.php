@@ -67,10 +67,12 @@ class Category extends BaseModel
         'children_count'        => 'int',
     ];
 
-    /**
-     * @var array
-     */
     protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
+    protected $guarded = [
         'date_added',
         'date_modified',
     ];
@@ -89,11 +91,6 @@ class Category extends BaseModel
         'uuid',
         'date_deleted'
     ];
-    protected $guarded = [
-        'date_added',
-        'date_modified'
-    ];
-
 
     /**
      * @return mixed

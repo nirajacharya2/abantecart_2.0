@@ -36,11 +36,19 @@ class CategoryDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
     protected $casts = [
         'category_id' => 'int',
         'language_id' => 'int',
+    ];
+
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
+    protected $guarded = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [
@@ -49,7 +57,6 @@ class CategoryDescription extends BaseModel
         'meta_keywords',
         'meta_description',
         'description',
-        'date_deleted'
     ];
 
     public function category()
