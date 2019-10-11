@@ -1,10 +1,11 @@
 <?php
 
-namespace abc\core\lib;
+namespace abc\core\lib\exceptions;
 
 use abc\core\ABC;
 use abc\core\engine\ARouter;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\ExceptionHandlerInterface;
 use ErrorException;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -12,7 +13,7 @@ use Whoops\Handler\PrettyPageHandler;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Whoops\Run;
 
-class AExceptionHandler
+class AExceptionHandler implements ExceptionHandlerInterface
 {
     /**
      * A list of the exception types that are not reported.

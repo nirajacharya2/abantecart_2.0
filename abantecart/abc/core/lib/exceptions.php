@@ -21,14 +21,20 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\lib\contracts\ExceptionHandlerInterface;
 
 require_once(ABC::env('DIR_LIB').'exceptions/aexception.php');
 require_once(ABC::env('DIR_LIB').'exceptions/exception.php');
 require_once(ABC::env('DIR_LIB').'exceptions/libException.php');
-require_once(ABC::env('DIR_LIB').'exceptions/handler.php');
 require_once(ABC::env('DIR_LIB').'exceptions/exception_codes.php');
 
 $config = [
     'debug' => (ABC::env('DEBUG') ? true : false),
 ];
-new AHandleExceptions($config, new AExceptionHandler($config['debug']));
+
+/**
+ * @var ExceptionHandlerInterface $exceptionHandler
+ */
+$exceptionHandler = ABC::getObjectByAlias('AExceptionHandler', [ $config['debug'] ]);
+
+new AHandleExceptions($config, $exceptionHandler);
