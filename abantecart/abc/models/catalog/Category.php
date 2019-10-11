@@ -785,7 +785,11 @@ class Category extends BaseModel
             }
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $category, func_get_args());
-            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            if( $data['keywords']){
+                UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
+            }elseif($data['keyword']) {
+                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            }
 
             Registry::cache()->remove('category');
             $db->commit();
@@ -868,10 +872,10 @@ class Category extends BaseModel
                     $categoryName = $description[$language->getContentLanguageID()]['name'];
                 }
             }
-            if($data['keyword']) {
-                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
-            }elseif( $data['keywords']){
+            if( $data['keywords']){
                 UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
+            }elseif($data['keyword']) {
+                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             }
 
             //allow to extends this method from extensions
