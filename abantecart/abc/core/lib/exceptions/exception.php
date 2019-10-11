@@ -2,6 +2,7 @@
 
 namespace abc\core\lib;
 
+use abc\core\lib\contracts\ExceptionHandlerInterface;
 use ErrorException;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -19,9 +20,9 @@ class AHandleExceptions
     /**
      * Bootstrap the given application.
      *
-     * @param array  $config
+     * @param array                      $config
      *
-     * @param AExceptionHandler $handler
+     * @param ExceptionHandlerInterface $handler
      *
      * @return void
      */
@@ -161,7 +162,7 @@ class AHandleExceptions
     /**
      * Get an instance of the exception handler.
      *
-     * @return AExceptionHandler
+     * @return ExceptionHandlerInterface
      */
     protected function getExceptionHandler()
     {
