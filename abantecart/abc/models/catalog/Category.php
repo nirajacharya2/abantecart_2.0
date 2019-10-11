@@ -823,18 +823,9 @@ class Category extends BaseModel
 
             if (!empty($data['category_description'])) {
                 foreach ($data['category_description'] as $language_id => $value) {
-                    $update = [];
-
-                    foreach ($value as $key => $item_val) {
-                        $update[$key] = $item_val;
-                    }
-
-                    if (!empty($update)) {
-                        // insert or update
-                        $language->replaceDescriptions('category_descriptions',
-                            ['category_id' => (int)$categoryId],
-                            [$language_id => $update]);
-                    }
+                    if(!$value){ continue; }
+                    $value['language_id'] = $language_id;
+                    $category->descriptions()->update($value);
                 }
             }
 
