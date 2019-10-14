@@ -28,8 +28,10 @@ class ProductModelTest extends ATestCase
     public function testValidator()
     {
         //validate new product
-        $product = new Product(
-            [
+        $product = new Product();
+        $errors = [];
+        try{
+            $data = [
                 'product_id'          => -0.1,
                 'uuid'                => -0.00000000021,
                 'model'               => -0.00000000021,
@@ -45,7 +47,6 @@ class ProductModelTest extends ATestCase
                 'shipping_price'      => 'fail',
                 'price'               => 'fail',
                 'tax_class_id'        => 'fail',
-                'date_available'      => NULL,
                 'weight'              => 'fail',
                 'weight_class_id'     => 99999,
                 'length'              => 'fail',
@@ -62,22 +63,20 @@ class ProductModelTest extends ATestCase
                 'maximum'             => 'fail',
                 'product_type_id'     => 'fail',
                 'settings'            => -0.00000000021,
-            ]
-        );
-        $errors = [];
-        try{
-            $product->validate();
+            ];
+            $product->validate($data);
         }catch(ValidationException $e){
             $errors = $product->errors()['validation'];
+            //var_Dump(var_dump(array_diff(array_keys($data),array_keys($errors))));
         }
 
-        $this->assertEquals(32, count($errors));
+        $this->assertEquals(30, count($errors));
 
-
-        //validate new customer
-        //validate new customer
-        $product = new Product(
-            [
+        //validate correct data
+        $product = new Product();
+        $errors = [];
+        try{
+            $data = [
                 'uuid'                => 'sssss',
                 'model'               => 'tesmodeltest',
                 'sku'                 => 'testskutest',
@@ -109,16 +108,13 @@ class ProductModelTest extends ATestCase
                 'maximum'             => 0,
                 'product_type_id'     => null,
                 'settings'            => '',
-            ]
-        );
-        $errors = [];
-        try{
+            ];
             $product->validate();
         }catch(ValidationException $e){
             $errors = $product->errors()['validation'];
-            var_dump($errors);
-        }
 
+        }
+var_Dump($errors);
         $this->assertEquals(0, count($errors));
 
     }
@@ -176,7 +172,7 @@ class ProductModelTest extends ATestCase
             'length'              => '0.00',
             'width'               => '0.00',
             'height'              => '0.00',
-            'length_class_id'     => '0',
+            'length_class_id'     => '1',
             'weight'              => '75.00',
             'weight_class_id'     => '2',
         ];

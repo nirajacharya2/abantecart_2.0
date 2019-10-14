@@ -2087,3 +2087,35 @@ INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 # TODO
 #MOVE products_featured to products
 #and drop table
+
+
+ALTER TABLE `ac_products`
+CHANGE COLUMN `manufacturer_id` `manufacturer_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `tax_class_id` `tax_class_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `weight_class_id` `weight_class_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `length_class_id` `length_class_id` INT(11) NULL DEFAULT NULL ,
+ADD INDEX `ac_products_idx1` (`manufacturer_id` ASC),
+ADD INDEX `ac_products_idx2` (`tax_class_id` ASC),
+ADD INDEX `ac_products_idx3` (`weight_class_id` ASC),
+ADD INDEX `ac_products_idx4` (`length_class_id` ASC);
+ALTER TABLE `ac_products`
+ADD CONSTRAINT `ac_products_fk1`
+  FOREIGN KEY (`manufacturer_id`)
+  REFERENCES `ac_manufacturers` (`manufacturer_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk2`
+  FOREIGN KEY (`tax_class_id`)
+  REFERENCES `ac_tax_classes` (`tax_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk3`
+  FOREIGN KEY (`weight_class_id`)
+  REFERENCES `ac_weight_classes` (`weight_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk4`
+  FOREIGN KEY (`length_class_id`)
+  REFERENCES `ac_length_classes` (`length_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;

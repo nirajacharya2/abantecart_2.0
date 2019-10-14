@@ -121,6 +121,7 @@ class Product extends BaseModel
      * @var array
      */
     protected $casts = [
+        'product_id'        => 'int',
         'quantity'          => 'int',
         'stock_status_id'   => 'int',
         'manufacturer_id'   => 'int',
@@ -137,6 +138,7 @@ class Product extends BaseModel
         'height'            => 'float',
         'length_class_id'   => 'int',
         'status'            => 'int',
+        'featured'          => 'int',
         'viewed'            => 'int',
         'sort_order'        => 'int',
         'subtract'          => 'int',
@@ -145,11 +147,10 @@ class Product extends BaseModel
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
+        'settings'          => 'serialized'
     ];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $dates = [
         'date_available',
         'date_added',
@@ -197,20 +198,367 @@ class Product extends BaseModel
     ];
 
     protected $rules = [
-        'product_id'        => 'integer',
-        'model'             => 'string|max:64',
-        //NOTE
-        //if need sku as mandatory use "present" instead "required"
-        'sku'               => 'string|max:64|nullable',
-        'location'          => 'string|max:128',
-        'quantity'          => 'integer',
-        'stock_checkout'    => 'max:1|nullable',
-        'stock_status_id'   => 'integer',
-        'manufacturer_id'   => 'integer',
-        'shipping'          => 'integer|max:1|min:0',
-        'ship_individually' => 'integer|max:1|min:0',
-        'free_shipping'     => 'integer|max:1|min:0',
-        'shipping_price'    => 'numeric',
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer!'],
+            ],
+        ],
+
+        'uuid' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'between:1,255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'UUID must be between 1 and 255 characters!',
+                ],
+            ],
+        ],
+
+        'model' => [
+            'checks'   => [
+                'string',
+                'between:1,64',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_model',
+                    'language_block' => 'catalog/product',
+                    'default_text'   => 'Product Model must be less than 64 characters! Recommended 5-25 characters',
+                    'section'        => 'admin',
+                ],
+            ],
+        ],
+
+        'sku' => [
+            'checks'   => [
+                'string',
+                'between:1,64',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Product sku must be less than 64 characters!',
+                ],
+            ],
+        ],
+
+        'location' => [
+            'checks'   => [
+                'string',
+                'between:1,128',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Product Location must be less than 128 characters!',
+                ],
+            ],
+        ],
+
+        'quantity' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Product Quantity must be an integer!',
+                ],
+            ],
+        ],
+        'stock_checkout' => [
+            'checks'   => [
+                'string',
+                'nullable',
+                'in:0,1'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Stock Checkout can be 1,0 or empty!',
+                ],
+            ],
+        ],
+
+        'stock_status_id'   => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required',
+               // 'exists:stock_statuses',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in stock_statuses table!',
+                ],
+            ],
+        ],
+
+        'manufacturer_id'   => [
+            'checks'   => [
+                'integer',
+                'required',
+                'sometimes',
+                'exists:manufacturers',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in Manufacturers table!',
+                ],
+            ],
+        ],
+
+        'shipping' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'ship_individually' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'free_shipping' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'shipping_price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+
+        'tax_class_id'   => [
+            'checks'   => [
+                'integer',
+                'required',
+                'sometimes',
+                'exists:tax_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in tax_classes table!',
+                ],
+            ],
+        ],
+
+        'weight' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'weight_class_id'   => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:weight_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in weight_classes table!',
+                ],
+            ],
+        ],
+
+        'length' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'width' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'height' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'length_class_id'   => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:length_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in length_classes table!',
+                ],
+            ],
+        ],
+
+        'status' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'featured' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'viewed' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'sort_order' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'subtract' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'minimum' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Minimal Quantity is not integer!',
+                ],
+            ],
+        ],
+
+        'maximum' => [
+            'checks'   => [
+                'integer',
+                'gte:minimum'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Maximum Quantity is not integer or less than minimal.',
+                ],
+            ],
+        ],
+
+        'cost' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'call_to_order' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'product_type_id'   => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
     ];
 
     protected $fields = [
@@ -637,20 +985,10 @@ class Product extends BaseModel
      */
     public static $auditExcludes = ['sku'];
 
-    /**
-     * @param array $options
-     *
-     * @return bool|void
-     * @throws \Exception
-     */
-    public function save(array $options = [])
+
+    public function setSettings($value)
     {
-        if ($this->hasPermission('update')) {
-            parent::save();
-            $this->registry->get('cache')->remove('product');
-        } else {
-            throw new Exception('No permission for object to save the model.');
-        }
+        $this->attributes['settings'] = serialize($value);
     }
 
     /**

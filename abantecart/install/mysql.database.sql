@@ -9591,20 +9591,20 @@ CREATE TABLE `ac_products` (
   `quantity` int(4) NOT NULL DEFAULT '0',
   `stock_checkout` CHAR(1) NULL DEFAULT '',
   `stock_status_id` int(11) NOT NULL,
-  `manufacturer_id` int(11) NOT NULL,
+  `manufacturer_id` int(11) DEFAULT NULL,
   `shipping` int(1) NOT NULL DEFAULT '1',
   `ship_individually` int(1) NOT NULL DEFAULT '0',
   `free_shipping` int(1) NOT NULL DEFAULT '0',
   `shipping_price` decimal(15,4) NOT NULL DEFAULT '0.0000',
   `price` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `tax_class_id` int(11) NOT NULL,
+  `tax_class_id` int(11) DEFAULT NULL,
   `date_available` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `weight` decimal(5,2) NOT NULL DEFAULT '0.00',
-  `weight_class_id` int(11) NOT NULL DEFAULT '0',
+  `weight_class_id` int(11) DEFAULT NULL,
   `length` decimal(5,2) NOT NULL DEFAULT '0.00',
   `width` decimal(5,2) NOT NULL DEFAULT '0.00',
   `height` decimal(5,2) NOT NULL DEFAULT '0.00',
-  `length_class_id` int(11) NOT NULL DEFAULT '0',
+  `length_class_id` int(11) DEFAULT NULL,
   `status` int(1) NOT NULL DEFAULT '0',
   `featured` int(1) NOT NULL DEFAULT '0',
   `viewed` int(5) NOT NULL DEFAULT '0',
@@ -9624,7 +9624,11 @@ CREATE TABLE `ac_products` (
   INDEX `stage_idx` (`stage_id` ASC),
   KEY `uuid_uniq` (`uuid`),
   INDEX `ac_products_idx` (`stock_status_id`,  `manufacturer_id`, `weight_class_id`, `length_class_id`),
-  INDEX `ac_products_status_idx` (`product_id`, `status`, `date_available`)
+  INDEX `ac_products_status_idx` (`product_id`, `status`, `date_available`),
+  INDEX `ac_products_idx1` (`manufacturer_id` ASC),
+  INDEX `ac_products_idx2` (`tax_class_id` ASC),
+  INDEX `ac_products_idx3` (`weight_class_id` ASC),
+  INDEX `ac_products_idx4` (`length_class_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -13885,4 +13889,26 @@ ADD CONSTRAINT `ac_order_products_ibfk_2`
   FOREIGN KEY (`order_status_id`)
   REFERENCES `ac_order_statuses` (`order_status_id`)
   ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+###########
+ALTER TABLE `ac_products`
+ADD CONSTRAINT `ac_products_fk1`
+  FOREIGN KEY (`manufacturer_id`)
+  REFERENCES `ac_manufacturers` (`manufacturer_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk2`
+  FOREIGN KEY (`tax_class_id`)
+  REFERENCES `ac_tax_classes` (`tax_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk3`
+  FOREIGN KEY (`weight_class_id`)
+  REFERENCES `ac_weight_classes` (`weight_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk4`
+  FOREIGN KEY (`length_class_id`)
+  REFERENCES `ac_length_classes` (`length_class_id`)
+  ON DELETE SET NULL
   ON UPDATE CASCADE;
