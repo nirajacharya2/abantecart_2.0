@@ -106,7 +106,6 @@ DROP TABLE IF EXISTS `ac_length_classes` CASCADE;
 DROP TABLE IF EXISTS `ac_manufacturers` CASCADE;
 DROP TABLE IF EXISTS `ac_order_totals` CASCADE;
 DROP TABLE IF EXISTS `ac_product_tags` CASCADE;
-DROP TABLE IF EXISTS `ac_products_featured` CASCADE;
 DROP TABLE IF EXISTS `ac_product_options` CASCADE;
 DROP TABLE IF EXISTS `ac_product_descriptions` CASCADE;
 DROP TABLE IF EXISTS `ac_product_discounts` CASCADE;
@@ -9607,6 +9606,7 @@ CREATE TABLE `ac_products` (
   `height` decimal(5,2) NOT NULL DEFAULT '0.00',
   `length_class_id` int(11) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '0',
+  `featured` int(1) NOT NULL DEFAULT '0',
   `viewed` int(5) NOT NULL DEFAULT '0',
   `sort_order` int(11) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '1',
@@ -9841,14 +9841,6 @@ CREATE TABLE `ac_product_discounts` (
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 CREATE INDEX `ac_product_discounts_idx` ON `ac_product_discounts` (`product_id`, `customer_group_id`);
-
---
--- DDL for table `product_featured`
---
-CREATE TABLE `ac_products_featured` (
-  `product_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`product_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- DDL for table `product_related`
@@ -13236,11 +13228,6 @@ ALTER TABLE `ac_product_descriptions`
   ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_discounts`
-  ADD FOREIGN KEY (`product_id`)
-  REFERENCES `ac_products`(`product_id`)
-  ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `ac_products_featured`
   ADD FOREIGN KEY (`product_id`)
   REFERENCES `ac_products`(`product_id`)
   ON DELETE CASCADE ON UPDATE CASCADE;

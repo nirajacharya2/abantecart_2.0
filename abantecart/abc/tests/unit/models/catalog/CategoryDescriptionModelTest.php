@@ -33,7 +33,7 @@ class CategoryDescriptionModelTest extends ATestCase
             $categoryDescription->validate();
         } catch (ValidationException $e) {
             $errors = $categoryDescription->errors()['validation'];
-            var_dump($errors);
+            //var_dump($errors);
         }
 
         $this->assertEquals(1, count($errors));
@@ -50,7 +50,7 @@ class CategoryDescriptionModelTest extends ATestCase
             $categoryDescription->validate();
         } catch (ValidationException $e) {
             $errors = $categoryDescription->errors()['validation'];
-            var_dump($errors);
+            //var_dump($errors);
         }
         $this->assertEquals(0, count($errors));
 

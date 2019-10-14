@@ -239,8 +239,6 @@ ALTER TABLE `ac_order_totals`
 ALTER TABLE `ac_product_discounts`
   ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `ac_products_featured`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_options`
   ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2084,3 +2082,8 @@ ADD COLUMN `children_count` int(11) NOT NULL DEFAULT '0' AFTER `active_products_
 
 INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('general','config_google_tag_manager_id','');
+
+
+# TODO
+#MOVE products_featured to products
+#and drop table

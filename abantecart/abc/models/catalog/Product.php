@@ -160,6 +160,8 @@ class Product extends BaseModel
      * @var array
      */
     protected $fillable = [
+        'product_id',
+        'uuid',
         'model',
         'sku',
         'location',
@@ -181,6 +183,7 @@ class Product extends BaseModel
         'height',
         'length_class_id',
         'status',
+        'featured',
         'viewed',
         'sort_order',
         'subtract',
@@ -188,9 +191,8 @@ class Product extends BaseModel
         'maximum',
         'cost',
         'call_to_order',
-        'settings',
         'product_type_id',
-        'uuid',
+        'settings',
         'date_deleted'
     ];
 
