@@ -28,6 +28,7 @@ use abc\core\lib\ADB;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\contracts\AttributeManagerInterface;
+use abc\models\catalog\Category;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -2495,8 +2496,11 @@ class ModelCatalogProduct extends Model
             if (isset($filter['pto']) && !is_null($filter['pto'])) {
                 $sql .= " AND p.price <= '".(float)$filter['pto']."'";
             }
+
             if ($filter['category']) {
-                $sql .= " AND p2c.category_id = '".(int)$filter['category']."'";
+                $childrenIds = Category::getChildrenIDs((int)$filter['category']);
+                $childrenIds[] = (int)$filter['category'];
+                $sql .= " AND p2c.category_id IN (".implode(',', $childrenIds).")";
             }
             if (isset($filter['status']) && !is_null($filter['status'])) {
                 $sql .= " AND p.status = '".(int)$filter['status']."'";

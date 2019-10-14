@@ -42,6 +42,26 @@ class UrlAlias extends BaseModel
         return $this->belongsTo(Language::class, 'language_id');
     }
 
+    /**
+     * @param string $name
+     * @param int    $id
+     *
+     * @return array
+     */
+    public static function getKeyWordsArray(string $name, $id)
+    {
+        $result = self::select(['language_id', 'keyword'])
+                       ->where('query', '=', $name ."=".(int)$id)
+                       ->get();
+        return $result->toArray();
+    }
+
+    /**
+     * @param string $query
+     * @param int $language_id
+     *
+     * @return string
+     */
     private static function getKeyWord(string $query, int $language_id)
     {
         $keyword = self::select('keyword')
@@ -72,15 +92,15 @@ class UrlAlias extends BaseModel
     private static function setKeyword(string $keyword, string $objectKeyName, int $objectId)
     {
         $keyword = H::SEOEncode($keyword, $objectKeyName, $objectId);
-        $registry = Registry::getInstance();
 
         if ($keyword) {
-            $registry->get('language')->replaceDescriptions('url_aliases',
+            Registry::language()->replaceDescriptions(
+                'url_aliases',
                 ['query' => $objectKeyName."=".(int)$objectId],
-                [$registry->get('language')->getContentLanguageID() => ['keyword' => $keyword]]);
+                [static::$current_language_id => ['keyword' => $keyword]]);
         } else {
             self::where('query', '=', $objectKeyName."=".(int)$objectId)
-                ->where('language_id', '=', $registry->get('language')->getContentLanguageID())
+                ->where('language_id', '=', static::$current_language_id)
                 ->delete();
         }
     }
@@ -98,5 +118,32 @@ class UrlAlias extends BaseModel
     public static function setManufacturerKeyword(string $keyword, int $productId)
     {
         self::setKeyword($keyword, 'manufacturer_id', $productId);
+    }
+
+    /**
+     * @param array $data - ['language_id' => 1, 'keyword' => 'somekeyword']
+     * @param string $name - 'product_id', 'category_id' etc
+     * @param int $id
+     *
+     * @throws \Exception
+     */
+    public static function replaceKeywords( $data, $name, $id)
+    {
+        $data = (array)$data;
+        $id = (int)$id;
+        $name = (string)$name;
+
+        $query = $name.'='.$id;
+        $urlAlias = new UrlAlias();
+        $urlAlias->where('query', '=', $query)->forceDelete();
+        unset($urlAlias);
+
+        foreach ((array)$data as $keyword) {
+            $urlAlias = new UrlAlias();
+            $urlAlias->query = $query;
+            $urlAlias->language_id = (int)$keyword['language_id'];
+            $urlAlias->keyword = \H::SEOEncode($keyword['keyword'], $name, $id);
+            $urlAlias->save();
+        }
     }
 }

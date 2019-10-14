@@ -92,19 +92,17 @@ class ControllerBlocksCategory extends AController
      *
      * @param array $all_categories
      * @param int $parent_id
-     * @param string $path
      *
      * @return array
      * @throws \abc\core\lib\AException
      */
-    protected function buildCategoryTree($all_categories = [], $parent_id = 0, $path = '')
+    protected function buildCategoryTree($all_categories = [], $parent_id = 0)
     {
         $output = [];
         foreach ($all_categories as $category) {
-            if ($parent_id != $category['parent_id']) {
+            if ($parent_id != $category['parent_id'] || !$category['active_products_count']) {
                 continue;
             }
-            $category['path'] = $path ? $path.'_'.$category['category_id'] : $category['category_id'];
             $category['parents'] = explode("_", $category['path']);
             //dig into level
             $category['level'] = sizeof($category['parents']) - 1;
@@ -113,8 +111,11 @@ class ControllerBlocksCategory extends AController
                 $this->selected_root_id = $category['parents'][0];
             }
             $output[] = $category;
-            $output = array_merge($output,
-                $this->buildCategoryTree($all_categories, $category['category_id'], $category['path']));
+            $output = array_merge($output, $this->buildCategoryTree(
+                                                                    $all_categories,
+                                                                    $category['category_id']
+                                                                    )
+            );
         }
         if ($parent_id == 0) {
             //place result into memory for future usage (for menu. see below)
@@ -153,12 +154,7 @@ class ControllerBlocksCategory extends AController
             $category['children'] = $this->buildNestedCategoryList($category['category_id']);
             $thumbnail = $this->thumbnails[$category['category_id']];
             $category['thumb'] = $thumbnail['thumb_url'];
-            //get product counts from children levels.
-            if (count($category['children'])) {
-                foreach ($category['children'] as $child) {
-                    $category['product_count'] += $child['product_count'];
-                }
-            }
+            $category['product_count'] = $category['active_products_count'];
             $category['href'] = $this->html->getSEOURL('product/category', '&path='.$category['path'], '&encode');
             //mark current category
             if (in_array($category['category_id'], $this->path)) {

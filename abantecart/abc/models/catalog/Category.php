@@ -67,10 +67,12 @@ class Category extends BaseModel
         'children_count'        => 'int',
     ];
 
-    /**
-     * @var array
-     */
     protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
+    protected $guarded = [
         'date_added',
         'date_modified',
     ];
@@ -89,11 +91,6 @@ class Category extends BaseModel
         'uuid',
         'date_deleted'
     ];
-    protected $guarded = [
-        'date_added',
-        'date_modified'
-    ];
-
 
     /**
      * @return mixed
@@ -143,7 +140,7 @@ class Category extends BaseModel
             $data = $this->toArray();
             $data['images'] = $this->getImages();
             if ($this->getKey()) {
-                $data['keyword'] = UrlAlias::getCategoryKeyword($this->getKey(), static::$current_language_id);
+                $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
             }
             $this->cache->push($cache_key, $data);
         }
@@ -785,7 +782,11 @@ class Category extends BaseModel
             }
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $category, func_get_args());
-            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            if( $data['keywords']){
+                UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
+            }elseif($data['keyword']) {
+                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            }
 
             Registry::cache()->remove('category');
             $db->commit();
@@ -822,18 +823,9 @@ class Category extends BaseModel
 
             if (!empty($data['category_description'])) {
                 foreach ($data['category_description'] as $language_id => $value) {
-                    $update = [];
-
-                    foreach ($value as $key => $item_val) {
-                        $update[$key] = $item_val;
-                    }
-
-                    if (!empty($update)) {
-                        // insert or update
-                        $language->replaceDescriptions('category_descriptions',
-                            ['category_id' => (int)$categoryId],
-                            [$language_id => $update]);
-                    }
+                    if(!$value){ continue; }
+                    $value['language_id'] = $language_id;
+                    $category->descriptions()->update($value);
                 }
             }
 
@@ -868,8 +860,12 @@ class Category extends BaseModel
                     $categoryName = $description[$language->getContentLanguageID()]['name'];
                 }
             }
+            if( $data['keywords']){
+                UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
+            }elseif($data['keyword']) {
+                UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
+            }
 
-            UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
 
@@ -924,6 +920,7 @@ class Category extends BaseModel
                 'category_id='.(int)$categoryId
             )->forceDelete();
 
+
             //delete resources
             $rm = new AResourceManager();
             $resources = $rm->getResourcesList(
@@ -944,14 +941,19 @@ class Category extends BaseModel
             $lm = new ALayoutManager();
             $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
             $category = static::find($categoryId);
-            $parentId = $category->parent_id;
-            //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
-            $category->forceDelete();
-            $parent = Category::find($parentId);
-            if($parent){
-                //run recalculation of products count and subcategories count
-                $parent->touch();
+            $parentId = null;
+            if($category) {
+                $parentId = $category->parent_id;
+                //allow to extends this method from extensions
+                Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
+                $category->forceDelete();
+            }
+            if($parentId) {
+                $parent = Category::find($parentId);
+                if ($parent) {
+                    //run recalculation of products count and subcategories count
+                    $parent->touch();
+                }
             }
         }
 
@@ -1110,4 +1112,35 @@ class Category extends BaseModel
         return $query->get()->toArray();
     }
 
+    /**
+     * @param string $name
+     * @param int|null $parent_id
+     *
+     * @return QueryBuilder|\Illuminate\Database\Eloquent\Model|null
+     */
+    public static function getCategoryByName(string $name, $parent_id = null)
+    {
+        $db = Registry::db();
+        $name = $db->escape(mb_strtolower( html_entity_decode($name, ENT_QUOTES, ABC::env('APP_CHARSET'))));
+        /** @var QueryBuilder $query */
+        $query = CategoryDescription::whereRaw("LOWER(name) = '".$name."'");
+        $query->join(
+            'categories',
+            'categories.category_id',
+            '=',
+            'category_descriptions.category_id'
+        );
+        $query->addSelect('category_descriptions.*');
+        $query->addSelect('categories.*');
+        $parent_id = (int)$parent_id;
+        if(!$parent_id){
+            $query->whereNull('categories.parent_id');
+        }else{
+            $query->where(['categories.parent_id', $parent_id]);
+        }
+
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->first();
+    }
 }

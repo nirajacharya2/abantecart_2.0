@@ -74,7 +74,7 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                 return null;
             }
 
-            $manufacturer = (new Manufacturer())->addManufacturer($this->data['request']);
+            $manufacturer = Manufacturer::addManufacturer($this->data['request']);
 
             $manufacturerObj = Manufacturer::find($manufacturer);
             if ($manufacturerObj && $this->data['fillable'] && is_array($this->data['fillable'])) {
@@ -151,7 +151,10 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                     }
                 }
 
-                if (isset($request['manufacturer_images'])) {
+                //remove all mapped images if image array not set
+                // made because http cannot send empty array!
+                $request['manufacturer_images'] = $request['manufacturer_images'] ?: [];
+                if (is_array($request['manufacturer_images'])) {
                     $manufacturerImages['images'] = $request['manufacturer_images'];
                     $resource_mdl = new ResourceLibrary();
                     $resource_mdl->updateImageResourcesByUrls($manufacturerImages,

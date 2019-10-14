@@ -1230,23 +1230,6 @@ class Product extends BaseModel
         return $this->keywords;
     }
 
-    public function replaceKeywords($data)
-    {
-        $query = 'product_id='.$this->product_id;
-        $urlAlias = new UrlAlias();
-        $urlAlias->where('query', '=', $query)->forceDelete();
-        unset($urlAlias);
-
-        foreach ((array)$data as $keyword) {
-            $urlAlias = new UrlAlias();
-            $urlAlias->query = $query;
-            $urlAlias->language_id = (int)$keyword['language_id'];
-            $urlAlias->keyword = H::SEOEncode($keyword['keyword'], 'product_id', $this->product_id);
-            $urlAlias->save();
-        }
-        $this->cache->remove('product');
-    }
-
     public function auditables()
     {
         return $this->morphMany(Audit::class, 'auditable');

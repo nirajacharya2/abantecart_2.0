@@ -103,7 +103,7 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 
 
 <script type="application/javascript">
-	$(document).ready(function () {
+    $(window).load(function () {
 		tinymce.remove();
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';

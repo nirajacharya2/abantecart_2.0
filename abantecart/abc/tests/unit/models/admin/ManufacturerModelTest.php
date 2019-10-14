@@ -20,7 +20,7 @@ class ManufacturerModelTest extends ATestCase
             'keyword' => 'test-create-manufacturer'
         ];
         try {
-        $manufacturerId = (new Manufacturer())->addManufacturer($arManufacturer);
+        $manufacturerId = Manufacturer::addManufacturer($arManufacturer);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
         } catch (Warning $e) {

@@ -103,7 +103,7 @@ $wrapper_id = \H::randomWord(6);
 
 
 <script type="application/javascript">
-	$(document).load(function () {
+	$(window).load(function () {
 		tinymce.remove();
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
@@ -140,11 +140,11 @@ $wrapper_id = \H::randomWord(6);
 			if(elem.hasClass('closing')){
 				textareaInsert(editor, '<'+tag+'>');
 				elem.text(tag.replace('/', ''));
-				elem.removeClass('closing');				
+				elem.removeClass('closing');
 			} else {
 				textareaInsert(editor, '<'+tag+'>');
 				elem.prepend('/');
-				elem.addClass('closing');	
+				elem.addClass('closing');
 			}
 			return false;
 		});
@@ -157,11 +157,11 @@ $wrapper_id = \H::randomWord(6);
 			if(elem.hasClass('closing')){
 				textareaInsert(editor, '<'+tag+'>');
 				elem.text(tag.replace('/', ''));
-				elem.removeClass('closing');				
+				elem.removeClass('closing');
 			} else {
 				textareaInsert(editor, '<a href="" target="">');
 				elem.prepend('/');
-				elem.addClass('closing');	
+				elem.addClass('closing');
 			}
 			return false;
 		});
@@ -179,7 +179,6 @@ $wrapper_id = \H::randomWord(6);
 			textareaInsert(editor, '<!-- comment -->');
 			return false;
 		});
-
 		$('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 			var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
 		        prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab

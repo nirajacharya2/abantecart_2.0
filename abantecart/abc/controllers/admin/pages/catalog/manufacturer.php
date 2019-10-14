@@ -169,7 +169,7 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         if (($this->request->is_POST()) && $this->validateForm()) {
-            $manufacturer_id = (new Manufacturer())->addManufacturer($this->request->post);
+            $manufacturer_id = Manufacturer::addManufacturer($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, __FUNCTION__, ['manufacturer_id' => $manufacturer_id]);
             abc_redirect($this->html->getSecureURL(
