@@ -43,6 +43,12 @@ class ProductDescription extends BaseModel
         'blurb'       => 'html',
     ];
 
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
     protected $fillable = [
         'product_id',
         'language_id',
@@ -58,10 +64,11 @@ class ProductDescription extends BaseModel
         'product_id' => [
             'checks'   => [
                 'integer',
-                'required'
+                'required',
+                'exists: products',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer!'],
+                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
             ],
         ],
         'language_id' => [

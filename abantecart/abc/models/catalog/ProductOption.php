@@ -76,6 +76,12 @@ class ProductOption extends BaseModel
         'settings'     => 'serialized'
     ];
 
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
     /**
      * @var array
      */

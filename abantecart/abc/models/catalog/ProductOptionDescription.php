@@ -47,7 +47,6 @@ class ProductOptionDescription extends BaseModel
         'product_option_id',
         'language_id',
     ];
-    public $timestamps = false;
 
     protected $casts = [
         'product_option_id' => 'int',
@@ -62,6 +61,81 @@ class ProductOptionDescription extends BaseModel
         'name',
         'option_placeholder',
         'error_text',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_option_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:product_options',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product Option ID is not Integer or absent in product_options table!'],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'between:3,255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Name must be greater than 3 and less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'option_placeholder' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Placeholder must be less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'error_text' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Error Text must be less than 255 characters!',
+                ],
+            ],
+        ],
+
     ];
 
     public function product()

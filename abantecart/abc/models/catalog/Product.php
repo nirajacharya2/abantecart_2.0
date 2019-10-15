@@ -113,11 +113,6 @@ class Product extends BaseModel
     protected $primaryKey = 'product_id';
 
     /**
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
      * @var array
      */
     protected $casts = [
