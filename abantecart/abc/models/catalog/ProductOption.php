@@ -20,12 +20,15 @@
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Validation\Rule;
 
 /**
  * Class ProductOption
@@ -59,10 +62,6 @@ class ProductOption extends BaseModel
      * @var string
      */
     protected $primaryKey = 'product_option_id';
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
 
     /**
      * @var array
@@ -74,14 +73,15 @@ class ProductOption extends BaseModel
         'sort_order'   => 'int',
         'status'       => 'int',
         'required'     => 'int',
+        'settings'     => 'serialized'
     ];
 
     /**
      * @var array
      */
     protected $fillable = [
-        'attribute_id',
         'product_id',
+        'attribute_id',
         'group_id',
         'sort_order',
         'status',
@@ -90,6 +90,105 @@ class ProductOption extends BaseModel
         'regexp_pattern',
         'settings',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer!'],
+            ],
+        ],
+        'attribute_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:global_attributes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Attribute ID is not Integer or not presents in global_attributes table!'],
+            ],
+        ],
+        'group_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Group ID is not integer!'],
+            ],
+        ],
+        'sort_order' => [
+            'checks'   => [
+                'integer'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+        'status' => [
+            'checks'   => [
+                'boolean'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'element_type' => [
+            'checks'   => [
+                'string',
+                'size:1',
+                /** @see __construct() method  */
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => ':attribute must be 1 character length and presents in element_types list of AHtml class!',
+                ],
+            ],
+        ],
+
+        'required' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'regexp_pattern' => [
+            'checks'   => [
+                'string',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Blurb must be less than 1500 characters!',
+                ],
+            ],
+        ]
+    ];
+
+    public function __construct(array $attributes = [])
+    {
+        $letters = array_keys(HtmlElementFactory::getAvailableElements());
+        $this->rules['element_type']['checks'][] = Rule::in($letters);
+        parent::__construct($attributes);
+    }
+
+    public function setSettings($value)
+    {
+        $this->attributes['settings'] = serialize($value);
+    }
 
     /**
      * @return mixed
@@ -174,10 +273,12 @@ class ProductOption extends BaseModel
                 'product_option_value_descriptions.name as option_value_name',
 
             ]
-        )->whereIn('product_options.product_option_id', $po_ids)
+        );
+        $query->whereIn('product_options.product_option_id', $po_ids)
                        ->leftJoin(
                            'product_option_descriptions',
                            function ($join) {
+                               /** @var JoinClause $join */
                                $join->on('product_option_descriptions.product_option_id', '=',
                                    'product_options.product_option_id')
                                     ->where('product_option_descriptions.language_id', '=',
@@ -191,9 +292,16 @@ class ProductOption extends BaseModel
             )->leftJoin(
                 'product_option_value_descriptions',
                 function ($join) {
-                    $join->on('product_option_value_descriptions.product_option_value_id', '=',
-                        'product_option_values.product_option_value_id')
-                         ->where('product_option_value_descriptions.language_id', '=', static::$current_language_id);
+                    /** @var JoinClause $join */
+                    $join->on(
+                        'product_option_value_descriptions.product_option_value_id',
+                        '=',
+                        'product_option_values.product_option_value_id'
+                    )->where(
+                        'product_option_value_descriptions.language_id',
+                        '=',
+                        static::$current_language_id
+                    );
                 }
             )->orderBy('product_options.product_option_id');
 

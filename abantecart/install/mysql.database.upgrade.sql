@@ -2119,3 +2119,21 @@ ADD CONSTRAINT `ac_products_fk4`
   REFERENCES `ac_length_classes` (`length_class_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_product_options`
+CHANGE COLUMN `product_option_id` `product_option_id` INT(11) NOT NULL ,
+CHANGE COLUMN `attribute_id` `attribute_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `group_id` `group_id` INT(11) NULL DEFAULT NULL ,
+ADD INDEX `ac_product_options_ibfk_3_idx` (`group_id` ASC);
+ALTER TABLE `ac_product_options`
+ADD CONSTRAINT `ac_product_options_ibfk_2`
+  FOREIGN KEY (`attribute_id`)
+  REFERENCES `ac_global_attributes` (`attribute_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_product_options_ibfk_3`
+  FOREIGN KEY (`group_id`)
+  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;

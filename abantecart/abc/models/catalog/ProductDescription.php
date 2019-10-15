@@ -26,8 +26,6 @@ class ProductDescription extends BaseModel
 {
     use SoftDeletes;
 
-    public $timestamps = false;
-
     protected $primaryKey = 'id';
 
     protected $mainClassName = Product::class;
@@ -53,6 +51,87 @@ class ProductDescription extends BaseModel
         'meta_description',
         'description',
         'blurb',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer!'],
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
+            ],
+        ],
+        'name' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'between:3,255',
+            ],
+            'messages' => [
+                '*' => [
+                    'language_key'   => 'error_name',
+                    'language_block' => 'catalog/product',
+                    'default_text'   => 'Product Name must be greater than 3 and less than 255 characters!',
+                    'section'        => 'admin',
+                ],
+            ],
+        ],
+        'meta_keywords' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Meta keywords must be less than 255 characters!',
+                ],
+            ],
+        ],
+        'meta_description' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Meta description must be less than 255 characters!',
+                ],
+            ],
+        ],
+        'description' => [
+            'checks'   => [
+                'string',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Description of product not set!',
+                ],
+            ],
+        ],
+        'blurb' => [
+            'checks'   => [
+                'string',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text'   => 'Blurb must be less than 1500 characters!',
+                ],
+            ],
+        ]
     ];
 
     public function product()

@@ -9493,22 +9493,23 @@ INSERT INTO `ac_tax_rate_descriptions` (`tax_rate_id`, `language_id`, `descripti
 --
 CREATE TABLE `ac_product_options` (
   `product_option_id` int(11) NOT NULL AUTO_INCREMENT,
-  `attribute_id` int(11) NOT NULL,
+  `attribute_id` int(11) DEFAULT NULL,
   `product_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL DEFAULT '0',
+  `group_id` int(11) DEFAULT NULL,
   `sort_order` int(3) NOT NULL DEFAULT '0',
   `status` int(1) NOT NULL DEFAULT '1',
   `element_type` char(1) NOT NULL DEFAULT 'I',
   `required` smallint(1) NOT NULL default '0',
   `regexp_pattern` varchar(255) NOT NULL default '',
-  `settings` text COLLATE utf8_general_ci,
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-    `date_deleted` timestamp NULL,
-    `stage_id` INT(6) NULL,
+  `settings` text,
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted` timestamp NULL,
+  `stage_id` INT(6) NULL,
   PRIMARY KEY (`product_option_id`),
   INDEX `stage_idx` (`stage_id` ASC),
-  INDEX `ac_product_options_idx` (`attribute_id`, `product_id`, `group_id` )
+  INDEX `ac_product_options_idx` (`attribute_id`, `product_id`, `group_id` ),
+  INDEX `ac_product_options_ibfk_3_idx` (`group_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 
@@ -13910,5 +13911,17 @@ ADD CONSTRAINT `ac_products_fk3`
 ADD CONSTRAINT `ac_products_fk4`
   FOREIGN KEY (`length_class_id`)
   REFERENCES `ac_length_classes` (`length_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_options`
+ADD CONSTRAINT `ac_product_options_ibfk_2`
+  FOREIGN KEY (`attribute_id`)
+  REFERENCES `ac_global_attributes` (`attribute_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_product_options_ibfk_3`
+  FOREIGN KEY (`group_id`)
+  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
