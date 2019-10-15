@@ -42,7 +42,6 @@ class ProductOptionValue extends BaseModel
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'product_option_value_id';
-    public $timestamps = false;
 
     /**
      * @var array
@@ -62,6 +61,12 @@ class ProductOptionValue extends BaseModel
         'default'            => 'int',
     ];
 
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
     protected $fillable = [
         'product_option_id',
         'product_id',
@@ -78,6 +83,158 @@ class ProductOptionValue extends BaseModel
         'sort_order',
         'default',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_option_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:product_options',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product Option ID is not Integer or absent in product_options table!'],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+            ],
+        ],
+
+        'group_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Group ID is not integer!'],
+            ],
+        ],
+
+        'sku' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option SKU must be less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'quantity' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Quantity must be an integer!',
+                ],
+            ],
+        ],
+
+        'subtract' => [
+            'checks'   => [
+                'boolean',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+
+        'price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'prefix' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Price prefix cannot be empty!',
+                ],
+            ],
+        ],
+
+        'weight' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'weight_type' => [
+            'checks'   => [
+                'string',
+                'max:3',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Weight Type must be less than 3 characters length!',
+                ],
+            ],
+        ],
+
+        'sort_order' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer!',
+                ],
+            ],
+        ],
+
+        'attribute_value_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:global_attributes_values',
+            ],
+            'messages' => [
+                '*' => ['default_text' => ':attribute is not integer or absent in global_attribute_values table!'],
+            ],
+        ],
+
+        'default' => [
+            'checks'   => [
+                'boolean',
+                /** @see __construct() method */
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a boolean!',
+                ],
+            ],
+        ],
+
+    ];
+
 
     public function option()
     {

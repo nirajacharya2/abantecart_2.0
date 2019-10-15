@@ -13925,3 +13925,13 @@ ADD CONSTRAINT `ac_product_options_ibfk_3`
   REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_product_option_values`
+  ADD INDEX `ac_product_option_values_ibfk_3_idx` (`attribute_value_id` ASC);
+ALTER TABLE `ac_product_option_values`
+  ADD CONSTRAINT `ac_product_option_values_ibfk_3`
+FOREIGN KEY (`attribute_value_id`)
+REFERENCES `ac_global_attributes_values` (`attribute_value_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;

@@ -46,7 +46,6 @@ class ProductOptionValueDescription extends BaseModel
         'language_id',
         'product_id',
     ];
-    public $timestamps = false;
 
     protected $casts = [
         'product_option_value_id' => 'int',
@@ -55,12 +54,68 @@ class ProductOptionValueDescription extends BaseModel
         'grouped_attribute_names' => 'serialized'
     ];
 
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
+    ];
+
     protected $fillable = [
         'product_option_value_id',
         'language_id',
         'product_id',
         'name',
         'grouped_attribute_names',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_option_value_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:product_option_values',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product Option Value ID is not Integer or absent in product_option_values table!'],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Name must be greater than 3 and less than 1500 characters!',
+                ],
+            ],
+        ],
     ];
 
     public function product()

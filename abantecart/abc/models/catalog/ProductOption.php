@@ -73,7 +73,7 @@ class ProductOption extends BaseModel
         'sort_order'   => 'int',
         'status'       => 'int',
         'required'     => 'int',
-        'settings'     => 'serialized'
+        'settings'     => 'serialized',
     ];
 
     /** @var array */
@@ -99,26 +99,27 @@ class ProductOption extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id' => [
+        'product_id'   => [
             'checks'   => [
                 'integer',
-                'required'
+                'required',
+                'exists:products',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer!'],
+                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
             ],
         ],
         'attribute_id' => [
             'checks'   => [
                 'integer',
                 'nullable',
-                'exists:global_attributes'
+                'exists:global_attributes',
             ],
             'messages' => [
                 '*' => ['default_text' => 'Attribute ID is not Integer or not presents in global_attributes table!'],
             ],
         ],
-        'group_id' => [
+        'group_id'     => [
             'checks'   => [
                 'integer',
                 'nullable',
@@ -127,9 +128,9 @@ class ProductOption extends BaseModel
                 '*' => ['default_text' => 'Group ID is not integer!'],
             ],
         ],
-        'sort_order' => [
+        'sort_order'   => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -137,9 +138,9 @@ class ProductOption extends BaseModel
                 ],
             ],
         ],
-        'status' => [
+        'status'       => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -152,11 +153,11 @@ class ProductOption extends BaseModel
             'checks'   => [
                 'string',
                 'size:1',
-                /** @see __construct() method  */
+                /** @see __construct() method */
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => ':attribute must be 1 character length and presents in element_types list of AHtml class!',
+                    'default_text' => ':attribute must be 1 character length and presents in element_types list of AHtml class!',
                 ],
             ],
         ],
@@ -178,10 +179,10 @@ class ProductOption extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Blurb must be less than 1500 characters!',
+                    'default_text' => 'Blurb must be less than 1500 characters!',
                 ],
             ],
-        ]
+        ],
     ];
 
     public function __construct(array $attributes = [])
@@ -211,6 +212,7 @@ class ProductOption extends BaseModel
     {
         return $this->hasMany(ProductOptionDescription::class, 'product_option_id');
     }
+
     /**
      * @return mixed
      */
@@ -253,7 +255,7 @@ class ProductOption extends BaseModel
          */
         $rm = ABC::getObjectByAlias('AResourceManager');
         $rm->setType('image');
-        if($this->option_values) {
+        if ($this->option_values) {
             foreach ($this->option_values as $option_value) {
                 //Remove previous resources of object
                 $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
@@ -281,16 +283,16 @@ class ProductOption extends BaseModel
             ]
         );
         $query->whereIn('product_options.product_option_id', $po_ids)
-                       ->leftJoin(
-                           'product_option_descriptions',
-                           function ($join) {
-                               /** @var JoinClause $join */
-                               $join->on('product_option_descriptions.product_option_id', '=',
-                                   'product_options.product_option_id')
-                                    ->where('product_option_descriptions.language_id', '=',
-                                        static::$current_language_id);
-                           }
-                       )->leftJoin(
+              ->leftJoin(
+                  'product_option_descriptions',
+                  function ($join) {
+                      /** @var JoinClause $join */
+                      $join->on('product_option_descriptions.product_option_id', '=',
+                          'product_options.product_option_id')
+                           ->where('product_option_descriptions.language_id', '=',
+                               static::$current_language_id);
+                  }
+              )->leftJoin(
                 'product_option_values',
                 'product_options.product_option_id',
                 '=',
