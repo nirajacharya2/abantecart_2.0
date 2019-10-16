@@ -16,9 +16,13 @@
 			<?php } ?>
 
 			<div class="actionitem btn-group mr10 toolbar">
-				<a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>" title="<?php echo $button_add; ?>">
-				<i class="fa fa-plus"></i>
-					<?php
+                <?php if($insert){ ?>
+                <a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>"
+                   title="<?php echo $button_add; ?>">
+                    <i class="fa fa-plus"></i>
+                </a>
+                    <?php
+                    }
 				if ($auditLog) {
 				?>
 					<a data-toggle="modal"
@@ -32,7 +36,6 @@
 					<?php
 				}
 				?>
-				</a>
 			</div>
 		</div>
 
@@ -92,6 +95,7 @@
 
 	<div class="panel-footer col-xs-12">
 		<div class="text-center">
+            <?php if($form['submit']){ ?>
 			<button class="btn btn-primary lock-on-click">
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
@@ -101,6 +105,7 @@
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
+            <?php } ?>
 		</div>
 	</div>
 	</form>

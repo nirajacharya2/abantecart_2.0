@@ -7,9 +7,11 @@
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
-				<a class="btn btn-primary tooltips" href="<?php echo $button_add_file->href; ?>" data-target="#file_modal" data-toggle="modal" title="<?php echo $button_add_file->text; ?>">
+                <?php if($insert){?>
+				<a class="btn btn-primary tooltips" href="<?php echo $insert->href; ?>" data-target="#file_modal" data-toggle="modal" title="<?php echo $insert->text; ?>">
 				<i class="fa fa-plus"></i>
 				</a>
+                <?php } ?>
 			</div>
 		</div>
 		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>

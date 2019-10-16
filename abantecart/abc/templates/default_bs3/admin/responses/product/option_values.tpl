@@ -10,26 +10,31 @@
 		<div class="form-group">
 			<label class="heading col-sm-10"><?php echo $text_option_type; ?>: <?php echo $option_type; ?></label>
 			<div class="input-group col-sm-2">
-			<a class="pull-right btn btn-default tooltips" onclick="optionDelete('<?php echo $button_remove_option->href; ?>')" data-original-title="<?php echo $button_remove_option->text; ?>" data-confirmation="delete">
-			 <i class="fa fa-trash"></i>
-			 </a>
+            <?php if($button_remove_option){ ?>
+                <a class="pull-right btn btn-default tooltips"
+                   onclick="optionDelete('<?php echo $button_remove_option->href; ?>')"
+                   data-original-title="<?php echo $button_remove_option->text; ?>"
+                   data-confirmation="delete"><i class="fa fa-trash"></i>
+                </a>
+            <?php } ?>
 		    </div>
 		</div>
 
 		<?php
-		$fields = array('entry_status'=>'status',
-						'entry_option_name'=>'option_name',
-						'entry_option_placeholder' => 'option_placeholder',
-						'entry_sort_order' => 'option_sort_order',
-						'entry_required' => 'required',
-						'entry_allowed_extensions' => 'extensions',
-						'entry_min_size'=>'min_size',
-						'entry_max_size'=>'max_size',
-						'entry_upload_dir'=>'directory',
-						'entry_regexp_pattern' => 'option_regexp_pattern',
-						'entry_error_text'=>'option_error_text'
+		$fields = [
+            'entry_status'             =>'status',
+            'entry_option_name'        =>'option_name',
+            'entry_option_placeholder' => 'option_placeholder',
+            'entry_sort_order'         => 'option_sort_order',
+            'entry_required'           => 'required',
+            'entry_allowed_extensions' => 'extensions',
+            'entry_min_size'           =>'min_size',
+            'entry_max_size'           =>'max_size',
+            'entry_upload_dir'         =>'directory',
+            'entry_regexp_pattern'     => 'option_regexp_pattern',
+            'entry_error_text'         =>'option_error_text'
 
-		);
+        ];
 		foreach ($fields as $e=>$name) { ?>
 				<?php
 					$entry = $$e;
@@ -67,6 +72,7 @@
 	</div>
 	<div class="panel-footer">
 		<div class="center">
+            <?php if($button_save){ ?>
 			 <button id="update_option" class="btn btn-primary">
 			 <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
 			 </button>
@@ -74,6 +80,7 @@
 			 <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
                  <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			 </a>
+            <?php } ?>
 		</div>
 	</div>
 </div>
@@ -119,7 +126,9 @@
 	</div>
 	<div class="panel-footer">
 		<div class="center">
-			<?php if (in_array($option_data['element_type'], $elements_with_options)) { ?>
+		<?php
+        if($button_save){
+            if (in_array($option_data['element_type'], $elements_with_options)) { ?>
 			<a href="#" title="<?php echo $button_add?>" id="add_option_value" class="btn btn-success"><i class="fa fa-plus-circle fa-lg"></i></a>&nbsp;&nbsp;
 			<?php } ?>
 			<button type="submit" class="btn btn-primary">
@@ -129,6 +138,7 @@
 			<a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
                 <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
 			</a>
+        <?php } ?>
 		</div>
 	</div>
 </div>

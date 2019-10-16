@@ -5,10 +5,8 @@
 } ?>
 
 <div id="content" class="panel panel-default">
-
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
-
 			<?php if (!empty ($list_url)) { ?>
 			<div class="btn-group">
 				<a class="btn btn-white tooltips" href="<?php echo $list_url; ?>" data-toggle="tooltip" data-original-title="<?php echo $text_back_to_list; ?>">
@@ -18,12 +16,12 @@
 			<?php } ?>
 
 			<div class="actionitem btn-group mr10 toolbar">
+                <?php if($insert){ ?>
 				<a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>" title="<?php echo $button_add; ?>">
 				<i class="fa fa-plus"></i>
 				</a>
-				<?php
-				if ($auditLog) {
-				?>
+				<?php }
+				if ($auditLog) { ?>
 				<a data-toggle="modal"
 				   class="btn btn-white tooltips"
 				   data-target="#viewport_modal"
@@ -94,6 +92,7 @@
 
 	<div class="panel-footer col-xs-12">
 		<div class="text-center">
+            <?php if($form['submit']){ ?>
 			<button class="btn btn-primary lock-on-click">
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
@@ -103,6 +102,7 @@
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
+            <?php } ?>
 		</div>
 	</div>
 	</form>

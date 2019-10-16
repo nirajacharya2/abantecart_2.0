@@ -21,12 +21,14 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 			</div>
 		<?php } ?>
 			<div class="btn-group ml10 toolbar">
+                <?php if($text_new_option){?>
                     <a class="btn btn-white tooltips" href="#"
 					   title="<?php echo $text_new_option; ?>"
 					   data-original-title="<?php echo $text_new_option; ?>"
 					   data-target="#option_modal" data-toggle="modal">
                     <i class="fa fa-plus"></i>
                     </a>
+                <?php } ?>
 			</div>
 		</div>
 		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
