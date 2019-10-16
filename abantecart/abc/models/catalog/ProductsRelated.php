@@ -32,6 +32,30 @@ class ProductsRelated extends BaseModel
         'related_id' => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => ':attribute is not integer or absent in products table!'],
+            ],
+        ],
+        'related_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products,product_id',
+            ],
+            'messages' => [
+                '*' => ['default_text' => ':attribute is not integer or absent in products table!'],
+            ],
+        ],
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
