@@ -17,9 +17,15 @@
 
 			<?php if ($product_id) { ?>
 		    <div class="btn-group">
-    	        <a class="btn btn-white lock-on-click tooltips" href="<?php echo $clone_url; ?>" data-toggle="tooltip" title="<?php echo $text_clone; ?>" data-original-title="<?php echo $text_clone; ?>">
-    	        <i class="fa fa-tags"></i>
-    	        </a>
+                <?php if($text_clone){?>
+                <a class="btn btn-white lock-on-click tooltips"
+                   href="<?php echo $clone_url; ?>"
+                   data-toggle="tooltip"
+                   title="<?php echo $text_clone; ?>"
+                   data-original-title="<?php echo $text_clone; ?>">
+                <i class="fa fa-tags"></i>
+                </a>
+                <?php } ?>
 		    </div>	
 		    <?php } ?>
 		</div>
