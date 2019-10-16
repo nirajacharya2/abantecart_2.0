@@ -21,8 +21,8 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
+use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -30,8 +30,8 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductFiles extends AController
 {
-    private $error = array();
-    public $data = array();
+    private $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -49,14 +49,14 @@ class ControllerPagesCatalogProductFiles extends AController
             abc_redirect($this->html->getSecureURL('catalog/product'));
         }
 
-        if (AHelperUtils::has_value($product_id) && $this->request->is_GET()) {
+        if (H::has_value($product_id) && $this->request->is_GET()) {
             $product_info = $this->model_catalog_product->getProduct($product_id);
             if (!$product_info) {
                 $this->session->data['warning'] = $this->language->get('error_product_not_found');
                 abc_redirect($this->html->getSecureURL('catalog/product'));
             }
             // remove
-            if (AHelperUtils::has_value($this->request->get['act']) && $this->request->get['act'] == 'delete') {
+            if (H::has_value($this->request->get['act']) && $this->request->get['act'] == 'delete') {
                 $download_info = $this->model_catalog_download->getDownload($this->request->get['download_id']);
                 $map_list = $this->model_catalog_download->getDownloadMapList($this->request->get['download_id']);
 
@@ -94,37 +94,37 @@ class ControllerPagesCatalogProductFiles extends AController
         }
 
         $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($product_id);
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id),
             'text'      => $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product').' - '
                 .$this->data['product_description'][$this->session->data['content_language_id']]['name'],
             'separator' => ' :: ',
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('catalog/product_files', '&product_id='.$product_id),
             'text'      => $this->language->get('tab_files'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         $this->data['active'] = 'files';
         //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', array($this->data));
+        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
         $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
         unset($tabs_obj);
 
         $this->loadModel('catalog/download');
-        $this->data['downloads'] = array();
+        $this->data['downloads'] = [];
 
         $this->data['product_files'] = $this->model_catalog_download->getProductDownloadsDetails($product_id);
 
@@ -138,12 +138,12 @@ class ControllerPagesCatalogProductFiles extends AController
                 $this->config->get('config_image_grid_height'));
             if ($resource_info['resource_path']) {
                 $file['icon'] = $this->html->buildResourceImage(
-                    array(
+                    [
                         'url'    => $thumbnail,
                         'width'  => $this->config->get('config_image_grid_width'),
                         'height' => $this->config->get('config_image_grid_height'),
                         'attr'   => 'alt="'.$resource_info['title'].'"',
-                    ));
+                    ]);
             } else {
                 $file['icon'] = $resource_info['resource_code'];
             }
@@ -152,12 +152,12 @@ class ControllerPagesCatalogProductFiles extends AController
                 $file['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
 
             $file['button_edit'] = $this->html->buildElement(
-                array(
+                [
                     'type' => 'button',
                     'text' => $this->language->get('button_edit'),
                     'href' => $this->html->getSecureURL('r/product/product/buildDownloadForm',
                         '&product_id='.$product_id.'&download_id='.$file['download_id']),
-                ));
+                ]);
 
             $map_list = $this->model_catalog_download->getDownloadMapList($file['download_id']);
             if ((sizeof($map_list) == 1 && key($map_list) == $product_id) || $file['shared'] != 1) {
@@ -169,18 +169,18 @@ class ControllerPagesCatalogProductFiles extends AController
             }
 
             $file['button_delete'] = $this->html->buildElement(
-                array(
+                [
                     'type' => 'button',
                     'text' => $text,
                     'href' => $this->html->getSecureURL('catalog/product_files',
                         '&act=delete&product_id='.$product_id.'&download_id='.$file['download_id']),
                     'icon' => $icon,
-                ));
+                ]);
 
             $orders_count = $this->model_catalog_download->getTotalOrdersWithProduct($product_id);
             if ($orders_count) {
                 $file['push_to_customers'] = $this->html->buildElement(
-                    array(
+                    [
                         'type'  => 'button',
                         'name'  => 'push_to_customers',
                         'text'  => sprintf($this->language->get('text_push_to_orders'), $orders_count),
@@ -189,19 +189,19 @@ class ControllerPagesCatalogProductFiles extends AController
                         'href'  => $this->html->getSecureURL('catalog/product_files/pushToCustomers',
                             '&product_id='.$product_id.'&download_id='.$file['download_id']),
                         'attr'  => 'data-orders-count="'.$orders_count.'"',
-                    ));
+                    ]);
             }
             if($file['map_list']){
                 foreach($file['map_list'] as $k=>&$item){
 
-                    $new= array(
+                    $new= [
                         'product_id'=> $k,
                         'name' => $item,
                         'url' => $this->html->getSecureURL(
                                                             'catalog/product_files',
                                                             '&product_id='.$k
                         )
-                    );
+                    ];
                     $item = $new;
                 }
             }
@@ -209,13 +209,13 @@ class ControllerPagesCatalogProductFiles extends AController
         }
         unset($file);
 
-        $this->data['button_add_file'] = $this->html->buildElement(
-            array(
+        $this->data['insert'] = $this->html->buildElement(
+            [
                 'type' => 'button',
                 'text' => $this->language->get('text_add_file'),
                 'href' => $this->html->getSecureURL('r/product/product/buildDownloadForm', '&product_id='.$product_id),
 
-            )
+            ]
         );
         if ($this->config->get('config_embed_status')) {
             $this->data['embed_url'] = $this->html->getSecureURL('common/do_embed/product', '&product_id='.$product_id);
@@ -266,7 +266,7 @@ class ControllerPagesCatalogProductFiles extends AController
         $download_info['attributes_data'] = serialize($this->download->getDownloadAttributesValues($download_id));
         $this->loadModel('catalog/download');
         $orders_for_push = $this->model_catalog_download->getOrdersWithProduct($product_id);
-        $updated_array = array();
+        $updated_array = [];
         if ($orders_for_push) {
             foreach ($orders_for_push as $row) {
                 $updated_array = array_merge(
