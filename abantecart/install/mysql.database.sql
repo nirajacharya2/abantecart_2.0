@@ -39,10 +39,6 @@ DROP TABLE IF EXISTS `ac_global_attributes_type_descriptions` CASCADE;
 DROP TABLE IF EXISTS `ac_global_attributes_types` CASCADE;
 DROP TABLE IF EXISTS `ac_global_attributes_descriptions` CASCADE;
 DROP TABLE IF EXISTS `ac_global_attributes` CASCADE;
-DROP TABLE IF EXISTS `ac_product_filter_ranges_descriptions` CASCADE;
-DROP TABLE IF EXISTS `ac_product_filter_descriptions` CASCADE;
-DROP TABLE IF EXISTS `ac_product_filter_ranges` CASCADE;
-DROP TABLE IF EXISTS `ac_product_filters` CASCADE;
 DROP TABLE IF EXISTS `ac_contents_to_stores` CASCADE;
 DROP TABLE IF EXISTS `ac_block_descriptions` CASCADE;
 DROP TABLE IF EXISTS `ac_custom_lists` CASCADE;
@@ -12955,74 +12951,6 @@ VALUES
 (1, 1, 'Product Option', NOW()),
 (2, 1, 'Download Attribute', NOW()),
 (3, 1, 'Object Attribute', NOW());
-
---
--- Product Features and Filters
---
-
-CREATE TABLE `ac_product_filters` (
-  `filter_id` int(11) NOT NULL AUTO_INCREMENT,
-  `filter_type` char(1) NOT NULL DEFAULT '',  -- M - manufacture/brand, C - Category  based, F - Feature based, O - Option based, P - Price based
-  `categories_hash` text NOT NULL, -- Hash with selected categories, that are used. Default ALL categories.
-  `feature_id` int(11),
-  `sort_order` int(3) NOT NULL DEFAULT '0',
-  `status` smallint(1) NOT NULL default '0',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  PRIMARY KEY (`filter_id`),
-  KEY `feature_id` (`feature_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
-CREATE TABLE `ac_product_filter_descriptions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `filter_id` int(11) NOT NULL,
-  `value` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  `language_id` int(11) NOT NULL,
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `date_deleted` timestamp NULL,
-    `stage_id` INT(6) NULL,
-  PRIMARY KEY (`id`,`filter_id`,`language_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
-CREATE TABLE `ac_product_filter_ranges` (
-  `range_id` int(11) NOT NULL AUTO_INCREMENT,
-  `feature_id` int(11),
-  `filter_id` int(11) NOT NULL,
-  `from` decimal(12,2) NOT NULL DEFAULT '0.00',
-  `to` decimal(12,2) NOT NULL DEFAULT '0.00',
-  `sort_order` int(3) NOT NULL DEFAULT '0',
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `date_deleted` timestamp NULL,
-    `stage_id` INT(6) NULL,
-  PRIMARY KEY (`range_id`),
-  KEY `from` (`from`,`to`),
-  KEY `filter_id` (`filter_id`),
-  KEY `feature_id` (`feature_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-
-CREATE TABLE `ac_product_filter_ranges_descriptions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `range_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  `language_id` int(11) NOT NULL,
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `date_deleted` timestamp NULL,
-    `stage_id` INT(6) NULL,
-  PRIMARY KEY (`id`,`range_id`,`language_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
 
 CREATE TABLE `ac_extension_dependencies` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
