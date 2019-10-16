@@ -65,7 +65,7 @@ class ProductDescription extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'exists: products',
+                'exists:products',
             ],
             'messages' => [
                 '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
