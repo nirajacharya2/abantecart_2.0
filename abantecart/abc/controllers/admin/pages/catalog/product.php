@@ -446,6 +446,9 @@ class ControllerPagesCatalogProduct extends AController
 
             //$productInfo = Cache::get('product.'.$product_id);
 
+            /**
+             * @var Product $productInfo
+             */
             $productInfo = $this->productInstance->find($product_id);
 
             $product = $this->productInstance
@@ -475,24 +478,14 @@ class ControllerPagesCatalogProduct extends AController
             $productStores = $this->db->table('products_to_stores')
                 ->where('product_id', '=', $product_id)
                 ->get()->toArray();
-            $product['product_stores'] = array_column($productStores, 'store_id');
+            $product['product_store'] = array_column($productStores, 'store_id');
 
-            $productCategories = $this->db->table('products_to_categories')
-                ->leftJoin(
-                    'category_descriptions',
-                    'category_descriptions.category_id',
-                    '=',
-                    'products_to_categories.category_id'
-                    )
-                ->where(
-                    [
-                        'products_to_categories.product_id' => $product_id,
-                        'category_descriptions.language_id' => $this->language->getContentLanguageID()
-                    ]
-                )
-                ->get()
-                ->toArray();
-            $product['categories'] = array_column($productCategories, 'name', 'category_id');
+            $productCategories = $productInfo->categories;
+            $product['categories'] = [];
+            foreach ($productCategories as $productCategory) {
+                    $product['categories'][] = $productCategory->category_id;
+            }
+
 
             $product['keyword'] = UrlAlias::getProductKeyword($product_id, $this->language->getContentLanguageID());
             $product_type_id = $product['product_type_id'];
@@ -510,9 +503,7 @@ class ControllerPagesCatalogProduct extends AController
                     $product['tags'] = implode(',', $arTags);
                     unset($arTags, $tags);
                 }
-                if (is_array($fieldValue) && $fieldName == 'categories') {
-                    //$product['categories'] = array_column(array_column($fieldValue, 'pivot'), 'category_id');
-                }
+
                 if (is_array($fieldValue) && $fieldName == 'attributes') {
                     $attributes = $fieldValue;
                     foreach ($attributes as $attribute) {

@@ -138,7 +138,8 @@ class ControllerResponsesCatalogProductForm extends AController
             unset($fields['categories']);
         }
 
-        if (!isset($fields['product_stores']) || empty($fields['product_stores']) || $fields['product_stores']==0) {
+
+        if (!isset($fields['product_store']) || empty($fields['product_store']) || $fields['product_store']==0) {
             $fields['product_stores'] = [0];
         }
 
