@@ -831,7 +831,7 @@ class Product extends BaseModel
      */
     public function getProductCategories()
     {
-        $categories = Category::getCategories(0, static::$current_language_id);
+        $categories = Category::getCategories(0);
         $product_categories = [];
         foreach ($categories as $category) {
             $product_categories[] = (object)[
