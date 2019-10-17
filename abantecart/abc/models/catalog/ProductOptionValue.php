@@ -31,7 +31,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Database\Eloquent\Collection $order_options
  *
  * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
- * @method static ProductOptionValue select(mixed $select) Builder
  *
  * @package abc\models
  */

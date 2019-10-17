@@ -42,208 +42,199 @@ class ModelCatalogProduct extends Model
 
     public $data = [];
 
-    /** @param array $data
-     * @return int
-     * @throws \Exception
-     */
-    public function addProduct($data)
-    {
-        $language_id = (int)$this->language->getContentLanguageID();
+    /* public function addProduct($data)
+     {
+         $language_id = (int)$this->language->getContentLanguageID();
 
-        $fields = $this->getProductColumns();
-        $this->data['preformat_fields'] = [
-        "shipping_price",
-        "price",
-        "cost",
-        "weight",
-        "length",
-        "width",
-        "height",
-    ];
-        $this->data['perform_json'] = [];
-        $this->data['perform_serialize'] = [];
-        $this->data['timestamps'] = ['date_available'];
+         $fields = $this->getProductColumns();
+         $this->data['preformat_fields'] = [
+         "shipping_price",
+         "price",
+         "cost",
+         "weight",
+         "length",
+         "width",
+         "height",
+     ];
+         $this->data['perform_json'] = [];
+         $this->data['perform_serialize'] = [];
+         $this->data['timestamps'] = ['date_available'];
 
-        $this->data['nullable'] = ['sku'];
+         $this->data['nullable'] = ['sku'];
 
-        $affected_tables = [];
+         $affected_tables = [];
 
-        $this->extensions->hk_InitData($this, __FUNCTION__);
+         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $insert = [];
-          foreach ($fields as $f) {
-              if (isset($data[$f])) {
-                  if (in_array($f, $this->data['preformat_fields'])) {
-                      $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
-                      $insert[] = $f." = '".$this->db->escape($data[$f])."'";
-                  }elseif (in_array($f, $this->data['nullable'])) {
-                      $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
-                  }elseif (in_array($f, $this->data['timestamps'])) {
-                      $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
-                  } elseif (in_array($f, $this->data['perform_json'])) {
-                      $insert[] = $f." = '".json_encode($data[$f])."'";
-                  } elseif (in_array($f, $this->data['perform_serialize'])) {
-                      $insert[] = $f." = '".serialize($data[$f])."'";
-                  } else {
-                      $insert[] = $f." = '".$this->db->escape($data[$f])."'";
-                  }
+         $insert = [];
+           foreach ($fields as $f) {
+               if (isset($data[$f])) {
+                   if (in_array($f, $this->data['preformat_fields'])) {
+                       $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                       $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                   }elseif (in_array($f, $this->data['nullable'])) {
+                       $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
+                   }elseif (in_array($f, $this->data['timestamps'])) {
+                       $insert[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
+                   } elseif (in_array($f, $this->data['perform_json'])) {
+                       $insert[] = $f." = '".json_encode($data[$f])."'";
+                   } elseif (in_array($f, $this->data['perform_serialize'])) {
+                       $insert[] = $f." = '".serialize($data[$f])."'";
+                   } else {
+                       $insert[] = $f." = '".$this->db->escape($data[$f])."'";
+                   }
 
-              }
-          }
+               }
+           }
 
-        if (!empty($insert)) {
-            $this->db->query(
-                "INSERT INTO `".$this->db->table_name("products")."` 
-                SET ".implode(',', $insert)
-            );
-            $affected_tables[] = 'products';
-        }
-        $product_id = $this->db->getLastId();
+         if (!empty($insert)) {
+             $this->db->query(
+                 "INSERT INTO `".$this->db->table_name("products")."`
+                 SET ".implode(',', $insert)
+             );
+             $affected_tables[] = 'products';
+         }
+         $product_id = $this->db->getLastId();
 
 
-        // if new product
-        if (!is_int(key($data['product_description']))) {
-            $update = [];
-            foreach ($data['product_description'] as $field => $value) {
-                $update[$language_id][$field] = $value;
-            }
-            $this->language->replaceDescriptions(
-                'product_descriptions',
-                ['product_id' => (int)$product_id],
-                $update
-            );
-            $affected_tables[] = 'product_descriptions';
-        } else { // if cloning
-            foreach ($data['product_description'] as $language_id => $value) {
-                $this->db->query(
-                    "INSERT INTO ".$this->db->table_name("product_descriptions")." 
-                    SET product_id = '".(int)$product_id."',
-                        language_id = '".(int)$language_id."',
-                        name = '".$this->db->escape($value['name'])."',
-                        meta_keywords = '".$this->db->escape($value['meta_keywords'])."',
-                        meta_description = '".$this->db->escape($value['meta_description'])."',
-                        description = '".$this->db->escape($value['description'])."',
-                        blurb = '".$this->db->escape($value['blurb'])."'"
-                );
-            }
-            reset($data['product_description']);
-        }
+         // if new product
+         if (!is_int(key($data['product_description']))) {
+             $update = [];
+             foreach ($data['product_description'] as $field => $value) {
+                 $update[$language_id][$field] = $value;
+             }
+             $this->language->replaceDescriptions(
+                 'product_descriptions',
+                 ['product_id' => (int)$product_id],
+                 $update
+             );
+             $affected_tables[] = 'product_descriptions';
+         } else { // if cloning
+             foreach ($data['product_description'] as $language_id => $value) {
+                 $this->db->query(
+                     "INSERT INTO ".$this->db->table_name("product_descriptions")."
+                     SET product_id = '".(int)$product_id."',
+                         language_id = '".(int)$language_id."',
+                         name = '".$this->db->escape($value['name'])."',
+                         meta_keywords = '".$this->db->escape($value['meta_keywords'])."',
+                         meta_description = '".$this->db->escape($value['meta_description'])."',
+                         description = '".$this->db->escape($value['description'])."',
+                         blurb = '".$this->db->escape($value['blurb'])."'"
+                 );
+             }
+             reset($data['product_description']);
+         }
 
-        if ($data['featured']) {
-            $this->setFeatured($product_id, true);
-            $affected_tables[] = 'product_featured';
-        }
+         $seo_keys = [];
+         if ($data['keyword']) {
+             if (is_string($data['keyword'])) {
+                 $seo_keys = [
+                     $language_id => [
+                         'keyword' => H::SEOEncode($data['keyword'], 'product_id', $product_id),
+                     ],
+                 ];
+             } //when cloning
+             else {
+                 if (is_array($data['keyword'])) {
+                     $all_languages = $this->language->getAvailableLanguages();
+                     $all_ids = [];
+                     foreach ($all_languages as $l) {
+                         $all_ids[] = $l['language_id'];
+                     }
+                     foreach ($data['keyword'] as $lang_id => $seo_key) {
+                         if (!in_array($lang_id, $all_ids)) {
+                             continue;
+                         }
+                         $seo_keys[(int)$lang_id] = [
+                             'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
+                         ];
+                     }
+                 }
+             }
+         } else {
+             //Default behavior to save SEO URL keyword from product name in default language
+             // when new product
+             if (!is_int(key($data['product_description']))) {
+                 $seo_keys = [
+                     $language_id => [
+                         'keyword' => H::SEOEncode($data['product_description']['name'], 'product_id', $product_id),
+                     ],
+                 ];
+             } else { // when clones
+                 $product_seo_keys = $this->getProductSEOKeywords($product_id);
 
-        $seo_keys = [];
-        if ($data['keyword']) {
-            if (is_string($data['keyword'])) {
-                $seo_keys = [
-                    $language_id => [
-                        'keyword' => H::SEOEncode($data['keyword'], 'product_id', $product_id),
-                    ],
-                ];
-            } //when cloning
-            else {
-                if (is_array($data['keyword'])) {
-                    $all_languages = $this->language->getAvailableLanguages();
-                    $all_ids = [];
-                    foreach ($all_languages as $l) {
-                        $all_ids[] = $l['language_id'];
-                    }
-                    foreach ($data['keyword'] as $lang_id => $seo_key) {
-                        if (!in_array($lang_id, $all_ids)) {
-                            continue;
-                        }
-                        $seo_keys[(int)$lang_id] = [
-                            'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
-                        ];
-                    }
-                }
-            }
-        } else {
-            //Default behavior to save SEO URL keyword from product name in default language
-            // when new product
-            if (!is_int(key($data['product_description']))) {
-                $seo_keys = [
-                    $language_id => [
-                        'keyword' => H::SEOEncode($data['product_description']['name'], 'product_id', $product_id),
-                    ],
-                ];
-            } else { // when clones
-                $product_seo_keys = $this->getProductSEOKeywords($product_id);
+                 $all_languages = $this->language->getAvailableLanguages();
+                 $all_ids = [];
+                 foreach ($all_languages as $l) {
+                     $all_ids[] = $l['language_id'];
+                 }
+                 foreach ($product_seo_keys as $lang_id => $seo_key) {
+                     if (!in_array($lang_id, $all_ids)) {
+                         continue;
+                     }
+                     $seo_keys[(int)$lang_id] = [
+                         'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
+                     ];
+                 }
+             }
+         }
+         if ($seo_keys) {
+             foreach ($seo_keys as $lang_id => $seo_key) {
+                 $this->language->replaceDescriptions('url_aliases',
+                     [
+                         'query'       => "product_id=".(int)$product_id,
+                         'language_id' => $lang_id,
+                     ],
+                     [$lang_id => $seo_key]
+                 );
+             }
+         } else {
+             $this->db->query(
+                 "DELETE
+                 FROM ".$this->db->table_name("url_aliases")."
+                 WHERE query = 'product_id=".(int)$product_id."'
+                     AND language_id = '".(int)$language_id."'");
+         }
+         $affected_tables[] = 'url_aliases';
+         if ($data['product_tags']) {
+             if (is_string($data['product_tags'])) {
+                 $tags = (array)explode(',', $data['product_tags']);
+                 $tags = [$language_id => $tags];
+             } elseif (is_array($data['product_tags'])) {
+                 $tags = $data['product_tags'];
+                 foreach ($tags as &$taglist) {
+                     $taglist = (array)explode(',', $taglist);
+                 }
+                 unset($taglist);
+             } else {
+                 $tags = (array)$data['product_tags'];
+             }
 
-                $all_languages = $this->language->getAvailableLanguages();
-                $all_ids = [];
-                foreach ($all_languages as $l) {
-                    $all_ids[] = $l['language_id'];
-                }
-                foreach ($product_seo_keys as $lang_id => $seo_key) {
-                    if (!in_array($lang_id, $all_ids)) {
-                        continue;
-                    }
-                    $seo_keys[(int)$lang_id] = [
-                        'keyword' => H::SEOEncode($seo_key, 'product_id', $product_id),
-                    ];
-                }
-            }
-        }
-        if ($seo_keys) {
-            foreach ($seo_keys as $lang_id => $seo_key) {
-                $this->language->replaceDescriptions('url_aliases',
-                    [
-                        'query'       => "product_id=".(int)$product_id,
-                        'language_id' => $lang_id,
-                    ],
-                    [$lang_id => $seo_key]
-                );
-            }
-        } else {
-            $this->db->query(
-                "DELETE
-                FROM ".$this->db->table_name("url_aliases")." 
-                WHERE query = 'product_id=".(int)$product_id."'
-                    AND language_id = '".(int)$language_id."'");
-        }
-        $affected_tables[] = 'url_aliases';
-        if ($data['product_tags']) {
-            if (is_string($data['product_tags'])) {
-                $tags = (array)explode(',', $data['product_tags']);
-                $tags = [$language_id => $tags];
-            } elseif (is_array($data['product_tags'])) {
-                $tags = $data['product_tags'];
-                foreach ($tags as &$taglist) {
-                    $taglist = (array)explode(',', $taglist);
-                }
-                unset($taglist);
-            } else {
-                $tags = (array)$data['product_tags'];
-            }
+             array_walk_recursive($tags, 'trim');
 
-            array_walk_recursive($tags, 'trim');
+             foreach ($tags as $lang_id => $taglist) {
+                 $taglist = array_unique($taglist);
 
-            foreach ($tags as $lang_id => $taglist) {
-                $taglist = array_unique($taglist);
-
-                foreach ($taglist as $tag) {
-                    $tag = trim($tag);
-                    if (!$tag) {
-                        continue;
-                    }
-                    $sql = "INSERT INTO ".$this->db->table_name('product_tags')."
-                            (product_id, language_id, tag)
-                            VALUES
-                            (".(int)$product_id.", ".(int)$lang_id.", '".$this->db->escape($tag)."');";
-                    $this->db->query($sql);
-                }
-            }
-            $affected_tables[] = 'product_tags';
-        }
-        $this->cache->remove('product');
-        $data['operation_type'] = 'insert';
-        $this->updateEvent($product_id, $data, $affected_tables);
-        return $product_id;
-    }
-
+                 foreach ($taglist as $tag) {
+                     $tag = trim($tag);
+                     if (!$tag) {
+                         continue;
+                     }
+                     $sql = "INSERT INTO ".$this->db->table_name('product_tags')."
+                             (product_id, language_id, tag)
+                             VALUES
+                             (".(int)$product_id.", ".(int)$lang_id.", '".$this->db->escape($tag)."');";
+                     $this->db->query($sql);
+                 }
+             }
+             $affected_tables[] = 'product_tags';
+         }
+         $this->cache->remove('product');
+         $data['operation_type'] = 'insert';
+         $this->updateEvent($product_id, $data, $affected_tables);
+         return $product_id;
+     }
+ */
     /**
      * @param int $product_id
      * @param array $data
@@ -394,10 +385,6 @@ class ModelCatalogProduct extends Model
                 }
             }
             $affected_tables[] = 'product_descriptions';
-        }
-        if (isset($data['featured'])) {
-            $this->setFeatured($product_id, ($data['featured'] ? true : false));
-            $affected_tables[] = 'product_featured';
         }
 
         if (isset($data['keyword'])) {
@@ -1610,10 +1597,7 @@ class ModelCatalogProduct extends Model
             "DELETE FROM ".$this->db->table_name("product_tags")." 
             WHERE product_id='".(int)$product_id."'"
         );
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("products_featured")." 
-            WHERE product_id='".(int)$product_id."'"
-        );
+
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("product_specials")." 
             WHERE product_id='".(int)$product_id."'");
@@ -1666,13 +1650,12 @@ class ModelCatalogProduct extends Model
     public function getProduct($product_id)
     {
         $query = $this->db->query(
-            "SELECT DISTINCT *, p.product_id, COALESCE(pf.product_id, 0) AS featured,
+            "SELECT DISTINCT *, p.product_id, 
                 (SELECT keyword
                  FROM ".$this->db->table_name("url_aliases")." 
                  WHERE query = 'product_id=".(int)$product_id."'
                     AND language_id='".(int)$this->language->getContentLanguageID()."' ) AS keyword
             FROM ".$this->db->table_name("products")." p
-            LEFT JOIN ".$this->db->table_name("products_featured")." pf ON pf.product_id = p.product_id
             LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
                     ON (p.product_id = pd.product_id
                             AND pd.language_id = '".(int)$this->config->get('storefront_language_id')."')
@@ -1713,64 +1696,6 @@ class ModelCatalogProduct extends Model
         return $query->row;
     }
 
-    /**
-     * @param int $product_id
-     * @param bool $act
-     *
-     * @throws \Exception
-     */
-    public function setFeatured($product_id, $act = true)
-    {
-        $this->db->query(
-            "DELETE 
-            FROM ".$this->db->table_name("products_featured")." 
-            WHERE product_id='".(int)$product_id."'"
-        );
-        if ($act) {
-            $this->db->query(
-                "INSERT INTO ".$this->db->table_name("products_featured")." 
-                SET product_id = '".(int)$product_id."'"
-            );
-        }
-    }
-
-    /**
-     * @param array $data
-     *
-     * @throws \Exception
-     */
-    public function addFeatured($data)
-    {
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("products_featured")." "
-        );
-        if (isset($data['featured_product'])) {
-            foreach ($data['featured_product'] as $product_id) {
-                $this->db->query(
-                    "INSERT INTO ".$this->db->table_name("products_featured")." 
-                    SET product_id = '".(int)$product_id."'"
-                );
-            }
-        }
-    }
-
-    /**
-     * @return array
-     * @throws \Exception
-     */
-    public function getFeaturedProducts()
-    {
-        $query = $this->db->query(
-            "SELECT product_id 
-            FROM ".$this->db->table_name("products_featured")." "
-        );
-        $featured = [];
-        foreach ($query->rows as $product) {
-            $featured[] = $product['product_id'];
-        }
-
-        return $featured;
-    }
 
     /**
      * @param string $keyword
@@ -1887,11 +1812,12 @@ class ModelCatalogProduct extends Model
      */
     public function getProductOptionByAttributeId($attribute_id, $group_id)
     {
+        $inc = (int)$group_id ? "group_id = '".(int)$group_id."'" : "group_id IS NULL";
         $product_option = $this->db->query(
             "SELECT product_option_id 
                 FROM ".$this->db->table_name("product_options")."
                 WHERE attribute_id = '".(int)$attribute_id."'
-                    AND group_id = '".(int)$group_id."'
+                    AND ".$inc."
                 ORDER BY sort_order");
 
         return $product_option->row['product_option_id'];
@@ -2003,7 +1929,7 @@ class ModelCatalogProduct extends Model
     {
         $product_option_data = [];
         $group_select = '';
-        if (is_int($group_id)) {
+        if ((int)$group_id) {
             $group_select = "AND group_id = '".(int)$group_id."'";
         }
         $product_option = $this->db->query(
@@ -2012,6 +1938,7 @@ class ModelCatalogProduct extends Model
              WHERE product_id = '".(int)$product_id."' "
             .$group_select.
             " ORDER BY sort_order");
+
         foreach ($product_option->rows as $product_option) {
             $option_data = $this->getProductOption($product_id, $product_option['product_option_id']);
             $option_data['product_option_value'] =
@@ -2877,50 +2804,41 @@ class ModelCatalogProduct extends Model
         return ($result->num_rows ? true : false);
     }
 
-    /**
-     *
-     * Check if product or any option has any stock available
-     *
-     * @param int $product_id
-     *
-     * @return int|true - integer as quantity, true as availability when track-stock is off
-     * @throws \Exception
-     */
-    public function hasAnyStock($product_id)
-    {
-        if (!(int)$product_id) {
-            return 0;
-        }
-        $total_quantity = 0;
-        //check product option values
-        $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
-                                    FROM ".$this->db->table_name("product_options")." po
-                                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
-                                        ON (po.product_option_id = pov.product_option_id)
-                                    WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
-        if ($query->num_rows) {
-            $notrack_qnt = 0;
-            foreach ($query->rows as $row) {
-                //if tracking of stock disabled - set quantity as big
-                if (!$row['subtract']) {
-                    $notrack_qnt += 10000000;
-                    continue;
-                }
-                $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
-            }
-            //if some of option value have subtract NO - think product is available
-            if ($total_quantity == 0 && $notrack_qnt) {
-                $total_quantity = true;
-            }
-        } else {
-            //get product quantity without options
-            $query = $this->db->query("SELECT quantity
-                                        FROM ".$this->db->table_name("products")." p
-                                        WHERE p.product_id = '".(int)$product_id."'");
-            $total_quantity = (int)$query->row['quantity'];
-        }
-        return $total_quantity;
-    }
+    /*  public function hasAnyStock($product_id)
+      {
+          if (!(int)$product_id) {
+              return 0;
+          }
+          $total_quantity = 0;
+          //check product option values
+          $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
+                                      FROM ".$this->db->table_name("product_options")." po
+                                      LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+                                          ON (po.product_option_id = pov.product_option_id)
+                                      WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
+          if ($query->num_rows) {
+              $notrack_qnt = 0;
+              foreach ($query->rows as $row) {
+                  //if tracking of stock disabled - set quantity as big
+                  if (!$row['subtract']) {
+                      $notrack_qnt += 10000000;
+                      continue;
+                  }
+                  $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
+              }
+              //if some of option value have subtract NO - think product is available
+              if ($total_quantity == 0 && $notrack_qnt) {
+                  $total_quantity = true;
+              }
+          } else {
+              //get product quantity without options
+              $query = $this->db->query("SELECT quantity
+                                          FROM ".$this->db->table_name("products")." p
+                                          WHERE p.product_id = '".(int)$product_id."'");
+              $total_quantity = (int)$query->row['quantity'];
+          }
+          return $total_quantity;
+      }*/
 
     public function getProductColumns()
     {

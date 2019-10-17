@@ -150,31 +150,31 @@ var_Dump($errors);
                 ],
             'manufacturer_id'     => '11',
             'model'               => 'Test Model',
-            'call_to_order'       => '0',
-            'price'               => '29.5000',
-            'cost'                => '22',
-            'tax_class_id'        => '1',
-            'subtract'            => '0',
-            'quantity'            => '99',
-            'minimum'             => '1',
-            'maximum'             => '0',
-            'stock_checkout'      => '',
-            'stock_status_id'     => '1',
-            'sku'                 => '124596788',
-            'location'            => '',
-            'keyword'             => '',
-            'date_available'      => '2013-08-29 14:35:30',
-            'sort_order'          => '1',
-            'shipping'            => '1',
-            'free_shipping'       => '0',
-            'ship_individually'   => '0',
-            'shipping_price'      => '0',
-            'length'              => '0.00',
-            'width'               => '0.00',
-            'height'              => '0.00',
-            'length_class_id'     => '1',
-            'weight'              => '75.00',
-            'weight_class_id'     => '2',
+            'call_to_order'     => '0',
+            'price'             => '29.5000',
+            'cost'              => '22',
+            'tax_class_id'      => '1',
+            'subtract'          => '0',
+            'quantity'          => '99',
+            'minimum'           => '1',
+            'maximum'           => '0',
+            'stock_checkout'    => '',
+            'stock_status_id'   => '1',
+            'sku'               => '124596788',
+            'location'          => '',
+            'keyword'           => 'test-seo-keyword',
+            'date_available'    => '2013-08-29 14:35:30',
+            'sort_order'        => '1',
+            'shipping'          => '1',
+            'free_shipping'     => '0',
+            'ship_individually' => '0',
+            'shipping_price'    => '0',
+            'length'            => '0.00',
+            'width'             => '0.00',
+            'height'            => '0.00',
+            'length_class_id'   => '1',
+            'weight'            => '75.00',
+            'weight_class_id'   => '2',
         ];
         $productId = null;
         try {
@@ -188,7 +188,18 @@ var_Dump($errors);
         }
 
         $this->assertIsInt($productId);
+
+        $product_info = Product::getProductInfo((int)$productId);
+
+        $this->assertEquals($arProduct['keyword'], $product_info['keyword']);
+        $this->assertEquals($arProduct['product_description']['name'], $product_info['name']);
         return $productId;
+    }
+
+    public function testHasAnyStock()
+    {
+        $product = Product::find(57);
+        $this->assertEquals(true, $product->hasAnyStock());
     }
 
     /**
@@ -264,14 +275,13 @@ var_Dump($errors);
         $this->assertEquals(1, $result);
     }
 
-
-    public function testStaticMethods()
-    {
-        //test getOrderProductOptionsWithValues
-        $productOptions = Product::getProductOptionsWithValues(80);
-        $this->assertEquals(1, count($productOptions));
-        $this->assertEquals(11, count($productOptions[0]['description']));
-        $this->assertEquals(3, count($productOptions[0]['values']));
-    }
+    /* public function testStaticMethods()
+     {
+         //test getOrderProductOptionsWithValues
+         $productOptions = Product::getProductOptionsWithValues(80);
+         $this->assertEquals(1, count($productOptions));
+         $this->assertEquals(11, count($productOptions[0]['description']));
+         $this->assertEquals(3, count($productOptions[0]['values']));
+     }*/
 
 }

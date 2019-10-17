@@ -104,11 +104,14 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 
 <script type="application/javascript">
     $(window).load(function () {
-		tinymce.remove();
+        try {
+            tinymce.remove();
+        } catch (e) {
+        }
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
-		tinymce.baseURL = "<?php echo $this->templateResource('vendor/tinymce/tinymce'); ?>";
+        tinymce.baseURL = "<?php echo $this->templateResource('vendor/assets/tinymce/tinymce'); ?>";
 
 		tinymce.init(mcei);
 

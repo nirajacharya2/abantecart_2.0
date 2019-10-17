@@ -20,7 +20,6 @@ class StockStatus extends BaseModel
 {
     //TODO: needs to rebuild this table!!!
     public $incrementing = false;
-    public $timestamps = false;
 
     protected $casts = [
         'stock_status_id' => 'int',

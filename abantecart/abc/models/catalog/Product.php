@@ -50,6 +50,7 @@ use Illuminate\Support\Collection;
  * @property float                         $height
  * @property int                           $length_class_id
  * @property int                           $status
+ * @property int $featured
  * @property int                           $viewed
  * @property int                           $sort_order
  * @property int                           $subtract
@@ -73,13 +74,11 @@ use Illuminate\Support\Collection;
  * @property ProductOption                 $product_options
  * @property ProductSpecial                $product_specials
  * @property ProductTag                    $product_tags
- * @property ProductsFeatured              $products_featured
  * @property ProductsRelated               $products_related
  * @property Review                        $reviews
  * @property int                           $product_type_id
  *
  * @method static Product find(int $product_id) Product
- * @method static Product select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -1070,18 +1069,10 @@ class Product extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function tagLanguaged()
+    public function tagsByLanguage()
     {
         return $this->hasMany(ProductTag::class, 'product_id')
-            ->where('language_id', '=', $this->registry->get('language')->getContentLanguageID());
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function featured()
-    {
-        return $this->hasOne(ProductsFeatured::class, 'product_id');
+                    ->where('language_id', '=', static::$current_language_id);
     }
 
     /**
@@ -1238,7 +1229,7 @@ class Product extends BaseModel
      */
     public function getStockStatuses($language_id = 0)
     {
-        $language_id = $language_id ?? $this->registry->get('language')->getContentLanguageID();
+        $language_id = $language_id ?: static::$current_language_id;
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
             ->select(['stock_status_id as id', 'name'])
             ->get();
@@ -1397,16 +1388,20 @@ class Product extends BaseModel
     {
         $total_quantity = 0;
         //check product option values
-        $option_values = $this->query()->from('product_options')
-            ->where('product_options.product_id', $this->product_id)
-            ->where('status', 1)
-            ->join(
+        $option_values = ProductOption::select(['product_option_values.quantity', 'product_option_values.subtract'])
+                                      ->where(
+                                          [
+                                              'product_options.product_id' => $this->product_id,
+                                              'status'                     => 1,
+                                          ]
+                                      )
+                                      ->join(
                 'product_option_values',
                 'product_option_values.product_option_id',
                 '=',
                 'product_options.product_option_id'
-            )->select('product_option_values.quantity', 'product_option_values.subtract')
-            ->get();
+                                      )
+                                      ->get();
         if ($option_values) {
             $notrack_qnt = 0;
             foreach ($option_values as $row) {
@@ -1419,7 +1414,7 @@ class Product extends BaseModel
             }
         } else {
             //get product quantity without options
-            $total_quantity = (int)$this::find($this->product_id)->quantity;
+            $total_quantity = $this->quantity;
         }
 
         return $total_quantity;
@@ -1555,13 +1550,12 @@ class Product extends BaseModel
         $urlAliases = UrlAlias::where('query', '=', 'product_id='.$this->product_id)->get();
         if ($urlAliases) {
             foreach ($urlAliases as $urlAlias) {
-                $this->keywords[] = [
+                $this->keywords[$urlAlias->language_id] = [
                     'keyword'     => H::SEOEncode($urlAlias->keyword, 'product_id', $this->product_id),
                     'language_id' => $urlAlias->language_id,
                 ];
             }
         }
-        $this->cache->remove('product');
         return $this->keywords;
     }
 
@@ -1570,9 +1564,60 @@ class Product extends BaseModel
         return $this->morphMany(Audit::class, 'auditable');
     }
 
-    /*
-     * User methods ????? Todo add RBAC to check for user
+    /**
+     * @param $product_id
+     *
+     * @return array
      */
+    public static function getProductInfo($product_id)
+    {
+        $product_id = (int)$product_id;
+        if (!$product_id) {
+            return [];
+        }
+
+        $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
+                          ->find($product_id);
+        if (!$product) {
+            return [];
+        }
+
+        $productArray = $product->toArray();
+        $output = $productArray;
+        unset($output['description'], $output['keyword']);
+
+        $output = array_merge($output, $productArray['description']);
+        $keywords = $product->keywords();
+        $output['keyword'] = $keywords[static::$current_language_id]['keyword'];
+        $output['has_track_options'] = $product->hasTrackOptions();
+
+        if ($output['has_track_options']) {
+            $output['quantity'] = $product->hasAnyStock();
+        }
+        return $output;
+    }
+
+    public function hasTrackOptions()
+    {
+        $query = ProductOptionValue::select();
+        $query->join('product_options',
+            function ($join) {
+                /** @var JoinClause $join */
+                $join->on(
+                    'product_options.product_option_id',
+                    '=',
+                    'product_option_values.product_option_id'
+                );
+                $join->where('product_option_values.subtract', '=', 1);
+            }
+        );
+        $query->where(
+            'product_options.product_id',
+            '=',
+            $this->getKey()
+        );
+        return ($query->count());
+    }
 
     /**
      * @param array $product_data
@@ -1735,8 +1780,7 @@ class Product extends BaseModel
         if (isset($product_data['product_tags'])) {
             $tags = explode(',', $product_data['product_tags']);
             if (is_array($tags)) {
-                $registry = Registry::getInstance();
-                $languageId = $registry->get('language')->getContentLanguageID();
+                $languageId = static::$current_language_id;
                 $productTags = [];
                 foreach ($tags as $tag) {
                     $productTag = ProductTag::updateOrCreate([
@@ -2061,6 +2105,27 @@ class Product extends BaseModel
             }
         }
         return $result;
+    }
+
+    /**
+     * Destroy the models for the given IDs.
+     *
+     * @param  \Illuminate\Support\Collection|array|int $ids
+     *
+     * @return int
+     */
+    public static function destroy($ids)
+    {
+        $IDs = [];
+        if ($ids instanceof Collection) {
+            $IDs = $ids->all();
+        }
+
+        $IDs = is_array($IDs) ? $IDs : func_get_args();
+        foreach ($IDs as $id) {
+            UrlAlias::where('query', '=', 'product_id='.$id)->forceDelete();
+        }
+        return parent::destroy($ids);
     }
 
 }

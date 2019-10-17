@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property Product $product
  *
+ * @method static ProductSpecial find(int $product_id) ProductSpecial
+ *
  * @package abc\models
  */
 class ProductSpecial extends BaseModel
