@@ -291,10 +291,17 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $product->update($upd_array);
         }
 
-        //$product->save();
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
+
+        foreach( (array)$data['category_uuids'] as $uuid ){
+            $category = Category::where( [ 'uuid' => $uuid ] )->first();
+            if($category){
+                $category->touch();
+            }
+        }
+
         UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
         return $product;
     }
