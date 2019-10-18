@@ -1362,7 +1362,7 @@ class Product extends BaseModel
                                                             ->get()->pluck('category_id')->toArray();
         }
 
-        if ($product_data['product_category'] != $product_data['product_category_prev']) {
+        if (isset($product_data['product_category']) &&  $product_data['product_category'] != $product_data['product_category_prev']) {
 
             $ids = (array)$product_data['product_category'];
             $product_data['product_category'] = [];
