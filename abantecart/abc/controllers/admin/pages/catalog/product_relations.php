@@ -52,6 +52,7 @@ class ControllerPagesCatalogProductRelations extends AController
         }
 
         if ($this->request->is_POST()) {
+            $this->request->post['product_category'] = $this->request->post['product_category'] ?: [];
             Product::updateProductLinks($product_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product_relations', '&product_id='.$product_id));
