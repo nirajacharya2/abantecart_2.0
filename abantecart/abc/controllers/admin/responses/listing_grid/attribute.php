@@ -61,7 +61,7 @@ class ControllerResponsesListingGridAttribute extends AController
                 $attr_parent_id = (int)$this->request->post['nodeid'];
                 $new_level = (int)$this->request->post["n_level"] + 1;
             } else {
-                $attr_parent_id = null;
+                $attr_parent_id = $this->request->post['_search']=='true' ? 0: null;
             }
         }
 

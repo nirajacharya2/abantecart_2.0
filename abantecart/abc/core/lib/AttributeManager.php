@@ -660,7 +660,7 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
      * @return array|int
      * @throws \Exception
      */
-    public function getAttributes($data = [], $language_id = 0, $attribute_parent_id = null, $mode = 'default')
+    public function getAttributes($data = [], $language_id = 0, $attribute_parent_id = 0, $mode = 'default')
     {
 
         if (!$language_id) {
@@ -703,8 +703,10 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
         if (!empty($data['subsql_filter'])) {
             $sql .= " AND ".$data['subsql_filter'];
         }
-        if (empty($data['search']) && !is_null($attribute_parent_id)) {
+        if (empty($data['search']) && $attribute_parent_id>0) {
             $sql .= " AND ga.attribute_parent_id = '".(int)$attribute_parent_id."' ";
+        }elseif($attribute_parent_id === null){
+            $sql .= " AND ga.attribute_parent_id IS NULL ";
         }
 
         if (!empty($data['attribute_type_id'])) {

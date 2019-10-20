@@ -1243,6 +1243,7 @@ class ControllerPagesCatalogProduct extends AController
         if (!isset($data['language_id'])) {
             $data['language_id'] = $this->language->getContentLanguageID();
         }
+        $data['product_category'] = $data['product_category'] ?: [];
         return $data;
     }
 }

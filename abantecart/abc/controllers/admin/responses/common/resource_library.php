@@ -63,18 +63,35 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         //quick action routing
         $this->data['action'] = $this->request->get['action'];
-        if ($this->data['action'] == 'list_object' || $this->data['action'] == 'list_library') {
-            return $this->list_library();
+        if ($this->data['action'] == 'list_object'
+            || $this->data['action'] == 'list_library'
+        ){
+            $result = $this->list_library();
+            //update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            return $result;
         }
-        if ($this->data['action'] == 'add' || (!$this->data['resource_id'] && $this->data['action'] != 'multisave')) {
-            return $this->add();
+        if ($this->data['action'] == 'add'
+            ||
+            (!$this->data['resource_id'] && $this->data['action'] != 'multisave')
+        ){
+            $result = $this->add();
+            //update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            return $result;
         }
         if ($this->data['action'] == 'save' && $this->data['resource_id']) {
-            return $this->update_resource_details();
+            $result = $this->update_resource_details();
+            //update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            return $result;
         }
 
         if ($this->data['action'] == 'multisave') {
-            return $this->_multiple_update();
+            $result = $this->_multiple_update();
+            //update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            return $result;
         }
         //edit is default action. proceed
 
