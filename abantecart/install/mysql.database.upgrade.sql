@@ -2143,3 +2143,7 @@ FOREIGN KEY (`attribute_value_id`)
 REFERENCES `ac_global_attributes_values` (`attribute_value_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+ALTER TABLE `ac_products_related`
+  ADD UNIQUE INDEX `ac_product_related_unique_idx` (`product_id` ASC, `related_id` ASC),
+  ADD CONSTRAINT `ac_products_related_chk` CHECK (`product_id` <> `related_id`);

@@ -382,7 +382,7 @@ class ControllerPagesCatalogProduct extends AController
             $product_data = $this->prepareData($this->request->post);
             $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
 
-            Product::updateProduct($product_id, $product_data, $this->language->getContentLanguageID());
+            Product::updateProduct($product_id, $product_data);
 
             $this->extensions->hk_ProcessData($this, 'product_update');
             $this->session->data['success'] = $this->language->get('text_success');

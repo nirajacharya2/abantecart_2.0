@@ -366,7 +366,8 @@ class AuditLogTest extends ATestCase
     public function UpdateProduct(int $productId, $data)
     {
         try {
-            Product::updateProduct($productId, $data, 1);
+            Product::setCurrentLanguageID(1);
+            Product::updateProduct($productId, $data);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
         } catch (Warning $e) {

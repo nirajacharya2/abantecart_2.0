@@ -1076,11 +1076,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function related()
     {
-        return $this->hasMany(ProductsRelated::class, 'product_id');
+        return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
     }
 
     /**
@@ -1646,11 +1646,10 @@ class Product extends BaseModel
     /**
      * @param int   $product_id
      * @param array $product_data
-     * @param int   $language_id
      *
      * @return bool
      */
-    public static function updateProduct(int $product_id, array $product_data, int $language_id)
+    public static function updateProduct(int $product_id, array $product_data)
     {
         /**
          * @var Product $product
@@ -1664,18 +1663,25 @@ class Product extends BaseModel
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {
-                $product_data['product_description']['language_id'] = $language_id;
+                $product_data['product_description']['language_id'] = static::$current_language_id;
             }
             $product->descriptions()->update($product_data['product_description']);
         }
 
         if ($product_data['keyword'] || $product_data['product_description']['name']) {
-            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $product_id);
+            UrlAlias::setProductKeyword(
+                $product_data['keyword'] ?: $product_data['product_description']['name'],
+                $product_id
+            );
         }
 
-        $attributes = array_filter($product_data, function ($k) {
-            return (strpos($k, 'attribute_') === 0);
-        }, ARRAY_FILTER_USE_KEY);
+        $attributes = array_filter(
+            $product_data,
+            function ($k) {
+                return (strpos($k, 'attribute_') === 0);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
 
         if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
@@ -1797,6 +1803,33 @@ class Product extends BaseModel
         }
         return true;
     }
+
+    /**
+     * @param array $product_ids
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function relateProducts($product_ids = [])
+    {
+        if (!$product_ids || !is_array($product_ids)) {
+            return false;
+        }
+        $product_ids = array_unique($product_ids);
+        foreach ($product_ids as $product_id) {
+            $key = array_search($product_id, $product_ids);
+            $ids = $product_ids;
+            unset($ids[$key]);
+            $product = Product::find($product_id);
+            if ($product) {
+                $product->related()->sync($ids);
+                $product->touch();
+            }
+        }
+
+        return true;
+    }
+
 
     /**
      * @param int $productId

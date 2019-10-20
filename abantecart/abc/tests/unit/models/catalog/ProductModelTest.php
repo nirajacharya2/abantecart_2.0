@@ -18,6 +18,7 @@
 
 namespace abc\tests\unit\models\catalog;
 
+use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
 use Illuminate\Validation\ValidationException;
@@ -32,37 +33,37 @@ class ProductModelTest extends ATestCase
         $errors = [];
         try{
             $data = [
-                'product_id'          => -0.1,
-                'uuid'                => -0.00000000021,
-                'model'               => -0.00000000021,
-                'sku'                 => -1,
-                'location'            => -1,
-                'quantity'            => 'fail',
-                'stock_checkout'      => 'fail',
-                'stock_status_id'     => 'fail',
-                'manufacturer_id'     => 9999,
-                'shipping'            => 'fail',
-                'ship_individually'   => 'fail',
-                'free_shipping'       => 'fail',
-                'shipping_price'      => 'fail',
-                'price'               => 'fail',
-                'tax_class_id'        => 'fail',
-                'weight'              => 'fail',
-                'weight_class_id'     => 99999,
-                'length'              => 'fail',
-                'width'               => 'fail',
-                'height'              => 'fail',
-                'length_class_id'     => 'fail',
-                'status'              => 'fail',
-                'viewed'              => 'fail',
-                'sort_order'          => 'fail',
-                'call_to_order'       => -0.00000000021,
-                'cost'                => 'fail',
-                'subtract'            => 'fail',
-                'minimum'             => 'fail',
-                'maximum'             => 'fail',
-                'product_type_id'     => 'fail',
-                'settings'            => -0.00000000021,
+                'product_id'        => -0.1,
+                'uuid'              => -0.00000000021,
+                'model'             => -0.00000000021,
+                'sku'               => -1,
+                'location'          => -1,
+                'quantity'          => 'fail',
+                'stock_checkout'    => 'fail',
+                'stock_status_id'   => 'fail',
+                'manufacturer_id'   => 9999,
+                'shipping'          => 'fail',
+                'ship_individually' => 'fail',
+                'free_shipping'     => 'fail',
+                'shipping_price'    => 'fail',
+                'price'             => 'fail',
+                'tax_class_id'      => 'fail',
+                'weight'            => 'fail',
+                'weight_class_id'   => 99999,
+                'length'            => 'fail',
+                'width'             => 'fail',
+                'height'            => 'fail',
+                'length_class_id'   => 'fail',
+                'status'            => 'fail',
+                'viewed'            => 'fail',
+                'sort_order'        => 'fail',
+                'call_to_order'     => -0.00000000021,
+                'cost'              => 'fail',
+                'subtract'          => 'fail',
+                'minimum'           => 'fail',
+                'maximum'           => 'fail',
+                'product_type_id'   => 'fail',
+                'settings'          => -0.00000000021,
             ];
             $product->validate($data);
         }catch(ValidationException $e){
@@ -77,37 +78,37 @@ class ProductModelTest extends ATestCase
         $errors = [];
         try{
             $data = [
-                'uuid'                => 'sssss',
-                'model'               => 'tesmodeltest',
-                'sku'                 => 'testskutest',
-                'location'            => 'somewhere',
-                'quantity'            => 10,
-                'stock_checkout'      => '0',
-                'stock_status_id'     => 1,
-                'manufacturer_id'     => 11,
-                'shipping'            => false,
-                'ship_individually'   => false,
-                'free_shipping'       => '0',
-                'shipping_price'      => 0.0,
-                'price'               => 1.00,
-                'tax_class_id'        => 2,
-                'date_available'      => date('Y-m-d H:i:s'),
-                'weight'              => 0.0,
-                'weight_class_id'     => 1,
-                'length'              => 0.0,
-                'width'               => 0.0,
-                'height'              => 0.0,
-                'length_class_id'     => 1,
-                'status'              => 1,
-                'viewed'              => 0,
-                'sort_order'          => 15,
-                'call_to_order'       => 0,
-                'cost'                => 0.95,
-                'subtract'            => 0,
-                'minimum'             => 1,
-                'maximum'             => 0,
-                'product_type_id'     => null,
-                'settings'            => '',
+                'uuid'              => 'sssss',
+                'model'             => 'tesmodeltest',
+                'sku'               => 'testskutest',
+                'location'          => 'somewhere',
+                'quantity'          => 10,
+                'stock_checkout'    => '0',
+                'stock_status_id'   => 1,
+                'manufacturer_id'   => 11,
+                'shipping'          => false,
+                'ship_individually' => false,
+                'free_shipping'     => '0',
+                'shipping_price'    => 0.0,
+                'price'             => 1.00,
+                'tax_class_id'      => 2,
+                'date_available'    => date('Y-m-d H:i:s'),
+                'weight'            => 0.0,
+                'weight_class_id'   => 1,
+                'length'            => 0.0,
+                'width'             => 0.0,
+                'height'            => 0.0,
+                'length_class_id'   => 1,
+                'status'            => 1,
+                'viewed'            => 0,
+                'sort_order'        => 15,
+                'call_to_order'     => 0,
+                'cost'              => 0.95,
+                'subtract'          => 0,
+                'minimum'           => 1,
+                'maximum'           => 0,
+                'product_type_id'   => null,
+                'settings'          => '',
             ];
             $product->validate();
         }catch(ValidationException $e){
@@ -118,9 +119,6 @@ var_Dump($errors);
         $this->assertEquals(0, count($errors));
 
     }
-
-
-
 
     /**
      * @return int
@@ -150,31 +148,31 @@ var_Dump($errors);
                 ],
             'manufacturer_id'     => '11',
             'model'               => 'Test Model',
-            'call_to_order'     => '0',
-            'price'             => '29.5000',
-            'cost'              => '22',
-            'tax_class_id'      => '1',
-            'subtract'          => '0',
-            'quantity'          => '99',
-            'minimum'           => '1',
-            'maximum'           => '0',
-            'stock_checkout'    => '',
-            'stock_status_id'   => '1',
-            'sku'               => '124596788',
-            'location'          => '',
-            'keyword'           => 'test-seo-keyword',
-            'date_available'    => '2013-08-29 14:35:30',
-            'sort_order'        => '1',
-            'shipping'          => '1',
-            'free_shipping'     => '0',
-            'ship_individually' => '0',
-            'shipping_price'    => '0',
-            'length'            => '0.00',
-            'width'             => '0.00',
-            'height'            => '0.00',
-            'length_class_id'   => '1',
-            'weight'            => '75.00',
-            'weight_class_id'   => '2',
+            'call_to_order'       => '0',
+            'price'               => '29.5000',
+            'cost'                => '22',
+            'tax_class_id'        => '1',
+            'subtract'            => '0',
+            'quantity'            => '99',
+            'minimum'             => '1',
+            'maximum'             => '0',
+            'stock_checkout'      => '',
+            'stock_status_id'     => '1',
+            'sku'                 => '124596788',
+            'location'            => '',
+            'keyword'             => 'test-seo-keyword',
+            'date_available'      => '2013-08-29 14:35:30',
+            'sort_order'          => '1',
+            'shipping'            => '1',
+            'free_shipping'       => '0',
+            'ship_individually'   => '0',
+            'shipping_price'      => '0',
+            'length'              => '0.00',
+            'width'               => '0.00',
+            'height'              => '0.00',
+            'length_class_id'     => '1',
+            'weight'              => '75.00',
+            'weight_class_id'     => '2',
         ];
         $productId = null;
         try {
@@ -237,7 +235,8 @@ var_Dump($errors);
                 ],
         ];
         try {
-            Product::updateProduct($productId, $arProductData, 1);
+            Product::setCurrentLanguageID(1);
+            Product::updateProduct($productId, $arProductData);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
         } catch (Warning $e) {
@@ -245,7 +244,6 @@ var_Dump($errors);
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
         }
-
 
         $product = Product::find($productId);
         $this->assertEquals(0, $product->featured);
@@ -275,13 +273,24 @@ var_Dump($errors);
         $this->assertEquals(1, $result);
     }
 
-    /* public function testStaticMethods()
-     {
-         //test getOrderProductOptionsWithValues
-         $productOptions = Product::getProductOptionsWithValues(80);
+    public function testStaticMethods()
+    {
+        $db = Registry::db();
+        //test getOrderProductOptionsWithValues
+        /* $productOptions = Product::getProductOptionsWithValues(80);
          $this->assertEquals(1, count($productOptions));
          $this->assertEquals(11, count($productOptions[0]['description']));
-         $this->assertEquals(3, count($productOptions[0]['values']));
-     }*/
+         $this->assertEquals(3, count($productOptions[0]['values']));*/
+
+        $related_ids = [50, 50, 50, 51];
+        Product::relateProducts($related_ids);
+
+        $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
+            ." WHERE product_id=50");
+        $this->assertEquals(1, $result->num_rows);
+        $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
+            ." WHERE product_id=51");
+        $this->assertEquals(1, $result->num_rows);
+    }
 
 }

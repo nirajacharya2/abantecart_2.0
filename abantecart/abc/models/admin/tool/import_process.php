@@ -340,7 +340,8 @@ class ModelToolImportProcess extends Model
         } else {
             //flat array for description (specific for update)
             $product_data['product_description'] = $product_desc;
-            Product::updateProduct($product_id, $product_data, $language_id);
+            Product::setCurrentLanguageID($language_id);
+            Product::updateProduct($product_id, $product_data);
             $this->toLog("Updated product '{$product_desc['name']}' with ID {$product_id}.");
             $status = true;
         }

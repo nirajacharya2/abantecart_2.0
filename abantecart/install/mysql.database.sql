@@ -9850,7 +9850,9 @@ CREATE TABLE `ac_products_related` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `related_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`,`product_id`,`related_id`)
+  PRIMARY KEY (`id`, `product_id`, `related_id`),
+  UNIQUE INDEX `ac_product_related_unique_idx` (`product_id` ASC, `related_id` ASC),
+  CONSTRAINT `ac_products_related_chk` CHECK (`product_id` <> `related_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --

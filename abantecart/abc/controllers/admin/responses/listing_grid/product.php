@@ -27,6 +27,8 @@ use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDiscount;
+use abc\models\catalog\ProductSpecial;
 use H;
 use stdClass;
 
@@ -222,7 +224,7 @@ class ControllerResponsesListingGridProduct extends AController
                             }
                         }
                         if (!empty($upd)) {
-                            Product::updateProduct($id, $upd, $this->language->getContentLanguageID());
+                            Product::updateProduct($id, $upd);
                             $this->extensions->hk_ProcessData($this, 'update', ['product_id' => $id]);
                         }
                     }
@@ -231,7 +233,7 @@ class ControllerResponsesListingGridProduct extends AController
             case 'relate':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    $this->model_catalog_product->relateProducts($ids);
+                    Product::relateProducts($ids);
                 }
                 break;
             default:
@@ -282,7 +284,7 @@ class ControllerResponsesListingGridProduct extends AController
                     $value = H::dateDisplay2ISO($value);
                 }
                 $data = [$key => $value];
-                Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
+                Product::updateProduct($product_id, $data);
             }
             $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             return null;
@@ -302,7 +304,7 @@ class ControllerResponsesListingGridProduct extends AController
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return null;
                     }
-                    Product::updateProduct($k, [$f => $v], $this->language->getContentLanguageID());
+                    Product::updateProduct($k, [$f => $v]);
                     $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
                 }
             }
@@ -333,7 +335,10 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductDiscount($this->request->get['id'], $data);
+                $discount = ProductDiscount::find($this->request->get['id']);
+                if ($discount) {
+                    $discount->update($data);
+                }
             }
 
             return null;
@@ -366,7 +371,10 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductSpecial($this->request->get['id'], $data);
+                $special = ProductSpecial::find($this->request->get['id']);
+                if ($special) {
+                    $special->update($data);
+                }
             }
 
             return null;

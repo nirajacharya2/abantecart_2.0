@@ -294,196 +294,176 @@ class ModelCatalogProduct extends Model
             return $id;
         }
     */
-    /**
-     * @param int $product_id
-     * @param array $data
-     *
-     * @throws \Exception
-     */
-    public function updateProduct($product_id, $data)
-    {
-        $language_id = (int)$this->language->getContentLanguageID();
 
-        $fields = $this->getProductColumns();
-        $this->data['preformat_fields'] = [
-            "shipping_price",
-            "price",
-            "cost",
-            "weight",
-            "length",
-            "width",
-            "height",
-        ];
-        $this->data['perform_json'] = [];
-        $this->data['perform_serialize'] = [];
-        $this->data['timestamps'] = ['date_available'];
+    /*   public function updateProduct($product_id, $data)
+       {
+           $language_id = (int)$this->language->getContentLanguageID();
 
-        $this->data['nullable'] = ['sku'];
+           $fields = $this->getProductColumns();
+           $this->data['preformat_fields'] = [
+               "shipping_price",
+               "price",
+               "cost",
+               "weight",
+               "length",
+               "width",
+               "height",
+           ];
+           $this->data['perform_json'] = [];
+           $this->data['perform_serialize'] = [];
+           $this->data['timestamps'] = ['date_available'];
 
-        $affected_tables = [];
+           $this->data['nullable'] = ['sku'];
 
-        $this->extensions->hk_InitData($this, __FUNCTION__);
+           $affected_tables = [];
 
-        $update = [];
-        foreach ($fields as $f) {
-            if (isset($data[$f])) {
-                if (in_array($f, $this->data['preformat_fields'])) {
-                    $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+           $this->extensions->hk_InitData($this, __FUNCTION__);
+
+           $update = [];
+           foreach ($fields as $f) {
+               if (isset($data[$f])) {
+                   if (in_array($f, $this->data['preformat_fields'])) {
+                       $data[$f] = H::preformatFloat($data[$f], $this->language->get('decimal_point'));
+                       $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                   }elseif (in_array($f, $this->data['nullable'])) {
+                       $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
+                   }elseif (in_array($f, $this->data['timestamps'])) {
+                       $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
+                   } elseif (in_array($f, $this->data['perform_json'])) {
+                       $update[] = $f." = '".json_encode($data[$f])."'";
+                   } elseif (in_array($f, $this->data['perform_serialize'])) {
+                       $update[] = $f." = '".serialize($data[$f])."'";
+                   } else {
+                       $update[] = $f." = '".$this->db->escape($data[$f])."'";
+                   }
+
+               }
+           }
+
+           if (!empty($update)) {
+               $this->db->query(
+                   "UPDATE `".$this->db->table_name("products`")."
+                   SET ".implode(',', $update)."
+                   WHERE product_id = '".(int)$product_id."'"
+               );
+               $affected_tables[] = 'products';
+           }
+
+           if (!empty($data['product_description'])) {
+
+               foreach ($data['product_description'] as $field => $value) {
+
+                   $fields = ['name', 'description', 'meta_keywords', 'meta_description', 'blurb'];
+                   $update = [];
+                   foreach ($fields as $f) {
+                       if ($f == $field) {
+                           $update[$f] = $value;
+                       }
+                   }
+
+                   if (!empty($update)) {
+                       $this->language->replaceDescriptions('product_descriptions',
+                           ['product_id' => (int)$product_id],
+                           [$language_id => $update]);
+                   }
+               }
+               $affected_tables[] = 'product_descriptions';
+           }
+
+           if (isset($data['keyword'])) {
+               $data['keyword'] = H::SEOEncode($data['keyword'], 'product_id', $product_id);
+               if ($data['keyword']) {
+                   $this->language->replaceDescriptions('url_aliases',
+                       ['query' => "product_id=".(int)$product_id],
+                       [$language_id => ['keyword' => $data['keyword']]]);
+               } else {
+                   $this->db->query("DELETE
+                                   FROM ".$this->db->table_name("url_aliases")."
+                                   WHERE query = 'product_id=".(int)$product_id."'
+                                       AND language_id = '".$language_id."'");
+               }
+               $affected_tables[] = 'url_aliases';
+           }
+
+           if (isset($data['product_tags'])) {
+               $tags = explode(',', $data['product_tags']);
+
+               foreach ($tags as &$tag) {
+                   $tag = $this->db->escape(trim($tag));
+               }
+
+               $this->language->replaceMultipleDescriptions('product_tags',
+                   ['product_id' => (int)$product_id],
+                   [$language_id => ['tag' => array_unique($tags)]]);
+               $affected_tables[] = 'product_tags';
+           }
+
+           if (!in_array('products', $affected_tables)) {
+               $this->touchProduct($product_id);
+           }
+           $data['operation_type'] = 'update';
+           $this->updateEvent($product_id, $data, $affected_tables);
+       }
+   */
+
+    /* public function updateProductDiscount($product_discount_id, $data)
+     {
+         $fields = ["customer_group_id", "quantity", "priority", "price", "date_start", "date_end",];
+         if (isset($data['price'])) {
+             $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
+         }
+         if (!empty($data['date_start'])) {
+             $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+         }
+         if (!empty($data['date_end'])) {
+             $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+         }
+         $update = [];
+         foreach ($fields as $f) {
+             if (isset($data[$f])) {
+                 $update[] = $f." = '".$this->db->escape($data[$f])."'";
+             }
+         }
+         if (!empty($update)) {
+             $this->db->query("UPDATE ".$this->db->table_name("product_discounts")."
+                                 SET ".implode(',', $update)."
+                                 WHERE product_discount_id = '".(int)$product_discount_id."'");
+         }
+         $this->cache->remove('product');
+     }*/
+
+    /*
+        public function updateProductSpecial($product_special_id, $data)
+        {
+            $fields = ["customer_group_id", "priority", "price", "date_start", "date_end",];
+            if (isset($data['price'])) {
+                $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
+            }
+            if (!empty($data['date_start'])) {
+                $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+            }
+            if (!empty($data['date_end'])) {
+                $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+            }
+
+            $update = [];
+            foreach ($fields as $f) {
+                if (isset($data[$f])) {
                     $update[] = $f." = '".$this->db->escape($data[$f])."'";
-                }elseif (in_array($f, $this->data['nullable'])) {
-                    $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NULL");
-                }elseif (in_array($f, $this->data['timestamps'])) {
-                    $update[] = $f." = ".($data[$f] ? "'".$this->db->escape($data[$f])."'" : "NOW()");
-                } elseif (in_array($f, $this->data['perform_json'])) {
-                    $update[] = $f." = '".json_encode($data[$f])."'";
-                } elseif (in_array($f, $this->data['perform_serialize'])) {
-                    $update[] = $f." = '".serialize($data[$f])."'";
-                } else {
-                    $update[] = $f." = '".$this->db->escape($data[$f])."'";
-                }
-
-            }
-        }
-
-        if (!empty($update)) {
-            $this->db->query(
-                "UPDATE `".$this->db->table_name("products`")." 
-                SET ".implode(',', $update)." 
-                WHERE product_id = '".(int)$product_id."'"
-            );
-            $affected_tables[] = 'products';
-        }
-
-        if (!empty($data['product_description'])) {
-
-            foreach ($data['product_description'] as $field => $value) {
-
-                $fields = ['name', 'description', 'meta_keywords', 'meta_description', 'blurb'];
-                $update = [];
-                foreach ($fields as $f) {
-                    if ($f == $field) {
-                        $update[$f] = $value;
-                    }
-                }
-
-                if (!empty($update)) {
-                    $this->language->replaceDescriptions('product_descriptions',
-                        ['product_id' => (int)$product_id],
-                        [$language_id => $update]);
                 }
             }
-            $affected_tables[] = 'product_descriptions';
-        }
-
-        if (isset($data['keyword'])) {
-            $data['keyword'] = H::SEOEncode($data['keyword'], 'product_id', $product_id);
-            if ($data['keyword']) {
-                $this->language->replaceDescriptions('url_aliases',
-                    ['query' => "product_id=".(int)$product_id],
-                    [$language_id => ['keyword' => $data['keyword']]]);
-            } else {
-                $this->db->query("DELETE
-                                FROM ".$this->db->table_name("url_aliases")." 
-                                WHERE query = 'product_id=".(int)$product_id."'
-                                    AND language_id = '".$language_id."'");
+            if (!empty($update)) {
+                $this->db->query(
+                    "UPDATE `".$this->db->table_name("product_specials`")."
+                    SET ".implode(',', $update)."
+                    WHERE product_special_id = '".(int)$product_special_id."'"
+                );
             }
-            $affected_tables[] = 'url_aliases';
+            $this->cache->remove('product');
         }
+    */
 
-        if (isset($data['product_tags'])) {
-            $tags = explode(',', $data['product_tags']);
-
-            foreach ($tags as &$tag) {
-                $tag = $this->db->escape(trim($tag));
-            }
-
-            $this->language->replaceMultipleDescriptions('product_tags',
-                ['product_id' => (int)$product_id],
-                [$language_id => ['tag' => array_unique($tags)]]);
-            $affected_tables[] = 'product_tags';
-        }
-
-        if (!in_array('products', $affected_tables)) {
-            $this->touchProduct($product_id);
-        }
-        $data['operation_type'] = 'update';
-        $this->updateEvent($product_id, $data, $affected_tables);
-    }
-
-    /**
-     * @param int $product_discount_id
-     * @param array $data
-     *
-     * @throws \Exception
-     */
-    public function updateProductDiscount($product_discount_id, $data)
-    {
-        $fields = ["customer_group_id", "quantity", "priority", "price", "date_start", "date_end",];
-        if (isset($data['price'])) {
-            $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
-        }
-        if (!empty($data['date_start'])) {
-            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
-        }
-        if (!empty($data['date_end'])) {
-            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
-        }
-        $update = [];
-        foreach ($fields as $f) {
-            if (isset($data[$f])) {
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
-            }
-        }
-        if (!empty($update)) {
-            $this->db->query("UPDATE ".$this->db->table_name("product_discounts")." 
-                                SET ".implode(',', $update)."
-                                WHERE product_discount_id = '".(int)$product_discount_id."'");
-        }
-        $this->cache->remove('product');
-    }
-
-    /**
-     * @param int $product_special_id
-     * @param array $data
-     *
-     * @throws \Exception
-     */
-    public function updateProductSpecial($product_special_id, $data)
-    {
-        $fields = ["customer_group_id", "priority", "price", "date_start", "date_end",];
-        if (isset($data['price'])) {
-            $data['price'] = H::preformatFloat($data['price'], $this->language->get('decimal_point'));
-        }
-        if (!empty($data['date_start'])) {
-            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
-        }
-        if (!empty($data['date_end'])) {
-            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
-        }
-
-        $update = [];
-        foreach ($fields as $f) {
-            if (isset($data[$f])) {
-                $update[] = $f." = '".$this->db->escape($data[$f])."'";
-            }
-        }
-        if (!empty($update)) {
-            $this->db->query(
-                "UPDATE `".$this->db->table_name("product_specials`")." 
-                SET ".implode(',', $update)." 
-                WHERE product_special_id = '".(int)$product_special_id."'"
-            );
-        }
-        $this->cache->remove('product');
-    }
-
-    /**
-     * @param int $product_id
-     * @param array $data
-     *
-     * @return bool
-     * @throws \Exception
-     */
+    /*
     public function updateProductLinks($product_id, $data)
     {
         if (!(int)$product_id || !$data) {
@@ -566,7 +546,7 @@ class ModelCatalogProduct extends Model
 
         return true;
     }
-
+*/
     /**
      * @param array $product_ids
      *

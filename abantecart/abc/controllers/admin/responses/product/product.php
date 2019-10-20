@@ -174,7 +174,7 @@ class ControllerResponsesProductProduct extends AController
         $result = '';
 
         if ($this->request->is_POST()) {
-            $this->model_catalog_product->updateProduct($this->request->get['product_id'], $this->request->post);
+            Product::updateProduct($this->request->get['product_id'], $this->request->post);
             $result = 'Saved!';
         }
 
