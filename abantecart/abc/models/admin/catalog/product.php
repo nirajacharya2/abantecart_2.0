@@ -235,77 +235,65 @@ class ModelCatalogProduct extends Model
          return $product_id;
      }
  */
-    /**
-     * @param int $product_id
-     * @param array $data
-     *
-     * @return int
-     * @throws \Exception
-     */
-    public function addProductDiscount($product_id, $data)
-    {
-        $data['price'] = str_replace(" ", "", $data['price']);
-        if (!empty($data['date_start']) && !$data['iso_date']) {
-            $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
-        }
-        if (!empty($data['date_end']) && !$data['iso_date']) {
-            $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
-        }
-        $this->db->query(
-            "INSERT INTO ".$this->db->table_name("product_discounts")."
+
+    /*  public function addProductDiscount($product_id, $data)
+      {
+          $data['price'] = str_replace(" ", "", $data['price']);
+          if (!empty($data['date_start']) && !$data['iso_date']) {
+              $data['date_start'] = H::dateDisplay2ISO($data['date_start'], $this->language->get('date_format_short'));
+          }
+          if (!empty($data['date_end']) && !$data['iso_date']) {
+              $data['date_end'] = H::dateDisplay2ISO($data['date_end'], $this->language->get('date_format_short'));
+          }
+          $this->db->query(
+              "INSERT INTO ".$this->db->table_name("product_discounts")."
+                  SET product_id = '".(int)$product_id."',
+                      customer_group_id = '".(int)$data['customer_group_id']."',
+                      quantity = '".H::preformatInteger($data['quantity'])."',
+                      priority = '".(int)$data['priority']."',
+                      price = '".H::preformatFloat($data['price'])."',
+                      date_start = '".$this->db->escape($data['date_start'])."',
+                      date_end = '".$this->db->escape($data['date_end'])."'"
+          );
+          $id = $this->db->getLastId();
+          $this->touchProduct($product_id);
+          $this->updateEvent($product_id, $data, ['product_discounts']);
+
+          return $id;
+      }*/
+
+    /*
+        public function addProductSpecial($product_id, $data)
+        {
+            $data['price'] = str_replace(" ", "", $data['price']);
+            if (!empty($data['date_start']) && !$data['iso_date']) {
+                $data['date_start'] = H::dateDisplay2ISO(
+                    $data['date_start'],
+                    $this->language->get('date_format_short')
+                );
+            }
+            if (!empty($data['date_end']) && !$data['iso_date']) {
+                $data['date_end'] = H::dateDisplay2ISO(
+                    $data['date_end'],
+                    $this->language->get('date_format_short')
+                );
+            }
+
+            $this->db->query(
+                "INSERT INTO ".$this->db->table_name("product_specials")."
                 SET product_id = '".(int)$product_id."',
                     customer_group_id = '".(int)$data['customer_group_id']."',
-                    quantity = '".H::preformatInteger($data['quantity'])."',
                     priority = '".(int)$data['priority']."',
-                    price = '".H::preformatFloat($data['price'])."',
+                    price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
                     date_start = '".$this->db->escape($data['date_start'])."',
-                    date_end = '".$this->db->escape($data['date_end'])."'"
-        );
-        $id = $this->db->getLastId();
-        $this->touchProduct($product_id);
-        $this->updateEvent($product_id, $data, ['product_discounts']);
+                    date_end = '".$this->db->escape($data['date_end'])."'");
+            $id = $this->db->getLastId();
+            $this->touchProduct($product_id);
+            $this->updateEvent($product_id, $data, ['product_specials']);
 
-        return $id;
-    }
-
-    /**
-     * @param int $product_id
-     * @param array $data
-     *
-     * @return int
-     * @throws \Exception
-     */
-    public function addProductSpecial($product_id, $data)
-    {
-        $data['price'] = str_replace(" ", "", $data['price']);
-        if (!empty($data['date_start']) && !$data['iso_date']) {
-            $data['date_start'] = H::dateDisplay2ISO(
-                $data['date_start'],
-                $this->language->get('date_format_short')
-            );
+            return $id;
         }
-        if (!empty($data['date_end']) && !$data['iso_date']) {
-            $data['date_end'] = H::dateDisplay2ISO(
-                $data['date_end'],
-                $this->language->get('date_format_short')
-            );
-        }
-
-        $this->db->query(
-            "INSERT INTO ".$this->db->table_name("product_specials")."
-            SET product_id = '".(int)$product_id."',
-                customer_group_id = '".(int)$data['customer_group_id']."',
-                priority = '".(int)$data['priority']."',
-                price = '".H::preformatFloat($data['price'], $this->language->get('decimal_point'))."',
-                date_start = '".$this->db->escape($data['date_start'])."',
-                date_end = '".$this->db->escape($data['date_end'])."'");
-        $id = $this->db->getLastId();
-        $this->touchProduct($product_id);
-        $this->updateEvent($product_id, $data, ['product_specials']);
-
-        return $id;
-    }
-
+    */
     /**
      * @param int $product_id
      * @param array $data
