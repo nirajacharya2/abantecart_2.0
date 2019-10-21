@@ -2,14 +2,16 @@
 
 namespace abc\models\catalog;
 
+use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
+use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
-use abc\models\order\CouponsProduct;
+use abc\models\order\Coupon;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
@@ -36,6 +38,7 @@ use Illuminate\Support\Collection;
  * @property string                        $stock_checkout
  * @property int                           $stock_status_id
  * @property int                           $manufacturer_id
+ * @property Manufacturer $manufacturer
  * @property int                           $shipping
  * @property int                           $ship_individually
  * @property int                           $free_shipping
@@ -65,16 +68,11 @@ use Illuminate\Support\Collection;
  * @property ProductDescription            $descriptions
  * @property Collection                    $categories
  * @property ProductOption                 $options
- * @property CouponsProduct                $coupons_products
  * @property ProductDescription            $product_descriptions
  * @property ProductDiscount               $product_discounts
- * @property ProductOptionDescription      $product_option_descriptions
- * @property ProductOptionValueDescription $product_option_value_descriptions
- * @property ProductOptionValue            $product_option_values
  * @property ProductOption                 $product_options
  * @property ProductSpecial                $product_specials
  * @property ProductTag                    $product_tags
- * @property ProductsRelated               $products_related
  * @property Review                        $reviews
  * @property int                           $product_type_id
  *
@@ -211,7 +209,7 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'UUID must be between 1 and 255 characters!',
+                    'default_text' => 'UUID must be between 1 and 255 characters!',
                 ],
             ],
         ],
@@ -238,7 +236,7 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Product sku must be less than 64 characters!',
+                    'default_text' => 'Product sku must be less than 64 characters!',
                 ],
             ],
         ],
@@ -250,18 +248,18 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Product Location must be less than 128 characters!',
+                    'default_text' => 'Product Location must be less than 128 characters!',
                 ],
             ],
         ],
 
-        'quantity' => [
+        'quantity'       => [
             'checks'   => [
                 'integer',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Product Quantity must be an integer!',
+                    'default_text' => 'Product Quantity must be an integer!',
                 ],
             ],
         ],
@@ -273,17 +271,17 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Stock Checkout can be 1,0 or empty!',
+                    'default_text' => 'Stock Checkout can be 1,0 or empty!',
                 ],
             ],
         ],
 
-        'stock_status_id'   => [
+        'stock_status_id' => [
             'checks'   => [
                 'integer',
                 'sometimes',
                 'required',
-               // 'exists:stock_statuses',
+                // 'exists:stock_statuses',
             ],
             'messages' => [
                 '*' => [
@@ -292,7 +290,7 @@ class Product extends BaseModel
             ],
         ],
 
-        'manufacturer_id'   => [
+        'manufacturer_id' => [
             'checks'   => [
                 'integer',
                 'required',
@@ -327,7 +325,7 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'free_shipping' => [
+        'free_shipping'     => [
             'checks'   => [
                 'boolean',
             ],
@@ -337,7 +335,7 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'shipping_price' => [
+        'shipping_price'    => [
             'checks'   => [
                 'numeric',
             ],
@@ -347,7 +345,7 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'price' => [
+        'price'             => [
             'checks'   => [
                 'numeric',
             ],
@@ -358,8 +356,7 @@ class Product extends BaseModel
             ],
         ],
 
-
-        'tax_class_id'   => [
+        'tax_class_id' => [
             'checks'   => [
                 'integer',
                 'required',
@@ -384,7 +381,7 @@ class Product extends BaseModel
             ],
         ],
 
-        'weight_class_id'   => [
+        'weight_class_id' => [
             'checks'   => [
                 'integer',
                 'nullable',
@@ -430,7 +427,7 @@ class Product extends BaseModel
             ],
         ],
 
-        'length_class_id'   => [
+        'length_class_id' => [
             'checks'   => [
                 'integer',
                 'nullable',
@@ -465,7 +462,7 @@ class Product extends BaseModel
             ],
         ],
 
-        'viewed' => [
+        'viewed'     => [
             'checks'   => [
                 'integer'
             ],
@@ -542,7 +539,7 @@ class Product extends BaseModel
             ],
         ],
 
-        'product_type_id'   => [
+        'product_type_id' => [
             'checks'   => [
                 'integer',
                 'nullable',
@@ -650,7 +647,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store'    => [
+        'product_store'     => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -979,18 +976,17 @@ class Product extends BaseModel
      */
     public static $auditExcludes = ['sku'];
 
-
     public function setSettings($value)
     {
         $this->attributes['settings'] = serialize($value);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function coupons()
     {
-        return $this->hasMany(CouponsProduct::class, 'product_id');
+        return $this->belongsToMany(Coupon::class, 'coupons_products', 'product_id', 'coupon_id');
     }
 
     /**
@@ -1024,30 +1020,6 @@ class Product extends BaseModel
     public function options()
     {
         return $this->hasMany(ProductOption::class, 'product_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function option_descriptions()
-    {
-        return $this->hasMany(ProductOptionDescription::class, 'product_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function option_values()
-    {
-        return $this->hasMany(ProductOptionValue::class, 'product_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function option_value_descriptions()
-    {
-        return $this->hasMany(ProductOptionValueDescription::class, 'product_id');
     }
 
     /**
@@ -1088,7 +1060,7 @@ class Product extends BaseModel
      */
     public function reviews()
     {
-        return $this->hasMany(Review::class, 'product_id');
+        return $this->hasMany(Review::class, 'product_id', 'product_id');
     }
 
     /**
@@ -1104,7 +1076,7 @@ class Product extends BaseModel
      */
     public function manufacturer()
     {
-        return $this->hasOne(Manufacturer::class, 'manufacturer_id');
+        return $this->hasOne(Manufacturer::class, 'manufacturer_id', 'manufacturer_id');
     }
 
     /**
@@ -1140,8 +1112,8 @@ class Product extends BaseModel
             ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
             ->where(
                 [
-                    'ot.object_type' => 'Product',
-                    'ot.status' => 1,
+                    'ot.object_type'  => 'Product',
+                    'ot.status'       => 1,
                     'otd.language_id' => static::$current_language_id
                 ]
             )
@@ -1264,31 +1236,18 @@ class Product extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return array|false|mixed
      * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public function getAllData()
     {
-        $cache_key = 'product.alldata.'.$this->getKey();
-        $data = $this->cache->pull($cache_key);
-        if ($data === false) {
-            $this->load('descriptions', 'discounts', 'tags', 'stores', 'categories');
-            $data = $this->toArray();
-            foreach ($this->options as $option) {
-                $data['options'][] = $option->getAllData();
-            }
-            $data['images'] = $this->images();
-            $data['keywords'] = $this->keywords();
-
-            //TODO: need to rewrite into relations
-            if ($this->manufacturer_id) {
-                $manufacturer = Manufacturer::find($this->manufacturer_id);
-                if ($manufacturer) {
-                    $data['manufacturer'] = $manufacturer->toArray();
-                }
-            }
-            $this->cache->push($cache_key, $data);
+        // eagerLoading!
+        $rels = array_keys(static::getRelationships('HasMany', 'HasOne', 'belongsToMany'));
+        unset($rels['options']);
+        $this->load($rels);
+        $data = $this->toArray();
+        foreach ($this->options as $option) {
+            $data['options'][] = $option->getAllData();
         }
         return $data;
     }
@@ -1389,19 +1348,19 @@ class Product extends BaseModel
         $total_quantity = 0;
         //check product option values
         $option_values = ProductOption::select(['product_option_values.quantity', 'product_option_values.subtract'])
-                                      ->where(
-                                          [
-                                              'product_options.product_id' => $this->product_id,
-                                              'status'                     => 1,
-                                          ]
-                                      )
-                                      ->join(
+            ->where(
+                [
+                    'product_options.product_id' => $this->product_id,
+                    'status'                     => 1,
+                ]
+            )
+            ->join(
                 'product_option_values',
                 'product_option_values.product_option_id',
                 '=',
                 'product_options.product_option_id'
-                                      )
-                                      ->get();
+            )
+            ->get();
         if ($option_values) {
             $notrack_qnt = 0;
             foreach ($option_values as $row) {
@@ -1577,7 +1536,7 @@ class Product extends BaseModel
         }
 
         $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
-                          ->find($product_id);
+            ->find($product_id);
         if (!$product) {
             return [];
         }
@@ -1641,6 +1600,108 @@ class Product extends BaseModel
             self::updateProductLinks($product, $product_data);
             return $productId;
         }
+    }
+
+    /**
+     *
+     * @return bool|array
+     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
+     */
+    public function copyProduct()
+    {
+        $product_id = $this->getKey();
+        if (!$product_id) {
+            return false;
+        }
+
+        $productInfo = $this->getAllData();
+
+        foreach ($productInfo['descriptions'] as &$description) {
+            unset($description['product_id']);
+            $description['name'] .= '(Copy)';
+        }
+        $productInfo['sku'] = $productInfo['sku'] ? $productInfo['sku'].' (copy)' : null;
+        foreach ($productInfo['options'] as &$option) {
+            unset(
+                $option['product_id'],
+                $option['product_option_id']
+            );
+            foreach ($option['values'] as &$optionValues) {
+                unset(
+                    $optionValues['product_id'],
+                    $optionValues['product_option_id'],
+                    $optionValues['product_option_value_id']
+                );
+                $optionValues['sku'] = $optionValues['sku'] ? $optionValues['sku'].' (copy)' : null;
+            }
+        }
+
+        foreach ($productInfo['discounts'] as &$discount) {
+            unset($discount['product_id']);
+        }
+
+        unset(
+            $productInfo['product_id'],
+            $productInfo['uuid']
+        );
+
+        var_export($productInfo['keywords']);
+        exit;
+
+        $data = array_merge($data, ['product_discount' => $this->getProductDiscounts($product_id)]);
+        $data = array_merge($data, ['product_special' => $this->getProductSpecials($product_id)]);
+        $data = array_merge($data, ['product_download' => $this->getProductDownloads($product_id)]);
+        $data = array_merge($data, ['product_category' => $this->getProductCategories($product_id)]);
+        $data = array_merge($data, ['product_store' => $this->getProductStores($product_id)]);
+        $data = array_merge($data, ['product_related' => $this->getProductRelated($product_id)]);
+        $data = array_merge($data, ['product_tags' => $this->getProductTags($product_id)]);
+        $data = array_merge($data, ['keyword' => $this->getProductSEOKeywords($product_id)]);
+
+        //set status to off for cloned product
+        $data['status'] = 0;
+
+        //get product resources
+        $rm = new AResourceManager();
+        $resources = $rm->getResourcesList(
+            [
+                'object_name' => 'products',
+                'object_id'   => $product_id,
+                'sort'        => 'sort_order',
+            ]);
+
+        $new_product_id = $this->addProduct($data);
+
+        foreach ($data['product_discount'] as $item) {
+            //sign to prevent converting date from display format to iso
+            $item['iso_date'] = true;
+            $this->addProductDiscount($new_product_id, $item);
+        }
+        foreach ($data['product_special'] as $item) {
+            $item['iso_date'] = true;
+            $this->addProductSpecial($new_product_id, $item);
+        }
+
+        $this->updateProductLinks($new_product_id, $data);
+        $this->_clone_product_options($new_product_id, $data);
+
+        foreach ($resources as $r) {
+            $rm->mapResource(
+                'products',
+                $new_product_id,
+                $r['resource_id']
+            );
+        }
+        $this->cache->remove('product');
+
+        //clone layout for the product if present
+        $layout_clone_result = $this->_clone_product_layout($product_id, $new_product_id);
+
+        return [
+            'name'         => $data['name'],
+            'id'           => $new_product_id,
+            'layout_clone' => $layout_clone_result,
+        ];
     }
 
     /**
@@ -1744,8 +1805,8 @@ class Product extends BaseModel
 
         if( !is_array($product_data['product_category_prev']) ){
             $product_data['product_category_prev'] = $model->categories()
-                                                            ->where('product_id', '=', $model->getKey())
-                                                            ->get()->pluck('category_id')->toArray();
+                ->where('product_id', '=', $model->getKey())
+                ->get()->pluck('category_id')->toArray();
         }
 
         if (isset($product_data['product_category']) &&  $product_data['product_category'] != $product_data['product_category_prev']) {
@@ -1829,7 +1890,6 @@ class Product extends BaseModel
 
         return true;
     }
-
 
     /**
      * @param int $productId
@@ -1922,7 +1982,6 @@ class Product extends BaseModel
         ];
     }
 
-
     /**
      * @param int $product_id
      *
@@ -1937,14 +1996,14 @@ class Product extends BaseModel
          * @var QueryBuilder $query
          */
         $query = ProductOption::with('description')
-                               ->with('values', 'values.description')
-                               ->where(
-                                   [
-                                       'product_id' => $product_id,
-                                       'group_id' => 0
-                                   ]
-                               )->active()
-                                ->orderBy('sort_order');
+            ->with('values', 'values.description')
+            ->where(
+                [
+                    'product_id' => $product_id,
+                    'group_id'   => 0
+                ]
+            )->active()
+            ->orderBy('sort_order');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
 
@@ -1986,17 +2045,17 @@ class Product extends BaseModel
             /** @var QueryBuilder $query */
             $query = OrderProduct::select(['order_products.product_id']);
             $query->leftJoin('orders',
-                    'order_products.order_id',
-                    '=',
-                    'orders.order_id')
-                ->leftJoin('products',
-                    'order_products.product_id',
-                    '=',
-                    'products.product_id')
-                ->where('orders.order_status_id', '>', 0)
-                ->where('order_products.product_id', '>', 0)
-                ->groupBy('order_products.product_id')
-                ->orderBy($db->raw('SUM('.$aliasOP.'.quantity) '), 'DESC');
+                'order_products.order_id',
+                '=',
+                'orders.order_id')
+                  ->leftJoin('products',
+                      'order_products.product_id',
+                      '=',
+                      'products.product_id')
+                  ->where('orders.order_status_id', '>', 0)
+                  ->where('order_products.product_id', '>', 0)
+                  ->groupBy('order_products.product_id')
+                  ->orderBy($db->raw('SUM('.$aliasOP.'.quantity) '), 'DESC');
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
@@ -2155,10 +2214,117 @@ class Product extends BaseModel
         }
 
         $IDs = is_array($IDs) ? $IDs : func_get_args();
+        $arr = [];
         foreach ($IDs as $id) {
-            UrlAlias::where('query', '=', 'product_id='.$id)->forceDelete();
+            $arr[] = 'product_id='.$id;
         }
+        UrlAlias::whereIn('query', $arr)->forceDelete();
         return parent::destroy($ids);
+    }
+
+    /**
+     * @return bool|null
+     * @throws Exception
+     */
+    public function delete()
+    {
+        UrlAlias::where('query', '=', 'product_id='.$this->getKey())
+                ->forceDelete();
+        return parent::delete();
+    }
+
+    /**
+     * @param array $data
+     * @param null|int $attribute_id
+     *
+     * @return int|false
+     * @throws Exception
+     */
+    public function addProductOption($data = [], $attribute_id = null)
+    {
+        $product_id = $this->getKey();
+        $attribute_id = $attribute_id ?: $data['attribute_id'];
+        if (!$product_id) {
+            Registry::log()->write(__CLASS__.": ".__FUNCTION__.': Unknown product ID');
+            return false;
+        }
+
+        $data['product_id'] = $product_id;
+
+        $db = Registry::db();
+        $db->beginTransaction();
+        try {
+
+            /**
+             * @var AttributeManager $am
+             */
+            $am = ABC::getObjectByAlias('AttributeManager');
+            $attribute = $am->getAttribute($attribute_id);
+            if ($attribute) {
+                $data = array_merge($data, $attribute);
+                $attributeDescriptions = $am->getAttributeDescriptions($attribute_id);
+                $data['attribute_id'] = $attribute_id;
+            } else {
+                $data['placeholder'] = $data['option_placeholder'];
+                $attributeDescriptions = [];
+                $data['attribute_id'] = null;
+            }
+            $productOption = new ProductOption($data);
+            $productOption->save();
+
+            $product_option_id = $productOption->getKey();
+
+            if (!empty($data['option_name'])) {
+                $productOption->description()->insert(
+                    [
+                        'product_option_id'  => $product_option_id,
+                        'product_id'         => $product_id,
+                        'language_id'        => static::$current_language_id,
+                        'name'               => $data['option_name'],
+                        'error_text'         => $data['error_text'],
+                        'option_placeholder' => $data['placeholder'],
+                    ]
+                );
+            }
+
+            foreach ($attributeDescriptions as $language_id => $descr) {
+                $productOption->description()->updateOrInsert(
+
+                    [
+                        'product_option_id' => $product_option_id,
+                        'product_id'        => $product_id,
+                        'language_id'       => $language_id,
+                    ],
+                    [
+                        'name'               => $descr['name'],
+                        'error_text'         => $descr['error_text'],
+                        'option_placeholder' => $data['placeholder'],
+                    ]
+                );
+            }
+
+            //add empty option value for single value attributes
+            $elements_with_options = HtmlElementFactory::getElementsWithOptions();
+            if (!in_array($data['element_type'], $elements_with_options)) {
+                $optionValue = new ProductOptionValue(
+                    [
+                        'product_id'        => $product_id,
+                        'product_option_id' => $product_option_id,
+                    ]
+                );
+                $optionValue->save();
+            }
+
+            $this->touch();
+            $db->commit();
+        } catch (\Exception $e) {
+            Registry::log()->write($e->getMessage());
+            Registry::log()->write($e->getTraceAsString());
+            $db->rollback();
+            return false;
+        }
+
+        return $product_option_id;
     }
 
 }

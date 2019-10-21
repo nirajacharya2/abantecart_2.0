@@ -176,6 +176,7 @@ class ProductOption extends BaseModel
         'regexp_pattern' => [
             'checks'   => [
                 'string',
+                'nullable',
             ],
             'messages' => [
                 '*' => [
@@ -198,7 +199,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function product()
     {
@@ -206,7 +207,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function descriptions()
     {
@@ -214,7 +215,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function description()
     {
@@ -223,7 +224,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function values()
     {
@@ -231,7 +232,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return false|mixed
+     * @return false|array
      */
     public function getAllData()
     {

@@ -547,181 +547,138 @@ class ModelCatalogProduct extends Model
         return true;
     }
 */
-    /**
-     * @param array $product_ids
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function relateProducts($product_ids = [])
-    {
-        if (!$product_ids || !is_array($product_ids)) {
-            return false;
-        }
-        foreach ($product_ids as $product_id) {
-            if ((int)$product_id) {
-                foreach ($product_ids as $related_id) {
-                    if ((int)$related_id && $related_id != $product_id) {
-                        $this->db->query(
-                            "DELETE FROM ".$this->db->table_name("products_related")." 
-                            WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'");
-                        $this->db->query(
-                            "INSERT INTO ".$this->db->table_name("products_related")." 
-                            SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'"
-                        );
-                    }
-                    $this->updateEvent($product_id, ['related_id' => $related_id], ['products_related']);
-                }
-            }
-        }
 
-        return true;
-    }
+    /*   public function relateProducts($product_ids = [])
+       {
+           if (!$product_ids || !is_array($product_ids)) {
+               return false;
+           }
+           foreach ($product_ids as $product_id) {
+               if ((int)$product_id) {
+                   foreach ($product_ids as $related_id) {
+                       if ((int)$related_id && $related_id != $product_id) {
+                           $this->db->query(
+                               "DELETE FROM ".$this->db->table_name("products_related")."
+                               WHERE product_id = '".(int)$related_id."' AND related_id = '".(int)$product_id."'");
+                           $this->db->query(
+                               "INSERT INTO ".$this->db->table_name("products_related")."
+                               SET product_id = '".(int)$related_id."', related_id = '".(int)$product_id."'"
+                           );
+                       }
+                       $this->updateEvent($product_id, ['related_id' => $related_id], ['products_related']);
+                   }
+               }
+           }
 
-    /**
-     * @param int $product_id
-     * @param array $data
-     *
-     * @return int
-     * @throws \Exception
-     */
-    public function addProductOption($product_id, $data)
-    {
+           return true;
+       }
+   */
 
-        /**
-         * @var AttributeManagerInterface $am
-         */
-        $am = ABC::getObjectByAlias('AttributeManager');
-        $attribute = $am->getAttribute($data['attribute_id']);
+    /*   public function addProductOption($product_id, $data)
+       {
 
-        if ($attribute) {
-            $data['element_type'] = $attribute['element_type'];
-            $data['required'] = $attribute['required'];
-            $data['regexp_pattern'] = $attribute['regexp_pattern'];
-            $data['placeholder'] = $attribute['placeholder'];
-            $data['sort_order'] = $attribute['sort_order'];
-            $data['settings'] = $attribute['settings'];
-        } else {
-            $data['placeholder'] = $data['option_placeholder'];
-        }
 
-        $this->db->query(
-            "INSERT INTO ".$this->db->table_name("product_options")."
-                (product_id,
-                 attribute_id,
-                 element_type,
-                 required,
-                 sort_order,
-                 group_id,
-                 status,
-                 regexp_pattern,
-                 settings)
-            VALUES ('".(int)$product_id."',
-                '".(int)$data['attribute_id']."',
-                '".$this->db->escape($data['element_type'])."',
-                '".(int)$data['required']."',
-                '".(int)$data['sort_order']."',
-                '".(int)$data['group_id']."',
-                '".(int)$data['status']."',
-                '".$this->db->escape($data['regexp_pattern'])."',
-                '".$this->db->escape($data['settings'])."'
-                )"
-        );
-        $product_option_id = $this->db->getLastId();
+           $am = ABC::getObjectByAlias('AttributeManager');
+           $attribute = $am->getAttribute($data['attribute_id']);
 
-        if (!empty($data['option_name'])) {
-            $attributeDescriptions = [
-                $this->language->getContentLanguageID() => [
-                    'name'        => $data['option_name'],
-                    'error_text'  => $data['error_text'],
-                    'placeholder' => $data['placeholder'],
-                ],
-            ];
-        } else {
-            $attributeDescriptions = $am->getAttributeDescriptions($data['attribute_id']);
-        }
+           if ($attribute) {
+               $data['element_type'] = $attribute['element_type'];
+               $data['required'] = $attribute['required'];
+               $data['regexp_pattern'] = $attribute['regexp_pattern'];
+               $data['placeholder'] = $attribute['placeholder'];
+               $data['sort_order'] = $attribute['sort_order'];
+               $data['settings'] = $attribute['settings'];
+           } else {
+               $data['placeholder'] = $data['option_placeholder'];
+           }
 
-        foreach ($attributeDescriptions as $language_id => $descr) {
-            $this->language->replaceDescriptions('product_option_descriptions',
-                [
-                    'product_option_id' => (int)$product_option_id,
-                    'product_id'        => (int)$product_id,
-                ],
-                [
-                    $language_id => [
-                        'name'               => $descr['name'],
-                        'error_text'         => $descr['error_text'],
-                        'option_placeholder' => $data['placeholder'],
-                    ],
-                ]);
-        }
+           $this->db->query(
+               "INSERT INTO ".$this->db->table_name("product_options")."
+                   (product_id,
+                    attribute_id,
+                    element_type,
+                    required,
+                    sort_order,
+                    group_id,
+                    status,
+                    regexp_pattern,
+                    settings)
+               VALUES ('".(int)$product_id."',
+                   '".(int)$data['attribute_id']."',
+                   '".$this->db->escape($data['element_type'])."',
+                   '".(int)$data['required']."',
+                   '".(int)$data['sort_order']."',
+                   '".(int)$data['group_id']."',
+                   '".(int)$data['status']."',
+                   '".$this->db->escape($data['regexp_pattern'])."',
+                   '".$this->db->escape($data['settings'])."'
+                   )"
+           );
+           $product_option_id = $this->db->getLastId();
 
-        //add empty option value for single value attributes
-        $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-        if (!in_array($data['element_type'], $elements_with_options)) {
-            $this->insertProductOptionValue($product_id, $product_option_id, '', '', []);
-        }
+           if (!empty($data['option_name'])) {
+               $attributeDescriptions = [
+                   $this->language->getContentLanguageID() => [
+                       'name'        => $data['option_name'],
+                       'error_text'  => $data['error_text'],
+                       'placeholder' => $data['placeholder'],
+                   ],
+               ];
+           } else {
+               $attributeDescriptions = $am->getAttributeDescriptions($data['attribute_id']);
+           }
 
-        $this->touchProduct($product_id);
+           foreach ($attributeDescriptions as $language_id => $descr) {
+               $this->language->replaceDescriptions('product_option_descriptions',
+                   [
+                       'product_option_id' => (int)$product_option_id,
+                       'product_id'        => (int)$product_id,
+                   ],
+                   [
+                       $language_id => [
+                           'name'               => $descr['name'],
+                           'error_text'         => $descr['error_text'],
+                           'option_placeholder' => $data['placeholder'],
+                       ],
+                   ]);
+           }
 
-        return $product_option_id;
-    }
+           //add empty option value for single value attributes
+           $elements_with_options = HtmlElementFactory::getElementsWithOptions();
+           if (!in_array($data['element_type'], $elements_with_options)) {
+               $this->insertProductOptionValue($product_id, $product_option_id, '', '', []);
+           }
 
-    /**
-     * @param int $product_id
-     * @param int $product_option_id
-     *
-     * @throws \Exception
-     */
-    public function deleteProductOption($product_id, $product_option_id)
-    {
+           $this->touchProduct($product_id);
 
-        /**
-         * @var AttributeManagerInterface $am
-         */
-        $am = ABC::getObjectByAlias('AttributeManager');
-        $attribute = $am->getAttributeByProductOptionId($product_option_id);
-        $group_attribute = $am->getAttributes(['limit' => null], 0, $attribute['attribute_id']);
-        if (count($group_attribute)) {
-            //delete children options/values
-            $children = $this->db->query(
-                "SELECT product_option_id
-                FROM ".$this->db->table_name("product_options")."
-                WHERE product_id = '".(int)$product_id."'
-                    AND group_id = '".(int)$product_option_id."'"
-            );
-            foreach ($children->rows as $g_attribute) {
-                $this->_deleteProductOption($product_id, $g_attribute['product_option_id']);
-            }
-        }
+           return $product_option_id;
+       }*/
 
-        $this->_deleteProductOption($product_id, $product_option_id);
+    /* public function deleteProductOption($product_id, $product_option_id)
+     {
 
-        $this->touchProduct($product_id);
-    }
+         $am = ABC::getObjectByAlias('AttributeManager');
+         $attribute = $am->getAttributeByProductOptionId($product_option_id);
+         $group_attribute = $am->getAttributes(['limit' => null], 0, $attribute['attribute_id']);
+         if (count($group_attribute)) {
+             //delete children options/values
+             $children = $this->db->query(
+                 "SELECT product_option_id
+                 FROM ".$this->db->table_name("product_options")."
+                 WHERE product_id = '".(int)$product_id."'
+                     AND group_id = '".(int)$product_option_id."'"
+             );
+             foreach ($children->rows as $g_attribute) {
+                 $this->_deleteProductOption($product_id, $g_attribute['product_option_id']);
+             }
+         }
 
-    /**
-     * @param int $product_id
-     * @param int $product_option_id
-     *
-     * @throws \Exception
-     */
-    protected function _deleteProductOption($product_id, $product_option_id)
-    {
-        $values = $this->getProductOptionValues($product_id, $product_option_id);
-        foreach ($values as $v) {
-            $this->deleteProductOptionValue($product_id, $v['product_option_value_id']);
-        }
+         $this->_deleteProductOption($product_id, $product_option_id);
 
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("product_option_descriptions")."
-                WHERE product_id = '".(int)$product_id."'
-                    AND product_option_id = '".(int)$product_option_id."'");
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("product_options")."
-                WHERE product_id = '".(int)$product_id."'
-                    AND product_option_id = '".(int)$product_option_id."'");
-    }
+         $this->touchProduct($product_id);
+     }*/
+
+
 
     //Add new product option value and value descriptions for all global attributes languages or current language
 
@@ -909,33 +866,6 @@ class ModelCatalogProduct extends Model
         return $pd_opt_val_id;
     }
 
-    /**
-     * @param int $product_id
-     * @param int $pd_opt_val_id
-     * @param int $language_id
-     *
-     * @return null
-     * @throws \Exception
-     */
-    public function deleteProductOptionValueDescriptions($product_id, $pd_opt_val_id, $language_id = 0)
-    {
-        if (empty($product_id) || empty($pd_opt_val_id)) {
-            return false;
-        }
-        $add_language = '';
-        if ($language_id) {
-            $add_language = " AND language_id = '".(int)$language_id."'";
-        }
-        $this->db->query(
-            "DELETE 
-            FROM ".$this->db->table_name("product_option_value_descriptions")."
-            WHERE product_id = '".(int)$product_id."'
-                AND product_option_value_id = '".(int)$pd_opt_val_id."'"
-                .$add_language
-        );
-
-        return true;
-    }
 
     /**
      * @param int $product_id
@@ -1108,93 +1038,8 @@ class ModelCatalogProduct extends Model
         $this->touchProduct($product_id);
     }
 
-    /**
-     * @param int $product_id
-     * @param int $pd_opt_val_id
-     * @param int $language_id
-     *
-     * @return null
-     * @throws \Exception
-     */
-    public function deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id = 0)
-    {
-        if (empty($product_id) || empty($pd_opt_val_id)) {
-            return false;
-        }
 
-        $this->_deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id);
 
-        //delete children values
-        $children = $this->db->query(
-            "SELECT product_option_value_id 
-            FROM ".$this->db->table_name("product_option_values")."
-            WHERE product_id = '".(int)$product_id."'
-                AND group_id = '".(int)$pd_opt_val_id."'"
-        );
-        foreach ($children->rows as $g_attribute) {
-            $this->_deleteProductOptionValue($product_id, $g_attribute['product_option_value_id'], $language_id);
-        }
-
-        $this->touchProduct($product_id);
-        return true;
-    }
-
-    /**
-     * @param int $product_id
-     * @param int $pd_opt_val_id
-     * @param int $language_id
-     *
-     * @return bool
-     * @throws \ReflectionException
-     */
-    public function _deleteProductOptionValue($product_id, $pd_opt_val_id, $language_id)
-    {
-        if (empty($product_id) || empty($pd_opt_val_id)) {
-            return false;
-        }
-        $add_language = '';
-        if ($language_id) {
-            $add_language = " AND language_id = '".(int)$language_id."'";
-        }
-
-        $this->db->query(
-            "DELETE 
-            FROM ".$this->db->table_name("product_option_value_descriptions")."
-            WHERE product_id = '".(int)$product_id."'
-                AND product_option_value_id = '".(int)$pd_opt_val_id."'"
-                .$add_language
-        );
-
-        //Delete product_option_values that have no values left in descriptions
-        $sql = "DELETE 
-                FROM ".$this->db->table_name("product_option_values")." 
-                WHERE product_option_value_id = '".(int)$pd_opt_val_id."' 
-                    AND product_option_value_id NOT IN
-                                    ( SELECT product_option_value_id 
-                                      FROM ".$this->db->table_name("product_option_value_descriptions")."
-                                      WHERE product_id = '".(int)$product_id."'
-                                            AND product_option_value_id = '".(int)$pd_opt_val_id."'
-                                    )";
-        $this->db->query($sql);
-        //get product resources
-        $rm = new AResourceManager();
-        $resources = $rm->getResourcesList([
-            'object_name' => 'product_option_value',
-            'object_id'   => (int)$pd_opt_val_id,
-        ]);
-        foreach ($resources as $r) {
-            $rm->unmapResource(
-                'product_option_value',
-                $pd_opt_val_id,
-                $r['resource_id']);
-            //remove if orphan
-            if (!$rm->isMapped($r['resource_id'])) {
-                $rm->deleteResource($r['resource_id']);
-            }
-        }
-
-        return true;
-    }
 
     /**
      * @param int $product_id

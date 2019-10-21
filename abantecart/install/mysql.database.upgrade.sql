@@ -2121,6 +2121,7 @@ ALTER TABLE `ac_product_options`
 CHANGE COLUMN `product_option_id` `product_option_id` INT(11) NOT NULL ,
 CHANGE COLUMN `attribute_id` `attribute_id` INT(11) NULL DEFAULT NULL ,
 CHANGE COLUMN `group_id` `group_id` INT(11) NULL DEFAULT NULL ,
+  CHANGE COLUMN `regexp_pattern` `regexp_pattern` VARCHAR(255) NULL DEFAULT '',
 ADD INDEX `ac_product_options_ibfk_3_idx` (`group_id` ASC);
 ALTER TABLE `ac_product_options`
 ADD CONSTRAINT `ac_product_options_ibfk_2`
@@ -2133,6 +2134,11 @@ ADD CONSTRAINT `ac_product_options_ibfk_3`
   REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_option_descriptions`
+  CHANGE COLUMN `error_text` `error_text` VARCHAR(255) NULL
+COMMENT 'translatable';
+
 
 
 ALTER TABLE `ac_product_option_values`

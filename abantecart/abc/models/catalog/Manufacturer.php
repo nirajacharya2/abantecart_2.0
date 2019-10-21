@@ -40,6 +40,7 @@ class Manufacturer extends BaseModel
     ];
 
     protected $fillable = [
+        'manufacturer_id',
         'name',
         'sort_order',
         'uuid',

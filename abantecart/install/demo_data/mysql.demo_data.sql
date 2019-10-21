@@ -1087,7 +1087,7 @@ VALUES
 (61,1,'Color Design Eye Brightening All in One 5 Shadow &amp; Liner Palette','','','&lt;p&gt;\r\n	Infinitely luminous. Sensationally smooth. All-in-one 5 shadow palette to brighten eyes. Lancome’s new versatile, all-in-one palette conveniently creates a full eye look for day or night. Experience the newest generation of luminosity as silky lustrous powders transparently wrap the skin, allowing a seamless layering of pure color for a silky sheen and radiant finish. Build with absolute precision and apply the shades in 5 simple steps (all over, lid, crease, highlighter and liner) to design your customized eye look. Contour, sculpt and lift in soft day colors or intensify with dramatic evening hues for smoldering smoky effects. Long wear, 8-hour formula. Color does not fade, continues to stay true&lt;/p&gt;\r\n',''),
 (62,1,'ck one shock for him Deodorant','','','&lt;p&gt;\r\n	Shock Off! cK one shock for him opens with pure freshness, the heart pulses with spice and finishes with a masculine tobacco musk. Experience ck one shock, the newest fragrance from Calvin Klein with this 2.6 oz Deodorant.&lt;/p&gt;\r\n',''),
 (63,1,'Pour Homme Eau de Toilette','','','&lt;p&gt;\r\n	An intriguing masculine fragrance that fuses the bracing freshness of Darjeeling tea with the intensity of spice and musk. For those seeking a discreet accent to their personality.&lt;/p&gt;\r\n',''),
-(64,1,'Beauty Eau de Parfum','','','&lt;p&gt;\r\n	Beauty by Calvin Klein is a sophisticated and feminine fragrance presenting a new scructure to modern florals. Radiating rich and intense luminosity; Beauty leaves a complex and memorable impression. Experience the glamour and strength with the Beauty Eau de Parfum&lt;/p&gt;\r\n',''),
+  (64, 1, 'PhpUnit test product. Beauty Eau de Parfum', 'Beauty Eau de Parfum', 'Parfum', '&lt;p&gt;\r\n	Beauty by Calvin Klein is a sophisticated and feminine fragrance presenting a new scructure to modern florals. Radiating rich and intense luminosity; Beauty leaves a complex and memorable impression. Experience the glamour and strength with the Beauty Eau de Parfum&lt;/p&gt;\r\n', 'Beauty Eau de Parfum'),
 (65,1,'Absolue Eye Precious Cells','','','&lt;p&gt;\r\n	Smoothes – Tightens – Regenerates Radiance Exclusive innovation from Lancôme A powerful combination of unique ingredients – Reconstruction Complex and Pro-Xylane™ – has been shown to improve the condition around the stem cells, and stimulate cell regeneration to reconstruct skin to a denser quality*. Results Immediately, the eye contour appears smoother and more radiant. Day 7, signs of fatigue are minimized and the appearance of puffiness is reduced. Day 28, density is improved. Skin is soft and looks healthier. The youthful look of the eye contour is restored. Ophthalmologist – tested. Dermatologist – tested for safety.&lt;/p&gt;\r\n',''),
 (66,1,'Total Moisture Facial Cream','','','&lt;p&gt;\r\n	Say good-bye to dry skin and hello to “total moisture”. This facial cream provides concentrated immediate &amp;amp; long-term hydration for an ultra radiant complexion. Contains exclusive tri-radiance complex to help develop the skin’s reserves of water &amp;amp; reinforce skin’s moisture barrier for a radiantly refreshed complexion. For normal to dry skin.&lt;/p&gt;\r\n',''),
 (67,1,'Flash Bronzer Body Gel','','','&lt;p&gt;\r\n	Look irresistible! Discover the self-tanning results you dream of: Instant bronzed glowing body Enriched with natural caramel extract for an immediate, gorgeous, bronzed glow. Exquisitely beautiful tan The perfect balance of self-tanning ingredients helps to achieve an ideal color, providing an even, natural-looking, golden tan. Color development within 30 minutes, lasting up to 5 days. Transfer-resistant formula With an exclusive Color-Set™ complex that smoothes on without streaks, dries in 4 minutes and protects clothes against rub-off. Hydrating &amp;amp; smoothing action Leaves skin soft, smooth, and hydrated. Pure Vitamin E delivers antioxidant protection, helping to reduce signs of premature aging. Indulgent experience Delightfully scented with hints of jasmine and honey in a silky, non-greasy formula&lt;/p&gt;\r\n',''),
@@ -1145,7 +1145,7 @@ VALUES
 --
 
 INSERT INTO `ac_product_discounts`
-(`product_discount_id`,
+(
 `product_id`,
 `customer_group_id`,
 `quantity`,
@@ -1154,10 +1154,11 @@ INSERT INTO `ac_product_discounts`
 `date_start`,
 `date_end`
 )
-VALUES 
-(1,81,1,2,0,59.0000,NULL,NULL),
-(2,81,1,3,0,56.0000,NULL,NULL),
-(3,81,1,4,0,50.0000,NULL,NULL);
+VALUES
+  (81, 1, 2, 0, 59.0000, NULL, NULL),
+  (81, 1, 3, 0, 56.0000, NULL, NULL),
+  (81, 1, 4, 0, 50.0000, NULL, NULL),
+  (64, 1, 4, 0, 50.0000, NULL, NULL);
 
 --
 -- Dumping data for table `product_options`
@@ -1549,7 +1550,7 @@ VALUES
 --
 
 INSERT INTO `ac_product_specials`
-(`product_special_id`,
+(
 `product_id`,
 `customer_group_id`,
 `priority`,
@@ -1557,15 +1558,16 @@ INSERT INTO `ac_product_specials`
 `date_start`,
 `date_end`
 )
-VALUES 
-(252,51,1,0,19.0000,NULL,NULL),
-(253,55,1,0,27.0000,NULL,NULL),
-(254,67,1,0,29.0000,NULL,NULL),
-(255,72,1,0,24.0000,NULL,NULL),
-(256,88,1,0,27.0000,NULL,NULL),
-(257,93,1,0,220.0000,NULL,NULL),
-(258,65,1,1,89.0000,NULL,NULL),
-(260,80,1,1,45.0000,NULL,NULL);
+VALUES
+  (51, 1, 0, 19.0000, NULL, NULL),
+  (55, 1, 0, 27.0000, NULL, NULL),
+  (67, 1, 0, 29.0000, NULL, NULL),
+  (72, 1, 0, 24.0000, NULL, NULL),
+  (88, 1, 0, 27.0000, NULL, NULL),
+  (93, 1, 0, 220.0000, NULL, NULL),
+  (65, 1, 1, 89.0000, NULL, NULL),
+  (80, 1, 1, 45.0000, NULL, NULL),
+  (64, 1, 1, 45.0000, NULL, NULL);
 
 --
 -- Dumping data for table `product_tags`
@@ -1583,6 +1585,8 @@ VALUES
 (51,'makeup',1),
 (54,'eye',1),
 (54,'makeup',1),
+  (64, 'fragrance', 1),
+  (64, 'parfum', 1),
 (77,'body',1),
 (77,'men',1),
 (77,'shower',1),
@@ -1632,8 +1636,10 @@ VALUES
 -- Dumping data for table `coupons_products`
 --
 INSERT INTO `ac_coupons_products`
-(`coupon_product_id`, `coupon_id`, `product_id`)
-VALUES (1,6,68);
+(`coupon_id`, `product_id`)
+VALUES
+  (6, 68),
+  (5, 64);
 
 
 --
@@ -1652,7 +1658,8 @@ VALUES
  (116,115),
  (116,118),
  (118,115),
- (118,116);
+  (118, 116),
+  (64, 50);
 
 --
 -- Dumping data for table `products_to_categories`
@@ -1797,7 +1804,8 @@ INSERT INTO `ac_products_to_downloads`
 (product_id,download_id)
 VALUES
  (111,1),
- (111,2);
+  (111, 2),
+  (64, 2);
 
 --
 -- Dumping data for table `products_to_stores`
@@ -2593,7 +2601,7 @@ VALUES
 --
 
 INSERT INTO `ac_reviews`
-(`review_id`,
+(
 `product_id`,
 `customer_id`,
 `author`,
@@ -2601,24 +2609,30 @@ INSERT INTO `ac_reviews`
 `rating`,
 `status`)
 VALUES
-(63,77,6,'Bernard Horne','I thought since it was made for men that it was the perfect thing to go with the body wash. Its too small and doesn\'t lather up very well.',3,1),
-(62,54,2,'Juliana Davis','I\'ve been wearing all Lancome mascara\'s and I\'m just get really upset when I\'m out. I\'ve tried other Brands, but it\'s always right back to the Lancome productss. The extend L\'EXTREME is by far the best!!! Really Long and Great! ',5,1),
-(61,56,0,'Cassandra','Fortunately, I got this as a gift. BUT, I am willing to purchase this when I run out. This may be expensive but it is sooooo worth it! I love this concealer and I wouldn\'t even dare to use other brands. One more thing, the little tube lasts for a long time. I\'ve been using it everyday for 8 months now and I still have about 1/4 left.',5,1),
-(64,76,7,'James','Finally a deodorant for men that doesn\'t smell like cheap cologne. I\'ve been using this for a couple of weeks now and I can\'t say anything bad about it. To me it just smells fresh',4,1),
-(65,100,0,'Juli','Smooth Silk is an accurate name for this creamy lip liner. It is by far the best lip pencil I have ever encountered.',5,1),
-(66,100,0,'Marianne','Nice pencil! This is a smooth, long lasting pencil, wonderful shades!',4,1),
-(67,97,0,'Ann','Really reduces shades and swellings)',4,1),
-(68,99,0,'Alice','This is much darker than the picture',2,1),
-(69,57,0,'Jane','When it arrived, the blush had cracked and was crumbling all over, so I\'m only able to use half of it.',2,1),
-(70,55,0,'Kristin K.','These lipsticks are moisturizing and have good pigmentation; however, their lasting power is not as advertised! ',4,1),
-(71,55,0,'lara','This is quite simply good stuff. \nThe color payout is rich, the texture creamy and moist, and best of all no scent. No taste.',5,1),
-(72,93,0,'L. D.','I totally love it.it smells heavenly . It smells so natural and my skin just loves it. ',5,1),
-(73,93,0,'Walton','This creme is a bit heavy for my skin; however, as the day goes on it does not create an oily build-up. A little goes a long way, and I could see improvements in my skin tone within a week. Good product, will be purchasing again.',4,1),
-(74,74,0,'Stefania V','it works very well moisturing and cleaning and unlike many other healthy shampoos it doesn\'t open the hair platelets too far and therefore doesn\'t feel so dry and sticky so I can get away without using a conditioner. Great value.',4,1),
-(75,102,0,'Mary','This is more of a evening fragrance. I love it',4,1),
-(76,110,0,'Lara','Product was very reasonably priced. It will make a nice gift.',5,1),
-(77,111,0,'Mr. G. Thomas','I would totally recommend product for anyone keen to learn a foreign language quickly. \nHowever, you must be fully committed and be ready to dedicate your time for study every day!',5,1),
-(78,119,0,'F Buckley ','Good quality. Also good enough to wear out.\n\nWould order more in the future. ',5,1);
+  (77, 6, 'Bernard Horne', 'I thought since it was made for men that it was the perfect thing to go with the body wash. Its too small and doesn\'t lather up very well.', 3, 1),
+  (54, 2, 'Juliana Davis', 'I\'ve been wearing all Lancome mascara\'s and I\'m just get really upset when I\'m out. I\'ve tried other Brands, but it\'s always right back to the Lancome productss. The extend L\'EXTREME is by far the best!!! Really Long and Great! ', 5, 1),
+  (56, 0, 'Cassandra', 'Fortunately, I got this as a gift. BUT, I am willing to purchase this when I run out. This may be expensive but it is sooooo worth it! I love this concealer and I wouldn\'t even dare to use other brands. One more thing, the little tube lasts for a long time. I\'ve been using it everyday for 8 months now and I still have about 1/4 left.', 5, 1),
+  (76, 7, 'James', 'Finally a deodorant for men that doesn\'t smell like cheap cologne. I\'ve been using this for a couple of weeks now and I can\'t say anything bad about it. To me it just smells fresh', 4, 1),
+  (100, 0, 'Juli', 'Smooth Silk is an accurate name for this creamy lip liner. It is by far the best lip pencil I have ever encountered.', 5, 1),
+  (100, 0, 'Marianne', 'Nice pencil! This is a smooth, long lasting pencil, wonderful shades!', 4, 1),
+  (97, 0, 'Ann', 'Really reduces shades and swellings)', 4, 1),
+  (99, 0, 'Alice', 'This is much darker than the picture', 2, 1),
+  (57, 0, 'Jane', 'When it arrived, the blush had cracked and was crumbling all over, so I\'m only able to use half of it.', 2, 1),
+  (55, 0, 'Kristin K.', 'These lipsticks are moisturizing and have good pigmentation; however, their lasting power is not as advertised! ', 4, 1),
+  (55, 0, 'lara', 'This is quite simply good stuff. \nThe color payout is rich, the texture creamy and moist, and best of all no scent. No taste.', 5, 1),
+  (93, 0, 'L. D.', 'I totally love it.it smells heavenly . It smells so natural and my skin just loves it. ', 5, 1),
+  (93, 0, 'Walton',
+   'This creme is a bit heavy for my skin; however, as the day goes on it does not create an oily build-up. A little goes a long way, and I could see improvements in my skin tone within a week. Good product, will be purchasing again.',
+   4, 1),
+  (74, 0, 'Stefania V',
+   'it works very well moisturing and cleaning and unlike many other healthy shampoos it doesn\'t open the hair platelets too far and therefore doesn\'t feel so dry and sticky so I can get away without using a conditioner. Great value.',
+   4, 1),
+  (102, 0, 'Mary', 'This is more of a evening fragrance. I love it', 4, 1),
+  (110, 0, 'Lara', 'Product was very reasonably priced. It will make a nice gift.', 5, 1),
+  (111, 0, 'Mr. G. Thomas',
+   'I would totally recommend product for anyone keen to learn a foreign language quickly. \nHowever, you must be fully committed and be ready to dedicate your time for study every day!', 5, 1),
+  (119, 0, 'F Buckley ', 'Good quality. Also good enough to wear out.\n\nWould order more in the future. ', 5, 1),
+  (64, 0, 'test user ', 'Some review text from customer', 2, 1);
 
 
 --

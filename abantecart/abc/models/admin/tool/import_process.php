@@ -29,6 +29,7 @@ use abc\core\lib\ATaskManager;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductOption;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -529,13 +530,24 @@ class ModelToolImportProcess extends Model
         }
 
         $this->toLog("Creating product option for product ID {$product_id}.");
+        $product = Product::find($product_id);
+        if (!$product) {
+            $this->toLog("Error: Product ID ".$product_id." not found in database.");
+            return false;
+        }
+
         //get existing options and values.
         $this->load->model('catalog/product');
         $options = $this->model_catalog_product->getProductOptions($product_id);
         if ($options) {
             //delete all options if exist
             foreach ($options as $option) {
-                $this->model_catalog_product->deleteProductOption($product_id, $option['product_option_id']);
+                ProductOption::where(
+                    [
+                        'product_option_id' => $product_id,
+                        'product_id'        => $option['product_option_id'],
+                    ]
+                )->forceDelete();
             }
         }
 
@@ -557,7 +569,7 @@ class ModelToolImportProcess extends Model
             $opt_data['sort_order'] = isset($data[$i]['sort_order']) ? $data[$i]['sort_order'] : 0;
             $opt_data['status'] = isset($data[$i]['status']) ? $data[$i]['status'] : 1;
 
-            $p_option_id = $this->model_catalog_product->addProductOption($product_id, $opt_data);
+            $p_option_id = $product->addProductOption($opt_data);
             if ($p_option_id) {
                 $this->toLog("Created product option '{$data[$i]['name']}' with ID {$p_option_id}.");
             } else {

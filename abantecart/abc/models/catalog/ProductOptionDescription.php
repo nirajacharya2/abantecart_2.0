@@ -134,6 +134,7 @@ class ProductOptionDescription extends BaseModel
             'checks'   => [
                 'string',
                 'max:255',
+                'nullable',
             ],
             'messages' => [
                 '*' => [

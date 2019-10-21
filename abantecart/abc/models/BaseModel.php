@@ -561,7 +561,7 @@ class BaseModel extends OrmModel
      */
     public function updateRelationships(array $data)
     {
-        foreach ($this->getRelationships() as $relationship_name => $relationship_details) {
+        foreach ($this::getRelationships() as $relationship_name => $relationship_details) {
             if (isset($data[$relationship_name])) {
                 switch ($relationship_details['type']) {
                     case 'BelongsToMany':
@@ -658,18 +658,27 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param string $typeOnly - filter output by relation type
+     * Method returns related orm-models list.
+     *
+     * @param string|array $typesOnly - filter output by relation type or few
      *
      * @return array
      * @throws \ReflectionException
      */
-    public function getRelationships($typeOnly = '')
+    public static function getRelationships($typesOnly = null)
     {
+        $typesOnly = is_string($typesOnly) ? func_get_args() : $typesOnly;
+
+        foreach ($typesOnly as &$t) {
+            $t = strtolower($t);
+        }
         $model = new static;
         $relationships = [];
-
         foreach ((new ReflectionClass($model))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($method->class != get_class($model)
+            if (
+                //exclude getAllData to prevent recursive call of this method
+                $method->getName() == 'getAllData'
+                || $method->class != $model->getClass()
                 || !empty($method->getParameters())
                 //note: check if method in list of baseModel class, not child!
                 || in_array($method->getName(), get_class_methods(__CLASS__))
@@ -681,7 +690,7 @@ class BaseModel extends OrmModel
                 $return = $method->invoke($model);
                 if ($return instanceof Relation) {
                     $type = (new ReflectionClass($return))->getShortName();
-                    if (!$typeOnly || ($type == $typeOnly)) {
+                    if (!$typesOnly || in_array(strtolower($type), $typesOnly)) {
                         $relationships[$method->getName()] = [
                             'type'  => $type,
                             'model' => (new ReflectionClass($return->getRelated()))->getName(),

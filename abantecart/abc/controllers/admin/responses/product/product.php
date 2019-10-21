@@ -36,6 +36,7 @@ use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductOption;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
@@ -519,7 +520,7 @@ class ControllerResponsesProductProduct extends AController
 
             $this->data['remove_option'] = $this->html->getSecureURL(
                                                 'product/product/del_option',
-                                                '&product_id='.$product_id.'&option_id='.$option_id);
+                '&product_option_id='.$option_id);
 
             $this->data['button_remove_option'] = $this->html->buildElement([
                 'type'  => 'button',
@@ -611,11 +612,19 @@ class ControllerResponsesProductProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        $this->model_catalog_product->deleteProductOption(
-                                            $this->request->get['product_id'],
-                                            $this->request->get['option_id']
-        );
+
+        $option = ProductOption::find($this->request->get['product_option_id']);
+        if ($option) {
+            $option->forceDelete();
+        } else {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => 'Option ID '.$this->request->get['product_option_id'].' not found!',
+                    'reset_value' => true,
+                ]);
+        }
+
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->response->setOutput($this->language->get('text_option_removed'));

@@ -27,7 +27,6 @@ class Review extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'review_id';
-    public $timestamps = false;
 
     protected $casts = [
         'product_id'  => 'int',
@@ -48,12 +47,11 @@ class Review extends BaseModel
         'text',
         'rating',
         'status',
-        'date_added',
-        'date_modified',
+
     ];
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
 }

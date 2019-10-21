@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\contracts\AttributeManagerInterface;
+use abc\models\catalog\Product;
 
 class ControllerPagesCatalogProductOptions extends AController
 {
@@ -46,15 +47,19 @@ class ControllerPagesCatalogProductOptions extends AController
         $this->attribute_manager = ABC::getObjectByAlias('AttributeManager');
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            $product_id = $this->request->get['product_id'];
-            $product_option_id = $this->model_catalog_product->addProductOption($product_id, $this->request->post);
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect(
-                $this->html->getSecureURL(
-                    'catalog/product_options',
-                    '&product_id='.$product_id.'&product_option_id='.$product_option_id
-                )
-            );
+            $product = Product::find($this->request->get['product_id']);
+            if ($product) {
+                $product_option_id = $product->addProductOption($this->request->post);
+                if ($product_option_id) {
+                    $this->session->data['success'] = $this->language->get('text_success');
+                    abc_redirect(
+                        $this->html->getSecureURL(
+                            'catalog/product_options',
+                            '&product_id='.$product->product_id.'&product_option_id='.$product_option_id
+                        )
+                    );
+                }
+            }
         }
 
         $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
@@ -70,7 +75,7 @@ class ControllerPagesCatalogProductOptions extends AController
             [
                 'search' =>
                         "ga.attribute_type_id = '".$this->attribute_manager->getAttributeTypeID('product_option')."'"
-                        ." AND ga.status = 1 AND ga.attribute_parent_id = 0 ",
+                        ." AND ga.status = 1 AND ga.attribute_parent_id IS NULL ",
                 'sort'   => 'sort_order',
                 'order'  => 'ASC',
                 'limit'  => 1000 // !we can not have unlimited, so set 1000 for now

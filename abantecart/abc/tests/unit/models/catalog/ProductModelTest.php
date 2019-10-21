@@ -21,17 +21,36 @@ namespace abc\tests\unit\models\catalog;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\tests\unit\ATestCase;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Warning;
 
 class ProductModelTest extends ATestCase
 {
+    public function testGetAllData()
+    {
+        //NOTE: Product ID 64 have all relations.
+        // Do not delete them before test!
+
+        Product::setCurrentLanguageID(1);
+        $product = Product::find(64);
+        $data = $product->getAllData();
+        $rels = Product::getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        $rels = array_keys($rels);
+        foreach ($rels as $rel) {
+            $rel = Str::snake($rel);
+            //var_dump($rel.": ".count($data[$rel]));
+            $this->assertGreaterThan(0, count($data[$rel]));
+        }
+    }
+
     public function testValidator()
     {
+
         //validate new product
         $product = new Product();
         $errors = [];
-        try{
+        try {
             $data = [
                 'product_id'        => -0.1,
                 'uuid'              => -0.00000000021,
@@ -66,7 +85,7 @@ class ProductModelTest extends ATestCase
                 'settings'          => -0.00000000021,
             ];
             $product->validate($data);
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
             //var_Dump(var_dump(array_diff(array_keys($data),array_keys($errors))));
         }
@@ -76,7 +95,7 @@ class ProductModelTest extends ATestCase
         //validate correct data
         $product = new Product();
         $errors = [];
-        try{
+        try {
             $data = [
                 'uuid'              => 'sssss',
                 'model'             => 'tesmodeltest',
@@ -111,11 +130,10 @@ class ProductModelTest extends ATestCase
                 'settings'          => '',
             ];
             $product->validate();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
 
         }
-var_Dump($errors);
         $this->assertEquals(0, count($errors));
 
     }
@@ -291,6 +309,7 @@ var_Dump($errors);
         $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
             ." WHERE product_id=51");
         $this->assertEquals(1, $result->num_rows);
+
     }
 
 }
