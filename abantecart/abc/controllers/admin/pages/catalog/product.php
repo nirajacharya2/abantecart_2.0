@@ -596,6 +596,7 @@ class ControllerPagesCatalogProduct extends AController
             }
         }
 
+        $this->data['heading_title'] = $this->language->get('heading_title');
         $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($product_id);
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
