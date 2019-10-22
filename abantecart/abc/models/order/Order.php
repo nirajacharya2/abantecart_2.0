@@ -1279,18 +1279,16 @@ class Order extends BaseModel
                 if ($order_product) {
                     //update order quantity
                     $old_qnt = $order_product->quantity;
-                    $order_product->update(
-                        [
-                            'price'           => H::preformatFloat($orderProduct['price'],
-                                    $language->get('decimal_point'))
-                                / $orderInfo['value'],
-                            'total'           => H::preformatFloat($orderProduct['total'],
-                                    $language->get('decimal_point'))
-                                / $orderInfo['value'],
-                            'quantity'        => $orderProduct['quantity'],
-                            'order_status_id' => (int)$orderProduct['order_status_id'],
-                        ]
-                    );
+                    $update = $orderProduct;
+                    $update['price'] = H::preformatFloat(
+                                            $orderProduct['price'],
+                                            $language->get('decimal_point')) / $orderInfo['value'];
+
+                    $update['total'] = H::preformatFloat(
+                                            $orderProduct['total'],
+                                            $language->get('decimal_point')) / $orderInfo['value'];
+
+                    $order_product->update( $update);
 
                     //update stock quantity if product presents
                     if( $product_info['quantity'] !== null ) {
@@ -1312,24 +1310,21 @@ class Order extends BaseModel
                         }
                     }
                 } else {
-                    $order_product = new OrderProduct(
-                        [
-                            'order_id'        => $order_id,
-                            'product_id'      => $product_id,
-                            'name'            => $product->description->name,
-                            'model'           => $product->model,
-                            'sku'             => $product->sku,
-                            'price'           => H::preformatFloat($orderProduct['price'],
-                                    $language->get('decimal_point')
-                                ) / $orderInfo['value'],
-                            'total'           => H::preformatFloat(
-                                    $orderProduct['total'],
-                                    $language->get('decimal_point')
-                                ) / $orderInfo['value'],
-                            'quantity'        => $orderProduct['quantity'],
-                            'order_status_id' => $orderProduct['order_status_id'],
-                        ]
-                    );
+                    $new_data = $orderProduct;
+                    $new_data['order_id'] = $order_id;
+                    $new_data['product_id'] = $product_id;
+                    $new_data['name'] = $product->description->name;
+                    $new_data['model'] = $product->model;
+                    $new_data['sku'] = $product->sku;
+                    $new_data['price'] = H::preformatFloat(
+                                            $orderProduct['price'],
+                                            $language->get('decimal_point')) / $orderInfo['value'];
+
+                    $new_data['total'] = H::preformatFloat(
+                                            $orderProduct['total'],
+                                            $language->get('decimal_point')) / $orderInfo['value'];
+
+                    $order_product = new OrderProduct( $new_data );
                     $order_product->save();
                     $order_product_id = $order_product->order_product_id;
 

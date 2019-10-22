@@ -1580,6 +1580,7 @@ class ControllerResponsesProductProduct extends AController
              * @var OrderProduct $order_product_info
              */
             $order_product_info = OrderProduct::where(['order_id'=>$order_id, 'order_product_id' => $order_product_id ] )->first();
+            $this->data['order_product_info'] = $order_product_info->toArray();
 
             $product_id = (int)$order_product_info->product_id;
             $product_info = $this->model_catalog_product->getProduct($product_id);
