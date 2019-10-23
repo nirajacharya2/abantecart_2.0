@@ -345,7 +345,11 @@ class Category extends BaseModel
     {
         $languageId = static::$current_language_id;
 
-        $cacheKey = 'category.list.'.$parentId.'.store_'.$storeId.'_limit_'.$limit.'_lang_'.$languageId;
+        $cacheKey = 'category.list.'.$parentId
+                    .'.store_'.$storeId
+                    .'_limit_'.$limit
+                    .'_lang_'.$languageId
+                    .'_side_'.(int)ABC::env('IS_ADMIN');
         $cache = Registry::cache()->pull($cacheKey);
 
         if ($cache === false) {
