@@ -1574,6 +1574,7 @@ class ControllerResponsesProductProduct extends AController
         }
         $preset_values = [];
 
+        $this->data['product_info'] = $product_info;
         if ($order_product_id) {
 
             //if unknown product_id but order_product_id we know
@@ -1585,7 +1586,6 @@ class ControllerResponsesProductProduct extends AController
 
             $product_id = (int)$order_product_info->product_id;
             $product_info = $this->model_catalog_product->getProduct($product_id);
-
             $preset_values['price'] = $this->currency->format(
                                             $order_product_info->price,
                                             $order_info['currency'], $order_info['value'],
