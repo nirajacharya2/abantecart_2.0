@@ -1556,6 +1556,7 @@ class ControllerResponsesProductProduct extends AController
         $this->data['order_product_id'] = $order_product_id = (int)$this->request->get['order_product_id'];
         $order_id = (int)$this->request->get['order_id'];
         $order_info = Order::getOrderArray($order_id, 'any');
+        $this->data['order_info'] = $order_info;
 
         $tax = new ATax($this->registry);
         $tax->setZone($order_info['country_id'], $order_info['zone_id']);
