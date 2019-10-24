@@ -743,7 +743,7 @@ return [
             //  'CACHE_FOLDER' => '{$dirs['cache']}abac',
             //  'CACHE_TTL'    => '3600',
             //  'CACHE_DRIVER' => 'text'
-            ]
+            ],
             
         'RABBIT_MQ' => [
             'HOST' => '',
