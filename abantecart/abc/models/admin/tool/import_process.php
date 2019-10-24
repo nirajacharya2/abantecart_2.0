@@ -27,6 +27,7 @@ use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
 use abc\models\catalog\Category;
+use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
@@ -940,12 +941,12 @@ class ModelToolImportProcess extends Model
 
             $last_parent_id = 0;
             $catIds = [];
-            foreach ($categories as $index => $c_name) {
+            $index = 0;
+            foreach ($categories as $c_name=> $cid) {
                 if($c_name===''){ continue; }
                 //is parent?
                 $is_parent = ($index + 1 == count($categories)) ? false : true;
                 //check if category exists with this name
-                $cid = $this->getCategory($c_name, $language_id, $store_id, $last_parent_id);
                 $catIds[] = (int)$cid;
                 if ($is_parent) {
                     if (!$cid) {
@@ -966,6 +967,7 @@ class ModelToolImportProcess extends Model
                     }
                     break;
                 }
+                $index++;
             }
         }
         return $ret;
@@ -981,65 +983,79 @@ class ModelToolImportProcess extends Model
      */
     protected function checkCategoryTree($nameTree = [], $language_id, $store_id)
     {
+        $nameTree = array_values($nameTree);
         Category::setCurrentLanguageID($language_id);
-        $output = $nameTree;
+        $output = array_flip($nameTree);
+        foreach($output as &$o){
+            $o = null;
+        }
         $fullPath = [];
         $k=0;
+
+        //check if parent exists
+        $parent_exists = $this->findCategoryByNameAndParent($nameTree[0], $language_id, $store_id, 0);
+        if(!$parent_exists){
+            return $output;
+        }
+
         foreach($nameTree as $c_name) {
             if($c_name === ''){ continue; }
             $parentId = $fullPath ? $fullPath[$k-1] : 0;
-            $exist = $this->getCategory($c_name, $language_id, $store_id, $parentId);
+            $exist = $this->findCategoryByNameAndParent($c_name, $language_id, $store_id, $parentId);
             if($exist) {
-                $fullPath[$k] = $exist;
+                $fullPath[$k] = $exist['category_id'];
+                $output[$c_name] = $exist['category_id'];
+            }else{
+                $output[$c_name] = null;
             }
             $k++;
         }
 
-        //if full path already exists  - returns original tree
-        if(!$fullPath || Category::where('path', '=', implode("_", $fullPath))->count() == 1){
-            return $output;
-        }
+        return $output;
+    }
 
-        //if sub-path
-        $parts = $fullPath;
-        /** @var Category $category */
-        $category = null;
-        while(count($parts)>0){
-            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
-            if($category){
-                break;
-            }
-            $category = null;
-            array_shift($parts);
-        }
+    protected function findCategoryByNameAndParent($category_name, $language_id, $store_id, $parent_id)
+    {
+        $query = CategoryDescription::select(['category_descriptions.category_id', 'category_descriptions.name', 'categories.path'])
+                ->whereRaw(
+                    "LCASE(".Registry::db()->table_name('category_descriptions').".name) = '".$this->db->escape(mb_strtolower($category_name))."'"
+                );
+        $query->join(
+            'categories_to_stores',
+            'category_descriptions.category_id',
+            '=',
+            'categories_to_stores.category_id'
+        );
+        $query->join(
+            'categories',
+            'categories.category_id',
+            '=',
+            'category_descriptions.category_id'
+        );
+        $query->where(
+            [
+                'category_descriptions.language_id' => $language_id,
+                'categories_to_stores.store_id'     => $store_id,
+            ]
+        );
 
-        if(!$category){
-            $parts = $fullPath;
-            while(count($parts)>0){
-                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
-                if($category){
-                    break;
-                }
-                $category = null;
-                array_pop($parts);
-            }
+        if($parent_id<0){
+        }elseif($parent_id>0){
+            $query->where('categories.parent_id', '=', $parent_id);
+        }else{
+            $query->whereNull('categories.parent_id');
         }
-
-        //if not found - returns original tree
-        if(!$category){
-            return $output;
+        /** @var CategoryDescription|Category $result */
+        $result = $query->first();
+        if($result){
+            $output = [
+                'category_id' => $result->category_id,
+                'path'        => $result->path,
+                'name'        => html_entity_decode($result->name, ENT_QUOTES,ABC::env('APP_CHARSET'))
+            ];
+        }else{
+            $output = [];
         }
-
-        //if category tree is a part of existing category - change tree
-        $catPath = explode("_", $category->path);
-        foreach ($catPath as $id){
-            if($id!=$fullPath[0]) {
-                /** @var Category $item */
-                $item = Category::with('description')->find($id);
-                array_unshift($output,$item->description->name);
-            }
-        }
-
         return $output;
     }
 

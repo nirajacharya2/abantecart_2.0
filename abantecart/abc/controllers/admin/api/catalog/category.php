@@ -118,11 +118,13 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     }
                 }
             }
+            Registry::cache()->remove('*');
         } catch (\Exception $e) {
             $this->rest->setResponseData(['Error' => 'Create Error: '.$e->getMessage()]);
             $this->rest->sendResponse(200);
             return null;
         }
+
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
@@ -255,7 +257,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
             if ($deleteBy) {
                 Category::withTrashed()->where($deleteBy, $request[$deleteBy])
                     ->forceDelete();
-                (Registry::getInstance())->get('cache')->remove('*');
+                Registry::cache()->remove('*');
 
             } else {
                 $this->rest->setResponseData(['Error' => 'Not correct request, Category_ID not found']);

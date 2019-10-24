@@ -593,6 +593,7 @@ class ControllerPagesCatalogProduct extends AController
             $this->data = array_merge($this->data, $product_info);
         }
 
+        $this->data['heading_title'] = $this->language->get('heading_title');
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
@@ -686,6 +687,24 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['product_store'] = [0];
         }
 
+        if (isset($this->request->post['product_description'])) {
+            $this->data['product_description'] = $this->request->post['product_description'];
+        } elseif (isset($product_info)) {
+            $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions(
+                $product_id,
+                $content_language_id
+            );
+        } else {
+            $this->data['product_description'] = [];
+        }
+
+        if (isset($this->request->post['featured'])) {
+            $this->data['featured'] = $this->request->post['featured'];
+        } elseif (isset($product_info)) {
+            $this->data['featured'] = $product_info['featured'];
+        } else {
+            $this->data['featured'] = 0;
+        }
 
         if (isset($this->request->post['product_tags'])) {
             $this->data['product_tags'] = $this->request->post['product_tags'];

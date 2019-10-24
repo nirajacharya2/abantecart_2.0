@@ -495,7 +495,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		},
 		ondblClickRow:function (row_id) {
 			//Disable Double click on grid
-		<?php if ($data['disbale_dblClick']) { ?>
+		<?php if ($data['disable_dblClick']) { ?>
 				return false;
 			<?php } ?>
 			// quickview modal

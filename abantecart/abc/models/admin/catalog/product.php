@@ -2250,6 +2250,7 @@ class ModelCatalogProduct extends Model
                 'product_id'    => 'p.product_id',
                 'name'          => 'pd.name',
                 'model'         => 'p.model',
+                'sku'           => 'p.sku',
                 'quantity'      => 'quantity',
                 'price'         => 'p.price',
                 'status'        => 'p.status',
