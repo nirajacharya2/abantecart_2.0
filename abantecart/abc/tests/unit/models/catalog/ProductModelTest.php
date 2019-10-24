@@ -44,6 +44,15 @@ class ProductModelTest extends ATestCase
         }
     }
 
+//    public function testCopyProduct()
+//    {
+//        Product::setCurrentLanguageID(1);
+//        $product = Product::find(64);
+//        $product_id = $product->copyProduct();
+//        var_dump($product_id);
+//exit;
+//    }
+
     public function testValidator()
     {
 

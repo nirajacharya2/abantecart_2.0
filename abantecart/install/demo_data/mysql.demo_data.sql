@@ -2675,7 +2675,8 @@ VALUES
 (28,'product_id=119','fruit-of-the-loom-t-shirts-5-pack-super-premium',1),
 (29,'product_id=120','jersey-cotton-striped-polo-shirt',1),
 (30,'product_id=121','designer-men-casual-formal-double-cuffs-grandad-band-collar-shirt-elegant-tie',1),
-(31,'product_id=122','mens-fine-cotton-giraffe-polo-shirts',1)
+  (31, 'product_id=122', 'mens-fine-cotton-giraffe-polo-shirts', 1),
+  (64, 'product_id=64', 'phpunit-test-product-beauty-eau-de-parfum', 1)
 ;
 
 --

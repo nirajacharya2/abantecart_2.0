@@ -6,6 +6,7 @@ use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
+use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -1249,6 +1250,7 @@ class Product extends BaseModel
         foreach ($this->options as $option) {
             $data['options'][] = $option->getAllData();
         }
+        $data['keywords'] = $this->keywords();
         return $data;
     }
 
@@ -1608,101 +1610,154 @@ class Product extends BaseModel
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
      */
-    public function copyProduct()
-    {
-        $product_id = $this->getKey();
-        if (!$product_id) {
-            return false;
-        }
+    /*   public function copyProduct()
+       {
+           $product_id = $this->getKey();
+           if (!$product_id) {
+               return false;
+           }
 
-        $productInfo = $this->getAllData();
+   return false;
+           $this->load('descriptions');
+           $clone = $this->replicate();
+           $clone->push(); //Push before to get id of $clone
 
-        foreach ($productInfo['descriptions'] as &$description) {
-            unset($description['product_id']);
-            $description['name'] .= '(Copy)';
-        }
-        $productInfo['sku'] = $productInfo['sku'] ? $productInfo['sku'].' (copy)' : null;
-        foreach ($productInfo['options'] as &$option) {
-            unset(
-                $option['product_id'],
-                $option['product_option_id']
-            );
-            foreach ($option['values'] as &$optionValues) {
-                unset(
-                    $optionValues['product_id'],
-                    $optionValues['product_option_id'],
-                    $optionValues['product_option_value_id']
-                );
-                $optionValues['sku'] = $optionValues['sku'] ? $optionValues['sku'].' (copy)' : null;
-            }
-        }
 
-        foreach ($productInfo['discounts'] as &$discount) {
-            unset($discount['product_id']);
-        }
+           return $clone->product_id;
 
-        unset(
-            $productInfo['product_id'],
-            $productInfo['uuid']
-        );
 
-        var_export($productInfo['keywords']);
-        exit;
 
-        $data = array_merge($data, ['product_discount' => $this->getProductDiscounts($product_id)]);
-        $data = array_merge($data, ['product_special' => $this->getProductSpecials($product_id)]);
-        $data = array_merge($data, ['product_download' => $this->getProductDownloads($product_id)]);
-        $data = array_merge($data, ['product_category' => $this->getProductCategories($product_id)]);
-        $data = array_merge($data, ['product_store' => $this->getProductStores($product_id)]);
-        $data = array_merge($data, ['product_related' => $this->getProductRelated($product_id)]);
-        $data = array_merge($data, ['product_tags' => $this->getProductTags($product_id)]);
-        $data = array_merge($data, ['keyword' => $this->getProductSEOKeywords($product_id)]);
 
-        //set status to off for cloned product
-        $data['status'] = 0;
 
-        //get product resources
-        $rm = new AResourceManager();
-        $resources = $rm->getResourcesList(
-            [
-                'object_name' => 'products',
-                'object_id'   => $product_id,
-                'sort'        => 'sort_order',
-            ]);
 
-        $new_product_id = $this->addProduct($data);
 
-        foreach ($data['product_discount'] as $item) {
-            //sign to prevent converting date from display format to iso
-            $item['iso_date'] = true;
-            $this->addProductDiscount($new_product_id, $item);
-        }
-        foreach ($data['product_special'] as $item) {
-            $item['iso_date'] = true;
-            $this->addProductSpecial($new_product_id, $item);
-        }
 
-        $this->updateProductLinks($new_product_id, $data);
-        $this->_clone_product_options($new_product_id, $data);
 
-        foreach ($resources as $r) {
-            $rm->mapResource(
-                'products',
-                $new_product_id,
-                $r['resource_id']
-            );
-        }
-        $this->cache->remove('product');
 
-        //clone layout for the product if present
-        $layout_clone_result = $this->_clone_product_layout($product_id, $new_product_id);
 
-        return [
-            'name'         => $data['name'],
-            'id'           => $new_product_id,
-            'layout_clone' => $layout_clone_result,
-        ];
-    }
+
+
+
+
+
+
+
+
+           $db = Registry::db();
+
+           $productInfo = $this->getAllData();
+
+           foreach ($productInfo['descriptions'] as &$description) {
+               unset($description['product_id']);
+               $description['name'] .= '(Copy)';
+           }
+           $productInfo['sku'] = $productInfo['sku'] ? $productInfo['sku'].' (copy)' : null;
+           foreach ($productInfo['options'] as &$option) {
+               unset(
+                   $option['product_id'],
+                   $option['product_option_id']
+               );
+               foreach ($option['descriptions'] as &$optionDesc) {
+                   unset(
+                       $optionDesc['product_id'],
+                       $optionDesc['product_option_id']
+                   );
+               }
+               foreach ($option['values'] as &$optionValues) {
+                   unset(
+                       $optionValues['product_id'],
+                       $optionValues['product_option_id'],
+                       $optionValues['product_option_value_id']
+                   );
+                   $optionValues['sku'] = $optionValues['sku'] ? $optionValues['sku'].' (copy)' : null;
+                   foreach ($optionValues['descriptions'] as &$optionDesc) {
+                       unset(
+                           $optionDesc['product_id'],
+                           $optionDesc['product_option_value_id']
+                       );
+                   }
+               }
+           }
+
+           foreach ($productInfo['discounts'] as &$discount) {
+               unset($discount['product_id']);
+           }
+
+
+           unset(
+               $productInfo['product_id'],
+               $productInfo['description'],
+               $productInfo['uuid'],
+               $productInfo['reviews'],
+               $productInfo['tags_by_language']
+           );
+           foreach($productInfo['tags'] as &$r){
+               unset($r['product_id'],$r['id']);
+           }
+           foreach($productInfo['options'] as &$r){
+               unset($r['product_id'],$r['id']);
+           }
+
+           //set status to off for cloned product
+           $productInfo['status'] = 0;
+
+           //get product resources
+   //        $rm = new AResourceManager();
+   //        $resources = $rm->getResourcesList(
+   //            [
+   //                'object_name' => 'products',
+   //                'object_id'   => $product_id,
+   //                'sort'        => 'sort_order',
+   //            ]);
+           $db->beginTransaction();
+           $product = new Product($productInfo);
+           $product->save();
+           $productId = $product->product_id;
+
+           if ($productId) {
+               foreach($productInfo['descriptions'] as $item) {
+                   $description = new ProductDescription($item);
+                   $product->descriptions()->save($item);
+               }
+
+   //            UrlAlias::setProductKeyword($productInfo['keywords'] ?: $product_data['product_description']['name'], $productId);
+   //            self::updateProductLinks($product, $product_data);
+               return $productId;
+           }
+
+           exit;
+
+           foreach ($data['product_discount'] as $item) {
+               //sign to prevent converting date from display format to iso
+               $item['iso_date'] = true;
+               $this->addProductDiscount($new_product_id, $item);
+           }
+           foreach ($data['product_special'] as $item) {
+               $item['iso_date'] = true;
+               $this->addProductSpecial($new_product_id, $item);
+           }
+
+           $this->updateProductLinks($new_product_id, $data);
+           $this->_clone_product_options($new_product_id, $data);
+
+           foreach ($resources as $r) {
+               $rm->mapResource(
+                   'products',
+                   $new_product_id,
+                   $r['resource_id']
+               );
+           }
+           $this->cache->remove('product');
+
+           //clone layout for the product if present
+           $layout_clone_result = $this->_clone_product_layout($product_id, $new_product_id);
+
+           return [
+               'name'         => $data['name'],
+               'id'           => $new_product_id,
+               'layout_clone' => $layout_clone_result,
+           ];
+       }*/
 
     /**
      * @param int   $product_id

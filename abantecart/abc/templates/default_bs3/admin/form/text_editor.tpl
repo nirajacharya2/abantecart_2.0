@@ -106,7 +106,8 @@ $wrapper_id = \H::randomWord(6);
 	$(window).load(function () {
 	    try {
             tinymce.remove();
-        }catch(){}
+        } catch (e) {
+        }
 		//initiate editor
 		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
