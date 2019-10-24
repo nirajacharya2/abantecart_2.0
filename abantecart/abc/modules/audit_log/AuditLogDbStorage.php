@@ -41,20 +41,10 @@ class AuditLogDbStorage implements AuditLogStorageInterface
         }
         $data['entity']['model_id'] = $auditableModelId;
 
-        $mainModel = $this->db->table('audit_models')
-            ->where('name', '=', $data['related']['name'])
-            ->first();
-        if ($mainModel) {
-            $mainModelId = $mainModel->id;
-        } else {
-            $mainModelId = $this->db->table('audit_models')->insertGetId(['name' => $data['related']['name']]);
-        }
-        $data['related']['model_id'] = $mainModelId;
-
         $db = $this->db;
         $this->db->transaction(static function () use ($db, $data) {
 
-            $auditSession = $db->table('audit_sessions')
+            /*$auditSession = $db->table('audit_sessions')
                 ->where('session_id', '=', $data['event']['session_id'])
                 ->first();
             if ($auditSession) {
@@ -62,7 +52,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
             } else {
                 $auditSessionId = $db->table('audit_sessions')->insertGetId(['session_id' => $data['event']['session_id']]);
             }
-            $event['audit_session_id'] = $auditSessionId;
+            $event['audit_session_id'] = $auditSessionId;*/
 
             $auditUser = $db->table('audit_users')
                 ->where('user_type_id', '=', AuditUser::getUserTypeId($data['actor']['group']))
@@ -80,10 +70,10 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 $auditUserId = $db->table('audit_users')->insertGetId($userData);
             }
             $event['audit_user_id'] = $auditUserId;
-            $event['request_id'] = $data['event']['id'];
-            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['event']['group']];
-            $event['main_auditable_model_id'] = $data['related']['model_id'];
-            $event['main_auditable_id'] = $data['related']['id'];
+            $event['request_id'] = $data['id'];
+            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']];
+            $event['main_auditable_model_id'] = $data['entity']['model_id'];
+            $event['main_auditable_id'] = $data['entity']['id'];
 
             $auditEvent = $db->table('audit_events')
                 ->where('request_id', '=', $event['request_id'])
@@ -99,17 +89,27 @@ class AuditLogDbStorage implements AuditLogStorageInterface
             }
 
             if ($eventId) {
-                $eventDescription = [
-                    'auditable_model_id' => $data['entity']['model_id'],
-                    'auditable_id'       => $data['entity']['id'] ?: 0,
-                    'field_name'         => $data['event']['name'],
-                    'old_value'          => $data['event']['oldValue'],
-                    'new_value'          => $data['event']['newValue'],
-                    'audit_event_id'     => $eventId,
-                ];
-                $db->table('audit_event_descriptions')->insert($eventDescription);
+                foreach ($data['changes'] as $change) {
+                    $model = $db->table('audit_models')
+                        ->where('name', '=', $change['groupName'])
+                        ->first();
+                    if ($model) {
+                        $modelId = $model->id;
+                    } else {
+                        $modelId = $db->table('audit_models')->insertGetId(['name' => $change['groupName']]);
+                    }
+                    $change['model_id'] = $modelId;
+                    $eventDescription = [
+                        'auditable_model_id' => $change['model_id'],
+                        'auditable_id'       => $change['groupId'] ?: 0,
+                        'field_name'         => $change['name'],
+                        'old_value'          => $change['oldValue'],
+                        'new_value'          => $change['newValue'],
+                        'audit_event_id'     => $eventId,
+                    ];
+                    $db->table('audit_event_descriptions')->insert($eventDescription);
+                }
             }
-
         });
     }
 
