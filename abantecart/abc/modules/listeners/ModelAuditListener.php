@@ -2,13 +2,16 @@
 
 namespace abc\modules\listeners;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\AuditLogStorageInterface;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use abc\models\system\AuditEvent;
 use abc\models\system\AuditModel;
 use abc\models\system\AuditUser;
+use H;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Support\Facades\Cache;
 use ReflectionClass;
@@ -251,9 +254,9 @@ class ModelAuditListener
         $main_auditable_id = !$main_auditable_id ? $oldData[$modelObject->getMainModelClassKey()] : $main_auditable_id;
 
         $userData = [
-            'user_type_id' => AuditUser::getUserTypeId($user_type),
-            'user_id'      => $user_id,
-            'name'         => $user_name,
+            'group' => $user_type,
+            'id'    => $user_id,
+            'name'  => $user_name,
         ];
         $db = $this->registry->get('db');
 
@@ -295,6 +298,7 @@ class ModelAuditListener
                 foreach ($newValue as $cName => $nValue) {
                     $eventDescription[] = [
                         'auditable_model_id' => $auditableModelId,
+                        'auditable_model_name' => $auditable_model,
                         'auditable_id'       => $auditable_id ?: 0,
                         'field_name'         => $cName,
                         'old_value'          => $oldData[$colName][$cName],
@@ -304,6 +308,7 @@ class ModelAuditListener
             } else {
                 $eventDescription[] = [
                     'auditable_model_id' => $auditableModelId,
+                    'auditable_model_name' => $auditable_model,
                     'auditable_id'       => $auditable_id ?: 0,
                     'field_name'         => $colName,
                     'old_value'          => $oldData[$colName],
@@ -311,7 +316,6 @@ class ModelAuditListener
                 ];
             }
         }
-
 
         $db = $this->registry->get('db');
         $mainModel = $db->table('audit_models')
@@ -327,62 +331,50 @@ class ModelAuditListener
             $event_name = 'updating';
         }
 
-        $event = [
-            'request_id'              => $request_id,
-            'event_type_id'           => AuditEvent::EVENT_NAMES[$event_name],
-            'main_auditable_model_id' => $mainModelId,
-            'main_auditable_id'       => $main_auditable_id,
+        $data = [
+            'id'     => $request_id,
+            'actor'  => $userData,
+            'app'    => [
+                'name'    => 'Abantecart',
+                'server'  => '',
+                'version' => '2.0',
+                'build'   => ABC::env('BUILD_ID') ?: '',
+                'stage'   => ABC::$stage_name,
+            ],
+            'entity' => [
+                'name'  => $main_auditable_model,
+                'id'    => $main_auditable_id,
+                'group' => $event_name,
+            ],
         ];
 
+        foreach ($eventDescription as $item) {
+            $data['changes'][] = [
+              'name' => $item['field_name'],
+              'groupId' => $item['auditable_id'],
+              'groupName' => $item['auditable_model_name'],
+              'oldValue' => $item['old_value'],
+              'newValue' => $item['new_value'],
+            ];
+        }
+
+        /**
+         *
+         * @var AuditLogStorageInterface $auditLogStorage
+         */
+        $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
+
+        if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
+            return $this->output(
+                false,
+                'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
+            );
+        }
+
         try {
-            $this->registry->get('db')->transaction(function () use ($db, $session_id, $userData, $event, $eventDescription) {
-
-                $auditSession = $db->table('audit_sessions')
-                    ->where('session_id', '=', $session_id)
-                    ->first();
-                if ($auditSession) {
-                    $auditSessionId = $auditSession->id;
-                } else {
-                    $auditSessionId = $db->table('audit_sessions')->insertGetId(['session_id' => $session_id]);
-                }
-                $event['audit_session_id'] = $auditSessionId;
-
-                $auditUser = $db->table('audit_users')
-                    ->where('user_type_id', '=', $userData['user_type_id'])
-                    ->where('user_id', '=', $userData['user_id'])
-                    ->where('name', '=', $userData['name'])
-                    ->first();
-                if ($auditUser) {
-                    $auditUserId = $auditUser->id;
-                } else {
-                    $auditUserId = $db->table('audit_users')->insertGetId($userData);
-                }
-                $event['audit_user_id'] = $auditUserId;
-
-                $auditEvent = $db->table('audit_events')
-                    ->where('request_id', '=', $event['request_id'])
-                    ->where('audit_user_id', '=', $auditUserId)
-                    ->where('event_type_id', '=', $event['event_type_id'])
-                    ->where('main_auditable_model_id', '=', $event['main_auditable_model_id'])
-                    ->where('main_auditable_id', '=', $event['main_auditable_id'])
-                    ->first();
-                if ($auditEvent) {
-                    $eventId = $auditEvent->id;
-                } else {
-                    $eventId = $db->table('audit_events')->insertGetId($event);
-                }
-
-                if ($eventId) {
-                    foreach ($eventDescription as &$item) {
-                        $item['audit_event_id'] = $eventId;
-                    }
-                    $db->table('audit_event_descriptions')->insert($eventDescription);
-                }
-
-            });
-        } catch (\PDOException $e) {
+            $auditLogStorage->write($data);
+        } catch (\Exception $e) {
             \H::df($e->getMessage());
-
             $error_message = __CLASS__.": Auditing of ".$modelClassName." failed.";
             $this->registry->get('log')->write($error_message);
             $this->registry->get('log')->write($e->getMessage());

@@ -744,6 +744,13 @@ return [
             //  'CACHE_TTL'    => '3600',
             //  'CACHE_DRIVER' => 'text'
             ]
+            
+        'RABBIT_MQ' => [
+            'HOST' => '',
+            'PORT' => 5672,
+            'USER' => '',
+            'PASSWORD' => ''
+           ]
 
 ];
 EOD;
