@@ -1379,7 +1379,15 @@ class Product extends BaseModel
             }
 
             //touch all categories to call update listener that calculates products count in it
-            $affectedCategories = (array)$product_data['product_category'] + (array)$product_data['product_category_prev'];
+            $affectedCategories = [];
+
+            foreach((array)$product_data['product_category']  as $id) {
+                $affectedCategories[] = $id;
+            }
+            foreach((array)$product_data['product_category_prev']  as $id) {
+                $affectedCategories[] = $id;
+            }
+
             foreach($affectedCategories as $categoryId){
                 $category = Category::find($categoryId);
                 $category->touch();

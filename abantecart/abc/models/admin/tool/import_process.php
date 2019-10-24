@@ -982,19 +982,7 @@ class ModelToolImportProcess extends Model
         //check if parent exists
         $parent_exists = $this->findCategoryByNameAndParent($nameTree[0], $language_id, $store_id, 0);
         if(!$parent_exists){
-            //try to find any with the same name in sub-categories
-            $exist = $this->findCategoryByNameAndParent($nameTree[0], $language_id, $store_id, -1);
-            if($exist) {
-                $up = explode('_',$exist['path']);
-                array_pop($up);
-                foreach($up as $cid){
-                    $category = CategoryDescription::where(['language_id' => $language_id, 'category_id' => $cid])->first();
-                    $name = html_entity_decode( $category->name, ENT_QUOTES, ABC::env('APP_CHARSET'));
-                    $tmp = $output;
-                    $output = [$name => $cid] + $tmp;
-                    array_unshift($nameTree, $name);
-                }
-            }
+            return $output;
         }
 
         foreach($nameTree as $c_name) {
@@ -1004,60 +992,10 @@ class ModelToolImportProcess extends Model
             if($exist) {
                 $fullPath[$k] = $exist['category_id'];
                 $output[$c_name] = $exist['category_id'];
+            }else{
+                $output[$c_name] = null;
             }
             $k++;
-        }
-
-
-        //if full path already exists  - returns original tree
-        if(!$fullPath
-            ||
-            ( count($fullPath) == count($nameTree) && Category::where('path', '=', implode("_", $fullPath))->count() == 1 )
-        ){
-            return $output;
-        }
-
-        //if sub-path
-        $parts = $fullPath;
-        /** @var Category $category */
-        $category = null;
-        while(count($parts)>0){
-            $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
-            if($category){
-                break;
-            }
-            $category = null;
-            array_shift($parts);
-        }
-
-        if(!$category){
-            $parts = $fullPath;
-            while(count($parts)>0){
-                $category = Category::where('path', 'like', '%'.implode("_", $parts)."%")->first();
-                if($category){
-                    break;
-                }
-                $category = null;
-                array_pop($parts);
-            }
-        }
-
-        //if not found - returns original tree
-        if(!$category){
-            return $output;
-        }
-
-        //if category tree is a part of existing category - change tree
-        $catPath = explode("_", $category->path);
-        foreach ($catPath as $id){
-            if($id!=$fullPath[0]) {
-                /** @var Category $item */
-                $item = Category::with('description')->find($id);
-                $tmp = $output;
-                $output = [$item->description->name => $id];
-                $output += $tmp;
-                unset($tmp);
-            }
         }
 
         return $output;
