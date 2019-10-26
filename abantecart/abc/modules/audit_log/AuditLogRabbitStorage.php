@@ -83,7 +83,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         if (is_array($request['filter'])) {
             foreach ($request['filter'] as $item) {
                 $item = json_decode($item, true);
-                H::df($item);
                 if (isset($request['user_name']) && !empty($request['user_name'])) {
                     $item['actor.name'] = $request['user_name'];
                 }
