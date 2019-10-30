@@ -526,7 +526,9 @@ class ControllerResponsesListingGridCustomer extends AController
 
         $code = H::genToken(32);
         //save password reset code
-        Customer::find($customer_id)->update(['data' => ['password_reset' => $code] ]);
+        $data = $customer_info->data;
+        $data['password_reset'] = $code;
+        Customer::find($customer_id)->update(['data' => $data ]);
         //build reset link
         /**
          * @var AEncryption $enc
