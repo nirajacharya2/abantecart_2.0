@@ -55,7 +55,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
 
     public function getEvents(array $request)
     {
-        $conf = new AuditLogConfig('http://localhost:3000/api/');
+        $api  = ABC::env('AUDIT_LOG_API');
+        $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
         try {
             $request = $this->prepareRequest($request);
