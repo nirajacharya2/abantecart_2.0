@@ -395,7 +395,7 @@
 		},
 
 		created: function () {
-			//this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
+			this.debouncedGetDataFromApi = _.debounce(this.getDataFromApi, 500)
 		},
 		watch: {
 			selected_data_object: function (newVal, oldVal) {
