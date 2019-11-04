@@ -607,6 +607,7 @@ class ControllerPagesSaleCustomer extends AController
             'type'   => 'form',
             'name'   => 'cgFrm',
             'attr'   => 'data-confirm-exit="true" class="form-horizontal"',
+            'csrf' => true,
             'action' => $this->data['action'],
         ]);
         $this->data['form']['submit'] = $form->getFieldHtml([
@@ -1150,6 +1151,11 @@ class ControllerPagesSaleCustomer extends AController
     {
         if (!$this->user->canModify('sale/customer')) {
             $this->error['warning'] = $this->language->get('error_permission');
+            return false;
+        }
+
+        if (!$this->csrftoken->isTokenValid()) {
+            $this->error['warning'] = $this->language->get('error_unknown');
             return false;
         }
 
