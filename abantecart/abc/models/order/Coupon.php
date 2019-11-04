@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\catalog\Product;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -210,7 +211,7 @@ class Coupon extends BaseModel
 
     public function products()
     {
-        return $this->hasMany(CouponsProduct::class, 'coupon_id');
+        return $this->belongsToMany(Product::class, 'coupons_products', 'coupon_id', 'product_id');
     }
 
     public function orders()
