@@ -2,7 +2,7 @@
 
 use abc\core\ABC;
 
-if (!file_exists(ABC::env('DIR_PUBLIC').'vendor/components/jqGrid/js/i18n/grid.locale-'.$locale.'.js')) {
+if (!file_exists(ABC::env('DIR_PUBLIC').'vendor/components/jqgrid/js/i18n/grid.locale-'.$locale.'.js')) {
     $locale = 'en';
 }
 $this->document->addScript($this->templateResource('assets/js/jqgrid/js/i18n/grid.locale-'.$locale.'.js'));
