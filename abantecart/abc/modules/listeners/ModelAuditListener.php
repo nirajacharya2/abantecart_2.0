@@ -380,12 +380,10 @@ class ModelAuditListener
             $this->registry->get('log')->write($e->getMessage());
             $this->registry->get('log')->write($event_name);
             //TODO: need to check
-            if ($modelObject::$auditingStrictMode) {
-                return false;
-                //throw new \Exception($error_message);
-            }
-            // stop event listeners firing
-            return false;
+            return $this->output(
+                false,
+                $error_message
+            );
         }
 
         return $this->output(

@@ -42,15 +42,32 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     public function write(array $data)
     {
-        $conf = ABC::env('RABBIT_MQ');
-        $conn = new AMQPStreamConnection($conf['HOST'], $conf['PORT'], $conf['USER'], $conf['PASSWORD']);
-        $channel = $conn->channel();
-        $channel->queue_declare('audit_log', false, false, false, false);
+        $domain = ABC::env('AUDIT_LOG_API')['DOMAIN'];
+        $data = [
+            'data'   => $data,
+            'domain' => $domain ?: 'audit-log-index'
+        ];
 
-        $msg = new AMQPMessage(json_encode($data));
-        $channel->basic_publish($msg, '', 'audit_log');
-        $channel->close();
-        $conn->close();
+        try {
+            $conf = ABC::env('RABBIT_MQ');
+            $conn = new AMQPStreamConnection($conf['HOST'], $conf['PORT'], $conf['USER'], $conf['PASSWORD']);
+            $channel = $conn->channel();
+            $channel->queue_declare('audit_log', false, true, false, false);
+
+            $msg = new AMQPMessage(json_encode($data));
+            $channel->basic_publish($msg, '', $conf['QUEUE']);
+            $channel->close();
+            $conn->close();
+        } catch (\Exception $exception) {
+            if (!file_exists(ABC::env('DIR_SYSTEM').'rabbitmq')) {
+                if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'rabbitmq', 0775, true) && !is_dir($concurrentDirectory)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+                }
+            }
+            $backupFile = ABC::env('DIR_SYSTEM').'rabbitmq/rabbit_data.bak';
+            file_put_contents($backupFile, json_encode($data). PHP_EOL, FILE_APPEND );
+
+        }
     }
 
     public function getEvents(array $request)
@@ -60,7 +77,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $client = new AuditLogClient($conf);
         try {
             $request = $this->prepareRequest($request);
-            $events = $client->getEvents($request);
+            $events = $client->getEvents($api['DOMAIN'], $request);
             $result = [
                 'items' => $this->prepareEvents($events['events']),
                 'total' => $events['total'],
@@ -167,7 +184,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $client = new AuditLogClient($conf);
         $filter = json_decode($request['filter'], true);
         try {
-            $event = $client->getEventById($filter['audit_event_id']);
+            $event = $client->getEventById($api['DOMAIN'], $filter['audit_event_id']);
             $result = [
                 'items' => $this->prepareEventDescriptionRows($event['events']),
                 'total' => $event['total'],
