@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace unit\models\admin;
+namespace unit\models\locale;
 
 use abc\models\locale\Currency;
 use abc\tests\unit\ATestCase;
@@ -54,8 +54,6 @@ class CurrencyModelTest extends ATestCase
      * @depends testCreateCurrency
      *
      * @param $createdId
-     *
-     * @return mixed
      */
     public function testReadCurrency(int $createdId)
     {
@@ -68,7 +66,6 @@ class CurrencyModelTest extends ATestCase
      *
      * @param $createdId
      *
-     * @return mixed
      */
     public function testUpdateCurrency(int $createdId)
     {

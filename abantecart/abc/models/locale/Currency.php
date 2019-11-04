@@ -23,6 +23,8 @@ use abc\core\lib\AError;
  *
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
+ * @method static Currency find(int $currency_id) Currency
+ *
  * @package abc\models
  */
 class Currency extends BaseModel
