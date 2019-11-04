@@ -50,6 +50,7 @@ use ReflectionMethod;
  * @package abc\models
  * @method static QueryBuilder|Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder|Builder whereRaw(string $sql) QueryBuilder
+ * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*' ) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder active() QueryBuilder

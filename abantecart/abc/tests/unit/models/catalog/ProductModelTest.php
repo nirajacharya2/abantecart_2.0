@@ -20,6 +20,7 @@ namespace abc\tests\unit\models\catalog;
 
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
 use abc\tests\unit\ATestCase;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -119,7 +120,7 @@ class ProductModelTest extends ATestCase
                 'free_shipping'     => '0',
                 'shipping_price'    => 0.0,
                 'price'             => 1.00,
-                'tax_class_id'      => 2,
+                'tax_class_id'      => 1,
                 'date_available'    => date('Y-m-d H:i:s'),
                 'weight'            => 0.0,
                 'weight_class_id'   => 1,
@@ -134,14 +135,14 @@ class ProductModelTest extends ATestCase
                 'cost'              => 0.95,
                 'subtract'          => 0,
                 'minimum'           => 1,
-                'maximum'           => 0,
+                'maximum'           => 150,
                 'product_type_id'   => null,
                 'settings'          => '',
             ];
-            $product->validate();
+            $product->validate($data);
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
-
+            var_Dump($errors);
         }
         $this->assertEquals(0, count($errors));
 
@@ -246,7 +247,7 @@ class ProductModelTest extends ATestCase
     public function testUpdateProduct(int $productId)
     {
         $arProductData = [
-            'featured'            => '0',
+            'featured'            => 0,
             'product_description' =>
                 [
                     'name'             => 'Test update product',
@@ -273,7 +274,33 @@ class ProductModelTest extends ATestCase
         }
 
         $product = Product::find($productId);
-        $this->assertEquals(0, $product->featured);
+        $this->assertEquals(false, $product->featured);
+
+    }
+
+    /**
+     * @depends testCreateProduct
+     *
+     * @param int $productId
+     */
+    public function testTouchProduct(int $productId)
+    {
+        $product = Product::find($productId);
+        $old_date = (string)$product->date_modified;
+        try {
+            /** @var ProductDescription $pd */
+            $pd = ProductDescription::where('product_id', '=', $productId)->first();
+            sleep(2);
+            $pd->touch();
+        } catch (\PDOException $e) {
+            $this->fail($e->getMessage());
+        } catch (Warning $e) {
+            $this->fail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->fail($e->getMessage());
+        }
+        $product->refresh();
+        $this->assertNotEquals((string)$product->date_modified, $old_date);
 
     }
 
@@ -296,8 +323,7 @@ class ProductModelTest extends ATestCase
             $this->fail($e->getMessage());
             $result = false;
         }
-
-        $this->assertEquals(1, $result);
+        $this->assertEquals(true, $result);
     }
 
     public function testStaticMethods()

@@ -131,7 +131,7 @@ class Product extends BaseModel
         'height'            => 'float',
         'length_class_id'   => 'int',
         'status'            => 'int',
-        'featured'          => 'int',
+        'featured'          => 'boolean',
         'viewed'            => 'int',
         'sort_order'        => 'int',
         'subtract'          => 'int',
@@ -2271,7 +2271,7 @@ class Product extends BaseModel
      */
     public static function destroy($ids)
     {
-        $IDs = [];
+        $IDs = null;
         if ($ids instanceof Collection) {
             $IDs = $ids->all();
         }
@@ -2282,19 +2282,19 @@ class Product extends BaseModel
             $arr[] = 'product_id='.$id;
         }
         UrlAlias::whereIn('query', $arr)->forceDelete();
-        return parent::destroy($ids);
+        return parent::destroy($IDs);
     }
 
     /**
      * @return bool|null
      * @throws Exception
      */
-    public function delete()
-    {
-        UrlAlias::where('query', '=', 'product_id='.$this->getKey())
-                ->forceDelete();
-        return parent::delete();
-    }
+    /* public function delete()
+     {
+         UrlAlias::where('query', '=', 'product_id='.$this->getKey())
+                 ->forceDelete();
+         return parent::delete();
+     }*/
 
     /**
      * @param array $data

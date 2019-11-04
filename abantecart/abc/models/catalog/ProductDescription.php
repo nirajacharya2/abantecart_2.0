@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string   $meta_description
  * @property string   $description
  * @property string   $blurb
+ * @property string $date_modified
+ * @property string $date_added
  *
  * @property Product  $product
  * @property Language $language
@@ -48,6 +50,8 @@ class ProductDescription extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    protected $touches = ['product'];
 
     protected $fillable = [
         'product_id',
