@@ -23,6 +23,7 @@ use abc\core\lib\CheckOut;
 use abc\core\lib\CheckOutAdmin;
 use abc\core\lib\ACurrency;
 use abc\core\lib\UserResolver;
+use abc\modules\audit_log\AuditLogRabbitStorage;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
 
@@ -58,4 +59,5 @@ return [
     'UserResolver'      => UserResolver::class,
     'AdminCommands'     => AdminCommands::class,
     'AExceptionHandler' => AExceptionHandler::class,
+    'AuditLogStorage' => AuditLogRabbitStorage::class,
 ];

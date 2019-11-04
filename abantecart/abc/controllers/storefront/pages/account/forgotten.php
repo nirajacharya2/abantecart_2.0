@@ -60,8 +60,10 @@ class ControllerPagesAccountForgotten extends AController
             $customer = $this->findCustomer('password', $this->request->post);
             if ($customer) {
                 $code = H::genToken(32);
+                $data = $customer->data;
+                $data['password_reset'] = $code;
                 //save password reset code
-                $customer->update(['data' => ['password_reset' => $code]]);
+                $customer->update(['data' => $data]);
                 //build reset link
                 /**
                  * @var AEncryption $enc

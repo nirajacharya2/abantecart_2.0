@@ -139,10 +139,10 @@
 											name="data_object_id"
 											v-model="data_object_id"
 											v-bind:disabled="isDataObjectIdDisabled"
-											label="Data Object ID"
+											label="Auditable ID"
 											single-line
 											mask="###########"
-											hint="Input Data Object ID"
+											hint="Input Auditable ID"
 									></v-text-field>
 								</v-container>
 							</v-flex>
@@ -151,9 +151,9 @@
 									<v-select
 											:items="available_fields"
 											v-model="selected_fields"
-											label="Changet field"
+											label="Auditable field"
 											multiple
-											hint="Pick changet field"
+											hint="Pick Auditable field"
 											persistent-hint
 											v-bind:disabled="isSelectedFieldsDisabled"
 											@input="selectedFieldsChange()"
@@ -219,14 +219,15 @@
 										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
 										</th>
-										<th class="column" v-if="!expandedAll" @click="expandAll()">
+										<!--<th class="column" v-if="!expandedAll" @click="expandAll()">
 											Expand all
 											<v-icon small>unfold_more</v-icon>
 										</th>
 										<th class="column" v-if="expandedAll" @click="unExpandAll()">
 											Expand all
 											<v-icon small>unfold_less</v-icon>
-										</th>
+										</th> -->
+										<th></th>
 									</tr>
 								</template>
 								<template slot="items" slot-scope="props">
@@ -299,14 +300,14 @@
 
 
 <script>
-	var data_objects = <?php echo $data_objects; ?>;
-	var auditable_type = '<?php echo $auditable_type; ?>';
-	var auditable_id = '<?php echo $auditable_id; ?>';
+	let data_objects = <?php echo $data_objects; ?>;
+	let auditable_type = '<?php echo $auditable_type; ?>';
+	let auditable_id = '<?php echo $auditable_id; ?>';
 
-	var curDate = new Date();
+	let curDate = new Date();
 	curDate = curDate.toISOString().substr(0, 10);
 
-	var vm = new Vue({
+	let vm = new Vue({
 		el: '#app',
 		data: {
 			rowsPerPage: [10, 20, 30, 40, 50],
@@ -344,13 +345,13 @@
 					align: 'left',
 					value: 'user_name'
 				},
-				{
+				/*{
 					text: 'User Alias',
 					align: 'left',
 					value: 'alias_name'
-				},
-				{text: 'Data Object', value: 'main_auditable_model'},
-				{text: 'Data Object ID', value: 'main_auditable_id'},
+				},*/
+				{text: 'Auditable Object', value: 'main_auditable_model'},
+				{text: 'Auditable ID', value: 'main_auditable_id'},
 				{text: 'Event', value: 'event'},
 				{text: 'Date Change', value: 'date_added'},
 			],
@@ -416,7 +417,7 @@
 				this.isDataObjectDisabled = true;
 				this.isDataObjectIdDisabled = true;
 				this.isSelectedFieldsDisabled = false;
-				var filterItem = {
+				let filterItem = {
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
 				};
@@ -451,7 +452,7 @@
 				this.data_object_id = '';
 			},
 			addFilter: function () {
-				var filterItem = {
+				let filterItem = {
 					'auditable_type': this.selected_data_object,
 					'field_name': this.selected_fields,
 					'auditable_id': this.data_object_id,
@@ -465,7 +466,7 @@
 				if (!this.isConcreteObject) {
 					this.arFilter = [];
 					for (i = 0; i < this.objectsInArFilter.length; i++) {
-						var index = this.data_objects.indexOf(this.objectsInArFilter[i]);
+						let index = this.data_objects.indexOf(this.objectsInArFilter[i]);
 						if (index == -1) {
 							this.data_objects.push(this.objectsInArFilter[i]);
 						}
@@ -478,7 +479,7 @@
 				this.debouncedGetDataFromApi();
 			},
 			removeAddedFromSelect: function (item) {
-				var index = this.data_objects.indexOf(item);
+				let index = this.data_objects.indexOf(item);
 				if (index > -1) {
 					this.data_objects.splice(index, 1);
 				}
@@ -492,7 +493,7 @@
 			selectChip: function (item) {
 			},
 			removeChip: function (item) {
-				var index = -1;
+				let index = -1;
 				for (i = 0; i < this.arFilter.length; i++) {
 					if (this.arFilter[i].auditable_type == item.auditable_type) {
 						index = i;
@@ -508,17 +509,20 @@
 			},
 			getDataFromApi() {
 				this.loading = true;
-				var param = this.pagination;
+				let param = this.pagination;
 				param.filter = this.arFilter;
 				param.date_from = this.date_from;
 				param.date_to = this.date_to;
 				param.user_name = this.user_name;
 				param.events = this.events;
 				this.unExpandAll();
-				var promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
+				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
 						vm.table_items = response.data.items;
 						vm.table_total = response.data.total;
+						for (let i=0; i<vm.table_items.length; i++) {
+							vm.expand_items[i] = [];
+						}
 						vm.loading = false;
 					})
 					.catch(function (error) {
@@ -532,21 +536,24 @@
 				} else {
 					props.expanded = false;
 				}
+				console.log(props)
 			},
 			getExpandDataFromApi(props) {
 				this.loading = true;
 				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
 				props.expanded = true;
-				var filter = {
+				let filter = {
 					'audit_event_id': props.item.id,
 				};
-				var param = {
+				let param = {
 					filter: filter,
 					getDetail: true,
 				}
-				var promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
+				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
 					.then(function (response) {
-						vm.expand_items[props.index] = response.data.items;
+						console.log(response)
+						//vm.expand_items[props.index] = response.data.items;
+						vm.expand_items.splice(props.index, 1, response.data.items);
 						vm.expand_table_total[props.index] = response.data.total;
 						props.expanded = true;
 						vm.$set(vm.$refs.dTable.expanded, props.index, true);
@@ -560,18 +567,18 @@
 			expandAll: function () {
 				for (let i = 0; i < this.table_items.length; i += 1) {
 					const item = this.table_items[i];
-					var props = {
+					let props = {
 						index: i,
 						item: item,
 					}
-					this.getExpandDataFromApi(props);
+					this.expandFunction(props);
 				}
 				this.expandedAll = true;
 			},
 			unExpandAll: function () {
 				for (let i = 0; i < this.table_items.length; i += 1) {
 					const item = this.table_items[i];
-					var props = {
+					let props = {
 						index: i,
 						item: item,
 					}
