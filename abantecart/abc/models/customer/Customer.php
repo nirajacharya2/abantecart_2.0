@@ -38,6 +38,7 @@ use Illuminate\Support\Collection;
  * @property int $newsletter
  * @property int $address_id
  * @property int $status
+ * @property string $advanced_status
  * @property int $approved
  * @property int $customer_group_id
  * @property string $ip
@@ -53,7 +54,7 @@ use Illuminate\Support\Collection;
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
  * @method static Customer find(int $customer_id) Customer
- * @method static Customer select(mixed $select) Builder
+ * @method static Customer select(mixed $select = '*') Builder
  * @package abc\models
  */
 class Customer extends BaseModel
