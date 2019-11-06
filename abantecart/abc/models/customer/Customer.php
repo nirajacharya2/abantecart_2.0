@@ -42,7 +42,7 @@ use Illuminate\Support\Collection;
  * @property int $approved
  * @property int $customer_group_id
  * @property string $ip
- * @property string $data
+ * @property array $data
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  * @property \Carbon\Carbon $last_login
