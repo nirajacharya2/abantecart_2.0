@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $order_product_id
  * @property int $order_id
  * @property int $product_id
+ * @property int $order_status_id
  * @property string $name
  * @property string $model
  * @property string $sku
