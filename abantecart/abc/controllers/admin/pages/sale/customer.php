@@ -895,6 +895,18 @@ class ControllerPagesSaleCustomer extends AController
                     'title' => $this->language->get('text_view').' '.$this->language->get('tab_history'),
                 ]
             );
+            $this->data['message'] = $this->html->buildElement([
+                'type'   => 'button',
+                'text'   => $this->language->get('button_message'),
+                'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
+                'target' => 'new',
+            ]);
+            $this->data['new_order'] = $this->html->buildElement([
+                'type'   => 'button',
+                'text'   => $this->language->get('text_create_order'),
+                'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id='.$customer_id),
+                'target' => 'new',
+            ]);
             $this->data['addresses'] = Address::getAddressesByCustomerId($customer_id);
         }
 
