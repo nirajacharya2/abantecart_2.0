@@ -112,7 +112,7 @@ class Product extends BaseModel
      */
     protected $primaryKey = 'product_id';
 
-    protected $touches = ['categories'];
+   // protected $touches = ['categories'];
     /**
      * @var array
      */
