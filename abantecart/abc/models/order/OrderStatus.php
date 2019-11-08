@@ -9,6 +9,7 @@ use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 
@@ -17,10 +18,12 @@ use Illuminate\Validation\Rule;
  *
  * @property int $order_status_id
  * @property string $status_text_id
+ * @property int $display_status
  *
- * @property \Illuminate\Database\Eloquent\Collection $order_histories
- * @property \Illuminate\Database\Eloquent\Collection $order_status_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $orders
+ * @property Collection $order_histories
+ * @property Collection $descriptions
+ * @property OrderStatusDescription $description
+ * @property Order $orders
  *
  * @package abc\models
  */
