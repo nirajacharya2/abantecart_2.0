@@ -179,7 +179,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        (Registry::getInstance())->get('cache')->remove('*');
+        Registry::cache()->remove('*');
 
         $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',
@@ -249,7 +249,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @return mixed
      * @throws \Exception
      */
-    private function updateProduct($product, $data)
+    protected function updateProduct($product, $data)
     {
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
         $rels = [];
@@ -266,6 +266,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->updateRelationships($rels);
         $product->updateImages($data);
 
+        //touch category to run recalculation of products count in it
         foreach( (array)$data['category_uuids'] as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
             if($category){
@@ -301,6 +302,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $data['categories'][] = $category->category_id;
                 }
             }
+        }else{
+            //if product does not assigned to any category
+            $data['categories'] = [];
         }
         if ($data['manufacturer']['uuid']) {
             $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
