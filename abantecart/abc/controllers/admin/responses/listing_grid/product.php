@@ -303,7 +303,7 @@ class ControllerResponsesListingGridProduct extends AController
                         return null;
                     }
                     Product::updateProduct($k, [$f => $v], $this->language->getContentLanguageID());
-                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
+                    $this->extensions->hk_ProcessData($this, __FUNCTION__, ['product_id' => $k]);
                 }
             }
         }
@@ -336,6 +336,13 @@ class ControllerResponsesListingGridProduct extends AController
                 $this->model_catalog_product->updateProductDiscount($this->request->get['id'], $data);
             }
 
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
             return null;
         }
 
@@ -369,6 +376,13 @@ class ControllerResponsesListingGridProduct extends AController
                 $this->model_catalog_product->updateProductSpecial($this->request->get['id'], $data);
             }
 
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
             return null;
         }
 
@@ -402,6 +416,13 @@ class ControllerResponsesListingGridProduct extends AController
                 Product::updateProductLinks($this->request->get['id'], $data);
             }
 
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
             return null;
         }
 
