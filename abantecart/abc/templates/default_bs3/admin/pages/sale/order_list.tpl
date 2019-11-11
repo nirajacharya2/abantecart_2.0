@@ -5,6 +5,9 @@
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
+                <?php echo $this->getHookVar('toolbar_pre'); ?>
+			</div>
+			<div class="btn-group mr10 toolbar">
 			<?php if (!empty($search_form)) { ?>
 			    <form id="<?php echo $search_form['form_open']->name; ?>"
 			    	  method="<?php echo $search_form['form_open']->method; ?>"
@@ -33,8 +36,11 @@
 			    </form>
 			<?php } ?>
 			</div>
+			<div class="btn-group mr10 toolbar">
+                <?php echo $this->getHookVar('toolbar_post'); ?>
+			</div>
 		</div>
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
