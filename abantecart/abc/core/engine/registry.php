@@ -33,6 +33,7 @@ use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALog;
+use abc\core\lib\AMessage;
 use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
 use abc\core\lib\ASession;
@@ -60,6 +61,7 @@ use abc\core\lib\AUser;
  * @method static ADownload download()
  * @method static ACache cache()
  * @method static AOrderStatus order_status()
+ * @method static AMessage messages()
  */
 final class Registry
 {
