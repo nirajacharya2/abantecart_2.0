@@ -43,6 +43,8 @@ class OrderProduct extends BaseModel
 
     protected $primaryKey = 'order_product_id';
 
+    protected $touches = ['order'];
+
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 
