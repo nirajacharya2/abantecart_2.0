@@ -1615,6 +1615,15 @@ class Order extends BaseModel
             $query->whereRaw("DATE(".$aliasO.".date_added) = DATE('".$db->escape($inputData['filter_date_added'])."')");
         }
 
+        if (H::has_value($inputData['filter_date_start'])) {
+            $query->whereRaw("DATE(".$aliasO.".date_added) >= DATE('".$db->escape($inputData['filter_date_start'])."')");
+        }
+
+        if (H::has_value($inputData['filter_date_end'])) {
+            $query->whereRaw("DATE(".$aliasO.".date_added) <= DATE('".$db->escape($inputData['filter_date_end'])."')");
+        }
+
+
         if ($inputData['store_id'] !== null) {
             $query->where('orders.store_id', '=', (int)$inputData['store_id']);
         }

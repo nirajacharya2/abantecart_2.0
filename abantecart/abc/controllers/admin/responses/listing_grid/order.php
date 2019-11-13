@@ -48,7 +48,7 @@ class ControllerResponsesListingGridOrder extends AController
         $sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
-        $allowedFields = array_merge( ['name', 'order_id', 'date_added', 'total'], (array)$this->data['allowed_fields'] );
+        $allowedFields = array_merge( ['name', 'order_id', 'date_added', 'total', 'date_end', 'date_start'], (array)$this->data['allowed_fields'] );
         $allowedSortFields = array_merge( ['customer_id', 'order_id', 'name', 'status', 'date_added', 'total'], (array)$this->data['allowed_sort_fields'] );
 
         $allowedDirection = ['asc', 'desc'];
@@ -68,6 +68,12 @@ class ControllerResponsesListingGridOrder extends AController
         ];
         if (isset($this->request->get['status']) && $this->request->get['status'] !== 'default') {
             $data['filter_order_status_id'] = $this->request->get['status'];
+        }
+        if (isset($this->request->get['date_end']) && $this->request->get['date_end'] !== '') {
+            $data['filter_date_end'] = H::dateDisplay2ISO($this->request->get['date_end']);
+        }
+        if (isset($this->request->get['date_start']) && $this->request->get['date_start'] !== '') {
+            $data['filter_date_start'] = H::dateDisplay2ISO($this->request->get['date_start']);
         }
         if ( H::has_value( $this->request->get['customer_id'] ) ) {
             $data['filter_customer_id'] = $this->request->get['customer_id'];

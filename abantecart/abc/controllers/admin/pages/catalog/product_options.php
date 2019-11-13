@@ -46,13 +46,18 @@ class ControllerPagesCatalogProductOptions extends AController
         $this->attribute_manager = ABC::getObjectByAlias('AttributeManager');
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            $product_id = $this->request->get['product_id'];
-            $product_option_id = $this->model_catalog_product->addProductOption($product_id, $this->request->post);
+            $this->data['product_id'] = $this->request->get['product_id'];
+            $this->data['product_option_id'] = $this->model_catalog_product->addProductOption(
+                $this->data['product_id'],
+                $this->request->post
+            );
+            $this->extensions->hk_ProcessData($this);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect(
                 $this->html->getSecureURL(
                     'catalog/product_options',
-                    '&product_id='.$product_id.'&product_option_id='.$product_option_id
+                    '&product_id='.$this->data['product_id']
+                        .'&product_option_id='.$this->data['product_option_id']
                 )
             );
         }

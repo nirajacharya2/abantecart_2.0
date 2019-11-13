@@ -774,6 +774,10 @@ var runTaskStepsUI = function (task_details) {
 				senddata['eta'] = step.eta;
 				timeout = (step.eta + 10)*1000;
 			}
+			if(step.hasOwnProperty('max_execution_time') && step.max_execution_time > 0){
+				senddata['eta'] = step.max_execution_time;
+				timeout = (step.max_execution_time + 10)*1000;
+			}
 
 			ajaxes[k] = {
 				task_id:task_details.task_id,
