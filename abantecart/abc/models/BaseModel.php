@@ -669,7 +669,7 @@ class BaseModel extends OrmModel
     public static function getRelationships($typesOnly = null)
     {
         $typesOnly = is_string($typesOnly) ? func_get_args() : $typesOnly;
-
+        $typesOnly = (array)$typesOnly;
         foreach ($typesOnly as &$t) {
             $t = strtolower($t);
         }

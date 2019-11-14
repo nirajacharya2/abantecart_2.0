@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $order_product_id
  * @property int $order_id
  * @property int $product_id
+ * @property int $order_status_id
  * @property string $name
  * @property string $model
  * @property string $sku
@@ -41,6 +42,8 @@ class OrderProduct extends BaseModel
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';
+
+    protected $touches = ['order'];
 
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';

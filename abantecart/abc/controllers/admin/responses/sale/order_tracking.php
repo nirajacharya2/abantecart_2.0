@@ -11,14 +11,12 @@ use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use abc\modules\events\ABaseEvent;
-use Carbon\Carbon;
 use H;
 
 class ControllerResponsesSaleOrderTracking extends AController
 {
     public function products()
     {
-
         $this->loadLanguage('sale/order');
         $this->loadModel('catalog/product');
         //init controller data
@@ -46,7 +44,6 @@ class ControllerResponsesSaleOrderTracking extends AController
         if ($this->request->is_POST() && is_array($post['product'])) {
 
             $this->db->beginTransaction();
-            $order = Order::find($order_id);
             try {
                 foreach($post['product'] as $orderProduct){
                     /**
@@ -55,8 +52,6 @@ class ControllerResponsesSaleOrderTracking extends AController
                     $op = OrderProduct::find($orderProduct['order_product_id']);
                     if($op && $op->order_status_id != $orderProduct['order_status_id']){
                         $op->update(['order_status_id' => $orderProduct['order_status_id']]);
-                        $order->update(['date_modified' => Carbon::now()]);
-                        $order->touch();
                     }
                 }
                 $this->db->commit();

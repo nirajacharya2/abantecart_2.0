@@ -78,6 +78,7 @@ use Illuminate\Support\Collection;
  * @property int                           $product_type_id
  *
  * @method static Product find(int $product_id) Product
+ * @method static Product select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -110,6 +111,7 @@ class Product extends BaseModel
      */
     protected $primaryKey = 'product_id';
 
+    protected $touches = ['categories'];
     /**
      * @var array
      */
@@ -648,7 +650,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store'     => [
+        'product_store'    => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',

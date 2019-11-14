@@ -607,6 +607,7 @@ class ControllerPagesSaleCustomer extends AController
             'type'   => 'form',
             'name'   => 'cgFrm',
             'attr'   => 'data-confirm-exit="true" class="form-horizontal"',
+            'csrf' => true,
             'action' => $this->data['action'],
         ]);
         $this->data['form']['submit'] = $form->getFieldHtml([
@@ -894,6 +895,18 @@ class ControllerPagesSaleCustomer extends AController
                     'title' => $this->language->get('text_view').' '.$this->language->get('tab_history'),
                 ]
             );
+            $this->data['message'] = $this->html->buildElement([
+                'type'   => 'button',
+                'text'   => $this->language->get('button_message'),
+                'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
+                'target' => 'new',
+            ]);
+            $this->data['new_order'] = $this->html->buildElement([
+                'type'   => 'button',
+                'text'   => $this->language->get('text_create_order'),
+                'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id='.$customer_id),
+                'target' => 'new',
+            ]);
             $this->data['addresses'] = Address::getAddressesByCustomerId($customer_id);
         }
 
@@ -1150,6 +1163,11 @@ class ControllerPagesSaleCustomer extends AController
     {
         if (!$this->user->canModify('sale/customer')) {
             $this->error['warning'] = $this->language->get('error_permission');
+            return false;
+        }
+
+        if (!$this->csrftoken->isTokenValid()) {
+            $this->error['warning'] = $this->language->get('error_unknown');
             return false;
         }
 

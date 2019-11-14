@@ -297,6 +297,16 @@ class ControllerPagesSaleOrder extends AController
                 'value'   => ($this->request->get['status'] ?: $search_params['status']),
             ]
         );
+        $this->view->assign('js_date_format', H::format4Datepicker($this->language->get('date_format_short')));
+        $grid_search_form['fields']['date_start'] = $form->getFieldHtml([
+            'type'    => 'date',
+            'name'    => 'date_start',
+        ]);
+
+        $grid_search_form['fields']['date_end'] = $form->getFieldHtml([
+            'type'    => 'date',
+            'name'    => 'date_end',
+        ]);
         $grid_settings['search_form'] = true;
 
         $grid = $this->dispatch('common/listing_grid', [$grid_settings]);

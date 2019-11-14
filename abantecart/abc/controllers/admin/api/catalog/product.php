@@ -179,7 +179,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        (Registry::getInstance())->get('cache')->remove('*');
+        Registry::cache()->remove('*');
 
         $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',
@@ -212,20 +212,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         //create product
-        $product = new Product();
-        //expand fillable columns for extensions
-        if ($this->data['fillable']) {
-            $product->addFillable($this->data['fillable']);
-        }
-
-        $fills = $product->getFillable();
-        foreach ($fills as $fillable) {
-            if ($fillable == 'date_available') {
-                continue;
-            }
-            $product->{$fillable} = $data[$fillable];
-        }
-
+        $product = new Product($data);
         $product->save();
 
         if (!$product || !$product->getKey()) {
@@ -262,7 +249,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @return mixed
      * @throws \Exception
      */
-    private function updateProduct($product, $data)
+    protected function updateProduct($product, $data)
     {
         $expected_relations = ['descriptions', 'categories', 'stores', 'tags'];
         $rels = [];
@@ -273,28 +260,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
 
-        //expand fillable columns for extensions
-        if ($this->data['fillable']) {
-            $product->addFillable($this->data['fillable']);
-        }
-
-        $fills = $product->getFillable();
-        $upd_array = [];
-        foreach ($fills as $fillable) {
-            if (isset($data[$fillable])) {
-                $product->{$fillable} = urldecode($data[$fillable]);
-                $upd_array[$fillable] = urldecode($data[$fillable]);
-            }
-        }
-
-        if($upd_array) {
-            $product->update($upd_array);
-        }
+        $product->update($data);
 
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
 
+        //touch category to run recalculation of products count in it
         foreach( (array)$data['category_uuids'] as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
             if($category){
@@ -330,6 +302,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $data['categories'][] = $category->category_id;
                 }
             }
+        }else{
+            //if product does not assigned to any category
+            $data['categories'] = [];
         }
         if ($data['manufacturer']['uuid']) {
             $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])

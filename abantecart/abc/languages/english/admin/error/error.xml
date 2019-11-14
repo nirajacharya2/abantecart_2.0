@@ -8,4 +8,8 @@
     <key>text_error</key>
     <value><![CDATA[Please check error log for more information]]></value>
   </definition>
+  <definition>
+    <key>text_page_not_found</key>
+    <value><![CDATA[Oops.... Not found.]]></value>
+  </definition>
 </definitions>
