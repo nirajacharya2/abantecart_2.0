@@ -22,9 +22,6 @@ namespace abc\models\storefront;
 
 use abc\core\engine\Model;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ModelLocalisationCountry extends Model
 {
@@ -32,6 +29,7 @@ class ModelLocalisationCountry extends Model
      * @param int $country_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getCountry($country_id)
     {
@@ -50,15 +48,16 @@ class ModelLocalisationCountry extends Model
 
     /**
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCountries()
     {
         $language_id = $this->language->getLanguageID();
         $default_language_id = $this->language->getDefaultLanguageID();
         $cache_key = 'localization.country.lang_'.$language_id;
-        $country_data = $this->cache->pull($cache_key);
+        $country_data = $this->cache->get($cache_key);
 
-        if ($country_data === false) {
+        if ($country_data === null) {
             if ($language_id == $default_language_id) {
                 $query = $this->db->query("SELECT *
                                             FROM ".$this->db->table_name("countries")." c
@@ -81,7 +80,7 @@ class ModelLocalisationCountry extends Model
                                             ORDER BY cd1.name,cd2.name ASC");
             }
             $country_data = $query->rows;
-            $this->cache->push($cache_key, $country_data);
+            $this->cache->put($cache_key, $country_data);
         }
         return (array)$country_data;
     }

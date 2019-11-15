@@ -8,7 +8,7 @@ use abc\core\engine\AHtml;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
@@ -31,7 +31,7 @@ $dir_install = dirname(__DIR__).$dir_sep;
 
 //Set up common paths
 ABC::env(
-    array(
+    [
         'MIN_PHP_VERSION'    => '7.0.0',
         'DIR_ROOT'           => $dir_root,
         'DIR_APP'            => $dir_app,
@@ -73,7 +73,7 @@ ABC::env(
         'POSTFIX_OVERRIDE' => '.override',
         'POSTFIX_PRE'      => '.pre',
         'POSTFIX_POST'     => '.post',
-    )
+    ]
 );
 
 // AbanteCart Version
@@ -221,8 +221,7 @@ if (ABC::env('DATABASES')) {
 }
 
 // Cache
-$registry->set('cache', new ACache());
-$registry->get('cache')->setCacheStorageDriver('file');
+$registry->set('cache', new AbcCache('file'));
 
 // Config
 $config = new AConfig($registry);

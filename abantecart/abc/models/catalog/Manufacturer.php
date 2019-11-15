@@ -130,24 +130,25 @@ class Manufacturer extends BaseModel
             UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
         }
 
-        $this->cache->remove('manufacturer');
+        $this->cache->flush('manufacturer');
     }
 
     /**
      * @return array|false|mixed
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllData()
     {
         $cache_key = 'manufacturer.alldata.'.$this->getKey();
-        $data = $this->cache->pull($cache_key);
-        if ($data === false) {
+        $data = $this->cache->get($cache_key);
+        if ($data === null) {
             $this->load('stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
             $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
-            $this->cache->push($cache_key, $data);
+            $this->cache->put($cache_key, $data);
         }
         return $data;
     }
@@ -156,6 +157,7 @@ class Manufacturer extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getImages()
     {
@@ -242,9 +244,9 @@ class Manufacturer extends BaseModel
         }
         $storeId = (int)$this->config->get('config_store_id');
         $cacheKey = 'manufacturer.'.$manufacturerId.'.store_'.$storeId;
-        $output = $this->cache->pull($cacheKey);
+        $output = $this->cache->get($cacheKey);
 
-        if ($output !== false) {
+        if ($output !== null) {
             return $output;
         }
 
@@ -275,7 +277,7 @@ class Manufacturer extends BaseModel
             }
         }
 
-        $this->cache->push($cacheKey, $output);
+        $this->cache->put($cacheKey, $output);
         return $output;
     }
 
@@ -326,7 +328,7 @@ class Manufacturer extends BaseModel
         } catch (\Exception $e) {
 
         }
-        $this->cache->remove('manufacturer');
+        $this->cache->flush('manufacturer');
         return true;
     }
 

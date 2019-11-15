@@ -47,7 +47,7 @@ class ALanguage
      */
     protected $db;
     /**
-     * @var \abc\core\cache\ACache
+     * @var \abc\core\lib\AbcCache
      */
     protected $cache;
     /**
@@ -107,7 +107,7 @@ class ALanguage
         }
 
         $this->db = $registry->get('db');
-        $this->cache = $registry->get('cache');
+        $this->cache = Registry::cache();
 
         //current active language details
         $this->language_details = $this->getLanguageDetails($this->code);
@@ -137,6 +137,7 @@ class ALanguage
      * @return null|string - Definition value
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get($key, $block = '', $silent = false)
     {
@@ -175,6 +176,7 @@ class ALanguage
      * @return string
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get_error($key)
     {
@@ -211,6 +213,7 @@ class ALanguage
      * @return array- Array with key/definition
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getASet($block = '')
     {
@@ -239,6 +242,7 @@ class ALanguage
      * @return array|null - Array with key/definition loaded
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function load($block = '', $mode = '')
     {
@@ -639,6 +643,7 @@ class ALanguage
      * @return array|null
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function _load($filename, $mode = '')
     {
@@ -658,9 +663,9 @@ class ALanguage
         $cache_key = str_replace('/', '_', $cache_key);
 
         if ($this->cache) {
-            $load_data = $this->cache->pull($cache_key);
+            $load_data = $this->cache->get($cache_key);
         }
-        if ($load_data === false) {
+        if ($load_data === null) {
 
             //Check that filename has proper name with no other special characters.
             $block_name = str_replace('/', '_', $filename);
@@ -709,13 +714,8 @@ class ALanguage
 
             $load_data = $_;
             if ($this->cache) {
-                $this->cache->push($cache_key, $load_data);
+                $this->cache->put($cache_key, $load_data);
             }
-        } elseif ($load_data === []) {
-           /* $error = new AWarning(
-                'Cache of "'.$filename.'" contains an empty array! Suggests to clear cache manually.'
-            );
-            $error->toLog()->toDebug();*/
         }
 
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$filename.' is loaded');
@@ -1070,8 +1070,7 @@ class ALanguage
                         (`".implode("`, `", array_keys($update_data))."`)
                         VALUES ('".implode("', '", $update_data)."') ";
                 $this->db->query($sql);
-                $this->cache->remove('localization');
-                $this->cache->remove('storefront_menu');
+                $this->cache->flush();
             }
         }
         if ($this->registry->get('config')->get('warn_lang_text_missing')) {

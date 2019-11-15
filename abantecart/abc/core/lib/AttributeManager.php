@@ -45,8 +45,8 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
 
     public function clearCache()
     {
-        $this->cache->remove('attribute');
-        $this->cache->remove('attributes');
+        $this->cache->flush('attribute');
+        $this->cache->flush('attributes');
     }
 
     /**
@@ -795,6 +795,7 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateAttributeCommonData($data = [])
     {

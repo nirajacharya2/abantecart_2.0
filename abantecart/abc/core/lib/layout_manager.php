@@ -25,7 +25,7 @@ use abc\core\engine\Registry;
 use H;
 
 /**
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property ASession $session
  * @property ADB $db
  * @property AConfig $config
@@ -84,6 +84,7 @@ class ALayoutManager
      * @param string $layout_id
      *
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($tmpl_id = '', $page_id = '', $layout_id = '')
     {
@@ -262,6 +263,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getLayouts($layout_type = '')
     {
@@ -272,8 +274,8 @@ class ALayoutManager
             $cache_key = 'layout.a.default.'.$this->tmpl_id;
         }
         $cache_key .= '.store_'.$store_id;
-        $layouts = $this->cache->pull($cache_key);
-        if ($layouts !== false) {
+        $layouts = $this->cache->get($cache_key);
+        if ($layouts !== null) {
             // return cached layouts
             return $layouts;
         }
@@ -309,7 +311,7 @@ class ALayoutManager
             $layouts = $query->rows;
         }
 
-        $this->cache->push($cache_key, $layouts);
+        $this->cache->put($cache_key, $layouts);
 
         return $layouts;
     }
@@ -356,6 +358,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function getAllLayoutBlocks($layout_id = 0)
     {
@@ -363,8 +366,8 @@ class ALayoutManager
         $layout_id = !$layout_id ? $this->layout_id : $layout_id;
 
         $cache_key = 'layout.a.blocks.'.$layout_id.'.store_'.$store_id;
-        $blocks = $this->cache->pull($cache_key);
-        if ($blocks !== false) {
+        $blocks = $this->cache->get($cache_key);
+        if ($blocks !== null) {
             // return cached blocks
             return $blocks;
         }
@@ -387,7 +390,7 @@ class ALayoutManager
         $query = $this->db->query($sql);
         $blocks = $query->rows;
 
-        $this->cache->push($cache_key, $blocks);
+        $this->cache->put($cache_key, $blocks);
 
         return $blocks;
     }
@@ -395,14 +398,15 @@ class ALayoutManager
     /**
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllBlocks()
     {
         $store_id = (int)$this->config->get('config_store_id');
         $language_id = (int)$this->language->getContentLanguageID();
         $cache_key = 'layout.a.blocks.all.store_'.$store_id.'_lang_'.$language_id;
-        $blocks = $this->cache->pull($cache_key);
-        if ($blocks !== false) {
+        $blocks = $this->cache->get($cache_key);
+        if ($blocks !== null) {
             // return cached blocks
             return $blocks;
         }
@@ -431,7 +435,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->push($cache_key, $blocks);
+        $this->cache->put($cache_key, $blocks);
 
         return $blocks;
     }
@@ -630,6 +634,7 @@ class ALayoutManager
     /**
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getLayoutBlocks()
     {
@@ -663,6 +668,7 @@ class ALayoutManager
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function buildChildrenBlocks($blocks, $total_blocks)
     {
@@ -839,7 +845,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return true;
     }
@@ -892,7 +898,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return $new_layout_id;
     }
@@ -906,6 +912,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function clonePageLayout($src_layout_id, $dest_layout_id = '', $layout_name = '')
     {
@@ -936,7 +943,7 @@ class ALayoutManager
         #clone blocks from source layout
         $this->cloneLayoutBlocks($src_layout_id, $dest_layout_id);
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return true;
     }
@@ -964,7 +971,7 @@ class ALayoutManager
             ."' AND page_id = '".(int)$page_id."'");
         $this->deleteAllLayoutBlocks($layout_id);
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return true;
     }
@@ -1045,7 +1052,7 @@ class ALayoutManager
                              WHERE instance_id = '".( int )$instance_id."'");
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return $instance_id;
     }
@@ -1071,7 +1078,7 @@ class ALayoutManager
                                 WHERE layout_id = '".( int )$layout_id."' 
                                     AND parent_instance_id = '".( int )$parent_instance_id."'");
 
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
         }
 
         return true;
@@ -1092,7 +1099,7 @@ class ALayoutManager
         } else {
             $this->db->query("DELETE FROM ".$this->db->table_name("block_layouts")." 
                                 WHERE layout_id = '".( int )$layout_id."'");
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
         }
 
         return true;
@@ -1125,7 +1132,7 @@ class ALayoutManager
                                 WHERE layout_id = '".( int )$layout_id."'");
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return $layout_id;
     }
@@ -1278,7 +1285,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return $page_id;
     }
@@ -1376,7 +1383,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return $block_id;
     }
@@ -1476,7 +1483,7 @@ class ALayoutManager
                     [(int)$description['language_id'] => $update]);
             }
 
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
 
             return $custom_block_id;
         } else {
@@ -1501,7 +1508,7 @@ class ALayoutManager
                     ],
                 ]);
 
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
 
             return $custom_block_id;
         }
@@ -1513,6 +1520,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBlockDescriptions($custom_block_id = 0)
     {
@@ -1520,8 +1528,8 @@ class ALayoutManager
             return [];
         }
         $cache_key = 'layout.a.block.descriptions.'.$custom_block_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
 
@@ -1537,7 +1545,7 @@ class ALayoutManager
                 $output[$row['language_id']] = $row;
             }
         }
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -1548,6 +1556,7 @@ class ALayoutManager
      *
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCustomBlockName($custom_block_id, $language_id = 0)
     {
@@ -1617,7 +1626,7 @@ class ALayoutManager
         $this->db->query("DELETE FROM ".$this->db->table_name("custom_blocks")." 
                                 WHERE custom_block_id = '".( int )$custom_block_id."'");
 
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return true;
     }
@@ -1641,7 +1650,7 @@ class ALayoutManager
                 $sql .= " AND parent_block_id = '".( int )$parent_block_id."'";
             }
             $this->db->query($sql);
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
         }
 
         return true;
@@ -1673,7 +1682,7 @@ class ALayoutManager
             $this->db->query("DELETE FROM ".$this->db->table_name("blocks")." 
                                 WHERE block_id = '".( int )$block_id."'");
 
-            $this->cache->remove('layout');
+            $this->cache->flush('layout');
 
             return true;
         } else {
@@ -1688,6 +1697,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function cloneTemplateLayouts($new_template)
     {
@@ -1735,6 +1745,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function cloneLayoutBlocks($source_layout_id, $new_layout_id)
     {
@@ -1782,7 +1793,7 @@ class ALayoutManager
             $this->db->query("DELETE FROM ".$this->db->table_name("block_layouts")." 
                                 WHERE layout_id = '".$layout['layout_id']."' ");
         }
-        $this->cache->remove('layout');
+        $this->cache->flush('layout');
 
         return true;
     }

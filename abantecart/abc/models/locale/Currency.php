@@ -73,15 +73,16 @@ class Currency extends BaseModel
         if (!$this->hasPermission('read')) {
             return false;
         }
-        $currency_data = false;
-        //$currency_data = $this->cache->pull('localization.currency');
+        $currency_data = null;
+        //????
+        //$currency_data = $this->cache->get('localization.currency');
 
-        if ($currency_data === false) {
+        if ($currency_data === null) {
 
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = array(
+                $currency_data[$result['code']] = [
                     'currency_id'   => $result['currency_id'],
                     'title'         => $result['title'],
                     'code'          => $result['code'],
@@ -91,10 +92,10 @@ class Currency extends BaseModel
                     'value'         => $result['value'],
                     'status'        => $result['status'],
                     'date_modified' => $result['date_modified'],
-                );
+                ];
             }
 
-            $this->cache->push('localization.currency', $currency_data);
+            $this->cache->put('localization.currency', $currency_data);
         }
 
         return $currency_data;
@@ -118,8 +119,9 @@ class Currency extends BaseModel
      */
     public function updateCurrencies()
     {
-        $api_key =
-            $this->config->get('alphavantage_api_key') ? $this->config->get('alphavantage_api_key') : 'P6WGY9G9LB22GMBJ';
+        $api_key = $this->config->get('alphavantage_api_key') 
+                    ? $this->config->get('alphavantage_api_key') 
+                    : 'P6WGY9G9LB22GMBJ';
 
         $base_currency_code = $this->config->get('config_currency');
 
@@ -152,7 +154,7 @@ class Currency extends BaseModel
         }
         $this->where('code', $base_currency_code)
              ->update(['value' => '1.00000']);
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
 
     }
 

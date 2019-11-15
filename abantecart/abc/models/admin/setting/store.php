@@ -17,297 +17,364 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
+
 use abc\core\engine\Model;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
+
 /**
  * Class ModelSettingStore
+ *
  * @property ModelSettingSetting $model_setting_setting
  */
-class ModelSettingStore extends Model {
-	/**
-	 * @param array $data
-	 * @return int
-	 */
-	public function addStore($data) {
-		if (empty($data['alias'])) {
-			$data['alias'] = substr(str_replace(' ', '', $data['name']), 0, 15);
-		}
+class ModelSettingStore extends Model
+{
+    /**
+     * @param array $data
+     *
+     * @return int
+     * @throws \abc\core\lib\AException
+     */
+    public function addStore($data)
+    {
+        if (empty($data['alias'])) {
+            $data['alias'] = substr(str_replace(' ', '', $data['name']), 0, 15);
+        }
 
-		$this->db->query("INSERT INTO " . $this->db->table_name("stores") . " 
-							SET name = '" . $this->db->escape($data['name']) . "',
-								alias = '" . $this->db->escape($data['alias']) . "',
-								status = '" . $this->db->escape($data['status']) . "'");
-		$store_id = $this->db->getLastId();
+        $this->db->query("INSERT INTO ".$this->db->table_name("stores")." 
+                            SET name = '".$this->db->escape($data['name'])."',
+                                alias = '".$this->db->escape($data['alias'])."',
+                                status = '".$this->db->escape($data['status'])."'");
+        $store_id = $this->db->getLastId();
 
-		//Clone from selected store
-		if ( $data['clone_store']!='') {
-			 $sql = "INSERT INTO " . $this->db->table_name("settings") . " (store_id, `group`, `key`, `value`)
-					SELECT '".$store_id."' as store_id, `group`, `key`, `value`
-					FROM " . $this->db->table_name("settings") . " 
-					WHERE `store_id` = '" . $this->db->escape($data['clone_store']) . "'";
-			$this->db->query( $sql );
-		}else{
-			// add settings of extension of default store to new store settings
-			// NOTE: we do this because of extension status in settings table. It used to recognize is extension installed or not
-			$extension_list = $this->extensions->getEnabledExtensions();
-			$sql = "INSERT INTO " . $this->db->table_name("settings") . " (store_id, `group`, `key`, `value`)
-					SELECT '".$store_id."' as store_id, `group`, `key`, `value`
-					FROM " . $this->db->table_name("settings") . "
-					WHERE `group` in ('".implode("' ,'",$extension_list)."') AND store_id='0';";
-			$this->db->query( $sql );
-		}
-		
-		$this->load->model('setting/setting');
-		foreach ($data['store_description'] as $language_id => $value) {
-			$this->language->replaceDescriptions('store_descriptions',
-											 array('store_id' => (int)$store_id),
-											 array($language_id => array(
-																		'description' => $value['description']
-											 )) );
-			$this->model_setting_setting->editSetting('details',array('config_description_'.(int)$language_id => $value['description']),$store_id);
-		}
-		unset($data['store_description']);
+        //Clone from selected store
+        if ($data['clone_store'] != '') {
+            $sql = "INSERT INTO ".$this->db->table_name("settings")." (store_id, `group`, `key`, `value`)
+                    SELECT '".$store_id."' as store_id, `group`, `key`, `value`
+                    FROM ".$this->db->table_name("settings")." 
+                    WHERE `store_id` = '".$this->db->escape($data['clone_store'])."'";
+            $this->db->query($sql);
+        } else {
+            // add settings of extension of default store to new store settings
+            // NOTE: we do this because of extension status in settings table. It used to recognize is extension installed or not
+            $extension_list = $this->extensions->getEnabledExtensions();
+            $sql = "INSERT INTO ".$this->db->table_name("settings")." (store_id, `group`, `key`, `value`)
+                    SELECT '".$store_id."' as store_id, `group`, `key`, `value`
+                    FROM ".$this->db->table_name("settings")."
+                    WHERE `group` in ('".implode("' ,'", $extension_list)."') AND store_id='0';";
+            $this->db->query($sql);
+        }
 
-		//Copy some data to details 
-		$this->model_setting_setting->editSetting('details',
-													array(
-															'config_url'    =>$data['config_url'],
-															'store_name'    =>$data['name'],
-															'config_ssl'    =>$data['config_ssl'],
-															'config_ssl_url'=>$data['config_ssl_url']),
-													$store_id);
+        $this->load->model('setting/setting');
+        foreach ($data['store_description'] as $language_id => $value) {
+            $this->language->replaceDescriptions('store_descriptions',
+                ['store_id' => (int)$store_id],
+                [
+                    $language_id => [
+                        'description' => $value['description'],
+                    ],
+                ]);
+            $this->model_setting_setting->editSetting('details',
+                ['config_description_'.(int)$language_id => $value['description']], $store_id);
+        }
+        unset($data['store_description']);
 
-		$this->cache->remove('settings');
-		$this->cache->remove('stores');
-		return $store_id;
-	}
+        //Copy some data to details
+        $this->model_setting_setting->editSetting('details',
+            [
+                'config_url'     => $data['config_url'],
+                'store_name'     => $data['name'],
+                'config_ssl'     => $data['config_ssl'],
+                'config_ssl_url' => $data['config_ssl_url'],
+            ],
+            $store_id);
 
-	/**
-	 * @param int $store_id
-	 * @param array $data
-	 */
-	public function editStore($store_id, $data) {
+        $this->cache->flush('settings');
+        $this->cache->flush('stores');
+        return $store_id;
+    }
 
-		if ( !empty($data['store_description']) ) {
-			foreach ($data['store_description'] as $language_id => $value) {
-				if ( isset($value['description']) ){
-					$this->language->replaceDescriptions('store_descriptions',
-														 array('store_id' => (int)$store_id),
-														 array($language_id => array(
-																					'description' => $value['description']
-														 )) );
-				}
-			}
-		}
-		unset($data['store_description']);
+    /**
+     * @param int $store_id
+     * @param array $data
+     *
+     * @throws \abc\core\lib\AException
+     */
+    public function editStore($store_id, $data)
+    {
 
-		$this->load->model('setting/setting');
-		if ( isset($data['alias']) ){
-			$this->db->query(
-				"UPDATE " . $this->db->table_name("stores") . " 
-				SET  `alias`='" . $this->db->escape($data['alias']) . "'
-				WHERE store_id = '" . (int)$store_id . "' ");
-		}
-		if ( isset($data['status']) ){
-			$this->db->query(
-				"UPDATE " . $this->db->table_name("stores") . " 
-				SET  `status`='" . $this->db->escape($data['status']) . "'
-				WHERE store_id = '" . (int)$store_id . "' ");
-		}
-		if ( isset($data['name']) ){
-			$this->db->query(
-				"UPDATE " . $this->db->table_name("stores") . " 
-				SET  `name`='" . $this->db->escape($data['name']) . "'
-				WHERE store_id = '" . (int)$store_id . "' ");
-				$this->model_setting_setting->editSetting('details',array('config_name'=>$data['name']),$store_id);
-		}
-		if ( isset($data['config_url']) ){
-			$this->model_setting_setting->editSetting('details',array('config_url'=>$data['config_url']),$store_id);
-		}
-		if ( isset($data['config_ssl']) ){
-			$this->model_setting_setting->editSetting('details',array('config_ssl'=>$data['config_ssl']),$store_id);
-		}
+        if (!empty($data['store_description'])) {
+            foreach ($data['store_description'] as $language_id => $value) {
+                if (isset($value['description'])) {
+                    $this->language->replaceDescriptions('store_descriptions',
+                        ['store_id' => (int)$store_id],
+                        [
+                            $language_id => [
+                                'description' => $value['description'],
+                            ],
+                        ]);
+                }
+            }
+        }
+        unset($data['store_description']);
 
-		$this->cache->remove('settings');
-		$this->cache->remove('stores');
-	}
+        $this->load->model('setting/setting');
+        if (isset($data['alias'])) {
+            $this->db->query(
+                "UPDATE ".$this->db->table_name("stores")." 
+                SET  `alias`='".$this->db->escape($data['alias'])."'
+                WHERE store_id = '".(int)$store_id."' ");
+        }
+        if (isset($data['status'])) {
+            $this->db->query(
+                "UPDATE ".$this->db->table_name("stores")." 
+                SET  `status`='".$this->db->escape($data['status'])."'
+                WHERE store_id = '".(int)$store_id."' ");
+        }
+        if (isset($data['name'])) {
+            $this->db->query(
+                "UPDATE ".$this->db->table_name("stores")." 
+                SET  `name`='".$this->db->escape($data['name'])."'
+                WHERE store_id = '".(int)$store_id."' ");
+            $this->model_setting_setting->editSetting('details', ['config_name' => $data['name']], $store_id);
+        }
+        if (isset($data['config_url'])) {
+            $this->model_setting_setting->editSetting('details', ['config_url' => $data['config_url']], $store_id);
+        }
+        if (isset($data['config_ssl'])) {
+            $this->model_setting_setting->editSetting('details', ['config_ssl' => $data['config_ssl']], $store_id);
+        }
 
-	/**
-	 * @param int $store_id
-	 */
-	public function deleteStore($store_id) {
-		$this->db->query("DELETE FROM " . $this->db->table_name("stores") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("settings") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("store_descriptions") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("categories_to_stores") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("products_to_stores") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("contents_to_stores") . " WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("manufacturers_to_stores") . " WHERE store_id = '" . (int)$store_id . "'");
-	
-		$this->cache->remove('settings');
-		$this->cache->remove('stores');
-	}
+        $this->cache->flush('settings');
+        $this->cache->flush('stores');
+    }
 
-	/**
-	 * @param int $store_id
-	 * @return array
-	 */
-	public function getStore($store_id) {
+    /**
+     * @param int $store_id
+     *
+     * @throws \Exception
+     */
+    public function deleteStore($store_id)
+    {
+        $this->db->query("DELETE FROM ".$this->db->table_name("stores")." WHERE store_id = '".(int)$store_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("settings")." WHERE store_id = '".(int)$store_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("store_descriptions")." WHERE store_id = '".(int)$store_id
+            ."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("categories_to_stores")." WHERE store_id = '"
+            .(int)$store_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("products_to_stores")." WHERE store_id = '".(int)$store_id
+            ."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE store_id = '".(int)$store_id
+            ."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("manufacturers_to_stores")." WHERE store_id = '"
+            .(int)$store_id."'");
 
-		$query = $this->db->query( "SELECT * 
-									FROM " . $this->db->table_name("stores") . " 
-									WHERE store_id = '" . (int)$store_id . "'");
-		$output = $query->rows[0];
+        $this->cache->flush('settings');
+        $this->cache->flush('stores');
+    }
 
-		$query = $this->db->query( "SELECT DISTINCT * 
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE store_id = '" . (int)$store_id . "'");
-		if($query->num_rows){
-			foreach($query->rows as $row){
-				$output[$row['key']] = $row['value'];
-			}
-		}
-		return $output;
-	}
+    /**
+     * @param int $store_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getStore($store_id)
+    {
 
-	/**
-	 * checks if current selected store from store switcher is default. Note: this check needed only for default store admin side.
-	 * @return bool
-	 */
-	public function isDefaultStore(){
-		$store_settings = $this->getStore((int)$this->session->data['current_store_id']);
-		return ($this->config->get('config_url') == $store_settings['config_url']);
-	}
+        $query = $this->db->query("SELECT * 
+                                    FROM ".$this->db->table_name("stores")." 
+                                    WHERE store_id = '".(int)$store_id."'");
+        $output = $query->rows[0];
 
-	/**
-	 * @param int $store_id
-	 * @return string mixed
-	 */
-	public function getStoreURL($store_id){
-		$store_settings = $this->getStore($store_id);
-		return $store_settings['config_url'];
-	}
-	/**
-	 * @param int $store_id
-	 * @return array
-	 */
-	public function getStoreDescriptions($store_id) {
-		$store_description_data = array();
-		$query = $this->db->query( "SELECT * 
-									FROM " . $this->db->table_name("store_descriptions") . " 
-									WHERE store_id = '" . (int)$store_id . "'");
-		foreach ($query->rows as $result) {
-			$store_description_data[$result['language_id']] = array('description' => $result['description']);
-		}
-		return $store_description_data;
-	}
+        $query = $this->db->query("SELECT DISTINCT * 
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE store_id = '".(int)$store_id."'");
+        if ($query->num_rows) {
+            foreach ($query->rows as $row) {
+                $output[$row['key']] = $row['value'];
+            }
+        }
+        return $output;
+    }
 
-	/**
-	 * @return array
-	 */
-	public function getStores() {
-		$store_data = $this->cache->pull('stores');
-		if ( $store_data === false ) {
-			$query = $this->db->query("SELECT *
-										FROM " . $this->db->table_name("stores") . " 
-										ORDER BY store_id");
-			$store_data = $query->rows;
-			$this->cache->push('stores', $store_data);
-		}
-		return (array)$store_data;
-	}
+    /**
+     * checks if current selected store from store switcher is default. Note: this check needed only for default store admin side.
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function isDefaultStore()
+    {
+        $store_settings = $this->getStore((int)$this->session->data['current_store_id']);
+        return ($this->config->get('config_url') == $store_settings['config_url']);
+    }
 
-	/**
-	 * @return int
-	 */
-	public function getTotalStores() {
-		$query = $this->db->query( "SELECT COUNT(*) AS total 
-									FROM " . $this->db->table_name("stores") . " "
-								);
-		return $query->row['total'];
-	}
+    /**
+     * @param int $store_id
+     *
+     * @return string mixed
+     * @throws \Exception
+     */
+    public function getStoreURL($store_id)
+    {
+        $store_settings = $this->getStore($store_id);
+        return $store_settings['config_url'];
+    }
 
-	/**
-	 * @param string $language
-	 * @return int
-	 */
-	public function getTotalStoresByLanguage($language) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_storefront_language' AND  `value` = '" . $this->db->escape($language) . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @param int $store_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getStoreDescriptions($store_id)
+    {
+        $store_description_data = [];
+        $query = $this->db->query("SELECT * 
+                                    FROM ".$this->db->table_name("store_descriptions")." 
+                                    WHERE store_id = '".(int)$store_id."'");
+        foreach ($query->rows as $result) {
+            $store_description_data[$result['language_id']] = ['description' => $result['description']];
+        }
+        return $store_description_data;
+    }
 
-	/**
-	 * @param string $currency
-	 * @return int
-	 */
-	public function getTotalStoresByCurrency($currency) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_currency' AND `value` = '" . $this->db->escape($currency) . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getStores()
+    {
+        $store_data = $this->cache->get('stores');
+        if ($store_data === null) {
+            $query = $this->db->query("SELECT *
+                                        FROM ".$this->db->table_name("stores")." 
+                                        ORDER BY store_id");
+            $store_data = $query->rows;
+            $this->cache->put('stores', $store_data);
+        }
+        return (array)$store_data;
+    }
 
-	/**
-	 * @param int $country_id
-	 * @return int
-	 */
-	public function getTotalStoresByCountryId($country_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_country_id' AND  `value` = '" . (int)$country_id . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStores()
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total 
+                                    FROM ".$this->db->table_name("stores")." "
+        );
+        return $query->row['total'];
+    }
 
-	/**
-	 * @param int $zone_id
-	 * @return int
-	 */
-	public function getTotalStoresByZoneId($zone_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_zone_id' AND  `value` = '" . (int)$zone_id . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @param string $language
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByLanguage($language)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_storefront_language' AND  `value` = '"
+            .$this->db->escape($language)."'");
+        return $query->row['total'];
+    }
 
-	/**
-	 * @param int $customer_group_id
-	 * @return int
-	 */
-	public function getTotalStoresByCustomerGroupId($customer_group_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_customer_group_id' AND `value` = '" . (int)$customer_group_id . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @param string $currency
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByCurrency($currency)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_currency' AND `value` = '".$this->db->escape($currency)."'");
+        return $query->row['total'];
+    }
 
-	/**
-	 * @param int $information_id
-	 * @return int
-	 */
-	public function getTotalStoresByInformationId($information_id) {
-		$account_query = $this->db->query("SELECT COUNT(*) AS total
-											FROM " . $this->db->table_name("settings") . " 
-											WHERE `key` = 'config_account_id' AND `value` = '" . (int)$information_id . "'");
-		$checkout_query = $this->db->query("SELECT COUNT(*) AS total
-											FROM " . $this->db->table_name("settings") . " 
-											WHERE `key` = 'config_checkout_id' AND `value` = '" . (int)$information_id . "'");
-		return ($account_query->row['total'] + $checkout_query->row['total']);
-	}
+    /**
+     * @param int $country_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByCountryId($country_id)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_country_id' AND  `value` = '".(int)$country_id."'");
+        return $query->row['total'];
+    }
 
-	/**
-	 * @param int $order_status_id
-	 * @return int
-	 */
-	public function getTotalStoresByOrderStatusId($order_status_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("settings") . " 
-									WHERE `key` = 'config_order_status_id' AND `value` = '" . (int)$order_status_id . "'");
-		return $query->row['total'];
-	}
+    /**
+     * @param int $zone_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByZoneId($zone_id)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_zone_id' AND  `value` = '".(int)$zone_id."'");
+        return $query->row['total'];
+    }
+
+    /**
+     * @param int $customer_group_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByCustomerGroupId($customer_group_id)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_customer_group_id' AND `value` = '".(int)$customer_group_id
+            ."'");
+        return $query->row['total'];
+    }
+
+    /**
+     * @param int $information_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByInformationId($information_id)
+    {
+        $account_query = $this->db->query("SELECT COUNT(*) AS total
+                                            FROM ".$this->db->table_name("settings")." 
+                                            WHERE `key` = 'config_account_id' AND `value` = '".(int)$information_id
+            ."'");
+        $checkout_query = $this->db->query("SELECT COUNT(*) AS total
+                                            FROM ".$this->db->table_name("settings")." 
+                                            WHERE `key` = 'config_checkout_id' AND `value` = '".(int)$information_id
+            ."'");
+        return ($account_query->row['total'] + $checkout_query->row['total']);
+    }
+
+    /**
+     * @param int $order_status_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalStoresByOrderStatusId($order_status_id)
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("settings")." 
+                                    WHERE `key` = 'config_order_status_id' AND `value` = '".(int)$order_status_id."'");
+        return $query->row['total'];
+    }
 }

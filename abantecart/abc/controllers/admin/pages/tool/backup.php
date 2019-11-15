@@ -23,12 +23,8 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ABackup;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
@@ -36,7 +32,7 @@ if (ABC::env('IS_DEMO')) {
 
 class ControllerPagesToolBackup extends AController
 {
-    private $error = array();
+    private $error = [];
     public $data;
 
     public function main()
@@ -84,7 +80,7 @@ class ControllerPagesToolBackup extends AController
             }
 
             if ($content) {
-                $this->cache->remove('*');
+                $this->cache->flush('*');
                 if ($file_type == 'sql') {
                     $this->model_tool_backup->restore($content);
                     $this->session->data['success'] = $this->language->get('text_success');
@@ -97,7 +93,7 @@ class ControllerPagesToolBackup extends AController
                         $this->error['warning'] = $this->language->get('error_xml');
                     }
                 }
-            } elseif (!AHelperUtils::has_value($this->request->post['do_backup'])) {
+            } elseif (!H::has_value($this->request->post['do_backup'])) {
                 if ($this->request->files) {
                     $this->error['warning'] = $this->language->get('error_empty')
                             .' ('.pathinfo($this->request->files['restore']['name'], PATHINFO_EXTENSION).')';
@@ -110,7 +106,7 @@ class ControllerPagesToolBackup extends AController
                         $uploaded_file = $this->request->files['import'];
                     }
                     if ($uploaded_file) {
-                        $this->error['warning'] .= '<br>Error: '.AHelperUtils::getTextUploadError($uploaded_file['error']);
+                        $this->error['warning'] .= '<br>Error: '.H::getTextUploadError($uploaded_file['error']);
                     }
                 }
             }
@@ -137,29 +133,29 @@ class ControllerPagesToolBackup extends AController
 
         $this->document->resetBreadcrumbs();
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
+        ]);
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('tool/backup'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         $this->loadModel('tool/backup');
 
         $this->data['tables'] = $this->model_tool_backup->getTables();
         //if we cannot to get table list from database -show error
         if ($this->data['tables'] === false) {
-            $this->data['tables'] = array();
+            $this->data['tables'] = [];
         }
 
         $table_sizes = $this->model_tool_backup->getTableSizes($this->data['tables']);
-        $tables = array();
+        $tables = [];
         $db_size = 0;
         foreach ($this->data['tables'] as $table) {
             $tables[$table] = $table.' ('.$table_sizes[$table]['text'].')';
@@ -174,32 +170,32 @@ class ControllerPagesToolBackup extends AController
 
         $form = new AForm('ST');
 
-        $form->setForm(array('form_name' => 'backup'));
+        $form->setForm(['form_name' => 'backup']);
 
         $this->data['form']['id'] = 'backup';
         $this->data['form']['form_open'] = $form->getFieldHtml(
-                array(
+                [
                     'type'   => 'form',
                     'name'   => 'backup',
                     'action' => $this->html->getSecureURL('tool/backup'),
                     'attr'   => 'class="aform form-horizontal"',
-                )).
+                ]).
             $form->getFieldHtml(
-                array(
+                [
                     'type'  => 'hidden',
                     'name'  => 'do_backup',
                     'value' => 1,
-                ));
+                ]);
 
         $this->data['form']['fields']['tables'] = $form->getFieldHtml(
-            array(
+            [
                 'type'      => 'checkboxgroup',
                 'name'      => 'table_list[]',
                 'value'     => $this->data['tables'],
                 'options'   => $tables,
                 'scrollbox' => true,
                 'style'     => 'checkboxgroup',
-            ));
+            ]);
 
         $c_size = $this->model_tool_backup->getCodeSize();
         if ($c_size > 1048576) {
@@ -210,12 +206,12 @@ class ControllerPagesToolBackup extends AController
         $this->data['entry_backup_code'] = sprintf($this->language->get('entry_backup_code'), $code_size);
 
         $this->data['form']['fields']['backup_code'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'checkbox',
                 'name'    => 'backup_code',
                 'value'   => '1',
                 'checked' => true,
-            ));
+            ]);
 
         $c_size = $this->model_tool_backup->getContentSize();
         if ($c_size > 1048576) {
@@ -226,19 +222,19 @@ class ControllerPagesToolBackup extends AController
         $this->data['entry_backup_content'] = sprintf($this->language->get('entry_backup_content'), $content_size);
 
         $this->data['form']['fields']['backup_content'] = $form->getFieldHtml(
-            array(
+            [
                 'type'    => 'checkbox',
                 'name'    => 'backup_content',
                 'value'   => '1',
                 'checked' => true,
-            ));
+            ]);
 
         $this->data['form']['fields']['compress_backup'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'checkbox',
                 'name'  => 'compress_backup',
                 'value' => 1,
-            ));
+            ]);
 
         $this->data['entry_compress_backup'] = sprintf(
             $this->language->get('entry_compress_backup'),
@@ -249,67 +245,67 @@ class ControllerPagesToolBackup extends AController
         $this->data['form']['build_task_url'] = $this->html->getSecureURL('r/tool/backup/buildTask');
         $this->data['form']['complete_task_url'] = $this->html->getSecureURL('r/tool/backup/complete');
         $this->data['form']['backup_now'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'backup_now',
                 'text'  => $this->language->get('button_backup_now'),
                 'style' => 'button1',
-            ));
+            ]);
         $this->data['form']['backup_schedule'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'backup_schedule',
                 'text'  => $this->language->get('button_backup_schedule'),
                 'style' => 'button1',
-            ));
+            ]);
 
         $form = new AForm('ST');
-        $form->setForm(array('form_name' => 'restore_form'));
+        $form->setForm(['form_name' => 'restore_form']);
         $this->data['restoreform']['id'] = 'restore_form';
         $this->data['restoreform']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'restore_form',
                 'action' => $this->html->getSecureURL('tool/backup'),
                 'attr'   => 'class="aform form-horizontal"',
-            ));
+            ]);
         $this->data['restoreform']['file'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'file',
                 'name' => 'restore',
                 'attr' => 'accept=".sql, .xml"',
-            ));
+            ]);
         $this->data['restoreform']['submit'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'submit',
                 'text'  => $this->language->get('tab_restore'),
                 'style' => 'button1',
-            ));
+            ]);
 
         $form = new AForm('ST');
-        $form->setForm(array('form_name' => 'loadxml_form'));
+        $form->setForm(['form_name' => 'loadxml_form']);
         $this->data['xmlform']['id'] = 'loadxml_form';
         $this->data['xmlform']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'loadxml_form',
                 'action' => $this->html->getSecureURL('tool/backup'),
                 'attr'   => 'class="aform form-horizontal"',
-            ));
+            ]);
         $this->data['xmlform']['file'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'file',
                 'name' => 'import',
                 'attr' => 'accept=".xml"',
-            ));
+            ]);
         $this->data['xmlform']['submit'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'submit',
                 'text'  => $this->language->get('button_load'),
                 'style' => 'button1',
-            ));
+            ]);
 
         $this->data['text_fail_note'] = sprintf(
             $this->language->get('text_fail_note'),
@@ -343,7 +339,7 @@ class ControllerPagesToolBackup extends AController
             $this->error['warning'] = $this->language->get('error_nothing_to_do');
         }
 
-        if (AHelperUtils::has_value($this->request->post['do_backup'])) { // sign of backup form
+        if (H::has_value($this->request->post['do_backup'])) { // sign of backup form
             $this->request->post['backup_code'] = $this->request->post['backup_code'] ? true : false;
             $this->request->post['backup_content'] = $this->request->post['backup_content'] ? true : false;
 
@@ -368,7 +364,7 @@ class ControllerPagesToolBackup extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if ($this->user->canAccess('tool/backup')) {
-            $filename = str_replace(array('../', '..\\', '\\', '/'), '', $this->request->get['filename']);
+            $filename = str_replace(['../', '..\\', '\\', '/'], '', $this->request->get['filename']);
             $file = ABC::env('DIR_BACKUP').$filename;
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');

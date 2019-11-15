@@ -44,9 +44,6 @@ $class_list = [
         'attribute',
         'language',
     ],
-    'core/cache'  => [
-        'cache',
-    ],
     'core/view'   => [
         'view',
     ],

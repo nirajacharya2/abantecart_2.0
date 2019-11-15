@@ -22,8 +22,10 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Class ADB
@@ -79,6 +81,7 @@ class ADB
 
             $this->orm->setAsGlobal();  //this is important
             //register ORM-model event listeners
+            /** @var Dispatcher $evd */
             $evd = ABC::getObjectByAlias('EventDispatcher');
             if (is_object($evd)) {
                 $this->orm->setEventDispatcher($evd);

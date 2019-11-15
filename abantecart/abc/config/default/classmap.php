@@ -4,6 +4,7 @@
  */
 
 use abc\core\engine\Attribute;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AttributeManager;
 use abc\core\lib\Abac;
 use abc\core\lib\ACart;
@@ -23,12 +24,14 @@ use abc\core\lib\CheckOut;
 use abc\core\lib\CheckOutAdmin;
 use abc\core\lib\ACurrency;
 use abc\core\lib\UserResolver;
+use abc\core\view\AViewDefaultRender;
 use abc\modules\audit_log\AuditLogDbStorage;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
 
 return [
-    'AViewRender'       => \abc\core\view\AViewDefaultRender::class,
+    'cache'             => AbcCache::class,
+    'AViewRender'       => AViewDefaultRender::class,
     'ALog'              => [
         ALog::class,
         [

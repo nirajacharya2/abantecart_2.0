@@ -107,7 +107,7 @@ class BaseModel extends OrmModel
     protected $config;
 
     /**
-     * @var \abc\core\cache\ACache
+     * @var \abc\core\lib\AbcCache
      */
     protected $cache;
 

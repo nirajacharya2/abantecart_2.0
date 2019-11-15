@@ -138,7 +138,7 @@ class ControllerResponsesListingGridExtension extends AController
         }
 
         $rows = array_merge($to_install, $extensions->rows);
-        $updates = $this->cache->pull('extensions.updates');
+        $updates = $this->cache->get('extensions.updates');
 
         foreach ($rows as $row) {
             $extension = $row['key'];

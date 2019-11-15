@@ -78,7 +78,7 @@ class ModelToolMPAPI extends Model {
 
 		if($auth['status']){
 			//remove cache info about updates
-			$this->cache->remove('extensions');
+			$this->cache->flush('extensions');
 			return true;
 		} else {
 			return false;			

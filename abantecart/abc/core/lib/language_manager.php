@@ -589,6 +589,7 @@ class ALanguageManager extends ALanguage
      *
      * @return bool
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteAllLanguageEntries($language_id)
     {
@@ -615,6 +616,7 @@ class ALanguageManager extends ALanguage
      *
      * @return string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function cloneToAllLanguages($table, $source_language)
     {
@@ -675,6 +677,7 @@ class ALanguageManager extends ALanguage
      * @return null|string
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function fillMissingLanguageEntries($language_id, $source_language_id = 1, $translate_method = '')
     {
@@ -723,6 +726,7 @@ class ALanguageManager extends ALanguage
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function definitionAutoLoad($language_id, $section, $specific_block)
     {
@@ -755,8 +759,7 @@ class ALanguageManager extends ALanguage
 
         //delete cash before loading
         if (is_object($this->cache)) {
-            $this->cache->remove('localization');
-            $this->cache->remove('storefront_menu');
+            $this->cache->flush();
         }
 
         //get list of lang blocks for every language
@@ -878,6 +881,7 @@ class ALanguageManager extends ALanguage
      *
      * @return null|string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function cloneMissingDefinitions($block, $language_id, $source_language)
     {
@@ -1058,6 +1062,7 @@ class ALanguageManager extends ALanguage
      *
      * @return null|string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function cloneLanguageRows(
         $table,
@@ -1196,7 +1201,7 @@ class ALanguageManager extends ALanguage
                 }
             }
             if ($tcount > 0) {
-                $this->cache->remove('localization');
+                $this->cache->flush();
             }
         }
 
@@ -1208,13 +1213,14 @@ class ALanguageManager extends ALanguage
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getLanguageBasedTables()
     {
         $cache_key = 'tables.language_based_tables';
         $load_data = [];
         if ($this->cache) {
-            $load_data = $this->cache->pull($cache_key);
+            $load_data = $this->cache->get($cache_key);
         }
         if (!$load_data) {
             $sql = "SELECT DISTINCT table_name 
@@ -1223,7 +1229,7 @@ class ALanguageManager extends ALanguage
             $load_sql = $this->db->query($sql);
             $load_data = $load_sql->rows;
             if ($this->cache) {
-                $this->cache->push($cache_key, $load_data);
+                $this->cache->put($cache_key, $load_data);
             }
         }
 
@@ -1237,6 +1243,7 @@ class ALanguageManager extends ALanguage
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTranslatableFields($table_name)
     {
@@ -1251,7 +1258,7 @@ class ALanguageManager extends ALanguage
             return $this->translatable_fields[$table_name];
         } else {
             if ($this->cache) {
-                $load_data = $this->cache->pull($cache_key);
+                $load_data = $this->cache->get($cache_key);
             }
         }
         if ($load_data) {
@@ -1274,7 +1281,7 @@ class ALanguageManager extends ALanguage
             }
             //save cache
             if ($this->cache) {
-                $this->cache->push($cache_key, $result);
+                $this->cache->put($cache_key, $result);
             }
             //save to memory
             $this->translatable_fields[$table_name] = $result;

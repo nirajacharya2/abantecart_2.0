@@ -39,6 +39,7 @@ class ModelLocalisationCurrency extends Model
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
     public function addCurrency($data)
     {
@@ -60,7 +61,7 @@ class ModelLocalisationCurrency extends Model
                                   '".(int)$data['status']."',
                                   NOW())");
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
 
         return $this->db->getLastId();
     }
@@ -70,12 +71,14 @@ class ModelLocalisationCurrency extends Model
      * @param     $data
      *
      * @return bool
+     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editCurrency($currency_id, $data)
     {
         // prevent disabling the only enabled currency in cart
         if (isset($data['status']) && ! $data['status']) {
-            $enabled = array();
+            $enabled = [];
             $all = $this->getCurrencies();
             foreach ($all as $c) {
                 if ($c['status'] && $c['currency_id'] != $currency_id) {
@@ -87,8 +90,8 @@ class ModelLocalisationCurrency extends Model
             }
         }
 
-        $fields = array('title', 'code', 'symbol_left', 'symbol_right', 'decimal_place', 'value', 'status',);
-        $update = array('date_modified = NOW()');
+        $fields = ['title', 'code', 'symbol_left', 'symbol_right', 'decimal_place', 'value', 'status',];
+        $update = ['date_modified = NOW()'];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
                 $update[] = $f." = '".$this->db->escape($data[$f])."'";
@@ -98,7 +101,7 @@ class ModelLocalisationCurrency extends Model
             $this->db->query("UPDATE ".$this->db->table_name("currencies")." 
                               SET ".implode(',', $update)."
                               WHERE currency_id = '".(int)$currency_id."'");
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
 
         return true;
@@ -108,6 +111,7 @@ class ModelLocalisationCurrency extends Model
      * @param int $currency_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function deleteCurrency($currency_id)
     {
@@ -117,7 +121,7 @@ class ModelLocalisationCurrency extends Model
         }
         $this->db->query("DELETE FROM ".$this->db->table_name("currencies")." 
                           WHERE currency_id = '".(int)$currency_id."'");
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
 
         return true;
     }
@@ -126,6 +130,7 @@ class ModelLocalisationCurrency extends Model
      * @param int $currency_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getCurrency($currency_id)
     {
@@ -140,19 +145,20 @@ class ModelLocalisationCurrency extends Model
      * @param array $data
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getCurrencies($data = array())
+    public function getCurrencies($data = [])
     {
         if ($data) {
             $sql = "SELECT * FROM ".$this->db->table_name("currencies")." ";
 
-            $sort_data = array(
+            $sort_data = [
                 'title',
                 'code',
                 'value',
                 'status',
                 'date_modified',
-            );
+            ];
 
             if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
                 $sql .= " ORDER BY ".$data['sort'];
@@ -182,15 +188,15 @@ class ModelLocalisationCurrency extends Model
 
             return $query->rows;
         } else {
-            $currency_data = $this->cache->pull('localization.currency');
+            $currency_data = $this->cache->get('localization.currency');
 
-            if ($currency_data === false) {
+            if ($currency_data === null) {
                 $query = $this->db->query("SELECT *
                                             FROM ".$this->db->table_name("currencies")." 
                                             ORDER BY title ASC");
 
                 foreach ($query->rows as $result) {
-                    $currency_data[$result['code']] = array(
+                    $currency_data[$result['code']] = [
                         'currency_id'   => $result['currency_id'],
                         'title'         => $result['title'],
                         'code'          => $result['code'],
@@ -200,10 +206,10 @@ class ModelLocalisationCurrency extends Model
                         'value'         => $result['value'],
                         'status'        => $result['status'],
                         'date_modified' => $result['date_modified'],
-                    );
+                    ];
                 }
 
-                $this->cache->push('localization.currency', $currency_data);
+                $this->cache->put('localization.currency', $currency_data);
             }
 
             return $currency_data;
@@ -254,7 +260,7 @@ class ModelLocalisationCurrency extends Model
                   date_modified = NOW()
               WHERE code = '".$this->db->escape($base_currency_code)."'";
         $this->db->query($sql);
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
 
     }
 
@@ -262,6 +268,7 @@ class ModelLocalisationCurrency extends Model
      * @param string $new_currency_code
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function switchConfigCurrency($new_currency_code)
     {
@@ -278,7 +285,7 @@ class ModelLocalisationCurrency extends Model
             } else {
                 $new_value = $currency['value'] * $scale;
             }
-            $this->editCurrency($currency['currency_id'], array('value' => $new_value));
+            $this->editCurrency($currency['currency_id'], ['value' => $new_value]);
         }
 
         return true;
@@ -286,6 +293,7 @@ class ModelLocalisationCurrency extends Model
 
     /**
      * @return int
+     * @throws \Exception
      */
     public function getTotalCurrencies()
     {

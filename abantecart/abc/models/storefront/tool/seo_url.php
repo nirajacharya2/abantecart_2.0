@@ -23,16 +23,13 @@ namespace abc\models\storefront;
 use abc\core\ABC;
 use abc\core\engine\Model;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ModelToolSeoUrl extends Model
 {
     /**
      * @param string $link - URL
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function rewrite($link)
     {
@@ -41,7 +38,7 @@ class ModelToolSeoUrl extends Model
             $url_data = parse_url(str_replace('&amp;', '&', $link));
 
             $url = '';
-            $data = array();
+            $data = [];
             parse_str($url_data['query'], $data);
 
             $language_id = (int)$this->config->get('storefront_language_id');
@@ -77,7 +74,7 @@ class ModelToolSeoUrl extends Model
                     default:
                 }
 
-                if ( ! $object_name) {
+                if (!$object_name) {
                     continue;
                 }
 
@@ -120,11 +117,12 @@ class ModelToolSeoUrl extends Model
 
     /**
      * @param string $object_name - product, category, manufacturer, content
-     * @param string $param_key   - product_id, category_id, manufacturer_id, content_id
-     * @param int    $param_value - id
-     * @param int    $language_id
+     * @param string $param_key - product_id, category_id, manufacturer_id, content_id
+     * @param int $param_value - id
+     * @param int $language_id
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getSEOKeyword($object_name, $param_key, $param_value, $language_id)
     {
@@ -134,10 +132,10 @@ class ModelToolSeoUrl extends Model
 
         if ($this->config->get('config_cache_enable')) {
             $cache_key = $object_name.'.url_aliases.lang_'.(int)$language_id;
-            $aliases = $this->cache->pull($cache_key);
+            $aliases = $this->cache->get($cache_key);
             //if no cache - push
-            if ($aliases === false) {
-                $aliases = array();
+            if ($aliases === null) {
+                $aliases = [];
                 $sql = "SELECT query, keyword
                     FROM ".$this->db->table_name('url_aliases')."
                     WHERE `query` LIKE '".$this->db->escape($param_key, true)."=%'
@@ -149,7 +147,7 @@ class ModelToolSeoUrl extends Model
                     $parts = explode('=', $seo_query);
                     $aliases[$parts[1]] = $row['keyword'];
                 }
-                $this->cache->push($cache_key, $aliases);
+                $this->cache->put($cache_key, $aliases);
             }
             $output = isset($aliases[$param_value]) ? $aliases[$param_value] : '';
 

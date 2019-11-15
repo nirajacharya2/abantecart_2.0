@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,77 +17,82 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\lib\AMenu_Storefront;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerBlocksMenu extends AController {
-	public $data=array();
-	private $menu_items;
-	public function main() {
+class ControllerBlocksMenu extends AController
+{
+    public $data = [];
+    private $menu_items;
 
-		//HTML cache only for non-customer
-		if(!$this->customer->isLogged() && !$this->customer->isUnauthCustomer()){
-			if($this->html_cache()){
-				return;
-			}
-		}
+    public function main()
+    {
 
-		$this->loadLanguage('blocks/menu');
-		$this->loadLanguage('common/header');
+        //HTML cache only for non-customer
+        if (!$this->customer->isLogged() && !$this->customer->isUnauthCustomer()) {
+            if ($this->html_cache()) {
+                return;
+            }
+        }
 
-		$this->data['heading_title'] = $this->language->get('heading_title','blocks/menu');
+        $this->loadLanguage('blocks/menu');
+        $this->loadLanguage('common/header');
 
-		$cache_key = 'storefront_menu.store_'.(int)$this->config->get('config_store_id').'_lang_'.$this->config->get('storefront_language_id');
-		$this->menu_items = $this->cache->pull($cache_key);
-		if($this->menu_items === false){
-			$menu = new AMenu_Storefront();
-			$this->menu_items = $menu->getMenuItems();
+        $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/menu');
 
-			//writes into cache result of calling _buildMenu func!
-			$this->cache->push($cache_key, $this->menu_items);
-		}
+        $cache_key = 'storefront_menu.store_'
+            .(int)$this->config->get('config_store_id')
+            .'_lang_'.$this->config->get('storefront_language_id');
+        $this->menu_items = $this->cache->get($cache_key);
+        if ($this->menu_items === null) {
+            $menu = new AMenu_Storefront();
+            $this->menu_items = $menu->getMenuItems();
 
-		//build menu structure after caching. related to http/https urls
-		$this->menu_items = $this->_buildMenu('');
+            //writes into cache result of calling _buildMenu func!
+            $this->cache->put($cache_key, $this->menu_items);
+        }
 
-		$storefront_menu = $this->menu_items;
-		$this->session->data['storefront_menu'] = $storefront_menu;
-		$this->data['storemenu'] = $storefront_menu;
+        //build menu structure after caching. related to http/https urls
+        $this->menu_items = $this->_buildMenu('');
 
-		$this->view->batchAssign($this->data);
-		$this->processTemplate();
-	}
+        $storefront_menu = $this->menu_items;
+        $this->session->data['storefront_menu'] = $storefront_menu;
+        $this->data['storemenu'] = $storefront_menu;
 
+        $this->view->batchAssign($this->data);
+        $this->processTemplate();
+    }
 
-	private function _buildMenu( $parent = '' ) {
-		$menu = array();
-		if ( empty($this->menu_items[$parent]) ) return $menu;
-		$lang_id = (int)$this->config->get('storefront_language_id');
+    private function _buildMenu($parent = '')
+    {
+        $menu = [];
+        if (empty($this->menu_items[$parent])) {
+            return $menu;
+        }
+        $lang_id = (int)$this->config->get('storefront_language_id');
 
-		foreach ( $this->menu_items[$parent] as $item ) {
-			if( preg_match ( "/^http/i", $item ['item_url'] ) ){
-				$href = $item ['item_url'];
-			}
-			//process relative url such as ../blog/index.php
-			elseif( preg_match ( "/^\.\.\//i", $item ['item_url'] ) ){
-				$href = str_replace('../','',$item ['item_url']);
-			}else {
-				$href = $this->html->getSecureURL( $item ['item_url'] );
-			}
-			$menu[] = array(
-				'id' => $item['item_id'],
-				'current' => $item['current'],
-				'icon' => $item['item_icon'],
-				'icon_rl_id' => $item['item_icon_rl_id'],
-				'href' =>  $href,
-				'text' => $item['item_text'][$lang_id],
-				'children' => $this->_buildMenu( $item['item_id'] ),
-			);
-		}
-		return $menu;
-	}
+        foreach ($this->menu_items[$parent] as $item) {
+            if (preg_match("/^http/i", $item ['item_url'])) {
+                $href = $item ['item_url'];
+            } //process relative url such as ../blog/index.php
+            elseif (preg_match("/^\.\.\//i", $item ['item_url'])) {
+                $href = str_replace('../', '', $item ['item_url']);
+            } else {
+                $href = $this->html->getSecureURL($item ['item_url']);
+            }
+            $menu[] = [
+                'id'         => $item['item_id'],
+                'current'    => $item['current'],
+                'icon'       => $item['item_icon'],
+                'icon_rl_id' => $item['item_icon_rl_id'],
+                'href'       => $href,
+                'text'       => $item['item_text'][$lang_id],
+                'children'   => $this->_buildMenu($item['item_id']),
+            ];
+        }
+        return $menu;
+    }
 }

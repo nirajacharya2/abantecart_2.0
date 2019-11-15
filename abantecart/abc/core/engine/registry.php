@@ -20,7 +20,7 @@
 
 namespace abc\core\engine;
 
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConfigManager;
@@ -59,7 +59,7 @@ use abc\core\lib\AUser;
  * @method static AUser user()
  * @method static ACurrency currency()
  * @method static ADownload download()
- * @method static ACache cache()
+ * @method static AbcCache cache()
  * @method static AOrderStatus order_status()
  * @method static AMessage messages()
  */
@@ -90,7 +90,7 @@ final class Registry
     /**
      * @param $key string
      *
-     * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\cache\ACache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
+     * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\lib\AbcCache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
      */
     public function get($key)
     {

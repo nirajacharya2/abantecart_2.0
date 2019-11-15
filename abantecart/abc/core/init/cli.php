@@ -159,7 +159,7 @@ registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\AS
 // Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
-    registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
+    registerClass($registry, 'cache', 'cache', [ABC::env('CACHE')['driver']], '\abc\core\lib\AbcCache', ['file']);
     registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);
     registerClass(
         $registry,

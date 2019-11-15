@@ -72,6 +72,7 @@ class ModelSettingSetting extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllSettings($data = [], $mode = 'default')
     {
@@ -136,6 +137,7 @@ class ModelSettingSetting extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalSettings($data = [])
     {
@@ -328,17 +330,19 @@ class ModelSettingSetting extends Model
         }
         // if change cache status - flush cache
         if (isset($data['config_cache_enable'])) {
-            $this->cache->remove('*');
+            $this->cache->flush('*');
         }
 
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
-        $this->cache->remove('stores');
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
+        $this->cache->flush('stores');
     }
 
     /**
      * @param string $group
      * @param int $store_id
+     *
+     * @throws \Exception
      */
     public function deleteSetting($group, $store_id = 0)
     {
@@ -347,8 +351,8 @@ class ModelSettingSetting extends Model
                           WHERE `group` = '".$this->db->escape($group)."'
                           AND `store_id` = '".$store_id."'");
 
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
-        $this->cache->remove('stores');
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
+        $this->cache->flush('stores');
     }
 }

@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
 
 use abc\core\engine\Model;
@@ -45,15 +46,15 @@ class ModelLocalisationZone extends Model
 
         foreach ($data['zone_name'] as $language_id => $value) {
             $this->language->replaceDescriptions('zone_descriptions',
-                array('zone_id' => (int)$zone_id),
-                array(
-                    $language_id => array(
+                ['zone_id' => (int)$zone_id],
+                [
+                    $language_id => [
                         'name' => $value['name'],
-                    ),
-                ));
+                    ],
+                ]);
         }
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
         return $zone_id;
     }
 
@@ -65,8 +66,8 @@ class ModelLocalisationZone extends Model
      */
     public function editZone($zone_id, $data)
     {
-        $fields = array('status', 'code', 'country_id',);
-        $update = array();
+        $fields = ['status', 'code', 'country_id',];
+        $update = [];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
                 $update[] = $f." = '".$this->db->escape($data[$f])."'";
@@ -78,21 +79,21 @@ class ModelLocalisationZone extends Model
                 SET ".implode(',', $update)." 
                 WHERE zone_id = '".(int)$zone_id."'"
             );
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
 
         if ($data['zone_name']) {
             foreach ($data['zone_name'] as $language_id => $value) {
                 $this->language->replaceDescriptions('zone_descriptions',
-                    array('zone_id' => (int)$zone_id),
-                    array(
-                        $language_id => array(
+                    ['zone_id' => (int)$zone_id],
+                    [
+                        $language_id => [
                             'name' => $value['name'],
-                        ),
-                    ));
+                        ],
+                    ]);
             }
         }
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -111,7 +112,7 @@ class ModelLocalisationZone extends Model
             WHERE zone_id = '".(int)$zone_id."'"
         );
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -150,14 +151,14 @@ class ModelLocalisationZone extends Model
      */
     public function getZoneDescriptions($zone_id)
     {
-        $zone_data = array();
+        $zone_data = [];
         $query = $this->db->query(
             "SELECT *
             FROM ".$this->db->table_name("zone_descriptions")." 
             WHERE zone_id = '".(int)$zone_id."'"
         );
         foreach ($query->rows as $result) {
-            $zone_data[$result['language_id']] = array('name' => $result['name']);
+            $zone_data[$result['language_id']] = ['name' => $result['name']];
         }
         return $zone_data;
     }
@@ -169,7 +170,7 @@ class ModelLocalisationZone extends Model
      * @return array
      * @throws \Exception
      */
-    public function getZones($data = array(), $mode = 'default')
+    public function getZones($data = [], $mode = 'default')
     {
         $language_id = $this->language->getContentLanguageID();
         $default_language_id = $this->language->getDefaultLanguageID();
@@ -252,7 +253,7 @@ class ModelLocalisationZone extends Model
      * @return array
      * @throws \Exception
      */
-    public function getTotalZones($data = array())
+    public function getTotalZones($data = [])
     {
         return $this->getZones($data, 'total_only');
     }
@@ -262,15 +263,16 @@ class ModelLocalisationZone extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getZonesByCountryId($country_id)
     {
         $language_id = $this->language->getContentLanguageID();
         $default_language_id = $this->language->getDefaultLanguageID();
         $cache_key = 'localization.zone.'.$country_id.'.lang_'.$language_id;
-        $zone_data = $this->cache->pull($cache_key);
+        $zone_data = $this->cache->get($cache_key);
 
-        if ($zone_data === false) {
+        if ($zone_data === null) {
             $query = $this->db->query(
                 "SELECT *, COALESCE( zd1.name, zd2.name) as name 
                 FROM ".$this->db->table_name("zones")." z
@@ -281,7 +283,7 @@ class ModelLocalisationZone extends Model
                 WHERE z.country_id = '".(int)$country_id."'
                 ORDER BY zd1.name, zd2.name");
             $zone_data = $query->rows;
-            $this->cache->push($cache_key, $zone_data);
+            $this->cache->put($cache_key, $zone_data);
         }
 
         return $zone_data;
@@ -320,6 +322,7 @@ class ModelLocalisationZone extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getZonesByLocationId($location_id)
     {
@@ -327,9 +330,9 @@ class ModelLocalisationZone extends Model
         $default_language_id = $this->language->getDefaultLanguageID();
 
         $cache_key = 'localization.zone.location.'.$location_id.'.lang_'.$language_id;
-        $zone_data = $this->cache->pull($cache_key);
+        $zone_data = $this->cache->get($cache_key);
 
-        if ($zone_data === false) {
+        if ($zone_data === null) {
             $query = $this->db->query(
                 "SELECT z.*, COALESCE( zd1.name, zd2.name) as name
                 FROM ".$this->db->table_name("zones")." z
@@ -341,7 +344,7 @@ class ModelLocalisationZone extends Model
                     ON ( zl.zone_id = z.zone_id AND zl.location_id = '".(int)$location_id."' )
                 ORDER BY zd1.name, zd2.name");
             $zone_data = $query->rows;
-            $this->cache->push($cache_key, $zone_data);
+            $this->cache->put($cache_key, $zone_data);
         }
 
         return $zone_data;

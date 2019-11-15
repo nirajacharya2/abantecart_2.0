@@ -21,7 +21,6 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AData;
 use abc\core\lib\AError;
-use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 
@@ -155,7 +154,7 @@ class ControllerTaskToolImportProcess extends AController
                         $this->errors[] = $error_text;
                         $this->log->write($error_text);
                         $result = false;
-                    } catch (AException $e) {
+                    } catch (\Exception $e) {
                         $error_text = $e->getMessage();
                         $this->errors[] = $error_text;
                         $this->log->write($error_text);
@@ -191,7 +190,7 @@ class ControllerTaskToolImportProcess extends AController
         //sends always true as result
         $tm->updateStep($step_id, ['last_result' => $this->failed_count ? false : true]);
         //all done, clear cache
-        $this->cache->remove('*');
+        $this->cache->flush('*');
         //return always true fo import process only. we think one failed row cannot block task
         return true;
     }

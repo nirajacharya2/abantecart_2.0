@@ -6,7 +6,6 @@ use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
-use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -1129,6 +1128,7 @@ class Product extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductCategories()
     {
@@ -1260,6 +1260,7 @@ class Product extends BaseModel
      * @return mixed
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function thumbnail()
     {
@@ -1281,6 +1282,7 @@ class Product extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function images()
     {
@@ -1406,7 +1408,7 @@ class Product extends BaseModel
         if (!$result) {
             $this->errors = array_merge($this->errors, $resource_mdl->errors());
         }
-        $this->cache->remove('product');
+        $this->cache->flush('product');
         return $result;
     }
 
@@ -1490,7 +1492,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $this->cache->remove('product');
+        $this->cache->flush('product');
         return true;
     }
 
@@ -1749,7 +1751,7 @@ class Product extends BaseModel
                    $r['resource_id']
                );
            }
-           $this->cache->remove('product');
+           $this->cache->flush('product');
 
            //clone layout for the product if present
            $layout_clone_result = $this->_clone_product_layout($product_id, $new_product_id);
@@ -2104,8 +2106,8 @@ class Product extends BaseModel
             .'.store_'.$store_id
             .'_lang_'.$language_id
             .'_'.md5($limit);
-        $productIds = $cache->pull($cache_key);
-        if ($productIds === false) {
+        $productIds = $cache->get($cache_key);
+        if ($productIds === null) {
             $productIds = [];
             /** @var QueryBuilder $query */
             $query = OrderProduct::select(['order_products.product_id']);
@@ -2129,7 +2131,7 @@ class Product extends BaseModel
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
                 $productIds = array_column($product_data, 'product_id');
-                $cache->push($cache_key, $productIds);
+                $cache->put($cache_key, $productIds);
             }
         }
         return $productIds;
@@ -2162,7 +2164,7 @@ class Product extends BaseModel
             .'_lang_'.$language_id
             .'_'.md5($limit.$order.$start.$sort.$total);
 
-        $product_data = $cache->pull($cache_key);
+        $product_data = $cache->get($cache_key);
         if ($product_data === false) {
             $product_data = [];
 
@@ -2183,6 +2185,7 @@ class Product extends BaseModel
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
                 ->addSelect($select)
                 ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
+                    /** @var JoinClause $subQuery */
                     $subQuery->on('products.product_id',
                         '=',
                         'product_descriptions.product_id')
@@ -2238,7 +2241,7 @@ class Product extends BaseModel
             $result_rows = $query->get();
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
-                $cache->push($cache_key, $product_data);
+                $cache->put($cache_key, $product_data);
             }
         }
         return $product_data;
@@ -2250,6 +2253,7 @@ class Product extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getProductsAllInfo(array $productIds)
     {

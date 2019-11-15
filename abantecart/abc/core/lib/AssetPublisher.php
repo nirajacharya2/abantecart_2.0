@@ -23,7 +23,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\core\lib\contracts\AssetPublisherDriverInterface;
 use H;
@@ -35,7 +34,6 @@ use H;
  * @property ALanguageManager $language
  * @property AConfig $config
  * @property ASession $session
- * @property \abc\core\cache\ACache $cache
  * @property ALoader $load
  * @property ExtensionsApi $extensions
  *

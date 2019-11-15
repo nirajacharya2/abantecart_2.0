@@ -21,14 +21,14 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\commands\Publish;
 use abc\core\engine\ExtensionUtils;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
+use H;
 
 /**
  * @property \abc\core\engine\ExtensionsApi      $extensions
  * @property ADB                                 $db
- * @property \abc\core\cache\ACache              $cache
+ * @property \abc\core\lib\AbcCache              $cache
  * @property AConfig                             $config
  * @property \abc\core\engine\ALanguage          $language
  * @property \abc\core\engine\ALoader            $load
@@ -132,7 +132,7 @@ class AExtensionManager
                              `license_key` = '".$this->db->escape($license_key)."',
                              `date_added` = NOW()");
 
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
 
         return $this->db->getLastId();
     }
@@ -144,6 +144,7 @@ class AExtensionManager
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getParentsExtensionTextId($extension_txt_id)
     {
@@ -168,6 +169,7 @@ class AExtensionManager
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getChildrenExtensions($parent_extension_txt_id)
     {
@@ -194,6 +196,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function addDependant($extension_txt_id, $extension_parent_txt_id)
     {
@@ -215,7 +218,7 @@ class AExtensionManager
                     VALUES ('".$extension_id."', '".$extension_parent_id."')";
             $this->db->query($sql);
         }
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
         return true;
     }
 
@@ -227,6 +230,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteDependant($extension_txt_id = '', $extension_parent_txt_id = '')
     {
@@ -252,7 +256,7 @@ class AExtensionManager
         $sql .= implode(' AND ', $where);
         $this->db->query($sql);
 
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
 
         return true;
     }
@@ -266,6 +270,7 @@ class AExtensionManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editSetting($extension_txt_id, $data)
     {
@@ -399,7 +404,7 @@ class AExtensionManager
 
             //Special case.
             //Check that we have single mode RL with ID
-            if (AHelperUtils::has_value($data[$key."_resource_id"]) && !AHelperUtils::has_value($value)) {
+            if (H::has_value($data[$key."_resource_id"]) && !H::has_value($value)) {
                 //save ID if resource path is missing
                 $value = $data[$key."_resource_id"];
             }
@@ -438,9 +443,9 @@ class AExtensionManager
         $this->db->query($sql);
 
 
-        $this->cache->remove('admin_menu');
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
+        $this->cache->flush('admin_menu');
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
 
         return true;
     }
@@ -458,9 +463,9 @@ class AExtensionManager
             ."';");
         $this->db->query("DELETE FROM ".$this->db->table_name("language_definitions")." WHERE `block` = '"
             .$this->db->escape($group)."_".$this->db->escape($group)."';");
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
-        $this->cache->remove('localization');
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -472,6 +477,7 @@ class AExtensionManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function install($name, $config)
     {
@@ -514,7 +520,7 @@ class AExtensionManager
             if (is_file($file)) {
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }
@@ -572,10 +578,13 @@ class AExtensionManager
     }
 
     /**
-     * @param string                       $name
+     * @param string $name
      * @param \DOMNode | \SimpleXMLElement $config
      *
      * @return bool|null
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function uninstall($name, $config)
     {
@@ -608,7 +617,7 @@ class AExtensionManager
             if (is_file($file)) {
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }
@@ -639,6 +648,8 @@ class AExtensionManager
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function delete($extension_txt_id)
     {
@@ -682,7 +693,7 @@ class AExtensionManager
         // refresh data about updates
         $this->load->model('tool/updater');
         $this->model_tool_updater->check4updates();
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
         return true;
     }
 
@@ -690,6 +701,8 @@ class AExtensionManager
      * @param string $extension_txt_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function validate($extension_txt_id)
     {
@@ -698,7 +711,7 @@ class AExtensionManager
             return false;
         }
         // get config.xml
-        $config = AHelperUtils::getExtensionConfigXml($extension_txt_id);
+        $config = H::getExtensionConfigXml($extension_txt_id);
         $result = $this->validateCoreVersion($extension_txt_id, $config);
         if (!$result) {
             return false;
@@ -732,6 +745,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateDependencies($extension_txt_id, $config)
     {
@@ -759,8 +773,8 @@ class AExtensionManager
             // if extension installed - check version that need
             if ($version) {
                 if ($required
-                    && (!AHelperUtils::versionCompare($version, $versions[$item], '>=')
-                        || !AHelperUtils::versionCompare($prior_version, $versions[$item], '<='))) {
+                    && (!H::versionCompare($version, $versions[$item], '>=')
+                        || !H::versionCompare($prior_version, $versions[$item], '<='))) {
                     $this->errors[] =
                         sprintf('%s extension cannot be installed: %s extension versions '.$prior_version.' - '.$version
                             .' are required', $extension_txt_id, $item);
@@ -781,6 +795,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function checkDependantsBeforeUninstall($extension_txt_id)
     {
@@ -792,7 +807,7 @@ class AExtensionManager
             /**
              * @var \DOMNode $config
              */
-            $config = AHelperUtils::getExtensionConfigXml($extension);
+            $config = H::getExtensionConfigXml($extension);
             if (!isset($config->dependencies->item)) {
                 continue;
             }
@@ -851,7 +866,7 @@ class AExtensionManager
         }
         // check is cart version presents on extension cart version list
         foreach ($cart_versions as $version) {
-            $result = AHelperUtils::versionCompare(ABC::env('VERSION'), $version, '>=')
+            $result = H::versionCompare(ABC::env('VERSION'), $version, '>=')
                 && version_compare($version, '2.0.0', '>');
             if ($result) {
                 return true;
@@ -859,7 +874,7 @@ class AExtensionManager
         }
         // if not - seek cart earlier version then current cart version in the list
         foreach ($cart_versions as $version) {
-            $result = (AHelperUtils::versionCompare($version, ABC::env('VERSION'), '<=')
+            $result = (H::versionCompare($version, ABC::env('VERSION'), '<=')
                 && version_compare($version, '2.0.0', '<='));
             if ($result) {
                 $error_text = 'Extension "%s" written for earlier version of Abantecart (v.%s) lower that you have. ';

@@ -22,9 +22,8 @@ use abc\commands\base\BaseCommand;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-use abc\core\cache\ACache;
 use abc\core\lib\{
-    AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
+    AbcCache, AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
 use H;
 
@@ -107,8 +106,7 @@ class Install extends BaseCommand
         }
         if (!$errors) {
             $registry = Registry::getInstance();
-            $registry->set('cache', new ACache());
-            $registry->get('cache')->setCacheStorageDriver('file');
+            $registry->set('cache', new AbcCache('file'));
             $config = new AConfig($registry, (string)$options['http_server']);
             $registry->set('config', $config);
             $registry->set('language', new ALanguageManager($registry));
@@ -707,13 +705,15 @@ return [
                     [
                         'CACHE_DRIVER' => '{$options['cache_driver']}',
                         'DIR_CACHE'    => '{$dirs['cache']}',
-                        //for "apc", "apcu", "xcache", "memcache" and "memcached" cache-drivers
-                        //'CACHE_SECRET' => 'your_cache_secret',
-                        //for "memcache" and "memcached" cache-drivers
-                        //'CACHE_HOST' => 'your_cache_host',
-                        //'CACHE_PORT' => 'your_cache_port',
-                        //'CACHE_PERSISTENT' => false, //boolean
-                        //'CACHE_COMPRESS_LEVEL' => false, //boolean
+                        'driver' => '{$options['cache_driver']}',
+                        'stores' => [
+                            '{$options['cache_driver']}' => [
+                                'path'   => '{$dirs['cache']}',
+                                //time-to-live in minutes
+                                //also can be Datetime Object
+                                'ttl'    => 1440
+                            ]
+                        ]
                     ],
         //enable debug info collection
         // 1 - output to debug-bar and logging, 2 - only logging (see log-directory)
@@ -879,10 +879,8 @@ EOD;
         //run destructor and close db-connection
         unset($db);
         //clear cache dir in case of reinstall
-        $cache = new ACache();
-        $cache->setCacheStorageDriver('file');
-        $cache->enableCache();
-        $cache->remove('*');
+        $cache = new AbcCache('file');
+        $cache->flush();
 
         return $errors;
     }
@@ -933,10 +931,8 @@ EOD;
         $db->query("SET @@session.sql_mode = 'MYSQL40'");
 
         //clear earlier created cache by AConfig and ALanguage classes in previous step
-        $cache = new ACache();
-        $cache->setCacheStorageDriver('file');
-        $cache->enableCache();
-        $cache->remove('*');
+        $cache = new AbcCache('file');
+        $cache->flush();
 
         return $errors;
     }

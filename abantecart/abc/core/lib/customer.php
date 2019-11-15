@@ -96,7 +96,7 @@ class ACustomer extends ALibBase
      */
     protected $config;
     /**
-     * @var \abc\core\cache\ACache
+     * @var \abc\core\lib\AbcCache
      */
     protected $cache;
     /**
@@ -260,7 +260,7 @@ class ACustomer extends ALibBase
 
             //set cookie for unauthenticated user (expire in 1 year)
             /**
-             * @var AEncryption $enc
+             * @var AEncryption $encryption
              */
             $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
@@ -947,6 +947,7 @@ class ACustomer extends ALibBase
      * @throws AException
      * @throws ValidationException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function createCustomer($data, $subscribe_only = false)
     {
@@ -1065,6 +1066,7 @@ class ACustomer extends ALibBase
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editCustomer( $data )
     {
@@ -1123,6 +1125,7 @@ class ACustomer extends ALibBase
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editPassword( $loginname, $password )
     {
@@ -1183,6 +1186,7 @@ class ACustomer extends ALibBase
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function validateRegistrationData( $data )
     {
@@ -1281,6 +1285,7 @@ class ACustomer extends ALibBase
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function validateSubscribeData( $data )
     {

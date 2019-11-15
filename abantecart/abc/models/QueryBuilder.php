@@ -18,11 +18,57 @@
 
 namespace abc\models;
 
+use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\AbcCache;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\Grammars\Grammar;
+use Illuminate\Database\Query\Processors\Processor;
+use Illuminate\Support\Facades\Cache;
 
 class QueryBuilder extends Builder
 {
+
+    protected $cacheStorage = null;
+
+    public function __construct(ConnectionInterface $connection, Grammar $grammar = null, Processor $processor = null)
+    {
+        parent::__construct($connection, $grammar, $processor);
+        $this->cacheStorage = ABC::env('CACHE')['cache.default'];
+    }
+
+    /**
+    * Returns a Unique String that can identify this Query.
+    *
+    * @return string
+    */
+    protected function getCacheKey()
+    {
+         return json_encode([
+             $this->toSql() => $this->getBindings()
+         ]);
+    }
+
+    public function useCacheStorage($storage = ''){
+        if($storage) {
+            $this->cacheStorage = $storage;
+        }
+    }
+
+    protected function runSelect()
+    {
+        /** @var AbcCache $cache */
+        $cache = Registry::cache();
+        return $cache->remember(
+            $this->getCacheKey(),
+            1,
+            function() {
+                 return parent::runSelect();
+            }
+        );
+    }
+
     public function setGridRequest($data = [])
     {
         if ($data['sort'] != 'description.title') {

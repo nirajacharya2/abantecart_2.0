@@ -229,7 +229,7 @@ class ModelCatalogProduct extends Model
              }
              $affected_tables[] = 'product_tags';
          }
-         $this->cache->remove('product');
+         $this->cache->flush('product');
          $data['operation_type'] = 'insert';
          $this->updateEvent($product_id, $data, $affected_tables);
          return $product_id;
@@ -429,7 +429,7 @@ class ModelCatalogProduct extends Model
                                  SET ".implode(',', $update)."
                                  WHERE product_discount_id = '".(int)$product_discount_id."'");
          }
-         $this->cache->remove('product');
+         $this->cache->flush('product');
      }*/
 
     /*
@@ -459,7 +459,7 @@ class ModelCatalogProduct extends Model
                     WHERE product_special_id = '".(int)$product_special_id."'"
                 );
             }
-            $this->cache->remove('product');
+            $this->cache->flush('product');
         }
     */
 
@@ -689,6 +689,7 @@ class ModelCatalogProduct extends Model
      *
      * @return int|null
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function addProductOptionValueAndDescription($product_id, $option_id, $data)
     {
@@ -866,7 +867,6 @@ class ModelCatalogProduct extends Model
         return $pd_opt_val_id;
     }
 
-
     /**
      * @param int $product_id
      * @param int $option_id
@@ -876,6 +876,7 @@ class ModelCatalogProduct extends Model
      *
      * @return int|false
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function insertProductOptionValue($product_id, $option_id, $attribute_value_id, $pd_opt_val_id, $data)
     {
@@ -911,6 +912,7 @@ class ModelCatalogProduct extends Model
      *
      * @return null|int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function updateProductOptionValue($pd_opt_val_id, $attribute_value_id, $data)
     {
@@ -949,6 +951,7 @@ class ModelCatalogProduct extends Model
      * @param int $language_id
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function updateProductOptionValueAndDescription($product_id, $pd_opt_val_id, $data, $language_id)
     {
@@ -1038,15 +1041,13 @@ class ModelCatalogProduct extends Model
         $this->touchProduct($product_id);
     }
 
-
-
-
     /**
      * @param int $product_id
      *
      * @return bool|array
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function copyProduct($product_id)
     {
@@ -1128,7 +1129,7 @@ class ModelCatalogProduct extends Model
                 $r['resource_id']
             );
         }
-        $this->cache->remove('product');
+        $this->cache->flush('product');
 
         //clone layout for the product if present
         $layout_clone_result = $this->_clone_product_layout($product_id, $new_product_id);
@@ -1146,6 +1147,7 @@ class ModelCatalogProduct extends Model
      *
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function _clone_product_options($product_id, $data)
     {
@@ -1269,7 +1271,7 @@ class ModelCatalogProduct extends Model
                 }
             }
         }
-        $this->cache->remove('product');
+        $this->cache->flush('product');
     }
 
     /**
@@ -1278,6 +1280,7 @@ class ModelCatalogProduct extends Model
      *
      * @return null
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function _clone_product_layout($product_id, $new_product_id)
     {
@@ -1330,6 +1333,7 @@ class ModelCatalogProduct extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteProduct($product_id)
     {
@@ -1420,7 +1424,7 @@ class ModelCatalogProduct extends Model
 
         $this->db->query("DELETE FROM ".$this->db->table_name("products")." WHERE product_id = '".(int)$product_id."'");
 
-        $this->cache->remove('product');
+        $this->cache->flush('product');
 
         return true;
     }
@@ -1436,7 +1440,7 @@ class ModelCatalogProduct extends Model
             "DELETE FROM ".$this->db->table_name("product_discounts")." 
             WHERE product_discount_id = '".(int)$product_discount_id."'"
         );
-        $this->cache->remove('product');
+        $this->cache->flush('product');
     }
 
     /**
@@ -1451,7 +1455,7 @@ class ModelCatalogProduct extends Model
             WHERE product_special_id='".(int)$product_special_id."'"
         );
 
-        $this->cache->remove('product');
+        $this->cache->flush('product');
     }
 
     /**
@@ -1726,7 +1730,7 @@ class ModelCatalogProduct extends Model
                 ]);
         }
 
-        $this->cache->remove('product');
+        $this->cache->flush('product');
     }
 
     /**
@@ -1771,6 +1775,7 @@ class ModelCatalogProduct extends Model
      *
      * @return null
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function updateProductOptionValues($product_id, $option_id, $data)
     {
@@ -2116,6 +2121,7 @@ class ModelCatalogProduct extends Model
      *
      * @return array|int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProducts($data = [])
     {
@@ -2285,15 +2291,15 @@ class ModelCatalogProduct extends Model
             return $query->rows;
         } else {
             $cache_key = 'product.lang_'.$language_id;
-            $product_data = $this->cache->pull($cache_key);
-            if ($product_data === false) {
+            $product_data = $this->cache->get($cache_key);
+            if ($product_data === null) {
                 $query = $this->db->query("SELECT ".$this->db->raw_sql_row_count()." *, p.product_id
                                             FROM ".$this->db->table_name("products")." p
                                             LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
                                                 ON (p.product_id = pd.product_id AND pd.language_id = '".$language_id."')
                                             ORDER BY pd.name ASC");
                 $product_data = $query->rows;
-                $this->cache->push($cache_key, $product_data);
+                $this->cache->put($cache_key, $product_data);
             }
 
             return $product_data;
@@ -2412,6 +2418,7 @@ class ModelCatalogProduct extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductCondition($product_id)
     {
@@ -2581,7 +2588,7 @@ class ModelCatalogProduct extends Model
             SET date_modified = NOW() 
             WHERE product_id ='".$product_id."'"
         );
-        $this->cache->remove('product');
+        $this->cache->flush('product');
 
         return true;
     }

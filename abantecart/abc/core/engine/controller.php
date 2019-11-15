@@ -71,7 +71,7 @@ use H;
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ADB $db
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property \abc\core\lib\ALanguageManager $language
  * @property AResource $resource
  * @property \abc\core\engine\ALoader $load

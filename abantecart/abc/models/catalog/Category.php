@@ -229,19 +229,20 @@ class Category extends BaseModel
      * @return array|false|mixed
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllData()
     {
         $cache_key = 'category.alldata.'.$this->getKey();
-        $data = $this->cache->pull($cache_key);
-        if ($data === false) {
+        $data = $this->cache->get($cache_key);
+        if ($data === null) {
             $this->load('descriptions', 'stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
             if ($this->getKey()) {
                 $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
             }
-            $this->cache->push($cache_key, $data);
+            $this->cache->put($cache_key, $data);
         }
         return $data;
     }
@@ -250,6 +251,7 @@ class Category extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getImages()
     {
@@ -335,6 +337,7 @@ class Category extends BaseModel
      * @return string
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getPath($category_id, $mode = '')
     {
@@ -382,6 +385,7 @@ class Category extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getCategoryBranchInfo($category_id)
     {
@@ -438,6 +442,7 @@ class Category extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getCategories($parentId = 0, $storeId = null, $limit = 0)
     {
@@ -448,7 +453,7 @@ class Category extends BaseModel
                     .'_limit_'.$limit
                     .'_lang_'.$languageId
                     .'_side_'.(int)ABC::env('IS_ADMIN');
-        $cache = Registry::cache()->pull($cacheKey);
+        $cache = Registry::cache()->get($cacheKey);
 
         if ($cache === false) {
             $category_data = [];
@@ -500,7 +505,7 @@ class Category extends BaseModel
                 $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId));
             }
             $cache = $category_data;
-            Registry::cache()->push($cacheKey, $cache);
+            Registry::cache()->put($cacheKey, $cache);
         }
 
         return $cache;
@@ -510,6 +515,7 @@ class Category extends BaseModel
      * @param int $categoryId
      *
      * @return false|mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getCategory($categoryId)
     {
@@ -518,8 +524,8 @@ class Category extends BaseModel
         $languageId = static::$current_language_id;
 
         $cacheKey = 'product.listing.category.'.(int)$categoryId.'.store_'.$storeId.'_lang_'.$languageId;
-        $cache = Registry::cache()->pull($cacheKey);
-        if ($cache === false) {
+        $cache = Registry::cache()->get($cacheKey);
+        if ($cache === null) {
 
             $arSelect = ['*'];
 
@@ -562,7 +568,7 @@ class Category extends BaseModel
 
             if ($category) {
                 $cache = $category->toArray();
-                Registry::cache()->push($cacheKey, $cache);
+                Registry::cache()->put($cacheKey, $cache);
             }
         }
         return $cache;
@@ -614,6 +620,7 @@ class Category extends BaseModel
      * @return array
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getAllCategories()
     {
@@ -654,6 +661,7 @@ class Category extends BaseModel
      * @return Collection|bool
      * @throws \ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function getCategoriesData($inputData)
     {
@@ -889,7 +897,7 @@ class Category extends BaseModel
                 UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             }
 
-            Registry::cache()->remove('category');
+            Registry::cache()->flush('category');
             $db->commit();
             //call listener on saved event after commit
             $category->touch();
@@ -970,8 +978,8 @@ class Category extends BaseModel
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
 
-            $cache->remove('category');
-            $cache->remove('product');
+            $cache->flush('category');
+            $cache->flush('product');
             $db->commit();
             //call event listener on saved
             $category->touch();
@@ -989,6 +997,7 @@ class Category extends BaseModel
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function deleteCategory($categoryId)
     {
@@ -1057,8 +1066,8 @@ class Category extends BaseModel
             }
         }
 
-        $cache->remove('category');
-        $cache->remove('product');
+        $cache->flush('category');
+        $cache->flush('product');
         return true;
     }
 

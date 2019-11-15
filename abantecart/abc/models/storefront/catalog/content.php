@@ -29,6 +29,7 @@ class ModelCatalogContent extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getContent($content_id)
     {
@@ -36,9 +37,9 @@ class ModelCatalogContent extends Model
         $store_id = (int)$this->config->get('config_store_id');
         $language_id = (int)$this->config->get('storefront_language_id');
         $cache_key = 'content.'.$content_id.'.store_'.$store_id.'_lang_'.$language_id;
-        $cache = $this->cache->pull($cache_key);
+        $cache = $this->cache->get($cache_key);
 
-        if ($cache !== false) {
+        if ($cache !== null) {
             return $cache;
         }
 
@@ -56,7 +57,7 @@ class ModelCatalogContent extends Model
         if ($query->num_rows) {
             $cache = $query->row;
         }
-        $this->cache->push($cache_key, $cache);
+        $this->cache->put($cache_key, $cache);
 
         return $cache;
     }
@@ -64,14 +65,15 @@ class ModelCatalogContent extends Model
     /**
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getContents()
     {
         $store_id = (int)$this->config->get('config_store_id');
         $language_id = (int)$this->config->get('storefront_language_id');
         $cache_key = 'content.all.store_'.$store_id.'_lang_'.$language_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output === false) {
+        $output = $this->cache->get($cache_key);
+        if ($output === null) {
             $output = [];
             $sql = "SELECT i.*, id.*
                     FROM ".$this->db->table_name("contents")." i
@@ -89,7 +91,7 @@ class ModelCatalogContent extends Model
             if ($query->num_rows) {
                 $output = $query->rows;
             }
-            $this->cache->push($cache_key, $output);
+            $this->cache->put($cache_key, $output);
         }
         return $output;
     }

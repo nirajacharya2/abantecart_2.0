@@ -340,12 +340,13 @@ final class ADataEncryption
 
     private function loadKeys()
     {
-        $config = $this->registry->get('config');
-        $cache = $this->registry->get('cache');
+        $config = Registry::config();
+        /** @var AbcCache $cache */
+        $cache = Registry::cache();
 
         $this->keys = [];
         $cache_key = 'encryption.keys.store_'.(int)$config->get('config_store_id');
-        $this->keys = $cache->pull($cache_key);
+        $this->keys = $cache->get($cache_key);
         if (empty($this->keys)) {
             $db = Registry::db();
             $query = $db->table('encryption_keys')->where("status", '=', 1)->get();
@@ -355,7 +356,7 @@ final class ADataEncryption
             foreach ($query->toArray() as $row) {
                 $this->keys[$row['key_id']] = $row['key_name'];
             }
-            $cache->push($cache_key, $this->keys);
+            $cache->put($cache_key, $this->keys);
         }
     }
 

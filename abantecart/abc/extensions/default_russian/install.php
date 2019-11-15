@@ -4339,4 +4339,4 @@ $this->db->query("INSERT INTO ".$this->db->table_name('field_descriptions')."
 (13,'Запрос:','Запрос должен быть между 10 и 3000 символов!',".$new_language_id."),
 (14,'Введите код, указанный на картинке:','Проверка код не совпадает с изображением!',".$new_language_id.");");
 
-$this->cache->remove('localization');
+$this->cache->flush('localization');

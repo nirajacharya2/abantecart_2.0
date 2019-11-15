@@ -47,4 +47,4 @@ $this->db->query(
     WHERE `code`='".$language_code."'"
 );
 
-$this->cache->remove('localization');
+$this->cache->flush('localization');
