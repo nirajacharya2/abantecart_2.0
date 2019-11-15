@@ -88,7 +88,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
     }
 
-    private function prepareRequest($request)
+    protected function prepareRequest($request)
     {
         $allowSortBy = [
             'date_added'           => 'request.timestamp',
@@ -153,7 +153,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         return $result;
     }
 
-    private function prepareEvents($events)
+    protected function prepareEvents($events)
     {
         $result = [];
         foreach ($events as $event) {
@@ -195,7 +195,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
     }
 
-    private function prepareEventDescriptionRows($events)
+    protected function prepareEventDescriptionRows($events)
     {
         $result = [];
 
