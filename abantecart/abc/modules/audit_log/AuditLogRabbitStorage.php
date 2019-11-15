@@ -14,6 +14,7 @@ use H;
 use http\Exception;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 
 class AuditLogRabbitStorage implements AuditLogStorageInterface
 {
@@ -45,14 +46,28 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $domain = ABC::env('AUDIT_LOG_API')['DOMAIN'];
         $data = [
             'data'   => $data,
-            'domain' => $domain ?: 'audit-log-index'
+            'domain' => $domain ?: 'audit-log-index',
         ];
 
         try {
             $conf = ABC::env('RABBIT_MQ');
             $conn = new AMQPStreamConnection($conf['HOST'], $conf['PORT'], $conf['USER'], $conf['PASSWORD']);
             $channel = $conn->channel();
-            $channel->queue_declare('audit_log', false, true, false, false);
+
+            $channel->exchange_declare('exch_main', 'direct', false, true, false);
+            $channel->exchange_declare('exch_backup', 'fanout', false, true, false);
+
+            $channel->queue_declare('audit_log', false, true, false, false, false, new AMQPTable([
+                'x-dead-letter-exchange' => 'exch_backup',
+                'x-message-ttl'          => 15000,
+                //'x-expires'              => 16000,
+            ]));
+
+            $channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
+
+            $channel->queue_bind('audit_log', 'exch_main');
+            $channel->queue_bind('audit_log_backup', 'exch_backup');
+
 
             $msg = new AMQPMessage(json_encode($data));
             $channel->basic_publish($msg, '', $conf['QUEUE']);
@@ -64,15 +79,16 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
                     throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
                 }
             }
+            $this->log->write($exception->getMessage());
             $backupFile = ABC::env('DIR_SYSTEM').'rabbitmq/rabbit_data.bak';
-            file_put_contents($backupFile, json_encode($data). PHP_EOL, FILE_APPEND );
+            file_put_contents($backupFile, json_encode($data).PHP_EOL, FILE_APPEND);
 
         }
     }
 
     public function getEvents(array $request)
     {
-        $api  = ABC::env('AUDIT_LOG_API');
+        $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
         try {
@@ -136,10 +152,10 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $filter[] = $item;
         }
         $result = [
-            'limit'    => (int)$request['rowsPerPage'],
-            'offset'   => (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'],
-            'sort'     => $allowSortBy[$request['sortBy']] ?: '',
-            'order'    => $request['descending'] === 'true' ? 'DESC' : 'ASC',
+            'limit'  => (int)$request['rowsPerPage'],
+            'offset' => (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'],
+            'sort'   => $allowSortBy[$request['sortBy']] ?: '',
+            'order'  => $request['descending'] === 'true' ? 'DESC' : 'ASC',
         ];
         if (!empty($request['date_from'])) {
             $result['dateFrom'] = $request['date_from'];
@@ -179,7 +195,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     public function getEventDetail(array $request)
     {
-        $api  = ABC::env('AUDIT_LOG_API');
+        $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
         $filter = json_decode($request['filter'], true);
